@@ -1,0 +1,21 @@
+{
+  "name": "myhibachi-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "myhibachi-frontend",
+    "myhibachi-backend"
+  ],
+  "scripts": {
+    "dev:frontend": "cd myhibachi-frontend && npm run dev",
+    "dev:backend": "cd myhibachi-backend && python -m uvicorn main:app --reload --port 8000",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "build:frontend": "cd myhibachi-frontend && npm run build",
+    "start:frontend": "cd myhibachi-frontend && npm start",
+    "lint": "cd myhibachi-frontend && npm run lint",
+    "type-check": "cd myhibachi-frontend && npm run type-check"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
