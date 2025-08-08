@@ -1,94 +1,191 @@
 'use client'
 
-import { useState } from 'react'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { faqs } from '@/data/faqsData'
+import '@/styles/base.css'
+import '@/styles/faqs.css'
 
 export default function FAQsPage() {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filteredFAQs, setFilteredFAQs] = useState(faqs)
 
-  const faqs = [
-    {
-      question: 'What is included in your hibachi catering service?',
-      answer: 'Our service includes a professional hibachi chef, all cooking equipment, fresh ingredients, setup and cleanup, and an entertaining cooking performance for your guests.'
-    },
-    {
-      question: 'How many people can you serve?',
-      answer: 'We can accommodate groups from 10 to 100+ guests. Our chefs can work with multiple grills for larger events.'
-    },
-    {
-      question: 'How far in advance should I book?',
-      answer: 'We recommend booking at least 2-3 weeks in advance, especially for weekend events. However, we may be able to accommodate shorter notice requests based on availability.'
-    },
-    {
-      question: 'Do you provide tables and seating?',
-      answer: 'We provide the hibachi grills and cooking equipment. Tables, chairs, and other furniture can be arranged upon request for an additional fee.'
-    },
-    {
-      question: 'What areas do you serve?',
-      answer: 'We currently serve the Greater Metro Area. Contact us to confirm if we can reach your location.'
-    },
-    {
-      question: 'Can you accommodate dietary restrictions?',
-      answer: 'Absolutely! We can accommodate vegetarian, gluten-free, and other dietary needs. Please let us know about any restrictions when booking.'
-    },
-    {
-      question: 'What is your cancellation policy?',
-      answer: 'We require 48 hours notice for cancellations. Cancellations within 48 hours may be subject to a cancellation fee.'
-    },
-    {
-      question: 'Do you require a deposit?',
-      answer: 'Yes, we require a 50% deposit to secure your booking, with the remaining balance due on the day of service.'
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setFilteredFAQs(faqs)
+    } else {
+      const filtered = faqs.filter(
+        faq =>
+          faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          faq.answer.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      setFilteredFAQs(filtered)
+      setOpenFAQ(null) // Close any open FAQ when searching
     }
-  ]
+  }, [searchTerm])
 
   const toggleFAQ = (index: number) => {
     setOpenFAQ(openFAQ === index ? null : index)
   }
 
   return (
-    <div className="py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h1>
-          <p className="text-gray-600">Everything you need to know about our hibachi catering service</p>
-        </div>
+    <>
+      {/* SEO Meta Tags */}
+      <head>
+        <title>Frequently Asked Questions – My Hibachi</title>
+        <meta 
+          name="description" 
+          content="Find answers to your most common questions about My Hibachi's private chef catering service. Learn about pricing, booking, menus, and more." 
+        />
+        <meta name="keywords" content="hibachi catering FAQ, private chef questions, hibachi party booking, My Hibachi" />
+      </head>
 
-        <div className="space-y-4">
-          {faqs.map((faq, index) => (
-            <div key={index} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-              <button
-                onClick={() => toggleFAQ(index)}
-                className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 focus:outline-none focus:bg-gray-50"
-              >
-                <span className="font-semibold text-gray-900">{faq.question}</span>
-                {openFAQ === index ? (
-                  <ChevronUp className="w-5 h-5 text-gray-500" />
-                ) : (
-                  <ChevronDown className="w-5 h-5 text-gray-500" />
-                )}
-              </button>
-              {openFAQ === index && (
-                <div className="px-6 pb-4">
-                  <p className="text-gray-700">{faq.answer}</p>
+      <main>
+        {/* Hero Section */}
+        <section className="faqs-hero">
+          <div className="container">
+            <h1>Frequently Asked Questions</h1>
+            <p>
+              Everything you need to know about My Hibachi&apos;s private chef catering service. 
+              From booking and pricing to menus and dietary accommodations, we&apos;ve got you covered.
+            </p>
+          </div>
+        </section>
+
+        {/* FAQs Content */}
+        <section className="faqs-container">
+          {/* Search Bar */}
+          <div className="faq-search">
+            <input
+              type="text"
+              placeholder="Search FAQs..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="faq-search-input"
+            />
+          </div>
+
+          {/* Results Count */}
+          {searchTerm && (
+            <p className="search-results-count">
+              Found {filteredFAQs.length} result{filteredFAQs.length !== 1 ? 's' : ''} for &quot;{searchTerm}&quot;
+            </p>
+          )}
+
+          {/* FAQ Accordion */}
+          <div className="faqs-accordion">
+            {filteredFAQs.length === 0 ? (
+              <div className="no-results">
+                <p>No FAQs found matching your search. Try different keywords or browse all questions below.</p>
+              </div>
+            ) : (
+              filteredFAQs.map((faq, index) => (
+                <div
+                  key={index}
+                  className={`faq-item ${openFAQ === index ? 'active' : ''}`}
+                >
+                  <button
+                    onClick={() => toggleFAQ(index)}
+                    className="faq-question"
+                    aria-expanded={openFAQ === index}
+                    aria-controls={`faq-answer-${index}`}
+                  >
+                    <h3>{faq.question}</h3>
+                    <span className="faq-icon">+</span>
+                  </button>
+                  
+                  <div
+                    id={`faq-answer-${index}`}
+                    className="faq-answer"
+                    role="region"
+                    aria-labelledby={`faq-question-${index}`}
+                  >
+                    <div className="faq-answer-content">
+                      {faq.answer.split('\n').map((paragraph, pIndex) => (
+                        <p key={pIndex} dangerouslySetInnerHTML={{ 
+                          __html: paragraph.replace(
+                            /contact@myhibachi\.com/g, 
+                            '<a href="mailto:contact@myhibachi.com" class="contact-link">contact@myhibachi.com</a>'
+                          )
+                        }} />
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
+              ))
+            )}
+          </div>
 
-        <div className="text-center mt-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Still have questions?</h2>
-          <p className="text-gray-600 mb-6">
-            Contact us and we&apos;ll be happy to help you plan your perfect hibachi experience.
-          </p>
-          <a
-            href="/contact"
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-          >
-            Contact Us
-          </a>
-        </div>
-      </div>
-    </div>
+          {/* Contact CTA */}
+          <div className="contact-highlight" style={{ marginTop: '3rem' }}>
+            <h2 style={{ color: '#ff6b35', marginBottom: '1rem' }}>Still have questions?</h2>
+            <p style={{ marginBottom: '1rem' }}>
+              Our team is here to help you plan the perfect hibachi experience for your event. 
+              Contact us for personalized assistance and custom quotes.
+            </p>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <a 
+                href="mailto:contact@myhibachi.com" 
+                className="contact-highlight"
+                style={{ 
+                  display: 'inline-block',
+                  padding: '0.75rem 1.5rem',
+                  background: '#ff6b35',
+                  color: 'white',
+                  textDecoration: 'none',
+                  borderRadius: '25px',
+                  fontWeight: '600',
+                  transition: 'background 0.3s ease'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.background = '#e55a2b'}
+                onMouseOut={(e) => e.currentTarget.style.background = '#ff6b35'}
+              >
+                📧 Email Us
+              </a>
+              <a 
+                href="/contact"
+                style={{
+                  display: 'inline-block',
+                  padding: '0.75rem 1.5rem',
+                  border: '2px solid #ff6b35',
+                  color: '#ff6b35',
+                  textDecoration: 'none',
+                  borderRadius: '25px',
+                  fontWeight: '600',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = '#ff6b35'
+                  e.currentTarget.style.color = 'white'
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = 'transparent'
+                  e.currentTarget.style.color = '#ff6b35'
+                }}
+              >
+                📞 Contact Form
+              </a>
+              <a 
+                href="/booking"
+                style={{
+                  display: 'inline-block',
+                  padding: '0.75rem 1.5rem',
+                  background: '#4a2d13',
+                  color: 'white',
+                  textDecoration: 'none',
+                  borderRadius: '25px',
+                  fontWeight: '600',
+                  transition: 'background 0.3s ease'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.background = '#3a2310'}
+                onMouseOut={(e) => e.currentTarget.style.background = '#4a2d13'}
+              >
+                🎉 Book Now
+              </a>
+            </div>
+          </div>
+        </section>
+      </main>
+    </>
   )
 }
