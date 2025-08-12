@@ -142,3 +142,17 @@ test-results.xml
 
 # Optional packages
 .pnp.*
+
+# Test data files (keeping production data)
+*-test.ts
+*-test.js
+*-test.tsx
+*-test.jsx
+
+# Temporary validation scripts
+validate-*.sh
+validate-*.bat
+
+# Component development files
+*.component.dev.tsx
+*.component.dev.ts

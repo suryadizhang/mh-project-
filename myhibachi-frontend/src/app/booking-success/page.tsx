@@ -41,7 +41,7 @@ const REVIEW_PLATFORMS = [
   {
     name: 'Facebook',
     icon: '📘',
-    url: 'https://www.facebook.com/YOUR_FACEBOOK_PAGE/reviews',
+    url: 'https://www.facebook.com/people/My-hibachi/61577483702847/',
     color: 'hover:bg-blue-50 hover:border-blue-300',
     description: 'Share with friends',
     reward: 'Bonus discount'

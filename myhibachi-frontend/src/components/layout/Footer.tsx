@@ -21,7 +21,7 @@ export default function Footer() {
             <a href="https://www.instagram.com/my_hibachi_chef/" target="_blank" rel="noopener noreferrer" className="footer-social-icon">
               <i className="bi bi-instagram"></i>
             </a>
-            <a href="https://www.facebook.com/myhibachi" target="_blank" rel="noopener noreferrer" className="footer-social-icon">
+            <a href="https://www.facebook.com/people/My-hibachi/61577483702847/" target="_blank" rel="noopener noreferrer" className="footer-social-icon">
               <i className="bi bi-facebook"></i>
             </a>
             <a href="https://www.yelp.com/biz/my-hibachi-fremont" target="_blank" rel="noopener noreferrer" className="footer-social-icon">

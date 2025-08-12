@@ -6,6 +6,9 @@ import Footer from '@/components/layout/Footer'
 
 // Import global styles
 import '@/styles/base.css'
+import '@/styles/footer.css'
+import '@/styles/free-quote-button.css'
+import '@/styles/quote-calculator.css'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

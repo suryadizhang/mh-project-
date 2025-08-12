@@ -1,199 +1,379 @@
-export interface FAQ {
+export type FaqItem = {
+  id: string;
   question: string;
   answer: string;
-}
+  category: string;
+  subcategory: string;
+  tags: string[];
+  confidence: 'high' | 'medium' | 'low';
+  source_urls: string[];
+  review_needed?: boolean;
+};
 
-export const faqs: FAQ[] = [
+export const faqs: FaqItem[] = [
+  // Pricing & Minimums
   {
-    question: "What is on the Menu?",
-    answer: "Each guest gets: Choice of 2 Proteins - Chicken, NY Strip Steak, Shrimp, Scallops or Salmon, Tofu or Vegetarian Options. Lots of Sake (21+), Fried Rice, Fresh Cooked Vegetables, Side Salad, and our Signature Sauce. We also offer these food upgrade options: Filet Mignon (+$5.00), Lobster Tail (+$10.00), Appetizers: Gyoza (+$10.00) (6 pcs), Appetizers: Edamame (+$5.00), Stir-fried noodles (+$4.00). Additionally, we provide sushi and buffet options. Please contact us at contact@myhibachi.com for the complete menu if needed."
+    id: 'base-pricing',
+    question: 'How much does My Hibachi Chef cost?',
+    answer: '$55 per adult (13+), $30 per child (6-12), free for ages 5 & under. $550 party minimum (≈10 adults). This includes your choice of 2 proteins (Chicken, NY Strip Steak, Shrimp, Scallops, Salmon, or Tofu), hibachi fried rice, fresh vegetables, side salad, signature sauces, and plenty of sake for adults 21+.',
+    category: 'Pricing & Minimums',
+    subcategory: 'Per‑person Rates',
+    tags: ['pricing', '$55 adult', '$30 child', '$550 minimum'],
+    confidence: 'high',
+    source_urls: ['/menu']
   },
   {
-    question: "What if I need a third protein or more?",
-    answer: "Typically, each guest selects two proteins from the following options: Chicken, NY Strip Steak, Shrimp, Scallops, Salmon, or Tofu. You can also choose Filet Mignon or Lobster Tail as substitutes for any of the proteins. If you'd like to offer a third protein to your guests, the pricing for the third option is as follows: Filet Mignon: +$15 per person, Lobster Tail: +$15 per person, Any additional protein (Chicken, NY Strip Steak, Shrimp, Scallops, Salmon, or Tofu): +$10 per person."
+    id: 'party-minimum',
+    question: 'Is there a minimum party size?',
+    answer: 'Yes — $550 total minimum (approximately 10 adults). Smaller groups can reach the minimum through upgrades or additional proteins.',
+    category: 'Pricing & Minimums',
+    subcategory: 'Minimum Spend / Party Size',
+    tags: ['minimum', '$550', 'party size', 'upgrades'],
+    confidence: 'high',
+    source_urls: ['/menu']
   },
   {
-    question: "Can I Have More Details on Kids Prices?",
-    answer: "The Kids price is for ages between 6-12 years old. 13 and older is adult price. Age 5 and under eats free! They get 1 protein and about 1/4 cup of rice."
+    id: 'tipping',
+    question: 'Is tipping expected?',
+    answer: 'Tips are appreciated and paid directly to your chef after the party. We suggest 20-35% of total service cost. You can tip cash or via Venmo/Zelle Business.',
+    category: 'Pricing & Minimums',
+    subcategory: 'Gratuity & Fees',
+    tags: ['tipping', '20-35%', 'cash', 'venmo', 'zelle'],
+    confidence: 'high',
+    source_urls: ['/BookUs']
   },
   {
-    question: "What if I don't have a venue for the hibachi party?",
-    answer: "If you don't have a venue, please contact us at contact@myhibachi.com for venue recommendations in the Northern California area. We serve the San Francisco Bay Area, San Jose, Sacramento, and nearby cities and can suggest suitable locations for your hibachi party."
+    id: 'travel-fees',
+    question: 'Do you charge travel fees?',
+    answer: 'First 30 miles from our location are free. After that, $2 per mile up to 150-mile service radius. Text (916) 740-8768 to calculate your travel fee.',
+    category: 'Pricing & Minimums',
+    subcategory: 'Travel Fees',
+    tags: ['travel', 'free 30 miles', '$2 per mile', '150 mile radius'],
+    confidence: 'high',
+    source_urls: ['/menu', '/contact']
+  },
+
+  // Menu & Upgrades  
+  {
+    id: 'menu-options',
+    question: 'What\'s included in the hibachi menu?',
+    answer: 'Each guest chooses 2 proteins: Chicken, NY Strip Steak, Shrimp, Scallops, Salmon, or Tofu. Plus fried rice, vegetables, salad, sauces, and sake for adults 21+.',
+    category: 'Menu & Upgrades',
+    subcategory: 'Included Items',
+    tags: ['2 proteins', 'chicken', 'steak', 'shrimp', 'rice', 'vegetables', 'sake'],
+    confidence: 'high',
+    source_urls: ['/menu']
   },
   {
-    question: "What does the total cost include?",
-    answer: "Your total includes: 1. Base Cost: $60 per adult, $30 per child, with a $600 minimum. (The base price includes each guest's choice of two complimentary proteins, plenty of fried rice, vegetables, salad, sauces, and unlimited sake—enough to satisfy your appetite.) 2. Optional food upgrades: Filet Mignon (+$5/portion), Lobster Tail (+$10/portion), Noodles(+$4/portion), add appetizers: gyoza $10 (6pcs) or add appetizers: edamame $5, sushi of 13 types(starting at just $44/portion) 3. Travel Fee: The first 20 miles are free; after that, it's $2 per mile. Please note: The above costs do not include tips, which will be paid directly to the chefs after the party. We recommend tipping 20-35% of the service cost (Base Cost + Optional Food Upgrades). Much appreciated in advance!"
+    id: 'premium-upgrades',
+    question: 'What are the premium protein upgrades?',
+    answer: 'For premium protein upgrades: Salmon, Scallops, and Filet Mignon are +$5 per person, while Lobster Tail is +$15 per person. These upgrade your existing protein choices to premium options.',
+    category: 'Menu & Upgrades',
+    subcategory: 'Premium Upgrades',
+    tags: ['upgrades', 'salmon +$5', 'scallops +$5', 'filet +$5', 'lobster +$15', 'premium proteins'],
+    confidence: 'high',
+    source_urls: ['/menu']
   },
   {
-    question: "How do I use a coupon?",
-    answer: "Your coupon will be automatically applied to your party cost calculation by our customer service team after you submit your booking. They will send you an email for verification. On the day of service, the chef will bring the invoice, which will be presented to you after the party to settle the final payment. For example, if your total is $650 and you have a $50 coupon, you'll pay $400 after the $50 coupon and $200 deposit deductions. We offer two types of coupons that can be stacked: 1. Tiered Coupons (based on the number of adults). 2. Channel Coupons (obtained through special promotions or referrals)."
+    id: 'kids-menu',
+    question: 'What are the kids\' portions and pricing?',
+    answer: '$30 per child (6-12 years) — same 2-protein selection as adults. Ages 5 & under eat free with adult purchase (1 protein, small rice portion).',
+    category: 'Menu & Upgrades', 
+    subcategory: 'Kids\' Portions',
+    tags: ['kids', '$30', '6-12 years', 'free under 5', '2 proteins'],
+    confidence: 'high',
+    source_urls: ['/menu']
   },
   {
-    question: "What's the deposit for when booking on your site?",
-    answer: "We require a $216 payment at booking, which includes a $200 deposit plus $16 in sales tax. After your party, the chef will deduct $200 from your final bill."
+    id: 'sake-service',
+    question: 'Do you serve sake and alcohol?',
+    answer: 'Yes! We provide sake for guests 21+ as part of the standard experience. We don\'t provide other alcohol — you\'re welcome to supply your own beer, wine, or cocktails.',
+    category: 'Menu & Upgrades',
+    subcategory: 'Add‑ons & Sides',
+    tags: ['sake', 'alcohol', '21+', 'byob', 'beer', 'wine'],
+    confidence: 'high',
+    source_urls: ['/menu']
+  },
+
+  // Booking & Payments
+  {
+    id: 'how-to-book',
+    question: 'How do I book My Hibachi Chef?',
+    answer: 'Book online through our website or text (916) 740-8768. Must book 48+ hours in advance. Requires event details, guest count, and $100 non-refundable deposit.',
+    category: 'Booking & Payments',
+    subcategory: 'How to Book',
+    tags: ['booking', 'online', 'text', '48 hours', '$100 deposit'],
+    confidence: 'high',
+    source_urls: ['/BookUs']
   },
   {
-    question: "Do you Offer Table and Chair Setup?",
-    answer: "Sorry, we do NOT offer setup service for the parties. We suggest that you choose a table and chair rental company locally. Here's a list of highly-rated rental companies based on customer reviews in Northern California: Party rental companies in San Francisco Bay Area, San Jose, and Sacramento regions. You can contact us at contact@myhibachi.com for specific recommendations in your area!"
+    id: 'deposit-policy',
+    question: 'What\'s the deposit policy?',
+    answer: '$100 non-refundable deposit secures your date and is deducted from final bill. Remaining balance due on event date. Accept Venmo Business, Zelle Business, Cash, Credit Card.',
+    category: 'Booking & Payments',
+    subcategory: 'Deposits & Balance',
+    tags: ['$100 deposit', 'non-refundable', 'deducted', 'final bill'],
+    confidence: 'high',
+    source_urls: ['/BookUs']
   },
   {
-    question: "How Do I Setup Tables & Chairs?",
-    answer: "We recommend setting up so that the chef is up front of the party where everyone can see them. Two 8' rectangular tables arranged in L shape, can sit about 10 people. Three 6' rectangular tables arranged in U shape can sit between 12 and 15 people."
+    id: 'payment-methods',
+    question: 'What payment methods do you accept?',
+    answer: 'Venmo Business, Zelle Business, Cash, and Credit Card. Deposit paid online when booking. Balance due on event date or in advance.',
+    category: 'Booking & Payments',
+    subcategory: 'Payment Methods',
+    tags: ['venmo', 'zelle', 'cash', 'credit card', 'online deposit'],
+    confidence: 'high',
+    source_urls: ['/BookUs']
   },
   {
-    question: "Can you Accommodate Dietary Restrictions?",
-    answer: "Yes, we can accommodate most dietary restrictions upon request, which include but are not limited to: Vegan, Vegetarian, Gluten-free, Dairy-free, Halal, Kosher. It's very important you let your reservation manager know the exact restrictions before the party."
+    id: 'advance-booking',
+    question: 'How far in advance should I book?',
+    answer: '48 hours minimum required. For weekends and holidays, recommend 1-2 weeks ahead. Text (916) 740-8768 to check availability.',
+    category: 'Booking & Payments',
+    subcategory: 'Scheduling & Availability',
+    tags: ['48 hours minimum', 'weekends', 'holidays', '1-2 weeks'],
+    confidence: 'high',
+    source_urls: ['/BookUs']
+  },
+
+  // Travel & Service Area
+  {
+    id: 'service-areas',
+    question: 'Where do you serve?',
+    answer: 'Within 150 miles of our location. Primary areas: San Francisco Bay Area, Sacramento region. Free travel first 30 miles, then $2/mile.',
+    category: 'Travel & Service Area',
+    subcategory: 'Coverage Radius',
+    tags: ['150 miles', 'bay area', 'sacramento', 'free 30 miles'],
+    confidence: 'high',
+    source_urls: ['/contact', '/menu']
   },
   {
-    question: "Do you cook indoors?",
-    answer: "Our experience is best outside in backyards, terraces, balconies etc. Although we prefer outside, we can cook indoors if we are notified ahead of time and there are high ceilings and plenty of ventilation in the cooking area."
+    id: 'travel-distance',
+    question: 'Do you travel to my city?',
+    answer: 'We serve the Bay Area, Sacramento, Central Valley, and coastal/mountain communities within 150 miles of our location. Text (916) 740-8768 with your zip code for confirmation.',
+    category: 'Travel & Service Area', 
+    subcategory: 'Coverage Radius',
+    tags: ['bay area', 'sacramento', 'central valley', 'zip code', 'confirmation'],
+    confidence: 'high',
+    source_urls: ['/contact']
+  },
+
+  // On‑Site Setup & Requirements
+  {
+    id: 'space-requirements',
+    question: 'What space do you need for the hibachi setup?',
+    answer: 'Clear area 68.3"L × 27.5"W × 41.3"H for our grill. Need level ground, outdoor space or well-ventilated indoor area, and table access so guests can watch the show.',
+    category: 'On‑Site Setup & Requirements',
+    subcategory: 'Space & Ventilation',
+    tags: ['68x27x41 inches', 'level ground', 'outdoor', 'ventilated', 'table access'],
+    confidence: 'high',
+    source_urls: ['/BookUs']
   },
   {
-    question: "Do you offer Upgrades?",
-    answer: "Yes! As part of the regular menu all guests get 2 protein choices and all the sides but we also offer some additional upgrades with extra purchase. Upgrade to Filet Mignon $5. Upgrade to Lobster $10. Add appetizers: gyoza $10 (6pcs). Add appetizers: edamame $5. Add Noodles $4."
+    id: 'table-setup',
+    question: 'How should I arrange tables and seating?',
+    answer: 'U-shape with chef\'s grill at the open end so everyone watches the show. Two 8-foot tables seat ~10 people, three 6-foot tables handle 12-15 guests.',
+    category: 'On‑Site Setup & Requirements',
+    subcategory: 'Table Setup',
+    tags: ['u-shape', '8-foot tables', '10 people', '6-foot tables', '12-15 guests'],
+    confidence: 'high',
+    source_urls: []
   },
   {
-    question: "Will the chef I selected be the one who comes to my event?",
-    answer: "We always do our best to send the chef you selected. However, in rare cases, unforeseen circumstances may prevent that chef from being available. In such situations, we will assign another highly skilled chef to ensure your event runs smoothly and the service quality remains exceptional. We appreciate your understanding and flexibility."
+    id: 'indoor-cooking',
+    question: 'Can you cook indoors?',
+    answer: 'Outdoor preferred for safety, but indoor possible with high ceilings and excellent ventilation. Must handle smoke and propane safely. Email cs@myhibachichef.com to discuss indoor requirements.',
+    category: 'On‑Site Setup & Requirements',
+    subcategory: 'Indoor vs Outdoor',
+    tags: ['outdoor preferred', 'indoor possible', 'high ceilings', 'ventilation', 'smoke'],
+    confidence: 'high',
+    source_urls: []
   },
   {
-    question: "How Do I Book?",
-    answer: "On our homepage, click 'Book Now' and choose your location in Northern California. This will take you to the booking page for that area. Once there, you'll be prompted to select a chef, date, and time. Afterward, enter your contact information—name, phone number, and email address are required fields. Be sure to review your entries carefully to ensure accuracy. Next, provide the party details, including the event address, guest composition, food preferences, party occasion, and how you heard about us. Fields marked with an asterisk (*) are mandatory. Lastly, agree to the service terms. When you've filled out all required fields, click 'Complete Appointment.'"
+    id: 'what-to-provide',
+    question: 'What do I need to provide?',
+    answer: 'You provide: tables, chairs, plates, utensils, glasses, beverages (except sake), napkins. We bring: hibachi grill, food, cooking tools, propane, safety equipment, sake.',
+    category: 'On‑Site Setup & Requirements',
+    subcategory: 'Tableware & Cleanup',
+    tags: ['tables', 'chairs', 'plates', 'utensils', 'glasses', 'napkins'],
+    confidence: 'high',
+    source_urls: []
+  },
+
+  // Dietary & Allergens
+  {
+    id: 'dietary-restrictions',
+    question: 'Can you accommodate dietary restrictions?',
+    answer: 'Yes! Vegetarian, vegan, gluten-free, dairy-free, halal, kosher. Please notify us 48+ hours in advance so our chef can prepare. Email cs@myhibachichef.com with specific needs.',
+    category: 'Dietary & Allergens',
+    subcategory: 'Dietary Accommodations',
+    tags: ['vegetarian', 'vegan', 'gluten-free', 'dairy-free', 'halal', 'kosher', '48 hours'],
+    confidence: 'high',
+    source_urls: ['/BookUs']
+  },
+
+  // Policies (Cancellation, Weather, Refunds)
+  {
+    id: 'cancellation-policy',
+    question: 'What\'s your cancellation policy?',
+    answer: 'Full refund if canceled 7+ days before event. $100 deposit non-refundable within 7 days. One free reschedule within 48 hours of booking; additional reschedules cost $100.',
+    category: 'Policies (Cancellation, Weather, Refunds)',
+    subcategory: 'Cancellation & Changes',
+    tags: ['7 days', 'full refund', 'deposit non-refundable', 'free reschedule', '$100 fee'],
+    confidence: 'high',
+    source_urls: ['/BookUs']
   },
   {
-    question: "Can I Get an Estimate?",
-    answer: "Yes! We have an automatic estimator that will get you very close to your price. Contact us at contact@myhibachi.com or use our booking system for a detailed estimate based on your party size and preferences."
+    id: 'weather-policy',
+    question: 'What happens if it rains?',
+    answer: 'You must provide overhead covering (tent, patio, garage) for rain cooking. We cannot cook in unsafe/uncovered conditions. No refund for uncovered rain setups — plan a backup covered area!',
+    category: 'Policies (Cancellation, Weather, Refunds)',
+    subcategory: 'Weather / Backup Plan',
+    tags: ['rain', 'overhead covering', 'tent', 'patio', 'garage', 'no refund'],
+    confidence: 'high',
+    source_urls: ['/BookUs']
+  },
+
+  // Kids & Special Occasions
+  {
+    id: 'birthday-parties',
+    question: 'Do you do birthday parties and special events?',
+    answer: 'Absolutely! Birthday parties are our specialty. Chefs make the show extra fun and family-friendly, accommodate dietary needs, and make the birthday person feel special. Book 48+ hours ahead!',
+    category: 'Kids & Special Occasions',
+    subcategory: 'Birthdays/Anniversaries',
+    tags: ['birthday', 'special events', 'family-friendly', 'dietary needs', '48 hours'],
+    confidence: 'high',
+    source_urls: []
+  },
+
+  // Contact & Response Times
+  {
+    id: 'contact-methods',
+    question: 'What\'s the fastest way to reach you?',
+    answer: 'Text (916) 740-8768 for fastest response, or email cs@myhibachichef.com. Follow @my_hibachi_chef on Instagram and Facebook. Usually respond within 1-2 hours during business hours.',
+    category: 'Contact & Response Times',
+    subcategory: 'Best Way to Reach',
+    tags: ['text', '916-740-8768', 'email', 'instagram', 'facebook', '1-2 hours'],
+    confidence: 'high',
+    source_urls: ['/contact']
+  },
+
+  // Additional Popular Questions Based on Competitor Analysis
+  {
+    id: 'third-protein',
+    question: 'Can I add a third protein or more?',
+    answer: 'Yes! Each guest normally gets 2 proteins, but you can add a 3rd protein for +$10 per person. This is an additional option that gives you more food, not an upgrade. If you want the 3rd protein to be a premium option (Filet Mignon or Lobster Tail), that would be the +$10 for the additional protein plus the premium upgrade cost. Contact us at cs@myhibachichef.com to customize your menu.',
+    category: 'Menu & Upgrades',
+    subcategory: 'Add‑ons & Sides',
+    tags: ['third protein', 'additional protein', 'add-on', '+$10', 'more food'],
+    confidence: 'high',
+    source_urls: ['/menu']
   },
   {
-    question: "How much does your service cost?",
-    answer: "Our service has a base price of $60 per adult and $30 per child with a $600 minimum spend."
+    id: 'additional-enhancements',
+    question: 'What additional enhancements can I add to my menu?',
+    answer: 'We offer several delicious add-on options: Yakisoba Noodles (Japanese-style lo mein), Extra Fried Rice, Extra Vegetables (mixed seasonal vegetables), and Edamame (steamed soybeans with sea salt) are all +$5 each. Gyoza (pan-fried Japanese dumplings) and 3rd Protein (add a third protein to your meal) are +$10 each. These can be ordered per person or shared family-style.',
+    category: 'Menu & Upgrades',
+    subcategory: 'Add‑ons & Sides',
+    tags: ['enhancements', 'add-ons', 'yakisoba noodles +$5', 'extra rice +$5', 'extra vegetables +$5', 'edamame +$5', 'gyoza +$10', '3rd protein +$10', 'sides'],
+    confidence: 'high',
+    source_urls: ['/menu']
   },
   {
-    question: "Can I provide my own proteins?",
-    answer: "Due to insurance and pricing requirements, we do not cook any outside protein or food at this time."
+    id: 'chef-arrival-time',
+    question: 'What time will the chef arrive?',
+    answer: 'Our chef will arrive approximately 15-30 minutes before your scheduled party time for setup. Setup is quick and usually takes just a few minutes. We\'ll confirm arrival time when we call to finalize details.',
+    category: 'On-Site Setup & Requirements',
+    subcategory: 'General',
+    tags: ['arrival time', '15-30 minutes early', 'setup time'],
+    confidence: 'high',
+    source_urls: ['/BookUs']
   },
   {
-    question: "What time will the chef arrive?",
-    answer: "The chef will try to arrive approximately 15-30 minutes prior to the reservation time. Our set-up process is usually very easy and only takes a few minutes."
+    id: 'protein-choices-different',
+    question: 'Can guests choose different proteins?',
+    answer: 'Absolutely! Each guest can choose their own 2 proteins from: Chicken, NY Strip Steak, Shrimp, Scallops, Salmon, or Tofu. Everyone can have different selections. Premium upgrades (Filet Mignon +$5, Lobster Tail +$15) are also individual choices.',
+    category: 'Menu & Upgrades',
+    subcategory: 'Included Items',
+    tags: ['individual choices', 'different proteins', 'personalized'],
+    confidence: 'high',
+    source_urls: ['/menu']
   },
   {
-    question: "Do I Need to Tip the Chef?",
-    answer: "Gratuity goes directly to the chef and is greatly appreciated! We suggest 20-35% of the service cost (Base Cost + Optional food upgrades) as tips."
+    id: 'why-deposit-required',
+    question: 'Why is a deposit required?',
+    answer: 'The $100 deposit confirms your reservation and helps us prepare fresh ingredients specifically for your party. It also ensures commitment from both sides and covers our preparation costs. The deposit is deducted from your final bill on party day.',
+    category: 'Booking & Payments',
+    subcategory: 'Deposits & Balance',
+    tags: ['deposit explanation', 'reservation confirmation', 'preparation costs'],
+    confidence: 'high',
+    source_urls: ['/BookUs']
   },
   {
-    question: "Can you Tell More About Fees?",
-    answer: "All fees are included in price per person except for chef gratuity, possible travel fee and optional upgrades. We accept and prefer Cash in all locations, to be paid after the party. Some locations accept other forms of payment like Stripe or Credit Card. Contact us at contact@myhibachi.com for specific payment options offered in your area."
+    id: 'safety-precautions',
+    question: 'Is it safe to use propane for cooking in residential areas?',
+    answer: 'Yes, absolutely safe! Our chefs are experienced professionals who follow strict safety protocols. We bring portable fire extinguishers to every event, perform propane leak checks, maintain safe distances from flammable objects, and ensure proper ventilation.',
+    category: 'On-Site Setup & Requirements',
+    subcategory: 'General',
+    tags: ['safety', 'propane', 'fire extinguisher', 'leak checks', 'protocols'],
+    confidence: 'high',
+    source_urls: []
   },
   {
-    question: "What if someone does not eat meat?",
-    answer: "We can provide tofu to meet Vegetarian and Vegan needs. The price per person does not change. We will supplement their dishes with additional extras on cooked veggies etc."
-  },
-  {
-    question: "What Should I Prepare for My Party?",
-    answer: "You should arrange for a clear area for our grill: 68.3\" L x 27.5\" W x 41.3\" H and setup your tables, chairs, silverware, large plates, salad plates, drink cups and any beverages you want to drink besides sake (which we bring plenty of!)"
-  },
-  {
-    question: "Can I See What the Experience is Like?",
-    answer: "Yes! We have videos and photos from happy customers that showcase the My Hibachi experience. You can find examples on our social media pages and website gallery. Contact us at contact@myhibachi.com to see more examples of our hibachi parties."
-  },
-  {
-    question: "Are These Parties Kid Friendly?",
-    answer: "Yes 100%! Our parties are fun for the whole family! Our chefs are very talented and can tailor the experience to be even more kid and family friendly. Just let the reservations manager know after booking."
-  },
-  {
-    question: "Can you Explain the Travel Fee?",
-    answer: "The first 20 miles to your party location from our location is free! It's $2 per mile after the first 20. Our chef will start from our Northern California locations serving the San Francisco Bay Area, San Jose, Sacramento, and nearby cities."
-  },
-  {
-    question: "What can I expect after Booking?",
-    answer: "After you reserve your time online you will: Receive a confirmation email (Check spam or verify whether your email address is correct if not receiving it). Our booking manager will reach out to you at least a week before your party date to finalize all details, including menu and price, but you can also contact them directly anytime before that at contact@myhibachi.com."
-  },
-  {
-    question: "Do You Have Insurance?",
-    answer: "If you or your venue manager require insurance, we can recommend platforms where you can purchase party insurance. Please contact our customer service team at contact@myhibachi.com, and we can offer guidance on insurance options. For small events, the cost typically ranges from $60 to $100."
-  },
-  {
-    question: "Can you offer sushi?",
-    answer: "Yes, our chefs can make 13 types of sushi rolls including: Kyoto To The Bay (Select 5 Rolls - Alaskan Roll, California Roll, Chili Shrimp Roll, Las Vegas Roll, Philadelphia Roll, Yellow submarine, Godzilla, Spicy Salmon Roll or Spicy Tuna Roll), Sushi Garden (Seaweed Salad, Shrimp Nigiri, Salmon Nigiri, California Roll, Philadelphia Roll, Spicy Tuna Roll, Rainbow Roll), Tokyo Platter, Samurai Platter, and various individual roll trays. Contact us for complete sushi menu and pricing."
-  },
-  {
-    question: "What are the meal pricing and rules?",
-    answer: "Meal Rules by Age Group: Adults (13+ yrs) & Older Children (6-12 yrs) get 2 Standard Proteins per person (Chicken, Steak, Shrimp, Scallops, Salmon, Tofu). Default: Chicken + Steak if no selection made. Upgrades: Premium Proteins +$5 (Filet Mignon) / +$10 (Lobster Tail), 3rd+ Proteins: $10/standard, $15/premium. Young Children (5 yrs & under) get 1 Protein FREE (Standard or Premium), no sides/sushi, no additional proteins available."
-  },
-  {
-    question: "What's the recommended layout for the party?",
-    answer: "We recommend a U-shaped setup with a gap for the chef's workstation, allowing all guests to watch the cooking performance. We suggest using 8-foot tables, each seating 4-5 people."
-  },
-  {
-    question: "Can guests choose different proteins?",
-    answer: "Yes, each guest can choose 2 proteins, and each person's choice can vary. Our chefs can cook and serve different proteins separately to ensure everyone is satisfied."
-  },
-  {
-    question: "I haven't received a confirmation email after paying the deposit?",
-    answer: "If you paid via our website, you should receive a confirmation email from contact@myhibachi.com. If you used a payment link provided by our team, there will be no email, but don't worry—our customer service team checks payments daily and will reach out to confirm."
-  },
-  {
-    question: "What about travel fee reimbursement for remote areas?",
-    answer: "We serve Northern California including the San Francisco Bay Area, San Jose, Sacramento, and nearby cities. If your location is far, we offer travel fee reimbursement, which varies based on the number of guests. Contact contact@myhibachi.com to apply."
-  },
-  {
-    question: "How should I send the protein choices list?",
-    answer: "Each guest can choose 2 proteins. The easiest way is to send an Excel sheet with columns for name, first protein, and second protein. Alternatively, you can send a text format like: guest1-protein1/protein2. We'll compile and confirm the selections with you."
-  },
-  {
-    question: "Can the party be held in a garage or indoors?",
-    answer: "We usually host hibachi parties outdoors, but indoor events are possible with proper ventilation if necessary."
-  },
-  {
-    question: "How do I pay the tip? When should it be paid?",
-    answer: "Tips are typically paid directly to the chef at the end of the party, either in cash or via Stripe."
-  },
-  {
-    question: "Can the balance payment be made in cash? Can I pay in advance?",
-    answer: "Yes, the remaining balance can be paid in cash after the party. You can also pay in advance via Stripe by contacting us for the payment link. Stripe accepts most credit cards."
-  },
-  {
-    question: "What if the number of guests is less than 10?",
-    answer: "Our parties generally start with at least 10 adults or a minimum spend of $600. If you don't meet this standard, you can select proteins like chicken, NY strip steak, shrimp, scallops, salmon or tofu to reach the total. Contact us at contact@myhibachi.com for a customized plan."
-  },
-  {
-    question: "Can I get a receipt or invoice for the deposit and the remaining balance?",
-    answer: "Yes, absolutely! If you need a receipt or invoice, please feel free to contact our customer service team at contact@myhibachi.com. We can include all payments, such as the deposit, remaining balance, and gratuity, in the receipt or invoice for your convenience."
-  },
-  {
-    question: "I'm worried about the safety of paying the deposit. What should I do?",
-    answer: "We completely understand your concern and want to reassure you that paying the deposit is safe and secure. We use trusted payment platforms like Stripe, ensuring all transactions are encrypted and fully protected. Additionally, our cancellation policy offers a full refund if you cancel at least 48 hours before the event. Our customer service team is available daily and ready to assist with any questions or concerns. You can always reach out to us at contact@myhibachi.com, and we'll respond promptly. We're dedicated to earning your trust and delivering an unforgettable hibachi experience."
-  },
-  {
-    question: "Is the deposit amount the same for all orders?",
-    answer: "Yes, regardless of whether your order is a few hundred dollars for a small event or several thousand dollars for a large party, we only require a $200 deposit. (Please note that the $216 charge includes a $16 processing fee and tax for online transactions.)"
-  },
-  {
-    question: "Why is a Deposit Required?",
-    answer: "1. Reservation Confirmation: The deposit ensures that your preferred date and time are reserved exclusively for you. 2. Preparation Costs: Hosting a hibachi party requires us to purchase fresh, high-quality ingredients and prepare specific setups tailored to your event. 3. Commitment Assurance: Requiring a deposit helps minimize last-minute cancellations and ensures commitment from both sides. 4. Easy Balance Management: The deposit is deducted from your total cost, making the final payment more manageable. 5. Custom Services: If you request special upgrades or dietary accommodations, the deposit helps us confirm these customizations. Contact contact@myhibachi.com for any questions."
-  },
-  {
-    question: "Is it safe to use propane for cooking in residential areas?",
-    answer: "Yes, it is safe to use propane for cooking when proper precautions are followed. Propane is a clean-burning, efficient fuel that is widely used in residential and commercial settings. Our propane tanks are certified by trusted suppliers and used in accordance with all safety guidelines."
-  },
-  {
-    question: "What precautions are in place to prevent fire hazards?",
-    answer: "Our chefs follow strict safety protocols, including: Performing leak checks on propane tanks before use, Keeping a safe distance between cooking equipment and flammable objects, Ensuring proper ventilation when using propane-powered appliances, Bringing a portable fire extinguisher to every event for added safety. We work closely with our chefs to ensure they are always vigilant about potential risks."
-  },
-  {
-    question: "How does My Hibachi ensure its cooking equipment is safe to use?",
-    answer: "We exclusively use high-quality griddles and certified propane tanks, which are well-known for their safety and reliability. Our propane tanks are regularly inspected, and our chefs perform thorough safety checks before and after each use. The equipment is designed with built-in safety mechanisms to minimize risk."
-  },
-  {
-    question: "What steps does My Hibachi take to ensure fire safety during cooking?",
-    answer: "At My Hibachi, safety is our top priority. All of our chefs have 5-10 years of experience and undergo comprehensive fire safety training before joining our team. Every time our chefs visit a customer's home, they bring a portable fire extinguisher to ensure maximum safety and preparedness. Our cooking equipment meets industry safety standards."
-  },
-  {
-    question: "When is the deadline to confirm the party menu (protein list)?",
-    answer: "The deadline is 3 days before the party. If not received, we'll default to chicken and steak, our most popular choices."
-  },
-  {
-    question: "What's your Cancellation Policy & Weather Policy?",
-    answer: "We offer a 48-hour full refund guarantee. Cancel at least 48 hours before your event, and we'll refund your deposit with no questions asked. Rescheduling is free with 48-hour notice; after that, a $200 rescheduling fee applies. Weather Policy: If it rains, the customer must provide a covered area (such as a tent or patio) for the chef to cook under. It is the customer's responsibility to decide and cancel due to inclement weather at least 48 hours before the event. Please notify us at least 24 hours in advance of any changes to guest numbers."
+    id: 'receipt-invoice',
+    question: 'Can I get a receipt or invoice?',
+    answer: 'Yes! We can provide receipts or invoices for deposit, remaining balance, and gratuity. Perfect for expense reimbursement or business events. Contact cs@myhibachichef.com to request documentation.',
+    category: 'Booking & Payments',
+    subcategory: 'Deposits & Balance',
+    tags: ['receipt', 'invoice', 'business', 'expense reimbursement'],
+    confidence: 'high',
+    source_urls: ['/BookUs']
   }
+];
+
+export const categories = [
+  'Pricing & Minimums',
+  'Menu & Upgrades', 
+  'Booking & Payments',
+  'Travel & Service Area',
+  'On‑Site Setup & Requirements',
+  'Dietary & Allergens',
+  'Policies (Cancellation, Weather, Refunds)',
+  'Kids & Special Occasions',
+  'Corporate & Insurance',
+  'Contact & Response Times'
+];
+
+// Subcategory mapping
+export const subcategories = {
+  'Pricing & Minimums': ['Per‑person Rates', 'Minimum Spend / Party Size', 'Gratuity & Fees', 'Travel Fees', 'Discounts / Group Rates'],
+  'Menu & Upgrades': ['Included Items', 'Protein Choices', 'Premium Upgrades', 'Add‑ons & Sides', 'Kids\' Portions'],
+  'Booking & Payments': ['How to Book', 'Deposits & Balance', 'Payment Methods', 'Scheduling & Availability', 'Modifying a Booking'],
+  'Travel & Service Area': ['Coverage Radius', 'Travel Fees', 'Multi‑stop / Venue Rules'],
+  'On‑Site Setup & Requirements': ['Space & Ventilation', 'Power/Propane & Safety', 'Tableware & Cleanup', 'Indoor vs Outdoor'],
+  'Dietary & Allergens': ['Gluten‑Free', 'Vegetarian/Vegan', 'Shellfish & Sesame', 'Cross‑Contact', 'Dietary Accommodations'],
+  'Policies (Cancellation, Weather, Refunds)': ['Cancellation & Changes', 'Weather / Backup Plan', 'Refunds & Credits', 'Late / No‑Show'],
+  'Kids & Special Occasions': ['Children Pricing & Portions', 'Birthdays/Anniversaries', 'Weddings / Corporate Milestones'],
+  'Corporate & Insurance': ['W‑9 / Vendor Setup', 'COI / Liability Coverage', 'Tax & Invoicing'],
+  'Contact & Response Times': ['Best Way to Reach', 'Response SLAs', 'After‑hours / Weekends']
+};
+
+// Generate all tags dynamically from the FAQ data
+export const getAllTags = () => Array.from(
+  new Set(faqs.flatMap(faq => faq.tags || []))
+).sort();
+
+// Pre-computed tags for better performance
+export const allTags = [
+  'pricing', 'cost', 'adults', 'children', 'minimum', 'travel', 'fees', 'distance', 'miles',
+  'party size', 'guests', 'tipping', 'gratuity', 'chef', 'menu', 'proteins', 'included', 'sake',
+  'upgrades', 'filet', 'lobster', 'premium', 'yakisoba', 'noodles', 'edamame', 'gyoza', 'enhancements',
+  'dietary', 'allergies', 'vegetarian', 'vegan', 'gluten-free', 'kids', 'family', 'alcohol', '21+', 
+  'beverages', 'booking', 'reserve', 'advance', 'deposit', 'payment', 'non-refundable', 'venmo', 
+  'zelle', 'cash', 'credit card', '48 hours', 'availability', 'service area', 'bay area', 'sacramento', 
+  'coverage', 'space', 'grill', 'dimensions', 'setup', 'tables', 'seating', 'arrangement', 'u-shape',
+  'indoor', 'outdoor', 'ventilation', 'safety', 'host provides', 'chef brings', 'requirements',
+  'cancellation', 'refund', '7 days', 'reschedule', 'weather', 'rain', 'covered area', 'tent',
+  'birthday', 'kids party', 'family friendly', 'contact', 'phone', 'email', 'social media'
 ];

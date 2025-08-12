@@ -115,7 +115,7 @@ END:VCALENDAR`
 VERSION:2.0
 PRODID:-//MyHibachi//Booking System//EN
 BEGIN:VEVENT
-UID:${bookingData.bookingId}@myhibachi.com
+UID:${bookingData.bookingId}@myhibachichef.com
 DTSTART:${googleStartTime}
 DTEND:${googleEndTime}
 SUMMARY:${title}
@@ -231,7 +231,7 @@ END:VCALENDAR`
             </ul>
             
             <p><strong>Questions or need to make changes?</strong><br>
-            Call us at <a href="tel:+1234567890">(123) 456-7890</a> or email <a href="mailto:bookings@myhibachi.com">bookings@myhibachi.com</a></p>
+            Call us at <a href="tel:+19167408768">(916) 740-8768</a> or email <a href="mailto:cs@myhibachichef.com">cs@myhibachichef.com</a></p>
         </div>
         
         <div class="footer">
@@ -317,7 +317,7 @@ myhibachi.com`
             <div class="review-buttons">
                 <a href="https://g.page/r/your-google-business-id/review" class="review-button google" target="_blank">⭐ Review on Google</a>
                 <a href="https://www.yelp.com/writeareview/biz/your-yelp-business-id" class="review-button yelp" target="_blank">🍽️ Review on Yelp</a>
-                <a href="https://www.facebook.com/your-facebook-page/reviews" class="review-button facebook" target="_blank">👍 Review on Facebook</a>
+                <a href="https://www.facebook.com/people/My-hibachi/61577483702847/" class="review-button facebook" target="_blank">👍 Review on Facebook</a>
             </div>
             
             <p>Your honest review helps us improve and lets other families know what to expect. We truly appreciate your time!</p>
@@ -345,7 +345,7 @@ We hope you had an amazing hibachi experience! Would you mind taking a moment to
 Leave a review:
 - Google: https://g.page/r/your-google-business-id/review
 - Yelp: https://www.yelp.com/writeareview/biz/your-yelp-business-id
-- Facebook: https://www.facebook.com/your-facebook-page/reviews
+- Facebook: https://www.facebook.com/people/My-hibachi/61577483702847/
 
 Planning another event? Visit myhibachi.com to book again!
 

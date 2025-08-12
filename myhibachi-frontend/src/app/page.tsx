@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import '@/styles/home.css'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
+import { FreeQuoteButton } from '@/components/quote/FreeQuoteButton'
 
 export default function Home() {
   useScrollAnimation()
@@ -237,7 +238,7 @@ export default function Home() {
             <h3 className="section-title text-center">🌟 Bringing Hibachi Experience to Your Neighborhood! 🌟</h3>
             <p className="service-intro text-center">
               We&apos;re excited to bring our premium hibachi experience directly to your location! 
-              Serving within <span className="highlight-text">150 miles of Fremont, CA</span> with 
+              Serving within <span className="highlight-text">150 miles from our location</span> with 
               <span className="highlight-text">reasonable travel fees</span> for locations outside our primary service areas.
             </p>
             
@@ -250,7 +251,7 @@ export default function Home() {
                     <li>San Francisco - The heart of culinary excellence</li>
                     <li>San Jose - Silicon Valley&apos;s finest hibachi</li>
                     <li>Oakland - East Bay entertainment at its best</li>
-                    <li>Fremont - Our home base with premium service</li>
+                    <li>Bay Area - Our home base with premium service</li>
                     <li>Santa Clara - Tech meets traditional Japanese cuisine</li>
                     <li>Sunnyvale - Where innovation meets flavor</li>
                     <li>Mountain View - Bringing mountains of flavor</li>
@@ -281,7 +282,7 @@ export default function Home() {
                 <span className="radius-icon">📍</span>
                 <h4 className="radius-title">We Come to You!</h4>
                 <p className="radius-description">
-                  Serving anywhere within <span className="highlight-text">150 miles of Fremont, CA 94539</span>
+                  Serving anywhere within <span className="highlight-text">150 miles from our location</span>
                 </p>
                 <p className="travel-fee-info">
                   <span className="travel-highlight">💰 Transparent Pricing:</span> 
@@ -413,9 +414,15 @@ export default function Home() {
             <Link href="/contact" className="btn btn-primary btn-lg">
               <i className="bi bi-calendar-check me-2"></i> Book Your Premium Experience
             </Link>
+            <div className="mt-3">
+              <FreeQuoteButton variant="secondary" />
+            </div>
           </div>
         </div>
       </section>
+      
+      {/* Floating Quote Button */}
+      <FreeQuoteButton variant="floating" />
     </main>
   )
 }

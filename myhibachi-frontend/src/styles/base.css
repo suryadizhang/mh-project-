@@ -19,18 +19,22 @@ body {
   overflow-x: hidden;
 }
 
-/* Ensure all emojis are visible throughout the page */
+/* Canonical emoji rule – single source of truth */
 .emoji-visible {
-  filter: none !important;
-  background: none !important;
-  background-clip: unset !important;
-  -webkit-background-clip: unset !important;
-  -webkit-text-fill-color: unset !important;
-  color: inherit !important;
-  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  display: inline !important;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  background: none;
+  background-clip: initial;
+  -webkit-background-clip: initial;
+  -webkit-text-fill-color: initial;
+  color: inherit;
+  text-shadow: none;
+  filter: none;
+  opacity: 1;
+  visibility: visible;
+  display: inline;
 }
 
 /* Global Animations */

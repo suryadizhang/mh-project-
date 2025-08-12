@@ -47,7 +47,13 @@ export default function Navbar() {
               </Link>
             </li>
             <li className="nav-item">
-              <Link href="/booking" className="nav-link nav-link-custom">
+              <Link href="/quote" className="nav-link nav-link-custom">
+                <i className="bi bi-calculator nav-icon"></i>
+                <span className="nav-text">Get Quote</span>
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link href="/BookUs" className="nav-link nav-link-custom">
                 <i className="bi bi-calendar-check nav-icon"></i>
                 <span className="nav-text">Book Us</span>
               </Link>

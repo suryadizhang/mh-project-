@@ -149,10 +149,10 @@ const MYHIBACHI_MENU_SERVICES: MenuService[] = [
     category: 'equipment'
   },
 
-  // Travel Fees (calculated based on distance from Fremont, CA)
+  // Travel Fees (calculated based on distance from base location)
   {
     name: 'Travel Fee',
-    description: 'Travel fee calculated based on distance from our Fremont location',
+    description: 'Travel fee calculated based on distance from our base location',
     basePrice: 0, // This will be calculated dynamically
     priceType: 'flat_rate',
     category: 'travel'

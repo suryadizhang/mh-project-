@@ -1,5 +1,6 @@
 import { Shield, Users, Database, Settings, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { BaseLocationManager } from '@/components/admin/BaseLocationManager'
 
 export default function SuperAdminPage() {
   const systemStats = [
@@ -117,6 +118,9 @@ export default function SuperAdminPage() {
           </table>
         </div>
       </div>
+
+      {/* Base Location Management */}
+      <BaseLocationManager />
 
       {/* System Controls */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

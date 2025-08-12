@@ -6,6 +6,7 @@ import { format, addDays } from 'date-fns'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import './datepicker.css'
+import { FreeQuoteButton } from '@/components/quote/FreeQuoteButton'
 
 // Type definitions for booking form
 
@@ -1157,6 +1158,8 @@ export default function BookingPage() {
           </form>
         </div>
       </div>
+      
+      <FreeQuoteButton variant="floating" />
     </div>
     </>
   )

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Calendar, User } from 'lucide-react'
+import { FreeQuoteButton } from '@/components/quote/FreeQuoteButton'
 
 export default function BlogPage() {
   const blogPosts = [
@@ -92,6 +93,9 @@ export default function BlogPage() {
           </a>
         </div>
       </div>
+      
+      {/* Floating Quote Button */}
+      <FreeQuoteButton variant="floating" />
     </div>
   )
 }

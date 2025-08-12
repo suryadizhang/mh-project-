@@ -1,5 +1,6 @@
 import '@/styles/contact.css'
 import '@/styles/base.css'
+import { FreeQuoteButton } from '@/components/quote/FreeQuoteButton'
 
 export default function ContactPage() {
   return (
@@ -87,7 +88,7 @@ export default function ContactPage() {
                     <i className="bi bi-geo-alt-fill contact-icon"></i>
                     <div className="contact-details">
                       <h5>Service Coverage</h5>
-                      <p className="contact-link">Northern California up to 150 miles from Fremont</p>
+                      <p className="contact-link">Northern California up to 150 miles from our location</p>
                       <p className="contact-note">Premium mobile hibachi service delivered to your location!</p>
                     </div>
                   </div>
@@ -289,7 +290,7 @@ export default function ContactPage() {
             <div className="col-md-3 mb-3">
               <div className="d-flex align-items-center">
                 <i className="bi bi-geo-alt-fill text-primary me-2"></i>
-                <span>Fremont</span>
+                <span>Northern California</span>
               </div>
             </div>
             <div className="col-md-3 mb-3">
@@ -375,11 +376,14 @@ export default function ContactPage() {
           <div className="text-center mt-4">
             <div className="alert alert-info d-inline-block">
               <i className="bi bi-info-circle-fill me-2"></i>
-              We serve within <strong>150 miles of Fremont, CA</strong> with reasonable travel fees for locations outside our primary service areas.
+              We serve within <strong>150 miles of our location</strong> with reasonable travel fees for locations outside our primary service areas.
             </div>
           </div>
         </div>
       </section>
+      
+      {/* Floating Quote Button */}
+      <FreeQuoteButton variant="floating" />
     </div>
   )
 }

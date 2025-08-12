@@ -5,6 +5,7 @@ import { useForm, Controller, SubmitHandler, Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { format, addDays } from 'date-fns'
+import { FreeQuoteButton } from '@/components/quote/FreeQuoteButton'
 
 // Validation schema
 const bookingSchema = z.object({
@@ -478,11 +479,14 @@ export default function BookingPage() {
             <li>• <strong>Advance Notice:</strong> All bookings require minimum 2 days advance notice</li>
             <li>• <strong>Duration:</strong> Each session is 90 minutes of premium hibachi entertainment</li>
             <li>• <strong>Confirmation:</strong> We will contact you within 1-2 hours to confirm details</li>
-            <li>• <strong>Service Area:</strong> We serve within 150 miles of Fremont, CA</li>
+            <li>• <strong>Service Area:</strong> We serve within 150 miles of our location</li>
             <li>• <strong>Deposit Required:</strong> A deposit is required to lock the booking slot and secure your reservation</li>
           </ul>
         </div>
       </div>
+      
+      {/* Floating Quote Button */}
+      <FreeQuoteButton variant="floating" />
     </div>
   )
 }

@@ -21,17 +21,17 @@ export default function MenuPage() {
                   <span className="floating-icon emoji-visible" style={{animationDelay: '3s'}}>🥩</span>
                 </div>
               </div>
-              
+
               <h1 className="display-1 fw-bold mb-4">
                 <span className="gradient-text">Premium Hibachi Menu</span>
               </h1>
-              
+
               <p className="hero-subtitle mb-4">
                 <span className="emoji-visible">✨</span>
                 Experience authentic Japanese hibachi dining in the comfort of your home
                 <span className="emoji-visible">✨</span>
               </p>
-              
+
               {/* Enhanced Value Proposition */}
               <div className="value-proposition mb-5">
                 <div className="value-item">
@@ -49,7 +49,7 @@ export default function MenuPage() {
                   <span className="value-text">Live Entertainment</span>
                 </div>
               </div>
-              
+
               {/* Enhanced feature badges with better animations */}
               <div className="hero-features-grid mb-5">
                 <div className="feature-badge modern-feature-badge">
@@ -61,7 +61,7 @@ export default function MenuPage() {
                     <span className="feature-subtitle">Fresh ingredients</span>
                   </div>
                 </div>
-                        
+
                 <div className="feature-badge modern-feature-badge">
                   <div className="feature-icon-bg">
                     <span className="feature-icon emoji-visible">🔧</span>
@@ -81,7 +81,7 @@ export default function MenuPage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Quick stats redesigned */}
               <div className="hero-stats">
                 <div className="stat-item">
@@ -116,7 +116,7 @@ export default function MenuPage() {
                   <p className="section-subtitle">Premium experience, honest pricing — no hidden fees</p>
                 </div>
               </div>
-              
+
               {/* Enhanced pricing cards */}
               <div className="row justify-content-center mb-5">
                 <div className="col-lg-12">
@@ -149,7 +149,7 @@ export default function MenuPage() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="pricing-card modern-card child-price" data-price="child">
                       <div className="card-glow"></div>
                       <div className="card-header-accent"></div>
@@ -178,7 +178,7 @@ export default function MenuPage() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="pricing-card modern-card toddler-price" data-price="toddler">
                       <div className="card-glow"></div>
                       <div className="card-header-accent"></div>
@@ -210,7 +210,7 @@ export default function MenuPage() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="pricing-footer">
                 <div className="info-cards-grid">
                   <div className="info-card">
@@ -222,7 +222,7 @@ export default function MenuPage() {
                       <p>$550 total order (≈ 10 adults)</p>
                     </div>
                   </div>
-                  
+
                   <div className="info-card">
                     <div className="info-icon">
                       <span className="emoji-visible">💡</span>
@@ -232,7 +232,7 @@ export default function MenuPage() {
                       <p>20-35% based on satisfaction</p>
                     </div>
                   </div>
-                  
+
                   <div className="info-card">
                     <div className="info-icon">
                       <span className="emoji-visible">🚗</span>
@@ -243,7 +243,7 @@ export default function MenuPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="alert alert-info mt-4">
                   <i className="bi bi-info-circle-fill me-2"></i>
                   All packages include fried rice, mixed vegetables, and our signature sauces.
@@ -251,7 +251,7 @@ export default function MenuPage() {
               </div>
             </div>
           </div>
-          
+
           {/* What's Included Section */}
           <div className="card menu-card p-0 border-0 overflow-hidden mb-5">
             <div className="included-section p-5">
@@ -264,7 +264,7 @@ export default function MenuPage() {
                   <p className="section-subtitle">Every booking includes these delicious accompaniments & entertainment</p>
                 </div>
               </div>
-              
+
               <div className="included-items-grid mb-5">
                 <div className="included-item modern-item enhanced-item">
                   <div className="item-icon-wrapper">
@@ -276,7 +276,7 @@ export default function MenuPage() {
                     <div className="included-badge">Signature Recipe</div>
                   </div>
                 </div>
-                
+
                 <div className="included-item modern-item enhanced-item">
                   <div className="item-icon-wrapper">
                     <span className="included-icon emoji-visible">🥬</span>
@@ -287,7 +287,7 @@ export default function MenuPage() {
                     <div className="included-badge">Farm Fresh</div>
                   </div>
                 </div>
-                
+
                 <div className="included-item modern-item enhanced-item">
                   <div className="item-icon-wrapper">
                     <span className="included-icon emoji-visible">🥗</span>
@@ -298,7 +298,7 @@ export default function MenuPage() {
                     <div className="included-badge">House Special</div>
                   </div>
                 </div>
-                
+
                 <div className="included-item modern-item enhanced-item">
                   <div className="item-icon-wrapper">
                     <span className="included-icon emoji-visible">🥄</span>
@@ -309,7 +309,7 @@ export default function MenuPage() {
                     <div className="included-badge">Customer Favorite</div>
                   </div>
                 </div>
-                
+
                 <div className="included-item modern-item enhanced-item">
                   <div className="item-icon-wrapper">
                     <span className="included-icon emoji-visible">🌶️</span>
@@ -320,7 +320,7 @@ export default function MenuPage() {
                     <div className="included-badge">Chef&apos;s Special</div>
                   </div>
                 </div>
-                
+
                 <div className="included-item modern-item enhanced-item">
                   <div className="item-icon-wrapper">
                     <span className="included-icon emoji-visible">🎪</span>
@@ -332,7 +332,7 @@ export default function MenuPage() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="protein-selection-banner modern-banner enhanced-banner">
                 <div className="banner-content">
                   <div className="banner-icon">
@@ -362,7 +362,7 @@ export default function MenuPage() {
                   <p className="section-subtitle">Choose your perfect combination from our premium selection</p>
                 </div>
               </div>
-              
+
               <div className="row mb-5">
                 <div className="col-lg-6 mb-4">
                   <div className="protein-card modern-card enhanced-protein-card">
@@ -401,7 +401,7 @@ export default function MenuPage() {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="protein-item modern-protein-item enhanced-protein-item">
                         <div className="protein-content">
                           <div className="protein-header">
@@ -422,7 +422,7 @@ export default function MenuPage() {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="protein-item modern-protein-item enhanced-protein-item">
                         <div className="protein-content">
                           <div className="protein-header">
@@ -443,7 +443,7 @@ export default function MenuPage() {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="protein-item modern-protein-item enhanced-protein-item">
                         <div className="protein-content">
                           <div className="protein-header">
@@ -464,7 +464,7 @@ export default function MenuPage() {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="protein-item modern-protein-item enhanced-protein-item">
                         <div className="protein-content">
                           <div className="protein-header">
@@ -488,7 +488,7 @@ export default function MenuPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="col-lg-6 mb-4">
                   <div className="upgrade-card modern-card featured-upgrade enhanced-upgrade-card">
                     <div className="card-glow premium-glow"></div>
@@ -528,7 +528,7 @@ export default function MenuPage() {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="upgrade-item modern-upgrade-item enhanced-upgrade-item">
                         <div className="upgrade-content">
                           <div className="upgrade-header">
@@ -551,7 +551,7 @@ export default function MenuPage() {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="upgrade-item modern-upgrade-item enhanced-upgrade-item">
                         <div className="upgrade-content">
                           <div className="upgrade-header">
@@ -574,7 +574,7 @@ export default function MenuPage() {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="upgrade-item modern-upgrade-item enhanced-upgrade-item">
                         <div className="upgrade-content">
                           <div className="upgrade-header">
@@ -616,7 +616,7 @@ export default function MenuPage() {
                   <p className="section-subtitle">Take your hibachi experience to the next level</p>
                 </div>
               </div>
-              
+
               <div className="additional-items-grid">
                 <div className="additional-item-card modern-additional-card">
                   <div className="additional-content">
@@ -632,7 +632,7 @@ export default function MenuPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="additional-item-card modern-additional-card">
                   <div className="additional-content">
                     <div className="additional-icon-wrapper">
@@ -647,7 +647,7 @@ export default function MenuPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="additional-item-card modern-additional-card">
                   <div className="additional-content">
                     <div className="additional-icon-wrapper">
@@ -662,7 +662,37 @@ export default function MenuPage() {
                     </div>
                   </div>
                 </div>
-                
+
+                <div className="additional-item-card modern-additional-card">
+                  <div className="additional-content">
+                    <div className="additional-icon-wrapper">
+                      <span className="additional-icon emoji-visible">🫛</span>
+                    </div>
+                    <h5 className="additional-name">Edamame</h5>
+                    <p className="additional-desc">Fresh steamed soybeans with sea salt</p>
+                  </div>
+                  <div className="additional-price">
+                    <div className="add-price-circle">
+                      <span className="add-price-tag">+$5</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="additional-item-card modern-additional-card">
+                  <div className="additional-content">
+                    <div className="additional-icon-wrapper">
+                      <span className="additional-icon emoji-visible">🥟</span>
+                    </div>
+                    <h5 className="additional-name">Gyoza</h5>
+                    <p className="additional-desc">Pan-fried Japanese dumplings</p>
+                  </div>
+                  <div className="additional-price">
+                    <div className="add-price-circle">
+                      <span className="add-price-tag">+$10</span>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="additional-item-card modern-additional-card">
                   <div className="additional-content">
                     <div className="additional-icon-wrapper">
@@ -696,13 +726,13 @@ export default function MenuPage() {
                 <p className="section-subtitle">We bring the hibachi experience directly to your location!</p>
               </div>
             </div>
-            
+
             <p className="service-intro text-center">
-              We&apos;re excited to bring our premium hibachi experience directly to your location! 
-              Serving within <span className="highlight-text">150 miles of Fremont, CA</span> with 
+              We&apos;re excited to bring our premium hibachi experience directly to your location!
+              Serving within <span className="highlight-text">150 miles of Fremont, CA</span> with
               <span className="highlight-text">reasonable travel fees</span> for locations outside our primary service areas.
             </p>
-            
+
             <div className="row mt-4">
               <div className="col-md-6">
                 <div className="service-area-card">
@@ -737,7 +767,7 @@ export default function MenuPage() {
                 </div>
               </div>
             </div>
-            
+
             <div className="service-radius-info text-center mt-4">
               <div className="radius-card">
                 <span className="radius-icon">📍</span>
@@ -746,8 +776,8 @@ export default function MenuPage() {
                   Serving anywhere within <span className="highlight-text">150 miles of Fremont, CA 94539</span>
                 </p>
                 <p className="travel-fee-info">
-                  <span className="travel-highlight">💰 Transparent Pricing:</span> 
-                  Minimal travel fees apply for locations outside our primary service areas. 
+                  <span className="travel-highlight">💰 Transparent Pricing:</span>
+                  Minimal travel fees apply for locations outside our primary service areas.
                   <br />
                   <strong>Call us for a custom quote - we make it affordable for everyone!</strong>
                 </p>
@@ -769,7 +799,7 @@ export default function MenuPage() {
           <div className="cta-section text-center p-5">
             <div className="cta-content-wrapper">
               <div className="cta-background-pattern"></div>
-              
+
               {/* CTA Header */}
               <div className="cta-header mb-5">
                 <div className="cta-icon-group mb-4">
@@ -784,7 +814,7 @@ export default function MenuPage() {
                   Book your premium hibachi experience today and create memories that will last a lifetime
                 </p>
               </div>
-              
+
               {/* Main CTA Button */}
               <div className="cta-button-wrapper mb-5">
                 <Link href="/contact" aria-label="Order your hibachi experience now" className="cta-link">
@@ -795,7 +825,7 @@ export default function MenuPage() {
                     <div className="button-shimmer"></div>
                   </button>
                 </Link>
-                
+
                 {/* Secondary actions */}
                 <div className="secondary-actions mt-4">
                   <div className="action-item">
@@ -809,7 +839,7 @@ export default function MenuPage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Enhanced Feature Highlights */}
               <div className="cta-features-section">
                 <h3 className="features-title mb-4">Why Choose My Hibachi?</h3>
@@ -823,7 +853,7 @@ export default function MenuPage() {
                       <p className="feature-description">Expertly trained hibachi chefs with 8+ years of professional experience</p>
                     </div>
                   </div>
-                  
+
                   <div className="cta-feature-card modern-feature-card">
                     <div className="feature-icon-wrapper">
                       <span className="feature-icon emoji-visible">🎭</span>
@@ -833,7 +863,7 @@ export default function MenuPage() {
                       <p className="feature-description">Amazing tricks, flips, and interactive cooking show</p>
                     </div>
                   </div>
-                  
+
                   <div className="cta-feature-card modern-feature-card">
                     <div className="feature-icon-wrapper">
                       <span className="feature-icon emoji-visible">🎯</span>
