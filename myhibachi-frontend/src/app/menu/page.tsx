@@ -108,7 +108,7 @@ export default function MenuPage() {
               <div className="text-center mb-5">
                 <div className="section-header animated-section">
                   <div className="section-icon-wrapper mb-3">
-                    <span className="section-icon emoji-visible">�</span>
+                    <span className="section-icon emoji-visible">💰</span>
                   </div>
                   <h2 className="section-title mb-4">
                     <span>Transparent Pricing</span>

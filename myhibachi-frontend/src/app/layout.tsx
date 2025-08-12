@@ -50,22 +50,22 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* Bootstrap CSS */}
-        <link 
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
           rel="stylesheet"
         />
-        
+
         {/* Bootstrap Icons */}
-        <link 
-          rel="stylesheet" 
+        <link
+          rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
         />
-        
+
         {/* Video preload hint for hero video */}
         <link rel="preload" href="/videos/hero_video.mp4" as="video" type="video/mp4" />
-        
+
         {/* Bootstrap JavaScript Bundle */}
-        <script 
+        <script
           src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
           async
         ></script>

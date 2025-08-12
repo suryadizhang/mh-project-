@@ -1,3 +1,5 @@
+'use client'
+
 import type { FaqItem } from '@/data/faqsData'
 import { FaqItemComponent } from './FaqItem'
 import { useState } from 'react'
@@ -16,7 +18,7 @@ function groupFAQsByCategory(faqs: FaqItem[]) {
     acc[category].push(faq)
     return acc
   }, {} as Record<string, FaqItem[]>)
-  
+
   return grouped
 }
 

@@ -39,7 +39,7 @@ export default function FAQsPage() {
           <div className="container">
             <h1>Frequently Asked Questions</h1>
             <p>
-              Everything you need to know about My Hibachi Chef&apos;s private catering service. 
+              Everything you need to know about My Hibachi Chef&apos;s private catering service.
               From pricing and booking to menus and dietary accommodations.
             </p>
           </div>
@@ -48,12 +48,12 @@ export default function FAQsPage() {
         {/* FAQ List */}
         <section className="faqs-content">
           <div className="container">
-            <FaqList 
+            <FaqList
               items={faqs}
             />
           </div>
         </section>
-        
+
         {/* Floating Quote Button */}
         <FreeQuoteButton variant="floating" />
       </main>

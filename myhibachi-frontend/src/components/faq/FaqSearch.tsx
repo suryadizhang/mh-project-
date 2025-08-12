@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from 'react'
 
 interface FaqSearchProps {
@@ -31,7 +33,7 @@ export function FaqSearch({ value, onChange, resultsCount }: FaqSearchProps) {
           autoComplete="off"
         />
         {value && (
-          <button 
+          <button
             onClick={() => onChange('')}
             className="clear-search"
             aria-label="Clear search"
@@ -40,7 +42,7 @@ export function FaqSearch({ value, onChange, resultsCount }: FaqSearchProps) {
           </button>
         )}
       </div>
-      
+
       {value && (
         <div className="search-results-info">
           {resultsCount > 0 ? (

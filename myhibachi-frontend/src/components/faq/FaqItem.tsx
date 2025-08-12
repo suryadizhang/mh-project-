@@ -1,3 +1,5 @@
+'use client'
+
 import type { FaqItem } from '@/data/faqsData'
 import { useState, useRef, useEffect } from 'react'
 
@@ -29,7 +31,7 @@ export function FaqItemComponent({ faq, isOpen, onToggle }: FaqItemComponentProp
   }
 
   return (
-    <div 
+    <div
       id={faq.id}
       className={`faq-item ${isOpen ? 'active' : ''} ${faq.confidence === 'low' ? 'low-confidence' : ''}`}
       data-category={faq.category.toLowerCase().replace(/[^a-z0-9]/g, '-')}
@@ -51,7 +53,7 @@ export function FaqItemComponent({ faq, isOpen, onToggle }: FaqItemComponentProp
           </span>
         </div>
       </button>
-      
+
       <div
         id={`faq-answer-${faq.id}`}
         className="faq-answer"
@@ -60,22 +62,22 @@ export function FaqItemComponent({ faq, isOpen, onToggle }: FaqItemComponentProp
         ref={answerRef}
       >
         <div className="faq-answer-content">
-          <div dangerouslySetInnerHTML={{ 
-            __html: faq.answer 
+          <div dangerouslySetInnerHTML={{
+            __html: faq.answer
           }} />
-          
+
           {/* Feedback and actions */}
           <div className="faq-actions">
             <div className="helpfulness">
               <span className="helpfulness-label">Was this helpful?</span>
-              <button 
+              <button
                 onClick={() => trackHelpfulness(true)}
                 className={`helpfulness-btn ${wasHelpful === true ? 'active' : ''}`}
                 aria-label="Mark as helpful"
               >
                 👍
               </button>
-              <button 
+              <button
                 onClick={() => trackHelpfulness(false)}
                 className={`helpfulness-btn ${wasHelpful === false ? 'active' : ''}`}
                 aria-label="Mark as not helpful"

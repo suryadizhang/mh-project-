@@ -1,7 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
+  },
+  images: {
+    unoptimized: false,
+  },
+  reactStrictMode: false, // Temporarily disable strict mode
+  output: 'standalone', // Try standalone output
 };
 
 export default nextConfig;

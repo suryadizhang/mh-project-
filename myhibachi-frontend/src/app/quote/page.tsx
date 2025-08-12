@@ -1,3 +1,5 @@
+'use client'
+
 import { QuoteCalculator } from '@/components/quote/QuoteCalculator'
 import '@/styles/quote-calculator.css'
 
@@ -39,7 +41,7 @@ export default function QuotePage() {
           <div className="container">
             <h1>Free Hibachi Catering Quote</h1>
             <p>
-              Get an instant estimate for your hibachi party. Our calculator includes 
+              Get an instant estimate for your hibachi party. Our calculator includes
               pricing for adults, children, upgrades, and travel fees based on your location.
             </p>
           </div>
@@ -59,21 +61,21 @@ export default function QuotePage() {
               <div className="info-card">
                 <h3>📊 Initial Estimates</h3>
                 <p>
-                  Our calculator provides initial estimates based on current pricing. 
+                  Our calculator provides initial estimates based on current pricing.
                   Final pricing may vary and will be confirmed during booking consultation.
                 </p>
               </div>
               <div className="info-card">
                 <h3>📞 Personal Consultation</h3>
                 <p>
-                  Every quote is followed up by our customer service team to confirm 
+                  Every quote is followed up by our customer service team to confirm
                   details, finalize pricing, and answer any questions you may have.
                 </p>
               </div>
               <div className="info-card">
                 <h3>🚛 Travel Fee Transparency</h3>
                 <p>
-                  First 30 miles from our location are completely free. After that, it&apos;s just 
+                  First 30 miles from our location are completely free. After that, it&apos;s just
                   $2 per mile. No hidden fees or surprise charges.
                 </p>
               </div>
