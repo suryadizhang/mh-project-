@@ -27,9 +27,9 @@
 .hero-media-container {
   position: relative;
   width: 100%;
-  height: 800px;
+  height: 480px; /* Reduced from 800px to 480px (3/5 of 800px) */
   overflow: hidden;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem; /* Reduced from 3rem to 2rem */
 }
 
 .hero-media-overlay {
@@ -61,12 +61,12 @@
   z-index: 2;
   color: white;
   text-align: center;
-  margin-top: -600px;
-  margin-bottom: 300px;
+  margin-top: -360px; /* Reduced from -600px to -360px (3/5) */
+  margin-bottom: 180px; /* Reduced from 300px to 180px (3/5) */
 }
 
 .main-title {
-  font-size: 4rem;
+  font-size: 2.8rem; /* Reduced from 4rem to 2.8rem (3.5/5) */
   font-weight: 700;
   margin-bottom: 1rem;
   text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.6);
@@ -164,16 +164,35 @@
   right: 20px;
   width: 70px;
   height: 70px;
-  background: rgba(219, 43, 40, 0.1);
+  background: linear-gradient(135deg, rgba(219, 43, 40, 0.15) 0%, rgba(255, 184, 0, 0.12) 50%, rgba(219, 43, 40, 0.08) 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2.5rem;
+  z-index: 1;
+  box-shadow:
+    0 0 20px rgba(219, 43, 40, 0.15),
+    inset 0 0 15px rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(219, 43, 40, 0.1);
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+  transform-origin: center center; /* Ensure all transforms happen from center */
+}
+
+.experience-icon-wrapper:hover {
+  transform: scale(1.1);
+  transform-origin: center center; /* Ensure scaling happens from center */
+  box-shadow:
+    0 0 30px rgba(219, 43, 40, 0.25),
+    inset 0 0 20px rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, rgba(219, 43, 40, 0.2) 0%, rgba(255, 184, 0, 0.15) 50%, rgba(219, 43, 40, 0.12) 100%);
 }
 
 .experience-content {
   position: relative;
+  padding-right: 90px; /* Add padding to prevent overlap with absolutely positioned icon */
+  z-index: 2; /* Ensure content stays above background elements */
 }
 
 .experience-title {
@@ -239,7 +258,64 @@
 }
 
 .pulsing-circus {
-  animation: pulse 2s ease-in-out infinite;
+  animation: smoothPulse 3s ease-in-out infinite;
+}
+
+@keyframes smoothPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+    filter: drop-shadow(0 0 10px rgba(219, 43, 40, 0.3));
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+    filter: drop-shadow(0 0 20px rgba(219, 43, 40, 0.4));
+  }
+}
+
+.experience-wrapper {
+  background: linear-gradient(135deg,
+    rgba(219, 43, 40, 0.12) 0%,
+    rgba(255, 184, 0, 0.1) 30%,
+    rgba(255, 105, 180, 0.08) 60%,
+    rgba(219, 43, 40, 0.1) 100%
+  ) !important;
+  box-shadow:
+    0 0 25px rgba(219, 43, 40, 0.2),
+    inset 0 0 15px rgba(255, 255, 255, 0.25),
+    0 4px 15px rgba(0, 0, 0, 0.05) !important;
+  /* Removed position: relative to preserve original icon positioning */
+  overflow: hidden;
+}
+
+/* Removed ::before shimmer effect to prevent positioning issues */
+
+.experience-wrapper:hover {
+  background: linear-gradient(135deg,
+    rgba(219, 43, 40, 0.18) 0%,
+    rgba(255, 184, 0, 0.15) 30%,
+    rgba(255, 105, 180, 0.12) 60%,
+    rgba(219, 43, 40, 0.15) 100%
+  ) !important;
+  box-shadow:
+    0 0 35px rgba(219, 43, 40, 0.3),
+    inset 0 0 20px rgba(255, 255, 255, 0.3),
+    0 6px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+    opacity: 0;
+  }
 }
 
 @keyframes rotate {
@@ -520,13 +596,33 @@
   border-radius: 20px;
   margin: 4rem auto;
   max-width: 1200px;
+  position: relative;
+  /* Add overlay for better text contrast */
+}
+
+.cta-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 20px;
+  pointer-events: none;
+}
+
+.cta-section * {
+  position: relative;
+  z-index: 1;
 }
 
 .cta-title {
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  color: #ffffff;
 }
 
 .cta-description {
@@ -534,10 +630,24 @@
   max-width: 800px;
   margin: 0 auto 2rem;
   line-height: 1.7;
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Override highlight-text in CTA section for better contrast */
+.cta-section .highlight-text {
+  color: #fff3cd !important;
+  font-weight: 700;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.1em 0.3em;
+  border-radius: 4px;
 }
 
 .cta-special-offer {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 1.5rem;
   border-radius: 15px;
   margin-bottom: 2rem;
@@ -549,11 +659,15 @@
   font-size: 1.25rem;
   margin-bottom: 0.5rem;
   display: block;
+  color: #ffffff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
 
 .offer-text {
   font-size: 1.1rem;
   margin: 0;
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 .cta-buttons {
@@ -562,7 +676,9 @@
 
 .cta-footer {
   font-size: 0.9rem;
-  opacity: 0.8;
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  opacity: 0.95;
 }
 
 .animate-on-scroll {
@@ -712,7 +828,11 @@
   .main-title {
     font-size: 3rem;
   }
-  
+
+  .experience-content {
+    padding-right: 80px; /* Slightly less padding on medium screens */
+  }
+
   .features-grid {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
@@ -720,45 +840,49 @@
 
 @media (max-width: 768px) {
   .hero-media-container {
-    height: 500px;
+    height: 300px; /* Reduced from 500px to 300px (3/5) */
   }
-  
+
   .headline-section {
-    margin-top: -400px;
-    margin-bottom: 200px;
+    margin-top: -240px; /* Reduced from -400px to -240px (3/5) */
+    margin-bottom: 120px; /* Reduced from 200px to 120px (3/5) */
   }
-  
+
   .main-title {
-    font-size: 2.5rem;
+    font-size: 2rem; /* Reduced from 2.5rem to 2rem */
   }
-  
+
   .subtitle {
-    font-size: 1.2rem;
+    font-size: 1.1rem; /* Reduced from 1.2rem to 1.1rem */
   }
-  
+
   .stat-number {
     font-size: 2rem;
   }
-  
+
   .experience-card {
     padding: 2rem 1.5rem;
   }
-  
+
+  .experience-content {
+    padding-right: 0; /* Remove extra padding on mobile since icon is relative */
+  }
+
   .experience-icon-wrapper {
     position: relative;
     top: 0;
     right: 0;
     margin-bottom: 1.5rem;
   }
-  
+
   .features-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .services-heading {
     font-size: 2rem;
   }
-  
+
   .service-description {
     font-size: 0.9rem;
   }

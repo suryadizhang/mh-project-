@@ -32,11 +32,15 @@ export const metadata: Metadata = {
   description: "Premium hibachi catering service bringing authentic Japanese cuisine to your events.",
   icons: {
     icon: [
-      { url: '/My Hibachi logo avatar.ico' },
-      { url: '/My Hibachi logo.png', sizes: '32x32', type: 'image/png' },
-    ],
-    apple: [
-      { url: '/My Hibachi logo.png', sizes: '180x180' },
+      {
+        url: '/favicon.ico',
+        sizes: '16x16 32x32',
+      },
+      {
+        url: '/icon.png',
+        sizes: '32x32',
+        type: 'image/png',
+      },
     ],
   },
 };

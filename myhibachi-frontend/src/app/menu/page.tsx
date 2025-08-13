@@ -76,27 +76,9 @@ export default function MenuPage() {
                     <span className="feature-icon emoji-visible">💎</span>
                   </div>
                   <div className="feature-content">
-                    <span className="feature-title">Luxury Service</span>
-                    <span className="feature-subtitle">8+ years experience</span>
+                    <span className="feature-title">Experience the Difference</span>
+                    <span className="feature-subtitle">Crafted Through Dedication</span>
                   </div>
-                </div>
-              </div>
-
-              {/* Quick stats redesigned */}
-              <div className="hero-stats">
-                <div className="stat-item">
-                  <span className="stat-number">8+</span>
-                  <span className="stat-label">Years Experience</span>
-                </div>
-                <div className="stat-divider"></div>
-                <div className="stat-item">
-                  <span className="stat-number">500+</span>
-                  <span className="stat-label">Happy Customers</span>
-                </div>
-                <div className="stat-divider"></div>
-                <div className="stat-item">
-                  <span className="stat-number">⭐⭐⭐⭐⭐</span>
-                  <span className="stat-label">5 Star Reviews</span>
                 </div>
               </div>
             </div>
@@ -272,7 +254,7 @@ export default function MenuPage() {
                   </div>
                   <div className="included-content">
                     <h5 className="included-title">Hibachi Fried Rice</h5>
-                    <p className="included-desc">Perfectly seasoned with fresh eggs and mixed vegetables</p>
+                    <p className="included-desc">Perfectly seasoned with fresh ingredients</p>
                     <div className="included-badge">Signature Recipe</div>
                   </div>
                 </div>

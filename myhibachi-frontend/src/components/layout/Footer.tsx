@@ -6,11 +6,11 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer-content">
         <div className="footer-brand">
-          <Image 
-            src="/My Hibachi logo.png" 
-            alt="My Hibachi Chef Logo" 
-            width={80} 
-            height={80}
+          <Image
+            src="/My Hibachi logo.png"
+            alt="My Hibachi Chef Logo"
+            width={96}
+            height={96}
             className="footer-logo"
           />
           <h3>My Hibachi Chef</h3>
@@ -29,16 +29,18 @@ export default function Footer() {
             </a>
           </div>
         </div>
-        
+
         <div className="footer-menu">
           <h3>Quick Links</h3>
           <ul className="footer-links">
             <li><Link href="/"><i className="bi bi-chevron-right footer-link-icon"></i> Home</Link></li>
             <li><Link href="/menu"><i className="bi bi-chevron-right footer-link-icon"></i> Menu</Link></li>
             <li><Link href="/contact"><i className="bi bi-chevron-right footer-link-icon"></i> Contact</Link></li>
+            <li><Link href="/BookUs"><i className="bi bi-chevron-right footer-link-icon"></i> Book Us</Link></li>
+            <li><Link href="/contact"><i className="bi bi-chevron-right footer-link-icon"></i> Get Quote</Link></li>
           </ul>
         </div>
-        
+
         <div className="footer-contact">
           <h3>Contact Us</h3>
           <ul className="footer-contact-info">
@@ -57,7 +59,7 @@ export default function Footer() {
           </ul>
         </div>
       </div>
-      
+
       <div className="footer-copyright">
         <p>&copy; 2025 My Hibachi Chef. All rights reserved.</p>
       </div>

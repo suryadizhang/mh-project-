@@ -2,17 +2,17 @@
 .footer {
   background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
   color: #fff;
-  padding: 3rem 2rem 1rem;
+  padding: 1rem 1.5rem 0.5rem; /* Reduced from 3rem 2rem 1rem */
   margin-top: auto;
 }
 
 .footer-content {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Reduced minmax from 250px */
+  gap: 1rem; /* Reduced from 2rem */
+  margin-bottom: 1rem; /* Reduced from 2rem */
   max-width: 1200px;
-  margin: 0 auto 2rem auto;
+  margin: 0 auto 1rem auto; /* Reduced from 2rem */
 }
 
 .footer-brand,
@@ -26,39 +26,41 @@
 .footer-menu h3,
 .footer-contact h3 {
   color: #ff6b35;
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
+  margin-bottom: 0.5rem; /* Keep reduced margin */
+  font-size: 1.2rem; /* Back to original size */
   font-weight: 600;
 }
 
 .footer-logo {
   border-radius: 8px;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem; /* Keep reduced margin */
 }
 
 .footer-description {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem; /* Keep reduced margin */
   color: #ccc;
   line-height: 1.6;
+  font-size: 1rem; /* Back to original size */
 }
 
 .footer-social {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem; /* Reduced from 1rem */
 }
 
 .footer-social-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 30px; /* Keep reduced size */
+  height: 30px; /* Keep reduced size */
   background: rgba(255, 107, 53, 0.1);
   border: 1px solid rgba(255, 107, 53, 0.3);
   border-radius: 50%;
   color: #ccc;
   text-decoration: none;
   transition: all 0.3s ease;
+  font-size: 1rem; /* Back to original size */
 }
 
 .footer-social-icon:hover {
@@ -76,7 +78,7 @@
 
 .footer-links li,
 .footer-contact-info li {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem; /* Keep reduced margin */
 }
 
 .footer-links a {
@@ -85,6 +87,7 @@
   transition: color 0.3s ease;
   display: flex;
   align-items: center;
+  font-size: 1rem; /* Back to original size */
 }
 
 .footer-links a:hover {
@@ -93,7 +96,7 @@
 
 .footer-link-icon {
   margin-right: 0.5rem;
-  font-size: 0.8rem;
+  font-size: 0.8rem; /* Back to original size */
 }
 
 .footer-contact-info li {
@@ -101,38 +104,39 @@
   align-items: center;
   color: #ccc;
   line-height: 1.6;
+  font-size: 1rem; /* Back to original size */
 }
 
 .footer-contact-icon {
-  margin-right: 0.75rem;
+  margin-right: 0.5rem; /* Keep reduced margin */
   color: #ff6b35;
-  font-size: 1rem;
-  min-width: 16px;
+  font-size: 1rem; /* Back to original size */
+  min-width: 16px; /* Back to original size */
 }
 
 .footer-copyright {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 2rem;
+  padding-top: 1rem; /* Keep reduced padding */
   text-align: center;
   color: #999;
 }
 
 .footer-copyright p {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.9rem; /* Back to original size */
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   .footer {
-    padding: 2rem 1rem 1rem;
+    padding: 1rem 0.75rem 0.5rem; /* Reduced from 2rem 1rem 1rem */
   }
-  
+
   .footer-content {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 0.75rem; /* Reduced from 1.5rem */
   }
-  
+
   .footer-social {
     justify-content: center;
   }
@@ -143,12 +147,12 @@
   .footer {
     padding: 2rem 1rem 1rem;
   }
-  
+
   .footer-content {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
-  
+
   .social-links {
     justify-content: center;
   }
