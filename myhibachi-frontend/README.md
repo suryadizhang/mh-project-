@@ -109,6 +109,51 @@ npm run build
 npm start
 ```
 
+## Live Chat Support (tawk.to)
+
+This project includes comprehensive tawk.to live chat integration for customer support:
+
+### Configuration
+Live chat is configured via environment variables in `.env.local`:
+- `NEXT_PUBLIC_TAWK_PROPERTY_ID`: Your tawk.to property ID (689c0b9cb5ccf2192652b7e3)
+- `NEXT_PUBLIC_TAWK_WIDGET_ID`: Widget ID (defaults to "default")
+
+### Features
+- **Automatic loading** on all public pages (App Router integration)
+- **Smart hiding** on admin routes (/admin, /superadmin, /checkout)
+- **Custom "Live Chat" buttons** on contact page with multiple variants
+- **Email capture** with TawkEmailPrompt component (optional)
+- **Visitor attribute setting** for personalized support
+- **Pages Router compatibility** with TawkWrapperPages component
+- **TypeScript support** with comprehensive type definitions
+
+### For Operators
+- **Install the tawk.to mobile app** on iOS/Android
+- **Sign in** with the property credentials
+- **Enable push notifications** to reply on the go
+- **Configure Pre-Chat Form** in tawk.to dashboard:
+  - Enable and mark Email as Required
+  - Add Name field if desired
+  - Customize message prompts
+- **Set up Offline Form** with auto-responder:
+  - Subject: "Thanks — we got your message"
+  - Include booking instructions in response
+- **Enable email notifications** for your support address
+
+### Components
+- `TawkScript.tsx` - Core widget loader
+- `TawkWrapper.tsx` - App Router conditional wrapper
+- `TawkWrapperPages.tsx` - Pages Router conditional wrapper
+- `LiveChatButton.tsx` - Custom chat trigger buttons
+- `TawkEmailPrompt.tsx` - Email capture prompt (optional)
+- `UseTawkUser.tsx` - User context setting helper
+
+### Content Security Policy
+If using CSP, allow:
+- `script-src`: `https://embed.tawk.to`
+- `connect-src`: `https://*.tawk.to wss://*.tawk.to`
+- `img-src`: `https://*.tawk.to data:`
+
 ## License
 
 Private project for MyHibachi catering business.

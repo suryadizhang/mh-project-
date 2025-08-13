@@ -32,12 +32,12 @@
 
 /* Hero section */
 .hero-section {
-  padding: 4rem 2rem;
+  padding: 2.5rem 2rem; /* Restored to original */
   background: #fff;
 }
 
 .hero-content {
-  max-width: 800px;
+  max-width: 700px; /* Restored to original */
   margin: 0 auto;
   text-align: center;
 }
@@ -47,14 +47,14 @@
   justify-content: center;
   align-items: center;
   position: relative;
-  height: 120px;
-  margin: 2rem 0;
+  height: 80px; /* Restored to original */
+  margin: 2rem 0; /* Restored to original */
 }
 
 .floating-icons {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 120px; /* Restored to original */
+  height: 120px; /* Restored to original */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -66,8 +66,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 90px;
-  height: 90px;
+  width: 90px; /* Restored to original */
+  height: 90px; /* Restored to original */
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 123, 0, 0.1) 0%, rgba(255, 123, 0, 0.05) 50%, transparent 70%);
   z-index: 1;
@@ -86,7 +86,7 @@
 }
 
 .hero-main-icon {
-  font-size: 4rem;
+  font-size: 4rem; /* Restored to original */
   position: absolute;
   top: 50%;
   left: 50%;
@@ -106,7 +106,7 @@
 }
 
 .floating-icon {
-  font-size: 1.8rem;
+  font-size: 1.8rem; /* Restored to original */
   position: absolute;
   opacity: 0.7;
   z-index: 5;
@@ -192,9 +192,9 @@
 }
 
 .hero-subtitle {
-  font-size: 1.25rem;
+  font-size: 1.25rem; /* Restored to original */
   color: #666;
-  max-width: 700px;
+  max-width: 700px; /* Restored to original */
   margin: 0 auto;
 }
 
@@ -214,7 +214,7 @@
 }
 
 .value-icon {
-  font-size: 1.5rem;
+  font-size: 1.5rem; /* Restored to original */
 }
 
 .value-divider {
@@ -225,32 +225,32 @@
 /* Hero Features Grid */
 .hero-features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  max-width: 800px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Restored to original */
+  gap: 1.5rem; /* Restored to original */
+  max-width: 800px; /* Restored to original */
   margin: 0 auto;
 }
 
 .feature-badge {
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-radius: 20px;
-  padding: 2rem;
+  border-radius: 20px; /* Restored to original */
+  padding: 2rem; /* Restored to original */
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Restored to original */
   transition: all 0.3s ease;
-  border: 2px solid rgba(219, 43, 40, 0.1);
+  border: 2px solid rgba(219, 43, 40, 0.1); /* Restored to original */
   position: relative;
 }
 
 .feature-badge:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  transform: translateY(-5px); /* Restored to original */
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15); /* Restored to original */
   border-color: rgba(219, 43, 40, 0.3);
 }
 
 .feature-icon-bg {
-  width: 60px;
-  height: 60px;
+  width: 60px; /* Restored to original */
+  height: 60px; /* Restored to original */
   border-radius: 50%;
   background: linear-gradient(135deg, #ff7b00, #ffb800);
   display: flex;
@@ -269,7 +269,7 @@
 }
 
 .feature-icon {
-  font-size: 1.8rem;
+  font-size: 1.8rem; /* Restored to original */
   position: relative;
   z-index: 1;
 }
@@ -278,14 +278,14 @@
   display: block;
   font-weight: 600;
   color: #333;
-  margin-bottom: 0.5rem;
-  font-size: 1.1rem;
+  margin-bottom: 0.5rem; /* Restored to original */
+  font-size: 1.1rem; /* Restored to original */
 }
 
 .feature-subtitle {
   display: block;
   color: #666;
-  font-size: 0.9rem;
+  font-size: 0.9rem; /* Restored to original */
 }
 
 .feature-content {
@@ -301,7 +301,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 2rem;
+  gap: 2rem; /* Restored to original */
   flex-wrap: wrap;
 }
 
@@ -311,19 +311,19 @@
 
 .stat-number {
   display: block;
-  font-size: 2rem;
+  font-size: 2rem; /* Restored to original */
   font-weight: 700;
   color: #db2b28;
 }
 
 .stat-label {
   color: #666;
-  font-size: 0.9rem;
+  font-size: 0.9rem; /* Restored to original */
 }
 
 .stat-divider {
   width: 1px;
-  height: 40px;
+  height: 40px; /* Restored to original */
   background: #ddd;
 }
 
@@ -728,7 +728,7 @@
   }
 
   .hero-stats {
-    gap: 1rem;
+    gap: 1rem; /* Restored to original mobile gap */
   }
 
   .stat-divider {
@@ -1047,7 +1047,7 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .hero-section {
-    padding: 2rem 1rem;
+    padding: 1.5rem 1rem; /* Restored to original mobile padding */
   }
 
   .section-title {
@@ -1066,8 +1066,8 @@
 
 @media (max-width: 768px) {
   .hero-icon-wrapper {
-    height: 100px;
-    margin: 1.5rem 0;
+    height: 60px; /* Reduced from 100px to 60px */
+    margin: 1rem 0; /* Reduced from 1.5rem to 1rem */
   }
 
   .floating-icons {
@@ -1339,6 +1339,23 @@
   overflow: hidden;
 }
 
+.cta-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cta-section * {
+  position: relative;
+  z-index: 1;
+}
+
 .cta-content-wrapper {
   position: relative;
   z-index: 1;
@@ -1374,14 +1391,17 @@
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 1rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  color: #ffffff;
 }
 
 .cta-main-subtitle {
   font-size: 1.2rem;
   max-width: 700px;
   margin: 0 auto;
-  opacity: 0.9;
+  opacity: 0.95;
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 .cta-button-wrapper {
@@ -1394,7 +1414,7 @@
 }
 
 .cta-main-button {
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
   color: #db2b28;
   border: none;
   border-radius: 50px;
@@ -1408,6 +1428,10 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  z-index: 3;
+  backdrop-filter: blur(5px);
+  text-shadow: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .modern-cta-button {
@@ -1416,7 +1440,8 @@
 
 .modern-cta-button:hover {
   transform: translateY(-5px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 1);
 }
 
 .button-text {

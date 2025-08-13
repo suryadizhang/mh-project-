@@ -8,11 +8,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Download, 
-  Eye, 
-  DollarSign, 
-  FileText, 
+import {
+  Download,
+  Eye,
+  DollarSign,
+  FileText,
   Calculator,
   CreditCard,
   CheckCircle,
@@ -65,8 +65,8 @@ interface InvoiceSettings {
 
 export default function AdminInvoicePage() {
   const params = useParams()
-  const bookingId = params.bookingId as string
-  
+  const bookingId = params?.bookingId as string
+
   const [booking, setBooking] = useState<BookingData | null>(null)
   const [invoiceSettings, setInvoiceSettings] = useState<InvoiceSettings>({
     depositAmount: 0,
@@ -87,7 +87,7 @@ export default function AdminInvoicePage() {
       try {
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1000))
-        
+
         const mockBooking: BookingData = {
           bookingId: bookingId,
           confirmationNumber: `MH${Math.random().toString(36).substr(2, 8).toUpperCase()}`,
@@ -142,7 +142,7 @@ export default function AdminInvoicePage() {
           paymentStatus: 'pending',
           notes: 'Customer requested extra ginger sauce'
         }
-        
+
         setBooking(mockBooking)
       } catch (error) {
         console.error('Error fetching booking:', error)
@@ -162,38 +162,38 @@ export default function AdminInvoicePage() {
 
   const calculateTax = () => {
     if (!booking) return 0
-    
+
     // Calculate services subtotal (without automatic discounts)
     const servicesSubtotal = booking.services.reduce((sum, service) => sum + (service.price * service.quantity), 0)
-    
+
     // Add travel fee and apply admin discount
     const travelFee = calculateTravelFee()
     const subtotalWithTravel = servicesSubtotal + travelFee
     const subtotalAfterDiscount = subtotalWithTravel - invoiceSettings.discountAmount
-    
+
     // Calculate 8% tax on the subtotal
     return Math.max(subtotalAfterDiscount, 0) * 0.08
   }
 
   const calculateTotalWithAdjustments = () => {
     if (!booking) return 0
-    
+
     // Calculate services subtotal (without automatic discounts)
     const servicesSubtotal = booking.services.reduce((sum, service) => sum + (service.price * service.quantity), 0)
-    
+
     // Add travel fee
     const travelFee = calculateTravelFee()
     const subtotalWithTravel = servicesSubtotal + travelFee
-    
+
     // Apply admin discount
     const subtotalAfterDiscount = subtotalWithTravel - invoiceSettings.discountAmount
-    
+
     // Calculate tax on the subtotal (8% tax rate)
     const taxAmount = Math.max(subtotalAfterDiscount, 0) * 0.08
-    
+
     // Final total including tax
     const totalWithTax = Math.max(subtotalAfterDiscount, 0) + taxAmount
-    
+
     return totalWithTax
   }
 
@@ -220,7 +220,7 @@ export default function AdminInvoicePage() {
       })
 
       const url = `/api/v1/bookings/${bookingId}/invoice?${queryParams.toString()}`
-      
+
       if (format === 'pdf') {
         // Download PDF
         const response = await fetch(url)
@@ -307,7 +307,7 @@ export default function AdminInvoicePage() {
                   <p className="text-sm text-gray-600">{booking.guestCount} guests</p>
                 </div>
               </div>
-              
+
               <div>
                 <Label className="text-sm font-medium text-gray-500">Venue Address</Label>
                 <p className="text-sm">
@@ -353,13 +353,13 @@ export default function AdminInvoicePage() {
                     </div>
                   </div>
                 ))}
-                
+
                 <div className="pt-4 space-y-2">
                   <div className="flex justify-between font-medium">
                     <span>Services Subtotal:</span>
                     <span>${booking.services.reduce((sum, service) => sum + (service.price * service.quantity), 0).toFixed(2)}</span>
                   </div>
-                  
+
                   <p className="text-sm text-gray-500 italic">
                     * Final totals with travel fees, discounts, and tax are calculated in the Payment Summary below
                   </p>
@@ -537,38 +537,38 @@ export default function AdminInvoicePage() {
                     <span>Services Subtotal:</span>
                     <span>${booking.services.reduce((sum, service) => sum + (service.price * service.quantity), 0).toFixed(2)}</span>
                   </div>
-                  
+
                   {invoiceSettings.travelMiles > 0 && (
                     <div className="flex justify-between text-blue-600">
                       <span>Travel Fee ({invoiceSettings.travelMiles} mi × $2):</span>
                       <span>+${calculateTravelFee().toFixed(2)}</span>
                     </div>
                   )}
-                  
+
                   {invoiceSettings.discountAmount > 0 && (
                     <div className="flex justify-between text-green-600">
                       <span>Discount ({invoiceSettings.discountDescription || 'Applied'}):</span>
                       <span>-${invoiceSettings.discountAmount.toFixed(2)}</span>
                     </div>
                   )}
-                  
+
                   <div className="flex justify-between text-orange-600">
                     <span>Tax (8%):</span>
                     <span>+${calculateTax().toFixed(2)}</span>
                   </div>
-                  
+
                   <div className="flex justify-between font-medium border-t pt-1">
                     <span>Total Amount:</span>
                     <span>${calculateTotalWithAdjustments().toFixed(2)}</span>
                   </div>
-                  
+
                   {invoiceSettings.depositAmount > 0 && (
                     <div className="flex justify-between">
                       <span>Deposit {invoiceSettings.depositPaid ? '(Paid)' : '(Required)'}:</span>
                       <span>${invoiceSettings.depositAmount.toFixed(2)}</span>
                     </div>
                   )}
-                  
+
                   <div className="flex justify-between font-semibold border-t pt-1">
                     <span>Balance Due:</span>
                     <span className={calculateBalanceDue() === 0 ? 'text-green-600' : 'text-orange-600'}>
@@ -602,7 +602,7 @@ export default function AdminInvoicePage() {
                   <Eye className="h-4 w-4" />
                   Preview HTML
                 </Button>
-                
+
                 <Button
                   onClick={() => handleGenerateInvoice('pdf')}
                   disabled={generating}
@@ -612,7 +612,7 @@ export default function AdminInvoicePage() {
                   Download PDF
                 </Button>
               </div>
-              
+
               {generating && (
                 <div className="text-center py-4">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500 mx-auto mb-2"></div>

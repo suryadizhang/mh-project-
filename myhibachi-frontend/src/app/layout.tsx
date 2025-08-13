@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Poppins } from "next/font/google";
 import "./globals.css";
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
+// import TawkWrapper from '@/components/TawkWrapper' // Disabled - only using manual LiveChatButton
 
 // Import global styles
 import '@/styles/base.css'
@@ -32,11 +33,15 @@ export const metadata: Metadata = {
   description: "Premium hibachi catering service bringing authentic Japanese cuisine to your events.",
   icons: {
     icon: [
-      { url: '/My Hibachi logo avatar.ico' },
-      { url: '/My Hibachi logo.png', sizes: '32x32', type: 'image/png' },
-    ],
-    apple: [
-      { url: '/My Hibachi logo.png', sizes: '180x180' },
+      {
+        url: '/favicon.ico',
+        sizes: '16x16 32x32',
+      },
+      {
+        url: '/icon.png',
+        sizes: '32x32',
+        type: 'image/png',
+      },
     ],
   },
 };
@@ -78,6 +83,10 @@ export default function RootLayout({
           {children}
         </main>
         <Footer />
+        {/* TawkWrapper disabled - only using manual LiveChatButton on contact page */}
+        {/* Optional: Uncomment to enable email capture prompt
+        <TawkEmailPrompt />
+        */}
       </body>
     </html>
   );
