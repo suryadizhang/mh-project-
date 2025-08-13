@@ -10,7 +10,7 @@ export default function MenuPage() {
       <div className="menu-container">
         <div className="container-fluid px-lg-5">
           {/* Enhanced Hero Section with Better Flow */}
-          <div className="hero-section text-center mb-5">
+          <div className="hero-section page-hero-background text-center mb-5">
             <div className="hero-content">
               <div className="hero-icon-wrapper mb-4">
                 <div className="floating-icons">
@@ -77,26 +77,8 @@ export default function MenuPage() {
                   </div>
                   <div className="feature-content">
                     <span className="feature-title">Luxury Service</span>
-                    <span className="feature-subtitle">8+ years experience</span>
+                    <span className="feature-subtitle">Premium quality</span>
                   </div>
-                </div>
-              </div>
-
-              {/* Quick stats redesigned */}
-              <div className="hero-stats">
-                <div className="stat-item">
-                  <span className="stat-number">8+</span>
-                  <span className="stat-label">Years Experience</span>
-                </div>
-                <div className="stat-divider"></div>
-                <div className="stat-item">
-                  <span className="stat-number">500+</span>
-                  <span className="stat-label">Happy Customers</span>
-                </div>
-                <div className="stat-divider"></div>
-                <div className="stat-item">
-                  <span className="stat-number">⭐⭐⭐⭐⭐</span>
-                  <span className="stat-label">5 Star Reviews</span>
                 </div>
               </div>
             </div>
@@ -729,7 +711,7 @@ export default function MenuPage() {
 
             <p className="service-intro text-center">
               We&apos;re excited to bring our premium hibachi experience directly to your location!
-              Serving within <span className="highlight-text">150 miles of Fremont, CA</span> with
+              Serving within <span className="highlight-text">150 miles</span> with
               <span className="highlight-text">reasonable travel fees</span> for locations outside our primary service areas.
             </p>
 
@@ -742,7 +724,6 @@ export default function MenuPage() {
                     <li>San Francisco - The heart of culinary excellence</li>
                     <li>San Jose - Silicon Valley&apos;s finest hibachi</li>
                     <li>Oakland - East Bay entertainment at its best</li>
-                    <li>Fremont - Our home base with premium service</li>
                     <li>Santa Clara - Tech meets traditional Japanese cuisine</li>
                     <li>Sunnyvale - Where innovation meets flavor</li>
                     <li>Mountain View - Bringing mountains of flavor</li>
@@ -773,7 +754,7 @@ export default function MenuPage() {
                 <span className="radius-icon">📍</span>
                 <h4 className="radius-title">We Come to You!</h4>
                 <p className="radius-description">
-                  Serving anywhere within <span className="highlight-text">150 miles of Fremont, CA 94539</span>
+                  Serving anywhere within <span className="highlight-text">150 miles</span>
                 </p>
                 <p className="travel-fee-info">
                   <span className="travel-highlight">💰 Transparent Pricing:</span>

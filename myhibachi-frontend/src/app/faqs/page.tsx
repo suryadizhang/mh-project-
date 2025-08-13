@@ -35,7 +35,7 @@ export default function FAQsPage() {
 
       <main className="faqs-page">
         {/* Hero Section */}
-        <section className="faqs-hero">
+        <section className="faqs-hero page-hero-background">
           <div className="container">
             <h1>Frequently Asked Questions</h1>
             <p>
@@ -46,7 +46,7 @@ export default function FAQsPage() {
         </section>
 
         {/* FAQ List */}
-        <section className="faqs-content">
+        <section className="faqs-content section-background">
           <div className="container">
             <FaqList
               items={faqs}

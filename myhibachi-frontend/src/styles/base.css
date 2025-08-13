@@ -193,3 +193,74 @@ body {
   display: inline-block;
   animation: pulse 1.5s infinite;
 }
+
+/* Universal Company Background Branding */
+.company-background {
+  position: relative;
+}
+
+.company-background::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/images/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  opacity: 0.03;
+  z-index: -2;
+  pointer-events: none;
+}
+
+/* Page-specific background overlay (for hero sections) */
+.page-hero-background {
+  position: relative;
+  background-image: url('/images/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.page-hero-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1;
+}
+
+.page-hero-background > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Subtle background pattern for content sections */
+.section-background {
+  position: relative;
+}
+
+.section-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/images/background.jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.05;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.section-background > * {
+  position: relative;
+  z-index: 1;
+}

@@ -1226,8 +1226,19 @@
 
 .area-list li {
   padding: 0.5rem 0;
+  padding-left: 2rem;
   border-bottom: 1px solid #eee;
   color: #555;
+  position: relative;
+}
+
+.area-list li:before {
+  content: '•';
+  color: #ff7b00;
+  font-weight: bold;
+  position: absolute;
+  left: 0.5rem;
+  top: 0.5rem;
 }
 
 .area-list li:last-child {
@@ -1282,8 +1293,12 @@
 .travel-fee-info {
   margin-bottom: 1.5rem;
   font-size: 1.1rem;
-  color: #e9ecef;
+  color: #333;
   line-height: 1.6;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .travel-highlight {

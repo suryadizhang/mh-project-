@@ -64,7 +64,7 @@ function BookingSuccessContent() {
   useEffect(() => {
     // In production, fetch booking details from API using bookingId
     const bookingId = searchParams?.get('id')
-    
+
     if (bookingId) {
       // Mock booking data (in production, fetch from API)
       const mockBooking: BookingDetails = {
@@ -83,15 +83,15 @@ function BookingSuccessContent() {
 
   const handleDownloadInvoice = async () => {
     if (!booking) return
-    
+
     setIsGeneratingInvoice(true)
-    
+
     try {
       // In production, call API to generate PDF invoice
       const response = await fetch(`/api/v1/bookings/${booking.bookingId}/invoice`, {
         method: 'GET',
       })
-      
+
       if (response.ok) {
         const blob = await response.blob()
         const url = window.URL.createObjectURL(blob)
@@ -125,26 +125,26 @@ function BookingSuccessContent() {
 
   const generateCalendarLink = () => {
     if (!booking) return ''
-    
+
     const startDate = new Date(`${booking.eventDate}T${booking.eventTime === '12PM' ? '12:00' : booking.eventTime === '3PM' ? '15:00' : booking.eventTime === '6PM' ? '18:00' : '21:00'}:00`)
     const endDate = new Date(startDate.getTime() + 3 * 60 * 60 * 1000) // 3 hours later
-    
+
     const title = encodeURIComponent('MyHibachi Private Chef Experience')
     const details = encodeURIComponent(`Private hibachi chef experience for ${booking.guestCount} guests.\n\nVenue: ${booking.venueAddress}\n\nBooking ID: ${booking.bookingId}`)
     const location = encodeURIComponent(booking.venueAddress)
-    
+
     const startTime = startDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
     const endTime = endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
-    
+
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startTime}/${endTime}&details=${details}&location=${location}`
   }
 
   const downloadICalFile = () => {
     if (!booking) return
-    
+
     const startDate = new Date(`${booking.eventDate}T${booking.eventTime === '12PM' ? '12:00' : booking.eventTime === '3PM' ? '15:00' : booking.eventTime === '6PM' ? '18:00' : '21:00'}:00`)
     const endDate = new Date(startDate.getTime() + 3 * 60 * 60 * 1000)
-    
+
     const icalContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//MyHibachi//Booking System//EN
@@ -180,19 +180,22 @@ END:VCALENDAR`
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50">
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-2xl mx-auto">
-          {/* Success Header */}
-          <div className="text-center mb-8">
-            <div className="text-6xl mb-4">🎉</div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Booking Confirmed!
-            </h1>
-            <p className="text-lg text-gray-600">
-              Your hibachi experience has been successfully booked
-            </p>
+    <div className="min-h-screen">
+      {/* Success Hero Section with Company Background */}
+      <section className="page-hero-background py-20 text-white text-center">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="text-6xl mb-6">🎉</div>
+          <h1 className="text-5xl font-bold mb-6">Booking Confirmed!</h1>
+          <p className="text-xl mb-8 text-gray-200">Your hibachi experience has been successfully booked</p>
+          <div className="text-lg">
+            <span className="bg-green-600 text-white px-4 py-2 rounded-full">Confirmation Complete</span>
           </div>
+        </div>
+      </section>
+
+      {/* Success Details Section */}
+      <div className="py-12 section-background">
+        <div className="max-w-2xl mx-auto px-4">
 
           {/* Booking Details Card */}
           <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden mb-6">
@@ -266,7 +269,7 @@ END:VCALENDAR`
               <span>📅</span>
               <span>Add to Google Calendar</span>
             </button>
-            
+
             <button
               onClick={downloadICalFile}
               className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
@@ -336,8 +339,8 @@ END:VCALENDAR`
                   📸 Photo Contest Bonus!
                 </h4>
                 <p className="text-blue-700 text-sm">
-                  Share a photo of your hibachi experience on social media and tag us 
-                  <strong> @MyHibachi</strong> or <strong>#MyHibachiExperience</strong> for an extra 
+                  Share a photo of your hibachi experience on social media and tag us
+                  <strong> @MyHibachi</strong> or <strong>#MyHibachiExperience</strong> for an extra
                   <strong> 15% discount</strong> on your next booking!
                 </p>
               </div>

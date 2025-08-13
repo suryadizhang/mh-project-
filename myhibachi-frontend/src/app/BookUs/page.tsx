@@ -501,15 +501,23 @@ export default function BookingPage() {
     <>
       <ValidationModal />
       <AgreementModal />
-      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 py-12">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-red-600 to-red-700 px-8 py-12 text-center">
-            <div className="text-6xl mb-4">🥘</div>
-            <h1 className="text-4xl font-bold text-white mb-2">Book Your Hibachi Experience</h1>
-            <p className="text-red-100 text-lg">Premium Japanese hibachi dining at your location</p>
+
+      {/* Hero Section with Company Background */}
+      <section className="page-hero-background py-20 text-white text-center">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="text-6xl mb-6">🥘</div>
+          <h1 className="text-5xl font-bold mb-6">Book Your Hibachi Experience</h1>
+          <p className="text-xl mb-8 text-gray-200">Premium Japanese hibachi dining at your location</p>
+          <div className="text-lg">
+            <span className="bg-red-600 text-white px-4 py-2 rounded-full">Professional Catering Service</span>
           </div>
+        </div>
+      </section>
+
+      {/* Booking Form Section */}
+      <div className="py-12 section-background">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
 
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-8">
@@ -1158,9 +1166,9 @@ export default function BookingPage() {
           </form>
         </div>
       </div>
+      </div>
 
       <FreeQuoteButton variant="floating" />
-    </div>
     </>
   )
 }

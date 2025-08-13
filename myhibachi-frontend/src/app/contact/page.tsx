@@ -6,7 +6,7 @@ export default function ContactPage() {
   return (
     <div className="contact-page">
       {/* Hero Section */}
-      <div className="contact-hero">
+      <div className="contact-hero page-hero-background">
         <div className="hero-content">
           <div className="animated-hero-icons">
             <span className="hero-icon-floating">🎉</span>
@@ -19,8 +19,8 @@ export default function ContactPage() {
             <span className="gradient-text">Book Your Hibachi Experience</span>
           </h1>
           <p className="hero-subtitle">
-            <span className="highlight-text">Elevate Your Celebration</span> with a spectacular culinary journey! 
-            Our master hibachi chefs bring <span className="highlight-text">restaurant-quality dining</span> and 
+            <span className="highlight-text">Elevate Your Celebration</span> with a spectacular culinary journey!
+            Our master hibachi chefs bring <span className="highlight-text">restaurant-quality dining</span> and
             <span className="highlight-text">unforgettable entertainment</span> directly to your venue!
           </p>
           <div className="hero-features">
@@ -51,7 +51,7 @@ export default function ContactPage() {
                   <i className="bi bi-envelope-fill title-icon"></i>
                   Professional Booking Services
                 </h3>
-                
+
                 <div className="contact-info-list">
                   <div className="contact-item">
                     <i className="bi bi-envelope-fill contact-icon"></i>
@@ -110,7 +110,7 @@ export default function ContactPage() {
                 <div className="review-section">
                   <h5 className="section-subtitle">⭐ Share Your Experience & Help Others Discover Excellence!</h5>
                   <p className="review-incentive">
-                    Your testimonials inspire confidence in future clients and help us maintain our commitment to exceptional service. 
+                    Your testimonials inspire confidence in future clients and help us maintain our commitment to exceptional service.
                     We value every review! 🙏
                   </p>
                   <div className="review-buttons">
@@ -142,7 +142,7 @@ export default function ContactPage() {
                       <div className="review-badge">⭐ 5.0 Stars</div>
                     </a>
                   </div>
-                  
+
                   <div className="review-stats">
                     <div className="stat-item">
                       <span className="stat-number">⭐⭐⭐⭐⭐</span>
@@ -186,7 +186,7 @@ export default function ContactPage() {
             </div>
           </div>
         </div>
-        
+
         {/* Booking Call-to-Action Section */}
         <div className="booking-cta-section">
           <div className="card booking-cta-card">
@@ -196,7 +196,7 @@ export default function ContactPage() {
               </div>
               <h2 className="cta-title">Ready to Experience Hibachi Excellence?</h2>
               <p className="cta-text">
-                Turn your next gathering into an unforgettable culinary event with our professional hibachi chefs. 
+                Turn your next gathering into an unforgettable culinary event with our professional hibachi chefs.
                 From intimate dinners to large celebrations, we create personalized experiences that delight all your guests.
               </p>
               <div className="cta-buttons">
@@ -264,7 +264,7 @@ export default function ContactPage() {
       <section className="py-5 service-areas-section">
         <div className="container">
           <h2 className="text-center mb-5">Our Service Areas</h2>
-          
+
           {/* Primary Bay Area Locations */}
           <h4 className="text-center mb-4">🏙️ Primary Bay Area Locations</h4>
           <p className="text-center mb-4">No additional travel fees within these areas!</p>
@@ -318,7 +318,7 @@ export default function ContactPage() {
               </div>
             </div>
           </div>
-          
+
           {/* Sacramento & Extended Regions */}
           <h4 className="text-center mb-4">🏞️ Sacramento & Extended Regions</h4>
           <p className="text-center mb-4">Minimal travel fees for these beautiful locations!</p>
@@ -372,7 +372,7 @@ export default function ContactPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="text-center mt-4">
             <div className="alert alert-info d-inline-block">
               <i className="bi bi-info-circle-fill me-2"></i>
@@ -381,7 +381,7 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
-      
+
       {/* Floating Quote Button */}
       <FreeQuoteButton variant="floating" />
     </div>

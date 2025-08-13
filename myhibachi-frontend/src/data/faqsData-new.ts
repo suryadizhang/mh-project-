@@ -23,7 +23,7 @@ export const faqs: FaqItem[] = [
   {
     id: 'travel-fees',
     question: 'Do you charge travel fees?',
-    answer: 'The first 30 miles from our Fremont location are completely free. After 30 miles, it\'s $2 per mile. We serve all of Northern California up to 150 miles from Fremont. Text us at (916) 740-8768 to calculate your travel fee.',
+    answer: 'The first 30 miles from our location are completely free. After 30 miles, it\'s $2 per mile. We serve all of Northern California up to 150 miles from our location. Text us at (916) 740-8768 to calculate your travel fee.',
     category: 'Pricing & Minimums',
     tags: ['travel', 'fees', 'distance', 'miles'],
     confidence: 'high',
@@ -137,16 +137,16 @@ export const faqs: FaqItem[] = [
   {
     id: 'service-areas',
     question: 'Where do you serve?',
-    answer: 'We serve all of Northern California within 150 miles of Fremont. Primary areas include the San Francisco Bay Area (SF, San Jose, Oakland, Fremont), Sacramento region, and surrounding cities. Free travel for first 30 miles, then $2/mile. Contact cs@myhibachichef.com for specific location confirmation.',
+    answer: 'We serve all of Northern California within 150 miles of our location. Primary areas include the San Francisco Bay Area (SF, San Jose, Oakland), Sacramento region, and surrounding cities. Free travel for first 30 miles, then $2/mile. Contact cs@myhibachichef.com for specific location confirmation.',
     category: 'Travel & Service Area',
-    tags: ['service area', 'bay area', 'sacramento', 'fremont'],
+    tags: ['service area', 'bay area', 'sacramento'],
     confidence: 'high',
     source_urls: ['/contact', '/menu']
   },
   {
     id: 'travel-distance',
     question: 'Do you travel to my city?',
-    answer: 'We serve within 150 miles of Fremont, CA. This includes the entire Bay Area, Sacramento, Central Valley, and many coastal and mountain communities. If you\'re unsure about your location, text us at (916) 740-8768 with your zip code and we\'ll confirm availability and travel fees.',
+    answer: 'We serve within 150 miles of our location. This includes the entire Bay Area, Sacramento, Central Valley, and many coastal and mountain communities. If you\'re unsure about your location, text us at (916) 740-8768 with your zip code and we\'ll confirm availability and travel fees.',
     category: 'Travel & Service Area',
     tags: ['travel', 'distance', 'coverage'],
     confidence: 'high',
@@ -253,7 +253,7 @@ export const allTags = [
   'upgrades', 'filet', 'lobster', 'premium', 'dietary', 'allergies', 'vegetarian', 'vegan',
   'gluten-free', 'kids', 'family', 'alcohol', '21+', 'beverages', 'booking', 'reserve',
   'advance', 'deposit', 'payment', 'refundable', 'venmo', 'zelle', 'cash', 'credit card',
-  '48 hours', 'availability', 'service area', 'bay area', 'sacramento', 'fremont', 'coverage',
+  '48 hours', 'availability', 'service area', 'bay area', 'sacramento', 'coverage',
   'space', 'grill', 'dimensions', 'setup', 'tables', 'seating', 'arrangement', 'u-shape',
   'indoor', 'outdoor', 'ventilation', 'safety', 'host provides', 'chef brings', 'requirements',
   'cancellation', 'refund', '7 days', 'reschedule', 'weather', 'rain', 'covered area', 'tent',

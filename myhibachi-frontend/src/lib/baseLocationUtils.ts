@@ -19,7 +19,7 @@ const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
  */
 export async function getBaseLocation(): Promise<BaseLocationData> {
   const now = Date.now()
-  
+
   // Return cached data if still valid
   if (baseLocationCache && (now - cacheTimestamp) < CACHE_DURATION) {
     return baseLocationCache
@@ -38,26 +38,26 @@ export async function getBaseLocation(): Promise<BaseLocationData> {
     }
 
     const location = await response.json()
-    
+
     // Update cache
     baseLocationCache = location
     cacheTimestamp = now
-    
+
     return location
   } catch (error) {
     console.error('Error fetching base location:', error)
-    
-    // Return default Fremont location as fallback
+
+    // Return default location as fallback
     const defaultLocation: BaseLocationData = {
       zipCode: '94536',
-      city: 'Fremont',
+      city: 'Bay Area',
       state: 'CA',
       lat: 37.4958,
       lng: -121.9405,
       lastUpdated: '2025-01-15',
       updatedBy: 'Default Fallback'
     }
-    
+
     return defaultLocation
   }
 }
@@ -65,7 +65,7 @@ export async function getBaseLocation(): Promise<BaseLocationData> {
 /**
  * Calculate distance between two points using Haversine formula
  * @param lat1 Base location latitude
- * @param lng1 Base location longitude  
+ * @param lng1 Base location longitude
  * @param lat2 Customer location latitude
  * @param lng2 Customer location longitude
  * @returns Distance in miles
@@ -74,7 +74,7 @@ export function calculateDistance(lat1: number, lng1: number, lat2: number, lng2
   const R = 3959 // Earth's radius in miles
   const dLat = (lat2 - lat1) * Math.PI / 180
   const dLng = (lng2 - lng1) * Math.PI / 180
-  const a = 
+  const a =
     Math.sin(dLat/2) * Math.sin(dLat/2) +
     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
     Math.sin(dLng/2) * Math.sin(dLng/2)

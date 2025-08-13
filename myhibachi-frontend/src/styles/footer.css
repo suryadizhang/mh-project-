@@ -2,17 +2,17 @@
 .footer {
   background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
   color: #fff;
-  padding: 3rem 2rem 1rem;
+  padding: 1.5rem 1rem 0.5rem;
   margin-top: auto;
 }
 
 .footer-content {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  margin-bottom: 2rem;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
   max-width: 1200px;
-  margin: 0 auto 2rem auto;
+  margin: 0 auto 1rem auto;
 }
 
 .footer-brand,
@@ -33,7 +33,7 @@
 
 .footer-logo {
   border-radius: 8px;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .footer-description {
@@ -125,14 +125,21 @@
 /* Responsive */
 @media (max-width: 768px) {
   .footer {
-    padding: 2rem 1rem 1rem;
+    padding: 1rem 0.75rem 0.5rem;
   }
-  
+
   .footer-content {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
   }
-  
+
+  .footer-logo {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 0.5rem;
+  }
+
   .footer-social {
     justify-content: center;
   }
@@ -143,12 +150,12 @@
   .footer {
     padding: 2rem 1rem 1rem;
   }
-  
+
   .footer-content {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
-  
+
   .social-links {
     justify-content: center;
   }

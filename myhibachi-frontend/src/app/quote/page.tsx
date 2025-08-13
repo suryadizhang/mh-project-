@@ -37,7 +37,7 @@ export default function QuotePage() {
 
       <main className="quote-page">
         {/* Hero Section */}
-        <section className="quote-hero">
+        <section className="page-hero-background">
           <div className="container">
             <h1>Free Hibachi Catering Quote</h1>
             <p>
@@ -48,14 +48,14 @@ export default function QuotePage() {
         </section>
 
         {/* Quote Calculator */}
-        <section className="quote-section">
+        <section className="section-background">
           <div className="container">
             <QuoteCalculator />
           </div>
         </section>
 
         {/* Additional Info */}
-        <section className="quote-info">
+        <section className="section-background">
           <div className="container">
             <div className="info-grid">
               <div className="info-card">
