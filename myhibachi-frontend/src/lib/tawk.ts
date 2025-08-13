@@ -3,22 +3,24 @@ export function setTawkVisitor(attrs: Record<string, string>) {
   const Tawk_API = window.Tawk_API;
   if (!Tawk_API) return;
 
-  if (typeof Tawk_API.onLoad === "function") {
+  const apply = () => {
     if (typeof Tawk_API.setAttributes === "function") {
-      Tawk_API.setAttributes(attrs, function (err: unknown) {
+      Tawk_API.setAttributes(attrs, (err: unknown) => {
         if (err) console.error("Tawk setAttributes error:", err);
       });
     }
-  } else {
-    // If widget not loaded yet, hook onLoad once
-    window.Tawk_API = Tawk_API || {};
-    window.Tawk_API.onLoad = function () {
-      if (typeof window.Tawk_API?.setAttributes === "function") {
-        window.Tawk_API.setAttributes(attrs, function (err: unknown) {
-          if (err) console.error("Tawk setAttributes error:", err);
-        });
-      }
+  };
+
+  if (typeof Tawk_API.onLoad === "function") {
+    // If widget has onLoad, hook it
+    const originalOnLoad = Tawk_API.onLoad;
+    window.Tawk_API.onLoad = function() {
+      if (originalOnLoad) originalOnLoad();
+      apply();
     };
+  } else {
+    // Fallback: attempt after a short delay
+    setTimeout(apply, 1500);
   }
 }
 

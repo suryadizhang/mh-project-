@@ -84,6 +84,9 @@ export default function RootLayout({
         </main>
         <Footer />
         <TawkWrapper />
+        {/* Optional: Uncomment to enable email capture prompt
+        <TawkEmailPrompt />
+        */}
       </body>
     </html>
   );
