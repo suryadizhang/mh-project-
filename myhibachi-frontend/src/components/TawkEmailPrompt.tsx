@@ -24,24 +24,24 @@ export default function TawkEmailPrompt() {
 
   // MyHibachi branded styling
   return (
-    <div 
+    <div
       className="tawk-email-prompt"
       style={{
-        position: "fixed", 
+        position: "fixed",
         bottom: 80, // Above the tawk widget
-        right: 16, 
-        padding: 16, 
-        background: "#fff", 
-        boxShadow: "0 8px 20px rgba(219, 43, 40, 0.15)", 
-        borderRadius: 12, 
+        right: 16,
+        padding: 16,
+        background: "#fff",
+        boxShadow: "0 8px 20px rgba(219, 43, 40, 0.15)",
+        borderRadius: 12,
         zIndex: 9999,
         border: "2px solid rgba(219, 43, 40, 0.1)",
         maxWidth: 280
       }}
     >
       <div style={{
-        fontWeight: 600, 
-        marginBottom: 8, 
+        fontWeight: 600,
+        marginBottom: 8,
         color: "#db2b28",
         fontSize: "14px"
       }}>
@@ -56,8 +56,8 @@ export default function TawkEmailPrompt() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           style={{
-            padding: "8px 12px", 
-            border: "1px solid #ddd", 
+            padding: "8px 12px",
+            border: "1px solid #ddd",
             borderRadius: 8,
             fontSize: "14px",
             outline: "none",
@@ -66,14 +66,14 @@ export default function TawkEmailPrompt() {
           onKeyDown={(e) => e.key === "Enter" && save()}
         />
         <div style={{display: "flex", gap: 8}}>
-          <button 
-            onClick={save} 
+          <button
+            onClick={save}
             disabled={!email}
             style={{
               flex: 1,
-              padding: "8px 12px", 
-              borderRadius: 8, 
-              border: "none", 
+              padding: "8px 12px",
+              borderRadius: 8,
+              border: "none",
               background: email ? "#db2b28" : "#ccc",
               color: "#fff",
               fontSize: "12px",
@@ -84,12 +84,12 @@ export default function TawkEmailPrompt() {
           >
             Save
           </button>
-          <button 
+          <button
             onClick={() => setShow(false)}
             style={{
-              padding: "8px 12px", 
-              borderRadius: 8, 
-              border: "1px solid #ddd", 
+              padding: "8px 12px",
+              borderRadius: 8,
+              border: "1px solid #ddd",
               background: "#f6f6f6",
               color: "#666",
               fontSize: "12px",

@@ -142,7 +142,7 @@ Live chat is configured via environment variables in `.env.local`:
 
 ### Components
 - `TawkScript.tsx` - Core widget loader
-- `TawkWrapper.tsx` - App Router conditional wrapper  
+- `TawkWrapper.tsx` - App Router conditional wrapper
 - `TawkWrapperPages.tsx` - Pages Router conditional wrapper
 - `LiveChatButton.tsx` - Custom chat trigger buttons
 - `TawkEmailPrompt.tsx` - Email capture prompt (optional)

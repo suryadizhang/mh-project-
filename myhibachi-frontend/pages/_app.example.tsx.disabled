@@ -1,4 +1,4 @@
-/*
+/* 
  * Example Pages Router integration (_app.tsx)
  * Use this if your project uses Pages Router instead of App Router
  */
