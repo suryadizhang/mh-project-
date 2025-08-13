@@ -7,8 +7,8 @@ interface LiveChatButtonProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-export default function LiveChatButton({ 
-  className = '', 
+export default function LiveChatButton({
+  className = '',
   variant = 'primary',
   size = 'md'
 }: LiveChatButtonProps) {
@@ -18,7 +18,7 @@ export default function LiveChatButton({
 
   const getButtonClasses = () => {
     const baseClasses = 'btn d-flex align-items-center gap-2 fw-bold transition-all';
-    
+
     const variantClasses = {
       primary: 'btn-primary',
       outline: 'btn-outline-primary',

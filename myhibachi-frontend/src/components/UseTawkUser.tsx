@@ -16,6 +16,6 @@ export default function UseTawkUser({ name, email }: UseTawkUserProps) {
       });
     }
   }, [name, email]);
-  
+
   return null;
 }

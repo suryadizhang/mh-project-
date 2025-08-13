@@ -2,7 +2,7 @@ export function setTawkVisitor(attrs: Record<string, string>) {
   if (typeof window === "undefined") return;
   const Tawk_API = window.Tawk_API;
   if (!Tawk_API) return;
-  
+
   if (typeof Tawk_API.onLoad === "function") {
     if (typeof Tawk_API.setAttributes === "function") {
       Tawk_API.setAttributes(attrs, function (err: unknown) {
@@ -27,7 +27,7 @@ export function openTawkChat() {
   if (typeof window === "undefined") return;
   const Tawk_API = window.Tawk_API;
   if (!Tawk_API) return;
-  
+
   // Use maximize method to open the chat
   if (typeof Tawk_API.maximize === "function") {
     Tawk_API.maximize();
