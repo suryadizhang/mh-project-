@@ -102,7 +102,7 @@ export default function BookingPage() {
     try {
       const dateStr = format(date, 'yyyy-MM-dd')
       const response = await fetch(`/api/v1/bookings/availability?date=${dateStr}`)
-      
+
       if (response.ok) {
         const data = await response.json()
         const formattedSlots = data.timeSlots.map((slot: {
@@ -113,8 +113,8 @@ export default function BookingPage() {
           isAvailable: boolean;
         }) => ({
           time: slot.time,
-          label: slot.time === '12PM' ? '12:00 PM' : 
-                 slot.time === '3PM' ? '3:00 PM' : 
+          label: slot.time === '12PM' ? '12:00 PM' :
+                 slot.time === '3PM' ? '3:00 PM' :
                  slot.time === '6PM' ? '6:00 PM' : '9:00 PM',
           available: slot.available,
           isAvailable: slot.isAvailable
@@ -164,24 +164,24 @@ export default function BookingPage() {
   // Enhanced onSubmit with comprehensive validation
   const onSubmit = async (data: BookingFormData) => {
     setIsSubmitting(true)
-    
+
     try {
       // Check for missing fields
       const missing: string[] = []
-      
+
       if (!data.name || data.name.length < 2) missing.push('Full Name')
       if (!data.email) missing.push('Email Address')
       if (!data.phone || data.phone.length < 10) missing.push('Phone Number')
       if (!data.eventDate) missing.push('Event Date')
       if (!data.eventTime) missing.push('Event Time')
       if (!data.guestCount || data.guestCount < 1) missing.push('Estimate Number of Guests')
-      
+
       // Check venue address
       if (!data.venueStreet) missing.push('Venue Street Address')
       if (!data.venueCity) missing.push('Venue City')
       if (!data.venueState) missing.push('Venue State')
       if (!data.venueZipcode) missing.push('Venue ZIP Code')
-      
+
       // Check billing address (only if not same as venue)
       if (!data.sameAsVenue) {
         if (!data.addressStreet) missing.push('Billing Street Address')
@@ -189,7 +189,7 @@ export default function BookingPage() {
       if (!data.addressState) missing.push('Billing State')
       if (!data.addressZipcode) missing.push('Billing ZIP Code')
     }
-    
+
     // If there are missing fields, show modal
     if (missing.length > 0) {
       setMissingFields(missing)
@@ -202,13 +202,13 @@ export default function BookingPage() {
       try {
         const dateStr = format(data.eventDate, 'yyyy-MM-dd')
         const response = await fetch(`/api/v1/bookings/availability?date=${dateStr}`)
-        
+
         if (response.ok) {
           const availabilityData = await response.json()
           const selectedSlot = availabilityData.timeSlots.find(
             (slot: { time: string; isAvailable: boolean }) => slot.time === data.eventTime
           )
-          
+
           if (!selectedSlot || !selectedSlot.isAvailable) {
             setDateError(`The ${data.eventTime} time slot is no longer available. Please select a different time.`)
             return
@@ -219,7 +219,7 @@ export default function BookingPage() {
         // Continue with booking as a fallback
       }
     }
-    
+
     // If all validation passes, show agreement modal
     setFormData(data)
     setShowAgreementModal(true)
@@ -234,7 +234,7 @@ export default function BookingPage() {
   // Handle agreement confirmation with actual booking submission
   const handleAgreementConfirm = async () => {
     if (!formData) return
-    
+
     try {
       const bookingData = {
         date: format(formData.eventDate, 'yyyy-MM-dd'),
@@ -272,10 +272,10 @@ export default function BookingPage() {
       if (response.ok && result.success) {
         setShowAgreementModal(false)
         setFormData(null)
-        
+
         // Show success message with booking ID
         alert(`🎉 Booking Confirmed!\n\nConfirmation Code: ${result.bookingId}\n\nWe will contact you soon at ${formData.email} to finalize your hibachi experience details.\n\nThank you for choosing My Hibachi!`)
-        
+
         // Reset form
         window.location.reload()
       } else {
@@ -283,7 +283,7 @@ export default function BookingPage() {
         if (result.code === 'SLOT_FULL') {
           setShowAgreementModal(false)
           setDateError('This time slot just became fully booked. Please select a different time.')
-          
+
           // Refresh availability data
           if (formData.eventDate) {
             fetchAvailability(formData.eventDate)
@@ -315,7 +315,7 @@ export default function BookingPage() {
             <h3 className="text-xl font-bold text-red-600">Please Complete Your Booking</h3>
             <p className="text-gray-600 mt-2">The following fields are required:</p>
           </div>
-          
+
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
             <ul className="space-y-1">
               {missingFields.map((field, index) => (
@@ -326,7 +326,7 @@ export default function BookingPage() {
               ))}
             </ul>
           </div>
-          
+
           <div className="flex space-x-3">
             <button
               onClick={() => setShowValidationModal(false)}
@@ -352,7 +352,7 @@ export default function BookingPage() {
             <h3 className="text-2xl font-bold">My Hibachi Catering Agreement</h3>
             <p className="text-red-100 mt-2">Please review and confirm the terms below</p>
           </div>
-          
+
           <div className="p-6 overflow-y-auto max-h-[60vh]">
             <div className="space-y-6 text-sm">
               <div>
@@ -392,7 +392,7 @@ export default function BookingPage() {
               <div>
                 <h4 className="font-bold text-red-600 mb-2">4. PAYMENT TERMS</h4>
                 <ul className="list-disc list-inside text-gray-700 space-y-1">
-                  <li>Deposit: $100 (non-refundable, required to reserve your date)</li>
+                  <li>Deposit: $100 (refundable if canceled 7+ days before event, required to reserve your date)</li>
                   <li>Remaining balance: Due on or before the event date</li>
                   <li>Accepted payments: Venmo Business, Zelle Business, Cash, or Card</li>
                 </ul>
@@ -434,7 +434,7 @@ export default function BookingPage() {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-gray-50 p-6 border-t">
             {/* Customer Details Confirmation */}
             {formData && (
@@ -532,7 +532,7 @@ export default function BookingPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center text-xl font-bold ${
                     (watch('name') && watch('email') && watch('phone')) ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
@@ -548,7 +548,7 @@ export default function BookingPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center text-xl font-bold ${
                     (watch('venueStreet') && watch('venueCity') && watch('venueState') && watch('venueZipcode')) ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
@@ -564,7 +564,7 @@ export default function BookingPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center text-xl font-bold ${
                     (watch('sameAsVenue') || (watch('addressStreet') && watch('addressCity') && watch('addressState') && watch('addressZipcode'))) ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
@@ -581,7 +581,7 @@ export default function BookingPage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Overall Progress Bar */}
               <div className="mt-6">
                 <div className="flex justify-between text-sm text-gray-600 mb-2">
@@ -594,15 +594,15 @@ export default function BookingPage() {
                   ) / 4 * 100)}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div 
+                  <div
                     className="bg-gradient-to-r from-blue-500 to-red-500 h-3 rounded-full transition-all duration-300"
-                    style={{ 
+                    style={{
                       width: `${(
                         (watch('eventDate') && watch('eventTime') ? 1 : 0) +
                         (watch('name') && watch('email') && watch('phone') ? 1 : 0) +
                         (watch('venueStreet') && watch('venueCity') && watch('venueState') && watch('venueZipcode') ? 1 : 0) +
                         (watch('sameAsVenue') || (watch('addressStreet') && watch('addressCity') && watch('addressState') && watch('addressZipcode')) ? 1 : 0)
-                      ) / 4 * 100}%` 
+                      ) / 4 * 100}%`
                     }}
                   ></div>
                 </div>
@@ -626,7 +626,7 @@ export default function BookingPage() {
                   )}
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -679,7 +679,7 @@ export default function BookingPage() {
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">
                 📅 Date & Time Selection
               </h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -716,41 +716,41 @@ export default function BookingPage() {
                             if (field.value && date.toDateString() === field.value.toDateString()) {
                               return 'bg-red-500 text-white font-bold rounded'
                             }
-                            
+
                             // Style for booked dates
-                            const isBooked = bookedDates.some(bookedDate => 
+                            const isBooked = bookedDates.some(bookedDate =>
                               bookedDate.toDateString() === date.toDateString()
                             )
-                            
+
                             if (isBooked) {
                               return 'bg-red-100 text-red-400 line-through cursor-not-allowed'
                             }
-                            
+
                             return ''
                           }}
                           onSelect={(date: Date | null) => {
                             // Additional validation when user selects a date
                             if (!date) return
-                            
+
                             const now = new Date()
                             const timeDiff = date.getTime() - now.getTime()
                             const hoursDiff = timeDiff / (1000 * 60 * 60)
-                            
+
                             if (hoursDiff < 48) {
                               setDateError('Please select a date at least 48 hours in advance')
                               return
                             }
-                            
+
                             // Check if the date is booked
-                            const isBooked = bookedDates.some(bookedDate => 
+                            const isBooked = bookedDates.some(bookedDate =>
                               bookedDate.toDateString() === date.toDateString()
                             )
-                            
+
                             if (isBooked) {
                               setDateError('This date is fully booked. Please select another date.')
                               return
                             }
-                            
+
                             setDateError(null)
                           }}
                           filterDate={(date: Date) => {
@@ -758,18 +758,18 @@ export default function BookingPage() {
                             const now = new Date()
                             const timeDiff = date.getTime() - now.getTime()
                             const hoursDiff = timeDiff / (1000 * 60 * 60)
-                            
+
                             // Must be at least 48 hours in future
                             if (hoursDiff < 48) return false
-                            
+
                             // Only allow current year and future years (prevents previous year navigation)
                             if (date.getFullYear() < now.getFullYear()) return false
-                            
+
                             // Check if the date is booked
-                            const isBooked = bookedDates.some(bookedDate => 
+                            const isBooked = bookedDates.some(bookedDate =>
                               bookedDate.toDateString() === date.toDateString()
                             )
-                            
+
                             return !isBooked
                           }}
                         />
@@ -822,8 +822,8 @@ export default function BookingPage() {
                           {loadingTimeSlots ? "⏳ Loading time slots..." : "🕐 Select a time"}
                         </option>
                         {availableTimeSlots.map((slot) => (
-                          <option 
-                            key={slot.time} 
+                          <option
+                            key={slot.time}
                             value={slot.time}
                             disabled={!slot.isAvailable}
                             style={{
@@ -831,8 +831,8 @@ export default function BookingPage() {
                               fontWeight: slot.isAvailable ? 'bold' : 'normal'
                             }}
                           >
-                            {slot.isAvailable 
-                              ? `✅ ${slot.label} (${slot.available} slot${slot.available !== 1 ? 's' : ''} available)` 
+                            {slot.isAvailable
+                              ? `✅ ${slot.label} (${slot.available} slot${slot.available !== 1 ? 's' : ''} available)`
                               : `❌ ${slot.label} – Fully Booked`
                             }
                           </option>
@@ -891,7 +891,7 @@ export default function BookingPage() {
                   )}
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -971,7 +971,7 @@ export default function BookingPage() {
                   )}
                 </div>
               </div>
-              
+
               {/* Checkbox - Disabled until venue address is complete */}
               <div className="mb-4">
                 <label className={`flex items-center space-x-3 ${isVenueAddressComplete ? 'cursor-pointer' : 'cursor-not-allowed'}`}>
@@ -1000,7 +1000,7 @@ export default function BookingPage() {
                   </p>
                 )}
               </div>
-              
+
               {/* Show minimized summary when checkbox is checked */}
               {sameAsVenue && isVenueAddressComplete ? (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -1095,7 +1095,7 @@ export default function BookingPage() {
                   </p>
                 </div>
               )}
-              
+
               <button
                 type="submit"
                 disabled={
@@ -1131,12 +1131,12 @@ export default function BookingPage() {
                     (watch('name') && watch('email') && watch('phone') ? 1 : 0) +
                     (watch('venueStreet') && watch('venueCity') && watch('venueState') && watch('venueZipcode') ? 1 : 0) +
                     (watch('sameAsVenue') || (watch('addressStreet') && watch('addressCity') && watch('addressState') && watch('addressZipcode')) ? 1 : 0)
-                  ) === 4 
+                  ) === 4
                     ? '🔥 Book Your Hibachi Experience'
                     : '📝 Complete Form to Continue'
                 )}
               </button>
-              
+
               {/* Form completion summary */}
               <div className="mt-4 text-sm text-gray-600">
                 <div className="flex flex-wrap justify-center items-center gap-2">
@@ -1158,7 +1158,7 @@ export default function BookingPage() {
           </form>
         </div>
       </div>
-      
+
       <FreeQuoteButton variant="floating" />
     </div>
     </>

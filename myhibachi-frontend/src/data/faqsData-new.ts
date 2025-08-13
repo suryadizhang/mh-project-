@@ -99,7 +99,7 @@ export const faqs: FaqItem[] = [
   {
     id: 'how-to-book',
     question: 'How do I book My Hibachi Chef?',
-    answer: 'Book online through our website or text us at (916) 740-8768. All events must be booked at least 48 hours in advance. You\'ll need to provide event details, guest count, and pay a $100 non-refundable deposit to secure your date. We\'ll follow up to finalize menu and details.',
+    answer: 'Book online through our website or text us at (916) 740-8768. All events must be booked at least 48 hours in advance. You\'ll need to provide event details, guest count, and pay a $100 refundable deposit to secure your date (refundable if canceled 7+ days before event). We\'ll follow up to finalize menu and details.',
     category: 'Booking & Payments',
     tags: ['booking', 'reserve', 'advance'],
     confidence: 'high',
@@ -108,9 +108,9 @@ export const faqs: FaqItem[] = [
   {
     id: 'deposit-policy',
     question: 'What\'s the deposit policy?',
-    answer: 'We require a $100 non-refundable deposit to secure your booking date. This deposit is deducted from your final bill. The remaining balance is due on or before your event date. We accept Venmo Business, Zelle Business, Cash, or Credit Card.',
+    answer: 'We require a $100 refundable deposit to secure your booking date (refundable if canceled 7+ days before event). This deposit is deducted from your final bill. The remaining balance is due on or before your event date. We accept Venmo Business, Zelle Business, Cash, or Credit Card.',
     category: 'Booking & Payments',
-    tags: ['deposit', 'payment', 'non-refundable'],
+    tags: ['deposit', 'payment', 'refundable'],
     confidence: 'high',
     source_urls: ['/BookUs']
   },
@@ -195,7 +195,7 @@ export const faqs: FaqItem[] = [
   {
     id: 'cancellation-policy',
     question: 'What\'s your cancellation policy?',
-    answer: 'Full refund if canceled at least 7 days before your event. The $100 deposit is non-refundable for cancellations within 7 days. One free reschedule allowed within 48 hours of booking; additional reschedules incur a $100 fee. Contact cs@myhibachichef.com for cancellations.',
+    answer: 'Full refund if canceled at least 7 days before your event. The $100 deposit is refundable for cancellations 7+ days before event, non-refundable within 7 days. One free reschedule allowed within 48 hours of booking; additional reschedules incur a $100 fee. Contact cs@myhibachichef.com for cancellations.',
     category: 'Policies (Cancellation, Weather, Refunds)',
     tags: ['cancellation', 'refund', '7 days', 'reschedule'],
     confidence: 'high',
@@ -236,7 +236,7 @@ export const faqs: FaqItem[] = [
 
 export const categories = [
   'Pricing & Minimums',
-  'Menu & Upgrades', 
+  'Menu & Upgrades',
   'Booking & Payments',
   'Travel & Service Area',
   'On-Site Setup & Requirements',
@@ -250,9 +250,9 @@ export const categories = [
 export const allTags = [
   'pricing', 'cost', 'adults', 'children', 'minimum', 'travel', 'fees', 'distance', 'miles',
   'party size', 'guests', 'tipping', 'gratuity', 'chef', 'menu', 'proteins', 'included', 'sake',
-  'upgrades', 'filet', 'lobster', 'premium', 'dietary', 'allergies', 'vegetarian', 'vegan', 
-  'gluten-free', 'kids', 'family', 'alcohol', '21+', 'beverages', 'booking', 'reserve', 
-  'advance', 'deposit', 'payment', 'non-refundable', 'venmo', 'zelle', 'cash', 'credit card',
+  'upgrades', 'filet', 'lobster', 'premium', 'dietary', 'allergies', 'vegetarian', 'vegan',
+  'gluten-free', 'kids', 'family', 'alcohol', '21+', 'beverages', 'booking', 'reserve',
+  'advance', 'deposit', 'payment', 'refundable', 'venmo', 'zelle', 'cash', 'credit card',
   '48 hours', 'availability', 'service area', 'bay area', 'sacramento', 'fremont', 'coverage',
   'space', 'grill', 'dimensions', 'setup', 'tables', 'seating', 'arrangement', 'u-shape',
   'indoor', 'outdoor', 'ventilation', 'safety', 'host provides', 'chef brings', 'requirements',

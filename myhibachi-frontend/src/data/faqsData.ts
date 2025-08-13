@@ -53,7 +53,7 @@ export const faqs: FaqItem[] = [
     source_urls: ['/menu', '/contact']
   },
 
-  // Menu & Upgrades  
+  // Menu & Upgrades
   {
     id: 'menu-options',
     question: 'What\'s included in the hibachi menu?',
@@ -78,7 +78,7 @@ export const faqs: FaqItem[] = [
     id: 'kids-menu',
     question: 'What are the kids\' portions and pricing?',
     answer: '$30 per child (6-12 years) — same 2-protein selection as adults. Ages 5 & under eat free with adult purchase (1 protein, small rice portion).',
-    category: 'Menu & Upgrades', 
+    category: 'Menu & Upgrades',
     subcategory: 'Kids\' Portions',
     tags: ['kids', '$30', '6-12 years', 'free under 5', '2 proteins'],
     confidence: 'high',
@@ -99,20 +99,20 @@ export const faqs: FaqItem[] = [
   {
     id: 'how-to-book',
     question: 'How do I book My Hibachi Chef?',
-    answer: 'Book online through our website or text (916) 740-8768. Must book 48+ hours in advance. Requires event details, guest count, and $100 non-refundable deposit.',
+    answer: 'Book online through our website or text (916) 740-8768. Must book 48+ hours in advance. Requires event details, guest count, and $100 refundable deposit (refundable if canceled 7+ days before event).',
     category: 'Booking & Payments',
     subcategory: 'How to Book',
-    tags: ['booking', 'online', 'text', '48 hours', '$100 deposit'],
+    tags: ['booking', 'online', 'text', '48 hours', '$100 deposit', 'refundable'],
     confidence: 'high',
     source_urls: ['/BookUs']
   },
   {
     id: 'deposit-policy',
     question: 'What\'s the deposit policy?',
-    answer: '$100 non-refundable deposit secures your date and is deducted from final bill. Remaining balance due on event date. Accept Venmo Business, Zelle Business, Cash, Credit Card.',
+    answer: '$100 refundable deposit secures your date and is deducted from final bill (refundable if canceled 7+ days before event). Remaining balance due on event date. Accept Venmo Business, Zelle Business, Cash, Credit Card.',
     category: 'Booking & Payments',
     subcategory: 'Deposits & Balance',
-    tags: ['$100 deposit', 'non-refundable', 'deducted', 'final bill'],
+    tags: ['$100 deposit', 'refundable', 'deducted', 'final bill'],
     confidence: 'high',
     source_urls: ['/BookUs']
   },
@@ -152,7 +152,7 @@ export const faqs: FaqItem[] = [
     id: 'travel-distance',
     question: 'Do you travel to my city?',
     answer: 'We serve the Bay Area, Sacramento, Central Valley, and coastal/mountain communities within 150 miles of our location. Text (916) 740-8768 with your zip code for confirmation.',
-    category: 'Travel & Service Area', 
+    category: 'Travel & Service Area',
     subcategory: 'Coverage Radius',
     tags: ['bay area', 'sacramento', 'central valley', 'zip code', 'confirmation'],
     confidence: 'high',
@@ -217,10 +217,10 @@ export const faqs: FaqItem[] = [
   {
     id: 'cancellation-policy',
     question: 'What\'s your cancellation policy?',
-    answer: 'Full refund if canceled 7+ days before event. $100 deposit non-refundable within 7 days. One free reschedule within 48 hours of booking; additional reschedules cost $100.',
+    answer: 'Full refund if canceled 7+ days before event. $100 deposit is refundable for cancellations 7+ days before event, non-refundable within 7 days. One free reschedule within 48 hours of booking; additional reschedules cost $100.',
     category: 'Policies (Cancellation, Weather, Refunds)',
     subcategory: 'Cancellation & Changes',
-    tags: ['7 days', 'full refund', 'deposit non-refundable', 'free reschedule', '$100 fee'],
+    tags: ['7 days', 'full refund', 'deposit refundable', 'free reschedule', '$100 fee'],
     confidence: 'high',
     source_urls: ['/BookUs']
   },
@@ -334,7 +334,7 @@ export const faqs: FaqItem[] = [
 
 export const categories = [
   'Pricing & Minimums',
-  'Menu & Upgrades', 
+  'Menu & Upgrades',
   'Booking & Payments',
   'Travel & Service Area',
   'On‑Site Setup & Requirements',
@@ -369,9 +369,9 @@ export const allTags = [
   'pricing', 'cost', 'adults', 'children', 'minimum', 'travel', 'fees', 'distance', 'miles',
   'party size', 'guests', 'tipping', 'gratuity', 'chef', 'menu', 'proteins', 'included', 'sake',
   'upgrades', 'filet', 'lobster', 'premium', 'yakisoba', 'noodles', 'edamame', 'gyoza', 'enhancements',
-  'dietary', 'allergies', 'vegetarian', 'vegan', 'gluten-free', 'kids', 'family', 'alcohol', '21+', 
-  'beverages', 'booking', 'reserve', 'advance', 'deposit', 'payment', 'non-refundable', 'venmo', 
-  'zelle', 'cash', 'credit card', '48 hours', 'availability', 'service area', 'bay area', 'sacramento', 
+  'dietary', 'allergies', 'vegetarian', 'vegan', 'gluten-free', 'kids', 'family', 'alcohol', '21+',
+  'beverages', 'booking', 'reserve', 'advance', 'deposit', 'payment', 'refundable', 'venmo',
+  'zelle', 'cash', 'credit card', '48 hours', 'availability', 'service area', 'bay area', 'sacramento',
   'coverage', 'space', 'grill', 'dimensions', 'setup', 'tables', 'seating', 'arrangement', 'u-shape',
   'indoor', 'outdoor', 'ventilation', 'safety', 'host provides', 'chef brings', 'requirements',
   'cancellation', 'refund', '7 days', 'reschedule', 'weather', 'rain', 'covered area', 'tent',
