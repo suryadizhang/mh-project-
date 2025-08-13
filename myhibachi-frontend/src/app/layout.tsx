@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Poppins } from "next/font/google";
 import "./globals.css";
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
+import TawkWrapper from '@/components/TawkWrapper'
 
 // Import global styles
 import '@/styles/base.css'
@@ -82,6 +83,7 @@ export default function RootLayout({
           {children}
         </main>
         <Footer />
+        <TawkWrapper />
       </body>
     </html>
   );

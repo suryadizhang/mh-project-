@@ -1,6 +1,7 @@
 import '@/styles/contact.css'
 import '@/styles/base.css'
 import { FreeQuoteButton } from '@/components/quote/FreeQuoteButton'
+import LiveChatButton from '@/components/LiveChatButton'
 
 export default function ContactPage() {
   return (
@@ -72,6 +73,18 @@ export default function ContactPage() {
                         +1 (916) 740-8768
                       </a>
                       <p className="contact-note">Text for immediate assistance, scheduled calls available</p>
+                    </div>
+                  </div>
+
+                  <div className="contact-item">
+                    <i className="bi bi-chat-square-dots-fill contact-icon"></i>
+                    <div className="contact-details">
+                      <h5>Live Chat Support</h5>
+                      <div className="d-flex align-items-center gap-2">
+                        <LiveChatButton variant="primary" size="sm" />
+                        <span className="contact-link">Chat with us now!</span>
+                      </div>
+                      <p className="contact-note">Get instant answers to all your hibachi catering questions</p>
                     </div>
                   </div>
 
@@ -204,6 +217,7 @@ export default function ContactPage() {
                   <i className="bi bi-chat-dots-fill me-2"></i>
                   Get a Custom Quote
                 </a>
+                <LiveChatButton variant="outline" size="lg" className="me-3" />
                 <a href="tel:+19167408768" className="btn btn-outline-primary btn-lg">
                   <i className="bi bi-telephone-fill me-2"></i>
                   Call Us Now

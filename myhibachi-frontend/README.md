@@ -109,6 +109,28 @@ npm run build
 npm start
 ```
 
+## Live Chat Support
+
+This project includes tawk.to live chat integration for customer support:
+
+### For Operators
+- Install the tawk.to app on iOS/Android
+- Sign in with the property credentials
+- Enable push notifications to reply on the go
+- Chat widget automatically appears on all pages except admin routes
+
+### Configuration
+Live chat is configured via environment variables in `.env.local`:
+- `NEXT_PUBLIC_TAWK_PROPERTY_ID`: Your tawk.to property ID
+- `NEXT_PUBLIC_TAWK_WIDGET_ID`: Widget ID (defaults to "default")
+
+### Features
+- Automatic loading on all public pages
+- Hidden on admin routes (/admin, /superadmin, /checkout)
+- Custom "Live Chat" buttons on contact page
+- Visitor attribute setting capability
+- TypeScript support
+
 ## License
 
 Private project for MyHibachi catering business.
