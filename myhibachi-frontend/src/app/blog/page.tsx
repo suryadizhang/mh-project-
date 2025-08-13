@@ -69,7 +69,7 @@ export default function BlogPage() {
                 <p className="text-gray-600 mb-4">{post.excerpt}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">{post.readTime}</span>
-                  <Link 
+                  <Link
                     href={`/blog/${post.slug}`}
                     className="text-blue-600 hover:text-blue-800 font-medium"
                   >
@@ -93,7 +93,7 @@ export default function BlogPage() {
           </a>
         </div>
       </div>
-      
+
       {/* Floating Quote Button removed - users can get quotes from dedicated quote page */}
     </div>
   )

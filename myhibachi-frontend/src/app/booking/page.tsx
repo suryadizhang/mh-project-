@@ -75,7 +75,7 @@ export default function BookingPage() {
         setIsCheckingAvailability(true)
         const dateStr = format(watchedFields.eventDate, 'yyyy-MM-dd')
         const key = `${dateStr}_${watchedFields.eventTime}`
-        
+
         try {
           const response = await fetch(`http://localhost:8000/api/v1/bookings/check?date=${dateStr}&time=${watchedFields.eventTime}`)
           const data = await response.json()
@@ -367,7 +367,7 @@ export default function BookingPage() {
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">
                 🎪 Event Venue Address
               </h2>
-              
+
               <div className="mb-4">
                 <label className="flex items-center cursor-pointer">
                   <input
@@ -460,8 +460,8 @@ export default function BookingPage() {
             {/* Submit Message */}
             {submitMessage && (
               <div className={`mt-4 p-4 rounded-lg text-center ${
-                submitMessage.includes('successfully') 
-                  ? 'bg-green-100 text-green-800 border border-green-200' 
+                submitMessage.includes('successfully')
+                  ? 'bg-green-100 text-green-800 border border-green-200'
                   : 'bg-red-100 text-red-800 border border-red-200'
               }`}>
                 {submitMessage}
@@ -484,7 +484,7 @@ export default function BookingPage() {
           </ul>
         </div>
       </div>
-      
+
       {/* Floating Quote Button removed - users can get quotes from dedicated quote page */}
     </div>
   )
