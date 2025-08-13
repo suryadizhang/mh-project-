@@ -5,7 +5,7 @@ import { useForm, Controller, SubmitHandler, Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { format, addDays } from 'date-fns'
-import { FreeQuoteButton } from '@/components/quote/FreeQuoteButton'
+// import { FreeQuoteButton } from '@/components/quote/FreeQuoteButton' // Removed floating button
 
 // Validation schema
 const bookingSchema = z.object({
@@ -485,8 +485,7 @@ export default function BookingPage() {
         </div>
       </div>
       
-      {/* Floating Quote Button */}
-      <FreeQuoteButton variant="floating" />
+      {/* Floating Quote Button removed - users can get quotes from dedicated quote page */}
     </div>
   )
 }

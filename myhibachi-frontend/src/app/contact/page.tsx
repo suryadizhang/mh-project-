@@ -1,6 +1,6 @@
 import '@/styles/contact.css'
 import '@/styles/base.css'
-import { FreeQuoteButton } from '@/components/quote/FreeQuoteButton'
+// import { FreeQuoteButton } from '@/components/quote/FreeQuoteButton' // Removed floating button
 import LiveChatButton from '@/components/LiveChatButton'
 
 export default function ContactPage() {
@@ -396,8 +396,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Floating Quote Button */}
-      <FreeQuoteButton variant="floating" />
+      {/* Floating Quote Button removed - users can get quotes from dedicated quote page */}
     </div>
   )
 }

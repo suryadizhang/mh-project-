@@ -399,8 +399,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Floating Quote Button */}
-      <FreeQuoteButton variant="floating" />
+      {/* Floating Quote Button removed - users can get quotes from dedicated quote page */}
     </main>
   )
 }
