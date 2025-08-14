@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import '@/styles/menu.css'
+import Assistant from '@/components/chat/Assistant'
 
 export default function MenuPage() {
   return (
@@ -860,6 +861,7 @@ export default function MenuPage() {
           </div>
         </div>
       </div>
+      <Assistant page="/menu" />
     </main>
   )
 }

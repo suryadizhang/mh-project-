@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import '@/styles/home.css'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
-import { FreeQuoteButton } from '@/components/quote/FreeQuoteButton'
+import Assistant from '@/components/chat/Assistant'
 
 export default function Home() {
   useScrollAnimation()
@@ -392,15 +392,11 @@ export default function Home() {
             <Link href="/contact" className="btn btn-primary btn-lg">
               <i className="bi bi-calendar-check me-2"></i> Book Your Premium Experience
             </Link>
-            <div className="mt-3">
-              <FreeQuoteButton variant="secondary" />
-            </div>
           </div>
         </div>
       </section>
 
-      {/* Floating Quote Button */}
-      <FreeQuoteButton variant="floating" />
+      <Assistant page="/" />
     </main>
   )
 }

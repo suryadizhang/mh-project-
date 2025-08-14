@@ -1,6 +1,6 @@
 import '@/styles/contact.css'
 import '@/styles/base.css'
-import { FreeQuoteButton } from '@/components/quote/FreeQuoteButton'
+import Assistant from '@/components/chat/Assistant'
 
 export default function ContactPage() {
   return (
@@ -382,8 +382,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Floating Quote Button */}
-      <FreeQuoteButton variant="floating" />
+      <Assistant page="/contact" />
     </div>
   )
 }

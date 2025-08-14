@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Star, ExternalLink, Download, MessageSquare, Gift } from 'lucide-react'
+import Assistant from '@/components/chat/Assistant'
 
 interface BookingDetails {
   bookingId: string
@@ -180,7 +181,8 @@ END:VCALENDAR`
   }
 
   return (
-    <div className="min-h-screen">
+    <>
+      <div className="min-h-screen">
       {/* Success Hero Section with Company Background */}
       <section className="page-hero-background py-20 text-white text-center">
         <div className="max-w-4xl mx-auto px-4">
@@ -417,7 +419,9 @@ END:VCALENDAR`
           </div>
         </div>
       </div>
-    </div>
+      </div>
+      <Assistant page="/booking-success" />
+    </>
   )
 }
 

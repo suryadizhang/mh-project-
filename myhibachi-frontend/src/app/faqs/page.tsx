@@ -3,6 +3,7 @@
 import { faqs } from '@/data/faqsData'
 import { FaqList } from '@/components/faq/FaqList'
 // import { FreeQuoteButton } from '@/components/quote/FreeQuoteButton' // Removed floating button
+import Assistant from '@/components/chat/Assistant'
 import '@/styles/base.css'
 import '@/styles/faqs.css'
 
@@ -55,6 +56,7 @@ export default function FAQsPage() {
         </section>
 
         {/* Floating Quote Button removed - users can get quotes from dedicated quote page */}
+        <Assistant page="/faqs" />
       </main>
     </>
   )

@@ -2,6 +2,7 @@
 
 import { QuoteCalculator } from '@/components/quote/QuoteCalculator'
 import '@/styles/quote-calculator.css'
+import Assistant from '@/components/chat/Assistant'
 
 export default function QuotePage() {
   return (
@@ -108,6 +109,7 @@ export default function QuotePage() {
             </div>
           </div>
         </section>
+        <Assistant page="/quote" />
       </main>
     </>
   )

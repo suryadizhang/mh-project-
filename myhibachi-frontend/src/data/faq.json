@@ -1,0 +1,86 @@
+[
+  {
+    "question": "How much does hibachi catering cost?",
+    "answer": "Our hibachi catering starts at $60 per person for adult portions and $35 per child (under 12). This includes professional chef service, premium ingredients, and entertaining teppanyaki-style cooking. Final pricing depends on menu selection and group size - contact us for a personalized quote!",
+    "category": "pricing",
+    "href": "/BookUs",
+    "keywords": ["price", "cost", "expensive", "budget", "money", "quote"]
+  },
+  {
+    "question": "What areas do you serve?",
+    "answer": "🚚 We serve the Bay Area & Sacramento region! First 30 miles are FREE, then $2/mile after that. We travel up to 150 miles total. Popular cities include San Francisco, Oakland, San Jose, Sacramento, Stockton, and surrounding areas.",
+    "category": "service",
+    "href": "/faqs",
+    "keywords": ["location", "travel", "distance", "service area", "delivery", "where"]
+  },
+  {
+    "question": "How much deposit is required?",
+    "answer": "💳 We require a 50% deposit to secure your booking. The remaining balance is due on the day of service. No surprise fees! Payment can be made via cash, card, or digital payment.",
+    "category": "booking",
+    "href": "/faqs",
+    "keywords": ["deposit", "payment", "booking", "secure", "reserve"]
+  },
+  {
+    "question": "What time slots are available?",
+    "answer": "🕐 Our popular time slots are:\n• 12PM (Lunch)\n• 3PM (Afternoon) \n• 6PM (Dinner)\n• 9PM (Late dinner)\n\nWe need 48 hours advance notice for booking. Weekend slots fill up quickly!",
+    "category": "scheduling",
+    "href": "/BookUs",
+    "keywords": ["time", "schedule", "availability", "when", "booking"]
+  },
+  {
+    "question": "What equipment do you bring?",
+    "answer": "🔥 We bring everything! Professional portable hibachi grills, premium cooking utensils, serving platters, and all necessary cooking equipment. You just provide the space - we handle the rest!",
+    "category": "service",
+    "href": "/faqs",
+    "keywords": ["equipment", "grill", "setup", "what bring", "portable"]
+  },
+  {
+    "question": "What's included in the service?",
+    "answer": "Our hibachi experience includes:\n• Professional chef service with entertaining cooking show\n• All premium ingredients and seasonings\n• Complete equipment setup and cleanup\n• Interactive teppanyaki-style cooking\n• Photo opportunities with the chef\n• Memorable dining experience for all guests",
+    "category": "service",
+    "href": "/faqs",
+    "keywords": ["included", "service", "what get", "experience", "chef"]
+  },
+  {
+    "question": "How many people minimum?",
+    "answer": "We cater to groups of 6 people or more. Perfect for family gatherings, birthday parties, corporate events, and special celebrations. The more guests, the more fun the interactive experience becomes!",
+    "category": "booking",
+    "href": "/BookUs",
+    "keywords": ["minimum", "group size", "people", "guests", "party size"]
+  },
+  {
+    "question": "Do you accommodate dietary restrictions?",
+    "answer": "Absolutely! We accommodate vegetarian, gluten-free, and most dietary restrictions. Please mention any allergies or dietary needs when booking so we can prepare accordingly. Our chef is experienced with various dietary requirements.",
+    "category": "dietary",
+    "href": "/menu",
+    "keywords": ["dietary", "vegetarian", "gluten-free", "allergies", "restrictions", "vegan"]
+  },
+  {
+    "question": "What if it rains (for outdoor events)?",
+    "answer": "We can cook indoors or outdoors! For outdoor events, we recommend having a covered area or backup indoor location ready. Our portable equipment works great in garages, covered patios, or any well-ventilated indoor space.",
+    "category": "logistics",
+    "href": "/faqs",
+    "keywords": ["rain", "weather", "indoor", "outdoor", "covered", "backup"]
+  },
+  {
+    "question": "How do I book an event?",
+    "answer": "📞 Easy! Call us at (916) 740-8768 or use our online booking form. We'll discuss your event details, menu preferences, and confirm availability. Book at least 48 hours in advance for best availability!",
+    "category": "booking",
+    "href": "/BookUs",
+    "keywords": ["book", "reserve", "schedule", "contact", "phone", "online"]
+  },
+  {
+    "question": "What makes your hibachi service special?",
+    "answer": "🌟 Our professional chef brings the authentic teppanyaki restaurant experience to your location! Interactive cooking show with tricks, premium ingredients, personalized service, and memorable entertainment that guests will talk about long after the event.",
+    "category": "service",
+    "href": "/faqs",
+    "keywords": ["special", "different", "unique", "authentic", "entertainment", "experience"]
+  },
+  {
+    "question": "Do you clean up after cooking?",
+    "answer": "Yes! Complete cleanup is included in our service. We bring our equipment, cook your meal, and leave your space clean. You can focus on enjoying the experience and spending time with your guests.",
+    "category": "service",
+    "href": "/faqs",
+    "keywords": ["cleanup", "clean", "mess", "after", "included"]
+  }
+]
