@@ -1,0 +1,12 @@
+{
+  "facebookPageId": "61577483702847",
+  "facebookAppId": "1234567890123456",
+  "instagramUsername": "my_hibachi_chef",
+  "instagramDmUrl": "https://ig.me/m/my_hibachi_chef",
+  "phone": "(916) 740-8768",
+  "email": "cs@myhibachichef.com",
+  "greetings": {
+    "loggedIn": "Hello! How can My Hibachi help you today? We're ready to make your event unforgettable! 🔥",
+    "loggedOut": "Hello! How can My Hibachi help you today? We're ready to make your event unforgettable! 🔥"
+  }
+}

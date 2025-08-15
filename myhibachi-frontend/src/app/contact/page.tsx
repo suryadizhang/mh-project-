@@ -1,6 +1,111 @@
+'use client'
+
 import '@/styles/contact.css'
 import '@/styles/base.css'
 import Assistant from '@/components/chat/Assistant'
+import ConsentBar from '@/components/consent/ConsentBar'
+import MetaMessenger from '@/components/chat/MetaMessenger'
+
+// Type definitions
+declare global {
+  interface Window {
+    FB?: {
+      init: (config: { xfbml: boolean; version: string }) => void
+      CustomerChat: {
+        show: () => void
+        hide: () => void
+      }
+    }
+    dataLayer?: unknown[]
+    opera?: string
+  }
+}
+
+// Inline Chat Button Components
+function InlineMessengerButton() {
+  const handleMessengerClick = () => {
+    try {
+      if (typeof window !== 'undefined' && window.FB?.CustomerChat?.show) {
+        window.FB.CustomerChat.show()
+
+        // GTM tracking
+        if (window.dataLayer) {
+          window.dataLayer.push({ event: 'chat_open', channel: 'messenger' })
+        }
+      } else {
+        console.warn('Facebook Messenger not available')
+      }
+    } catch (error) {
+      console.warn('Error opening Messenger:', error)
+    }
+  }
+
+  return (
+    <button
+      onClick={handleMessengerClick}
+      className="social-link facebook-link messenger-chat-button"
+      style={{ cursor: 'pointer', border: 'none', background: 'none', padding: 0, width: '100%' }}
+    >
+      <i className="bi bi-messenger social-icon"></i>
+      <div>
+        <strong>💬 Chat on Messenger</strong>
+        <small>Instant messaging with our team</small>
+      </div>
+    </button>
+  )
+}
+
+function InlineInstagramButton() {
+  const handleInstagramClick = () => {
+    try {
+      // GTM tracking
+      if (typeof window !== 'undefined' && window.dataLayer) {
+        window.dataLayer.push({ event: 'chat_open', channel: 'instagram' })
+      }
+
+      // Mobile app detection and opening
+      const userAgent = navigator.userAgent || navigator.vendor || window.opera || ''
+      const isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase())
+
+      if (isMobile) {
+        // Try to open Instagram app first
+        const instagramUrl = 'instagram://user?username=my_hibachi_chef'
+        const fallbackUrl = 'https://www.instagram.com/direct/t/my_hibachi_chef/'
+
+        const iframe = document.createElement('iframe')
+        iframe.style.display = 'none'
+        iframe.src = instagramUrl
+        document.body.appendChild(iframe)
+
+        setTimeout(() => {
+          document.body.removeChild(iframe)
+          window.open(fallbackUrl, '_blank')
+        }, 1000)
+      } else {
+        // Desktop - direct to Instagram DM
+        window.open('https://www.instagram.com/direct/t/my_hibachi_chef/', '_blank')
+      }
+    } catch (error) {
+      console.warn('Error opening Instagram:', error)
+      // Fallback to profile page
+      window.open('https://www.instagram.com/my_hibachi_chef/', '_blank')
+    }
+  }
+
+  return (
+    <button
+      onClick={handleInstagramClick}
+      className="social-link instagram-link instagram-chat-button"
+      style={{ cursor: 'pointer', border: 'none', background: 'none', padding: 0, width: '100%' }}
+    >
+      <i className="bi bi-instagram social-icon"></i>
+      <div>
+        <strong>📸 DM on Instagram</strong>
+        <small>Message @my_hibachi_chef directly</small>
+      </div>
+    </button>
+  )
+}
 
 export default function ContactPage() {
   return (
@@ -180,6 +285,15 @@ export default function ContactPage() {
                         <small>Event galleries & client testimonials</small>
                       </div>
                     </a>
+                  </div>
+
+                  {/* Chat Options Integration */}
+                  <div className="chat-options-section mt-4">
+                    <h6 className="chat-subtitle">💬 Instant Messaging</h6>
+                    <div className="chat-buttons">
+                      <InlineMessengerButton />
+                      <InlineInstagramButton />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -383,6 +497,8 @@ export default function ContactPage() {
       </section>
 
       <Assistant page="/contact" />
+      <ConsentBar />
+      <MetaMessenger />
     </div>
   )
 }

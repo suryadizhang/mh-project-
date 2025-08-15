@@ -20,6 +20,20 @@ export async function POST(request: NextRequest): Promise<NextResponse<Assistant
       return NextResponse.json({ error: 'Missing message or page' }, { status: 400 })
     }
 
+    // Check for human contact requests first (before search)
+    const contactKeywords = ['contact a person', 'talk to human', 'speak to someone', 'contact person', 'human support', 'live chat', 'real person', 'customer service', 'talk to a human', 'speak to a person']
+    const isContactRequest = contactKeywords.some(keyword =>
+      message.toLowerCase().includes(keyword)
+    )
+
+    if (isContactRequest) {
+      return NextResponse.json({
+        answer: "👋 I'd be happy to connect you with our team! You can chat with us on Facebook Messenger or Instagram DM. Would you like me to show you the options?",
+        citations: [{ title: 'Contact Our Team', href: '/contact' }],
+        confidence: 'high'
+      })
+    }
+
     // Search for relevant content
     const searchResults = await cosineSearch(message, page)
 
@@ -33,7 +47,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Assistant
 
     // Build answer from search results
     const topResult = searchResults[0]
-    const confidence = topResult.score > 0.7 ? 'high' : topResult.score > 0.5 ? 'medium' : 'low'
+    const confidence: 'high' | 'medium' | 'low' = topResult.score > 0.7 ? 'high' : topResult.score > 0.5 ? 'medium' : 'low'
 
     let answer = topResult.content
     let citations = [{ title: topResult.title, href: topResult.href }]
@@ -45,7 +59,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Assistant
       citations.push({ title: 'Get a Quote', href: '/quote' })
     }
 
-    // Handle specific common questions
+    // Handle specific common questions (after search results)
     if (message.toLowerCase().includes('travel') || message.toLowerCase().includes('distance')) {
       answer = "🚚 We serve the Bay Area & Sacramento region! First 30 miles are FREE, then $2/mile after that. We travel up to 150 miles total."
       citations = [{ title: 'Service Areas & Travel', href: '/faqs' }]

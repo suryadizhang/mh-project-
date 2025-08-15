@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { X, Send, ExternalLink } from 'lucide-react'
+import { X, Send, ExternalLink, MessageCircle, Instagram, Phone, Mail } from 'lucide-react'
 import Image from 'next/image'
+import { usePathname } from 'next/navigation'
+import { getContactData, openIG } from '@/lib/contactData'
 
 interface Message {
   id: string
@@ -19,40 +21,40 @@ interface AssistantProps {
 
 const WELCOME_SUGGESTIONS: Record<string, string[]> = {
   '/BookUs': [
+    "Contact a person",
     "What's included in the menu?",
     "How much is the deposit?",
-    "Do you serve Sacramento?",
-    "What's the minimum notice for booking?"
+    "Do you serve Sacramento?"
   ],
   '/menu': [
+    "Contact a person",
     "What proteins do you offer?",
     "What comes with the hibachi experience?",
-    "Do you have vegetarian options?",
-    "What's included in kids meals?"
+    "Do you have vegetarian options?"
   ],
   '/faqs': [
+    "Contact a person",
     "How far do you travel?",
     "What are your time slots?",
-    "Do you provide the grill?",
-    "How does pricing work?"
+    "Do you provide the grill?"
   ],
   '/contact': [
+    "Contact a person",
     "How do I get a quote?",
     "What's your phone number?",
-    "How quickly do you respond?",
-    "Can I book over the phone?"
+    "How quickly do you respond?"
   ],
   '/blog': [
+    "Contact a person",
     "What's new with My Hibachi?",
     "Do you have cooking tips?",
-    "What events do you cater?",
-    "How did My Hibachi start?"
+    "What events do you cater?"
   ],
   default: [
+    "Contact a person",
     "How much does hibachi cost?",
     "What's included in the service?",
-    "Do you travel to my location?",
-    "How do I book an event?"
+    "Do you travel to my location?"
   ]
 }
 
@@ -62,9 +64,9 @@ export default function Assistant({ page }: AssistantProps) {
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [showHandoff, setShowHandoff] = useState(false)
-  const [handoffForm, setHandoffForm] = useState({ name: '', email: '', message: '' })
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const pathname = usePathname()
 
   const storageKey = `mh_chat_${page}`
 
@@ -123,6 +125,26 @@ export default function Assistant({ page }: AssistantProps) {
     setInputValue('')
     setIsLoading(true)
 
+    // Check if user wants to contact a person
+    const contactKeywords = ['contact a person', 'talk to human', 'speak to someone', 'contact person', 'human support', 'live chat', 'real person', 'customer service', 'staff', 'team member']
+    const isContactRequest = contactKeywords.some(keyword =>
+      content.toLowerCase().includes(keyword)
+    )
+
+    if (isContactRequest) {
+      const contactMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'assistant',
+        content: "👋 I'd be happy to connect you with our team! You can choose how you'd like to chat with us:",
+        timestamp: new Date(),
+        confidence: 'high'
+      }
+      setMessages(prev => [...prev, contactMessage])
+      setIsLoading(false)
+      setShowHandoff(true)
+      return
+    }
+
     try {
       const response = await fetch('/api/assistant', {
         method: 'POST',
@@ -170,31 +192,6 @@ export default function Assistant({ page }: AssistantProps) {
     setIsOpen(!isOpen)
     if (typeof window !== 'undefined') {
       localStorage.setItem('mh_chat_closed', (!isOpen).toString())
-    }
-  }
-
-  const handleHandoffSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    try {
-      const response = await fetch('/api/support/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...handoffForm,
-          source: 'chat',
-          page,
-          chatHistory: messages.slice(-4) // Include recent context
-        })
-      })
-
-      if (response.ok) {
-        setShowHandoff(false)
-        setHandoffForm({ name: '', email: '', message: '' })
-        alert('Thanks! We\'ll get back to you soon. You can also call us directly at (916) 740-8768.')
-      }
-    } catch (error) {
-      console.error('Contact form error:', error)
-      alert('There was an issue sending your message. Please try calling us at (916) 740-8768.')
     }
   }
 
@@ -326,10 +323,7 @@ export default function Assistant({ page }: AssistantProps) {
                       <div className={`w-2 h-2 rounded-full ${getConfidenceColor(message.confidence)}`} />
                       {message.confidence === 'low' && (
                         <button
-                          onClick={() => {
-                            setHandoffForm({ ...handoffForm, message: message.content })
-                            setShowHandoff(true)
-                          }}
+                          onClick={() => setShowHandoff(true)}
                           className="text-xs text-blue-600 hover:text-blue-800 underline"
                         >
                           Talk to a human
@@ -398,47 +392,135 @@ export default function Assistant({ page }: AssistantProps) {
       {showHandoff && (
         <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center p-4">
           <div className="bg-white rounded-xl p-6 w-full max-w-sm">
-            <h3 className="font-semibold mb-4">Talk to Our Team</h3>
-            <form onSubmit={handleHandoffSubmit} className="space-y-3">
-              <input
-                type="text"
-                placeholder="Your name"
-                value={handoffForm.name}
-                onChange={(e) => setHandoffForm({ ...handoffForm, name: e.target.value })}
-                className="w-full p-2 border rounded text-sm"
-                required
-              />
-              <input
-                type="email"
-                placeholder="Your email"
-                value={handoffForm.email}
-                onChange={(e) => setHandoffForm({ ...handoffForm, email: e.target.value })}
-                className="w-full p-2 border rounded text-sm"
-                required
-              />
-              <textarea
-                placeholder="Your message..."
-                value={handoffForm.message}
-                onChange={(e) => setHandoffForm({ ...handoffForm, message: e.target.value })}
-                className="w-full p-2 border rounded text-sm h-20 resize-none"
-                required
-              />
-              <div className="flex space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setShowHandoff(false)}
-                  className="flex-1 p-2 border border-gray-300 rounded text-sm hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 p-2 bg-gradient-to-r from-[#ffb800] to-[#db2b28] text-white rounded text-sm hover:shadow-md"
-                >
-                  Send
-                </button>
+            <h3 className="font-semibold mb-2 text-center" style={{ fontSize: '16px' }}>💬 Choose How to Chat</h3>
+            <p className="text-gray-600 mb-4 text-center" style={{ fontSize: '12px' }}>
+              Select your preferred way to connect with our team
+            </p>
+
+            {/* Contact Options */}
+            <div className="space-y-3 mb-4">
+              {/* Messenger Option */}
+              <button
+                onClick={() => {
+                  try {
+                    if (window.FB?.CustomerChat?.show) {
+                      window.FB.CustomerChat.show()
+                      // GTM tracking
+                      if (typeof window !== 'undefined' && (window as unknown as { dataLayer?: unknown[] }).dataLayer) {
+                        ;(window as unknown as { dataLayer: unknown[] }).dataLayer.push({ event: 'chat_open', channel: 'messenger' })
+                      }
+                    } else {
+                      // Fallback to Facebook page
+                      window.open('https://www.facebook.com/people/My-hibachi/61577483702847/', '_blank')
+                    }
+                  } catch (error) {
+                    console.warn('Error opening Messenger:', error)
+                    // Fallback to Facebook page
+                    window.open('https://www.facebook.com/people/My-hibachi/61577483702847/', '_blank')
+                  }
+                  setShowHandoff(false)
+                }}
+                className="w-full flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border-2 border-blue-200 hover:border-blue-300"
+                style={{ fontSize: '14px' }}
+              >
+                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <MessageCircle size={20} className="text-white" />
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="font-medium">Facebook Messenger</div>
+                  <div className="text-xs text-gray-500">Instant responses on Facebook</div>
+                </div>
+              </button>
+
+              {/* Instagram Option */}
+              {(() => {
+                const { igUser, igUrl } = getContactData()
+                return (igUser || igUrl) ? (
+                  <button
+                    onClick={() => {
+                      openIG(igUser, igUrl)
+                      setShowHandoff(false)
+                    }}
+                    className="w-full flex items-center gap-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors border-2 border-purple-200 hover:border-purple-300"
+                    style={{ fontSize: '14px' }}
+                  >
+                    <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Instagram size={20} className="text-white" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <div className="font-medium">Instagram DM</div>
+                      <div className="text-xs text-gray-500">Message us @my_hibachi_chef</div>
+                    </div>
+                  </button>
+                ) : null
+              })()}
+
+              {/* Quick Contact Options */}
+              <div className="pt-2 border-t border-gray-200">
+                <p className="text-xs text-gray-500 mb-2 text-center">Or contact us directly:</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {/* Phone Option */}
+                  {(() => {
+                    const { phone } = getContactData()
+                    return phone ? (
+                      <a
+                        href={`tel:${phone}`}
+                        className="flex items-center gap-2 p-2 bg-green-50 hover:bg-green-100 rounded-lg transition-colors text-center"
+                        style={{ fontSize: '12px' }}
+                        onClick={() => setShowHandoff(false)}
+                      >
+                        <div className="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                          <Phone size={12} className="text-white" />
+                        </div>
+                        <span className="font-medium">Call</span>
+                      </a>
+                    ) : null
+                  })()}
+
+                  {/* Email Option */}
+                  {(() => {
+                    const { email } = getContactData()
+                    return email ? (
+                      <a
+                        href={`mailto:${email}`}
+                        className="flex items-center gap-2 p-2 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors text-center"
+                        style={{ fontSize: '12px' }}
+                        onClick={() => setShowHandoff(false)}
+                      >
+                        <div className="w-6 h-6 bg-orange-600 rounded-full flex items-center justify-center flex-shrink-0">
+                          <Mail size={12} className="text-white" />
+                        </div>
+                        <span className="font-medium">Email</span>
+                      </a>
+                    ) : null
+                  })()}
+                </div>
               </div>
-            </form>
+
+              {/* Contact Page Link - Only show if not on contact page */}
+              {pathname !== '/contact' && (
+                <a
+                  href="/contact#chat"
+                  className="w-full flex items-center gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
+                  style={{ fontSize: '13px' }}
+                  onClick={() => setShowHandoff(false)}
+                >
+                  <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
+                    <ExternalLink size={16} className="text-white" />
+                  </div>
+                  <span>View All Contact Options</span>
+                </a>
+              )}
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={() => setShowHandoff(false)}
+              className="w-full p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              style={{ fontSize: '14px' }}
+            >
+              ← Back to Chat
+            </button>
           </div>
         </div>
       )}

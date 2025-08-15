@@ -445,6 +445,74 @@
   font-size: 0.9rem;
 }
 
+/* Chat Options Section */
+.chat-options-section {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.chat-subtitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.chat-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.messenger-chat-button,
+.instagram-chat-button {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  padding: 0.875rem 1rem !important;
+  background: #f9f9f9 !important;
+  border-radius: 12px !important;
+  text-decoration: none !important;
+  transition: all 0.3s ease !important;
+  color: inherit !important;
+  border: none !important;
+  width: 100% !important;
+  text-align: left !important;
+}
+
+.messenger-chat-button:hover {
+  background: #1877f2 !important;
+  color: white !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 5px 15px rgba(24, 119, 242, 0.25) !important;
+}
+
+.messenger-chat-button:hover .social-icon {
+  color: white !important;
+}
+
+.instagram-chat-button:hover {
+  background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d) !important;
+  color: white !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 5px 15px rgba(225, 48, 108, 0.25) !important;
+}
+
+.instagram-chat-button:hover .social-icon {
+  color: white !important;
+}
+
+.messenger-chat-button .social-icon {
+  color: #1877f2 !important;
+  font-size: 1.5rem !important;
+}
+
+.instagram-chat-button .social-icon {
+  color: #e1306c !important;
+  font-size: 1.5rem !important;
+}
+
 /* Booking CTA Section */
 .booking-cta-section {
   margin: 4rem 0;
