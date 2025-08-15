@@ -274,7 +274,7 @@ export default function BookingPage() {
         setFormData(null)
 
         // Show success message with booking ID
-        alert(`🎉 Booking Confirmed!\n\nConfirmation Code: ${result.bookingId}\n\nWe will contact you soon at ${formData.email} to finalize your hibachi experience details.\n\nThank you for choosing My Hibachi!`)
+        alert(`Booking Confirmed!\n\nConfirmation Code: ${result.bookingId}\n\nWe will contact you soon at ${formData.email} to finalize your hibachi experience details.\n\nThank you for choosing My Hibachi!`)
 
         // Reset form
         window.location.reload()
@@ -505,24 +505,24 @@ export default function BookingPage() {
       {/* Hero Section with Company Background */}
       <section className="page-hero-background py-20 text-white text-center">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="text-6xl mb-6">🥘</div>
+          <div className="text-6xl mb-6">🍽️</div>
           <h1 className="text-5xl font-bold mb-6">Book Your Hibachi Experience</h1>
           <p className="text-xl mb-8 text-gray-200">Premium Japanese hibachi dining at your location</p>
-          <div className="text-lg">
+          <div className="text-lg mb-12">
             <span className="bg-red-600 text-white px-4 py-2 rounded-full">Professional Catering Service</span>
           </div>
         </div>
       </section>
 
       {/* Booking Form Section */}
-      <div className="py-12 section-background">
+      <div className="py-16 section-background">
         <div className="max-w-4xl mx-auto px-4">
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
 
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-8">
             {/* Form Progress Indicator */}
-            <div className="bg-gradient-to-r from-blue-50 to-red-50 rounded-xl p-6 mb-8 border border-gray-200">
+            <div className="bg-gradient-to-r from-blue-50 to-red-50 rounded-xl p-6 mb-8 mt-4 border border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">📋 Booking Progress</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 text-center">
                 <div className="space-y-2">
@@ -1122,7 +1122,7 @@ export default function BookingPage() {
                     (watch('sameAsVenue') || (watch('addressStreet') && watch('addressCity') && watch('addressState') && watch('addressZipcode')) ? 1 : 0)
                   ) === 4 && !isSubmitting
                     ? 'bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 hover:shadow-xl hover:scale-105 cursor-pointer'
-                    : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                    : 'bg-gray-500 text-gray-100 cursor-not-allowed'
                 }`}
               >
                 {isSubmitting ? (

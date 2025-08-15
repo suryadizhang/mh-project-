@@ -22,27 +22,33 @@ interface AssistantProps {
 const WELCOME_SUGGESTIONS: Record<string, string[]> = {
   '/BookUs': [
     "Contact a person",
+    "How much will my party cost?",
     "What's included in the menu?",
-    "How much is the deposit?",
-    "Do you serve Sacramento?"
+    "How much is the deposit?"
   ],
   '/menu': [
     "Contact a person",
+    "Get a quote for my event",
     "What proteins do you offer?",
-    "What comes with the hibachi experience?",
     "Do you have vegetarian options?"
   ],
   '/faqs': [
     "Contact a person",
     "How far do you travel?",
     "What are your time slots?",
-    "Do you provide the grill?"
+    "How much does hibachi catering cost?"
   ],
   '/contact': [
     "Contact a person",
     "How do I get a quote?",
     "What's your phone number?",
     "How quickly do you respond?"
+  ],
+  '/quote': [
+    "Contact a person",
+    "What's included in the base price?",
+    "Do you charge travel fees?",
+    "How do I book after getting a quote?"
   ],
   '/blog': [
     "Contact a person",

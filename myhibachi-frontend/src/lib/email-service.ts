@@ -53,21 +53,21 @@ const EMAIL_RATE_LIMIT = 5 // Max 5 emails per hour per recipient
 const EMAIL_RATE_WINDOW = 3600000 // 1 hour
 
 class MyHibachiEmailService {
-  
+
   // Check email rate limiting
   private checkEmailRateLimit(email: string): boolean {
     const now = Date.now()
     const userRecord = emailRateLimit.get(email)
-    
+
     if (!userRecord || now > userRecord.resetTime) {
       emailRateLimit.set(email, { count: 1, resetTime: now + EMAIL_RATE_WINDOW })
       return true
     }
-    
+
     if (userRecord.count >= EMAIL_RATE_LIMIT) {
       return false
     }
-    
+
     userRecord.count++
     return true
   }
@@ -75,28 +75,28 @@ class MyHibachiEmailService {
   // Generate calendar links
   private generateCalendarLinks(bookingData: BookingEmailData): { google: string; apple: string; ics: string } {
     const { customerName, eventDate, eventTime, venueAddress } = bookingData
-    
+
     // Convert event time to 24-hour format and create full datetime
     const timeMap: { [key: string]: string } = {
       '12PM': '12:00',
-      '3PM': '15:00', 
+      '3PM': '15:00',
       '6PM': '18:00',
       '9PM': '21:00'
     }
-    
+
     const eventStartTime = timeMap[eventTime]
     const startDate = `${eventDate}T${eventStartTime}:00`
     const endDate = `${eventDate}T${parseInt(eventStartTime.split(':')[0]) + 2}:00:00` // 2-hour duration
-    
+
     const title = `MyHibachi Experience - ${customerName}`
     const description = `Private hibachi cooking experience with MyHibachi. Enjoy fresh, premium ingredients prepared right at your venue!`
     const location = `${venueAddress.street}, ${venueAddress.city}, ${venueAddress.state} ${venueAddress.zipcode}`
-    
+
     // Google Calendar link
     const googleStartTime = startDate.replace(/[-:]/g, '').replace('T', 'T')
     const googleEndTime = endDate.replace(/[-:]/g, '').replace('T', 'T')
     const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${googleStartTime}/${googleEndTime}&details=${encodeURIComponent(description)}&location=${encodeURIComponent(location)}`
-    
+
     // Apple Calendar (webcal) link - simplified
     const appleUrl = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR
 VERSION:2.0
@@ -109,7 +109,7 @@ DESCRIPTION:${description}
 LOCATION:${location}
 END:VEVENT
 END:VCALENDAR`
-    
+
     // ICS file content
     const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
@@ -124,7 +124,7 @@ LOCATION:${location}
 STATUS:CONFIRMED
 END:VEVENT
 END:VCALENDAR`
-    
+
     return {
       google: googleUrl,
       apple: appleUrl,
@@ -136,7 +136,7 @@ END:VCALENDAR`
   private generateConfirmationEmail(bookingData: BookingEmailData): EmailTemplate {
     const { customerName, eventDate, eventTime, guestCount, venueAddress, confirmationNumber } = bookingData
     const calendarLinks = this.generateCalendarLinks(bookingData)
-    
+
     // Format date for display
     const displayDate = new Date(eventDate).toLocaleDateString('en-US', {
       weekday: 'long',
@@ -144,9 +144,9 @@ END:VCALENDAR`
       month: 'long',
       day: 'numeric'
     })
-    
-    const subject = "🎉 Your MyHibachi Experience is Confirmed!"
-    
+
+    const subject = "Your MyHibachi Experience is Confirmed!"
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -186,20 +186,20 @@ END:VCALENDAR`
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎉 Booking Confirmed!</h1>
+            <h1>Booking Confirmed!</h1>
             <p>Get ready for an amazing hibachi experience</p>
         </div>
-        
+
         <div class="content">
             <p>Hi <strong>${customerName}</strong>,</p>
-            
+
             <p>Great news! Your MyHibachi experience has been confirmed. Our talented chef will bring the authentic hibachi experience right to your location with fresh, premium ingredients and exciting table-side cooking.</p>
-            
+
             <div class="confirmation-number">
                 <p style="margin: 0;">Your confirmation number:</p>
                 <strong>${confirmationNumber}</strong>
             </div>
-            
+
             <div class="booking-details">
                 <h3>📅 Your Booking Details</h3>
                 <div class="detail-row">
@@ -215,25 +215,25 @@ END:VCALENDAR`
                     <span class="detail-value">${venueAddress.street}<br>${venueAddress.city}, ${venueAddress.state} ${venueAddress.zipcode}</span>
                 </div>
             </div>
-            
+
             <div class="cta-section">
                 <p><strong>Add this event to your calendar:</strong></p>
                 <a href="${calendarLinks.google}" class="cta-button" target="_blank">📅 Add to Google Calendar</a>
                 <a href="${calendarLinks.apple}" class="cta-button secondary" download="hibachi-booking.ics">🍎 Add to Apple Calendar</a>
             </div>
-            
+
             <h3>🍤 What to Expect</h3>
             <ul>
                 <li><strong>Fresh Ingredients:</strong> Premium meats, seafood, and vegetables</li>
                 <li><strong>Professional Chef:</strong> Skilled hibachi cooking with entertainment</li>
-                <li><strong>Complete Setup:</strong> We bring all equipment and cleanup afterward</li>
+                <li><strong>Complete Setup:</strong> We bring all equipment and handle the cooking</li>
                 <li><strong>Memorable Experience:</strong> Perfect for celebrations and special occasions</li>
             </ul>
-            
+
             <p><strong>Questions or need to make changes?</strong><br>
             Call us at <a href="tel:+19167408768">(916) 740-8768</a> or email <a href="mailto:cs@myhibachichef.com">cs@myhibachichef.com</a></p>
         </div>
-        
+
         <div class="footer">
             <p>Thank you for choosing MyHibachi!<br>
             <a href="https://myhibachi.com">myhibachi.com</a> | Follow us on social media @MyHibachi</p>
@@ -243,7 +243,7 @@ END:VCALENDAR`
 </html>`
 
     const text = `
-🎉 Your MyHibachi Experience is Confirmed!
+Your MyHibachi Experience is Confirmed!
 
 Hi ${customerName},
 
@@ -271,9 +271,9 @@ myhibachi.com`
   // Generate review request email template
   private generateReviewEmail(bookingData: BookingEmailData): EmailTemplate {
     const { customerName } = bookingData
-    
+
     const subject = "How Was Your Hibachi Experience? 🌟"
-    
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -306,27 +306,27 @@ myhibachi.com`
         <div class="header">
             <h1>🌟 How Was Your Experience?</h1>
         </div>
-        
+
         <div class="content">
             <p>Hi <strong>${customerName}</strong>,</p>
-            
+
             <p>We hope you had an amazing hibachi experience! Your feedback means the world to us and helps other families discover the joy of authentic hibachi cooking.</p>
-            
+
             <p><strong>Would you mind taking a moment to share your experience?</strong></p>
-            
+
             <div class="review-buttons">
                 <a href="https://g.page/r/your-google-business-id/review" class="review-button google" target="_blank">⭐ Review on Google</a>
                 <a href="https://www.yelp.com/writeareview/biz/your-yelp-business-id" class="review-button yelp" target="_blank">🍽️ Review on Yelp</a>
                 <a href="https://www.facebook.com/people/My-hibachi/61577483702847/" class="review-button facebook" target="_blank">👍 Review on Facebook</a>
             </div>
-            
+
             <p>Your honest review helps us improve and lets other families know what to expect. We truly appreciate your time!</p>
-            
+
             <p><strong>Planning another event?</strong> We'd love to cook for you again! Visit <a href="https://myhibachi.com">myhibachi.com</a> to book your next experience.</p>
-            
+
             <p>With gratitude,<br><strong>The MyHibachi Team</strong></p>
         </div>
-        
+
         <div class="footer">
             <p>MyHibachi - Bringing Authentic Hibachi to You<br>
             <a href="https://myhibachi.com">myhibachi.com</a> | (123) 456-7890</p>
@@ -360,9 +360,9 @@ myhibachi.com | (123) 456-7890`
   private generateUpsellEmail(bookingData: BookingEmailData): EmailTemplate {
     const { customerName } = bookingData
     const promoCode = `WELCOME10-${bookingData.bookingId.slice(-6)}`
-    
-    const subject = "Miss the Hibachi Magic? 🍤 Get 10% Off Your Next Experience!"
-    
+
+    const subject = "Miss the Hibachi Experience? 🍤 Get 10% Off Your Next Show!"
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -390,27 +390,27 @@ myhibachi.com | (123) 456-7890`
 <body>
     <div class="container">
         <div class="header">
-            <h1>🍤 Miss the Hibachi Magic?</h1>
+            <h1>🍤 Miss the Hibachi Experience?</h1>
             <p>Special offer just for you!</p>
         </div>
-        
+
         <div class="content">
             <p>Hi <strong>${customerName}</strong>,</p>
-            
+
             <p>It's been a month since your last hibachi experience, and we've been thinking about you! We hope you're still savoring those delicious memories.</p>
-            
+
             <p><strong>Ready for another unforgettable evening?</strong> We're offering you an exclusive 10% discount on your next booking!</p>
-            
+
             <div class="promo-code">
                 <p style="margin: 0 0 10px;">Your exclusive promo code:</p>
                 <strong>${promoCode}</strong>
                 <p style="margin: 10px 0 0; font-size: 14px;">Valid for 30 days</p>
             </div>
-            
+
             <div style="text-align: center;">
                 <a href="https://myhibachi.com/book?promo=${promoCode}" class="cta-button">🎉 Book Now & Save 10%</a>
             </div>
-            
+
             <div class="occasions">
                 <h3 style="margin: 0 0 15px; color: #ff6b35;">🎊 Perfect Occasions for Hibachi:</h3>
                 <ul style="margin: 0; padding-left: 20px;">
@@ -422,12 +422,12 @@ myhibachi.com | (123) 456-7890`
                     <li>Just because you deserve it!</li>
                 </ul>
             </div>
-            
+
             <p>Don't wait – this exclusive offer expires in 30 days, and our calendar fills up quickly!</p>
-            
+
             <p>Can't wait to cook for you again,<br><strong>The MyHibachi Team</strong></p>
         </div>
-        
+
         <div class="footer">
             <p>MyHibachi - Premium Hibachi Experiences<br>
             <a href="https://myhibachi.com">myhibachi.com</a> | (123) 456-7890</p>
@@ -440,7 +440,7 @@ myhibachi.com | (123) 456-7890`
 </html>`
 
     const text = `
-🍤 Miss the Hibachi Magic?
+🍤 Miss the Hibachi Experience?
 
 Hi ${customerName},
 
@@ -453,7 +453,7 @@ Book now: https://myhibachi.com/book?promo=${promoCode}
 
 Perfect occasions for hibachi:
 - Birthday celebrations
-- Anniversary dinners  
+- Anniversary dinners
 - Holiday gatherings
 - Date nights
 - Family reunions
@@ -468,12 +468,12 @@ myhibachi.com | (123) 456-7890`
 
   // Send email with error handling and logging
   private async sendEmail(
-    to: string, 
-    template: EmailTemplate, 
-    bookingId: string, 
+    to: string,
+    template: EmailTemplate,
+    bookingId: string,
     emailType: 'confirmation' | 'review_request' | 'upsell'
   ): Promise<{ success: boolean; messageId?: string; error?: string }> {
-    
+
     // Check rate limiting
     if (!this.checkEmailRateLimit(to)) {
       console.log(`[EMAIL RATE LIMITED] ${emailType} email to ${to} blocked due to rate limiting`)
@@ -528,9 +528,9 @@ myhibachi.com | (123) 456-7890`
   async sendBookingConfirmation(bookingData: BookingEmailData): Promise<boolean> {
     const template = this.generateConfirmationEmail(bookingData)
     const result = await this.sendEmail(
-      bookingData.customerEmail, 
-      template, 
-      bookingData.bookingId, 
+      bookingData.customerEmail,
+      template,
+      bookingData.bookingId,
       'confirmation'
     )
     return result.success
@@ -540,9 +540,9 @@ myhibachi.com | (123) 456-7890`
   async sendReviewRequest(bookingData: BookingEmailData): Promise<boolean> {
     const template = this.generateReviewEmail(bookingData)
     const result = await this.sendEmail(
-      bookingData.customerEmail, 
-      template, 
-      bookingData.bookingId, 
+      bookingData.customerEmail,
+      template,
+      bookingData.bookingId,
       'review_request'
     )
     return result.success
@@ -552,9 +552,9 @@ myhibachi.com | (123) 456-7890`
   async sendUpsellEmail(bookingData: BookingEmailData): Promise<boolean> {
     const template = this.generateUpsellEmail(bookingData)
     const result = await this.sendEmail(
-      bookingData.customerEmail, 
-      template, 
-      bookingData.bookingId, 
+      bookingData.customerEmail,
+      template,
+      bookingData.bookingId,
       'upsell'
     )
     return result.success
@@ -578,7 +578,7 @@ myhibachi.com | (123) 456-7890`
   // Admin function to manually resend email
   async resendEmail(bookingId: string, emailType: 'confirmation' | 'review_request' | 'upsell', bookingData: BookingEmailData): Promise<boolean> {
     console.log(`[EMAIL ADMIN] Manual resend requested for booking ${bookingId}, type: ${emailType}`)
-    
+
     switch (emailType) {
       case 'confirmation':
         return await this.sendBookingConfirmation(bookingData)
@@ -626,7 +626,7 @@ myhibachi.com | (123) 456-7890`
 
     } catch (error) {
       console.error(`[EMAIL ERROR] Failed to send custom email:`, error)
-      
+
       // Log failed email
       const emailLog: EmailLog = {
         bookingId: 'custom',
@@ -637,7 +637,7 @@ myhibachi.com | (123) 456-7890`
         error: error instanceof Error ? error.message : 'Unknown error'
       }
       emailLogs.push(emailLog)
-      
+
       return false
     }
   }

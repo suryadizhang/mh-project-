@@ -711,10 +711,14 @@ export default function MenuPage() {
             </div>
 
             <p className="service-intro text-center">
-              We&apos;re excited to bring our premium hibachi experience directly to your location!
-              Serving within <span className="highlight-text">150 miles</span> with
-              <span className="highlight-text">reasonable travel fees</span> for locations outside our primary service areas.
+              We bring authentic hibachi dining to homes and venues across the Bay Area, Sacramento, San Jose & surrounding regions.
+              Not sure we cover you? Reach out—we&apos;ll do our best!
             </p>
+            <div className="text-center mt-3 mb-4">
+              <a href="/BookUs" className="btn btn-primary me-3">📅 Ready to Plan Your Date?</a>
+              <a href="/quote" className="btn btn-outline-primary me-3">� Get Your Quote</a>
+              <a href="/contact" className="btn btn-outline-secondary">💬 Questions? Contact Us</a>
+            </div>
 
             <div className="row mt-4">
               <div className="col-md-6">
@@ -755,11 +759,11 @@ export default function MenuPage() {
                 <span className="radius-icon">📍</span>
                 <h4 className="radius-title">We Come to You!</h4>
                 <p className="radius-description">
-                  Serving anywhere within <span className="highlight-text">150 miles</span>
+                  Serving the Bay Area, Sacramento, San Jose & surrounding regions. Not sure we cover you? Reach out—we&apos;ll do our best!
                 </p>
                 <p className="travel-fee-info">
                   <span className="travel-highlight">💰 Transparent Pricing:</span>
-                  Minimal travel fees apply for locations outside our primary service areas.
+                  Flexible service area with transparent travel options—get your quote instantly above!
                   <br />
                   <strong>Call us for a custom quote - we make it affordable for everyone!</strong>
                 </p>
@@ -832,7 +836,7 @@ export default function MenuPage() {
                     </div>
                     <div className="feature-content">
                       <h4 className="feature-title">Professional Chef</h4>
-                      <p className="feature-description">Expertly trained hibachi chefs with 8+ years of professional experience</p>
+                      <p className="feature-description">Highly trained hibachi chefs delivering exceptional on-site dining experiences with skill, flair, and passion</p>
                     </div>
                   </div>
 

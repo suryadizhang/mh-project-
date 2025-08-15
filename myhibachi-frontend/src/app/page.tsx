@@ -119,7 +119,7 @@ export default function Home() {
                       <span className="stat-text">Bay Area & Sacramento</span>
                     </div>
                     <div className="stat-mini">
-                      <span className="stat-emoji">🎉</span>
+                      <span className="stat-emoji">*</span>
                       <span className="stat-text">All Events Welcome</span>
                     </div>
                   </div>
@@ -198,7 +198,7 @@ export default function Home() {
               </div>
               <div className="feature-item feature-occasions">
                 <div className="feature-icon-container">
-                  <span className="feature-icon feature-icon-occasions">🎉</span>
+                  <span className="feature-icon feature-icon-occasions">*</span>
                 </div>
                 <div className="feature-content">
                   <h4 className="feature-title">All Occasions</h4>
@@ -215,10 +215,13 @@ export default function Home() {
           <div className="service-areas animate-on-scroll">
             <h3 className="section-title text-center">🌟 Bringing Hibachi Experience to Your Neighborhood! 🌟</h3>
             <p className="service-intro text-center">
-              We&apos;re excited to bring our premium hibachi experience directly to your location!
-              Serving within <span className="highlight-text">150 miles from our location</span> with
-              <span className="highlight-text">reasonable travel fees</span> for locations outside our primary service areas.
+              We bring the hibachi experience to homes and venues across the Bay Area, Sacramento, San Jose and nearby communities.
+              Need us a bit farther? Tell us your location—we&apos;ll make it work with <span className="highlight-text">transparent travel options</span>.
             </p>
+            <div className="text-center mt-3 mb-4">
+              <a href="/BookUs" className="btn btn-primary me-3">📅 Check Your Date & Time</a>
+              <a href="/quote" className="btn btn-outline-primary">💬 Get a Quick Quote</a>
+            </div>
 
             <div className="row mt-4">
               <div className="col-md-6">
@@ -260,11 +263,11 @@ export default function Home() {
                 <span className="radius-icon">📍</span>
                 <h4 className="radius-title">We Come to You!</h4>
                 <p className="radius-description">
-                  Serving anywhere within <span className="highlight-text">150 miles from our location</span>
+                  Hibachi brought to your home or venue—tell us your location and we&apos;ll make it happen.
                 </p>
                 <p className="travel-fee-info">
                   <span className="travel-highlight">💰 Transparent Pricing:</span>
-                  Minimal travel fees apply for locations outside our primary service areas.
+                  Flexible service area with reasonable travel options for all locations.
                   <br />
                   <strong>Call us for a custom quote - we make it affordable for everyone!</strong>
                 </p>
@@ -280,11 +283,11 @@ export default function Home() {
 
           {/* Call-to-Action Section */}
           <div className="cta-section animate-on-scroll text-center">
-            <h2 className="cta-title">🎉 Ready to host an unforgettable hibachi experience? 🎉</h2>
+            <h2 className="cta-title">Ready to host an unforgettable hibachi experience?</h2>
             <p className="cta-description">
               Join hundreds of satisfied customers across the Bay Area and Sacramento! Discover why <span className="highlight-text">My Hibachi</span>
               is the premier choice for <span className="highlight-text">quality ingredients, reasonable prices, and exceptional entertainment</span>.
-              We bring the restaurant experience to your backyard - anywhere within 150 miles!
+              We come to you—chef, grill, and a full hibachi show. Just pick a date, we&apos;ll handle the rest!
             </p>
             <div className="cta-special-offer">
               <span className="offer-badge">✨ Special Offer ✨</span>

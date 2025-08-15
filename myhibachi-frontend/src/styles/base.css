@@ -19,6 +19,21 @@ body {
   overflow-x: hidden;
 }
 
+/* Improved text contrast for accessibility */
+.text-muted, .muted-text {
+  color: #555 !important; /* Better contrast than #666 */
+}
+
+/* Enhanced focus indicators for all interactive elements */
+button:focus,
+input:focus,
+textarea:focus,
+select:focus,
+a:focus {
+  outline: 2px solid #db2b28;
+  outline-offset: 2px;
+}
+
 /* Canonical emoji rule – single source of truth */
 .emoji-visible {
   font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";

@@ -76,7 +76,7 @@
 }
 
 .nav-link-custom {
-  color: #6b4019 !important;
+  color: #4a2c0a !important;
   font-weight: 500;
   padding: 0.75rem 1rem !important;
   border-radius: 10px;
@@ -92,6 +92,13 @@
   background-color: rgba(219, 43, 40, 0.1);
   color: #db2b28 !important;
   transform: translateY(-2px);
+}
+
+.nav-link-custom:focus {
+  outline: 2px solid #db2b28;
+  outline-offset: 2px;
+  background-color: rgba(219, 43, 40, 0.1);
+  color: #db2b28 !important;
 }
 
 .nav-icon {

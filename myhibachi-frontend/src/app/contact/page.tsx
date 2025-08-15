@@ -193,7 +193,7 @@ export default function ContactPage() {
                     <i className="bi bi-geo-alt-fill contact-icon"></i>
                     <div className="contact-details">
                       <h5>Service Coverage</h5>
-                      <p className="contact-link">Northern California up to 150 miles from our location</p>
+                      <p className="contact-link">We come to you across the Bay Area, Sacramento, San Jose, and nearby communities—just ask!</p>
                       <p className="contact-note">Premium mobile hibachi service delivered to your location!</p>
                     </div>
                   </div>
@@ -490,7 +490,7 @@ export default function ContactPage() {
           <div className="text-center mt-4">
             <div className="alert alert-info d-inline-block">
               <i className="bi bi-info-circle-fill me-2"></i>
-              We serve within <strong>150 miles of our location</strong> with reasonable travel fees for locations outside our primary service areas.
+              We bring hibachi to your home or venue across Northern California—<strong>contact us to see if we can reach you</strong> with our flexible service area and transparent travel options.
             </div>
           </div>
         </div>

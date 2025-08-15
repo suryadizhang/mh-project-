@@ -45,10 +45,10 @@ export const faqs: FaqItem[] = [
   {
     id: 'travel-fees',
     question: 'Do you charge travel fees?',
-    answer: 'First 30 miles from our location are free. After that, $2 per mile up to 150-mile service radius. Text (916) 740-8768 to calculate your travel fee.',
+    answer: 'First 30 miles from our location are free. After that, $2 per mile with flexible options for your area. Text (916) 740-8768 to calculate your travel fee.',
     category: 'Pricing & Minimums',
     subcategory: 'Travel Fees',
-    tags: ['travel', 'free 30 miles', '$2 per mile', '150 mile radius'],
+    tags: ['travel', 'free 30 miles', '$2 per mile', 'flexible service'],
     confidence: 'high',
     source_urls: ['/menu', '/contact']
   },
@@ -141,17 +141,17 @@ export const faqs: FaqItem[] = [
   {
     id: 'service-areas',
     question: 'Where do you serve?',
-    answer: 'Within 150 miles of our location. Primary areas: San Francisco Bay Area, Sacramento region. Free travel first 30 miles, then $2/mile.',
+    answer: 'We come to you across the Bay Area, Sacramento, San Jose, and nearby communities—just ask! Free travel first 30 miles, then $2/mile.',
     category: 'Travel & Service Area',
     subcategory: 'Coverage Radius',
-    tags: ['150 miles', 'bay area', 'sacramento', 'free 30 miles'],
+    tags: ['bay area', 'sacramento', 'san jose', 'free 30 miles'],
     confidence: 'high',
     source_urls: ['/contact', '/menu']
   },
   {
     id: 'travel-distance',
     question: 'Do you travel to my city?',
-    answer: 'We serve the Bay Area, Sacramento, Central Valley, and coastal/mountain communities within 150 miles of our location. Text (916) 740-8768 with your zip code for confirmation.',
+    answer: 'We serve the Bay Area, Sacramento, Central Valley, and coastal/mountain communities throughout Northern California. Text (916) 740-8768 with your zip code for confirmation.',
     category: 'Travel & Service Area',
     subcategory: 'Coverage Radius',
     tags: ['bay area', 'sacramento', 'central valley', 'zip code', 'confirmation'],
@@ -195,7 +195,7 @@ export const faqs: FaqItem[] = [
     question: 'What do I need to provide?',
     answer: 'You provide: tables, chairs, plates, utensils, glasses, beverages (except sake), napkins. We bring: hibachi grill, food, cooking tools, propane, safety equipment, sake.',
     category: 'On‑Site Setup & Requirements',
-    subcategory: 'Tableware & Cleanup',
+    subcategory: 'Tableware & Setup',
     tags: ['tables', 'chairs', 'plates', 'utensils', 'glasses', 'napkins'],
     confidence: 'high',
     source_urls: []
@@ -351,7 +351,7 @@ export const subcategories = {
   'Menu & Upgrades': ['Included Items', 'Protein Choices', 'Premium Upgrades', 'Add‑ons & Sides', 'Kids\' Portions'],
   'Booking & Payments': ['How to Book', 'Deposits & Balance', 'Payment Methods', 'Scheduling & Availability', 'Modifying a Booking'],
   'Travel & Service Area': ['Coverage Radius', 'Travel Fees', 'Multi‑stop / Venue Rules'],
-  'On‑Site Setup & Requirements': ['Space & Ventilation', 'Power/Propane & Safety', 'Tableware & Cleanup', 'Indoor vs Outdoor'],
+  'On‑Site Setup & Requirements': ['Space & Ventilation', 'Power/Propane & Safety', 'Tableware & Setup', 'Indoor vs Outdoor'],
   'Dietary & Allergens': ['Gluten‑Free', 'Vegetarian/Vegan', 'Shellfish & Sesame', 'Cross‑Contact', 'Dietary Accommodations'],
   'Policies (Cancellation, Weather, Refunds)': ['Cancellation & Changes', 'Weather / Backup Plan', 'Refunds & Credits', 'Late / No‑Show'],
   'Kids & Special Occasions': ['Children Pricing & Portions', 'Birthdays/Anniversaries', 'Weddings / Corporate Milestones'],

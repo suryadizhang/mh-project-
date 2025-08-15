@@ -64,13 +64,17 @@
   margin-top: -400px;
   margin-bottom: 67px;
   padding: 2rem;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 15px;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
 .main-title {
   font-size: 4rem;
   font-weight: 700;
   margin-bottom: 1rem;
-  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.6);
+  text-shadow: 3px 3px 15px rgba(0, 0, 0, 0.9), 0 0 25px rgba(0, 0, 0, 0.8);
   background: linear-gradient(to right, #fff, #f8e3bb, #fff);
   -webkit-background-clip: text;
   background-clip: text;
@@ -82,7 +86,9 @@
   font-size: 1.5rem;
   max-width: 800px;
   margin: 0 auto 2rem;
-  text-shadow: 1px 1px 8px rgba(0, 0, 0, 0.8);
+  text-shadow: 2px 2px 12px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 0, 0, 0.8);
+  color: white;
+  font-weight: 500;
 }
 
 .quality-badge {
@@ -123,7 +129,7 @@
 
 .stat-label {
   font-size: 1.1rem;
-  color: #6b4019;
+  color: #4a2c0a;
   font-weight: 500;
 }
 /* Experience Cards */
@@ -225,7 +231,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #6b4019;
+  color: #4a2c0a;
   font-weight: 500;
 }
 
@@ -234,8 +240,12 @@
 }
 
 .highlight-text {
-  color: #db2b28;
+  background-color: #db2b28;
+  color: white;
   font-weight: 600;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  display: inline-block;
 }
 
 .rotating-chef {
@@ -735,6 +745,176 @@
   margin-top: 3rem;
   position: relative;
   z-index: 1;
+}
+
+/* Button Styles */
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary, #db2b28) 0%, #c41e1a 100%);
+  color: white !important;
+  border: 2px solid transparent;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(219, 43, 40, 0.3);
+  color: white !important;
+  text-decoration: none;
+  background: linear-gradient(135deg, #c41e1a 0%, #b01e1a 100%) !important;
+}
+
+.btn-outline-primary {
+  background: white !important;
+  color: #db2b28 !important;
+  border: 2px solid #db2b28;
+}
+
+.btn-outline-primary:hover {
+  background: #db2b28 !important;
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(219, 43, 40, 0.2);
+  text-decoration: none;
+}
+
+/* Specific CTA section button overrides */
+.cta-section .btn-primary {
+  background: linear-gradient(135deg, #db2b28 0%, #c41e1a 100%) !important;
+  color: white !important;
+}
+
+.cta-section .btn-primary:hover {
+  background: linear-gradient(135deg, #c41e1a 0%, #b01e1a 100%) !important;
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(219, 43, 40, 0.3);
+}
+
+.cta-section .btn-outline-primary {
+  background: white !important;
+  color: #db2b28 !important;
+  border: 2px solid white;
+}
+
+.cta-section .btn-outline-primary:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #db2b28 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+}
+
+/* Modern CTA Section with white/light background */
+.cta-section .cta-main-title {
+  color: #333 !important;
+  font-weight: 700;
+}
+
+.cta-section .cta-main-subtitle {
+  color: #666 !important;
+}
+
+.cta-section .features-title {
+  color: #333 !important;
+  font-weight: 600;
+}
+
+.cta-section .feature-title {
+  color: #333 !important;
+  font-weight: 600;
+}
+
+.cta-section .feature-description {
+  color: #666 !important;
+}
+
+.cta-section .action-item span:not(.emoji-visible) {
+  color: #666 !important;
+}
+
+.cta-section .button-text {
+  color: white !important;
+}
+
+/* Modern CTA button styling */
+.cta-section .cta-main-button {
+  background: linear-gradient(135deg, #db2b28 0%, #c41e1a 100%) !important;
+  color: white !important;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.cta-section .cta-main-button:hover {
+  background: linear-gradient(135deg, #c41e1a 0%, #b01e1a 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(219, 43, 40, 0.3);
+}
+
+.cta-section .cta-main-button .button-text {
+  color: white !important;
+}
+
+.cta-section .cta-main-button * {
+  color: white !important;
+}
+
+.cta-section .cta-main-button:hover * {
+  color: white !important;
+}
+
+/* Additional specificity for button text elements */
+.cta-section .cta-main-button span.button-text {
+  color: white !important;
+}
+
+.cta-section .modern-cta-button {
+  color: white !important;
+}
+
+.cta-section .modern-cta-button * {
+  color: white !important;
+}
+
+/* Override the global white text rule for light background CTA sections */
+.cta-section .cta-content-wrapper {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 3rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.cta-section .cta-content-wrapper * {
+  color: inherit !important;
+}
+
+.cta-section .cta-content-wrapper h2,
+.cta-section .cta-content-wrapper h3,
+.cta-section .cta-content-wrapper h4 {
+  color: #333 !important;
+}
+
+.cta-section .cta-content-wrapper p,
+.cta-section .cta-content-wrapper span:not(.emoji-visible) {
+  color: #666 !important;
+}
+
+.btn-lg {
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
 }
 
 /* About Us Section */

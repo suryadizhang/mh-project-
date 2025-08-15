@@ -8,7 +8,7 @@
   },
   {
     "question": "What areas do you serve?",
-    "answer": "🚚 We serve the Bay Area & Sacramento region! First 30 miles are FREE, then $2/mile after that. We travel up to 150 miles total. Popular cities include San Francisco, Oakland, San Jose, Sacramento, Stockton, and surrounding areas.",
+    "answer": "🚚 We serve the Bay Area & Sacramento region! First 30 miles are FREE, then $2/mile after that. We bring hibachi across Northern California with flexible options. Popular cities include San Francisco, Oakland, San Jose, Sacramento, Stockton, and surrounding areas.",
     "category": "service",
     "href": "/faqs",
     "keywords": ["location", "travel", "distance", "service area", "delivery", "where"]
@@ -36,7 +36,7 @@
   },
   {
     "question": "What's included in the service?",
-    "answer": "Our hibachi experience includes:\n• Professional chef service with entertaining cooking show\n• All premium ingredients and seasonings\n• Complete equipment setup and cleanup\n• Interactive teppanyaki-style cooking\n• Photo opportunities with the chef\n• Memorable dining experience for all guests",
+    "answer": "Our hibachi experience includes:\n• Professional chef service with entertaining cooking show\n• All premium ingredients and seasonings\n• Complete equipment setup\n• Interactive teppanyaki-style cooking\n• Photo opportunities with the chef\n• Memorable dining experience for all guests",
     "category": "service",
     "href": "/faqs",
     "keywords": ["included", "service", "what get", "experience", "chef"]
@@ -75,12 +75,5 @@
     "category": "service",
     "href": "/faqs",
     "keywords": ["special", "different", "unique", "authentic", "entertainment", "experience"]
-  },
-  {
-    "question": "Do you clean up after cooking?",
-    "answer": "Yes! Complete cleanup is included in our service. We bring our equipment, cook your meal, and leave your space clean. You can focus on enjoying the experience and spending time with your guests.",
-    "category": "service",
-    "href": "/faqs",
-    "keywords": ["cleanup", "clean", "mess", "after", "included"]
   }
 ]

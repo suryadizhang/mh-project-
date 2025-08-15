@@ -55,13 +55,14 @@ export async function POST(request: NextRequest): Promise<NextResponse<Assistant
     // Add context-aware suggestions
     if (page === '/BookUs' && (message.toLowerCase().includes('book') || message.toLowerCase().includes('reserve'))) {
       answer += "\n\n📞 Ready to book? Use our booking form on this page or call (916) 740-8768!"
-    } else if (page === '/menu' && message.toLowerCase().includes('price')) {
-      citations.push({ title: 'Get a Quote', href: '/quote' })
+    } else if (message.toLowerCase().includes('price') || message.toLowerCase().includes('quote') || message.toLowerCase().includes('cost')) {
+      answer += "\n\n💰 Get an instant quote with our calculator!"
+      citations.push({ title: 'Get Instant Quote', href: '/quote' })
     }
 
     // Handle specific common questions (after search results)
     if (message.toLowerCase().includes('travel') || message.toLowerCase().includes('distance')) {
-      answer = "🚚 We serve the Bay Area & Sacramento region! First 30 miles are FREE, then $2/mile after that. We travel up to 150 miles total."
+      answer = "🚚 We serve the Bay Area & Sacramento region! First 30 miles are FREE, then $2/mile after that. We bring hibachi across Northern California with flexible options."
       citations = [{ title: 'Service Areas & Travel', href: '/faqs' }]
     }
 
@@ -73,6 +74,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<Assistant
     if (message.toLowerCase().includes('time') && message.toLowerCase().includes('slot')) {
       answer = "🕐 Our popular time slots are:\n• 12PM (Lunch)\n• 3PM (Afternoon) \n• 6PM (Dinner)\n• 9PM (Late dinner)\n\nWe need 48 hours advance notice for booking."
       citations = [{ title: 'Booking Times', href: '/BookUs' }]
+    }
+
+    if (message.toLowerCase().includes('quote') || message.toLowerCase().includes('pricing') || message.toLowerCase().includes('how much')) {
+      answer = "💰 Get an instant quote! Our hibachi experiences start at $55/adult and $30/child. Use our quote calculator to see exact pricing for your party size, location, and any upgrades!"
+      citations = [{ title: 'Get Instant Quote Calculator', href: '/quote' }, { title: 'View Full Menu & Pricing', href: '/menu' }]
     }
 
     return NextResponse.json({

@@ -15,14 +15,14 @@
   },
   {
     "title": "Service Requirements",
-    "content": "🏠 Client provides: adequate space for cooking setup, access to water source, electrical outlet (if cooking indoors), and parking for chef vehicle. We handle all equipment, ingredients, cooking, and cleanup.",
+    "content": "🏠 Client provides: adequate space for cooking setup, access to water source, electrical outlet (if cooking indoors), and parking for chef vehicle. We handle all equipment, ingredients, and cooking.",
     "category": "policies",
     "href": "/faqs",
     "keywords": ["requirements", "space", "water", "electrical", "parking", "client provides"]
   },
   {
     "title": "Travel & Distance Policy",
-    "content": "🚚 First 30 miles from our location are FREE. Additional mileage charged at $2/mile each way. Maximum travel distance is 150 miles. Popular service areas include Bay Area and Sacramento region.",
+    "content": "🚚 First 30 miles from our location are FREE. Additional mileage charged at $2/mile each way. Flexible service area with transparent travel options. Popular service areas include Bay Area and Sacramento region.",
     "category": "policies",
     "href": "/faqs",
     "keywords": ["travel", "distance", "mileage", "free", "service area", "bay area", "sacramento"]
@@ -50,14 +50,14 @@
   },
   {
     "title": "Equipment & Setup",
-    "content": "🔧 We provide all professional hibachi equipment, cooking utensils, serving dishes, and ingredients. Setup takes 15-20 minutes. We clean everything and leave your space as we found it. No mess, no stress for you!",
+    "content": "🔧 We provide all professional hibachi equipment, cooking utensils, serving dishes, and ingredients. Setup takes 15-20 minutes. You'll need to handle basic cleanup after our service. No stress cooking for you!",
     "category": "policies",
     "href": "/faqs",
-    "keywords": ["equipment", "setup", "professional", "cleanup", "utensils", "ingredients", "no mess"]
+    "keywords": ["equipment", "setup", "professional", "utensils", "ingredients", "hibachi equipment"]
   },
   {
     "title": "Event Timing & Duration",
-    "content": "⏰ Typical hibachi experience lasts 1.5-2 hours including setup, cooking show, dining, and cleanup. Flexible timing available. Popular slots: 12PM lunch, 3PM afternoon, 6PM dinner, 9PM late dinner.",
+    "content": "⏰ Typical hibachi experience lasts 1.5-2 hours including setup, cooking show, and dining. Flexible timing available. Popular slots: 12PM lunch, 3PM afternoon, 6PM dinner, 9PM late dinner.",
     "category": "policies",
     "href": "/BookUs",
     "keywords": ["timing", "duration", "1.5 hours", "2 hours", "flexible", "lunch", "dinner", "slots"]
