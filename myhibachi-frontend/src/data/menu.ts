@@ -15,7 +15,7 @@ export const menuData = {
       },
       {
         icon: "🔧",
-        title: "Custom Experience", 
+        title: "Custom Experience",
         subtitle: "Tailored to you"
       },
       {
@@ -25,7 +25,7 @@ export const menuData = {
       }
     ]
   },
-  
+
   pricing: {
     title: "Transparent Pricing",
     subtitle: "Premium experience, honest pricing — no hidden fees",
@@ -47,7 +47,7 @@ export const menuData = {
       {
         id: "premium",
         name: "Signature Experience",
-        price: "$45", 
+        price: "$45",
         description: "Our most popular package",
         minGuests: 8,
         popular: true,
@@ -88,7 +88,7 @@ export const menuData = {
         ]
       },
       {
-        name: "Beef", 
+        name: "Beef",
         items: [
           { name: "Sirloin Steak", description: "Premium cut sirloin" },
           { name: "Ribeye", description: "Marbled, tender ribeye" },
@@ -122,7 +122,7 @@ export const menuData = {
       subtitle: "No additional travel fees within these areas!",
       locations: [
         "San Francisco - The heart of culinary excellence",
-        "San Jose - Silicon Valley's finest hibachi", 
+        "San Jose - Silicon Valley's finest hibachi",
         "Oakland - East Bay entertainment at its best",
         "Bay Area - Our home base with premium service",
         "Santa Clara - Tech meets traditional Japanese cuisine",
@@ -156,7 +156,7 @@ export const menuData = {
       },
       {
         name: "Extended Performance",
-        price: "$50", 
+        price: "$50",
         description: "Additional 30 minutes of entertainment and tricks"
       },
       {

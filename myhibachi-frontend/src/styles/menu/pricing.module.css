@@ -204,24 +204,24 @@
   .pricingSection {
     padding: var(--menu-spacing-lg);
   }
-  
+
   .sectionTitle {
     font-size: var(--menu-font-size-2xl);
   }
-  
+
   .pricingGrid {
     grid-template-columns: 1fr;
     gap: var(--menu-spacing-md);
   }
-  
+
   .popularTier {
     transform: none;
   }
-  
+
   .popularTier:hover {
     transform: translateY(-5px);
   }
-  
+
   .tierPrice {
     font-size: var(--menu-font-size-3xl);
   }
@@ -231,11 +231,11 @@
   .pricingSection {
     padding: var(--menu-spacing-md);
   }
-  
+
   .pricingTier {
     padding: var(--menu-spacing-md);
   }
-  
+
   .sectionIcon {
     font-size: var(--menu-font-size-3xl);
   }

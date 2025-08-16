@@ -134,16 +134,16 @@
   .proteinsSection {
     padding: var(--menu-spacing-lg);
   }
-  
+
   .sectionTitle {
     font-size: var(--menu-font-size-2xl);
   }
-  
+
   .proteinsGrid {
     grid-template-columns: 1fr;
     gap: var(--menu-spacing-md);
   }
-  
+
   .proteinCategory {
     padding: var(--menu-spacing-md);
   }
@@ -153,11 +153,11 @@
   .proteinsSection {
     padding: var(--menu-spacing-md);
   }
-  
+
   .sectionIcon {
     font-size: var(--menu-font-size-3xl);
   }
-  
+
   .proteinItem {
     padding: var(--menu-spacing-sm);
   }

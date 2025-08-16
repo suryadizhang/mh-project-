@@ -9,7 +9,7 @@ export default function CTASection() {
         <p className={styles.ctaSubtitle}>
           Join thousands of satisfied customers who&apos;ve made their events unforgettable with My Hibachi!
         </p>
-        
+
         <div className={styles.ctaButtons}>
           <a href="/BookUs" className={styles.primaryCtaButton}>
             <Calendar className={styles.buttonIcon} />
@@ -24,7 +24,7 @@ export default function CTASection() {
             Ask Questions
           </a>
         </div>
-        
+
         <div className={styles.trustSignals}>
           <div className={styles.trustItem}>
             <span className={`${styles.trustIcon} emoji-visible`}>⭐</span>

@@ -8,19 +8,19 @@
   --menu-success: #28a745;
   --menu-warning: #ffc107;
   --menu-info: #17a2b8;
-  
+
   /* Background Colors */
   --menu-bg-primary: #f9f4eb;
   --menu-bg-card: #ffffff;
   --menu-bg-section: #f8f9fa;
   --menu-bg-overlay: rgba(0, 0, 0, 0.5);
-  
+
   /* Text Colors */
   --menu-text-primary: #333333;
   --menu-text-secondary: #666666;
   --menu-text-muted: #999999;
   --menu-text-white: #ffffff;
-  
+
   /* Spacing */
   --menu-spacing-xs: 0.5rem;
   --menu-spacing-sm: 1rem;
@@ -28,24 +28,24 @@
   --menu-spacing-lg: 2rem;
   --menu-spacing-xl: 3rem;
   --menu-spacing-xxl: 4rem;
-  
+
   /* Border Radius */
   --menu-border-radius-sm: 8px;
   --menu-border-radius-md: 12px;
   --menu-border-radius-lg: 15px;
   --menu-border-radius-xl: 20px;
-  
+
   /* Shadows */
   --menu-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
   --menu-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
   --menu-shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
   --menu-shadow-xl: 0 15px 30px rgba(0, 0, 0, 0.1);
-  
+
   /* Transitions */
   --menu-transition-fast: 0.2s ease;
   --menu-transition-normal: 0.3s ease;
   --menu-transition-slow: 0.5s ease;
-  
+
   /* Typography */
   --menu-font-size-xs: 0.75rem;
   --menu-font-size-sm: 0.875rem;
@@ -55,7 +55,7 @@
   --menu-font-size-2xl: 1.5rem;
   --menu-font-size-3xl: 2rem;
   --menu-font-size-4xl: 2.5rem;
-  
+
   /* Z-index */
   --menu-z-index-dropdown: 1000;
   --menu-z-index-sticky: 1020;

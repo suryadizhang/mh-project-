@@ -142,20 +142,20 @@
   .ctaSection {
     padding: var(--menu-spacing-xl) var(--menu-spacing-md);
   }
-  
+
   .ctaTitle {
     font-size: var(--menu-font-size-3xl);
   }
-  
+
   .ctaSubtitle {
     font-size: var(--menu-font-size-md);
   }
-  
+
   .ctaButtons {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .primaryCtaButton,
   .secondaryCtaButton,
   .tertiaryCtaButton {
@@ -163,7 +163,7 @@
     max-width: 300px;
     justify-content: center;
   }
-  
+
   .trustSignals {
     flex-direction: column;
     gap: var(--menu-spacing-sm);
@@ -174,7 +174,7 @@
   .ctaTitle {
     font-size: var(--menu-font-size-2xl);
   }
-  
+
   .primaryCtaButton,
   .secondaryCtaButton,
   .tertiaryCtaButton {

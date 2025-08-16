@@ -166,22 +166,22 @@
     font-size: var(--menu-font-size-3xl);
     line-height: 1.3;
   }
-  
+
   .serviceIntro {
     font-size: var(--menu-font-size-md);
   }
-  
+
   .ctaButtons {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .primaryBtn,
   .secondaryBtn {
     width: 100%;
     max-width: 300px;
   }
-  
+
   .areasGrid {
     grid-template-columns: 1fr;
     gap: var(--menu-spacing-md);
@@ -192,12 +192,12 @@
   .serviceAreas {
     padding: var(--menu-spacing-lg) var(--menu-spacing-md);
   }
-  
+
   .sectionTitle {
     font-size: var(--menu-font-size-2xl);
     line-height: 1.4;
   }
-  
+
   .serviceAreaCard {
     padding: var(--menu-spacing-md);
   }

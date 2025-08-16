@@ -146,21 +146,21 @@
   .additionalSection {
     padding: var(--menu-spacing-lg);
   }
-  
+
   .sectionTitle {
     font-size: var(--menu-font-size-2xl);
   }
-  
+
   .servicesGrid {
     grid-template-columns: 1fr;
     gap: var(--menu-spacing-md);
   }
-  
+
   .serviceHeader {
     flex-direction: column;
     gap: var(--menu-spacing-xs);
   }
-  
+
   .servicePrice {
     align-self: flex-start;
     font-size: var(--menu-font-size-xl);
@@ -171,11 +171,11 @@
   .additionalSection {
     padding: var(--menu-spacing-md);
   }
-  
+
   .serviceItem {
     padding: var(--menu-spacing-md);
   }
-  
+
   .sectionIcon {
     font-size: var(--menu-font-size-3xl);
   }

@@ -30,7 +30,7 @@ export default function AdditionalSection() {
         <div className={styles.addOnNote}>
           <p>
             <span className="emoji-visible">💡</span>
-            <strong>Add-On Services:</strong> These optional services can be added to any package. 
+            <strong>Add-On Services:</strong> These optional services can be added to any package.
             Discuss your preferences when booking to create the perfect experience.
           </p>
         </div>

@@ -19,8 +19,8 @@ export default function PricingSection() {
 
         <div className={styles.pricingGrid}>
           {pricing.tiers.map((tier) => (
-            <div 
-              key={tier.id} 
+            <div
+              key={tier.id}
               className={`${styles.pricingTier} ${tier.popular ? styles.popularTier : ''}`}
             >
               {tier.popular && (
@@ -28,7 +28,7 @@ export default function PricingSection() {
                   <span className="emoji-visible">⭐</span> Most Popular
                 </div>
               )}
-              
+
               <div className={styles.tierHeader}>
                 <h3 className={styles.tierName}>{tier.name}</h3>
                 <div className={styles.tierPrice}>
@@ -60,7 +60,7 @@ export default function PricingSection() {
         <div className={styles.pricingNote}>
           <p>
             <span className="emoji-visible">💡</span>
-            <strong>Note:</strong> Prices are per person. All packages include professional chef, 
+            <strong>Note:</strong> Prices are per person. All packages include professional chef,
             equipment, and entertainment. Travel fees may apply outside primary service areas.
           </p>
         </div>

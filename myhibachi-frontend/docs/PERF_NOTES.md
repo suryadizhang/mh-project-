@@ -54,7 +54,7 @@
 
 ### Global to Module CSS:
 - `.hero-section` → `styles.heroSection`
-- `.pricing-section` → `styles.pricingSection`  
+- `.pricing-section` → `styles.pricingSection`
 - `.section-title` → `styles.sectionTitle`
 - `.feature-badge` → `styles.featureBadge`
 - `.service-area-card` → `styles.serviceAreaCard`
