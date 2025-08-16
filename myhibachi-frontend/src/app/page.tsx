@@ -213,7 +213,10 @@ export default function Home() {
 
           {/* Service Areas */}
           <div className="service-areas animate-on-scroll">
-            <h3 className="section-title text-center">🌟 Bringing Hibachi Experience to Your Neighborhood! 🌟</h3>
+            <h3 className="section-title text-center">
+              🌟 Bringing Hibachi Experience<br className="d-none d-lg-block" />
+              to Your Neighborhood! 🌟
+            </h3>
             <p className="service-intro text-center">
               We bring the hibachi experience to homes and venues across the Bay Area, Sacramento, San Jose and nearby communities.
               Need us a bit farther? Tell us your location—we&apos;ll make it work with <span className="highlight-text">transparent travel options</span>.

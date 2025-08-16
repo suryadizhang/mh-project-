@@ -1,0 +1,164 @@
+/* Proteins Section Styles */
+
+.proteinsCard {
+  background: var(--menu-bg-card);
+  border-radius: var(--menu-border-radius-lg);
+  box-shadow: var(--menu-shadow-xl);
+  overflow: hidden;
+  margin-bottom: var(--menu-spacing-xl);
+  position: relative;
+  z-index: 1;
+}
+
+.proteinsSection {
+  padding: var(--menu-spacing-xl);
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: var(--menu-spacing-xl);
+}
+
+.sectionIconWrapper {
+  margin-bottom: var(--menu-spacing-md);
+}
+
+.sectionIcon {
+  font-size: var(--menu-font-size-4xl);
+  background: linear-gradient(135deg, var(--menu-primary), #ff6b6b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.sectionTitle {
+  font-size: var(--menu-font-size-3xl);
+  font-weight: 700;
+  color: var(--menu-text-primary);
+  margin-bottom: var(--menu-spacing-md);
+  line-height: 1.2;
+}
+
+.sectionSubtitle {
+  font-size: var(--menu-font-size-lg);
+  color: var(--menu-text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.proteinsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--menu-spacing-lg);
+  margin-bottom: var(--menu-spacing-xl);
+}
+
+.proteinCategory {
+  background: #f8f9fa;
+  border-radius: var(--menu-border-radius-md);
+  padding: var(--menu-spacing-lg);
+  border: 2px solid transparent;
+  transition: var(--menu-transition-normal);
+}
+
+.proteinCategory:hover {
+  border-color: var(--menu-primary);
+  box-shadow: var(--menu-shadow-md);
+  transform: translateY(-2px);
+}
+
+.categoryTitle {
+  font-size: var(--menu-font-size-xl);
+  font-weight: 700;
+  color: var(--menu-text-primary);
+  margin-bottom: var(--menu-spacing-md);
+  text-align: center;
+  padding-bottom: var(--menu-spacing-sm);
+  border-bottom: 2px solid var(--menu-primary);
+}
+
+.proteinItems {
+  display: flex;
+  flex-direction: column;
+  gap: var(--menu-spacing-sm);
+}
+
+.proteinItem {
+  background: white;
+  padding: var(--menu-spacing-md);
+  border-radius: var(--menu-border-radius-sm);
+  box-shadow: var(--menu-shadow-sm);
+  transition: var(--menu-transition-fast);
+}
+
+.proteinItem:hover {
+  box-shadow: var(--menu-shadow-md);
+  transform: translateX(5px);
+}
+
+.proteinName {
+  font-weight: 600;
+  color: var(--menu-text-primary);
+  font-size: var(--menu-font-size-md);
+  margin-bottom: 4px;
+}
+
+.proteinDescription {
+  color: var(--menu-text-secondary);
+  font-size: var(--menu-font-size-sm);
+  line-height: 1.4;
+}
+
+.proteinNote {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border-radius: var(--menu-border-radius-md);
+  padding: var(--menu-spacing-md);
+  text-align: center;
+  border-left: 4px solid var(--menu-success);
+}
+
+.proteinNote p {
+  margin: 0;
+  color: var(--menu-text-secondary);
+  font-size: var(--menu-font-size-sm);
+  line-height: 1.5;
+}
+
+.proteinNote strong {
+  color: var(--menu-text-primary);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .proteinsSection {
+    padding: var(--menu-spacing-lg);
+  }
+  
+  .sectionTitle {
+    font-size: var(--menu-font-size-2xl);
+  }
+  
+  .proteinsGrid {
+    grid-template-columns: 1fr;
+    gap: var(--menu-spacing-md);
+  }
+  
+  .proteinCategory {
+    padding: var(--menu-spacing-md);
+  }
+}
+
+@media (max-width: 576px) {
+  .proteinsSection {
+    padding: var(--menu-spacing-md);
+  }
+  
+  .sectionIcon {
+    font-size: var(--menu-font-size-3xl);
+  }
+  
+  .proteinItem {
+    padding: var(--menu-spacing-sm);
+  }
+}

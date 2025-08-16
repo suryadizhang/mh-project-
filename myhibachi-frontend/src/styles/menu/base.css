@@ -1,0 +1,98 @@
+/* Base Menu CSS Variables and Global Tokens */
+
+:root {
+  /* Colors */
+  --menu-primary: #dc3545;
+  --menu-primary-hover: #c82333;
+  --menu-secondary: #6c757d;
+  --menu-success: #28a745;
+  --menu-warning: #ffc107;
+  --menu-info: #17a2b8;
+  
+  /* Background Colors */
+  --menu-bg-primary: #f9f4eb;
+  --menu-bg-card: #ffffff;
+  --menu-bg-section: #f8f9fa;
+  --menu-bg-overlay: rgba(0, 0, 0, 0.5);
+  
+  /* Text Colors */
+  --menu-text-primary: #333333;
+  --menu-text-secondary: #666666;
+  --menu-text-muted: #999999;
+  --menu-text-white: #ffffff;
+  
+  /* Spacing */
+  --menu-spacing-xs: 0.5rem;
+  --menu-spacing-sm: 1rem;
+  --menu-spacing-md: 1.5rem;
+  --menu-spacing-lg: 2rem;
+  --menu-spacing-xl: 3rem;
+  --menu-spacing-xxl: 4rem;
+  
+  /* Border Radius */
+  --menu-border-radius-sm: 8px;
+  --menu-border-radius-md: 12px;
+  --menu-border-radius-lg: 15px;
+  --menu-border-radius-xl: 20px;
+  
+  /* Shadows */
+  --menu-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --menu-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --menu-shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+  --menu-shadow-xl: 0 15px 30px rgba(0, 0, 0, 0.1);
+  
+  /* Transitions */
+  --menu-transition-fast: 0.2s ease;
+  --menu-transition-normal: 0.3s ease;
+  --menu-transition-slow: 0.5s ease;
+  
+  /* Typography */
+  --menu-font-size-xs: 0.75rem;
+  --menu-font-size-sm: 0.875rem;
+  --menu-font-size-md: 1rem;
+  --menu-font-size-lg: 1.125rem;
+  --menu-font-size-xl: 1.25rem;
+  --menu-font-size-2xl: 1.5rem;
+  --menu-font-size-3xl: 2rem;
+  --menu-font-size-4xl: 2.5rem;
+  
+  /* Z-index */
+  --menu-z-index-dropdown: 1000;
+  --menu-z-index-sticky: 1020;
+  --menu-z-index-fixed: 1030;
+  --menu-z-index-modal: 1040;
+  --menu-z-index-popover: 1060;
+  --menu-z-index-tooltip: 1070;
+}
+
+/* Global Menu Container */
+.menu-container {
+  padding-top: var(--menu-spacing-lg);
+  padding-bottom: var(--menu-spacing-xxl);
+  position: relative;
+  background-color: var(--menu-bg-primary);
+  overflow: hidden;
+}
+
+.menu-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/images/background.jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.05;
+  z-index: 0;
+}
+
+/* Emoji visibility utility */
+.emoji-visible {
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+}
