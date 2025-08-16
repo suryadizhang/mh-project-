@@ -308,7 +308,7 @@ export default function BookingPage() {
     if (!showValidationModal) return null
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 1040 }}>
         <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
           <div className="text-center mb-4">
             <div className="text-4xl mb-2">⚠️</div>
@@ -345,7 +345,7 @@ export default function BookingPage() {
     if (!showAgreementModal) return null
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 1040 }}>
         <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
           <div className="bg-red-600 text-white p-6 text-center">
             <div className="text-4xl mb-2">📋</div>
@@ -353,7 +353,7 @@ export default function BookingPage() {
             <p className="text-red-100 mt-2">Please review and confirm the terms below</p>
           </div>
 
-          <div className="p-6 overflow-y-auto max-h-[60vh]">
+          <div className="p-6 overflow-y-auto max-h-[50vh]">
             <div className="space-y-6 text-sm">
               <div>
                 <h4 className="font-bold text-red-600 mb-2">1. SERVICES</h4>
@@ -432,48 +432,49 @@ export default function BookingPage() {
                   <li>My Hibachi is not liable for allergic reactions due to undisclosed sensitivities or customer-supplied ingredients.</li>
                 </ul>
               </div>
+
+              {/* Customer Details Confirmation */}
+              {formData && (
+                <div className="bg-white border border-gray-200 rounded-lg p-4 mt-6">
+                  <h4 className="font-bold text-gray-900 mb-3 text-center">Customer Agreement Confirmation</h4>
+                  <div className="text-sm text-gray-700 space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p><strong>Customer Name:</strong> {formData.name}</p>
+                        <p><strong>Email:</strong> {formData.email}</p>
+                        <p><strong>Phone:</strong> {formData.phone}</p>
+                      </div>
+                      <div>
+                        <p><strong>Event Date:</strong> {formData.eventDate ? format(new Date(formData.eventDate), 'MMMM dd, yyyy') : 'Not selected'}</p>
+                        <p><strong>Event Time:</strong> {formData.eventTime || 'Not selected'}</p>
+                        <p><strong>Estimate Number of Guests:</strong> {formData.guestCount || 'Not specified'}</p>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-gray-200">
+                      <p><strong>Event Venue:</strong></p>
+                      <p className="ml-4">{formData.venueStreet}</p>
+                      <p className="ml-4">{formData.venueCity}, {formData.venueState} {formData.venueZipcode}</p>
+                    </div>
+                    {!formData.sameAsVenue && (
+                      <div className="mt-2">
+                        <p><strong>Billing Address:</strong></p>
+                        <p className="ml-4">{formData.addressStreet}</p>
+                        <p className="ml-4">{formData.addressCity}, {formData.addressState} {formData.addressZipcode}</p>
+                      </div>
+                    )}
+                    <div className="mt-4 pt-3 border-t border-gray-200 text-center">
+                      <p className="font-medium text-red-600">
+                        <strong>{formData.name}</strong> agrees with this My Hibachi Catering Agreement
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="bg-gray-50 p-6 border-t">
-            {/* Customer Details Confirmation */}
-            {formData && (
-              <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
-                <h4 className="font-bold text-gray-900 mb-3 text-center">Customer Agreement Confirmation</h4>
-                <div className="text-sm text-gray-700 space-y-2">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <p><strong>Customer Name:</strong> {formData.name}</p>
-                      <p><strong>Email:</strong> {formData.email}</p>
-                      <p><strong>Phone:</strong> {formData.phone}</p>
-                    </div>
-                    <div>
-                      <p><strong>Event Date:</strong> {formData.eventDate ? format(new Date(formData.eventDate), 'MMMM dd, yyyy') : 'Not selected'}</p>
-                      <p><strong>Event Time:</strong> {formData.eventTime || 'Not selected'}</p>
-                      <p><strong>Estimate Number of Guests:</strong> {formData.guestCount || 'Not specified'}</p>
-                    </div>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-gray-200">
-                    <p><strong>Event Venue:</strong></p>
-                    <p className="ml-4">{formData.venueStreet}</p>
-                    <p className="ml-4">{formData.venueCity}, {formData.venueState} {formData.venueZipcode}</p>
-                  </div>
-                  {!formData.sameAsVenue && (
-                    <div className="mt-2">
-                      <p><strong>Billing Address:</strong></p>
-                      <p className="ml-4">{formData.addressStreet}</p>
-                      <p className="ml-4">{formData.addressCity}, {formData.addressState} {formData.addressZipcode}</p>
-                    </div>
-                  )}
-                  <div className="mt-4 pt-3 border-t border-gray-200 text-center">
-                    <p className="font-medium text-red-600">
-                      <strong>{formData.name}</strong> agrees with this My Hibachi Catering Agreement
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
+          {/* Fixed Footer with Buttons */}
+          <div className="border-t border-gray-200 p-6 bg-gray-50">
             <div className="text-center mb-4">
               <p className="text-lg font-bold text-gray-900">By clicking &quot;Confirm Booking&quot;, you acknowledge that you have read and agree to all terms above</p>
             </div>

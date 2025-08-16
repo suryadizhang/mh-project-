@@ -130,7 +130,7 @@ class EnterpriseMemoryCache {
         hits: 0,
         tag
       })
-      
+
       // Track tags for smart invalidation
       if (tag) {
         if (!this.tags.has(tag)) {
@@ -138,7 +138,7 @@ class EnterpriseMemoryCache {
         }
         this.tags.get(tag)!.add(key)
       }
-      
+
       console.log(`[CACHE SET] ${key} (TTL: ${ttlSeconds}s${tag ? `, tag: ${tag}` : ''})`)
     } catch (error) {
       this.stats.errors++
@@ -149,13 +149,13 @@ class EnterpriseMemoryCache {
   get<T>(key: string): T | null {
     try {
       const entry = this.cache.get(key) as CacheEntry<T> | undefined
-      
+
       if (!entry) {
         this.stats.misses++
         console.log(`[CACHE MISS] ${key}`)
         return null
       }
-      
+
       // Check TTL expiration
       if (Date.now() > entry.expiresAt) {
         this.cache.delete(key)
@@ -164,13 +164,13 @@ class EnterpriseMemoryCache {
         console.log(`[CACHE EXPIRED] ${key} (expired ${Math.round((Date.now() - entry.expiresAt) / 1000)}s ago)`)
         return null
       }
-      
+
       // Track hit statistics
       entry.hits++
       this.stats.hits++
       const age = Math.round((Date.now() - entry.timestamp) / 1000)
       console.log(`[CACHE HIT] ${key} (age: ${age}s, hits: ${entry.hits})`)
-      
+
       return entry.data as T
     } catch (error) {
       this.stats.errors++
@@ -183,10 +183,10 @@ class EnterpriseMemoryCache {
   // Pattern-based invalidation with enhanced logging
   invalidate(pattern: string): number {
     try {
-      const keysToDelete = Array.from(this.cache.keys()).filter(key => 
+      const keysToDelete = Array.from(this.cache.keys()).filter(key =>
         key.includes(pattern) || key.startsWith(pattern)
       )
-      
+
       keysToDelete.forEach(key => {
         const entry = this.cache.get(key)
         if (entry?.tag) {
@@ -201,7 +201,7 @@ class EnterpriseMemoryCache {
         }
         this.cache.delete(key)
       })
-      
+
       console.log(`[CACHE INVALIDATED] Cleared ${keysToDelete.length} entries matching pattern: ${pattern}`)
       return keysToDelete.length
     } catch (error) {
@@ -219,14 +219,14 @@ class EnterpriseMemoryCache {
         console.log(`[CACHE TAG] No keys found for tag: ${tag}`)
         return 0
       }
-      
+
       let deletedCount = 0
       keys.forEach(key => {
         if (this.cache.delete(key)) {
           deletedCount++
         }
       })
-      
+
       this.tags.delete(tag)
       console.log(`[CACHE TAG INVALIDATED] Cleared ${deletedCount} entries for tag: ${tag}`)
       return deletedCount
@@ -256,17 +256,17 @@ class EnterpriseMemoryCache {
   getAdvancedStats(): CacheStats {
     const totalRequests = this.stats.hits + this.stats.misses
     const hitRatio = totalRequests > 0 ? this.stats.hits / totalRequests : 0
-    
+
     // Get most popular cache keys
     const keyHits = Array.from(this.cache.entries())
       .map(([key, entry]) => ({ key, hits: entry.hits }))
       .sort((a, b) => b.hits - a.hits)
       .slice(0, 5)
-    
+
     // Estimate memory usage (rough calculation)
     const memoryUsage = Array.from(this.cache.values())
       .reduce((total, entry) => total + JSON.stringify(entry.data).length, 0)
-    
+
     return {
       hits: this.stats.hits,
       misses: this.stats.misses,
@@ -289,11 +289,11 @@ class EnterpriseMemoryCache {
   cleanup(): number {
     let cleanedCount = 0
     const now = Date.now()
-    
+
     for (const [key, entry] of this.cache.entries()) {
       if (now > entry.expiresAt) {
         this.cache.delete(key)
-        
+
         // Clean up tag references
         if (entry.tag) {
           const tagSet = this.tags.get(entry.tag)
@@ -304,15 +304,15 @@ class EnterpriseMemoryCache {
             }
           }
         }
-        
+
         cleanedCount++
       }
     }
-    
+
     if (cleanedCount > 0) {
       console.log(`[CACHE CLEANUP] Removed ${cleanedCount} expired entries`)
     }
-    
+
     return cleanedCount
   }
 
@@ -370,7 +370,7 @@ function sanitizeInput(input: string): string {
 function checkRateLimit(clientId: string): { allowed: boolean; error?: string; retryAfter?: number } {
   const now = Date.now()
   let clientLimits = rateLimitStore.get(clientId)
-  
+
   // Initialize rate limiting data if not exists
   if (!clientLimits) {
     clientLimits = {
@@ -380,7 +380,7 @@ function checkRateLimit(clientId: string): { allowed: boolean; error?: string; r
     }
     rateLimitStore.set(clientId, clientLimits)
   }
-  
+
   // Reset counters if time windows have passed
   if (now > clientLimits.minute.resetTime) {
     clientLimits.minute = { count: 0, resetTime: now + 60000 }
@@ -391,40 +391,40 @@ function checkRateLimit(clientId: string): { allowed: boolean; error?: string; r
   if (now > clientLimits.day.resetTime) {
     clientLimits.day = { count: 0, resetTime: now + 86400000 }
   }
-  
+
   // Check limits (most restrictive first)
   if (clientLimits.minute.count >= 2) {
-    return { 
-      allowed: false, 
+    return {
+      allowed: false,
       error: 'Too many booking requests. Maximum 2 bookings per minute allowed.',
       retryAfter: Math.ceil((clientLimits.minute.resetTime - now) / 1000)
     }
   }
-  
+
   if (clientLimits.hour.count >= 3) {
-    return { 
-      allowed: false, 
+    return {
+      allowed: false,
       error: 'Hourly booking limit exceeded. Maximum 3 bookings per hour allowed.',
       retryAfter: Math.ceil((clientLimits.hour.resetTime - now) / 1000)
     }
   }
-  
+
   if (clientLimits.day.count >= 10) {
-    return { 
-      allowed: false, 
+    return {
+      allowed: false,
       error: 'Daily booking limit exceeded. Maximum 10 bookings per day allowed.',
       retryAfter: Math.ceil((clientLimits.day.resetTime - now) / 1000)
     }
   }
-  
+
   // Increment all counters
   clientLimits.minute.count++
   clientLimits.hour.count++
   clientLimits.day.count++
-  
+
   // Update the store
   rateLimitStore.set(clientId, clientLimits)
-  
+
   return { allowed: true }
 }
 
@@ -439,32 +439,32 @@ function isDateAtLeastTwoDaysInAdvance(dateString: string): boolean {
   const eventDate = new Date(dateString)
   const today = new Date()
   const twoDaysFromNow = new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000)
-  
+
   // Reset time to start of day for accurate comparison
   eventDate.setHours(0, 0, 0, 0)
   twoDaysFromNow.setHours(0, 0, 0, 0)
-  
+
   return eventDate >= twoDaysFromNow
 }
 
 export async function POST(request: NextRequest) {
   try {
     const clientId = getClientId(request)
-    
+
     // Check multi-tier rate limiting
     const rateLimitResult = checkRateLimit(clientId)
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
-        { 
+        {
           detail: rateLimitResult.error,
           retryAfter: rateLimitResult.retryAfter,
           limits: {
             perMinute: '2 bookings maximum',
-            perHour: '3 bookings maximum', 
+            perHour: '3 bookings maximum',
             perDay: '10 bookings maximum'
           }
         },
-        { 
+        {
           status: 429,
           headers: {
             'Retry-After': rateLimitResult.retryAfter?.toString() || '60',
@@ -477,7 +477,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    
+
     // Sanitize all string inputs to prevent XSS
     const sanitizedBody = {
       ...body,
@@ -493,13 +493,13 @@ export async function POST(request: NextRequest) {
       venue_state: sanitizeInput(body.venue_state || '').toUpperCase(),
       venue_zipcode: sanitizeInput(body.venue_zipcode || ''),
     }
-    
+
     // Validate the request body
     const validationResult = createBookingSchema.safeParse(sanitizedBody)
-    
+
     if (!validationResult.success) {
       return NextResponse.json(
-        { 
+        {
           detail: 'Validation error',
           errors: validationResult.error.issues.map(issue => ({
             field: issue.path.join('.'),
@@ -509,9 +509,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    
+
     const data = validationResult.data
-    
+
     // Check if the date is at least 2 days in advance (48 hours)
     if (!isDateAtLeastTwoDaysInAdvance(data.event_date)) {
       return NextResponse.json(
@@ -519,17 +519,17 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    
+
     // Check if the time slot is available (with race condition protection)
-    const existingBookingCount = bookings.filter(booking => 
-      booking.event_date === data.event_date && 
+    const existingBookingCount = bookings.filter(booking =>
+      booking.event_date === data.event_date &&
       booking.event_time === data.event_time &&
       booking.status !== 'cancelled'
     ).length
-    
+
     if (existingBookingCount >= 2) { // Maximum 2 bookings per time slot
       return NextResponse.json(
-        { 
+        {
           detail: 'This time slot is fully booked. Please select a different time.',
           available_slots: 0,
           max_slots: 2
@@ -537,9 +537,9 @@ export async function POST(request: NextRequest) {
         { status: 409 }
       )
     }
-    
+
     const currentTime = new Date().toISOString()
-    
+
     // Create the booking with enhanced security fields
     const newBooking: Booking = {
       id: generateId(),
@@ -563,17 +563,17 @@ export async function POST(request: NextRequest) {
       ip_address: request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown',
       user_agent: request.headers.get('user-agent') || 'unknown'
     }
-    
+
     // Save the booking (atomic operation simulation with fallback)
     bookings.push(newBooking)
-    
+
     // Smart cache invalidation with tag-based and pattern-based clearing
     try {
       // Tag-based invalidation for efficient cache management
       const bookingTagCleared = cache.invalidateByTag('bookings')
       const availabilityTagCleared = cache.invalidateByTag('availability')
       const datesTagCleared = cache.invalidateByTag('booked-dates')
-      
+
       // Pattern-based fallback if tags aren't available
       if (bookingTagCleared === 0 && availabilityTagCleared === 0 && datesTagCleared === 0) {
         cache.invalidate('booked-dates')
@@ -581,7 +581,7 @@ export async function POST(request: NextRequest) {
         cache.invalidate('bookings-list')
         console.log('[CACHE FALLBACK] Used pattern-based invalidation as fallback')
       }
-      
+
       console.log(`[CACHE SMART INVALIDATION] Tags cleared - bookings: ${bookingTagCleared}, availability: ${availabilityTagCleared}, dates: ${datesTagCleared}`)
     } catch (cacheError) {
       console.warn('[CACHE WARNING] Cache invalidation failed, but booking was saved:', cacheError)
@@ -633,12 +633,12 @@ export async function POST(request: NextRequest) {
       console.error('[EMAIL ERROR] Email automation failed, but booking was saved:', emailError)
       // Don't fail the booking if email fails - email is enhancement, not core functionality
     }
-    
+
     // Log successful booking creation with rate limit info (audit trail)
     const currentLimits = rateLimitStore.get(clientId)
     console.log(`[BOOKING CREATED] ID: ${newBooking.id}, Date: ${newBooking.event_date}, Time: ${newBooking.event_time}, Client: ${clientId}, Limits: ${currentLimits?.minute.count}/2 min, ${currentLimits?.hour.count}/3 hr, ${currentLimits?.day.count}/10 day`)
     console.log(`[CACHE INVALIDATED] Cleared availability and booked-dates cache due to new booking`)
-    
+
     // Return success response with booking details and rate limit headers
     return NextResponse.json(
       {
@@ -653,7 +653,7 @@ export async function POST(request: NextRequest) {
           created_at: newBooking.created_at
         }
       },
-      { 
+      {
         status: 201,
         headers: {
           'X-RateLimit-Remaining-Minute': (2 - (currentLimits?.minute.count || 0)).toString(),
@@ -662,7 +662,7 @@ export async function POST(request: NextRequest) {
         }
       }
     )
-    
+
   } catch (error) {
     console.error('[BOOKING ERROR]', error)
     return NextResponse.json(
@@ -679,35 +679,35 @@ export async function GET(request: NextRequest) {
     if (!cacheHealthy) {
       console.warn('[CACHE WARNING] Cache system unhealthy, falling back to direct DB access')
     }
-    
+
     const url = new URL(request.url)
     const nocache = url.searchParams.get('nocache') === 'true' // Admin bypass
     const includeStats = url.searchParams.get('stats') === 'true' // Performance monitoring
-    
+
     // Admin cache bypass
     if (nocache) {
       cache.bypassCache('bookings-list')
       console.log('[CACHE BYPASS] Admin requested fresh data, bypassing cache')
     }
-    
+
     // Try to get cached bookings list with graceful fallback
     const cacheKey = 'bookings-list'
     let cachedBookings: CachedBookingData | null = null
-    
+
     if (cacheHealthy && !nocache) {
       cachedBookings = cache.get<CachedBookingData>(cacheKey)
     }
-    
+
     if (cachedBookings) {
       const age = Math.floor((Date.now() - cachedBookings.timestamp) / 1000)
       console.log(`[CACHE HIT] Retrieved bookings list from cache (age: ${age}s)`)
-      
+
       const response = {
         total: cachedBookings.total,
         bookings: cachedBookings.bookings,
         ...(includeStats && { cacheStats: cache.getAdvancedStats() })
       }
-      
+
       return NextResponse.json(response, {
         headers: {
           'X-Cache-Status': 'HIT',
@@ -761,7 +761,7 @@ export async function GET(request: NextRequest) {
     } catch (dbError) {
       console.error('[DATABASE ERROR] Failed to fetch bookings from storage:', dbError)
       return NextResponse.json(
-        { 
+        {
           detail: 'Database temporarily unavailable. Please try again later.',
           error: 'STORAGE_ERROR'
         },
@@ -771,7 +771,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('[BOOKING FETCH ERROR]', error)
     return NextResponse.json(
-      { 
+      {
         detail: 'Internal server error',
         error: 'SYSTEM_ERROR'
       },

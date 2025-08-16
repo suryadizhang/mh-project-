@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import Link from 'next/link'
+import { Calculator, Calendar, MessageCircle } from 'lucide-react'
 import '@/styles/menu.css'
 import Assistant from '@/components/chat/Assistant'
 
@@ -715,9 +716,18 @@ export default function MenuPage() {
               Not sure we cover you? Reach out—we&apos;ll do our best!
             </p>
             <div className="text-center mt-3 mb-4">
-              <a href="/BookUs" className="btn btn-primary me-3">📅 Ready to Plan Your Date?</a>
-              <a href="/quote" className="btn btn-outline-primary me-3">� Get Your Quote</a>
-              <a href="/contact" className="btn btn-outline-secondary">💬 Questions? Contact Us</a>
+              <a href="/BookUs" className="btn btn-primary me-3">
+                <Calendar className="w-4 h-4 me-2 inline" />
+                Ready to Plan Your Date?
+              </a>
+              <a href="/quote" className="btn btn-outline-primary me-3">
+                <Calculator className="w-4 h-4 me-2 inline" />
+                Get Your Quote
+              </a>
+              <a href="/contact" className="btn btn-outline-secondary">
+                <MessageCircle className="w-4 h-4 me-2 inline" />
+                Questions? Contact Us
+              </a>
             </div>
 
             <div className="row mt-4">
@@ -761,7 +771,7 @@ export default function MenuPage() {
                 <p className="radius-description">
                   Serving the Bay Area, Sacramento, San Jose & surrounding regions. Not sure we cover you? Reach out—we&apos;ll do our best!
                 </p>
-                <p className="travel-fee-info">
+                <p className="travel-fee-info" style={{ color: 'white' }}>
                   <span className="travel-highlight">💰 Transparent Pricing:</span>
                   Flexible service area with transparent travel options—get your quote instantly above!
                   <br />
