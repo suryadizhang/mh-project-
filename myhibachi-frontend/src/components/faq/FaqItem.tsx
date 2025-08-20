@@ -38,17 +38,17 @@ export function FaqItemComponent({ faq, isOpen, onToggle }: FaqItemComponentProp
     >
       <button
         onClick={onToggle}
-        className="faq-question"
+        className="faq-toggle"
         aria-expanded={isOpen}
         aria-controls={`faq-answer-${faq.id}`}
         id={`faq-question-${faq.id}`}
       >
-        <h3>{faq.question}</h3>
+        <h3 className="faq-question">{faq.question}</h3>
         <div className="faq-meta">
           {faq.confidence === 'low' && (
             <span className="confidence-indicator" title="This answer may need verification">⚠️</span>
           )}
-          <span className="faq-icon" aria-hidden="true">
+          <span className="faq-toggle-icon" aria-hidden="true">
             {isOpen ? '−' : '+'}
           </span>
         </div>
@@ -56,15 +56,13 @@ export function FaqItemComponent({ faq, isOpen, onToggle }: FaqItemComponentProp
 
       <div
         id={`faq-answer-${faq.id}`}
-        className="faq-answer"
+        className={`faq-answer ${isOpen ? 'expanded' : ''}`}
         role="region"
         aria-labelledby={`faq-question-${faq.id}`}
         ref={answerRef}
       >
         <div className="faq-answer-content">
-          <div dangerouslySetInnerHTML={{
-            __html: faq.answer
-          }} />
+          <div dangerouslySetInnerHTML={{ __html: faq.answer }} />
 
           {/* Feedback and actions */}
           <div className="faq-actions">

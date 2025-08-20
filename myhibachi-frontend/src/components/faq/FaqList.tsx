@@ -24,9 +24,13 @@ function groupFAQsByCategory(faqs: FaqItem[]) {
 
 export function FaqList({ items }: FaqListProps) {
   const [openItems, setOpenItems] = useState<Set<string>>(new Set())
+
+  // Calculate grouped FAQs first
+  const groupedFAQs = groupFAQsByCategory(items)
+
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    // Start with all categories collapsed (empty set)
-    new Set()
+    // Start with all categories expanded for better UX
+    new Set(Object.keys(groupedFAQs))
   )
 
   const toggleItem = (id: string) => {
@@ -53,8 +57,6 @@ export function FaqList({ items }: FaqListProps) {
     })
   }
 
-  const groupedFAQs = groupFAQsByCategory(items)
-
   if (items.length === 0) {
     return (
       <div className="no-results">
@@ -75,30 +77,32 @@ export function FaqList({ items }: FaqListProps) {
 
   return (
     <div className="faq-list">
-      {/* FAQ Categories */}
-      <div className="faqs-categories">
-        {Object.entries(groupedFAQs).map(([category, faqs]) => (
-          <div key={category} className="faq-category">
-            {/* Category Header */}
-            <div className="category-header">
-              <button
-                onClick={() => toggleCategory(category)}
-                className="category-toggle"
-                aria-expanded={expandedCategories.has(category)}
-              >
-                <h2 className="category-title">{category}</h2>
-                <span className="category-icon">
-                  {expandedCategories.has(category) ? '−' : '+'}
-                </span>
-              </button>
-              <div className="category-count">
-                {faqs.length} questions
+      <div className="faqs-accordion">
+        <div className="faqs-categories">
+          {Object.entries(groupedFAQs).map(([category, faqs]) => (
+            <div key={category} className="faq-category">
+              {/* Category Header */}
+              <div className="category-header">
+                <button
+                  onClick={() => toggleCategory(category)}
+                  className="category-toggle"
+                  aria-expanded={expandedCategories.has(category)}
+                >
+                  <div className="category-title-wrapper">
+                    <span className="category-icon">📋</span>
+                    <h2 className="category-title">{category}</h2>
+                  </div>
+                  <span className="toggle-icon">
+                    {expandedCategories.has(category) ? '▲' : '▼'}
+                  </span>
+                </button>
+                <div className="category-count">
+                  {faqs.length} questions
+                </div>
               </div>
-            </div>
 
-            {/* Category Content */}
-            {expandedCategories.has(category) && (
-              <div className="category-content">
+              {/* Category Content */}
+              <div className={`category-content ${expandedCategories.has(category) ? 'expanded' : ''}`}>
                 <div className="category-faqs">
                   {faqs.map((faq) => (
                     <FaqItemComponent
@@ -110,9 +114,9 @@ export function FaqList({ items }: FaqListProps) {
                   ))}
                 </div>
               </div>
-            )}
-          </div>
-        ))}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
