@@ -66,6 +66,10 @@ export default function RootLayout({
           href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
         />
 
+        {/* Performance optimization hints */}
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="preconnect" href="//fonts.gstatic.com" crossOrigin="anonymous" />
+
         {/* Video preload hint for hero video */}
         <link rel="preload" href="/videos/hero_video.mp4" as="video" type="video/mp4" />
 

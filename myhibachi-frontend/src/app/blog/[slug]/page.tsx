@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { Calendar, User, ArrowLeft, Share2 } from 'lucide-react'
 import Assistant from '@/components/chat/Assistant'
 import BlogStructuredData from '@/components/blog/BlogStructuredData'
-import blogPosts from '@/data/blogPosts'
+import blogPosts, { getPostsByEventType, getPostsByServiceArea } from '@/data/blogPosts'
 import { Metadata } from 'next'
 
 interface BlogPostPageProps {
@@ -58,6 +58,17 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   if (!post) {
     notFound()
   }
+
+  // Get related posts based on event type and service area
+  const relatedByEvent = getPostsByEventType(post.eventType)
+    .filter(p => p.id !== post.id)
+    .slice(0, 2)
+
+  const relatedByArea = getPostsByServiceArea(post.serviceArea)
+    .filter(p => p.id !== post.id && !relatedByEvent.includes(p))
+    .slice(0, 1)
+
+  const relatedPosts = [...relatedByEvent, ...relatedByArea].slice(0, 3)
 
   // Generate full article content based on the post data
   const generateFullContent = (post: typeof blogPosts[0]) => {
@@ -124,7 +135,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       </div>
     `)
 
-    // Call to action
+    // Call to action with internal links
     sections.push(`
       <h2 class="text-2xl font-bold text-gray-900 mb-4">Ready to Book Your Event?</h2>
       <p class="text-gray-700 mb-6 leading-relaxed">
@@ -132,7 +143,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       </p>
       <p class="text-gray-700 mb-6 leading-relaxed">
         <a href="/menu" class="text-blue-600 hover:text-blue-800 font-medium underline">View our complete hibachi menu</a>
-        to see all the delicious options available for your celebration.
+        to see all the delicious options available for your celebration, or explore our
+        <a href="/blog" class="text-blue-600 hover:text-blue-800 font-medium underline">other catering guides</a>
+        for more event inspiration.
       </p>
       <div class="bg-gradient-to-r from-orange-500 to-red-600 rounded-lg p-6 text-white mb-6">
         <h3 class="text-xl font-bold mb-3">Get Your Free Quote Today</h3>
@@ -217,7 +230,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </div>
 
         {/* Related Keywords */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Tags</h3>
           <div className="flex flex-wrap gap-2">
             {post.keywords.map((keyword, index) => (
@@ -230,6 +243,39 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             ))}
           </div>
         </div>
+
+        {/* Related Posts */}
+        {relatedPosts.length > 0 && (
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Related Hibachi Catering Guides</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {relatedPosts.map((relatedPost) => (
+                <article key={relatedPost.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="mb-2">
+                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                      {relatedPost.eventType}
+                    </span>
+                  </div>
+                  <h4 className="font-semibold text-gray-900 mb-2">
+                    <Link href={`/blog/${relatedPost.slug}`} className="hover:text-blue-600">
+                      {relatedPost.title}
+                    </Link>
+                  </h4>
+                  <p className="text-gray-600 text-sm mb-3">{relatedPost.excerpt.slice(0, 100)}...</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500">{relatedPost.readTime}</span>
+                    <Link
+                      href={`/blog/${relatedPost.slug}`}
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    >
+                      Read →
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
       </article>
 
       <Assistant page={`/blog/${post.slug}`} />

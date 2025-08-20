@@ -1,0 +1,307 @@
+/* Home Page CTA Section - Call-to-Action and Services */
+
+/* Call-to-Action Section */
+.cta-section {
+  background: linear-gradient(to right, #ffb800, #db2b28) !important;
+  padding: 4rem 2rem;
+  color: white !important;
+  text-align: center;
+  border-radius: 20px;
+  margin: 4rem auto;
+  max-width: 1200px;
+  position: relative;
+  z-index: 10;
+}
+
+.cta-section::before {
+  display: none !important;
+}
+
+.cta-section * {
+  color: white !important;
+}
+
+.cta-section .highlight-text {
+  color: #fff3cd !important;
+  font-weight: 600;
+}
+
+.cta-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  color: white !important;
+}
+
+.cta-description {
+  font-size: 1.2rem;
+  max-width: 800px;
+  margin: 0 auto 2rem;
+  line-height: 1.7;
+  color: white !important;
+}
+
+.cta-special-offer {
+  background: rgba(255, 255, 255, 0.25) !important;
+  padding: 1.5rem;
+  border-radius: 15px;
+  margin-bottom: 2rem;
+  display: inline-block;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.offer-badge {
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  display: block;
+  color: white !important;
+}
+
+.offer-text {
+  font-size: 1.1rem;
+  margin: 0;
+  color: white !important;
+}
+
+.cta-buttons {
+  margin-bottom: 1.5rem;
+}
+
+.cta-footer {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  color: white !important;
+}
+
+.cta-footer small {
+  color: white !important;
+}
+
+/* Animation Classes */
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 1s ease;
+}
+
+.animate-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Services Section */
+.services-section {
+  padding: 5rem 0;
+  background-color: #f9f4eb;
+  position: relative;
+  overflow: hidden;
+}
+
+.services-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/images/background.jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.05;
+  z-index: 0;
+}
+
+.services-heading {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 3rem;
+  color: #4a2d13;
+  position: relative;
+  z-index: 1;
+}
+
+.service-icon {
+  font-size: 1.5rem;
+  vertical-align: middle;
+  margin: 0 0.5rem;
+}
+
+.services-grid {
+  position: relative;
+  z-index: 1;
+}
+
+.service-card {
+  background-color: #fff;
+  border-radius: 20px;
+  padding: 2rem;
+  height: 100%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.service-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 35px rgba(219, 43, 40, 0.2);
+}
+
+.service-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #ff7b00, #db2b28);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 1.5rem;
+}
+
+.service-icon-bi {
+  color: white;
+  font-size: 2.5rem;
+}
+
+.service-title {
+  color: #4a2d13;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.service-description {
+  color: #666;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  flex-grow: 1;
+}
+
+.service-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background-color: #f9f9f9;
+  padding: 1.25rem;
+  border-radius: 12px;
+  margin-top: auto;
+}
+
+.service-feature {
+  font-size: 0.9rem;
+  color: #4a2d13;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.service-feature i {
+  color: #db2b28;
+}
+
+.services-cta {
+  margin-top: 3rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* Modern CTA Section with white/light background */
+.cta-section .cta-main-title {
+  color: #333 !important;
+  font-weight: 700;
+}
+
+.cta-section .cta-main-subtitle {
+  color: #666 !important;
+}
+
+.cta-section .features-title {
+  color: #333 !important;
+  font-weight: 600;
+}
+
+.cta-section .feature-title {
+  color: #333 !important;
+  font-weight: 600;
+}
+
+.cta-section .feature-description {
+  color: #666 !important;
+}
+
+.cta-section .action-item span:not(.emoji-visible) {
+  color: #666 !important;
+}
+
+.cta-section .button-text {
+  color: white !important;
+}
+
+/* Modern CTA button styling */
+.cta-section .cta-main-button {
+  background: linear-gradient(135deg, #db2b28 0%, #c41e1a 100%) !important;
+  color: white !important;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.cta-section .cta-main-button:hover {
+  background: linear-gradient(135deg, #c41e1a 0%, #b01e1a 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(219, 43, 40, 0.3);
+}
+
+.cta-section .cta-main-button .button-text {
+  color: white !important;
+}
+
+.cta-section .cta-main-button * {
+  color: white !important;
+}
+
+.cta-section .cta-main-button:hover * {
+  color: white !important;
+}
+
+/* Additional specificity for button text elements */
+.cta-section .cta-main-button span.button-text {
+  color: white !important;
+}
+
+.cta-section .modern-cta-button {
+  color: white !important;
+}
+
+.cta-section .modern-cta-button * {
+  color: white !important;
+}
+
+/* Override the global white text rule for light background CTA sections */
+.cta-section .cta-content-wrapper {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 3rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.cta-section .cta-content-wrapper * {
+  color: inherit !important;
+}
+
+.cta-section .cta-content-wrapper h2,
+.cta-section .cta-content-wrapper h3,
+.cta-section .cta-content-wrapper h4 {
+  color: #333 !important;
+}
+
+.cta-section .cta-content-wrapper p,
+.cta-section .cta-content-wrapper span:not(.emoji-visible) {
+  color: #666 !important;
+}

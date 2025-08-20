@@ -1,0 +1,129 @@
+/* Home Page Features Section - What Makes Us Special Grid */
+
+/* Features Section */
+.features-section {
+  padding: 4rem 0;
+  background: #f9f4ec;
+  margin: 0 -15px;
+  position: relative;
+}
+
+.features-heading {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 3rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.heading-emoji {
+  font-size: 2rem;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.feature-item {
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 3px solid transparent;
+}
+
+.feature-item:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+.feature-premium {
+  border-bottom-color: #f8b500;
+}
+
+.feature-pricing {
+  border-bottom-color: #4caf50;
+}
+
+.feature-entertainment {
+  border-bottom-color: #9c27b0;
+}
+
+.feature-location {
+  border-bottom-color: #2196f3;
+}
+
+.feature-excellence {
+  border-bottom-color: #e91e63;
+}
+
+.feature-occasions {
+  border-bottom-color: #ff5722;
+}
+
+.feature-icon-container {
+  margin-bottom: 1.5rem;
+}
+
+.feature-icon {
+  font-size: 3rem;
+}
+
+.feature-icon-premium {
+  color: #f8b500;
+}
+
+.feature-icon-pricing {
+  color: #4caf50;
+}
+
+.feature-icon-entertainment {
+  color: #9c27b0;
+}
+
+.feature-icon-location {
+  color: #2196f3;
+}
+
+.feature-icon-excellence {
+  color: #e91e63;
+}
+
+.feature-icon-occasions {
+  color: #ff5722;
+}
+
+.feature-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.feature-description {
+  color: #666;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.feature-tag {
+  display: inline-block;
+  padding: 0.5rem 1.25rem;
+  background: rgba(219, 43, 40, 0.1);
+  color: #db2b28;
+  font-weight: 500;
+  border-radius: 30px;
+  font-size: 0.9rem;
+}

@@ -1,16 +1,16 @@
 import Link from 'next/link'
 import { Calendar, User } from 'lucide-react'
 import Assistant from '@/components/chat/Assistant'
-import { getFeaturedPosts, getSeasonalPosts, getRecentPosts } from '@/data/blogPosts'
+import { getFeaturedPosts, getSeasonalPosts, getRecentPosts, getEventSpecificPosts } from '@/data/blogPosts'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'My Hibachi Blog | Tips, Stories & Local Event Ideas',
-  description: 'Discover hibachi catering tips, local event ideas for Bay Area, Sacramento, San Jose and more. Seasonal menus, party planning guides, and authentic hibachi stories.',
-  keywords: 'hibachi blog, bay area catering, sacramento hibachi, san jose events, hibachi tips, party planning, seasonal menus, mobile hibachi chef',
+  title: 'My Hibachi Blog | Event Catering Guides for Bay Area, Sacramento & San Jose',
+  description: 'Complete hibachi catering guides for every event: birthdays, weddings, corporate events, pool parties, and more. Expert tips for Bay Area, Sacramento, San Jose celebrations.',
+  keywords: 'hibachi blog, bay area catering, sacramento hibachi, san jose events, hibachi tips, party planning, seasonal menus, mobile hibachi chef, event catering guides, birthday hibachi, wedding hibachi, corporate hibachi',
   openGraph: {
-    title: 'My Hibachi Blog | Tips, Stories & Local Event Ideas',
-    description: 'Discover hibachi catering tips, local event ideas for Bay Area, Sacramento, San Jose and more.',
+    title: 'My Hibachi Blog | Event Catering Guides for Bay Area, Sacramento & San Jose',
+    description: 'Complete hibachi catering guides for every event: birthdays, weddings, corporate events, pool parties, and more.',
     type: 'website'
   }
 }
@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 export default function BlogPage() {
   const featuredPosts = getFeaturedPosts()
   const seasonalPosts = getSeasonalPosts()
+  const eventSpecificPosts = getEventSpecificPosts().slice(0, 6) // Get first 6 new event posts
   const allRecentPosts = getRecentPosts(12)
 
   return (
@@ -75,6 +76,53 @@ export default function BlogPage() {
                       className="text-blue-600 hover:text-blue-800 font-medium"
                     >
                       Read More →
+                    </Link>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          {/* Event-Specific Posts Section */}
+          <div className="mb-12">
+            <h2 className="text-3xl font-bold text-center text-gray-900 mb-4">Event-Specific Hibachi Guides</h2>
+            <p className="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-8">
+              Complete hibachi catering guides for every type of celebration and event
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+            {eventSpecificPosts.map((post) => (
+              <article key={post.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div className="h-40 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                  <div className="text-white text-center p-4">
+                    <div className="text-sm font-medium bg-black bg-opacity-30 rounded px-2 py-1 mb-2">
+                      🎉 {post.eventType}
+                    </div>
+                    <div className="text-xs bg-black bg-opacity-30 rounded px-2 py-1">
+                      📍 {post.serviceArea}
+                    </div>
+                  </div>
+                </div>
+                <div className="p-5">
+                  <div className="flex items-center text-sm text-gray-500 mb-3">
+                    <Calendar className="w-4 h-4 mr-1" />
+                    <span className="mr-4">{post.date}</span>
+                    <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">NEW</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-3">
+                    <Link href={`/blog/${post.slug}`} className="hover:text-blue-600">
+                      {post.title}
+                    </Link>
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-4">{post.excerpt}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">{post.readTime}</span>
+                    <Link
+                      href={`/blog/${post.slug}`}
+                      className="text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      Read Guide →
                     </Link>
                   </div>
                 </div>

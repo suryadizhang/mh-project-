@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="footer-brand">
           <Image
             src="/My Hibachi logo.png"
-            alt="My Hibachi Chef Logo"
+            alt="MyHibachi Private Hibachi Chef Bay Area Sacramento San Jose Mobile Catering Service Logo"
             width={120}
             height={120}
             className="footer-logo"
@@ -17,6 +17,20 @@ export default function Footer() {
           <p className="footer-description">
             Bringing the authentic hibachi experience to your location with premium quality and reasonable prices.
           </p>
+          <div className="footer-business-info">
+            <p className="footer-address">
+              <i className="bi bi-geo-alt-fill"></i>
+              Serving Bay Area, Sacramento & San Jose, California
+            </p>
+            <p className="footer-phone">
+              <i className="bi bi-telephone-fill"></i>
+              <a href="tel:+19167408768">(916) 740-8768</a>
+            </p>
+            <p className="footer-email">
+              <i className="bi bi-envelope-fill"></i>
+              <a href="mailto:cs@myhibachichef.com">cs@myhibachichef.com</a>
+            </p>
+          </div>
           <div className="footer-social">
             <a href="https://www.instagram.com/my_hibachi_chef/" target="_blank" rel="noopener noreferrer" className="footer-social-icon">
               <i className="bi bi-instagram"></i>

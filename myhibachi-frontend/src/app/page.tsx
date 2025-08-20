@@ -1,7 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import '@/styles/home.css'
+import '@/styles/home/home-base.css'
+import '@/styles/home/home-hero.css'
+import '@/styles/home/home-experience.css'
+import '@/styles/home/home-features.css'
+import '@/styles/home/home-service-areas.css'
+import '@/styles/home/home-cta.css'
+import '@/styles/home/home-buttons.css'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
 import Assistant from '@/components/chat/Assistant'
 
@@ -22,6 +28,7 @@ export default function Home() {
             muted
             loop
             playsInline
+            aria-label="Professional hibachi chef cooking demonstration at private event"
             style={{ backgroundColor: '#000' }}
           >
             <source src="/videos/hero_video.mp4" type="video/mp4" />
@@ -33,7 +40,7 @@ export default function Home() {
           {/* Animated Headline Section */}
           <div className="headline-section animate-on-scroll">
             <h1 className="main-title text-center">
-              Experience the Art of Japanese Hibachi
+              Private Hibachi Chef | Bay Area, Sacramento & San Jose
             </h1>
             <p className="subtitle text-center">
               Where Culinary Mastery Meets Unforgettable Entertainment
