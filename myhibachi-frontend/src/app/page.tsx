@@ -9,7 +9,6 @@ import '@/styles/home/home-service-areas.css'
 import '@/styles/home/home-cta.css'
 import '@/styles/home/home-buttons.css'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
-import Assistant from '@/components/chat/Assistant'
 
 export default function Home() {
   useScrollAnimation()
@@ -408,8 +407,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      <Assistant page="/" />
     </main>
   )
 }

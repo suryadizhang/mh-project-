@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono, Poppins } from "next/font/google";
 import "./globals.css";
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
+import ClientLayout from '@/components/layout/ClientLayout'
 // import TawkWrapper from '@/components/TawkWrapper' // Disabled - only using manual LiveChatButton
 
 // Import global styles
@@ -82,11 +83,13 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} ${poppins.variable} antialiased min-h-screen flex flex-col company-background`}
       >
-        <Navbar />
-        <main className="flex-1">
-          {children}
-        </main>
-        <Footer />
+        <ClientLayout>
+          <Navbar />
+          <main className="flex-1">
+            {children}
+          </main>
+          <Footer />
+        </ClientLayout>
         {/* TawkWrapper disabled - only using manual LiveChatButton on contact page */}
         {/* Optional: Uncomment to enable email capture prompt
         <TawkEmailPrompt />
