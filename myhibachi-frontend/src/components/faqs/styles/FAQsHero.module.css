@@ -1,0 +1,72 @@
+/* FAQs Hero Section Styles */
+
+.faqsHero {
+  background: linear-gradient(135deg, var(--color-dark) 0%, var(--color-brown) 100%);
+  background-image: url('/images/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-blend-mode: multiply;
+  color: white;
+  padding: 4rem 2rem 3rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.faqsHero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 0;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.title {
+  font-family: var(--font-primary);
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  color: var(--color-secondary);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  line-height: 1.1;
+}
+
+.description {
+  font-size: 1rem;
+  max-width: 600px;
+  margin: 0 auto 1.5rem;
+  opacity: 0.95;
+  line-height: 1.5;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+  font-family: var(--font-secondary);
+}
+
+@media (max-width: 768px) {
+  .faqsHero {
+    padding: 6rem 1rem 4rem;
+  }
+
+  .title {
+    font-size: 2.5rem;
+  }
+
+  .description {
+    font-size: 1.2rem;
+    padding: 0 1rem;
+  }
+
+  .container {
+    padding: 0 1rem;
+  }
+}
