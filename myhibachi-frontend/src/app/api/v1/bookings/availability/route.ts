@@ -20,6 +20,9 @@ const bookingRequestSchema = z.object({
       .min(10, 'Phone number must be at least 10 digits')
       .max(20, 'Phone number must be less than 20 characters')
       .regex(/^[\d\s\(\)\-\+\.]+$/, 'Phone can only contain digits and common formatting characters'),
+    preferredCommunication: z.enum(['phone', 'text', 'email'], { 
+      message: 'Preferred communication must be phone, text, or email' 
+    }),
     guestCount: z.number()
       .int('Guest count must be a whole number')
       .min(1, 'At least 1 guest required')
