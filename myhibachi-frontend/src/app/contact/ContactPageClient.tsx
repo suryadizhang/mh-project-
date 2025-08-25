@@ -19,18 +19,29 @@ declare global {
 function InlineMessengerButton() {
   const handleMessengerClick = () => {
     try {
+      // GTM tracking
+      if (typeof window !== 'undefined' && window.dataLayer) {
+        window.dataLayer.push({ event: 'chat_open', channel: 'messenger' })
+      }
+
+      // Try to show Facebook Customer Chat if available
       if (typeof window !== 'undefined' && window.FB?.CustomerChat?.show) {
         window.FB.CustomerChat.show()
-
-        // GTM tracking
-        if (window.dataLayer) {
-          window.dataLayer.push({ event: 'chat_open', channel: 'messenger' })
-        }
+        console.log('Facebook Customer Chat opened')
       } else {
-        console.warn('Facebook Messenger not available')
+        // Fallback: Open Messenger directly
+        const pageId = '61577483702847' // My-hibachi page ID
+        const messengerUrl = `https://m.me/${pageId}`
+        
+        console.log('Opening Messenger directly:', messengerUrl)
+        window.open(messengerUrl, '_blank', 'noopener,noreferrer')
       }
     } catch (error) {
       console.warn('Error opening Messenger:', error)
+      // Final fallback: Open Messenger directly
+      const pageId = '61577483702847'
+      const messengerUrl = `https://m.me/${pageId}`
+      window.open(messengerUrl, '_blank', 'noopener,noreferrer')
     }
   }
 
@@ -62,27 +73,31 @@ function InlineInstagramButton() {
       const isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase())
 
       if (isMobile) {
-        // Try to open Instagram app first
-        const instagramUrl = 'instagram://user?username=my_hibachi_chef'
-        const fallbackUrl = 'https://www.instagram.com/direct/t/my_hibachi_chef/'
-
+        // Try to open Instagram app first with the ig.me URL (works best on mobile)
+        const igMeUrl = 'https://ig.me/m/my_hibachi_chef'
+        console.log('Opening Instagram DM (mobile):', igMeUrl)
+        
+        // Try Instagram app deep link first
         const iframe = document.createElement('iframe')
         iframe.style.display = 'none'
-        iframe.src = instagramUrl
+        iframe.src = 'instagram://user?username=my_hibachi_chef'
         document.body.appendChild(iframe)
 
         setTimeout(() => {
           document.body.removeChild(iframe)
-          window.open(fallbackUrl, '_blank')
+          // Fallback to ig.me which works on both app and web
+          window.open(igMeUrl, '_blank', 'noopener,noreferrer')
         }, 1000)
       } else {
-        // Desktop - direct to Instagram DM
-        window.open('https://www.instagram.com/direct/t/my_hibachi_chef/', '_blank')
+        // Desktop - use ig.me URL which redirects properly
+        const igMeUrl = 'https://ig.me/m/my_hibachi_chef'
+        console.log('Opening Instagram DM (desktop):', igMeUrl)
+        window.open(igMeUrl, '_blank', 'noopener,noreferrer')
       }
     } catch (error) {
       console.warn('Error opening Instagram:', error)
-      // Fallback to profile page
-      window.open('https://www.instagram.com/my_hibachi_chef/', '_blank')
+      // Ultimate fallback to profile page
+      window.open('https://www.instagram.com/my_hibachi_chef/', '_blank', 'noopener,noreferrer')
     }
   }
 

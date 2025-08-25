@@ -2,7 +2,7 @@
 
 import type { FaqItem } from '@/data/faqsData'
 import { FaqItemComponent } from './FaqItem'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface FaqListProps {
   items: FaqItem[]
@@ -24,14 +24,17 @@ function groupFAQsByCategory(faqs: FaqItem[]) {
 
 export function FaqList({ items }: FaqListProps) {
   const [openItems, setOpenItems] = useState<Set<string>>(new Set())
+  
+  // Start with all categories collapsed initially to prevent hydration errors
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
+  const [mounted, setMounted] = useState(false)
 
   // Calculate grouped FAQs first
   const groupedFAQs = groupFAQsByCategory(items)
 
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    // Start with all categories expanded for better UX
-    new Set(Object.keys(groupedFAQs))
-  )
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const toggleItem = (id: string) => {
     setOpenItems(prev => {
@@ -86,14 +89,14 @@ export function FaqList({ items }: FaqListProps) {
                 <button
                   onClick={() => toggleCategory(category)}
                   className="category-toggle"
-                  aria-expanded={expandedCategories.has(category)}
+                  aria-expanded={mounted ? expandedCategories.has(category) : false}
                 >
                   <div className="category-title-wrapper">
                     <span className="category-icon">📋</span>
                     <h2 className="category-title">{category}</h2>
                   </div>
                   <span className="toggle-icon">
-                    {expandedCategories.has(category) ? '▲' : '▼'}
+                    ▼
                   </span>
                 </button>
                 <div className="category-count">
@@ -102,7 +105,7 @@ export function FaqList({ items }: FaqListProps) {
               </div>
 
               {/* Category Content */}
-              <div className={`category-content ${expandedCategories.has(category) ? 'expanded' : ''}`}>
+              <div className={`category-content ${mounted && expandedCategories.has(category) ? 'expanded' : ''}`}>
                 <div className="category-faqs">
                   {faqs.map((faq) => (
                     <FaqItemComponent
