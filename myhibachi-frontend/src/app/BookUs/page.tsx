@@ -1216,16 +1216,33 @@ export default function BookingPage() {
                     (watch('sameAsVenue') || (watch('addressStreet') && watch('addressCity') && watch('addressState') && watch('addressZipcode')) ? 1 : 0)
                   ) < 4 || isSubmitting
                 }
-                className={`px-8 py-4 rounded-lg text-lg font-semibold transition duration-200 shadow-lg transform ${
+                className={`text-lg font-bold transition-all duration-300 position-relative overflow-hidden inline-flex items-center gap-4 border-none ${
                   (
                     (watch('eventDate') && watch('eventTime') ? 1 : 0) +
                     (watch('name') && watch('email') && watch('phone') && watch('preferredCommunication') ? 1 : 0) +
                     (watch('venueStreet') && watch('venueCity') && watch('venueState') && watch('venueZipcode') ? 1 : 0) +
                     (watch('sameAsVenue') || (watch('addressStreet') && watch('addressCity') && watch('addressState') && watch('addressZipcode')) ? 1 : 0)
                   ) === 4 && !isSubmitting
-                    ? 'bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 hover:shadow-xl hover:scale-105 cursor-pointer'
-                    : 'bg-gray-500 text-gray-100 cursor-not-allowed'
+                    ? 'bg-gradient-to-r from-red-500 to-red-400 text-white hover:shadow-2xl hover:scale-105 cursor-pointer'
+                    : 'bg-gradient-to-r from-gray-400 to-gray-500 text-white cursor-not-allowed'
                 }`}
+                style={{
+                  borderRadius: '50px',
+                  paddingLeft: '3rem',
+                  paddingRight: '3rem',
+                  paddingTop: '0.75rem',
+                  paddingBottom: '0.75rem',
+                  minWidth: '280px',
+                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
+                  boxShadow: (
+                    (watch('eventDate') && watch('eventTime') ? 1 : 0) +
+                    (watch('name') && watch('email') && watch('phone') && watch('preferredCommunication') ? 1 : 0) +
+                    (watch('venueStreet') && watch('venueCity') && watch('venueState') && watch('venueZipcode') ? 1 : 0) +
+                    (watch('sameAsVenue') || (watch('addressStreet') && watch('addressCity') && watch('addressState') && watch('addressZipcode')) ? 1 : 0)
+                  ) === 4 && !isSubmitting 
+                    ? '0 8px 25px rgba(239, 68, 68, 0.4)' 
+                    : '0 4px 15px rgba(156, 163, 175, 0.3)'
+                }}
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center">
