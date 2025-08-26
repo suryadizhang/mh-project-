@@ -379,10 +379,10 @@ export function QuoteCalculator() {
               Book Your Event Now
             </a>
             <a
-              href="tel:9167408768"
+              href="/contact"
               className="call-btn"
             >
-              Call (916) 740-8768
+              Contact Us
             </a>
           </div>
         </div>
