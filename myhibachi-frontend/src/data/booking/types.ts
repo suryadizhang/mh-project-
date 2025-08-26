@@ -4,6 +4,7 @@ export type BookingFormData = {
   name: string;
   email: string;
   phone: string;
+  preferredCommunication: 'phone' | 'text' | 'email' | '';
   eventDate: Date;
   eventTime: '12PM' | '3PM' | '6PM' | '9PM';
   guestCount: number;
@@ -74,6 +75,7 @@ export const VALIDATION_RULES = {
     }
   },
   phone: { required: 'Phone number is required' },
+  preferredCommunication: { required: 'Please select a communication method' },
   eventDate: { required: 'Event date is required' },
   eventTime: { required: 'Event time is required' },
   guestCount: {
