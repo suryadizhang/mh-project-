@@ -1,5 +1,5 @@
 import { faqs } from '@/data/faqsData'
-import { FAQsPageContainer } from '@/components/faqs'
+import { FAQsPageContainer } from '@/components/faq'
 import '@/styles/base.css'
 import '@/styles/faqs/faqs-base.css'
 import '@/styles/faqs/faqs-items.css'

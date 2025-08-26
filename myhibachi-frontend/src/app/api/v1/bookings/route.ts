@@ -3,6 +3,9 @@ import { z } from 'zod'
 import { emailService, type BookingEmailData } from '@/lib/email-service'
 import { emailScheduler } from '@/lib/email-scheduler'
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic'
+
 // Enhanced validation schema with comprehensive security patterns
 const createBookingSchema = z.object({
   name: z.string()
@@ -336,6 +339,7 @@ const cache = new EnterpriseMemoryCache()
 
 // Make cache globally accessible for monitoring
 declare global {
+  // eslint-disable-next-line no-var
   var bookingCache: EnterpriseMemoryCache | undefined
 }
 

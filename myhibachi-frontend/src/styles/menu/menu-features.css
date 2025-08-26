@@ -491,7 +491,8 @@
   margin-top: 2rem;
 }
 
-.radius-card {
+/* Menu-specific radius card styling */
+.menu-container .radius-card {
   background: linear-gradient(135deg, #28a745, #20c997);
   color: white;
   border-radius: 15px;
@@ -499,23 +500,31 @@
   text-align: center;
 }
 
-.radius-icon {
+.menu-container .radius-icon {
   font-size: 3rem;
   margin-bottom: 1rem;
 }
 
-.radius-title {
+.menu-container .radius-title {
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 1rem;
 }
 
-.radius-description {
+.menu-container .radius-description {
   margin-bottom: 1rem;
 }
 
-.travel-fee-info {
+.menu-container .travel-fee-info {
   margin-bottom: 1rem;
+  color: #333; /* Dark text as safe fallback */
+  font-weight: 500;
+}
+
+/* White text only when parent has dark background */
+.menu-container .radius-card .travel-fee-info {
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 .travel-highlight {

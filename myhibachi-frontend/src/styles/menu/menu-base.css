@@ -1,5 +1,6 @@
 /* Menu Page Base Styles */
 .menu-container {
+  color: #333; /* Default dark text for safety */
   padding-top: 2rem;
   padding-bottom: 4rem;
   position: relative;
@@ -213,8 +214,13 @@
   align-items: center;
   gap: 0.5rem;
   font-weight: 600; /* Increased from 500 to 600 for better visibility */
-  color: #ffffff; /* White text for dark backgrounds */
+  color: #222; /* Dark text as fallback */
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 0 5px rgba(0, 0, 0, 0.6); /* Dark shadows for white text */
+}
+
+/* White text on dark hero backgrounds only */
+.page-hero-background .value-item {
+  color: #ffffff; /* White text for dark backgrounds */
 }
 
 .value-icon {
@@ -222,10 +228,15 @@
 }
 
 .value-divider {
-  color: #ffffff; /* White for dark backgrounds */
+  color: #333; /* Dark text as fallback */
   font-size: 1.2rem;
   font-weight: bold; /* Added bold weight */
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7); /* Dark shadow for white text */
+}
+
+/* White text on dark hero backgrounds only */
+.page-hero-background .value-divider {
+  color: #ffffff; /* White for dark backgrounds */
 }
 
 /* Hero Features Grid */

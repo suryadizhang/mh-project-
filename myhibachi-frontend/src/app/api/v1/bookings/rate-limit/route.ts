@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic'
+
 // Same client ID generation as bookings endpoint
 function getClientId(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for')

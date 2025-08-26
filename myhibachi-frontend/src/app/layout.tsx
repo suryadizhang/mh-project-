@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import ClientLayout from '@/components/layout/ClientLayout'
+import { PerformanceMonitoring } from '@/components/seo/TechnicalSEO'
 // import TawkWrapper from '@/components/TawkWrapper' // Disabled - only using manual LiveChatButton
 
 // Import global styles
@@ -83,6 +84,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} ${poppins.variable} antialiased min-h-screen flex flex-col company-background`}
       >
+        {/* Core Web Vitals Performance Monitoring */}
+        <PerformanceMonitoring />
+        
         <ClientLayout>
           <Navbar />
           <main className="flex-1">

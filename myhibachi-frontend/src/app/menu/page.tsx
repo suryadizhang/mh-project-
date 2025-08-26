@@ -783,7 +783,7 @@ export default function MenuPage() {
                 <p className="radius-description">
                   Serving the Bay Area, Sacramento, San Jose & surrounding regions. Not sure we cover you? Reach out—we&apos;ll do our best!
                 </p>
-                <p className="travel-fee-info" style={{ color: 'white' }}>
+                <p className="travel-fee-info">
                   <span className="travel-highlight">💰 Transparent Pricing:</span>
                   Flexible service area with transparent travel options—get your quote instantly above!
                   <br />

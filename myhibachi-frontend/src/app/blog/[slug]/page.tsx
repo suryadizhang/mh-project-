@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Calendar, User, ArrowLeft, Share2 } from 'lucide-react'
 import Assistant from '@/components/chat/Assistant'
 import BlogStructuredData from '@/components/blog/BlogStructuredData'
+import { LocalBusinessSchema, BreadcrumbSchema } from '@/components/seo/TechnicalSEO'
 import blogPosts, { getPostsByEventType, getPostsByServiceArea } from '@/data/blogPosts'
 import { Metadata } from 'next'
 
@@ -169,6 +170,24 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       <BlogStructuredData post={post} />
+      
+      {/* Enhanced SEO Schema Markup */}
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Blog', url: '/blog' },
+          { name: post.title, url: `/blog/${post.slug}` }
+        ]}
+      />
+      
+      {post.serviceArea && post.serviceArea !== 'All Areas' && (
+        <LocalBusinessSchema
+          location={post.serviceArea}
+          eventType={post.eventType}
+          description={post.metaDescription}
+          url={`https://myhibachi.com/blog/${post.slug}`}
+        />
+      )}
 
       {/* Navigation */}
       <div className="bg-white border-b">

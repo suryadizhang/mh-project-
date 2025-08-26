@@ -96,7 +96,8 @@
   margin-top: 4rem;
 }
 
-.radius-card {
+/* Home page specific radius card styling */
+.service-areas .radius-card {
   background: white;
   border-radius: 15px;
   padding: 2rem;
@@ -104,26 +105,26 @@
   display: inline-block;
 }
 
-.radius-icon {
+.service-areas .radius-icon {
   font-size: 2.5rem;
   margin-bottom: 1rem;
   display: block;
 }
 
-.radius-title {
+.service-areas .radius-title {
   font-size: 1.8rem;
   font-weight: 700;
   color: #333;
   margin-bottom: 1rem;
 }
 
-.radius-description {
+.service-areas .radius-description {
   font-size: 1.1rem;
   color: #666;
   margin-bottom: 1.5rem;
 }
 
-.travel-fee-info {
+.service-areas .travel-fee-info {
   background: #f9f4ec;
   padding: 1.25rem;
   border-radius: 10px;
