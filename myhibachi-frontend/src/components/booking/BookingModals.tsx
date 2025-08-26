@@ -6,12 +6,12 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
   showValidationModal,
   setShowValidationModal,
   showAgreementModal,
-  setShowAgreementModal,
+  // setShowAgreementModal, // Commented out as it's not used in this component
   missingFields,
   isSubmitting,
   onAgreementConfirm,
   onAgreementCancel,
-  className = '' 
+  // className = '' // Commented out as it's not used in this component
 }) => {
   const handleCloseValidation = () => {
     setShowValidationModal(false);
