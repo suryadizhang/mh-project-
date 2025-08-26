@@ -1,19 +1,15 @@
 'use client'
 
 import Link from 'next/link'
-import '@/styles/home/home-base.css'
-import '@/styles/home/home-hero.css'
-import '@/styles/home/home-experience.css'
-import '@/styles/home/home-features.css'
-import '@/styles/home/home-service-areas.css'
-import '@/styles/home/home-cta.css'
-import '@/styles/home/home-buttons.css'
+import '@/styles/home.css'
+import '@/styles/pages/home.page.css'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
+import Assistant from '@/components/chat/Assistant'
 
 export default function Home() {
   useScrollAnimation()
   return (
-    <main>
+    <main data-page="home">
       {/* Hero Video Section */}
       <section className="about-section">
         {/* Hero Media Container */}
@@ -27,7 +23,6 @@ export default function Home() {
             muted
             loop
             playsInline
-            aria-label="Professional hibachi chef cooking demonstration at private event"
             style={{ backgroundColor: '#000' }}
           >
             <source src="/videos/hero_video.mp4" type="video/mp4" />
@@ -39,7 +34,7 @@ export default function Home() {
           {/* Animated Headline Section */}
           <div className="headline-section animate-on-scroll">
             <h1 className="main-title text-center">
-              Private Hibachi Chef | Bay Area, Sacramento & San Jose
+              Experience the Art of Japanese Hibachi
             </h1>
             <p className="subtitle text-center">
               Where Culinary Mastery Meets Unforgettable Entertainment
@@ -121,7 +116,7 @@ export default function Home() {
                   </p>
                   <div className="experience-stats">
                     <div className="stat-mini">
-                      <span className="stat-emoji">📍</span>
+                      <span className="stat-emoji">🌉</span>
                       <span className="stat-text">Bay Area & Sacramento</span>
                     </div>
                     <div className="stat-mini">
@@ -269,7 +264,7 @@ export default function Home() {
 
             <div className="service-radius-info text-center mt-4">
               <div className="radius-card">
-                <span className="radius-icon">📍</span>
+                <span className="radius-icon"> 🚗</span>
                 <h4 className="radius-title">We Come to You!</h4>
                 <p className="radius-description">
                   Hibachi brought to your home or venue—tell us your location and we&apos;ll make it happen.
@@ -306,7 +301,7 @@ export default function Home() {
               <Link href="/menu" className="btn btn-primary btn-lg me-3">
                 🔥 View Our Menu
               </Link>
-              <Link href="/contact" className="btn btn-outline-primary btn-lg">
+              <Link href="/quote" className="btn btn-outline-primary btn-lg">
                 💬 Get Your Free Quote
               </Link>
             </div>
@@ -401,12 +396,14 @@ export default function Home() {
           </div>
 
           <div className="services-cta text-center">
-            <Link href="/contact" className="btn btn-primary btn-lg">
+            <Link href="/BookUs" className="btn btn-primary btn-lg">
               <i className="bi bi-calendar-check me-2"></i> Book Your Premium Experience
             </Link>
           </div>
         </div>
       </section>
+
+      <Assistant page="/" />
     </main>
   )
 }

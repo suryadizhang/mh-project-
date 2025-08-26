@@ -17,7 +17,7 @@
   max-width: 900px;
   margin-left: auto;
   margin-right: auto;
-  word-wrap: break-word;
+  overflow-wrap: break-word;
   hyphens: auto;
 }
 
@@ -161,7 +161,7 @@
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .sectionTitle {
     font-size: var(--menu-font-size-3xl);
     line-height: 1.3;
@@ -188,7 +188,7 @@
   }
 }
 
-@media (max-width: 576px) {
+@media (width <= 576px) {
   .serviceAreas {
     padding: var(--menu-spacing-lg) var(--menu-spacing-md);
   }

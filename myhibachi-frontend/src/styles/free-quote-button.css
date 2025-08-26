@@ -25,12 +25,12 @@
 .free-quote-primary {
   background: linear-gradient(135deg, var(--color-primary, #db2b28) 0%, #c41e1a 100%);
   color: white;
-  box-shadow: 0 2px 8px rgba(219, 43, 40, 0.2);
+  box-shadow: 0 2px 8px rgb(219 43 40 / 20%);
 }
 
 .free-quote-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(219, 43, 40, 0.3);
+  box-shadow: 0 6px 20px rgb(219 43 40 / 30%);
 }
 
 .free-quote-primary:active {
@@ -48,7 +48,7 @@
   background: var(--color-primary, #db2b28);
   color: white;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(219, 43, 40, 0.2);
+  box-shadow: 0 4px 12px rgb(219 43 40 / 20%);
 }
 
 /* Floating Button Style */
@@ -60,34 +60,32 @@
   color: white;
   border-radius: 50px;
   padding: 1rem 1.5rem;
-  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+  box-shadow: 0 4px 20px rgb(212 175 55 / 40%);
   z-index: 1000;
   animation: pulse 2s infinite;
 }
 
 .free-quote-floating:hover {
   transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5);
+  box-shadow: 0 8px 30px rgb(212 175 55 / 50%);
   animation: none;
 }
 
 @keyframes pulse {
   0%, 100% {
-    box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+    box-shadow: 0 4px 20px rgb(212 175 55 / 40%);
   }
+
   50% {
-    box-shadow: 0 4px 30px rgba(212, 175, 55, 0.6);
+    box-shadow: 0 4px 30px rgb(212 175 55 / 60%);
   }
 }
 
 /* Modal Styles */
 .quote-modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  inset: 0;
+  background: rgb(0 0 0 / 70%);
   z-index: 2000;
   display: flex;
   align-items: center;
@@ -111,7 +109,7 @@
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgb(0 0 0 / 10%);
   border: none;
   border-radius: 50%;
   width: 40px;
@@ -128,7 +126,7 @@
 }
 
 .quote-close-btn:hover {
-  background: rgba(219, 43, 40, 0.1);
+  background: rgb(219 43 40 / 10%);
   color: var(--color-primary, #db2b28);
   transform: scale(1.1);
 }
@@ -143,6 +141,7 @@
     opacity: 0;
     transform: translateY(50px);
   }
+
   to { 
     opacity: 1;
     transform: translateY(0);
@@ -150,7 +149,7 @@
 }
 
 /* Mobile Responsiveness */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .free-quote-floating {
     bottom: 1rem;
     right: 1rem;
@@ -173,7 +172,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .free-quote-btn {
     padding: 0.6rem 1.2rem;
     font-size: 0.9rem;

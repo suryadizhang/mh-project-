@@ -45,7 +45,7 @@
 }
 
 .logoContainer {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgb(255 255 255 / 95%);
   backdrop-filter: blur(10px);
   padding: var(--home-card-padding);
   border-radius: 20px;
@@ -59,7 +59,7 @@
 }
 
 .logoImage {
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(0 4px 8px rgb(0 0 0 / 10%));
   transition: transform var(--home-animation-fast) ease-in-out;
 }
 
@@ -71,7 +71,7 @@
   font-size: var(--home-card-title-size);
   font-weight: 700;
   color: var(--home-primary);
-  margin: 1rem 0 0.5rem 0;
+  margin: 1rem 0 0.5rem;
   text-shadow: var(--home-text-shadow);
 }
 
@@ -83,7 +83,7 @@
 }
 
 .aboutContent {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgb(255 255 255 / 95%);
   backdrop-filter: blur(10px);
   padding: var(--home-card-padding);
   border-radius: 20px;
@@ -104,7 +104,7 @@
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .heroContent {
     padding: 1.5rem 0;
   }
@@ -129,7 +129,7 @@
   }
 }
 
-@media (max-width: 576px) {
+@media (width <= 576px) {
   .qualityBadge {
     font-size: 0.9rem;
     padding: 0.5rem 1rem;

@@ -35,11 +35,8 @@
 .booking-hero::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.2);
+  inset: 0;
+  background: rgb(0 0 0 / 20%);
   z-index: 1;
 }
 
@@ -58,7 +55,7 @@
   font-size: 3rem;
   font-weight: bold;
   margin-bottom: 1rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 2px 2px 4px rgb(0 0 0 / 30%);
 }
 
 .hero-subtitle {
@@ -101,12 +98,12 @@
 }
 
 .pricing-card {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgb(255 255 255 / 20%);
   backdrop-filter: blur(10px);
   border-radius: 12px;
   padding: 1rem 1.5rem;
   text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgb(255 255 255 / 30%);
 }
 
 .pricing-label {
@@ -135,7 +132,7 @@
   border-radius: 12px;
   padding: 2rem;
   margin-bottom: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgb(0 0 0 / 10%);
   border: 1px solid #e5e7eb;
 }
 
@@ -199,7 +196,7 @@
 .form-input:focus {
   outline: none;
   border-color: #FF6B6B;
-  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+  box-shadow: 0 0 0 3px rgb(255 107 107 / 10%);
 }
 
 .form-input.error {
@@ -383,7 +380,7 @@
   background: white;
   border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgb(0 0 0 / 10%);
   border: 1px solid #e5e7eb;
 }
 
@@ -516,7 +513,7 @@
 
 .submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 15px rgba(255, 107, 107, 0.3);
+  box-shadow: 0 8px 15px rgb(255 107 107 / 30%);
 }
 
 .submit-btn:disabled {
@@ -538,6 +535,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -548,7 +546,7 @@
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .booking-content {
     grid-template-columns: 1fr;
     gap: 1rem;
@@ -589,7 +587,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .hero-features {
     flex-direction: column;
     gap: 0.5rem;

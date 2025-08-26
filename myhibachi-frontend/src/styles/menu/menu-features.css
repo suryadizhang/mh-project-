@@ -535,7 +535,7 @@
   font-weight: 700;
 }
 
-.service-promise {
+[data-page="menu"] .service-promise {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -543,11 +543,11 @@
   margin-top: 1rem;
 }
 
-.promise-icon {
+[data-page="menu"] .promise-icon {
   font-size: 1.2rem;
 }
 
-.promise-text {
+[data-page="menu"] .promise-text {
   font-size: 0.9rem;
 }
 
@@ -631,7 +631,7 @@
   text-decoration: none;
 }
 
-.cta-main-button {
+[data-page="menu"] .cta-main-button {
   background: linear-gradient(135deg, #db2b28 0%, #c41e1a 100%);
   color: white !important;
   border: none;
@@ -652,41 +652,42 @@
   box-shadow: 0 4px 15px rgb(0 0 0 / 20%);
 }
 
-.cta-main-button * {
+[data-page="menu"] .cta-main-button * {
   color: white !important;
 }
 
-.cta-main-button .button-text {
+[data-page="menu"] .cta-main-button .button-text {
   color: white !important;
 }
 
-.cta-main-button:hover {
+[data-page="menu"] .cta-main-button:hover {
   background: linear-gradient(135deg, #c41e1a 0%, #b01e1a 100%);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgb(219 43 40 / 30%);
 }
 
-.cta-main-button:hover * {
+[data-page="menu"] .cta-main-button:hover * {
   color: white !important;
 }
 
-.modern-cta-button {
+[data-page="menu"] .modern-cta-button {
   box-shadow: 0 10px 20px rgb(0 0 0 / 10%);
 }
 
-.modern-cta-button:hover {
+[data-page="menu"] .modern-cta-button:hover {
   transform: translateY(-5px);
   box-shadow: 0 15px 30px rgb(0 0 0 / 25%);
 }
 
-.cta-main-button.modern-cta-button:hover {
+[data-page="menu"] .cta-main-button.modern-cta-button:hover {
   background: linear-gradient(135deg, #c41e1a 0%, #b01e1a 100%) !important;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgb(219 43 40 / 30%);
 }
 
-.button-text {
+[data-page="menu"] .button-text {
   z-index: 1;
+  color: white !important;
 }
 
 .button-icon {
@@ -1344,7 +1345,7 @@
   text-align: center;
 }
 
-.cta-main-button {
+[data-page="menu"] .cta-main-button {
   background: linear-gradient(135deg, #ff6b35, #ff8a65);
   border: none;
   border-radius: 50px;
@@ -1362,14 +1363,14 @@
   box-shadow: 0 8px 25px rgb(255 107 53 / 40%);
 }
 
-.cta-main-button:hover {
+[data-page="menu"] .cta-main-button:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 35px rgb(255 107 53 / 50%);
   color: #fff;
   text-decoration: none;
 }
 
-.button-shimmer {
+[data-page="menu"] .button-shimmer {
   position: absolute;
   top: 0;
   left: -100%;
@@ -1379,7 +1380,7 @@
   transition: left 0.6s ease;
 }
 
-.cta-main-button:hover .button-shimmer {
+[data-page="menu"] .cta-main-button:hover .button-shimmer {
   left: 100%;
 }
 

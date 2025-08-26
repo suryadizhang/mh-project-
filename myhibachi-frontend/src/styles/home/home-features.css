@@ -37,7 +37,7 @@
   background: white;
   border-radius: 15px;
   padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 5%);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -46,7 +46,7 @@
 
 .feature-item:hover {
   transform: translateY(-10px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 15px 40px rgb(0 0 0 / 10%);
 }
 
 .feature-premium {
@@ -121,7 +121,7 @@
 .feature-tag {
   display: inline-block;
   padding: 0.5rem 1.25rem;
-  background: rgba(219, 43, 40, 0.1);
+  background: rgb(219 43 40 / 10%);
   color: #db2b28;
   font-weight: 500;
   border-radius: 30px;

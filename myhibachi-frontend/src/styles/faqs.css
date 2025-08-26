@@ -20,7 +20,7 @@
 
 .faq-category:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 4px 20px rgba(219, 43, 40, 0.1);
+  box-shadow: 0 4px 20px rgb(219 43 40 / 10%);
 }
 
 /* Category Header */
@@ -43,7 +43,7 @@
 }
 
 .category-toggle:hover {
-  background: rgba(219, 43, 40, 0.05);
+  background: rgb(219 43 40 / 5%);
 }
 
 .category-toggle:focus {
@@ -110,6 +110,7 @@
     opacity: 0;
     max-height: 0;
   }
+
   to {
     opacity: 1;
     max-height: 2000px;
@@ -133,7 +134,7 @@
 }
 
 /* Mobile Optimizations */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .faqs-categories {
     gap: 1rem;
   }
@@ -172,28 +173,24 @@
   --color-text-light: #666;
   --color-text-muted: #999;
   --color-border: #e5e5e5;
-  --color-background: #ffffff;
+  --color-background: #fff;
   --color-background-light: #fafafa;
   --color-background-accent: #f8f8f8;
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
   --color-info: #3b82f6;
-  
   --font-primary: 'Poppins', system-ui, -apple-system, sans-serif;
   --font-secondary: 'Inter', system-ui, -apple-system, sans-serif;
-  
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
-  --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.15);
-  
+  --shadow-sm: 0 2px 4px rgb(0 0 0 / 10%);
+  --shadow-md: 0 4px 20px rgb(0 0 0 / 10%);
+  --shadow-lg: 0 8px 32px rgb(0 0 0 / 12%);
+  --shadow-xl: 0 12px 48px rgb(0 0 0 / 15%);
   --radius-sm: 6px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 20px;
   --radius-full: 50px;
-  
   --transition-fast: all 0.2s ease;
   --transition-normal: all 0.3s ease;
   --transition-slow: all 0.5s ease;
@@ -238,7 +235,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgb(0 0 0 / 50%);
   z-index: 0;
 }
 
@@ -253,7 +250,7 @@
   font-weight: 800;
   margin-bottom: 1rem;
   color: var(--color-secondary);
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  text-shadow: 2px 2px 4px rgb(0 0 0 / 70%);
   line-height: 1.1;
 }
 
@@ -263,7 +260,7 @@
   margin: 0 auto 1.5rem;
   opacity: 0.95;
   line-height: 1.5;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+  text-shadow: 1px 1px 2px rgb(0 0 0 / 70%);
   font-family: var(--font-secondary);
 }
 
@@ -281,10 +278,10 @@
   align-items: center;
   gap: 0.5rem;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgb(255 255 255 / 10%);
   border-radius: var(--radius-md);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgb(255 255 255 / 20%);
   min-width: 120px;
 }
 
@@ -362,7 +359,7 @@
 .faq-search-input:focus {
   outline: none;
   background: white;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 2px 4px rgb(0 0 0 / 5%);
 }
 
 .clear-search {
@@ -418,7 +415,7 @@
   font-weight: 600;
   font-size: 0.9rem;
   padding: 0.5rem 1rem;
-  background: rgba(255, 107, 53, 0.1);
+  background: rgb(255 107 53 / 10%);
   border-radius: var(--radius-full);
   transition: var(--transition-fast);
 }
@@ -555,9 +552,9 @@
   justify-content: center;
   gap: 0.4rem;
   padding: 0.75rem;
-  background: rgba(255, 107, 53, 0.05);
+  background: rgb(255 107 53 / 5%);
   border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 107, 53, 0.2);
+  border: 1px solid rgb(255 107 53 / 20%);
   margin-bottom: 0.5rem;
 }
 
@@ -592,7 +589,7 @@
 
 .remove-filter:hover {
   opacity: 1;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgb(255 255 255 / 20%);
 }
 
 .clear-all-filters {
@@ -613,7 +610,7 @@
 }
 
 /* Mobile Optimizations for Filters */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .faq-filters {
     margin-top: 0.5rem;
     margin-bottom: 1rem;
@@ -760,7 +757,7 @@
 }
 
 .faq-question:focus {
-  outline: 3px solid rgba(255, 107, 53, 0.3);
+  outline: 3px solid rgb(255 107 53 / 30%);
   outline-offset: -3px;
   background: var(--color-background-accent);
 }
@@ -799,7 +796,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(255, 107, 53, 0.1);
+  background: rgb(255 107 53 / 10%);
 }
 
 .faq-item.active .faq-icon {
@@ -855,7 +852,7 @@
 
 /* Search Highlighting */
 .search-highlight {
-  background: rgba(255, 235, 59, 0.4);
+  background: rgb(255 235 59 / 40%);
   padding: 0.1rem 0.2rem;
   border-radius: 3px;
   font-weight: 600;
@@ -936,7 +933,7 @@
 }
 
 .faq-category {
-  background: rgba(75, 45, 19, 0.1);
+  background: rgb(75 45 19 / 10%);
   color: var(--color-brown);
   padding: 0.3rem 0.8rem;
   border-radius: var(--radius-full);
@@ -951,7 +948,7 @@
 }
 
 .faq-tag {
-  background: rgba(255, 107, 53, 0.1);
+  background: rgb(255 107 53 / 10%);
   color: var(--color-secondary);
   padding: 0.2rem 0.6rem;
   border-radius: var(--radius-full);
@@ -960,7 +957,7 @@
 }
 
 .review-needed {
-  background: rgba(245, 158, 11, 0.1);
+  background: rgb(245 158 11 / 10%);
   color: var(--color-warning);
   padding: 0.3rem 0.8rem;
   border-radius: var(--radius-full);
@@ -1167,7 +1164,7 @@
 .contact-info {
   margin-top: 2rem;
   padding-top: 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgb(255 255 255 / 20%);
   font-family: var(--font-secondary);
   opacity: 0.8;
   line-height: 1.6;
@@ -1181,7 +1178,7 @@
    RESPONSIVE DESIGN
    ============================================ */
 
-@media (max-width: 1024px) {
+@media (width <= 1024px) {
   .container {
     padding: 0 1.5rem;
   }
@@ -1200,7 +1197,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .faqs-hero {
     padding: 6rem 1rem 4rem;
   }
@@ -1250,7 +1247,7 @@
   }
   
   .faq-question {
-    padding: 1.5rem 1.5rem;
+    padding: 1.5rem;
   }
   
   .faq-question h3 {
@@ -1312,7 +1309,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .faqs-hero h1 {
     font-size: 2rem;
   }
@@ -1383,7 +1380,7 @@
   }
   
   .faq-item {
-    page-break-inside: avoid;
+    break-inside: avoid;
     border: 1px solid #ddd;
     margin-bottom: 1rem;
     border-radius: 4px;
@@ -1430,7 +1427,7 @@
 .cta-btn:focus,
 button:focus,
 input:focus {
-  outline: 3px solid rgba(255, 107, 53, 0.5);
+  outline: 3px solid rgb(255 107 53 / 50%);
   outline-offset: 2px;
 }
 
@@ -1440,8 +1437,8 @@ input:focus {
     --color-border: #000;
     --color-text-light: #000;
     --color-text-muted: #333;
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 2px 4px rgb(0 0 0 / 30%);
+    --shadow-md: 0 4px 20px rgb(0 0 0 / 30%);
   }
   
   .faq-item {
@@ -1498,6 +1495,7 @@ input:focus {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1506,15 +1504,16 @@ input:focus {
 
 /* Highlight animation for hash-linked FAQs */
 .faq-item.highlighted {
-  background: rgba(255, 235, 59, 0.2);
+  background: rgb(255 235 59 / 20%);
   animation: highlightPulse 2s ease-in-out;
 }
 
 @keyframes highlightPulse {
   0%, 100% { 
-    background: rgba(255, 235, 59, 0.2); 
+    background: rgb(255 235 59 / 20%); 
   }
+
   50% { 
-    background: rgba(255, 235, 59, 0.4); 
+    background: rgb(255 235 59 / 40%); 
   }
 }

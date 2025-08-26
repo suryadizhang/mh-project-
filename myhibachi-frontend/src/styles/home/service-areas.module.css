@@ -48,7 +48,7 @@
   transition: all var(--home-animation-fast) ease-in-out;
   font-size: 1.1rem;
   display: inline-block;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px rgb(0 0 0 / 20%);
 }
 
 .primaryButton {
@@ -61,7 +61,7 @@
   background: var(--home-primary-dark);
   color: white;
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 25px rgb(0 0 0 / 30%);
 }
 
 .secondaryButton {
@@ -74,11 +74,11 @@
   background: white;
   color: var(--home-primary);
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 25px rgb(255 255 255 / 30%);
 }
 
 .areaCard {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgb(255 255 255 / 95%);
   backdrop-filter: blur(10px);
   border-radius: 20px;
   padding: var(--home-card-padding);
@@ -120,19 +120,19 @@
   font-size: 1rem;
   color: var(--menu-text-primary);
   padding: 0.75rem 1rem;
-  background: rgba(220, 53, 69, 0.05);
+  background: rgb(220 53 69 / 5%);
   border-radius: 10px;
   border-left: 4px solid var(--home-primary);
   transition: all var(--home-animation-fast) ease-in-out;
 }
 
 .locationItem:hover {
-  background: rgba(220, 53, 69, 0.1);
+  background: rgb(220 53 69 / 10%);
   transform: translateX(5px);
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .ctaButtons {
     flex-direction: column;
     align-items: center;
@@ -154,7 +154,7 @@
   }
 }
 
-@media (max-width: 576px) {
+@media (width <= 576px) {
   .areaCard {
     padding: 1rem;
   }

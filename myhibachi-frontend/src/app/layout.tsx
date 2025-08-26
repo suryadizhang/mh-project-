@@ -9,6 +9,13 @@ import { PerformanceMonitoring } from '@/components/seo/TechnicalSEO'
 
 // Import global styles
 import '@/styles/base.css'
+import '@/styles/utilities.css'
+import '@/styles/menu.css'
+import '@/styles/menu/menu-features.css'
+import '@/styles/menu/menu-pricing.css'
+import '@/styles/menu/menu-base.css'
+import '@/styles/menu/base.css'
+import '@/styles/pages/menu.page.css'
 import '@/styles/footer.css'
 import '@/styles/free-quote-button.css'
 import '@/styles/quote-calculator.css'

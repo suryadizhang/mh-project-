@@ -1,21 +1,10 @@
-﻿import Link from 'next/link'
-import { Calculator, Calendar, MessageCircle } from 'lucide-react'
-import '@/styles/menu/menu-base.css'
-import '@/styles/menu/menu-pricing.css'
-import '@/styles/menu/menu-features.css'
-import Assistant from '@/components/chat/Assistant'
-import { Metadata } from 'next'
+﻿'use client'
 
-export const metadata: Metadata = {
-  title: "Private Hibachi Chef Menu & Pricing | Bay Area & Sacramento Catering",
-  description: "Premium hibachi catering menu with fresh ingredients. Professional private chef service in San Francisco, San Jose, Oakland, Sacramento. Book your hibachi experience today!",
-  keywords: "hibachi menu, private hibachi chef, bay area hibachi catering, sacramento hibachi, san jose hibachi, hibachi pricing, mobile hibachi chef, hibachi catering menu, private chef services",
-  openGraph: {
-    title: "Private Hibachi Chef Menu & Pricing | Bay Area & Sacramento",
-    description: "Premium hibachi catering menu with fresh ingredients. Professional private chef service across Northern California.",
-    type: 'website'
-  }
-}
+import Link from 'next/link'
+import { Calculator, Calendar, MessageCircle } from 'lucide-react'
+import '@/styles/menu.css'
+import '@/styles/pages/menu.page.css'
+import Assistant from '@/components/chat/Assistant'
 
 export default function MenuPage() {
   return (
@@ -393,7 +382,7 @@ export default function MenuPage() {
                         </div>
                         <div className="protein-check">
                           <div className="check-circle">
-                            <span className="check-icon emoji-visible">✓</span>
+                            <span className="check-icon">✓</span>
                           </div>
                         </div>
                       </div>
@@ -414,7 +403,7 @@ export default function MenuPage() {
                         </div>
                         <div className="protein-check">
                           <div className="check-circle">
-                            <span className="check-icon emoji-visible">✓</span>
+                            <span className="check-icon">✓</span>
                           </div>
                         </div>
                       </div>
@@ -435,7 +424,7 @@ export default function MenuPage() {
                         </div>
                         <div className="protein-check">
                           <div className="check-circle">
-                            <span className="check-icon emoji-visible">✓</span>
+                            <span className="check-icon">✓</span>
                           </div>
                         </div>
                       </div>
@@ -456,7 +445,7 @@ export default function MenuPage() {
                         </div>
                         <div className="protein-check">
                           <div className="check-circle">
-                            <span className="check-icon emoji-visible">✓</span>
+                            <span className="check-icon">✓</span>
                           </div>
                         </div>
                       </div>
@@ -477,7 +466,7 @@ export default function MenuPage() {
                         </div>
                         <div className="protein-check">
                           <div className="check-circle">
-                            <span className="check-icon emoji-visible">✓</span>
+                            <span className="check-icon">✓</span>
                           </div>
                         </div>
                       </div>
@@ -716,7 +705,7 @@ export default function MenuPage() {
             <div className="text-center mb-5">
               <div className="section-header animated-section">
                 <div className="section-icon-wrapper mb-3">
-                  <span className="section-icon emoji-visible">📍</span>
+                  <span className="section-icon emoji-visible">🏠</span>
                 </div>
                 <h2 className="section-title mb-4">Our Service Areas</h2>
                 <p className="section-subtitle">We bring the hibachi experience directly to your location!</p>
@@ -778,12 +767,12 @@ export default function MenuPage() {
 
             <div className="service-radius-info text-center mt-4">
               <div className="radius-card">
-                <span className="radius-icon">📍</span>
+                <span className="radius-icon"> 🚗 </span>
                 <h4 className="radius-title">We Come to You!</h4>
                 <p className="radius-description">
                   Serving the Bay Area, Sacramento, San Jose & surrounding regions. Not sure we cover you? Reach out—we&apos;ll do our best!
                 </p>
-                <p className="travel-fee-info">
+                <p className="travel-fee-info" style={{ color: 'white' }}>
                   <span className="travel-highlight">💰 Transparent Pricing:</span>
                   Flexible service area with transparent travel options—get your quote instantly above!
                   <br />
@@ -825,7 +814,7 @@ export default function MenuPage() {
 
               {/* Main CTA Button */}
               <div className="cta-button-wrapper mb-5">
-                <Link href="/contact" aria-label="Order your hibachi experience now" className="cta-link">
+                <Link href="/BookUs" aria-label="Order your hibachi experience now" className="cta-link">
                   <button className="cta-main-button modern-cta-button">
                     <span className="button-icon emoji-visible">🍽️</span>
                     <span className="button-text">Order Your Hibachi Experience</span>

@@ -1,0 +1,183 @@
+/* ==========================================================================
+   HOME PAGE SCOPED STYLES
+   Data attribute: data-page="home"
+   Purpose: Page-specific CSS overrides for home page emoji animations
+   ========================================================================== */
+
+/* ==========================================================================
+   SERVICE AREAS SECTION EMOJI ANIMATIONS FOR HOME PAGE
+   Apply orbital motion to all emoji icons in service areas section
+   ========================================================================== */
+
+/* Radius card icons (📍 in "We Come to You!" section) */
+[data-page="home"] .radius-icon {
+  display: inline-block !important;
+  position: relative !important;
+  animation: homeDriveAnimation 3s infinite ease-in-out !important;
+  transform-origin: center !important;
+  backface-visibility: hidden !important;
+}
+
+/* Override for house emoji in stats - should be static */
+[data-page="home"] .stat-emoji {
+  display: inline-block !important;
+  position: relative !important;
+  /* Keep house emoji static */
+  animation: none !important;
+  transform-origin: center !important;
+  backface-visibility: hidden !important;
+}
+
+/* ==========================================================================
+   SERVICE AREAS RADIUS CARD FIX - RESTORE ORIGINAL DESIGN
+   Fix contrast issue - use original dark gradient background with white text
+   ========================================================================== */
+
+[data-page="home"] .radius-card {
+  background: linear-gradient(135deg, #28a745, #20c997) !important;
+  color: white !important;
+  border-radius: var(--radius-lg-custom, 15px) !important;
+  padding: 2rem !important;
+  text-align: center !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease !important;
+}
+
+[data-page="home"] .radius-icon {
+  font-size: 3rem !important;
+  margin-bottom: 1rem !important;
+  color: white !important;
+}
+
+[data-page="home"] .radius-title {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 1rem !important;
+  color: white !important;
+}
+
+[data-page="home"] .radius-description {
+  margin-bottom: 1.5rem !important;
+  color: white !important;
+  opacity: 0.95 !important;
+}
+
+[data-page="home"] .travel-fee-info {
+  margin-bottom: 1.5rem !important;
+  color: white !important;
+  opacity: 0.9 !important;
+}
+
+[data-page="home"] .travel-highlight {
+  color: #FFE4B5 !important;
+  font-weight: 600 !important;
+}
+
+[data-page="home"] .service-promise {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.75rem !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  padding: 1rem !important;
+  border-radius: 10px !important;
+}
+
+[data-page="home"] .promise-text {
+  color: white !important;
+  font-weight: 500 !important;
+}
+
+/* Promise icons (🎯 in service promise section) */
+[data-page="home"] .promise-icon {
+  display: inline-block !important;
+  position: relative !important;
+  animation: homeOrbitAnimation 9s infinite linear !important;
+  transform-origin: center !important;
+  backface-visibility: hidden !important;
+}
+
+/* Feature icons in service cards */
+[data-page="home"] .featureIcon,
+[data-page="home"] .serviceIcon {
+  display: inline-block !important;
+  position: relative !important;
+  animation: homeOrbitAnimation 11s infinite linear !important;
+  transform-origin: center !important;
+  backface-visibility: hidden !important;
+}
+
+/* Add staggered delays for variety */
+[data-page="home"] .radius-icon:nth-child(1) {
+  animation-delay: 0s !important;
+}
+
+/* Car driving animation for home page */
+@keyframes homeDriveAnimation {
+  0% {
+    transform: translateX(-12px);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateX(12px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-12px);
+    opacity: 0.8;
+  }
+}
+
+[data-page="home"] .promise-icon:nth-child(1) {
+  animation-delay: 1.5s !important;
+}
+
+[data-page="home"] .featureIcon:nth-child(1),
+[data-page="home"] .serviceIcon:nth-child(1) {
+  animation-delay: 3s !important;
+}
+
+/* Home page orbital animation - slightly different timing */
+@keyframes homeOrbitAnimation {
+  0% {
+    transform: rotate(0deg);
+    opacity: 0.8;
+  }
+  25% {
+    opacity: 1;
+  }
+  50% {
+    transform: rotate(180deg);
+    opacity: 0.9;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 0.8;
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Reduce animation intensity on mobile */
+  [data-page="home"] .radius-icon,
+  [data-page="home"] .promise-icon,
+  [data-page="home"] .featureIcon,
+  [data-page="home"] .serviceIcon {
+    animation-duration: 10s !important;
+  }
+}
+
+@media (max-width: 576px) {
+  /* Further reduce on small screens */
+  [data-page="home"] .radius-icon,
+  [data-page="home"] .promise-icon,
+  [data-page="home"] .featureIcon,
+  [data-page="home"] .serviceIcon {
+    animation-duration: 12s !important;
+  }
+}

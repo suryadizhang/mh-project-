@@ -11,11 +11,8 @@
 .booking-hero::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.2);
+  inset: 0;
+  background: rgb(0 0 0 / 20%);
   z-index: 1;
 }
 
@@ -33,7 +30,7 @@
   font-size: 3rem;
   font-weight: bold;
   margin-bottom: 1rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 2px 2px 4px rgb(0 0 0 / 30%);
 }
 
 .hero-subtitle {
@@ -63,7 +60,7 @@
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .hero-title {
     font-size: 2rem;
   }

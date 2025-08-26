@@ -1,6 +1,48 @@
 /* Base CSS - Global resets and animations */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* CSS Custom Properties (Variables) */
+:root {
+  /* Colors */
+  --color-primary: #db2b28;
+  --color-secondary: #ff7b00;
+  --color-gold: #ffb800;
+  --color-success: #28a745;
+  --color-background: #ffffff;
+  --color-background-light: #f8f9fa;
+  --color-background-accent: #f9f4eb;
+  --color-border-custom: rgba(0, 0, 0, 0.1);
+  --text-default: #333333;
+  --text-strong: #111111;
+  --text-light: #666666;
+  --text-on-dark: #ffffff;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-md-custom: 15px;
+  --radius-lg-custom: 20px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+
+  /* Transitions */
+  --transition-fast: all 0.15s ease;
+  --transition-normal: all 0.3s ease;
+  --transition-slow: all 0.5s ease;
+}
+
 /* CSS Reset */
 * {
   margin: 0;
@@ -13,7 +55,7 @@ html {
 }
 
 body {
-  font-family: 'Poppins', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  font-family: Poppins, Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
   line-height: 1.6;
   color: #333;
   overflow-x: hidden;
@@ -42,7 +84,7 @@ a:focus {
   line-height: 1;
   background: none;
   background-clip: initial;
-  -webkit-background-clip: initial;
+  background-clip: initial;
   -webkit-text-fill-color: initial;
   color: inherit;
   text-shadow: none;
@@ -58,6 +100,7 @@ a:focus {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -69,6 +112,7 @@ a:focus {
     opacity: 0;
     transform: translateY(40px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -79,9 +123,11 @@ a:focus {
   0% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.1);
   }
+
   100% {
     transform: scale(1);
   }
@@ -91,15 +137,19 @@ a:focus {
   0% {
     transform: translate(0, 0) rotate(0deg);
   }
+
   25% {
     transform: translate(50px, 30px) rotate(90deg);
   }
+
   50% {
     transform: translate(0, 60px) rotate(180deg);
   }
+
   75% {
     transform: translate(-50px, 30px) rotate(270deg);
   }
+
   100% {
     transform: translate(0, 0) rotate(360deg);
   }
@@ -110,6 +160,7 @@ a:focus {
     opacity: 0;
     transform: translateX(-50px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -121,6 +172,7 @@ a:focus {
     opacity: 0;
     transform: translateX(50px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -132,6 +184,7 @@ a:focus {
     opacity: 0;
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -192,7 +245,7 @@ a:focus {
 /* Common utility classes */
 .gradient-text {
   background: linear-gradient(135deg, #ff7b00, #ffb800, #db2b28);
-  -webkit-background-clip: text;
+  background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
@@ -246,7 +299,7 @@ a:focus {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgb(0 0 0 / 60%);
   z-index: 1;
 }
 

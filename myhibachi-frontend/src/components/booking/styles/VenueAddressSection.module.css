@@ -10,7 +10,7 @@
 
 .form-control:focus {
   border-color: #f59e0b;
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+  box-shadow: 0 0 0 3px rgb(245 158 11 / 10%);
 }
 
 /* Section description styling */
@@ -39,7 +39,7 @@ input[type="text"] {
 
 input[type="text"]:focus {
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.1);
+  box-shadow: 0 4px 8px rgb(245 158 11 / 10%);
 }
 
 /* ZIP code field specific styling */
@@ -49,7 +49,7 @@ input[id="venueZipcode"] {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .form-section {
     border-left: 2px solid #f59e0b;
   }

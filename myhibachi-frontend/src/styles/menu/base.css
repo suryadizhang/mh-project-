@@ -11,15 +11,15 @@
 
   /* Background Colors */
   --menu-bg-primary: #f9f4eb;
-  --menu-bg-card: #ffffff;
+  --menu-bg-card: #fff;
   --menu-bg-section: #f8f9fa;
-  --menu-bg-overlay: rgba(0, 0, 0, 0.5);
+  --menu-bg-overlay: rgb(0 0 0 / 50%);
 
   /* Text Colors */
-  --menu-text-primary: #333333;
-  --menu-text-secondary: #666666;
-  --menu-text-muted: #999999;
-  --menu-text-white: #ffffff;
+  --menu-text-primary: #333;
+  --menu-text-secondary: #666;
+  --menu-text-muted: #999;
+  --menu-text-white: #fff;
 
   /* Spacing */
   --menu-spacing-xs: 0.5rem;
@@ -36,10 +36,10 @@
   --menu-border-radius-xl: 20px;
 
   /* Shadows */
-  --menu-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
-  --menu-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
-  --menu-shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
-  --menu-shadow-xl: 0 15px 30px rgba(0, 0, 0, 0.1);
+  --menu-shadow-sm: 0 2px 4px rgb(0 0 0 / 10%);
+  --menu-shadow-md: 0 4px 8px rgb(0 0 0 / 10%);
+  --menu-shadow-lg: 0 8px 16px rgb(0 0 0 / 10%);
+  --menu-shadow-xl: 0 15px 30px rgb(0 0 0 / 10%);
 
   /* Transitions */
   --menu-transition-fast: 0.2s ease;

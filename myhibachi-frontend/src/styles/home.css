@@ -38,7 +38,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgb(0 0 0 / 50%);
   z-index: 1;
 }
 
@@ -64,19 +64,19 @@
   margin-top: -400px;
   margin-bottom: 67px;
   padding: 2rem;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgb(0 0 0 / 40%);
   border-radius: 15px;
   backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
 }
 
 .main-title {
   font-size: 4rem;
   font-weight: 700;
   margin-bottom: 1rem;
-  text-shadow: 3px 3px 15px rgba(0, 0, 0, 0.9), 0 0 25px rgba(0, 0, 0, 0.8);
+  text-shadow: 3px 3px 15px rgb(0 0 0 / 90%), 0 0 25px rgb(0 0 0 / 80%);
   background: linear-gradient(to right, #fff, #f8e3bb, #fff);
-  -webkit-background-clip: text;
+  background-clip: text;
   background-clip: text;
   color: transparent;
   display: inline-block;
@@ -86,7 +86,7 @@
   font-size: 1.5rem;
   max-width: 800px;
   margin: 0 auto 2rem;
-  text-shadow: 2px 2px 12px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 0, 0, 0.8);
+  text-shadow: 2px 2px 12px rgb(0 0 0 / 90%), 0 0 20px rgb(0 0 0 / 80%);
   color: white;
   font-weight: 500;
 }
@@ -94,19 +94,19 @@
 .quality-badge {
   display: inline-block;
   padding: 0.75rem 2rem;
-  background: rgba(219, 43, 40, 0.85);
+  background: rgb(219 43 40 / 85%);
   color: white;
   font-weight: 500;
   border-radius: 50px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
 }
 
 /* Statistics Section */
 .statistics-section {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgb(255 255 255 / 95%);
   border-radius: 15px;
   padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 10%);
   max-width: 1000px;
   margin: 0 auto 4rem;
 }
@@ -132,6 +132,7 @@
   color: #4a2c0a;
   font-weight: 500;
 }
+
 /* Experience Cards */
 .experience-sections {
   max-width: 1200px;
@@ -141,7 +142,7 @@
 .experience-card {
   background: white;
   border-radius: 20px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 15px 35px rgb(0 0 0 / 5%);
   padding: 2.5rem;
   height: 100%;
   transition: all 0.3s ease;
@@ -156,13 +157,13 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, rgba(219, 43, 40, 0.05) 0%, rgba(255, 184, 0, 0.05) 100%);
+  background: linear-gradient(135deg, rgb(219 43 40 / 5%) 0%, rgb(255 184 0 / 5%) 100%);
   z-index: -1;
 }
 
 .experience-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 40px rgb(0 0 0 / 10%);
 }
 
 .experience-icon-wrapper {
@@ -171,13 +172,13 @@
   right: 20px;
   width: 70px;
   height: 70px;
-  background: rgba(219, 43, 40, 0.1);
+  background: rgb(219 43 40 / 10%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2.2rem;
-  border: 2px solid rgba(219, 43, 40, 0.2);
+  border: 2px solid rgb(219 43 40 / 20%);
   z-index: 2;
 }
 
@@ -208,7 +209,7 @@
 }
 
 .highlight-badge {
-  background: rgba(219, 43, 40, 0.1);
+  background: rgb(219 43 40 / 10%);
   color: #db2b28;
   padding: 0.5rem 1rem;
   border-radius: 30px;
@@ -261,6 +262,7 @@
     transform: scale(1);
     filter: brightness(1);
   }
+
   50% {
     transform: scale(1.1);
     filter: brightness(1.2) hue-rotate(10deg);
@@ -271,6 +273,7 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -313,7 +316,7 @@
   background: white;
   border-radius: 15px;
   padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 5%);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -322,7 +325,7 @@
 
 .feature-item:hover {
   transform: translateY(-10px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 15px 40px rgb(0 0 0 / 10%);
 }
 
 .feature-premium {
@@ -397,7 +400,7 @@
 .feature-tag {
   display: inline-block;
   padding: 0.5rem 1.25rem;
-  background: rgba(219, 43, 40, 0.1);
+  background: rgb(219 43 40 / 10%);
   color: #db2b28;
   font-weight: 500;
   border-radius: 30px;
@@ -421,19 +424,19 @@
   max-width: 900px;
   margin-left: auto;
   margin-right: auto;
-  word-wrap: break-word;
+  overflow-wrap: break-word;
   hyphens: auto;
 }
 
 /* Responsive font sizes for section-title */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .section-title {
     font-size: 2rem;
     line-height: 1.3;
   }
 }
 
-@media (max-width: 576px) {
+@media (width <= 576px) {
   .section-title {
     font-size: 1.75rem;
     line-height: 1.4;
@@ -451,7 +454,7 @@
   background: white;
   border-radius: 15px;
   padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 5%);
   height: 100%;
 }
 
@@ -478,12 +481,12 @@
 
 .area-list li {
   padding: 0.75rem 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgb(0 0 0 / 5%);
   position: relative;
   padding-left: 2rem;
 }
 
-.area-list li:before {
+.area-list li::before {
   content: '•';
   color: #db2b28;
   position: absolute;
@@ -501,6 +504,7 @@
 }
 
 /* DEPRECATED: Global radius-card styling moved to scoped home-service-areas.css */
+
 /*
 .radius-card {
   background: white;
@@ -549,7 +553,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  background: rgba(219, 43, 40, 0.1);
+  background: rgb(219 43 40 / 10%);
   padding: 1rem;
   border-radius: 10px;
 }
@@ -593,7 +597,7 @@
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 4px rgb(0 0 0 / 30%);
   color: white !important;
 }
 
@@ -606,12 +610,12 @@
 }
 
 .cta-special-offer {
-  background: rgba(255, 255, 255, 0.25) !important;
+  background: rgb(255 255 255 / 25%) !important;
   padding: 1.5rem;
   border-radius: 15px;
   margin-bottom: 2rem;
   display: inline-block;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgb(255 255 255 / 30%);
 }
 
 .offer-badge {
@@ -700,7 +704,7 @@
   border-radius: 20px;
   padding: 2rem;
   height: 100%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 10%);
   transition: all 0.3s ease;
   position: relative;
   z-index: 1;
@@ -710,7 +714,7 @@
 
 .service-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 15px 35px rgba(219, 43, 40, 0.2);
+  box-shadow: 0 15px 35px rgb(219 43 40 / 20%);
 }
 
 .service-icon-wrapper {
@@ -793,7 +797,7 @@
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(219, 43, 40, 0.3);
+  box-shadow: 0 6px 20px rgb(219 43 40 / 30%);
   color: white !important;
   text-decoration: none;
   background: linear-gradient(135deg, #c41e1a 0%, #b01e1a 100%) !important;
@@ -809,7 +813,7 @@
   background: #db2b28 !important;
   color: white !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(219, 43, 40, 0.2);
+  box-shadow: 0 6px 20px rgb(219 43 40 / 20%);
   text-decoration: none;
 }
 
@@ -823,7 +827,7 @@
   background: linear-gradient(135deg, #c41e1a 0%, #b01e1a 100%) !important;
   color: white !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(219, 43, 40, 0.3);
+  box-shadow: 0 6px 20px rgb(219 43 40 / 30%);
 }
 
 .cta-section .btn-outline-primary {
@@ -833,10 +837,10 @@
 }
 
 .cta-section .btn-outline-primary:hover {
-  background: rgba(255, 255, 255, 0.9) !important;
+  background: rgb(255 255 255 / 90%) !important;
   color: #db2b28 !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 6px 20px rgb(255 255 255 / 30%);
 }
 
 /* Modern CTA Section with white/light background */
@@ -885,7 +889,7 @@
 .cta-section .cta-main-button:hover {
   background: linear-gradient(135deg, #c41e1a 0%, #b01e1a 100%) !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(219, 43, 40, 0.3);
+  box-shadow: 0 6px 20px rgb(219 43 40 / 30%);
 }
 
 .cta-section .cta-main-button .button-text {
@@ -915,10 +919,10 @@
 
 /* Override the global white text rule for light background CTA sections */
 .cta-section .cta-content-wrapper {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgb(255 255 255 / 95%);
   border-radius: 15px;
   padding: 3rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 10%);
 }
 
 .cta-section .cta-content-wrapper * {
@@ -955,7 +959,7 @@
   margin-bottom: 1.5rem;
 }
 
-@media (max-width: 992px) {
+@media (width <= 992px) {
   .main-title {
     font-size: 3rem;
   }
@@ -965,7 +969,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .hero-media-container {
     height: 500px;
   }
@@ -1044,7 +1048,7 @@
   background: white;
   border-radius: 8px;
   padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 5%);
 }
 
 .home-cta {

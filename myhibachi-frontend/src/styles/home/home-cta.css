@@ -30,7 +30,7 @@
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 4px rgb(0 0 0 / 30%);
   color: white !important;
 }
 
@@ -43,12 +43,12 @@
 }
 
 .cta-special-offer {
-  background: rgba(255, 255, 255, 0.25) !important;
+  background: rgb(255 255 255 / 25%) !important;
   padding: 1.5rem;
   border-radius: 15px;
   margin-bottom: 2rem;
   display: inline-block;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgb(255 255 255 / 30%);
 }
 
 .offer-badge {
@@ -138,7 +138,7 @@
   border-radius: 20px;
   padding: 2rem;
   height: 100%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 10%);
   transition: all 0.3s ease;
   position: relative;
   z-index: 1;
@@ -148,7 +148,7 @@
 
 .service-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 15px 35px rgba(219, 43, 40, 0.2);
+  box-shadow: 0 15px 35px rgb(219 43 40 / 20%);
 }
 
 .service-icon-wrapper {
@@ -255,7 +255,7 @@
 .cta-section .cta-main-button:hover {
   background: linear-gradient(135deg, #c41e1a 0%, #b01e1a 100%) !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(219, 43, 40, 0.3);
+  box-shadow: 0 6px 20px rgb(219 43 40 / 30%);
 }
 
 .cta-section .cta-main-button .button-text {
@@ -285,10 +285,10 @@
 
 /* Override the global white text rule for light background CTA sections */
 .cta-section .cta-content-wrapper {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgb(255 255 255 / 95%);
   border-radius: 15px;
   padding: 3rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 10%);
 }
 
 .cta-section .cta-content-wrapper * {

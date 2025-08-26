@@ -68,6 +68,18 @@ export default function Footer() {
               <i className="bi bi-telephone footer-contact-icon"></i>
               <span>(916) 740-8768</span>
             </li>
+            <li>
+              <i className="bi bi-messenger footer-contact-icon"></i>
+              <a href="https://m.me/61577483702847" target="_blank" rel="noopener noreferrer">
+                Facebook Messenger
+              </a>
+            </li>
+            <li>
+              <i className="bi bi-instagram footer-contact-icon"></i>
+              <a href="https://ig.me/m/my_hibachi_chef" target="_blank" rel="noopener noreferrer">
+                Instagram DM
+              </a>
+            </li>
           </ul>
         </div>
       </div>

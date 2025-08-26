@@ -31,7 +31,7 @@
   font-size: var(--menu-font-size-4xl);
   font-weight: 800;
   margin-bottom: var(--menu-spacing-md);
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  text-shadow: 0 2px 4px rgb(0 0 0 / 30%);
   line-height: 1.2;
 }
 
@@ -78,7 +78,7 @@
 
 .primaryCtaButton:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  box-shadow: 0 8px 25px rgb(0 0 0 / 30%);
   color: var(--menu-primary);
   text-decoration: none;
 }
@@ -97,14 +97,14 @@
 }
 
 .tertiaryCtaButton {
-  background: rgba(255,255,255,0.1);
+  background: rgb(255 255 255 / 10%);
   color: white;
-  border-color: rgba(255,255,255,0.3);
+  border-color: rgb(255 255 255 / 30%);
   backdrop-filter: blur(10px);
 }
 
 .tertiaryCtaButton:hover {
-  background: rgba(255,255,255,0.2);
+  background: rgb(255 255 255 / 20%);
   border-color: white;
   transform: translateY(-3px);
   color: white;
@@ -134,11 +134,11 @@
 
 .trustIcon {
   font-size: var(--menu-font-size-lg);
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  filter: drop-shadow(0 2px 4px rgb(0 0 0 / 30%));
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .ctaSection {
     padding: var(--menu-spacing-xl) var(--menu-spacing-md);
   }
@@ -170,7 +170,7 @@
   }
 }
 
-@media (max-width: 576px) {
+@media (width <= 576px) {
   .ctaTitle {
     font-size: var(--menu-font-size-2xl);
   }

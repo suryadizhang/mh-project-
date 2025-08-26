@@ -1,0 +1,364 @@
+/* ==========================================================================
+   QUOTE PAGE - SCOPED STYLES (DATA-PAGE="quote")
+   Safe migration from global styles to page-scoped architecture
+   ========================================================================== */
+
+[data-page="quote"] {
+  /* Page-level variables */
+  --quote-hero-bg: linear-gradient(135deg, var(--color-dark) 0%, var(--color-brown) 100%);
+  --quote-calculator-shadow: 0 12px 48px rgb(0 0 0 / 15%);
+  --quote-step-bg: var(--color-background-light);
+  --quote-button-primary: var(--color-primary);
+}
+
+/* ==========================================================================
+   HERO SECTION
+   ========================================================================== */
+[data-page="quote"] .hero-section {
+  background: var(--quote-hero-bg);
+  padding: var(--spacing-2xl) 0;
+  text-align: center;
+  color: var(--text-on-dark);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-page="quote"] .hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('/images/background.jpg') center/cover;
+  opacity: 0.1;
+  z-index: 0;
+}
+
+[data-page="quote"] .hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+[data-page="quote"] .hero-title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+  margin-bottom: var(--spacing-lg);
+}
+
+[data-page="quote"] .hero-subtitle {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ==========================================================================
+   QUOTE CALCULATOR CONTAINER
+   ========================================================================== */
+[data-page="quote"] .quote-calculator {
+  max-width: 900px;
+  margin: var(--spacing-2xl) auto;
+  padding: var(--spacing-xl);
+  background: var(--color-background);
+  border-radius: var(--radius-lg-custom);
+  box-shadow: var(--quote-calculator-shadow);
+  border: 1px solid var(--color-border-custom);
+}
+
+[data-page="quote"] .calculator-header {
+  text-align: center;
+  margin-bottom: var(--spacing-2xl);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 2px solid var(--color-border-custom);
+}
+
+[data-page="quote"] .calculator-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-strong);
+  margin-bottom: var(--spacing-sm);
+}
+
+[data-page="quote"] .calculator-subtitle {
+  color: var(--text-light);
+  font-size: 1.125rem;
+}
+
+/* ==========================================================================
+   QUOTE STEPS
+   ========================================================================== */
+[data-page="quote"] .quote-steps {
+  display: grid;
+  gap: var(--spacing-xl);
+}
+
+[data-page="quote"] .quote-step {
+  background: var(--quote-step-bg);
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-md-custom);
+  border: 2px solid var(--color-border-custom);
+  transition: var(--transition-normal);
+}
+
+[data-page="quote"] .quote-step.active {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgb(219 43 40 / 10%);
+  background: var(--color-background);
+}
+
+[data-page="quote"] .step-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+[data-page="quote"] .step-number {
+  width: 2.5rem;
+  height: 2.5rem;
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  margin-right: var(--spacing-md);
+}
+
+[data-page="quote"] .step-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-strong);
+  margin: 0;
+}
+
+[data-page="quote"] .step-content {
+  padding-left: 3.5rem;
+}
+
+/* ==========================================================================
+   FORM ELEMENTS
+   ========================================================================== */
+[data-page="quote"] .form-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+[data-page="quote"] .form-label {
+  display: block;
+  font-weight: 600;
+  color: var(--text-strong);
+  margin-bottom: var(--spacing-sm);
+}
+
+[data-page="quote"] .form-input,
+[data-page="quote"] .form-select,
+[data-page="quote"] .form-textarea {
+  width: 100%;
+  padding: var(--spacing-md);
+  border: 2px solid var(--color-border-custom);
+  border-radius: var(--radius-md-custom);
+  font-family: var(--font-secondary);
+  font-size: 1rem;
+  transition: var(--transition-fast);
+  background: var(--color-background);
+}
+
+[data-page="quote"] .form-input:focus,
+[data-page="quote"] .form-select:focus,
+[data-page="quote"] .form-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgb(219 43 40 / 10%);
+}
+
+[data-page="quote"] .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+}
+
+/* ==========================================================================
+   OPTION CARDS
+   ========================================================================== */
+[data-page="quote"] .option-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  margin: var(--spacing-lg) 0;
+}
+
+[data-page="quote"] .option-card {
+  background: var(--color-background);
+  border: 2px solid var(--color-border-custom);
+  border-radius: var(--radius-md-custom);
+  padding: var(--spacing-lg);
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+[data-page="quote"] .option-card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+[data-page="quote"] .option-card.selected {
+  border-color: var(--color-primary);
+  background: rgb(219 43 40 / 5%);
+}
+
+[data-page="quote"] .option-card-icon {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-sm);
+  color: var(--color-primary);
+}
+
+[data-page="quote"] .option-card-title {
+  font-weight: 600;
+  color: var(--text-strong);
+  margin-bottom: var(--spacing-xs);
+}
+
+[data-page="quote"] .option-card-price {
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+/* ==========================================================================
+   QUOTE SUMMARY
+   ========================================================================== */
+[data-page="quote"] .quote-summary {
+  background: var(--color-background-accent);
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg-custom);
+  margin-top: var(--spacing-xl);
+  border: 2px solid var(--color-border-custom);
+}
+
+[data-page="quote"] .summary-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-strong);
+  margin-bottom: var(--spacing-lg);
+  text-align: center;
+}
+
+[data-page="quote"] .summary-items {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+[data-page="quote"] .summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--color-border-custom);
+}
+
+[data-page="quote"] .summary-item:last-child {
+  border-bottom: none;
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: var(--color-primary);
+  padding-top: var(--spacing-md);
+  border-top: 2px solid var(--color-primary);
+  margin-top: var(--spacing-sm);
+}
+
+[data-page="quote"] .summary-label {
+  color: var(--text-default);
+}
+
+[data-page="quote"] .summary-value {
+  color: var(--text-strong);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   SCOPED BUTTON STYLES (Legacy Migration)
+   Note: This will be replaced by Button component in Phase 2
+   ========================================================================== */
+[data-page="quote"] .btn-primary {
+  background: linear-gradient(135deg, var(--quote-button-primary) 0%, var(--color-primary-hover) 100%);
+  color: var(--color-primary-contrast);
+  border: 2px solid var(--quote-button-primary);
+  padding: var(--spacing-md) var(--spacing-xl);
+  border-radius: var(--radius-md-custom);
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-normal);
+  cursor: pointer;
+  font-family: var(--font-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+[data-page="quote"] .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  filter: brightness(1.05);
+}
+
+[data-page="quote"] .btn-primary:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+@media (width <= 768px) {
+  [data-page="quote"] .quote-calculator {
+    margin: var(--spacing-xl) var(--spacing-md);
+    padding: var(--spacing-lg);
+  }
+
+  [data-page="quote"] .form-row {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  [data-page="quote"] .option-cards {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+
+  [data-page="quote"] .step-content {
+    padding-left: 0;
+  }
+
+  [data-page="quote"] .step-header {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-sm);
+  }
+
+  [data-page="quote"] .step-number {
+    margin-right: 0;
+  }
+}
+
+@media (width <= 480px) {
+  [data-page="quote"] .hero-section {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+
+  [data-page="quote"] .quote-step {
+    padding: var(--spacing-lg);
+  }
+
+  [data-page="quote"] .quote-summary {
+    padding: var(--spacing-lg);
+  }
+
+  [data-page="quote"] .option-card {
+    padding: var(--spacing-md);
+  }
+}

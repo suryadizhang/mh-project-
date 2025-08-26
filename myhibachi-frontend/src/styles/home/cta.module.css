@@ -15,12 +15,12 @@
 }
 
 .ctaContent {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgb(255 255 255 / 10%);
   backdrop-filter: blur(15px);
   border-radius: 30px;
   padding: calc(var(--home-card-padding) * 1.5);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 20px 60px rgb(0 0 0 / 30%);
+  border: 1px solid rgb(255 255 255 / 20%);
 }
 
 .ctaTitle {
@@ -54,7 +54,7 @@
   transition: all var(--home-animation-fast) ease-in-out;
   font-size: 1.1rem;
   display: inline-block;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 30%);
   min-width: 200px;
   text-align: center;
 }
@@ -70,7 +70,7 @@
   color: white;
   border-color: var(--home-accent);
   transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 40%);
 }
 
 .secondaryButton {
@@ -83,12 +83,12 @@
   background: white;
   color: var(--home-primary);
   transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 10px 30px rgb(255 255 255 / 30%);
 }
 
 .aboutSection {
   padding-top: 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgb(255 255 255 / 20%);
 }
 
 .aboutTitle {
@@ -106,7 +106,7 @@
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .ctaContent {
     padding: 2rem;
   }
@@ -128,7 +128,7 @@
   }
 }
 
-@media (max-width: 576px) {
+@media (width <= 576px) {
   .ctaContent {
     padding: 1.5rem;
   }

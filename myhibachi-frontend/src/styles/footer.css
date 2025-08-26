@@ -12,7 +12,7 @@
   gap: 1.5rem;
   margin-bottom: 1rem;
   max-width: 1200px;
-  margin: 0 auto 1rem auto;
+  margin: 0 auto 1rem;
 }
 
 .footer-brand,
@@ -81,8 +81,8 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: rgba(255, 107, 53, 0.1);
-  border: 1px solid rgba(255, 107, 53, 0.3);
+  background: rgb(255 107 53 / 10%);
+  border: 1px solid rgb(255 107 53 / 30%);
   border-radius: 50%;
   color: #ccc;
   text-decoration: none;
@@ -119,6 +119,22 @@
   color: #ff6b35;
 }
 
+.footer-contact-info a {
+  color: #ccc;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  display: inline;
+}
+
+.footer-contact-info a:hover {
+  color: #ff6b35;
+}
+
+.footer-contact-info li {
+  display: flex;
+  align-items: center;
+}
+
 .footer-link-icon {
   margin-right: 0.5rem;
   font-size: 0.8rem;
@@ -139,7 +155,7 @@
 }
 
 .footer-copyright {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgb(255 255 255 / 10%);
   padding-top: 2rem;
   text-align: center;
   color: #999;
@@ -151,7 +167,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .footer {
     padding: 1rem 0.75rem 0.5rem;
   }
@@ -174,7 +190,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .footer {
     padding: 2rem 1rem 1rem;
   }

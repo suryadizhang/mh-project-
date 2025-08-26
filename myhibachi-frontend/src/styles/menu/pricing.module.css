@@ -28,10 +28,10 @@
 .sectionIcon {
   font-size: var(--menu-font-size-4xl);
   background: linear-gradient(135deg, var(--menu-primary), #ff6b6b);
-  -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+  filter: drop-shadow(0 2px 4px rgb(0 0 0 / 10%));
 }
 
 .sectionTitle {
@@ -200,7 +200,7 @@
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .pricingSection {
     padding: var(--menu-spacing-lg);
   }
@@ -227,7 +227,7 @@
   }
 }
 
-@media (max-width: 576px) {
+@media (width <= 576px) {
   .pricingSection {
     padding: var(--menu-spacing-md);
   }

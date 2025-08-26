@@ -4,15 +4,15 @@
   top: 0 !important;
   z-index: 1030 !important;
   background: #f9e8d0 !important;
-  box-shadow: 0 4px 20px rgba(74, 45, 19, 0.15);
-  border-bottom: 2px solid rgba(219, 43, 40, 0.1);
+  box-shadow: 0 4px 20px rgb(74 45 19 / 15%);
+  border-bottom: 2px solid rgb(219 43 40 / 10%);
   padding: 1.25rem 0;
   transition: all 0.3s ease;
   min-height: 200px; /* Reduced from 220px for 10% smaller logo */
 }
 
 .custom-navbar:hover {
-  box-shadow: 0 6px 25px rgba(74, 45, 19, 0.2);
+  box-shadow: 0 6px 25px rgb(74 45 19 / 20%);
 }
 
 .navbar-container {
@@ -60,7 +60,7 @@
   display: flex !important;
 }
 
-@media (min-width: 992px) {
+@media (width >= 992px) {
   .navbar-collapse.collapse {
     display: flex !important;
   }
@@ -89,7 +89,7 @@
 }
 
 .nav-link-custom:hover, .nav-link-custom.active {
-  background-color: rgba(219, 43, 40, 0.1);
+  background-color: rgb(219 43 40 / 10%);
   color: #db2b28 !important;
   transform: translateY(-2px);
 }
@@ -97,7 +97,7 @@
 .nav-link-custom:focus {
   outline: 2px solid #db2b28;
   outline-offset: 2px;
-  background-color: rgba(219, 43, 40, 0.1);
+  background-color: rgb(219 43 40 / 10%);
   color: #db2b28 !important;
 }
 
@@ -114,7 +114,7 @@
   border: none;
   padding: 0.5rem;
   border-radius: 8px;
-  background-color: rgba(219, 43, 40, 0.1);
+  background-color: rgb(219 43 40 / 10%);
 }
 
 .navbar-toggler-custom:focus {
@@ -125,7 +125,7 @@
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2833, 37, 41, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 
-@media (max-width: 1200px) {
+@media (width <= 1200px) {
   .navbar-nav-custom {
     gap: 0.25rem;
   }
@@ -144,7 +144,7 @@
   }
 }
 
-@media (max-width: 992px) {
+@media (width <= 992px) {
   .custom-navbar {
     min-height: 160px; /* Reduced from 180px for 10% smaller logo */
   }
@@ -171,7 +171,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .custom-navbar {
     min-height: 150px; /* Reduced from 170px for 10% smaller logo */
     padding: 1rem 0;

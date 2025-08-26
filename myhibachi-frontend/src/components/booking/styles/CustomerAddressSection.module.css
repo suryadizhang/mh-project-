@@ -10,7 +10,7 @@
 
 .form-control:focus {
   border-color: #8b5cf6;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  box-shadow: 0 0 0 3px rgb(139 92 246 / 10%);
 }
 
 /* Checkbox styling */
@@ -75,7 +75,7 @@ input[id="addressZipcode"] {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .form-section {
     border-left: 2px solid #8b5cf6;
   }

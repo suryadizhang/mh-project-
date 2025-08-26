@@ -1,0 +1,140 @@
+/* ==========================================================================
+   CONTACT PAGE SCOPED STYLES - Phase 1 Migration
+   ========================================================================== */
+
+/* Page Scope: All styles within [data-page="contact"] */
+[data-page="contact"] {
+  /* Ensure base text color is safe */
+  color: var(--text-default);
+}
+
+/* Contact page card title - Fixed conflicts with other pages */
+[data-page="contact"] .card-title {
+  color: var(--color-brown);
+  font-weight: 700;
+  font-size: 1.75rem;
+  margin-bottom: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-primary);
+}
+
+[data-page="contact"] .title-icon {
+  color: var(--color-primary);
+  font-size: 1.5rem;
+}
+
+[data-page="contact"] .contact-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+/* Contact cards using design tokens */
+[data-page="contact"] .contact-card {
+  background: var(--color-background);
+  border-radius: var(--radius-lg-custom);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-normal);
+  border: 1px solid var(--color-border-custom);
+}
+
+[data-page="contact"] .contact-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--color-secondary);
+}
+
+/* Contact buttons using design tokens */
+[data-page="contact"] .btn-primary {
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  border: 0;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  transition: var(--transition-fast);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 280px;
+}
+
+[data-page="contact"] .btn-primary:where(:hover, :focus-visible):not(:disabled) {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+[data-page="contact"] .btn-secondary {
+  background: var(--color-secondary);
+  color: var(--color-primary-contrast);
+  border: 0;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  transition: var(--transition-fast);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 280px;
+}
+
+[data-page="contact"] .btn-secondary:where(:hover, :focus-visible):not(:disabled) {
+  background: #e55a2b;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Hero section text safety */
+[data-page="contact"] .hero-title {
+  color: var(--text-default); /* Safe dark fallback */
+}
+
+[data-page="contact"] .page-hero-background .hero-title {
+  color: var(--color-primary-contrast);
+  text-shadow: 0 2px 4px rgb(0 0 0 / 70%);
+}
+
+[data-page="contact"] .hero-subtitle {
+  color: var(--text-light); /* Safe fallback */
+}
+
+[data-page="contact"] .page-hero-background .hero-subtitle {
+  color: var(--color-primary-contrast);
+  opacity: 0.95;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 70%);
+}
+
+/* Form elements using design tokens */
+[data-page="contact"] .form-input,
+[data-page="contact"] .form-select,
+[data-page="contact"] .form-textarea {
+  border-color: var(--color-border-custom);
+  border-radius: var(--radius-sm-custom);
+  transition: var(--transition-fast);
+  background: var(--color-background);
+  color: var(--text-default);
+}
+
+[data-page="contact"] .form-input:focus,
+[data-page="contact"] .form-select:focus,
+[data-page="contact"] .form-textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgb(219 43 40 / 10%);
+  outline: none;
+}
+
+/* Safe text utilities for contact page */
+[data-page="contact"] .u-text-on-dark {
+  color: var(--color-primary-contrast);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 25%);
+}
