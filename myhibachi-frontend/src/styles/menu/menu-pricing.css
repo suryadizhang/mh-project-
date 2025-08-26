@@ -9,11 +9,8 @@
 .pricing-section::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(219, 43, 40, 0.02) 0%, rgba(255, 184, 0, 0.02) 100%);
+  inset: 0;
+  background: linear-gradient(135deg, rgb(219 43 40 / 2%) 0%, rgb(255 184 0 / 2%) 100%);
   z-index: 0;
 }
 
@@ -55,7 +52,7 @@
   background: #fff;
   border-radius: 20px; /* Restored to original */
   padding: 2.5rem; /* Restored to original */
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1); /* Restored to original */
+  box-shadow: 0 15px 40px rgb(0 0 0 / 10%); /* Restored to original */
   border: 2px solid transparent;
   transition: all 0.3s ease;
   position: relative;
@@ -69,11 +66,8 @@
 .pricing-card::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(219, 43, 40, 0.03) 0%, rgba(255, 184, 0, 0.03) 100%);
+  inset: 0;
+  background: linear-gradient(135deg, rgb(219 43 40 / 3%) 0%, rgb(255 184 0 / 3%) 100%);
   z-index: 0;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -81,8 +75,8 @@
 
 .pricing-card:hover {
   transform: translateY(-10px); /* Restored to original */
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15); /* Restored to original */
-  border-color: rgba(219, 43, 40, 0.2);
+  box-shadow: 0 25px 60px rgb(0 0 0 / 15%); /* Restored to original */
+  border-color: rgb(219 43 40 / 20%);
 }
 
 .pricing-card:hover::before {
@@ -123,7 +117,7 @@
 .pricing-features {
   list-style: none;
   padding: 0;
-  margin: 0 0 2rem 0; /* Restored to original */
+  margin: 0 0 2rem; /* Restored to original */
 }
 
 .pricing-feature {
@@ -160,19 +154,16 @@
   background: linear-gradient(135deg, #ff7b00, #ffb800);
   border-radius: 50%;
   margin-bottom: 1rem;
-  box-shadow: 0 8px 20px rgba(255, 123, 0, 0.3);
+  box-shadow: 0 8px 20px rgb(255 123 0 / 30%);
   transition: all 0.3s ease;
-  border: 3px solid rgba(255, 255, 255, 0.2);
+  border: 3px solid rgb(255 255 255 / 20%);
   position: relative;
 }
 
 .section-icon-wrapper::before {
   content: '';
   position: absolute;
-  top: -3px;
-  left: -3px;
-  right: -3px;
-  bottom: -3px;
+  inset: -3px;
   border-radius: 50%;
   background: linear-gradient(135deg, #ff7b00, #ffb800);
   z-index: -1;
@@ -182,7 +173,7 @@
 
 .section-icon-wrapper:hover {
   transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 12px 30px rgba(255, 123, 0, 0.4);
+  box-shadow: 0 12px 30px rgb(255 123 0 / 40%);
 }
 
 .section-icon {
@@ -215,7 +206,7 @@
   border-radius: 20px;
   padding: 2rem;
   text-align: center;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 15px 40px rgb(0 0 0 / 10%);
   position: relative;
   overflow: hidden;
   transition: transform 0.3s ease;
@@ -289,7 +280,7 @@
   border-radius: 15px;
   padding: 1.5rem;
   text-align: center;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 15px rgb(0 0 0 / 10%);
 }
 
 .info-icon {
@@ -309,7 +300,7 @@
 
 /* Included Items Section */
 .included-items {
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
   padding: 2.5rem 2rem; /* Restored to original */
   position: relative;
 }
@@ -317,11 +308,8 @@
 .included-items::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(40, 167, 69, 0.02) 0%, rgba(255, 184, 0, 0.02) 100%);
+  inset: 0;
+  background: linear-gradient(135deg, rgb(40 167 69 / 2%) 0%, rgb(255 184 0 / 2%) 100%);
   z-index: 0;
 }
 
@@ -338,10 +326,13 @@
 }
 
 .included-title {
-  font-size: 2.25rem; /* Restored to original */
-  font-weight: 700;
-  margin-bottom: 1rem; /* Restored to original */
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
   color: #333;
+  letter-spacing: 0.01em;
+  word-break: break-word;
+  line-height: 1.4;
 }
 
 .included-subtitle {
@@ -357,37 +348,34 @@
   gap: 2rem; /* Restored to original */
 }
 
-.included-item {
+[data-page="menu"] .included-item {
   background: #fff;
   border-radius: 15px; /* Restored to original */
   padding: 2rem; /* Restored to original */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Restored to original */
+  box-shadow: 0 10px 30px rgb(0 0 0 / 8%); /* Restored to original */
   transition: all 0.3s ease;
-  border: 2px solid rgba(40, 167, 69, 0.1);
+  border: 2px solid rgb(40 167 69 / 10%);
   position: relative;
   overflow: hidden;
 }
 
-.included-item::before {
+[data-page="menu"] .included-item::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(40, 167, 69, 0.03) 0%, rgba(255, 184, 0, 0.03) 100%);
+  inset: 0;
+  background: linear-gradient(135deg, rgb(40 167 69 / 3%) 0%, rgb(255 184 0 / 3%) 100%);
   z-index: 0;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
-.included-item:hover {
+[data-page="menu"] .included-item:hover {
   transform: translateY(-5px); /* Restored to original */
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12); /* Restored to original */
-  border-color: rgba(40, 167, 69, 0.3);
+  box-shadow: 0 15px 40px rgb(0 0 0 / 12%); /* Restored to original */
+  border-color: rgb(40 167 69 / 30%);
 }
 
-.included-item:hover::before {
+[data-page="menu"] .included-item:hover::before {
   opacity: 1;
 }
 
@@ -408,13 +396,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 5px 15px rgb(40 167 69 / 30%);
   transition: all 0.3s ease;
 }
 
 .included-item:hover .included-icon-bg {
   transform: scale(1.1);
-  box-shadow: 0 8px 20px rgba(40, 167, 69, 0.4);
+  box-shadow: 0 8px 20px rgb(40 167 69 / 40%);
 }
 
 .included-icon {
@@ -473,10 +461,7 @@
 .cta-section::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: url('/images/background.jpg') center/cover;
   opacity: 0.1;
   z-index: 0;
@@ -494,14 +479,14 @@
   font-weight: 700;
   color: #fff;
   margin-bottom: 1rem; /* Restored to original */
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 10px rgb(0 0 0 / 30%);
 }
 
 .cta-subtitle {
   font-size: 1.25rem; /* Restored to original */
-  color: rgba(255, 255, 255, 0.9);
+  color: rgb(255 255 255 / 90%);
   margin-bottom: 2rem; /* Restored to original */
-  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 5px rgb(0 0 0 / 30%);
 }
 
 .cta-button {
@@ -514,7 +499,7 @@
   text-decoration: none;
   display: inline-block;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 30px rgba(255, 123, 0, 0.3);
+  box-shadow: 0 10px 30px rgb(255 123 0 / 30%);
   border: none;
   cursor: pointer;
   position: relative;
@@ -528,7 +513,7 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 20%), transparent);
   transition: left 0.5s;
 }
 
@@ -538,13 +523,13 @@
 
 .cta-button:hover {
   transform: translateY(-3px);
-  box-shadow: 0 15px 40px rgba(255, 123, 0, 0.4);
+  box-shadow: 0 15px 40px rgb(255 123 0 / 40%);
 }
 
 /* Upgrade Cards */
 .upgrade-section {
   padding: 3rem 2rem; /* Restored to original */
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
   position: relative;
 }
 
@@ -582,7 +567,7 @@
   background: #fff;
   border-radius: 20px; /* Restored to original */
   padding: 2.5rem; /* Restored to original */
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1); /* Restored to original */
+  box-shadow: 0 15px 40px rgb(0 0 0 / 10%); /* Restored to original */
   border: 2px solid transparent;
   transition: all 0.3s ease;
   position: relative;
@@ -593,11 +578,8 @@
 .upgrade-card::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 123, 0, 0.03) 0%, rgba(219, 43, 40, 0.03) 100%);
+  inset: 0;
+  background: linear-gradient(135deg, rgb(255 123 0 / 3%) 0%, rgb(219 43 40 / 3%) 100%);
   z-index: 0;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -605,8 +587,8 @@
 
 .upgrade-card:hover {
   transform: translateY(-10px); /* Restored to original */
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15); /* Restored to original */
-  border-color: rgba(255, 123, 0, 0.3);
+  box-shadow: 0 25px 60px rgb(0 0 0 / 15%); /* Restored to original */
+  border-color: rgb(255 123 0 / 30%);
 }
 
 .upgrade-card:hover::before {
@@ -628,13 +610,13 @@
   align-items: center;
   justify-content: center;
   margin: 0 auto 1.5rem; /* Restored to original */
-  box-shadow: 0 10px 30px rgba(255, 123, 0, 0.3);
+  box-shadow: 0 10px 30px rgb(255 123 0 / 30%);
   transition: all 0.3s ease;
 }
 
 .upgrade-card:hover .upgrade-icon-bg {
   transform: scale(1.1);
-  box-shadow: 0 15px 40px rgba(255, 123, 0, 0.4);
+  box-shadow: 0 15px 40px rgb(255 123 0 / 40%);
 }
 
 .upgrade-icon {
@@ -670,7 +652,7 @@
 .upgrade-features {
   list-style: none;
   padding: 0;
-  margin: 0 0 2rem 0; /* Restored to original */
+  margin: 0 0 2rem; /* Restored to original */
   text-align: left;
 }
 
@@ -701,14 +683,14 @@
   text-decoration: none;
   display: inline-block;
   transition: all 0.3s ease;
-  box-shadow: 0 5px 15px rgba(255, 123, 0, 0.3);
+  box-shadow: 0 5px 15px rgb(255 123 0 / 30%);
   border: none;
   cursor: pointer;
 }
 
 .upgrade-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(255, 123, 0, 0.4);
+  box-shadow: 0 8px 20px rgb(255 123 0 / 40%);
 }
 
 /* Special Offer Cards */
@@ -734,7 +716,7 @@
 }
 
 /* Responsive Design */
-@media (max-width: 992px) {
+@media (width <= 992px) {
   .pricing-grid {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Restored to original */
     gap: 1.5rem; /* Restored to original */
@@ -749,7 +731,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .pricing-section {
     padding: 2rem 1rem; /* Restored to original mobile padding */
   }
@@ -771,7 +753,7 @@
   }
 
   .included-title {
-    font-size: 1.8rem; /* Restored to original mobile size */
+    font-size: 1.05rem;
   }
 
   .upgrade-title {
@@ -820,7 +802,7 @@
   }
 }
 
-@media (max-width: 576px) {
+@media (width <= 576px) {
   .pricing-card-price {
     font-size: 2.5rem; /* Restored to original small mobile size */
   }
