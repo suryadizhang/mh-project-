@@ -11,6 +11,8 @@ interface LazyBlogImageProps {
   onLoad?: () => void
   onError?: () => void
   fallbackSrc?: string
+  quality?: number
+  sizes?: string
 }
 
 export default function LazyBlogImage({ 
@@ -22,7 +24,9 @@ export default function LazyBlogImage({
   priority = false,
   onLoad,
   onError,
-  fallbackSrc
+  fallbackSrc,
+  quality = 85,
+  sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
 }: LazyBlogImageProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
@@ -109,6 +113,8 @@ export default function LazyBlogImage({
           onError={handleError}
           priority={priority}
           loading={priority ? 'eager' : 'lazy'}
+          quality={quality}
+          sizes={sizes}
         />
       )}
 

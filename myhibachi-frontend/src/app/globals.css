@@ -4,6 +4,7 @@
 
 @import url("tailwindcss");
 @import url("tw-animate-css");
+@import '../styles/responsive-images.css';
 
 @custom-variant dark (&:is(.dark *));
 
