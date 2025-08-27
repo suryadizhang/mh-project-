@@ -151,7 +151,9 @@ export const blogPosts: BlogPost[] = [
     readTime: "5 min read",
     category: "Holidays",
     serviceArea: "Fremont",
-    eventType: "Holiday"
+    eventType: "Holiday",
+    image: "/images/blog/holiday-hibachi-celebration.svg",
+    imageAlt: "Holiday hibachi celebration with festive decorations, snow, and winter party atmosphere"
   },
   {
     id: 9,
@@ -166,7 +168,9 @@ export const blogPosts: BlogPost[] = [
     category: "Seasonal",
     serviceArea: "All Areas",
     eventType: "Summer",
-    seasonal: true
+    seasonal: true,
+    image: "/images/blog/summer-pool-hibachi.svg",
+    imageAlt: "Summer hibachi pool party with sun, palm trees, and poolside cooking setup"
   },
   {
     id: 10,
@@ -194,7 +198,9 @@ export const blogPosts: BlogPost[] = [
     readTime: "6 min read",
     category: "Family",
     serviceArea: "Roseville",
-    eventType: "Kids Birthday"
+    eventType: "Kids Birthday",
+    image: "/images/blog/birthday-hibachi-party.svg",
+    imageAlt: "Kids birthday hibachi party with balloons, birthday cake, and children enjoying cooking show"
   },
   {
     id: 12,
