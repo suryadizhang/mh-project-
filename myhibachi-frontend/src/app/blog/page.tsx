@@ -1,11 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { Calendar, User } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { Calendar, User, Search, X } from 'lucide-react'
 import Assistant from '@/components/chat/Assistant'
-import BlogSearch from '@/components/blog/BlogSearch'
+import BlogTags from '@/components/blog/BlogTags'
+import BlogCategories from '@/components/blog/BlogCategories'
 import { getFeaturedPosts, getSeasonalPosts, getRecentPosts, getEventSpecificPosts } from '@/data/blogPosts'
-import type { BlogPost } from '@/data/blogPosts'
 import '@/styles/blog.css'
 
 export default function BlogPage() {
@@ -13,11 +14,65 @@ export default function BlogPage() {
   const seasonalPosts = getSeasonalPosts()
   const eventSpecificPosts = getEventSpecificPosts().slice(0, 6) // Get first 6 new event posts
   const allRecentPosts = getRecentPosts(12)
-  const allPosts = [...featuredPosts, ...seasonalPosts, ...eventSpecificPosts, ...allRecentPosts]
+  // All posts with memoization to prevent re-renders
+  const allPosts = useMemo(() => [
+    ...featuredPosts, 
+    ...seasonalPosts, 
+    ...eventSpecificPosts, 
+    ...allRecentPosts
+  ], [featuredPosts, seasonalPosts, eventSpecificPosts, allRecentPosts])
+
+  // State for filtering
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [selectedCategory, setSelectedCategory] = useState('')
   
-  const handleFilteredPosts = (filtered: BlogPost[]) => {
-    // TODO: Implement search results display
-    console.log('Filtered posts:', filtered.length)
+  // Filter posts based on search, tags, and category
+  const filteredPosts = useMemo(() => {
+    let filtered = allPosts;
+
+    // Apply search filter
+    if (searchQuery) {
+      filtered = filtered.filter(post =>
+        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (post.content && post.content.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        post.keywords.some((keyword: string) => keyword.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+    }
+
+    // Apply tag filter
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter(post =>
+        selectedTags.some(tag => post.keywords.includes(tag))
+      );
+    }
+
+    // Apply category filter
+    if (selectedCategory && selectedCategory !== 'All') {
+      filtered = filtered.filter(post => post.category === selectedCategory);
+    }
+
+    return filtered;
+  }, [allPosts, searchQuery, selectedTags, selectedCategory]);
+
+  // Check if any filters are active
+  const hasActiveFilters = searchQuery || selectedTags.length > 0 || (selectedCategory && selectedCategory !== 'All');
+
+  const handleTagFilter = (tag: string) => {
+    const newTags = selectedTags.includes(tag)
+      ? selectedTags.filter(t => t !== tag)
+      : [...selectedTags, tag]
+    
+    setSelectedTags(newTags)
+  }
+
+  const handleCategoryFilter = (category: string) => {
+    setSelectedCategory(category)
+  }
+
+  const clearTags = () => {
+    setSelectedTags([])
   }
 
   return (
@@ -38,9 +93,156 @@ export default function BlogPage() {
       {/* Search and Filter Section */}
       <div className="blog-section">
         <div className="max-w-6xl mx-auto px-4">
-          <BlogSearch posts={allPosts} onFilteredPosts={handleFilteredPosts} />
+          <div className="blog-search-container">
+            <div className="blog-search-bar">
+              <div className="blog-search-input-wrapper">
+                <Search className="blog-search-icon" />
+                <input
+                  type="text"
+                  placeholder="Search hibachi guides, events, locations..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="blog-search-input"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="blog-search-clear"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Tags and Categories Section */}
+      <div className="blog-section">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <BlogTags 
+              posts={allPosts}
+              onTagFilter={handleTagFilter}
+              selectedTags={selectedTags}
+              onClearTags={clearTags}
+            />
+            <BlogCategories 
+              posts={allPosts}
+              onCategoryFilter={handleCategoryFilter}
+              selectedCategory={selectedCategory}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Filtered Results Section */}
+      {hasActiveFilters && (
+        <div className="blog-section">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="blog-filter-results">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Search Results ({filteredPosts.length} {filteredPosts.length === 1 ? 'post' : 'posts'})
+                </h2>
+                <button 
+                  onClick={() => {
+                    setSearchQuery('')
+                    setSelectedTags([])
+                    setSelectedCategory('')
+                  }}
+                  className="text-orange-600 hover:text-orange-700 font-medium"
+                >
+                  Clear All Filters
+                </button>
+              </div>
+              
+              {/* Active Filters Display */}
+              <div className="flex flex-wrap gap-2 mb-6">
+                {searchQuery && (
+                  <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                    Search: &ldquo;{searchQuery}&rdquo;
+                    <button 
+                      onClick={() => setSearchQuery('')}
+                      className="ml-2 text-blue-600 hover:text-blue-800"
+                    >
+                      ×
+                    </button>
+                  </span>
+                )}
+                {selectedTags.map(tag => (
+                  <span key={tag} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                    Tag: {tag}
+                    <button 
+                      onClick={() => handleTagFilter(tag)}
+                      className="ml-2 text-green-600 hover:text-green-800"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+                {selectedCategory && selectedCategory !== 'All' && (
+                  <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
+                    Category: {selectedCategory}
+                    <button 
+                      onClick={() => setSelectedCategory('')}
+                      className="ml-2 text-purple-600 hover:text-purple-800"
+                    >
+                      ×
+                    </button>
+                  </span>
+                )}
+              </div>
+
+              {/* Filtered Posts Grid */}
+              {filteredPosts.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredPosts.map((post) => (
+                    <article key={post.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                      <div className="h-40 bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
+                        <div className="text-white text-center p-4">
+                          <div className="text-sm font-medium bg-black bg-opacity-30 rounded px-2 py-1">
+                            {post.serviceArea} • {post.eventType}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <div className="flex items-center text-sm text-gray-500 mb-2">
+                          <Calendar className="w-4 h-4 mr-1" />
+                          <span className="mr-3">{post.date}</span>
+                          <User className="w-4 h-4 mr-1" />
+                          <span>{post.author}</span>
+                        </div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">
+                          <Link href={`/blog/${post.slug}`} className="hover:text-blue-600">
+                            {post.title}
+                          </Link>
+                        </h3>
+                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{post.excerpt}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-500">{post.readTime}</span>
+                          <Link
+                            href={`/blog/${post.slug}`}
+                            className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                          >
+                            Read More →
+                          </Link>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="text-gray-500 text-lg mb-4">No posts found matching your filters</div>
+                  <p className="text-gray-400">Try adjusting your search terms or removing some filters</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Featured Posts Section */}
       <div className="pt-24 pb-20 section-background" style={{backgroundColor: '#f8f9fa'}}>
