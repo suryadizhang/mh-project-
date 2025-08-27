@@ -55,6 +55,7 @@
   /* Brand Colors */
   --color-primary: #DB2B28;
   --color-primary-hover: #c41e1a;
+  --color-primary-dark: #a01d1a;
   --color-primary-contrast: #fff;
   --color-secondary: #ff6b35;
   --color-gold: #d4af37;
@@ -63,11 +64,14 @@
   /* Neutral Colors */
   --color-dark: #1a1a1a;
   --color-brown: #4a2d13;
+  --color-text: #1f2937;
+  --color-text-strong: #111827;
   --text-strong: #111;
   --text-default: #222;
   --text-secondary: #333;
   --text-light: #666;
-  --text-muted: #999;
+  --text-muted: #666;
+  --color-text-muted: #4b5563;
   --text-on-dark: #fff;
   
   /* Background Colors */

@@ -76,7 +76,7 @@ export default function BlogPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" data-page="blog">
       {/* Hero Section with Company Background */}
       <section className="page-hero-background py-20 text-white text-center mb-24">
         <div className="max-w-4xl mx-auto px-4">
@@ -219,12 +219,16 @@ export default function BlogPage() {
                             {post.title}
                           </Link>
                         </h3>
-                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{post.excerpt}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-500">{post.readTime}</span>
+                        <p className="text-gray-600 text-sm mb-3" style={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
+                        }}>{post.excerpt}</p>
+                        <div className="flex items-center justify-end">
                           <Link
                             href={`/blog/${post.slug}`}
-                            className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                            className="blog-read-more-inline"
                           >
                             Read More →
                           </Link>
@@ -277,11 +281,10 @@ export default function BlogPage() {
                     </Link>
                   </h3>
                   <p className="text-gray-600 mb-4">{post.excerpt}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">{post.readTime}</span>
+                  <div className="flex items-center justify-end">
                     <Link
                       href={`/blog/${post.slug}`}
-                      className="text-blue-600 hover:text-blue-800 font-medium"
+                      className="blog-read-more-inline"
                     >
                       Read More →
                     </Link>
