@@ -1,13 +1,51 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState, useMemo } from 'react'
 import { Calendar, User, Search, X } from 'lucide-react'
 import Assistant from '@/components/chat/Assistant'
 import BlogTags from '@/components/blog/BlogTags'
 import BlogCategories from '@/components/blog/BlogCategories'
-import { getFeaturedPosts, getSeasonalPosts, getRecentPosts, getEventSpecificPosts } from '@/data/blogPosts'
+import BlogCardImage from '@/components/blog/BlogCardImage'
+import { getFeaturedPosts, getSeasonalPosts, getRecentPosts, getEventSpecificPosts, BlogPost } from '@/data/blogPosts'
 import '@/styles/blog.css'
+
+// Helper function for rendering blog card images in styled sections
+const renderBlogCardImage = (post: BlogPost) => {
+  if (post.image) {
+    return (
+      <>
+        <Image 
+          src={post.image} 
+          alt={post.imageAlt || `${post.title} - ${post.serviceArea} ${post.eventType} hibachi catering`}
+          width={400}
+          height={200}
+          className="w-full h-full object-cover"
+        />
+        <div className="blog-card-badges">
+          <div className="blog-card-badge">
+            🎉 {post.eventType}
+          </div>
+          <div className="blog-card-badge">
+            📍 {post.serviceArea}
+          </div>
+        </div>
+      </>
+    )
+  } else {
+    return (
+      <div className="blog-card-badges">
+        <div className="blog-card-badge">
+          🎉 {post.eventType}
+        </div>
+        <div className="blog-card-badge">
+          📍 {post.serviceArea}
+        </div>
+      </div>
+    )
+  }
+}
 
 export default function BlogPage() {
   const featuredPosts = getFeaturedPosts()
@@ -199,14 +237,11 @@ export default function BlogPage() {
               {filteredPosts.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredPosts.map((post) => (
-                    <article key={post.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                      <div className="h-40 bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
-                        <div className="text-white text-center p-4">
-                          <div className="text-sm font-medium bg-black bg-opacity-30 rounded px-2 py-1">
-                            {post.serviceArea} • {post.eventType}
-                          </div>
-                        </div>
-                      </div>
+                    <article key={post.id} className="blog-card group bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+                      <BlogCardImage 
+                        post={post} 
+                        className="h-40"
+                      />
                       <div className="p-4">
                         <div className="flex items-center text-sm text-gray-500 mb-2">
                           <Calendar className="w-4 h-4 mr-1" />
@@ -260,14 +295,11 @@ export default function BlogPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
             {featuredPosts.map((post) => (
-              <article key={post.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                <div className="h-48 bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
-                  <div className="text-white text-center p-4">
-                    <div className="text-sm font-medium bg-black bg-opacity-30 rounded px-2 py-1 mb-2">
-                      {post.serviceArea} • {post.eventType}
-                    </div>
-                  </div>
-                </div>
+              <article key={post.id} className="blog-card group bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+                <BlogCardImage 
+                  post={post} 
+                  className="h-48"
+                />
                 <div className="p-6">
                   <div className="flex items-center text-sm text-gray-500 mb-3">
                     <Calendar className="w-4 h-4 mr-1" />
@@ -305,15 +337,8 @@ export default function BlogPage() {
           <div className="blog-posts-grid">
             {eventSpecificPosts.map((post) => (
               <article key={post.id} className="blog-card category-event">
-                <div className="blog-card-image">
-                  <div className="blog-card-badges">
-                    <div className="blog-card-badge">
-                      🎉 {post.eventType}
-                    </div>
-                    <div className="blog-card-badge">
-                      📍 {post.serviceArea}
-                    </div>
-                  </div>
+                <div className={`blog-card-image ${post.image ? 'has-image' : ''}`}>
+                  {renderBlogCardImage(post)}
                 </div>
                 <div className="blog-card-content">
                   <div className="blog-card-meta">
@@ -354,12 +379,8 @@ export default function BlogPage() {
           <div className="blog-posts-grid seasonal-grid">
             {seasonalPosts.map((post) => (
               <article key={post.id} className="blog-card category-seasonal">
-                <div className="blog-card-image">
-                  <div className="blog-card-badges">
-                    <div className="blog-card-badge">
-                      {post.seasonal ? '🍂 SEASONAL' : post.category}
-                    </div>
-                  </div>
+                <div className={`blog-card-image ${post.image ? 'has-image' : ''}`}>
+                  {renderBlogCardImage(post)}
                 </div>
                 <div className="blog-card-content">
                   <h3 className="blog-card-title">

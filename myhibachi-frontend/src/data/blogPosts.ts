@@ -17,6 +17,8 @@ export interface BlogPost {
   eventType: string
   featured?: boolean
   seasonal?: boolean
+  image?: string
+  imageAlt?: string
 }
 
 export const blogPosts: BlogPost[] = [
@@ -34,7 +36,9 @@ export const blogPosts: BlogPost[] = [
     category: "Service Areas",
     serviceArea: "Bay Area",
     eventType: "General",
-    featured: true
+    featured: true,
+    image: "/images/blog/hibachi-chef-cooking.svg",
+    imageAlt: "Professional hibachi chef cooking at table with flames and fresh ingredients"
   },
   {
     id: 2,
@@ -50,7 +54,9 @@ export const blogPosts: BlogPost[] = [
     serviceArea: "All Areas",
     eventType: "Romantic",
     featured: true,
-    seasonal: true
+    seasonal: true,
+    image: "/images/blog/valentine-hibachi-date.svg",
+    imageAlt: "Romantic hibachi date night setup with candles, hearts, and intimate dining"
   },
   {
     id: 3,
@@ -65,7 +71,9 @@ export const blogPosts: BlogPost[] = [
     category: "Service Areas",
     serviceArea: "Sacramento",
     eventType: "Birthday",
-    featured: true
+    featured: true,
+    image: "/images/blog/birthday-hibachi-party.svg",
+    imageAlt: "Birthday hibachi celebration with cake, balloons, and party atmosphere"
   },
   {
     id: 4,
@@ -80,7 +88,9 @@ export const blogPosts: BlogPost[] = [
     category: "Corporate",
     serviceArea: "San Jose",
     eventType: "Corporate",
-    featured: true
+    featured: true,
+    image: "/images/blog/corporate-hibachi-catering.svg",
+    imageAlt: "Corporate hibachi event with team building and business professionals dining"
   },
   {
     id: 5,
@@ -94,7 +104,9 @@ export const blogPosts: BlogPost[] = [
     readTime: "8 min read",
     category: "Weddings",
     serviceArea: "Peninsula",
-    eventType: "Wedding"
+    eventType: "Wedding",
+    image: "/images/blog/wedding-hibachi-catering.svg",
+    imageAlt: "Elegant wedding hibachi reception with bride, groom, and beautiful setup"
   },
   {
     id: 6,
@@ -108,7 +120,9 @@ export const blogPosts: BlogPost[] = [
     readTime: "5 min read",
     category: "Celebrations",
     serviceArea: "Oakland",
-    eventType: "Graduation"
+    eventType: "Graduation",
+    image: "/images/blog/graduation-hibachi-party.svg",
+    imageAlt: "Graduation hibachi celebration with caps, diplomas, and academic achievement theme"
   },
   {
     id: 7,
