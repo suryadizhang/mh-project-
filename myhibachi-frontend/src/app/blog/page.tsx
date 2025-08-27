@@ -1,25 +1,24 @@
+'use client'
+
 import Link from 'next/link'
 import { Calendar, User } from 'lucide-react'
 import Assistant from '@/components/chat/Assistant'
+import BlogSearch from '@/components/blog/BlogSearch'
 import { getFeaturedPosts, getSeasonalPosts, getRecentPosts, getEventSpecificPosts } from '@/data/blogPosts'
-import { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'My Hibachi Blog | Event Catering Guides for Bay Area, Sacramento & San Jose',
-  description: 'Complete hibachi catering guides for every event: birthdays, weddings, corporate events, pool parties, and more. Expert tips for Bay Area, Sacramento, San Jose celebrations.',
-  keywords: 'hibachi blog, bay area catering, sacramento hibachi, san jose events, hibachi tips, party planning, seasonal menus, mobile hibachi chef, event catering guides, birthday hibachi, wedding hibachi, corporate hibachi',
-  openGraph: {
-    title: 'My Hibachi Blog | Event Catering Guides for Bay Area, Sacramento & San Jose',
-    description: 'Complete hibachi catering guides for every event: birthdays, weddings, corporate events, pool parties, and more.',
-    type: 'website'
-  }
-}
+import type { BlogPost } from '@/data/blogPosts'
+import '@/styles/blog.css'
 
 export default function BlogPage() {
   const featuredPosts = getFeaturedPosts()
   const seasonalPosts = getSeasonalPosts()
   const eventSpecificPosts = getEventSpecificPosts().slice(0, 6) // Get first 6 new event posts
   const allRecentPosts = getRecentPosts(12)
+  const allPosts = [...featuredPosts, ...seasonalPosts, ...eventSpecificPosts, ...allRecentPosts]
+  
+  const handleFilteredPosts = (filtered: BlogPost[]) => {
+    // TODO: Implement search results display
+    console.log('Filtered posts:', filtered.length)
+  }
 
   return (
     <div className="min-h-screen">
@@ -35,6 +34,13 @@ export default function BlogPage() {
           </div>
         </div>
       </section>
+
+      {/* Search and Filter Section */}
+      <div className="blog-section">
+        <div className="max-w-6xl mx-auto px-4">
+          <BlogSearch posts={allPosts} onFilteredPosts={handleFilteredPosts} />
+        </div>
+      </div>
 
       {/* Featured Posts Section */}
       <div className="pt-24 pb-20 section-background" style={{backgroundColor: '#f8f9fa'}}>
@@ -84,43 +90,45 @@ export default function BlogPage() {
           </div>
 
           {/* Event-Specific Posts Section */}
-          <div className="mb-12">
-            <h2 className="text-3xl font-bold text-center text-gray-900 mb-4">Event-Specific Hibachi Guides</h2>
-            <p className="text-lg text-gray-600 text-center max-w-3xl mx-auto mb-8">
+          <div className="blog-section-header">
+            <h2 className="blog-section-title">Event-Specific Hibachi Guides</h2>
+            <p className="blog-section-subtitle">
               Complete hibachi catering guides for every type of celebration and event
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+          <div className="blog-posts-grid">
             {eventSpecificPosts.map((post) => (
-              <article key={post.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                <div className="h-40 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                  <div className="text-white text-center p-4">
-                    <div className="text-sm font-medium bg-black bg-opacity-30 rounded px-2 py-1 mb-2">
+              <article key={post.id} className="blog-card category-event">
+                <div className="blog-card-image">
+                  <div className="blog-card-badges">
+                    <div className="blog-card-badge">
                       🎉 {post.eventType}
                     </div>
-                    <div className="text-xs bg-black bg-opacity-30 rounded px-2 py-1">
+                    <div className="blog-card-badge">
                       📍 {post.serviceArea}
                     </div>
                   </div>
                 </div>
-                <div className="p-5">
-                  <div className="flex items-center text-sm text-gray-500 mb-3">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    <span className="mr-4">{post.date}</span>
-                    <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">NEW</span>
+                <div className="blog-card-content">
+                  <div className="blog-card-meta">
+                    <div className="flex items-center">
+                      <Calendar className="w-4 h-4 mr-1" />
+                      <span className="mr-4">{post.date}</span>
+                    </div>
+                    <span className="blog-card-badge blog-badge-new">NEW</span>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-3">
-                    <Link href={`/blog/${post.slug}`} className="hover:text-blue-600">
+                  <h3 className="blog-card-title">
+                    <Link href={`/blog/${post.slug}`}>
                       {post.title}
                     </Link>
                   </h3>
-                  <p className="text-gray-600 text-sm mb-4">{post.excerpt}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">{post.readTime}</span>
+                  <p className="blog-card-excerpt">{post.excerpt}</p>
+                  <div className="blog-card-footer">
+                    <span className="blog-card-read-time">{post.readTime}</span>
                     <Link
                       href={`/blog/${post.slug}`}
-                      className="text-blue-600 hover:text-blue-800 font-medium"
+                      className="blog-card-read-more"
                     >
                       Read Guide →
                     </Link>
@@ -131,35 +139,35 @@ export default function BlogPage() {
           </div>
 
           {/* Seasonal Posts Section */}
-          <div className="mb-12">
-            <h2 className="text-3xl font-bold text-center text-gray-900 mb-4">Seasonal Highlights</h2>
-            <p className="text-lg text-gray-600 text-center max-w-3xl mx-auto">
+          <div className="blog-section-header">
+            <h2 className="blog-section-title">Seasonal Highlights</h2>
+            <p className="blog-section-subtitle">
               Perfect timing for your hibachi celebrations throughout the year
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          <div className="blog-posts-grid seasonal-grid">
             {seasonalPosts.map((post) => (
-              <article key={post.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                <div className="h-32 bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center">
-                  <div className="text-white text-center">
-                    <div className="text-xs font-medium bg-black bg-opacity-30 rounded px-2 py-1">
+              <article key={post.id} className="blog-card category-seasonal">
+                <div className="blog-card-image">
+                  <div className="blog-card-badges">
+                    <div className="blog-card-badge">
                       {post.seasonal ? '🍂 SEASONAL' : post.category}
                     </div>
                   </div>
                 </div>
-                <div className="p-4">
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">
-                    <Link href={`/blog/${post.slug}`} className="hover:text-blue-600">
+                <div className="blog-card-content">
+                  <h3 className="blog-card-title">
+                    <Link href={`/blog/${post.slug}`}>
                       {post.title}
                     </Link>
                   </h3>
-                  <p className="text-gray-600 text-sm mb-3">{post.excerpt}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">{post.readTime}</span>
+                  <p className="blog-card-excerpt">{post.excerpt}</p>
+                  <div className="blog-card-footer">
+                    <span className="blog-card-read-time">{post.readTime}</span>
                     <Link
                       href={`/blog/${post.slug}`}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      className="blog-card-read-more"
                     >
                       Read →
                     </Link>
@@ -170,44 +178,48 @@ export default function BlogPage() {
           </div>
 
           {/* All Recent Posts */}
-          <div className="mb-12">
-            <h2 className="text-3xl font-bold text-center text-gray-900 mb-4">Latest Hibachi Articles</h2>
-            <p className="text-lg text-gray-600 text-center max-w-3xl mx-auto">
+          <div className="blog-section-header">
+            <h2 className="blog-section-title">Latest Hibachi Articles</h2>
+            <p className="blog-section-subtitle">
               Latest hibachi catering tips, local event guides, and seasonal menu updates
             </p>
           </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="blog-posts-grid">
           {allRecentPosts.map((post) => (
-            <article key={post.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-              <div className="h-48 bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
-                <div className="text-white text-center p-4">
-                  <div className="text-sm font-medium bg-black bg-opacity-30 rounded px-2 py-1 mb-1">
+            <article key={post.id} className="blog-card category-recent">
+              <div className="blog-card-image">
+                <div className="blog-card-badges">
+                  <div className="blog-card-badge">
                     {post.serviceArea}
                   </div>
-                  <div className="text-xs bg-black bg-opacity-30 rounded px-2 py-1">
+                  <div className="blog-card-badge">
                     {post.eventType}
                   </div>
                 </div>
               </div>
-              <div className="p-6">
-                <div className="flex items-center text-sm text-gray-500 mb-3">
-                  <Calendar className="w-4 h-4 mr-1" />
-                  <span className="mr-4">{post.date}</span>
-                  <User className="w-4 h-4 mr-1" />
-                  <span>{post.author}</span>
+              <div className="blog-card-content">
+                <div className="blog-card-meta">
+                  <div className="flex items-center">
+                    <Calendar className="w-4 h-4 mr-1" />
+                    <span className="mr-4">{post.date}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <User className="w-4 h-4 mr-1" />
+                    <span>{post.author}</span>
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  <Link href={`/blog/${post.slug}`} className="hover:text-blue-600">
+                <h3 className="blog-card-title">
+                  <Link href={`/blog/${post.slug}`}>
                     {post.title}
                   </Link>
                 </h3>
-                <p className="text-gray-600 mb-4">{post.excerpt}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">{post.readTime}</span>
+                <p className="blog-card-excerpt">{post.excerpt}</p>
+                <div className="blog-card-footer">
+                  <span className="blog-card-read-time">{post.readTime}</span>
                   <Link
                     href={`/blog/${post.slug}`}
-                    className="text-blue-600 hover:text-blue-800 font-medium"
+                    className="blog-card-read-more"
                   >
                     Read More →
                   </Link>
@@ -220,24 +232,24 @@ export default function BlogPage() {
         </div>
 
         {/* Newsletter Section */}
-        <div className="text-center mt-16 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-8">
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">
+        <div className="blog-newsletter">
+          <h3 className="blog-newsletter-title">
             Never Miss a Hibachi Tip or Local Event Idea
           </h3>
-          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+          <p className="blog-newsletter-description">
             Get exclusive hibachi party planning tips, seasonal menu updates, and local event inspiration delivered to your inbox.
             Perfect for Bay Area, Sacramento, San Jose and surrounding areas.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto">
+          <div className="blog-newsletter-actions">
             <Link
               href="/contact"
-              className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 transition-colors"
+              className="blog-btn blog-btn-primary"
             >
               Get Hibachi Updates
             </Link>
             <Link
               href="/booking"
-              className="inline-flex items-center px-8 py-3 border-2 border-orange-600 text-base font-medium rounded-md text-orange-600 bg-white hover:bg-orange-50 transition-colors"
+              className="blog-btn blog-btn-secondary"
             >
               Book Event Now
             </Link>
