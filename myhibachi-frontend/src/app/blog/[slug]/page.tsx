@@ -152,7 +152,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <h3 class="text-xl font-bold mb-3">Get Your Free Quote Today</h3>
         <p class="mb-4">Professional hibachi catering with premium ingredients and entertainment included.</p>
         <div class="flex flex-col sm:flex-row gap-4">
-          <a href="/booking" class="bg-white text-orange-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors text-center">
+          <a href="/BookUs" class="bg-white text-orange-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors text-center">
             Book Now
           </a>
           <a href="/contact" class="border border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-orange-600 transition-colors text-center">
@@ -269,28 +269,25 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Related Hibachi Catering Guides</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {relatedPosts.map((relatedPost) => (
-                <article key={relatedPost.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="mb-2">
-                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                      {relatedPost.eventType}
-                    </span>
-                  </div>
-                  <h4 className="font-semibold text-gray-900 mb-2">
-                    <Link href={`/blog/${relatedPost.slug}`} className="hover:text-blue-600">
+                <Link key={relatedPost.id} href={`/blog/${relatedPost.slug}`} className="block">
+                  <article className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+                    <div className="mb-2">
+                      <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                        {relatedPost.eventType}
+                      </span>
+                    </div>
+                    <h4 className="font-semibold text-gray-900 mb-2 hover:text-blue-600">
                       {relatedPost.title}
-                    </Link>
-                  </h4>
-                  <p className="text-gray-600 text-sm mb-3">{relatedPost.excerpt.slice(0, 100)}...</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">{relatedPost.readTime}</span>
-                    <Link
-                      href={`/blog/${relatedPost.slug}`}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                    >
-                      Read →
-                    </Link>
-                  </div>
-                </article>
+                    </h4>
+                    <p className="text-gray-600 text-sm mb-3">{relatedPost.excerpt.slice(0, 100)}...</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500">{relatedPost.readTime}</span>
+                      <span className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                        Read →
+                      </span>
+                    </div>
+                  </article>
+                </Link>
               ))}
             </div>
           </div>

@@ -9,28 +9,14 @@ export default function Footer() {
           <Image
             src="/My Hibachi logo.png"
             alt="MyHibachi Private Hibachi Chef Bay Area Sacramento San Jose Mobile Catering Service Logo"
-            width={120}
-            height={120}
+            width={100}
+            height={100}
             className="footer-logo"
           />
           <h3>My Hibachi Chef</h3>
           <p className="footer-description">
             Bringing the authentic hibachi experience to your location with premium quality and reasonable prices.
           </p>
-          <div className="footer-business-info">
-            <p className="footer-address">
-              <i className="bi bi-geo-alt-fill"></i>
-              Serving Bay Area, Sacramento & San Jose, California
-            </p>
-            <p className="footer-phone">
-              <i className="bi bi-telephone-fill"></i>
-              <a href="tel:+19167408768">(916) 740-8768</a>
-            </p>
-            <p className="footer-email">
-              <i className="bi bi-envelope-fill"></i>
-              <a href="mailto:cs@myhibachichef.com">cs@myhibachichef.com</a>
-            </p>
-          </div>
           <div className="footer-social">
             <a href="https://www.instagram.com/my_hibachi_chef/" target="_blank" rel="noopener noreferrer" className="footer-social-icon">
               <i className="bi bi-instagram"></i>
@@ -49,7 +35,8 @@ export default function Footer() {
           <ul className="footer-links">
             <li><Link href="/"><i className="bi bi-chevron-right footer-link-icon"></i> Home</Link></li>
             <li><Link href="/menu"><i className="bi bi-chevron-right footer-link-icon"></i> Menu</Link></li>
-            <li><Link href="/contact"><i className="bi bi-chevron-right footer-link-icon"></i> Contact</Link></li>
+            <li><Link href="/BookUs"><i className="bi bi-chevron-right footer-link-icon"></i> Book Us</Link></li>
+            <li><Link href="/quote"><i className="bi bi-chevron-right footer-link-icon"></i> Get Quote</Link></li>
           </ul>
         </div>
 
