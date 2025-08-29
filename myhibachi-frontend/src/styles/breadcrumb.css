@@ -1,0 +1,115 @@
+/* Breadcrumb Navigation Styles */
+.breadcrumb-nav {
+  padding: 1rem 0;
+  margin-bottom: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.breadcrumb-list {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.breadcrumb-link {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.breadcrumb-link:hover {
+  color: #FF6B35;
+  background: rgba(255, 107, 53, 0.1);
+}
+
+.breadcrumb-current {
+  color: #FF6B35;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+}
+
+.breadcrumb-separator {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  margin: 0 0.25rem;
+}
+
+/* Container for page content with breadcrumbs */
+.page-with-breadcrumbs {
+  min-height: 100vh;
+}
+
+.page-content-with-breadcrumbs {
+  padding-top: 0; /* Remove default padding since breadcrumbs provide spacing */
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .breadcrumb-nav {
+    padding: 0.75rem 1rem;
+  }
+  
+  .breadcrumb-item {
+    font-size: 0.8rem;
+  }
+  
+  .breadcrumb-link,
+  .breadcrumb-current {
+    padding: 0.2rem 0.4rem;
+  }
+}
+
+/* Light theme adjustments for pages with light backgrounds */
+.light-background .breadcrumb-nav {
+  background: rgba(0, 0, 0, 0.03);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.light-background .breadcrumb-link {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.light-background .breadcrumb-link:hover {
+  color: #FF6B35;
+  background: rgba(255, 107, 53, 0.1);
+}
+
+.light-background .breadcrumb-separator {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/* Accessibility improvements */
+.breadcrumb-link:focus {
+  outline: 2px solid #FF6B35;
+  outline-offset: 2px;
+}
+
+/* Animation for breadcrumb appearance */
+.breadcrumb-nav {
+  animation: slideInDown 0.3s ease-out;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

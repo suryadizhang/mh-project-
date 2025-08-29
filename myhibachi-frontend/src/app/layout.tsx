@@ -4,8 +4,9 @@ import "./globals.css";
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import ClientLayout from '@/components/layout/ClientLayout'
+import BackToTopButton from '@/components/ui/BackToTopButton'
 import { PerformanceMonitoring } from '@/components/seo/TechnicalSEO'
-// import TawkWrapper from '@/components/TawkWrapper' // Disabled - only using manual LiveChatButton
+import { generatePageMetadata, SITE_CONFIG, generateOrganizationSchema, generateLocalBusinessSchema } from '@/lib/seo-config'
 
 // Import global styles
 import '@/styles/base.css'
@@ -19,6 +20,9 @@ import '@/styles/pages/menu.page.css'
 import '@/styles/footer.css'
 import '@/styles/free-quote-button.css'
 import '@/styles/quote-calculator.css'
+import '@/styles/back-to-top.css'
+import '@/styles/breadcrumb.css'
+import '@/styles/optimized-image.css'
 
 const inter = Inter({
   variable: "--font-inter",
@@ -37,23 +41,11 @@ const poppins = Poppins({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "MyHibachi - Authentic Japanese Hibachi Catering",
-  description: "Premium hibachi catering service bringing authentic Japanese cuisine to your events.",
-  icons: {
-    icon: [
-      {
-        url: '/favicon.ico',
-        sizes: '16x16 32x32',
-      },
-      {
-        url: '/icon.png',
-        sizes: '32x32',
-        type: 'image/png',
-      },
-    ],
-  },
-};
+export const metadata: Metadata = generatePageMetadata({
+  title: SITE_CONFIG.title,
+  description: SITE_CONFIG.description,
+  path: "/",
+});
 
 export default function RootLayout({
   children,
@@ -82,6 +74,20 @@ export default function RootLayout({
         {/* Video preload hint for hero video */}
         <link rel="preload" href="/videos/hero_video.mp4" as="video" type="video/mp4" />
 
+        {/* Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(generateOrganizationSchema()),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(generateLocalBusinessSchema()),
+          }}
+        />
+
         {/* Bootstrap JavaScript Bundle */}
         <script
           src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
@@ -100,11 +106,8 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
+          <BackToTopButton />
         </ClientLayout>
-        {/* TawkWrapper disabled - only using manual LiveChatButton on contact page */}
-        {/* Optional: Uncomment to enable email capture prompt
-        <TawkEmailPrompt />
-        */}
       </body>
     </html>
   );

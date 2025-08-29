@@ -1,0 +1,125 @@
+/* Optimized Image Styles */
+
+/* Base image styles */
+.optimized-image {
+  transition: opacity 0.3s ease-in-out;
+  object-fit: cover;
+}
+
+.optimized-image.loading {
+  opacity: 0.7;
+}
+
+.optimized-image.loaded {
+  opacity: 1;
+}
+
+/* Error fallback */
+.image-error-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+  border: 2px dashed #ddd;
+  min-height: 200px;
+  border-radius: 8px;
+}
+
+/* Hero image styles */
+.hero-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  max-height: 80vh;
+}
+
+/* Card image styles */
+.card-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+}
+
+.card-image:hover {
+  transform: scale(1.02);
+}
+
+/* Avatar image styles */
+.avatar-image {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Gallery image styles */
+.gallery-image {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.gallery-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Loading animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.optimized-image.loading {
+  background: linear-gradient(90deg, #f0f0f0 0px, #e0e0e0 40px, #f0f0f0 80px);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hero-image {
+    max-height: 50vh;
+  }
+  
+  .gallery-image:hover {
+    transform: none; /* Disable hover effects on mobile */
+  }
+}
+
+/* Accessibility improvements */
+.optimized-image:focus {
+  outline: 2px solid #FF6B35;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .image-error-fallback {
+    border-color: #000;
+    background-color: #fff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .optimized-image,
+  .card-image,
+  .gallery-image {
+    transition: none;
+  }
+  
+  .gallery-image:hover,
+  .card-image:hover {
+    transform: none;
+  }
+  
+  .optimized-image.loading {
+    animation: none;
+  }
+}
