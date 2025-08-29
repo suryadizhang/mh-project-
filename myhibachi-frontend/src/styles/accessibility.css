@@ -1,0 +1,63 @@
+/* Accessibility Improvements */
+
+/* Focus management */
+.focus-visible:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .back-to-top-button {
+    border: 2px solid #000;
+    background: #fff;
+    color: #000;
+  }
+  
+  .back-to-top-button:hover {
+    background: #000;
+    color: #fff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .back-to-top-button {
+    animation: none;
+    transition: none;
+  }
+  
+  .back-to-top-button.slide-in {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* Keyboard navigation improvements */
+.back-to-top-button:focus-visible {
+  outline: 3px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Screen reader improvements */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Enhanced contrast for better visibility */
+.back-to-top-button {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.back-to-top-button:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}

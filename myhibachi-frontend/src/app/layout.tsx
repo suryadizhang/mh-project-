@@ -5,12 +5,14 @@ import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import ClientLayout from '@/components/layout/ClientLayout'
 import BackToTopButton from '@/components/ui/BackToTopButton'
+import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 import { PerformanceMonitoring } from '@/components/seo/TechnicalSEO'
 import { generatePageMetadata, SITE_CONFIG, generateOrganizationSchema, generateLocalBusinessSchema } from '@/lib/seo-config'
 
 // Import global styles
 import '@/styles/base.css'
 import '@/styles/utilities.css'
+import '@/styles/accessibility.css'
 import '@/styles/menu.css'
 import '@/styles/menu/menu-features.css'
 import '@/styles/menu/menu-pricing.css'
@@ -74,6 +76,9 @@ export default function RootLayout({
         {/* Video preload hint for hero video */}
         <link rel="preload" href="/videos/hero_video.mp4" as="video" type="video/mp4" />
 
+        {/* Google Search Console Verification - Add your verification code here when you get it */}
+        {/* <meta name="google-site-verification" content="YOUR_VERIFICATION_CODE_HERE" /> */}
+
         {/* Structured Data */}
         <script
           type="application/ld+json"
@@ -97,6 +102,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} ${poppins.variable} antialiased min-h-screen flex flex-col company-background`}
       >
+        {/* Google Analytics 4 */}
+        <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || ''} />
+        
         {/* Core Web Vitals Performance Monitoring */}
         <PerformanceMonitoring />
         

@@ -5,6 +5,7 @@ import '@/styles/home.css'
 import '@/styles/pages/home.page.css'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
 import Assistant from '@/components/chat/Assistant'
+import TestimonialsSection from '@/components/sections/TestimonialsSection'
 
 export default function Home() {
   useScrollAnimation()
@@ -402,6 +403,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Testimonials Section */}
+      <TestimonialsSection />
 
       <Assistant page="/" />
     </main>
