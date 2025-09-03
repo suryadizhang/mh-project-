@@ -1,0 +1,15 @@
+[tool.black]
+line-length = 79
+target-version = ['py39']
+include = '\.pyi?$'
+
+[tool.ruff]
+line-length = 79
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E203", "E501"]  # Ignore line length for now to prevent conflicts
+
+[tool.ruff.lint.isort]
+force-single-line = false

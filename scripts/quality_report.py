@@ -10,12 +10,13 @@ This script generates a comprehensive quality report showing:
 - Production readiness assessment
 """
 
-import os
 import json
-from pathlib import Path
-from typing import Dict
+import os
 import subprocess
 import sys
+from pathlib import Path
+from typing import Dict
+
 
 class QualityReporter:
     def __init__(self, project_root: str):
@@ -32,7 +33,7 @@ class QualityReporter:
     def analyze_project_structure(self) -> Dict:
         """Analyze the project structure and organization."""
         print("📊 Analyzing project structure...")
-        
+
         structure = {
             "frontend": {
                 "path": "myhibachi-frontend/",
@@ -72,7 +73,7 @@ class QualityReporter:
                         structure["frontend"]["api_routes"].append(
                             str(route_dir.relative_to(api_path))
                         )
-            
+
             # Count server-only files
             server_path = frontend_path / "src" / "lib" / "server"
             if server_path.exists():
@@ -85,7 +86,7 @@ class QualityReporter:
             routers_path = fastapi_path / "app" / "routers"
             if routers_path.exists():
                 structure["backend_fastapi"]["routers"] = [
-                    f.name for f in routers_path.glob("*.py") 
+                    f.name for f in routers_path.glob("*.py")
                     if f.name != "__init__.py"
                 ]
 
@@ -94,13 +95,13 @@ class QualityReporter:
     def check_security_compliance(self) -> Dict:
         """Check security compliance and sensitive data handling."""
         print("🔒 Checking security compliance...")
-        
+
         security = {
             "environment_variables": {
                 "server_only_properly_isolated": True,
                 "frontend_env_vars": ["NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"],
                 "server_env_vars": [
-                    "STRIPE_SECRET_KEY", 
+                    "STRIPE_SECRET_KEY",
                     "STRIPE_WEBHOOK_SECRET",
                     "DATABASE_URL"
                 ]
@@ -123,7 +124,7 @@ class QualityReporter:
     def assess_code_quality(self) -> Dict:
         """Assess overall code quality metrics."""
         print("⚡ Assessing code quality...")
-        
+
         quality = {
             "typescript_compliance": {
                 "strict_mode": True,
@@ -153,7 +154,7 @@ class QualityReporter:
     def check_production_readiness(self) -> Dict:
         """Check production readiness status."""
         print("🚀 Checking production readiness...")
-        
+
         readiness = {
             "stripe_integration": {
                 "payment_intents": True,
@@ -185,7 +186,7 @@ class QualityReporter:
     def run_guard_checks(self) -> Dict:
         """Run the guard script and summarize results."""
         print("🛡️ Running guard checks...")
-        
+
         try:
             result = subprocess.run(
                 [sys.executable, "scripts/guard_check.py"],
@@ -193,7 +194,7 @@ class QualityReporter:
                 capture_output=True,
                 text=True
             )
-            
+
             # Parse guard script output
             violations = []
             if result.returncode != 0:
@@ -201,7 +202,7 @@ class QualityReporter:
                 for line in lines:
                     if 'SERVER_ENV_IN_FRONTEND' in line:
                         violations.append("Server env var in frontend (expected in /lib/server/)")
-            
+
             return {
                 "guard_script_status": "PASSED" if result.returncode == 0 else "MINOR_VIOLATIONS",
                 "violations": violations,
@@ -217,13 +218,13 @@ class QualityReporter:
     def generate_report(self) -> Dict:
         """Generate the complete quality report."""
         print("📋 Generating comprehensive quality report...\n")
-        
+
         self.report["structure"] = self.analyze_project_structure()
         self.report["security"] = self.check_security_compliance()
         self.report["quality"] = self.assess_code_quality()
         self.report["production_readiness"] = self.check_production_readiness()
         self.report["guard_checks"] = self.run_guard_checks()
-        
+
         return self.report
 
     def print_summary(self):
@@ -234,18 +235,18 @@ class QualityReporter:
         print(f"📅 Report Date: {self.report['timestamp']}")
         print(f"📁 Project: {self.report['project']}")
         print()
-        
+
         # Structure Summary
         print("📊 PROJECT STRUCTURE:")
         frontend = self.report["structure"]["frontend"]
         print(f"   ✅ Frontend: {frontend['type']}")
         print(f"   ✅ API Routes: {len(frontend['api_routes'])} routes")
         print(f"   ✅ Server-only Files: {len(frontend['server_only'])} files properly isolated")
-        
+
         backend = self.report["structure"]["backend_fastapi"]
         print(f"   ✅ FastAPI Backend: {len(backend['routers'])} routers")
         print()
-        
+
         # Security Summary
         print("🔒 SECURITY COMPLIANCE:")
         self.report["security"]
@@ -253,7 +254,7 @@ class QualityReporter:
         print("   ✅ Secrets Management: No hardcoded secrets")
         print("   ✅ API Security: CORS, validation, webhook verification")
         print()
-        
+
         # Quality Summary
         print("⚡ CODE QUALITY:")
         self.report["quality"]
@@ -261,7 +262,7 @@ class QualityReporter:
         print("   ✅ Architecture: Separation of concerns, service layer")
         print("   ✅ Testing: API endpoints and webhooks covered")
         print()
-        
+
         # Production Readiness
         print("🚀 PRODUCTION READINESS:")
         self.report["production_readiness"]
@@ -269,7 +270,7 @@ class QualityReporter:
         print("   ✅ Database: Migrations and connection pooling")
         print("   ✅ Deployment: Docker and environment configs")
         print()
-        
+
         # Guard Checks
         print("🛡️ GUARD CHECKS:")
         guard = self.report["guard_checks"]
@@ -280,14 +281,14 @@ class QualityReporter:
         else:
             print("   ✅ All violations resolved")
         print()
-        
+
         print("="*80)
         print("🎉 OVERALL STATUS: PRODUCTION READY")
         print("="*80)
         print("\n📋 Key Achievements:")
         print("   • Complete end-to-end Stripe payment integration")
         print("   • Proper frontend/backend separation")
-        print("   • Security best practices implemented") 
+        print("   • Security best practices implemented")
         print("   • TypeScript strict mode compliance")
         print("   • Comprehensive error handling")
         print("   • Production-ready architecture")
@@ -301,18 +302,18 @@ class QualityReporter:
 def main():
     """Main function to run the quality report."""
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    
+
     reporter = QualityReporter(project_root)
     report = reporter.generate_report()
-    
+
     # Print human-readable summary
     reporter.print_summary()
-    
+
     # Save detailed JSON report
     report_file = os.path.join(project_root, "QUALITY_AUDIT_REPORT.json")
     with open(report_file, 'w', encoding='utf-8') as f:
         json.dump(report, f, indent=2, ensure_ascii=False)
-    
+
     print(f"\n📄 Detailed report saved to: {report_file}")
 
 

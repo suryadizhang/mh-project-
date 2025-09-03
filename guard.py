@@ -9,14 +9,15 @@ Author: Release Management Team
 Date: September 1, 2025
 """
 
+import argparse
+import json
 import re
 import sys
-import json
+from dataclasses import dataclass
 from pathlib import Path
 from typing import List
-from dataclasses import dataclass
-from colorama import init, Fore, Style
-import argparse
+
+from colorama import Fore, Style, init
 
 # Initialize colorama for cross-platform colored output
 init()
