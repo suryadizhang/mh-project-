@@ -73,7 +73,10 @@ class RepositoryGuard:
             },
             "myhibachi-ai-backend": {
                 "type": "AI Backend",
-                "forbidden_env": ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"],
+                "forbidden_env": [
+                    "STRIPE_SECRET_KEY",
+                    "STRIPE_WEBHOOK_SECRET",
+                ],
                 "dev_port": 8002,
             },
         }
@@ -140,7 +143,9 @@ class RepositoryGuard:
                 if file_path.name != ".gitkeep":
                     self.violations.append(
                         Violation(
-                            relative_path, "EMPTY_FILE", "Zero-byte file detected"
+                            relative_path,
+                            "EMPTY_FILE",
+                            "Zero-byte file detected",
                         )
                     )
                     self.stats["empty_files"] += 1
@@ -148,7 +153,9 @@ class RepositoryGuard:
 
             # Read file content
             try:
-                content = file_path.read_text(encoding="utf-8", errors="ignore")
+                content = file_path.read_text(
+                    encoding="utf-8", errors="ignore"
+                )
             except Exception:
                 return  # Skip binary files
 
@@ -180,7 +187,9 @@ class RepositoryGuard:
             # Log but don't fail on file access issues
             print(f"Warning: Could not scan {relative_path}: {e}")
 
-    def check_secrets(self, file_path: Path, content: str, lines: List[str]) -> None:
+    def check_secrets(
+        self, file_path: Path, content: str, lines: List[str]
+    ) -> None:
         """Check for hardcoded secrets"""
         relative_path = str(file_path.relative_to(self.repo_root))
 
@@ -267,7 +276,10 @@ class RepositoryGuard:
                     r'import.*from.*["\']stripe["\']',
                     "Server-side Stripe import in frontend",
                 ),
-                (r"process\.env\.(?!NEXT_PUBLIC_)", "Non-public environment variable"),
+                (
+                    r"process\.env\.(?!NEXT_PUBLIC_)",
+                    "Non-public environment variable",
+                ),
                 (
                     r'import.*from.*["\']\.\.\/.*backend',
                     "Cross-boundary import to backend",
@@ -319,7 +331,8 @@ class RepositoryGuard:
         for env_var in forbidden_env_vars:
             if env_var in content:
                 line_num = next(
-                    (i + 1 for i, line in enumerate(lines) if env_var in line), 0
+                    (i + 1 for i, line in enumerate(lines) if env_var in line),
+                    0,
                 )
                 self.violations.append(
                     Violation(
@@ -351,8 +364,12 @@ class RepositoryGuard:
                         continue
 
                     try:
-                        content = file_path.read_text(encoding="utf-8", errors="ignore")
-                        self.check_file_cross_imports(file_path, content, folder_name)
+                        content = file_path.read_text(
+                            encoding="utf-8", errors="ignore"
+                        )
+                        self.check_file_cross_imports(
+                            file_path, content, folder_name
+                        )
                     except Exception:
                         continue
 
@@ -423,7 +440,11 @@ class RepositoryGuard:
                         continue
 
     def check_port_in_file(
-        self, file_path: Path, content: str, expected_port: int, folder_name: str
+        self,
+        file_path: Path,
+        content: str,
+        expected_port: int,
+        folder_name: str,
     ) -> None:
         """Check for incorrect port assignments in a file"""
         relative_path = str(file_path.relative_to(self.repo_root))
@@ -500,9 +521,13 @@ class RepositoryGuard:
             print(
                 f"\n{Fore.YELLOW}{violation_type} ({len(type_violations)} issues):{Style.RESET_ALL}"
             )
-            for violation in type_violations[:10]:  # Limit to first 10 per type
+            for violation in type_violations[
+                :10
+            ]:  # Limit to first 10 per type
                 line_info = (
-                    f" (line {violation.line_number})" if violation.line_number else ""
+                    f" (line {violation.line_number})"
+                    if violation.line_number
+                    else ""
                 )
                 print(f"  📁 {violation.file_path}{line_info}")
                 print(f"     {violation.description}")
@@ -517,10 +542,14 @@ class RepositoryGuard:
         print(f"\n{Fore.CYAN}📊 SCAN STATISTICS:{Style.RESET_ALL}")
         print(f"Files scanned: {self.stats['files_scanned']}")
         print(f"Empty files: {self.stats['empty_files']}")
-        print(f"Placeholder violations: {self.stats['placeholder_violations']}")
+        print(
+            f"Placeholder violations: {self.stats['placeholder_violations']}"
+        )
         print(f"Security violations: {self.stats['security_violations']}")
         print(f"Separation violations: {self.stats['separation_violations']}")
-        print(f"Cross-import violations: {self.stats['cross_import_violations']}")
+        print(
+            f"Cross-import violations: {self.stats['cross_import_violations']}"
+        )
         print(f"Total violations: {len(self.violations)}")
 
     def generate_json_report(self, output_path: Path) -> None:
@@ -573,9 +602,14 @@ def main():
     parser = argparse.ArgumentParser(
         description="Repository Guard - Security & Quality Enforcement"
     )
-    parser.add_argument("--json-output", type=Path, help="Output JSON report to file")
     parser.add_argument(
-        "--repo-root", type=Path, default=Path.cwd(), help="Repository root path"
+        "--json-output", type=Path, help="Output JSON report to file"
+    )
+    parser.add_argument(
+        "--repo-root",
+        type=Path,
+        default=Path.cwd(),
+        help="Repository root path",
     )
 
     args = parser.parse_args()
@@ -586,7 +620,9 @@ def main():
         (repo_root / folder).exists()
         for folder in ["myhibachi-frontend", "myhibachi-backend-fastapi"]
     ):
-        print(f"{Fore.RED}❌ Not a valid My Hibachi repository root{Style.RESET_ALL}")
+        print(
+            f"{Fore.RED}❌ Not a valid My Hibachi repository root{Style.RESET_ALL}"
+        )
         sys.exit(1)
 
     # Run the guard

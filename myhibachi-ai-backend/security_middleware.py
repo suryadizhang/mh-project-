@@ -36,10 +36,14 @@ class SecurityConfig:
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": "DENY",
         "X-XSS-Protection": "1; mode=block",
-        "Strict-Transport-Security": ("max-age=31536000; includeSubDomains; preload"),
+        "Strict-Transport-Security": (
+            "max-age=31536000; includeSubDomains; preload"
+        ),
         "Referrer-Policy": "strict-origin-when-cross-origin",
         "Cross-Origin-Resource-Policy": "same-origin",
-        "Cache-Control": ("no-store, no-cache, must-revalidate, proxy-revalidate"),
+        "Cache-Control": (
+            "no-store, no-cache, must-revalidate, proxy-revalidate"
+        ),
         "Pragma": "no-cache",
         "Expires": "0",
     }
@@ -77,11 +81,15 @@ class RateLimiter:
     def __init__(self):
         self.requests: dict[str, list] = defaultdict(list)
 
-    def is_rate_limited(self, identifier: str, limit: int, window: int) -> bool:
+    def is_rate_limited(
+        self, identifier: str, limit: int, window: int
+    ) -> bool:
         now = time.time()
         # Clean old requests
         self.requests[identifier] = [
-            req_time for req_time in self.requests[identifier] if now - req_time < window
+            req_time
+            for req_time in self.requests[identifier]
+            if now - req_time < window
         ]
 
         # Check if limit exceeded
@@ -169,9 +177,14 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 
         return True
 
-    def log_security_event(self, event_type: str, client_ip: str, details: str):
+    def log_security_event(
+        self, event_type: str, client_ip: str, details: str
+    ):
         """Log security events for monitoring"""
-        logger.warning(f"SECURITY_EVENT: {event_type} | IP: {client_ip} | " f"Details: {details}")
+        logger.warning(
+            f"SECURITY_EVENT: {event_type} | IP: {client_ip} | "
+            f"Details: {details}"
+        )
 
     async def dispatch(self, request: Request, call_next):
         start_time = time.time()
@@ -185,7 +198,9 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 
         # Check if IP is blocked
         if client_ip in self.blocked_ips:
-            self.log_security_event("BLOCKED_IP", client_ip, "IP is in blocklist")
+            self.log_security_event(
+                "BLOCKED_IP", client_ip, "IP is in blocklist"
+            )
             return JSONResponse(
                 status_code=403,
                 content={"error": "Access denied"},
@@ -194,9 +209,13 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 
         # Rate limiting
         if self.rate_limiter.is_rate_limited(
-            client_ip, self.config.RATE_LIMIT_REQUESTS, self.config.RATE_LIMIT_WINDOW
+            client_ip,
+            self.config.RATE_LIMIT_REQUESTS,
+            self.config.RATE_LIMIT_WINDOW,
         ):
-            self.log_security_event("RATE_LIMIT", client_ip, "Rate limit exceeded")
+            self.log_security_event(
+                "RATE_LIMIT", client_ip, "Rate limit exceeded"
+            )
             return JSONResponse(
                 status_code=429,
                 content={"error": "Rate limit exceeded"},
@@ -209,7 +228,9 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         # Validate User-Agent
         user_agent = request.headers.get("user-agent", "")
         if not self.validate_user_agent(user_agent):
-            self.log_security_event("SUSPICIOUS_USER_AGENT", client_ip, f"UA: {user_agent}")
+            self.log_security_event(
+                "SUSPICIOUS_USER_AGENT", client_ip, f"UA: {user_agent}"
+            )
             # Block IP after suspicious activity
             self.blocked_ips.add(client_ip)
             return JSONResponse(
@@ -221,7 +242,9 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         # Validate Content-Type
         content_type = request.headers.get("content-type", "")
         if not self.validate_content_type(content_type):
-            self.log_security_event("INVALID_CONTENT_TYPE", client_ip, f"CT: {content_type}")
+            self.log_security_event(
+                "INVALID_CONTENT_TYPE", client_ip, f"CT: {content_type}"
+            )
             return JSONResponse(
                 status_code=400,
                 content={"error": "Invalid content type"},
@@ -243,7 +266,9 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 
         # Validate request content for attacks
         if not self.validate_request_content(request, body):
-            self.log_security_event("ATTACK_PATTERN", client_ip, "Suspicious content detected")
+            self.log_security_event(
+                "ATTACK_PATTERN", client_ip, "Suspicious content detected"
+            )
             # Block IP after attack attempt
             self.blocked_ips.add(client_ip)
             return JSONResponse(
