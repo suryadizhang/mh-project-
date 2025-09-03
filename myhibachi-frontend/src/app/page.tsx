@@ -1,11 +1,13 @@
 'use client'
 
-import Link from 'next/link'
 import '@/styles/home.css'
 import '@/styles/pages/home.page.css'
-import { useScrollAnimation } from '@/hooks/useScrollAnimation'
+
+import Link from 'next/link'
+
 import Assistant from '@/components/chat/Assistant'
 import TestimonialsSection from '@/components/sections/TestimonialsSection'
+import { useScrollAnimation } from '@/hooks/useScrollAnimation'
 
 export default function Home() {
   useScrollAnimation()

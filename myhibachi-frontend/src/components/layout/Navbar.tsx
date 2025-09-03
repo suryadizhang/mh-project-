@@ -1,10 +1,11 @@
 'use client'
 
-import Link from 'next/link'
-import { useState } from 'react'
-import { usePathname } from 'next/navigation'
-import Image from 'next/image'
 import '@/styles/navbar.css'
+
+import Image from 'next/image'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useState } from 'react'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)

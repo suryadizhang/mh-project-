@@ -1,23 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Dict, Any, List, Optional
-from datetime import datetime
+from typing import Any
 
 from app.database import get_db
-from app.utils.auth import get_current_user, get_admin_user
+from app.utils.auth import get_current_user
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
 
 
 @router.get("/")
 async def get_bookings(
-    user_id: Optional[str] = None,
-    status: Optional[str] = None,
+    user_id: str | None = None,
+    status: str | None = None,
     limit: int = 50,
     offset: int = 0,
     db: AsyncSession = Depends(get_db),
-    current_user: Dict[str, Any] = Depends(get_current_user)
-) -> List[Dict[str, Any]]:
+    current_user: dict[str, Any] = Depends(get_current_user),
+) -> list[dict[str, Any]]:
     """Get bookings with optional filters."""
     # Placeholder implementation
     # In real implementation, query your bookings table
@@ -33,7 +32,7 @@ async def get_bookings(
             "deposit_paid": True,
             "balance_due": 350.00,
             "payment_status": "deposit_paid",
-            "created_at": "2024-01-01T00:00:00Z"
+            "created_at": "2024-01-01T00:00:00Z",
         }
     ]
 
@@ -42,8 +41,8 @@ async def get_bookings(
 async def get_booking(
     booking_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: Dict[str, Any] = Depends(get_current_user)
-) -> Dict[str, Any]:
+    current_user: dict[str, Any] = Depends(get_current_user),
+) -> dict[str, Any]:
     """Get specific booking details."""
     # Placeholder implementation
     return {
@@ -59,26 +58,24 @@ async def get_booking(
         "payment_status": "deposit_paid",
         "menu_items": [
             {"name": "Adult Menu", "quantity": 6, "price": 45.00},
-            {"name": "Kids Menu", "quantity": 2, "price": 25.00}
+            {"name": "Kids Menu", "quantity": 2, "price": 25.00},
         ],
-        "addons": [
-            {"name": "Filet Mignon Upgrade", "quantity": 2, "price": 5.00}
-        ],
+        "addons": [{"name": "Filet Mignon Upgrade", "quantity": 2, "price": 5.00}],
         "location": {
             "address": "123 Main St, San Jose, CA 95123",
             "travel_distance": 15.5,
-            "travel_fee": 31.00
+            "travel_fee": 31.00,
         },
-        "created_at": "2024-01-01T00:00:00Z"
+        "created_at": "2024-01-01T00:00:00Z",
     }
 
 
 @router.post("/")
 async def create_booking(
-    booking_data: Dict[str, Any],
+    booking_data: dict[str, Any],
     db: AsyncSession = Depends(get_db),
-    current_user: Dict[str, Any] = Depends(get_current_user)
-) -> Dict[str, Any]:
+    current_user: dict[str, Any] = Depends(get_current_user),
+) -> dict[str, Any]:
     """Create a new booking."""
     # Placeholder implementation
     # In real implementation, validate and create booking
@@ -87,34 +84,28 @@ async def create_booking(
         "user_id": current_user["id"],
         "status": "pending",
         "message": "Booking created successfully",
-        **booking_data
+        **booking_data,
     }
 
 
 @router.put("/{booking_id}")
 async def update_booking(
     booking_id: str,
-    booking_data: Dict[str, Any],
+    booking_data: dict[str, Any],
     db: AsyncSession = Depends(get_db),
-    current_user: Dict[str, Any] = Depends(get_current_user)
-) -> Dict[str, Any]:
+    current_user: dict[str, Any] = Depends(get_current_user),
+) -> dict[str, Any]:
     """Update an existing booking."""
     # Placeholder implementation
-    return {
-        "id": booking_id,
-        "message": "Booking updated successfully",
-        **booking_data
-    }
+    return {"id": booking_id, "message": "Booking updated successfully", **booking_data}
 
 
 @router.delete("/{booking_id}")
 async def cancel_booking(
     booking_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: Dict[str, Any] = Depends(get_current_user)
-) -> Dict[str, str]:
+    current_user: dict[str, Any] = Depends(get_current_user),
+) -> dict[str, str]:
     """Cancel a booking."""
     # Placeholder implementation
-    return {
-        "message": f"Booking {booking_id} cancelled successfully"
-    }
+    return {"message": f"Booking {booking_id} cancelled successfully"}

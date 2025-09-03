@@ -85,14 +85,7 @@ function validateRequest(request: NextRequest): boolean {
   const contentType = request.headers.get('content-type') || ''
 
   // Block suspicious user agents
-  const suspiciousPatterns = [
-    /curl/i,
-    /wget/i,
-    /python-requests/i,
-    /bot/i,
-    /crawler/i,
-    /scanner/i
-  ]
+  const suspiciousPatterns = [/curl/i, /wget/i, /python-requests/i, /bot/i, /crawler/i, /scanner/i]
 
   // Allow legitimate bots (Google, Bing, etc.)
   const allowedBots = [
@@ -113,7 +106,11 @@ function validateRequest(request: NextRequest): boolean {
   }
 
   // Validate content-type for POST requests
-  if (request.method === 'POST' && !contentType.includes('application/json') && !contentType.includes('multipart/form-data')) {
+  if (
+    request.method === 'POST' &&
+    !contentType.includes('application/json') &&
+    !contentType.includes('multipart/form-data')
+  ) {
     return false
   }
 
@@ -179,6 +176,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
+    '/((?!api|_next/static|_next/image|favicon.ico).*)'
+  ]
 }

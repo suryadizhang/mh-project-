@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next'
+
 import blogPosts from '@/data/blogPosts'
 
 export default function sitemap(): MetadataRoute.Sitemap {

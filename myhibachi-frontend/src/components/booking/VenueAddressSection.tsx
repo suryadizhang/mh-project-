@@ -1,6 +1,8 @@
-import React from 'react'
-import { VenueAddressSectionProps } from './types'
 import './styles/VenueAddressSection.module.css'
+
+import React from 'react'
+
+import { VenueAddressSectionProps } from './types'
 
 const VenueAddressSection: React.FC<VenueAddressSectionProps & { className?: string }> = ({
   register,

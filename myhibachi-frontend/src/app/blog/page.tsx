@@ -1,19 +1,21 @@
 'use client'
 
-import Link from 'next/link'
-import { useState, useMemo } from 'react'
-import { Calendar, User } from 'lucide-react'
-import Assistant from '@/components/chat/Assistant'
-import BlogCardImage from '@/components/blog/BlogCardImage'
-import AdvancedFilters, { FilterState } from '@/components/blog/AdvancedFilters'
-import Pagination from '@/components/blog/Pagination'
-import {
-  getFeaturedPosts,
-  getSeasonalPosts,
-  getRecentPosts,
-  getEventSpecificPosts
-} from '@/data/blogPosts'
 import '@/styles/blog.css'
+
+import { Calendar, User } from 'lucide-react'
+import Link from 'next/link'
+import { useMemo, useState } from 'react'
+
+import AdvancedFilters, { FilterState } from '@/components/blog/AdvancedFilters'
+import BlogCardImage from '@/components/blog/BlogCardImage'
+import Pagination from '@/components/blog/Pagination'
+import Assistant from '@/components/chat/Assistant'
+import {
+  getEventSpecificPosts,
+  getFeaturedPosts,
+  getRecentPosts,
+  getSeasonalPosts
+} from '@/data/blogPosts'
 
 // Constants for pagination
 const POSTS_PER_PAGE = 9

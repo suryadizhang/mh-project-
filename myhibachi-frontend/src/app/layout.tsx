@@ -1,20 +1,4 @@
-import type { Metadata } from 'next'
-import { Inter, JetBrains_Mono, Poppins } from 'next/font/google'
-
 import './globals.css'
-import Navbar from '@/components/layout/Navbar'
-import Footer from '@/components/layout/Footer'
-import ClientLayout from '@/components/layout/ClientLayout'
-import BackToTopButton from '@/components/ui/BackToTopButton'
-import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
-import { PerformanceMonitoring } from '@/components/seo/TechnicalSEO'
-import {
-  generatePageMetadata,
-  SITE_CONFIG,
-  generateOrganizationSchema,
-  generateLocalBusinessSchema
-} from '@/lib/seo-config'
-
 // Import global styles
 import '@/styles/base.css'
 import '@/styles/utilities.css'
@@ -33,6 +17,22 @@ import '@/styles/breadcrumb.css'
 import '@/styles/optimized-image.css'
 // PHASE 5 FIX: Cross-browser button standardization - MUST LOAD LAST
 import '@/styles/components/buttons-cross-browser.css'
+
+import type { Metadata } from 'next'
+import { Inter, JetBrains_Mono, Poppins } from 'next/font/google'
+
+import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
+import ClientLayout from '@/components/layout/ClientLayout'
+import Footer from '@/components/layout/Footer'
+import Navbar from '@/components/layout/Navbar'
+import { PerformanceMonitoring } from '@/components/seo/TechnicalSEO'
+import BackToTopButton from '@/components/ui/BackToTopButton'
+import {
+  generateLocalBusinessSchema,
+  generateOrganizationSchema,
+  generatePageMetadata,
+  SITE_CONFIG
+} from '@/lib/seo-config'
 
 const inter = Inter({
   variable: '--font-inter',

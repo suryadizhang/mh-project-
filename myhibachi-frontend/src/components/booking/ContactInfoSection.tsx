@@ -1,6 +1,8 @@
-import React from 'react'
-import { FormSectionProps } from './types'
 import './styles/ContactInfoSection.module.css'
+
+import React from 'react'
+
+import { FormSectionProps } from './types'
 
 const ContactInfoSection: React.FC<FormSectionProps & { className?: string }> = ({
   register,

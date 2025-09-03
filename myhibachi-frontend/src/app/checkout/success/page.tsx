@@ -1,18 +1,19 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
 import {
-  CheckCircle,
-  Download,
-  Mail,
-  Phone,
-  Home,
-  CreditCard,
   Calendar,
-  DollarSign
+  CheckCircle,
+  CreditCard,
+  DollarSign,
+  Download,
+  Home,
+  Mail,
+  Phone
 } from 'lucide-react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
+
 import { apiFetch } from '@/lib/api'
 
 interface PaymentSuccess {

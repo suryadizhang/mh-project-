@@ -1,8 +1,10 @@
+import './styles/LocationSection.module.css'
+
 import React from 'react'
-import { Controller, Control, FieldErrors, UseFormWatch } from 'react-hook-form'
+import { Control, Controller, FieldErrors, UseFormWatch } from 'react-hook-form'
+
 import { BookingFormData } from '../../data/booking/types'
 import { US_STATES } from '../../data/booking/types'
-import './styles/LocationSection.module.css'
 
 interface LocationSectionProps {
   control: Control<BookingFormData>

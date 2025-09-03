@@ -1,7 +1,8 @@
 'use client'
 
+import { ChevronDown, Filter, MapPin, Users, X } from 'lucide-react'
 import React, { useState } from 'react'
-import { MapPin, Users, Filter, X, ChevronDown } from 'lucide-react'
+
 import { BlogPost } from '@/data/blogPosts'
 
 interface AdvancedFiltersProps {

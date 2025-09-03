@@ -1,5 +1,6 @@
-import React from 'react'
 import './styles/SubmitSection.module.css'
+
+import React from 'react'
 
 interface SubmitSectionProps {
   isSubmitting: boolean

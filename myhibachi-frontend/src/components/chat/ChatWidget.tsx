@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { X, Send, ExternalLink } from 'lucide-react'
+import { ExternalLink, Send, X } from 'lucide-react'
 import Image from 'next/image'
+import { useEffect, useRef, useState } from 'react'
 
 interface Message {
   id: string

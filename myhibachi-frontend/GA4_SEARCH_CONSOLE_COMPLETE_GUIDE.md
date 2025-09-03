@@ -138,6 +138,7 @@ gtag('event', 'social_media_click', {
 
 1. **GA4 Dashboard** → **Explore** → **Create New**
 2. **Add Metrics:**
+
    - Sessions
    - Users
    - Conversion Rate

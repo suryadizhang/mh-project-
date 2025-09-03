@@ -1,6 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+
 import ChatWidget from '@/components/chat/ChatWidget'
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {

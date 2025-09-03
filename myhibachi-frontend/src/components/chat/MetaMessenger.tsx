@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+
 import contactData from '@/data/contact.json'
 
 declare global {

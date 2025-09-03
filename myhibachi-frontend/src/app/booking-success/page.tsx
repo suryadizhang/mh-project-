@@ -1,15 +1,16 @@
 'use client'
 
-import React, { Suspense } from 'react'
 import { format } from 'date-fns'
-import { useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { Download, ExternalLink, Gift, MessageSquare, Star } from 'lucide-react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import React, { Suspense } from 'react'
+import { useEffect, useState } from 'react'
+
+import Assistant from '@/components/chat/Assistant'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Star, ExternalLink, Download, MessageSquare, Gift } from 'lucide-react'
-import Assistant from '@/components/chat/Assistant'
 
 interface BookingDetails {
   bookingId: string

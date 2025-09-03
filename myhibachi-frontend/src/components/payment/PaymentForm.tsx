@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
-import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js'
-import { Loader2, CreditCard, Shield, Lock, CheckCircle } from 'lucide-react'
+import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
+import { CheckCircle, CreditCard, Loader2, Lock, Shield } from 'lucide-react'
+import { FormEvent, useState } from 'react'
 
 interface BookingData {
   id: string

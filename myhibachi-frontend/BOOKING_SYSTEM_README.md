@@ -151,16 +151,19 @@ const MOCK_AVAILABILITY = {
 ## 🚀 Next Implementation Steps
 
 1. **Database Integration**:
+
    - Replace mock data with real database queries
    - Implement booking creation and updates
    - Add booking status management
 
 2. **Payment Processing**:
+
    - Integrate payment gateway (Stripe, Square, etc.)
    - Handle deposits and final payments
    - Send confirmation emails
 
 3. **Admin Panel**:
+
    - View and manage bookings
    - Adjust time slot capacity
    - Handle cancellations and rescheduling

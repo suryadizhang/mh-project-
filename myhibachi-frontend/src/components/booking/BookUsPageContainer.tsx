@@ -1,8 +1,11 @@
-import React from 'react'
-import BookUsHero from './BookUsHero'
-import BookingFormContainer from './BookingFormContainer'
-import Assistant from '@/components/chat/Assistant'
 import './styles/BookUsPageContainer.module.css'
+
+import React from 'react'
+
+import Assistant from '@/components/chat/Assistant'
+
+import BookingFormContainer from './BookingFormContainer'
+import BookUsHero from './BookUsHero'
 
 interface BookUsPageContainerProps {
   className?: string

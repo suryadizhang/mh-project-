@@ -1,16 +1,16 @@
+import './styles/BookingFormContainer.module.css'
+
+import { addDays, format } from 'date-fns'
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { format, addDays } from 'date-fns'
 
 import { apiFetch } from '@/lib/api'
 
 import ContactInfoSection from './ContactInfoSection'
-import EventDetailsSection from './EventDetailsSection'
-import VenueAddressSection from './VenueAddressSection'
 import CustomerAddressSection from './CustomerAddressSection'
+import EventDetailsSection from './EventDetailsSection'
 import SubmitSection from './SubmitSection'
-
-import './styles/BookingFormContainer.module.css'
+import VenueAddressSection from './VenueAddressSection'
 
 // Type definitions for booking form
 type BookingFormData = {

@@ -1,7 +1,9 @@
-import React from 'react'
-import { Controller, Control, FieldErrors } from 'react-hook-form'
-import { BookingFormData } from '../../data/booking/types'
 import './styles/GuestDetailsSection.module.css'
+
+import React from 'react'
+import { Control, Controller, FieldErrors } from 'react-hook-form'
+
+import { BookingFormData } from '../../data/booking/types'
 
 interface GuestDetailsSectionProps {
   control: Control<BookingFormData>

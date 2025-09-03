@@ -7,17 +7,18 @@ Dependencies are managed in requirements.txt - ensure proper FastAPI setup
 """
 
 import sys
-import uvicorn
 from pathlib import Path
+
+import uvicorn
 
 
 def main():
     """Main entry point for the AI backend"""
     print("🤖 MyHibachi AI Backend Starting...")
-    
+
     # Check if we should use the corrected version
     corrected_backend = Path(__file__).parent / "simple_backend_corrected.py"
-    
+
     if corrected_backend.exists():
         print("✅ Using corrected backend implementation")
         print("🤖 AI Backend running on port 8002")
@@ -28,7 +29,7 @@ def main():
                 host="127.0.0.1",
                 port=8002,
                 reload=True,
-                log_level="info"
+                log_level="info",
             )
         except ImportError as e:
             print(f"❌ Error importing corrected backend: {e}")

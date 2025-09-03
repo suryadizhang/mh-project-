@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { loadStripe } from '@stripe/stripe-js'
 import { Elements } from '@stripe/react-stripe-js'
-import { CreditCard, DollarSign, Shield, Users, Calendar, MapPin, Loader2 } from 'lucide-react'
-import PaymentForm from '@/components/payment/PaymentForm'
+import { loadStripe } from '@stripe/stripe-js'
+import { Calendar, CreditCard, DollarSign, Loader2, MapPin, Shield, Users } from 'lucide-react'
+import { useEffect, useState } from 'react'
+
+import CustomerSavingsDisplay from '@/components/CustomerSavingsDisplay'
 import AlternativePaymentOptions from '@/components/payment/AlternativePaymentOptions'
 import BookingLookup from '@/components/payment/BookingLookup'
-import CustomerSavingsDisplay from '@/components/CustomerSavingsDisplay'
+import PaymentForm from '@/components/payment/PaymentForm'
 import { apiFetch } from '@/lib/api'
 
 // Initialize Stripe

@@ -1,9 +1,10 @@
 'use client'
 
+import { Calendar, Clock, FileText, Home, LogOut, Mail, Settings, Users } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+
 import { cn } from '@/lib/utils'
-import { Calendar, Clock, Mail, FileText, Users, Settings, Home, LogOut } from 'lucide-react'
 
 const sidebarItems = [
   {

@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useRef, useEffect } from 'react'
 import Link from 'next/link'
+import React, { useEffect, useRef } from 'react'
+
 import { homeData } from '@/data/home'
 import styles from '@/styles/home/service-areas.module.css'
 

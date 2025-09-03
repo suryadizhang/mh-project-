@@ -1,6 +1,7 @@
 'use client'
 
 import type { FaqItem } from '@/data/faqsData'
+
 import { FaqList } from './FaqList'
 
 interface FAQsPageContainerProps {

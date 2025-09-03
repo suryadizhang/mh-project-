@@ -1,11 +1,13 @@
-import React from 'react'
-import { Controller } from 'react-hook-form'
-import { addDays } from 'date-fns'
-import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import '../../../app/BookUs/datepicker.css'
-import { EventDetailsSectionProps } from './types'
 import './styles/EventDetailsSection.module.css'
+
+import { addDays } from 'date-fns'
+import React from 'react'
+import DatePicker from 'react-datepicker'
+import { Controller } from 'react-hook-form'
+
+import { EventDetailsSectionProps } from './types'
 
 const EventDetailsSection: React.FC<EventDetailsSectionProps & { className?: string }> = ({
   register,

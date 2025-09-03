@@ -1,44 +1,33 @@
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
-from sqlalchemy import create_engine
-from app.config import settings
 import logging
+
+from app.config import settings
+from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
+                                    create_async_engine)
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 logger = logging.getLogger(__name__)
 
 # Async engine for async operations
 engine = create_async_engine(
-    settings.database_url,
-    echo=settings.debug,
-    pool_pre_ping=True,
-    pool_recycle=3600
+    settings.database_url, echo=settings.debug, pool_pre_ping=True, pool_recycle=3600
 )
 
 # Sync engine for Alembic migrations
 sync_engine = create_engine(
-    settings.database_url_sync,
-    echo=settings.debug,
-    pool_pre_ping=True,
-    pool_recycle=3600
+    settings.database_url_sync, echo=settings.debug, pool_pre_ping=True, pool_recycle=3600
 )
 
 # Async session maker
-AsyncSessionLocal = async_sessionmaker(
-    engine, 
-    class_=AsyncSession, 
-    expire_on_commit=False
-)
+AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 # Sync session maker for migrations
-SessionLocal = sessionmaker(
-    autocommit=False, 
-    autoflush=False, 
-    bind=sync_engine
-)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=sync_engine)
 
 
 class Base(DeclarativeBase):
     """Base class for all database models."""
+
     pass
 
 

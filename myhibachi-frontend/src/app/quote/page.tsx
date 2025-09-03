@@ -1,8 +1,9 @@
 'use client'
 
-import { QuoteCalculator } from '@/components/quote/QuoteCalculator'
 import '@/styles/quote-calculator.css'
+
 import Assistant from '@/components/chat/Assistant'
+import { QuoteCalculator } from '@/components/quote/QuoteCalculator'
 
 export default function QuotePage() {
   return (

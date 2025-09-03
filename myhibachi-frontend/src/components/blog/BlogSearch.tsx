@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Search, Filter, X } from 'lucide-react'
+import { Filter, Search, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+
 import type { BlogPost } from '@/data/blogPosts'
-import { getAllCategories, getAllServiceAreas, getAllEventTypes } from '@/data/blogPosts'
+import { getAllCategories, getAllEventTypes, getAllServiceAreas } from '@/data/blogPosts'
 
 interface BlogSearchProps {
   posts: BlogPost[]

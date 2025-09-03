@@ -1,6 +1,8 @@
-import React from 'react'
-import { BookingModalProps } from './types'
 import './styles/BookingModals.module.css'
+
+import React from 'react'
+
+import { BookingModalProps } from './types'
 
 const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
   showValidationModal,

@@ -1,8 +1,9 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { generateLocationPage, locationContentBlocks } from '@/lib/locationPageGenerator'
-import { LocalBusinessSchema, FAQSchema } from '@/components/seo/TechnicalSEO'
+
 import Assistant from '@/components/chat/Assistant'
+import { FAQSchema, LocalBusinessSchema } from '@/components/seo/TechnicalSEO'
+import { generateLocationPage, locationContentBlocks } from '@/lib/locationPageGenerator'
 
 const locationData = generateLocationPage('Oakland')
 

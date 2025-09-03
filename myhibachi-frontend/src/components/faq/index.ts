@@ -1,5 +1,5 @@
-export { FAQsPageContainer } from './FAQsPageContainer'
-export { FaqSearch } from './FaqSearch'
 export { FaqFilters } from './FaqFilters'
-export { FaqList } from './FaqList'
 export { FaqItemComponent } from './FaqItem'
+export { FaqList } from './FaqList'
+export { FaqSearch } from './FaqSearch'
+export { FAQsPageContainer } from './FAQsPageContainer'

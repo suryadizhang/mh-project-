@@ -390,11 +390,11 @@ function getLocationCoordinatesDetailed(location: string) {
 
 export type { TechnicalSEOProps }
 export {
+  BreadcrumbSchema,
+  EventSchema,
+  FAQSchema,
   generateEnhancedMetadata,
   getCoreWebVitalsMetadata,
   LocalBusinessSchema,
-  FAQSchema,
-  BreadcrumbSchema,
-  EventSchema,
   PerformanceMonitoring
 }

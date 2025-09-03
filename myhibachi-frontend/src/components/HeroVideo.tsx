@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { Pause, Play, Volume2, VolumeX } from 'lucide-react'
 import Link from 'next/link'
+import { useEffect, useRef, useState } from 'react'
+
 import { Button } from '@/components/ui/button'
-import { Play, Pause, Volume2, VolumeX } from 'lucide-react'
 
 interface HeroVideoProps {
   videoSrc?: string

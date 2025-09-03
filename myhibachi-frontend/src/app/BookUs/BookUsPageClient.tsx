@@ -1,12 +1,14 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import { useForm, Controller } from 'react-hook-form'
-import { format, addDays } from 'date-fns'
-import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import './datepicker.css'
 import '@/styles/booking/booking.css'
+
+import { addDays, format } from 'date-fns'
+import React, { useEffect, useState } from 'react'
+import DatePicker from 'react-datepicker'
+import { Controller, useForm } from 'react-hook-form'
+
 import Assistant from '@/components/chat/Assistant'
 import { apiFetch } from '@/lib/api'
 

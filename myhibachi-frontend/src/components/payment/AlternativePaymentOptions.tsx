@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { Copy, Check, ExternalLink, Phone, Mail, QrCode, Smartphone } from 'lucide-react'
+import { Check, Copy, ExternalLink, Mail, Phone, QrCode, Smartphone } from 'lucide-react'
 import QRCodeGenerator from 'qrcode'
+import { useState } from 'react'
+
 import { apiFetch } from '@/lib/api'
 
 interface BookingData {

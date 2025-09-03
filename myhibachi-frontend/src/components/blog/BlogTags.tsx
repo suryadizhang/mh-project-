@@ -1,7 +1,8 @@
 'use client'
 
+import { Filter, Tag, X } from 'lucide-react'
 import { useState } from 'react'
-import { Tag, X, Filter } from 'lucide-react'
+
 import type { BlogPost } from '@/data/blogPosts'
 
 interface BlogTagsProps {

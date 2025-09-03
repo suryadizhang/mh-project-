@@ -805,7 +805,7 @@
     animation: none; /* Disable animation for users who prefer reduced motion */
     opacity: 0.2; /* Further reduce opacity when static */
   }
-  
+
   .pulse-animation {
     animation: none; /* Also disable pulse animation */
   }

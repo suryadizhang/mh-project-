@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react'
+import { useEffect, useState } from 'react'
+
 import type { BlogPost } from '@/data/blogPosts'
 
 interface BlogPaginationProps {

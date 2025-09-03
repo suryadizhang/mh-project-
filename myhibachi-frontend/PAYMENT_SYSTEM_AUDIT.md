@@ -46,11 +46,13 @@
 ### Security Requirements (CRITICAL for Live Deployment)
 
 1. **Webhook Signature Verification**
+
    - Must implement Stripe webhook endpoints
    - Verify webhook signatures for security
    - Handle payment success/failure events
 
 2. **Environment Variables**
+
    - Replace test Stripe keys with live keys
    - Ensure STRIPE_SECRET_KEY is properly secured
    - Use proper environment variable validation
@@ -63,21 +65,25 @@
 ### Recommended Enhancements
 
 1. **Database Integration**
+
    - Store payment records in database
    - Link payments to booking system
    - Payment history and receipts
 
 2. **Email Notifications**
+
    - Automated payment confirmations
    - Receipt delivery via email
    - Admin payment notifications
 
 3. **Error Monitoring**
+
    - Implement error tracking (Sentry, etc.)
    - Payment failure logging
    - Admin alert system
 
 4. **Rate Limiting**
+
    - Implement API rate limiting
    - Prevent payment abuse
    - DDOS protection

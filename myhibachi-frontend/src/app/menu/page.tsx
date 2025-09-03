@@ -1,9 +1,11 @@
 ﻿'use client'
 
-import Link from 'next/link'
-import { Calculator, Calendar, MessageCircle } from 'lucide-react'
 import '@/styles/menu.css'
 import '@/styles/pages/menu.page.css'
+
+import { Calculator, Calendar, MessageCircle } from 'lucide-react'
+import Link from 'next/link'
+
 import Assistant from '@/components/chat/Assistant'
 
 export default function MenuPage() {

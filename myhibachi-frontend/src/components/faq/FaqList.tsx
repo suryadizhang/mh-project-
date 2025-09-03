@@ -1,8 +1,10 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+
 import type { FaqItem } from '@/data/faqsData'
+
 import { FaqItemComponent } from './FaqItem'
-import { useState, useEffect } from 'react'
 
 interface FaqListProps {
   items: FaqItem[]

@@ -1,4 +1,5 @@
-import { Search, Filter, UserPlus } from 'lucide-react'
+import { Filter, Search, UserPlus } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 
 export default function CustomersPage() {

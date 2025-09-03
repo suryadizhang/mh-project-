@@ -1,7 +1,7 @@
 'use client'
 
-import React from 'react'
 import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react'
+import React from 'react'
 
 interface PaginationProps {
   currentPage: number

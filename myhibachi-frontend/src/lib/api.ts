@@ -84,21 +84,33 @@ export const api = {
   get: <T = Record<string, unknown>>(path: string, options?: ApiRequestOptions) =>
     apiFetch<T>(path, { ...options, method: 'GET' }),
 
-  post: <T = Record<string, unknown>>(path: string, data?: Record<string, unknown>, options?: ApiRequestOptions) =>
+  post: <T = Record<string, unknown>>(
+    path: string,
+    data?: Record<string, unknown>,
+    options?: ApiRequestOptions
+  ) =>
     apiFetch<T>(path, {
       ...options,
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined
     }),
 
-  put: <T = Record<string, unknown>>(path: string, data?: Record<string, unknown>, options?: ApiRequestOptions) =>
+  put: <T = Record<string, unknown>>(
+    path: string,
+    data?: Record<string, unknown>,
+    options?: ApiRequestOptions
+  ) =>
     apiFetch<T>(path, {
       ...options,
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined
     }),
 
-  patch: <T = Record<string, unknown>>(path: string, data?: Record<string, unknown>, options?: ApiRequestOptions) =>
+  patch: <T = Record<string, unknown>>(
+    path: string,
+    data?: Record<string, unknown>,
+    options?: ApiRequestOptions
+  ) =>
     apiFetch<T>(path, {
       ...options,
       method: 'PATCH',
@@ -113,7 +125,8 @@ export const api = {
  * Stripe-specific API calls (to be migrated to backend)
  */
 export const stripeApi = {
-  createPaymentIntent: async (data: StripePaymentData) => api.post('/api/v1/payments/create-intent', data),
+  createPaymentIntent: async (data: StripePaymentData) =>
+    api.post('/api/v1/payments/create-intent', data),
 
   getCustomerDashboard: async (customerId: string) =>
     api.get(`/api/v1/customers/dashboard?customer_id=${customerId}`),

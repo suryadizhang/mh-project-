@@ -1,4 +1,5 @@
 import { Mail, Send, Users } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 
 export default function NewsletterPage() {

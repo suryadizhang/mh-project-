@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { Calendar, Users, Mail, TrendingUp } from 'lucide-react'
 import { format } from 'date-fns'
+import { Calendar, Mail, TrendingUp, Users } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
 
 // Enhanced booking interface for production
 interface Booking {

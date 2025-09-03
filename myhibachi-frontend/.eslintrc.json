@@ -1,6 +1,11 @@
 {
   "extends": ["next/core-web-vitals", "next/typescript"],
+  "plugins": ["simple-import-sort", "unused-imports"],
   "rules": {
-    "no-var": "off"
+    "no-var": "off",
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error",
+    "unused-imports/no-unused-imports": "error",
+    "no-console": "warn"
   }
 }

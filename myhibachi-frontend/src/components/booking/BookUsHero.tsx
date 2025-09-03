@@ -1,5 +1,6 @@
-import React from 'react'
 import './styles/BookUsHero.module.css'
+
+import React from 'react'
 
 interface BookUsHeroProps {
   className?: string

@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+
 import SEOAutomationDashboard from '@/components/admin/SEOAutomationDashboard'
 
 export const metadata: Metadata = {

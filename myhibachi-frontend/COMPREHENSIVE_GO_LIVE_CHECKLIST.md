@@ -9,12 +9,14 @@
 ### **Phase 1: Google Analytics 4 (GA4) Setup**
 
 - [ ] **Create Google Analytics Account**
+
   - Go to [analytics.google.com](https://analytics.google.com)
   - Set up property for "My Hibachi LLC"
   - Choose "Web" as platform
   - Add website URL (yourdomain.com)
 
 - [ ] **Get GA4 Measurement ID**
+
   - Copy GA4 Measurement ID (format: G-XXXXXXXXXX)
   - Add to environment variables: `NEXT_PUBLIC_GA_MEASUREMENT_ID`
 
@@ -26,6 +28,7 @@
 ### **Phase 2: Google Search Console Setup**
 
 - [ ] **Verify Domain Ownership**
+
   - Add property in [search.google.com/search-console](https://search.google.com/search-console)
   - Verify via DNS or HTML file
   - Submit sitemap.xml
@@ -37,12 +40,14 @@
 ### **Phase 3: Enhanced Ecommerce Tracking**
 
 - [ ] **Payment Event Tracking**
+
   - Track payment_started events
   - Track payment_completed events
   - Track payment_failed events
   - Track payment_method_selected events
 
 - [ ] **Revenue Tracking**
+
   - Set up purchase events with revenue data
   - Track deposit vs balance payments
   - Monitor tip amounts and payment fees
@@ -57,6 +62,7 @@
 ### **Phase 4: Google Tag Manager (GTM) - Optional but Recommended**
 
 - [ ] **Create GTM Container**
+
   - Set up container at [tagmanager.google.com](https://tagmanager.google.com)
   - Install GTM code on website
   - Configure GA4 through GTM for better control
@@ -74,12 +80,14 @@
 ### **Phase 1: Stripe Account & Business Setup**
 
 - [ ] **Stripe Live Account Activation**
+
   - Complete business verification process
   - Provide business documents (EIN, bank account)
   - Wait for approval (1-2 business days)
   - Activate live payments
 
 - [ ] **Business Information Update**
+
   - Business name: "My Hibachi LLC"
   - Business type: Food service/Catering
   - Tax ID/EIN number
@@ -103,6 +111,7 @@
   ```
 
 - [ ] **Webhook Endpoint Setup**
+
   - URL: `https://yourdomain.com/api/v1/payments/webhook`
   - Events to monitor:
     - `payment_intent.succeeded`
@@ -123,12 +132,14 @@
 Stripe provides comprehensive customer and payment data storage:
 
 - [ ] **Customer Records Setup**
+
   - Stripe automatically creates customer records
   - Stores customer email, name, phone
   - Links all payments to customer profiles
   - Maintains complete payment history
 
 - [ ] **Payment Data Storage**
+
   - All payment intents stored in Stripe
   - Complete transaction history
   - Metadata storage (booking IDs, tips, etc.)
@@ -143,12 +154,14 @@ Stripe provides comprehensive customer and payment data storage:
 ### **Phase 4: Stripe Dashboard & Reporting**
 
 - [ ] **Dashboard Configuration**
+
   - Set up custom dashboard views
   - Configure payment reporting
   - Set up automated payout reports
   - Enable tax reporting features
 
 - [ ] **Revenue Analytics**
+
   - Track payment volumes by method
   - Monitor fee vs revenue ratios
   - Analyze tip patterns and amounts
@@ -163,12 +176,14 @@ Stripe provides comprehensive customer and payment data storage:
 ### **Phase 5: Advanced Stripe Features**
 
 - [ ] **Payment Links** (Alternative to custom page)
+
   - Create shareable payment links
   - Custom branding and messaging
   - Mobile-optimized checkout
   - Automatic receipt delivery
 
 - [ ] **Stripe Invoicing** (For recurring customers)
+
   - Create custom invoice templates
   - Automated payment reminders
   - Subscription management (if needed)
@@ -241,6 +256,7 @@ Stripe provides comprehensive customer and payment data storage:
 ### **Production Deployment**
 
 - [ ] **Domain Configuration**
+
   - Purchase/configure custom domain (myhibachi.com)
   - Set up DNS records
   - Configure SSL certificate
@@ -271,6 +287,7 @@ Stripe provides comprehensive customer and payment data storage:
 ### **Performance Optimization**
 
 - [ ] **Website Speed Optimization**
+
   - Optimize images and assets
   - Enable compression and caching
   - Test Core Web Vitals
@@ -289,6 +306,7 @@ Stripe provides comprehensive customer and payment data storage:
 ### **Payment System Testing**
 
 - [ ] **Stripe Test Scenarios**
+
   - Test successful payments (small amounts)
   - Test declined card scenarios
   - Test 3D Secure authentication
@@ -304,6 +322,7 @@ Stripe provides comprehensive customer and payment data storage:
 ### **Analytics Testing**
 
 - [ ] **GA4 Event Testing**
+
   - Verify payment events fire correctly
   - Test enhanced ecommerce data
   - Confirm customer journey tracking
@@ -372,6 +391,7 @@ Stripe provides comprehensive customer and payment data storage:
 ### **Regular Maintenance Tasks**
 
 - [ ] **Weekly Reviews**
+
   - Review payment success rates
   - Monitor GA4 conversion data
   - Check for failed webhook deliveries

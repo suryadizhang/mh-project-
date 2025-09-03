@@ -1,9 +1,10 @@
 import type { NextConfig } from 'next'
 
 // Dynamic import for bundle analyzer to avoid type issues
-const _withBundleAnalyzer = process.env.ANALYZE === 'true'
-  ? require('@next/bundle-analyzer')({ enabled: true })
-  : (config: NextConfig) => config
+const _withBundleAnalyzer =
+  process.env.ANALYZE === 'true'
+    ? require('@next/bundle-analyzer')({ enabled: true })
+    : (config: NextConfig) => config
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -59,7 +60,8 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), speaker=()'
+            value:
+              'camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), speaker=()'
           },
           {
             key: 'Strict-Transport-Security',
@@ -99,7 +101,7 @@ const nextConfig: NextConfig = {
               "base-uri 'self'",
               "form-action 'self'",
               "frame-ancestors 'none'",
-              "upgrade-insecure-requests"
+              'upgrade-insecure-requests'
             ].join('; ')
           }
         ]

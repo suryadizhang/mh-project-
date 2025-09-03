@@ -1,9 +1,11 @@
-import { faqs } from '@/data/faqsData'
-import { FAQsPageContainer } from '@/components/faq'
 import '@/styles/base.css'
 import '@/styles/faqs/faqs-base.css'
 import '@/styles/faqs/faqs-items.css'
+
 import { Metadata } from 'next'
+
+import { FAQsPageContainer } from '@/components/faq'
+import { faqs } from '@/data/faqsData'
 
 export const metadata: Metadata = {
   title: 'Hibachi Catering FAQs | Private Chef Questions | Bay Area & Sacramento',

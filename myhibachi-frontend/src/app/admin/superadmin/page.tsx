@@ -1,6 +1,7 @@
-import { Shield, Users, Database, Settings, AlertTriangle } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { AlertTriangle, Database, Settings, Shield, Users } from 'lucide-react'
+
 import { BaseLocationManager } from '@/components/admin/BaseLocationManager'
+import { Button } from '@/components/ui/button'
 
 export default function SuperAdminPage() {
   const systemStats = [

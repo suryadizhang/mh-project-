@@ -1,10 +1,12 @@
 'use client'
 
-import React, { useRef, useEffect } from 'react'
 import Image from 'next/image'
-import HeroVideo from '../HeroVideo'
+import React, { useEffect, useRef } from 'react'
+
 import { homeData } from '@/data/home'
 import styles from '@/styles/home/hero.module.css'
+
+import HeroVideo from '../HeroVideo'
 
 export function HeroSection() {
   const heroRef = useRef<HTMLElement>(null)

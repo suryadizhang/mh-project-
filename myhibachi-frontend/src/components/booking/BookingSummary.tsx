@@ -1,7 +1,8 @@
 'use client'
 
-import React from 'react'
 import { format } from 'date-fns'
+import React from 'react'
+
 import type { BookingFormData } from '../../data/booking/types'
 
 interface BookingSummaryProps {

@@ -3,17 +3,25 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "dev:turbo": "next dev --turbopack",
-    "dev:stable": "next dev",
+    "analyze": "cross-env ANALYZE=true npm run build",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "lint:css": "stylelint \"**/*.{css,scss}\"",
-    "check:styles": "npm run lint:css",
     "check:css-conflicts": "stylelint \"**/*.{css,scss}\" --config .stylelintrc",
-    "analyze": "cross-env ANALYZE=true npm run build"
+    "check:styles": "npm run lint:css",
+    "dev": "next dev",
+    "dev:stable": "next dev",
+    "dev:turbo": "next dev --turbopack",
+    "format": "prettier --write . && sort-package-json package.json",
+    "lint": "next lint --max-warnings=0",
+    "lint:css": "stylelint \"**/*.{css,scss}\"",
+    "lint:fix": "next lint --fix",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
   },
+  "browserslist": [
+    ">=0.5%",
+    "last 2 versions",
+    "not dead"
+  ],
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
     "@radix-ui/react-slot": "^1.2.3",
@@ -45,6 +53,7 @@
     "@eslint/eslintrc": "^3",
     "@next/bundle-analyzer": "^15.5.2",
     "@tailwindcss/postcss": "^4",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/node": "^20",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
@@ -53,15 +62,14 @@
     "eslint-config-next": "^14.2.18",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.0.0-canary-7118f5dd7-20230705",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "eslint-plugin-unused-imports": "^4.2.0",
+    "prettier": "^3.3.3",
+    "sort-package-json": "^3.4.0",
     "stylelint": "^16.23.1",
     "stylelint-config-standard": "^39.0.0",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.6",
     "typescript": "^5"
-  },
-  "browserslist": [
-    ">=0.5%",
-    "last 2 versions",
-    "not dead"
-  ]
+  }
 }

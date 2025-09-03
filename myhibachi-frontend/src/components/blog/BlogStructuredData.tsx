@@ -1,4 +1,5 @@
 import Script from 'next/script'
+
 import { type BlogPost } from '@/data/blogPosts'
 
 interface BlogStructuredDataProps {

@@ -1,9 +1,11 @@
 'use client'
 
-import React from 'react'
+import { Calendar, Eye, Star, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
-import { TrendingUp, Eye, Star, Calendar } from 'lucide-react'
+import React from 'react'
+
 import { BlogPost } from '@/data/blogPosts'
+
 import BlogCardImage from './BlogCardImage'
 
 interface PopularPostsProps {

@@ -1,6 +1,8 @@
-import React from 'react'
-import { CustomerAddressSectionProps } from './types'
 import './styles/CustomerAddressSection.module.css'
+
+import React from 'react'
+
+import { CustomerAddressSectionProps } from './types'
 
 const CustomerAddressSection: React.FC<CustomerAddressSectionProps & { className?: string }> = ({
   register,

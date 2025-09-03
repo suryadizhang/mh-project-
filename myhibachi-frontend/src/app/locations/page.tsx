@@ -1,7 +1,8 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { LocalBusinessSchema } from '@/components/seo/TechnicalSEO'
+
 import Assistant from '@/components/chat/Assistant'
+import { LocalBusinessSchema } from '@/components/seo/TechnicalSEO'
 
 export const metadata: Metadata = {
   title: 'Hibachi Catering Locations | Bay Area, Sacramento & Central Valley | MyHibachi',

@@ -1,4 +1,4 @@
-import { UseFormRegister, Control, FieldErrors } from 'react-hook-form'
+import { Control, FieldErrors, UseFormRegister } from 'react-hook-form'
 
 // Type definitions for booking form
 export type BookingFormData = {

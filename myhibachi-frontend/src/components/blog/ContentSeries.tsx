@@ -1,9 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
+import { BookOpen, Calendar, ChevronRight, Tag, Users } from 'lucide-react'
 import Link from 'next/link'
-import { BookOpen, ChevronRight, Calendar, Tag, Users } from 'lucide-react'
+import React, { useState } from 'react'
+
 import { BlogPost } from '@/data/blogPosts'
+
 import BlogCardImage from './BlogCardImage'
 
 interface ContentSeries {

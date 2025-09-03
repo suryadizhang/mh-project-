@@ -1,9 +1,12 @@
 import '@/styles/contact.css'
 import '@/styles/base.css'
-import Assistant from '@/components/chat/Assistant'
-import ConsentBar from '@/components/consent/ConsentBar'
-import MetaMessenger from '@/components/chat/MetaMessenger'
+
 import { Metadata } from 'next'
+
+import Assistant from '@/components/chat/Assistant'
+import MetaMessenger from '@/components/chat/MetaMessenger'
+import ConsentBar from '@/components/consent/ConsentBar'
+
 import ContactPageClient from './ContactPageClient'
 
 export const metadata: Metadata = {

@@ -486,7 +486,9 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && needs.deployment-readiness.result == 'success'
     needs: deployment-readiness
-    environment: production
+    environment: 
+      name: production
+      url: ${{ vars.PRODUCTION_URL || 'https://myhibachi.com' }}
     
     steps:
     - name: 🚀 Deploy to Production

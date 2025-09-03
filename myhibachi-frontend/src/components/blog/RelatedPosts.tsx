@@ -1,9 +1,11 @@
 'use client'
 
-import React from 'react'
+import { ArrowRight, Calendar, User } from 'lucide-react'
 import Link from 'next/link'
-import { Calendar, User, ArrowRight } from 'lucide-react'
+import React from 'react'
+
 import { BlogPost } from '@/data/blogPosts'
+
 import BlogCardImage from './BlogCardImage'
 
 interface RelatedPostsProps {

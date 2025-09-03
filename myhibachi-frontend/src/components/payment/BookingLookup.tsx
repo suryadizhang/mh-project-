@@ -1,7 +1,7 @@
 'use client'
 
+import { Calendar, DollarSign, MapPin, Search, User } from 'lucide-react'
 import { useState } from 'react'
-import { Search, User, Calendar, MapPin, DollarSign } from 'lucide-react'
 
 interface BookingData {
   id: string

@@ -1,22 +1,21 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
 import { loadStripe } from '@stripe/stripe-js'
-
-import { apiFetch } from '@/lib/api'
-
 import {
-  CreditCard,
-  CheckCircle,
-  XCircle,
-  Loader2,
   ArrowLeft,
   Calendar,
+  CheckCircle,
+  CreditCard,
+  DollarSign,
+  Loader2,
   Users,
-  DollarSign
+  XCircle
 } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
+
+import { apiFetch } from '@/lib/api'
 
 // Initialize Stripe
 const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY

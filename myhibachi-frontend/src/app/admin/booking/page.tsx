@@ -1,4 +1,5 @@
-import { Search, Filter, Plus } from 'lucide-react'
+import { Filter, Plus, Search } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 
 export default function BookingPage() {

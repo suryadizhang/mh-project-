@@ -143,24 +143,24 @@ Please provide the following real information for your My Hibachi business:
 
 ### **1. Primary Business Contact**
 
-- **Business Phone**: ****\*\*****\_\_\_\_****\*\*****
-- **Business Email**: ****\*\*****\_\_\_\_****\*\*****
-- **Official Business Name**: ****\*\*****\_\_\_\_****\*\*****
+- **Business Phone**: \***\*\*\*\*\***\_\_\_\_\***\*\*\*\*\***
+- **Business Email**: \***\*\*\*\*\***\_\_\_\_\***\*\*\*\*\***
+- **Official Business Name**: \***\*\*\*\*\***\_\_\_\_\***\*\*\*\*\***
 
 ### **2. Zelle Payment Information**
 
-- **Zelle Email**: ****\*\*****\_\_\_\_****\*\*****
-- **Zelle Phone** (if different): ****\*\*****\_\_\_\_****\*\*****
+- **Zelle Email**: \***\*\*\*\*\***\_\_\_\_\***\*\*\*\*\***
+- **Zelle Phone** (if different): \***\*\*\*\*\***\_\_\_\_\***\*\*\*\*\***
 
 ### **3. Venmo Payment Information**
 
-- **Venmo Username**: ****\*\*****\_\_\_\_****\*\*****
-- **Venmo Display Name**: ****\*\*****\_\_\_\_****\*\*****
+- **Venmo Username**: \***\*\*\*\*\***\_\_\_\_\***\*\*\*\*\***
+- **Venmo Display Name**: \***\*\*\*\*\***\_\_\_\_\***\*\*\*\*\***
 
 ### **4. Website & Domain**
 
-- **Website URL**: ****\*\*****\_\_\_\_****\*\*****
-- **Domain for Email**: ****\*\*****\_\_\_\_****\*\*****
+- **Website URL**: \***\*\*\*\*\***\_\_\_\_\***\*\*\*\*\***
+- **Domain for Email**: \***\*\*\*\*\***\_\_\_\_\***\*\*\*\*\***
 
 ---
 

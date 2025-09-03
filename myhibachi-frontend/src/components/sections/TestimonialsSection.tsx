@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { ChevronLeft, ChevronRight, Star, Quote } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Quote, Star } from 'lucide-react'
+import { useEffect, useState } from 'react'
+
 import { useAnalytics } from '@/components/analytics/GoogleAnalytics'
 
 interface Testimonial {

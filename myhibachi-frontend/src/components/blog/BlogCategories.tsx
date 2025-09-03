@@ -1,7 +1,8 @@
 'use client'
 
+import { ChevronRight, Folder, Grid, List } from 'lucide-react'
 import { useState } from 'react'
-import { Folder, Grid, List, ChevronRight } from 'lucide-react'
+
 import type { BlogPost } from '@/data/blogPosts'
 
 interface BlogCategoriesProps {

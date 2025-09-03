@@ -1,8 +1,9 @@
-from pydantic import BaseModel, EmailStr, validator
-from typing import Optional, List, Dict, Any
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
+from typing import Any
+
+from pydantic import BaseModel, EmailStr
 
 
 class PaymentMethod(str, Enum):
@@ -31,8 +32,8 @@ class PaymentType(str, Enum):
 # Base schemas
 class CustomerBase(BaseModel):
     email: EmailStr
-    name: Optional[str] = None
-    phone: Optional[str] = None
+    name: str | None = None
+    phone: str | None = None
     preferred_payment_method: PaymentMethod = PaymentMethod.ZELLE
 
 
@@ -41,9 +42,9 @@ class CustomerCreate(CustomerBase):
 
 
 class CustomerUpdate(BaseModel):
-    name: Optional[str] = None
-    phone: Optional[str] = None
-    preferred_payment_method: Optional[PaymentMethod] = None
+    name: str | None = None
+    phone: str | None = None
+    preferred_payment_method: PaymentMethod | None = None
 
 
 class Customer(CustomerBase):
@@ -55,7 +56,7 @@ class Customer(CustomerBase):
     zelle_savings: Decimal
     loyalty_tier: str
     created_at: datetime
-    updated_at: Optional[datetime] = None
+    updated_at: datetime | None = None
 
     class Config:
         from_attributes = True
@@ -63,58 +64,58 @@ class Customer(CustomerBase):
 
 # Payment schemas
 class LineItem(BaseModel):
-    price_id: Optional[str] = None
+    price_id: str | None = None
     quantity: int = 1
     name: str
     amount: int  # in cents
-    description: Optional[str] = None
+    description: str | None = None
 
 
 class CreateCheckoutSession(BaseModel):
     booking_id: str
-    line_items: List[LineItem]
+    line_items: list[LineItem]
     mode: str = "payment"
     allow_promo_codes: bool = False
-    customer_email: Optional[str] = None
-    success_url: Optional[str] = None
-    cancel_url: Optional[str] = None
+    customer_email: str | None = None
+    success_url: str | None = None
+    cancel_url: str | None = None
 
 
 class CreatePaymentIntent(BaseModel):
     booking_id: str
     amount: int  # in cents
     currency: str = "usd"
-    customer_email: Optional[str] = None
+    customer_email: str | None = None
     payment_type: PaymentType = PaymentType.DEPOSIT
-    description: Optional[str] = None
-    metadata: Optional[Dict[str, str]] = {}
+    description: str | None = None
+    metadata: dict[str, str] | None = {}
 
 
 class PaymentBase(BaseModel):
-    booking_id: Optional[str] = None
+    booking_id: str | None = None
     amount: Decimal
     currency: str = "usd"
     method: PaymentMethod
     payment_type: PaymentType = PaymentType.DEPOSIT
-    description: Optional[str] = None
+    description: str | None = None
 
 
 class PaymentCreate(PaymentBase):
     user_id: str
-    stripe_payment_intent_id: Optional[str] = None
+    stripe_payment_intent_id: str | None = None
 
 
 class Payment(PaymentBase):
     id: str
     user_id: str
-    stripe_payment_intent_id: Optional[str] = None
-    stripe_customer_id: Optional[str] = None
+    stripe_payment_intent_id: str | None = None
+    stripe_customer_id: str | None = None
     status: PaymentStatus
     stripe_fee: Decimal
-    net_amount: Optional[Decimal] = None
-    metadata_json: Optional[str] = None
+    net_amount: Decimal | None = None
+    metadata_json: str | None = None
     created_at: datetime
-    updated_at: Optional[datetime] = None
+    updated_at: datetime | None = None
 
     class Config:
         from_attributes = True
@@ -122,10 +123,10 @@ class Payment(PaymentBase):
 
 # Invoice schemas
 class InvoiceBase(BaseModel):
-    booking_id: Optional[str] = None
+    booking_id: str | None = None
     amount_due: Decimal
     currency: str = "usd"
-    due_date: Optional[datetime] = None
+    due_date: datetime | None = None
 
 
 class InvoiceCreate(InvoiceBase):
@@ -140,11 +141,11 @@ class Invoice(InvoiceBase):
     stripe_customer_id: str
     amount_paid: Decimal
     status: str
-    hosted_invoice_url: Optional[str] = None
-    invoice_pdf_url: Optional[str] = None
-    paid_at: Optional[datetime] = None
+    hosted_invoice_url: str | None = None
+    invoice_pdf_url: str | None = None
+    paid_at: datetime | None = None
     created_at: datetime
-    updated_at: Optional[datetime] = None
+    updated_at: datetime | None = None
 
     class Config:
         from_attributes = True
@@ -153,8 +154,8 @@ class Invoice(InvoiceBase):
 # Product and Price schemas
 class ProductBase(BaseModel):
     name: str
-    description: Optional[str] = None
-    category: Optional[str] = None
+    description: str | None = None
+    category: str | None = None
 
 
 class Product(ProductBase):
@@ -170,8 +171,8 @@ class Product(ProductBase):
 class PriceBase(BaseModel):
     unit_amount: int  # cents
     currency: str = "usd"
-    recurring_interval: Optional[str] = None
-    nickname: Optional[str] = None
+    recurring_interval: str | None = None
+    nickname: str | None = None
 
 
 class Price(PriceBase):
@@ -189,9 +190,9 @@ class Price(PriceBase):
 # Refund schemas
 class RefundCreate(BaseModel):
     payment_id: str
-    amount: Optional[Decimal] = None  # None means full refund
-    reason: Optional[str] = None
-    notes: Optional[str] = None
+    amount: Decimal | None = None  # None means full refund
+    reason: str | None = None
+    notes: str | None = None
 
 
 class Refund(BaseModel):
@@ -201,9 +202,9 @@ class Refund(BaseModel):
     amount: Decimal
     currency: str
     status: str
-    reason: Optional[str] = None
-    requested_by: Optional[str] = None
-    notes: Optional[str] = None
+    reason: str | None = None
+    requested_by: str | None = None
+    notes: str | None = None
     created_at: datetime
 
     class Config:
@@ -237,27 +238,27 @@ class PaymentAnalytics(BaseModel):
     total_payments: int
     total_amount: Decimal
     avg_payment: Decimal
-    payment_methods: Dict[str, int]
-    monthly_revenue: List[Dict[str, Any]]
+    payment_methods: dict[str, int]
+    monthly_revenue: list[dict[str, Any]]
 
 
 class CustomerAnalytics(BaseModel):
     total_customers: int
     new_customers_this_month: int
-    top_customers: List[Dict[str, Any]]
-    payment_method_preferences: Dict[str, int]
-    loyalty_distribution: Dict[str, int]
+    top_customers: list[dict[str, Any]]
+    payment_method_preferences: dict[str, int]
+    loyalty_distribution: dict[str, int]
 
 
 # Error schemas
 class ErrorResponse(BaseModel):
     error: str
-    detail: Optional[str] = None
-    code: Optional[str] = None
+    detail: str | None = None
+    code: str | None = None
 
 
 # Success schemas
 class SuccessResponse(BaseModel):
     success: bool
     message: str
-    data: Optional[Dict[str, Any]] = None
+    data: dict[str, Any] | None = None

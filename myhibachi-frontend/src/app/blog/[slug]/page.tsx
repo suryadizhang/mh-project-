@@ -1,11 +1,12 @@
-import { notFound } from 'next/navigation'
-import Link from 'next/link'
-import { Calendar, User, ArrowLeft, Share2 } from 'lucide-react'
-import Assistant from '@/components/chat/Assistant'
-import BlogStructuredData from '@/components/blog/BlogStructuredData'
-import { LocalBusinessSchema, BreadcrumbSchema } from '@/components/seo/TechnicalSEO'
-import blogPosts, { getPostsByEventType, getPostsByServiceArea } from '@/data/blogPosts'
+import { ArrowLeft, Calendar, Share2, User } from 'lucide-react'
 import { Metadata } from 'next'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+
+import BlogStructuredData from '@/components/blog/BlogStructuredData'
+import Assistant from '@/components/chat/Assistant'
+import { BreadcrumbSchema, LocalBusinessSchema } from '@/components/seo/TechnicalSEO'
+import blogPosts, { getPostsByEventType, getPostsByServiceArea } from '@/data/blogPosts'
 
 interface BlogPostPageProps {
   params: Promise<{

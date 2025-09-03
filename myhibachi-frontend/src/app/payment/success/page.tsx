@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { CheckCircle, Download, Mail, Phone, Home, CreditCard } from 'lucide-react'
+import { CheckCircle, CreditCard, Download, Home, Mail, Phone } from 'lucide-react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
 
 interface PaymentDetails {
   id: string

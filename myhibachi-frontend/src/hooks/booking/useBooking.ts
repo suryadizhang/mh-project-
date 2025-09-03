@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
 import { format } from 'date-fns'
-import { BookingFormData, TimeSlot, DEFAULT_FORM_VALUES } from '@/data/booking/types'
+import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
+
+import { BookingFormData, DEFAULT_FORM_VALUES, TimeSlot } from '@/data/booking/types'
 import { apiFetch } from '@/lib/api'
 
 export function useBooking() {
