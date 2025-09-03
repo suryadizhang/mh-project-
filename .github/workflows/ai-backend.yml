@@ -17,6 +17,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
+      - name: Debug - List repository contents
+        run: |
+          echo "=== Repository root contents ==="
+          ls -la
+          echo "=== MyHibachi AI Backend directory ==="
+          ls -la myhibachi-ai-backend/ || echo "Directory does not exist"
+          echo "=== Check if requirements.txt exists ==="
+          test -f myhibachi-ai-backend/requirements.txt && echo "requirements.txt found" || echo "requirements.txt NOT found"
+          echo "=== Find all requirements.txt files ==="
+          find . -name "requirements.txt" -type f || echo "No requirements.txt files found"
+        
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
