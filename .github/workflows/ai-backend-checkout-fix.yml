@@ -1,0 +1,51 @@
+name: AI Backend CI - Checkout Fix
+
+on:
+  push:
+    paths: 
+      - 'myhibachi-ai-backend/**'
+      - '.github/workflows/ai-backend-checkout-fix.yml'
+  pull_request:
+    paths:
+      - 'myhibachi-ai-backend/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: false
+          
+      - name: Verify checkout
+        run: |
+          echo "=== Git status ==="
+          git status
+          echo "=== Current commit ==="
+          git log -1 --oneline
+          echo "=== Repository structure ==="
+          find . -name "*.txt" -o -name "*.py" | head -20
+          echo "=== AI Backend directory ==="
+          ls -la myhibachi-ai-backend/
+          
+      - name: Setup Python
+        uses: actions/setup-python@v5  # Try newer version
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'myhibachi-ai-backend/requirements.txt'
+          
+      - name: Install dependencies
+        working-directory: myhibachi-ai-backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+      - name: Test basic functionality
+        working-directory: myhibachi-ai-backend
+        run: |
+          python -c "import fastapi; print('✅ FastAPI imported successfully')"
+          python -c "import uvicorn; print('✅ Uvicorn imported successfully')"
