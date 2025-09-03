@@ -2,6 +2,8 @@
 """
 MyHibachi AI Backend - Main Entry Point
 Unified AI-powered customer service and FAQ system
+
+Dependencies are managed in requirements.txt - ensure proper FastAPI setup
 """
 
 import sys
