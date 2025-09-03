@@ -138,7 +138,7 @@ export default function AlternativePaymentOptions({
 
     // Simulate API call
     try {
-      const response = await apiFetch('/api/v1/payments/alternative-payment', {
+      await apiFetch('/api/v1/payments/alternative-payment', {
         method: 'POST',
         body: JSON.stringify({
           method,

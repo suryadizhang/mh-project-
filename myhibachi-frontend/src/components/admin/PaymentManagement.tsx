@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   CreditCard,
   RefreshCw,
-  Filter,
   Download,
   Eye,
   RotateCcw,
@@ -15,12 +14,9 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Search,
-  Calendar,
   ExternalLink
 } from 'lucide-react'
 import { format } from 'date-fns'
-import { apiFetch } from '@/lib/api'
 
 interface Payment {
   id: string
@@ -81,7 +77,7 @@ export default function PaymentManagement() {
     fetchAnalytics()
   }, [filter])
 
-  const fetchPayments = async () => {
+  const fetchPayments = useCallback(async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams()
@@ -100,9 +96,9 @@ export default function PaymentManagement() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filter])
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     try {
       const params = new URLSearchParams()
       if (filter.start_date) params.append('start_date', filter.start_date)
@@ -116,7 +112,7 @@ export default function PaymentManagement() {
     } catch (error) {
       console.error('Error fetching analytics:', error)
     }
-  }
+  }, [filter])
 
   const handleRefund = async () => {
     if (!selectedPayment || !refundData.payment_id) return

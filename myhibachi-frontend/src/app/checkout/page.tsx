@@ -14,7 +14,6 @@ import {
   ArrowLeft,
   Calendar,
   Users,
-  MapPin,
   DollarSign
 } from 'lucide-react'
 import Link from 'next/link'

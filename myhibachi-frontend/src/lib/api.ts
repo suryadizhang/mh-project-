@@ -5,7 +5,8 @@
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
-export interface ApiResponse<T = any> {
+// Type definitions
+export interface ApiResponse<T = Record<string, unknown>> {
   data?: T
   error?: string
   message?: string
@@ -16,10 +17,17 @@ export interface ApiRequestOptions extends RequestInit {
   timeout?: number
 }
 
+export interface StripePaymentData {
+  amount: number
+  customer_email: string
+  customer_name: string
+  [key: string]: unknown
+}
+
 /**
  * Main API fetch function - all backend calls should use this
  */
-export async function apiFetch<T = any>(
+export async function apiFetch<T = Record<string, unknown>>(
   path: string,
   options: ApiRequestOptions = {}
 ): Promise<ApiResponse<T>> {
@@ -73,31 +81,31 @@ export async function apiFetch<T = any>(
  * Convenience methods for common HTTP verbs
  */
 export const api = {
-  get: <T = any>(path: string, options?: ApiRequestOptions) =>
+  get: <T = Record<string, unknown>>(path: string, options?: ApiRequestOptions) =>
     apiFetch<T>(path, { ...options, method: 'GET' }),
 
-  post: <T = any>(path: string, data?: any, options?: ApiRequestOptions) =>
+  post: <T = Record<string, unknown>>(path: string, data?: Record<string, unknown>, options?: ApiRequestOptions) =>
     apiFetch<T>(path, {
       ...options,
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined
     }),
 
-  put: <T = any>(path: string, data?: any, options?: ApiRequestOptions) =>
+  put: <T = Record<string, unknown>>(path: string, data?: Record<string, unknown>, options?: ApiRequestOptions) =>
     apiFetch<T>(path, {
       ...options,
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined
     }),
 
-  patch: <T = any>(path: string, data?: any, options?: ApiRequestOptions) =>
+  patch: <T = Record<string, unknown>>(path: string, data?: Record<string, unknown>, options?: ApiRequestOptions) =>
     apiFetch<T>(path, {
       ...options,
       method: 'PATCH',
       body: data ? JSON.stringify(data) : undefined
     }),
 
-  delete: <T = any>(path: string, options?: ApiRequestOptions) =>
+  delete: <T = Record<string, unknown>>(path: string, options?: ApiRequestOptions) =>
     apiFetch<T>(path, { ...options, method: 'DELETE' })
 }
 
@@ -105,7 +113,7 @@ export const api = {
  * Stripe-specific API calls (to be migrated to backend)
  */
 export const stripeApi = {
-  createPaymentIntent: async (data: any) => api.post('/api/v1/payments/create-intent', data),
+  createPaymentIntent: async (data: StripePaymentData) => api.post('/api/v1/payments/create-intent', data),
 
   getCustomerDashboard: async (customerId: string) =>
     api.get(`/api/v1/customers/dashboard?customer_id=${customerId}`),
