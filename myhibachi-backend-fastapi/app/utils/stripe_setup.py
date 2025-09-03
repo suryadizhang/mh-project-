@@ -2,6 +2,7 @@ import logging
 from typing import Any
 
 import stripe
+
 from app.config import settings
 
 logger = logging.getLogger(__name__)

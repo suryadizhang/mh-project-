@@ -13,7 +13,7 @@ This script generates a comprehensive quality report showing:
 import os
 import json
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict
 import subprocess
 import sys
 
@@ -248,26 +248,26 @@ class QualityReporter:
         
         # Security Summary
         print("🔒 SECURITY COMPLIANCE:")
-        security = self.report["security"]
-        print(f"   ✅ Environment Variables: Properly isolated")
-        print(f"   ✅ Secrets Management: No hardcoded secrets")
-        print(f"   ✅ API Security: CORS, validation, webhook verification")
+        self.report["security"]
+        print("   ✅ Environment Variables: Properly isolated")
+        print("   ✅ Secrets Management: No hardcoded secrets")
+        print("   ✅ API Security: CORS, validation, webhook verification")
         print()
         
         # Quality Summary
         print("⚡ CODE QUALITY:")
-        quality = self.report["quality"]
-        print(f"   ✅ TypeScript: Strict mode, 95%+ type coverage")
-        print(f"   ✅ Architecture: Separation of concerns, service layer")
-        print(f"   ✅ Testing: API endpoints and webhooks covered")
+        self.report["quality"]
+        print("   ✅ TypeScript: Strict mode, 95%+ type coverage")
+        print("   ✅ Architecture: Separation of concerns, service layer")
+        print("   ✅ Testing: API endpoints and webhooks covered")
         print()
         
         # Production Readiness
         print("🚀 PRODUCTION READINESS:")
-        readiness = self.report["production_readiness"]
-        print(f"   ✅ Stripe Integration: Complete payment flow")
-        print(f"   ✅ Database: Migrations and connection pooling")
-        print(f"   ✅ Deployment: Docker and environment configs")
+        self.report["production_readiness"]
+        print("   ✅ Stripe Integration: Complete payment flow")
+        print("   ✅ Database: Migrations and connection pooling")
+        print("   ✅ Deployment: Docker and environment configs")
         print()
         
         # Guard Checks
@@ -278,7 +278,7 @@ class QualityReporter:
             for violation in guard['violations']:
                 print(f"   ⚠️  {violation}")
         else:
-            print(f"   ✅ All violations resolved")
+            print("   ✅ All violations resolved")
         print()
         
         print("="*80)

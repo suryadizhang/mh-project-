@@ -8,7 +8,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List
 
 class GuardViolation:
     def __init__(self, file_path: str, violation_type: str, details: str):
@@ -97,7 +97,7 @@ class ProjectGuard:
                             "EMPTY_FILE", 
                             "File is empty or contains only whitespace"
                         ))
-                except Exception as e:
+                except Exception:
                     # Skip binary files or files that can't be read
                     continue
 

@@ -1,10 +1,10 @@
 import uuid
 
-from app.database import Base
-from sqlalchemy import (Boolean, Column, DateTime, ForeignKey, Index, Integer,
-                        Numeric, String, Text)
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, Integer, Numeric, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+
+from app.database import Base
 
 
 class Customer(Base):

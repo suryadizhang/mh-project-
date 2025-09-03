@@ -1,12 +1,13 @@
 import logging
 from contextlib import asynccontextmanager
 
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from app.config import settings
 from app.database import Base, engine
 from app.routers import auth, bookings, stripe
 from app.utils.stripe_setup import setup_stripe_products
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

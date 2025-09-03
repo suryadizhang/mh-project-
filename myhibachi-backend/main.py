@@ -67,7 +67,7 @@ class BookingCreate(BaseModel):
     venue_zipcode: str = Field(..., min_length=5, max_length=10, description="Event venue zipcode")
 
     @validator("event_date")
-    def validate_event_date(cls, v):
+    def validate_event_date(self, v):
         today = date.today()
         min_date = today + timedelta(days=2)
         if v < min_date:
@@ -75,7 +75,7 @@ class BookingCreate(BaseModel):
         return v
 
     @validator("email")
-    def validate_email(cls, v):
+    def validate_email(self, v):
         import re
 
         email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
@@ -84,7 +84,7 @@ class BookingCreate(BaseModel):
         return v
 
     @validator("phone")
-    def validate_phone(cls, v):
+    def validate_phone(self, v):
         # Remove all non-digit characters
         digits_only = "".join(filter(str.isdigit, v))
         if len(digits_only) < 10:
