@@ -1,5 +1,10 @@
 import type { NextConfig } from 'next'
 
+// Dynamic import for bundle analyzer to avoid type issues
+const _withBundleAnalyzer = process.env.ANALYZE === 'true'
+  ? require('@next/bundle-analyzer')({ enabled: true })
+  : (config: NextConfig) => config
+
 const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
@@ -76,4 +81,4 @@ const nextConfig: NextConfig = {
   }
 }
 
-export default nextConfig
+export default _withBundleAnalyzer(nextConfig)
