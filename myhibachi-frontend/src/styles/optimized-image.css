@@ -86,7 +86,7 @@
   .hero-image {
     max-height: 50vh;
   }
-  
+
   .gallery-image:hover {
     transform: none; /* Disable hover effects on mobile */
   }
@@ -94,7 +94,7 @@
 
 /* Accessibility improvements */
 .optimized-image:focus {
-  outline: 2px solid #FF6B35;
+  outline: 2px solid #ff6b35;
   outline-offset: 2px;
 }
 
@@ -113,12 +113,12 @@
   .gallery-image {
     transition: none;
   }
-  
+
   .gallery-image:hover,
   .card-image:hover {
     transform: none;
   }
-  
+
   .optimized-image.loading {
     animation: none;
   }

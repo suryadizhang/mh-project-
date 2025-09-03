@@ -3,53 +3,44 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import {
-  Calendar,
-  Clock,
-  Mail,
-  FileText,
-  Users,
-  Settings,
-  Home,
-  LogOut
-} from 'lucide-react'
+import { Calendar, Clock, Mail, FileText, Users, Settings, Home, LogOut } from 'lucide-react'
 
 const sidebarItems = [
   {
     title: 'Dashboard',
     href: '/admin',
-    icon: Home,
+    icon: Home
   },
   {
     title: 'Bookings',
     href: '/admin/booking',
-    icon: Calendar,
+    icon: Calendar
   },
   {
     title: 'Schedule',
     href: '/admin/schedule',
-    icon: Clock,
+    icon: Clock
   },
   {
     title: 'Newsletter',
     href: '/admin/newsletter',
-    icon: Mail,
+    icon: Mail
   },
   {
     title: 'Logs',
     href: '/admin/logs',
-    icon: FileText,
+    icon: FileText
   },
   {
     title: 'Customers',
     href: '/admin/customers',
-    icon: Users,
+    icon: Users
   },
   {
     title: 'Super Admin',
     href: '/admin/superadmin',
-    icon: Settings,
-  },
+    icon: Settings
+  }
 ]
 
 export default function AdminSidebar() {
@@ -60,12 +51,12 @@ export default function AdminSidebar() {
       <div className="flex h-16 items-center justify-center border-b border-gray-700">
         <h1 className="text-xl font-bold">MyHibachi Admin</h1>
       </div>
-      
+
       <nav className="flex-1 space-y-1 px-2 py-4">
-        {sidebarItems.map((item) => {
+        {sidebarItems.map(item => {
           const Icon = item.icon
           const isActive = pathname === item.href
-          
+
           return (
             <Link
               key={item.href}
@@ -83,7 +74,7 @@ export default function AdminSidebar() {
           )
         })}
       </nav>
-      
+
       <div className="border-t border-gray-700 p-4">
         <button className="flex w-full items-center rounded-lg px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-700 hover:text-white">
           <LogOut className="mr-3 h-5 w-5" />

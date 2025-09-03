@@ -14,9 +14,7 @@ interface BlogPostPageProps {
 }
 
 // Generate metadata for SEO
-export async function generateMetadata(
-  { params }: BlogPostPageProps
-): Promise<Metadata> {
+export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
   const { slug } = await params
   const post = blogPosts.find(p => p.slug === slug)
 
@@ -35,20 +33,20 @@ export async function generateMetadata(
       description: post.metaDescription,
       type: 'article',
       authors: [post.author],
-      publishedTime: new Date(post.date).toISOString(),
+      publishedTime: new Date(post.date).toISOString()
     },
     twitter: {
       card: 'summary_large_image',
       title: post.title,
-      description: post.metaDescription,
+      description: post.metaDescription
     }
   }
 }
 
 // Generate static params for all blog posts
 export async function generateStaticParams() {
-  return blogPosts.map((post) => ({
-    slug: post.slug,
+  return blogPosts.map(post => ({
+    slug: post.slug
   }))
 }
 
@@ -72,7 +70,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const relatedPosts = [...relatedByEvent, ...relatedByArea].slice(0, 3)
 
   // Generate full article content based on the post data
-  const generateFullContent = (post: typeof blogPosts[0]) => {
+  const generateFullContent = (post: (typeof blogPosts)[0]) => {
     const sections = []
 
     // Introduction
@@ -170,7 +168,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       <BlogStructuredData post={post} />
-      
+
       {/* Enhanced SEO Schema Markup */}
       <BreadcrumbSchema
         items={[
@@ -179,7 +177,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           { name: post.title, url: `/blog/${post.slug}` }
         ]}
       />
-      
+
       {post.serviceArea && post.serviceArea !== 'All Areas' && (
         <LocalBusinessSchema
           location={post.serviceArea}
@@ -266,9 +264,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         {/* Related Posts */}
         {relatedPosts.length > 0 && (
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Related Hibachi Catering Guides</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Related Hibachi Catering Guides
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {relatedPosts.map((relatedPost) => (
+              {relatedPosts.map(relatedPost => (
                 <Link key={relatedPost.id} href={`/blog/${relatedPost.slug}`} className="block">
                   <article className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
                     <div className="mb-2">
@@ -279,7 +279,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                     <h4 className="font-semibold text-gray-900 mb-2 hover:text-blue-600">
                       {relatedPost.title}
                     </h4>
-                    <p className="text-gray-600 text-sm mb-3">{relatedPost.excerpt.slice(0, 100)}...</p>
+                    <p className="text-gray-600 text-sm mb-3">
+                      {relatedPost.excerpt.slice(0, 100)}...
+                    </p>
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-gray-500">{relatedPost.readTime}</span>
                       <span className="text-blue-600 hover:text-blue-800 text-sm font-medium">

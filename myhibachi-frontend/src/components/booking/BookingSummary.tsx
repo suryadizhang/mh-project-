@@ -24,7 +24,9 @@ export function BookingSummary({ formData, isSubmitting, onSubmit }: BookingSumm
           <div className="summary-item">
             <span className="summary-label">Date:</span>
             <span className="summary-value">
-              {formData.eventDate ? format(formData.eventDate, 'EEEE, MMMM d, yyyy') : 'Not selected'}
+              {formData.eventDate
+                ? format(formData.eventDate, 'EEEE, MMMM d, yyyy')
+                : 'Not selected'}
             </span>
           </div>
           <div className="summary-item">
@@ -60,7 +62,8 @@ export function BookingSummary({ formData, isSubmitting, onSubmit }: BookingSumm
             <span className="summary-value">
               {formData.addressStreet ? (
                 <>
-                  {formData.addressStreet}<br />
+                  {formData.addressStreet}
+                  <br />
                   {formData.addressCity}, {formData.addressState} {formData.addressZipcode}
                 </>
               ) : (
@@ -72,7 +75,8 @@ export function BookingSummary({ formData, isSubmitting, onSubmit }: BookingSumm
             <div className="summary-item">
               <span className="summary-label">Venue:</span>
               <span className="summary-value">
-                {formData.venueStreet}<br />
+                {formData.venueStreet}
+                <br />
                 {formData.venueCity}, {formData.venueState} {formData.venueZipcode}
               </span>
             </div>
@@ -88,8 +92,8 @@ export function BookingSummary({ formData, isSubmitting, onSubmit }: BookingSumm
             </div>
             <div className="pricing-note">
               <small>
-                * Final pricing may vary based on specific menu selections and add-ons.
-                Children (6-12) are $30 each. Final quote will be provided after booking.
+                * Final pricing may vary based on specific menu selections and add-ons. Children
+                (6-12) are $30 each. Final quote will be provided after booking.
               </small>
             </div>
           </div>
@@ -102,8 +106,8 @@ export function BookingSummary({ formData, isSubmitting, onSubmit }: BookingSumm
         <div className="terms-section">
           <div className="terms-note">
             <small>
-              📋 <strong>Next Steps:</strong> After submitting, we&apos;ll contact you within 24 hours
-              to confirm details, finalize menu selection, and process payment.
+              📋 <strong>Next Steps:</strong> After submitting, we&apos;ll contact you within 24
+              hours to confirm details, finalize menu selection, and process payment.
             </small>
           </div>
         </div>
@@ -130,4 +134,3 @@ export function BookingSummary({ formData, isSubmitting, onSubmit }: BookingSumm
     </div>
   )
 }
-

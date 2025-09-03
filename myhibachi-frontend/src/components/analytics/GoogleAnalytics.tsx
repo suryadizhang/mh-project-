@@ -46,7 +46,9 @@ interface AnalyticsParameters {
 export default function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps) {
   // Don't render analytics if measurement ID is missing or placeholder
   if (!measurementId || measurementId === 'G-XXXXXXXXXX' || measurementId.trim() === '') {
-    console.warn('[GoogleAnalytics] Measurement ID not configured. Please set NEXT_PUBLIC_GA_MEASUREMENT_ID in your environment variables.')
+    console.warn(
+      '[GoogleAnalytics] Measurement ID not configured. Please set NEXT_PUBLIC_GA_MEASUREMENT_ID in your environment variables.'
+    )
     return null
   }
 
@@ -170,17 +172,17 @@ export default function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps)
 export function useAnalytics() {
   const trackEvent = (eventName: string, parameters: AnalyticsParameters = {}) => {
     if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', eventName, parameters);
+      window.gtag('event', eventName, parameters)
     }
-  };
+  }
 
   const trackBookingStep = (step: string, details: BookingDetails = {}) => {
     trackEvent('booking_step_completed', {
       event_category: 'Booking Form',
       event_label: step,
       ...details
-    });
-  };
+    })
+  }
 
   const trackQuoteCalculated = (quoteValue: number, details: QuoteDetails = {}) => {
     trackEvent('quote_calculated', {
@@ -189,35 +191,35 @@ export function useAnalytics() {
       value: quoteValue,
       currency: 'USD',
       ...details
-    });
-  };
+    })
+  }
 
   const trackPageEngagement = (action: string, element: string) => {
     trackEvent('engagement', {
       event_category: 'Page Interaction',
       event_label: `${element}_${action}`,
       engagement_time_msec: Date.now()
-    });
-  };
+    })
+  }
 
   return {
     trackEvent,
     trackBookingStep,
     trackQuoteCalculated,
     trackPageEngagement
-  };
+  }
 }
 
 // TypeScript declarations
 declare global {
   interface Window {
-    gtag: (command: string, ...args: unknown[]) => void;
-    trackPageView: (url: string, title: string) => void;
-    trackBookingInteraction: (action: string, details?: BookingDetails) => void;
-    trackQuoteRequest: (details?: QuoteDetails) => void;
-    trackBookingConversion: (bookingData: BookingData) => void;
-    trackContactSubmission: (formType?: string) => void;
-    trackPhoneCall: () => void;
-    trackSocialInteraction: (platform: string, action: string) => void;
+    gtag: (command: string, ...args: unknown[]) => void
+    trackPageView: (url: string, title: string) => void
+    trackBookingInteraction: (action: string, details?: BookingDetails) => void
+    trackQuoteRequest: (details?: QuoteDetails) => void
+    trackBookingConversion: (bookingData: BookingData) => void
+    trackContactSubmission: (formType?: string) => void
+    trackPhoneCall: () => void
+    trackSocialInteraction: (platform: string, action: string) => void
   }
 }

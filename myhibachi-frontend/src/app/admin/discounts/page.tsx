@@ -163,9 +163,7 @@ export default function AdminDiscountsPage() {
           ...data,
           updatedAt: new Date().toISOString()
         }
-        setDiscounts(prev => 
-          prev.map(d => d.id === editingDiscount.id ? updatedDiscount : d)
-        )
+        setDiscounts(prev => prev.map(d => (d.id === editingDiscount.id ? updatedDiscount : d)))
       } else {
         // Create new discount
         const newDiscount: Discount = {
@@ -191,11 +189,9 @@ export default function AdminDiscountsPage() {
   }
 
   const toggleActive = (id: string) => {
-    setDiscounts(prev => 
-      prev.map(d => 
-        d.id === id 
-          ? { ...d, isActive: !d.isActive, updatedAt: new Date().toISOString() }
-          : d
+    setDiscounts(prev =>
+      prev.map(d =>
+        d.id === id ? { ...d, isActive: !d.isActive, updatedAt: new Date().toISOString() } : d
       )
     )
   }
@@ -216,7 +212,9 @@ export default function AdminDiscountsPage() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Discount Management</h1>
-              <p className="text-gray-600 mt-2">Manage discounts and promotional offers for MyHibachi bookings</p>
+              <p className="text-gray-600 mt-2">
+                Manage discounts and promotional offers for MyHibachi bookings
+              </p>
             </div>
             <button
               onClick={() => openModal()}
@@ -229,87 +227,48 @@ export default function AdminDiscountsPage() {
 
         {/* Active Discounts */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Active Discounts ({discounts.filter(d => d.isActive).length})</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Active Discounts ({discounts.filter(d => d.isActive).length})
+          </h2>
           <div className="grid gap-4">
-            {discounts.filter(d => d.isActive).map(discount => (
-              <div key={discount.id} className="border border-green-200 bg-green-50 rounded-lg p-4">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-semibold text-gray-900">{discount.name}</h3>
-                      <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
-                        {formatDiscountValue(discount)}
-                      </span>
-                      {discount.code && (
-                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                          Code: {discount.code}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-gray-600 text-sm mb-2">{discount.description}</p>
-                    <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-                      {discount.minOrderAmount && (
-                        <span>Min Order: ${discount.minOrderAmount}</span>
-                      )}
-                      {discount.validFrom && discount.validTo && (
-                        <span>Valid: {discount.validFrom} to {discount.validTo}</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex gap-2 ml-4">
-                    <button
-                      onClick={() => toggleActive(discount.id)}
-                      className="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-3 py-1 rounded text-sm transition-colors"
-                    >
-                      Deactivate
-                    </button>
-                    <button
-                      onClick={() => openModal(discount)}
-                      className="bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded text-sm transition-colors"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => deleteDiscount(discount.id)}
-                      className="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded text-sm transition-colors"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Inactive Discounts */}
-        {discounts.filter(d => !d.isActive).length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Inactive Discounts ({discounts.filter(d => !d.isActive).length})</h2>
-            <div className="grid gap-4">
-              {discounts.filter(d => !d.isActive).map(discount => (
-                <div key={discount.id} className="border border-gray-200 bg-gray-50 rounded-lg p-4">
+            {discounts
+              .filter(d => d.isActive)
+              .map(discount => (
+                <div
+                  key={discount.id}
+                  className="border border-green-200 bg-green-50 rounded-lg p-4"
+                >
                   <div className="flex justify-between items-start">
-                    <div className="flex-1 opacity-75">
+                    <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <h3 className="font-semibold text-gray-900">{discount.name}</h3>
-                        <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
                           {formatDiscountValue(discount)}
                         </span>
                         {discount.code && (
-                          <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
+                          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
                             Code: {discount.code}
                           </span>
                         )}
                       </div>
                       <p className="text-gray-600 text-sm mb-2">{discount.description}</p>
+                      <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+                        {discount.minOrderAmount && (
+                          <span>Min Order: ${discount.minOrderAmount}</span>
+                        )}
+                        {discount.validFrom && discount.validTo && (
+                          <span>
+                            Valid: {discount.validFrom} to {discount.validTo}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="flex gap-2 ml-4">
                       <button
                         onClick={() => toggleActive(discount.id)}
-                        className="bg-green-100 hover:bg-green-200 text-green-800 px-3 py-1 rounded text-sm transition-colors"
+                        className="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-3 py-1 rounded text-sm transition-colors"
                       >
-                        Activate
+                        Deactivate
                       </button>
                       <button
                         onClick={() => openModal(discount)}
@@ -327,6 +286,61 @@ export default function AdminDiscountsPage() {
                   </div>
                 </div>
               ))}
+          </div>
+        </div>
+
+        {/* Inactive Discounts */}
+        {discounts.filter(d => !d.isActive).length > 0 && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Inactive Discounts ({discounts.filter(d => !d.isActive).length})
+            </h2>
+            <div className="grid gap-4">
+              {discounts
+                .filter(d => !d.isActive)
+                .map(discount => (
+                  <div
+                    key={discount.id}
+                    className="border border-gray-200 bg-gray-50 rounded-lg p-4"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1 opacity-75">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold text-gray-900">{discount.name}</h3>
+                          <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
+                            {formatDiscountValue(discount)}
+                          </span>
+                          {discount.code && (
+                            <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
+                              Code: {discount.code}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-gray-600 text-sm mb-2">{discount.description}</p>
+                      </div>
+                      <div className="flex gap-2 ml-4">
+                        <button
+                          onClick={() => toggleActive(discount.id)}
+                          className="bg-green-100 hover:bg-green-200 text-green-800 px-3 py-1 rounded text-sm transition-colors"
+                        >
+                          Activate
+                        </button>
+                        <button
+                          onClick={() => openModal(discount)}
+                          className="bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded text-sm transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => deleteDiscount(discount.id)}
+                          className="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded text-sm transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
             </div>
           </div>
         )}
@@ -354,7 +368,9 @@ export default function AdminDiscountsPage() {
                       placeholder="e.g., First Time Customer"
                     />
                     {form.formState.errors.name && (
-                      <p className="text-red-600 text-sm mt-1">{form.formState.errors.name.message}</p>
+                      <p className="text-red-600 text-sm mt-1">
+                        {form.formState.errors.name.message}
+                      </p>
                     )}
                   </div>
 
@@ -385,10 +401,14 @@ export default function AdminDiscountsPage() {
                       placeholder={form.watch('type') === 'percentage' ? '10' : '25'}
                     />
                     <p className="text-gray-500 text-sm mt-1">
-                      {form.watch('type') === 'percentage' ? 'Enter percentage (e.g., 10 for 10%)' : 'Enter dollar amount (e.g., 25 for $25)'}
+                      {form.watch('type') === 'percentage'
+                        ? 'Enter percentage (e.g., 10 for 10%)'
+                        : 'Enter dollar amount (e.g., 25 for $25)'}
                     </p>
                     {form.formState.errors.value && (
-                      <p className="text-red-600 text-sm mt-1">{form.formState.errors.value.message}</p>
+                      <p className="text-red-600 text-sm mt-1">
+                        {form.formState.errors.value.message}
+                      </p>
                     )}
                   </div>
 
@@ -416,7 +436,9 @@ export default function AdminDiscountsPage() {
                     placeholder="Describe the discount and any conditions"
                   />
                   {form.formState.errors.description && (
-                    <p className="text-red-600 text-sm mt-1">{form.formState.errors.description.message}</p>
+                    <p className="text-red-600 text-sm mt-1">
+                      {form.formState.errors.description.message}
+                    </p>
                   )}
                 </div>
 
@@ -464,9 +486,7 @@ export default function AdminDiscountsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Valid To
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Valid To</label>
                     <input
                       type="date"
                       {...form.register('validTo')}
@@ -501,7 +521,11 @@ export default function AdminDiscountsPage() {
                     disabled={loading}
                     className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors disabled:opacity-50"
                   >
-                    {loading ? 'Saving...' : (editingDiscount ? 'Update Discount' : 'Create Discount')}
+                    {loading
+                      ? 'Saving...'
+                      : editingDiscount
+                        ? 'Update Discount'
+                        : 'Create Discount'}
                   </button>
                 </div>
               </form>

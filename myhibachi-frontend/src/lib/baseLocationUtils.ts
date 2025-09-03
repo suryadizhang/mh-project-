@@ -8,6 +8,8 @@ interface BaseLocationData {
   updatedBy: string
 }
 
+import { apiFetch } from './api'
+
 // Cache for base location to avoid repeated API calls
 let baseLocationCache: BaseLocationData | null = null
 let cacheTimestamp = 0
@@ -21,23 +23,18 @@ export async function getBaseLocation(): Promise<BaseLocationData> {
   const now = Date.now()
 
   // Return cached data if still valid
-  if (baseLocationCache && (now - cacheTimestamp) < CACHE_DURATION) {
+  if (baseLocationCache && now - cacheTimestamp < CACHE_DURATION) {
     return baseLocationCache
   }
 
   try {
-    const response = await fetch('/api/v1/admin/base-location', {
-      method: 'GET',
-      headers: {
-        'Cache-Control': 'no-cache'
-      }
-    })
+    const response = await apiFetch('/api/v1/admin/base-location')
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch base location')
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to fetch base location')
     }
 
-    const location = await response.json()
+    const location = response.data
 
     // Update cache
     baseLocationCache = location
@@ -72,13 +69,15 @@ export async function getBaseLocation(): Promise<BaseLocationData> {
  */
 export function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 3959 // Earth's radius in miles
-  const dLat = (lat2 - lat1) * Math.PI / 180
-  const dLng = (lng2 - lng1) * Math.PI / 180
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLng = ((lng2 - lng1) * Math.PI) / 180
   const a =
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLng/2) * Math.sin(dLng/2)
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   return R * c
 }
 

@@ -7,12 +7,14 @@ This document outlines the CSS architecture implemented to eliminate style confl
 ## Design Principles
 
 ### 1. Zero Visual Regression Policy
+
 - No spacing, size, color, or typography changes
 - No global selector behavior changes
 - No breaking changes to page markup
 - Hardcoded fallbacks for critical values
 
 ### 2. Scoped Architecture
+
 - Page-scoped styles using `data-page` attributes
 - Component-scoped styles using CSS Modules
 - Utility classes for common patterns
@@ -44,9 +46,10 @@ src/
 ## CSS Layer Architecture
 
 ### Layer 1: Design Tokens (globals.css)
+
 ```css
 :root {
-  --color-primary: #DB2B28;
+  --color-primary: #db2b28;
   --color-primary-contrast: #ffffff;
   --text-strong: #111111;
   --text-default: #222222;
@@ -56,19 +59,23 @@ src/
 ```
 
 ### Layer 2: Normalize & Base (globals.css)
+
 ```css
-*, *::before, *::after { 
-  box-sizing: border-box; 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-html { 
-  -webkit-font-smoothing: antialiased; 
+html {
+  -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
 }
 ```
 
 ### Layer 3: Utilities (utilities.css)
+
 ```css
 .u-text-on-dark {
   color: var(--text-on-dark);
@@ -77,20 +84,23 @@ html {
 ```
 
 ### Layer 4: Components (Button.module.css)
+
 ```css
 .button {
   /* Scoped component styles */
 }
 ```
 
-### Layer 5: Page Scopes (pages/*.page.css)
+### Layer 5: Page Scopes (pages/\*.page.css)
+
 ```css
-[data-page="menu"] .pricing-card {
+[data-page='menu'] .pricing-card {
   /* Page-specific styles */
 }
 ```
 
 ### Layer 6: Legacy Overrides (legacy.css)
+
 ```css
 /* Temporary compatibility layer */
 .btn-primary {
@@ -101,6 +111,7 @@ html {
 ## Page Scoping Implementation
 
 ### Layout Components
+
 Each critical page has a layout wrapper:
 
 ```tsx
@@ -111,11 +122,12 @@ export default function MenuLayout({ children }: { children: React.ReactNode }) 
 ```
 
 ### Page-Specific Styles
+
 Styles are scoped to prevent conflicts:
 
 ```css
 /* menu.page.css */
-[data-page="menu"] .pricing-card {
+[data-page='menu'] .pricing-card {
   background: var(--color-background);
   /* ... styles only apply to menu page */
 }
@@ -124,18 +136,20 @@ Styles are scoped to prevent conflicts:
 ## Button Centralization
 
 ### Component Usage
+
 Replace legacy `.btn-primary` with centralized component:
 
 ```tsx
 // Before (legacy)
-<button className="btn-primary">Get Quote</button>
+;<button className="btn-primary">Get Quote</button>
 
 // After (scoped)
 import { HibachiButton } from '@/components/ui/button'
-<HibachiButton variant="primary">Get Quote</HibachiButton>
+;<HibachiButton variant="primary">Get Quote</HibachiButton>
 ```
 
 ### Visual Compatibility
+
 The `HibachiButton` component matches legacy `.btn-primary` exactly:
 
 ```css
@@ -150,6 +164,7 @@ The `HibachiButton` component matches legacy `.btn-primary` exactly:
 ## White Text Visibility
 
 ### Defensive Utility Class
+
 ```css
 .u-text-on-dark {
   color: var(--text-on-dark);
@@ -158,7 +173,9 @@ The `HibachiButton` component matches legacy `.btn-primary` exactly:
 ```
 
 ### Usage
+
 Apply to white text over videos/gradients:
+
 ```html
 <h1 class="u-text-on-dark">Hibachi Catering</h1>
 ```
@@ -166,18 +183,21 @@ Apply to white text over videos/gradients:
 ## Migration Strategy
 
 ### Phase 1: Foundation ✅
+
 - [x] Design tokens in globals.css
 - [x] Page hooks with data-page attributes
 - [x] Utility classes for defensive CSS
 - [x] Legacy compatibility layer
 
 ### Phase 2: Component Migration (In Progress)
+
 - [x] Button component centralization
 - [ ] Replace .btn-primary in critical areas
 - [ ] Form component creation
 - [ ] Hero component creation
 
 ### Phase 3: Cleanup (Future)
+
 - [ ] Remove legacy CSS dependencies
 - [ ] Delete unused global styles
 - [ ] Enforce component-only architecture
@@ -187,32 +207,42 @@ Apply to white text over videos/gradients:
 ### Adding New Styles
 
 #### ✅ DO
+
 ```css
 /* Page-scoped */
-[data-page="menu"] .new-feature { }
+[data-page='menu'] .new-feature {
+}
 
 /* Component-scoped */
-.feature { } /* in Component.module.css */
+.feature {
+} /* in Component.module.css */
 
 /* Utility class */
-.u-new-utility { }
+.u-new-utility {
+}
 ```
 
 #### ❌ DON'T
+
 ```css
 /* Global styles (causes conflicts) */
-.btn-primary { }
-.hero-section { }
-.new-feature { }
+.btn-primary {
+}
+.hero-section {
+}
+.new-feature {
+}
 ```
 
 ### Specificity Rules
+
 - Prefer component classes over descendant chains
 - Use `:where()` for low-specificity grouping
 - Avoid `!important` except in escape-hatch.css
 - Maximum specificity: `0,3,0` (enforced by Stylelint)
 
 ### Naming Conventions
+
 - **Components**: PascalCase files, camelCase classes
 - **Utilities**: `u-` prefix (e.g., `u-text-center`)
 - **Page scopes**: `[data-page="name"] .class`
@@ -221,6 +251,7 @@ Apply to white text over videos/gradients:
 ## Quality Assurance
 
 ### Automated Checks
+
 ```bash
 # Lint CSS for conflicts
 npm run lint:css
@@ -233,6 +264,7 @@ npm run build
 ```
 
 ### Stylelint Configuration
+
 ```json
 {
   "extends": ["stylelint-config-standard"],
@@ -245,8 +277,9 @@ npm run build
 ```
 
 ### Manual Testing Checklist
+
 - [ ] `/menu` page visual comparison
-- [ ] `/contact` page visual comparison  
+- [ ] `/contact` page visual comparison
 - [ ] `/quote` page visual comparison
 - [ ] Button hover states match exactly
 - [ ] No console CSS warnings
@@ -255,6 +288,7 @@ npm run build
 ## Performance Considerations
 
 ### CSS Loading Order
+
 1. Tailwind base styles
 2. Design tokens & normalize
 3. Utility classes
@@ -263,12 +297,14 @@ npm run build
 6. Legacy overrides (last)
 
 ### Bundle Size Impact
+
 - **Design tokens**: +2KB (shared across pages)
 - **Utilities**: +5KB (cached utility classes)
 - **Page styles**: +3KB per page (only loaded when needed)
 - **Component styles**: +1KB per component (tree-shaken)
 
 ### Caching Strategy
+
 - CSS Modules automatically generate unique class names
 - Page-specific CSS loaded only when route accessed
 - Utility classes shared across all pages
@@ -276,15 +312,17 @@ npm run build
 ## Browser Support
 
 ### Target Browsers
+
 ```json
 "browserslist": [
   ">=0.5%",
-  "last 2 versions", 
+  "last 2 versions",
   "not dead"
 ]
 ```
 
 ### CSS Features Used
+
 - CSS Custom Properties (CSS Variables)
 - CSS Grid & Flexbox
 - CSS Modules
@@ -295,18 +333,22 @@ npm run build
 ### Common Issues
 
 #### Duplicate .btn-primary Declarations
+
 **Problem**: Multiple CSS files defining `.btn-primary`
 **Solution**: Replace with `<HibachiButton>` component
 
 #### Specificity Conflicts
+
 **Problem**: Styles not applying due to specificity
 **Solution**: Use data-page scoping or CSS Modules
 
 #### Visual Regression
+
 **Problem**: Buttons/elements look different after migration
 **Solution**: Copy computed styles from DOM before migration
 
 ### Debug Commands
+
 ```bash
 # Find conflicting selectors
 npm run lint:css
@@ -321,18 +363,21 @@ grep -r "data-page" src/
 ## Future Roadmap
 
 ### Q1 2025: Component System
+
 - [ ] Form component library
 - [ ] Hero component variants
 - [ ] Card component system
 - [ ] Navigation components
 
 ### Q2 2025: Design System
+
 - [ ] Comprehensive design tokens
 - [ ] Component documentation (Storybook)
 - [ ] Design system guidelines
 - [ ] Automated visual regression testing
 
 ### Q3 2025: Performance Optimization
+
 - [ ] Critical CSS inlining
 - [ ] Unused CSS elimination
 - [ ] CSS-in-JS evaluation
@@ -343,6 +388,7 @@ grep -r "data-page" src/
 ## Support
 
 For questions about this CSS architecture:
+
 1. Review this documentation
 2. Check existing component patterns
 3. Follow the migration guidelines

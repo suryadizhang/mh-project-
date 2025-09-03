@@ -29,7 +29,9 @@
   font-weight: 700;
   color: #fff; /* Pure white for maximum contrast against tan/dark background */
   margin-bottom: 1.5rem;
-  text-shadow: 0 2px 8px rgb(0 0 0 / 80%), 0 0 15px rgb(0 0 0 / 60%); /* Strong dark shadows */
+  text-shadow:
+    0 2px 8px rgb(0 0 0 / 80%),
+    0 0 15px rgb(0 0 0 / 60%); /* Strong dark shadows */
 }
 
 .quote-page .page-hero-background p {
@@ -455,8 +457,12 @@
 }
 
 @keyframes spin {
-  0% { transform: translateY(-50%) rotate(0deg); }
-  100% { transform: translateY(-50%) rotate(360deg); }
+  0% {
+    transform: translateY(-50%) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-50%) rotate(360deg);
+  }
 }
 
 .calculate-btn::before {
@@ -533,7 +539,8 @@
   font-size: 0.9rem;
 }
 
-.book-now-btn, .contact-btn {
+.book-now-btn,
+.contact-btn {
   flex: 1;
   min-width: 200px;
   padding: 1rem 1.5rem;
@@ -660,7 +667,7 @@
   margin-top: 1rem;
 }
 
-.contact-note a[href^="tel:"] {
+.contact-note a[href^='tel:'] {
   background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
   color: white;
   padding: 0.4rem 0.8rem;
@@ -672,19 +679,19 @@
   margin: 0 0.25rem;
 }
 
-.contact-note a[href^="tel:"]:hover {
+.contact-note a[href^='tel:']:hover {
   transform: translateY(-1px);
   box-shadow: 0 3px 10px rgb(40 167 69 / 30%);
 }
 
-.contact-note a[href^="mailto:"] {
+.contact-note a[href^='mailto:'] {
   color: var(--color-primary, #db2b28);
   text-decoration: none;
   font-weight: 500;
   margin-left: 0.25rem;
 }
 
-.contact-note a[href^="mailto:"]:hover {
+.contact-note a[href^='mailto:']:hover {
   text-decoration: underline;
 }
 
@@ -724,7 +731,9 @@
     flex-direction: column;
   }
 
-  .btn, .book-now-btn, .contact-btn {
+  .btn,
+  .book-now-btn,
+  .contact-btn {
     width: 100%;
     min-width: auto;
   }

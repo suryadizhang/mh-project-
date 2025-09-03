@@ -1,11 +1,11 @@
-import React from 'react';
-import BookUsHero from './BookUsHero';
-import BookingFormContainer from './BookingFormContainer';
-import Assistant from '@/components/chat/Assistant';
-import './styles/BookUsPageContainer.module.css';
+import React from 'react'
+import BookUsHero from './BookUsHero'
+import BookingFormContainer from './BookingFormContainer'
+import Assistant from '@/components/chat/Assistant'
+import './styles/BookUsPageContainer.module.css'
 
 interface BookUsPageContainerProps {
-  className?: string;
+  className?: string
 }
 
 const BookUsPageContainer: React.FC<BookUsPageContainerProps> = ({ className = '' }) => {
@@ -24,8 +24,7 @@ const BookUsPageContainer: React.FC<BookUsPageContainerProps> = ({ className = '
       {/* Modals will be handled by the BookingFormContainer */}
       <Assistant />
     </div>
-  );
-};
+  )
+}
 
-export default BookUsPageContainer;
-
+export default BookUsPageContainer

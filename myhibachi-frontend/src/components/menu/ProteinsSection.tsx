@@ -34,8 +34,9 @@ export default function ProteinsSection() {
         <div className={styles.proteinNote}>
           <p>
             <span className="emoji-visible">👨‍🍳</span>
-            <strong>Chef&apos;s Note:</strong> All proteins are fresh, never frozen, and prepared with our signature seasonings.
-            Special dietary requirements can be accommodated with advance notice.
+            <strong>Chef&apos;s Note:</strong> All proteins are fresh, never frozen, and prepared
+            with our signature seasonings. Special dietary requirements can be accommodated with
+            advance notice.
           </p>
         </div>
       </div>

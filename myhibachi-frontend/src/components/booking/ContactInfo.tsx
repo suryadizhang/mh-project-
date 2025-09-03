@@ -23,14 +23,12 @@ export function ContactInfo({ formData, onChange, errors }: ContactInfoProps) {
             id="name"
             name="name"
             value={formData.name}
-            onChange={(e) => onChange('name', e.target.value)}
+            onChange={e => onChange('name', e.target.value)}
             placeholder="Enter your full name"
             className={`form-input ${errors.name ? 'error' : ''}`}
             required
           />
-          {errors.name && (
-            <span className="error-message">{errors.name}</span>
-          )}
+          {errors.name && <span className="error-message">{errors.name}</span>}
         </div>
 
         <div className="form-group">
@@ -42,14 +40,12 @@ export function ContactInfo({ formData, onChange, errors }: ContactInfoProps) {
             id="email"
             name="email"
             value={formData.email}
-            onChange={(e) => onChange('email', e.target.value)}
+            onChange={e => onChange('email', e.target.value)}
             placeholder="Enter your email address"
             className={`form-input ${errors.email ? 'error' : ''}`}
             required
           />
-          {errors.email && (
-            <span className="error-message">{errors.email}</span>
-          )}
+          {errors.email && <span className="error-message">{errors.email}</span>}
         </div>
 
         <div className="form-group">
@@ -61,14 +57,12 @@ export function ContactInfo({ formData, onChange, errors }: ContactInfoProps) {
             id="phone"
             name="phone"
             value={formData.phone}
-            onChange={(e) => onChange('phone', e.target.value)}
+            onChange={e => onChange('phone', e.target.value)}
             placeholder="(555) 123-4567"
             className={`form-input ${errors.phone ? 'error' : ''}`}
             required
           />
-          {errors.phone && (
-            <span className="error-message">{errors.phone}</span>
-          )}
+          {errors.phone && <span className="error-message">{errors.phone}</span>}
         </div>
       </div>
     </div>

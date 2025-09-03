@@ -10,7 +10,12 @@ interface PaginationProps {
   className?: string
 }
 
-export default function Pagination({ currentPage, totalPages, onPageChange, className = '' }: PaginationProps) {
+export default function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+  className = ''
+}: PaginationProps) {
   if (totalPages <= 1) return null
 
   const generatePageNumbers = () => {
@@ -80,16 +85,20 @@ export default function Pagination({ currentPage, totalPages, onPageChange, clas
   }
 
   return (
-    <nav className={`flex items-center justify-center space-x-1 ${className}`} aria-label="Pagination">
+    <nav
+      className={`flex items-center justify-center space-x-1 ${className}`}
+      aria-label="Pagination"
+    >
       {/* Previous Button */}
       <button
         onClick={handlePrevious}
         disabled={currentPage === 1}
         className={`
           inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors
-          ${currentPage === 1
-            ? 'text-slate-400 cursor-not-allowed bg-slate-50'
-            : 'text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 hover:text-slate-900 shadow-sm'
+          ${
+            currentPage === 1
+              ? 'text-slate-400 cursor-not-allowed bg-slate-50'
+              : 'text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 hover:text-slate-900 shadow-sm'
           }
         `}
         aria-label="Go to previous page"
@@ -111,9 +120,10 @@ export default function Pagination({ currentPage, totalPages, onPageChange, clas
                 onClick={() => handlePageClick(page)}
                 className={`
                   px-3 py-2 text-sm font-medium rounded-lg transition-colors min-w-[40px]
-                  ${page === currentPage
-                    ? 'bg-slate-800 text-white border border-slate-800 shadow-sm'
-                    : 'text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 hover:text-slate-900 shadow-sm'
+                  ${
+                    page === currentPage
+                      ? 'bg-slate-800 text-white border border-slate-800 shadow-sm'
+                      : 'text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 hover:text-slate-900 shadow-sm'
                   }
                 `}
                 aria-label={`Go to page ${page}`}
@@ -132,9 +142,10 @@ export default function Pagination({ currentPage, totalPages, onPageChange, clas
         disabled={currentPage === totalPages}
         className={`
           inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors
-          ${currentPage === totalPages
-            ? 'text-slate-400 cursor-not-allowed bg-slate-50'
-            : 'text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 hover:text-slate-900 shadow-sm'
+          ${
+            currentPage === totalPages
+              ? 'text-slate-400 cursor-not-allowed bg-slate-50'
+              : 'text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 hover:text-slate-900 shadow-sm'
           }
         `}
         aria-label="Go to next page"

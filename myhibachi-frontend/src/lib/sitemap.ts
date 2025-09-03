@@ -86,11 +86,14 @@ export class BlogSitemapGenerator {
 
     // Tag pages (for popular tags)
     const allTags = this.posts.flatMap(post => post.keywords || [])
-    const tagCounts = allTags.reduce((acc, tag) => {
-      acc[tag] = (acc[tag] || 0) + 1
-      return acc
-    }, {} as Record<string, number>)
-    
+    const tagCounts = allTags.reduce(
+      (acc, tag) => {
+        acc[tag] = (acc[tag] || 0) + 1
+        return acc
+      },
+      {} as Record<string, number>
+    )
+
     const popularTags = Object.entries(tagCounts)
       .filter(([, count]) => count >= 3) // Only tags with 3+ posts
       .map(([tag]) => tag)
@@ -110,14 +113,18 @@ export class BlogSitemapGenerator {
 
   generateXMLSitemap(): string {
     const urls = this.generateSitemap()
-    
-    const xmlUrls = urls.map(url => `
+
+    const xmlUrls = urls
+      .map(
+        url => `
   <url>
     <loc>${this.escapeXml(url.url)}</loc>
     <lastmod>${url.lastModified}</lastmod>
     <changefreq>${url.changeFrequency}</changefreq>
     <priority>${url.priority}</priority>
-  </url>`).join('')
+  </url>`
+      )
+      .join('')
 
     return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -141,7 +148,9 @@ ${xmlUrls}
 </urlset>`
     }
 
-    const newsUrls = recentPosts.map(post => `
+    const newsUrls = recentPosts
+      .map(
+        post => `
   <url>
     <loc>${this.escapeXml(`${this.baseUrl}/blog/${post.slug}`)}</loc>
     <news:news>
@@ -153,7 +162,9 @@ ${xmlUrls}
       <news:title>${this.escapeXml(post.title)}</news:title>
       <news:keywords>${this.escapeXml((post.keywords || []).join(', '))}</news:keywords>
     </news:news>
-  </url>`).join('')
+  </url>`
+      )
+      .join('')
 
     return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
@@ -165,7 +176,8 @@ ${newsUrls}
   generateImageSitemap(): string {
     const imageUrls = this.posts
       .filter(post => post.image)
-      .map(post => `
+      .map(
+        post => `
   <url>
     <loc>${this.escapeXml(`${this.baseUrl}/blog/${post.slug}`)}</loc>
     <image:image>
@@ -173,7 +185,9 @@ ${newsUrls}
       <image:title>${this.escapeXml(post.title)}</image:title>
       <image:caption>${this.escapeXml(post.imageAlt || post.excerpt)}</image:caption>
     </image:image>
-  </url>`).join('')
+  </url>`
+      )
+      .join('')
 
     return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -184,7 +198,7 @@ ${imageUrls}
 
   generateSitemapIndex(): string {
     const lastModified = new Date().toISOString()
-    
+
     return `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
@@ -225,7 +239,7 @@ ${imageUrls}
     const categories = [...new Set(this.posts.map(post => post.category))]
     const authors = [...new Set(this.posts.map(post => post.author))]
     const serviceAreas = [...new Set(this.posts.map(post => post.serviceArea).filter(Boolean))]
-    
+
     return {
       totalUrls: urls.length,
       blogPosts: this.posts.length,

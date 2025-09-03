@@ -15,18 +15,18 @@ interface LazyBlogImageProps {
   sizes?: string
 }
 
-export default function LazyBlogImage({ 
-  src, 
-  alt, 
-  width, 
-  height, 
-  className = "", 
+export default function LazyBlogImage({
+  src,
+  alt,
+  width,
+  height,
+  className = '',
   priority = false,
   onLoad,
   onError,
   fallbackSrc,
   quality = 85,
-  sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+  sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
 }: LazyBlogImageProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
@@ -41,7 +41,7 @@ export default function LazyBlogImage({
           observer.unobserve(entry.target)
         }
       },
-      { 
+      {
         threshold: 0.1,
         rootMargin: '50px'
       }
@@ -73,11 +73,7 @@ export default function LazyBlogImage({
   const shouldLoad = priority || isInView
 
   return (
-    <div 
-      ref={imgRef}
-      className={`relative overflow-hidden ${className}`}
-      style={{ width, height }}
-    >
+    <div ref={imgRef} className={`relative overflow-hidden ${className}`} style={{ width, height }}>
       {/* Loading Skeleton */}
       {isLoading && shouldLoad && (
         <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse">
@@ -89,9 +85,7 @@ export default function LazyBlogImage({
       {!shouldLoad && (
         <div className="absolute inset-0 bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center">
           <div className="text-gray-400 text-center">
-            <div className="w-8 h-8 mx-auto mb-2 opacity-50">
-              🍱
-            </div>
+            <div className="w-8 h-8 mx-auto mb-2 opacity-50">🍱</div>
             <div className="text-xs font-medium">Loading...</div>
           </div>
         </div>
@@ -122,9 +116,7 @@ export default function LazyBlogImage({
       {hasError && !fallbackSrc && (
         <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center">
           <div className="text-gray-500 text-center">
-            <div className="w-8 h-8 mx-auto mb-2 opacity-50">
-              ⚠️
-            </div>
+            <div className="w-8 h-8 mx-auto mb-2 opacity-50">⚠️</div>
             <div className="text-xs font-medium">Image unavailable</div>
           </div>
         </div>

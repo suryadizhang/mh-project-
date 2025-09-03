@@ -18,10 +18,18 @@ export default function MenuPage() {
               <div className="hero-icon-wrapper mb-4">
                 <div className="floating-icons">
                   <span className="hero-main-icon emoji-visible">🍱</span>
-                  <span className="floating-icon emoji-visible" style={{animationDelay: '0s'}}>🔥</span>
-                  <span className="floating-icon emoji-visible" style={{animationDelay: '1s'}}>🥢</span>
-                  <span className="floating-icon emoji-visible" style={{animationDelay: '2s'}}>🍤</span>
-                  <span className="floating-icon emoji-visible" style={{animationDelay: '3s'}}>🥩</span>
+                  <span className="floating-icon emoji-visible" style={{ animationDelay: '0s' }}>
+                    🔥
+                  </span>
+                  <span className="floating-icon emoji-visible" style={{ animationDelay: '1s' }}>
+                    🥢
+                  </span>
+                  <span className="floating-icon emoji-visible" style={{ animationDelay: '2s' }}>
+                    🍤
+                  </span>
+                  <span className="floating-icon emoji-visible" style={{ animationDelay: '3s' }}>
+                    🥩
+                  </span>
                 </div>
               </div>
 
@@ -98,7 +106,9 @@ export default function MenuPage() {
                   <h2 className="section-title mb-4">
                     <span>Transparent Pricing</span>
                   </h2>
-                  <p className="section-subtitle">Premium experience, honest pricing — no hidden fees</p>
+                  <p className="section-subtitle">
+                    Premium experience, honest pricing — no hidden fees
+                  </p>
                 </div>
               </div>
 
@@ -246,7 +256,9 @@ export default function MenuPage() {
                     <span className="section-icon emoji-visible">🍽️</span>
                   </div>
                   <h2 className="section-title mb-4">Complete Hibachi Experience</h2>
-                  <p className="section-subtitle">Every booking includes these delicious accompaniments & entertainment</p>
+                  <p className="section-subtitle">
+                    Every booking includes these delicious accompaniments & entertainment
+                  </p>
                 </div>
               </div>
 
@@ -257,7 +269,9 @@ export default function MenuPage() {
                   </div>
                   <div className="included-content">
                     <h5 className="included-title">Hibachi Fried Rice</h5>
-                    <p className="included-desc">Perfectly seasoned with fresh eggs and mixed vegetables</p>
+                    <p className="included-desc">
+                      Perfectly seasoned with fresh eggs and mixed vegetables
+                    </p>
                     <div className="included-badge">Signature Recipe</div>
                   </div>
                 </div>
@@ -268,7 +282,9 @@ export default function MenuPage() {
                   </div>
                   <div className="included-content">
                     <h5 className="included-title">Fresh Seasonal Vegetables</h5>
-                    <p className="included-desc">Zucchini, carrots, onions, mushrooms, and broccoli</p>
+                    <p className="included-desc">
+                      Zucchini, carrots, onions, mushrooms, and broccoli
+                    </p>
                     <div className="included-badge">Farm Fresh</div>
                   </div>
                 </div>
@@ -301,7 +317,9 @@ export default function MenuPage() {
                   </div>
                   <div className="included-content">
                     <h5 className="included-title">House Special Hot Sauce</h5>
-                    <p className="included-desc">Bold and spicy signature blend with perfect heat</p>
+                    <p className="included-desc">
+                      Bold and spicy signature blend with perfect heat
+                    </p>
                     <div className="included-badge">Chef&apos;s Special</div>
                   </div>
                 </div>
@@ -312,7 +330,9 @@ export default function MenuPage() {
                   </div>
                   <div className="included-content">
                     <h5 className="included-title">Live Chef Entertainment</h5>
-                    <p className="included-desc">Amazing tricks, flips, and interactive cooking show</p>
+                    <p className="included-desc">
+                      Amazing tricks, flips, and interactive cooking show
+                    </p>
                     <div className="included-badge">Unforgettable</div>
                   </div>
                 </div>
@@ -325,7 +345,9 @@ export default function MenuPage() {
                   </div>
                   <div className="banner-text">
                     <h3 className="banner-title">Choose Any 2 Proteins From Below</h3>
-                    <p className="banner-subtitle">Mix and match for the perfect combination that suits your taste</p>
+                    <p className="banner-subtitle">
+                      Mix and match for the perfect combination that suits your taste
+                    </p>
                   </div>
                   <div className="banner-decoration">
                     <span className="emoji-visible">🍤</span>
@@ -344,7 +366,9 @@ export default function MenuPage() {
                     <span className="section-icon emoji-visible">🥩</span>
                   </div>
                   <h2 className="section-title mb-4">Protein Selection</h2>
-                  <p className="section-subtitle">Choose your perfect combination from our premium selection</p>
+                  <p className="section-subtitle">
+                    Choose your perfect combination from our premium selection
+                  </p>
                 </div>
               </div>
 
@@ -374,7 +398,10 @@ export default function MenuPage() {
                               <span className="emoji-visible">✨</span>
                             </div>
                           </div>
-                          <p className="protein-desc">Tender grilled chicken breast with signature hibachi seasonings and teriyaki glaze</p>
+                          <p className="protein-desc">
+                            Tender grilled chicken breast with signature hibachi seasonings and
+                            teriyaki glaze
+                          </p>
                           <div className="protein-features">
                             <span className="feature-tag">Fresh Daily</span>
                             <span className="feature-tag">Chef&apos;s Choice</span>
@@ -395,7 +422,9 @@ export default function MenuPage() {
                               <span className="emoji-visible">✨</span>
                             </div>
                           </div>
-                          <p className="protein-desc">Premium Angus Sirloin steak cooked to your preferred temperature</p>
+                          <p className="protein-desc">
+                            Premium Angus Sirloin steak cooked to your preferred temperature
+                          </p>
                           <div className="protein-features">
                             <span className="feature-tag">Fresh Daily</span>
                             <span className="feature-tag">Chef&apos;s Choice</span>
@@ -416,7 +445,9 @@ export default function MenuPage() {
                               <span className="emoji-visible">✨</span>
                             </div>
                           </div>
-                          <p className="protein-desc">Fresh jumbo shrimp with garlic butter and hibachi spices</p>
+                          <p className="protein-desc">
+                            Fresh jumbo shrimp with garlic butter and hibachi spices
+                          </p>
                           <div className="protein-features">
                             <span className="feature-tag">Fresh Daily</span>
                             <span className="feature-tag">Chef&apos;s Choice</span>
@@ -437,7 +468,9 @@ export default function MenuPage() {
                               <span className="emoji-visible">✨</span>
                             </div>
                           </div>
-                          <p className="protein-desc">Fresh tender calamari grilled with garlic and hibachi spices</p>
+                          <p className="protein-desc">
+                            Fresh tender calamari grilled with garlic and hibachi spices
+                          </p>
                           <div className="protein-features">
                             <span className="feature-tag">Fresh Daily</span>
                             <span className="feature-tag">Chef&apos;s Choice</span>
@@ -458,7 +491,9 @@ export default function MenuPage() {
                               <span className="emoji-visible">✨</span>
                             </div>
                           </div>
-                          <p className="protein-desc">Fried tofu with our house special seasoning - perfect vegetarian option</p>
+                          <p className="protein-desc">
+                            Fried tofu with our house special seasoning - perfect vegetarian option
+                          </p>
                           <div className="protein-features">
                             <span className="feature-tag">Fresh Daily</span>
                             <span className="feature-tag">Chef&apos;s Choice</span>
@@ -483,7 +518,9 @@ export default function MenuPage() {
                       </div>
                       <div className="header-content">
                         <h3 className="card-title">Premium Upgrades</h3>
-                        <p className="card-subtitle">Replace any protein with these premium options</p>
+                        <p className="card-subtitle">
+                          Replace any protein with these premium options
+                        </p>
                       </div>
                       <div className="upgrade-badge premium-badge">
                         <span className="emoji-visible">💎</span>
@@ -500,7 +537,9 @@ export default function MenuPage() {
                               <span>Popular</span>
                             </div>
                           </div>
-                          <p className="upgrade-desc">Wild-caught Atlantic salmon with teriyaki glaze</p>
+                          <p className="upgrade-desc">
+                            Wild-caught Atlantic salmon with teriyaki glaze
+                          </p>
                           <div className="upgrade-features">
                             <span className="feature-tag premium-tag">Premium Quality</span>
                             <span className="feature-tag premium-tag">Fresh Daily</span>
@@ -639,7 +678,9 @@ export default function MenuPage() {
                       <span className="additional-icon emoji-visible">🥬</span>
                     </div>
                     <h5 className="additional-name">Extra Vegetables</h5>
-                    <p className="additional-desc">Additional portion of mixed seasonal vegetables</p>
+                    <p className="additional-desc">
+                      Additional portion of mixed seasonal vegetables
+                    </p>
                   </div>
                   <div className="additional-price">
                     <div className="add-price-circle">
@@ -708,13 +749,16 @@ export default function MenuPage() {
                   <span className="section-icon emoji-visible">🏠</span>
                 </div>
                 <h2 className="section-title mb-4">Our Service Areas</h2>
-                <p className="section-subtitle">We bring the hibachi experience directly to your location!</p>
+                <p className="section-subtitle">
+                  We bring the hibachi experience directly to your location!
+                </p>
               </div>
             </div>
 
             <p className="service-intro text-center">
-              We bring authentic hibachi dining to homes and venues across the Bay Area, Sacramento, San Jose & surrounding regions.
-              Not sure we cover you? Reach out—we&apos;ll do our best!
+              We bring authentic hibachi dining to homes and venues across the Bay Area, Sacramento,
+              San Jose & surrounding regions. Not sure we cover you? Reach out—we&apos;ll do our
+              best!
             </p>
             <div className="text-center mt-3 mb-4">
               <a href="/BookUs" className="btn btn-primary me-3">
@@ -750,7 +794,9 @@ export default function MenuPage() {
               <div className="col-md-6">
                 <div className="service-area-card">
                   <h4 className="area-title">🏞️ Sacramento & Extended Regions</h4>
-                  <p className="area-subtitle">Minimal travel fees for these beautiful locations!</p>
+                  <p className="area-subtitle">
+                    Minimal travel fees for these beautiful locations!
+                  </p>
                   <ul className="area-list">
                     <li>Sacramento - Capital city hibachi experiences</li>
                     <li>Elk Grove - Family-friendly neighborhood service</li>
@@ -770,18 +816,21 @@ export default function MenuPage() {
                 <span className="radius-icon"> 🚗 </span>
                 <h4 className="radius-title">We Come to You!</h4>
                 <p className="radius-description">
-                  Serving the Bay Area, Sacramento, San Jose & surrounding regions. Not sure we cover you? Reach out—we&apos;ll do our best!
+                  Serving the Bay Area, Sacramento, San Jose & surrounding regions. Not sure we
+                  cover you? Reach out—we&apos;ll do our best!
                 </p>
                 <p className="travel-fee-info" style={{ color: 'white' }}>
                   <span className="travel-highlight">💰 Transparent Pricing:</span>
-                  Flexible service area with transparent travel options—get your quote instantly above!
+                  Flexible service area with transparent travel options—get your quote instantly
+                  above!
                   <br />
                   <strong>Call us for a custom quote - we make it affordable for everyone!</strong>
                 </p>
                 <div className="service-promise">
                   <span className="promise-icon">🎯</span>
                   <span className="promise-text">
-                    <strong>Our Promise:</strong> No hidden fees, just honest pricing and exceptional service!
+                    <strong>Our Promise:</strong> No hidden fees, just honest pricing and
+                    exceptional service!
                   </span>
                 </div>
               </div>
@@ -804,17 +853,20 @@ export default function MenuPage() {
                   <span className="cta-icon emoji-visible floating-cta-icon">🎉</span>
                   <span className="cta-icon emoji-visible floating-cta-icon">👨‍🍳</span>
                 </div>
-                <h2 className="cta-main-title">
-                  Ready for an Unforgettable Experience?
-                </h2>
+                <h2 className="cta-main-title">Ready for an Unforgettable Experience?</h2>
                 <p className="cta-main-subtitle">
-                  Book your premium hibachi experience today and create memories that will last a lifetime
+                  Book your premium hibachi experience today and create memories that will last a
+                  lifetime
                 </p>
               </div>
 
               {/* Main CTA Button */}
               <div className="cta-button-wrapper mb-5">
-                <Link href="/BookUs" aria-label="Order your hibachi experience now" className="cta-link">
+                <Link
+                  href="/BookUs"
+                  aria-label="Order your hibachi experience now"
+                  className="cta-link"
+                >
                   <button className="cta-main-button modern-cta-button">
                     <span className="button-icon emoji-visible">🍽️</span>
                     <span className="button-text">Order Your Hibachi Experience</span>
@@ -847,7 +899,10 @@ export default function MenuPage() {
                     </div>
                     <div className="feature-content">
                       <h4 className="feature-title">Professional Chef</h4>
-                      <p className="feature-description">Highly trained hibachi chefs delivering exceptional on-site dining experiences with skill, flair, and passion</p>
+                      <p className="feature-description">
+                        Highly trained hibachi chefs delivering exceptional on-site dining
+                        experiences with skill, flair, and passion
+                      </p>
                     </div>
                   </div>
 
@@ -857,7 +912,9 @@ export default function MenuPage() {
                     </div>
                     <div className="feature-content">
                       <h4 className="feature-title">Live Entertainment</h4>
-                      <p className="feature-description">Amazing tricks, flips, and interactive cooking show</p>
+                      <p className="feature-description">
+                        Amazing tricks, flips, and interactive cooking show
+                      </p>
                     </div>
                   </div>
 
@@ -867,7 +924,9 @@ export default function MenuPage() {
                     </div>
                     <div className="feature-content">
                       <h4 className="feature-title">Personalized Service</h4>
-                      <p className="feature-description">Customized experience tailored to your preferences</p>
+                      <p className="feature-description">
+                        Customized experience tailored to your preferences
+                      </p>
                     </div>
                   </div>
                 </div>

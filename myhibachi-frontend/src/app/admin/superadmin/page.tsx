@@ -11,9 +11,27 @@ export default function SuperAdminPage() {
   ]
 
   const adminUsers = [
-    { id: 1, name: 'Admin User', email: 'admin@myhibachi.com', role: 'Super Admin', lastActive: '2025-01-30' },
-    { id: 2, name: 'Manager User', email: 'manager@myhibachi.com', role: 'Manager', lastActive: '2025-01-30' },
-    { id: 3, name: 'Staff User', email: 'staff@myhibachi.com', role: 'Staff', lastActive: '2025-01-29' }
+    {
+      id: 1,
+      name: 'Admin User',
+      email: 'admin@myhibachi.com',
+      role: 'Super Admin',
+      lastActive: '2025-01-30'
+    },
+    {
+      id: 2,
+      name: 'Manager User',
+      email: 'manager@myhibachi.com',
+      role: 'Manager',
+      lastActive: '2025-01-30'
+    },
+    {
+      id: 3,
+      name: 'Staff User',
+      email: 'staff@myhibachi.com',
+      role: 'Staff',
+      lastActive: '2025-01-29'
+    }
   ]
 
   return (
@@ -33,7 +51,8 @@ export default function SuperAdminPage() {
           <div>
             <h3 className="text-sm font-medium text-red-800">Warning</h3>
             <p className="text-sm text-red-700">
-              This section contains sensitive system controls. Changes here can affect the entire application.
+              This section contains sensitive system controls. Changes here can affect the entire
+              application.
             </p>
           </div>
         </div>
@@ -46,11 +65,15 @@ export default function SuperAdminPage() {
             <div className="text-center">
               <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
               <p className="text-sm text-gray-600">{stat.label}</p>
-              <div className={`mt-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                stat.status === 'excellent' ? 'bg-green-100 text-green-800' :
-                stat.status === 'good' ? 'bg-blue-100 text-blue-800' :
-                'bg-gray-100 text-gray-800'
-              }`}>
+              <div
+                className={`mt-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                  stat.status === 'excellent'
+                    ? 'bg-green-100 text-green-800'
+                    : stat.status === 'good'
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-gray-100 text-gray-800'
+                }`}
+              >
                 {stat.status}
               </div>
             </div>
@@ -86,7 +109,7 @@ export default function SuperAdminPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {adminUsers.map((user) => (
+              {adminUsers.map(user => (
                 <tr key={user.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
@@ -95,11 +118,15 @@ export default function SuperAdminPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      user.role === 'Super Admin' ? 'bg-red-100 text-red-800' :
-                      user.role === 'Manager' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        user.role === 'Super Admin'
+                          ? 'bg-red-100 text-red-800'
+                          : user.role === 'Manager'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
                       {user.role}
                     </span>
                   </td>
@@ -138,7 +165,10 @@ export default function SuperAdminPage() {
             <Button variant="outline" className="w-full justify-start">
               Restore Database
             </Button>
-            <Button variant="outline" className="w-full justify-start text-red-600 border-red-300 hover:bg-red-50">
+            <Button
+              variant="outline"
+              className="w-full justify-start text-red-600 border-red-300 hover:bg-red-50"
+            >
               Clear All Data
             </Button>
           </div>

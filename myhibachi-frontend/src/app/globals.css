@@ -2,8 +2,8 @@
    MY HIBACHI - CSS ARCHITECTURE V2 (SCOPED, PHASED, AND SAFE)
    ========================================================================== */
 
-@import url("tailwindcss");
-@import url("tw-animate-css");
+@import url('tailwindcss');
+@import url('tw-animate-css');
 @import '../styles/responsive-images.css';
 
 @custom-variant dark (&:is(.dark *));
@@ -52,16 +52,16 @@
   /* ==========================================================================
      MY HIBACHI DESIGN TOKENS - Brand & UI System
      ========================================================================== */
-  
+
   /* Brand Colors */
-  --color-primary: #DB2B28;
+  --color-primary: #db2b28;
   --color-primary-hover: #c41e1a;
   --color-primary-dark: #a01d1a;
   --color-primary-contrast: #fff;
   --color-secondary: #ff6b35;
   --color-gold: #d4af37;
   --color-tan: #f5e6d3;
-  
+
   /* Neutral Colors */
   --color-dark: #1a1a1a;
   --color-brown: #4a2d13;
@@ -74,23 +74,23 @@
   --text-muted: #666;
   --color-text-muted: #4b5563;
   --text-on-dark: #fff;
-  
+
   /* Background Colors */
   --color-background: #fff;
   --color-background-light: #fafafa;
   --color-background-accent: #f8f8f8;
   --color-border-custom: #e5e5e5;
-  
+
   /* Status Colors */
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
   --color-info: #3b82f6;
-  
+
   /* Typography */
   --font-primary: 'Poppins', system-ui, -apple-system, sans-serif;
   --font-secondary: 'Inter', system-ui, -apple-system, sans-serif;
-  
+
   /* Spacing */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
@@ -98,20 +98,20 @@
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
   --spacing-2xl: 3rem;
-  
+
   /* Border Radius */
   --radius-sm-custom: 6px;
   --radius-md-custom: 12px;
   --radius-lg-custom: 16px;
   --radius-xl-custom: 20px;
   --radius-full: 50px;
-  
+
   /* Shadows */
   --shadow-sm: 0 2px 4px rgb(0 0 0 / 10%);
   --shadow-md: 0 4px 20px rgb(0 0 0 / 10%);
   --shadow-lg: 0 8px 32px rgb(0 0 0 / 12%);
   --shadow-xl: 0 12px 48px rgb(0 0 0 / 15%);
-  
+
   /* Transitions */
   --transition-fast: all 0.2s ease;
   --transition-normal: all 0.3s ease;
@@ -192,12 +192,14 @@
   /* ==========================================================================
      NORMALIZE & BOX MODEL
      ========================================================================== */
-  *, *::before, *::after { 
-    box-sizing: border-box; 
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
   }
 
-  html { 
-    -webkit-font-smoothing: antialiased; 
+  html {
+    -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     line-height: 1.5;
   }
@@ -222,20 +224,29 @@
   /* ==========================================================================
      UTILITY CLASSES - Defensive CSS for Cross-Browser Consistency
      ========================================================================== */
-  
+
   /* Text Color Utilities */
   .u-text-on-dark {
     color: var(--text-on-dark);
     text-shadow: 0 1px 2px rgb(0 0 0 / 25%);
   }
-  
-  .u-text-strong { color: var(--text-strong); }
-  .u-text-default { color: var(--text-default); }
-  .u-text-light { color: var(--text-light); }
-  .u-text-muted { color: var(--text-muted); }
-  
+
+  .u-text-strong {
+    color: var(--text-strong);
+  }
+  .u-text-default {
+    color: var(--text-default);
+  }
+  .u-text-light {
+    color: var(--text-light);
+  }
+  .u-text-muted {
+    color: var(--text-muted);
+  }
+
   /* Safe Component Patterns */
-  .component-on-primary { /* hard fallback */
+  .component-on-primary {
+    /* hard fallback */
     color: var(--color-primary-contrast);
   }
 }
@@ -249,7 +260,7 @@
 
 /* Page-specific CSS loaded via data attributes */
 @import url('../styles/pages/menu.page.css');
-@import url('../styles/pages/contact.page.css'); 
+@import url('../styles/pages/contact.page.css');
 @import url('../styles/pages/quote.page.css');
 
 /* ==========================================================================

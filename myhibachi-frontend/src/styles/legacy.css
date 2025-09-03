@@ -133,21 +133,47 @@
    ========================================================================== */
 
 /* These should be replaced with utility classes */
-.text-center { text-align: center !important; }
-.text-white { color: white !important; }
-.text-primary { color: var(--color-primary) !important; }
+.text-center {
+  text-align: center !important;
+}
+.text-white {
+  color: white !important;
+}
+.text-primary {
+  color: var(--color-primary) !important;
+}
 
-.mb-0 { margin-bottom: 0 !important; }
-.mb-1 { margin-bottom: 0.5rem !important; }
-.mb-2 { margin-bottom: 1rem !important; }
-.mb-3 { margin-bottom: 1.5rem !important; }
-.mb-4 { margin-bottom: 2rem !important; }
+.mb-0 {
+  margin-bottom: 0 !important;
+}
+.mb-1 {
+  margin-bottom: 0.5rem !important;
+}
+.mb-2 {
+  margin-bottom: 1rem !important;
+}
+.mb-3 {
+  margin-bottom: 1.5rem !important;
+}
+.mb-4 {
+  margin-bottom: 2rem !important;
+}
 
-.mt-0 { margin-top: 0 !important; }
-.mt-1 { margin-top: 0.5rem !important; }
-.mt-2 { margin-top: 1rem !important; }
-.mt-3 { margin-top: 1.5rem !important; }
-.mt-4 { margin-top: 2rem !important; }
+.mt-0 {
+  margin-top: 0 !important;
+}
+.mt-1 {
+  margin-top: 0.5rem !important;
+}
+.mt-2 {
+  margin-top: 1rem !important;
+}
+.mt-3 {
+  margin-top: 1.5rem !important;
+}
+.mt-4 {
+  margin-top: 2rem !important;
+}
 
 /* ==========================================================================
    LEGACY RESPONSIVE OVERRIDES - TO BE CLEANED UP
@@ -157,12 +183,12 @@
   .hero-title {
     font-size: 2.5rem;
   }
-  
+
   .btn {
     min-width: 100%;
     margin-bottom: 1rem;
   }
-  
+
   .cta-section .btn-primary {
     min-width: 100%;
     font-size: 1rem;

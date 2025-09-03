@@ -1,7 +1,8 @@
 'use client'
 
-import type { FaqItem } from '@/data/faqsData'
 import { useState, useRef, useEffect } from 'react'
+
+import type { FaqItem } from '@/data/faqsData'
 
 interface FaqItemComponentProps {
   faq: FaqItem
@@ -46,7 +47,9 @@ export function FaqItemComponent({ faq, isOpen, onToggle }: FaqItemComponentProp
         <h3 className="faq-question">{faq.question}</h3>
         <div className="faq-meta">
           {faq.confidence === 'low' && (
-            <span className="confidence-indicator" title="This answer may need verification">⚠️</span>
+            <span className="confidence-indicator" title="This answer may need verification">
+              ⚠️
+            </span>
           )}
           <span className="faq-toggle-icon" aria-hidden="true">
             {isOpen ? '−' : '+'}
@@ -62,7 +65,8 @@ export function FaqItemComponent({ faq, isOpen, onToggle }: FaqItemComponentProp
         ref={answerRef}
       >
         <div className="faq-answer-content">
-          <div dangerouslySetInnerHTML={{ __html: faq.answer }} />
+          {/* SECURITY FIX: Replace dangerouslySetInnerHTML with safe text rendering */}
+          <div className="faq-answer-text">{faq.answer}</div>
 
           {/* Feedback and actions */}
           <div className="faq-actions">
@@ -91,7 +95,9 @@ export function FaqItemComponent({ faq, isOpen, onToggle }: FaqItemComponentProp
             {faq.tags.length > 0 && (
               <div className="faq-tags">
                 {faq.tags.slice(0, 3).map(tag => (
-                  <span key={tag} className="faq-tag">{tag}</span>
+                  <span key={tag} className="faq-tag">
+                    {tag}
+                  </span>
                 ))}
               </div>
             )}

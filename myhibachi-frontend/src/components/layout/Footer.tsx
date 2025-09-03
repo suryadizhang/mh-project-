@@ -15,16 +15,32 @@ export default function Footer() {
           />
           <h3>My Hibachi Chef</h3>
           <p className="footer-description">
-            Bringing the authentic hibachi experience to your location with premium quality and reasonable prices.
+            Bringing the authentic hibachi experience to your location with premium quality and
+            reasonable prices.
           </p>
           <div className="footer-social">
-            <a href="https://www.instagram.com/my_hibachi_chef/" target="_blank" rel="noopener noreferrer" className="footer-social-icon">
+            <a
+              href="https://www.instagram.com/my_hibachi_chef/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-social-icon"
+            >
               <i className="bi bi-instagram"></i>
             </a>
-            <a href="https://www.facebook.com/people/My-hibachi/61577483702847/" target="_blank" rel="noopener noreferrer" className="footer-social-icon">
+            <a
+              href="https://www.facebook.com/people/My-hibachi/61577483702847/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-social-icon"
+            >
               <i className="bi bi-facebook"></i>
             </a>
-            <a href="https://www.yelp.com/biz/my-hibachi-fremont" target="_blank" rel="noopener noreferrer" className="footer-social-icon">
+            <a
+              href="https://www.yelp.com/biz/my-hibachi-fremont"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-social-icon"
+            >
               <i className="bi bi-yelp"></i>
             </a>
           </div>
@@ -33,10 +49,26 @@ export default function Footer() {
         <div className="footer-menu">
           <h3>Quick Links</h3>
           <ul className="footer-links">
-            <li><Link href="/"><i className="bi bi-chevron-right footer-link-icon"></i> Home</Link></li>
-            <li><Link href="/menu"><i className="bi bi-chevron-right footer-link-icon"></i> Menu</Link></li>
-            <li><Link href="/BookUs"><i className="bi bi-chevron-right footer-link-icon"></i> Book Us</Link></li>
-            <li><Link href="/quote"><i className="bi bi-chevron-right footer-link-icon"></i> Get Quote</Link></li>
+            <li>
+              <Link href="/">
+                <i className="bi bi-chevron-right footer-link-icon"></i> Home
+              </Link>
+            </li>
+            <li>
+              <Link href="/menu">
+                <i className="bi bi-chevron-right footer-link-icon"></i> Menu
+              </Link>
+            </li>
+            <li>
+              <Link href="/BookUs">
+                <i className="bi bi-chevron-right footer-link-icon"></i> Book Us
+              </Link>
+            </li>
+            <li>
+              <Link href="/quote">
+                <i className="bi bi-chevron-right footer-link-icon"></i> Get Quote
+              </Link>
+            </li>
           </ul>
         </div>
 

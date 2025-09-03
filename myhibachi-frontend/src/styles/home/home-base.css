@@ -1,8 +1,17 @@
 /* Home Page Base Styles - Core Layout and Typography */
 
 /* Font Family Override */
-.main-title, .subtitle, .experience-title, .features-heading, .section-title, .service-title {
-  font-family: var(--font-poppins), system-ui, -apple-system, sans-serif;
+.main-title,
+.subtitle,
+.experience-title,
+.features-heading,
+.section-title,
+.service-title {
+  font-family:
+    var(--font-poppins),
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 /* Scroll Animation Classes */

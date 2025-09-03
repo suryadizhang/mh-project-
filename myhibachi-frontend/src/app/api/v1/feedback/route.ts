@@ -1,54 +1,80 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server'
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { name, email, subject, message, rating, category } = body;
+/**
+ * ⚠️  MIGRATED TO BACKEND ⚠️
+ *
+ * This endpoint has been migrated to the FastAPI backend.
+ *
+ * OLD: /v1/feedback
+ * NEW: ${NEXT_PUBLIC_API_URL}/api/v1/feedback
+ *
+ * This stub returns HTTP 410 Gone to indicate permanent migration.
+ * Update your frontend code to use the new backend endpoint.
+ *
+ * Migration Date: 2025-09-02T05:45:43.913Z
+ * Backend Route: FastAPI backend - /api/v1/feedback
+ */
 
-    console.log('Feedback received:', { name, email, subject, message, category, rating });
-
-    return NextResponse.json(
-      { 
-        success: true, 
-        message: 'Thank you for your feedback! We appreciate your input.',
-        id: Date.now().toString()
-      },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error('Feedback submission error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to submit feedback' },
-      { status: 500 }
-    );
-  }
+export async function GET() {
+  return NextResponse.json(
+    {
+      error: 'Endpoint migrated to backend',
+      migration: {
+        from: '/v1/feedback',
+        to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/feedback`,
+        status: 'MIGRATED',
+        date: new Date().toISOString(),
+        instructions: 'Update frontend to use backend API endpoint'
+      }
+    },
+    { status: 410 }
+  )
 }
 
-export async function GET(request: NextRequest) {
-  try {
-    const searchParams = request.nextUrl.searchParams;
-    const category = searchParams.get('category');
-    const page = searchParams.get('page') || '1';
-    const limit = searchParams.get('limit') || '10';
+export async function POST() {
+  return NextResponse.json(
+    {
+      error: 'Endpoint migrated to backend',
+      migration: {
+        from: '/v1/feedback',
+        to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/feedback`,
+        status: 'MIGRATED',
+        date: new Date().toISOString(),
+        instructions: 'Update frontend to use backend API endpoint'
+      }
+    },
+    { status: 410 }
+  )
+}
 
-    return NextResponse.json(
-      { 
-        success: true, 
-        data: [],
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total: 0
-        },
-        category
-      },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error('Feedback retrieval error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Failed to retrieve feedback' },
-      { status: 500 }
-    );
-  }
+export async function PUT() {
+  return NextResponse.json(
+    {
+      error: 'Endpoint migrated to backend',
+      migration: {
+        from: '/v1/feedback',
+        to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/feedback`,
+        status: 'MIGRATED',
+        date: new Date().toISOString(),
+        instructions: 'Update frontend to use backend API endpoint'
+      }
+    },
+    { status: 410 }
+  )
+}
+
+export async function DELETE() {
+  return NextResponse.json(
+    {
+      error: 'Endpoint migrated to backend',
+      migration: {
+        from: '/v1/feedback',
+        to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/feedback`,
+        status: 'MIGRATED',
+        date: new Date().toISOString(),
+        instructions: 'Update frontend to use backend API endpoint'
+      }
+    },
+    { status: 410 }
+  )
 }

@@ -1,15 +1,12 @@
-import React from 'react';
-import './styles/SubmitSection.module.css';
+import React from 'react'
+import './styles/SubmitSection.module.css'
 
 interface SubmitSectionProps {
-  isSubmitting: boolean;
-  className?: string;
+  isSubmitting: boolean
+  className?: string
 }
 
-const SubmitSection: React.FC<SubmitSectionProps> = ({ 
-  isSubmitting,
-  className = '' 
-}) => {
+const SubmitSection: React.FC<SubmitSectionProps> = ({ isSubmitting, className = '' }) => {
   return (
     <div className={`form-section text-center ${className}`}>
       <button
@@ -36,8 +33,7 @@ const SubmitSection: React.FC<SubmitSectionProps> = ({
         </small>
       </p>
     </div>
-  );
-};
+  )
+}
 
-export default SubmitSection;
-
+export default SubmitSection

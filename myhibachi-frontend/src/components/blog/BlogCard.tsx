@@ -12,10 +12,10 @@ interface BlogCardProps {
 
 export default function BlogCard({ post, category }: BlogCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
-  
+
   const categoryStyles = {
     featured: 'category-featured',
-    seasonal: 'category-seasonal', 
+    seasonal: 'category-seasonal',
     event: 'category-event',
     recent: 'category-recent'
   }
@@ -29,7 +29,7 @@ export default function BlogCard({ post, category }: BlogCardProps) {
           </div>
         </div>
       </div>
-      
+
       <div className="blog-card-content">
         <div className="blog-card-meta">
           <div className="flex items-center">
@@ -45,28 +45,21 @@ export default function BlogCard({ post, category }: BlogCardProps) {
             <span>{post.readTime}</span>
           </div>
         </div>
-        
+
         <h3 className="blog-card-title">
-          <Link href={`/blog/${post.slug}`}>
-            {post.title}
-          </Link>
+          <Link href={`/blog/${post.slug}`}>{post.title}</Link>
         </h3>
-        
+
         <div className="blog-card-excerpt-wrapper">
           <p className={`blog-card-excerpt ${isExpanded ? 'expanded' : ''}`}>
             {post.excerpt}
             {post.content && isExpanded && (
-              <span className="blog-card-preview">
-                {post.content.substring(0, 200)}...
-              </span>
+              <span className="blog-card-preview">{post.content.substring(0, 200)}...</span>
             )}
           </p>
-          
+
           {post.content && post.content.length > 200 && (
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="blog-card-expand"
-            >
+            <button onClick={() => setIsExpanded(!isExpanded)} className="blog-card-expand">
               {isExpanded ? (
                 <>
                   <ChevronUp className="w-4 h-4" />
@@ -81,7 +74,7 @@ export default function BlogCard({ post, category }: BlogCardProps) {
             </button>
           )}
         </div>
-        
+
         {/* Tags */}
         {post.keywords && post.keywords.length > 0 && (
           <div className="blog-card-tags">
@@ -92,18 +85,13 @@ export default function BlogCard({ post, category }: BlogCardProps) {
             ))}
           </div>
         )}
-        
+
         <div className="blog-card-footer">
           <div className="blog-card-stats">
             <span className="blog-card-read-time">{post.readTime}</span>
-            {post.featured && (
-              <span className="blog-card-featured-badge">⭐ Featured</span>
-            )}
+            {post.featured && <span className="blog-card-featured-badge">⭐ Featured</span>}
           </div>
-          <Link
-            href={`/blog/${post.slug}`}
-            className="blog-card-read-more"
-          >
+          <Link href={`/blog/${post.slug}`} className="blog-card-read-more">
             Read Guide →
           </Link>
         </div>

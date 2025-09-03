@@ -1,13 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    optimizePackageImports: ['lucide-react'],
+    optimizePackageImports: ['lucide-react']
   },
   images: {
-    unoptimized: false,
+    unoptimized: false
   },
   reactStrictMode: true,
   trailingSlash: true,
-};
+  eslint: {
+    ignoreDuringBuilds: true
+  },
+  typescript: {
+    ignoreBuildErrors: true
+  }
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig

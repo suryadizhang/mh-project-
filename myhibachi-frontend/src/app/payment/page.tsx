@@ -7,6 +7,8 @@ import { CreditCard, DollarSign, Shield, Users, Calendar, MapPin, Loader2 } from
 import PaymentForm from '@/components/payment/PaymentForm'
 import AlternativePaymentOptions from '@/components/payment/AlternativePaymentOptions'
 import BookingLookup from '@/components/payment/BookingLookup'
+import CustomerSavingsDisplay from '@/components/CustomerSavingsDisplay'
+import { apiFetch } from '@/lib/api'
 
 // Initialize Stripe
 const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
@@ -42,21 +44,18 @@ export default function PaymentPage() {
   const [stripeElementsKey, setStripeElementsKey] = useState(0) // Force re-render
 
   // Calculate totals
-  const baseAmount = selectedBooking 
-    ? paymentType === 'deposit' 
-      ? 100 
+  const baseAmount = selectedBooking
+    ? paymentType === 'deposit'
+      ? 100
       : selectedBooking.remainingBalance
     : parseFloat(customAmount) || 0
 
   const tipValue = parseFloat(tipAmount) || 0
   const subtotal = baseAmount + tipValue
-  
+
   // Add processing fees based on payment method
-  const processingFee = paymentMethod === 'stripe' 
-    ? subtotal * 0.08 
-    : paymentMethod === 'venmo' 
-    ? subtotal * 0.03 
-    : 0
+  const processingFee =
+    paymentMethod === 'stripe' ? subtotal * 0.08 : paymentMethod === 'venmo' ? subtotal * 0.03 : 0
   const totalAmount = subtotal + processingFee
 
   // Create payment intent when amount changes and using Stripe
@@ -64,11 +63,8 @@ export default function PaymentPage() {
     const createPaymentIntent = async () => {
       try {
         setIsLoading(true)
-        const response = await fetch('/api/v1/payments/create-intent', {
+        const response = await apiFetch('/api/v1/payments/create-intent', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           body: JSON.stringify({
             amount: Math.round(totalAmount * 100), // Convert to cents
             currency: 'usd',
@@ -90,15 +86,14 @@ export default function PaymentPage() {
               eventDate: selectedBooking?.eventDate || 'N/A',
               paymentType
             }
-          }),
+          })
         })
 
-        if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.error || 'Failed to create payment intent')
+        if (!response.success) {
+          throw new Error(response.error || 'Failed to create payment intent')
         }
 
-        const { clientSecret: newClientSecret } = await response.json()
+        const { clientSecret: newClientSecret } = response.data
         setClientSecret(newClientSecret)
         setStripeElementsKey(prev => prev + 1) // Force Elements re-render
       } catch (error) {
@@ -125,18 +120,20 @@ export default function PaymentPage() {
       colorDanger: '#ef4444',
       fontFamily: 'Inter, system-ui, sans-serif',
       spacingUnit: '4px',
-      borderRadius: '8px',
-    },
+      borderRadius: '8px'
+    }
   }
 
-  const options = clientSecret ? {
-    clientSecret,
-    appearance,
-    loader: 'auto' as const,
-  } : {
-    appearance,
-    loader: 'auto' as const,
-  }
+  const options = clientSecret
+    ? {
+        clientSecret,
+        appearance,
+        loader: 'auto' as const
+      }
+    : {
+        appearance,
+        loader: 'auto' as const
+      }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -147,12 +144,10 @@ export default function PaymentPage() {
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <DollarSign className="w-8 h-8 text-red-600" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              My Hibachi Payment Portal
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Hibachi Payment Portal</h1>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Secure payment processing for your hibachi booking. Pay your deposit to lock in your date 
-              or settle your remaining balance with optional tips.
+              Secure payment processing for your hibachi booking. Pay your deposit to lock in your
+              date or settle your remaining balance with optional tips.
             </p>
           </div>
 
@@ -168,18 +163,23 @@ export default function PaymentPage() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column - Booking Lookup */}
           <div className="lg:col-span-1">
-            <BookingLookup 
+            <BookingLookup
               onBookingFound={setSelectedBooking}
               isLoading={isLoading}
               setIsLoading={setIsLoading}
             />
 
+            {/* Customer Savings Display */}
+            {selectedBooking?.customerEmail && (
+              <div className="mt-6">
+                <CustomerSavingsDisplay customerEmail={selectedBooking.customerEmail} />
+              </div>
+            )}
+
             {/* Manual Amount Entry */}
             {!selectedBooking && (
               <div className="bg-white rounded-xl shadow-lg p-6 mt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Or Enter Custom Amount
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Or Enter Custom Amount</h3>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -192,7 +192,7 @@ export default function PaymentPage() {
                       <input
                         type="number"
                         value={customAmount}
-                        onChange={(e) => setCustomAmount(e.target.value)}
+                        onChange={e => setCustomAmount(e.target.value)}
                         placeholder="0.00"
                         className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                       />
@@ -216,7 +216,9 @@ export default function PaymentPage() {
                   <div>
                     <div className="flex items-center text-gray-600 mb-2">
                       <Calendar className="w-4 h-4 mr-2" />
-                      <span>{selectedBooking.eventDate} at {selectedBooking.eventTime}</span>
+                      <span>
+                        {selectedBooking.eventDate} at {selectedBooking.eventTime}
+                      </span>
                     </div>
                     <div className="flex items-center text-gray-600 mb-2">
                       <Users className="w-4 h-4 mr-2" />
@@ -228,21 +230,33 @@ export default function PaymentPage() {
                     </div>
                   </div>
                   <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">Payment Status</div>
+                    <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">
+                      Payment Status
+                    </div>
                     <div className="text-sm">
                       <div className="flex justify-between">
                         <span>Total Event Cost:</span>
-                        <span className="font-medium">${selectedBooking.totalAmount.toFixed(2)}</span>
+                        <span className="font-medium">
+                          ${selectedBooking.totalAmount.toFixed(2)}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Deposit Paid:</span>
-                        <span className={selectedBooking.depositPaid ? 'text-green-600' : 'text-red-600'}>
-                          {selectedBooking.depositPaid ? `$${selectedBooking.depositAmount.toFixed(2)}` : 'Not Paid'}
+                        <span
+                          className={
+                            selectedBooking.depositPaid ? 'text-green-600' : 'text-red-600'
+                          }
+                        >
+                          {selectedBooking.depositPaid
+                            ? `$${selectedBooking.depositAmount.toFixed(2)}`
+                            : 'Not Paid'}
                         </span>
                       </div>
                       <div className="flex justify-between border-t pt-2 mt-2">
                         <span className="font-medium">Remaining Balance:</span>
-                        <span className="font-medium">${selectedBooking.remainingBalance.toFixed(2)}</span>
+                        <span className="font-medium">
+                          ${selectedBooking.remainingBalance.toFixed(2)}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -253,16 +267,14 @@ export default function PaymentPage() {
             {/* Payment Type Selection */}
             {selectedBooking && (
               <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Select Payment Type
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Select Payment Type</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   <button
                     onClick={() => setPaymentType('deposit')}
                     disabled={selectedBooking.depositPaid}
                     className={`p-4 rounded-lg border-2 transition-all ${
-                      paymentType === 'deposit' 
-                        ? 'border-red-500 bg-red-50' 
+                      paymentType === 'deposit'
+                        ? 'border-red-500 bg-red-50'
                         : 'border-gray-200 hover:border-gray-300'
                     } ${selectedBooking.depositPaid ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
@@ -277,8 +289,8 @@ export default function PaymentPage() {
                   <button
                     onClick={() => setPaymentType('balance')}
                     className={`p-4 rounded-lg border-2 transition-all ${
-                      paymentType === 'balance' 
-                        ? 'border-red-500 bg-red-50' 
+                      paymentType === 'balance'
+                        ? 'border-red-500 bg-red-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
@@ -295,15 +307,13 @@ export default function PaymentPage() {
 
             {/* Payment Method Selection */}
             <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Choose Payment Method
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Choose Payment Method</h3>
               <div className="grid md:grid-cols-3 gap-4">
                 <button
                   onClick={() => setPaymentMethod('stripe')}
                   className={`p-4 rounded-lg border-2 transition-all ${
-                    paymentMethod === 'stripe' 
-                      ? 'border-blue-500 bg-blue-50' 
+                    paymentMethod === 'stripe'
+                      ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
@@ -314,8 +324,8 @@ export default function PaymentPage() {
                 <button
                   onClick={() => setPaymentMethod('zelle')}
                   className={`p-4 rounded-lg border-2 transition-all ${
-                    paymentMethod === 'zelle' 
-                      ? 'border-purple-500 bg-purple-50' 
+                    paymentMethod === 'zelle'
+                      ? 'border-purple-500 bg-purple-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
@@ -328,8 +338,8 @@ export default function PaymentPage() {
                 <button
                   onClick={() => setPaymentMethod('venmo')}
                   className={`p-4 rounded-lg border-2 transition-all ${
-                    paymentMethod === 'venmo' 
-                      ? 'border-blue-400 bg-blue-50' 
+                    paymentMethod === 'venmo'
+                      ? 'border-blue-400 bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
@@ -348,8 +358,8 @@ export default function PaymentPage() {
                 Add Tip/Gratuity (Optional)
               </h3>
               <div className="grid grid-cols-4 gap-3 mb-4">
-                {[20, 25, 30, 35].map((percent) => {
-                  const tipValue = (baseAmount * percent / 100).toFixed(2)
+                {[20, 25, 30, 35].map(percent => {
+                  const tipValue = ((baseAmount * percent) / 100).toFixed(2)
                   return (
                     <button
                       key={percent}
@@ -373,7 +383,7 @@ export default function PaymentPage() {
                   <input
                     type="number"
                     value={tipAmount}
-                    onChange={(e) => setTipAmount(e.target.value)}
+                    onChange={e => setTipAmount(e.target.value)}
                     placeholder="0.00"
                     className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
@@ -383,9 +393,7 @@ export default function PaymentPage() {
 
             {/* Payment Summary */}
             <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Payment Summary
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Summary</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span>Base Amount:</span>
@@ -427,7 +435,7 @@ export default function PaymentPage() {
               stripePromise ? (
                 clientSecret ? (
                   <Elements key={stripeElementsKey} stripe={stripePromise} options={options}>
-                    <PaymentForm 
+                    <PaymentForm
                       amount={totalAmount}
                       bookingData={selectedBooking}
                       paymentType={paymentType}
@@ -451,9 +459,12 @@ export default function PaymentPage() {
                   <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <CreditCard className="w-8 h-8 text-red-600" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Payment Processing Unavailable</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    Payment Processing Unavailable
+                  </h3>
                   <p className="text-gray-600 mb-4">
-                    Credit card processing is currently not configured. Please use Zelle or Venmo instead.
+                    Credit card processing is currently not configured. Please use Zelle or Venmo
+                    instead.
                   </p>
                   <button
                     onClick={() => setPaymentMethod('zelle')}
@@ -470,7 +481,7 @@ export default function PaymentPage() {
                 </div>
               )
             ) : (
-              <AlternativePaymentOptions 
+              <AlternativePaymentOptions
                 method={paymentMethod}
                 amount={totalAmount}
                 bookingData={selectedBooking}

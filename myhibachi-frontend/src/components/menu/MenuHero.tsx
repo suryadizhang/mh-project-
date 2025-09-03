@@ -10,10 +10,30 @@ export default function MenuHero() {
         <div className={styles.heroIconWrapper}>
           <div className={styles.floatingIcons}>
             <span className={`${styles.heroMainIcon} emoji-visible`}>🍱</span>
-            <span className={`${styles.floatingIcon} emoji-visible`} style={{animationDelay: '0s'}}>🔥</span>
-            <span className={`${styles.floatingIcon} emoji-visible`} style={{animationDelay: '1s'}}>🥢</span>
-            <span className={`${styles.floatingIcon} emoji-visible`} style={{animationDelay: '2s'}}>🍤</span>
-            <span className={`${styles.floatingIcon} emoji-visible`} style={{animationDelay: '3s'}}>🥩</span>
+            <span
+              className={`${styles.floatingIcon} emoji-visible`}
+              style={{ animationDelay: '0s' }}
+            >
+              🔥
+            </span>
+            <span
+              className={`${styles.floatingIcon} emoji-visible`}
+              style={{ animationDelay: '1s' }}
+            >
+              🥢
+            </span>
+            <span
+              className={`${styles.floatingIcon} emoji-visible`}
+              style={{ animationDelay: '2s' }}
+            >
+              🍤
+            </span>
+            <span
+              className={`${styles.floatingIcon} emoji-visible`}
+              style={{ animationDelay: '3s' }}
+            >
+              🥩
+            </span>
           </div>
         </div>
 

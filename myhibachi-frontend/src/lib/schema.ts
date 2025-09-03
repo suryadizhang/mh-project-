@@ -47,7 +47,7 @@ export class BlogSchemaGenerator {
       wordCount: this.estimateWordCount(post.content || post.excerpt),
       inLanguage: 'en-US',
       isAccessibleForFree: true,
-      ...(post.featured && { 
+      ...(post.featured && {
         about: {
           '@type': 'Thing',
           name: 'Hibachi Catering',
@@ -152,7 +152,7 @@ export class BlogSchemaGenerator {
           name: 'San Francisco Bay Area'
         },
         {
-          '@type': 'Place', 
+          '@type': 'Place',
           name: 'Sacramento'
         },
         {
@@ -193,13 +193,10 @@ export class BlogSchemaGenerator {
   generateFAQSchema(post: BlogPost): object | null {
     // Extract FAQ-like content from blog posts
     const content = post.content || post.excerpt
-    const faqPatterns = [
-      /Q:\s*(.+?)\s*A:\s*(.+?)(?=Q:|$)/gi,
-      /\?\s*(.+?)\s*-\s*(.+?)(?=\?|$)/gi
-    ]
+    const faqPatterns = [/Q:\s*(.+?)\s*A:\s*(.+?)(?=Q:|$)/gi, /\?\s*(.+?)\s*-\s*(.+?)(?=\?|$)/gi]
 
-    const faqs: Array<{question: string, answer: string}> = []
-    
+    const faqs: Array<{ question: string; answer: string }> = []
+
     for (const pattern of faqPatterns) {
       let match
       while ((match = pattern.exec(content)) !== null) {
@@ -230,11 +227,16 @@ export class BlogSchemaGenerator {
     // Detect how-to content in blog posts
     const content = post.content || post.excerpt
     const hasHowToKeywords = [
-      'how to', 'step by step', 'guide', 'tutorial', 
-      'instructions', 'process', 'method'
-    ].some(keyword => 
-      post.title.toLowerCase().includes(keyword) || 
-      content.toLowerCase().includes(keyword)
+      'how to',
+      'step by step',
+      'guide',
+      'tutorial',
+      'instructions',
+      'process',
+      'method'
+    ].some(
+      keyword =>
+        post.title.toLowerCase().includes(keyword) || content.toLowerCase().includes(keyword)
     )
 
     if (!hasHowToKeywords) return null
@@ -258,7 +260,7 @@ export class BlogSchemaGenerator {
           name: 'Hibachi grill'
         },
         {
-          '@type': 'HowToSupply', 
+          '@type': 'HowToSupply',
           name: 'Fresh ingredients'
         }
       ],
@@ -295,11 +297,17 @@ export class BlogSchemaGenerator {
   generateRecipeSchema(post: BlogPost): object | null {
     // Check if post contains recipe content
     const hasRecipeKeywords = [
-      'recipe', 'ingredients', 'cooking', 'preparation',
-      'serves', 'portions', 'cook time'
-    ].some(keyword => 
-      post.title.toLowerCase().includes(keyword) || 
-      (post.keywords || []).some(k => k.toLowerCase().includes(keyword))
+      'recipe',
+      'ingredients',
+      'cooking',
+      'preparation',
+      'serves',
+      'portions',
+      'cook time'
+    ].some(
+      keyword =>
+        post.title.toLowerCase().includes(keyword) ||
+        (post.keywords || []).some(k => k.toLowerCase().includes(keyword))
     )
 
     if (!hasRecipeKeywords) return null
@@ -371,19 +379,19 @@ export class BlogSchemaGenerator {
   }
 
   private getLocationCoordinates(location: string): object {
-    const coordinates: Record<string, {lat: number, lng: number}> = {
+    const coordinates: Record<string, { lat: number; lng: number }> = {
       'San Francisco': { lat: 37.7749, lng: -122.4194 },
       'San Jose': { lat: 37.3382, lng: -121.8863 },
-      'Sacramento': { lat: 38.5816, lng: -121.4944 },
-      'Oakland': { lat: 37.8044, lng: -122.2712 },
-      'Silicon Valley': { lat: 37.4419, lng: -122.1430 },
-      'Peninsula': { lat: 37.5630, lng: -122.3255 },
+      Sacramento: { lat: 38.5816, lng: -121.4944 },
+      Oakland: { lat: 37.8044, lng: -122.2712 },
+      'Silicon Valley': { lat: 37.4419, lng: -122.143 },
+      Peninsula: { lat: 37.563, lng: -122.3255 },
       'South Bay': { lat: 37.3541, lng: -121.9552 },
       'East Bay': { lat: 37.8272, lng: -122.2913 }
     }
 
     const coords = coordinates[location] || coordinates['San Jose']
-    
+
     return {
       '@type': 'GeoCoordinates',
       latitude: coords.lat,

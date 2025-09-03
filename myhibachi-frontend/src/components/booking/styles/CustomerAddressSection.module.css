@@ -63,7 +63,7 @@ select.form-control {
 }
 
 /* ZIP code field specific styling */
-input[id="addressZipcode"] {
+input[id='addressZipcode'] {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -79,11 +79,11 @@ input[id="addressZipcode"] {
   .form-section {
     border-left: 2px solid #8b5cf6;
   }
-  
+
   .form-check {
     padding: 0.75rem;
   }
-  
+
   .section-description {
     padding: 0.5rem;
     font-size: 0.875rem;

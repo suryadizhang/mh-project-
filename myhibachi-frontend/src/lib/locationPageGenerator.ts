@@ -11,7 +11,7 @@ export interface LocationPage {
     hero: string
     services: string[]
     testimonials: string[]
-    faq: Array<{question: string, answer: string}>
+    faq: Array<{ question: string; answer: string }>
   }
   schema: Record<string, unknown>
 }
@@ -76,53 +76,53 @@ export function generateLocationPage(city: string): LocationPage {
       ]
     },
     schema: {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": `MyHibachi ${city}`,
-      "image": "https://myhibachi.com/logo.png",
-      "description": `Professional hibachi catering service in ${city}, California. Private chefs bring authentic Japanese hibachi entertainment to your location.`,
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": city,
-        "addressRegion": "CA",
-        "addressCountry": "US"
+      '@context': 'https://schema.org',
+      '@type': 'LocalBusiness',
+      name: `MyHibachi ${city}`,
+      image: 'https://myhibachi.com/logo.png',
+      description: `Professional hibachi catering service in ${city}, California. Private chefs bring authentic Japanese hibachi entertainment to your location.`,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: city,
+        addressRegion: 'CA',
+        addressCountry: 'US'
       },
-      "telephone": "+1-555-HIBACHI",
-      "url": `https://myhibachi.com/locations/${city.toLowerCase().replace(/\s+/g, '-')}`,
-      "servesCuisine": "Japanese",
-      "priceRange": "$$-$$$",
-      "serviceArea": {
-        "@type": "Place",
-        "name": `${city} and surrounding areas`
+      telephone: '+1-555-HIBACHI',
+      url: `https://myhibachi.com/locations/${city.toLowerCase().replace(/\s+/g, '-')}`,
+      servesCuisine: 'Japanese',
+      priceRange: '$$-$$$',
+      serviceArea: {
+        '@type': 'Place',
+        name: `${city} and surrounding areas`
       },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.9",
-        "reviewCount": "150"
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: '4.9',
+        reviewCount: '150'
       },
-      "hasOfferCatalog": {
-        "@type": "OfferCatalog",
-        "name": `${city} Hibachi Catering Services`,
-        "itemListElement": [
+      hasOfferCatalog: {
+        '@type': 'OfferCatalog',
+        name: `${city} Hibachi Catering Services`,
+        itemListElement: [
           {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Service",
-              "name": `${city} Birthday Party Hibachi`
+            '@type': 'Offer',
+            itemOffered: {
+              '@type': 'Service',
+              name: `${city} Birthday Party Hibachi`
             }
           },
           {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Service",
-              "name": `${city} Corporate Event Catering`
+            '@type': 'Offer',
+            itemOffered: {
+              '@type': 'Service',
+              name: `${city} Corporate Event Catering`
             }
           },
           {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Service",
-              "name": `${city} Wedding Reception Hibachi`
+            '@type': 'Offer',
+            itemOffered: {
+              '@type': 'Service',
+              name: `${city} Wedding Reception Hibachi`
             }
           }
         ]

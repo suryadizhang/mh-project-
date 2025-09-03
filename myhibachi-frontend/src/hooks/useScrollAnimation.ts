@@ -9,8 +9,8 @@ export const useScrollAnimation = () => {
       rootMargin: '0px 0px -100px 0px'
     }
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('animate-in')
         }
@@ -19,17 +19,17 @@ export const useScrollAnimation = () => {
 
     // Observe all elements with animate-on-scroll class
     const animatedElements = document.querySelectorAll('.animate-on-scroll')
-    animatedElements.forEach((el) => observer.observe(el))
+    animatedElements.forEach(el => observer.observe(el))
 
     // Counter animation for statistics
     const animateCounters = () => {
       const counters = document.querySelectorAll('.stat-number')
-      counters.forEach((counter) => {
+      counters.forEach(counter => {
         const target = counter.textContent?.replace(/\D/g, '') || '0'
         const targetNumber = parseInt(target)
         let current = 0
         const increment = targetNumber / 60 // 60 frames for smooth animation
-        
+
         const updateCounter = () => {
           if (current < targetNumber) {
             current += increment
@@ -49,7 +49,7 @@ export const useScrollAnimation = () => {
             else if (targetNumber === 50) counter.textContent = '50+'
           }
         }
-        
+
         // Only animate if element is visible
         const rect = counter.getBoundingClientRect()
         if (rect.top < window.innerHeight && rect.bottom > 0) {
@@ -61,15 +61,18 @@ export const useScrollAnimation = () => {
     // Trigger counter animation when statistics section comes into view
     const statisticsSection = document.querySelector('.statistics-section')
     if (statisticsSection) {
-      const statsObserver = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            animateCounters()
-            statsObserver.unobserve(entry.target) // Only animate once
-          }
-        })
-      }, { threshold: 0.5 })
-      
+      const statsObserver = new IntersectionObserver(
+        entries => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              animateCounters()
+              statsObserver.unobserve(entry.target) // Only animate once
+            }
+          })
+        },
+        { threshold: 0.5 }
+      )
+
       statsObserver.observe(statisticsSection)
     }
 

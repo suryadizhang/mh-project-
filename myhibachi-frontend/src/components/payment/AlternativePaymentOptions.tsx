@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Copy, Check, ExternalLink, Phone, Mail, QrCode, Smartphone } from 'lucide-react'
 import QRCodeGenerator from 'qrcode'
+import { apiFetch } from '@/lib/api'
 
 interface BookingData {
   id: string
@@ -26,12 +27,12 @@ interface AlternativePaymentOptionsProps {
   tipAmount: number
 }
 
-export default function AlternativePaymentOptions({ 
-  method, 
-  amount, 
-  bookingData, 
-  paymentType, 
-  tipAmount 
+export default function AlternativePaymentOptions({
+  method,
+  amount,
+  bookingData,
+  paymentType,
+  tipAmount
 }: AlternativePaymentOptionsProps) {
   const [copied, setCopied] = useState<string | null>(null)
   const [paymentSent, setPaymentSent] = useState(false)
@@ -95,7 +96,7 @@ export default function AlternativePaymentOptions({
     const deepLink = generateVenmoDeepLink()
     // Try to open Venmo app, fallback to web if app not installed
     window.location.href = deepLink
-    
+
     // Fallback to web version after a short delay if app doesn't open
     setTimeout(() => {
       const webUrl = `https://venmo.com/?txn=pay&recipients=myhibachichef&amount=${amount}&note=${encodeURIComponent(generatePaymentMemo())}`
@@ -112,7 +113,7 @@ export default function AlternativePaymentOptions({
         // For Zelle, we'll create a data string with payment info
         qrData = `Zelle Payment\nEmail: myhibachichef@gmail.com\nAmount: $${amount.toFixed(2)}\nMemo: ${generatePaymentMemo()}`
       }
-      
+
       const qrCodeDataUrl = await QRCodeGenerator.toDataURL(qrData, {
         width: 200,
         margin: 2,
@@ -137,11 +138,8 @@ export default function AlternativePaymentOptions({
 
     // Simulate API call
     try {
-      await fetch('/api/v1/payments/alternative-payment', {
+      const response = await apiFetch('/api/v1/payments/alternative-payment', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           method,
           amount,
@@ -151,7 +149,7 @@ export default function AlternativePaymentOptions({
           customerInfo,
           memo: generatePaymentMemo(),
           timestamp: new Date().toISOString()
-        }),
+        })
       })
     } catch (error) {
       console.error('Error recording payment:', error)
@@ -161,14 +159,19 @@ export default function AlternativePaymentOptions({
   if (paymentSent) {
     return (
       <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-        <div className={`w-16 h-16 bg-${details.color}-100 rounded-full flex items-center justify-center mx-auto mb-4`}>
-          <div className={`w-8 h-8 bg-${details.color}-600 rounded text-white text-lg flex items-center justify-center font-bold`}>
+        <div
+          className={`w-16 h-16 bg-${details.color}-100 rounded-full flex items-center justify-center mx-auto mb-4`}
+        >
+          <div
+            className={`w-8 h-8 bg-${details.color}-600 rounded text-white text-lg flex items-center justify-center font-bold`}
+          >
             {details.icon}
           </div>
         </div>
         <h3 className="text-2xl font-bold text-gray-900 mb-2">Payment Instructions Sent!</h3>
         <p className="text-gray-600 mb-6">
-          We&apos;ve recorded your intent to pay ${amount.toFixed(2)} via {method.charAt(0).toUpperCase() + method.slice(1)}.
+          We&apos;ve recorded your intent to pay ${amount.toFixed(2)} via{' '}
+          {method.charAt(0).toUpperCase() + method.slice(1)}.
         </p>
         <div className="bg-green-50 rounded-lg p-4 mb-6">
           <div className="text-sm text-green-800">
@@ -199,16 +202,17 @@ export default function AlternativePaymentOptions({
     <div className="bg-white rounded-xl shadow-lg p-6">
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center">
-          <div className={`w-6 h-6 bg-${details.color}-600 rounded text-white text-sm flex items-center justify-center font-bold mr-2`}>
+          <div
+            className={`w-6 h-6 bg-${details.color}-600 rounded text-white text-sm flex items-center justify-center font-bold mr-2`}
+          >
             {details.icon}
           </div>
           {method.charAt(0).toUpperCase() + method.slice(1)} Payment
         </h3>
         <p className="text-gray-600 text-sm">
-          {method === 'zelle' 
+          {method === 'zelle'
             ? 'No processing fees! Send payment directly using Zelle.'
-            : 'Send payment using Venmo with 3% processing fee included in total above.'
-          }
+            : 'Send payment using Venmo with 3% processing fee included in total above.'}
         </p>
       </div>
 
@@ -227,7 +231,11 @@ export default function AlternativePaymentOptions({
                   onClick={() => copyToClipboard(paymentDetails.zelle.email, 'email')}
                   className="p-2 text-purple-600 hover:bg-purple-100 rounded transition-colors"
                 >
-                  {copied === 'email' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  {copied === 'email' ? (
+                    <Check className="w-4 h-4" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
                 </button>
               </div>
               <div className="flex items-center justify-between bg-white rounded p-3">
@@ -239,12 +247,16 @@ export default function AlternativePaymentOptions({
                   onClick={() => copyToClipboard(details.phone, 'phone')}
                   className="p-2 text-purple-600 hover:bg-purple-100 rounded transition-colors"
                 >
-                  {copied === 'phone' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  {copied === 'phone' ? (
+                    <Check className="w-4 h-4" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
                 </button>
               </div>
             </>
           )}
-          
+
           {method === 'venmo' && (
             <div className="flex items-center justify-between bg-white rounded p-3">
               <div>
@@ -255,7 +267,11 @@ export default function AlternativePaymentOptions({
                 onClick={() => copyToClipboard(paymentDetails.venmo.username, 'username')}
                 className="p-2 text-blue-600 hover:bg-blue-100 rounded transition-colors"
               >
-                {copied === 'username' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copied === 'username' ? (
+                  <Check className="w-4 h-4" />
+                ) : (
+                  <Copy className="w-4 h-4" />
+                )}
               </button>
             </div>
           )}
@@ -299,7 +315,7 @@ export default function AlternativePaymentOptions({
                 </button>
               </>
             )}
-            
+
             {method === 'zelle' && (
               <>
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
@@ -309,8 +325,14 @@ export default function AlternativePaymentOptions({
                       <div className="font-medium mb-1">Zelle Quick Send</div>
                       <div>Open your banking app and use these details for Zelle payment:</div>
                       <div className="mt-2 space-y-1">
-                        <div>Email: <span className="font-mono font-medium">myhibachichef@gmail.com</span></div>
-                        <div>Amount: <span className="font-mono font-medium">${amount.toFixed(2)}</span></div>
+                        <div>
+                          Email:{' '}
+                          <span className="font-mono font-medium">myhibachichef@gmail.com</span>
+                        </div>
+                        <div>
+                          Amount:{' '}
+                          <span className="font-mono font-medium">${amount.toFixed(2)}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -338,10 +360,9 @@ export default function AlternativePaymentOptions({
               <img src={qrCode} alt={`${method} Payment QR Code`} className="w-48 h-48 mx-auto" />
             </div>
             <p className="text-sm text-gray-600 mt-3">
-              {method === 'venmo' 
+              {method === 'venmo'
                 ? 'Scan with your Venmo app to pay instantly'
-                : 'Scan with your banking app or save payment details'
-              }
+                : 'Scan with your banking app or save payment details'}
             </p>
             <button
               onClick={() => setShowQR(false)}
@@ -369,7 +390,7 @@ export default function AlternativePaymentOptions({
               {copied === 'amount' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
             </button>
           </div>
-          
+
           <div className="bg-white rounded p-3">
             <div className="text-sm font-medium text-gray-900 mb-2">Memo/Note (Required)</div>
             <div className="bg-yellow-50 border border-yellow-200 rounded p-2">
@@ -403,14 +424,12 @@ export default function AlternativePaymentOptions({
           <h4 className="font-medium text-gray-900 mb-3">Your Information</h4>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Full Name *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
               <input
                 type="text"
                 required
                 value={customerInfo.name}
-                onChange={(e) => setCustomerInfo(prev => ({ ...prev, name: e.target.value }))}
+                onChange={e => setCustomerInfo(prev => ({ ...prev, name: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -422,19 +441,17 @@ export default function AlternativePaymentOptions({
                 type="email"
                 required
                 value={customerInfo.email}
-                onChange={(e) => setCustomerInfo(prev => ({ ...prev, email: e.target.value }))}
+                onChange={e => setCustomerInfo(prev => ({ ...prev, email: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
               <input
                 type="tel"
                 required
                 value={customerInfo.phone}
-                onChange={(e) => setCustomerInfo(prev => ({ ...prev, phone: e.target.value }))}
+                onChange={e => setCustomerInfo(prev => ({ ...prev, phone: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -453,7 +470,7 @@ export default function AlternativePaymentOptions({
             Open in Venmo App
           </a>
         )}
-        
+
         <button
           onClick={handleConfirmPayment}
           disabled={!customerInfo.name || !customerInfo.email || !customerInfo.phone}

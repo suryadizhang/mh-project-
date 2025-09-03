@@ -10,43 +10,53 @@ interface BlogCategoriesProps {
   selectedCategory: string
 }
 
-export default function BlogCategories({ posts, onCategoryFilter, selectedCategory }: BlogCategoriesProps) {
+export default function BlogCategories({
+  posts,
+  onCategoryFilter,
+  selectedCategory
+}: BlogCategoriesProps) {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   // Get categories with post counts
-  const categoryData = posts.reduce((acc, post) => {
-    const category = post.category || 'Uncategorized'
-    if (!acc[category]) {
-      acc[category] = {
-        name: category,
-        count: 0,
-        posts: [],
-        description: getCategoryDescription(category)
+  const categoryData = posts.reduce(
+    (acc, post) => {
+      const category = post.category || 'Uncategorized'
+      if (!acc[category]) {
+        acc[category] = {
+          name: category,
+          count: 0,
+          posts: [],
+          description: getCategoryDescription(category)
+        }
       }
-    }
-    acc[category].count++
-    acc[category].posts.push(post)
-    return acc
-  }, {} as Record<string, {
-    name: string
-    count: number
-    posts: BlogPost[]
-    description: string
-  }>)
+      acc[category].count++
+      acc[category].posts.push(post)
+      return acc
+    },
+    {} as Record<
+      string,
+      {
+        name: string
+        count: number
+        posts: BlogPost[]
+        description: string
+      }
+    >
+  )
 
   const categories = Object.values(categoryData).sort((a, b) => b.count - a.count)
 
   function getCategoryDescription(category: string): string {
     const descriptions: Record<string, string> = {
       'Event Planning': 'Complete guides for planning hibachi events',
-      'Seasonal': 'Seasonal menus and holiday celebrations',
-      'Corporate': 'Business events and team building',
-      'Wedding': 'Wedding receptions and romantic dining',
-      'Birthday': 'Birthday parties and celebrations',
-      'Holiday': 'Holiday parties and seasonal events',
+      Seasonal: 'Seasonal menus and holiday celebrations',
+      Corporate: 'Business events and team building',
+      Wedding: 'Wedding receptions and romantic dining',
+      Birthday: 'Birthday parties and celebrations',
+      Holiday: 'Holiday parties and seasonal events',
       'Location Specific': 'City and region-specific guides',
       'Tips & Guides': 'Expert hibachi tips and how-tos',
-      'Uncategorized': 'General hibachi catering content'
+      Uncategorized: 'General hibachi catering content'
     }
     return descriptions[category] || 'Hibachi catering insights and guides'
   }
@@ -54,14 +64,14 @@ export default function BlogCategories({ posts, onCategoryFilter, selectedCatego
   function getCategoryIcon(category: string) {
     const icons: Record<string, string> = {
       'Event Planning': '🎉',
-      'Seasonal': '🍂', 
-      'Corporate': '🏢',
-      'Wedding': '💍',
-      'Birthday': '🎂',
-      'Holiday': '🎄',
+      Seasonal: '🍂',
+      Corporate: '🏢',
+      Wedding: '💍',
+      Birthday: '🎂',
+      Holiday: '🎄',
       'Location Specific': '📍',
       'Tips & Guides': '💡',
-      'Uncategorized': '📝'
+      Uncategorized: '📝'
     }
     return icons[category] || '📄'
   }
@@ -73,7 +83,7 @@ export default function BlogCategories({ posts, onCategoryFilter, selectedCatego
           <Folder className="w-5 h-5 text-orange-600" />
           <h3 className="blog-categories-title">Browse by Category</h3>
         </div>
-        
+
         <div className="blog-categories-view-toggle">
           <button
             onClick={() => setViewMode('grid')}
@@ -94,10 +104,7 @@ export default function BlogCategories({ posts, onCategoryFilter, selectedCatego
 
       {selectedCategory !== 'All' && (
         <div className="blog-categories-breadcrumb">
-          <button
-            onClick={() => onCategoryFilter('All')}
-            className="blog-breadcrumb-link"
-          >
+          <button onClick={() => onCategoryFilter('All')} className="blog-breadcrumb-link">
             All Categories
           </button>
           <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -118,15 +125,13 @@ export default function BlogCategories({ posts, onCategoryFilter, selectedCatego
           </div>
         </button>
 
-        {categories.map((category) => (
+        {categories.map(category => (
           <button
             key={category.name}
             onClick={() => onCategoryFilter(category.name)}
             className={`blog-category-card ${selectedCategory === category.name ? 'blog-category-selected' : ''}`}
           >
-            <div className="blog-category-icon">
-              {getCategoryIcon(category.name)}
-            </div>
+            <div className="blog-category-icon">{getCategoryIcon(category.name)}</div>
             <div className="blog-category-content">
               <h4 className="blog-category-name">{category.name}</h4>
               <p className="blog-category-description">{category.description}</p>

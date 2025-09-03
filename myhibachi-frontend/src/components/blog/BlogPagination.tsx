@@ -10,15 +10,19 @@ interface BlogPaginationProps {
   onPageChange: (paginatedPosts: BlogPost[], currentPage: number, totalPages: number) => void
 }
 
-export default function BlogPagination({ posts, postsPerPage = 9, onPageChange }: BlogPaginationProps) {
+export default function BlogPagination({
+  posts,
+  postsPerPage = 9,
+  onPageChange
+}: BlogPaginationProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const [loadMore, setLoadMore] = useState(false)
-  
+
   const totalPages = Math.ceil(posts.length / postsPerPage)
   const startIndex = (currentPage - 1) * postsPerPage
   const endIndex = loadMore ? currentPage * postsPerPage : startIndex + postsPerPage
   const currentPosts = posts.slice(0, endIndex)
-  
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
     setLoadMore(false)
@@ -26,13 +30,13 @@ export default function BlogPagination({ posts, postsPerPage = 9, onPageChange }
     const end = start + postsPerPage
     const paginatedPosts = posts.slice(start, end)
     onPageChange(paginatedPosts, page, totalPages)
-    
+
     // Scroll to top of blog section
-    document.querySelector('[data-page="blog"] .blog-section')?.scrollIntoView({ 
-      behavior: 'smooth' 
+    document.querySelector('[data-page="blog"] .blog-section')?.scrollIntoView({
+      behavior: 'smooth'
     })
   }
-  
+
   const handleLoadMore = () => {
     const nextPage = currentPage + 1
     setCurrentPage(nextPage)
@@ -40,23 +44,23 @@ export default function BlogPagination({ posts, postsPerPage = 9, onPageChange }
     const morePosts = posts.slice(0, nextPage * postsPerPage)
     onPageChange(morePosts, nextPage, totalPages)
   }
-  
+
   const resetPagination = () => {
     setCurrentPage(1)
     setLoadMore(false)
     const firstPagePosts = posts.slice(0, postsPerPage)
     onPageChange(firstPagePosts, 1, totalPages)
   }
-  
+
   // Update when posts change
   useEffect(() => {
     resetPagination()
   }, [posts.length]) // eslint-disable-line react-hooks/exhaustive-deps
-  
+
   if (posts.length <= postsPerPage) {
     return null
   }
-  
+
   return (
     <div className="blog-pagination-container">
       {loadMore ? (
@@ -65,22 +69,16 @@ export default function BlogPagination({ posts, postsPerPage = 9, onPageChange }
           <p className="text-sm text-gray-600 mb-4">
             Showing {currentPosts.length} of {posts.length} articles
           </p>
-          
+
           <div className="flex gap-4 justify-center">
             {currentPage < totalPages && (
-              <button
-                onClick={handleLoadMore}
-                className="blog-load-more-btn"
-              >
+              <button onClick={handleLoadMore} className="blog-load-more-btn">
                 Load More Articles
                 <ChevronRight className="w-4 h-4" />
               </button>
             )}
-            
-            <button
-              onClick={resetPagination}
-              className="blog-pagination-btn"
-            >
+
+            <button onClick={resetPagination} className="blog-pagination-btn">
               <RotateCcw className="w-4 h-4" />
               Start Over
             </button>
@@ -97,7 +95,7 @@ export default function BlogPagination({ posts, postsPerPage = 9, onPageChange }
             <ChevronLeft className="w-4 h-4" />
             Previous
           </button>
-          
+
           {/* Page Numbers */}
           {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
             let pageNum
@@ -110,7 +108,7 @@ export default function BlogPagination({ posts, postsPerPage = 9, onPageChange }
             } else {
               pageNum = currentPage - 2 + i
             }
-            
+
             return (
               <button
                 key={pageNum}
@@ -121,19 +119,16 @@ export default function BlogPagination({ posts, postsPerPage = 9, onPageChange }
               </button>
             )
           })}
-          
+
           {totalPages > 5 && currentPage < totalPages - 2 && (
             <>
               <span className="blog-pagination-dots">...</span>
-              <button
-                onClick={() => handlePageChange(totalPages)}
-                className="blog-pagination-btn"
-              >
+              <button onClick={() => handlePageChange(totalPages)} className="blog-pagination-btn">
                 {totalPages}
               </button>
             </>
           )}
-          
+
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
@@ -142,7 +137,7 @@ export default function BlogPagination({ posts, postsPerPage = 9, onPageChange }
             Next
             <ChevronRight className="w-4 h-4" />
           </button>
-          
+
           {/* Load More Option */}
           <button
             onClick={() => setLoadMore(true)}
@@ -153,14 +148,13 @@ export default function BlogPagination({ posts, postsPerPage = 9, onPageChange }
           </button>
         </div>
       )}
-      
+
       {/* Results Summary */}
       <div className="text-center mt-4">
         <p className="text-sm text-gray-600">
-          {loadMore 
+          {loadMore
             ? `Showing ${currentPosts.length} of ${posts.length} articles`
-            : `Page ${currentPage} of ${totalPages} • ${posts.length} total articles`
-          }
+            : `Page ${currentPage} of ${totalPages} • ${posts.length} total articles`}
         </p>
       </div>
     </div>

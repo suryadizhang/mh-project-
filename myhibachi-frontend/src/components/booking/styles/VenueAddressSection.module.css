@@ -33,17 +33,17 @@ select.form-control {
 }
 
 /* Address field styling */
-input[type="text"] {
+input[type='text'] {
   transition: all 0.3s ease;
 }
 
-input[type="text"]:focus {
+input[type='text']:focus {
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgb(245 158 11 / 10%);
 }
 
 /* ZIP code field specific styling */
-input[id="venueZipcode"] {
+input[id='venueZipcode'] {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -53,7 +53,7 @@ input[id="venueZipcode"] {
   .form-section {
     border-left: 2px solid #f59e0b;
   }
-  
+
   .section-description {
     padding: 0.5rem;
     font-size: 0.875rem;

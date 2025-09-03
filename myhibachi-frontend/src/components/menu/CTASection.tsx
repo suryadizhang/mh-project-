@@ -7,7 +7,8 @@ export default function CTASection() {
       <div className={styles.ctaContent}>
         <h2 className={styles.ctaTitle}>Ready to Book Your Hibachi Experience?</h2>
         <p className={styles.ctaSubtitle}>
-          Join thousands of satisfied customers who&apos;ve made their events unforgettable with My Hibachi!
+          Join thousands of satisfied customers who&apos;ve made their events unforgettable with My
+          Hibachi!
         </p>
 
         <div className={styles.ctaButtons}>

@@ -14,10 +14,10 @@ interface HeroVideoProps {
 }
 
 export default function HeroVideo({
-  videoSrc = "/videos/hero_video.mp4",
-  fallbackImage = "/images/background.jpg",
-  title = "Authentic Hibachi Experience",
-  subtitle = "Bringing the restaurant experience to your home with skilled chefs, premium ingredients, and unforgettable dining entertainment.",
+  videoSrc = '/videos/hero_video.mp4',
+  fallbackImage = '/images/background.jpg',
+  title = 'Authentic Hibachi Experience',
+  subtitle = 'Bringing the restaurant experience to your home with skilled chefs, premium ingredients, and unforgettable dining entertainment.',
   showControls = false
 }: HeroVideoProps) {
   const [isPlaying, setIsPlaying] = useState(true)
@@ -115,7 +115,12 @@ export default function HeroVideo({
           <Button asChild size="lg" className="shadow-strong">
             <Link href="/contact">Book Your Event</Link>
           </Button>
-          <Button variant="outline" asChild size="lg" className="bg-black bg-opacity-30 backdrop-blur-sm border-white text-white hover:bg-white hover:text-gray-900">
+          <Button
+            variant="outline"
+            asChild
+            size="lg"
+            className="bg-black bg-opacity-30 backdrop-blur-sm border-white text-white hover:bg-white hover:text-gray-900"
+          >
             <Link href="/menu">View Menu</Link>
           </Button>
         </div>

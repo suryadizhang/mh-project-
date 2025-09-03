@@ -68,20 +68,20 @@ export function QuoteCalculator() {
       // Calculate base pricing
       const adultPrice = 55 // $55 per adult
       const childPrice = 30 // $30 per child
-      const baseTotal = (quoteData.adults * adultPrice) + (quoteData.children * childPrice)
+      const baseTotal = quoteData.adults * adultPrice + quoteData.children * childPrice
 
       // Calculate upgrades
       let upgradeTotal = 0
-      upgradeTotal += quoteData.salmon * 5        // Salmon +$5 each
-      upgradeTotal += quoteData.scallops * 5      // Scallops +$5 each
-      upgradeTotal += quoteData.filetMignon * 5   // Filet Mignon +$5 each
-      upgradeTotal += quoteData.lobsterTail * 15  // Lobster Tail +$15 each
+      upgradeTotal += quoteData.salmon * 5 // Salmon +$5 each
+      upgradeTotal += quoteData.scallops * 5 // Scallops +$5 each
+      upgradeTotal += quoteData.filetMignon * 5 // Filet Mignon +$5 each
+      upgradeTotal += quoteData.lobsterTail * 15 // Lobster Tail +$15 each
       upgradeTotal += quoteData.thirdProteins * 10 // 3rd Protein +$10 each
       upgradeTotal += quoteData.yakisobaNoodles * 5 // Yakisoba Noodles +$5 each
-      upgradeTotal += quoteData.extraFriedRice * 5  // Extra Fried Rice +$5 each
+      upgradeTotal += quoteData.extraFriedRice * 5 // Extra Fried Rice +$5 each
       upgradeTotal += quoteData.extraVegetables * 5 // Extra Vegetables +$5 each
-      upgradeTotal += quoteData.edamame * 5       // Edamame +$5 each
-      upgradeTotal += quoteData.gyoza * 10        // Gyoza +$10 each
+      upgradeTotal += quoteData.edamame * 5 // Edamame +$5 each
+      upgradeTotal += quoteData.gyoza * 10 // Gyoza +$10 each
 
       // Apply $550 minimum
       const subtotal = baseTotal + upgradeTotal
@@ -117,7 +117,9 @@ export function QuoteCalculator() {
                 min="1"
                 max="50"
                 value={quoteData.adults}
-                onChange={(e) => handleInputChange('adults', Math.max(1, parseInt(e.target.value) || 1))}
+                onChange={e =>
+                  handleInputChange('adults', Math.max(1, parseInt(e.target.value) || 1))
+                }
                 className="form-input"
                 required
               />
@@ -132,7 +134,9 @@ export function QuoteCalculator() {
                 min="0"
                 max="20"
                 value={quoteData.children}
-                onChange={(e) => handleInputChange('children', Math.max(0, parseInt(e.target.value) || 0))}
+                onChange={e =>
+                  handleInputChange('children', Math.max(0, parseInt(e.target.value) || 0))
+                }
                 className="form-input"
               />
               <span className="field-note">$30 each (5 & under free)</span>
@@ -146,7 +150,7 @@ export function QuoteCalculator() {
                 id="location"
                 type="text"
                 value={quoteData.location}
-                onChange={(e) => handleInputChange('location', e.target.value)}
+                onChange={e => handleInputChange('location', e.target.value)}
                 placeholder="e.g., San Francisco, San Jose..."
                 className="form-input"
               />
@@ -158,7 +162,9 @@ export function QuoteCalculator() {
                 id="zipCode"
                 type="text"
                 value={quoteData.zipCode}
-                onChange={(e) => handleInputChange('zipCode', e.target.value.replace(/\D/g, '').slice(0, 5))}
+                onChange={e =>
+                  handleInputChange('zipCode', e.target.value.replace(/\D/g, '').slice(0, 5))
+                }
                 placeholder="94xxx"
                 className="form-input"
                 maxLength={5}
@@ -179,7 +185,7 @@ export function QuoteCalculator() {
                 type="number"
                 min="0"
                 value={quoteData.salmon}
-                onChange={(e) => handleInputChange('salmon', parseInt(e.target.value) || 0)}
+                onChange={e => handleInputChange('salmon', parseInt(e.target.value) || 0)}
                 className="form-input"
               />
             </div>
@@ -190,7 +196,7 @@ export function QuoteCalculator() {
                 type="number"
                 min="0"
                 value={quoteData.scallops}
-                onChange={(e) => handleInputChange('scallops', parseInt(e.target.value) || 0)}
+                onChange={e => handleInputChange('scallops', parseInt(e.target.value) || 0)}
                 className="form-input"
               />
             </div>
@@ -201,7 +207,7 @@ export function QuoteCalculator() {
                 type="number"
                 min="0"
                 value={quoteData.filetMignon}
-                onChange={(e) => handleInputChange('filetMignon', parseInt(e.target.value) || 0)}
+                onChange={e => handleInputChange('filetMignon', parseInt(e.target.value) || 0)}
                 className="form-input"
               />
             </div>
@@ -214,7 +220,7 @@ export function QuoteCalculator() {
                 type="number"
                 min="0"
                 value={quoteData.lobsterTail}
-                onChange={(e) => handleInputChange('lobsterTail', parseInt(e.target.value) || 0)}
+                onChange={e => handleInputChange('lobsterTail', parseInt(e.target.value) || 0)}
                 className="form-input"
               />
             </div>
@@ -225,20 +231,20 @@ export function QuoteCalculator() {
                 type="number"
                 min="0"
                 value={quoteData.thirdProteins}
-                onChange={(e) => handleInputChange('thirdProteins', parseInt(e.target.value) || 0)}
+                onChange={e => handleInputChange('thirdProteins', parseInt(e.target.value) || 0)}
                 className="form-input"
               />
             </div>
 
-            <div className="form-group">
-              {/* Empty div to maintain grid layout */}
-            </div>
+            <div className="form-group">{/* Empty div to maintain grid layout */}</div>
           </div>
         </div>
 
         <div className="form-section">
           <h3>Additional Enhancements (Optional)</h3>
-          <p className="section-subtitle">Additional choice options to customize your hibachi experience</p>
+          <p className="section-subtitle">
+            Additional choice options to customize your hibachi experience
+          </p>
 
           <div className="form-row">
             <div className="form-group">
@@ -247,7 +253,7 @@ export function QuoteCalculator() {
                 type="number"
                 min="0"
                 value={quoteData.yakisobaNoodles}
-                onChange={(e) => handleInputChange('yakisobaNoodles', parseInt(e.target.value) || 0)}
+                onChange={e => handleInputChange('yakisobaNoodles', parseInt(e.target.value) || 0)}
                 className="form-input"
               />
               <span className="field-note">Japanese style lo mein noodles</span>
@@ -259,7 +265,7 @@ export function QuoteCalculator() {
                 type="number"
                 min="0"
                 value={quoteData.extraFriedRice}
-                onChange={(e) => handleInputChange('extraFriedRice', parseInt(e.target.value) || 0)}
+                onChange={e => handleInputChange('extraFriedRice', parseInt(e.target.value) || 0)}
                 className="form-input"
               />
               <span className="field-note">Additional portion of hibachi fried rice</span>
@@ -271,7 +277,7 @@ export function QuoteCalculator() {
                 type="number"
                 min="0"
                 value={quoteData.extraVegetables}
-                onChange={(e) => handleInputChange('extraVegetables', parseInt(e.target.value) || 0)}
+                onChange={e => handleInputChange('extraVegetables', parseInt(e.target.value) || 0)}
                 className="form-input"
               />
               <span className="field-note">Additional portion of mixed seasonal vegetables</span>
@@ -283,7 +289,7 @@ export function QuoteCalculator() {
                 type="number"
                 min="0"
                 value={quoteData.edamame}
-                onChange={(e) => handleInputChange('edamame', parseInt(e.target.value) || 0)}
+                onChange={e => handleInputChange('edamame', parseInt(e.target.value) || 0)}
                 className="form-input"
               />
               <span className="field-note">Fresh steamed soybeans with sea salt</span>
@@ -295,7 +301,7 @@ export function QuoteCalculator() {
                 type="number"
                 min="0"
                 value={quoteData.gyoza}
-                onChange={(e) => handleInputChange('gyoza', parseInt(e.target.value) || 0)}
+                onChange={e => handleInputChange('gyoza', parseInt(e.target.value) || 0)}
                 className="form-input"
               />
               <span className="field-note">Pan-fried Japanese dumplings</span>
@@ -308,11 +314,14 @@ export function QuoteCalculator() {
           <div className="notice-content">
             <h4>🚗 Travel Fees</h4>
             <p>
-              Travel fees may apply depending on your location. The first 30 miles are free, then $2 per mile for distances beyond that.
+              Travel fees may apply depending on your location. The first 30 miles are free, then $2
+              per mile for distances beyond that.
             </p>
             <p className="contact-note">
-              <strong>Contact our customer service</strong> at <a href="tel:9167408768">(916) 740-8768</a> or
-              <a href="mailto:cs@myhibachichef.com"> cs@myhibachichef.com</a> for exact travel fee calculation for your area.
+              <strong>Contact our customer service</strong> at{' '}
+              <a href="tel:9167408768">(916) 740-8768</a> or
+              <a href="mailto:cs@myhibachichef.com"> cs@myhibachichef.com</a> for exact travel fee
+              calculation for your area.
             </p>
           </div>
         </div>
@@ -367,21 +376,18 @@ export function QuoteCalculator() {
               <li>• This is an initial estimate only - final pricing confirmed upon booking</li>
               <li>• Travel fees calculated separately based on your exact location</li>
               <li>• Gratuity (20-35% suggested) paid directly to chef</li>
-              <li>• $100 refundable deposit required to secure booking (refundable if canceled 7+ days before event)</li>
+              <li>
+                • $100 refundable deposit required to secure booking (refundable if canceled 7+ days
+                before event)
+              </li>
             </ul>
           </div>
 
           <div className="quote-actions">
-            <a
-              href="/BookUs"
-              className="book-now-btn"
-            >
+            <a href="/BookUs" className="book-now-btn">
               Book Your Event Now
             </a>
-            <a
-              href="/contact"
-              className="call-btn"
-            >
+            <a href="/contact" className="call-btn">
               Contact Us
             </a>
           </div>

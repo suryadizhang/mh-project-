@@ -1,56 +1,80 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
-// Force dynamic rendering for this route
-export const dynamic = 'force-dynamic'
+/**
+ * ⚠️  MIGRATED TO BACKEND ⚠️
+ *
+ * This endpoint has been migrated to the FastAPI backend.
+ *
+ * OLD: /v1/bookings/rate-limit
+ * NEW: ${NEXT_PUBLIC_API_URL}/api/v1/bookings/rate-limit
+ *
+ * This stub returns HTTP 410 Gone to indicate permanent migration.
+ * Update your frontend code to use the new backend endpoint.
+ *
+ * Migration Date: 2025-09-02T05:45:43.909Z
+ * Backend Route: FastAPI backend - /api/v1/bookings/rate-limit
+ */
 
-// Same client ID generation as bookings endpoint
-function getClientId(request: NextRequest): string {
-  const forwarded = request.headers.get('x-forwarded-for')
-  const ip = forwarded ? forwarded.split(',')[0] : 'unknown'
-  const userAgent = request.headers.get('user-agent') || 'unknown'
-  return `${ip}-${Buffer.from(userAgent).toString('base64').slice(0, 10)}`
+export async function GET() {
+  return NextResponse.json(
+    {
+      error: 'Endpoint migrated to backend',
+      migration: {
+        from: '/v1/bookings/rate-limit',
+        to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/bookings/rate-limit`,
+        status: 'MIGRATED',
+        date: new Date().toISOString(),
+        instructions: 'Update frontend to use backend API endpoint'
+      }
+    },
+    { status: 410 }
+  )
 }
 
-// Import the rate limit store (in production, this would be shared through Redis/database)
-// For now, we'll create a simple endpoint to check current limits
-export async function GET(request: NextRequest) {
-  try {
-    const clientId = getClientId(request)
-    const now = Date.now()
-    
-    // This is a simplified version - in production you'd access the shared rate limit store
-    return NextResponse.json({
-      clientId: clientId.substring(0, 20) + '...', // Partially obscure for privacy
-      limits: {
-        perMinute: {
-          max: 2,
-          window: '60 seconds',
-          remaining: 'Check booking response headers'
-        },
-        perHour: {
-          max: 3,
-          window: '1 hour',
-          remaining: 'Check booking response headers'
-        },
-        perDay: {
-          max: 10,
-          window: '24 hours',
-          remaining: 'Check booking response headers'
-        }
-      },
-      message: 'Rate limit information. Actual remaining counts are provided in booking response headers.',
-      timestamp: new Date(now).toISOString(),
-      headers: {
-        'X-RateLimit-Remaining-Minute': 'Provided after booking attempts',
-        'X-RateLimit-Remaining-Hour': 'Provided after booking attempts',
-        'X-RateLimit-Remaining-Day': 'Provided after booking attempts'
+export async function POST() {
+  return NextResponse.json(
+    {
+      error: 'Endpoint migrated to backend',
+      migration: {
+        from: '/v1/bookings/rate-limit',
+        to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/bookings/rate-limit`,
+        status: 'MIGRATED',
+        date: new Date().toISOString(),
+        instructions: 'Update frontend to use backend API endpoint'
       }
-    })
-  } catch (error) {
-    console.error('[RATE LIMIT STATUS ERROR]', error)
-    return NextResponse.json(
-      { detail: 'Internal server error' },
-      { status: 500 }
-    )
-  }
+    },
+    { status: 410 }
+  )
+}
+
+export async function PUT() {
+  return NextResponse.json(
+    {
+      error: 'Endpoint migrated to backend',
+      migration: {
+        from: '/v1/bookings/rate-limit',
+        to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/bookings/rate-limit`,
+        status: 'MIGRATED',
+        date: new Date().toISOString(),
+        instructions: 'Update frontend to use backend API endpoint'
+      }
+    },
+    { status: 410 }
+  )
+}
+
+export async function DELETE() {
+  return NextResponse.json(
+    {
+      error: 'Endpoint migrated to backend',
+      migration: {
+        from: '/v1/bookings/rate-limit',
+        to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/bookings/rate-limit`,
+        status: 'MIGRATED',
+        date: new Date().toISOString(),
+        instructions: 'Update frontend to use backend API endpoint'
+      }
+    },
+    { status: 410 }
+  )
 }

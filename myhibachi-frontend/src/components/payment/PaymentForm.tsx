@@ -26,10 +26,16 @@ interface PaymentFormProps {
   clientSecret: string
 }
 
-export default function PaymentForm({ amount, bookingData, paymentType, tipAmount, clientSecret }: PaymentFormProps) {
+export default function PaymentForm({
+  amount,
+  bookingData,
+  paymentType,
+  tipAmount,
+  clientSecret
+}: PaymentFormProps) {
   const stripe = useStripe()
   const elements = useElements()
-  
+
   const [isLoading, setIsLoading] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
@@ -75,11 +81,11 @@ export default function PaymentForm({ amount, bookingData, paymentType, tipAmoun
                 city: customerInfo.city,
                 state: customerInfo.state,
                 postal_code: customerInfo.zipCode,
-                country: 'US',
-              },
-            },
-          },
-        },
+                country: 'US'
+              }
+            }
+          }
+        }
       })
 
       if (error) {
@@ -145,14 +151,12 @@ export default function PaymentForm({ amount, bookingData, paymentType, tipAmoun
             <h4 className="font-medium text-gray-900 mb-3">Customer Information</h4>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Full Name *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
                 <input
                   type="text"
                   required
                   value={customerInfo.name}
-                  onChange={(e) => setCustomerInfo(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={e => setCustomerInfo(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
@@ -164,7 +168,7 @@ export default function PaymentForm({ amount, bookingData, paymentType, tipAmoun
                   type="email"
                   required
                   value={customerInfo.email}
-                  onChange={(e) => setCustomerInfo(prev => ({ ...prev, email: e.target.value }))}
+                  onChange={e => setCustomerInfo(prev => ({ ...prev, email: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
@@ -176,51 +180,43 @@ export default function PaymentForm({ amount, bookingData, paymentType, tipAmoun
                   type="tel"
                   required
                   value={customerInfo.phone}
-                  onChange={(e) => setCustomerInfo(prev => ({ ...prev, phone: e.target.value }))}
+                  onChange={e => setCustomerInfo(prev => ({ ...prev, phone: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
                 <input
                   type="text"
                   value={customerInfo.address}
-                  onChange={(e) => setCustomerInfo(prev => ({ ...prev, address: e.target.value }))}
+                  onChange={e => setCustomerInfo(prev => ({ ...prev, address: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  City
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
                 <input
                   type="text"
                   value={customerInfo.city}
-                  onChange={(e) => setCustomerInfo(prev => ({ ...prev, city: e.target.value }))}
+                  onChange={e => setCustomerInfo(prev => ({ ...prev, city: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  State
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
                 <input
                   type="text"
                   value={customerInfo.state}
-                  onChange={(e) => setCustomerInfo(prev => ({ ...prev, state: e.target.value }))}
+                  onChange={e => setCustomerInfo(prev => ({ ...prev, state: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  ZIP Code
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
                 <input
                   type="text"
                   value={customerInfo.zipCode}
-                  onChange={(e) => setCustomerInfo(prev => ({ ...prev, zipCode: e.target.value }))}
+                  onChange={e => setCustomerInfo(prev => ({ ...prev, zipCode: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
@@ -234,10 +230,10 @@ export default function PaymentForm({ amount, bookingData, paymentType, tipAmoun
             <Lock className="w-4 h-4 mr-2 text-blue-600" />
             Payment Details
           </h4>
-          <PaymentElement 
+          <PaymentElement
             options={{
               layout: 'tabs',
-              paymentMethodOrder: ['card', 'apple_pay', 'google_pay'],
+              paymentMethodOrder: ['card', 'apple_pay', 'google_pay']
             }}
           />
         </div>

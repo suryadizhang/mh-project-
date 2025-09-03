@@ -3,9 +3,27 @@ import { Button } from '@/components/ui/button'
 
 export default function NewsletterPage() {
   const subscribers = [
-    { id: 1, email: 'john@example.com', name: 'John Smith', subscribed: '2025-01-15', status: 'Active' },
-    { id: 2, email: 'sarah@example.com', name: 'Sarah Johnson', subscribed: '2025-01-20', status: 'Active' },
-    { id: 3, email: 'mike@example.com', name: 'Mike Chen', subscribed: '2025-01-25', status: 'Active' },
+    {
+      id: 1,
+      email: 'john@example.com',
+      name: 'John Smith',
+      subscribed: '2025-01-15',
+      status: 'Active'
+    },
+    {
+      id: 2,
+      email: 'sarah@example.com',
+      name: 'Sarah Johnson',
+      subscribed: '2025-01-20',
+      status: 'Active'
+    },
+    {
+      id: 3,
+      email: 'mike@example.com',
+      name: 'Mike Chen',
+      subscribed: '2025-01-25',
+      status: 'Active'
+    }
   ]
 
   return (
@@ -110,7 +128,7 @@ export default function NewsletterPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {subscribers.map((subscriber) => (
+              {subscribers.map(subscriber => (
                 <tr key={subscriber.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {subscriber.name}

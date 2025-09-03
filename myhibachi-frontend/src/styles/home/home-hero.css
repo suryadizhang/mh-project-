@@ -57,7 +57,9 @@
   font-size: 4rem;
   font-weight: 700;
   margin-bottom: 1rem;
-  text-shadow: 3px 3px 15px rgb(0 0 0 / 90%), 0 0 25px rgb(0 0 0 / 80%);
+  text-shadow:
+    3px 3px 15px rgb(0 0 0 / 90%),
+    0 0 25px rgb(0 0 0 / 80%);
   background: linear-gradient(to right, #fff, #f8e3bb, #fff);
   background-clip: text;
   background-clip: text;
@@ -69,7 +71,9 @@
   font-size: 1.5rem;
   max-width: 800px;
   margin: 0 auto 2rem;
-  text-shadow: 2px 2px 12px rgb(0 0 0 / 90%), 0 0 20px rgb(0 0 0 / 80%);
+  text-shadow:
+    2px 2px 12px rgb(0 0 0 / 90%),
+    0 0 20px rgb(0 0 0 / 80%);
   color: white;
   font-weight: 500;
 }
@@ -88,6 +92,11 @@
 }
 
 @keyframes qualityPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
 }

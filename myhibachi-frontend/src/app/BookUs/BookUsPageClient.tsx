@@ -8,24 +8,25 @@ import 'react-datepicker/dist/react-datepicker.css'
 import './datepicker.css'
 import '@/styles/booking/booking.css'
 import Assistant from '@/components/chat/Assistant'
+import { apiFetch } from '@/lib/api'
 
 // Type definitions for booking form
 type BookingFormData = {
-  name: string;
-  email: string;
-  phone: string;
-  eventDate: Date;
-  eventTime: '12PM' | '3PM' | '6PM' | '9PM';
-  guestCount: number;
-  addressStreet: string;
-  addressCity: string;
-  addressState: string;
-  addressZipcode: string;
-  sameAsVenue: boolean;
-  venueStreet?: string;
-  venueCity?: string;
-  venueState?: string;
-  venueZipcode?: string;
+  name: string
+  email: string
+  phone: string
+  eventDate: Date
+  eventTime: '12PM' | '3PM' | '6PM' | '9PM'
+  guestCount: number
+  addressStreet: string
+  addressCity: string
+  addressState: string
+  addressZipcode: string
+  sameAsVenue: boolean
+  venueStreet?: string
+  venueCity?: string
+  venueState?: string
+  venueZipcode?: string
 }
 
 export default function BookUsPageClient() {
@@ -36,12 +37,14 @@ export default function BookUsPageClient() {
   const [bookedDates, setBookedDates] = useState<Date[]>([])
   const [loadingDates, setLoadingDates] = useState(false)
   const [dateError, setDateError] = useState<string | null>(null)
-  const [availableTimeSlots, setAvailableTimeSlots] = useState<Array<{
-    time: string
-    label: string
-    available: number
-    isAvailable: boolean
-  }>>([])
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<
+    Array<{
+      time: string
+      label: string
+      available: number
+      isAvailable: boolean
+    }>
+  >([])
   const [loadingTimeSlots, setLoadingTimeSlots] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -51,12 +54,12 @@ export default function BookUsPageClient() {
     control,
     watch,
     setValue,
-    formState: { errors },
+    formState: { errors }
   } = useForm<BookingFormData>({
     defaultValues: {
       sameAsVenue: false,
-      guestCount: undefined,
-    },
+      guestCount: undefined
+    }
   })
 
   // Watch form values
@@ -72,11 +75,10 @@ export default function BookUsPageClient() {
     setLoadingDates(true)
     setDateError(null)
     try {
-      const response = await fetch('/api/v1/bookings/booked-dates')
-      if (response.ok) {
-        const data = await response.json()
+      const result = await apiFetch('/api/v1/bookings/booked-dates')
+      if (result.success) {
         // Convert string dates to Date objects
-        const dates = data.bookedDates?.map((dateStr: string) => new Date(dateStr)) || []
+        const dates = result.data.bookedDates?.map((dateStr: string) => new Date(dateStr)) || []
         setBookedDates(dates)
       } else {
         console.warn('Could not fetch booked dates, continuing without blocking dates')
@@ -95,11 +97,10 @@ export default function BookUsPageClient() {
     setLoadingTimeSlots(true)
     try {
       const dateStr = format(date, 'yyyy-MM-dd')
-      const response = await fetch(`/api/v1/bookings/available-times?date=${dateStr}`)
+      const response = await apiFetch(`/api/v1/bookings/available-times?date=${dateStr}`)
 
-      if (response.ok) {
-        const data = await response.json()
-        setAvailableTimeSlots(data.timeSlots || [])
+      if (response.success) {
+        setAvailableTimeSlots(response.data.timeSlots || [])
       } else {
         // Fallback to default time slots if API fails
         setAvailableTimeSlots([
@@ -199,26 +200,26 @@ export default function BookUsPageClient() {
         status: 'pending'
       }
 
-      const response = await fetch('/api/v1/bookings/submit', {
+      const response = await apiFetch('/api/v1/bookings/submit', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(submissionData),
+        body: JSON.stringify(submissionData)
       })
 
-      if (response.ok) {
+      if (response.success) {
         console.log('Booking submitted successfully')
         // Redirect to success page
         window.location.href = '/booking-success'
       } else {
-        const errorData = await response.json()
-        console.error('Booking submission failed:', errorData)
-        alert('Sorry, there was an error submitting your booking. Please try again or contact us directly.')
+        console.error('Booking submission failed:', response.error)
+        alert(
+          'Sorry, there was an error submitting your booking. Please try again or contact us directly.'
+        )
       }
     } catch (error) {
       console.error('Error submitting booking:', error)
-      alert('Sorry, there was an error submitting your booking. Please try again or contact us directly.')
+      alert(
+        'Sorry, there was an error submitting your booking. Please try again or contact us directly.'
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -262,7 +263,8 @@ export default function BookUsPageClient() {
               Book Your Hibachi Experience
             </h1>
             <p className="hero-subtitle">
-              Reserve your premium private hibachi chef service for an unforgettable culinary experience
+              Reserve your premium private hibachi chef service for an unforgettable culinary
+              experience
             </p>
             <div className="hero-features">
               <div className="feature-item">
@@ -297,7 +299,9 @@ export default function BookUsPageClient() {
                   <div className="row">
                     <div className="col-md-6">
                       <div className="form-group">
-                        <label htmlFor="name" className="form-label required">Full Name</label>
+                        <label htmlFor="name" className="form-label required">
+                          Full Name
+                        </label>
                         <input
                           type="text"
                           id="name"
@@ -313,7 +317,9 @@ export default function BookUsPageClient() {
 
                     <div className="col-md-6">
                       <div className="form-group">
-                        <label htmlFor="email" className="form-label required">Email Address</label>
+                        <label htmlFor="email" className="form-label required">
+                          Email Address
+                        </label>
                         <input
                           type="email"
                           id="email"
@@ -337,7 +343,9 @@ export default function BookUsPageClient() {
                   <div className="row">
                     <div className="col-md-6">
                       <div className="form-group">
-                        <label htmlFor="phone" className="form-label required">Phone Number</label>
+                        <label htmlFor="phone" className="form-label required">
+                          Phone Number
+                        </label>
                         <input
                           type="tel"
                           id="phone"
@@ -353,7 +361,9 @@ export default function BookUsPageClient() {
 
                     <div className="col-md-6">
                       <div className="form-group">
-                        <label htmlFor="guestCount" className="form-label required">Number of Guests</label>
+                        <label htmlFor="guestCount" className="form-label required">
+                          Number of Guests
+                        </label>
                         <input
                           type="number"
                           id="guestCount"
@@ -385,7 +395,9 @@ export default function BookUsPageClient() {
                   <div className="row">
                     <div className="col-md-6">
                       <div className="form-group">
-                        <label htmlFor="eventDate" className="form-label required">Event Date</label>
+                        <label htmlFor="eventDate" className="form-label required">
+                          Event Date
+                        </label>
                         <Controller
                           name="eventDate"
                           control={control}
@@ -393,8 +405,8 @@ export default function BookUsPageClient() {
                           render={({ field }) => (
                             <DatePicker
                               selected={field.value}
-                              onChange={(date) => field.onChange(date)}
-                              filterDate={(date) => !isDateDisabled(date)}
+                              onChange={date => field.onChange(date)}
+                              filterDate={date => !isDateDisabled(date)}
                               minDate={new Date()}
                               maxDate={addDays(new Date(), 90)}
                               className={`form-control ${errors.eventDate ? 'is-invalid' : ''}`}
@@ -407,9 +419,7 @@ export default function BookUsPageClient() {
                         {loadingDates && (
                           <small className="text-muted">Loading available dates...</small>
                         )}
-                        {dateError && (
-                          <small className="text-danger">{dateError}</small>
-                        )}
+                        {dateError && <small className="text-danger">{dateError}</small>}
                         {errors.eventDate && (
                           <div className="invalid-feedback d-block">{errors.eventDate.message}</div>
                         )}
@@ -418,7 +428,9 @@ export default function BookUsPageClient() {
 
                     <div className="col-md-6">
                       <div className="form-group">
-                        <label htmlFor="eventTime" className="form-label required">Preferred Time</label>
+                        <label htmlFor="eventTime" className="form-label required">
+                          Preferred Time
+                        </label>
                         {loadingTimeSlots ? (
                           <div className="form-control">Loading available times...</div>
                         ) : (
@@ -428,13 +440,16 @@ export default function BookUsPageClient() {
                             {...register('eventTime', { required: 'Event time is required' })}
                           >
                             <option value="">Select a time</option>
-                            {availableTimeSlots.map((slot) => (
+                            {availableTimeSlots.map(slot => (
                               <option
                                 key={slot.time}
                                 value={slot.time}
                                 disabled={!slot.isAvailable}
                               >
-                                {slot.label} {slot.isAvailable ? `(${slot.available} available)` : '(Fully Booked)'}
+                                {slot.label}{' '}
+                                {slot.isAvailable
+                                  ? `(${slot.available} available)`
+                                  : '(Fully Booked)'}
                               </option>
                             ))}
                           </select>
@@ -460,12 +475,16 @@ export default function BookUsPageClient() {
                   <div className="row">
                     <div className="col-12">
                       <div className="form-group">
-                        <label htmlFor="venueStreet" className="form-label required">Street Address</label>
+                        <label htmlFor="venueStreet" className="form-label required">
+                          Street Address
+                        </label>
                         <input
                           type="text"
                           id="venueStreet"
                           className={`form-control ${errors.venueStreet ? 'is-invalid' : ''}`}
-                          {...register('venueStreet', { required: 'Venue street address is required' })}
+                          {...register('venueStreet', {
+                            required: 'Venue street address is required'
+                          })}
                           placeholder="123 Main Street, Apt 2B"
                         />
                         {errors.venueStreet && (
@@ -478,7 +497,9 @@ export default function BookUsPageClient() {
                   <div className="row">
                     <div className="col-md-6">
                       <div className="form-group">
-                        <label htmlFor="venueCity" className="form-label required">City</label>
+                        <label htmlFor="venueCity" className="form-label required">
+                          City
+                        </label>
                         <input
                           type="text"
                           id="venueCity"
@@ -494,7 +515,9 @@ export default function BookUsPageClient() {
 
                     <div className="col-md-3">
                       <div className="form-group">
-                        <label htmlFor="venueState" className="form-label required">State</label>
+                        <label htmlFor="venueState" className="form-label required">
+                          State
+                        </label>
                         <select
                           id="venueState"
                           className={`form-control ${errors.venueState ? 'is-invalid' : ''}`}
@@ -514,7 +537,9 @@ export default function BookUsPageClient() {
 
                     <div className="col-md-3">
                       <div className="form-group">
-                        <label htmlFor="venueZipcode" className="form-label required">ZIP Code</label>
+                        <label htmlFor="venueZipcode" className="form-label required">
+                          ZIP Code
+                        </label>
                         <input
                           type="text"
                           id="venueZipcode"
@@ -557,12 +582,16 @@ export default function BookUsPageClient() {
                       <div className="row">
                         <div className="col-12">
                           <div className="form-group">
-                            <label htmlFor="addressStreet" className="form-label required">Street Address</label>
+                            <label htmlFor="addressStreet" className="form-label required">
+                              Street Address
+                            </label>
                             <input
                               type="text"
                               id="addressStreet"
                               className={`form-control ${errors.addressStreet ? 'is-invalid' : ''}`}
-                              {...register('addressStreet', { required: 'Street address is required' })}
+                              {...register('addressStreet', {
+                                required: 'Street address is required'
+                              })}
                               placeholder="123 Main Street, Apt 2B"
                             />
                             {errors.addressStreet && (
@@ -575,7 +604,9 @@ export default function BookUsPageClient() {
                       <div className="row">
                         <div className="col-md-6">
                           <div className="form-group">
-                            <label htmlFor="addressCity" className="form-label required">City</label>
+                            <label htmlFor="addressCity" className="form-label required">
+                              City
+                            </label>
                             <input
                               type="text"
                               id="addressCity"
@@ -591,7 +622,9 @@ export default function BookUsPageClient() {
 
                         <div className="col-md-3">
                           <div className="form-group">
-                            <label htmlFor="addressState" className="form-label required">State</label>
+                            <label htmlFor="addressState" className="form-label required">
+                              State
+                            </label>
                             <select
                               id="addressState"
                               className={`form-control ${errors.addressState ? 'is-invalid' : ''}`}
@@ -611,7 +644,9 @@ export default function BookUsPageClient() {
 
                         <div className="col-md-3">
                           <div className="form-group">
-                            <label htmlFor="addressZipcode" className="form-label required">ZIP Code</label>
+                            <label htmlFor="addressZipcode" className="form-label required">
+                              ZIP Code
+                            </label>
                             <input
                               type="text"
                               id="addressZipcode"
@@ -620,7 +655,9 @@ export default function BookUsPageClient() {
                               placeholder="94102"
                             />
                             {errors.addressZipcode && (
-                              <div className="invalid-feedback">{errors.addressZipcode.message}</div>
+                              <div className="invalid-feedback">
+                                {errors.addressZipcode.message}
+                              </div>
                             )}
                           </div>
                         </div>
@@ -742,7 +779,9 @@ export default function BookUsPageClient() {
                   </ul>
 
                   <p className="mt-3">
-                    <strong>By confirming this booking, you agree to these terms and conditions.</strong>
+                    <strong>
+                      By confirming this booking, you agree to these terms and conditions.
+                    </strong>
                   </p>
                 </div>
               </div>
@@ -761,8 +800,7 @@ export default function BookUsPageClient() {
                   onClick={handleAgreementConfirm}
                   disabled={isSubmitting}
                 >
-                  <i className="bi bi-check-lg me-2"></i>
-                  I Agree - Submit Booking
+                  <i className="bi bi-check-lg me-2"></i>I Agree - Submit Booking
                 </button>
               </div>
             </div>

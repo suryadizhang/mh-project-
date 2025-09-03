@@ -17,19 +17,20 @@ export default function BlogTags({ posts, onTagFilter, selectedTags, onClearTags
   // Extract unique tags from all posts
   const allTags = Array.from(
     new Set(
-      posts.flatMap(post => 
-        post.keywords?.slice(0, 5) || [] // Use first 5 keywords as tags
+      posts.flatMap(
+        post => post.keywords?.slice(0, 5) || [] // Use first 5 keywords as tags
       )
     )
   ).sort()
 
   // Get popular tags (tags that appear in multiple posts)
-  const tagCounts = allTags.reduce((acc, tag) => {
-    acc[tag] = posts.filter(post => 
-      post.keywords?.includes(tag)
-    ).length
-    return acc
-  }, {} as Record<string, number>)
+  const tagCounts = allTags.reduce(
+    (acc, tag) => {
+      acc[tag] = posts.filter(post => post.keywords?.includes(tag)).length
+      return acc
+    },
+    {} as Record<string, number>
+  )
 
   const popularTags = allTags
     .filter(tag => tagCounts[tag] >= 2)
@@ -48,17 +49,13 @@ export default function BlogTags({ posts, onTagFilter, selectedTags, onClearTags
           <Tag className="w-5 h-5 text-orange-600" />
           <h3 className="blog-tags-title">Popular Tags</h3>
         </div>
-        
+
         {selectedTags.length > 0 && (
           <div className="blog-tags-selected">
             <span className="text-sm text-gray-600">
               {selectedTags.length} tag{selectedTags.length > 1 ? 's' : ''} selected
             </span>
-            <button
-              onClick={onClearTags}
-              className="blog-tags-clear"
-              aria-label="Clear all tags"
-            >
+            <button onClick={onClearTags} className="blog-tags-clear" aria-label="Clear all tags">
               <X className="w-4 h-4" />
               Clear All
             </button>
@@ -67,11 +64,11 @@ export default function BlogTags({ posts, onTagFilter, selectedTags, onClearTags
       </div>
 
       <div className="blog-tags-cloud">
-        {displayTags.map((tag) => {
+        {displayTags.map(tag => {
           const isSelected = selectedTags.includes(tag)
           const count = tagCounts[tag]
           const popularity = count >= 5 ? 'high' : count >= 3 ? 'medium' : 'low'
-          
+
           return (
             <button
               key={tag}
@@ -88,10 +85,7 @@ export default function BlogTags({ posts, onTagFilter, selectedTags, onClearTags
 
       {popularTags.length > 12 && (
         <div className="blog-tags-toggle">
-          <button
-            onClick={() => setShowAllTags(!showAllTags)}
-            className="blog-tags-toggle-btn"
-          >
+          <button onClick={() => setShowAllTags(!showAllTags)} className="blog-tags-toggle-btn">
             <Filter className="w-4 h-4" />
             {showAllTags ? 'Show Popular Tags' : `Show All Tags (${allTags.length})`}
           </button>
@@ -102,7 +96,7 @@ export default function BlogTags({ posts, onTagFilter, selectedTags, onClearTags
         <div className="blog-tags-active">
           <h4 className="blog-tags-active-title">Active Filters:</h4>
           <div className="blog-tags-active-list">
-            {selectedTags.map((tag) => (
+            {selectedTags.map(tag => (
               <span key={tag} className="blog-tag-active">
                 {tag}
                 <button

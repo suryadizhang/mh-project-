@@ -6,28 +6,29 @@ import blogPosts from '@/data/blogPosts'
 // Generate structured data for blog listing page
 export const generateBlogListingStructuredData = () => {
   return {
-    "@context": "https://schema.org",
-    "@type": "Blog",
-    "name": "My Hibachi Blog",
-    "description": "Complete hibachi catering guides for every event: birthdays, weddings, corporate events, pool parties, and more. Expert tips for Bay Area, Sacramento, San Jose celebrations.",
-    "url": "https://myhibachi.com/blog",
-    "publisher": {
-      "@type": "Organization",
-      "name": "My Hibachi",
-      "url": "https://myhibachi.com"
+    '@context': 'https://schema.org',
+    '@type': 'Blog',
+    name: 'My Hibachi Blog',
+    description:
+      'Complete hibachi catering guides for every event: birthdays, weddings, corporate events, pool parties, and more. Expert tips for Bay Area, Sacramento, San Jose celebrations.',
+    url: 'https://myhibachi.com/blog',
+    publisher: {
+      '@type': 'Organization',
+      name: 'My Hibachi',
+      url: 'https://myhibachi.com'
     },
-    "blogPost": blogPosts.map(post => ({
-      "@type": "BlogPosting",
-      "headline": post.title,
-      "description": post.excerpt,
-      "url": `https://myhibachi.com/blog/${post.slug}`,
-      "datePublished": new Date(post.date).toISOString(),
-      "author": {
-        "@type": "Person",
-        "name": post.author
+    blogPost: blogPosts.map(post => ({
+      '@type': 'BlogPosting',
+      headline: post.title,
+      description: post.excerpt,
+      url: `https://myhibachi.com/blog/${post.slug}`,
+      datePublished: new Date(post.date).toISOString(),
+      author: {
+        '@type': 'Person',
+        name: post.author
       },
-      "keywords": post.keywords.join(", "),
-      "articleSection": post.category
+      keywords: post.keywords.join(', '),
+      articleSection: post.category
     }))
   }
 }
@@ -55,34 +56,49 @@ export const getBlogSitemapUrls = () => {
 // Generate keyword clusters for SEO analysis
 export const getKeywordClusters = () => {
   const keywords = blogPosts.flatMap(post => post.keywords)
-  const keywordCount = keywords.reduce((acc, keyword) => {
-    acc[keyword] = (acc[keyword] || 0) + 1
-    return acc
-  }, {} as Record<string, number>)
+  const keywordCount = keywords.reduce(
+    (acc, keyword) => {
+      acc[keyword] = (acc[keyword] || 0) + 1
+      return acc
+    },
+    {} as Record<string, number>
+  )
 
   return Object.entries(keywordCount)
-    .sort(([,a], [,b]) => b - a)
+    .sort(([, a], [, b]) => b - a)
     .slice(0, 50) // Top 50 keywords
 }
 
 // Generate location-based content mapping
 export const getLocationContentMap = () => {
   const locations = [
-    'Bay Area', 'Sacramento', 'San Jose', 'Oakland', 'Fremont', 'Stockton', 'Napa Valley',
-    'San Francisco', 'Palo Alto', 'Mountain View', 'Sunnyvale', 'Santa Clara'
+    'Bay Area',
+    'Sacramento',
+    'San Jose',
+    'Oakland',
+    'Fremont',
+    'Stockton',
+    'Napa Valley',
+    'San Francisco',
+    'Palo Alto',
+    'Mountain View',
+    'Sunnyvale',
+    'Santa Clara'
   ]
 
   return locations.map(location => ({
     location,
-    posts: blogPosts.filter(post =>
-      post.serviceArea.includes(location) ||
-      post.title.includes(location) ||
-      post.keywords.some(keyword => keyword.includes(location))
+    posts: blogPosts.filter(
+      post =>
+        post.serviceArea.includes(location) ||
+        post.title.includes(location) ||
+        post.keywords.some(keyword => keyword.includes(location))
     ),
-    count: blogPosts.filter(post =>
-      post.serviceArea.includes(location) ||
-      post.title.includes(location) ||
-      post.keywords.some(keyword => keyword.includes(location))
+    count: blogPosts.filter(
+      post =>
+        post.serviceArea.includes(location) ||
+        post.title.includes(location) ||
+        post.keywords.some(keyword => keyword.includes(location))
     ).length
   }))
 }
@@ -104,7 +120,7 @@ export const getHyperLocalKeywords = () => {
       'tech company party catering San Jose',
       'hibachi for San Jose backyard parties'
     ],
-    'Oakland': [
+    Oakland: [
       'Oakland hibachi catering',
       'East Bay hibachi chef for parties',
       'Oakland birthday party catering',
@@ -132,7 +148,7 @@ export const getHyperLocalKeywords = () => {
       'Santa Clara backyard hibachi',
       'Santa Clara party catering hibachi'
     ],
-    'Sunnyvale': [
+    Sunnyvale: [
       'Sunnyvale hibachi catering',
       'backyard hibachi chef Sunnyvale',
       'Sunnyvale party catering',
@@ -144,26 +160,35 @@ export const getHyperLocalKeywords = () => {
   return Object.entries(locationKeywords).map(([location, keywords]) => ({
     location,
     keywords,
-    posts: blogPosts.filter(post =>
-      post.serviceArea === location ||
-      post.title.includes(location) ||
-      post.keywords.some(keyword => keywords.some(locKeyword =>
-        keyword.toLowerCase().includes(locKeyword.toLowerCase())
-      ))
+    posts: blogPosts.filter(
+      post =>
+        post.serviceArea === location ||
+        post.title.includes(location) ||
+        post.keywords.some(keyword =>
+          keywords.some(locKeyword => keyword.toLowerCase().includes(locKeyword.toLowerCase()))
+        )
     )
   }))
 }
 
 // Generate location + event type combinations for content ideas
 export const getLocationEventCombinations = () => {
-  const locations = ['San Francisco', 'San Jose', 'Oakland', 'Palo Alto', 'Mountain View', 'Santa Clara', 'Sunnyvale']
+  const locations = [
+    'San Francisco',
+    'San Jose',
+    'Oakland',
+    'Palo Alto',
+    'Mountain View',
+    'Santa Clara',
+    'Sunnyvale'
+  ]
   const events = ['Birthday', 'Wedding', 'Corporate', 'Graduation', 'Holiday', 'Backyard Party']
 
   const combinations = []
   for (const location of locations) {
     for (const event of events) {
-      const existingPost = blogPosts.find(post =>
-        post.serviceArea === location && post.eventType.includes(event)
+      const existingPost = blogPosts.find(
+        post => post.serviceArea === location && post.eventType.includes(event)
       )
 
       combinations.push({
@@ -188,11 +213,11 @@ export const getLocationEventCombinations = () => {
 // Helper function for event descriptions
 function getEventDescription(event: string, location: string): string {
   const descriptions = {
-    'Birthday': `Celebrate in Style`,
-    'Wedding': `Unique Reception Dining`,
-    'Corporate': `Team Building Excellence`,
-    'Graduation': `Academic Success Celebration`,
-    'Holiday': `Seasonal Entertainment`,
+    Birthday: `Celebrate in Style`,
+    Wedding: `Unique Reception Dining`,
+    Corporate: `Team Building Excellence`,
+    Graduation: `Academic Success Celebration`,
+    Holiday: `Seasonal Entertainment`,
     'Backyard Party': `Private Chef Experience`
   }
 
@@ -206,45 +231,60 @@ function getEventDescription(event: string, location: string): string {
   }
 
   return descriptions[event as keyof typeof descriptions] || 'Premium Catering'
-}// Generate event-type content mapping
+} // Generate event-type content mapping
 export const getEventTypeContentMap = () => {
-  const eventTypes = ['Birthday', 'Wedding', 'Corporate', 'Pool Party', 'Graduation', 'Holiday', 'Backyard Party']
+  const eventTypes = [
+    'Birthday',
+    'Wedding',
+    'Corporate',
+    'Pool Party',
+    'Graduation',
+    'Holiday',
+    'Backyard Party'
+  ]
 
   return eventTypes.map(eventType => ({
     eventType,
-    posts: blogPosts.filter(post =>
-      post.eventType.includes(eventType) ||
-      post.keywords.some(keyword => keyword.toLowerCase().includes(eventType.toLowerCase()))
+    posts: blogPosts.filter(
+      post =>
+        post.eventType.includes(eventType) ||
+        post.keywords.some(keyword => keyword.toLowerCase().includes(eventType.toLowerCase()))
     ),
-    count: blogPosts.filter(post =>
-      post.eventType.includes(eventType) ||
-      post.keywords.some(keyword => keyword.toLowerCase().includes(eventType.toLowerCase()))
+    count: blogPosts.filter(
+      post =>
+        post.eventType.includes(eventType) ||
+        post.keywords.some(keyword => keyword.toLowerCase().includes(eventType.toLowerCase()))
     ).length
   }))
 }
 
 // Generate related content suggestions
-export const getRelatedContentSuggestions = (currentPost: typeof blogPosts[0]) => {
+export const getRelatedContentSuggestions = (currentPost: (typeof blogPosts)[0]) => {
   // Find posts with similar event types
-  const eventMatches = blogPosts.filter(post =>
-    post.id !== currentPost.id &&
-    post.eventType === currentPost.eventType
-  ).slice(0, 3)
+  const eventMatches = blogPosts
+    .filter(post => post.id !== currentPost.id && post.eventType === currentPost.eventType)
+    .slice(0, 3)
 
   // Find posts in same service area
-  const locationMatches = blogPosts.filter(post =>
-    post.id !== currentPost.id &&
-    post.serviceArea === currentPost.serviceArea &&
-    !eventMatches.includes(post)
-  ).slice(0, 2)
+  const locationMatches = blogPosts
+    .filter(
+      post =>
+        post.id !== currentPost.id &&
+        post.serviceArea === currentPost.serviceArea &&
+        !eventMatches.includes(post)
+    )
+    .slice(0, 2)
 
   // Find posts with similar keywords
-  const keywordMatches = blogPosts.filter(post =>
-    post.id !== currentPost.id &&
-    !eventMatches.includes(post) &&
-    !locationMatches.includes(post) &&
-    post.keywords.some(keyword => currentPost.keywords.includes(keyword))
-  ).slice(0, 2)
+  const keywordMatches = blogPosts
+    .filter(
+      post =>
+        post.id !== currentPost.id &&
+        !eventMatches.includes(post) &&
+        !locationMatches.includes(post) &&
+        post.keywords.some(keyword => currentPost.keywords.includes(keyword))
+    )
+    .slice(0, 2)
 
   return [...eventMatches, ...locationMatches, ...keywordMatches].slice(0, 6)
 }
@@ -255,37 +295,37 @@ export const getBlogPostsWithSEO = () => {
     ...post,
     fullUrl: `https://myhibachi.com/blog/${post.slug}`,
     structuredData: {
-      "@context": "https://schema.org",
-      "@type": "BlogPosting",
-      "headline": post.title,
-      "description": post.excerpt,
-      "image": "https://myhibachi.com/images/hibachi-og.jpg", // Add your OG image
-      "url": `https://myhibachi.com/blog/${post.slug}`,
-      "datePublished": new Date(post.date).toISOString(),
-      "dateModified": new Date(post.date).toISOString(),
-      "author": {
-        "@type": "Person",
-        "name": post.author
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: post.title,
+      description: post.excerpt,
+      image: 'https://myhibachi.com/images/hibachi-og.jpg', // Add your OG image
+      url: `https://myhibachi.com/blog/${post.slug}`,
+      datePublished: new Date(post.date).toISOString(),
+      dateModified: new Date(post.date).toISOString(),
+      author: {
+        '@type': 'Person',
+        name: post.author
       },
-      "publisher": {
-        "@type": "Organization",
-        "name": "My Hibachi",
-        "url": "https://myhibachi.com"
+      publisher: {
+        '@type': 'Organization',
+        name: 'My Hibachi',
+        url: 'https://myhibachi.com'
       },
-      "keywords": post.keywords.join(", "),
-      "articleSection": post.category,
-      "about": [
+      keywords: post.keywords.join(', '),
+      articleSection: post.category,
+      about: [
         {
-          "@type": "Thing",
-          "name": "Hibachi Catering"
+          '@type': 'Thing',
+          name: 'Hibachi Catering'
         },
         {
-          "@type": "Place",
-          "name": post.serviceArea
+          '@type': 'Place',
+          name: post.serviceArea
         },
         {
-          "@type": "Event",
-          "name": post.eventType
+          '@type': 'Event',
+          name: post.eventType
         }
       ]
     }

@@ -7,12 +7,10 @@ export function BookingHero() {
     <div className="booking-hero page-hero-background text-center mb-5">
       <div className="container">
         <div className="hero-content">
-          <h1 className="hero-title mb-4">
-            🎊 Book Your Hibachi Experience 🎊
-          </h1>
+          <h1 className="hero-title mb-4">🎊 Book Your Hibachi Experience 🎊</h1>
           <p className="hero-subtitle mb-4">
-            Schedule your unforgettable hibachi dinner with professional chef service,
-            live entertainment, and premium ingredients delivered to your location.
+            Schedule your unforgettable hibachi dinner with professional chef service, live
+            entertainment, and premium ingredients delivered to your location.
           </p>
 
           <div className="hero-features">
@@ -49,4 +47,3 @@ export function BookingHero() {
     </div>
   )
 }
-

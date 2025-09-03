@@ -32,12 +32,12 @@
 }
 
 .breadcrumb-link:hover {
-  color: #FF6B35;
+  color: #ff6b35;
   background: rgba(255, 107, 53, 0.1);
 }
 
 .breadcrumb-current {
-  color: #FF6B35;
+  color: #ff6b35;
   font-weight: 500;
   padding: 0.25rem 0.5rem;
 }
@@ -62,11 +62,11 @@
   .breadcrumb-nav {
     padding: 0.75rem 1rem;
   }
-  
+
   .breadcrumb-item {
     font-size: 0.8rem;
   }
-  
+
   .breadcrumb-link,
   .breadcrumb-current {
     padding: 0.2rem 0.4rem;
@@ -84,7 +84,7 @@
 }
 
 .light-background .breadcrumb-link:hover {
-  color: #FF6B35;
+  color: #ff6b35;
   background: rgba(255, 107, 53, 0.1);
 }
 
@@ -94,7 +94,7 @@
 
 /* Accessibility improvements */
 .breadcrumb-link:focus {
-  outline: 2px solid #FF6B35;
+  outline: 2px solid #ff6b35;
   outline-offset: 2px;
 }
 

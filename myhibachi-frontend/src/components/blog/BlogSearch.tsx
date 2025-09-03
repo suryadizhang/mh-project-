@@ -26,11 +26,12 @@ export default function BlogSearch({ posts, onFilteredPosts }: BlogSearchProps) 
 
     // Search filter
     if (searchQuery) {
-      filtered = filtered.filter(post =>
-        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (post.content && post.content.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        post.keywords.some(keyword => keyword.toLowerCase().includes(searchQuery.toLowerCase()))
+      filtered = filtered.filter(
+        post =>
+          post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (post.content && post.content.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          post.keywords.some(keyword => keyword.toLowerCase().includes(searchQuery.toLowerCase()))
       )
     }
 
@@ -59,7 +60,8 @@ export default function BlogSearch({ posts, onFilteredPosts }: BlogSearchProps) 
     setSelectedEvent('All')
   }
 
-  const hasActiveFilters = searchQuery || selectedCategory !== 'All' || selectedArea !== 'All' || selectedEvent !== 'All'
+  const hasActiveFilters =
+    searchQuery || selectedCategory !== 'All' || selectedArea !== 'All' || selectedEvent !== 'All'
 
   return (
     <div className="blog-search-container">
@@ -71,23 +73,17 @@ export default function BlogSearch({ posts, onFilteredPosts }: BlogSearchProps) 
             type="text"
             placeholder="Search hibachi guides, events, locations..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
             className="blog-search-input"
           />
           {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="blog-search-clear"
-            >
+            <button onClick={() => setSearchQuery('')} className="blog-search-clear">
               <X className="w-4 h-4" />
             </button>
           )}
         </div>
-        
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="blog-filter-toggle"
-        >
+
+        <button onClick={() => setShowFilters(!showFilters)} className="blog-filter-toggle">
           <Filter className="w-4 h-4" />
           Filters
           {hasActiveFilters && <span className="blog-filter-badge"></span>}
@@ -101,11 +97,13 @@ export default function BlogSearch({ posts, onFilteredPosts }: BlogSearchProps) 
             <label className="blog-filter-label">Category</label>
             <select
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              onChange={e => setSelectedCategory(e.target.value)}
               className="blog-filter-select"
             >
               {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
+                <option key={category} value={category}>
+                  {category}
+                </option>
               ))}
             </select>
           </div>
@@ -114,11 +112,13 @@ export default function BlogSearch({ posts, onFilteredPosts }: BlogSearchProps) 
             <label className="blog-filter-label">Service Area</label>
             <select
               value={selectedArea}
-              onChange={(e) => setSelectedArea(e.target.value)}
+              onChange={e => setSelectedArea(e.target.value)}
               className="blog-filter-select"
             >
               {serviceAreas.map(area => (
-                <option key={area} value={area}>{area}</option>
+                <option key={area} value={area}>
+                  {area}
+                </option>
               ))}
             </select>
           </div>
@@ -127,11 +127,13 @@ export default function BlogSearch({ posts, onFilteredPosts }: BlogSearchProps) 
             <label className="blog-filter-label">Event Type</label>
             <select
               value={selectedEvent}
-              onChange={(e) => setSelectedEvent(e.target.value)}
+              onChange={e => setSelectedEvent(e.target.value)}
               className="blog-filter-select"
             >
               {eventTypes.map(event => (
-                <option key={event} value={event}>{event}</option>
+                <option key={event} value={event}>
+                  {event}
+                </option>
               ))}
             </select>
           </div>

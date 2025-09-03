@@ -1,7 +1,12 @@
 /* CTA Section Styles */
 
 .ctaSection {
-  background: linear-gradient(135deg, var(--menu-primary) 0%, #ff6b6b 50%, var(--menu-primary) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--menu-primary) 0%,
+    #ff6b6b 50%,
+    var(--menu-primary) 100%
+  );
   border-radius: var(--menu-border-radius-lg);
   padding: var(--menu-spacing-xxl) var(--menu-spacing-lg);
   text-align: center;

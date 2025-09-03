@@ -9,7 +9,8 @@ const locationData = generateLocationPage('Mountain View')
 export const metadata: Metadata = {
   title: locationData.title,
   description: locationData.metaDescription,
-  keywords: 'Mountain View hibachi catering, hibachi chef Mountain View, Google area hibachi, tech company catering Mountain View, hibachi party Mountain View, Silicon Valley hibachi, Mountain View birthday hibachi, corporate hibachi Mountain View',
+  keywords:
+    'Mountain View hibachi catering, hibachi chef Mountain View, Google area hibachi, tech company catering Mountain View, hibachi party Mountain View, Silicon Valley hibachi, Mountain View birthday hibachi, corporate hibachi Mountain View',
   openGraph: {
     title: locationData.title,
     description: locationData.metaDescription,
@@ -37,9 +38,7 @@ export default function MountainViewHibachiPage() {
       <section className="page-hero-background py-20 text-white text-center">
         <div className="max-w-4xl mx-auto px-4">
           <h1 className="text-5xl font-bold mb-6">{locationData.h1}</h1>
-          <p className="text-xl mb-8 text-gray-200">
-            {locationData.content.hero}
-          </p>
+          <p className="text-xl mb-8 text-gray-200">{locationData.content.hero}</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               href="/booking"
@@ -67,7 +66,9 @@ export default function MountainViewHibachiPage() {
             {locationData.content.services.map((service, index) => (
               <div key={index} className="bg-white p-6 rounded-lg shadow-sm text-center">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">{service}</h3>
-                <p className="text-gray-600 text-sm">Professional hibachi entertainment for your Mountain View celebration</p>
+                <p className="text-gray-600 text-sm">
+                  Professional hibachi entertainment for your Mountain View celebration
+                </p>
               </div>
             ))}
           </div>
@@ -77,16 +78,24 @@ export default function MountainViewHibachiPage() {
       {/* Why Choose Us */}
       <section className="py-16">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="prose prose-lg max-w-none"
-               dangerouslySetInnerHTML={{ __html: locationContentBlocks.whyChooseUs('Mountain View').replace(/\n/g, '<br />') }} />
+          <div
+            className="prose prose-lg max-w-none"
+            dangerouslySetInnerHTML={{
+              __html: locationContentBlocks.whyChooseUs('Mountain View').replace(/\n/g, '<br />')
+            }}
+          />
         </div>
       </section>
 
       {/* Popular Events */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="prose prose-lg max-w-none"
-               dangerouslySetInnerHTML={{ __html: locationContentBlocks.popularEvents('Mountain View').replace(/\n/g, '<br />') }} />
+          <div
+            className="prose prose-lg max-w-none"
+            dangerouslySetInnerHTML={{
+              __html: locationContentBlocks.popularEvents('Mountain View').replace(/\n/g, '<br />')
+            }}
+          />
         </div>
       </section>
 
@@ -99,7 +108,12 @@ export default function MountainViewHibachiPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {locationData.content.testimonials.map((testimonial, index) => (
               <div key={index} className="bg-white p-6 rounded-lg shadow-sm">
-                <p className="text-gray-600 italic mb-4">&ldquo;{testimonial.split('&ldquo;')[1]?.split('&rdquo;')[0] || testimonial.split('"')[1]}&rdquo;</p>
+                <p className="text-gray-600 italic mb-4">
+                  &ldquo;
+                  {testimonial.split('&ldquo;')[1]?.split('&rdquo;')[0] ||
+                    testimonial.split('"')[1]}
+                  &rdquo;
+                </p>
                 <p className="text-gray-900 font-semibold">- {testimonial.split('- ')[1]}</p>
               </div>
             ))}
@@ -110,8 +124,12 @@ export default function MountainViewHibachiPage() {
       {/* Service Areas */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="prose prose-lg max-w-none"
-               dangerouslySetInnerHTML={{ __html: locationContentBlocks.serviceAreas('Mountain View').replace(/\n/g, '<br />') }} />
+          <div
+            className="prose prose-lg max-w-none"
+            dangerouslySetInnerHTML={{
+              __html: locationContentBlocks.serviceAreas('Mountain View').replace(/\n/g, '<br />')
+            }}
+          />
         </div>
       </section>
 

@@ -1,11 +1,11 @@
-import React from 'react';
-import { Controller } from 'react-hook-form';
-import { addDays } from 'date-fns';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import '../../../app/BookUs/datepicker.css';
-import { EventDetailsSectionProps } from './types';
-import './styles/EventDetailsSection.module.css';
+import React from 'react'
+import { Controller } from 'react-hook-form'
+import { addDays } from 'date-fns'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import '../../../app/BookUs/datepicker.css'
+import { EventDetailsSectionProps } from './types'
+import './styles/EventDetailsSection.module.css'
 
 const EventDetailsSection: React.FC<EventDetailsSectionProps & { className?: string }> = ({
   register,
@@ -28,7 +28,9 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps & { className?: str
       <div className="row">
         <div className="col-md-6">
           <div className="form-group">
-            <label htmlFor="eventDate" className="form-label required">Event Date</label>
+            <label htmlFor="eventDate" className="form-label required">
+              Event Date
+            </label>
             <Controller
               name="eventDate"
               control={control}
@@ -36,8 +38,8 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps & { className?: str
               render={({ field }) => (
                 <DatePicker
                   selected={field.value}
-                  onChange={(date) => field.onChange(date)}
-                  filterDate={(date) => !isDateDisabled(date)}
+                  onChange={date => field.onChange(date)}
+                  filterDate={date => !isDateDisabled(date)}
                   minDate={new Date()}
                   maxDate={addDays(new Date(), 90)}
                   className={`form-control ${errors.eventDate ? 'is-invalid' : ''}`}
@@ -47,12 +49,8 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps & { className?: str
                 />
               )}
             />
-            {loadingDates && (
-              <small className="text-muted">Loading available dates...</small>
-            )}
-            {dateError && (
-              <small className="text-danger">{dateError}</small>
-            )}
+            {loadingDates && <small className="text-muted">Loading available dates...</small>}
+            {dateError && <small className="text-danger">{dateError}</small>}
             {errors.eventDate && (
               <div className="invalid-feedback d-block">{errors.eventDate.message}</div>
             )}
@@ -61,7 +59,9 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps & { className?: str
 
         <div className="col-md-6">
           <div className="form-group">
-            <label htmlFor="eventTime" className="form-label required">Preferred Time</label>
+            <label htmlFor="eventTime" className="form-label required">
+              Preferred Time
+            </label>
             {loadingTimeSlots ? (
               <div className="form-control">Loading available times...</div>
             ) : (
@@ -71,25 +71,20 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps & { className?: str
                 {...register('eventTime', { required: 'Event time is required' })}
               >
                 <option value="">Select a time</option>
-                {availableTimeSlots.map((slot) => (
-                  <option
-                    key={slot.time}
-                    value={slot.time}
-                    disabled={!slot.isAvailable}
-                  >
-                    {slot.label} {slot.isAvailable ? `(${slot.available} available)` : '(Fully Booked)'}
+                {availableTimeSlots.map(slot => (
+                  <option key={slot.time} value={slot.time} disabled={!slot.isAvailable}>
+                    {slot.label}{' '}
+                    {slot.isAvailable ? `(${slot.available} available)` : '(Fully Booked)'}
                   </option>
                 ))}
               </select>
             )}
-            {errors.eventTime && (
-              <div className="invalid-feedback">{errors.eventTime.message}</div>
-            )}
+            {errors.eventTime && <div className="invalid-feedback">{errors.eventTime.message}</div>}
           </div>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default EventDetailsSection;
+export default EventDetailsSection

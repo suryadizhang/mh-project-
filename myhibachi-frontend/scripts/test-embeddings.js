@@ -18,7 +18,12 @@ function preprocessText(text) {
     .replace(/[^\w\s]/g, ' ')
     .split(/\s+/)
     .filter(word => word.length > 2)
-    .filter(word => !['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'].includes(word))
+    .filter(
+      word =>
+        !['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'].includes(
+          word
+        )
+    )
 }
 
 function getTermFrequency(terms) {
@@ -53,7 +58,7 @@ function calculateTFIDF(queryTerms, documentTerms, allDocuments) {
 
 async function testSearch(query, dataFiles) {
   console.log(`\n🔍 Testing search for: "${query}"`)
-  console.log('=' .repeat(50))
+  console.log('='.repeat(50))
 
   const queryTerms = preprocessText(query)
 
@@ -119,7 +124,7 @@ async function testSearch(query, dataFiles) {
 
 async function main() {
   console.log('🚀 My Hibachi Assistant - Data Pipeline Test')
-  console.log('=' .repeat(60))
+  console.log('='.repeat(60))
 
   const dataDir = path.join(__dirname, '../src/data')
 
@@ -166,7 +171,7 @@ async function main() {
 
     // Test page-specific data loading
     console.log('\n📄 Testing Page-Specific Data Loading...')
-    console.log('=' .repeat(50))
+    console.log('='.repeat(50))
 
     const pages = ['/BookUs', '/menu', '/faqs']
 
@@ -190,7 +195,6 @@ async function main() {
     console.log('   2. Navigate to /BookUs, /menu, or /faqs')
     console.log('   3. Test the chatbot floating button')
     console.log('   4. Try asking questions from the test queries above')
-
   } catch (error) {
     console.error('\n❌ Error during testing:', error.message)
     process.exit(1)

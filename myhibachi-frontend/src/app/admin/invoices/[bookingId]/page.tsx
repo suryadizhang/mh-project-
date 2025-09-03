@@ -164,7 +164,10 @@ export default function AdminInvoicePage() {
     if (!booking) return 0
 
     // Calculate services subtotal (without automatic discounts)
-    const servicesSubtotal = booking.services.reduce((sum, service) => sum + (service.price * service.quantity), 0)
+    const servicesSubtotal = booking.services.reduce(
+      (sum, service) => sum + service.price * service.quantity,
+      0
+    )
 
     // Add travel fee and apply admin discount
     const travelFee = calculateTravelFee()
@@ -179,7 +182,10 @@ export default function AdminInvoicePage() {
     if (!booking) return 0
 
     // Calculate services subtotal (without automatic discounts)
-    const servicesSubtotal = booking.services.reduce((sum, service) => sum + (service.price * service.quantity), 0)
+    const servicesSubtotal = booking.services.reduce(
+      (sum, service) => sum + service.price * service.quantity,
+      0
+    )
 
     // Add travel fee
     const travelFee = calculateTravelFee()
@@ -199,7 +205,8 @@ export default function AdminInvoicePage() {
 
   const calculateBalanceDue = () => {
     const adjustedTotal = calculateTotalWithAdjustments()
-    const balanceDue = adjustedTotal - (invoiceSettings.depositPaid ? invoiceSettings.depositAmount : 0)
+    const balanceDue =
+      adjustedTotal - (invoiceSettings.depositPaid ? invoiceSettings.depositAmount : 0)
     return Math.max(balanceDue, 0)
   }
 
@@ -274,9 +281,7 @@ export default function AdminInvoicePage() {
     <div className="container mx-auto py-8 px-4">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Generate Invoice
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Generate Invoice</h1>
         <p className="text-gray-600">
           Create and customize invoice for booking #{booking.confirmationNumber}
         </p>
@@ -311,8 +316,10 @@ export default function AdminInvoicePage() {
               <div>
                 <Label className="text-sm font-medium text-gray-500">Venue Address</Label>
                 <p className="text-sm">
-                  {booking.venueAddress.street}<br />
-                  {booking.venueAddress.city}, {booking.venueAddress.state} {booking.venueAddress.zipcode}
+                  {booking.venueAddress.street}
+                  <br />
+                  {booking.venueAddress.city}, {booking.venueAddress.state}{' '}
+                  {booking.venueAddress.zipcode}
                 </p>
               </div>
 
@@ -338,7 +345,10 @@ export default function AdminInvoicePage() {
             <CardContent>
               <div className="space-y-3">
                 {booking.services.map((service, index) => (
-                  <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                  <div
+                    key={index}
+                    className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0"
+                  >
                     <div className="flex-1">
                       <p className="font-medium">{service.name}</p>
                       <p className="text-sm text-gray-600">{service.description}</p>
@@ -357,11 +367,17 @@ export default function AdminInvoicePage() {
                 <div className="pt-4 space-y-2">
                   <div className="flex justify-between font-medium">
                     <span>Services Subtotal:</span>
-                    <span>${booking.services.reduce((sum, service) => sum + (service.price * service.quantity), 0).toFixed(2)}</span>
+                    <span>
+                      $
+                      {booking.services
+                        .reduce((sum, service) => sum + service.price * service.quantity, 0)
+                        .toFixed(2)}
+                    </span>
                   </div>
 
                   <p className="text-sm text-gray-500 italic">
-                    * Final totals with travel fees, discounts, and tax are calculated in the Payment Summary below
+                    * Final totals with travel fees, discounts, and tax are calculated in the
+                    Payment Summary below
                   </p>
                 </div>
               </div>
@@ -392,7 +408,7 @@ export default function AdminInvoicePage() {
                   max={booking.totalAmount}
                   step="0.01"
                   value={invoiceSettings.depositAmount || ''}
-                  onChange={(e) => {
+                  onChange={e => {
                     const value = e.target.value
                     // Prevent leading zeros and ensure valid number
                     const numValue = value === '' ? 0 : parseFloat(value.replace(/^0+/, '') || '0')
@@ -450,7 +466,7 @@ export default function AdminInvoicePage() {
                   min="0"
                   step="0.1"
                   value={invoiceSettings.travelMiles || ''}
-                  onChange={(e) => {
+                  onChange={e => {
                     const value = e.target.value
                     const numValue = value === '' ? 0 : parseFloat(value.replace(/^0+/, '') || '0')
                     setInvoiceSettings(prev => ({
@@ -475,9 +491,10 @@ export default function AdminInvoicePage() {
                     min="0"
                     step="0.01"
                     value={invoiceSettings.discountAmount || ''}
-                    onChange={(e) => {
+                    onChange={e => {
                       const value = e.target.value
-                      const numValue = value === '' ? 0 : parseFloat(value.replace(/^0+/, '') || '0')
+                      const numValue =
+                        value === '' ? 0 : parseFloat(value.replace(/^0+/, '') || '0')
                       setInvoiceSettings(prev => ({
                         ...prev,
                         discountAmount: isNaN(numValue) ? 0 : Math.max(0, numValue)
@@ -488,16 +505,16 @@ export default function AdminInvoicePage() {
                   <Input
                     id="discountDescription"
                     value={invoiceSettings.discountDescription}
-                    onChange={(e) => setInvoiceSettings(prev => ({
-                      ...prev,
-                      discountDescription: e.target.value
-                    }))}
+                    onChange={e =>
+                      setInvoiceSettings(prev => ({
+                        ...prev,
+                        discountDescription: e.target.value
+                      }))
+                    }
                     placeholder="Discount description (e.g., First time customer, Bulk order)"
                   />
                 </div>
-                <p className="text-sm text-gray-500">
-                  Enter discount amount and description
-                </p>
+                <p className="text-sm text-gray-500">Enter discount amount and description</p>
               </div>
 
               {/* Payment Terms */}
@@ -506,10 +523,12 @@ export default function AdminInvoicePage() {
                 <Input
                   id="paymentTerms"
                   value={invoiceSettings.paymentTerms}
-                  onChange={(e) => setInvoiceSettings(prev => ({
-                    ...prev,
-                    paymentTerms: e.target.value
-                  }))}
+                  onChange={e =>
+                    setInvoiceSettings(prev => ({
+                      ...prev,
+                      paymentTerms: e.target.value
+                    }))
+                  }
                   placeholder="Due upon service completion"
                 />
               </div>
@@ -520,10 +539,12 @@ export default function AdminInvoicePage() {
                 <Textarea
                   id="additionalNotes"
                   value={invoiceSettings.additionalNotes}
-                  onChange={(e) => setInvoiceSettings(prev => ({
-                    ...prev,
-                    additionalNotes: e.target.value
-                  }))}
+                  onChange={e =>
+                    setInvoiceSettings(prev => ({
+                      ...prev,
+                      additionalNotes: e.target.value
+                    }))
+                  }
                   placeholder="Any special instructions or notes for this invoice..."
                   rows={3}
                 />
@@ -535,7 +556,12 @@ export default function AdminInvoicePage() {
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
                     <span>Services Subtotal:</span>
-                    <span>${booking.services.reduce((sum, service) => sum + (service.price * service.quantity), 0).toFixed(2)}</span>
+                    <span>
+                      $
+                      {booking.services
+                        .reduce((sum, service) => sum + service.price * service.quantity, 0)
+                        .toFixed(2)}
+                    </span>
                   </div>
 
                   {invoiceSettings.travelMiles > 0 && (
@@ -571,7 +597,9 @@ export default function AdminInvoicePage() {
 
                   <div className="flex justify-between font-semibold border-t pt-1">
                     <span>Balance Due:</span>
-                    <span className={calculateBalanceDue() === 0 ? 'text-green-600' : 'text-orange-600'}>
+                    <span
+                      className={calculateBalanceDue() === 0 ? 'text-green-600' : 'text-orange-600'}
+                    >
                       ${calculateBalanceDue().toFixed(2)}
                     </span>
                   </div>
@@ -587,9 +615,7 @@ export default function AdminInvoicePage() {
                 <DollarSign className="h-5 w-5" />
                 Generate Invoice
               </CardTitle>
-              <CardDescription>
-                Create the invoice with your specified settings
-              </CardDescription>
+              <CardDescription>Create the invoice with your specified settings</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">

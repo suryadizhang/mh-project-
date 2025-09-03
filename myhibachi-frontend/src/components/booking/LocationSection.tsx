@@ -1,14 +1,14 @@
-import React from 'react';
-import { Controller, Control, FieldErrors, UseFormWatch } from 'react-hook-form';
-import { BookingFormData } from '../../data/booking/types';
-import { US_STATES } from '../../data/booking/types';
-import './styles/LocationSection.module.css';
+import React from 'react'
+import { Controller, Control, FieldErrors, UseFormWatch } from 'react-hook-form'
+import { BookingFormData } from '../../data/booking/types'
+import { US_STATES } from '../../data/booking/types'
+import './styles/LocationSection.module.css'
 
 interface LocationSectionProps {
-  control: Control<BookingFormData>;
-  errors: FieldErrors<BookingFormData>;
-  watch: UseFormWatch<BookingFormData>;
-  className?: string;
+  control: Control<BookingFormData>
+  errors: FieldErrors<BookingFormData>
+  watch: UseFormWatch<BookingFormData>
+  className?: string
 }
 
 const LocationSection: React.FC<LocationSectionProps> = ({
@@ -17,17 +17,15 @@ const LocationSection: React.FC<LocationSectionProps> = ({
   watch,
   className = ''
 }) => {
-  const sameAsVenue = watch('sameAsVenue');
+  const sameAsVenue = watch('sameAsVenue')
 
   return (
     <div className={`location-section ${className}`}>
       <h3 className="text-xl font-semibold mb-4">Event Location</h3>
-      
+
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Street Address *
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Street Address *</label>
           <Controller
             name="venueStreet"
             control={control}
@@ -47,9 +45,7 @@ const LocationSection: React.FC<LocationSectionProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              City *
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">City *</label>
             <Controller
               name="venueCity"
               control={control}
@@ -68,9 +64,7 @@ const LocationSection: React.FC<LocationSectionProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              State *
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">State *</label>
             <Controller
               name="venueState"
               control={control}
@@ -81,7 +75,9 @@ const LocationSection: React.FC<LocationSectionProps> = ({
                 >
                   <option value="">Select State</option>
                   {US_STATES.map(state => (
-                    <option key={state} value={state}>{state}</option>
+                    <option key={state} value={state}>
+                      {state}
+                    </option>
                   ))}
                 </select>
               )}
@@ -92,9 +88,7 @@ const LocationSection: React.FC<LocationSectionProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Zip Code *
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Zip Code *</label>
             <Controller
               name="venueZipcode"
               control={control}
@@ -136,7 +130,7 @@ const LocationSection: React.FC<LocationSectionProps> = ({
           {!sameAsVenue && (
             <div className="space-y-4">
               <h4 className="text-lg font-medium text-gray-900">Billing Address</h4>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Street Address *
@@ -160,9 +154,7 @@ const LocationSection: React.FC<LocationSectionProps> = ({
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    City *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">City *</label>
                   <Controller
                     name="addressCity"
                     control={control}
@@ -181,9 +173,7 @@ const LocationSection: React.FC<LocationSectionProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    State *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">State *</label>
                   <Controller
                     name="addressState"
                     control={control}
@@ -194,7 +184,9 @@ const LocationSection: React.FC<LocationSectionProps> = ({
                       >
                         <option value="">Select State</option>
                         {US_STATES.map(state => (
-                          <option key={state} value={state}>{state}</option>
+                          <option key={state} value={state}>
+                            {state}
+                          </option>
                         ))}
                       </select>
                     )}
@@ -205,9 +197,7 @@ const LocationSection: React.FC<LocationSectionProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Zip Code *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Zip Code *</label>
                   <Controller
                     name="addressZipcode"
                     control={control}
@@ -230,7 +220,7 @@ const LocationSection: React.FC<LocationSectionProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LocationSection;
+export default LocationSection

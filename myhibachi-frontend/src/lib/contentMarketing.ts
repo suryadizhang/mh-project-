@@ -13,7 +13,12 @@ export const generateSocialMediaContent = (postId: number) => {
   return {
     twitter: {
       text: `${post.title.slice(0, 120)}... 🍤🔥\n\n#hibachi #catering #${post.serviceArea.replace(' ', '')} #${post.eventType.replace(' ', '')}\n\n${baseUrl}/blog/${post.slug}`,
-      hashtags: ['hibachi', 'catering', post.serviceArea.replace(' ', ''), post.eventType.replace(' ', '')]
+      hashtags: [
+        'hibachi',
+        'catering',
+        post.serviceArea.replace(' ', ''),
+        post.eventType.replace(' ', '')
+      ]
     },
     facebook: {
       text: `🍤 ${post.title}\n\n${post.excerpt}\n\nRead the complete guide: ${baseUrl}/blog/${post.slug}\n\n#HibachiCatering #${post.serviceArea.replace(' ', '')}Events #InteractiveDining`,
@@ -21,7 +26,15 @@ export const generateSocialMediaContent = (postId: number) => {
     },
     instagram: {
       caption: `🔥 ${post.title}\n\n${post.excerpt.slice(0, 150)}...\n\n📍 Serving ${post.serviceArea}\n🎉 Perfect for ${post.eventType} events\n\nLink in bio for full guide!\n\n#hibachi #catering #${post.serviceArea.replace(' ', '').toLowerCase()} #${post.eventType.replace(' ', '').toLowerCase()} #mobilechef #interactivedining #partycatering`,
-      hashtags: ['hibachi', 'catering', post.serviceArea.replace(' ', '').toLowerCase(), post.eventType.replace(' ', '').toLowerCase(), 'mobilechef', 'interactivedining', 'partycatering']
+      hashtags: [
+        'hibachi',
+        'catering',
+        post.serviceArea.replace(' ', '').toLowerCase(),
+        post.eventType.replace(' ', '').toLowerCase(),
+        'mobilechef',
+        'interactivedining',
+        'partycatering'
+      ]
     },
     linkedin: {
       text: `${post.title}\n\n${post.excerpt}\n\nOur professional hibachi catering services bring restaurant-quality dining and entertainment directly to your ${post.eventType.toLowerCase()} event in ${post.serviceArea}.\n\nRead the complete guide: ${baseUrl}/blog/${post.slug}\n\n#ProfessionalCatering #CorporateEvents #TeamBuilding #HibachCatering`
@@ -50,7 +63,8 @@ export const generateNewsletterContent = (featured: number[] = [], seasonal: num
 export const generateBusinessListings = () => {
   const businessInfo = {
     name: 'My Hibachi',
-    description: 'Professional hibachi catering services bringing interactive Japanese dining experiences directly to your location. Serving Bay Area, Sacramento, San Jose, and surrounding communities with premium ingredients and entertaining chef performances.',
+    description:
+      'Professional hibachi catering services bringing interactive Japanese dining experiences directly to your location. Serving Bay Area, Sacramento, San Jose, and surrounding communities with premium ingredients and entertaining chef performances.',
     services: [
       'Birthday Party Hibachi Catering',
       'Corporate Event Hibachi',
@@ -71,7 +85,8 @@ export const generateBusinessListings = () => {
       'Napa Valley',
       'Peninsula'
     ],
-    keywords: 'hibachi catering, mobile hibachi chef, Japanese catering, interactive dining, live cooking show, party catering, corporate catering, wedding catering',
+    keywords:
+      'hibachi catering, mobile hibachi chef, Japanese catering, interactive dining, live cooking show, party catering, corporate catering, wedding catering',
     website: 'https://myhibachi.com',
     blog: 'https://myhibachi.com/blog'
   }
@@ -85,7 +100,8 @@ export const generateBusinessListings = () => {
     yelp: {
       ...businessInfo,
       categories: ['Caterers', 'Japanese', 'Event Planning & Services'],
-      specialties: 'Interactive hibachi cooking shows, premium ingredients, professional mobile setup'
+      specialties:
+        'Interactive hibachi cooking shows, premium ingredients, professional mobile setup'
     },
     nextdoor: {
       ...businessInfo,
@@ -98,23 +114,33 @@ export const generateBusinessListings = () => {
 // Generate content calendar suggestions
 export const generateContentCalendar = () => {
   const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
   ]
 
   const seasonalEvents = {
-    'January': ['New Year parties', 'winter corporate events', 'indoor celebrations'],
-    'February': ['Valentine\'s Day', 'winter sports parties', 'indoor romantic dinners'],
-    'March': ['spring celebrations', 'St. Patrick\'s Day', 'school fundraisers'],
-    'April': ['Easter celebrations', 'spring outdoor events', 'graduation planning'],
-    'May': ['Mother\'s Day', 'graduation parties', 'outdoor season start'],
-    'June': ['Father\'s Day', 'wedding season', 'graduation celebrations'],
-    'July': ['summer pool parties', 'Fourth of July', 'vacation gatherings'],
-    'August': ['back-to-school parties', 'late summer events', 'family reunions'],
-    'September': ['fall season start', 'harvest celebrations', 'corporate retreats'],
-    'October': ['Halloween parties', 'fall festivals', 'holiday planning'],
-    'November': ['Thanksgiving alternatives', 'holiday corporate events', 'family gatherings'],
-    'December': ['holiday parties', 'New Year planning', 'winter celebrations']
+    January: ['New Year parties', 'winter corporate events', 'indoor celebrations'],
+    February: ["Valentine's Day", 'winter sports parties', 'indoor romantic dinners'],
+    March: ['spring celebrations', "St. Patrick's Day", 'school fundraisers'],
+    April: ['Easter celebrations', 'spring outdoor events', 'graduation planning'],
+    May: ["Mother's Day", 'graduation parties', 'outdoor season start'],
+    June: ["Father's Day", 'wedding season', 'graduation celebrations'],
+    July: ['summer pool parties', 'Fourth of July', 'vacation gatherings'],
+    August: ['back-to-school parties', 'late summer events', 'family reunions'],
+    September: ['fall season start', 'harvest celebrations', 'corporate retreats'],
+    October: ['Halloween parties', 'fall festivals', 'holiday planning'],
+    November: ['Thanksgiving alternatives', 'holiday corporate events', 'family gatherings'],
+    December: ['holiday parties', 'New Year planning', 'winter celebrations']
   }
 
   return months.map(month => ({
@@ -126,12 +152,7 @@ export const generateContentCalendar = () => {
       `${month} Party Planning with Hibachi`,
       `Seasonal Ingredients in ${month}`
     ],
-    socialMediaThemes: [
-      `#${month}Hibachi`,
-      `#${month}Events`,
-      `#SeasonalMenu`,
-      `#PartyPlanning`
-    ]
+    socialMediaThemes: [`#${month}Hibachi`, `#${month}Events`, `#SeasonalMenu`, `#PartyPlanning`]
   }))
 }
 
@@ -154,7 +175,7 @@ export const generateContentMetrics = () => {
 }
 
 // Helper function to calculate SEO value
-function calculateSEOValue(post: typeof blogPosts[0]): number {
+function calculateSEOValue(post: (typeof blogPosts)[0]): number {
   let score = 0
 
   // Keyword density and variety
@@ -171,14 +192,14 @@ function calculateSEOValue(post: typeof blogPosts[0]): number {
 
   // Recent content
   const postDate = new Date(post.date)
-  const isRecent = (Date.now() - postDate.getTime()) < (90 * 24 * 60 * 60 * 1000) // 90 days
+  const isRecent = Date.now() - postDate.getTime() < 90 * 24 * 60 * 60 * 1000 // 90 days
   if (isRecent) score += 10
 
   return Math.min(score, 100) // Cap at 100
 }
 
 // Helper function to calculate social media potential
-function calculateSocialPotential(post: typeof blogPosts[0]): number {
+function calculateSocialPotential(post: (typeof blogPosts)[0]): number {
   let score = 0
 
   // Visual content potential
@@ -198,7 +219,7 @@ function calculateSocialPotential(post: typeof blogPosts[0]): number {
 }
 
 // Helper function to calculate conversion potential
-function calculateConversionPotential(post: typeof blogPosts[0]): number {
+function calculateConversionPotential(post: (typeof blogPosts)[0]): number {
   let score = 0
 
   // High-intent event types

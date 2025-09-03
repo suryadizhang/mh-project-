@@ -310,4 +310,6 @@ async def value_error_handler(request, exc: ValueError):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    print("⚠️  DEPRECATED/LEGACY BACKEND - Use myhibachi-backend-fastapi for new features")
+    print("🔗 Running on port 8001 (legacy)")
+    uvicorn.run(app, host="0.0.0.0", port=8001, reload=True)

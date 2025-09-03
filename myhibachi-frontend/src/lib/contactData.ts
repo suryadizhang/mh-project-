@@ -5,7 +5,9 @@ export function getContactData() {
     pageId: contact.facebookPageId || process.env.NEXT_PUBLIC_FB_PAGE_ID || '',
     appId: contact.facebookAppId || process.env.NEXT_PUBLIC_FB_APP_ID || '',
     igUser: contact.instagramUsername || process.env.NEXT_PUBLIC_IG_USERNAME || '',
-    igUrl: contact.instagramDmUrl || (contact.instagramUsername ? `https://ig.me/m/${contact.instagramUsername}` : ''),
+    igUrl:
+      contact.instagramDmUrl ||
+      (contact.instagramUsername ? `https://ig.me/m/${contact.instagramUsername}` : ''),
     phone: contact.phone || '',
     email: contact.email || '',
     greetings: contact.greetings || {
@@ -26,6 +28,9 @@ export function openIG(igUser: string, igDmUrl: string) {
 
   // GTM tracking
   if (typeof window !== 'undefined' && (window as unknown as { dataLayer?: unknown[] }).dataLayer) {
-    ;(window as unknown as { dataLayer: unknown[] }).dataLayer.push({ event: 'chat_open', channel: 'instagram' })
+    ;(window as unknown as { dataLayer: unknown[] }).dataLayer.push({
+      event: 'chat_open',
+      channel: 'instagram'
+    })
   }
 }

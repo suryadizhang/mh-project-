@@ -1,17 +1,17 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { blogPosts } from '@/data/blogPosts';
+import React, { useState, useEffect } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { blogPosts } from '@/data/blogPosts'
 
 interface FeaturedPostsCarouselProps {
-  maxPosts?: number;
-  autoPlay?: boolean;
-  autoPlayInterval?: number;
-  showDots?: boolean;
-  showArrows?: boolean;
-  height?: 'sm' | 'md' | 'lg' | 'xl';
+  maxPosts?: number
+  autoPlay?: boolean
+  autoPlayInterval?: number
+  showDots?: boolean
+  showArrows?: boolean
+  height?: 'sm' | 'md' | 'lg' | 'xl'
 }
 
 const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
@@ -22,59 +22,59 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
   showArrows = true,
   height = 'lg'
 }) => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const [isHovered, setIsHovered] = useState(false)
 
   // Get featured posts or top posts
-  const featuredPosts = blogPosts
-    .filter(post => post.featured)
-    .slice(0, maxPosts);
+  const featuredPosts = blogPosts.filter(post => post.featured).slice(0, maxPosts)
 
   // If not enough featured posts, get top posts by ID (simulating popularity)
-  const displayPosts = featuredPosts.length >= 3 
-    ? featuredPosts 
-    : blogPosts.slice(0, maxPosts);
+  const displayPosts = featuredPosts.length >= 3 ? featuredPosts : blogPosts.slice(0, maxPosts)
 
   // Auto-play functionality
   useEffect(() => {
-    if (!autoPlay || isHovered || displayPosts.length <= 1) return;
+    if (!autoPlay || isHovered || displayPosts.length <= 1) return
 
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % displayPosts.length);
-    }, autoPlayInterval);
+      setCurrentSlide(prev => (prev + 1) % displayPosts.length)
+    }, autoPlayInterval)
 
-    return () => clearInterval(interval);
-  }, [autoPlay, autoPlayInterval, isHovered, displayPosts.length]);
+    return () => clearInterval(interval)
+  }, [autoPlay, autoPlayInterval, isHovered, displayPosts.length])
 
   const goToSlide = (index: number) => {
-    setCurrentSlide(index);
-  };
+    setCurrentSlide(index)
+  }
 
   const goToPrevious = () => {
-    setCurrentSlide((prev) => (prev - 1 + displayPosts.length) % displayPosts.length);
-  };
+    setCurrentSlide(prev => (prev - 1 + displayPosts.length) % displayPosts.length)
+  }
 
   const goToNext = () => {
-    setCurrentSlide((prev) => (prev + 1) % displayPosts.length);
-  };
+    setCurrentSlide(prev => (prev + 1) % displayPosts.length)
+  }
 
   const getHeightClass = () => {
     switch (height) {
-      case 'sm': return 'h-64';
-      case 'md': return 'h-80';
-      case 'lg': return 'h-96';
-      case 'xl': return 'h-[32rem]';
+      case 'sm':
+        return 'h-64'
+      case 'md':
+        return 'h-80'
+      case 'lg':
+        return 'h-96'
+      case 'xl':
+        return 'h-[32rem]'
     }
-  };
+  }
 
   if (displayPosts.length === 0) {
-    return null;
+    return null
   }
 
   return (
     <div className="relative w-full bg-gray-100 rounded-xl overflow-hidden shadow-lg">
       {/* Carousel Container */}
-      <div 
+      <div
         className={`relative ${getHeightClass()} overflow-hidden`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -125,19 +125,31 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
                 <div className="flex items-center justify-center space-x-6 mb-8 text-sm text-gray-200">
                   <div className="flex items-center space-x-2">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                      <path
+                        fillRule="evenodd"
+                        d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                     <span>{post.author}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                      <path
+                        fillRule="evenodd"
+                        d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                     <span>{post.date}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                     <span>{post.readTime}</span>
                   </div>
@@ -150,7 +162,11 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
                 >
                   Read Full Article
                   <svg className="ml-2 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                    <path
+                      fillRule="evenodd"
+                      d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 </Link>
               </div>
@@ -177,7 +193,12 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
               aria-label="Previous slide"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </button>
 
@@ -187,7 +208,12 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
               aria-label="Next slide"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
             </button>
           </>
@@ -246,7 +272,7 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
         ))}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default FeaturedPostsCarousel;
+export default FeaturedPostsCarousel

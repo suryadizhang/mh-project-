@@ -44,12 +44,21 @@ function getLocationInfo(location: string) {
         'Fresh ingredients from SF farmers markets'
       ],
       neighborhoods: [
-        'SOMA', 'Financial District', 'Nob Hill', 'Russian Hill',
-        'Pacific Heights', 'Mission', 'Castro', 'Richmond', 'Sunset'
+        'SOMA',
+        'Financial District',
+        'Nob Hill',
+        'Russian Hill',
+        'Pacific Heights',
+        'Mission',
+        'Castro',
+        'Richmond',
+        'Sunset'
       ],
       popularEvents: [
-        'Tech executive dinners', 'Rooftop birthday parties',
-        'Urban holiday celebrations', 'Apartment housewarming'
+        'Tech executive dinners',
+        'Rooftop birthday parties',
+        'Urban holiday celebrations',
+        'Apartment housewarming'
       ],
       localPartners: ['Ferry Building vendors', 'Farmers Market suppliers'],
       priceRange: '$$$'
@@ -64,17 +73,23 @@ function getLocationInfo(location: string) {
         'Team building entertainment'
       ],
       neighborhoods: [
-        'Downtown San Jose', 'Santana Row', 'Willow Glen',
-        'Almaden Valley', 'East San Jose', 'Evergreen'
+        'Downtown San Jose',
+        'Santana Row',
+        'Willow Glen',
+        'Almaden Valley',
+        'East San Jose',
+        'Evergreen'
       ],
       popularEvents: [
-        'Startup celebrations', 'Employee birthday parties',
-        'Corporate team building', 'Tech family gatherings'
+        'Startup celebrations',
+        'Employee birthday parties',
+        'Corporate team building',
+        'Tech family gatherings'
       ],
       localPartners: ['Local tech cafeterias', 'Silicon Valley suppliers'],
       priceRange: '$$-$$$'
     },
-    'Oakland': {
+    Oakland: {
       tagline: 'East Bay Entertainment at Home',
       speciality: 'Bringing hibachi shows to East Bay backyards and celebrations',
       uniqueFeatures: [
@@ -84,12 +99,18 @@ function getLocationInfo(location: string) {
         'Community-focused service'
       ],
       neighborhoods: [
-        'Downtown Oakland', 'Rockridge', 'Temescal',
-        'Lake Merritt', 'Hills', 'Fruitvale'
+        'Downtown Oakland',
+        'Rockridge',
+        'Temescal',
+        'Lake Merritt',
+        'Hills',
+        'Fruitvale'
       ],
       popularEvents: [
-        'Family reunions', 'Graduation parties',
-        'Wedding receptions', 'Cultural celebrations'
+        'Family reunions',
+        'Graduation parties',
+        'Wedding receptions',
+        'Cultural celebrations'
       ],
       localPartners: ['Oakland farmers markets', 'Bay Area suppliers'],
       priceRange: '$$'
@@ -104,12 +125,18 @@ function getLocationInfo(location: string) {
         'Sophisticated service protocols'
       ],
       neighborhoods: [
-        'Downtown Palo Alto', 'University Avenue', 'Professorville',
-        'Crescent Park', 'Old Palo Alto', 'Barron Park'
+        'Downtown Palo Alto',
+        'University Avenue',
+        'Professorville',
+        'Crescent Park',
+        'Old Palo Alto',
+        'Barron Park'
       ],
       popularEvents: [
-        'Faculty celebrations', 'Luxury weddings',
-        'Stanford graduations', 'Executive dinners'
+        'Faculty celebrations',
+        'Luxury weddings',
+        'Stanford graduations',
+        'Executive dinners'
       ],
       localPartners: ['Stanford suppliers', 'Luxury ingredient sources'],
       priceRange: '$$$$'
@@ -124,12 +151,18 @@ function getLocationInfo(location: string) {
         'Tech-friendly scheduling'
       ],
       neighborhoods: [
-        'Downtown Mountain View', 'Whisman', 'Bubb Road',
-        'Old Mountain View', 'Willows', 'Moffett Field area'
+        'Downtown Mountain View',
+        'Whisman',
+        'Bubb Road',
+        'Old Mountain View',
+        'Willows',
+        'Moffett Field area'
       ],
       popularEvents: [
-        'Google employee parties', 'Startup celebrations',
-        'Tech family events', 'Product launch parties'
+        'Google employee parties',
+        'Startup celebrations',
+        'Tech family events',
+        'Product launch parties'
       ],
       localPartners: ['Google cafeterias', 'Tech company vendors'],
       priceRange: '$$-$$$'
@@ -144,17 +177,22 @@ function getLocationInfo(location: string) {
         'Academic celebration focus'
       ],
       neighborhoods: [
-        'Downtown Santa Clara', 'Mission', 'Rivermark',
-        'Laurelwood', 'Santa Clara University area'
+        'Downtown Santa Clara',
+        'Mission',
+        'Rivermark',
+        'Laurelwood',
+        'Santa Clara University area'
       ],
       popularEvents: [
-        'SCU graduations', 'Corporate events',
-        'Academic celebrations', 'Family gatherings'
+        'SCU graduations',
+        'Corporate events',
+        'Academic celebrations',
+        'Family gatherings'
       ],
       localPartners: ['SCU vendors', 'Corporate suppliers'],
       priceRange: '$$-$$$'
     },
-    'Sunnyvale': {
+    Sunnyvale: {
       tagline: 'Private Home Dining Experience',
       speciality: 'Family-focused hibachi catering for Sunnyvale homes',
       uniqueFeatures: [
@@ -164,27 +202,35 @@ function getLocationInfo(location: string) {
         'Residential area focus'
       ],
       neighborhoods: [
-        'Downtown Sunnyvale', 'Cherry', 'Lakewood',
-        'Fair Oaks', 'Ponderosa', 'Lawrence'
+        'Downtown Sunnyvale',
+        'Cherry',
+        'Lakewood',
+        'Fair Oaks',
+        'Ponderosa',
+        'Lawrence'
       ],
       popularEvents: [
-        'Family reunions', 'Birthday celebrations',
-        'Graduation parties', 'Anniversary dinners'
+        'Family reunions',
+        'Birthday celebrations',
+        'Graduation parties',
+        'Anniversary dinners'
       ],
       localPartners: ['Local family suppliers', 'Community vendors'],
       priceRange: '$$'
     }
   }
 
-  return locationDatabase[location as keyof typeof locationDatabase] || {
-    tagline: 'Professional Hibachi Catering',
-    speciality: 'Interactive dining experiences for your special events',
-    uniqueFeatures: ['Professional service', 'Fresh ingredients', 'Interactive entertainment'],
-    neighborhoods: [],
-    popularEvents: [],
-    localPartners: [],
-    priceRange: '$$'
-  }
+  return (
+    locationDatabase[location as keyof typeof locationDatabase] || {
+      tagline: 'Professional Hibachi Catering',
+      speciality: 'Interactive dining experiences for your special events',
+      uniqueFeatures: ['Professional service', 'Fresh ingredients', 'Interactive entertainment'],
+      neighborhoods: [],
+      popularEvents: [],
+      localPartners: [],
+      priceRange: '$$'
+    }
+  )
 }
 
 // Generate location-specific page content
@@ -225,31 +271,39 @@ Ready to create an unforgettable ${location} celebration? Our professional hibac
 // Generate location-specific schema markup
 function generateLocationSchema(location: string, locationData: LocationData) {
   return {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    "name": `${location} Hibachi Catering`,
-    "description": `Professional hibachi catering service in ${location}. ${locationData.speciality}`,
-    "provider": {
-      "@type": "Organization",
-      "name": "My Hibachi",
-      "url": "https://myhibachi.com"
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: `${location} Hibachi Catering`,
+    description: `Professional hibachi catering service in ${location}. ${locationData.speciality}`,
+    provider: {
+      '@type': 'Organization',
+      name: 'My Hibachi',
+      url: 'https://myhibachi.com'
     },
-    "areaServed": {
-      "@type": "City",
-      "name": location
+    areaServed: {
+      '@type': 'City',
+      name: location
     },
-    "serviceType": "Hibachi Catering",
-    "priceRange": locationData.priceRange,
-    "availableChannel": {
-      "@type": "ServiceChannel",
-      "url": `https://myhibachi.com/locations/${location.toLowerCase().replace(' ', '-')}`
+    serviceType: 'Hibachi Catering',
+    priceRange: locationData.priceRange,
+    availableChannel: {
+      '@type': 'ServiceChannel',
+      url: `https://myhibachi.com/locations/${location.toLowerCase().replace(' ', '-')}`
     }
   }
 }
 
 // Generate all location pages
 export const generateAllLocationPages = () => {
-  const locations = ['San Francisco', 'San Jose', 'Oakland', 'Palo Alto', 'Mountain View', 'Santa Clara', 'Sunnyvale']
+  const locations = [
+    'San Francisco',
+    'San Jose',
+    'Oakland',
+    'Palo Alto',
+    'Mountain View',
+    'Santa Clara',
+    'Sunnyvale'
+  ]
 
   return locations.map(location => ({
     location,

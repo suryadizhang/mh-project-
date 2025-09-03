@@ -18,57 +18,57 @@ interface Testimonial {
 const testimonials: Testimonial[] = [
   {
     id: 1,
-    name: "Sarah Johnson",
-    location: "Palo Alto, CA",
-    event: "Corporate Event",
+    name: 'Sarah Johnson',
+    location: 'Palo Alto, CA',
+    event: 'Corporate Event',
     rating: 5,
     text: "My Hibachi Chef made our company retreat absolutely unforgettable! The interactive cooking experience had everyone engaged and the food was incredible. Chef's entertainment skills were top-notch. Highly recommend for any corporate event!",
-    date: "August 2025"
+    date: 'August 2025'
   },
   {
     id: 2,
-    name: "Mike Chen",
-    location: "Mountain View, CA", 
-    event: "Birthday Party",
+    name: 'Mike Chen',
+    location: 'Mountain View, CA',
+    event: 'Birthday Party',
     rating: 5,
-    text: "Best birthday party ever! The chef was amazing with the kids and adults alike. The hibachi grill setup in our backyard was seamless and the cleanup was fantastic. Worth every penny for the memories we made!",
-    date: "July 2025"
+    text: 'Best birthday party ever! The chef was amazing with the kids and adults alike. The hibachi grill setup in our backyard was seamless and the cleanup was fantastic. Worth every penny for the memories we made!',
+    date: 'July 2025'
   },
   {
     id: 3,
-    name: "Jennifer Lopez",
-    location: "San Jose, CA",
-    event: "Wedding Reception",
+    name: 'Jennifer Lopez',
+    location: 'San Jose, CA',
+    event: 'Wedding Reception',
     rating: 5,
-    text: "Our wedding guests are still talking about the hibachi experience! It was unique, delicious, and so entertaining. The chef accommodated all our dietary restrictions perfectly. Made our special day even more memorable.",
-    date: "June 2025"
+    text: 'Our wedding guests are still talking about the hibachi experience! It was unique, delicious, and so entertaining. The chef accommodated all our dietary restrictions perfectly. Made our special day even more memorable.',
+    date: 'June 2025'
   },
   {
     id: 4,
-    name: "David Park",
-    location: "Fremont, CA",
-    event: "Family Reunion",
+    name: 'David Park',
+    location: 'Fremont, CA',
+    event: 'Family Reunion',
     rating: 5,
-    text: "Having hibachi at our family reunion was the perfect choice. Three generations all enjoyed the show and the food brought everyone together. The chef was professional and the experience was seamless from start to finish.",
-    date: "August 2025"
+    text: 'Having hibachi at our family reunion was the perfect choice. Three generations all enjoyed the show and the food brought everyone together. The chef was professional and the experience was seamless from start to finish.',
+    date: 'August 2025'
   },
   {
     id: 5,
-    name: "Lisa Rodriguez",
-    location: "Sacramento, CA",
-    event: "Graduation Party",
+    name: 'Lisa Rodriguez',
+    location: 'Sacramento, CA',
+    event: 'Graduation Party',
     rating: 5,
     text: "What an amazing way to celebrate our daughter's graduation! The hibachi chef turned our backyard into a restaurant-quality dining experience. All our guests were impressed and the graduate loved being the center of attention!",
-    date: "May 2025"
+    date: 'May 2025'
   },
   {
     id: 6,
-    name: "Tom Anderson",
-    location: "Oakland, CA",
-    event: "Anniversary Celebration",
+    name: 'Tom Anderson',
+    location: 'Oakland, CA',
+    event: 'Anniversary Celebration',
     rating: 5,
-    text: "For our 25th anniversary, we wanted something special. The hibachi experience was intimate yet exciting, and the quality of food exceeded our expectations. The chef made us feel like VIPs in our own home!",
-    date: "July 2025"
+    text: 'For our 25th anniversary, we wanted something special. The hibachi experience was intimate yet exciting, and the quality of food exceeded our expectations. The chef made us feel like VIPs in our own home!',
+    date: 'July 2025'
   }
 ]
 
@@ -82,19 +82,19 @@ export default function TestimonialsSection() {
     if (!isAutoPlaying) return
 
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % testimonials.length)
+      setCurrentIndex(prev => (prev + 1) % testimonials.length)
     }, 5000) // Change every 5 seconds
 
     return () => clearInterval(interval)
   }, [isAutoPlaying])
 
   const nextTestimonial = () => {
-    setCurrentIndex((prev) => (prev + 1) % testimonials.length)
+    setCurrentIndex(prev => (prev + 1) % testimonials.length)
     setIsAutoPlaying(false)
   }
 
   const prevTestimonial = () => {
-    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length)
+    setCurrentIndex(prev => (prev - 1 + testimonials.length) % testimonials.length)
     setIsAutoPlaying(false)
   }
 
@@ -114,8 +114,8 @@ export default function TestimonialsSection() {
             What Our Customers Say
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Don&apos;t just take our word for it. Here&apos;s what families and businesses across the Bay Area 
-            and Sacramento are saying about their hibachi experiences.
+            Don&apos;t just take our word for it. Here&apos;s what families and businesses across
+            the Bay Area and Sacramento are saying about their hibachi experiences.
           </p>
           <div className="flex justify-center mt-6">
             <div className="flex items-center gap-2">
@@ -134,7 +134,7 @@ export default function TestimonialsSection() {
           <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 relative overflow-hidden">
             {/* Background Quote Icon */}
             <Quote className="absolute top-6 right-6 w-16 h-16 text-red-100 opacity-50" />
-            
+
             {/* Testimonial Content */}
             <div className="relative z-10">
               {/* Rating Stars */}
@@ -154,19 +154,18 @@ export default function TestimonialsSection() {
                 <div className="flex flex-col items-center gap-2">
                   {/* Avatar placeholder */}
                   <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center text-white text-xl font-bold">
-                    {currentTestimonial.name.split(' ').map(n => n[0]).join('')}
+                    {currentTestimonial.name
+                      .split(' ')
+                      .map(n => n[0])
+                      .join('')}
                   </div>
-                  
+
                   <div>
-                    <h4 className="text-xl font-bold text-gray-800">
-                      {currentTestimonial.name}
-                    </h4>
+                    <h4 className="text-xl font-bold text-gray-800">{currentTestimonial.name}</h4>
                     <p className="text-gray-600">
                       {currentTestimonial.event} • {currentTestimonial.location}
                     </p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {currentTestimonial.date}
-                    </p>
+                    <p className="text-sm text-gray-500 mt-1">{currentTestimonial.date}</p>
                   </div>
                 </div>
               </div>
@@ -181,7 +180,7 @@ export default function TestimonialsSection() {
           >
             <ChevronLeft className="w-6 h-6 text-gray-600" />
           </button>
-          
+
           <button
             onClick={nextTestimonial}
             className="absolute right-4 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-full p-3 hover:bg-gray-50 transition-colors z-10"
@@ -198,9 +197,7 @@ export default function TestimonialsSection() {
               key={index}
               onClick={() => goToTestimonial(index)}
               className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                index === currentIndex 
-                  ? 'bg-red-500 scale-125' 
-                  : 'bg-gray-300 hover:bg-gray-400'
+                index === currentIndex ? 'bg-red-500 scale-125' : 'bg-gray-300 hover:bg-gray-400'
               }`}
               aria-label={`Go to testimonial ${index + 1}`}
             />

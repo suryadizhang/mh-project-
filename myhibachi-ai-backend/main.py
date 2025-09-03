@@ -18,12 +18,13 @@ def main():
     
     if corrected_backend.exists():
         print("✅ Using corrected backend implementation")
+        print("🤖 AI Backend running on port 8002")
         # Run the corrected backend
         try:
             uvicorn.run(
                 "simple_backend_corrected:app",
                 host="127.0.0.1",
-                port=8001,
+                port=8002,
                 reload=True,
                 log_level="info"
             )

@@ -20,39 +20,39 @@ interface ChatWidgetProps {
 const WELCOME_SUGGESTIONS: Record<string, string[]> = {
   '/BookUs': [
     "What's included in the menu?",
-    "How much is the deposit?",
-    "Do you serve Sacramento?",
+    'How much is the deposit?',
+    'Do you serve Sacramento?',
     "What's the minimum notice for booking?"
   ],
   '/menu': [
-    "What proteins do you offer?",
-    "What comes with the hibachi experience?",
-    "Do you have vegetarian options?",
+    'What proteins do you offer?',
+    'What comes with the hibachi experience?',
+    'Do you have vegetarian options?',
     "What's included in kids meals?"
   ],
   '/faqs': [
-    "How far do you travel?",
-    "What are your time slots?",
-    "Do you provide the grill?",
-    "How does pricing work?"
+    'How far do you travel?',
+    'What are your time slots?',
+    'Do you provide the grill?',
+    'How does pricing work?'
   ],
   '/contact': [
-    "How do I get a quote?",
+    'How do I get a quote?',
     "What's your phone number?",
-    "How quickly do you respond?",
-    "Can I book over the phone?"
+    'How quickly do you respond?',
+    'Can I book over the phone?'
   ],
   '/blog': [
     "What's new with My Hibachi?",
-    "Do you have cooking tips?",
-    "What events do you cater?",
-    "How did My Hibachi start?"
+    'Do you have cooking tips?',
+    'What events do you cater?',
+    'How did My Hibachi start?'
   ],
   default: [
-    "How much does hibachi cost?",
+    'How much does hibachi cost?',
     "What's included in the service?",
-    "Do you travel to my location?",
-    "How do I book an event?"
+    'Do you travel to my location?',
+    'How do I book an event?'
   ]
 }
 
@@ -74,7 +74,7 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
       if (stored) {
         try {
           const parsed = JSON.parse(stored) as Message[]
-          setMessages(parsed.map((m) => ({ ...m, timestamp: new Date(m.timestamp) })))
+          setMessages(parsed.map(m => ({ ...m, timestamp: new Date(m.timestamp) })))
         } catch (e) {
           console.warn('Failed to parse stored chat:', e)
         }
@@ -126,7 +126,7 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
       const response = await fetch('http://localhost:8001/api/v1/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           message: content,
           page: page || '/',
           consent_to_save: false
@@ -151,7 +151,8 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: "I'm having trouble right now. Please click 'Talk to a human' below for immediate help via Instagram, Facebook, text, or phone! 📱💬📞",    
+        content:
+          "I'm having trouble right now. Please click 'Talk to a human' below for immediate help via Instagram, Facebook, text, or phone! 📱💬📞",
         timestamp: new Date(),
         confidence: 'low'
       }
@@ -176,7 +177,10 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
   }
 
   const handleEmailUs = () => {
-    window.open('mailto:cs@myhibachichef.com?subject=My%20Hibachi%20Inquiry&body=Hi%20My%20Hibachi!%20I%20need%20help%20with...', '_blank')
+    window.open(
+      'mailto:cs@myhibachichef.com?subject=My%20Hibachi%20Inquiry&body=Hi%20My%20Hibachi!%20I%20need%20help%20with...',
+      '_blank'
+    )
   }
 
   const handleInstagramDM = () => {
@@ -197,10 +201,14 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
 
   const getConfidenceColor = (confidence?: string) => {
     switch (confidence) {
-      case 'high': return 'bg-green-500'
-      case 'medium': return 'bg-yellow-500'
-      case 'low': return 'bg-red-500'
-      default: return 'bg-gray-400'
+      case 'high':
+        return 'bg-green-500'
+      case 'medium':
+        return 'bg-yellow-500'
+      case 'low':
+        return 'bg-red-500'
+      default:
+        return 'bg-gray-400'
     }
   }
 
@@ -244,7 +252,9 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
             />
           </div>
           <div>
-            <h3 className="font-medium" style={{ fontSize: '14px' }}>My Hibachi Assistant</h3>
+            <h3 className="font-medium" style={{ fontSize: '14px' }}>
+              My Hibachi Assistant
+            </h3>
           </div>
         </div>
         <button
@@ -260,23 +270,27 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
       <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
         {messages.length === 0 && (
           <div className="text-center">
-            <p className="text-gray-600 mb-4" style={{ fontSize: '14px' }}>👋 Hi! I can help you with:</p>
+            <p className="text-gray-600 mb-4" style={{ fontSize: '14px' }}>
+              👋 Hi! I can help you with:
+            </p>
             <div className="flex flex-wrap gap-2 justify-center">
-              {(WELCOME_SUGGESTIONS[page || ''] || WELCOME_SUGGESTIONS.default).map((suggestion: string, i: number) => (
-                <button
-                  key={i}
-                  onClick={() => handleSuggestionClick(suggestion)}
-                  className="px-2 py-1 bg-orange-50 hover:bg-orange-100 text-orange-700 rounded-full transition-colors border border-orange-200"
-                  style={{ fontSize: '13px' }}
-                >
-                  {suggestion}
-                </button>
-              ))}
+              {(WELCOME_SUGGESTIONS[page || ''] || WELCOME_SUGGESTIONS.default).map(
+                (suggestion: string, i: number) => (
+                  <button
+                    key={i}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    className="px-2 py-1 bg-orange-50 hover:bg-orange-100 text-orange-700 rounded-full transition-colors border border-orange-200"
+                    style={{ fontSize: '13px' }}
+                  >
+                    {suggestion}
+                  </button>
+                )
+              )}
             </div>
           </div>
         )}
 
-        {messages.map((message) => (
+        {messages.map(message => (
           <div
             key={message.id}
             className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -301,7 +315,9 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
                   </div>
                 )}
                 <div className="flex-1">
-                  <p className="whitespace-pre-wrap" style={{ fontSize: '14px' }}>{message.content}</p>
+                  <p className="whitespace-pre-wrap" style={{ fontSize: '14px' }}>
+                    {message.content}
+                  </p>
 
                   {message.citations && message.citations.length > 0 && (
                     <div className="mt-2 space-y-1">
@@ -320,7 +336,9 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
 
                   {message.confidence && message.type === 'assistant' && (
                     <div className="flex items-center mt-2 space-x-2">
-                      <div className={`w-2 h-2 rounded-full ${getConfidenceColor(message.confidence)}`} />
+                      <div
+                        className={`w-2 h-2 rounded-full ${getConfidenceColor(message.confidence)}`}
+                      />
                       {message.confidence === 'low' && (
                         <button
                           onClick={() => setShowHandoff(true)}
@@ -342,8 +360,14 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
             <div className="bg-gray-100 p-3 rounded-2xl">
               <div className="flex space-x-1">
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                <div
+                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                  style={{ animationDelay: '0.1s' }}
+                />
+                <div
+                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                  style={{ animationDelay: '0.2s' }}
+                />
               </div>
             </div>
           </div>
@@ -359,7 +383,7 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
             ref={inputRef}
             type="text"
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={e => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ask about our menu, booking, or service areas..."
             className="flex-1 p-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
@@ -383,9 +407,7 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
             <span>💬</span>
             <span>Talk to a human</span>
           </button>
-          <p className="text-xs text-gray-400">
-            Press Enter to send
-          </p>
+          <p className="text-xs text-gray-400">Press Enter to send</p>
         </div>
       </div>
 
@@ -401,9 +423,9 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
             >
               <X size={18} className="text-gray-500" />
             </button>
-            
+
             <h3 className="font-semibold mb-4 text-center">Contact Us 💬</h3>
-            
+
             {/* Quick Contact Options */}
             <div className="space-y-3 mb-4">
               <button
@@ -451,7 +473,7 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
               </button>
               <p className="text-xs text-gray-500 mt-2">Click to open your email app</p>
             </div>
-            
+
             {/* Back to Chat Button */}
             <div className="border-t pt-4 mt-4">
               <button

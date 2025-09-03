@@ -8,8 +8,8 @@ interface FreeQuoteButtonProps {
   className?: string
 }
 
-export function FreeQuoteButton({ 
-  variant = 'primary', 
+export function FreeQuoteButton({
+  variant = 'primary',
   text = 'Get Free Quote',
   className = ''
 }: FreeQuoteButtonProps) {
@@ -17,7 +17,7 @@ export function FreeQuoteButton({
 
   const buttonClasses = {
     primary: 'free-quote-btn free-quote-primary',
-    secondary: 'free-quote-btn free-quote-secondary', 
+    secondary: 'free-quote-btn free-quote-secondary',
     floating: 'free-quote-btn free-quote-floating'
   }
 

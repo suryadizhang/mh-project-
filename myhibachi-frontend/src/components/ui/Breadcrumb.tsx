@@ -28,7 +28,7 @@ export default function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
       <ol className="breadcrumb-list">
         {breadcrumbItems.map((item, index) => {
           const isLast = index === breadcrumbItems.length - 1
-          
+
           return (
             <li key={item.href} className="breadcrumb-item">
               {isLast ? (
@@ -56,18 +56,16 @@ export default function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
 // Auto-generate breadcrumbs from pathname
 function generateBreadcrumbs(pathname: string): BreadcrumbItem[] {
   const segments = pathname.split('/').filter(Boolean)
-  const breadcrumbs: BreadcrumbItem[] = [
-    { label: 'Home', href: '/' }
-  ]
+  const breadcrumbs: BreadcrumbItem[] = [{ label: 'Home', href: '/' }]
 
   let currentPath = ''
-  
-  segments.forEach((segment) => {
+
+  segments.forEach(segment => {
     currentPath += `/${segment}`
-    
+
     // Convert segment to readable label
     const label = formatSegmentLabel(segment)
-    
+
     breadcrumbs.push({
       label,
       href: currentPath
@@ -81,23 +79,23 @@ function generateBreadcrumbs(pathname: string): BreadcrumbItem[] {
 function formatSegmentLabel(segment: string): string {
   // Handle special cases
   const specialCases: Record<string, string> = {
-    'BookUs': 'Book Us',
-    'GetQuote': 'Get Quote',
-    'faqs': 'FAQs',
-    'blog': 'Blog',
-    'menu': 'Menu',
-    'contact': 'Contact',
-    'quote': 'Get Quote',
-    'locations': 'Service Areas',
+    BookUs: 'Book Us',
+    GetQuote: 'Get Quote',
+    faqs: 'FAQs',
+    blog: 'Blog',
+    menu: 'Menu',
+    contact: 'Contact',
+    quote: 'Get Quote',
+    locations: 'Service Areas',
     'san-francisco': 'San Francisco',
     'san-jose': 'San Jose',
     'palo-alto': 'Palo Alto',
     'mountain-view': 'Mountain View',
     'santa-clara': 'Santa Clara',
-    'sacramento': 'Sacramento',
-    'oakland': 'Oakland',
-    'fremont': 'Fremont',
-    'sunnyvale': 'Sunnyvale'
+    sacramento: 'Sacramento',
+    oakland: 'Oakland',
+    fremont: 'Fremont',
+    sunnyvale: 'Sunnyvale'
   }
 
   if (specialCases[segment]) {
@@ -105,21 +103,22 @@ function formatSegmentLabel(segment: string): string {
   }
 
   // Default formatting: replace hyphens with spaces and capitalize
-  return segment
-    .replace(/-/g, ' ')
-    .replace(/\b\w/g, l => l.toUpperCase())
+  return segment.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
 }
 
 // Export function for generating structured data
-export function generateBreadcrumbStructuredData(items: BreadcrumbItem[], baseUrl: string = 'https://myhibachichef.com') {
+export function generateBreadcrumbStructuredData(
+  items: BreadcrumbItem[],
+  baseUrl: string = 'https://myhibachichef.com'
+) {
   return {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": items.map((item, index) => ({
-      "@type": "ListItem",
-      "position": index + 1,
-      "name": item.label,
-      "item": `${baseUrl}${item.href}`
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.label,
+      item: `${baseUrl}${item.href}`
     }))
   }
 }

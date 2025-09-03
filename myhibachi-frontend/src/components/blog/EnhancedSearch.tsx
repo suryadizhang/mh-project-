@@ -1,295 +1,329 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { blogPosts } from '@/data/blogPosts';
+import React, { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
+import { blogPosts } from '@/data/blogPosts'
 
 interface SearchResult {
-  id: number;
-  title: string;
-  slug: string;
-  excerpt: string;
-  category: string;
-  author: string;
-  date: string;
-  matchType: 'title' | 'excerpt' | 'keyword' | 'content';
-  matchText: string;
-  relevanceScore: number;
+  id: number
+  title: string
+  slug: string
+  excerpt: string
+  category: string
+  author: string
+  date: string
+  matchType: 'title' | 'excerpt' | 'keyword' | 'content'
+  matchText: string
+  relevanceScore: number
 }
 
 interface EnhancedSearchProps {
-  onResultClick?: (result: SearchResult) => void;
-  placeholder?: string;
-  maxResults?: number;
-  showCategories?: boolean;
-  autoFocus?: boolean;
+  onResultClick?: (result: SearchResult) => void
+  placeholder?: string
+  maxResults?: number
+  showCategories?: boolean
+  autoFocus?: boolean
 }
 
 const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
   onResultClick,
-  placeholder = "Search blog posts, topics, locations...",
+  placeholder = 'Search blog posts, topics, locations...',
   maxResults = 8,
   showCategories = true,
   autoFocus = false
 }) => {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(-1);
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const searchRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState<SearchResult[]>([])
+  const [isOpen, setIsOpen] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(-1)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const searchRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   // Auto focus if requested
   useEffect(() => {
     if (autoFocus && inputRef.current) {
-      inputRef.current.focus();
+      inputRef.current.focus()
     }
-  }, [autoFocus]);
+  }, [autoFocus])
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-        setSelectedIndex(-1);
+        setIsOpen(false)
+        setSelectedIndex(-1)
       }
-    };
+    }
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   // Perform search function
-  const performSearch = React.useCallback((searchQuery: string): SearchResult[] => {
-    const normalizedQuery = searchQuery.toLowerCase().trim();
-    const queryWords = normalizedQuery.split(/\s+/);
-    
-    const searchResults: SearchResult[] = [];
+  const performSearch = React.useCallback(
+    (searchQuery: string): SearchResult[] => {
+      const normalizedQuery = searchQuery.toLowerCase().trim()
+      const queryWords = normalizedQuery.split(/\s+/)
 
-    blogPosts.forEach(post => {
-      let relevanceScore = 0;
-      const matches: { type: SearchResult['matchType']; text: string; score: number }[] = [];
+      const searchResults: SearchResult[] = []
 
-      // Search in title (highest priority)
-      const titleMatch = post.title.toLowerCase();
-      if (titleMatch.includes(normalizedQuery)) {
-        matches.push({ type: 'title', text: post.title, score: 100 });
-        relevanceScore += 100;
-      } else {
-        // Check individual words in title
-        const titleWordMatches = queryWords.filter(word => titleMatch.includes(word));
-        if (titleWordMatches.length > 0) {
-          matches.push({ type: 'title', text: post.title, score: titleWordMatches.length * 50 });
-          relevanceScore += titleWordMatches.length * 50;
+      blogPosts.forEach(post => {
+        let relevanceScore = 0
+        const matches: { type: SearchResult['matchType']; text: string; score: number }[] = []
+
+        // Search in title (highest priority)
+        const titleMatch = post.title.toLowerCase()
+        if (titleMatch.includes(normalizedQuery)) {
+          matches.push({ type: 'title', text: post.title, score: 100 })
+          relevanceScore += 100
+        } else {
+          // Check individual words in title
+          const titleWordMatches = queryWords.filter(word => titleMatch.includes(word))
+          if (titleWordMatches.length > 0) {
+            matches.push({ type: 'title', text: post.title, score: titleWordMatches.length * 50 })
+            relevanceScore += titleWordMatches.length * 50
+          }
         }
-      }
 
-      // Search in excerpt
-      const excerptMatch = post.excerpt.toLowerCase();
-      if (excerptMatch.includes(normalizedQuery)) {
-        matches.push({ type: 'excerpt', text: post.excerpt, score: 60 });
-        relevanceScore += 60;
-      } else {
-        const excerptWordMatches = queryWords.filter(word => excerptMatch.includes(word));
-        if (excerptWordMatches.length > 0) {
-          matches.push({ type: 'excerpt', text: post.excerpt, score: excerptWordMatches.length * 30 });
-          relevanceScore += excerptWordMatches.length * 30;
+        // Search in excerpt
+        const excerptMatch = post.excerpt.toLowerCase()
+        if (excerptMatch.includes(normalizedQuery)) {
+          matches.push({ type: 'excerpt', text: post.excerpt, score: 60 })
+          relevanceScore += 60
+        } else {
+          const excerptWordMatches = queryWords.filter(word => excerptMatch.includes(word))
+          if (excerptWordMatches.length > 0) {
+            matches.push({
+              type: 'excerpt',
+              text: post.excerpt,
+              score: excerptWordMatches.length * 30
+            })
+            relevanceScore += excerptWordMatches.length * 30
+          }
         }
-      }
 
-      // Search in keywords
-      const keywordMatches = post.keywords.filter(keyword => 
-        keyword.toLowerCase().includes(normalizedQuery) ||
-        queryWords.some(word => keyword.toLowerCase().includes(word))
-      );
-      if (keywordMatches.length > 0) {
-        matches.push({ type: 'keyword', text: keywordMatches.join(', '), score: keywordMatches.length * 40 });
-        relevanceScore += keywordMatches.length * 40;
-      }
+        // Search in keywords
+        const keywordMatches = post.keywords.filter(
+          keyword =>
+            keyword.toLowerCase().includes(normalizedQuery) ||
+            queryWords.some(word => keyword.toLowerCase().includes(word))
+        )
+        if (keywordMatches.length > 0) {
+          matches.push({
+            type: 'keyword',
+            text: keywordMatches.join(', '),
+            score: keywordMatches.length * 40
+          })
+          relevanceScore += keywordMatches.length * 40
+        }
 
-      // Search in category, service area, event type
-      const metaFields = [post.category, post.serviceArea, post.eventType].join(' ').toLowerCase();
-      if (metaFields.includes(normalizedQuery)) {
-        matches.push({ type: 'content', text: `${post.category} • ${post.serviceArea}`, score: 30 });
-        relevanceScore += 30;
-      }
+        // Search in category, service area, event type
+        const metaFields = [post.category, post.serviceArea, post.eventType].join(' ').toLowerCase()
+        if (metaFields.includes(normalizedQuery)) {
+          matches.push({
+            type: 'content',
+            text: `${post.category} • ${post.serviceArea}`,
+            score: 30
+          })
+          relevanceScore += 30
+        }
 
-      // If we have matches, add to results
-      if (matches.length > 0) {
-        const bestMatch = matches.reduce((best, current) => 
-          current.score > best.score ? current : best
-        );
+        // If we have matches, add to results
+        if (matches.length > 0) {
+          const bestMatch = matches.reduce((best, current) =>
+            current.score > best.score ? current : best
+          )
 
-        searchResults.push({
-          id: post.id,
-          title: post.title,
-          slug: post.slug,
-          excerpt: post.excerpt,
-          category: post.category,
-          author: post.author,
-          date: post.date,
-          matchType: bestMatch.type,
-          matchText: bestMatch.text,
-          relevanceScore
-        });
-      }
-    });
+          searchResults.push({
+            id: post.id,
+            title: post.title,
+            slug: post.slug,
+            excerpt: post.excerpt,
+            category: post.category,
+            author: post.author,
+            date: post.date,
+            matchType: bestMatch.type,
+            matchText: bestMatch.text,
+            relevanceScore
+          })
+        }
+      })
 
-    // Sort by relevance and limit results
-    return searchResults
-      .sort((a, b) => b.relevanceScore - a.relevanceScore)
-      .slice(0, maxResults);
-  }, [maxResults]);
+      // Sort by relevance and limit results
+      return searchResults.sort((a, b) => b.relevanceScore - a.relevanceScore).slice(0, maxResults)
+    },
+    [maxResults]
+  )
 
   // Perform search
   useEffect(() => {
     if (query.length < 2) {
-      setResults([]);
-      setIsOpen(false);
-      return;
+      setResults([])
+      setIsOpen(false)
+      return
     }
 
-    setIsLoading(true);
-    
+    setIsLoading(true)
+
     // Simulate search delay for better UX
     const searchTimeout = setTimeout(() => {
-      const searchResults = performSearch(query);
-      setResults(searchResults);
-      setIsOpen(true);
-      setSelectedIndex(-1);
-      setIsLoading(false);
-    }, 150);
+      const searchResults = performSearch(query)
+      setResults(searchResults)
+      setIsOpen(true)
+      setSelectedIndex(-1)
+      setIsLoading(false)
+    }, 150)
 
-    return () => clearTimeout(searchTimeout);
-  }, [query, performSearch]);
+    return () => clearTimeout(searchTimeout)
+  }, [query, performSearch])
 
   const highlightText = (text: string, query: string) => {
-    if (!query) return text;
-    
-    const normalizedQuery = query.toLowerCase();
-    const queryWords = normalizedQuery.split(/\s+/).filter(word => word.length > 1);
-    
-    let highlightedText = text;
-    
+    if (!query) return text
+
+    const normalizedQuery = query.toLowerCase()
+    const queryWords = normalizedQuery.split(/\s+/).filter(word => word.length > 1)
+
+    let highlightedText = text
+
     // Highlight exact phrase first
-    const exactRegex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    highlightedText = highlightedText.replace(exactRegex, '<mark class="bg-yellow-200 px-1 rounded">$1</mark>');
-    
+    const exactRegex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+    highlightedText = highlightedText.replace(
+      exactRegex,
+      '<mark class="bg-yellow-200 px-1 rounded">$1</mark>'
+    )
+
     // Then highlight individual words
     queryWords.forEach(word => {
-      const wordRegex = new RegExp(`(${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-      highlightedText = highlightedText.replace(wordRegex, (match) => {
+      const wordRegex = new RegExp(`(${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+      highlightedText = highlightedText.replace(wordRegex, match => {
         // Don't double-highlight already marked text
-        if (match.includes('<mark')) return match;
-        return `<mark class="bg-blue-100 px-1 rounded">${match}</mark>`;
-      });
-    });
-    
-    return highlightedText;
-  };
+        if (match.includes('<mark')) return match
+        return `<mark class="bg-blue-100 px-1 rounded">${match}</mark>`
+      })
+    })
+
+    return highlightedText
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!isOpen || results.length === 0) return;
+    if (!isOpen || results.length === 0) return
 
     switch (e.key) {
       case 'ArrowDown':
-        e.preventDefault();
-        setSelectedIndex(prev => Math.min(prev + 1, results.length - 1));
-        break;
+        e.preventDefault()
+        setSelectedIndex(prev => Math.min(prev + 1, results.length - 1))
+        break
       case 'ArrowUp':
-        e.preventDefault();
-        setSelectedIndex(prev => Math.max(prev - 1, -1));
-        break;
+        e.preventDefault()
+        setSelectedIndex(prev => Math.max(prev - 1, -1))
+        break
       case 'Enter':
-        e.preventDefault();
+        e.preventDefault()
         if (selectedIndex >= 0 && results[selectedIndex]) {
-          handleResultClick(results[selectedIndex]);
+          handleResultClick(results[selectedIndex])
         }
-        break;
+        break
       case 'Escape':
-        e.preventDefault();
-        setIsOpen(false);
-        setSelectedIndex(-1);
-        inputRef.current?.blur();
-        break;
+        e.preventDefault()
+        setIsOpen(false)
+        setSelectedIndex(-1)
+        inputRef.current?.blur()
+        break
     }
-  };
+  }
 
   const handleResultClick = (result: SearchResult) => {
-    setQuery('');
-    setIsOpen(false);
-    setSelectedIndex(-1);
-    
+    setQuery('')
+    setIsOpen(false)
+    setSelectedIndex(-1)
+
     if (onResultClick) {
-      onResultClick(result);
+      onResultClick(result)
     }
-  };
+  }
 
   const getMatchTypeIcon = (matchType: SearchResult['matchType']) => {
     switch (matchType) {
       case 'title':
-        return '📄';
+        return '📄'
       case 'excerpt':
-        return '📝';
+        return '📝'
       case 'keyword':
-        return '🏷️';
+        return '🏷️'
       case 'content':
-        return '📂';
+        return '📂'
     }
-  };
+  }
 
   const getMatchTypeLabel = (matchType: SearchResult['matchType']) => {
     switch (matchType) {
       case 'title':
-        return 'Title match';
+        return 'Title match'
       case 'excerpt':
-        return 'Content match';
+        return 'Content match'
       case 'keyword':
-        return 'Topic match';
+        return 'Topic match'
       case 'content':
-        return 'Category match';
+        return 'Category match'
     }
-  };
+  }
 
   return (
     <div ref={searchRef} className="relative w-full max-w-2xl">
       {/* Search Input */}
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          <svg
+            className="h-5 w-5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
           </svg>
         </div>
-        
+
         <input
           ref={inputRef}
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={e => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
         />
-        
+
         {/* Loading/Clear Button */}
         <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
           {isLoading ? (
             <div className="animate-spin h-4 w-4 border-2 border-orange-500 border-t-transparent rounded-full"></div>
-          ) : query && (
-            <button
-              onClick={() => {
-                setQuery('');
-                setIsOpen(false);
-                inputRef.current?.focus();
-              }}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+          ) : (
+            query && (
+              <button
+                onClick={() => {
+                  setQuery('')
+                  setIsOpen(false)
+                  inputRef.current?.focus()
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )
           )}
         </div>
       </div>
@@ -304,7 +338,7 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
                   {results.length} result{results.length !== 1 ? 's' : ''} for &ldquo;{query}&rdquo;
                 </span>
               </div>
-              
+
               {results.map((result, index) => (
                 <Link
                   key={result.id}
@@ -318,27 +352,29 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
                     <div className="flex-shrink-0 mt-1">
                       <span className="text-lg">{getMatchTypeIcon(result.matchType)}</span>
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
-                      <h4 
+                      <h4
                         className="text-sm font-medium text-gray-900 line-clamp-1"
-                        dangerouslySetInnerHTML={{ 
-                          __html: highlightText(result.title, query) 
+                        dangerouslySetInnerHTML={{
+                          __html: highlightText(result.title, query)
                         }}
                       />
-                      
-                      <p 
+
+                      <p
                         className="text-sm text-gray-600 line-clamp-2 mt-1"
-                        dangerouslySetInnerHTML={{ 
+                        dangerouslySetInnerHTML={{
                           __html: highlightText(
-                            result.matchType === 'excerpt' ? result.excerpt : result.matchText, 
+                            result.matchType === 'excerpt' ? result.excerpt : result.matchText,
                             query
-                          ) 
+                          )
                         }}
                       />
-                      
+
                       <div className="flex items-center space-x-2 mt-2">
-                        <span className="text-xs text-gray-500">{getMatchTypeLabel(result.matchType)}</span>
+                        <span className="text-xs text-gray-500">
+                          {getMatchTypeLabel(result.matchType)}
+                        </span>
                         {showCategories && (
                           <>
                             <span className="text-xs text-gray-400">•</span>
@@ -349,19 +385,17 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
                         <span className="text-xs text-gray-500">{result.author}</span>
                       </div>
                     </div>
-                    
+
                     <div className="flex-shrink-0">
-                      <div className="text-xs text-gray-400">
-                        Score: {result.relevanceScore}
-                      </div>
+                      <div className="text-xs text-gray-400">Score: {result.relevanceScore}</div>
                     </div>
                   </div>
                 </Link>
               ))}
-              
+
               {results.length === maxResults && (
                 <div className="px-4 py-2 border-t border-gray-100 bg-gray-50">
-                  <Link 
+                  <Link
                     href={`/blog?search=${encodeURIComponent(query)}`}
                     className="text-xs text-orange-600 hover:text-orange-700 font-medium"
                   >
@@ -373,8 +407,18 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
           ) : (
             <div className="px-4 py-8 text-center">
               <div className="text-gray-400 mb-2">
-                <svg className="mx-auto h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6M4 8h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2v-8a2 2 0 012-2z" />
+                <svg
+                  className="mx-auto h-8 w-8"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6M4 8h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2v-8a2 2 0 012-2z"
+                  />
                 </svg>
               </div>
               <p className="text-sm text-gray-500">No results found for &ldquo;{query}&rdquo;</p>
@@ -390,14 +434,20 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
           <h4 className="text-sm font-medium text-gray-900 mb-2">Search Tips</h4>
           <ul className="text-xs text-gray-600 space-y-1">
             <li>• Search by location: &ldquo;San Francisco&rdquo;, &ldquo;Bay Area&rdquo;</li>
-            <li>• Search by event: &ldquo;birthday&rdquo;, &ldquo;wedding&rdquo;, &ldquo;corporate&rdquo;</li>
-            <li>• Search by season: &ldquo;summer&rdquo;, &ldquo;holiday&rdquo;, &ldquo;valentine&rdquo;</li>
+            <li>
+              • Search by event: &ldquo;birthday&rdquo;, &ldquo;wedding&rdquo;,
+              &ldquo;corporate&rdquo;
+            </li>
+            <li>
+              • Search by season: &ldquo;summer&rdquo;, &ldquo;holiday&rdquo;,
+              &ldquo;valentine&rdquo;
+            </li>
             <li>• Use quotes for exact phrases: &ldquo;hibachi catering&rdquo;</li>
           </ul>
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default EnhancedSearch;
+export default EnhancedSearch

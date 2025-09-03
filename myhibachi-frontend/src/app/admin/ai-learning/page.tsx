@@ -1,6 +1,6 @@
-'use client';
+'use client'
 
-import React from 'react';
+import React from 'react'
 
 export default function AILearningPage() {
   return (
@@ -10,5 +10,5 @@ export default function AILearningPage() {
         <p className="text-gray-600">AI Learning features coming soon...</p>
       </div>
     </div>
-  );
+  )
 }

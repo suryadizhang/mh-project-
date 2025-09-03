@@ -27,7 +27,12 @@ function preprocessText(text: string): string[] {
     .replace(/[^\w\s]/g, ' ')
     .split(/\s+/)
     .filter(word => word.length > 2)
-    .filter(word => !['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'].includes(word))
+    .filter(
+      word =>
+        !['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'].includes(
+          word
+        )
+    )
 }
 
 // Calculate term frequency
@@ -40,7 +45,11 @@ function getTermFrequency(terms: string[]): Map<string, number> {
 }
 
 // Calculate TF-IDF score
-function calculateTFIDF(queryTerms: string[], documentTerms: string[], allDocuments: string[][]): number {
+function calculateTFIDF(
+  queryTerms: string[],
+  documentTerms: string[],
+  allDocuments: string[][]
+): number {
   const queryTF = getTermFrequency(queryTerms)
   const docTF = getTermFrequency(documentTerms)
   const docCount = allDocuments.length
@@ -92,7 +101,8 @@ async function loadData(page: string): Promise<DataEntry[]> {
     return [
       {
         title: 'Contact Support',
-        content: 'For specific questions about our hibachi catering service, please contact us directly.',
+        content:
+          'For specific questions about our hibachi catering service, please contact us directly.',
         category: 'general',
         href: '/contact'
       }
@@ -151,7 +161,6 @@ export async function cosineSearch(query: string, page: string): Promise<SearchR
       .filter(result => result.score > 0.1) // Minimum threshold
       .sort((a, b) => b.score - a.score)
       .slice(0, 5) // Top 5 results
-
   } catch (error) {
     console.error('Vector search error:', error)
     return []

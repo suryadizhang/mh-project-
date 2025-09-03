@@ -6,7 +6,7 @@
 }
 
 .booking-submit-btn {
-  background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%);
+  background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
   border: none;
   border-radius: 12px;
   padding: 1rem 3rem;
@@ -71,7 +71,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
 
@@ -96,7 +97,7 @@
     font-size: 1.1rem;
     min-width: auto;
   }
-  
+
   .form-section {
     border-left: 2px solid #dc2626;
   }

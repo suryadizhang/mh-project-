@@ -23,7 +23,9 @@ export default function MetaMessenger() {
     // Check if Facebook App ID is properly configured
     const appId = contactData.facebookAppId
     if (!appId || appId === '1234567890123456') {
-      console.warn('Facebook Messenger: App ID not configured. Please set up a real Facebook App ID to enable Messenger chat.')
+      console.warn(
+        'Facebook Messenger: App ID not configured. Please set up a real Facebook App ID to enable Messenger chat.'
+      )
       return
     }
 
@@ -38,7 +40,7 @@ export default function MetaMessenger() {
       script.defer = true
       script.crossOrigin = 'anonymous'
       script.src = `https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0&appId=${appId}`
-      
+
       script.onload = () => {
         if (window.FB) {
           window.FB.init({

@@ -39,45 +39,74 @@ export default function Navbar() {
         </button>
 
         <div className={`navbar-collapse ${isOpen ? 'show' : ''}`} id="navbarNav">
-          <ul className="navbar-nav navbar-nav-custom ms-auto">{/* Changed to ms-auto for Bootstrap 5 */}
+          <ul className="navbar-nav navbar-nav-custom ms-auto">
+            {/* Changed to ms-auto for Bootstrap 5 */}
             <li className="nav-item">
-              <Link href="/" className={`nav-link nav-link-custom ${pathname === '/' ? 'active' : ''}`} onClick={handleLinkClick}>
+              <Link
+                href="/"
+                className={`nav-link nav-link-custom ${pathname === '/' ? 'active' : ''}`}
+                onClick={handleLinkClick}
+              >
                 <i className="bi bi-house-fill nav-icon"></i>
                 <span className="nav-text">Home</span>
               </Link>
             </li>
             <li className="nav-item">
-              <Link href="/menu" className={`nav-link nav-link-custom ${pathname === '/menu' ? 'active' : ''}`} onClick={handleLinkClick}>
+              <Link
+                href="/menu"
+                className={`nav-link nav-link-custom ${pathname === '/menu' ? 'active' : ''}`}
+                onClick={handleLinkClick}
+              >
                 <i className="bi bi-card-list nav-icon"></i>
                 <span className="nav-text">Menu</span>
               </Link>
             </li>
             <li className="nav-item">
-              <Link href="/quote" className={`nav-link nav-link-custom ${pathname === '/quote' ? 'active' : ''}`} onClick={handleLinkClick}>
+              <Link
+                href="/quote"
+                className={`nav-link nav-link-custom ${pathname === '/quote' ? 'active' : ''}`}
+                onClick={handleLinkClick}
+              >
                 <i className="bi bi-calculator nav-icon"></i>
                 <span className="nav-text">Get Quote</span>
               </Link>
             </li>
             <li className="nav-item">
-              <Link href="/BookUs" className={`nav-link nav-link-custom ${pathname === '/BookUs' ? 'active' : ''}`} onClick={handleLinkClick}>
+              <Link
+                href="/BookUs"
+                className={`nav-link nav-link-custom ${pathname === '/BookUs' ? 'active' : ''}`}
+                onClick={handleLinkClick}
+              >
                 <i className="bi bi-calendar-check nav-icon"></i>
                 <span className="nav-text">Book Us</span>
               </Link>
             </li>
             <li className="nav-item">
-              <Link href="/faqs" className={`nav-link nav-link-custom ${pathname === '/faqs' ? 'active' : ''}`} onClick={handleLinkClick}>
+              <Link
+                href="/faqs"
+                className={`nav-link nav-link-custom ${pathname === '/faqs' ? 'active' : ''}`}
+                onClick={handleLinkClick}
+              >
                 <i className="bi bi-question-circle nav-icon"></i>
                 <span className="nav-text">FAQs</span>
               </Link>
             </li>
             <li className="nav-item">
-              <Link href="/contact" className={`nav-link nav-link-custom ${pathname === '/contact' ? 'active' : ''}`} onClick={handleLinkClick}>
+              <Link
+                href="/contact"
+                className={`nav-link nav-link-custom ${pathname === '/contact' ? 'active' : ''}`}
+                onClick={handleLinkClick}
+              >
                 <i className="bi bi-chat-dots-fill nav-icon"></i>
                 <span className="nav-text">Contact</span>
               </Link>
             </li>
             <li className="nav-item">
-              <Link href="/blog" className={`nav-link nav-link-custom ${pathname === '/blog' ? 'active' : ''}`} onClick={handleLinkClick}>
+              <Link
+                href="/blog"
+                className={`nav-link nav-link-custom ${pathname === '/blog' ? 'active' : ''}`}
+                onClick={handleLinkClick}
+              >
                 <i className="bi bi-journal-text nav-icon"></i>
                 <span className="nav-text">Blog</span>
               </Link>

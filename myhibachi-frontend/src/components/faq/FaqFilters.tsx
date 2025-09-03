@@ -10,19 +10,19 @@ interface FaqFiltersProps {
   availableTags: string[]
 }
 
-export function FaqFilters({ 
-  activeCategory, 
-  activeTags, 
-  onCategoryChange, 
-  onTagToggle, 
-  availableTags 
+export function FaqFilters({
+  activeCategory,
+  activeTags,
+  onCategoryChange,
+  onTagToggle,
+  availableTags
 }: FaqFiltersProps) {
   const [showAllTags, setShowAllTags] = useState(false)
-  
+
   // Define categories locally to avoid import issues
   const categories = [
     'Pricing & Minimums',
-    'Menu & Upgrades', 
+    'Menu & Upgrades',
     'Booking & Payments',
     'Travel & Service Area',
     'On-Site Setup & Requirements',
@@ -35,7 +35,7 @@ export function FaqFilters({
 
   const maxVisibleTags = 6
   const visibleTags = showAllTags ? availableTags : availableTags.slice(0, maxVisibleTags)
-  
+
   return (
     <div className="faq-filters">
       {/* Category Tabs */}
@@ -47,7 +47,7 @@ export function FaqFilters({
         >
           All Questions
         </button>
-        {categories.map((category) => (
+        {categories.map(category => (
           <button
             key={category}
             onClick={() => onCategoryChange(category)}
@@ -63,7 +63,7 @@ export function FaqFilters({
       {availableTags.length > 0 && (
         <div className="tag-filters">
           <div className="tag-chips">
-            {visibleTags.map((tag) => (
+            {visibleTags.map(tag => (
               <button
                 key={tag}
                 onClick={() => onTagToggle(tag)}
@@ -75,14 +75,10 @@ export function FaqFilters({
               </button>
             ))}
             {availableTags.length > maxVisibleTags && (
-              <button 
-                onClick={() => setShowAllTags(!showAllTags)}
-                className="more-tags-toggle"
-              >
-                {showAllTags 
-                  ? '← Show Less' 
-                  : `+${availableTags.length - maxVisibleTags} more topics`
-                }
+              <button onClick={() => setShowAllTags(!showAllTags)} className="more-tags-toggle">
+                {showAllTags
+                  ? '← Show Less'
+                  : `+${availableTags.length - maxVisibleTags} more topics`}
               </button>
             )}
           </div>
@@ -95,16 +91,20 @@ export function FaqFilters({
           {activeCategory !== 'All' && (
             <span className="active-filter">
               {activeCategory}
-              <button onClick={() => onCategoryChange('All')} className="remove-filter">×</button>
+              <button onClick={() => onCategoryChange('All')} className="remove-filter">
+                ×
+              </button>
             </span>
           )}
-          {activeTags.map((tag) => (
+          {activeTags.map(tag => (
             <span key={tag} className="active-filter">
               {tag}
-              <button onClick={() => onTagToggle(tag)} className="remove-filter">×</button>
+              <button onClick={() => onTagToggle(tag)} className="remove-filter">
+                ×
+              </button>
             </span>
           ))}
-          <button 
+          <button
             onClick={() => {
               onCategoryChange('All')
               activeTags.forEach(tag => onTagToggle(tag))

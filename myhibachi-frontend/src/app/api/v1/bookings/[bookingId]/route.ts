@@ -5,7 +5,7 @@ export async function GET(
   context: { params: Promise<{ bookingId: string }> }
 ) {
   const { bookingId } = await context.params
-  
+
   return NextResponse.json({
     message: 'Booking details endpoint',
     bookingId,

@@ -1,12 +1,12 @@
-import React from 'react';
-import { CustomerAddressSectionProps } from './types';
-import './styles/CustomerAddressSection.module.css';
+import React from 'react'
+import { CustomerAddressSectionProps } from './types'
+import './styles/CustomerAddressSection.module.css'
 
-const CustomerAddressSection: React.FC<CustomerAddressSectionProps & { className?: string }> = ({ 
-  register, 
-  errors, 
+const CustomerAddressSection: React.FC<CustomerAddressSectionProps & { className?: string }> = ({
+  register,
+  errors,
   sameAsVenue,
-  className = '' 
+  className = ''
 }) => {
   return (
     <div className={`form-section ${className}`}>
@@ -35,7 +35,9 @@ const CustomerAddressSection: React.FC<CustomerAddressSectionProps & { className
           <div className="row">
             <div className="col-12">
               <div className="form-group">
-                <label htmlFor="addressStreet" className="form-label required">Street Address</label>
+                <label htmlFor="addressStreet" className="form-label required">
+                  Street Address
+                </label>
                 <input
                   type="text"
                   id="addressStreet"
@@ -53,7 +55,9 @@ const CustomerAddressSection: React.FC<CustomerAddressSectionProps & { className
           <div className="row">
             <div className="col-md-6">
               <div className="form-group">
-                <label htmlFor="addressCity" className="form-label required">City</label>
+                <label htmlFor="addressCity" className="form-label required">
+                  City
+                </label>
                 <input
                   type="text"
                   id="addressCity"
@@ -69,7 +73,9 @@ const CustomerAddressSection: React.FC<CustomerAddressSectionProps & { className
 
             <div className="col-md-3">
               <div className="form-group">
-                <label htmlFor="addressState" className="form-label required">State</label>
+                <label htmlFor="addressState" className="form-label required">
+                  State
+                </label>
                 <select
                   id="addressState"
                   className={`form-control ${errors.addressState ? 'is-invalid' : ''}`}
@@ -89,7 +95,9 @@ const CustomerAddressSection: React.FC<CustomerAddressSectionProps & { className
 
             <div className="col-md-3">
               <div className="form-group">
-                <label htmlFor="addressZipcode" className="form-label required">ZIP Code</label>
+                <label htmlFor="addressZipcode" className="form-label required">
+                  ZIP Code
+                </label>
                 <input
                   type="text"
                   id="addressZipcode"
@@ -106,8 +114,7 @@ const CustomerAddressSection: React.FC<CustomerAddressSectionProps & { className
         </>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default CustomerAddressSection;
-
+export default CustomerAddressSection

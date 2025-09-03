@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { format } from 'date-fns'
 import { BookingFormData, TimeSlot, DEFAULT_FORM_VALUES } from '@/data/booking/types'
+import { apiFetch } from '@/lib/api'
 
 export function useBooking() {
   // Form state
@@ -14,7 +15,7 @@ export function useBooking() {
     formState: { errors },
     watch,
     setValue,
-    getValues,
+    getValues
   } = useForm<BookingFormData>({
     defaultValues: DEFAULT_FORM_VALUES
   })
@@ -44,11 +45,10 @@ export function useBooking() {
     setLoadingDates(true)
     setDateError(null)
     try {
-      const response = await fetch('/api/v1/bookings/booked-dates')
-      if (response.ok) {
-        const data = await response.json()
-        console.log('Booked dates response:', data)
-        const dates = data.bookedDates?.map((dateStr: string) => new Date(dateStr)) || []
+      const result = await apiFetch('/api/v1/bookings/booked-dates')
+      if (result.success) {
+        console.log('Booked dates response:', result.data)
+        const dates = result.data.bookedDates?.map((dateStr: string) => new Date(dateStr)) || []
         setBookedDates(dates)
       } else {
         throw new Error('Failed to fetch booked dates')
@@ -66,20 +66,17 @@ export function useBooking() {
     setLoadingTimeSlots(true)
     try {
       const dateStr = format(date, 'yyyy-MM-dd')
-      const response = await fetch(`/api/v1/bookings/availability?date=${dateStr}`)
+      const response = await apiFetch(`/api/v1/bookings/availability?date=${dateStr}`)
 
-      if (response.ok) {
-        const data = await response.json()
-        const formattedSlots = data.timeSlots.map((slot: {
-          time: string
-          available: number
-          label: string
-        }) => ({
-          time: slot.time,
-          label: slot.label,
-          available: slot.available,
-          isAvailable: slot.available > 0
-        }))
+      if (response.success) {
+        const formattedSlots = response.data.timeSlots.map(
+          (slot: { time: string; available: number; label: string }) => ({
+            time: slot.time,
+            label: slot.label,
+            available: slot.available,
+            isAvailable: slot.available > 0
+          })
+        )
         setAvailableTimeSlots(formattedSlots)
       } else {
         console.error('Failed to fetch availability')

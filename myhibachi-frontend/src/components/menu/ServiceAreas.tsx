@@ -7,15 +7,18 @@ export default function ServiceAreas() {
   return (
     <div className={styles.serviceAreas}>
       <h3 className={styles.sectionTitle}>
-        🌟 Bringing Hibachi Experience<br className="d-none d-lg-block" />
+        🌟 Bringing Hibachi Experience
+        <br className="d-none d-lg-block" />
         to Your Neighborhood! 🌟
       </h3>
-      <p className={styles.serviceIntro}>
-        {serviceAreas.subtitle}
-      </p>
+      <p className={styles.serviceIntro}>{serviceAreas.subtitle}</p>
       <div className={styles.ctaButtons}>
-        <a href="/BookUs" className={styles.primaryBtn}>📅 Check Your Date & Time</a>
-        <a href="/quote" className={styles.secondaryBtn}>💬 Get a Quick Quote</a>
+        <a href="/BookUs" className={styles.primaryBtn}>
+          📅 Check Your Date & Time
+        </a>
+        <a href="/quote" className={styles.secondaryBtn}>
+          💬 Get a Quick Quote
+        </a>
       </div>
 
       <div className={styles.areasGrid}>
@@ -43,8 +46,8 @@ export default function ServiceAreas() {
       <div className={styles.travelNote}>
         <p>
           <span className="emoji-visible">🚗</span>
-          <strong>Travel Policy:</strong> Free service within primary areas. Extended areas may include
-          a small travel fee. Contact us for exact pricing for your location!
+          <strong>Travel Policy:</strong> Free service within primary areas. Extended areas may
+          include a small travel fee. Contact us for exact pricing for your location!
         </p>
       </div>
     </div>

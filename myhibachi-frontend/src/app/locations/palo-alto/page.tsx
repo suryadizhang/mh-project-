@@ -9,7 +9,8 @@ const locationData = generateLocationPage('Palo Alto')
 export const metadata: Metadata = {
   title: locationData.title,
   description: locationData.metaDescription,
-  keywords: 'Palo Alto hibachi catering, hibachi chef Palo Alto, Stanford area catering, hibachi catering near Palo Alto, private chef Palo Alto, Japanese catering Palo Alto, hibachi birthday party Palo Alto, corporate hibachi Palo Alto',
+  keywords:
+    'Palo Alto hibachi catering, hibachi chef Palo Alto, Stanford area catering, hibachi catering near Palo Alto, private chef Palo Alto, Japanese catering Palo Alto, hibachi birthday party Palo Alto, corporate hibachi Palo Alto',
   openGraph: {
     title: locationData.title,
     description: locationData.metaDescription,
@@ -37,9 +38,7 @@ export default function PaloAltoHibachiPage() {
       <section className="page-hero-background py-20 text-white text-center">
         <div className="max-w-4xl mx-auto px-4">
           <h1 className="text-5xl font-bold mb-6">{locationData.h1}</h1>
-          <p className="text-xl mb-8 text-gray-200">
-            {locationData.content.hero}
-          </p>
+          <p className="text-xl mb-8 text-gray-200">{locationData.content.hero}</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               href="/booking"
@@ -67,7 +66,9 @@ export default function PaloAltoHibachiPage() {
             {locationData.content.services.map((service, index) => (
               <div key={index} className="bg-white p-6 rounded-lg shadow-sm text-center">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">{service}</h3>
-                <p className="text-gray-600 text-sm">Professional hibachi entertainment for your Palo Alto celebration</p>
+                <p className="text-gray-600 text-sm">
+                  Professional hibachi entertainment for your Palo Alto celebration
+                </p>
               </div>
             ))}
           </div>
@@ -82,8 +83,9 @@ export default function PaloAltoHibachiPage() {
           </h2>
           <div className="bg-white p-8 rounded-lg shadow-sm">
             <p className="text-lg text-gray-600 mb-6">
-              Serving the Stanford University community and Silicon Valley tech companies with premium hibachi catering.
-              Perfect for graduation celebrations, corporate team building, faculty events, and student organization gatherings.
+              Serving the Stanford University community and Silicon Valley tech companies with
+              premium hibachi catering. Perfect for graduation celebrations, corporate team
+              building, faculty events, and student organization gatherings.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -112,8 +114,12 @@ export default function PaloAltoHibachiPage() {
       {/* Why Choose Us */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="prose prose-lg max-w-none"
-               dangerouslySetInnerHTML={{ __html: locationContentBlocks.whyChooseUs('Palo Alto').replace(/\n/g, '<br />') }} />
+          <div
+            className="prose prose-lg max-w-none"
+            dangerouslySetInnerHTML={{
+              __html: locationContentBlocks.whyChooseUs('Palo Alto').replace(/\n/g, '<br />')
+            }}
+          />
         </div>
       </section>
 
@@ -126,7 +132,9 @@ export default function PaloAltoHibachiPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {locationData.content.testimonials.map((testimonial, index) => (
               <div key={index} className="bg-white p-6 rounded-lg shadow-sm">
-                <p className="text-gray-600 italic mb-4">&ldquo;{testimonial.split('"')[1]}&rdquo;</p>
+                <p className="text-gray-600 italic mb-4">
+                  &ldquo;{testimonial.split('"')[1]}&rdquo;
+                </p>
                 <p className="text-gray-900 font-semibold">- {testimonial.split('- ')[1]}</p>
               </div>
             ))}
@@ -158,7 +166,8 @@ export default function PaloAltoHibachiPage() {
             Ready to Book Your Palo Alto Hibachi Experience?
           </h2>
           <p className="text-xl mb-8">
-            Contact us today for a free quote on your Palo Alto or Stanford area hibachi catering event!
+            Contact us today for a free quote on your Palo Alto or Stanford area hibachi catering
+            event!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link

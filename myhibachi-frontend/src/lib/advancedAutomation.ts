@@ -69,7 +69,7 @@ export class GMBPostManager {
         cta: template.cta,
         location,
         eventType: template.eventType,
-        publishDate: new Date(baseDate.getTime() + (index * 24 * 60 * 60 * 1000)),
+        publishDate: new Date(baseDate.getTime() + index * 24 * 60 * 60 * 1000),
         status: 'draft'
       }
       weeklyPosts.push(post)
@@ -92,29 +92,28 @@ export class GMBPostManager {
   }
 
   getScheduledPosts(location?: string): GMBPost[] {
-    return this.posts.filter(post =>
-      post.status === 'scheduled' &&
-      (!location || post.location === location)
+    return this.posts.filter(
+      post => post.status === 'scheduled' && (!location || post.location === location)
     )
   }
 
   generateEventPosts(location: string, eventType: string): GMBPost[] {
     const eventTemplates = {
-      'birthday': [
+      birthday: [
         {
           title: `Birthday Magic in ${location}!`,
           content: `🎂 Make birthdays unforgettable with hibachi entertainment in ${location}! Our chefs create a spectacular show while preparing fresh, delicious meals. Free birthday dessert included!`,
           cta: 'Book Birthday Celebration'
         }
       ],
-      'corporate': [
+      corporate: [
         {
           title: `Corporate Events Done Right - ${location}`,
           content: `💼 Impress clients and reward teams with premium hibachi dining in ${location}. Private rooms available, group menus, and professional service for your business events.`,
           cta: 'Plan Corporate Event'
         }
       ],
-      'graduation': [
+      graduation: [
         {
           title: `Celebrate Graduation in ${location}!`,
           content: `🎓 Honor achievements with family hibachi dining in ${location}! Our celebration atmosphere and chef entertainment make graduation dinners truly special.`,
@@ -356,12 +355,12 @@ export class CitationBuilder {
       'San Jose': '123 Main St, San Jose, CA 95112',
       'San Francisco': '456 Market St, San Francisco, CA 94102',
       'Palo Alto': '789 University Ave, Palo Alto, CA 94301',
-      'Oakland': '321 Broadway, Oakland, CA 94612',
+      Oakland: '321 Broadway, Oakland, CA 94612',
       'Mountain View': '654 Castro St, Mountain View, CA 94041',
       'Santa Clara': '987 Homestead Rd, Santa Clara, CA 95051',
-      'Sunnyvale': '147 Murphy Ave, Sunnyvale, CA 94086',
-      'Sacramento': '258 K St, Sacramento, CA 95814',
-      'Fremont': '369 Fremont Blvd, Fremont, CA 94536'
+      Sunnyvale: '147 Murphy Ave, Sunnyvale, CA 94086',
+      Sacramento: '258 K St, Sacramento, CA 95814',
+      Fremont: '369 Fremont Blvd, Fremont, CA 94536'
     }
     return addresses[location] || `123 Main St, ${location}, CA`
   }
@@ -383,9 +382,8 @@ export class CitationBuilder {
 
     locationCitations.forEach(citation => {
       // Citation validation logic would go here
-      const isValid = citation.businessName.length > 0 &&
-                     citation.address.length > 0 &&
-                     citation.phone.length > 0
+      const isValid =
+        citation.businessName.length > 0 && citation.address.length > 0 && citation.phone.length > 0
       validationResults[citation.id] = isValid
     })
 
@@ -418,7 +416,7 @@ export class ReviewManager {
       "We appreciate your honest feedback and are glad you visited us. We'd love the opportunity to provide you with an even better experience next time!"
     ],
     negative: [
-      "Thank you for bringing this to our attention. We sincerely apologize for falling short of your expectations. Please contact us directly so we can make this right.",
+      'Thank you for bringing this to our attention. We sincerely apologize for falling short of your expectations. Please contact us directly so we can make this right.',
       "We're sorry to hear about your experience and appreciate you taking the time to provide feedback. We'd like to discuss this further - please reach out to us directly.",
       "Your feedback is important to us, and we apologize for the disappointing experience. We'd appreciate the chance to speak with you directly to resolve this matter."
     ]
@@ -480,11 +478,23 @@ export class SocialMediaManager {
     const captions = [
       {
         content: `Fresh hibachi magic happening now in ${location}! 🔥🥢 Watch our master chefs create culinary art right before your eyes. Every sizzle tells a story!`,
-        hashtags: ['#MyHibachi', '#JapaneseCuisine', '#HibachiShow', '#FreshIngredients', `#${location.replace(' ', '')}`]
+        hashtags: [
+          '#MyHibachi',
+          '#JapaneseCuisine',
+          '#HibachiShow',
+          '#FreshIngredients',
+          `#${location.replace(' ', '')}`
+        ]
       },
       {
         content: `Date night perfection in ${location} ✨ Intimate hibachi dining where every meal is a performance and every bite is memorable. Book your romantic evening!`,
-        hashtags: ['#DateNight', '#RomanticDining', '#HibachiExperience', `#${location.replace(' ', '')}`, '#PerfectEvening']
+        hashtags: [
+          '#DateNight',
+          '#RomanticDining',
+          '#HibachiExperience',
+          `#${location.replace(' ', '')}`,
+          '#PerfectEvening'
+        ]
       }
     ]
 
@@ -494,7 +504,7 @@ export class SocialMediaManager {
       content: caption.content,
       hashtags: caption.hashtags,
       location,
-      scheduledTime: new Date(Date.now() + (index * 4 * 60 * 60 * 1000)), // 4 hours apart
+      scheduledTime: new Date(Date.now() + index * 4 * 60 * 60 * 1000), // 4 hours apart
       status: 'draft' as const
     }))
   }
@@ -511,7 +521,7 @@ export class SocialMediaManager {
       content,
       hashtags: [`#MyHibachi${location.replace(' ', '')}`, '#HibachiDining', '#JapaneseCuisine'],
       location,
-      scheduledTime: new Date(Date.now() + (index * 6 * 60 * 60 * 1000)), // 6 hours apart
+      scheduledTime: new Date(Date.now() + index * 6 * 60 * 60 * 1000), // 6 hours apart
       status: 'draft' as const
     }))
   }
@@ -590,7 +600,8 @@ export class SEOMonitor {
 
     return {
       totalKeywords: locationKeywords.length,
-      averagePosition: locationKeywords.reduce((sum, k) => sum + k.position, 0) / locationKeywords.length,
+      averagePosition:
+        locationKeywords.reduce((sum, k) => sum + k.position, 0) / locationKeywords.length,
       topTenKeywords: locationKeywords.filter(k => k.position <= 10).length,
       improvingKeywords: locationKeywords.filter(k => k.trend === 'up').length,
       decliningKeywords: locationKeywords.filter(k => k.trend === 'down').length
@@ -621,15 +632,15 @@ export class EmailMarketingManager {
 
   createLocationCampaign(location: string, campaignType: string): EmailCampaign {
     const campaigns = {
-      'welcome': {
+      welcome: {
         subject: `Welcome to My Hibachi ${location} Family!`,
         content: `Thank you for joining our hibachi family in ${location}! Get ready for exclusive offers, event invitations, and insider access to the best hibachi experience in town.`
       },
-      'birthday': {
+      birthday: {
         subject: `🎂 Special Birthday Offer for ${location} Diners!`,
         content: `Celebrate your special day with us in ${location}! Enjoy complimentary birthday hibachi dessert and our famous chef entertainment. Book your birthday celebration today!`
       },
-      'holiday': {
+      holiday: {
         subject: `Holiday Celebrations at My Hibachi ${location}`,
         content: `Make your holidays memorable with family hibachi dining in ${location}. Special holiday menus, group accommodations, and festive atmosphere await!`
       }

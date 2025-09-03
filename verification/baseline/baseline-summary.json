@@ -1,0 +1,17 @@
+{
+  "created": "2025-09-02T05:35:37.905Z",
+  "routes": 33,
+  "apiRoutes": 25,
+  "assets": {
+    "images": 112,
+    "fonts": 0,
+    "icons": 5
+  },
+  "buildSuccess": false,
+  "nextSteps": [
+    "Run Playwright for visual baseline",
+    "Extract DOM snapshots",
+    "Run Lighthouse audits",
+    "Create link map"
+  ]
+}

@@ -11,25 +11,26 @@ export default function QuotePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebPage",
-            "name": "Free Hibachi Catering Quote Calculator - My Hibachi Chef",
-            "description": "Get an instant estimate for your hibachi party. Calculate pricing for adults, children, upgrades, and travel fees. Serving Northern California.",
-            "url": "https://myhibachichef.com/quote",
-            "mainEntity": {
-              "@type": "LocalBusiness",
-              "@id": "https://myhibachichef.com/#business",
-              "name": "My Hibachi Chef",
-              "description": "Professional hibachi catering service",
-              "priceRange": "$55-$70 per person",
-              "serviceArea": {
-                "@type": "GeoCircle",
-                "geoMidpoint": {
-                  "@type": "GeoCoordinates",
-                  "latitude": 37.5485,
-                  "longitude": -121.9886
+            '@context': 'https://schema.org',
+            '@type': 'WebPage',
+            name: 'Free Hibachi Catering Quote Calculator - My Hibachi Chef',
+            description:
+              'Get an instant estimate for your hibachi party. Calculate pricing for adults, children, upgrades, and travel fees. Serving Northern California.',
+            url: 'https://myhibachichef.com/quote',
+            mainEntity: {
+              '@type': 'LocalBusiness',
+              '@id': 'https://myhibachichef.com/#business',
+              name: 'My Hibachi Chef',
+              description: 'Professional hibachi catering service',
+              priceRange: '$55-$70 per person',
+              serviceArea: {
+                '@type': 'GeoCircle',
+                geoMidpoint: {
+                  '@type': 'GeoCoordinates',
+                  latitude: 37.5485,
+                  longitude: -121.9886
                 },
-                "geoRadius": 150
+                geoRadius: 150
               }
             }
           })
@@ -42,8 +43,8 @@ export default function QuotePage() {
           <div className="container">
             <h1>Free Hibachi Catering Quote</h1>
             <p>
-              Get an instant estimate for your hibachi party. Our calculator includes
-              pricing for adults, children, upgrades, and travel fees based on your location.
+              Get an instant estimate for your hibachi party. Our calculator includes pricing for
+              adults, children, upgrades, and travel fees based on your location.
             </p>
           </div>
         </section>
@@ -62,15 +63,15 @@ export default function QuotePage() {
               <div className="info-card">
                 <h3>📊 Initial Estimates</h3>
                 <p>
-                  Our calculator provides initial estimates based on current pricing.
-                  Final pricing may vary and will be confirmed during booking consultation.
+                  Our calculator provides initial estimates based on current pricing. Final pricing
+                  may vary and will be confirmed during booking consultation.
                 </p>
               </div>
               <div className="info-card">
                 <h3>📞 Personal Consultation</h3>
                 <p>
-                  Every quote is followed up by our customer service team to confirm
-                  details, finalize pricing, and answer any questions you may have.
+                  Every quote is followed up by our customer service team to confirm details,
+                  finalize pricing, and answer any questions you may have.
                 </p>
               </div>
               <div className="info-card">

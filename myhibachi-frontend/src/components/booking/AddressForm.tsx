@@ -30,14 +30,12 @@ export function AddressForm({ formData, onChange, errors }: AddressFormProps) {
               id="addressStreet"
               name="addressStreet"
               value={formData.addressStreet}
-              onChange={(e) => onChange('addressStreet', e.target.value)}
+              onChange={e => onChange('addressStreet', e.target.value)}
               placeholder="Enter street address"
               className={`form-input ${errors.addressStreet ? 'error' : ''}`}
               required
             />
-            {errors.addressStreet && (
-              <span className="error-message">{errors.addressStreet}</span>
-            )}
+            {errors.addressStreet && <span className="error-message">{errors.addressStreet}</span>}
           </div>
 
           <div className="form-group">
@@ -49,14 +47,12 @@ export function AddressForm({ formData, onChange, errors }: AddressFormProps) {
               id="addressCity"
               name="addressCity"
               value={formData.addressCity}
-              onChange={(e) => onChange('addressCity', e.target.value)}
+              onChange={e => onChange('addressCity', e.target.value)}
               placeholder="Enter city"
               className={`form-input ${errors.addressCity ? 'error' : ''}`}
               required
             />
-            {errors.addressCity && (
-              <span className="error-message">{errors.addressCity}</span>
-            )}
+            {errors.addressCity && <span className="error-message">{errors.addressCity}</span>}
           </div>
 
           <div className="form-group">
@@ -68,14 +64,12 @@ export function AddressForm({ formData, onChange, errors }: AddressFormProps) {
               id="addressState"
               name="addressState"
               value={formData.addressState}
-              onChange={(e) => onChange('addressState', e.target.value)}
+              onChange={e => onChange('addressState', e.target.value)}
               placeholder="Enter state"
               className={`form-input ${errors.addressState ? 'error' : ''}`}
               required
             />
-            {errors.addressState && (
-              <span className="error-message">{errors.addressState}</span>
-            )}
+            {errors.addressState && <span className="error-message">{errors.addressState}</span>}
           </div>
 
           <div className="form-group">
@@ -87,7 +81,7 @@ export function AddressForm({ formData, onChange, errors }: AddressFormProps) {
               id="addressZipcode"
               name="addressZipcode"
               value={formData.addressZipcode}
-              onChange={(e) => onChange('addressZipcode', e.target.value)}
+              onChange={e => onChange('addressZipcode', e.target.value)}
               placeholder="Enter ZIP code"
               className={`form-input ${errors.addressZipcode ? 'error' : ''}`}
               required
@@ -105,12 +99,10 @@ export function AddressForm({ formData, onChange, errors }: AddressFormProps) {
             <input
               type="checkbox"
               checked={formData.sameAsVenue}
-              onChange={(e) => onChange('sameAsVenue', e.target.checked)}
+              onChange={e => onChange('sameAsVenue', e.target.checked)}
               className="checkbox-input"
             />
-            <span className="checkbox-text">
-              Event venue is the same as service address
-            </span>
+            <span className="checkbox-text">Event venue is the same as service address</span>
           </label>
         </div>
 
@@ -131,13 +123,11 @@ export function AddressForm({ formData, onChange, errors }: AddressFormProps) {
                   id="venueStreet"
                   name="venueStreet"
                   value={formData.venueStreet || ''}
-                  onChange={(e) => onChange('venueStreet', e.target.value)}
+                  onChange={e => onChange('venueStreet', e.target.value)}
                   placeholder="Enter venue street address"
                   className={`form-input ${errors.venueStreet ? 'error' : ''}`}
                 />
-                {errors.venueStreet && (
-                  <span className="error-message">{errors.venueStreet}</span>
-                )}
+                {errors.venueStreet && <span className="error-message">{errors.venueStreet}</span>}
               </div>
 
               <div className="form-group">
@@ -149,13 +139,11 @@ export function AddressForm({ formData, onChange, errors }: AddressFormProps) {
                   id="venueCity"
                   name="venueCity"
                   value={formData.venueCity || ''}
-                  onChange={(e) => onChange('venueCity', e.target.value)}
+                  onChange={e => onChange('venueCity', e.target.value)}
                   placeholder="Enter venue city"
                   className={`form-input ${errors.venueCity ? 'error' : ''}`}
                 />
-                {errors.venueCity && (
-                  <span className="error-message">{errors.venueCity}</span>
-                )}
+                {errors.venueCity && <span className="error-message">{errors.venueCity}</span>}
               </div>
 
               <div className="form-group">
@@ -167,13 +155,11 @@ export function AddressForm({ formData, onChange, errors }: AddressFormProps) {
                   id="venueState"
                   name="venueState"
                   value={formData.venueState || ''}
-                  onChange={(e) => onChange('venueState', e.target.value)}
+                  onChange={e => onChange('venueState', e.target.value)}
                   placeholder="Enter venue state"
                   className={`form-input ${errors.venueState ? 'error' : ''}`}
                 />
-                {errors.venueState && (
-                  <span className="error-message">{errors.venueState}</span>
-                )}
+                {errors.venueState && <span className="error-message">{errors.venueState}</span>}
               </div>
 
               <div className="form-group">
@@ -185,7 +171,7 @@ export function AddressForm({ formData, onChange, errors }: AddressFormProps) {
                   id="venueZipcode"
                   name="venueZipcode"
                   value={formData.venueZipcode || ''}
-                  onChange={(e) => onChange('venueZipcode', e.target.value)}
+                  onChange={e => onChange('venueZipcode', e.target.value)}
                   placeholder="Enter venue ZIP code"
                   className={`form-input ${errors.venueZipcode ? 'error' : ''}`}
                 />

@@ -1,8 +1,8 @@
-import React from 'react';
-import './styles/BookUsHero.module.css';
+import React from 'react'
+import './styles/BookUsHero.module.css'
 
 interface BookUsHeroProps {
-  className?: string;
+  className?: string
 }
 
 const BookUsHero: React.FC<BookUsHeroProps> = ({ className = '' }) => {
@@ -15,7 +15,8 @@ const BookUsHero: React.FC<BookUsHeroProps> = ({ className = '' }) => {
             Book Your Hibachi Experience
           </h1>
           <p className="hero-subtitle">
-            Reserve your premium private hibachi chef service for an unforgettable culinary experience
+            Reserve your premium private hibachi chef service for an unforgettable culinary
+            experience
           </p>
           <div className="hero-features">
             <div className="feature-item">
@@ -34,8 +35,7 @@ const BookUsHero: React.FC<BookUsHeroProps> = ({ className = '' }) => {
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default BookUsHero;
-
+export default BookUsHero

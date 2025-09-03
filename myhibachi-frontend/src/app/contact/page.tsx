@@ -7,12 +7,15 @@ import { Metadata } from 'next'
 import ContactPageClient from './ContactPageClient'
 
 export const metadata: Metadata = {
-  title: "Book Private Hibachi Chef | Bay Area & Sacramento Catering Contact",
-  description: "Contact MyHibachi for premium private hibachi chef services. Serving San Francisco, San Jose, Oakland, Sacramento. Professional hibachi catering for all events. Get your free quote!",
-  keywords: "book hibachi chef, contact hibachi catering, bay area private chef, sacramento hibachi service, san jose hibachi catering, hibachi chef booking, private hibachi contact",
+  title: 'Book Private Hibachi Chef | Bay Area & Sacramento Catering Contact',
+  description:
+    'Contact MyHibachi for premium private hibachi chef services. Serving San Francisco, San Jose, Oakland, Sacramento. Professional hibachi catering for all events. Get your free quote!',
+  keywords:
+    'book hibachi chef, contact hibachi catering, bay area private chef, sacramento hibachi service, san jose hibachi catering, hibachi chef booking, private hibachi contact',
   openGraph: {
-    title: "Book Private Hibachi Chef | Bay Area & Sacramento Catering",
-    description: "Contact MyHibachi for premium private hibachi chef services across Northern California.",
+    title: 'Book Private Hibachi Chef | Bay Area & Sacramento Catering',
+    description:
+      'Contact MyHibachi for premium private hibachi chef services across Northern California.',
     type: 'website'
   }
 }

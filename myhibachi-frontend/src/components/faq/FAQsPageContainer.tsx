@@ -15,8 +15,8 @@ export function FAQsPageContainer({ faqs }: FAQsPageContainerProps) {
         <div className="faqs-header">
           <h1>Frequently Asked Questions</h1>
           <p className="faqs-subtitle">
-            Everything you need to know about our hibachi catering services. 
-            Can&apos;t find what you&apos;re looking for? <a href="/contact">Contact us directly</a>.
+            Everything you need to know about our hibachi catering services. Can&apos;t find what
+            you&apos;re looking for? <a href="/contact">Contact us directly</a>.
           </p>
         </div>
 

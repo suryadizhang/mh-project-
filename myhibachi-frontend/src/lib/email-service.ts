@@ -53,7 +53,6 @@ const EMAIL_RATE_LIMIT = 5 // Max 5 emails per hour per recipient
 const EMAIL_RATE_WINDOW = 3600000 // 1 hour
 
 class MyHibachiEmailService {
-
   // Check email rate limiting
   private checkEmailRateLimit(email: string): boolean {
     const now = Date.now()
@@ -73,7 +72,11 @@ class MyHibachiEmailService {
   }
 
   // Generate calendar links
-  private generateCalendarLinks(bookingData: BookingEmailData): { google: string; apple: string; ics: string } {
+  private generateCalendarLinks(bookingData: BookingEmailData): {
+    google: string
+    apple: string
+    ics: string
+  } {
     const { customerName, eventDate, eventTime, venueAddress } = bookingData
 
     // Convert event time to 24-hour format and create full datetime
@@ -134,7 +137,8 @@ END:VCALENDAR`
 
   // Generate booking confirmation email template
   private generateConfirmationEmail(bookingData: BookingEmailData): EmailTemplate {
-    const { customerName, eventDate, eventTime, guestCount, venueAddress, confirmationNumber } = bookingData
+    const { customerName, eventDate, eventTime, guestCount, venueAddress, confirmationNumber } =
+      bookingData
     const calendarLinks = this.generateCalendarLinks(bookingData)
 
     // Format date for display
@@ -145,7 +149,7 @@ END:VCALENDAR`
       day: 'numeric'
     })
 
-    const subject = "Your MyHibachi Experience is Confirmed!"
+    const subject = 'Your MyHibachi Experience is Confirmed!'
 
     const html = `
 <!DOCTYPE html>
@@ -272,7 +276,7 @@ myhibachi.com`
   private generateReviewEmail(bookingData: BookingEmailData): EmailTemplate {
     const { customerName } = bookingData
 
-    const subject = "How Was Your Hibachi Experience? 🌟"
+    const subject = 'How Was Your Hibachi Experience? 🌟'
 
     const html = `
 <!DOCTYPE html>
@@ -361,7 +365,7 @@ myhibachi.com | (123) 456-7890`
     const { customerName } = bookingData
     const promoCode = `WELCOME10-${bookingData.bookingId.slice(-6)}`
 
-    const subject = "Miss the Hibachi Experience? 🍤 Get 10% Off Your Next Show!"
+    const subject = 'Miss the Hibachi Experience? 🍤 Get 10% Off Your Next Show!'
 
     const html = `
 <!DOCTYPE html>
@@ -473,7 +477,6 @@ myhibachi.com | (123) 456-7890`
     bookingId: string,
     emailType: 'confirmation' | 'review_request' | 'upsell'
   ): Promise<{ success: boolean; messageId?: string; error?: string }> {
-
     // Check rate limiting
     if (!this.checkEmailRateLimit(to)) {
       console.log(`[EMAIL RATE LIMITED] ${emailType} email to ${to} blocked due to rate limiting`)
@@ -506,7 +509,6 @@ myhibachi.com | (123) 456-7890`
 
       console.log(`[EMAIL SENT] ${emailType} email sent to ${to} for booking ${bookingId}`)
       return { success: true, messageId: result.data?.id }
-
     } catch (error) {
       // Log failed email
       const emailLog: EmailLog = {
@@ -566,7 +568,7 @@ myhibachi.com | (123) 456-7890`
   }
 
   // Get all email logs with pagination
-  getAllEmailLogs(page: number = 1, limit: number = 50): { logs: EmailLog[], total: number } {
+  getAllEmailLogs(page: number = 1, limit: number = 50): { logs: EmailLog[]; total: number } {
     const startIndex = (page - 1) * limit
     const endIndex = startIndex + limit
     return {
@@ -576,8 +578,14 @@ myhibachi.com | (123) 456-7890`
   }
 
   // Admin function to manually resend email
-  async resendEmail(bookingId: string, emailType: 'confirmation' | 'review_request' | 'upsell', bookingData: BookingEmailData): Promise<boolean> {
-    console.log(`[EMAIL ADMIN] Manual resend requested for booking ${bookingId}, type: ${emailType}`)
+  async resendEmail(
+    bookingId: string,
+    emailType: 'confirmation' | 'review_request' | 'upsell',
+    bookingData: BookingEmailData
+  ): Promise<boolean> {
+    console.log(
+      `[EMAIL ADMIN] Manual resend requested for booking ${bookingId}, type: ${emailType}`
+    )
 
     switch (emailType) {
       case 'confirmation':
@@ -592,7 +600,12 @@ myhibachi.com | (123) 456-7890`
   }
 
   // Send custom email (for admin-generated emails like invoices)
-  async sendCustomEmail(emailData: { to: string; subject: string; html: string; text: string }): Promise<boolean> {
+  async sendCustomEmail(emailData: {
+    to: string
+    subject: string
+    html: string
+    text: string
+  }): Promise<boolean> {
     try {
       // Check rate limiting
       if (!this.checkEmailRateLimit(emailData.to)) {
@@ -607,7 +620,7 @@ myhibachi.com | (123) 456-7890`
         to: [to],
         subject,
         html,
-        text,
+        text
       })
 
       // Log email
@@ -623,7 +636,6 @@ myhibachi.com | (123) 456-7890`
 
       console.log(`[EMAIL SENT] Custom email sent to ${to}, Message ID: ${result.data?.id}`)
       return true
-
     } catch (error) {
       console.error(`[EMAIL ERROR] Failed to send custom email:`, error)
 

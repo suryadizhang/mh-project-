@@ -72,7 +72,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <nav className="w-64 bg-white shadow-sm border-r border-gray-200 min-h-[calc(100vh-4rem)]">
           <div className="p-4">
             <div className="space-y-1">
-              {navigation.map((item) => {
+              {navigation.map(item => {
                 const isActive = pathname === item.href
                 return (
                   <Link
@@ -80,9 +80,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     href={item.href}
                     className={`
                       flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors
-                      ${isActive
-                        ? 'bg-red-50 text-red-700 border-r-2 border-red-600'
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      ${
+                        isActive
+                          ? 'bg-red-50 text-red-700 border-r-2 border-red-600'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                       }
                     `}
                   >
@@ -117,9 +118,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </nav>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto">
-          {children}
-        </main>
+        <main className="flex-1 overflow-auto">{children}</main>
       </div>
     </div>
   )

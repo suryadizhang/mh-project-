@@ -3,12 +3,15 @@
 ## 📡 API Endpoints
 
 ### 1. Get Fully Booked Dates
+
 ```
 GET /api/v1/bookings/booked-dates
 ```
+
 **Purpose**: Returns dates that are completely unavailable (all time slots booked)
 
 **Response Example**:
+
 ```json
 {
   "success": true,
@@ -18,12 +21,15 @@ GET /api/v1/bookings/booked-dates
 ```
 
 ### 2. Get Availability for Specific Date
+
 ```
 GET /api/v1/bookings/availability?date=YYYY-MM-DD
 ```
+
 **Purpose**: Returns time slot availability for a specific date
 
 **Response Example**:
+
 ```json
 {
   "success": true,
@@ -37,7 +43,7 @@ GET /api/v1/bookings/availability?date=YYYY-MM-DD
       "isAvailable": false
     },
     {
-      "time": "3PM", 
+      "time": "3PM",
       "available": 1,
       "maxCapacity": 2,
       "booked": 1,
@@ -48,12 +54,15 @@ GET /api/v1/bookings/availability?date=YYYY-MM-DD
 ```
 
 ### 3. Create Booking (Ready for Implementation)
+
 ```
 POST /api/v1/bookings/availability
 ```
+
 **Purpose**: Reserve a time slot for a customer
 
 **Request Body**:
+
 ```json
 {
   "date": "2025-08-09",
@@ -70,6 +79,7 @@ POST /api/v1/bookings/availability
 ## 🗂️ Database Schema Recommendations
 
 ### Bookings Table
+
 ```sql
 CREATE TABLE bookings (
     id UUID PRIMARY KEY,
@@ -88,10 +98,11 @@ CREATE TABLE bookings (
 ```
 
 ### Time Slots Configuration Table
+
 ```sql
 CREATE TABLE time_slot_config (
     id SERIAL PRIMARY KEY,
-    time_slot VARCHAR(10) NOT NULL, -- '12PM', '3PM', '6PM', '9PM'  
+    time_slot VARCHAR(10) NOT NULL, -- '12PM', '3PM', '6PM', '9PM'
     max_capacity INTEGER DEFAULT 2,
     is_active BOOLEAN DEFAULT true
 );
@@ -106,9 +117,9 @@ The system currently uses mock data to demonstrate functionality:
 const MOCK_AVAILABILITY = {
   '2025-08-08': {
     '12PM': { booked: 2, maxCapacity: 2 }, // Fully booked
-    '3PM': { booked: 1, maxCapacity: 2 },  // 1 slot available
-    '6PM': { booked: 0, maxCapacity: 2 },  // 2 slots available  
-    '9PM': { booked: 2, maxCapacity: 2 },  // Fully booked
+    '3PM': { booked: 1, maxCapacity: 2 }, // 1 slot available
+    '6PM': { booked: 0, maxCapacity: 2 }, // 2 slots available
+    '9PM': { booked: 2, maxCapacity: 2 } // Fully booked
   }
   // ... more dates
 }
@@ -117,18 +128,21 @@ const MOCK_AVAILABILITY = {
 ## ✨ Frontend Features
 
 ### Date Selection
+
 - ✅ **React DatePicker**: Professional date selection with custom styling
 - ✅ **48-Hour Rule**: Enforces minimum advance booking requirement
 - ✅ **Blocked Dates**: Automatically excludes fully booked dates
 - ✅ **No Previous Years**: Prevents navigation to past years
 
-### Time Slot Selection  
+### Time Slot Selection
+
 - ✅ **Dynamic Loading**: Fetches availability when date is selected
 - ✅ **Visual Indicators**: Shows available slots vs "Fully Booked"
 - ✅ **Real-time Updates**: Updates based on actual bookings
 - ✅ **Smart Messaging**: User-friendly availability feedback
 
 ### User Experience
+
 - ✅ **Loading States**: Shows progress during API calls
 - ✅ **Error Handling**: Graceful fallbacks if APIs fail
 - ✅ **Validation**: Comprehensive form validation with helpful messages

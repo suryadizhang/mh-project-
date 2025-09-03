@@ -35,7 +35,9 @@ function PaymentSuccessContent() {
       }
 
       try {
-        const response = await fetch(`/api/v1/payments/create-intent?payment_intent_id=${paymentIntentId}`)
+        const response = await fetch(
+          `/api/v1/payments/create-intent?payment_intent_id=${paymentIntentId}`
+        )
         const data = await response.json()
 
         if (response.ok) {
@@ -117,7 +119,7 @@ Contact: (916) 740-8768 | info@myhibachi.com
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Payment Error</h1>
           <p className="text-gray-600 mb-6">{error}</p>
-          <Link 
+          <Link
             href="/payment"
             className="inline-flex items-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
           >
@@ -142,7 +144,8 @@ Contact: (916) 740-8768 | info@myhibachi.com
             ${paymentDetails ? (paymentDetails.amount / 100).toFixed(2) : '0.00'} USD
           </p>
           <p className="text-gray-600">
-            Your payment has been processed successfully. A confirmation email will be sent to your registered email address.
+            Your payment has been processed successfully. A confirmation email will be sent to your
+            registered email address.
           </p>
         </div>
 
@@ -159,7 +162,8 @@ Contact: (916) 740-8768 | info@myhibachi.com
                 <div>
                   <div className="text-gray-500">Amount</div>
                   <div className="font-semibold text-gray-900">
-                    ${(paymentDetails.amount / 100).toFixed(2)} {paymentDetails.currency.toUpperCase()}
+                    ${(paymentDetails.amount / 100).toFixed(2)}{' '}
+                    {paymentDetails.currency.toUpperCase()}
                   </div>
                 </div>
                 <div>
@@ -179,14 +183,18 @@ Contact: (916) 740-8768 | info@myhibachi.com
                 {paymentDetails.metadata.bookingId && (
                   <div>
                     <div className="text-gray-500">Booking ID</div>
-                    <div className="font-mono text-gray-900">{paymentDetails.metadata.bookingId}</div>
+                    <div className="font-mono text-gray-900">
+                      {paymentDetails.metadata.bookingId}
+                    </div>
                   </div>
                 )}
                 {paymentDetails.metadata.paymentType && (
                   <div>
                     <div className="text-gray-500">Payment Type</div>
                     <div className="text-gray-900 capitalize">
-                      {paymentDetails.metadata.paymentType === 'deposit' ? 'Deposit Payment' : 'Balance Payment'}
+                      {paymentDetails.metadata.paymentType === 'deposit'
+                        ? 'Deposit Payment'
+                        : 'Balance Payment'}
                     </div>
                   </div>
                 )}
@@ -245,7 +253,8 @@ Contact: (916) 740-8768 | info@myhibachi.com
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Need Help?</h3>
           <p className="text-gray-600 mb-4">
-            If you have any questions about your payment or booking, please don&apos;t hesitate to contact us:
+            If you have any questions about your payment or booking, please don&apos;t hesitate to
+            contact us:
           </p>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center space-y-2 sm:space-y-0 sm:space-x-6 text-sm">
             <div className="flex items-center">

@@ -8,23 +8,25 @@ import type { BlogPost } from '../data/blogPosts'
 export const convertSEOToStandardBlogPosts = (): BlogPost[] => {
   const seoBlogs = generateSEOBlogCalendar()
 
-  return seoBlogs.map((seoPost: SEOBlogPost): BlogPost => ({
-    id: seoPost.id,
-    title: seoPost.title,
-    slug: seoPost.slug,
-    excerpt: seoPost.metaDescription, // Use metaDescription as excerpt
-    content: undefined, // Will be generated based on content outline
-    metaDescription: seoPost.metaDescription,
-    keywords: [seoPost.primaryKeyword, ...seoPost.secondaryKeywords],
-    author: seoPost.author,
-    date: formatDate(seoPost.publishDate),
-    readTime: calculateReadTime(seoPost.contentLength),
-    category: mapEventToCategory(seoPost.eventType),
-    serviceArea: seoPost.targetLocation,
-    eventType: seoPost.eventType,
-    featured: shouldBeFeatured(seoPost),
-    seasonal: isSeasonalPost(seoPost)
-  }))
+  return seoBlogs.map(
+    (seoPost: SEOBlogPost): BlogPost => ({
+      id: seoPost.id,
+      title: seoPost.title,
+      slug: seoPost.slug,
+      excerpt: seoPost.metaDescription, // Use metaDescription as excerpt
+      content: undefined, // Will be generated based on content outline
+      metaDescription: seoPost.metaDescription,
+      keywords: [seoPost.primaryKeyword, ...seoPost.secondaryKeywords],
+      author: seoPost.author,
+      date: formatDate(seoPost.publishDate),
+      readTime: calculateReadTime(seoPost.contentLength),
+      category: mapEventToCategory(seoPost.eventType),
+      serviceArea: seoPost.targetLocation,
+      eventType: seoPost.eventType,
+      featured: shouldBeFeatured(seoPost),
+      seasonal: isSeasonalPost(seoPost)
+    })
+  )
 }
 
 // Helper function to format date
@@ -48,27 +50,27 @@ const calculateReadTime = (contentLength: number): string => {
 const mapEventToCategory = (eventType: string): string => {
   const categoryMap: Record<string, string> = {
     'Backyard Party': 'Outdoor Events',
-    'Corporate': 'Corporate',
+    Corporate: 'Corporate',
     'Corporate Tech': 'Corporate',
-    'Birthday': 'Birthday',
-    'Wedding': 'Weddings',
-    'Graduation': 'Celebrations',
-    'Holiday': 'Holidays',
+    Birthday: 'Birthday',
+    Wedding: 'Weddings',
+    Graduation: 'Celebrations',
+    Holiday: 'Holidays',
     'Pool Party': 'Summer Events',
-    'Engagement': 'Romantic',
-    'Anniversary': 'Romantic',
+    Engagement: 'Romantic',
+    Anniversary: 'Romantic',
     'Baby Shower': 'Celebrations',
-    'Retirement': 'Professional',
+    Retirement: 'Professional',
     'Family Reunion': 'Family',
-    'Networking': 'Professional',
-    'Housewarming': 'Celebrations',
+    Networking: 'Professional',
+    Housewarming: 'Celebrations',
     'Summer BBQ': 'Summer Events',
     'Sports Party': 'Sports Events',
     'Block Party': 'Community Events',
-    'Festival': 'Community Events',
+    Festival: 'Community Events',
     'Tech Event': 'Corporate',
-    'University': 'Educational',
-    'Cultural': 'Cultural Events'
+    University: 'Educational',
+    Cultural: 'Cultural Events'
   }
 
   return categoryMap[eventType] || 'Events'
@@ -79,18 +81,29 @@ const shouldBeFeatured = (seoPost: SEOBlogPost): boolean => {
   const highPriorityLocations = ['San Jose', 'San Francisco', 'Oakland', 'Palo Alto', 'Bay Area']
   const highPriorityEvents = ['Backyard Party', 'Corporate', 'Wedding', 'Birthday']
 
-  return highPriorityLocations.includes(seoPost.targetLocation) &&
-         highPriorityEvents.includes(seoPost.eventType)
+  return (
+    highPriorityLocations.includes(seoPost.targetLocation) &&
+    highPriorityEvents.includes(seoPost.eventType)
+  )
 }
 
 // Determine if post is seasonal
 const isSeasonalPost = (seoPost: SEOBlogPost): boolean => {
-  const seasonalKeywords = ['holiday', 'summer', 'winter', 'spring', 'fall', 'thanksgiving', 'christmas', 'new year']
+  const seasonalKeywords = [
+    'holiday',
+    'summer',
+    'winter',
+    'spring',
+    'fall',
+    'thanksgiving',
+    'christmas',
+    'new year'
+  ]
   const titleLower = seoPost.title.toLowerCase()
   const eventLower = seoPost.eventType.toLowerCase()
 
-  return seasonalKeywords.some(keyword =>
-    titleLower.includes(keyword) || eventLower.includes(keyword)
+  return seasonalKeywords.some(
+    keyword => titleLower.includes(keyword) || eventLower.includes(keyword)
   )
 }
 

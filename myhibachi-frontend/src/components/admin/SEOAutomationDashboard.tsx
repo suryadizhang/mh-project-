@@ -29,8 +29,15 @@ export default function SEOAutomationDashboard() {
   const [isRunning, setIsRunning] = useState(false)
 
   const locations = [
-    'San Jose', 'San Francisco', 'Palo Alto', 'Oakland',
-    'Mountain View', 'Santa Clara', 'Sunnyvale', 'Sacramento', 'Fremont'
+    'San Jose',
+    'San Francisco',
+    'Palo Alto',
+    'Oakland',
+    'Mountain View',
+    'Santa Clara',
+    'Sunnyvale',
+    'Sacramento',
+    'Fremont'
   ]
 
   useEffect(() => {
@@ -72,7 +79,9 @@ export default function SEOAutomationDashboard() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">SEO Automation Dashboard</h1>
-          <p className="text-gray-600 mt-1">Manage automated SEO and marketing tasks across all locations</p>
+          <p className="text-gray-600 mt-1">
+            Manage automated SEO and marketing tasks across all locations
+          </p>
         </div>
         <Badge variant={stats.automationStatus === 'active' ? 'default' : 'secondary'}>
           {stats.automationStatus === 'active' ? '🟢 Active' : '🟡 Paused'}
@@ -138,10 +147,10 @@ export default function SEOAutomationDashboard() {
               <label className="text-sm font-medium">Select Location</label>
               <select
                 value={selectedLocation}
-                onChange={(e) => setSelectedLocation(e.target.value)}
+                onChange={e => setSelectedLocation(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
               >
-                {locations.map((location) => (
+                {locations.map(location => (
                   <option key={location} value={location}>
                     {location}
                   </option>
@@ -149,20 +158,14 @@ export default function SEOAutomationDashboard() {
               </select>
             </div>
 
-            <Button
-              onClick={runAutomation}
-              disabled={isRunning}
-              className="w-full"
-            >
+            <Button onClick={runAutomation} disabled={isRunning} className="w-full">
               {isRunning ? (
                 <>
                   <span className="animate-spin mr-2">⏳</span>
                   Running Automation...
                 </>
               ) : (
-                <>
-                  🚀 Run Full Automation for {selectedLocation}
-                </>
+                <>🚀 Run Full Automation for {selectedLocation}</>
               )}
             </Button>
           </CardContent>
@@ -209,7 +212,9 @@ export default function SEOAutomationDashboard() {
                 <span className="text-xl">📍</span>
                 <h3 className="font-semibold">Google My Business</h3>
               </div>
-              <p className="text-sm text-gray-600">Automated post generation and scheduling for all locations</p>
+              <p className="text-sm text-gray-600">
+                Automated post generation and scheduling for all locations
+              </p>
               <ul className="text-xs text-gray-500 space-y-1">
                 <li>• Weekly content calendar</li>
                 <li>• Event-specific posts</li>
@@ -222,7 +227,9 @@ export default function SEOAutomationDashboard() {
                 <span className="text-xl">🏢</span>
                 <h3 className="font-semibold">Directory Management</h3>
               </div>
-              <p className="text-sm text-gray-600">Automated submissions to 12+ business directories</p>
+              <p className="text-sm text-gray-600">
+                Automated submissions to 12+ business directories
+              </p>
               <ul className="text-xs text-gray-500 space-y-1">
                 <li>• Yelp, TripAdvisor, Foursquare</li>
                 <li>• Delivery platforms</li>
@@ -235,7 +242,9 @@ export default function SEOAutomationDashboard() {
                 <span className="text-xl">📧</span>
                 <h3 className="font-semibold">Email Marketing</h3>
               </div>
-              <p className="text-sm text-gray-600">Location-specific email campaigns and sequences</p>
+              <p className="text-sm text-gray-600">
+                Location-specific email campaigns and sequences
+              </p>
               <ul className="text-xs text-gray-500 space-y-1">
                 <li>• Welcome sequences</li>
                 <li>• Birthday campaigns</li>
@@ -248,7 +257,9 @@ export default function SEOAutomationDashboard() {
                 <span className="text-xl">⭐</span>
                 <h3 className="font-semibold">Review Management</h3>
               </div>
-              <p className="text-sm text-gray-600">Automated review responses and reputation monitoring</p>
+              <p className="text-sm text-gray-600">
+                Automated review responses and reputation monitoring
+              </p>
               <ul className="text-xs text-gray-500 space-y-1">
                 <li>• Smart response templates</li>
                 <li>• Sentiment analysis</li>

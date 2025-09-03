@@ -1,11 +1,11 @@
-import React from 'react';
-import { FormSectionProps } from './types';
-import './styles/ContactInfoSection.module.css';
+import React from 'react'
+import { FormSectionProps } from './types'
+import './styles/ContactInfoSection.module.css'
 
-const ContactInfoSection: React.FC<FormSectionProps & { className?: string }> = ({ 
-  register, 
-  errors, 
-  className = '' 
+const ContactInfoSection: React.FC<FormSectionProps & { className?: string }> = ({
+  register,
+  errors,
+  className = ''
 }) => {
   return (
     <div className={`form-section ${className}`}>
@@ -17,7 +17,9 @@ const ContactInfoSection: React.FC<FormSectionProps & { className?: string }> = 
       <div className="row">
         <div className="col-md-6">
           <div className="form-group">
-            <label htmlFor="name" className="form-label required">Full Name</label>
+            <label htmlFor="name" className="form-label required">
+              Full Name
+            </label>
             <input
               type="text"
               id="name"
@@ -25,15 +27,15 @@ const ContactInfoSection: React.FC<FormSectionProps & { className?: string }> = 
               {...register('name', { required: 'Name is required' })}
               placeholder="Enter your full name"
             />
-            {errors.name && (
-              <div className="invalid-feedback">{errors.name.message}</div>
-            )}
+            {errors.name && <div className="invalid-feedback">{errors.name.message}</div>}
           </div>
         </div>
 
         <div className="col-md-6">
           <div className="form-group">
-            <label htmlFor="email" className="form-label required">Email Address</label>
+            <label htmlFor="email" className="form-label required">
+              Email Address
+            </label>
             <input
               type="email"
               id="email"
@@ -47,9 +49,7 @@ const ContactInfoSection: React.FC<FormSectionProps & { className?: string }> = 
               })}
               placeholder="your.email@example.com"
             />
-            {errors.email && (
-              <div className="invalid-feedback">{errors.email.message}</div>
-            )}
+            {errors.email && <div className="invalid-feedback">{errors.email.message}</div>}
           </div>
         </div>
       </div>
@@ -57,7 +57,9 @@ const ContactInfoSection: React.FC<FormSectionProps & { className?: string }> = 
       <div className="row">
         <div className="col-md-6">
           <div className="form-group">
-            <label htmlFor="phone" className="form-label required">Phone Number</label>
+            <label htmlFor="phone" className="form-label required">
+              Phone Number
+            </label>
             <input
               type="tel"
               id="phone"
@@ -65,15 +67,15 @@ const ContactInfoSection: React.FC<FormSectionProps & { className?: string }> = 
               {...register('phone', { required: 'Phone number is required' })}
               placeholder="(555) 123-4567"
             />
-            {errors.phone && (
-              <div className="invalid-feedback">{errors.phone.message}</div>
-            )}
+            {errors.phone && <div className="invalid-feedback">{errors.phone.message}</div>}
           </div>
         </div>
 
         <div className="col-md-6">
           <div className="form-group">
-            <label htmlFor="guestCount" className="form-label required">Number of Guests</label>
+            <label htmlFor="guestCount" className="form-label required">
+              Number of Guests
+            </label>
             <input
               type="number"
               id="guestCount"
@@ -94,7 +96,7 @@ const ContactInfoSection: React.FC<FormSectionProps & { className?: string }> = 
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ContactInfoSection;
+export default ContactInfoSection

@@ -7,24 +7,28 @@ A comprehensive payment processing system that integrates with Stripe for credit
 ## ✨ Key Features
 
 ### 🔐 **Secure Payment Processing**
+
 - **Stripe Integration**: Full credit card processing with 2FA and PIN verification
 - **Alternative Methods**: Zelle and Venmo payment options (no processing fees)
 - **8% Processing Fee**: Automatically calculated for Stripe payments only
 - **PCI Compliance**: All card data handled securely by Stripe
 
 ### 💰 **Flexible Payment Options**
+
 - **Deposit Payments**: $100 deposit to secure bookings
 - **Balance Payments**: Pay remaining amount with optional tips
 - **Custom Amounts**: Manual payment entry for any amount
 - **Tips/Gratuity**: Preset percentages (15%, 18%, 20%, 25%) or custom amounts
 
 ### 🔍 **Booking Integration**
+
 - **Customer Lookup**: Search by booking ID, email, or name
 - **Automatic Amount Detection**: System finds owed amounts from bookings
 - **Payment Tracking**: Links payments to specific bookings
 - **Status Updates**: Automatic booking status updates after payment
 
 ### 📱 **User Experience**
+
 - **Mobile Responsive**: Works seamlessly on all devices
 - **Real-time Calculations**: Live total updates with fees and tips
 - **Payment Summary**: Clear breakdown of all charges
@@ -33,6 +37,7 @@ A comprehensive payment processing system that integrates with Stripe for credit
 ## 🏗️ System Architecture
 
 ### Frontend Components
+
 ```
 src/app/payment/
 ├── page.tsx                    # Main payment page
@@ -46,6 +51,7 @@ src/components/payment/
 ```
 
 ### Backend API Routes
+
 ```
 src/app/api/v1/payments/
 ├── create-intent/
@@ -57,17 +63,20 @@ src/app/api/v1/payments/
 ## 💳 Payment Methods
 
 ### 1. **Credit Card (Stripe)**
+
 - **Processing Fee**: 8% automatically added
 - **Security**: 256-bit SSL encryption + 2FA
 - **Features**: Apple Pay, Google Pay, traditional cards
 - **Verification**: PIN verification for enhanced security
 
 ### 2. **Zelle**
+
 - **No Fees**: Direct bank transfer
 - **Details**: payments@myhibachi.com | (916) 740-8768
 - **Verification**: Manual confirmation within 1-2 hours
 
 ### 3. **Venmo**
+
 - **No Fees**: Peer-to-peer transfer
 - **Username**: @MyHibachi-Catering
 - **App Integration**: Direct link to Venmo app
@@ -75,6 +84,7 @@ src/app/api/v1/payments/
 ## 🔄 Payment Flow
 
 ### 1. **Customer Access**
+
 ```
 Payment Page URL: /payment
 - Accessible by anyone with the link
@@ -83,6 +93,7 @@ Payment Page URL: /payment
 ```
 
 ### 2. **Booking Lookup (Optional)**
+
 ```
 Search Methods:
 - Booking ID (e.g., MH-20250830-AB12)
@@ -92,6 +103,7 @@ Search Methods:
 ```
 
 ### 3. **Payment Type Selection**
+
 ```
 Deposit Payment:
 - Fixed $100 amount
@@ -105,6 +117,7 @@ Balance Payment:
 ```
 
 ### 4. **Tip Calculation**
+
 ```
 Preset Options: 15%, 18%, 20%, 25%
 Custom Amount: Manual entry
@@ -113,6 +126,7 @@ Fee Application: Only to Stripe payments (not tips)
 ```
 
 ### 5. **Payment Processing**
+
 ```
 Stripe Flow:
 1. Customer info collection
@@ -132,6 +146,7 @@ Alternative Flow:
 ## 🔧 Technical Implementation
 
 ### Environment Variables
+
 ```bash
 # Stripe Configuration
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
@@ -146,6 +161,7 @@ VENMO_USERNAME=@MyHibachi-Catering
 ```
 
 ### Stripe Integration
+
 ```typescript
 // Payment Intent Creation
 const paymentIntent = await stripe.paymentIntents.create({
@@ -163,6 +179,7 @@ const paymentIntent = await stripe.paymentIntents.create({
 ```
 
 ### Fee Calculation
+
 ```typescript
 // Only Stripe payments include 8% fee
 const baseAmount = deposit || balance || customAmount
@@ -175,6 +192,7 @@ const totalAmount = subtotal + processingFee
 ## 📱 User Interface
 
 ### Payment Page Features
+
 - **Multi-step Form**: Booking lookup → Payment type → Method → Processing
 - **Real-time Updates**: Live calculation display
 - **Responsive Design**: Mobile-first approach
@@ -182,6 +200,7 @@ const totalAmount = subtotal + processingFee
 - **Error Handling**: Clear error messages and recovery
 
 ### Success Page Features
+
 - **Payment Confirmation**: Complete transaction details
 - **Receipt Download**: Printable payment receipt
 - **Booking Information**: Event details and status
@@ -191,12 +210,14 @@ const totalAmount = subtotal + processingFee
 ## 🛡️ Security Features
 
 ### Data Protection
+
 - **No Card Storage**: All card data handled by Stripe
 - **SSL Encryption**: 256-bit encryption for all communications
 - **Input Sanitization**: XSS and injection prevention
 - **Rate Limiting**: API abuse prevention
 
 ### Authentication
+
 - **2-Factor Authentication**: Stripe's built-in 2FA
 - **PIN Verification**: Additional security layer
 - **Email Confirmation**: Payment verification emails
@@ -205,6 +226,7 @@ const totalAmount = subtotal + processingFee
 ## 📊 Demo Data
 
 ### Test Booking IDs
+
 ```
 MH-20250830-AB12 - John Smith (No deposit paid)
 MH-20250825-CD34 - Sarah Johnson (Deposit paid)
@@ -212,6 +234,7 @@ MH-20250828-EF56 - Mike Davis (Deposit paid)
 ```
 
 ### Test Customers
+
 ```
 Email: john.smith@email.com
 Email: sarah.j@email.com
@@ -221,6 +244,7 @@ Email: mike.davis@email.com
 ## 🚀 Deployment
 
 ### Requirements
+
 1. **Stripe Account**: Live API keys for production
 2. **Domain Setup**: HTTPS required for payment processing
 3. **Webhook Configuration**: Payment confirmation handling
@@ -228,6 +252,7 @@ Email: mike.davis@email.com
 5. **Email Service**: Confirmation and notification emails
 
 ### Production Setup
+
 1. **Environment Variables**: Configure live Stripe keys
 2. **Webhook Endpoints**: Set up payment confirmation webhooks
 3. **Database Schema**: Create payment and booking tables
@@ -237,6 +262,7 @@ Email: mike.davis@email.com
 ## 📈 Future Enhancements
 
 ### Planned Features
+
 - **Recurring Payments**: Subscription-based services
 - **Multi-currency**: International payment support
 - **Payment Plans**: Installment payment options
@@ -244,6 +270,7 @@ Email: mike.davis@email.com
 - **Mobile App**: Dedicated payment application
 
 ### Integration Opportunities
+
 - **Calendar Sync**: Google/Outlook calendar integration
 - **CRM Integration**: Customer relationship management
 - **Accounting Software**: QuickBooks/Xero integration
@@ -252,6 +279,7 @@ Email: mike.davis@email.com
 ## 🔍 Testing
 
 ### Test Payment Methods
+
 ```
 Stripe Test Cards:
 - Success: 4242424242424242
@@ -265,6 +293,7 @@ Zelle/Venmo Testing:
 ```
 
 ### Testing Scenarios
+
 1. **Deposit Payment**: New booking deposit
 2. **Balance Payment**: Final payment with tips
 3. **Custom Payment**: Manual amount entry
@@ -274,11 +303,13 @@ Zelle/Venmo Testing:
 ## 📞 Support
 
 ### Contact Information
+
 - **Phone**: (916) 740-8768
 - **Email**: info@myhibachi.com
 - **Website**: https://myhibachi.com
 
 ### Technical Support
+
 - **Payment Issues**: Stripe dashboard monitoring
 - **Integration Help**: Developer documentation
 - **API Questions**: Technical support team
@@ -288,6 +319,7 @@ Zelle/Venmo Testing:
 ## 🎉 Implementation Complete!
 
 The My Hibachi Payment System is now fully implemented with:
+
 - ✅ Stripe credit card processing with 8% fee
 - ✅ Zelle and Venmo alternative options (no fees)
 - ✅ Booking integration and customer lookup

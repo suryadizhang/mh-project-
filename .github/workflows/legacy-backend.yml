@@ -1,0 +1,139 @@
+name: Legacy Backend CI (Quarantine)
+
+on:
+  push:
+    paths: 
+      - 'myhibachi-backend/**'
+      - '.github/workflows/legacy-backend.yml'
+  pull_request:
+    paths:
+      - 'myhibachi-backend/**'
+
+defaults:
+  run:
+    working-directory: myhibachi-backend
+
+jobs:
+  quarantine-validation:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: myhibachi-backend/requirements.txt
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f "requirements.txt" ]; then
+            pip install -r requirements.txt
+          fi
+          
+      - name: Validate deprecation warnings
+        run: |
+          echo "🚨 LEGACY BACKEND QUARANTINE VALIDATION 🚨"
+          echo "This backend is in QUARANTINE and scheduled for deprecation"
+          echo ""
+          
+          # Check for deprecation markers
+          if ! grep -r "DEPRECATED\|deprecated\|LEGACY\|legacy" . --exclude-dir=__pycache__ | head -5; then
+            echo "❌ VIOLATION: Legacy backend missing deprecation warnings"
+            echo "Add deprecation notices to all endpoints and README"
+            exit 1
+          fi
+          
+          echo "✅ Deprecation warnings found"
+          
+      - name: Validate port isolation
+        run: |
+          echo "Checking port isolation (must use 8001)..."
+          if grep -r "port.*800[02]" . --exclude-dir=__pycache__ || grep -r ":800[02]" . --exclude-dir=__pycache__; then
+            echo "❌ PORT COLLISION: Legacy backend using ports 8000 or 8002"
+            echo "Must use port 8001 only"
+            exit 1
+          fi
+          
+          # Verify 8001 is used
+          if ! grep -r "8001" . --exclude-dir=__pycache__; then
+            echo "⚠️  WARNING: Port 8001 not found, verify configuration"
+          else
+            echo "✅ Port 8001 properly configured"
+          fi
+          
+      - name: Check for Stripe integration violations
+        run: |
+          echo "Checking for Stripe integration violations..."
+          if grep -r "sk_live_\|sk_test_\|STRIPE_SECRET\|stripe.api_key" . --exclude-dir=__pycache__; then
+            echo "❌ SECURITY VIOLATION: Legacy backend contains Stripe secrets"
+            echo "All Stripe integration must be moved to FastAPI backend"
+            exit 1
+          else
+            echo "✅ No Stripe secrets found in legacy backend"
+          fi
+          
+      - name: Syntax validation only
+        run: |
+          echo "Running minimal syntax validation..."
+          if [ -f "main.py" ]; then
+            python -c "import main; print('Legacy main.py syntax valid')"
+          fi
+          
+          # Check for any Python syntax errors
+          find . -name "*.py" -exec python -m py_compile {} \; || echo "Syntax errors found"
+          
+      - name: Block new feature development
+        run: |
+          echo "🛑 DEVELOPMENT BLOCK CHECK 🛑"
+          echo "Legacy backend is in quarantine - no new features allowed"
+          echo ""
+          
+          # Check git diff for substantial changes (if in PR context)
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            echo "Checking for substantial changes in PR..."
+            git fetch origin main
+            CHANGED_FILES=$(git diff --name-only origin/main...HEAD | grep "myhibachi-backend/" | wc -l)
+            
+            if [ "$CHANGED_FILES" -gt 2 ]; then
+              echo "❌ VIOLATION: Too many files changed in legacy backend ($CHANGED_FILES files)"
+              echo "Legacy backend is quarantined - only critical bug fixes allowed"
+              echo "Move new features to FastAPI backend instead"
+              exit 1
+            fi
+            
+            # Check for new functions/classes
+            if git diff origin/main...HEAD | grep "^+.*def \|^+.*class "; then
+              echo "❌ VIOLATION: New functions/classes detected in legacy backend"
+              echo "No new development allowed - implement in FastAPI backend"
+              exit 1
+            fi
+          fi
+          
+          echo "✅ No prohibited development detected"
+          
+      - name: Generate quarantine report
+        run: |
+          echo "📋 LEGACY BACKEND QUARANTINE REPORT 📋" | tee quarantine-report.txt
+          echo "Generated: $(date)" | tee -a quarantine-report.txt
+          echo "" | tee -a quarantine-report.txt
+          echo "Status: QUARANTINED - Scheduled for deprecation" | tee -a quarantine-report.txt
+          echo "Port: 8001 (isolated)" | tee -a quarantine-report.txt
+          echo "Stripe Integration: REMOVED (moved to FastAPI backend)" | tee -a quarantine-report.txt
+          echo "Development: BLOCKED (bug fixes only)" | tee -a quarantine-report.txt
+          echo "" | tee -a quarantine-report.txt
+          echo "Next Steps:" | tee -a quarantine-report.txt
+          echo "1. Complete FastAPI migration" | tee -a quarantine-report.txt
+          echo "2. Update all frontend calls to use FastAPI" | tee -a quarantine-report.txt
+          echo "3. Verify zero traffic to legacy endpoints" | tee -a quarantine-report.txt
+          echo "4. Schedule decommission date" | tee -a quarantine-report.txt
+          
+      - name: Run guard checks
+        run: |
+          cd ..
+          pip install colorama
+          python guard.py

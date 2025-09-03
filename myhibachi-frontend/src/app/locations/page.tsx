@@ -5,11 +5,14 @@ import Assistant from '@/components/chat/Assistant'
 
 export const metadata: Metadata = {
   title: 'Hibachi Catering Locations | Bay Area, Sacramento & Central Valley | MyHibachi',
-  description: 'Professional hibachi catering across California! Serving San Jose, San Francisco, Oakland, Palo Alto, Mountain View, Sacramento & more. Book your private chef today!',
-  keywords: 'hibachi catering locations, Bay Area hibachi chef, Sacramento hibachi catering, California hibachi service, mobile hibachi catering, private chef California',
+  description:
+    'Professional hibachi catering across California! Serving San Jose, San Francisco, Oakland, Palo Alto, Mountain View, Sacramento & more. Book your private chef today!',
+  keywords:
+    'hibachi catering locations, Bay Area hibachi chef, Sacramento hibachi catering, California hibachi service, mobile hibachi catering, private chef California',
   openGraph: {
     title: 'Hibachi Catering Locations | Bay Area, Sacramento & Central Valley',
-    description: 'Professional hibachi catering across California! Serving San Jose, San Francisco, Oakland, Palo Alto, Mountain View, Sacramento & more.',
+    description:
+      'Professional hibachi catering across California! Serving San Jose, San Francisco, Oakland, Palo Alto, Mountain View, Sacramento & more.',
     type: 'website',
     locale: 'en_US',
     siteName: 'MyHibachi'
@@ -24,7 +27,7 @@ export default function LocationsPage() {
     {
       city: 'San Jose',
       slug: 'san-jose',
-      description: 'Silicon Valley\'s premier hibachi catering for tech companies and families',
+      description: "Silicon Valley's premier hibachi catering for tech companies and families",
       highlights: ['Tech Company Events', 'Family Celebrations', 'Backyard Parties']
     },
     {
@@ -82,14 +85,16 @@ export default function LocationsPage() {
       {/* Hero Section */}
       <section className="page-hero-background py-20 text-white text-center">
         <div className="max-w-4xl mx-auto px-4">
-          <h1 className="text-5xl font-bold mb-6">
-            Hibachi Catering Locations Across California
-          </h1>
+          <h1 className="text-5xl font-bold mb-6">Hibachi Catering Locations Across California</h1>
           <p className="text-xl mb-8 text-gray-200">
-            Professional hibachi chefs bringing authentic Japanese entertainment to your location throughout the Bay Area, Sacramento, and Central Valley. From intimate family dinners to large corporate events.
+            Professional hibachi chefs bringing authentic Japanese entertainment to your location
+            throughout the Bay Area, Sacramento, and Central Valley. From intimate family dinners to
+            large corporate events.
           </p>
           <div className="text-lg mb-12">
-            <span className="bg-orange-600 text-white px-6 py-3 rounded-full">Serving 50+ Cities Across California</span>
+            <span className="bg-orange-600 text-white px-6 py-3 rounded-full">
+              Serving 50+ Cities Across California
+            </span>
           </div>
         </div>
       </section>
@@ -158,8 +163,11 @@ export default function LocationsPage() {
             Featured Hibachi Catering Locations
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {locationCards.map((location) => (
-              <div key={location.slug} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+            {locationCards.map(location => (
+              <div
+                key={location.slug}
+                className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+              >
                 <div className="h-32 bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
                   <h3 className="text-2xl font-bold text-white">{location.city}</h3>
                 </div>
@@ -169,7 +177,10 @@ export default function LocationsPage() {
                     <h4 className="text-sm font-semibold text-gray-900 mb-2">Popular Services:</h4>
                     <div className="flex flex-wrap gap-2">
                       {location.highlights.map((highlight, index) => (
-                        <span key={index} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
+                        <span
+                          key={index}
+                          className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full"
+                        >
                           {highlight}
                         </span>
                       ))}
@@ -200,28 +211,36 @@ export default function LocationsPage() {
                 <span className="text-2xl">🚗</span>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Flexible Travel</h3>
-              <p className="text-gray-600 text-sm">We travel to your location anywhere in our service area with full mobile setup</p>
+              <p className="text-gray-600 text-sm">
+                We travel to your location anywhere in our service area with full mobile setup
+              </p>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">👨‍🍳</span>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Local Expertise</h3>
-              <p className="text-gray-600 text-sm">Our chefs know each area and can recommend the best setup for your location</p>
+              <p className="text-gray-600 text-sm">
+                Our chefs know each area and can recommend the best setup for your location
+              </p>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">📱</span>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Easy Booking</h3>
-              <p className="text-gray-600 text-sm">Simple online booking system with location-specific pricing and availability</p>
+              <p className="text-gray-600 text-sm">
+                Simple online booking system with location-specific pricing and availability
+              </p>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">🏆</span>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Consistent Quality</h3>
-              <p className="text-gray-600 text-sm">Same high-quality service and entertainment regardless of your location</p>
+              <p className="text-gray-600 text-sm">
+                Same high-quality service and entertainment regardless of your location
+              </p>
             </div>
           </div>
         </div>
@@ -230,9 +249,7 @@ export default function LocationsPage() {
       {/* CTA Section */}
       <section className="py-16 bg-orange-600 text-white text-center">
         <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl font-bold mb-6">
-            Ready to Book Hibachi Catering in Your Area?
-          </h2>
+          <h2 className="text-3xl font-bold mb-6">Ready to Book Hibachi Catering in Your Area?</h2>
           <p className="text-xl mb-8">
             Contact us today to check availability and get a free quote for your location!
           </p>

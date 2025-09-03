@@ -32,9 +32,7 @@ export default function Home() {
         <div className="container">
           {/* Animated Headline Section */}
           <div className="headline-section animate-on-scroll">
-            <h1 className="main-title text-center">
-              Experience the Art of Japanese Hibachi
-            </h1>
+            <h1 className="main-title text-center">Experience the Art of Japanese Hibachi</h1>
             <p className="subtitle text-center">
               Where Culinary Mastery Meets Unforgettable Entertainment
             </p>
@@ -63,15 +61,19 @@ export default function Home() {
                     <div className="highlight-badge">🌟 Traditional + Modern Fusion</div>
                   </div>
                   <p className="experience-text">
-                    At <span className="highlight-text">My Hibachi</span>, our talented chefs are true maestros of the teppanyaki grill,
-                    blending years of experience with an unwavering passion for flavor and flair. Having honed their skills in renowned
-                    Japanese kitchens, our chefs fuse traditional techniques with a modern twist, ensuring each dish is a unique encounter
-                    that delights both the palate and the memory.
+                    At <span className="highlight-text">My Hibachi</span>, our talented chefs are
+                    true maestros of the teppanyaki grill, blending years of experience with an
+                    unwavering passion for flavor and flair. Having honed their skills in renowned
+                    Japanese kitchens, our chefs fuse traditional techniques with a modern twist,
+                    ensuring each dish is a unique encounter that delights both the palate and the
+                    memory.
                   </p>
                   <p className="experience-text">
-                    We believe that <span className="highlight-text">quality ingredients at reasonable prices</span> and exceptional
-                    service bring people together. We are committed to turning every event into a celebration of fresh, delectable
-                    Japanese cuisine with <span className="highlight-text">quality as our top priority</span>.
+                    We believe that{' '}
+                    <span className="highlight-text">quality ingredients at reasonable prices</span>{' '}
+                    and exceptional service bring people together. We are committed to turning every
+                    event into a celebration of fresh, delectable Japanese cuisine with{' '}
+                    <span className="highlight-text">quality as our top priority</span>.
                   </p>
                   <div className="experience-stats">
                     <div className="stat-mini">
@@ -103,15 +105,20 @@ export default function Home() {
                     <div className="highlight-badge">🎭 Interactive Entertainment</div>
                   </div>
                   <p className="experience-text">
-                    <span className="highlight-text">My Hibachi</span> brings the thrill of hibachi cooking and entertainment directly
-                    to you as your mobile, private chef experience in the North California Bay Area and Sacramento. Whether you&apos;re
-                    celebrating a wedding, proposal, birthday, family reunion, corporate event, anniversary, holiday party, engagement,
-                    or bachelor/bachelorette party, My Hibachi transforms your gathering into a memorable occasion.
+                    <span className="highlight-text">My Hibachi</span> brings the thrill of hibachi
+                    cooking and entertainment directly to you as your mobile, private chef
+                    experience in the North California Bay Area and Sacramento. Whether you&apos;re
+                    celebrating a wedding, proposal, birthday, family reunion, corporate event,
+                    anniversary, holiday party, engagement, or bachelor/bachelorette party, My
+                    Hibachi transforms your gathering into a memorable occasion.
                   </p>
                   <p className="experience-text">
-                    Our skilled chefs don&apos;t just cook—they perform, crafting a vibrant, interactive atmosphere that keeps your guests
-                    entertained and engaged. With <span className="highlight-text">premium quality ingredients and reasonable pricing</span>,
-                    we deliver exceptional value for your special events.
+                    Our skilled chefs don&apos;t just cook—they perform, crafting a vibrant,
+                    interactive atmosphere that keeps your guests entertained and engaged. With{' '}
+                    <span className="highlight-text">
+                      premium quality ingredients and reasonable pricing
+                    </span>
+                    , we deliver exceptional value for your special events.
                   </p>
                   <div className="experience-stats">
                     <div className="stat-mini">
@@ -143,7 +150,8 @@ export default function Home() {
                 <div className="feature-content">
                   <h4 className="feature-title">Premium Quality Ingredients</h4>
                   <p className="feature-description">
-                    Fresh, high-quality meats, vegetables, and authentic Japanese seasonings sourced from trusted suppliers.
+                    Fresh, high-quality meats, vegetables, and authentic Japanese seasonings sourced
+                    from trusted suppliers.
                   </p>
                   <div className="feature-tag">Quality First</div>
                 </div>
@@ -155,7 +163,8 @@ export default function Home() {
                 <div className="feature-content">
                   <h4 className="feature-title">Reasonable Pricing</h4>
                   <p className="feature-description">
-                    Competitive rates that deliver exceptional value without compromising on quality or service excellence.
+                    Competitive rates that deliver exceptional value without compromising on quality
+                    or service excellence.
                   </p>
                   <div className="feature-tag">Great Value</div>
                 </div>
@@ -167,7 +176,8 @@ export default function Home() {
                 <div className="feature-content">
                   <h4 className="feature-title">Interactive Entertainment</h4>
                   <p className="feature-description">
-                    Skilled chefs who combine culinary expertise with entertaining performances for an unforgettable experience.
+                    Skilled chefs who combine culinary expertise with entertaining performances for
+                    an unforgettable experience.
                   </p>
                   <div className="feature-tag">Fun & Engaging</div>
                 </div>
@@ -179,7 +189,8 @@ export default function Home() {
                 <div className="feature-content">
                   <h4 className="feature-title">Mobile Service</h4>
                   <p className="feature-description">
-                    We bring the complete hibachi experience to your location across the Bay Area and Sacramento region.
+                    We bring the complete hibachi experience to your location across the Bay Area
+                    and Sacramento region.
                   </p>
                   <div className="feature-tag">Convenient</div>
                 </div>
@@ -191,7 +202,8 @@ export default function Home() {
                 <div className="feature-content">
                   <h4 className="feature-title">Excellence Guarantee</h4>
                   <p className="feature-description">
-                    Our commitment to quality is our priority, ensuring every event exceeds your expectations.
+                    Our commitment to quality is our priority, ensuring every event exceeds your
+                    expectations.
                   </p>
                   <div className="feature-tag">Guaranteed</div>
                 </div>
@@ -203,7 +215,8 @@ export default function Home() {
                 <div className="feature-content">
                   <h4 className="feature-title">All Occasions</h4>
                   <p className="feature-description">
-                    Perfect for weddings, birthdays, corporate events, and any celebration that deserves something special.
+                    Perfect for weddings, birthdays, corporate events, and any celebration that
+                    deserves something special.
                   </p>
                   <div className="feature-tag">Versatile</div>
                 </div>
@@ -214,16 +227,23 @@ export default function Home() {
           {/* Service Areas */}
           <div className="service-areas animate-on-scroll">
             <h3 className="section-title text-center">
-              🌟 Bringing Hibachi Experience<br className="d-none d-lg-block" />
+              🌟 Bringing Hibachi Experience
+              <br className="d-none d-lg-block" />
               to Your Neighborhood! 🌟
             </h3>
             <p className="service-intro text-center">
-              We bring the hibachi experience to homes and venues across the Bay Area, Sacramento, San Jose and nearby communities.
-              Need us a bit farther? Tell us your location—we&apos;ll make it work with <span className="highlight-text">transparent travel options</span>.
+              We bring the hibachi experience to homes and venues across the Bay Area, Sacramento,
+              San Jose and nearby communities. Need us a bit farther? Tell us your
+              location—we&apos;ll make it work with{' '}
+              <span className="highlight-text">transparent travel options</span>.
             </p>
             <div className="text-center mt-3 mb-4">
-              <a href="/BookUs" className="btn btn-primary me-3">📅 Check Your Date & Time</a>
-              <a href="/quote" className="btn btn-outline-primary">💬 Get a Quick Quote</a>
+              <a href="/BookUs" className="btn btn-primary me-3">
+                📅 Check Your Date & Time
+              </a>
+              <a href="/quote" className="btn btn-outline-primary">
+                💬 Get a Quick Quote
+              </a>
             </div>
 
             <div className="row mt-4">
@@ -246,7 +266,9 @@ export default function Home() {
               <div className="col-md-6">
                 <div className="service-area-card">
                   <h4 className="area-title">🏞️ Sacramento & Extended Regions</h4>
-                  <p className="area-subtitle">Minimal travel fees for these beautiful locations!</p>
+                  <p className="area-subtitle">
+                    Minimal travel fees for these beautiful locations!
+                  </p>
                   <ul className="area-list">
                     <li>Sacramento - Capital city hibachi experiences</li>
                     <li>Elk Grove - Family-friendly neighborhood service</li>
@@ -266,7 +288,8 @@ export default function Home() {
                 <span className="radius-icon">📍</span>
                 <h4 className="radius-title">We Come to You!</h4>
                 <p className="radius-description">
-                  Hibachi brought to your home or venue—tell us your location and we&apos;ll make it happen.
+                  Hibachi brought to your home or venue—tell us your location and we&apos;ll make it
+                  happen.
                 </p>
                 <p className="travel-fee-info">
                   <span className="travel-highlight">💰 Transparent Pricing:</span>
@@ -277,7 +300,8 @@ export default function Home() {
                 <div className="service-promise">
                   <span className="promise-icon">🎯</span>
                   <span className="promise-text">
-                    <strong>Our Promise:</strong> No hidden fees, just honest pricing and exceptional service!
+                    <strong>Our Promise:</strong> No hidden fees, just honest pricing and
+                    exceptional service!
                   </span>
                 </div>
               </div>
@@ -288,13 +312,20 @@ export default function Home() {
           <div className="cta-section animate-on-scroll text-center">
             <h2 className="cta-title">Ready to host an unforgettable hibachi experience?</h2>
             <p className="cta-description">
-              Join hundreds of satisfied customers across the Bay Area and Sacramento! Discover why <span className="highlight-text">My Hibachi</span>
-              is the premier choice for <span className="highlight-text">quality ingredients, reasonable prices, and exceptional entertainment</span>.
-              We come to you—chef, grill, and a full hibachi show. Just pick a date, we&apos;ll handle the rest!
+              Join hundreds of satisfied customers across the Bay Area and Sacramento! Discover why{' '}
+              <span className="highlight-text">My Hibachi</span>
+              is the premier choice for{' '}
+              <span className="highlight-text">
+                quality ingredients, reasonable prices, and exceptional entertainment
+              </span>
+              . We come to you—chef, grill, and a full hibachi show. Just pick a date, we&apos;ll
+              handle the rest!
             </p>
             <div className="cta-special-offer">
               <span className="offer-badge">✨ Special Offer ✨</span>
-              <p className="offer-text">Book now and let us create memories that will last a lifetime!</p>
+              <p className="offer-text">
+                Book now and let us create memories that will last a lifetime!
+              </p>
             </div>
             <div className="cta-buttons">
               <Link href="/menu" className="btn btn-primary btn-lg me-3">
@@ -305,7 +336,10 @@ export default function Home() {
               </Link>
             </div>
             <p className="cta-footer">
-              <small>📞 Questions? Call us for instant assistance! • 🚗 We travel to you! • 💯 Satisfaction guaranteed!</small>
+              <small>
+                📞 Questions? Call us for instant assistance! • 🚗 We travel to you! • 💯
+                Satisfaction guaranteed!
+              </small>
             </p>
           </div>
 
@@ -317,8 +351,8 @@ export default function Home() {
                 <p className="about-text">
                   My Hibachi Chef was founded with a simple mission: to bring the excitement and
                   flavors of hibachi cooking directly to our customers. What started as a small
-                  catering service has grown into a premier hibachi experience provider serving
-                  the entire region.
+                  catering service has grown into a premier hibachi experience provider serving the
+                  entire region.
                 </p>
                 <p className="about-text">
                   Our team of professionally trained chefs combines culinary expertise with
@@ -334,7 +368,8 @@ export default function Home() {
       <section className="services-section">
         <div className="container">
           <h2 className="services-heading text-center">
-            <span className="service-icon">🍽️</span> Premium Services for Every Occasion <span className="service-icon">🎪</span>
+            <span className="service-icon">🍽️</span> Premium Services for Every Occasion{' '}
+            <span className="service-icon">🎪</span>
           </h2>
 
           <div className="row services-grid">
@@ -364,9 +399,9 @@ export default function Home() {
                 </div>
                 <h3 className="service-title">Corporate Events</h3>
                 <p className="service-description">
-                  Elevate your business gatherings with interactive hibachi entertainment.
-                  Perfect for team building, client appreciation events, and corporate celebrations
-                  that leave lasting impressions.
+                  Elevate your business gatherings with interactive hibachi entertainment. Perfect
+                  for team building, client appreciation events, and corporate celebrations that
+                  leave lasting impressions.
                 </p>
                 <div className="service-features">
                   <span className="feature-badge">🤝 Team Building</span>
@@ -383,9 +418,9 @@ export default function Home() {
                 </div>
                 <h3 className="service-title">Special Occasions</h3>
                 <p className="service-description">
-                  Mark life&apos;s milestone moments with unforgettable hibachi experiences.
-                  From intimate proposals to grand celebrations, we make every moment special
-                  with personalized service and attention to detail.
+                  Mark life&apos;s milestone moments with unforgettable hibachi experiences. From
+                  intimate proposals to grand celebrations, we make every moment special with
+                  personalized service and attention to detail.
                 </p>
                 <div className="service-features">
                   <span className="feature-badge">💍 Proposals & Engagements</span>

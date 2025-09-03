@@ -26,9 +26,5 @@
       }
     ]
   },
-  "ignoreFiles": [
-    "**/*.min.css",
-    "**/vendor/**/*.css",
-    "**/node_modules/**/*.css"
-  ]
+  "ignoreFiles": ["**/*.min.css", "**/vendor/**/*.css", "**/node_modules/**/*.css"]
 }

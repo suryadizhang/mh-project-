@@ -1,8 +1,8 @@
-import React from 'react';
-import { BookingModalProps } from './types';
-import './styles/BookingModals.module.css';
+import React from 'react'
+import { BookingModalProps } from './types'
+import './styles/BookingModals.module.css'
 
-const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({ 
+const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
   showValidationModal,
   setShowValidationModal,
   showAgreementModal,
@@ -10,20 +10,20 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
   missingFields,
   isSubmitting,
   onAgreementConfirm,
-  onAgreementCancel,
+  onAgreementCancel
   // className = '' // Commented out as it's not used in this component
 }) => {
   const handleCloseValidation = () => {
-    setShowValidationModal(false);
-  };
+    setShowValidationModal(false)
+  }
 
   const handleConfirmAgreement = () => {
-    onAgreementConfirm();
-  };
+    onAgreementConfirm()
+  }
 
   const handleCancelAgreement = () => {
-    onAgreementCancel();
-  };
+    onAgreementCancel()
+  }
 
   return (
     <>
@@ -50,11 +50,7 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
                 </ul>
               </div>
               <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleCloseValidation}
-                >
+                <button type="button" className="btn btn-primary" onClick={handleCloseValidation}>
                   <i className="bi bi-check-lg me-2"></i>
                   Got It
                 </button>
@@ -108,7 +104,9 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
                   </ul>
 
                   <p className="mt-3">
-                    <strong>By confirming this booking, you agree to these terms and conditions.</strong>
+                    <strong>
+                      By confirming this booking, you agree to these terms and conditions.
+                    </strong>
                   </p>
                 </div>
               </div>
@@ -127,8 +125,7 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
                   onClick={handleConfirmAgreement}
                   disabled={isSubmitting}
                 >
-                  <i className="bi bi-check-lg me-2"></i>
-                  I Agree - Submit Booking
+                  <i className="bi bi-check-lg me-2"></i>I Agree - Submit Booking
                 </button>
               </div>
             </div>
@@ -136,7 +133,7 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
         </div>
       )}
     </>
-  );
-};
+  )
+}
 
-export default BookingModals;
+export default BookingModals

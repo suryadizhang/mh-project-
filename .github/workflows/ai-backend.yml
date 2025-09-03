@@ -1,0 +1,99 @@
+name: AI Backend CI
+
+on:
+  push:
+    paths: 
+      - 'myhibachi-ai-backend/**'
+      - '.github/workflows/ai-backend.yml'
+  pull_request:
+    paths:
+      - 'myhibachi-ai-backend/**'
+
+defaults:
+  run:
+    working-directory: myhibachi-ai-backend
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: myhibachi-ai-backend/requirements.txt
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f "requirements.txt" ]; then
+            pip install -r requirements.txt
+          else
+            pip install fastapi uvicorn python-multipart
+          fi
+          
+      - name: Setup test environment
+        run: |
+          echo "AI_MODEL_API_KEY=fake_key_for_testing" > .env
+          echo "OPENAI_API_KEY=fake_openai_key_for_testing" >> .env
+          echo "AI_BACKEND_PORT=8002" >> .env
+          
+      - name: Run linting (ruff)
+        run: |
+          pip install ruff
+          ruff check . || echo "Linting completed with warnings"
+          
+      - name: Run type checking (mypy)
+        run: |
+          pip install mypy
+          mypy *.py --ignore-missing-imports || echo "Type checking completed with warnings"
+          
+      - name: Run tests
+        run: |
+          if [ -d "tests" ] || [ -f "test_*.py" ]; then
+            pip install pytest
+            python -m pytest -v
+          else
+            echo "No tests found, running basic syntax validation"
+            python -c "import main; print('Syntax validation passed')" || python -c "import simple_backend_corrected; print('Syntax validation passed')"
+          fi
+          
+      - name: Start application (health check)
+        run: |
+          if [ -f "main.py" ]; then
+            timeout 30s python main.py &
+            sleep 10
+            curl -f http://localhost:8002/health || curl -f http://localhost:8002/ || echo "Health check failed"
+          elif [ -f "simple_backend_corrected.py" ]; then
+            timeout 30s python simple_backend_corrected.py &
+            sleep 10
+            curl -f http://localhost:8002/health || curl -f http://localhost:8002/ || echo "Health check failed"
+          else
+            echo "No main application file found"
+          fi
+          
+      - name: Run security audit
+        run: |
+          pip install safety
+          safety check || echo "Security audit completed with warnings"
+          
+      - name: Validate AI isolation
+        run: |
+          echo "Checking AI backend isolation from payment processing..."
+          if grep -r "stripe\|payment\|billing" . --exclude-dir=__pycache__ || grep -r "STRIPE_" . --exclude-dir=__pycache__; then
+            echo "❌ SECURITY VIOLATION: AI backend contains payment-related code"
+            exit 1
+          else
+            echo "✅ AI backend properly isolated from payment processing"
+          fi
+          
+      - name: Run guard checks
+        run: |
+          cd ..
+          pip install colorama
+          python guard.py

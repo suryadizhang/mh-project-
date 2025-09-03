@@ -10,7 +10,7 @@
    ========================================================================== */
 
 /* Radius card icons (📍 in "We Come to You!" section) */
-[data-page="home"] .radius-icon {
+[data-page='home'] .radius-icon {
   display: inline-block !important;
   position: relative !important;
   animation: homeDriveAnimation 3s infinite ease-in-out !important;
@@ -19,7 +19,7 @@
 }
 
 /* Override for house emoji in stats - should be static */
-[data-page="home"] .stat-emoji {
+[data-page='home'] .stat-emoji {
   display: inline-block !important;
   position: relative !important;
   /* Keep house emoji static */
@@ -33,7 +33,7 @@
    Fix contrast issue - use original dark gradient background with white text
    ========================================================================== */
 
-[data-page="home"] .radius-card {
+[data-page='home'] .radius-card {
   background: linear-gradient(135deg, #28a745, #20c997) !important;
   color: white !important;
   border-radius: var(--radius-lg-custom, 15px) !important;
@@ -43,37 +43,37 @@
   transition: all 0.3s ease !important;
 }
 
-[data-page="home"] .radius-icon {
+[data-page='home'] .radius-icon {
   font-size: 3rem !important;
   margin-bottom: 1rem !important;
   color: white !important;
 }
 
-[data-page="home"] .radius-title {
+[data-page='home'] .radius-title {
   font-size: 1.5rem !important;
   font-weight: 700 !important;
   margin-bottom: 1rem !important;
   color: white !important;
 }
 
-[data-page="home"] .radius-description {
+[data-page='home'] .radius-description {
   margin-bottom: 1.5rem !important;
   color: white !important;
   opacity: 0.95 !important;
 }
 
-[data-page="home"] .travel-fee-info {
+[data-page='home'] .travel-fee-info {
   margin-bottom: 1.5rem !important;
   color: white !important;
   opacity: 0.9 !important;
 }
 
-[data-page="home"] .travel-highlight {
-  color: #FFE4B5 !important;
+[data-page='home'] .travel-highlight {
+  color: #ffe4b5 !important;
   font-weight: 600 !important;
 }
 
-[data-page="home"] .service-promise {
+[data-page='home'] .service-promise {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -83,13 +83,13 @@
   border-radius: 10px !important;
 }
 
-[data-page="home"] .promise-text {
+[data-page='home'] .promise-text {
   color: white !important;
   font-weight: 500 !important;
 }
 
 /* Promise icons (🎯 in service promise section) */
-[data-page="home"] .promise-icon {
+[data-page='home'] .promise-icon {
   display: inline-block !important;
   position: relative !important;
   animation: homeOrbitAnimation 9s infinite linear !important;
@@ -98,8 +98,8 @@
 }
 
 /* Feature icons in service cards */
-[data-page="home"] .featureIcon,
-[data-page="home"] .serviceIcon {
+[data-page='home'] .featureIcon,
+[data-page='home'] .serviceIcon {
   display: inline-block !important;
   position: relative !important;
   animation: homeOrbitAnimation 11s infinite linear !important;
@@ -108,7 +108,7 @@
 }
 
 /* Add staggered delays for variety */
-[data-page="home"] .radius-icon:nth-child(1) {
+[data-page='home'] .radius-icon:nth-child(1) {
   animation-delay: 0s !important;
 }
 
@@ -128,12 +128,12 @@
   }
 }
 
-[data-page="home"] .promise-icon:nth-child(1) {
+[data-page='home'] .promise-icon:nth-child(1) {
   animation-delay: 1.5s !important;
 }
 
-[data-page="home"] .featureIcon:nth-child(1),
-[data-page="home"] .serviceIcon:nth-child(1) {
+[data-page='home'] .featureIcon:nth-child(1),
+[data-page='home'] .serviceIcon:nth-child(1) {
   animation-delay: 3s !important;
 }
 
@@ -164,20 +164,20 @@
    ========================================================================== */
 @media (max-width: 768px) {
   /* Reduce animation intensity on mobile */
-  [data-page="home"] .radius-icon,
-  [data-page="home"] .promise-icon,
-  [data-page="home"] .featureIcon,
-  [data-page="home"] .serviceIcon {
+  [data-page='home'] .radius-icon,
+  [data-page='home'] .promise-icon,
+  [data-page='home'] .featureIcon,
+  [data-page='home'] .serviceIcon {
     animation-duration: 10s !important;
   }
 }
 
 @media (max-width: 576px) {
   /* Further reduce on small screens */
-  [data-page="home"] .radius-icon,
-  [data-page="home"] .promise-icon,
-  [data-page="home"] .featureIcon,
-  [data-page="home"] .serviceIcon {
+  [data-page='home'] .radius-icon,
+  [data-page='home'] .promise-icon,
+  [data-page='home'] .featureIcon,
+  [data-page='home'] .serviceIcon {
     animation-duration: 12s !important;
   }
 }

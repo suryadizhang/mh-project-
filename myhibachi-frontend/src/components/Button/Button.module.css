@@ -135,12 +135,12 @@
 }
 
 /* Loading state */
-.button[data-loading="true"] {
+.button[data-loading='true'] {
   pointer-events: none;
   opacity: 0.8;
 }
 
-.button[data-loading="true"]::after {
+.button[data-loading='true']::after {
   content: '';
   position: absolute;
   width: 1rem;

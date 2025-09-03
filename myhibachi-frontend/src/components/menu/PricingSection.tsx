@@ -18,7 +18,7 @@ export default function PricingSection() {
         </div>
 
         <div className={styles.pricingGrid}>
-          {pricing.tiers.map((tier) => (
+          {pricing.tiers.map(tier => (
             <div
               key={tier.id}
               className={`${styles.pricingTier} ${tier.popular ? styles.popularTier : ''}`}

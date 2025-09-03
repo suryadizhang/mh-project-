@@ -51,21 +51,24 @@ src/
 ## Getting Started
 
 1. **Install dependencies**:
+
 ```bash
 npm install
 ```
 
 2. **Run the development server**:
+
 ```bash
 npm run dev
 ```
 
 3. **Open your browser**:
-Navigate to [http://localhost:3000](http://localhost:3000)
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
 ## Pages
 
 ### Public Pages
+
 - **Home** (`/`) - Hero section, features, stats, and CTA
 - **Menu** (`/menu`) - Hibachi menu with categories and pricing
 - **Contact** (`/contact`) - Contact form and business information
@@ -74,6 +77,7 @@ Navigate to [http://localhost:3000](http://localhost:3000)
 - **Blog** (`/blog`) - Blog posts and articles
 
 ### Admin Pages
+
 - **Dashboard** (`/admin`) - Overview and statistics
 - **Bookings** (`/admin/booking`) - Manage reservations
 - **Schedule** (`/admin/schedule`) - Chef scheduling and calendar
@@ -85,16 +89,19 @@ Navigate to [http://localhost:3000](http://localhost:3000)
 ## Development
 
 ### Adding New Pages
+
 1. Create a new directory in `src/app/`
 2. Add a `page.tsx` file
 3. Import any page-specific CSS if needed
 
 ### Adding Components
+
 1. Add components to `src/components/`
 2. Use shadcn/ui components when possible
 3. Follow TypeScript best practices
 
 ### Styling
+
 - Use Tailwind CSS for layout and common styles
 - Create page-specific CSS files in `src/styles/` for unique styling
 - Import CSS files directly in page components
@@ -114,11 +121,14 @@ npm start
 This project includes comprehensive tawk.to live chat integration for customer support:
 
 ### Configuration
+
 Live chat is configured via environment variables in `.env.local`:
+
 - `NEXT_PUBLIC_TAWK_PROPERTY_ID`: Your tawk.to property ID (689c0b9cb5ccf2192652b7e3)
 - `NEXT_PUBLIC_TAWK_WIDGET_ID`: Widget ID (defaults to "default")
 
 ### Features
+
 - **Automatic loading** on all public pages (App Router integration)
 - **Smart hiding** on admin routes (/admin, /superadmin, /checkout)
 - **Custom "Live Chat" buttons** on contact page with multiple variants
@@ -128,6 +138,7 @@ Live chat is configured via environment variables in `.env.local`:
 - **TypeScript support** with comprehensive type definitions
 
 ### For Operators
+
 - **Install the tawk.to mobile app** on iOS/Android
 - **Sign in** with the property credentials
 - **Enable push notifications** to reply on the go
@@ -141,6 +152,7 @@ Live chat is configured via environment variables in `.env.local`:
 - **Enable email notifications** for your support address
 
 ### Components
+
 - `TawkScript.tsx` - Core widget loader
 - `TawkWrapper.tsx` - App Router conditional wrapper
 - `TawkWrapperPages.tsx` - Pages Router conditional wrapper
@@ -149,7 +161,9 @@ Live chat is configured via environment variables in `.env.local`:
 - `UseTawkUser.tsx` - User context setting helper
 
 ### Content Security Policy
+
 If using CSP, allow:
+
 - `script-src`: `https://embed.tawk.to`
 - `connect-src`: `https://*.tawk.to wss://*.tawk.to`
 - `img-src`: `https://*.tawk.to data:`

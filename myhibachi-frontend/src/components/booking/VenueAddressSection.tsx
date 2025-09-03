@@ -1,11 +1,11 @@
-import React from 'react';
-import { VenueAddressSectionProps } from './types';
-import './styles/VenueAddressSection.module.css';
+import React from 'react'
+import { VenueAddressSectionProps } from './types'
+import './styles/VenueAddressSection.module.css'
 
-const VenueAddressSection: React.FC<VenueAddressSectionProps & { className?: string }> = ({ 
-  register, 
-  errors, 
-  className = '' 
+const VenueAddressSection: React.FC<VenueAddressSectionProps & { className?: string }> = ({
+  register,
+  errors,
+  className = ''
 }) => {
   return (
     <div className={`form-section ${className}`}>
@@ -20,7 +20,9 @@ const VenueAddressSection: React.FC<VenueAddressSectionProps & { className?: str
       <div className="row">
         <div className="col-12">
           <div className="form-group">
-            <label htmlFor="venueStreet" className="form-label required">Street Address</label>
+            <label htmlFor="venueStreet" className="form-label required">
+              Street Address
+            </label>
             <input
               type="text"
               id="venueStreet"
@@ -38,7 +40,9 @@ const VenueAddressSection: React.FC<VenueAddressSectionProps & { className?: str
       <div className="row">
         <div className="col-md-6">
           <div className="form-group">
-            <label htmlFor="venueCity" className="form-label required">City</label>
+            <label htmlFor="venueCity" className="form-label required">
+              City
+            </label>
             <input
               type="text"
               id="venueCity"
@@ -46,15 +50,15 @@ const VenueAddressSection: React.FC<VenueAddressSectionProps & { className?: str
               {...register('venueCity', { required: 'Venue city is required' })}
               placeholder="San Francisco"
             />
-            {errors.venueCity && (
-              <div className="invalid-feedback">{errors.venueCity.message}</div>
-            )}
+            {errors.venueCity && <div className="invalid-feedback">{errors.venueCity.message}</div>}
           </div>
         </div>
 
         <div className="col-md-3">
           <div className="form-group">
-            <label htmlFor="venueState" className="form-label required">State</label>
+            <label htmlFor="venueState" className="form-label required">
+              State
+            </label>
             <select
               id="venueState"
               className={`form-control ${errors.venueState ? 'is-invalid' : ''}`}
@@ -74,7 +78,9 @@ const VenueAddressSection: React.FC<VenueAddressSectionProps & { className?: str
 
         <div className="col-md-3">
           <div className="form-group">
-            <label htmlFor="venueZipcode" className="form-label required">ZIP Code</label>
+            <label htmlFor="venueZipcode" className="form-label required">
+              ZIP Code
+            </label>
             <input
               type="text"
               id="venueZipcode"
@@ -89,8 +95,7 @@ const VenueAddressSection: React.FC<VenueAddressSectionProps & { className?: str
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default VenueAddressSection;
-
+export default VenueAddressSection

@@ -136,7 +136,18 @@ export default function AdminDashboard() {
   // Export bookings to CSV
   const exportToCSV = () => {
     const csvContent = [
-      ['ID', 'Customer Name', 'Email', 'Phone', 'Event Date', 'Time', 'Guests', 'Status', 'Venue Address', 'Created At'],
+      [
+        'ID',
+        'Customer Name',
+        'Email',
+        'Phone',
+        'Event Date',
+        'Time',
+        'Guests',
+        'Status',
+        'Venue Address',
+        'Created At'
+      ],
       ...filteredBookings.map(booking => [
         booking.id,
         booking.customerName,
@@ -149,7 +160,9 @@ export default function AdminDashboard() {
         booking.venueAddress,
         new Date(booking.createdAt).toLocaleString()
       ])
-    ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n')
+    ]
+      .map(row => row.map(cell => `"${cell}"`).join(','))
+      .join('\n')
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
     const link = document.createElement('a')
@@ -166,12 +179,12 @@ export default function AdminDashboard() {
   const updateBookingStatus = async (bookingId: string, newStatus: 'confirmed' | 'cancelled') => {
     try {
       // In production, this would be an API call
-      setBookings(prev => prev.map(booking => 
-        booking.id === bookingId 
-          ? { ...booking, status: newStatus }
-          : booking
-      ))
-      
+      setBookings(prev =>
+        prev.map(booking =>
+          booking.id === bookingId ? { ...booking, status: newStatus } : booking
+        )
+      )
+
       // Show success message (you could add a toast notification here)
       console.log(`Booking ${bookingId} updated to ${newStatus}`)
     } catch (error) {
@@ -181,11 +194,16 @@ export default function AdminDashboard() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'bg-green-100 text-green-800'
-      case 'pending': return 'bg-yellow-100 text-yellow-800'
-      case 'cancelled': return 'bg-red-100 text-red-800'
-      case 'completed': return 'bg-blue-100 text-blue-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'confirmed':
+        return 'bg-green-100 text-green-800'
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'cancelled':
+        return 'bg-red-100 text-red-800'
+      case 'completed':
+        return 'bg-blue-100 text-blue-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
     }
   }
 
@@ -214,7 +232,9 @@ export default function AdminDashboard() {
                 <div>
                   <p className="text-sm font-medium text-gray-600">{stat.title}</p>
                   <p className="text-3xl font-bold text-gray-900 mt-2">{stat.value}</p>
-                  <p className={`text-sm mt-1 ${stat.change.includes('+') ? 'text-green-600' : stat.change.includes('needed') ? 'text-red-600' : 'text-gray-500'}`}>
+                  <p
+                    className={`text-sm mt-1 ${stat.change.includes('+') ? 'text-green-600' : stat.change.includes('needed') ? 'text-red-600' : 'text-gray-500'}`}
+                  >
                     {stat.change}
                   </p>
                 </div>
@@ -238,13 +258,13 @@ export default function AdminDashboard() {
             {filteredBookings.length} of {bookings.length} bookings shown
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={e => setStatusFilter(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
             >
               <option value="all">All Status</option>
@@ -259,7 +279,7 @@ export default function AdminDashboard() {
             <input
               type="date"
               value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
+              onChange={e => setDateFilter(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
             />
           </div>
@@ -282,7 +302,7 @@ export default function AdminDashboard() {
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">📋 Booking Management</h2>
         </div>
-        
+
         {loading ? (
           <div className="p-12 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
@@ -293,7 +313,9 @@ export default function AdminDashboard() {
             <div className="text-6xl mb-4">📭</div>
             <p className="text-gray-500 text-lg">No bookings found</p>
             <p className="text-gray-400 text-sm mt-2">
-              {statusFilter !== 'all' || dateFilter ? 'Try adjusting your filters' : 'Bookings will appear here once customers start booking'}
+              {statusFilter !== 'all' || dateFilter
+                ? 'Try adjusting your filters'
+                : 'Bookings will appear here once customers start booking'}
             </p>
           </div>
         ) : (
@@ -319,11 +341,13 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredBookings.map((booking) => (
+                {filteredBookings.map(booking => (
                   <tr key={booking.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm">
-                        <div className="font-medium text-gray-900 font-mono text-xs">{booking.id}</div>
+                        <div className="font-medium text-gray-900 font-mono text-xs">
+                          {booking.id}
+                        </div>
                         <div className="text-gray-500">
                           Created: {format(new Date(booking.createdAt), 'MMM dd, yyyy HH:mm')}
                         </div>
@@ -347,7 +371,9 @@ export default function AdminDashboard() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(booking.status)}`}>
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(booking.status)}`}
+                      >
                         {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                       </span>
                     </td>

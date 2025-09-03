@@ -70,7 +70,9 @@ export default function OptimizedImage({
     quality,
     priority,
     ...(placeholder === 'blur' && { placeholder: 'blur' as const }),
-    ...(placeholder === 'blur' && { blurDataURL: blurDataURL || generateBlurDataURL(width, height) }),
+    ...(placeholder === 'blur' && {
+      blurDataURL: blurDataURL || generateBlurDataURL(width, height)
+    }),
     ...(sizes && { sizes })
   }
 
@@ -95,7 +97,15 @@ export default function OptimizedImage({
 }
 
 // Hero image component with optimization
-export function HeroImage({ src, alt, className = '' }: { src: string; alt: string; className?: string }) {
+export function HeroImage({
+  src,
+  alt,
+  className = ''
+}: {
+  src: string
+  alt: string
+  className?: string
+}) {
   return (
     <OptimizedImage
       src={src}
@@ -112,7 +122,15 @@ export function HeroImage({ src, alt, className = '' }: { src: string; alt: stri
 }
 
 // Card image component
-export function CardImage({ src, alt, className = '' }: { src: string; alt: string; className?: string }) {
+export function CardImage({
+  src,
+  alt,
+  className = ''
+}: {
+  src: string
+  alt: string
+  className?: string
+}) {
   return (
     <OptimizedImage
       src={src}
@@ -128,7 +146,17 @@ export function CardImage({ src, alt, className = '' }: { src: string; alt: stri
 }
 
 // Avatar/profile image component
-export function AvatarImage({ src, alt, size = 100, className = '' }: { src: string; alt: string; size?: number; className?: string }) {
+export function AvatarImage({
+  src,
+  alt,
+  size = 100,
+  className = ''
+}: {
+  src: string
+  alt: string
+  size?: number
+  className?: string
+}) {
   return (
     <OptimizedImage
       src={src}
@@ -143,7 +171,15 @@ export function AvatarImage({ src, alt, size = 100, className = '' }: { src: str
 }
 
 // Gallery image component
-export function GalleryImage({ src, alt, className = '' }: { src: string; alt: string; className?: string }) {
+export function GalleryImage({
+  src,
+  alt,
+  className = ''
+}: {
+  src: string
+  alt: string
+  className?: string
+}) {
   return (
     <OptimizedImage
       src={src}

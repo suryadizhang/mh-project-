@@ -144,13 +144,16 @@ export default function CustomersPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {customers.map((customer) => (
+              {customers.map(customer => (
                 <tr key={customer.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                         <span className="text-sm font-medium text-gray-700">
-                          {customer.name.split(' ').map(n => n[0]).join('')}
+                          {customer.name
+                            .split(' ')
+                            .map(n => n[0])
+                            .join('')}
                         </span>
                       </div>
                       <div className="ml-4">
@@ -174,11 +177,13 @@ export default function CustomersPage() {
                     {customer.lastBooking}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      customer.status === 'VIP' 
-                        ? 'bg-purple-100 text-purple-800' 
-                        : 'bg-green-100 text-green-800'
-                    }`}>
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        customer.status === 'VIP'
+                          ? 'bg-purple-100 text-purple-800'
+                          : 'bg-green-100 text-green-800'
+                      }`}
+                    >
                       {customer.status}
                     </span>
                   </td>

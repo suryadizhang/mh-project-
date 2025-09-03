@@ -22,7 +22,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgb(0 0 0 / 60%);
+  background-color: rgba(0, 0, 0, 0.6);
   z-index: 0;
 }
 
@@ -33,9 +33,9 @@
   margin: 0 auto;
   padding: 1.5rem; /* Reduced from 2rem to 1.5rem */
   border-radius: 20px;
-  background-color: rgb(0 0 0 / 40%);
+  background-color: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(8px);
-  box-shadow: 0 10px 30px rgb(0 0 0 / 30%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   animation: fadeInUp 0.8s ease-out;
 }
 
@@ -43,7 +43,7 @@
   font-size: 2.8rem; /* Reduced from 4rem to 2.8rem */
   font-weight: 800;
   margin-bottom: 1.5rem; /* Reduced from 2rem to 1.5rem */
-  text-shadow: 0 4px 8px rgb(0 0 0 / 50%);
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
   letter-spacing: -0.02em;
 }
 
@@ -71,7 +71,7 @@
   border-radius: 6px;
   font-weight: 600;
   display: inline-block;
-  box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .hero-subtitle {
@@ -80,7 +80,9 @@
   font-weight: 400; /* Increased from 300 to 400 for better readability */
   line-height: 1.8;
   color: #fff; /* Added white color for maximum contrast against dark background */
-  text-shadow: 0 2px 6px rgb(0 0 0 / 80%), 0 0 10px rgb(0 0 0 / 60%); /* Enhanced shadow for better contrast */
+  text-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.8),
+    0 0 10px rgba(0, 0, 0, 0.6); /* Enhanced shadow for better contrast */
 }
 
 .hero-features {
@@ -92,21 +94,21 @@
 }
 
 .feature-badge {
-  background: rgb(255 255 255 / 15%);
+  background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(4px);
   border-radius: 30px;
   padding: 0.7rem 1.5rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  border: 1px solid rgb(255 255 255 / 20%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
 }
 
 .feature-badge:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgb(0 0 0 / 20%);
-  background: rgb(255 255 255 / 25%);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .feature-icon {
@@ -120,14 +122,14 @@
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 0;
+  z-index: -1; /* Changed from 0 to -1 to ensure icons stay behind text */
   pointer-events: none;
 }
 
 .hero-icon-floating {
   position: absolute;
   font-size: 2.5rem;
-  opacity: 0.7;
+  opacity: 0.3; /* Reduced from 0.7 to 0.3 for better text readability */
   animation: floatAround 12s infinite linear;
 }
 
@@ -168,14 +170,14 @@
   background: #fff;
   border-radius: 20px;
   border: none;
-  box-shadow: 0 10px 30px rgb(0 0 0 / 10%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   overflow: hidden;
 }
 
 .contact-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 15px 35px rgb(219 43 40 / 20%);
+  box-shadow: 0 15px 35px rgba(219, 43, 40, 0.2);
 }
 
 .contact-page .card-title {
@@ -184,7 +186,7 @@
   font-size: 1.75rem;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid rgb(219 43 40 / 10%);
+  border-bottom: 2px solid rgba(219, 43, 40, 0.1);
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -221,7 +223,7 @@
   color: #db2b28;
   font-size: 1.5rem;
   padding: 0.75rem;
-  background: rgb(219 43 40 / 10%);
+  background: rgba(219, 43, 40, 0.1);
   border-radius: 50%;
   min-width: 3rem;
   height: 3rem;
@@ -494,7 +496,15 @@
 }
 
 .instagram-chat-button:hover {
-  background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d) !important;
+  background: linear-gradient(
+    45deg,
+    #405de6,
+    #5851db,
+    #833ab4,
+    #c13584,
+    #e1306c,
+    #fd1d1d
+  ) !important;
   color: white !important;
   transform: translateY(-2px) !important;
   box-shadow: 0 5px 15px rgb(225 48 108 / 25%) !important;
@@ -535,7 +545,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgb(0 0 0 / 15%);
+  background: rgba(0, 0, 0, 0.15);
   z-index: 1;
 }
 
@@ -588,22 +598,32 @@
 }
 
 .cta-buttons .btn-primary {
-  background: rgb(255 255 255 / 95%);
+  background: rgba(255, 255, 255, 0.95);
   color: #db2b28;
   border: 2px solid white;
   position: relative;
   z-index: 3;
+  -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
-  box-shadow: 0 4px 15px rgb(0 0 0 / 20%);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   text-shadow: none;
+  /* Cross-browser fallback for backdrop-filter */
+  background-color: #f8f8f8;
+}
+
+/* Enhanced support for backdrop-filter */
+@supports (backdrop-filter: blur(5px)) {
+  .cta-buttons .btn-primary {
+    background: rgba(255, 255, 255, 0.95);
+  }
 }
 
 .cta-buttons .btn-primary:hover {
-  background: rgb(255 255 255 / 100%);
+  background: rgba(255, 255, 255, 1);
   color: #db2b28;
   border-color: white;
   transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgb(0 0 0 / 30%);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
 .cta-buttons .btn-outline-primary {
@@ -612,16 +632,24 @@
   border: 2px solid white;
   position: relative;
   z-index: 3;
-  text-shadow: 0 1px 3px rgb(0 0 0 / 30%);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .cta-buttons .btn-outline-primary:hover {
-  background: rgb(255 255 255 / 95%);
+  background: rgba(255, 255, 255, 0.95);
   color: #db2b28;
   transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgb(0 0 0 / 30%);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
   text-shadow: none;
+}
+
+/* Enhanced support for backdrop-filter on hover */
+@supports (backdrop-filter: blur(5px)) {
+  .cta-buttons .btn-outline-primary:hover {
+    background: rgba(255, 255, 255, 0.95);
+  }
 }
 
 /* Testimonials Section */
@@ -771,6 +799,18 @@
   }
 }
 
+/* Accessibility: Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .hero-icon-floating {
+    animation: none; /* Disable animation for users who prefer reduced motion */
+    opacity: 0.2; /* Further reduce opacity when static */
+  }
+  
+  .pulse-animation {
+    animation: none; /* Also disable pulse animation */
+  }
+}
+
 @keyframes pulse {
   0% {
     transform: scale(1);
@@ -786,7 +826,11 @@
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
     transform: translateY(0);
   }
 
@@ -827,6 +871,11 @@
   .cta-buttons .btn {
     width: 100%;
     max-width: 300px;
+  }
+
+  /* Hide animated icons on mobile for better text readability */
+  .animated-hero-icons {
+    display: none;
   }
 }
 

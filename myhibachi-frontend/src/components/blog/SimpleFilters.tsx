@@ -19,13 +19,17 @@ export interface FilterState {
 
 const EVENT_SIZES = [
   'Intimate (2-10 people)',
-  'Small (10-25 people)', 
+  'Small (10-25 people)',
   'Medium (25-50 people)',
   'Large (50-100 people)',
   'Extra Large (100+ people)'
 ]
 
-export default function SimpleFilters({ posts, onFiltersChange, activeFilters }: SimpleFiltersProps) {
+export default function SimpleFilters({
+  posts,
+  onFiltersChange,
+  activeFilters
+}: SimpleFiltersProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
   // Extract unique values from posts
@@ -55,10 +59,12 @@ export default function SimpleFilters({ posts, onFiltersChange, activeFilters }:
   }
 
   const hasActiveFilters = () => {
-    return activeFilters.locations.length > 0 ||
-           activeFilters.eventSizes.length > 0 ||
-           activeFilters.searchQuery ||
-           activeFilters.categories.length > 0
+    return (
+      activeFilters.locations.length > 0 ||
+      activeFilters.eventSizes.length > 0 ||
+      activeFilters.searchQuery ||
+      activeFilters.categories.length > 0
+    )
   }
 
   return (
@@ -88,7 +94,9 @@ export default function SimpleFilters({ posts, onFiltersChange, activeFilters }:
             className="flex items-center text-sm text-slate-600 hover:text-slate-800"
           >
             {isExpanded ? 'Hide' : 'Show'} Filters
-            <ChevronDown className={`w-4 h-4 ml-1 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+            <ChevronDown
+              className={`w-4 h-4 ml-1 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+            />
           </button>
         </div>
       </div>
@@ -100,7 +108,7 @@ export default function SimpleFilters({ posts, onFiltersChange, activeFilters }:
             type="text"
             placeholder="Search posts by title, content, or keywords..."
             value={activeFilters.searchQuery}
-            onChange={(e) => handleFilterChange('searchQuery', e.target.value)}
+            onChange={e => handleFilterChange('searchQuery', e.target.value)}
             className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent text-slate-900 placeholder-slate-500"
           />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -163,9 +171,7 @@ export default function SimpleFilters({ posts, onFiltersChange, activeFilters }:
 
             {/* Category Filter */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-3">
-                Categories
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-3">Categories</label>
               <div className="space-y-2">
                 {uniqueCategories.map(category => (
                   <label key={category} className="flex items-center">
@@ -209,7 +215,10 @@ export default function SimpleFilters({ posts, onFiltersChange, activeFilters }:
               </span>
             )}
             {activeFilters.locations.map(location => (
-              <span key={location} className="inline-flex items-center bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-sm">
+              <span
+                key={location}
+                className="inline-flex items-center bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-sm"
+              >
                 📍 {location}
                 <button
                   onClick={() => handleArrayFilterToggle('locations', location)}
@@ -220,7 +229,10 @@ export default function SimpleFilters({ posts, onFiltersChange, activeFilters }:
               </span>
             ))}
             {activeFilters.eventSizes.map(size => (
-              <span key={size} className="inline-flex items-center bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-sm">
+              <span
+                key={size}
+                className="inline-flex items-center bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-sm"
+              >
                 👥 {size}
                 <button
                   onClick={() => handleArrayFilterToggle('eventSizes', size)}
@@ -231,7 +243,10 @@ export default function SimpleFilters({ posts, onFiltersChange, activeFilters }:
               </span>
             ))}
             {activeFilters.categories.map(category => (
-              <span key={category} className="inline-flex items-center bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-sm">
+              <span
+                key={category}
+                className="inline-flex items-center bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-sm"
+              >
                 {category}
                 <button
                   onClick={() => handleArrayFilterToggle('categories', category)}

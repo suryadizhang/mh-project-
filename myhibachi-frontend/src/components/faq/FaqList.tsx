@@ -10,21 +10,24 @@ interface FaqListProps {
 
 // Helper function to group FAQs by category only
 function groupFAQsByCategory(faqs: FaqItem[]) {
-  const grouped = faqs.reduce((acc, faq) => {
-    const category = faq.category
-    if (!acc[category]) {
-      acc[category] = []
-    }
-    acc[category].push(faq)
-    return acc
-  }, {} as Record<string, FaqItem[]>)
+  const grouped = faqs.reduce(
+    (acc, faq) => {
+      const category = faq.category
+      if (!acc[category]) {
+        acc[category] = []
+      }
+      acc[category].push(faq)
+      return acc
+    },
+    {} as Record<string, FaqItem[]>
+  )
 
   return grouped
 }
 
 export function FaqList({ items }: FaqListProps) {
   const [openItems, setOpenItems] = useState<Set<string>>(new Set())
-  
+
   // Start with all categories collapsed initially to prevent hydration errors
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
   const [mounted, setMounted] = useState(false)
@@ -65,9 +68,7 @@ export function FaqList({ items }: FaqListProps) {
       <div className="no-results">
         <div className="no-results-content">
           <h3>No FAQs found</h3>
-          <p>
-            If you can&apos;t find what you&apos;re looking for, we&apos;re here to help!
-          </p>
+          <p>If you can&apos;t find what you&apos;re looking for, we&apos;re here to help!</p>
           <div className="no-results-actions">
             <a href="/contact" className="contact-cta-btn">
               Contact us directly
@@ -95,19 +96,17 @@ export function FaqList({ items }: FaqListProps) {
                     <span className="category-icon">📋</span>
                     <h2 className="category-title">{category}</h2>
                   </div>
-                  <span className="toggle-icon">
-                    ▼
-                  </span>
+                  <span className="toggle-icon">▼</span>
                 </button>
-                <div className="category-count">
-                  {faqs.length} questions
-                </div>
+                <div className="category-count">{faqs.length} questions</div>
               </div>
 
               {/* Category Content */}
-              <div className={`category-content ${mounted && expandedCategories.has(category) ? 'expanded' : ''}`}>
+              <div
+                className={`category-content ${mounted && expandedCategories.has(category) ? 'expanded' : ''}`}
+              >
                 <div className="category-faqs">
-                  {faqs.map((faq) => (
+                  {faqs.map(faq => (
                     <FaqItemComponent
                       key={faq.id}
                       faq={faq}

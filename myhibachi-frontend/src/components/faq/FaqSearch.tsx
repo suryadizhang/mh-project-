@@ -25,7 +25,7 @@ export function FaqSearch({ value, onChange, resultsCount }: FaqSearchProps) {
           type="text"
           placeholder="Search FAQs... (Press / to focus)"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={e => onChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           onKeyDown={handleKeyDown}
@@ -33,11 +33,7 @@ export function FaqSearch({ value, onChange, resultsCount }: FaqSearchProps) {
           autoComplete="off"
         />
         {value && (
-          <button
-            onClick={() => onChange('')}
-            className="clear-search"
-            aria-label="Clear search"
-          >
+          <button onClick={() => onChange('')} className="clear-search" aria-label="Clear search">
             ✕
           </button>
         )}

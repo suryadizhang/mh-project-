@@ -46,41 +46,88 @@
     "content": "🥗 We accommodate most dietary restrictions including vegetarian, gluten-free, and common allergies. Please inform us of any restrictions at booking so we can prepare appropriate ingredients and avoid cross-contamination.",
     "category": "policies",
     "href": "/menu",
-    "keywords": ["dietary", "restrictions", "vegetarian", "gluten-free", "allergies", "cross-contamination"]
+    "keywords": [
+      "dietary",
+      "restrictions",
+      "vegetarian",
+      "gluten-free",
+      "allergies",
+      "cross-contamination"
+    ]
   },
   {
     "title": "Equipment & Setup",
     "content": "🔧 We provide all professional hibachi equipment, cooking utensils, serving dishes, and ingredients. Setup takes 15-20 minutes. You'll need to handle basic cleanup after our service. No stress cooking for you!",
     "category": "policies",
     "href": "/faqs",
-    "keywords": ["equipment", "setup", "professional", "utensils", "ingredients", "hibachi equipment"]
+    "keywords": [
+      "equipment",
+      "setup",
+      "professional",
+      "utensils",
+      "ingredients",
+      "hibachi equipment"
+    ]
   },
   {
     "title": "Event Timing & Duration",
     "content": "⏰ Typical hibachi experience lasts 1.5-2 hours including setup, cooking show, and dining. Flexible timing available. Popular slots: 12PM lunch, 3PM afternoon, 6PM dinner, 9PM late dinner.",
     "category": "policies",
     "href": "/BookUs",
-    "keywords": ["timing", "duration", "1.5 hours", "2 hours", "flexible", "lunch", "dinner", "slots"]
+    "keywords": [
+      "timing",
+      "duration",
+      "1.5 hours",
+      "2 hours",
+      "flexible",
+      "lunch",
+      "dinner",
+      "slots"
+    ]
   },
   {
     "title": "Liability & Insurance",
     "content": "🛡️ My Hibachi is fully insured and licensed. We follow all food safety protocols and health department guidelines. Professional chef with years of experience ensures safe, entertaining cooking experience for all guests.",
     "category": "policies",
     "href": "/faqs",
-    "keywords": ["liability", "insurance", "licensed", "food safety", "health department", "professional", "experienced"]
+    "keywords": [
+      "liability",
+      "insurance",
+      "licensed",
+      "food safety",
+      "health department",
+      "professional",
+      "experienced"
+    ]
   },
   {
     "title": "Gratuity Guidelines",
     "content": "💝 Gratuity is appreciated but not required. Standard service gratuity is 15-20% for exceptional service. Your chef works hard to create a memorable experience - tips are always appreciated but never expected!",
     "category": "policies",
     "href": "/faqs",
-    "keywords": ["gratuity", "tip", "appreciated", "15-20%", "exceptional", "memorable", "not required"]
+    "keywords": [
+      "gratuity",
+      "tip",
+      "appreciated",
+      "15-20%",
+      "exceptional",
+      "memorable",
+      "not required"
+    ]
   },
   {
     "title": "Contact & Support",
     "content": "📞 Questions? Call (916) 740-8768 or use our website contact form. We typically respond within 4 hours during business hours. Emergency day-of-event contact available for urgent matters only.",
     "category": "policies",
     "href": "/contact",
-    "keywords": ["contact", "support", "phone", "website", "response time", "emergency", "business hours"]
+    "keywords": [
+      "contact",
+      "support",
+      "phone",
+      "website",
+      "response time",
+      "emergency",
+      "business hours"
+    ]
   }
 ]

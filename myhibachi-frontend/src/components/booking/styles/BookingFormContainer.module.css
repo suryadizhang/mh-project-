@@ -19,7 +19,7 @@
   font-weight: 600;
   margin-bottom: 1.5rem;
   color: #1f2937;
-  border-bottom: 2px solid #FF6B6B;
+  border-bottom: 2px solid #ff6b6b;
   padding-bottom: 0.5rem;
 }
 
@@ -59,7 +59,7 @@
 
 .form-control:focus {
   outline: none;
-  border-color: #FF6B6B;
+  border-color: #ff6b6b;
   box-shadow: 0 0 0 3px rgb(255 107 107 / 10%);
 }
 

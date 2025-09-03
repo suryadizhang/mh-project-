@@ -88,7 +88,8 @@
   white-space: nowrap;
 }
 
-.nav-link-custom:hover, .nav-link-custom.active {
+.nav-link-custom:hover,
+.nav-link-custom.active {
   background-color: rgb(219 43 40 / 10%);
   color: #db2b28 !important;
   transform: translateY(-2px);

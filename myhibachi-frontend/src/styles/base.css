@@ -55,14 +55,24 @@ html {
 }
 
 body {
-  font-family: Poppins, Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  font-family:
+    Poppins,
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    sans-serif;
   line-height: 1.6;
   color: #333;
   overflow-x: hidden;
 }
 
 /* Improved text contrast for accessibility */
-.text-muted, .muted-text {
+.text-muted,
+.muted-text {
   color: #555 !important; /* Better contrast than #666 */
 }
 
@@ -78,7 +88,7 @@ a:focus {
 
 /* Canonical emoji rule – single source of truth */
 .emoji-visible {
-  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
   font-style: normal;
   font-weight: 400;
   line-height: 1;
@@ -210,7 +220,9 @@ a:focus {
 
 /* Animation classes */
 .animate-on-scroll {
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s ease;
 }
 
 .animate-hidden {

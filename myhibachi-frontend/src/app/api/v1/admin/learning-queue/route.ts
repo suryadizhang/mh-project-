@@ -1,49 +1,80 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server'
 
-export async function GET(request: NextRequest) {
-  try {
-    const searchParams = request.nextUrl.searchParams;
-    const page = searchParams.get('page') || '1';
-    const limit = searchParams.get('limit') || '10';
-    
-    return NextResponse.json(
-      { 
-        success: true, 
-        data: [],
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total: 0
-        }
-      },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error('Learning queue retrieval error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Internal server error' },
-      { status: 500 }
-    );
-  }
+/**
+ * ⚠️  MIGRATED TO BACKEND ⚠️
+ *
+ * This endpoint has been migrated to the FastAPI backend.
+ *
+ * OLD: /v1/admin/learning-queue
+ * NEW: ${NEXT_PUBLIC_API_URL}/api/v1/admin/learning-queue
+ *
+ * This stub returns HTTP 410 Gone to indicate permanent migration.
+ * Update your frontend code to use the new backend endpoint.
+ *
+ * Migration Date: 2025-09-02T05:45:43.902Z
+ * Backend Route: FastAPI backend - /api/v1/admin/learning-queue
+ */
+
+export async function GET() {
+  return NextResponse.json(
+    {
+      error: 'Endpoint migrated to backend',
+      migration: {
+        from: '/v1/admin/learning-queue',
+        to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/admin/learning-queue`,
+        status: 'MIGRATED',
+        date: new Date().toISOString(),
+        instructions: 'Update frontend to use backend API endpoint'
+      }
+    },
+    { status: 410 }
+  )
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    
-    return NextResponse.json(
-      { 
-        success: true, 
-        message: 'Learning queue item created',
-        data: { id: Date.now().toString(), ...body }
-      },
-      { status: 201 }
-    );
-  } catch (error) {
-    console.error('Learning queue creation error:', error);
-    return NextResponse.json(
-      { success: false, message: 'Internal server error' },
-      { status: 500 }
-    );
-  }
+export async function POST() {
+  return NextResponse.json(
+    {
+      error: 'Endpoint migrated to backend',
+      migration: {
+        from: '/v1/admin/learning-queue',
+        to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/admin/learning-queue`,
+        status: 'MIGRATED',
+        date: new Date().toISOString(),
+        instructions: 'Update frontend to use backend API endpoint'
+      }
+    },
+    { status: 410 }
+  )
+}
+
+export async function PUT() {
+  return NextResponse.json(
+    {
+      error: 'Endpoint migrated to backend',
+      migration: {
+        from: '/v1/admin/learning-queue',
+        to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/admin/learning-queue`,
+        status: 'MIGRATED',
+        date: new Date().toISOString(),
+        instructions: 'Update frontend to use backend API endpoint'
+      }
+    },
+    { status: 410 }
+  )
+}
+
+export async function DELETE() {
+  return NextResponse.json(
+    {
+      error: 'Endpoint migrated to backend',
+      migration: {
+        from: '/v1/admin/learning-queue',
+        to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/admin/learning-queue`,
+        status: 'MIGRATED',
+        date: new Date().toISOString(),
+        instructions: 'Update frontend to use backend API endpoint'
+      }
+    },
+    { status: 410 }
+  )
 }

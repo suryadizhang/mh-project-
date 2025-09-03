@@ -32,10 +32,9 @@ export function getBookings(): Booking[] {
 }
 
 export function isTimeSlotAvailable(date: string, time: string): boolean {
-  return !bookingsStore.some(booking => 
-    booking.event_date === date && 
-    booking.event_time === time &&
-    booking.status !== 'cancelled'
+  return !bookingsStore.some(
+    booking =>
+      booking.event_date === date && booking.event_time === time && booking.status !== 'cancelled'
   )
 }
 
@@ -47,10 +46,10 @@ export function isDateAtLeastTwoDaysInAdvance(dateString: string): boolean {
   const eventDate = new Date(dateString)
   const today = new Date()
   const twoDaysFromNow = new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000)
-  
+
   // Reset time to start of day for accurate comparison
   eventDate.setHours(0, 0, 0, 0)
   twoDaysFromNow.setHours(0, 0, 0, 0)
-  
+
   return eventDate >= twoDaysFromNow
 }

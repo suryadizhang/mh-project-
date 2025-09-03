@@ -1,12 +1,12 @@
-import React from 'react';
-import { Controller, Control, FieldErrors } from 'react-hook-form';
-import { BookingFormData } from '../../data/booking/types';
-import './styles/GuestDetailsSection.module.css';
+import React from 'react'
+import { Controller, Control, FieldErrors } from 'react-hook-form'
+import { BookingFormData } from '../../data/booking/types'
+import './styles/GuestDetailsSection.module.css'
 
 interface GuestDetailsSectionProps {
-  control: Control<BookingFormData>;
-  errors: FieldErrors<BookingFormData>;
-  className?: string;
+  control: Control<BookingFormData>
+  errors: FieldErrors<BookingFormData>
+  className?: string
 }
 
 const GuestDetailsSection: React.FC<GuestDetailsSectionProps> = ({
@@ -17,12 +17,10 @@ const GuestDetailsSection: React.FC<GuestDetailsSectionProps> = ({
   return (
     <div className={`guest-details-section ${className}`}>
       <h3 className="text-xl font-semibold mb-4">Guest Information</h3>
-      
+
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Full Name *
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
           <Controller
             name="name"
             control={control}
@@ -35,15 +33,11 @@ const GuestDetailsSection: React.FC<GuestDetailsSectionProps> = ({
               />
             )}
           />
-          {errors.name && (
-            <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
-          )}
+          {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Email Address *
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
           <Controller
             name="email"
             control={control}
@@ -56,15 +50,11 @@ const GuestDetailsSection: React.FC<GuestDetailsSectionProps> = ({
               />
             )}
           />
-          {errors.email && (
-            <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
-          )}
+          {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Phone Number *
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
           <Controller
             name="phone"
             control={control}
@@ -77,9 +67,7 @@ const GuestDetailsSection: React.FC<GuestDetailsSectionProps> = ({
               />
             )}
           />
-          {errors.phone && (
-            <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
-          )}
+          {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
         </div>
 
         <div>
@@ -107,9 +95,7 @@ const GuestDetailsSection: React.FC<GuestDetailsSectionProps> = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Number of Guests
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Number of Guests</label>
           <Controller
             name="guestCount"
             control={control}
@@ -130,7 +116,7 @@ const GuestDetailsSection: React.FC<GuestDetailsSectionProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default GuestDetailsSection;
+export default GuestDetailsSection

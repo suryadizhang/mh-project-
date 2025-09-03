@@ -2,7 +2,7 @@
 
 import React from 'react'
 import DatePicker from 'react-datepicker'
-import "react-datepicker/dist/react-datepicker.css"
+import 'react-datepicker/dist/react-datepicker.css'
 import { format } from 'date-fns'
 import type { BookingFormData, TimeSlot } from '../../data/booking/types'
 
@@ -13,7 +13,12 @@ interface DateTimeSelectionProps {
   timeSlots: TimeSlot[]
 }
 
-export function DateTimeSelection({ formData, onChange, errors, timeSlots }: DateTimeSelectionProps) {
+export function DateTimeSelection({
+  formData,
+  onChange,
+  errors,
+  timeSlots
+}: DateTimeSelectionProps) {
   const today = new Date()
   const oneYearFromNow = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate())
 
@@ -28,7 +33,7 @@ export function DateTimeSelection({ formData, onChange, errors, timeSlots }: Dat
           <DatePicker
             id="eventDate"
             selected={formData.eventDate}
-            onChange={(date) => onChange('eventDate', date || new Date())}
+            onChange={date => onChange('eventDate', date || new Date())}
             minDate={today}
             maxDate={oneYearFromNow}
             placeholderText="Select event date"
@@ -37,9 +42,7 @@ export function DateTimeSelection({ formData, onChange, errors, timeSlots }: Dat
             showPopperArrow={false}
             required
           />
-          {errors.eventDate && (
-            <span className="error-message">{errors.eventDate}</span>
-          )}
+          {errors.eventDate && <span className="error-message">{errors.eventDate}</span>}
           <div className="date-info">
             {formData.eventDate && (
               <span className="selected-date">
@@ -54,14 +57,17 @@ export function DateTimeSelection({ formData, onChange, errors, timeSlots }: Dat
             Event Time <span className="required">*</span>
           </label>
           <div className="time-slots">
-            {timeSlots.map((slot) => (
+            {timeSlots.map(slot => (
               <button
                 key={slot.time}
                 type="button"
                 className={`time-slot ${formData.eventTime === slot.time ? 'selected' : ''} ${
                   !slot.isAvailable ? 'unavailable' : ''
                 }`}
-                onClick={() => slot.isAvailable && onChange('eventTime', slot.time as '12PM' | '3PM' | '6PM' | '9PM')}
+                onClick={() =>
+                  slot.isAvailable &&
+                  onChange('eventTime', slot.time as '12PM' | '3PM' | '6PM' | '9PM')
+                }
                 disabled={!slot.isAvailable}
               >
                 <span className="time-label">{slot.label}</span>
@@ -71,9 +77,7 @@ export function DateTimeSelection({ formData, onChange, errors, timeSlots }: Dat
               </button>
             ))}
           </div>
-          {errors.eventTime && (
-            <span className="error-message">{errors.eventTime}</span>
-          )}
+          {errors.eventTime && <span className="error-message">{errors.eventTime}</span>}
         </div>
 
         <div className="form-group">
@@ -86,7 +90,7 @@ export function DateTimeSelection({ formData, onChange, errors, timeSlots }: Dat
               id="guestCount"
               name="guestCount"
               value={formData.guestCount}
-              onChange={(e) => onChange('guestCount', parseInt(e.target.value) || 0)}
+              onChange={e => onChange('guestCount', parseInt(e.target.value) || 0)}
               min="1"
               max="20"
               placeholder="Enter guest count"
@@ -112,9 +116,7 @@ export function DateTimeSelection({ formData, onChange, errors, timeSlots }: Dat
               </button>
             </div>
           </div>
-          {errors.guestCount && (
-            <span className="error-message">{errors.guestCount}</span>
-          )}
+          {errors.guestCount && <span className="error-message">{errors.guestCount}</span>}
           <div className="guest-info">
             <p className="pricing-note">
               💡 <strong>Pricing:</strong> Adults $55 each • Children (6-12) $30 each

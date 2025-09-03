@@ -9,7 +9,11 @@
 
   /* Background gradients */
   --home-gradient-primary: linear-gradient(135deg, var(--home-primary) 0%, var(--home-accent) 100%);
-  --home-gradient-hero: linear-gradient(135deg, rgb(220 53 69 / 90%) 0%, rgb(255 107 107 / 90%) 100%);
+  --home-gradient-hero: linear-gradient(
+    135deg,
+    rgb(220 53 69 / 90%) 0%,
+    rgb(255 107 107 / 90%) 100%
+  );
   --home-gradient-card: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
 
   /* Hero video styles */

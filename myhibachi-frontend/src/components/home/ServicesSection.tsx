@@ -1,48 +1,47 @@
-'use client';
+'use client'
 
-import React, { useRef, useEffect } from 'react';
-import { homeData } from '@/data/home';
-import styles from '@/styles/home/services.module.css';
+import React, { useRef, useEffect } from 'react'
+import { homeData } from '@/data/home'
+import styles from '@/styles/home/services.module.css'
 
 export function ServicesSection() {
-  const sectionRef = useRef<HTMLElement>(null);
+  const sectionRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
+      entries => {
+        entries.forEach(entry => {
           if (entry.isIntersecting) {
-            entry.target.classList.add(styles.animateIn);
+            entry.target.classList.add(styles.animateIn)
             // Animate individual service cards with stagger
-            const cards = entry.target.querySelectorAll(`.${styles.serviceCard}`);
+            const cards = entry.target.querySelectorAll(`.${styles.serviceCard}`)
             cards.forEach((card, index) => {
               setTimeout(() => {
-                card.classList.add(styles.cardAnimateIn);
-              }, index * 150);
-            });
+                card.classList.add(styles.cardAnimateIn)
+              }, index * 150)
+            })
           }
-        });
+        })
       },
       { threshold: 0.1 }
-    );
+    )
 
     if (sectionRef.current) {
-      observer.observe(sectionRef.current);
+      observer.observe(sectionRef.current)
     }
 
-    return () => observer.disconnect();
-  }, []);
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <section className={styles.servicesSection} ref={sectionRef}>
       <div className="container">
         <div className="row">
           <div className="col-12 text-center">
-            <h2 className={styles.sectionTitle}>
-              {homeData.services.title}
-            </h2>
+            <h2 className={styles.sectionTitle}>{homeData.services.title}</h2>
             <p className={styles.sectionSubtitle}>
-              Perfect for any occasion, bringing people together through exceptional food and entertainment
+              Perfect for any occasion, bringing people together through exceptional food and
+              entertainment
             </p>
           </div>
         </div>
@@ -53,15 +52,9 @@ export function ServicesSection() {
               {homeData.services.items.map((service, index) => (
                 <div key={index} className={styles.serviceCard}>
                   <div className={styles.cardContent}>
-                    <div className={styles.serviceIcon}>
-                      {service.icon}
-                    </div>
-                    <h3 className={styles.serviceTitle}>
-                      {service.title}
-                    </h3>
-                    <p className={styles.serviceDescription}>
-                      {service.description}
-                    </p>
+                    <div className={styles.serviceIcon}>{service.icon}</div>
+                    <h3 className={styles.serviceTitle}>{service.title}</h3>
+                    <p className={styles.serviceDescription}>{service.description}</p>
                   </div>
                 </div>
               ))}
@@ -70,5 +63,5 @@ export function ServicesSection() {
         </div>
       </div>
     </section>
-  );
+  )
 }

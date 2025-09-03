@@ -64,13 +64,13 @@ export default function SchedulePage() {
 
         {/* Calendar Grid Placeholder */}
         <div className="grid grid-cols-7 gap-1 mb-4">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
             <div key={day} className="p-2 text-center text-sm font-medium text-gray-500">
               {day}
             </div>
           ))}
         </div>
-        
+
         <div className="grid grid-cols-7 gap-1">
           {Array.from({ length: 35 }, (_, i) => (
             <div key={i} className="aspect-square p-2 border border-gray-100 text-center text-sm">
@@ -86,20 +86,28 @@ export default function SchedulePage() {
           <h2 className="text-xl font-semibold text-gray-900">Upcoming Events</h2>
         </div>
         <div className="divide-y divide-gray-200">
-          {scheduledEvents.map((event) => (
+          {scheduledEvents.map(event => (
             <div key={event.id} className="p-6 hover:bg-gray-50">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <h3 className="text-lg font-medium text-gray-900">{event.title}</h3>
                   <div className="mt-1 text-sm text-gray-500">
-                    <p>{event.date} • {event.time}</p>
-                    <p>{event.guests} guests • {event.chef}</p>
+                    <p>
+                      {event.date} • {event.time}
+                    </p>
+                    <p>
+                      {event.guests} guests • {event.chef}
+                    </p>
                     <p>{event.location}</p>
                   </div>
                 </div>
                 <div className="flex space-x-2">
-                  <Button variant="outline" size="sm">Edit</Button>
-                  <Button variant="outline" size="sm">Details</Button>
+                  <Button variant="outline" size="sm">
+                    Edit
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    Details
+                  </Button>
                 </div>
               </div>
             </div>
