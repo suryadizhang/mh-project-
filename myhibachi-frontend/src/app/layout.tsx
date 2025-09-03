@@ -1,13 +1,19 @@
-import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Poppins } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next'
+import { Inter, JetBrains_Mono, Poppins } from 'next/font/google'
+
+import './globals.css'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import ClientLayout from '@/components/layout/ClientLayout'
 import BackToTopButton from '@/components/ui/BackToTopButton'
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 import { PerformanceMonitoring } from '@/components/seo/TechnicalSEO'
-import { generatePageMetadata, SITE_CONFIG, generateOrganizationSchema, generateLocalBusinessSchema } from '@/lib/seo-config'
+import {
+  generatePageMetadata,
+  SITE_CONFIG,
+  generateOrganizationSchema,
+  generateLocalBusinessSchema
+} from '@/lib/seo-config'
 
 // Import global styles
 import '@/styles/base.css'
@@ -25,34 +31,36 @@ import '@/styles/quote-calculator.css'
 import '@/styles/back-to-top.css'
 import '@/styles/breadcrumb.css'
 import '@/styles/optimized-image.css'
+// PHASE 5 FIX: Cross-browser button standardization - MUST LOAD LAST
+import '@/styles/components/buttons-cross-browser.css'
 
 const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
+  variable: '--font-inter',
+  subsets: ['latin']
+})
 
 const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
-  subsets: ["latin"],
-});
+  variable: '--font-jetbrains-mono',
+  subsets: ['latin']
+})
 
 const poppins = Poppins({
-  variable: "--font-poppins",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-});
+  variable: '--font-poppins',
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  display: 'swap'
+})
 
 export const metadata: Metadata = generatePageMetadata({
   title: SITE_CONFIG.title,
   description: SITE_CONFIG.description,
-  path: "/",
-});
+  path: '/'
+})
 
 export default function RootLayout({
-  children,
+  children
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="en">
@@ -83,13 +91,13 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(generateOrganizationSchema()),
+            __html: JSON.stringify(generateOrganizationSchema())
           }}
         />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(generateLocalBusinessSchema()),
+            __html: JSON.stringify(generateLocalBusinessSchema())
           }}
         />
 
@@ -104,19 +112,17 @@ export default function RootLayout({
       >
         {/* Google Analytics 4 */}
         <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || ''} />
-        
+
         {/* Core Web Vitals Performance Monitoring */}
         <PerformanceMonitoring />
-        
+
         <ClientLayout>
           <Navbar />
-          <main className="flex-1">
-            {children}
-          </main>
+          <main className="flex-1">{children}</main>
           <Footer />
           <BackToTopButton />
         </ClientLayout>
       </body>
     </html>
-  );
+  )
 }
