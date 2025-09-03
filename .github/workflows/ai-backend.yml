@@ -32,8 +32,9 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-          cache: 'pip'
-          cache-dependency-path: 'myhibachi-ai-backend/requirements.txt'
+          # Temporarily disable cache to resolve path issues
+          # cache: 'pip'
+          # cache-dependency-path: 'myhibachi-ai-backend/requirements.txt'
           
       - name: Install dependencies
         working-directory: myhibachi-ai-backend
