@@ -6,7 +6,7 @@ from enum import Enum
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -48,34 +48,58 @@ class BookingStatus(str, Enum):
 
 # Pydantic Models
 class BookingCreate(BaseModel):
-    name: str = Field(..., min_length=2, max_length=100, description="Customer full name")
+    name: str = Field(
+        ..., min_length=2, max_length=100, description="Customer full name"
+    )
     email: str = Field(..., description="Customer email address")
-    phone: str = Field(..., min_length=10, max_length=20, description="Customer phone number")
+    phone: str = Field(
+        ..., min_length=10, max_length=20, description="Customer phone number"
+    )
     event_date: date = Field(..., description="Event date (YYYY-MM-DD)")
     event_time: TimeSlot = Field(..., description="Event time slot")
     address_street: str = Field(
-        ..., min_length=1, max_length=200, description="Customer street address"
+        ...,
+        min_length=1,
+        max_length=200,
+        description="Customer street address",
     )
-    address_city: str = Field(..., min_length=1, max_length=100, description="Customer city")
-    address_state: str = Field(..., min_length=2, max_length=50, description="Customer state")
-    address_zipcode: str = Field(..., min_length=5, max_length=10, description="Customer zipcode")
+    address_city: str = Field(
+        ..., min_length=1, max_length=100, description="Customer city"
+    )
+    address_state: str = Field(
+        ..., min_length=2, max_length=50, description="Customer state"
+    )
+    address_zipcode: str = Field(
+        ..., min_length=5, max_length=10, description="Customer zipcode"
+    )
     venue_street: str = Field(
-        ..., min_length=1, max_length=200, description="Event venue street address"
+        ...,
+        min_length=1,
+        max_length=200,
+        description="Event venue street address",
     )
-    venue_city: str = Field(..., min_length=1, max_length=100, description="Event venue city")
-    venue_state: str = Field(..., min_length=2, max_length=50, description="Event venue state")
-    venue_zipcode: str = Field(..., min_length=5, max_length=10, description="Event venue zipcode")
+    venue_city: str = Field(
+        ..., min_length=1, max_length=100, description="Event venue city"
+    )
+    venue_state: str = Field(
+        ..., min_length=2, max_length=50, description="Event venue state"
+    )
+    venue_zipcode: str = Field(
+        ..., min_length=5, max_length=10, description="Event venue zipcode"
+    )
 
-    @validator("event_date")
-    def validate_event_date(self, v):
+    @field_validator("event_date")
+    @classmethod
+    def validate_event_date(cls, v):
         today = date.today()
         min_date = today + timedelta(days=2)
         if v < min_date:
             raise ValueError("Event date must be at least 2 days in advance")
         return v
 
-    @validator("email")
-    def validate_email(self, v):
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v):
         import re
 
         email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
@@ -83,8 +107,9 @@ class BookingCreate(BaseModel):
             raise ValueError("Invalid email format")
         return v
 
-    @validator("phone")
-    def validate_phone(self, v):
+    @field_validator("phone")
+    @classmethod
+    def validate_phone(cls, v):
         # Remove all non-digit characters
         digits_only = "".join(filter(str.isdigit, v))
         if len(digits_only) < 10:
@@ -170,7 +195,11 @@ async def root():
     }
 
 
-@app.get("/api/v1/bookings/check", response_model=AvailabilityCheck, tags=["Bookings"])
+@app.get(
+    "/api/v1/bookings/check",
+    response_model=AvailabilityCheck,
+    tags=["Bookings"],
+)
 async def check_availability(
     date: date = Query(..., description="Event date (YYYY-MM-DD)"),
     time: TimeSlot = Query(..., description="Event time slot"),
@@ -204,13 +233,19 @@ async def check_availability(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@app.post("/api/v1/bookings", response_model=BookingCreateResponse, tags=["Bookings"])
+@app.post(
+    "/api/v1/bookings", response_model=BookingCreateResponse, tags=["Bookings"]
+)
 async def create_booking(booking_data: BookingCreate):
     """Create a new hibachi booking"""
     try:
         # Check if time slot is still available
-        if not is_time_slot_available(booking_data.event_date, booking_data.event_time):
-            raise HTTPException(status_code=409, detail="This time slot is already booked")
+        if not is_time_slot_available(
+            booking_data.event_date, booking_data.event_time
+        ):
+            raise HTTPException(
+                status_code=409, detail="This time slot is already booked"
+            )
 
         # Create new booking
         booking_id = generate_booking_id()
@@ -258,7 +293,9 @@ async def create_booking(booking_data: BookingCreate):
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@app.get("/api/v1/bookings", response_model=list[BookingSummary], tags=["Bookings"])
+@app.get(
+    "/api/v1/bookings", response_model=list[BookingSummary], tags=["Bookings"]
+)
 async def get_all_bookings():
     """Get all bookings (admin endpoint - should be protected with authentication in production)"""
     try:
@@ -279,11 +316,17 @@ async def get_all_bookings():
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@app.get("/api/v1/bookings/{booking_id}", response_model=BookingResponse, tags=["Bookings"])
+@app.get(
+    "/api/v1/bookings/{booking_id}",
+    response_model=BookingResponse,
+    tags=["Bookings"],
+)
 async def get_booking(booking_id: str):
     """Get a specific booking by ID"""
     try:
-        booking = next((b for b in bookings_storage if b.id == booking_id), None)
+        booking = next(
+            (b for b in bookings_storage if b.id == booking_id), None
+        )
         if not booking:
             raise HTTPException(status_code=404, detail="Booking not found")
         return booking
@@ -298,14 +341,19 @@ async def get_booking(booking_id: str):
 async def update_booking_status(booking_id: str, status: BookingStatus):
     """Update booking status (admin endpoint)"""
     try:
-        booking = next((b for b in bookings_storage if b.id == booking_id), None)
+        booking = next(
+            (b for b in bookings_storage if b.id == booking_id), None
+        )
         if not booking:
             raise HTTPException(status_code=404, detail="Booking not found")
 
         booking.status = status
         logger.info(f"Updated booking {booking_id} status to {status}")
 
-        return {"message": f"Booking status updated to {status}", "booking_id": booking_id}
+        return {
+            "message": f"Booking status updated to {status}",
+            "booking_id": booking_id,
+        }
     except HTTPException:
         raise
     except Exception as e:
@@ -316,7 +364,9 @@ async def update_booking_status(booking_id: str, status: BookingStatus):
 # Error handlers
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc: HTTPException):
-    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+    return JSONResponse(
+        status_code=exc.status_code, content={"detail": exc.detail}
+    )
 
 
 @app.exception_handler(ValueError)
@@ -327,6 +377,8 @@ async def value_error_handler(request, exc: ValueError):
 if __name__ == "__main__":
     import uvicorn
 
-    print("⚠️  DEPRECATED/LEGACY BACKEND - Use myhibachi-backend-fastapi for new features")
+    print(
+        "⚠️  DEPRECATED/LEGACY BACKEND - Use myhibachi-backend-fastapi for new features"
+    )
     print("🔗 Running on port 8001 (legacy)")
     uvicorn.run(app, host="0.0.0.0", port=8001, reload=True)

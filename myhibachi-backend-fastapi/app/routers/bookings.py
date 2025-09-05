@@ -61,7 +61,9 @@ async def get_booking(
             {"name": "Adult Menu", "quantity": 6, "price": 45.00},
             {"name": "Kids Menu", "quantity": 2, "price": 25.00},
         ],
-        "addons": [{"name": "Filet Mignon Upgrade", "quantity": 2, "price": 5.00}],
+        "addons": [
+            {"name": "Filet Mignon Upgrade", "quantity": 2, "price": 5.00}
+        ],
         "location": {
             "address": "123 Main St, San Jose, CA 95123",
             "travel_distance": 15.5,
@@ -98,7 +100,11 @@ async def update_booking(
 ) -> dict[str, Any]:
     """Update an existing booking."""
     # Placeholder implementation
-    return {"id": booking_id, "message": "Booking updated successfully", **booking_data}
+    return {
+        "id": booking_id,
+        "message": "Booking updated successfully",
+        **booking_data,
+    }
 
 
 @router.delete("/{booking_id}")

@@ -1,28 +1,26 @@
-import { ArrowLeft, Calendar, Share2, User } from 'lucide-react'
-import { Metadata } from 'next'
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { ArrowLeft, Calendar, Share2, User } from 'lucide-react';
+import { Metadata } from 'next';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
-import BlogStructuredData from '@/components/blog/BlogStructuredData'
-import Assistant from '@/components/chat/Assistant'
-import { BreadcrumbSchema, LocalBusinessSchema } from '@/components/seo/TechnicalSEO'
-import blogPosts, { getPostsByEventType, getPostsByServiceArea } from '@/data/blogPosts'
+import BlogStructuredData from '@/components/blog/BlogStructuredData';
+import Assistant from '@/components/chat/Assistant';
+import { BreadcrumbSchema, LocalBusinessSchema } from '@/components/seo/TechnicalSEO';
+import blogPosts, { getPostsByEventType, getPostsByServiceArea } from '@/data/blogPosts';
 
 interface BlogPostPageProps {
-  params: Promise<{
-    slug: string
-  }>
+  params: Promise;
 }
 
 // Generate metadata for SEO
-export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
-  const { slug } = await params
-  const post = blogPosts.find(p => p.slug === slug)
+export async function generateMetadata({ params }: BlogPostPageProps): Promise {
+  const { slug } = await params;
+  const post = blogPosts.find((p) => p.slug === slug);
 
   if (!post) {
     return {
-      title: 'Blog Post Not Found'
-    }
+      title: 'Blog Post Not Found',
+    };
   }
 
   return {
@@ -34,52 +32,52 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       description: post.metaDescription,
       type: 'article',
       authors: [post.author],
-      publishedTime: new Date(post.date).toISOString()
+      publishedTime: new Date(post.date).toISOString(),
     },
     twitter: {
       card: 'summary_large_image',
       title: post.title,
-      description: post.metaDescription
-    }
-  }
+      description: post.metaDescription,
+    },
+  };
 }
 
 // Generate static params for all blog posts
 export async function generateStaticParams() {
-  return blogPosts.map(post => ({
-    slug: post.slug
-  }))
+  return blogPosts.map((post) => ({
+    slug: post.slug,
+  }));
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const { slug } = await params
-  const post = blogPosts.find(p => p.slug === slug)
+  const { slug } = await params;
+  const post = blogPosts.find((p) => p.slug === slug);
 
   if (!post) {
-    notFound()
+    notFound();
   }
 
   // Get related posts based on event type and service area
   const relatedByEvent = getPostsByEventType(post.eventType)
-    .filter(p => p.id !== post.id)
-    .slice(0, 2)
+    .filter((p) => p.id !== post.id)
+    .slice(0, 2);
 
   const relatedByArea = getPostsByServiceArea(post.serviceArea)
-    .filter(p => p.id !== post.id && !relatedByEvent.includes(p))
-    .slice(0, 1)
+    .filter((p) => p.id !== post.id && !relatedByEvent.includes(p))
+    .slice(0, 1);
 
-  const relatedPosts = [...relatedByEvent, ...relatedByArea].slice(0, 3)
+  const relatedPosts = [...relatedByEvent, ...relatedByArea].slice(0, 3);
 
   // Generate full article content based on the post data
   const generateFullContent = (post: (typeof blogPosts)[0]) => {
-    const sections = []
+    const sections = [];
 
     // Introduction
     sections.push(`
       <p class="text-lg text-gray-700 mb-6 leading-relaxed">
         ${post.excerpt}
       </p>
-    `)
+    `);
 
     // Service Area Specific Content
     if (post.serviceArea && post.serviceArea !== 'All Areas') {
@@ -95,18 +93,20 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <li class="mb-2">Interactive cooking show entertainment for all ages</li>
           <li class="mb-2">Customizable menu options for dietary preferences</li>
         </ul>
-      `)
+      `);
     }
 
     // Event Type Specific Content
     if (post.eventType && post.eventType !== 'General') {
       sections.push(`
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">Perfect for ${post.eventType} Celebrations</h2>
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Perfect for ${
+          post.eventType
+        } Celebrations</h2>
         <p class="text-gray-700 mb-6 leading-relaxed">
           ${post.eventType.toLowerCase()} events become extraordinary with hibachi catering. The interactive cooking show
           creates lasting memories while providing delicious, fresh-cooked meals that please every palate.
         </p>
-      `)
+      `);
     }
 
     // Seasonal content if applicable
@@ -117,7 +117,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           Our seasonal menu incorporates the freshest ingredients available during this time of year. From premium seafood
           to perfectly grilled meats and fresh vegetables, every dish is prepared with attention to quality and flavor.
         </p>
-      `)
+      `);
     }
 
     // Planning tips
@@ -133,7 +133,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <li class="mb-2">Special requests or menu customizations</li>
         </ul>
       </div>
-    `)
+    `);
 
     // Call to action with internal links
     sections.push(`
@@ -159,12 +159,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </a>
         </div>
       </div>
-    `)
+    `);
 
-    return sections.join('')
-  }
+    return sections.join('');
+  };
 
-  const fullContent = generateFullContent(post)
+  const fullContent = generateFullContent(post);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -175,7 +175,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         items={[
           { name: 'Home', url: '/' },
           { name: 'Blog', url: '/blog' },
-          { name: post.title, url: `/blog/${post.slug}` }
+          { name: post.title, url: `/blog/${post.slug}` },
         ]}
       />
 
@@ -189,58 +189,58 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       )}
 
       {/* Navigation */}
-      <div className="bg-white border-b">
-        <div className="max-w-4xl mx-auto px-4 py-4">
+      <div className="border-b bg-white">
+        <div className="mx-auto max-w-4xl px-4 py-4">
           <Link
             href="/blog"
-            className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
+            className="inline-flex items-center font-medium text-blue-600 hover:text-blue-800"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Blog
           </Link>
         </div>
       </div>
 
       {/* Article Header */}
-      <article className="max-w-4xl mx-auto px-4 py-12">
+      <article className="mx-auto max-w-4xl px-4 py-12">
         <header className="mb-8">
-          <div className="flex flex-wrap gap-2 mb-4">
-            <span className="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">
+          <div className="mb-4 flex flex-wrap gap-2">
+            <span className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800">
               {post.category}
             </span>
-            <span className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">
+            <span className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-800">
               {post.serviceArea}
             </span>
-            <span className="bg-purple-100 text-purple-800 text-sm px-3 py-1 rounded-full">
+            <span className="rounded-full bg-purple-100 px-3 py-1 text-sm text-purple-800">
               {post.eventType}
             </span>
           </div>
 
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+          <h1 className="mb-6 text-4xl leading-tight font-bold text-gray-900 lg:text-5xl">
             {post.title}
           </h1>
 
-          <div className="flex items-center justify-between flex-wrap gap-4 text-sm text-gray-600">
+          <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-gray-600">
             <div className="flex items-center gap-6">
               <div className="flex items-center">
-                <Calendar className="w-4 h-4 mr-2" />
+                <Calendar className="mr-2 h-4 w-4" />
                 <span>{post.date}</span>
               </div>
               <div className="flex items-center">
-                <User className="w-4 h-4 mr-2" />
+                <User className="mr-2 h-4 w-4" />
                 <span>{post.author}</span>
               </div>
               <span>{post.readTime}</span>
             </div>
             <button className="flex items-center text-blue-600 hover:text-blue-800">
-              <Share2 className="w-4 h-4 mr-2" />
+              <Share2 className="mr-2 h-4 w-4" />
               Share
             </button>
           </div>
         </header>
 
         {/* Article Content */}
-        <div className="bg-white rounded-lg shadow-sm p-8 mb-8">
+        <div className="mb-8 rounded-lg bg-white p-8 shadow-sm">
           <div
             className="prose prose-lg max-w-none"
             dangerouslySetInnerHTML={{ __html: fullContent }}
@@ -248,13 +248,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </div>
 
         {/* Related Keywords */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Tags</h3>
+        <div className="mb-8 rounded-lg bg-white p-6 shadow-sm">
+          <h3 className="mb-4 text-lg font-semibold text-gray-900">Tags</h3>
           <div className="flex flex-wrap gap-2">
             {post.keywords.map((keyword, index) => (
               <span
                 key={index}
-                className="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full"
+                className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700"
               >
                 {keyword}
               </span>
@@ -264,28 +264,28 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
         {/* Related Posts */}
         {relatedPosts.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="rounded-lg bg-white p-6 shadow-sm">
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">
               Related Hibachi Catering Guides
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {relatedPosts.map(relatedPost => (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              {relatedPosts.map((relatedPost) => (
                 <Link key={relatedPost.id} href={`/blog/${relatedPost.slug}`} className="block">
-                  <article className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
+                  <article className="cursor-pointer rounded-lg border border-gray-200 p-4 transition-shadow hover:shadow-md">
                     <div className="mb-2">
-                      <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                      <span className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800">
                         {relatedPost.eventType}
                       </span>
                     </div>
-                    <h4 className="font-semibold text-gray-900 mb-2 hover:text-blue-600">
+                    <h4 className="mb-2 font-semibold text-gray-900 hover:text-blue-600">
                       {relatedPost.title}
                     </h4>
-                    <p className="text-gray-600 text-sm mb-3">
+                    <p className="mb-3 text-sm text-gray-600">
                       {relatedPost.excerpt.slice(0, 100)}...
                     </p>
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-gray-500">{relatedPost.readTime}</span>
-                      <span className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                      <span className="text-sm font-medium text-blue-600 hover:text-blue-800">
                         Read →
                       </span>
                     </div>
@@ -299,5 +299,5 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
       <Assistant page={`/blog/${post.slug}`} />
     </div>
-  )
+  );
 }

@@ -50,7 +50,7 @@ FAQ_DATA = [
     {
         "id": "1",
         "question": "What's included in the hibachi service?",
-        "answer": "Our hibachi service includes a professional chef, portable hibachi grill, all cooking equipment, and utensils. We provide hibachi vegetables (zucchini, onions, mushrooms), fried rice, and your choice of proteins. Please note: We do NOT include cleanup service, tables, chairs, or dinnerware - these need to be arranged separately.",
+        "answer": "Our hibachi service includes a professional chef, portable hibachi grill, all cooking equipment, and utensils. We provide hibachi vegetables (zucchini, onions, mushrooms), fried rice, and your choice of proteins. Please note: We do NOT include cleanup service, tables, chairs, or dinnerware - these need to be arranged separately.",  # noqa: E501
         "category": "service",
         "keywords": [
             "included",
@@ -66,7 +66,7 @@ FAQ_DATA = [
     {
         "id": "2",
         "question": "Do you serve Sacramento?",
-        "answer": "Yes! We serve anywhere in Northern California including the greater Sacramento area (Roseville, Folsom, Davis, and surrounding cities). We have reasonable travel fees that apply based on distance from our base location.",
+        "answer": "Yes! We serve anywhere in Northern California including the greater Sacramento area (Roseville, Folsom, Davis, and surrounding cities). We have reasonable travel fees that apply based on distance from our base location.",  # noqa: E501
         "category": "service_area",
         "keywords": [
             "sacramento",
@@ -82,7 +82,7 @@ FAQ_DATA = [
     {
         "id": "3",
         "question": "How much is the deposit?",
-        "answer": "We require a $100 refundable deposit to secure your booking. This deposit is refundable according to our terms and conditions (please check the agreement section). The remaining balance is due on the event day.",
+        "answer": "We require a $100 refundable deposit to secure your booking. This deposit is refundable according to our terms and conditions (please check the agreement section). The remaining balance is due on the event day.",  # noqa: E501
         "category": "pricing",
         "keywords": [
             "deposit",
@@ -99,7 +99,7 @@ FAQ_DATA = [
     {
         "id": "4",
         "question": "What proteins do you offer?",
-        "answer": "We offer premium proteins including chicken, beef steak, shrimp, salmon, tofu for vegetarians, and combination options. All proteins are fresh and prepared with our signature hibachi seasonings.",
+        "answer": "We offer premium proteins including chicken, beef steak, shrimp, salmon, tofu for vegetarians, and combination options. All proteins are fresh and prepared with our signature hibachi seasonings.",  # noqa: E501
         "category": "menu",
         "keywords": [
             "proteins",
@@ -117,7 +117,7 @@ FAQ_DATA = [
     {
         "id": "5",
         "question": "Where do you serve? What's your service area?",
-        "answer": "We serve throughout Northern California including the Bay Area (San Francisco, San Jose, Oakland, Palo Alto, Mountain View, Santa Clara, Sunnyvale, Fremont) and the greater Sacramento area. We charge reasonable travel fees based on distance from our base location.",
+        "answer": "We serve throughout Northern California including the Bay Area (San Francisco, San Jose, Oakland, Palo Alto, Mountain View, Santa Clara, Sunnyvale, Fremont) and the greater Sacramento area. We charge reasonable travel fees based on distance from our base location.",  # noqa: E501
         "category": "service_area",
         "keywords": [
             "service area",
@@ -136,23 +136,43 @@ FAQ_DATA = [
     {
         "id": "6",
         "question": "What's your cancellation policy?",
-        "answer": "Please refer to our terms and conditions in the agreement section for our complete cancellation policy. The $100 deposit refund is subject to these terms and conditions.",
+        "answer": "Please refer to our terms and conditions in the agreement section for our complete cancellation policy. The $100 deposit refund is subject to these terms and conditions.",  # noqa: E501
         "category": "policy",
-        "keywords": ["cancellation", "policy", "refund", "terms", "conditions", "agreement"],
+        "keywords": [
+            "cancellation",
+            "policy",
+            "refund",
+            "terms",
+            "conditions",
+            "agreement",
+        ],
     },
     {
         "id": "7",
         "question": "Do you provide cleanup service?",
-        "answer": "No, we do not provide cleanup service. Our service includes the chef, equipment, cooking, and food preparation. Cleanup, tables, chairs, and dinnerware are not included and need to be arranged separately by the customer.",
+        "answer": "No, we do not provide cleanup service. Our service includes the chef, equipment, cooking, and food preparation. Cleanup, tables, chairs, and dinnerware are not included and need to be arranged separately by the customer.",  # noqa: E501
         "category": "service",
-        "keywords": ["cleanup", "clean", "tables", "chairs", "dinnerware", "not included"],
+        "keywords": [
+            "cleanup",
+            "clean",
+            "tables",
+            "chairs",
+            "dinnerware",
+            "not included",
+        ],
     },
     {
         "id": "8",
         "question": "What about tables and chairs?",
-        "answer": "Tables, chairs, and dinnerware are not included in our hibachi service. These need to be arranged separately by the customer. We focus on providing the chef, cooking equipment, and delicious hibachi food.",
+        "answer": "Tables, chairs, and dinnerware are not included in our hibachi service. These need to be arranged separately by the customer. We focus on providing the chef, cooking equipment, and delicious hibachi food.",  # noqa: E501
         "category": "service",
-        "keywords": ["tables", "chairs", "dinnerware", "not included", "arrange separately"],
+        "keywords": [
+            "tables",
+            "chairs",
+            "dinnerware",
+            "not included",
+            "arrange separately",
+        ],
     },
 ]
 
@@ -160,10 +180,14 @@ FAQ_DATA = [
 # Simple PII scrubber
 def scrub_pii(text: str) -> str:
     # Email pattern
-    text = re.sub(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b", "[EMAIL]", text)
+    text = re.sub(
+        r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b", "[EMAIL]", text
+    )
     # Phone pattern
     text = re.sub(
-        r"\b(?:\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})\b", "[PHONE]", text
+        r"\b(?:\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})\b",
+        "[PHONE]",
+        text,
     )
     # SSN pattern
     text = re.sub(r"\b\d{3}-\d{2}-\d{4}\b", "[SSN]", text)
@@ -181,7 +205,10 @@ def search_faqs(query: str, limit: int = 3) -> list[dict[str, Any]]:
         keyword_score = 0
 
         # Direct question matching (highest weight)
-        if query_lower in faq["question"].lower() or faq["question"].lower() in query_lower:
+        if (
+            query_lower in faq["question"].lower()
+            or faq["question"].lower() in query_lower
+        ):
             question_score += 10
 
         # Keyword matching
@@ -256,7 +283,7 @@ Guidelines:
     except Exception as e:
         print(f"OpenAI error: {e}")
         return (
-            "I'm having trouble accessing my knowledge right now. Please contact our team directly for assistance.",
+            "I'm having trouble accessing my knowledge right now. Please contact our team directly for assistance.",  # noqa: E501
             0.2,
         )
 
@@ -275,12 +302,16 @@ async def chat(request: ChatRequest):
         # Search FAQs first
         faq_results = search_faqs(clean_message)
 
-        if faq_results and faq_results[0]["score"] > 2.0:  # Increased threshold for better matching
+        if (
+            faq_results and faq_results[0]["score"] > 2.0
+        ):  # Increased threshold for better matching
             # High confidence FAQ match
             best_faq = faq_results[0]
             return ChatResponse(
                 answer=best_faq["answer"],
-                confidence=min(best_faq["score"] / 10.0, 0.95),  # More realistic confidence scoring
+                confidence=min(
+                    best_faq["score"] / 10.0, 0.95
+                ),  # More realistic confidence scoring
                 route="local",
                 sources=[
                     {
@@ -335,7 +366,9 @@ async def submit_feedback(request: FeedbackRequest):
 
     except Exception as e:
         print(f"Feedback error: {e}")
-        raise HTTPException(status_code=500, detail="Failed to process feedback")
+        raise HTTPException(
+            status_code=500, detail="Failed to process feedback"
+        )
 
 
 if __name__ == "__main__":

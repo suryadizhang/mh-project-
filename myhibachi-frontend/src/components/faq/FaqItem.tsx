@@ -1,40 +1,42 @@
-'use client'
+'use client';
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react';
 
-import type { FaqItem } from '@/data/faqsData'
+import type { FaqItem } from '@/data/faqsData';
 
 interface FaqItemComponentProps {
-  faq: FaqItem
-  isOpen: boolean
-  onToggle: () => void
+  faq: FaqItem;
+  isOpen: boolean;
+  onToggle: () => void;
 }
 
 export function FaqItemComponent({ faq, isOpen, onToggle }: FaqItemComponentProps) {
-  const answerRef = useRef<HTMLDivElement>(null)
-  const [wasHelpful, setWasHelpful] = useState<boolean | null>(null)
+  const answerRef = useRef<HTMLDivElement>(null);
+  const [wasHelpful, setWasHelpful] = useState<boolean | null>(null);
 
   useEffect(() => {
     // Auto-expand if this FAQ matches a hash in URL
-    const hash = window.location.hash.slice(1)
+    const hash = window.location.hash.slice(1);
     if (hash === faq.id && !isOpen) {
-      onToggle()
+      onToggle();
       setTimeout(() => {
-        document.getElementById(faq.id)?.scrollIntoView({ behavior: 'smooth' })
-      }, 300)
+        document.getElementById(faq.id)?.scrollIntoView({ behavior: 'smooth' });
+      }, 300);
     }
-  }, [faq.id, isOpen, onToggle])
+  }, [faq.id, isOpen, onToggle]);
 
   const trackHelpfulness = (helpful: boolean) => {
-    setWasHelpful(helpful)
+    setWasHelpful(helpful);
     // Analytics tracking would go here
-    console.log('FAQ Feedback:', { faq_id: faq.id, helpful, category: faq.category })
-  }
+    console.log('FAQ Feedback:', { faq_id: faq.id, helpful, category: faq.category });
+  };
 
   return (
     <div
       id={faq.id}
-      className={`faq-item ${isOpen ? 'active' : ''} ${faq.confidence === 'low' ? 'low-confidence' : ''}`}
+      className={`faq-item ${isOpen ? 'active' : ''} ${
+        faq.confidence === 'low' ? 'low-confidence' : ''
+      }`}
       data-category={faq.category.toLowerCase().replace(/[^a-z0-9]/g, '-')}
     >
       <button
@@ -94,7 +96,7 @@ export function FaqItemComponent({ faq, isOpen, onToggle }: FaqItemComponentProp
             <span className="faq-category">{faq.category}</span>
             {faq.tags.length > 0 && (
               <div className="faq-tags">
-                {faq.tags.slice(0, 3).map(tag => (
+                {faq.tags.slice(0, 3).map((tag) => (
                   <span key={tag} className="faq-tag">
                     {tag}
                   </span>
@@ -110,5 +112,5 @@ export function FaqItemComponent({ faq, isOpen, onToggle }: FaqItemComponentProp
         </div>
       </div>
     </div>
-  )
+  );
 }

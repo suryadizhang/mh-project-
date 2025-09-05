@@ -108,12 +108,32 @@ __pycache__/
 .Python
 env/
 venv/
+.venv/
 ENV/
 env.bak/
 venv.bak/
 pip-log.txt
 pip-delete-this-directory.txt
 .pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+__pycache__
+.Python
+build/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
 # Vercel
 .vercel
@@ -149,10 +169,37 @@ test-results.xml
 *-test.tsx
 *-test.jsx
 
-# Temporary validation scripts
-validate-*.sh
-validate-*.bat
+# Documentation and reports (keep only active ones)
+archive-docs/
+*.backup
+*.old
+*-COMPLETED.md
+*-FINAL.md
+*-SUCCESS.md
+*-REPORT.md
+PHASE_*.md
+CLEANUP_*.md
+COMPREHENSIVE_*.md
+FINAL_*.md
+MIGRATION_*.md
+PRODUCTION_*.md
+PROTOTYPE_*.md
+RELIABLE_*.md
+REFACTOR_*.md
+QUALITY_*.md
+SEO_IMPLEMENTATION_*.md
+STRIPE_INTEGRATION_*.md
+STRIPE_IMPLEMENTATION_*.md
+WEBHOOK_*.md
+*_FIXES.md
+*_COMPLETE.md
+*_SUCCESS.md
+verification/*.md
+verification/step-*.md
+verification/phase*.md
 
-# Component development files
-*.component.dev.tsx
-*.component.dev.ts
+# Keep only essential docs
+!PROJECT_SUMMARY.md
+!DEPLOYMENT_STRATEGY.md
+!README.md
+!docs/

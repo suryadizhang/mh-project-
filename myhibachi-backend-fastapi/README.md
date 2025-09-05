@@ -1,15 +1,23 @@
 # 🍱 My Hibachi - Stripe Integration Backend (FastAPI)
 
-Production-ready Stripe integration for My Hibachi catering services with comprehensive payment processing, customer management, and analytics.
+Production-ready Stripe integration for My Hibachi catering services
+with comprehensive payment processing, customer management, and
+analytics.
 
 ## 🚀 Features
 
-- **Complete Stripe Integration**: Checkout, Payment Intents, Customer Portal, Webhooks
-- **Payment Flows**: Deposits, balance collection, add-ons, full purchases
-- **Customer Management**: Automatic Stripe customer creation, analytics tracking
-- **Invoice & Quote System**: Hosted invoices, quote generation and acceptance
-- **Refund & Dispute Handling**: Admin refund processing, dispute tracking
-- **Analytics Dashboard**: Payment analytics, customer insights, revenue tracking
+- **Complete Stripe Integration**: Checkout, Payment Intents, Customer
+  Portal, Webhooks
+- **Payment Flows**: Deposits, balance collection, add-ons, full
+  purchases
+- **Customer Management**: Automatic Stripe customer creation,
+  analytics tracking
+- **Invoice & Quote System**: Hosted invoices, quote generation and
+  acceptance
+- **Refund & Dispute Handling**: Admin refund processing, dispute
+  tracking
+- **Analytics Dashboard**: Payment analytics, customer insights,
+  revenue tracking
 - **Tax Integration**: Automatic tax calculation (configurable)
 - **Comprehensive Logging**: Webhook audit trail, payment tracking
 
@@ -20,7 +28,8 @@ Production-ready Stripe integration for My Hibachi catering services with compre
 - **SQLAlchemy**: ORM with async support and Alembic migrations
 - **Stripe Python SDK**: Official Stripe integration
 - **Pydantic**: Data validation and serialization
-- **JWT Authentication**: Secure API access (integrates with existing auth)
+- **JWT Authentication**: Secure API access (integrates with existing
+  auth)
 
 ## 📋 Requirements
 
@@ -49,6 +58,7 @@ cp .env.example .env
 ```
 
 **Required Configuration:**
+
 ```bash
 # Database
 DATABASE_URL=postgresql+asyncpg://username:password@localhost:5432/myhibachi_db
@@ -94,7 +104,7 @@ API Documentation: http://localhost:8000/docs
 
 1. **Install Stripe CLI**: https://stripe.com/docs/stripe-cli
 2. **Login**: `stripe login`
-3. **Forward webhooks**: 
+3. **Forward webhooks**:
    ```bash
    stripe listen --forward-to localhost:8000/api/stripe/webhook
    ```
@@ -212,11 +222,12 @@ invoice = stripe.Invoice.create(
 - **invoice.payment_failed** - Invoice payment failure
 - **customer.created** - Customer creation
 - **charge.dispute.created** - Dispute creation
-- **customer.subscription.*** - Subscription events (future)
+- **customer.subscription.\*** - Subscription events (future)
 
 ## 🏃‍♂️ Smoke Test Plan
 
 ### Prerequisites
+
 ```bash
 # 1. Start servers
 uvicorn app.main:app --reload --port 8000
@@ -229,6 +240,7 @@ stripe listen --forward-to localhost:8000/api/stripe/webhook
 ### Test Scenario
 
 1. **Create Test Booking**
+
    ```bash
    curl -X POST http://localhost:8000/api/bookings \
      -H "Content-Type: application/json" \
@@ -243,6 +255,7 @@ stripe listen --forward-to localhost:8000/api/stripe/webhook
    ```
 
 2. **Start Checkout Session**
+
    ```bash
    curl -X POST http://localhost:8000/api/stripe/create-checkout-session \
      -H "Content-Type: application/json" \
@@ -256,11 +269,13 @@ stripe listen --forward-to localhost:8000/api/stripe/webhook
    ```
 
 3. **Complete Payment**
+
    - Visit checkout URL
    - Use card: 4242 4242 4242 4242
    - Complete payment
 
 4. **Verify Webhook Processing**
+
    ```bash
    # Check webhook events
    curl http://localhost:8000/api/stripe/payments?booking_id=booking-123 \
@@ -268,6 +283,7 @@ stripe listen --forward-to localhost:8000/api/stripe/webhook
    ```
 
 5. **Admin Panel Verification**
+
    ```bash
    # View payment in admin
    curl http://localhost:8000/api/stripe/analytics/payments \
@@ -275,6 +291,7 @@ stripe listen --forward-to localhost:8000/api/stripe/webhook
    ```
 
 6. **Test Refund**
+
    ```bash
    curl -X POST http://localhost:8000/api/stripe/refund \
      -H "Content-Type: application/json" \
@@ -396,6 +413,7 @@ stripe customers list --api-key $STRIPE_SECRET_KEY
 ## 📞 Support
 
 For issues and questions:
+
 - Check API documentation at `/docs`
 - Review webhook events in Stripe Dashboard
 - Check application logs
@@ -404,9 +422,10 @@ For issues and questions:
 ## 📈 Monitoring & Analytics
 
 The system provides comprehensive analytics:
+
 - Payment success/failure rates
 - Customer lifetime value
-- Payment method preferences  
+- Payment method preferences
 - Revenue trends
 - Dispute rates
 - Refund patterns

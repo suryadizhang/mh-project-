@@ -30,7 +30,9 @@ async def get_current_user(
         token = credentials.credentials
 
         try:
-            payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+            payload = jwt.decode(
+                token, settings.secret_key, algorithms=[settings.algorithm]
+            )
             user_id = payload.get("sub")
             if user_id is None:
                 raise HTTPException(
@@ -78,7 +80,10 @@ async def get_admin_user(
 ) -> dict[str, Any]:
     """Ensure current user is admin."""
     if not current_user.get("is_admin", False):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
     return current_user
 
 

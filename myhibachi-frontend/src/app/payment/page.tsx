@@ -1,69 +1,65 @@
-'use client'
+'use client';
 
-import { Elements } from '@stripe/react-stripe-js'
-import { loadStripe } from '@stripe/stripe-js'
-import { Calendar, CreditCard, DollarSign, Loader2, MapPin, Shield, Users } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import { Calendar, CreditCard, DollarSign, Loader2, MapPin, Shield, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-import CustomerSavingsDisplay from '@/components/CustomerSavingsDisplay'
-import AlternativePaymentOptions from '@/components/payment/AlternativePaymentOptions'
-import BookingLookup from '@/components/payment/BookingLookup'
-import PaymentForm from '@/components/payment/PaymentForm'
-import { apiFetch } from '@/lib/api'
+import CustomerSavingsDisplay from '@/components/CustomerSavingsDisplay';
+import AlternativePaymentOptions from '@/components/payment/AlternativePaymentOptions';
+import BookingLookup from '@/components/payment/BookingLookup';
+import PaymentForm from '@/components/payment/PaymentForm';
+import { apiFetch } from '@/lib/api';
 
 // Initialize Stripe
-const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null
+const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
 
 interface BookingData {
-  id: string
-  customerName: string
-  customerEmail: string
-  eventDate: string
-  eventTime: string
-  guestCount: number
-  venueAddress: string
-  totalAmount: number
-  depositPaid: boolean
-  depositAmount: number
-  remainingBalance: number
-  services: Array<{
-    name: string
-    price: number
-    quantity: number
-  }>
+  id: string;
+  customerName: string;
+  customerEmail: string;
+  eventDate: string;
+  eventTime: string;
+  guestCount: number;
+  venueAddress: string;
+  totalAmount: number;
+  depositPaid: boolean;
+  depositAmount: number;
+  remainingBalance: number;
+  services: Array;
 }
 
 export default function PaymentPage() {
-  const [selectedBooking, setSelectedBooking] = useState<BookingData | null>(null)
-  const [paymentType, setPaymentType] = useState<'deposit' | 'balance'>('deposit')
-  const [customAmount, setCustomAmount] = useState('')
-  const [tipAmount, setTipAmount] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'zelle' | 'venmo'>('stripe')
-  const [isLoading, setIsLoading] = useState(false)
-  const [clientSecret, setClientSecret] = useState<string | null>(null)
-  const [stripeElementsKey, setStripeElementsKey] = useState(0) // Force re-render
+  const [selectedBooking, setSelectedBooking] = useState<BookingData | null>(null);
+  const [paymentType, setPaymentType] = useState<'deposit' | 'balance'>('deposit');
+  const [customAmount, setCustomAmount] = useState('');
+  const [tipAmount, setTipAmount] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'zelle' | 'venmo'>('stripe');
+  const [isLoading, setIsLoading] = useState(false);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [stripeElementsKey, setStripeElementsKey] = useState(0); // Force re-render
 
   // Calculate totals
   const baseAmount = selectedBooking
     ? paymentType === 'deposit'
       ? 100
       : selectedBooking.remainingBalance
-    : parseFloat(customAmount) || 0
+    : parseFloat(customAmount) || 0;
 
-  const tipValue = parseFloat(tipAmount) || 0
-  const subtotal = baseAmount + tipValue
+  const tipValue = parseFloat(tipAmount) || 0;
+  const subtotal = baseAmount + tipValue;
 
   // Add processing fees based on payment method
   const processingFee =
-    paymentMethod === 'stripe' ? subtotal * 0.08 : paymentMethod === 'venmo' ? subtotal * 0.03 : 0
-  const totalAmount = subtotal + processingFee
+    paymentMethod === 'stripe' ? subtotal * 0.08 : paymentMethod === 'venmo' ? subtotal * 0.03 : 0;
+  const totalAmount = subtotal + processingFee;
 
   // Create payment intent when amount changes and using Stripe
   useEffect(() => {
     const createPaymentIntent = async () => {
       try {
-        setIsLoading(true)
+        setIsLoading(true);
         const response = await apiFetch('/api/v1/payments/create-intent', {
           method: 'POST',
           body: JSON.stringify({
@@ -79,38 +75,38 @@ export default function PaymentPage() {
               address: '',
               city: '',
               state: '',
-              zipCode: ''
+              zipCode: '',
             },
             metadata: {
               bookingId: selectedBooking?.id || 'manual-payment',
               customerName: selectedBooking?.customerName || 'Guest User',
               eventDate: selectedBooking?.eventDate || 'N/A',
-              paymentType
-            }
-          })
-        })
+              paymentType,
+            },
+          }),
+        });
 
         if (!response.success) {
-          throw new Error(response.error || 'Failed to create payment intent')
+          throw new Error(response.error || 'Failed to create payment intent');
         }
 
-        const { clientSecret: newClientSecret } = response.data
-        setClientSecret(newClientSecret)
-        setStripeElementsKey(prev => prev + 1) // Force Elements re-render
+        const { clientSecret: newClientSecret } = response.data as { clientSecret: string };
+        setClientSecret(newClientSecret);
+        setStripeElementsKey((prev) => prev + 1); // Force Elements re-render
       } catch (error) {
-        console.error('Error creating payment intent:', error)
-        setClientSecret(null)
+        console.error('Error creating payment intent:', error);
+        setClientSecret(null);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
     if (paymentMethod === 'stripe' && totalAmount > 0) {
-      createPaymentIntent()
+      createPaymentIntent();
     } else {
-      setClientSecret(null)
+      setClientSecret(null);
     }
-  }, [totalAmount, paymentMethod, selectedBooking, paymentType, tipValue])
+  }, [totalAmount, paymentMethod, selectedBooking, paymentType, tipValue]);
 
   const appearance = {
     theme: 'stripe' as const,
@@ -121,47 +117,47 @@ export default function PaymentPage() {
       colorDanger: '#ef4444',
       fontFamily: 'Inter, system-ui, sans-serif',
       spacingUnit: '4px',
-      borderRadius: '8px'
-    }
-  }
+      borderRadius: '8px',
+    },
+  };
 
   const options = clientSecret
     ? {
         clientSecret,
         appearance,
-        loader: 'auto' as const
+        loader: 'auto' as const,
       }
     : {
         appearance,
-        loader: 'auto' as const
-      }
+        loader: 'auto' as const,
+      };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gray-50 px-4 py-8">
+      <div className="mx-auto max-w-4xl">
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+        <div className="mb-8 rounded-xl bg-white p-8 shadow-lg">
           <div className="text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <DollarSign className="w-8 h-8 text-red-600" />
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+              <DollarSign className="h-8 w-8 text-red-600" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Hibachi Payment Portal</h1>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <h1 className="mb-2 text-3xl font-bold text-gray-900">My Hibachi Payment Portal</h1>
+            <p className="mx-auto max-w-2xl text-gray-600">
               Secure payment processing for your hibachi booking. Pay your deposit to lock in your
               date or settle your remaining balance with optional tips.
             </p>
           </div>
 
           {/* Security Badge */}
-          <div className="flex items-center justify-center mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
-            <Shield className="w-5 h-5 text-green-600 mr-2" />
-            <span className="text-green-800 font-medium">
+          <div className="mt-6 flex items-center justify-center rounded-lg border border-green-200 bg-green-50 p-4">
+            <Shield className="mr-2 h-5 w-5 text-green-600" />
+            <span className="font-medium text-green-800">
               Secured by Stripe with 2-Factor Authentication
             </span>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid gap-8 lg:grid-cols-3">
           {/* Left Column - Booking Lookup */}
           <div className="lg:col-span-1">
             <BookingLookup
@@ -179,23 +175,23 @@ export default function PaymentPage() {
 
             {/* Manual Amount Entry */}
             {!selectedBooking && (
-              <div className="bg-white rounded-xl shadow-lg p-6 mt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Or Enter Custom Amount</h3>
+              <div className="mt-6 rounded-xl bg-white p-6 shadow-lg">
+                <h3 className="mb-4 text-lg font-semibold text-gray-900">Or Enter Custom Amount</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="mb-1 block text-sm font-medium text-gray-700">
                       Amount to Pay
                     </label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                      <span className="absolute top-1/2 left-3 -translate-y-1/2 transform text-gray-500">
                         $
                       </span>
                       <input
                         type="number"
                         value={customAmount}
-                        onChange={e => setCustomAmount(e.target.value)}
+                        onChange={(e) => setCustomAmount(e.target.value)}
                         placeholder="0.00"
-                        className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-8 focus:border-transparent focus:ring-2 focus:ring-red-500"
                       />
                     </div>
                   </div>
@@ -208,30 +204,30 @@ export default function PaymentPage() {
           <div className="lg:col-span-2">
             {/* Booking Summary */}
             {selectedBooking && (
-              <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <Users className="w-5 h-5 mr-2 text-red-600" />
+              <div className="mb-6 rounded-xl bg-white p-6 shadow-lg">
+                <h3 className="mb-4 flex items-center text-lg font-semibold text-gray-900">
+                  <Users className="mr-2 h-5 w-5 text-red-600" />
                   Booking Details
                 </h3>
-                <div className="grid md:grid-cols-2 gap-4 text-sm">
+                <div className="grid gap-4 text-sm md:grid-cols-2">
                   <div>
-                    <div className="flex items-center text-gray-600 mb-2">
-                      <Calendar className="w-4 h-4 mr-2" />
+                    <div className="mb-2 flex items-center text-gray-600">
+                      <Calendar className="mr-2 h-4 w-4" />
                       <span>
                         {selectedBooking.eventDate} at {selectedBooking.eventTime}
                       </span>
                     </div>
-                    <div className="flex items-center text-gray-600 mb-2">
-                      <Users className="w-4 h-4 mr-2" />
+                    <div className="mb-2 flex items-center text-gray-600">
+                      <Users className="mr-2 h-4 w-4" />
                       <span>{selectedBooking.guestCount} guests</span>
                     </div>
                     <div className="flex items-center text-gray-600">
-                      <MapPin className="w-4 h-4 mr-2" />
+                      <MapPin className="mr-2 h-4 w-4" />
                       <span>{selectedBooking.venueAddress}</span>
                     </div>
                   </div>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="text-xs text-gray-500 uppercase tracking-wide mb-2">
+                  <div className="rounded-lg bg-gray-50 p-4">
+                    <div className="mb-2 text-xs tracking-wide text-gray-500 uppercase">
                       Payment Status
                     </div>
                     <div className="text-sm">
@@ -253,7 +249,7 @@ export default function PaymentPage() {
                             : 'Not Paid'}
                         </span>
                       </div>
-                      <div className="flex justify-between border-t pt-2 mt-2">
+                      <div className="mt-2 flex justify-between border-t pt-2">
                         <span className="font-medium">Remaining Balance:</span>
                         <span className="font-medium">
                           ${selectedBooking.remainingBalance.toFixed(2)}
@@ -267,29 +263,29 @@ export default function PaymentPage() {
 
             {/* Payment Type Selection */}
             {selectedBooking && (
-              <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Select Payment Type</h3>
-                <div className="grid md:grid-cols-2 gap-4">
+              <div className="mb-6 rounded-xl bg-white p-6 shadow-lg">
+                <h3 className="mb-4 text-lg font-semibold text-gray-900">Select Payment Type</h3>
+                <div className="grid gap-4 md:grid-cols-2">
                   <button
                     onClick={() => setPaymentType('deposit')}
                     disabled={selectedBooking.depositPaid}
-                    className={`p-4 rounded-lg border-2 transition-all ${
+                    className={`rounded-lg border-2 p-4 transition-all ${
                       paymentType === 'deposit'
                         ? 'border-red-500 bg-red-50'
                         : 'border-gray-200 hover:border-gray-300'
-                    } ${selectedBooking.depositPaid ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    } ${selectedBooking.depositPaid ? 'cursor-not-allowed opacity-50' : ''}`}
                   >
                     <div className="text-left">
                       <div className="font-medium">Deposit Payment</div>
                       <div className="text-sm text-gray-600">$100.00 to secure your booking</div>
                       {selectedBooking.depositPaid && (
-                        <div className="text-xs text-green-600 mt-1">✓ Already Paid</div>
+                        <div className="mt-1 text-xs text-green-600">✓ Already Paid</div>
                       )}
                     </div>
                   </button>
                   <button
                     onClick={() => setPaymentType('balance')}
-                    className={`p-4 rounded-lg border-2 transition-all ${
+                    className={`rounded-lg border-2 p-4 transition-all ${
                       paymentType === 'balance'
                         ? 'border-red-500 bg-red-50'
                         : 'border-gray-200 hover:border-gray-300'
@@ -307,30 +303,30 @@ export default function PaymentPage() {
             )}
 
             {/* Payment Method Selection */}
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Choose Payment Method</h3>
-              <div className="grid md:grid-cols-3 gap-4">
+            <div className="mb-6 rounded-xl bg-white p-6 shadow-lg">
+              <h3 className="mb-4 text-lg font-semibold text-gray-900">Choose Payment Method</h3>
+              <div className="grid gap-4 md:grid-cols-3">
                 <button
                   onClick={() => setPaymentMethod('stripe')}
-                  className={`p-4 rounded-lg border-2 transition-all ${
+                  className={`rounded-lg border-2 p-4 transition-all ${
                     paymentMethod === 'stripe'
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <CreditCard className="w-6 h-6 mx-auto mb-2 text-blue-600" />
+                  <CreditCard className="mx-auto mb-2 h-6 w-6 text-blue-600" />
                   <div className="text-sm font-medium">Credit Card</div>
                   <div className="text-xs text-gray-600">+8% processing fee</div>
                 </button>
                 <button
                   onClick={() => setPaymentMethod('zelle')}
-                  className={`p-4 rounded-lg border-2 transition-all ${
+                  className={`rounded-lg border-2 p-4 transition-all ${
                     paymentMethod === 'zelle'
                       ? 'border-purple-500 bg-purple-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <div className="w-6 h-6 mx-auto mb-2 bg-purple-600 rounded text-white text-xs flex items-center justify-center font-bold">
+                  <div className="mx-auto mb-2 flex h-6 w-6 items-center justify-center rounded bg-purple-600 text-xs font-bold text-white">
                     Z
                   </div>
                   <div className="text-sm font-medium">Zelle</div>
@@ -338,13 +334,13 @@ export default function PaymentPage() {
                 </button>
                 <button
                   onClick={() => setPaymentMethod('venmo')}
-                  className={`p-4 rounded-lg border-2 transition-all ${
+                  className={`rounded-lg border-2 p-4 transition-all ${
                     paymentMethod === 'venmo'
                       ? 'border-blue-400 bg-blue-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <div className="w-6 h-6 mx-auto mb-2 bg-blue-400 rounded text-white text-xs flex items-center justify-center font-bold">
+                  <div className="mx-auto mb-2 flex h-6 w-6 items-center justify-center rounded bg-blue-400 text-xs font-bold text-white">
                     V
                   </div>
                   <div className="text-sm font-medium">Venmo</div>
@@ -354,47 +350,47 @@ export default function PaymentPage() {
             </div>
 
             {/* Tips/Gratuity */}
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="mb-6 rounded-xl bg-white p-6 shadow-lg">
+              <h3 className="mb-4 text-lg font-semibold text-gray-900">
                 Add Tip/Gratuity (Optional)
               </h3>
-              <div className="grid grid-cols-4 gap-3 mb-4">
-                {[20, 25, 30, 35].map(percent => {
-                  const tipValue = ((baseAmount * percent) / 100).toFixed(2)
+              <div className="mb-4 grid grid-cols-4 gap-3">
+                {[20, 25, 30, 35].map((percent) => {
+                  const tipValue = ((baseAmount * percent) / 100).toFixed(2);
                   return (
                     <button
                       key={percent}
                       onClick={() => setTipAmount(tipValue)}
-                      className="p-3 border border-gray-300 rounded-lg hover:border-red-500 hover:bg-red-50 transition-all text-center"
+                      className="rounded-lg border border-gray-300 p-3 text-center transition-all hover:border-red-500 hover:bg-red-50"
                     >
                       <div className="font-medium">{percent}%</div>
                       <div className="text-sm text-gray-600">${tipValue}</div>
                     </button>
-                  )
+                  );
                 })}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="mb-1 block text-sm font-medium text-gray-700">
                   Custom Tip Amount
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                  <span className="absolute top-1/2 left-3 -translate-y-1/2 transform text-gray-500">
                     $
                   </span>
                   <input
                     type="number"
                     value={tipAmount}
-                    onChange={e => setTipAmount(e.target.value)}
+                    onChange={(e) => setTipAmount(e.target.value)}
                     placeholder="0.00"
-                    className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-8 focus:border-transparent focus:ring-2 focus:ring-red-500"
                   />
                 </div>
               </div>
             </div>
 
             {/* Payment Summary */}
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Summary</h3>
+            <div className="mb-6 rounded-xl bg-white p-6 shadow-lg">
+              <h3 className="mb-4 text-lg font-semibold text-gray-900">Payment Summary</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span>Base Amount:</span>
@@ -422,8 +418,8 @@ export default function PaymentPage() {
                     <span>${processingFee.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="border-t pt-2 mt-2">
-                  <div className="flex justify-between font-bold text-lg">
+                <div className="mt-2 border-t pt-2">
+                  <div className="flex justify-between text-lg font-bold">
                     <span>Total Amount:</span>
                     <span className="text-red-600">${totalAmount.toFixed(2)}</span>
                   </div>
@@ -445,37 +441,37 @@ export default function PaymentPage() {
                     />
                   </Elements>
                 ) : (
-                  <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+                  <div className="rounded-xl bg-white p-8 text-center shadow-lg">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
+                      <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">Preparing Payment...</h3>
+                    <h3 className="mb-2 text-xl font-bold text-gray-900">Preparing Payment...</h3>
                     <p className="text-gray-600">
                       Setting up secure payment processing. This will only take a moment.
                     </p>
                   </div>
                 )
               ) : (
-                <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <CreditCard className="w-8 h-8 text-red-600" />
+                <div className="rounded-xl bg-white p-8 text-center shadow-lg">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+                    <CreditCard className="h-8 w-8 text-red-600" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  <h3 className="mb-2 text-xl font-bold text-gray-900">
                     Payment Processing Unavailable
                   </h3>
-                  <p className="text-gray-600 mb-4">
+                  <p className="mb-4 text-gray-600">
                     Credit card processing is currently not configured. Please use Zelle or Venmo
                     instead.
                   </p>
                   <button
                     onClick={() => setPaymentMethod('zelle')}
-                    className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors mr-2"
+                    className="mr-2 rounded-lg bg-purple-600 px-6 py-3 text-white transition-colors hover:bg-purple-700"
                   >
                     Use Zelle
                   </button>
                   <button
                     onClick={() => setPaymentMethod('venmo')}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="rounded-lg bg-blue-600 px-6 py-3 text-white transition-colors hover:bg-blue-700"
                   >
                     Use Venmo
                   </button>
@@ -494,5 +490,5 @@ export default function PaymentPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

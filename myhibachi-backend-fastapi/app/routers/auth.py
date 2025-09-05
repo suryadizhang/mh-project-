@@ -25,7 +25,11 @@ async def login() -> dict[str, Any]:
     return {
         "access_token": "dev-token-123",
         "token_type": "bearer",
-        "user": {"id": "dev-user-123", "email": "dev@myhibachi.com", "name": "Dev User"},
+        "user": {
+            "id": "dev-user-123",
+            "email": "dev@myhibachi.com",
+            "name": "Dev User",
+        },
     }
 
 

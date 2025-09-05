@@ -1,22 +1,22 @@
 // Technical SEO Components for Next.js App Router
 // ================================================
 
-import { Metadata } from 'next'
+import { Metadata } from 'next';
 
 interface TechnicalSEOProps {
-  title: string
-  description: string
-  keywords?: string[]
-  canonicalUrl?: string
+  title: string;
+  description: string;
+  keywords?: string[];
+  canonicalUrl?: string;
   openGraph?: {
-    title?: string
-    description?: string
-    image?: string
-    type?: 'website' | 'article'
-  }
-  structuredData?: Record<string, unknown>
-  location?: string
-  eventType?: string
+    title?: string;
+    description?: string;
+    image?: string;
+    type?: 'website' | 'article';
+  };
+  structuredData?: Record;
+  location?: string;
+  eventType?: string;
 }
 
 // Enhanced metadata generator for perfect SEO
@@ -26,10 +26,10 @@ function generateEnhancedMetadata({
   keywords = [],
   canonicalUrl,
   openGraph,
-  location
+  location,
 }: TechnicalSEOProps): Metadata {
-  const baseUrl = 'https://myhibachi.com'
-  const fullCanonicalUrl = canonicalUrl ? `${baseUrl}${canonicalUrl}` : baseUrl
+  const baseUrl = 'https://myhibachi.com';
+  const fullCanonicalUrl = canonicalUrl ? `${baseUrl}${canonicalUrl}` : baseUrl;
 
   return {
     title: `${title} | My Hibachi Catering`,
@@ -50,11 +50,11 @@ function generateEnhancedMetadata({
           url: openGraph?.image || '/images/hibachi-og-default.jpg',
           width: 1200,
           height: 630,
-          alt: `${title} - My Hibachi Catering`
-        }
+          alt: `${title} - My Hibachi Catering`,
+        },
       ],
       locale: 'en_US',
-      type: openGraph?.type || 'website'
+      type: openGraph?.type || 'website',
     },
 
     // Twitter Cards
@@ -64,7 +64,7 @@ function generateEnhancedMetadata({
       description: openGraph?.description || description,
       site: '@MyHibachiCatering',
       creator: '@MyHibachiCatering',
-      images: [openGraph?.image || '/images/hibachi-og-default.jpg']
+      images: [openGraph?.image || '/images/hibachi-og-default.jpg'],
     },
 
     // Additional metadata
@@ -76,20 +76,20 @@ function generateEnhancedMetadata({
         follow: true,
         'max-video-preview': -1,
         'max-image-preview': 'large',
-        'max-snippet': -1
-      }
+        'max-snippet': -1,
+      },
     },
 
     // Verification tags
     verification: {
       google: 'your-google-verification-code',
       yandex: 'your-yandex-verification',
-      yahoo: 'your-yahoo-verification'
+      yahoo: 'your-yahoo-verification',
     },
 
     // Canonical URL
     alternates: {
-      canonical: fullCanonicalUrl
+      canonical: fullCanonicalUrl,
     },
 
     // Location-specific metadata
@@ -98,10 +98,10 @@ function generateEnhancedMetadata({
         'geo.region': 'US-CA',
         'geo.placename': location,
         'geo.position': getLocationCoordinates(location),
-        ICBM: getLocationCoordinates(location)
-      }
-    })
-  }
+        ICBM: getLocationCoordinates(location),
+      },
+    }),
+  };
 }
 
 // Core Web Vitals optimization metadata helper
@@ -111,9 +111,9 @@ function getCoreWebVitalsMetadata() {
     other: {
       'dns-prefetch': '//fonts.googleapis.com',
       preconnect: '//fonts.gstatic.com',
-      'resource-hint': 'preload'
-    }
-  }
+      'resource-hint': 'preload',
+    },
+  };
 }
 
 // Local Business Schema Component
@@ -122,15 +122,15 @@ function LocalBusinessSchema({
   eventType,
   businessName = 'My Hibachi Catering',
   description,
-  url
+  url,
 }: {
-  location: string
-  eventType?: string
-  businessName?: string
-  description?: string
-  url?: string
+  location: string;
+  eventType?: string;
+  businessName?: string;
+  description?: string;
+  url?: string;
 }) {
-  const coordinates = getLocationCoordinatesDetailed(location)
+  const coordinates = getLocationCoordinatesDetailed(location);
 
   const schema = {
     '@context': 'https://schema.org',
@@ -147,24 +147,24 @@ function LocalBusinessSchema({
       addressLocality: location,
       addressRegion: 'CA',
       addressCountry: 'US',
-      postalCode: coordinates.zipCode
+      postalCode: coordinates.zipCode,
     },
 
     geo: {
       '@type': 'GeoCoordinates',
       latitude: coordinates.lat,
-      longitude: coordinates.lng
+      longitude: coordinates.lng,
     },
 
     areaServed: [
       {
         '@type': 'City',
-        name: location
+        name: location,
       },
       {
         '@type': 'State',
-        name: 'California'
-      }
+        name: 'California',
+      },
     ],
 
     serviceType: 'Hibachi Catering',
@@ -179,7 +179,7 @@ function LocalBusinessSchema({
       ratingValue: '4.9',
       reviewCount: '127',
       bestRating: '5',
-      worstRating: '1'
+      worstRating: '1',
     },
 
     review: [
@@ -187,14 +187,14 @@ function LocalBusinessSchema({
         '@type': 'Review',
         author: {
           '@type': 'Person',
-          name: 'Sarah M.'
+          name: 'Sarah M.',
         },
         reviewRating: {
           '@type': 'Rating',
-          ratingValue: '5'
+          ratingValue: '5',
         },
-        reviewBody: `Amazing hibachi experience in ${location}! The chef was entertaining and the food was delicious.`
-      }
+        reviewBody: `Amazing hibachi experience in ${location}! The chef was entertaining and the food was delicious.`,
+      },
     ],
 
     hasOfferCatalog: {
@@ -206,57 +206,59 @@ function LocalBusinessSchema({
           itemOffered: {
             '@type': 'Service',
             name: `${eventType || 'Private'} Hibachi Catering`,
-            description: `Professional hibachi catering for ${eventType?.toLowerCase() || 'private'} events in ${location}`
-          }
-        }
-      ]
+            description: `Professional hibachi catering for ${
+              eventType?.toLowerCase() || 'private'
+            } events in ${location}`,
+          },
+        },
+      ],
     },
 
     sameAs: [
       'https://www.facebook.com/myhibachicatering',
       'https://www.instagram.com/myhibachicatering',
       'https://www.yelp.com/biz/my-hibachi-catering',
-      'https://www.linkedin.com/company/my-hibachi-catering'
-    ]
-  }
+      'https://www.linkedin.com/company/my-hibachi-catering',
+    ],
+  };
 
   return (
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(schema, null, 2)
+        __html: JSON.stringify(schema, null, 2),
       }}
     />
-  )
+  );
 }
 
 // FAQ Schema Component for rich snippets
-function FAQSchema({ faqs }: { faqs: Array<{ question: string; answer: string }> }) {
+function FAQSchema({ faqs }: { faqs: Array }) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: faqs.map(faq => ({
+    mainEntity: faqs.map((faq) => ({
       '@type': 'Question',
       name: faq.question,
       acceptedAnswer: {
         '@type': 'Answer',
-        text: faq.answer
-      }
-    }))
-  }
+        text: faq.answer,
+      },
+    })),
+  };
 
   return (
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(schema, null, 2)
+        __html: JSON.stringify(schema, null, 2),
       }}
     />
-  )
+  );
 }
 
 // Breadcrumb Schema Component
-function BreadcrumbSchema({ items }: { items: Array<{ name: string; url: string }> }) {
+function BreadcrumbSchema({ items }: { items: Array }) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -264,18 +266,18 @@ function BreadcrumbSchema({ items }: { items: Array<{ name: string; url: string 
       '@type': 'ListItem',
       position: index + 1,
       name: item.name,
-      item: `https://myhibachi.com${item.url}`
-    }))
-  }
+      item: `https://myhibachi.com${item.url}`,
+    })),
+  };
 
   return (
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(schema, null, 2)
+        __html: JSON.stringify(schema, null, 2),
       }}
     />
-  )
+  );
 }
 
 // Event Schema Component
@@ -285,14 +287,14 @@ function EventSchema({
   location,
   startDate,
   endDate,
-  organizer = 'My Hibachi Catering'
+  organizer = 'My Hibachi Catering',
 }: {
-  name: string
-  description: string
-  location: string
-  startDate?: string
-  endDate?: string
-  organizer?: string
+  name: string;
+  description: string;
+  location: string;
+  startDate?: string;
+  endDate?: string;
+  organizer?: string;
 }) {
   const schema = {
     '@context': 'https://schema.org',
@@ -311,14 +313,14 @@ function EventSchema({
         '@type': 'PostalAddress',
         addressLocality: location,
         addressRegion: 'CA',
-        addressCountry: 'US'
-      }
+        addressCountry: 'US',
+      },
     },
 
     organizer: {
       '@type': 'Organization',
       name: organizer,
-      url: 'https://myhibachi.com'
+      url: 'https://myhibachi.com',
     },
 
     offers: {
@@ -327,18 +329,18 @@ function EventSchema({
       price: 'Contact for pricing',
       priceCurrency: 'USD',
       availability: 'https://schema.org/InStock',
-      validFrom: new Date().toISOString()
-    }
-  }
+      validFrom: new Date().toISOString(),
+    },
+  };
 
   return (
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(schema, null, 2)
+        __html: JSON.stringify(schema, null, 2),
       }}
     />
-  )
+  );
 }
 
 // Performance monitoring component
@@ -355,10 +357,10 @@ function PerformanceMonitoring() {
             getLCP(console.log);
             getTTFB(console.log);
           });
-        `
+        `,
       }}
     />
-  )
+  );
 }
 
 // Helper functions
@@ -370,9 +372,9 @@ function getLocationCoordinates(location: string): string {
     'Palo Alto': '37.4419,-122.1430',
     'Mountain View': '37.3861,-122.0839',
     'Santa Clara': '37.3541,-121.9552',
-    Sunnyvale: '37.3688,-122.0363'
-  }
-  return coords[location as keyof typeof coords] || coords['San Jose']
+    Sunnyvale: '37.3688,-122.0363',
+  };
+  return coords[location as keyof typeof coords] || coords['San Jose'];
 }
 
 function getLocationCoordinatesDetailed(location: string) {
@@ -383,12 +385,12 @@ function getLocationCoordinatesDetailed(location: string) {
     'Palo Alto': { lat: 37.4419, lng: -122.143, zipCode: '94301' },
     'Mountain View': { lat: 37.3861, lng: -122.0839, zipCode: '94041' },
     'Santa Clara': { lat: 37.3541, lng: -121.9552, zipCode: '95050' },
-    Sunnyvale: { lat: 37.3688, lng: -122.0363, zipCode: '94085' }
-  }
-  return details[location as keyof typeof details] || details['San Jose']
+    Sunnyvale: { lat: 37.3688, lng: -122.0363, zipCode: '94085' },
+  };
+  return details[location as keyof typeof details] || details['San Jose'];
 }
 
-export type { TechnicalSEOProps }
+export type { TechnicalSEOProps };
 export {
   BreadcrumbSchema,
   EventSchema,
@@ -396,5 +398,5 @@ export {
   generateEnhancedMetadata,
   getCoreWebVitalsMetadata,
   LocalBusinessSchema,
-  PerformanceMonitoring
-}
+  PerformanceMonitoring,
+};

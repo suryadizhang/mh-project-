@@ -17,7 +17,8 @@ const eslintConfig = [
       // Formatting and whitespace rules
       'no-trailing-spaces': 'error',
       'eol-last': ['error', 'always'],
-      indent: ['error', 2, { SwitchCase: 1 }],
+      // Disable indent rule to prevent stack overflow - use Prettier instead
+      // indent: ['error', 2, { SwitchCase: 1 }],
       'no-multiple-empty-lines': ['error', { max: 2, maxEOF: 1 }],
 
       // Import organization

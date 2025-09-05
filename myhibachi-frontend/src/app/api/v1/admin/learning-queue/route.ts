@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
 
 /**
  * ⚠️  MIGRATED TO BACKEND ⚠️
@@ -21,14 +21,16 @@ export async function GET() {
       error: 'Endpoint migrated to backend',
       migration: {
         from: '/v1/admin/learning-queue',
-        to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/admin/learning-queue`,
+        to: `${
+          process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        }/api/v1/admin/learning-queue`,
         status: 'MIGRATED',
         date: new Date().toISOString(),
-        instructions: 'Update frontend to use backend API endpoint'
-      }
+        instructions: 'Update frontend to use backend API endpoint',
+      },
     },
-    { status: 410 }
-  )
+    { status: 410 },
+  );
 }
 
 export async function POST() {
@@ -37,14 +39,16 @@ export async function POST() {
       error: 'Endpoint migrated to backend',
       migration: {
         from: '/v1/admin/learning-queue',
-        to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/admin/learning-queue`,
+        to: `${
+          process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        }/api/v1/admin/learning-queue`,
         status: 'MIGRATED',
         date: new Date().toISOString(),
-        instructions: 'Update frontend to use backend API endpoint'
-      }
+        instructions: 'Update frontend to use backend API endpoint',
+      },
     },
-    { status: 410 }
-  )
+    { status: 410 },
+  );
 }
 
 export async function PUT() {
@@ -53,14 +57,16 @@ export async function PUT() {
       error: 'Endpoint migrated to backend',
       migration: {
         from: '/v1/admin/learning-queue',
-        to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/admin/learning-queue`,
+        to: `${
+          process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        }/api/v1/admin/learning-queue`,
         status: 'MIGRATED',
         date: new Date().toISOString(),
-        instructions: 'Update frontend to use backend API endpoint'
-      }
+        instructions: 'Update frontend to use backend API endpoint',
+      },
     },
-    { status: 410 }
-  )
+    { status: 410 },
+  );
 }
 
 export async function DELETE() {
@@ -69,12 +75,14 @@ export async function DELETE() {
       error: 'Endpoint migrated to backend',
       migration: {
         from: '/v1/admin/learning-queue',
-        to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/admin/learning-queue`,
+        to: `${
+          process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        }/api/v1/admin/learning-queue`,
         status: 'MIGRATED',
         date: new Date().toISOString(),
-        instructions: 'Update frontend to use backend API endpoint'
-      }
+        instructions: 'Update frontend to use backend API endpoint',
+      },
     },
-    { status: 410 }
-  )
+    { status: 410 },
+  );
 }

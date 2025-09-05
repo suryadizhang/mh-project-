@@ -93,15 +93,15 @@ export const SavingsCalculator = ({ amount }: { amount: number }) => {
 
 ```typescript
 // src/app/api/v1/customers/route.ts
-import Stripe from 'stripe'
+import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-08-27.basil'
-})
+  apiVersion: '2025-08-27.basil',
+});
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, name, phone, source } = await request.json()
+    const { email, name, phone, source } = await request.json();
 
     // Create Stripe customer (FREE - no charges)
     const stripeCustomer = await stripe.customers.create({
@@ -114,9 +114,9 @@ export async function POST(request: NextRequest) {
         signupDate: new Date().toISOString(),
         source: source || 'payment-page',
         zellePromotion: 'active',
-        totalSavings: '0'
-      }
-    })
+        totalSavings: '0',
+      },
+    });
 
     // Store customer data (implement your database logic)
     const customer = {
@@ -126,17 +126,17 @@ export async function POST(request: NextRequest) {
       phone,
       stripeCustomerId: stripeCustomer.id,
       preferredPaymentMethod: 'zelle',
-      createdAt: new Date().toISOString()
-    }
+      createdAt: new Date().toISOString(),
+    };
 
     return NextResponse.json({
       success: true,
       customer,
-      stripeCustomerId: stripeCustomer.id
-    })
+      stripeCustomerId: stripeCustomer.id,
+    });
   } catch (error) {
-    console.error('Customer creation error:', error)
-    return NextResponse.json({ error: 'Failed to create customer' }, { status: 500 })
+    console.error('Customer creation error:', error);
+    return NextResponse.json({ error: 'Failed to create customer' }, { status: 500 });
   }
 }
 ```
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
 // src/app/api/v1/payments/track/route.ts
 export async function POST(request: NextRequest) {
   try {
-    const { customerId, method, amount, savings } = await request.json()
+    const { customerId, method, amount, savings } = await request.json();
 
     // Update Stripe customer metadata (FREE)
     if (customerId) {
@@ -160,20 +160,20 @@ export async function POST(request: NextRequest) {
             parseInt(
               customer.metadata[
                 `total${method.charAt(0).toUpperCase() + method.slice(1)}Payments`
-              ] || '0'
+              ] || '0',
             ) + 1
           ).toString(),
           totalSavings:
             method === 'zelle'
               ? (parseFloat(customer.metadata.totalSavings || '0') + savings).toString()
-              : customer.metadata.totalSavings || '0'
-        }
-      })
+              : customer.metadata.totalSavings || '0',
+        },
+      });
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ error: 'Tracking failed' }, { status: 500 })
+    return NextResponse.json({ error: 'Tracking failed' }, { status: 500 });
   }
 }
 ```
@@ -191,8 +191,8 @@ export const newsletterSegments = {
     campaigns: [
       'Loyalty rewards for smart choices',
       'Early access to new services',
-      'Exclusive Zelle user discounts'
-    ]
+      'Exclusive Zelle user discounts',
+    ],
   },
 
   stripeUsers: {
@@ -201,8 +201,8 @@ export const newsletterSegments = {
     campaigns: [
       'Educational content about Zelle savings',
       'Monthly savings report showing potential savings',
-      'Special incentives to try Zelle'
-    ]
+      'Special incentives to try Zelle',
+    ],
   },
 
   mixedUsers: {
@@ -211,25 +211,25 @@ export const newsletterSegments = {
     campaigns: [
       'Smart payment tips and tricks',
       'Payment method optimization advice',
-      'Personalized savings recommendations'
-    ]
-  }
-}
+      'Personalized savings recommendations',
+    ],
+  },
+};
 
 export async function segmentCustomerByPaymentHistory(stripeCustomerId: string) {
-  const customer = await stripe.customers.retrieve(stripeCustomerId)
-  const metadata = customer.metadata
+  const customer = await stripe.customers.retrieve(stripeCustomerId);
+  const metadata = customer.metadata;
 
-  const zelleCount = parseInt(metadata.totalZellePayments || '0')
-  const stripeCount = parseInt(metadata.totalStripePayments || '0')
-  const venmoCount = parseInt(metadata.totalVenmoPayments || '0')
+  const zelleCount = parseInt(metadata.totalZellePayments || '0');
+  const stripeCount = parseInt(metadata.totalStripePayments || '0');
+  const venmoCount = parseInt(metadata.totalVenmoPayments || '0');
 
   if (zelleCount > stripeCount + venmoCount) {
-    return 'zelleUsers'
+    return 'zelleUsers';
   } else if (stripeCount > zelleCount + venmoCount) {
-    return 'stripeUsers'
+    return 'stripeUsers';
   } else {
-    return 'mixedUsers'
+    return 'mixedUsers';
   }
 }
 ```
@@ -243,58 +243,58 @@ export const zellePromotionCampaigns = {
     subject: '💰 Welcome! Start saving with Zelle payments',
     template: `
       Hi {{customerName}},
-      
+
       Welcome to My Hibachi! 🍱
-      
+
       💡 Pro Tip: Save money on every booking by paying with Zelle!
-      
+
       ✅ Zelle: 0% fees - SAVE MONEY!
       ❌ Credit Card: 8% fees
-      
+
       For a $400 booking, that's $32 in savings!
-      
+
       Simply send payments to: myhibachichef@gmail.com
-      
+
       Ready to book? Visit: myhibachi.com/BookUs
-    `
+    `,
   },
 
   savingsReport: {
     subject: '🎉 You saved ${{totalSavings}} with smart payment choices!',
     template: `
       Hi {{customerName}},
-      
+
       Great news! Here's how much you've saved by choosing Zelle:
-      
+
       💰 Total Savings: ${{ totalSavings }}
       📊 Zelle Payments: {{zelleCount}}
       📈 Average Savings per Payment: ${{ avgSavings }}
-      
+
       Keep it up! Every Zelle payment saves you 8% compared to credit cards.
-      
+
       Book your next hibachi experience: myhibachi.com/BookUs
-    `
+    `,
   },
 
   creditCardUserEducation: {
     subject: '💡 Did you know you could save money on payments?',
     template: `
       Hi {{customerName}},
-      
-      We noticed you've been using credit cards for payments. 
-      
+
+      We noticed you've been using credit cards for payments.
+
       💰 What if we told you there's a way to save 8% on every payment?
-      
+
       Zelle payments are:
       ✅ Completely FREE (0% fees)
       ✅ Instant bank-to-bank transfer
       ✅ More secure than credit cards
       ✅ Save you ${{ potentialSavings }} on your next ${{ nextBookingAmount }} booking
-      
+
       Try Zelle on your next booking: myhibachi.com/payment
-    `
-  }
-}
+    `,
+  },
+};
 ```
 
 ### **Phase 4: Booking System Integration (Week 4)**
@@ -304,33 +304,33 @@ export const zellePromotionCampaigns = {
 ```typescript
 // Update booking confirmation to promote Zelle
 export async function sendBookingConfirmation(booking: BookingData) {
-  const depositAmount = 100
-  const zelleTotal = depositAmount
-  const stripeTotal = depositAmount + depositAmount * 0.08
-  const savings = stripeTotal - zelleTotal
+  const depositAmount = 100;
+  const zelleTotal = depositAmount;
+  const stripeTotal = depositAmount + depositAmount * 0.08;
+  const savings = stripeTotal - zelleTotal;
 
   const emailContent = `
     🍱 Booking Confirmed - My Hibachi Catering
-    
+
     Event Date: ${booking.eventDate}
     Guest Count: ${booking.guestCount}
     Deposit Required: $${depositAmount}
-    
+
     💰 PAYMENT OPTIONS (Choose the smartest option!):
-    
+
     🥇 ZELLE - RECOMMENDED (Save $${savings.toFixed(2)}!)
     Total: $${zelleTotal.toFixed(2)}
     Send to: myhibachichef@gmail.com
     Reference: ${booking.id}
-    
+
     🥉 Credit Card - Convenient but expensive
     Total: $${stripeTotal.toFixed(2)} (includes $${savings.toFixed(2)} processing fee)
     Pay online: myhibachi.com/payment
-    
+
     💡 Smart customers choose Zelle and save money!
-    
+
     Questions? Call (916) 740-8768
-  `
+  `;
 
   // Send email...
   // Also create Stripe customer and invoice for record keeping
@@ -346,34 +346,34 @@ export async function sendBookingConfirmation(booking: BookingData) {
 ```typescript
 interface PaymentAnalytics {
   monthlyBreakdown: {
-    zelleRevenue: number
-    zelleTransactions: number
-    zellePercentage: number
+    zelleRevenue: number;
+    zelleTransactions: number;
+    zellePercentage: number;
 
-    venmoRevenue: number
-    venmoTransactions: number
-    venmoFees: number
+    venmoRevenue: number;
+    venmoTransactions: number;
+    venmoFees: number;
 
-    stripeRevenue: number
-    stripeTransactions: number
-    stripeFees: number
+    stripeRevenue: number;
+    stripeTransactions: number;
+    stripeFees: number;
 
-    totalCustomerSavings: number
-    businessFeesSaved: number
-  }
+    totalCustomerSavings: number;
+    businessFeesSaved: number;
+  };
 
   customerBehavior: {
-    newZelleAdopters: number
-    methodSwitchers: number
-    loyalZelleUsers: number
-    avgSavingsPerCustomer: number
-  }
+    newZelleAdopters: number;
+    methodSwitchers: number;
+    loyalZelleUsers: number;
+    avgSavingsPerCustomer: number;
+  };
 
   conversionMetrics: {
-    zelleConversionRate: number // % who choose Zelle
-    savingsAwareness: number // % who see savings info
-    repeatZelleUsage: number // % who use Zelle again
-  }
+    zelleConversionRate: number; // % who choose Zelle
+    savingsAwareness: number; // % who see savings info
+    repeatZelleUsage: number; // % who use Zelle again
+  };
 }
 ```
 

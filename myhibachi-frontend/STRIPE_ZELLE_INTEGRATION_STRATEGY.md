@@ -35,35 +35,35 @@
 // Enhanced customer schema leveraging Stripe + our database
 interface UnifiedCustomer {
   // Our Database Fields
-  id: string
-  email: string
-  name: string
-  phone: string
-  createdAt: Date
+  id: string;
+  email: string;
+  name: string;
+  phone: string;
+  createdAt: Date;
 
   // Stripe Integration
-  stripeCustomerId?: string // Link to Stripe customer
-  preferredPaymentMethod: 'zelle' | 'venmo' | 'stripe'
+  stripeCustomerId?: string; // Link to Stripe customer
+  preferredPaymentMethod: 'zelle' | 'venmo' | 'stripe';
 
   // Booking System Integration
-  totalBookings: number
-  lastBookingDate?: Date
-  avgBookingValue: number
+  totalBookings: number;
+  lastBookingDate?: Date;
+  avgBookingValue: number;
 
   // Newsletter System
-  newsletterSubscribed: boolean
+  newsletterSubscribed: boolean;
   emailPreferences: {
-    bookingReminders: boolean
-    promotions: boolean
-    receipts: boolean
-  }
+    bookingReminders: boolean;
+    promotions: boolean;
+    receipts: boolean;
+  };
 
   // Payment History (aggregated)
-  totalPaid: number
-  zellePayments: number
-  venmoPayments: number
-  stripePayments: number
-  preferredFeeMethod: string // Track which they choose most
+  totalPaid: number;
+  zellePayments: number;
+  venmoPayments: number;
+  stripePayments: number;
+  preferredFeeMethod: string; // Track which they choose most
 }
 ```
 
@@ -72,23 +72,23 @@ interface UnifiedCustomer {
 ```typescript
 // Smart payment method suggestion based on amount
 function suggestOptimalPaymentMethod(amount: number): PaymentSuggestion {
-  const zelleMessage = '💰 SAVE MONEY: Pay with Zelle (0% fees)'
-  const venmoMessage = '💡 GOOD OPTION: Pay with Venmo (3% fees)'
-  const stripeMessage = '💳 CONVENIENT: Pay with Credit Card (8% fees)'
+  const zelleMessage = '💰 SAVE MONEY: Pay with Zelle (0% fees)';
+  const venmoMessage = '💡 GOOD OPTION: Pay with Venmo (3% fees)';
+  const stripeMessage = '💳 CONVENIENT: Pay with Credit Card (8% fees)';
 
   if (amount >= 100) {
     return {
       primary: { method: 'zelle', message: zelleMessage, savings: amount * 0.08 },
       secondary: { method: 'venmo', message: venmoMessage, savings: amount * 0.05 },
-      tertiary: { method: 'stripe', message: stripeMessage, extraCost: amount * 0.08 }
-    }
+      tertiary: { method: 'stripe', message: stripeMessage, extraCost: amount * 0.08 },
+    };
   } else {
     // For smaller amounts, convenience might outweigh savings
     return {
       primary: { method: 'zelle', message: zelleMessage, savings: amount * 0.08 },
       secondary: { method: 'stripe', message: stripeMessage, extraCost: amount * 0.08 },
-      tertiary: { method: 'venmo', message: venmoMessage, savings: amount * 0.05 }
-    }
+      tertiary: { method: 'venmo', message: venmoMessage, savings: amount * 0.05 },
+    };
   }
 }
 ```
@@ -103,7 +103,7 @@ function suggestOptimalPaymentMethod(amount: number): PaymentSuggestion {
 // Create/Update Stripe customers for ALL payment methods
 export async function createUnifiedCustomer(customerData: CustomerInput) {
   // 1. Create in our database first
-  const customer = await db.customers.create(customerData)
+  const customer = await db.customers.create(customerData);
 
   // 2. Create in Stripe (even for Zelle/Venmo users)
   const stripeCustomer = await stripe.customers.create({
@@ -114,19 +114,19 @@ export async function createUnifiedCustomer(customerData: CustomerInput) {
       internalCustomerId: customer.id,
       preferredPaymentMethod: 'zelle', // Start with Zelle preference
       signupDate: new Date().toISOString(),
-      source: 'my-hibachi-website'
-    }
-  })
+      source: 'my-hibachi-website',
+    },
+  });
 
   // 3. Link Stripe customer ID back to our database
   await db.customers.update(customer.id, {
-    stripeCustomerId: stripeCustomer.id
-  })
+    stripeCustomerId: stripeCustomer.id,
+  });
 
   // 4. Subscribe to newsletter by default (with consent)
-  await subscribeToNewsletter(customer)
+  await subscribeToNewsletter(customer);
 
-  return { customer, stripeCustomer }
+  return { customer, stripeCustomer };
 }
 ```
 
@@ -135,10 +135,10 @@ export async function createUnifiedCustomer(customerData: CustomerInput) {
 ```typescript
 // Enhanced payment processing that creates Stripe customers regardless of method
 export async function processPayment(paymentData: PaymentInput) {
-  const { customerId, amount, method, bookingId } = paymentData
+  const { customerId, amount, method, bookingId } = paymentData;
 
   // Always ensure customer exists in Stripe (for free features)
-  const customer = await ensureStripeCustomer(customerId)
+  const customer = await ensureStripeCustomer(customerId);
 
   switch (method) {
     case 'zelle':
@@ -146,24 +146,24 @@ export async function processPayment(paymentData: PaymentInput) {
         ...paymentData,
         stripeCustomerId: customer.stripeCustomerId,
         feeAmount: 0,
-        savings: amount * 0.08 // Show how much they saved
-      })
+        savings: amount * 0.08, // Show how much they saved
+      });
 
     case 'venmo':
       return await processVenmoPayment({
         ...paymentData,
         stripeCustomerId: customer.stripeCustomerId,
         feeAmount: amount * 0.03,
-        savings: amount * 0.05 // Compared to Stripe
-      })
+        savings: amount * 0.05, // Compared to Stripe
+      });
 
     case 'stripe':
       return await processStripePayment({
         ...paymentData,
         stripeCustomerId: customer.stripeCustomerId,
         feeAmount: amount * 0.08,
-        message: '💡 Next time save 8% with Zelle!'
-      })
+        message: '💡 Next time save 8% with Zelle!',
+      });
   }
 }
 ```
@@ -173,19 +173,19 @@ export async function processPayment(paymentData: PaymentInput) {
 ```typescript
 // Give customers access to their complete payment history
 export async function createCustomerPortalSession(customerId: string) {
-  const customer = await db.customers.findById(customerId)
+  const customer = await db.customers.findById(customerId);
 
   if (!customer.stripeCustomerId) {
-    throw new Error('Customer not linked to Stripe')
+    throw new Error('Customer not linked to Stripe');
   }
 
   // Create Stripe portal session (FREE feature)
   const session = await stripe.billingPortal.sessions.create({
     customer: customer.stripeCustomerId,
-    return_url: 'https://myhibachi.com/account'
-  })
+    return_url: 'https://myhibachi.com/account',
+  });
 
-  return session.url
+  return session.url;
 }
 ```
 
@@ -199,19 +199,19 @@ export async function createCustomerPortalSession(customerId: string) {
 interface NewsletterIntegration {
   // Stripe-powered customer segmentation
   segments: {
-    zelleUsers: Customer[] // Reward with exclusive discounts
-    venmoUsers: Customer[] // Encourage Zelle migration
-    stripeUsers: Customer[] // Show Zelle savings opportunities
-    highValueCustomers: Customer[] // VIP treatment
-  }
+    zelleUsers: Customer[]; // Reward with exclusive discounts
+    venmoUsers: Customer[]; // Encourage Zelle migration
+    stripeUsers: Customer[]; // Show Zelle savings opportunities
+    highValueCustomers: Customer[]; // VIP treatment
+  };
 
   // Automated campaigns
   campaigns: {
-    zellePromotion: 'Get 10% off when you pay with Zelle!'
-    savingsReminder: 'You could have saved $X by using Zelle last month'
-    loyaltyProgram: 'Zelle users get early access to bookings'
-    paymentTips: 'Payment tip: Zelle saves you money on every booking'
-  }
+    zellePromotion: 'Get 10% off when you pay with Zelle!';
+    savingsReminder: 'You could have saved $X by using Zelle last month';
+    loyaltyProgram: 'Zelle users get early access to bookings';
+    paymentTips: 'Payment tip: Zelle saves you money on every booking';
+  };
 }
 
 // Enhanced newsletter subscription with payment preferences
@@ -224,22 +224,22 @@ export async function subscribeToNewsletter(customer: Customer) {
     preferences: {
       paymentTips: true, // Educate about Zelle savings
       promotions: true,
-      bookingReminders: true
+      bookingReminders: true,
     },
     metadata: {
       preferredPaymentMethod: customer.preferredPaymentMethod,
       customerValue: customer.totalPaid,
-      stripeCustomerId: customer.stripeCustomerId
-    }
-  })
+      stripeCustomerId: customer.stripeCustomerId,
+    },
+  });
 
   // Also add to Stripe for unified customer view
   await stripe.customers.update(customer.stripeCustomerId, {
     metadata: {
       newsletterSubscribed: 'true',
-      subscriptionDate: new Date().toISOString()
-    }
-  })
+      subscriptionDate: new Date().toISOString(),
+    },
+  });
 }
 ```
 
@@ -253,10 +253,10 @@ export async function subscribeToNewsletter(customer: Customer) {
 // Booking system that promotes Zelle at every step
 export async function createBooking(bookingData: BookingInput) {
   // 1. Create booking in database
-  const booking = await db.bookings.create(bookingData)
+  const booking = await db.bookings.create(bookingData);
 
   // 2. Ensure customer exists in unified system
-  const customer = await createUnifiedCustomer(bookingData.customer)
+  const customer = await createUnifiedCustomer(bookingData.customer);
 
   // 3. Create Stripe invoice (even for Zelle payments - FREE feature)
   const invoice = await stripe.invoices.create({
@@ -266,23 +266,23 @@ export async function createBooking(bookingData: BookingInput) {
       bookingId: booking.id,
       eventDate: booking.eventDate,
       guestCount: booking.guestCount.toString(),
-      internalBookingRef: booking.reference
+      internalBookingRef: booking.reference,
     },
     custom_fields: [
       {
         name: 'Event Date',
-        value: booking.eventDate
+        value: booking.eventDate,
       },
       {
         name: 'Guest Count',
-        value: booking.guestCount.toString()
+        value: booking.guestCount.toString(),
       },
       {
         name: 'Preferred Payment',
-        value: 'Zelle (0% fees) - myhibachichef@gmail.com'
-      }
-    ]
-  })
+        value: 'Zelle (0% fees) - myhibachichef@gmail.com',
+      },
+    ],
+  });
 
   // 4. Add invoice line items
   await stripe.invoiceItems.create({
@@ -290,8 +290,8 @@ export async function createBooking(bookingData: BookingInput) {
     invoice: invoice.id,
     amount: booking.depositAmount * 100, // $100 deposit
     currency: 'usd',
-    description: 'Hibachi Catering Deposit'
-  })
+    description: 'Hibachi Catering Deposit',
+  });
 
   // 5. Send booking confirmation with payment options
   await sendBookingConfirmation({
@@ -302,16 +302,16 @@ export async function createBooking(bookingData: BookingInput) {
       recommended: {
         method: 'zelle',
         message: '💰 SAVE 8% - Pay with Zelle (FREE)',
-        instructions: 'Send to: myhibachichef@gmail.com'
+        instructions: 'Send to: myhibachichef@gmail.com',
       },
       alternatives: [
         { method: 'venmo', fee: '3%', message: 'Pay with Venmo @myhibachichef' },
-        { method: 'stripe', fee: '8%', message: 'Pay with Credit Card (convenient)' }
-      ]
-    }
-  })
+        { method: 'stripe', fee: '8%', message: 'Pay with Credit Card (convenient)' },
+      ],
+    },
+  });
 
-  return { booking, customer, invoice }
+  return { booking, customer, invoice };
 }
 ```
 
@@ -325,65 +325,65 @@ export async function createBooking(bookingData: BookingInput) {
 interface PaymentAnalytics {
   // Revenue breakdown by method
   zelleRevenue: {
-    amount: number
-    transactions: number
-    percentage: number
-    savings: number // Total fees saved compared to Stripe
-  }
+    amount: number;
+    transactions: number;
+    percentage: number;
+    savings: number; // Total fees saved compared to Stripe
+  };
 
   venmoRevenue: {
-    amount: number
-    transactions: number
-    fees: number
-    percentage: number
-  }
+    amount: number;
+    transactions: number;
+    fees: number;
+    percentage: number;
+  };
 
   stripeRevenue: {
-    amount: number
-    transactions: number
-    fees: number
-    percentage: number
-  }
+    amount: number;
+    transactions: number;
+    fees: number;
+    percentage: number;
+  };
 
   // Customer behavior insights
   customerInsights: {
-    zelleAdopters: number
-    methodSwitchers: number // Customers who switched to Zelle
-    feesSavedForCustomers: number
+    zelleAdopters: number;
+    methodSwitchers: number; // Customers who switched to Zelle
+    feesSavedForCustomers: number;
     avgTransactionByMethod: {
-      zelle: number
-      venmo: number
-      stripe: number
-    }
-  }
+      zelle: number;
+      venmo: number;
+      stripe: number;
+    };
+  };
 
   // Business optimization
   businessMetrics: {
-    totalFeesSaved: number // By promoting Zelle
-    revenueEfficiency: number // Revenue after fees
-    customerSatisfaction: number // Based on payment experience
-  }
+    totalFeesSaved: number; // By promoting Zelle
+    revenueEfficiency: number; // Revenue after fees
+    customerSatisfaction: number; // Based on payment experience
+  };
 }
 
 // Generate comprehensive analytics using both Stripe and our data
-export async function generatePaymentAnalytics(): Promise<PaymentAnalytics> {
+export async function generatePaymentAnalytics(): Promise {
   // Get Stripe data (FREE)
   const stripePayments = await stripe.paymentIntents.list({
     limit: 1000,
-    created: { gte: getMonthStart() }
-  })
+    created: { gte: getMonthStart() },
+  });
 
   // Get our database data
   const zellePayments = await db.payments.findMany({
-    where: { method: 'zelle', createdAt: { gte: getMonthStart() } }
-  })
+    where: { method: 'zelle', createdAt: { gte: getMonthStart() } },
+  });
 
   const venmoPayments = await db.payments.findMany({
-    where: { method: 'venmo', createdAt: { gte: getMonthStart() } }
-  })
+    where: { method: 'venmo', createdAt: { gte: getMonthStart() } },
+  });
 
   // Calculate metrics
-  return calculateAnalytics({ stripePayments, zellePayments, venmoPayments })
+  return calculateAnalytics({ stripePayments, zellePayments, venmoPayments });
 }
 ```
 
@@ -446,57 +446,57 @@ export const newsletterCampaigns = {
     subject: '💰 Keep More Money in Your Pocket - Pay with Zelle!',
     content: `
       Hi {customerName},
-      
+
       Want to save money on your hibachi bookings? Use Zelle!
-      
+
       💰 Zelle: 0% processing fees - YOU SAVE MONEY!
       💸 Credit Card: 8% processing fees - COSTS YOU EXTRA
-      
+
       Example: $500 booking
-      • Zelle: Pay exactly $500 
+      • Zelle: Pay exactly $500
       • Credit Card: Pay $540 ($40 extra in fees!)
-      
+
       Simply send payment to: myhibachichef@gmail.com
-      
+
       Save money on your next booking: myhibachi.com/payment
     `,
-    targetSegment: 'stripeUsers' // Help credit card users save money
+    targetSegment: 'stripeUsers', // Help credit card users save money
   },
 
   savingsConfirmation: {
     subject: '✅ You saved ${savedAmount} by choosing Zelle! 🎉',
     content: `
       Smart choice, {customerName}!
-      
+
       By paying with Zelle, you saved: $${savedAmount}
       Your total savings with us: $${totalSavings}
-      
+
       Keep saving on future bookings - always choose Zelle!
-      
+
       Next booking: myhibachi.com/BookUs
     `,
-    targetSegment: 'zelleUsers' // Reinforce their smart choice
+    targetSegment: 'zelleUsers', // Reinforce their smart choice
   },
 
   potentialSavings: {
     subject: '💡 You could save $${potentialSavings} on your next booking',
     content: `
       Hi {customerName},
-      
+
       We noticed you used a credit card for your last booking.
-      
+
       💡 Money-saving tip: Choose Zelle next time and save $${potentialSavings}!
-      
+
       Zelle is:
       ✅ Free (0% processing fees)
       ✅ Instant bank-to-bank transfer
       ✅ Secure and trusted
-      
+
       Start saving: myhibachi.com/payment
     `,
-    targetSegment: 'recentStripeUsers' // Convert recent credit card users
-  }
-}
+    targetSegment: 'recentStripeUsers', // Convert recent credit card users
+  },
+};
 ```
 
 ### **3. Zelle Usage Tracking & Encouragement**

@@ -32,7 +32,7 @@ export function calculatePaymentSavings(amount: number, method: 'stripe' | 'zell
   }
 }
 
-/* 
+/*
 // IMPLEMENTATION MOVED TO NEW STRIPE INTEGRATION
 // See src/lib/server/stripeCustomerService.ts for working implementation
 */

@@ -2,7 +2,7 @@ name: AI Backend CI
 
 on:
   push:
-    paths: 
+    paths:
       - 'myhibachi-ai-backend/**'
       - '.github/workflows/ai-backend.yml'
   pull_request:
@@ -12,11 +12,11 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Debug - List repository contents
         run: |
           echo "=== Repository root contents ==="
@@ -27,7 +27,7 @@ jobs:
           test -f myhibachi-ai-backend/requirements.txt && echo "requirements.txt found" || echo "requirements.txt NOT found"
           echo "=== Find all requirements.txt files ==="
           find . -name "requirements.txt" -type f || echo "No requirements.txt files found"
-        
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
@@ -35,7 +35,7 @@ jobs:
           # Temporarily disable cache to resolve path issues
           # cache: 'pip'
           # cache-dependency-path: 'myhibachi-ai-backend/requirements.txt'
-          
+
       - name: Install dependencies
         working-directory: myhibachi-ai-backend
         run: |
@@ -45,26 +45,26 @@ jobs:
           else
             pip install fastapi uvicorn python-multipart
           fi
-          
+
       - name: Setup test environment
         working-directory: myhibachi-ai-backend
         run: |
           echo "AI_MODEL_API_KEY=fake_key_for_testing" > .env
           echo "OPENAI_API_KEY=fake_openai_key_for_testing" >> .env
           echo "AI_BACKEND_PORT=8002" >> .env
-          
+
       - name: Run linting (ruff)
         working-directory: myhibachi-ai-backend
         run: |
           pip install ruff
           ruff check . || echo "Linting completed with warnings"
-          
+
       - name: Run type checking (mypy)
         working-directory: myhibachi-ai-backend
         run: |
           pip install mypy
           mypy *.py --ignore-missing-imports || echo "Type checking completed with warnings"
-          
+
       - name: Run tests
         working-directory: myhibachi-ai-backend
         run: |
@@ -75,7 +75,7 @@ jobs:
             echo "No tests found, running basic syntax validation"
             python -c "import main; print('Syntax validation passed')" || python -c "import simple_backend_corrected; print('Syntax validation passed')"
           fi
-          
+
       - name: Start application (health check)
         working-directory: myhibachi-ai-backend
         run: |
@@ -90,13 +90,13 @@ jobs:
           else
             echo "No main application file found"
           fi
-          
+
       - name: Run security audit
         working-directory: myhibachi-ai-backend
         run: |
           pip install safety
           safety check || echo "Security audit completed with warnings"
-          
+
       - name: Validate AI isolation
         working-directory: myhibachi-ai-backend
         run: |
@@ -107,7 +107,7 @@ jobs:
           else
             echo "✅ AI backend properly isolated from payment processing"
           fi
-          
+
       - name: Run guard checks
         run: |
           cd ..

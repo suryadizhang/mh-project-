@@ -5,12 +5,12 @@
 /* WARNING: This file contains legacy global styles that create conflicts.
    These styles are preserved during migration to prevent visual regressions.
    New styles should use scoped components or page-specific CSS.
-   
+
    Migration Status:
    - ❌ Global .btn-primary declarations (multiple conflicts)
    - ❌ Unscoped hero styles
    - ❌ Global layout styles
-   
+
    Target for deletion: After all components are migrated to design system
 */
 

@@ -10,20 +10,20 @@
 
 ```typescript
 // src/services/stripeCustomerService.ts
-import Stripe from 'stripe'
+import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16'
-})
+  apiVersion: '2023-10-16',
+});
 
 export class StripeCustomerService {
   // Create comprehensive customer profile in Stripe
   static async createCustomerProfile(customerData: {
-    email: string
-    name: string
-    phone?: string
-    address?: Stripe.AddressParam
-    metadata?: Record<string, string>
+    email: string;
+    name: string;
+    phone?: string;
+    address?: Stripe.AddressParam;
+    metadata?: Record;
   }) {
     const customer = await stripe.customers.create({
       email: customerData.email,
@@ -35,7 +35,7 @@ export class StripeCustomerService {
         signupSource: 'myhibachi-website',
         customerType: 'catering-client',
         createdAt: new Date().toISOString(),
-        ...customerData.metadata
+        ...customerData.metadata,
       },
       // Enable customer portal access
       invoice_settings: {
@@ -43,37 +43,37 @@ export class StripeCustomerService {
         custom_fields: [
           {
             name: 'Preferred Payment Method',
-            value: 'Zelle (0% fees) - myhibachichef@gmail.com'
-          }
-        ]
-      }
-    })
+            value: 'Zelle (0% fees) - myhibachichef@gmail.com',
+          },
+        ],
+      },
+    });
 
-    return customer
+    return customer;
   }
 
   // Update customer with payment preferences and history
   static async updateCustomerPreferences(
     customerId: string,
     updates: {
-      preferredPaymentMethod?: 'zelle' | 'venmo' | 'stripe'
-      totalBookings?: number
-      totalSpent?: number
-      lastBookingDate?: string
-      zelleUsageCount?: number
-      totalSavingsFromZelle?: number
-    }
+      preferredPaymentMethod?: 'zelle' | 'venmo' | 'stripe';
+      totalBookings?: number;
+      totalSpent?: number;
+      lastBookingDate?: string;
+      zelleUsageCount?: number;
+      totalSavingsFromZelle?: number;
+    },
   ) {
-    const metadata: Record<string, string> = {}
+    const metadata: Record = {};
 
     if (updates.preferredPaymentMethod)
-      metadata.preferredPaymentMethod = updates.preferredPaymentMethod
-    if (updates.totalBookings) metadata.totalBookings = updates.totalBookings.toString()
-    if (updates.totalSpent) metadata.totalSpent = updates.totalSpent.toString()
-    if (updates.lastBookingDate) metadata.lastBookingDate = updates.lastBookingDate
-    if (updates.zelleUsageCount) metadata.zelleUsageCount = updates.zelleUsageCount.toString()
+      metadata.preferredPaymentMethod = updates.preferredPaymentMethod;
+    if (updates.totalBookings) metadata.totalBookings = updates.totalBookings.toString();
+    if (updates.totalSpent) metadata.totalSpent = updates.totalSpent.toString();
+    if (updates.lastBookingDate) metadata.lastBookingDate = updates.lastBookingDate;
+    if (updates.zelleUsageCount) metadata.zelleUsageCount = updates.zelleUsageCount.toString();
     if (updates.totalSavingsFromZelle)
-      metadata.totalSavingsFromZelle = updates.totalSavingsFromZelle.toString()
+      metadata.totalSavingsFromZelle = updates.totalSavingsFromZelle.toString();
 
     return await stripe.customers.update(customerId, {
       metadata,
@@ -81,63 +81,63 @@ export class StripeCustomerService {
         custom_fields: [
           {
             name: 'Payment Savings',
-            value: `$${updates.totalSavingsFromZelle || 0} saved with Zelle`
+            value: `$${updates.totalSavingsFromZelle || 0} saved with Zelle`,
           },
           {
             name: 'Preferred Method',
-            value: `${updates.preferredPaymentMethod || 'zelle'} (Smart Choice!)`
-          }
-        ]
-      }
-    })
+            value: `${updates.preferredPaymentMethod || 'zelle'} (Smart Choice!)`,
+          },
+        ],
+      },
+    });
   }
 
   // Search customers by various criteria
   static async searchCustomers(query: {
-    email?: string
-    name?: string
-    paymentMethod?: string
-    limit?: number
+    email?: string;
+    name?: string;
+    paymentMethod?: string;
+    limit?: number;
   }) {
     const searchParams: Stripe.CustomerSearchParams = {
       query: '',
-      limit: query.limit || 100
-    }
+      limit: query.limit || 100,
+    };
 
-    const queryParts: string[] = []
+    const queryParts: string[] = [];
 
-    if (query.email) queryParts.push(`email:"${query.email}"`)
-    if (query.name) queryParts.push(`name:"${query.name}"`)
+    if (query.email) queryParts.push(`email:"${query.email}"`);
+    if (query.name) queryParts.push(`name:"${query.name}"`);
     if (query.paymentMethod)
-      queryParts.push(`metadata["preferredPaymentMethod"]:"${query.paymentMethod}"`)
+      queryParts.push(`metadata["preferredPaymentMethod"]:"${query.paymentMethod}"`);
 
-    searchParams.query = queryParts.join(' AND ')
+    searchParams.query = queryParts.join(' AND ');
 
-    return await stripe.customers.search(searchParams)
+    return await stripe.customers.search(searchParams);
   }
 
   // Get customer analytics and payment history
   static async getCustomerAnalytics(customerId: string) {
-    const customer = await stripe.customers.retrieve(customerId)
+    const customer = await stripe.customers.retrieve(customerId);
 
     // Get payment intents for this customer
     const paymentIntents = await stripe.paymentIntents.list({
       customer: customerId,
-      limit: 100
-    })
+      limit: 100,
+    });
 
     // Get invoices for this customer
     const invoices = await stripe.invoices.list({
       customer: customerId,
-      limit: 100
-    })
+      limit: 100,
+    });
 
     // Calculate analytics
-    const totalStripePayments = paymentIntents.data.filter(pi => pi.status === 'succeeded')
-    const totalRevenue = totalStripePayments.reduce((sum, pi) => sum + pi.amount, 0) / 100
-    const avgOrderValue = totalRevenue / totalStripePayments.length || 0
+    const totalStripePayments = paymentIntents.data.filter((pi) => pi.status === 'succeeded');
+    const totalRevenue = totalStripePayments.reduce((sum, pi) => sum + pi.amount, 0) / 100;
+    const avgOrderValue = totalRevenue / totalStripePayments.length || 0;
 
-    const metadata = customer.metadata || {}
+    const metadata = customer.metadata || {};
 
     return {
       customer,
@@ -152,9 +152,9 @@ export class StripeCustomerService {
         customerSince: metadata.createdAt || customer.created,
         lastBooking: metadata.lastBookingDate || 'Never',
         paymentIntents: paymentIntents.data.length,
-        invoices: invoices.data.length
-      }
-    }
+        invoices: invoices.data.length,
+      },
+    };
   }
 
   // Create customer portal session for self-service
@@ -166,22 +166,22 @@ export class StripeCustomerService {
         business_profile: {
           headline: 'My Hibachi Catering - Manage Your Account',
           privacy_policy_url: 'https://myhibachi.com/privacy',
-          terms_of_service_url: 'https://myhibachi.com/terms'
+          terms_of_service_url: 'https://myhibachi.com/terms',
         },
         features: {
           payment_method_update: {
-            enabled: true
+            enabled: true,
           },
           invoice_history: {
-            enabled: true
+            enabled: true,
           },
           customer_update: {
             enabled: true,
-            allowed_updates: ['email', 'phone', 'address']
-          }
-        }
-      }
-    })
+            allowed_updates: ['email', 'phone', 'address'],
+          },
+        },
+      },
+    });
   }
 }
 ```
@@ -197,55 +197,57 @@ export class StripeCustomerService {
 export class StripeAnalyticsService {
   // Generate revenue reports by payment method
   static async generateRevenueReport(startDate: Date, endDate: Date) {
-    const startTimestamp = Math.floor(startDate.getTime() / 1000)
-    const endTimestamp = Math.floor(endDate.getTime() / 1000)
+    const startTimestamp = Math.floor(startDate.getTime() / 1000);
+    const endTimestamp = Math.floor(endDate.getTime() / 1000);
 
     // Get Stripe payment data
     const paymentIntents = await stripe.paymentIntents.list({
       created: { gte: startTimestamp, lte: endTimestamp },
-      limit: 1000
-    })
+      limit: 1000,
+    });
 
     // Get customer data for segmentation
     const customers = await stripe.customers.list({
       created: { gte: startTimestamp, lte: endTimestamp },
-      limit: 1000
-    })
+      limit: 1000,
+    });
 
     // Calculate Stripe revenue
     const stripeRevenue =
       paymentIntents.data
-        .filter(pi => pi.status === 'succeeded')
-        .reduce((sum, pi) => sum + pi.amount, 0) / 100
+        .filter((pi) => pi.status === 'succeeded')
+        .reduce((sum, pi) => sum + pi.amount, 0) / 100;
 
-    const stripeFees = stripeRevenue * 0.029 + paymentIntents.data.length * 0.3 // Stripe's actual fees
-    const processingFees = stripeRevenue * 0.08 // Our 8% fee
+    const stripeFees = stripeRevenue * 0.029 + paymentIntents.data.length * 0.3; // Stripe's actual fees
+    const processingFees = stripeRevenue * 0.08; // Our 8% fee
 
     // Analyze customer payment preferences
-    const zelleUsers = customers.data.filter(c => c.metadata?.preferredPaymentMethod === 'zelle')
-    const venmoUsers = customers.data.filter(c => c.metadata?.preferredPaymentMethod === 'venmo')
-    const stripeUsers = customers.data.filter(c => c.metadata?.preferredPaymentMethod === 'stripe')
+    const zelleUsers = customers.data.filter((c) => c.metadata?.preferredPaymentMethod === 'zelle');
+    const venmoUsers = customers.data.filter((c) => c.metadata?.preferredPaymentMethod === 'venmo');
+    const stripeUsers = customers.data.filter(
+      (c) => c.metadata?.preferredPaymentMethod === 'stripe',
+    );
 
     // Calculate estimated Zelle/Venmo revenue (from metadata)
     const totalZelleRevenue = zelleUsers.reduce(
       (sum, c) => sum + parseFloat(c.metadata?.totalSpent || '0'),
-      0
-    )
+      0,
+    );
 
     const totalVenmoRevenue = venmoUsers.reduce(
       (sum, c) => sum + parseFloat(c.metadata?.totalSpent || '0'),
-      0
-    )
+      0,
+    );
 
     return {
       period: { startDate, endDate },
       revenue: {
         stripe: {
           amount: stripeRevenue,
-          transactions: paymentIntents.data.filter(pi => pi.status === 'succeeded').length,
+          transactions: paymentIntents.data.filter((pi) => pi.status === 'succeeded').length,
           fees: stripeFees,
           processingFees,
-          netRevenue: stripeRevenue - processingFees
+          netRevenue: stripeRevenue - processingFees,
         },
         zelle: {
           amount: totalZelleRevenue,
@@ -253,55 +255,55 @@ export class StripeAnalyticsService {
           fees: 0,
           processingFees: 0,
           netRevenue: totalZelleRevenue,
-          customerSavings: totalZelleRevenue * 0.08 // What customers saved
+          customerSavings: totalZelleRevenue * 0.08, // What customers saved
         },
         venmo: {
           amount: totalVenmoRevenue,
           transactions: venmoUsers.length,
           fees: totalVenmoRevenue * 0.03,
           processingFees: totalVenmoRevenue * 0.03,
-          netRevenue: totalVenmoRevenue - totalVenmoRevenue * 0.03
-        }
+          netRevenue: totalVenmoRevenue - totalVenmoRevenue * 0.03,
+        },
       },
       customers: {
         total: customers.data.length,
         zelleUsers: zelleUsers.length,
         venmoUsers: venmoUsers.length,
         stripeUsers: stripeUsers.length,
-        zelleAdoptionRate: (zelleUsers.length / customers.data.length) * 100
+        zelleAdoptionRate: (zelleUsers.length / customers.data.length) * 100,
       },
       insights: {
         totalCustomerSavings: zelleUsers.reduce(
           (sum, c) => sum + parseFloat(c.metadata?.totalSavingsFromZelle || '0'),
-          0
+          0,
         ),
         avgOrderValue: {
           stripe: stripeRevenue / Math.max(paymentIntents.data.length, 1),
           zelle: totalZelleRevenue / Math.max(zelleUsers.length, 1),
-          venmo: totalVenmoRevenue / Math.max(venmoUsers.length, 1)
-        }
-      }
-    }
+          venmo: totalVenmoRevenue / Math.max(venmoUsers.length, 1),
+        },
+      },
+    };
   }
 
   // Track customer lifetime value
   static async getCustomerLifetimeValue() {
-    const allCustomers = await stripe.customers.list({ limit: 1000 })
+    const allCustomers = await stripe.customers.list({ limit: 1000 });
 
     const clvData = await Promise.all(
-      allCustomers.data.map(async customer => {
+      allCustomers.data.map(async (customer) => {
         const paymentIntents = await stripe.paymentIntents.list({
           customer: customer.id,
-          limit: 100
-        })
+          limit: 100,
+        });
 
         const totalSpent =
           paymentIntents.data
-            .filter(pi => pi.status === 'succeeded')
-            .reduce((sum, pi) => sum + pi.amount, 0) / 100
+            .filter((pi) => pi.status === 'succeeded')
+            .reduce((sum, pi) => sum + pi.amount, 0) / 100;
 
-        const bookingCount = parseInt(customer.metadata?.totalBookings || '0')
-        const preferredMethod = customer.metadata?.preferredPaymentMethod || 'unknown'
+        const bookingCount = parseInt(customer.metadata?.totalBookings || '0');
+        const preferredMethod = customer.metadata?.preferredPaymentMethod || 'unknown';
 
         return {
           customerId: customer.id,
@@ -311,65 +313,62 @@ export class StripeAnalyticsService {
           preferredMethod,
           avgOrderValue: totalSpent / Math.max(bookingCount, 1),
           customerSince: new Date(customer.created * 1000),
-          totalSavings: parseFloat(customer.metadata?.totalSavingsFromZelle || '0')
-        }
-      })
-    )
+          totalSavings: parseFloat(customer.metadata?.totalSavingsFromZelle || '0'),
+        };
+      }),
+    );
 
     return {
       averageLifetimeValue: clvData.reduce((sum, c) => sum + c.totalSpent, 0) / clvData.length,
       topCustomers: clvData.sort((a, b) => b.totalSpent - a.totalSpent).slice(0, 10),
       paymentMethodBreakdown: {
-        zelle: clvData.filter(c => c.preferredMethod === 'zelle'),
-        venmo: clvData.filter(c => c.preferredMethod === 'venmo'),
-        stripe: clvData.filter(c => c.preferredMethod === 'stripe')
-      }
-    }
+        zelle: clvData.filter((c) => c.preferredMethod === 'zelle'),
+        venmo: clvData.filter((c) => c.preferredMethod === 'venmo'),
+        stripe: clvData.filter((c) => c.preferredMethod === 'stripe'),
+      },
+    };
   }
 
   // Geographic analysis of customers
   static async getGeographicAnalysis() {
     const customers = await stripe.customers.list({
       limit: 1000,
-      expand: ['data.address']
-    })
+      expand: ['data.address'],
+    });
 
     const locations = customers.data
-      .filter(c => c.address?.city && c.address?.state)
-      .map(c => ({
+      .filter((c) => c.address?.city && c.address?.state)
+      .map((c) => ({
         city: c.address!.city,
         state: c.address!.state,
         zipCode: c.address!.postal_code,
         preferredPayment: c.metadata?.preferredPaymentMethod || 'unknown',
-        totalSpent: parseFloat(c.metadata?.totalSpent || '0')
-      }))
+        totalSpent: parseFloat(c.metadata?.totalSpent || '0'),
+      }));
 
     // Group by location
-    const locationStats = locations.reduce(
-      (acc, customer) => {
-        const key = `${customer.city}, ${customer.state}`
-        if (!acc[key]) {
-          acc[key] = {
-            customerCount: 0,
-            totalRevenue: 0,
-            paymentMethods: { zelle: 0, venmo: 0, stripe: 0 }
-          }
-        }
+    const locationStats = locations.reduce((acc, customer) => {
+      const key = `${customer.city}, ${customer.state}`;
+      if (!acc[key]) {
+        acc[key] = {
+          customerCount: 0,
+          totalRevenue: 0,
+          paymentMethods: { zelle: 0, venmo: 0, stripe: 0 },
+        };
+      }
 
-        acc[key].customerCount++
-        acc[key].totalRevenue += customer.totalSpent
-        if (customer.preferredPayment in acc[key].paymentMethods) {
-          acc[key].paymentMethods[
-            customer.preferredPayment as keyof (typeof acc)[typeof key]['paymentMethods']
-          ]++
-        }
+      acc[key].customerCount++;
+      acc[key].totalRevenue += customer.totalSpent;
+      if (customer.preferredPayment in acc[key].paymentMethods) {
+        acc[key].paymentMethods[
+          customer.preferredPayment as keyof (typeof acc)[typeof key]['paymentMethods']
+        ]++;
+      }
 
-        return acc
-      },
-      {} as Record<string, any>
-    )
+      return acc;
+    }, {} as Record);
 
-    return locationStats
+    return locationStats;
   }
 }
 ```
@@ -392,21 +391,21 @@ export class StripeCommunicationService {
       customFields: [
         'Preferred Payment Method: Zelle (Save 8%!)',
         'Next Payment Tip: Use Zelle to avoid processing fees',
-        'Customer Savings Program: Active'
-      ]
-    }
+        'Customer Savings Program: Active',
+      ],
+    };
   }
 
   // Create and send custom invoices with Zelle promotion
   static async createPromotionalInvoice(
     customerId: string,
     bookingData: {
-      eventDate: string
-      guestCount: number
-      totalAmount: number
-      depositAmount: number
-      description: string
-    }
+      eventDate: string;
+      guestCount: number;
+      totalAmount: number;
+      depositAmount: number;
+      description: string;
+    },
   ) {
     const invoice = await stripe.invoices.create({
       customer: customerId,
@@ -415,29 +414,29 @@ export class StripeCommunicationService {
         eventDate: bookingData.eventDate,
         guestCount: bookingData.guestCount.toString(),
         bookingType: 'catering',
-        createdVia: 'website'
+        createdVia: 'website',
       },
       custom_fields: [
         {
           name: '💰 SAVE MONEY',
-          value: 'Pay with Zelle (0% fees) - myhibachichef@gmail.com'
+          value: 'Pay with Zelle (0% fees) - myhibachichef@gmail.com',
         },
         {
           name: '💸 Credit Card Cost',
-          value: `+$${(bookingData.totalAmount * 0.08).toFixed(2)} processing fee (8%)`
+          value: `+$${(bookingData.totalAmount * 0.08).toFixed(2)} processing fee (8%)`,
         },
         {
           name: '🎯 Smart Choice',
-          value: `Save $${(bookingData.totalAmount * 0.08).toFixed(2)} with Zelle`
-        }
+          value: `Save $${(bookingData.totalAmount * 0.08).toFixed(2)} with Zelle`,
+        },
       ],
       footer: 'Choose Zelle and keep more money in your pocket! Zero processing fees.',
       // Auto-advance the invoice but don't auto-charge (encourage Zelle)
       auto_advance: false,
       payment_settings: {
-        payment_method_types: ['card'] // Only show card as backup
-      }
-    })
+        payment_method_types: ['card'], // Only show card as backup
+      },
+    });
 
     // Add line items
     await stripe.invoiceItems.create({
@@ -448,38 +447,42 @@ export class StripeCommunicationService {
       description: `Hibachi Catering Deposit - ${bookingData.eventDate}`,
       metadata: {
         itemType: 'deposit',
-        guestCount: bookingData.guestCount.toString()
-      }
-    })
+        guestCount: bookingData.guestCount.toString(),
+      },
+    });
 
-    return invoice
+    return invoice;
   }
 
   // Send payment confirmation with savings message
   static async sendPaymentConfirmation(paymentData: {
-    customerId: string
-    amount: number
-    paymentMethod: 'zelle' | 'venmo' | 'stripe'
-    bookingId?: string
+    customerId: string;
+    amount: number;
+    paymentMethod: 'zelle' | 'venmo' | 'stripe';
+    bookingId?: string;
   }) {
-    const customer = await stripe.customers.retrieve(paymentData.customerId)
+    const customer = await stripe.customers.retrieve(paymentData.customerId);
 
-    let savingsMessage = ''
-    let nextTimeMessage = ''
+    let savingsMessage = '';
+    let nextTimeMessage = '';
 
     switch (paymentData.paymentMethod) {
       case 'zelle':
-        savingsMessage = `🎉 You saved $${(paymentData.amount * 0.08).toFixed(2)} by choosing Zelle!`
-        nextTimeMessage = 'Keep saving with Zelle on future bookings!'
-        break
+        savingsMessage = `🎉 You saved $${(paymentData.amount * 0.08).toFixed(
+          2,
+        )} by choosing Zelle!`;
+        nextTimeMessage = 'Keep saving with Zelle on future bookings!';
+        break;
       case 'venmo':
-        savingsMessage = `💡 You saved $${(paymentData.amount * 0.05).toFixed(2)} vs credit card!`
-        nextTimeMessage = `Next time save $${(paymentData.amount * 0.08).toFixed(2)} with Zelle!`
-        break
+        savingsMessage = `💡 You saved $${(paymentData.amount * 0.05).toFixed(2)} vs credit card!`;
+        nextTimeMessage = `Next time save $${(paymentData.amount * 0.08).toFixed(2)} with Zelle!`;
+        break;
       case 'stripe':
-        savingsMessage = `💸 This payment cost $${(paymentData.amount * 0.08).toFixed(2)} in processing fees`
-        nextTimeMessage = `Save $${(paymentData.amount * 0.08).toFixed(2)} next time with Zelle!`
-        break
+        savingsMessage = `💸 This payment cost $${(paymentData.amount * 0.08).toFixed(
+          2,
+        )} in processing fees`;
+        nextTimeMessage = `Save $${(paymentData.amount * 0.08).toFixed(2)} next time with Zelle!`;
+        break;
     }
 
     // Create a payment confirmation "invoice" (not a real invoice, just for communication)
@@ -491,35 +494,35 @@ export class StripeCommunicationService {
         paymentType: 'confirmation',
         originalPaymentMethod: paymentData.paymentMethod,
         savingsAmount: (paymentData.amount * 0.08).toString(),
-        bookingId: paymentData.bookingId || ''
+        bookingId: paymentData.bookingId || '',
       },
       custom_fields: [
         {
           name: '✅ Payment Received',
-          value: `$${paymentData.amount.toFixed(2)} via ${paymentData.paymentMethod.toUpperCase()}`
+          value: `$${paymentData.amount.toFixed(2)} via ${paymentData.paymentMethod.toUpperCase()}`,
         },
         {
           name: '💰 Your Savings',
-          value: savingsMessage
+          value: savingsMessage,
         },
         {
           name: '💡 Next Time',
-          value: nextTimeMessage
-        }
+          value: nextTimeMessage,
+        },
       ],
-      footer: 'Thank you for choosing My Hibachi! Smart customers choose Zelle.'
-    })
+      footer: 'Thank you for choosing My Hibachi! Smart customers choose Zelle.',
+    });
 
     // Finalize and send
-    await stripe.invoices.finalizeInvoice(confirmation.id)
-    await stripe.invoices.sendInvoice(confirmation.id)
+    await stripe.invoices.finalizeInvoice(confirmation.id);
+    await stripe.invoices.sendInvoice(confirmation.id);
 
-    return confirmation
+    return confirmation;
   }
 
   // Send failed payment notifications with helpful suggestions
   static async handleFailedPayment(paymentIntentId: string) {
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
     if (paymentIntent.customer) {
       // Create helpful communication about payment failure
@@ -530,33 +533,33 @@ export class StripeCommunicationService {
         metadata: {
           paymentType: 'failure_help',
           originalAmount: (paymentIntent.amount / 100).toString(),
-          failureReason: paymentIntent.last_payment_error?.message || 'Unknown'
+          failureReason: paymentIntent.last_payment_error?.message || 'Unknown',
         },
         custom_fields: [
           {
             name: '❌ Payment Issue',
-            value: 'Your payment could not be processed'
+            value: 'Your payment could not be processed',
           },
           {
             name: '💡 Easy Solution',
-            value: 'Try Zelle - 0% fees, instant transfer'
+            value: 'Try Zelle - 0% fees, instant transfer',
           },
           {
             name: '📧 Zelle Payment',
-            value: 'Send to: myhibachichef@gmail.com'
+            value: 'Send to: myhibachichef@gmail.com',
           },
           {
             name: "💰 You'll Save",
-            value: `$${((paymentIntent.amount / 100) * 0.08).toFixed(2)} in processing fees`
-          }
+            value: `$${((paymentIntent.amount / 100) * 0.08).toFixed(2)} in processing fees`,
+          },
         ],
-        footer: 'Contact us at (916) 740-8768 if you need help with payment.'
-      })
+        footer: 'Contact us at (916) 740-8768 if you need help with payment.',
+      });
 
-      await stripe.invoices.finalizeInvoice(failureHelp.id)
-      await stripe.invoices.sendInvoice(failureHelp.id)
+      await stripe.invoices.finalizeInvoice(failureHelp.id);
+      await stripe.invoices.sendInvoice(failureHelp.id);
 
-      return failureHelp
+      return failureHelp;
     }
   }
 
@@ -567,50 +570,50 @@ export class StripeCommunicationService {
         subject: '🎉 Welcome to My Hibachi - Save Money with Smart Payment Choices!',
         body: `
           Welcome to My Hibachi family!
-          
+
           💰 MONEY-SAVING TIP: Pay with Zelle and avoid processing fees!
-          
+
           Here's how much you can save:
           • $200 booking: Save $16 with Zelle
-          • $400 booking: Save $32 with Zelle  
+          • $400 booking: Save $32 with Zelle
           • $600 booking: Save $48 with Zelle
-          
+
           Simply send payment to: myhibachichef@gmail.com
-          
+
           Book your hibachi experience: myhibachi.com/BookUs
-        `
+        `,
       },
 
       bookingConfirmation: {
         subject: '✅ Booking Confirmed - Choose Your Payment Method',
         body: `
           Your hibachi booking is confirmed! 🍱
-          
+
           PAYMENT OPTIONS:
           🥇 Zelle (RECOMMENDED): 0% fees - myhibachichef@gmail.com
-          🥈 Venmo: 3% fees - @myhibachichef  
+          🥈 Venmo: 3% fees - @myhibachichef
           🥉 Credit Card: 8% fees - convenient but costly
-          
+
           Pay now: myhibachi.com/payment
-        `
+        `,
       },
 
       paymentReminder: {
         subject: '💰 Payment Due - Save Money with Zelle!',
         body: `
           Your hibachi event is coming up!
-          
+
           Outstanding amount: $[AMOUNT]
-          
+
           💡 SAVE MONEY: Pay with Zelle and save $[SAVINGS]
-          
+
           Zelle: myhibachichef@gmail.com (FREE)
           Online: myhibachi.com/payment (8% fee)
-          
+
           Smart customers choose Zelle!
-        `
-      }
-    }
+        `,
+      },
+    };
   }
 }
 ```
@@ -623,58 +626,58 @@ export class StripeCommunicationService {
 
 ```typescript
 // src/app/api/stripe/webhooks/route.ts
-import { headers } from 'next/headers'
-import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
+import { headers } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
+import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export async function POST(request: NextRequest) {
-  const body = await request.text()
-  const signature = headers().get('stripe-signature')!
+  const body = await request.text();
+  const signature = headers().get('stripe-signature')!;
 
-  let event: Stripe.Event
+  let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err) {
-    console.error('Webhook signature verification failed:', err)
-    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
+    console.error('Webhook signature verification failed:', err);
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
   // Handle different webhook events
   switch (event.type) {
     case 'customer.created':
-      await handleNewCustomer(event.data.object as Stripe.Customer)
-      break
+      await handleNewCustomer(event.data.object as Stripe.Customer);
+      break;
 
     case 'payment_intent.succeeded':
-      await handleSuccessfulPayment(event.data.object as Stripe.PaymentIntent)
-      break
+      await handleSuccessfulPayment(event.data.object as Stripe.PaymentIntent);
+      break;
 
     case 'payment_intent.payment_failed':
-      await handleFailedPayment(event.data.object as Stripe.PaymentIntent)
-      break
+      await handleFailedPayment(event.data.object as Stripe.PaymentIntent);
+      break;
 
     case 'invoice.payment_succeeded':
-      await handleInvoicePayment(event.data.object as Stripe.Invoice)
-      break
+      await handleInvoicePayment(event.data.object as Stripe.Invoice);
+      break;
 
     case 'customer.updated':
-      await handleCustomerUpdate(event.data.object as Stripe.Customer)
-      break
+      await handleCustomerUpdate(event.data.object as Stripe.Customer);
+      break;
 
     default:
-      console.log(`Unhandled event type: ${event.type}`)
+      console.log(`Unhandled event type: ${event.type}`);
   }
 
-  return NextResponse.json({ received: true })
+  return NextResponse.json({ received: true });
 }
 
 // Handle new customer creation
 async function handleNewCustomer(customer: Stripe.Customer) {
-  console.log('New customer created:', customer.id)
+  console.log('New customer created:', customer.id);
 
   // Send welcome email with Zelle promotion
   const welcomeInvoice = await stripe.invoices.create({
@@ -684,31 +687,31 @@ async function handleNewCustomer(customer: Stripe.Customer) {
     custom_fields: [
       {
         name: '🎉 Welcome Bonus',
-        value: 'Save 8% on every booking with Zelle!'
+        value: 'Save 8% on every booking with Zelle!',
       },
       {
         name: '💰 How to Save',
-        value: 'Send payments to: myhibachichef@gmail.com'
+        value: 'Send payments to: myhibachichef@gmail.com',
       },
       {
         name: '📱 Easy Payment',
-        value: "Use your bank's Zelle feature - it's free!"
-      }
+        value: "Use your bank's Zelle feature - it's free!",
+      },
     ],
-    footer: 'Smart customers choose Zelle. Welcome to the family!'
-  })
+    footer: 'Smart customers choose Zelle. Welcome to the family!',
+  });
 
-  await stripe.invoices.finalizeInvoice(welcomeInvoice.id)
-  await stripe.invoices.sendInvoice(welcomeInvoice.id)
+  await stripe.invoices.finalizeInvoice(welcomeInvoice.id);
+  await stripe.invoices.sendInvoice(welcomeInvoice.id);
 }
 
 // Handle successful Stripe payments (encourage Zelle for next time)
 async function handleSuccessfulPayment(paymentIntent: Stripe.PaymentIntent) {
-  console.log('Payment succeeded:', paymentIntent.id)
+  console.log('Payment succeeded:', paymentIntent.id);
 
-  const amount = paymentIntent.amount / 100
-  const fee = amount * 0.08
-  const savings = fee // What they could have saved with Zelle
+  const amount = paymentIntent.amount / 100;
+  const fee = amount * 0.08;
+  const savings = fee; // What they could have saved with Zelle
 
   if (paymentIntent.customer) {
     // Update customer with payment history
@@ -717,48 +720,48 @@ async function handleSuccessfulPayment(paymentIntent: Stripe.PaymentIntent) {
         lastPaymentMethod: 'stripe',
         lastPaymentAmount: amount.toString(),
         lastPaymentDate: new Date().toISOString(),
-        potentialSavings: savings.toString()
-      }
-    })
+        potentialSavings: savings.toString(),
+      },
+    });
 
     // Send follow-up with savings tip
     await StripeCommunicationService.sendPaymentConfirmation({
       customerId: paymentIntent.customer as string,
       amount,
-      paymentMethod: 'stripe'
-    })
+      paymentMethod: 'stripe',
+    });
   }
 }
 
 // Handle failed payments with helpful alternatives
 async function handleFailedPayment(paymentIntent: Stripe.PaymentIntent) {
-  console.log('Payment failed:', paymentIntent.id)
+  console.log('Payment failed:', paymentIntent.id);
 
   if (paymentIntent.customer) {
-    await StripeCommunicationService.handleFailedPayment(paymentIntent.id)
+    await StripeCommunicationService.handleFailedPayment(paymentIntent.id);
   }
 }
 
 // Handle invoice payments
 async function handleInvoicePayment(invoice: Stripe.Invoice) {
-  console.log('Invoice paid:', invoice.id)
+  console.log('Invoice paid:', invoice.id);
 
   // Track invoice payment and suggest Zelle for future payments
   if (invoice.customer) {
-    const amount = (invoice.amount_paid || 0) / 100
+    const amount = (invoice.amount_paid || 0) / 100;
 
     await stripe.customers.update(invoice.customer as string, {
       metadata: {
         lastInvoicePayment: amount.toString(),
-        lastInvoiceDate: new Date().toISOString()
-      }
-    })
+        lastInvoiceDate: new Date().toISOString(),
+      },
+    });
   }
 }
 
 // Handle customer updates
 async function handleCustomerUpdate(customer: Stripe.Customer) {
-  console.log('Customer updated:', customer.id)
+  console.log('Customer updated:', customer.id);
 
   // If they updated their preferred payment method to Zelle, congratulate them
   if (customer.metadata?.preferredPaymentMethod === 'zelle') {
@@ -769,22 +772,22 @@ async function handleCustomerUpdate(customer: Stripe.Customer) {
       custom_fields: [
         {
           name: '🎉 Excellent Choice!',
-          value: 'You selected Zelle as your preferred payment method'
+          value: 'You selected Zelle as your preferred payment method',
         },
         {
           name: '💰 Your Savings',
-          value: "You'll save 8% on every future booking!"
+          value: "You'll save 8% on every future booking!",
         },
         {
           name: '📧 Easy Payments',
-          value: 'Just send to: myhibachichef@gmail.com'
-        }
+          value: 'Just send to: myhibachichef@gmail.com',
+        },
       ],
-      footer: 'Thank you for making the smart financial choice!'
-    })
+      footer: 'Thank you for making the smart financial choice!',
+    });
 
-    await stripe.invoices.finalizeInvoice(congratsInvoice.id)
-    await stripe.invoices.sendInvoice(congratsInvoice.id)
+    await stripe.invoices.finalizeInvoice(congratsInvoice.id);
+    await stripe.invoices.sendInvoice(congratsInvoice.id);
   }
 }
 ```

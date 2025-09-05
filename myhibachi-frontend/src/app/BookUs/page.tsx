@@ -1,55 +1,48 @@
-'use client'
+'use client';
 
-import 'react-datepicker/dist/react-datepicker.css'
-import './datepicker.css'
+import 'react-datepicker/dist/react-datepicker.css';
+import './datepicker.css';
 
-import { addDays, format } from 'date-fns'
-import React, { useEffect, useState } from 'react'
-import DatePicker from 'react-datepicker'
-import { Controller, useForm } from 'react-hook-form'
+import { addDays, format } from 'date-fns';
+import React, { useEffect, useState } from 'react';
+import DatePicker from 'react-datepicker';
+import { Controller, useForm } from 'react-hook-form';
 
-import Assistant from '@/components/chat/Assistant'
-import { apiFetch } from '@/lib/api'
+import Assistant from '@/components/chat/Assistant';
+import { apiFetch } from '@/lib/api';
 
 // Type definitions for booking form
 
 type BookingFormData = {
-  name: string
-  email: string
-  phone: string
-  preferredCommunication: 'phone' | 'text' | 'email' | ''
-  eventDate: Date
-  eventTime: '12PM' | '3PM' | '6PM' | '9PM'
-  guestCount: number
-  addressStreet: string
-  addressCity: string
-  addressState: string
-  addressZipcode: string
-  sameAsVenue: boolean
-  venueStreet?: string
-  venueCity?: string
-  venueState?: string
-  venueZipcode?: string
-}
+  name: string;
+  email: string;
+  phone: string;
+  preferredCommunication: 'phone' | 'text' | 'email' | '';
+  eventDate: Date;
+  eventTime: '12PM' | '3PM' | '6PM' | '9PM';
+  guestCount: number;
+  addressStreet: string;
+  addressCity: string;
+  addressState: string;
+  addressZipcode: string;
+  sameAsVenue: boolean;
+  venueStreet?: string;
+  venueCity?: string;
+  venueState?: string;
+  venueZipcode?: string;
+};
 
 export default function BookingPage() {
-  const [showValidationModal, setShowValidationModal] = useState(false)
-  const [missingFields, setMissingFields] = useState<string[]>([])
-  const [showAgreementModal, setShowAgreementModal] = useState(false)
-  const [formData, setFormData] = useState<BookingFormData | null>(null)
-  const [bookedDates, setBookedDates] = useState<Date[]>([])
-  const [loadingDates, setLoadingDates] = useState(false)
-  const [dateError, setDateError] = useState<string | null>(null)
-  const [availableTimeSlots, setAvailableTimeSlots] = useState<
-    Array<{
-      time: string
-      label: string
-      available: number
-      isAvailable: boolean
-    }>
-  >([])
-  const [loadingTimeSlots, setLoadingTimeSlots] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showValidationModal, setShowValidationModal] = useState(false);
+  const [missingFields, setMissingFields] = useState<string[]>([]);
+  const [showAgreementModal, setShowAgreementModal] = useState(false);
+  const [formData, setFormData] = useState<BookingFormData | null>(null);
+  const [bookedDates, setBookedDates] = useState<Date[]>([]);
+  const [loadingDates, setLoadingDates] = useState(false);
+  const [dateError, setDateError] = useState<string | null>(null);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<Array>([]);
+  const [loadingTimeSlots, setLoadingTimeSlots] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -57,66 +50,69 @@ export default function BookingPage() {
     control,
     watch,
     setValue,
-    formState: { errors }
+    formState: { errors },
   } = useForm<BookingFormData>({
     defaultValues: {
       sameAsVenue: false,
       guestCount: undefined,
-      preferredCommunication: ''
-    }
-  })
+      preferredCommunication: '',
+    },
+  });
 
   // Watch form values
-  const sameAsVenue = watch('sameAsVenue')
-  const venueStreet = watch('venueStreet')
-  const venueCity = watch('venueCity')
-  const venueState = watch('venueState')
-  const venueZipcode = watch('venueZipcode')
-  const selectedDate = watch('eventDate')
+  const sameAsVenue = watch('sameAsVenue');
+  const venueStreet = watch('venueStreet');
+  const venueCity = watch('venueCity');
+  const venueState = watch('venueState');
+  const venueZipcode = watch('venueZipcode');
+  const selectedDate = watch('eventDate');
 
   // Fetch booked dates from API
   const fetchBookedDates = async () => {
-    setLoadingDates(true)
-    setDateError(null)
+    setLoadingDates(true);
+    setDateError(null);
     try {
-      const result = await apiFetch('/api/v1/bookings/booked-dates')
-      if (result.success) {
+      const result = await apiFetch('/api/v1/bookings/booked-dates');
+      if (result.success && result.data) {
         // Convert string dates to Date objects
-        const dates = result.data.bookedDates?.map((dateStr: string) => new Date(dateStr)) || []
-        setBookedDates(dates)
+        const bookedDates = (result.data as Record)?.bookedDates;
+        const dates = Array.isArray(bookedDates)
+          ? bookedDates.map((dateStr: string) => new Date(dateStr))
+          : [];
+        setBookedDates(dates);
       } else {
-        console.warn('Could not fetch booked dates, continuing without blocking dates')
-        setBookedDates([])
+        console.warn('Could not fetch booked dates, continuing without blocking dates');
+        setBookedDates([]);
       }
     } catch (error) {
-      console.warn('Error fetching booked dates:', error)
-      setBookedDates([])
+      console.warn('Error fetching booked dates:', error);
+      setBookedDates([]);
     } finally {
-      setLoadingDates(false)
+      setLoadingDates(false);
     }
-  }
+  };
 
   // Fetch booked dates on component mount
   useEffect(() => {
-    fetchBookedDates()
-  }, [])
+    fetchBookedDates();
+  }, []);
 
   // Fetch availability for selected date
   const fetchAvailability = async (date: Date) => {
-    setLoadingTimeSlots(true)
-    setDateError(null)
+    setLoadingTimeSlots(true);
+    setDateError(null);
     try {
-      const dateStr = format(date, 'yyyy-MM-dd')
-      const response = await apiFetch(`/api/v1/bookings/availability?date=${dateStr}`)
+      const dateStr = format(date, 'yyyy-MM-dd');
+      const response = await apiFetch(`/api/v1/bookings/availability?date=${dateStr}`);
 
-      if (response.success) {
+      if (response.success && response.data?.timeSlots && Array.isArray(response.data.timeSlots)) {
         const formattedSlots = response.data.timeSlots.map(
           (slot: {
-            time: string
-            available: number
-            maxCapacity: number
-            booked: number
-            isAvailable: boolean
+            time: string;
+            available: number;
+            maxCapacity: number;
+            booked: number;
+            isAvailable: boolean;
           }) => ({
             time: slot.time,
             label:
@@ -128,41 +124,41 @@ export default function BookingPage() {
                     ? '6:00 PM'
                     : '9:00 PM',
             available: slot.available,
-            isAvailable: slot.isAvailable
-          })
-        )
-        setAvailableTimeSlots(formattedSlots)
+            isAvailable: slot.isAvailable,
+          }),
+        );
+        setAvailableTimeSlots(formattedSlots);
       } else {
-        console.warn('Could not fetch availability, using default slots')
-        setAvailableTimeSlots([])
+        console.warn('Could not fetch availability, using default slots');
+        setAvailableTimeSlots([]);
       }
     } catch (error) {
-      console.warn('Error fetching availability:', error)
-      setAvailableTimeSlots([])
+      console.warn('Error fetching availability:', error);
+      setAvailableTimeSlots([]);
     } finally {
-      setLoadingTimeSlots(false)
+      setLoadingTimeSlots(false);
     }
-  }
+  };
 
   // Fetch availability when date changes
   useEffect(() => {
     if (selectedDate) {
-      fetchAvailability(selectedDate)
+      fetchAvailability(selectedDate);
     } else {
-      setAvailableTimeSlots([])
+      setAvailableTimeSlots([]);
     }
-  }, [selectedDate])
+  }, [selectedDate]);
 
   // Check if venue address is completely filled
-  const isVenueAddressComplete = venueStreet && venueCity && venueState && venueZipcode
+  const isVenueAddressComplete = venueStreet && venueCity && venueState && venueZipcode;
 
   // Auto-fill billing address when checkbox is checked and venue address is complete
   useEffect(() => {
     if (sameAsVenue && isVenueAddressComplete) {
-      setValue('addressStreet', venueStreet)
-      setValue('addressCity', venueCity)
-      setValue('addressState', venueState)
-      setValue('addressZipcode', venueZipcode)
+      setValue('addressStreet', venueStreet);
+      setValue('addressCity', venueCity);
+      setValue('addressState', venueState);
+      setValue('addressZipcode', venueZipcode);
     }
   }, [
     sameAsVenue,
@@ -171,92 +167,92 @@ export default function BookingPage() {
     venueState,
     venueZipcode,
     isVenueAddressComplete,
-    setValue
-  ])
+    setValue,
+  ]);
 
   // Automatically uncheck if venue address becomes incomplete
   useEffect(() => {
     if (sameAsVenue && !isVenueAddressComplete) {
-      setValue('sameAsVenue', false)
+      setValue('sameAsVenue', false);
     }
-  }, [sameAsVenue, isVenueAddressComplete, setValue])
+  }, [sameAsVenue, isVenueAddressComplete, setValue]);
 
   // Enhanced onSubmit with comprehensive validation
   const onSubmit = async (data: BookingFormData) => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
       // Check for missing fields
-      const missing: string[] = []
+      const missing: string[] = [];
 
-      if (!data.name || data.name.length < 2) missing.push('Full Name')
-      if (!data.email) missing.push('Email Address')
-      if (!data.phone || data.phone.length < 10) missing.push('Phone Number')
-      if (!data.preferredCommunication) missing.push('Preferred Communication Method')
-      if (!data.eventDate) missing.push('Event Date')
-      if (!data.eventTime) missing.push('Event Time')
-      if (!data.guestCount || data.guestCount < 1) missing.push('Estimate Number of Guests')
+      if (!data.name || data.name.length < 2) missing.push('Full Name');
+      if (!data.email) missing.push('Email Address');
+      if (!data.phone || data.phone.length < 10) missing.push('Phone Number');
+      if (!data.preferredCommunication) missing.push('Preferred Communication Method');
+      if (!data.eventDate) missing.push('Event Date');
+      if (!data.eventTime) missing.push('Event Time');
+      if (!data.guestCount || data.guestCount < 1) missing.push('Estimate Number of Guests');
 
       // Check venue address
-      if (!data.venueStreet) missing.push('Venue Street Address')
-      if (!data.venueCity) missing.push('Venue City')
-      if (!data.venueState) missing.push('Venue State')
-      if (!data.venueZipcode) missing.push('Venue ZIP Code')
+      if (!data.venueStreet) missing.push('Venue Street Address');
+      if (!data.venueCity) missing.push('Venue City');
+      if (!data.venueState) missing.push('Venue State');
+      if (!data.venueZipcode) missing.push('Venue ZIP Code');
 
       // Check billing address (only if not same as venue)
       if (!data.sameAsVenue) {
-        if (!data.addressStreet) missing.push('Billing Street Address')
-        if (!data.addressCity) missing.push('Billing City')
-        if (!data.addressState) missing.push('Billing State')
-        if (!data.addressZipcode) missing.push('Billing ZIP Code')
+        if (!data.addressStreet) missing.push('Billing Street Address');
+        if (!data.addressCity) missing.push('Billing City');
+        if (!data.addressState) missing.push('Billing State');
+        if (!data.addressZipcode) missing.push('Billing ZIP Code');
       }
 
       // If there are missing fields, show modal
       if (missing.length > 0) {
-        setMissingFields(missing)
-        setShowValidationModal(true)
-        return
+        setMissingFields(missing);
+        setShowValidationModal(true);
+        return;
       }
 
       // Additional validation: Check if selected time slot is still available
       if (data.eventDate && data.eventTime) {
         try {
-          const dateStr = format(data.eventDate, 'yyyy-MM-dd')
-          const response = await fetch(`/api/v1/bookings/availability?date=${dateStr}`)
+          const dateStr = format(data.eventDate, 'yyyy-MM-dd');
+          const response = await fetch(`/api/v1/bookings/availability?date=${dateStr}`);
 
           if (response.ok) {
-            const availabilityData = await response.json()
+            const availabilityData = await response.json();
             const selectedSlot = availabilityData.timeSlots.find(
-              (slot: { time: string; isAvailable: boolean }) => slot.time === data.eventTime
-            )
+              (slot: { time: string; isAvailable: boolean }) => slot.time === data.eventTime,
+            );
 
             if (!selectedSlot || !selectedSlot.isAvailable) {
               setDateError(
-                `The ${data.eventTime} time slot is no longer available. Please select a different time.`
-              )
-              return
+                `The ${data.eventTime} time slot is no longer available. Please select a different time.`,
+              );
+              return;
             }
           }
         } catch (error) {
-          console.warn('Could not verify slot availability:', error)
+          console.warn('Could not verify slot availability:', error);
           // Continue with booking as a fallback
         }
       }
 
       // If all validation passes, show agreement modal
-      setFormData(data)
-      setShowAgreementModal(true)
+      setFormData(data);
+      setShowAgreementModal(true);
     } catch (error) {
-      console.error('Form submission error:', error)
-      setDateError('An unexpected error occurred. Please try again.')
+      console.error('Form submission error:', error);
+      setDateError('An unexpected error occurred. Please try again.');
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   // Handle agreement confirmation with actual booking submission
   const handleAgreementConfirm = async () => {
-    if (!formData) return
+    if (!formData) return;
 
     try {
       const bookingData = {
@@ -272,7 +268,7 @@ export default function BookingPage() {
             street: formData.venueStreet,
             city: formData.venueCity,
             state: formData.venueState,
-            zipcode: formData.venueZipcode
+            zipcode: formData.venueZipcode,
           },
           billingAddress: formData.sameAsVenue
             ? null
@@ -280,73 +276,76 @@ export default function BookingPage() {
                 street: formData.addressStreet,
                 city: formData.addressCity,
                 state: formData.addressState,
-                zipcode: formData.addressZipcode
-              }
-        }
-      }
+                zipcode: formData.addressZipcode,
+              },
+        },
+      };
 
       const response = await apiFetch('/api/v1/bookings/availability', {
         method: 'POST',
-        body: JSON.stringify(bookingData)
-      })
+        body: JSON.stringify(bookingData),
+      });
 
       if (response.success) {
-        setShowAgreementModal(false)
-        setFormData(null)
+        setShowAgreementModal(false);
+        setFormData(null);
 
         // Show success message with booking ID
+        const bookingId = (response.data as Record)?.bookingId || 'N/A';
         alert(
-          `Booking Confirmed!\n\nConfirmation Code: ${response.data.bookingId}\n\nWe will contact you soon at ${formData.email} to finalize your hibachi experience details.\n\nThank you for choosing My Hibachi!`
-        )
+          `Booking Confirmed!\n\nConfirmation Code: ${bookingId}\n\nWe will contact you soon at ${formData.email} to finalize your hibachi experience details.\n\nThank you for choosing My Hibachi!`,
+        );
 
         // Reset form
-        window.location.reload()
+        window.location.reload();
       } else {
         // Handle booking errors
         if (response.data?.code === 'SLOT_FULL') {
-          setShowAgreementModal(false)
-          setDateError('This time slot just became fully booked. Please select a different time.')
+          setShowAgreementModal(false);
+          setDateError('This time slot just became fully booked. Please select a different time.');
 
           // Refresh availability data
           if (formData.eventDate) {
-            fetchAvailability(formData.eventDate)
+            fetchAvailability(formData.eventDate);
           }
         } else {
           alert(
-            `❌ Booking Failed\n\n${response.error || 'Please try again or contact support.'}\n\nYour information has been preserved.`
-          )
+            `❌ Booking Failed\n\n${
+              response.error || 'Please try again or contact support.'
+            }\n\nYour information has been preserved.`,
+          );
         }
       }
     } catch (error) {
-      console.error('Booking submission error:', error)
+      console.error('Booking submission error:', error);
       alert(
-        '❌ Network Error\n\nPlease check your connection and try again.\nYour information has been preserved.'
-      )
+        '❌ Network Error\n\nPlease check your connection and try again.\nYour information has been preserved.',
+      );
     }
-  }
+  };
 
   const handleAgreementCancel = () => {
-    setShowAgreementModal(false)
-    setFormData(null)
-  }
+    setShowAgreementModal(false);
+    setFormData(null);
+  };
 
   // Validation Modal Component
   const ValidationModal = () => {
-    if (!showValidationModal) return null
+    if (!showValidationModal) return null;
 
     return (
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
+        className="bg-opacity-50 fixed inset-0 flex items-center justify-center bg-black p-4"
         style={{ zIndex: 1040 }}
       >
-        <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-          <div className="text-center mb-4">
-            <div className="text-4xl mb-2">⚠️</div>
+        <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl">
+          <div className="mb-4 text-center">
+            <div className="mb-2 text-4xl">⚠️</div>
             <h3 className="text-xl font-bold text-red-600">Please Complete Your Booking</h3>
-            <p className="text-gray-600 mt-2">The following fields are required:</p>
+            <p className="mt-2 text-gray-600">The following fields are required:</p>
           </div>
 
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
             <ul className="space-y-1">
               {missingFields.map((field, index) => (
                 <li key={index} className="flex items-center space-x-2 text-red-700">
@@ -360,37 +359,37 @@ export default function BookingPage() {
           <div className="flex space-x-3">
             <button
               onClick={() => setShowValidationModal(false)}
-              className="flex-1 bg-red-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-red-700 transition duration-200"
+              className="flex-1 rounded-lg bg-red-600 px-4 py-3 font-medium text-white transition duration-200 hover:bg-red-700"
             >
               Got it, I&apos;ll complete the form
             </button>
           </div>
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   // Agreement Modal Component
   const AgreementModal = () => {
-    if (!showAgreementModal) return null
+    if (!showAgreementModal) return null;
 
     return (
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
+        className="bg-opacity-50 fixed inset-0 flex items-center justify-center bg-black p-4"
         style={{ zIndex: 1040 }}
       >
-        <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-          <div className="bg-red-600 text-white p-6 text-center">
-            <div className="text-4xl mb-2">📋</div>
+        <div className="max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-xl bg-white shadow-2xl">
+          <div className="bg-red-600 p-6 text-center text-white">
+            <div className="mb-2 text-4xl">📋</div>
             <h3 className="text-2xl font-bold">My Hibachi Catering Agreement</h3>
-            <p className="text-red-100 mt-2">Please review and confirm the terms below</p>
+            <p className="mt-2 text-red-100">Please review and confirm the terms below</p>
           </div>
 
-          <div className="p-6 overflow-y-auto max-h-[50vh]">
+          <div className="max-h-[50vh] overflow-y-auto p-6">
             <div className="space-y-6 text-sm">
               <div>
-                <h4 className="font-bold text-red-600 mb-2">1. SERVICES</h4>
-                <p className="text-gray-700 mb-2">
+                <h4 className="mb-2 font-bold text-red-600">1. SERVICES</h4>
+                <p className="mb-2 text-gray-700">
                   My Hibachi will provide hibachi catering services at the Customer&apos;s location
                   on [Event Date] from [Start Time] to approximately [End Time]. We will bring a
                   private chef, all cooking equipment, and fresh food ingredients.
@@ -402,9 +401,9 @@ export default function BookingPage() {
               </div>
 
               <div>
-                <h4 className="font-bold text-red-600 mb-2">2. CUSTOMER RESPONSIBILITIES</h4>
-                <p className="text-gray-700 mb-2">Customer must provide:</p>
-                <ul className="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                <h4 className="mb-2 font-bold text-red-600">2. CUSTOMER RESPONSIBILITIES</h4>
+                <p className="mb-2 text-gray-700">Customer must provide:</p>
+                <ul className="ml-4 list-inside list-disc space-y-1 text-gray-700">
                   <li>Tables, chairs, and dining utensils (plates, napkins, forks, etc.)</li>
                   <li>Safe, level space for outdoor cooking (patio, driveway, etc.)</li>
                   <li>Adequate lighting for evening events</li>
@@ -415,8 +414,8 @@ export default function BookingPage() {
               </div>
 
               <div>
-                <h4 className="font-bold text-red-600 mb-2">3. MENU, HEADCOUNT & FINAL DETAILS</h4>
-                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                <h4 className="mb-2 font-bold text-red-600">3. MENU, HEADCOUNT & FINAL DETAILS</h4>
+                <ul className="list-inside list-disc space-y-1 text-gray-700">
                   <li>
                     Food orders and headcount must be confirmed via text or email the week of the
                     event.
@@ -435,8 +434,8 @@ export default function BookingPage() {
               </div>
 
               <div>
-                <h4 className="font-bold text-red-600 mb-2">4. PAYMENT TERMS</h4>
-                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                <h4 className="mb-2 font-bold text-red-600">4. PAYMENT TERMS</h4>
+                <ul className="list-inside list-disc space-y-1 text-gray-700">
                   <li>
                     Deposit: $100 (refundable if canceled 7+ days before event, required to reserve
                     your date)
@@ -447,8 +446,8 @@ export default function BookingPage() {
               </div>
 
               <div>
-                <h4 className="font-bold text-red-600 mb-2">5. CANCELLATION & WEATHER POLICY</h4>
-                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                <h4 className="mb-2 font-bold text-red-600">5. CANCELLATION & WEATHER POLICY</h4>
+                <ul className="list-inside list-disc space-y-1 text-gray-700">
                   <li>Full refund if canceled at least 7 days before the event</li>
                   <li>
                     One-time reschedule allowed within 48 hours; otherwise, a $100 rescheduling fee
@@ -462,13 +461,13 @@ export default function BookingPage() {
               </div>
 
               <div>
-                <h4 className="font-bold text-red-600 mb-2">6. LIABILITY WAIVER</h4>
-                <p className="text-gray-700 mb-2 font-medium">
+                <h4 className="mb-2 font-bold text-red-600">6. LIABILITY WAIVER</h4>
+                <p className="mb-2 font-medium text-gray-700">
                   PLEASE TAKE NOTICE: My Hibachi and its agents, employees, or representatives will
                   NOT be liable to any Host or guests for property damage or personal injury
                   resulting from the event.
                 </p>
-                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                <ul className="list-inside list-disc space-y-1 text-gray-700">
                   <li>
                     Property damage includes injury to any real or personal property at the event
                     site.
@@ -481,7 +480,7 @@ export default function BookingPage() {
               </div>
 
               <div>
-                <h4 className="font-bold text-red-600 mb-2">7. FORCE MAJEURE</h4>
+                <h4 className="mb-2 font-bold text-red-600">7. FORCE MAJEURE</h4>
                 <p className="text-gray-700">
                   Neither party shall be held liable for failure to perform due to events beyond
                   their reasonable control including but not limited to illness, accidents, fire,
@@ -490,8 +489,8 @@ export default function BookingPage() {
               </div>
 
               <div>
-                <h4 className="font-bold text-red-600 mb-2">8. FOOD SAFETY & ALLERGIES</h4>
-                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                <h4 className="mb-2 font-bold text-red-600">8. FOOD SAFETY & ALLERGIES</h4>
+                <ul className="list-inside list-disc space-y-1 text-gray-700">
                   <li>
                     Customer is responsible for notifying Caterer of any food allergies at least 48
                     hours in advance.
@@ -505,12 +504,12 @@ export default function BookingPage() {
 
               {/* Customer Details Confirmation */}
               {formData && (
-                <div className="bg-white border border-gray-200 rounded-lg p-4 mt-6">
-                  <h4 className="font-bold text-gray-900 mb-3 text-center">
+                <div className="mt-6 rounded-lg border border-gray-200 bg-white p-4">
+                  <h4 className="mb-3 text-center font-bold text-gray-900">
                     Customer Agreement Confirmation
                   </h4>
-                  <div className="text-sm text-gray-700 space-y-2">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div>
                         <p>
                           <strong>Customer Name:</strong> {formData.name}
@@ -548,7 +547,7 @@ export default function BookingPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="mt-4 pt-3 border-t border-gray-200">
+                    <div className="mt-4 border-t border-gray-200 pt-3">
                       <p>
                         <strong>Event Venue:</strong>
                       </p>
@@ -568,7 +567,7 @@ export default function BookingPage() {
                         </p>
                       </div>
                     )}
-                    <div className="mt-4 pt-3 border-t border-gray-200 text-center">
+                    <div className="mt-4 border-t border-gray-200 pt-3 text-center">
                       <p className="font-medium text-red-600">
                         <strong>{formData.name}</strong> agrees with this My Hibachi Catering
                         Agreement
@@ -581,8 +580,8 @@ export default function BookingPage() {
           </div>
 
           {/* Fixed Footer with Buttons */}
-          <div className="border-t border-gray-200 p-6 bg-gray-50">
-            <div className="text-center mb-4">
+          <div className="border-t border-gray-200 bg-gray-50 p-6">
+            <div className="mb-4 text-center">
               <p className="text-lg font-bold text-gray-900">
                 By clicking &quot;Confirm Booking&quot;, you acknowledge that you have read and
                 agree to all terms above
@@ -591,13 +590,13 @@ export default function BookingPage() {
             <div className="flex space-x-3">
               <button
                 onClick={handleAgreementCancel}
-                className="flex-1 bg-gray-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-600 transition duration-200"
+                className="flex-1 rounded-lg bg-gray-500 px-4 py-3 font-medium text-white transition duration-200 hover:bg-gray-600"
               >
                 Cancel & Review Form
               </button>
               <button
                 onClick={handleAgreementConfirm}
-                className="flex-1 bg-red-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-red-700 transition duration-200"
+                className="flex-1 rounded-lg bg-red-600 px-4 py-3 font-medium text-white transition duration-200 hover:bg-red-700"
               >
                 ✅ Confirm Booking & Accept Agreement
               </button>
@@ -605,8 +604,8 @@ export default function BookingPage() {
           </div>
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <>
@@ -614,15 +613,15 @@ export default function BookingPage() {
       <AgreementModal />
 
       {/* Hero Section with Company Background */}
-      <section className="page-hero-background py-20 text-white text-center">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="text-6xl mb-6">🍽️</div>
-          <h1 className="text-5xl font-bold mb-6">Book Your Hibachi Experience</h1>
-          <p className="text-xl mb-8 text-gray-200">
+      <section className="page-hero-background py-20 text-center text-white">
+        <div className="mx-auto max-w-4xl px-4">
+          <div className="mb-6 text-6xl">🍽️</div>
+          <h1 className="mb-6 text-5xl font-bold">Book Your Hibachi Experience</h1>
+          <p className="mb-8 text-xl text-gray-200">
             Premium Japanese hibachi dining at your location
           </p>
-          <div className="text-lg mb-12">
-            <span className="bg-red-600 text-white px-4 py-2 rounded-full">
+          <div className="mb-12 text-lg">
+            <span className="rounded-full bg-red-600 px-4 py-2 text-white">
               Professional Catering Service
             </span>
           </div>
@@ -630,20 +629,20 @@ export default function BookingPage() {
       </section>
 
       {/* Booking Form Section */}
-      <div className="py-16 section-background">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+      <div className="section-background py-16">
+        <div className="mx-auto max-w-4xl px-4">
+          <div className="overflow-hidden rounded-2xl bg-white shadow-xl">
             {/* Form */}
-            <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-8">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 p-8">
               {/* Form Progress Indicator */}
-              <div className="bg-gradient-to-r from-blue-50 to-red-50 rounded-xl p-6 mb-8 mt-4 border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
+              <div className="mt-4 mb-8 rounded-xl border border-gray-200 bg-gradient-to-r from-blue-50 to-red-50 p-6">
+                <h3 className="mb-4 text-center text-lg font-semibold text-gray-900">
                   📋 Booking Progress
                 </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 text-center">
+                <div className="grid grid-cols-2 gap-2 text-center md:grid-cols-4 md:gap-4">
                   <div className="space-y-2">
                     <div
-                      className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center text-xl font-bold ${
+                      className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold ${
                         watch('eventDate') && watch('eventTime')
                           ? 'bg-green-500 text-white'
                           : 'bg-gray-200 text-gray-500'
@@ -667,7 +666,7 @@ export default function BookingPage() {
 
                   <div className="space-y-2">
                     <div
-                      className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center text-xl font-bold ${
+                      className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold ${
                         watch('name') &&
                         watch('email') &&
                         watch('phone') &&
@@ -702,7 +701,7 @@ export default function BookingPage() {
 
                   <div className="space-y-2">
                     <div
-                      className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center text-xl font-bold ${
+                      className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold ${
                         watch('venueStreet') &&
                         watch('venueCity') &&
                         watch('venueState') &&
@@ -737,7 +736,7 @@ export default function BookingPage() {
 
                   <div className="space-y-2">
                     <div
-                      className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center text-xl font-bold ${
+                      className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold ${
                         watch('sameAsVenue') ||
                         (watch('addressStreet') &&
                           watch('addressCity') &&
@@ -776,7 +775,7 @@ export default function BookingPage() {
 
                 {/* Overall Progress Bar */}
                 <div className="mt-6">
-                  <div className="flex justify-between text-sm text-gray-600 mb-2">
+                  <div className="mb-2 flex justify-between text-sm text-gray-600">
                     <span>Form Completion</span>
                     <span>
                       {Math.round(
@@ -801,14 +800,14 @@ export default function BookingPage() {
                             ? 1
                             : 0)) /
                           4) *
-                          100
+                          100,
                       )}
                       %
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div className="h-3 w-full rounded-full bg-gray-200">
                     <div
-                      className="bg-gradient-to-r from-blue-500 to-red-500 h-3 rounded-full transition-all duration-300"
+                      className="h-3 rounded-full bg-gradient-to-r from-blue-500 to-red-500 transition-all duration-300"
                       style={{
                         width: `${
                           (((watch('eventDate') && watch('eventTime') ? 1 : 0) +
@@ -833,7 +832,7 @@ export default function BookingPage() {
                               : 0)) /
                             4) *
                           100
-                        }%`
+                        }%`,
                       }}
                     ></div>
                   </div>
@@ -841,71 +840,71 @@ export default function BookingPage() {
               </div>
               {/* Customer Information */}
               <div className="border-b pb-6">
-                <div className="flex items-center justify-between mb-4">
+                <div className="mb-4 flex items-center justify-between">
                   <h2 className="text-2xl font-semibold text-gray-900">👤 Customer Information</h2>
                   <div className="text-sm">
                     {watch('name') &&
                     watch('email') &&
                     watch('phone') &&
                     watch('preferredCommunication') ? (
-                      <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full font-semibold">
+                      <span className="rounded-full bg-green-100 px-3 py-1 font-semibold text-green-800">
                         ✅ Complete
                       </span>
                     ) : (
-                      <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full">
+                      <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-800">
                         ⏳ Pending
                       </span>
                     )}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
                       Full Name *
                     </label>
                     <input
                       {...register('name')}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                       placeholder="John Smith"
                     />
                     {errors.name && (
-                      <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+                      <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
                       Email Address *
                     </label>
                     <input
                       {...register('email')}
                       type="email"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                       placeholder="john@example.com"
                     />
                     {errors.email && (
-                      <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+                      <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
                       Phone Number *
                     </label>
                     <input
                       {...register('phone')}
                       type="tel"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                       placeholder="(555) 123-4567"
                     />
                     {errors.phone && (
-                      <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
+                      <p className="mt-1 text-sm text-red-500">{errors.phone.message}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
                       Preferred Communication Method *
                     </label>
                     <Controller
@@ -914,7 +913,7 @@ export default function BookingPage() {
                       render={({ field }) => (
                         <select
                           {...field}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                          className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                         >
                           <option value="">Select how we should contact you</option>
                           <option value="phone">📞 Phone Call</option>
@@ -924,7 +923,7 @@ export default function BookingPage() {
                       )}
                     />
                     {errors.preferredCommunication && (
-                      <p className="text-red-500 text-sm mt-1">
+                      <p className="mt-1 text-sm text-red-500">
                         {errors.preferredCommunication.message}
                       </p>
                     )}
@@ -934,13 +933,13 @@ export default function BookingPage() {
 
               {/* Date & Time Selection */}
               <div className="border-b pb-6">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+                <h2 className="mb-4 text-2xl font-semibold text-gray-900">
                   📅 Date & Time Selection
                 </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
                       Event Date *
                     </label>
                     <Controller
@@ -951,15 +950,15 @@ export default function BookingPage() {
                           <DatePicker
                             selected={field.value}
                             onChange={(date: Date | null) => {
-                              setDateError(null)
-                              field.onChange(date)
+                              setDateError(null);
+                              field.onChange(date);
                             }}
                             minDate={addDays(new Date(), 2)} // 48 hours minimum
                             maxDate={addDays(new Date(), 730)} // 2 years maximum
                             excludeDates={bookedDates}
                             dateFormat="MMMM d, yyyy"
                             placeholderText="Select your event date"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200"
+                            className="w-full rounded-lg border border-gray-300 px-4 py-3 transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                             calendarClassName="shadow-xl border border-gray-200"
                             wrapperClassName="w-full"
                             showPopperArrow={false}
@@ -969,84 +968,84 @@ export default function BookingPage() {
                             dropdownMode="select"
                             yearDropdownItemNumber={3}
                             scrollableYearDropdown={false}
-                            dayClassName={date => {
+                            dayClassName={(date) => {
                               // Highlight selected date
                               if (
                                 field.value &&
                                 date.toDateString() === field.value.toDateString()
                               ) {
-                                return 'bg-red-500 text-white font-bold rounded'
+                                return 'bg-red-500 text-white font-bold rounded';
                               }
 
                               // Style for booked dates
                               const isBooked = bookedDates.some(
-                                bookedDate => bookedDate.toDateString() === date.toDateString()
-                              )
+                                (bookedDate) => bookedDate.toDateString() === date.toDateString(),
+                              );
 
                               if (isBooked) {
-                                return 'bg-red-100 text-red-400 line-through cursor-not-allowed'
+                                return 'bg-red-100 text-red-400 line-through cursor-not-allowed';
                               }
 
-                              return ''
+                              return '';
                             }}
                             onSelect={(date: Date | null) => {
                               // Additional validation when user selects a date
-                              if (!date) return
+                              if (!date) return;
 
-                              const now = new Date()
-                              const timeDiff = date.getTime() - now.getTime()
-                              const hoursDiff = timeDiff / (1000 * 60 * 60)
+                              const now = new Date();
+                              const timeDiff = date.getTime() - now.getTime();
+                              const hoursDiff = timeDiff / (1000 * 60 * 60);
 
                               if (hoursDiff < 48) {
-                                setDateError('Please select a date at least 48 hours in advance')
-                                return
+                                setDateError('Please select a date at least 48 hours in advance');
+                                return;
                               }
 
                               // Check if the date is booked
                               const isBooked = bookedDates.some(
-                                bookedDate => bookedDate.toDateString() === date.toDateString()
-                              )
+                                (bookedDate) => bookedDate.toDateString() === date.toDateString(),
+                              );
 
                               if (isBooked) {
                                 setDateError(
-                                  'This date is fully booked. Please select another date.'
-                                )
-                                return
+                                  'This date is fully booked. Please select another date.',
+                                );
+                                return;
                               }
 
-                              setDateError(null)
+                              setDateError(null);
                             }}
                             filterDate={(date: Date) => {
                               // Filter out dates that don't meet our criteria
-                              const now = new Date()
-                              const timeDiff = date.getTime() - now.getTime()
-                              const hoursDiff = timeDiff / (1000 * 60 * 60)
+                              const now = new Date();
+                              const timeDiff = date.getTime() - now.getTime();
+                              const hoursDiff = timeDiff / (1000 * 60 * 60);
 
                               // Must be at least 48 hours in future
-                              if (hoursDiff < 48) return false
+                              if (hoursDiff < 48) return false;
 
                               // Only allow current year and future years (prevents previous year navigation)
-                              if (date.getFullYear() < now.getFullYear()) return false
+                              if (date.getFullYear() < now.getFullYear()) return false;
 
                               // Check if the date is booked
                               const isBooked = bookedDates.some(
-                                bookedDate => bookedDate.toDateString() === date.toDateString()
-                              )
+                                (bookedDate) => bookedDate.toDateString() === date.toDateString(),
+                              );
 
-                              return !isBooked
+                              return !isBooked;
                             }}
                           />
                           {loadingDates && (
-                            <div className="absolute right-3 top-3">
-                              <div className="animate-spin h-4 w-4 border-2 border-red-500 border-t-transparent rounded-full"></div>
+                            <div className="absolute top-3 right-3">
+                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-red-500 border-t-transparent"></div>
                             </div>
                           )}
                         </div>
                       )}
                     />
-                    <div className="text-sm mt-1 space-y-1">
+                    <div className="mt-1 space-y-1 text-sm">
                       <p className="text-gray-500">Must be at least 48 hours in advance</p>
-                      {dateError && <p className="text-red-500 font-medium">⚠️ {dateError}</p>}
+                      {dateError && <p className="font-medium text-red-500">⚠️ {dateError}</p>}
                       {loadingDates && (
                         <p className="text-blue-500">🔄 Loading available dates...</p>
                       )}
@@ -1062,12 +1061,12 @@ export default function BookingPage() {
                       )}
                     </div>
                     {errors.eventDate && (
-                      <p className="text-red-500 text-sm mt-1">{errors.eventDate.message}</p>
+                      <p className="mt-1 text-sm text-red-500">{errors.eventDate.message}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
                       Event Time *
                     </label>
                     <Controller
@@ -1076,26 +1075,28 @@ export default function BookingPage() {
                       render={({ field }) => (
                         <select
                           {...field}
-                          className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 ${
+                          className={`w-full rounded-lg border border-gray-300 px-4 py-3 transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500 ${
                             loadingTimeSlots ? 'animate-pulse bg-gray-100' : ''
-                          } ${field.value ? 'bg-green-50 border-green-300' : ''}`}
+                          } ${field.value ? 'border-green-300 bg-green-50' : ''}`}
                           disabled={loadingTimeSlots}
                         >
                           <option value="">
                             {loadingTimeSlots ? '⏳ Loading time slots...' : '🕐 Select a time'}
                           </option>
-                          {availableTimeSlots.map(slot => (
+                          {availableTimeSlots.map((slot) => (
                             <option
                               key={slot.time}
                               value={slot.time}
                               disabled={!slot.isAvailable}
                               style={{
                                 color: !slot.isAvailable ? '#9ca3af' : '#059669',
-                                fontWeight: slot.isAvailable ? 'bold' : 'normal'
+                                fontWeight: slot.isAvailable ? 'bold' : 'normal',
                               }}
                             >
                               {slot.isAvailable
-                                ? `✅ ${slot.label} (${slot.available} slot${slot.available !== 1 ? 's' : ''} available)`
+                                ? `✅ ${slot.label} (${slot.available} slot${
+                                    slot.available !== 1 ? 's' : ''
+                                  } available)`
                                 : `❌ ${slot.label} – Fully Booked`}
                             </option>
                           ))}
@@ -1106,12 +1107,12 @@ export default function BookingPage() {
                       )}
                     />
                     {errors.eventTime && (
-                      <p className="text-red-500 text-sm mt-1">{errors.eventTime.message}</p>
+                      <p className="mt-1 text-sm text-red-500">{errors.eventTime.message}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
                       Estimate Number of Guests *
                     </label>
                     <Controller
@@ -1122,16 +1123,16 @@ export default function BookingPage() {
                           type="number"
                           min="1"
                           value={field.value || ''}
-                          onChange={e =>
+                          onChange={(e) =>
                             field.onChange(e.target.value ? parseInt(e.target.value) : undefined)
                           }
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                          className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                           placeholder="Enter estimated guest count"
                         />
                       )}
                     />
                     {errors.guestCount && (
-                      <p className="text-red-500 text-sm mt-1">{errors.guestCount.message}</p>
+                      <p className="mt-1 text-sm text-red-500">{errors.guestCount.message}</p>
                     )}
                   </div>
                 </div>
@@ -1139,76 +1140,76 @@ export default function BookingPage() {
 
               {/* Event Venue - Now above Billing Address */}
               <div className="border-b pb-6">
-                <div className="flex items-center justify-between mb-4">
+                <div className="mb-4 flex items-center justify-between">
                   <h2 className="text-2xl font-semibold text-gray-900">🎪 Event Venue</h2>
                   <div className="text-sm">
                     {watch('venueStreet') &&
                     watch('venueCity') &&
                     watch('venueState') &&
                     watch('venueZipcode') ? (
-                      <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full font-semibold">
+                      <span className="rounded-full bg-green-100 px-3 py-1 font-semibold text-green-800">
                         ✅ Complete
                       </span>
                     ) : (
-                      <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full">
+                      <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-800">
                         ⏳ Pending
                       </span>
                     )}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
                       Venue Street Address *
                     </label>
                     <input
                       {...register('venueStreet')}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                       placeholder="456 Event Venue Street"
                     />
                     {errors.venueStreet && (
-                      <p className="text-red-500 text-sm mt-1">{errors.venueStreet.message}</p>
+                      <p className="mt-1 text-sm text-red-500">{errors.venueStreet.message}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">City *</label>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">City *</label>
                     <input
                       {...register('venueCity')}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                       placeholder="Event City"
                     />
                     {errors.venueCity && (
-                      <p className="text-red-500 text-sm mt-1">{errors.venueCity.message}</p>
+                      <p className="mt-1 text-sm text-red-500">{errors.venueCity.message}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">State *</label>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">State *</label>
                     <input
                       {...register('venueState')}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                       placeholder="ST"
                       maxLength={2}
                     />
                     {errors.venueState && (
-                      <p className="text-red-500 text-sm mt-1">{errors.venueState.message}</p>
+                      <p className="mt-1 text-sm text-red-500">{errors.venueState.message}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
                       ZIP Code *
                     </label>
                     <input
                       {...register('venueZipcode')}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                       placeholder="12345"
                       maxLength={10}
                     />
                     {errors.venueZipcode && (
-                      <p className="text-red-500 text-sm mt-1">{errors.venueZipcode.message}</p>
+                      <p className="mt-1 text-sm text-red-500">{errors.venueZipcode.message}</p>
                     )}
                   </div>
                 </div>
@@ -1216,7 +1217,7 @@ export default function BookingPage() {
 
               {/* Billing Address - Changed from Customer Address */}
               <div className="border-b pb-6">
-                <div className="flex items-center justify-between mb-4">
+                <div className="mb-4 flex items-center justify-between">
                   <h2 className="text-2xl font-semibold text-gray-900">💳 Billing Address</h2>
                   <div className="text-sm">
                     {watch('sameAsVenue') ||
@@ -1224,11 +1225,11 @@ export default function BookingPage() {
                       watch('addressCity') &&
                       watch('addressState') &&
                       watch('addressZipcode')) ? (
-                      <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full font-semibold">
+                      <span className="rounded-full bg-green-100 px-3 py-1 font-semibold text-green-800">
                         ✅ Complete
                       </span>
                     ) : (
-                      <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full">
+                      <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-800">
                         ⏳ Pending
                       </span>
                     )}
@@ -1238,7 +1239,9 @@ export default function BookingPage() {
                 {/* Checkbox - Disabled until venue address is complete */}
                 <div className="mb-4">
                   <label
-                    className={`flex items-center space-x-3 ${isVenueAddressComplete ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                    className={`flex items-center space-x-3 ${
+                      isVenueAddressComplete ? 'cursor-pointer' : 'cursor-not-allowed'
+                    }`}
                   >
                     <Controller
                       name="sameAsVenue"
@@ -1249,20 +1252,22 @@ export default function BookingPage() {
                           checked={field.value}
                           onChange={field.onChange}
                           disabled={!isVenueAddressComplete}
-                          className={`w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500 focus:ring-2 ${
-                            !isVenueAddressComplete ? 'opacity-50 cursor-not-allowed' : ''
+                          className={`h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-2 focus:ring-red-500 ${
+                            !isVenueAddressComplete ? 'cursor-not-allowed opacity-50' : ''
                           }`}
                         />
                       )}
                     />
                     <span
-                      className={`text-sm font-medium ${isVenueAddressComplete ? 'text-gray-700' : 'text-gray-400'}`}
+                      className={`text-sm font-medium ${
+                        isVenueAddressComplete ? 'text-gray-700' : 'text-gray-400'
+                      }`}
                     >
                       Billing address is the same as Event Venue address
                     </span>
                   </label>
                   {!isVenueAddressComplete && (
-                    <p className="text-amber-600 text-sm mt-2 ml-7">
+                    <p className="mt-2 ml-7 text-sm text-amber-600">
                       ⚠️ Please complete the Event Venue address above to use this option
                     </p>
                   )}
@@ -1270,9 +1275,9 @@ export default function BookingPage() {
 
                 {/* Show minimized summary when checkbox is checked */}
                 {sameAsVenue && isVenueAddressComplete ? (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <span className="text-green-600 font-medium">
+                  <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                    <div className="mb-2 flex items-center space-x-2">
+                      <span className="font-medium text-green-600">
                         ✓ Billing address is the same as venue address:
                       </span>
                     </div>
@@ -1286,64 +1291,64 @@ export default function BookingPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
                         Street Address *
                       </label>
                       <input
                         {...register('addressStreet')}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                        className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                         placeholder="123 Main Street"
                         disabled={sameAsVenue}
                       />
                       {errors.addressStreet && (
-                        <p className="text-red-500 text-sm mt-1">{errors.addressStreet.message}</p>
+                        <p className="mt-1 text-sm text-red-500">{errors.addressStreet.message}</p>
                       )}
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">City *</label>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">City *</label>
                       <input
                         {...register('addressCity')}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                        className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                         placeholder="Your City"
                         disabled={sameAsVenue}
                       />
                       {errors.addressCity && (
-                        <p className="text-red-500 text-sm mt-1">{errors.addressCity.message}</p>
+                        <p className="mt-1 text-sm text-red-500">{errors.addressCity.message}</p>
                       )}
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
                         State *
                       </label>
                       <input
                         {...register('addressState')}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                        className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                         placeholder="ST"
                         maxLength={2}
                         disabled={sameAsVenue}
                       />
                       {errors.addressState && (
-                        <p className="text-red-500 text-sm mt-1">{errors.addressState.message}</p>
+                        <p className="mt-1 text-sm text-red-500">{errors.addressState.message}</p>
                       )}
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
                         ZIP Code *
                       </label>
                       <input
                         {...register('addressZipcode')}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                        className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                         placeholder="12345"
                         maxLength={10}
                         disabled={sameAsVenue}
                       />
                       {errors.addressZipcode && (
-                        <p className="text-red-500 text-sm mt-1">{errors.addressZipcode.message}</p>
+                        <p className="mt-1 text-sm text-red-500">{errors.addressZipcode.message}</p>
                       )}
                     </div>
                   </div>
@@ -1374,9 +1379,9 @@ export default function BookingPage() {
                     ? 1
                     : 0) <
                   4 && (
-                  <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                    <div className="text-amber-800 text-sm">
-                      <div className="flex items-center justify-center mb-3">
+                  <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                    <div className="text-sm text-amber-800">
+                      <div className="mb-3 flex items-center justify-center">
                         <span className="mr-2">⚠️</span>
                         <span className="font-semibold">
                           Please complete the following sections to submit your booking (
@@ -1407,7 +1412,7 @@ export default function BookingPage() {
                       <div className="space-y-2">
                         {/* Date & Time Section */}
                         {!(watch('eventDate') && watch('eventTime')) && (
-                          <div className="flex items-center justify-center space-x-2 text-amber-700 bg-amber-100 py-2 px-3 rounded">
+                          <div className="flex items-center justify-center space-x-2 rounded bg-amber-100 px-3 py-2 text-amber-700">
                             <span>📅</span>
                             <span className="font-medium">Date & Time Selection</span>
                             <span className="text-xs">
@@ -1429,7 +1434,7 @@ export default function BookingPage() {
                           watch('phone') &&
                           watch('preferredCommunication')
                         ) && (
-                          <div className="flex items-center justify-center space-x-2 text-amber-700 bg-amber-100 py-2 px-3 rounded">
+                          <div className="flex items-center justify-center space-x-2 rounded bg-amber-100 px-3 py-2 text-amber-700">
                             <span>👤</span>
                             <span className="font-medium">Customer Information</span>
                             <span className="text-xs">
@@ -1438,7 +1443,7 @@ export default function BookingPage() {
                                 !watch('name') && 'name',
                                 !watch('email') && 'email',
                                 !watch('phone') && 'phone',
-                                !watch('preferredCommunication') && 'communication method'
+                                !watch('preferredCommunication') && 'communication method',
                               ]
                                 .filter(Boolean)
                                 .join(', ')}
@@ -1454,7 +1459,7 @@ export default function BookingPage() {
                           watch('venueState') &&
                           watch('venueZipcode')
                         ) && (
-                          <div className="flex items-center justify-center space-x-2 text-amber-700 bg-amber-100 py-2 px-3 rounded">
+                          <div className="flex items-center justify-center space-x-2 rounded bg-amber-100 px-3 py-2 text-amber-700">
                             <span>🎪</span>
                             <span className="font-medium">Event Venue Address</span>
                             <span className="text-xs">
@@ -1463,7 +1468,7 @@ export default function BookingPage() {
                                 !watch('venueStreet') && 'street',
                                 !watch('venueCity') && 'city',
                                 !watch('venueState') && 'state',
-                                !watch('venueZipcode') && 'zip code'
+                                !watch('venueZipcode') && 'zip code',
                               ]
                                 .filter(Boolean)
                                 .join(', ')}
@@ -1480,7 +1485,7 @@ export default function BookingPage() {
                             watch('addressState') &&
                             watch('addressZipcode'))
                         ) && (
-                          <div className="flex items-center justify-center space-x-2 text-amber-700 bg-amber-100 py-2 px-3 rounded">
+                          <div className="flex items-center justify-center space-x-2 rounded bg-amber-100 px-3 py-2 text-amber-700">
                             <span>💳</span>
                             <span className="font-medium">Billing Address</span>
                             <span className="text-xs">
@@ -1518,7 +1523,7 @@ export default function BookingPage() {
                         : 0) <
                       4 || isSubmitting
                   }
-                  className={`text-lg font-bold transition-all duration-300 position-relative overflow-hidden inline-flex items-center gap-4 border-none ${
+                  className={`position-relative inline-flex items-center gap-4 overflow-hidden border-none text-lg font-bold transition-all duration-300 ${
                     (watch('eventDate') && watch('eventTime') ? 1 : 0) +
                       (watch('name') &&
                       watch('email') &&
@@ -1540,8 +1545,8 @@ export default function BookingPage() {
                         ? 1
                         : 0) ===
                       4 && !isSubmitting
-                      ? 'bg-gradient-to-r from-red-500 to-red-400 text-white hover:shadow-2xl hover:scale-105 cursor-pointer'
-                      : 'bg-gradient-to-r from-gray-400 to-gray-500 text-white cursor-not-allowed'
+                      ? 'cursor-pointer bg-gradient-to-r from-red-500 to-red-400 text-white hover:scale-105 hover:shadow-2xl'
+                      : 'cursor-not-allowed bg-gradient-to-r from-gray-400 to-gray-500 text-white'
                   }`}
                   style={{
                     borderRadius: '50px',
@@ -1574,13 +1579,13 @@ export default function BookingPage() {
                           : 0) ===
                         4 && !isSubmitting
                         ? '0 8px 25px rgba(239, 68, 68, 0.4)'
-                        : '0 4px 15px rgba(156, 163, 175, 0.3)'
+                        : '0 4px 15px rgba(156, 163, 175, 0.3)',
                   }}
                 >
                   {isSubmitting ? (
                     <span className="flex items-center justify-center">
                       <svg
-                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                        className="mr-3 -ml-1 h-5 w-5 animate-spin text-white"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -1630,24 +1635,50 @@ export default function BookingPage() {
 
                 {/* Form completion summary */}
                 <div className="mt-4 text-sm text-gray-600">
-                  <div className="flex flex-wrap justify-center items-center gap-2">
+                  <div className="flex flex-wrap items-center justify-center gap-2">
                     <span
-                      className={`px-2 py-1 rounded text-xs ${watch('eventDate') && watch('eventTime') ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'}`}
+                      className={`rounded px-2 py-1 text-xs ${
+                        watch('eventDate') && watch('eventTime')
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-500'
+                      }`}
                     >
                       📅 Date & Time
                     </span>
                     <span
-                      className={`px-2 py-1 rounded text-xs ${watch('name') && watch('email') && watch('phone') && watch('preferredCommunication') ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'}`}
+                      className={`rounded px-2 py-1 text-xs ${
+                        watch('name') &&
+                        watch('email') &&
+                        watch('phone') &&
+                        watch('preferredCommunication')
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-500'
+                      }`}
                     >
                       👤 Customer Info
                     </span>
                     <span
-                      className={`px-2 py-1 rounded text-xs ${watch('venueStreet') && watch('venueCity') && watch('venueState') && watch('venueZipcode') ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'}`}
+                      className={`rounded px-2 py-1 text-xs ${
+                        watch('venueStreet') &&
+                        watch('venueCity') &&
+                        watch('venueState') &&
+                        watch('venueZipcode')
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-500'
+                      }`}
                     >
                       🎪 Venue
                     </span>
                     <span
-                      className={`px-2 py-1 rounded text-xs ${watch('sameAsVenue') || (watch('addressStreet') && watch('addressCity') && watch('addressState') && watch('addressZipcode')) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'}`}
+                      className={`rounded px-2 py-1 text-xs ${
+                        watch('sameAsVenue') ||
+                        (watch('addressStreet') &&
+                          watch('addressCity') &&
+                          watch('addressState') &&
+                          watch('addressZipcode'))
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-500'
+                      }`}
                     >
                       💳 Billing
                     </span>
@@ -1661,5 +1692,5 @@ export default function BookingPage() {
 
       <Assistant />
     </>
-  )
+  );
 }

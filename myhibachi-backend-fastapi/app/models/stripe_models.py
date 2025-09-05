@@ -1,6 +1,16 @@
 import uuid
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, Integer, Numeric, String, Text
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    Numeric,
+    String,
+    Text,
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -15,7 +25,9 @@ class Customer(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String, nullable=False, unique=True, index=True)
     email = Column(String, nullable=False, unique=True, index=True)
-    stripe_customer_id = Column(String, nullable=False, unique=True, index=True)
+    stripe_customer_id = Column(
+        String, nullable=False, unique=True, index=True
+    )
     name = Column(String)
     phone = Column(String)
     preferred_payment_method = Column(String, default="zelle")
@@ -44,7 +56,9 @@ class Payment(Base):
     user_id = Column(String, nullable=False, index=True)
     booking_id = Column(String, index=True)
     stripe_payment_intent_id = Column(String, unique=True, index=True)
-    stripe_customer_id = Column(String, ForeignKey("customers.stripe_customer_id"))
+    stripe_customer_id = Column(
+        String, ForeignKey("customers.stripe_customer_id")
+    )
 
     # Payment details
     amount = Column(Numeric(10, 2), nullable=False)
@@ -79,7 +93,9 @@ class Invoice(Base):
     user_id = Column(String, nullable=False, index=True)
     booking_id = Column(String, index=True)
     stripe_invoice_id = Column(String, unique=True, index=True)
-    stripe_customer_id = Column(String, ForeignKey("customers.stripe_customer_id"))
+    stripe_customer_id = Column(
+        String, ForeignKey("customers.stripe_customer_id")
+    )
 
     # Invoice details
     amount_due = Column(Numeric(10, 2), nullable=False)
@@ -236,4 +252,8 @@ class Dispute(Base):
 Index("idx_payments_user_booking", Payment.user_id, Payment.booking_id)
 Index("idx_payments_status_method", Payment.status, Payment.method)
 Index("idx_invoices_user_booking", Invoice.user_id, Invoice.booking_id)
-Index("idx_webhook_events_type_processed", WebhookEvent.type, WebhookEvent.processed)
+Index(
+    "idx_webhook_events_type_processed",
+    WebhookEvent.type,
+    WebhookEvent.processed,
+)

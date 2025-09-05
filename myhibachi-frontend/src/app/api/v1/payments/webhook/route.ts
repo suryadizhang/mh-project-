@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
 
 /**
  * ⚠️  MIGRATED TO BACKEND ⚠️
@@ -24,12 +24,14 @@ export async function POST() {
       error: 'Webhook endpoint migrated to backend',
       migration: {
         from: '/api/v1/payments/webhook',
-        to: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/stripe/v1/payments/webhook`,
+        to: `${
+          process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        }/api/stripe/v1/payments/webhook`,
         status: 'MIGRATED',
         date: new Date().toISOString(),
-        instructions: 'Update Stripe webhook configuration to use backend endpoint'
-      }
+        instructions: 'Update Stripe webhook configuration to use backend endpoint',
+      },
     },
-    { status: 410 }
-  )
+    { status: 410 },
+  );
 }

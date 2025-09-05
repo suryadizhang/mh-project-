@@ -1,0 +1,122 @@
+name: 🎯 Code Quality & Formatting
+
+on:
+  push:
+    branches: [ main, develop, chore/*, feature/*, fix/* ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  formatting-check:
+    name: 🔧 Formatting & Linting
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: 📦 Install Python Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install black ruff isort pre-commit bandit flake8
+
+    - name: 🟦 Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: 📦 Install Node Dependencies
+      working-directory: ./myhibachi-frontend
+      run: |
+        npm ci
+
+    - name: 🔧 Check Python Formatting (Black)
+      run: |
+        black --check --diff .
+
+    - name: 🔧 Check Python Linting (Ruff)
+      run: |
+        ruff check .
+
+    - name: 🔧 Check Import Sorting (isort)
+      run: |
+        isort --check-only --diff .
+
+    - name: 🔧 Check TypeScript/JS Formatting (Prettier)
+      working-directory: ./myhibachi-frontend
+      run: |
+        npx prettier --check "**/*.{ts,tsx,js,jsx,json,css,md}"
+
+    - name: 🔒 Security Check (Bandit)
+      run: |
+        bandit -r . -f json -o bandit-report.json || true
+
+    - name: 🔍 Additional Linting (Flake8)
+      run: |
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+    - name: 📋 Pre-commit All Files
+      run: |
+        pre-commit run --all-files
+
+  auto-fix:
+    name: 🛠️ Auto-fix Formatting (if needed)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref != 'refs/heads/main'
+    needs: formatting-check
+    # Only run if formatting check failed
+    continue-on-error: true
+
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: 📦 Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install black ruff isort
+
+    - name: 🟦 Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: 📦 Install Node Dependencies
+      working-directory: ./myhibachi-frontend
+      run: |
+        npm ci
+
+    - name: 🔧 Apply Formatting Fixes
+      run: |
+        black .
+        ruff check --fix .
+        isort .
+
+    - name: 🔧 Apply Frontend Formatting
+      working-directory: ./myhibachi-frontend
+      run: |
+        npx prettier --write "**/*.{ts,tsx,js,jsx,json,css,md}"
+
+    - name: 📤 Commit Auto-fixes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action Auto-formatter"
+        git add .
+        if git diff --staged --quiet; then
+          echo "No formatting changes needed"
+        else
+          git commit -m "🤖 Auto-fix: Code formatting and linting fixes"
+          git push
+        fi

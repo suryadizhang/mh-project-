@@ -81,11 +81,19 @@ async def health_check():
         "status": "healthy",
         "environment": settings.environment,
         "database": "connected",
-        "stripe": "configured" if settings.stripe_secret_key else "not configured",
+        "stripe": "configured"
+        if settings.stripe_secret_key
+        else "not configured",
     }
 
 
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=settings.debug, log_level="info")
+    uvicorn.run(
+        "app.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=settings.debug,
+        log_level="info",
+    )

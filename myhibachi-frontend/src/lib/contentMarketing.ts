@@ -12,7 +12,10 @@ export const generateSocialMediaContent = (postId: number) => {
 
   return {
     twitter: {
-      text: `${post.title.slice(0, 120)}... 🍤🔥\n\n#hibachi #catering #${post.serviceArea.replace(' ', '')} #${post.eventType.replace(' ', '')}\n\n${baseUrl}/blog/${post.slug}`,
+      text: `${post.title.slice(0, 120)}... 🍤🔥\n\n#hibachi #catering #${post.serviceArea.replace(
+        ' ',
+        ''
+      )} #${post.eventType.replace(' ', '')}\n\n${baseUrl}/blog/${post.slug}`,
       hashtags: [
         'hibachi',
         'catering',
@@ -21,11 +24,21 @@ export const generateSocialMediaContent = (postId: number) => {
       ]
     },
     facebook: {
-      text: `🍤 ${post.title}\n\n${post.excerpt}\n\nRead the complete guide: ${baseUrl}/blog/${post.slug}\n\n#HibachiCatering #${post.serviceArea.replace(' ', '')}Events #InteractiveDining`,
+      text: `🍤 ${post.title}\n\n${post.excerpt}\n\nRead the complete guide: ${baseUrl}/blog/${
+        post.slug
+      }\n\n#HibachiCatering #${post.serviceArea.replace(' ', '')}Events #InteractiveDining`,
       image: `${baseUrl}/images/hibachi-social.jpg` // You'll need to add this image
     },
     instagram: {
-      caption: `🔥 ${post.title}\n\n${post.excerpt.slice(0, 150)}...\n\n📍 Serving ${post.serviceArea}\n🎉 Perfect for ${post.eventType} events\n\nLink in bio for full guide!\n\n#hibachi #catering #${post.serviceArea.replace(' ', '').toLowerCase()} #${post.eventType.replace(' ', '').toLowerCase()} #mobilechef #interactivedining #partycatering`,
+      caption: `🔥 ${post.title}\n\n${post.excerpt.slice(0, 150)}...\n\n📍 Serving ${
+        post.serviceArea
+      }\n🎉 Perfect for ${
+        post.eventType
+      } events\n\nLink in bio for full guide!\n\n#hibachi #catering #${post.serviceArea
+        .replace(' ', '')
+        .toLowerCase()} #${post.eventType
+        .replace(' ', '')
+        .toLowerCase()} #mobilechef #interactivedining #partycatering`,
       hashtags: [
         'hibachi',
         'catering',
@@ -37,7 +50,13 @@ export const generateSocialMediaContent = (postId: number) => {
       ]
     },
     linkedin: {
-      text: `${post.title}\n\n${post.excerpt}\n\nOur professional hibachi catering services bring restaurant-quality dining and entertainment directly to your ${post.eventType.toLowerCase()} event in ${post.serviceArea}.\n\nRead the complete guide: ${baseUrl}/blog/${post.slug}\n\n#ProfessionalCatering #CorporateEvents #TeamBuilding #HibachCatering`
+      text: `${post.title}\n\n${
+        post.excerpt
+      }\n\nOur professional hibachi catering services bring restaurant-quality dining and entertainment directly to your ${post.eventType.toLowerCase()} event in ${
+        post.serviceArea
+      }.\n\nRead the complete guide: ${baseUrl}/blog/${
+        post.slug
+      }\n\n#ProfessionalCatering #CorporateEvents #TeamBuilding #HibachCatering`
     }
   }
 }

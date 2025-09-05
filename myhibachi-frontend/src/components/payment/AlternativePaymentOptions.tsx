@@ -1,31 +1,31 @@
-'use client'
+'use client';
 
-import { Check, Copy, ExternalLink, Mail, Phone, QrCode, Smartphone } from 'lucide-react'
-import QRCodeGenerator from 'qrcode'
-import { useState } from 'react'
+import { Check, Copy, ExternalLink, Mail, Phone, QrCode, Smartphone } from 'lucide-react';
+import QRCodeGenerator from 'qrcode';
+import { useState } from 'react';
 
-import { apiFetch } from '@/lib/api'
+import { apiFetch } from '@/lib/api';
 
 interface BookingData {
-  id: string
-  customerName: string
-  customerEmail: string
-  eventDate: string
-  eventTime: string
-  guestCount: number
-  venueAddress: string
-  totalAmount: number
-  depositPaid: boolean
-  depositAmount: number
-  remainingBalance: number
+  id: string;
+  customerName: string;
+  customerEmail: string;
+  eventDate: string;
+  eventTime: string;
+  guestCount: number;
+  venueAddress: string;
+  totalAmount: number;
+  depositPaid: boolean;
+  depositAmount: number;
+  remainingBalance: number;
 }
 
 interface AlternativePaymentOptionsProps {
-  method: 'zelle' | 'venmo'
-  amount: number
-  bookingData: BookingData | null
-  paymentType: 'deposit' | 'balance'
-  tipAmount: number
+  method: 'zelle' | 'venmo';
+  amount: number;
+  bookingData: BookingData | null;
+  paymentType: 'deposit' | 'balance';
+  tipAmount: number;
 }
 
 export default function AlternativePaymentOptions({
@@ -33,17 +33,17 @@ export default function AlternativePaymentOptions({
   amount,
   bookingData,
   paymentType,
-  tipAmount
+  tipAmount,
 }: AlternativePaymentOptionsProps) {
-  const [copied, setCopied] = useState<string | null>(null)
-  const [paymentSent, setPaymentSent] = useState(false)
-  const [showQR, setShowQR] = useState(false)
-  const [qrCode, setQrCode] = useState<string | null>(null)
+  const [copied, setCopied] = useState<string | null>(null);
+  const [paymentSent, setPaymentSent] = useState(false);
+  const [showQR, setShowQR] = useState(false);
+  const [qrCode, setQrCode] = useState<string | null>(null);
   const [customerInfo, setCustomerInfo] = useState({
     name: bookingData?.customerName || '',
     email: bookingData?.customerEmail || '',
-    phone: ''
-  })
+    phone: '',
+  });
 
   const paymentDetails = {
     zelle: {
@@ -51,68 +51,74 @@ export default function AlternativePaymentOptions({
       phone: '(916) 740-8768',
       name: 'My Hibachi LLC',
       color: 'purple',
-      icon: 'Z'
+      icon: 'Z',
     },
     venmo: {
       username: '@myhibachichef',
       phone: '(916) 740-8768',
       name: 'My Hibachi LLC',
       color: 'blue',
-      icon: 'V'
-    }
-  }
+      icon: 'V',
+    },
+  };
 
-  const details = paymentDetails[method]
+  const details = paymentDetails[method];
 
   const copyToClipboard = async (text: string, type: string) => {
     try {
-      await navigator.clipboard.writeText(text)
-      setCopied(type)
-      setTimeout(() => setCopied(null), 2000)
+      await navigator.clipboard.writeText(text);
+      setCopied(type);
+      setTimeout(() => setCopied(null), 2000);
     } catch (err) {
-      console.error('Failed to copy:', err)
+      console.error('Failed to copy:', err);
     }
-  }
+  };
 
   const generatePaymentMemo = () => {
-    const parts = []
+    const parts = [];
     if (bookingData) {
-      parts.push(`Booking: ${bookingData.id}`)
-      parts.push(`Event: ${bookingData.eventDate}`)
+      parts.push(`Booking: ${bookingData.id}`);
+      parts.push(`Event: ${bookingData.eventDate}`);
     }
-    parts.push(`Type: ${paymentType === 'deposit' ? 'Deposit' : 'Balance'}`)
+    parts.push(`Type: ${paymentType === 'deposit' ? 'Deposit' : 'Balance'}`);
     if (tipAmount > 0) {
-      parts.push(`Tip: $${tipAmount.toFixed(2)}`)
+      parts.push(`Tip: $${tipAmount.toFixed(2)}`);
     }
-    return parts.join(' | ')
-  }
+    return parts.join(' | ');
+  };
 
   const generateVenmoDeepLink = () => {
-    const memo = generatePaymentMemo()
-    const venmoUrl = `venmo://paycharge?txn=pay&recipients=${encodeURIComponent('@myhibachichef')}&amount=${amount}&note=${encodeURIComponent(memo)}`
-    return venmoUrl
-  }
+    const memo = generatePaymentMemo();
+    const venmoUrl = `venmo://paycharge?txn=pay&recipients=${encodeURIComponent(
+      '@myhibachichef',
+    )}&amount=${amount}&note=${encodeURIComponent(memo)}`;
+    return venmoUrl;
+  };
 
   const openVenmoApp = () => {
-    const deepLink = generateVenmoDeepLink()
+    const deepLink = generateVenmoDeepLink();
     // Try to open Venmo app, fallback to web if app not installed
-    window.location.href = deepLink
+    window.location.href = deepLink;
 
     // Fallback to web version after a short delay if app doesn't open
     setTimeout(() => {
-      const webUrl = `https://venmo.com/?txn=pay&recipients=myhibachichef&amount=${amount}&note=${encodeURIComponent(generatePaymentMemo())}`
-      window.open(webUrl, '_blank')
-    }, 2000)
-  }
+      const webUrl = `https://venmo.com/?txn=pay&recipients=myhibachichef&amount=${amount}&note=${encodeURIComponent(
+        generatePaymentMemo(),
+      )}`;
+      window.open(webUrl, '_blank');
+    }, 2000);
+  };
 
   const generateQRCode = async () => {
     try {
-      let qrData = ''
+      let qrData = '';
       if (method === 'venmo') {
-        qrData = generateVenmoDeepLink()
+        qrData = generateVenmoDeepLink();
       } else if (method === 'zelle') {
         // For Zelle, we'll create a data string with payment info
-        qrData = `Zelle Payment\nEmail: myhibachichef@gmail.com\nAmount: $${amount.toFixed(2)}\nMemo: ${generatePaymentMemo()}`
+        qrData = `Zelle Payment\nEmail: myhibachichef@gmail.com\nAmount: $${amount.toFixed(
+          2,
+        )}\nMemo: ${generatePaymentMemo()}`;
       }
 
       const qrCodeDataUrl = await QRCodeGenerator.toDataURL(qrData, {
@@ -120,22 +126,22 @@ export default function AlternativePaymentOptions({
         margin: 2,
         color: {
           dark: method === 'venmo' ? '#3D95CE' : '#6B46C1',
-          light: '#FFFFFF'
-        }
-      })
-      setQrCode(qrCodeDataUrl)
-      setShowQR(true)
+          light: '#FFFFFF',
+        },
+      });
+      setQrCode(qrCodeDataUrl);
+      setShowQR(true);
     } catch (error) {
-      console.error('Error generating QR code:', error)
+      console.error('Error generating QR code:', error);
     }
-  }
+  };
 
   const handleConfirmPayment = async () => {
     // In a real implementation, this would:
     // 1. Send notification to admin
     // 2. Update booking status
     // 3. Send confirmation email
-    setPaymentSent(true)
+    setPaymentSent(true);
 
     // Simulate API call
     try {
@@ -149,35 +155,35 @@ export default function AlternativePaymentOptions({
           tipAmount,
           customerInfo,
           memo: generatePaymentMemo(),
-          timestamp: new Date().toISOString()
-        })
-      })
+          timestamp: new Date().toISOString(),
+        }),
+      });
     } catch (error) {
-      console.error('Error recording payment:', error)
+      console.error('Error recording payment:', error);
     }
-  }
+  };
 
   if (paymentSent) {
     return (
-      <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+      <div className="rounded-xl bg-white p-8 text-center shadow-lg">
         <div
-          className={`w-16 h-16 bg-${details.color}-100 rounded-full flex items-center justify-center mx-auto mb-4`}
+          className={`h-16 w-16 bg-${details.color}-100 mx-auto mb-4 flex items-center justify-center rounded-full`}
         >
           <div
-            className={`w-8 h-8 bg-${details.color}-600 rounded text-white text-lg flex items-center justify-center font-bold`}
+            className={`h-8 w-8 bg-${details.color}-600 flex items-center justify-center rounded text-lg font-bold text-white`}
           >
             {details.icon}
           </div>
         </div>
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">Payment Instructions Sent!</h3>
-        <p className="text-gray-600 mb-6">
+        <h3 className="mb-2 text-2xl font-bold text-gray-900">Payment Instructions Sent!</h3>
+        <p className="mb-6 text-gray-600">
           We&apos;ve recorded your intent to pay ${amount.toFixed(2)} via{' '}
           {method.charAt(0).toUpperCase() + method.slice(1)}.
         </p>
-        <div className="bg-green-50 rounded-lg p-4 mb-6">
+        <div className="mb-6 rounded-lg bg-green-50 p-4">
           <div className="text-sm text-green-800">
-            <div className="font-medium mb-2">Next Steps:</div>
-            <ol className="list-decimal list-inside space-y-1 text-left">
+            <div className="mb-2 font-medium">Next Steps:</div>
+            <ol className="list-inside list-decimal space-y-1 text-left">
               <li>Send payment using the details provided above</li>
               <li>Include the memo/note for payment identification</li>
               <li>We&apos;ll confirm receipt within 1-2 business hours</li>
@@ -187,30 +193,30 @@ export default function AlternativePaymentOptions({
         </div>
         <div className="flex items-center justify-center space-x-4 text-sm text-gray-600">
           <div className="flex items-center">
-            <Phone className="w-4 h-4 mr-1" />
+            <Phone className="mr-1 h-4 w-4" />
             <span>(916) 740-8768</span>
           </div>
           <div className="flex items-center">
-            <Mail className="w-4 h-4 mr-1" />
+            <Mail className="mr-1 h-4 w-4" />
             <span>info@myhibachi.com</span>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
+    <div className="rounded-xl bg-white p-6 shadow-lg">
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center">
+        <h3 className="mb-2 flex items-center text-lg font-semibold text-gray-900">
           <div
-            className={`w-6 h-6 bg-${details.color}-600 rounded text-white text-sm flex items-center justify-center font-bold mr-2`}
+            className={`h-6 w-6 bg-${details.color}-600 mr-2 flex items-center justify-center rounded text-sm font-bold text-white`}
           >
             {details.icon}
           </div>
           {method.charAt(0).toUpperCase() + method.slice(1)} Payment
         </h3>
-        <p className="text-gray-600 text-sm">
+        <p className="text-sm text-gray-600">
           {method === 'zelle'
             ? 'No processing fees! Send payment directly using Zelle.'
             : 'Send payment using Venmo with 3% processing fee included in total above.'}
@@ -218,40 +224,40 @@ export default function AlternativePaymentOptions({
       </div>
 
       {/* Payment Instructions */}
-      <div className={`bg-${details.color}-50 rounded-lg p-4 mb-6`}>
+      <div className={`bg-${details.color}-50 mb-6 rounded-lg p-4`}>
         <h4 className={`font-medium text-${details.color}-900 mb-3`}>Payment Instructions</h4>
         <div className="space-y-3">
           {method === 'zelle' && (
             <>
-              <div className="flex items-center justify-between bg-white rounded p-3">
+              <div className="flex items-center justify-between rounded bg-white p-3">
                 <div>
                   <div className="text-sm font-medium text-gray-900">Email</div>
-                  <div className="text-purple-700 font-mono">{paymentDetails.zelle.email}</div>
+                  <div className="font-mono text-purple-700">{paymentDetails.zelle.email}</div>
                 </div>
                 <button
                   onClick={() => copyToClipboard(paymentDetails.zelle.email, 'email')}
-                  className="p-2 text-purple-600 hover:bg-purple-100 rounded transition-colors"
+                  className="rounded p-2 text-purple-600 transition-colors hover:bg-purple-100"
                 >
                   {copied === 'email' ? (
-                    <Check className="w-4 h-4" />
+                    <Check className="h-4 w-4" />
                   ) : (
-                    <Copy className="w-4 h-4" />
+                    <Copy className="h-4 w-4" />
                   )}
                 </button>
               </div>
-              <div className="flex items-center justify-between bg-white rounded p-3">
+              <div className="flex items-center justify-between rounded bg-white p-3">
                 <div>
                   <div className="text-sm font-medium text-gray-900">Phone</div>
-                  <div className="text-purple-700 font-mono">{details.phone}</div>
+                  <div className="font-mono text-purple-700">{details.phone}</div>
                 </div>
                 <button
                   onClick={() => copyToClipboard(details.phone, 'phone')}
-                  className="p-2 text-purple-600 hover:bg-purple-100 rounded transition-colors"
+                  className="rounded p-2 text-purple-600 transition-colors hover:bg-purple-100"
                 >
                   {copied === 'phone' ? (
-                    <Check className="w-4 h-4" />
+                    <Check className="h-4 w-4" />
                   ) : (
-                    <Copy className="w-4 h-4" />
+                    <Copy className="h-4 w-4" />
                   )}
                 </button>
               </div>
@@ -259,25 +265,25 @@ export default function AlternativePaymentOptions({
           )}
 
           {method === 'venmo' && (
-            <div className="flex items-center justify-between bg-white rounded p-3">
+            <div className="flex items-center justify-between rounded bg-white p-3">
               <div>
                 <div className="text-sm font-medium text-gray-900">Username</div>
-                <div className="text-blue-700 font-mono">{paymentDetails.venmo.username}</div>
+                <div className="font-mono text-blue-700">{paymentDetails.venmo.username}</div>
               </div>
               <button
                 onClick={() => copyToClipboard(paymentDetails.venmo.username, 'username')}
-                className="p-2 text-blue-600 hover:bg-blue-100 rounded transition-colors"
+                className="rounded p-2 text-blue-600 transition-colors hover:bg-blue-100"
               >
                 {copied === 'username' ? (
-                  <Check className="w-4 h-4" />
+                  <Check className="h-4 w-4" />
                 ) : (
-                  <Copy className="w-4 h-4" />
+                  <Copy className="h-4 w-4" />
                 )}
               </button>
             </div>
           )}
 
-          <div className="flex items-center justify-between bg-white rounded p-3">
+          <div className="flex items-center justify-between rounded bg-white p-3">
             <div>
               <div className="text-sm font-medium text-gray-900">Recipient Name</div>
               <div className={`text-${details.color}-700 font-medium`}>{details.name}</div>
@@ -287,31 +293,33 @@ export default function AlternativePaymentOptions({
 
         {/* Quick Payment Buttons */}
         <div className="mb-6">
-          <h4 className="font-medium text-gray-900 mb-3">Quick Payment Options</h4>
+          <h4 className="mb-3 font-medium text-gray-900">Quick Payment Options</h4>
           <div className="space-y-3">
             {method === 'venmo' && (
               <>
                 <button
                   onClick={openVenmoApp}
-                  className="w-full flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-white transition-colors hover:bg-blue-700"
                 >
-                  <Smartphone className="w-5 h-5 mr-2" />
+                  <Smartphone className="mr-2 h-5 w-5" />
                   Open Venmo App (${amount.toFixed(2)} pre-filled)
                 </button>
                 <a
-                  href={`https://venmo.com/?txn=pay&recipients=myhibachichef&amount=${amount}&note=${encodeURIComponent(generatePaymentMemo())}`}
+                  href={`https://venmo.com/?txn=pay&recipients=myhibachichef&amount=${amount}&note=${encodeURIComponent(
+                    generatePaymentMemo(),
+                  )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  className="flex w-full items-center justify-center rounded-lg bg-blue-500 px-4 py-3 text-white transition-colors hover:bg-blue-600"
                 >
-                  <ExternalLink className="w-5 h-5 mr-2" />
+                  <ExternalLink className="mr-2 h-5 w-5" />
                   Pay via Venmo Web
                 </a>
                 <button
                   onClick={generateQRCode}
-                  className="w-full flex items-center justify-center px-4 py-3 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors"
+                  className="flex w-full items-center justify-center rounded-lg bg-blue-400 px-4 py-3 text-white transition-colors hover:bg-blue-500"
                 >
-                  <QrCode className="w-5 h-5 mr-2" />
+                  <QrCode className="mr-2 h-5 w-5" />
                   Show Venmo QR Code
                 </button>
               </>
@@ -319,11 +327,11 @@ export default function AlternativePaymentOptions({
 
             {method === 'zelle' && (
               <>
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
                   <div className="flex items-start">
-                    <QrCode className="w-5 h-5 text-yellow-600 mr-2 mt-0.5" />
+                    <QrCode className="mt-0.5 mr-2 h-5 w-5 text-yellow-600" />
                     <div className="text-sm text-yellow-800">
-                      <div className="font-medium mb-1">Zelle Quick Send</div>
+                      <div className="mb-1 font-medium">Zelle Quick Send</div>
                       <div>Open your banking app and use these details for Zelle payment:</div>
                       <div className="mt-2 space-y-1">
                         <div>
@@ -340,9 +348,9 @@ export default function AlternativePaymentOptions({
                 </div>
                 <button
                   onClick={generateQRCode}
-                  className="w-full flex items-center justify-center px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  className="flex w-full items-center justify-center rounded-lg bg-purple-600 px-4 py-3 text-white transition-colors hover:bg-purple-700"
                 >
-                  <QrCode className="w-5 h-5 mr-2" />
+                  <QrCode className="mr-2 h-5 w-5" />
                   Generate Payment QR Code
                 </button>
               </>
@@ -352,22 +360,22 @@ export default function AlternativePaymentOptions({
 
         {/* QR Code Display */}
         {showQR && qrCode && (
-          <div className="mb-6 bg-white rounded-lg p-6 text-center border">
-            <h4 className="font-medium text-gray-900 mb-3">
+          <div className="mb-6 rounded-lg border bg-white p-6 text-center">
+            <h4 className="mb-3 font-medium text-gray-900">
               {method === 'venmo' ? 'Venmo' : 'Zelle'} Payment QR Code
             </h4>
-            <div className="inline-block p-4 bg-white rounded-lg shadow-sm">
+            <div className="inline-block rounded-lg bg-white p-4 shadow-sm">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={qrCode} alt={`${method} Payment QR Code`} className="w-48 h-48 mx-auto" />
+              <img src={qrCode} alt={`${method} Payment QR Code`} className="mx-auto h-48 w-48" />
             </div>
-            <p className="text-sm text-gray-600 mt-3">
+            <p className="mt-3 text-sm text-gray-600">
               {method === 'venmo'
                 ? 'Scan with your Venmo app to pay instantly'
                 : 'Scan with your banking app or save payment details'}
             </p>
             <button
               onClick={() => setShowQR(false)}
-              className="mt-3 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              className="mt-3 px-4 py-2 text-gray-600 transition-colors hover:text-gray-800"
             >
               Hide QR Code
             </button>
@@ -376,40 +384,40 @@ export default function AlternativePaymentOptions({
       </div>
 
       {/* Amount and Memo */}
-      <div className="bg-gray-50 rounded-lg p-4 mb-6">
-        <h4 className="font-medium text-gray-900 mb-3">Payment Details</h4>
+      <div className="mb-6 rounded-lg bg-gray-50 p-4">
+        <h4 className="mb-3 font-medium text-gray-900">Payment Details</h4>
         <div className="space-y-3">
-          <div className="flex items-center justify-between bg-white rounded p-3">
+          <div className="flex items-center justify-between rounded bg-white p-3">
             <div>
               <div className="text-sm font-medium text-gray-900">Amount to Send</div>
-              <div className="text-green-600 font-bold text-xl">${amount.toFixed(2)}</div>
+              <div className="text-xl font-bold text-green-600">${amount.toFixed(2)}</div>
             </div>
             <button
               onClick={() => copyToClipboard(amount.toFixed(2), 'amount')}
-              className="p-2 text-gray-600 hover:bg-gray-100 rounded transition-colors"
+              className="rounded p-2 text-gray-600 transition-colors hover:bg-gray-100"
             >
-              {copied === 'amount' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              {copied === 'amount' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             </button>
           </div>
 
-          <div className="bg-white rounded p-3">
-            <div className="text-sm font-medium text-gray-900 mb-2">Memo/Note (Required)</div>
-            <div className="bg-yellow-50 border border-yellow-200 rounded p-2">
-              <div className="text-yellow-800 text-sm font-mono break-all">
+          <div className="rounded bg-white p-3">
+            <div className="mb-2 text-sm font-medium text-gray-900">Memo/Note (Required)</div>
+            <div className="rounded border border-yellow-200 bg-yellow-50 p-2">
+              <div className="font-mono text-sm break-all text-yellow-800">
                 {generatePaymentMemo()}
               </div>
               <button
                 onClick={() => copyToClipboard(generatePaymentMemo(), 'memo')}
-                className="mt-2 text-yellow-700 hover:text-yellow-900 text-xs flex items-center"
+                className="mt-2 flex items-center text-xs text-yellow-700 hover:text-yellow-900"
               >
                 {copied === 'memo' ? (
                   <>
-                    <Check className="w-3 h-3 mr-1" />
+                    <Check className="mr-1 h-3 w-3" />
                     Copied!
                   </>
                 ) : (
                   <>
-                    <Copy className="w-3 h-3 mr-1" />
+                    <Copy className="mr-1 h-3 w-3" />
                     Copy Memo
                   </>
                 )}
@@ -421,39 +429,39 @@ export default function AlternativePaymentOptions({
 
       {/* Customer Information for Manual Payments */}
       {!bookingData && (
-        <div className="bg-gray-50 rounded-lg p-4 mb-6">
-          <h4 className="font-medium text-gray-900 mb-3">Your Information</h4>
-          <div className="grid md:grid-cols-2 gap-4">
+        <div className="mb-6 rounded-lg bg-gray-50 p-4">
+          <h4 className="mb-3 font-medium text-gray-900">Your Information</h4>
+          <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Full Name *</label>
               <input
                 type="text"
                 required
                 value={customerInfo.name}
-                onChange={e => setCustomerInfo(prev => ({ ...prev, name: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onChange={(e) => setCustomerInfo((prev) => ({ ...prev, name: e.target.value }))}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Email Address *
               </label>
               <input
                 type="email"
                 required
                 value={customerInfo.email}
-                onChange={e => setCustomerInfo(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onChange={(e) => setCustomerInfo((prev) => ({ ...prev, email: e.target.value }))}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Phone Number *</label>
               <input
                 type="tel"
                 required
                 value={customerInfo.phone}
-                onChange={e => setCustomerInfo(prev => ({ ...prev, phone: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onChange={(e) => setCustomerInfo((prev) => ({ ...prev, phone: e.target.value }))}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -464,10 +472,12 @@ export default function AlternativePaymentOptions({
       <div className="space-y-4">
         {method === 'venmo' && (
           <a
-            href={`venmo://paycharge?txn=pay&recipients=@myhibachichef&amount=${amount}&note=${encodeURIComponent(generatePaymentMemo())}`}
-            className={`w-full bg-${details.color}-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-${details.color}-700 transition-colors flex items-center justify-center`}
+            href={`venmo://paycharge?txn=pay&recipients=@myhibachichef&amount=${amount}&note=${encodeURIComponent(
+              generatePaymentMemo(),
+            )}`}
+            className={`w-full bg-${details.color}-600 rounded-lg px-6 py-3 font-medium text-white hover:bg-${details.color}-700 flex items-center justify-center transition-colors`}
           >
-            <ExternalLink className="w-5 h-5 mr-2" />
+            <ExternalLink className="mr-2 h-5 w-5" />
             Open in Venmo App
           </a>
         )}
@@ -475,16 +485,16 @@ export default function AlternativePaymentOptions({
         <button
           onClick={handleConfirmPayment}
           disabled={!customerInfo.name || !customerInfo.email || !customerInfo.phone}
-          className="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full rounded-lg bg-green-600 px-6 py-3 font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           I&apos;ve Sent the Payment
         </button>
       </div>
 
       {/* Important Notes */}
-      <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-        <h5 className="font-medium text-yellow-900 mb-2">Important Notes:</h5>
-        <ul className="text-sm text-yellow-800 space-y-1">
+      <div className="mt-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+        <h5 className="mb-2 font-medium text-yellow-900">Important Notes:</h5>
+        <ul className="space-y-1 text-sm text-yellow-800">
           <li>• Include the memo/note exactly as shown for faster processing</li>
           <li>• Payments are typically verified within 1-2 business hours</li>
           <li>• You&apos;ll receive email confirmation once payment is verified</li>
@@ -492,5 +502,5 @@ export default function AlternativePaymentOptions({
         </ul>
       </div>
     </div>
-  )
+  );
 }

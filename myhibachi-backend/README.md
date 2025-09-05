@@ -5,17 +5,20 @@ FastAPI backend for the MyHibachi booking system.
 ## Setup
 
 1. Create virtual environment:
+
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
 2. Install dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
 3. Run the development server:
+
 ```bash
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
@@ -28,11 +31,13 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 ## Database
 
-Currently using in-memory storage for demonstration. In production, integrate with PostgreSQL.
+Currently using in-memory storage for demonstration. In production,
+integrate with PostgreSQL.
 
 ## Environment Variables
 
 Create a `.env` file:
+
 ```
 DATABASE_URL=postgresql://user:password@localhost/myhibachi
 SECRET_KEY=your-secret-key

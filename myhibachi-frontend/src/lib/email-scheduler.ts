@@ -141,7 +141,9 @@ class EmailScheduler {
         scheduledEmail.status = success ? 'sent' : 'failed'
 
         console.log(
-          `[EMAIL SCHEDULER] ${scheduledEmail.emailType} email ${success ? 'sent' : 'failed'} for booking ${scheduledEmail.bookingId}`
+          `[EMAIL SCHEDULER] ${scheduledEmail.emailType} email ${
+            success ? 'sent' : 'failed'
+          } for booking ${scheduledEmail.bookingId}`
         )
       } catch (error) {
         scheduledEmail.status = 'failed'

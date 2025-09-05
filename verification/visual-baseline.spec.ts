@@ -12,7 +12,7 @@ const routes = routesData.routes;
 const breakpoints = [
   { name: 'mobile', width: 375, height: 667 },
   { name: 'tablet', width: 768, height: 1024 },
-  { name: 'desktop', width: 1280, height: 720 }
+  { name: 'desktop', width: 1280, height: 720 },
 ];
 
 test.describe('Visual Baseline Creation', () => {
@@ -21,17 +21,17 @@ test.describe('Visual Baseline Creation', () => {
       test(`${route} - ${bp.name}`, async ({ page }) => {
         // Set viewport
         await page.setViewportSize({ width: bp.width, height: bp.height });
-        
+
         try {
           // Navigate to route
           await page.goto(`http://localhost:3000${route}`, {
             waitUntil: 'networkidle',
-            timeout: 30000
+            timeout: 30000,
           });
-          
+
           // Wait for any loading to complete
           await page.waitForTimeout(2000);
-          
+
           // Hide dynamic elements that might cause flaky tests
           await page.addStyleTag({
             content: `
@@ -40,16 +40,18 @@ test.describe('Visual Baseline Creation', () => {
               .current-time,
               .chat-widget,
               .analytics-tag { opacity: 0 !important; }
-            `
+            `,
           });
-          
+
           // Take screenshot
-          const filename = `${route.replace(/\//g, '_') || 'home'}_${bp.name}.png`;
+          const filename = `${route.replace(/\//g, '_') || 'home'}_${
+            bp.name
+          }.png`;
           await page.screenshot({
             path: path.join(BASELINE_DIR, 'screens', filename),
-            fullPage: true
+            fullPage: true,
           });
-          
+
           // Save DOM snapshot
           const domContent = await page.content();
           const cleanDom = domContent
@@ -57,33 +59,49 @@ test.describe('Visual Baseline Creation', () => {
             .replace(/data-react-[^=]*="[^"]*"/g, '')
             .replace(/<!--.*?-->/gs, '')
             .replace(/\s+/g, ' ');
-            
+
           fs.writeFileSync(
-            path.join(BASELINE_DIR, 'dom', `${filename.replace('.png', '.html')}`),
+            path.join(
+              BASELINE_DIR,
+              'dom',
+              `${filename.replace('.png', '.html')}`
+            ),
             cleanDom
           );
-          
+
           // Extract metadata
           const title = await page.title();
-          const description = await page.getAttribute('meta[name="description"]', 'content');
-          const canonical = await page.getAttribute('link[rel="canonical"]', 'href');
-          
+          const description = await page.getAttribute(
+            'meta[name="description"]',
+            'content'
+          );
+          const canonical = await page.getAttribute(
+            'link[rel="canonical"]',
+            'href'
+          );
+
           const metadata = {
             title,
             description,
             canonical,
             url: route,
             viewport: bp,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           };
-          
+
           fs.writeFileSync(
-            path.join(BASELINE_DIR, 'dom', `${filename.replace('.png', '.meta.json')}`),
+            path.join(
+              BASELINE_DIR,
+              'dom',
+              `${filename.replace('.png', '.meta.json')}`
+            ),
             JSON.stringify(metadata, null, 2)
           );
-          
         } catch (error) {
-          console.error(`Failed to capture ${route} at ${bp.name}:`, error.message);
+          console.error(
+            `Failed to capture ${route} at ${bp.name}:`,
+            error.message
+          );
           // Continue with other routes
         }
       });

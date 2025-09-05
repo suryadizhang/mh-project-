@@ -1,69 +1,66 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
 
-import type { FaqItem } from '@/data/faqsData'
+import type { FaqItem } from '@/data/faqsData';
 
-import { FaqItemComponent } from './FaqItem'
+import { FaqItemComponent } from './FaqItem';
 
 interface FaqListProps {
-  items: FaqItem[]
+  items: FaqItem[];
 }
 
 // Helper function to group FAQs by category only
 function groupFAQsByCategory(faqs: FaqItem[]) {
-  const grouped = faqs.reduce(
-    (acc, faq) => {
-      const category = faq.category
-      if (!acc[category]) {
-        acc[category] = []
-      }
-      acc[category].push(faq)
-      return acc
-    },
-    {} as Record<string, FaqItem[]>
-  )
+  const grouped = faqs.reduce((acc, faq) => {
+    const category = faq.category;
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(faq);
+    return acc;
+  }, {} as Record);
 
-  return grouped
+  return grouped;
 }
 
 export function FaqList({ items }: FaqListProps) {
-  const [openItems, setOpenItems] = useState<Set<string>>(new Set())
+  const [openItems, setOpenItems] = useState<Set>(new Set());
 
   // Start with all categories collapsed initially to prevent hydration errors
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
-  const [mounted, setMounted] = useState(false)
+  const [expandedCategories, setExpandedCategories] = useState<Set>(new Set());
+  const [mounted, setMounted] = useState(false);
 
   // Calculate grouped FAQs first
-  const groupedFAQs = groupFAQsByCategory(items)
+  const groupedFAQs = groupFAQsByCategory(items);
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   const toggleItem = (id: string) => {
-    setOpenItems(prev => {
-      const newSet = new Set(prev)
+    setOpenItems((prev) => {
+      const newSet = new Set(prev);
       if (newSet.has(id)) {
-        newSet.delete(id)
+        newSet.delete(id);
       } else {
-        newSet.add(id)
+        newSet.add(id);
       }
-      return newSet
-    })
-  }
+      return newSet;
+    });
+  };
 
   const toggleCategory = (category: string) => {
-    setExpandedCategories(prev => {
-      const newSet = new Set(prev)
+    setExpandedCategories((prev) => {
+      const newSet = new Set(prev);
       if (newSet.has(category)) {
-        newSet.delete(category)
+        newSet.delete(category);
       } else {
-        newSet.add(category)
+        newSet.add(category);
       }
-      return newSet
-    })
-  }
+      return newSet;
+    });
+  };
 
   if (items.length === 0) {
     return (
@@ -78,7 +75,7 @@ export function FaqList({ items }: FaqListProps) {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -105,10 +102,12 @@ export function FaqList({ items }: FaqListProps) {
 
               {/* Category Content */}
               <div
-                className={`category-content ${mounted && expandedCategories.has(category) ? 'expanded' : ''}`}
+                className={`category-content ${
+                  mounted && expandedCategories.has(category) ? 'expanded' : ''
+                }`}
               >
                 <div className="category-faqs">
-                  {faqs.map(faq => (
+                  {faqs.map((faq) => (
                     <FaqItemComponent
                       key={faq.id}
                       faq={faq}
@@ -123,5 +122,5 @@ export function FaqList({ items }: FaqListProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

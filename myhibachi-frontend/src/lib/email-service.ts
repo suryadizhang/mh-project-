@@ -98,7 +98,11 @@ class MyHibachiEmailService {
     // Google Calendar link
     const googleStartTime = startDate.replace(/[-:]/g, '').replace('T', 'T')
     const googleEndTime = endDate.replace(/[-:]/g, '').replace('T', 'T')
-    const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${googleStartTime}/${googleEndTime}&details=${encodeURIComponent(description)}&location=${encodeURIComponent(location)}`
+    const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
+      title
+    )}&dates=${googleStartTime}/${googleEndTime}&details=${encodeURIComponent(
+      description
+    )}&location=${encodeURIComponent(location)}`
 
     // Apple Calendar (webcal) link - simplified
     const appleUrl = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR

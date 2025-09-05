@@ -190,7 +190,7 @@ VENMO_USERNAME=@MyHibachi-Catering
 Your My Hibachi payment system is now **100% COMPLETE** with:
 
 🔥 **Stripe Integration** with 8% fee and 2FA security
-🔥 **Zelle & Venmo** alternatives with zero fees  
+🔥 **Zelle & Venmo** alternatives with zero fees
 🔥 **Booking Lookup** with automatic amount detection
 🔥 **Tip System** with preset and custom options
 🔥 **Mobile Responsive** design for all devices

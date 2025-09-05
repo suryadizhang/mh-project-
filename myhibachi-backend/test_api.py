@@ -32,7 +32,8 @@ def test_availability_check():
         # Test with a future date
         future_date = (date.today() + timedelta(days=3)).isoformat()
         response = requests.get(
-            f"{BASE_URL}/api/v1/bookings/check", params={"date": future_date, "time": "3PM"}
+            f"{BASE_URL}/api/v1/bookings/check",
+            params={"date": future_date, "time": "3PM"},
         )
         assert response.status_code == 200
         data = response.json()
@@ -64,7 +65,9 @@ def test_create_booking():
             "venue_zipcode": "94105",
         }
 
-        response = requests.post(f"{BASE_URL}/api/v1/bookings", json=booking_data)
+        response = requests.post(
+            f"{BASE_URL}/api/v1/bookings", json=booking_data
+        )
         assert response.status_code == 201
         data = response.json()
         print(f"✅ Booking creation passed: ID = {data['id']}")
@@ -94,7 +97,8 @@ def test_availability_after_booking():
     try:
         future_date = (date.today() + timedelta(days=5)).isoformat()
         response = requests.get(
-            f"{BASE_URL}/api/v1/bookings/check", params={"date": future_date, "time": "6PM"}
+            f"{BASE_URL}/api/v1/bookings/check",
+            params={"date": future_date, "time": "6PM"},
         )
         assert response.status_code == 200
         data = response.json()

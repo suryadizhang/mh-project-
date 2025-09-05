@@ -20,7 +20,9 @@ export const generateLocationPage = (location: string) => {
 
   return {
     title: `${location} Hibachi Catering | ${locationData.tagline}`,
-    metaDescription: `Professional ${location.toLowerCase()} hibachi catering with private chefs. ${locationData.speciality}. Book your interactive dining experience today!`,
+    metaDescription: `Professional ${location.toLowerCase()} hibachi catering with private chefs. ${
+      locationData.speciality
+    }. Book your interactive dining experience today!`,
     h1: `${location} Hibachi Catering: ${locationData.tagline}`,
     content: generateLocationContent(location, locationData),
     keywords: localKeywords?.keywords || [],
@@ -238,11 +240,15 @@ function generateLocationContent(location: string, locationData: LocationData) {
   return `
 # ${location} Hibachi Catering: ${locationData.tagline}
 
-Transform your ${location} celebration with professional hibachi catering that brings restaurant-quality entertainment directly to your location. ${locationData.speciality}
+Transform your ${location} celebration with professional hibachi catering that brings restaurant-quality entertainment directly to your location. ${
+    locationData.speciality
+  }
 
 ## Why ${location} Chooses Our Hibachi Catering
 
-${locationData.uniqueFeatures.map((feature: string) => `**${feature}**: Professional expertise tailored to ${location} events`).join('\n')}
+${locationData.uniqueFeatures
+  .map((feature: string) => `**${feature}**: Professional expertise tailored to ${location} events`)
+  .join('\n')}
 
 ## Popular ${location} Hibachi Events
 ${locationData.popularEvents.map((event: string) => `- 🎉 ${event}`).join('\n')}
@@ -255,7 +261,9 @@ ${locationData.neighborhoods.map((area: string) => `- ${area}`).join('\n')}
 Our ${location} hibachi catering team understands the unique needs of ${location} events. From logistics and setup to menu customization and entertainment, we ensure your celebration is perfectly tailored to ${location}'s style and preferences.
 
 ### Fresh, Local Ingredients
-We partner with ${locationData.localPartners.join(' and ')} to source the freshest ingredients for your ${location} hibachi experience.
+We partner with ${locationData.localPartners.join(
+    ' and '
+  )} to source the freshest ingredients for your ${location} hibachi experience.
 
 ### Professional Setup
 Our experienced team handles all aspects of setup and logistics specific to ${location} venues and residential areas.
@@ -318,9 +326,14 @@ export const generateLocationSocialContent = (location: string) => {
 
   return {
     facebook: {
-      text: `🍤 Now serving ${location}! Professional hibachi catering bringing interactive dining to your ${location} celebrations. ${locationData.speciality}
+      text: `🍤 Now serving ${location}! Professional hibachi catering bringing interactive dining to your ${location} celebrations. ${
+        locationData.speciality
+      }
 
-Book your ${location} hibachi experience today! #${location.replace(' ', '')}Hibachi #InteractiveDining`,
+Book your ${location} hibachi experience today! #${location.replace(
+        ' ',
+        ''
+      )}Hibachi #InteractiveDining`,
       hashtags: [`${location.replace(' ', '')}Hibachi`, 'InteractiveDining', 'PrivateChef']
     },
     instagram: {
@@ -335,7 +348,10 @@ Serving: ${locationData.neighborhoods.slice(0, 3).join(', ')} and more!
 
 Book your ${location} experience 👆 link in bio
 
-#${location.replace(' ', '')}Hibachi #PrivateChef #InteractiveDining #${location.replace(' ', '')}Events`,
+#${location.replace(' ', '')}Hibachi #PrivateChef #InteractiveDining #${location.replace(
+        ' ',
+        ''
+      )}Events`,
       hashtags: [`${location.replace(' ', '')}Hibachi`, 'PrivateChef', 'InteractiveDining']
     },
     twitter: {

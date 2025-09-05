@@ -1,55 +1,55 @@
-'use client'
+'use client';
 
-import Script from 'next/script'
+import Script from 'next/script';
 
 interface GoogleAnalyticsProps {
-  measurementId: string
+  measurementId: string;
 }
 
 // Analytics event types
 interface BookingDetails {
-  booking_type?: string
-  service_area?: string
-  guest_count?: number
-  event_type?: string
-  location?: string
-  estimated_value?: number
+  booking_type?: string;
+  service_area?: string;
+  guest_count?: number;
+  event_type?: string;
+  location?: string;
+  estimated_value?: number;
 }
 
 interface QuoteDetails {
-  event_type?: string
-  location?: string
-  estimated_value?: number
-  guest_count?: number
+  event_type?: string;
+  location?: string;
+  estimated_value?: number;
+  guest_count?: number;
 }
 
 interface BookingData {
-  booking_id: string
-  estimated_value?: number
-  event_type?: string
-  location?: string
-  guest_count?: number
+  booking_id: string;
+  estimated_value?: number;
+  event_type?: string;
+  location?: string;
+  guest_count?: number;
 }
 
 interface AnalyticsParameters {
-  event_category?: string
-  event_label?: string
-  value?: number
-  currency?: string
-  custom_parameter_1?: string
-  custom_parameter_2?: string
-  custom_parameter_3?: string
-  engagement_time_msec?: number
-  [key: string]: string | number | undefined
+  event_category?: string;
+  event_label?: string;
+  value?: number;
+  currency?: string;
+  custom_parameter_1?: string;
+  custom_parameter_2?: string;
+  custom_parameter_3?: string;
+  engagement_time_msec?: number;
+  [key: string]: string | number | undefined;
 }
 
 export default function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps) {
   // Don't render analytics if measurement ID is missing or placeholder
   if (!measurementId || measurementId === 'G-XXXXXXXXXX' || measurementId.trim() === '') {
     console.warn(
-      '[GoogleAnalytics] Measurement ID not configured. Please set NEXT_PUBLIC_GA_MEASUREMENT_ID in your environment variables.'
-    )
-    return null
+      '[GoogleAnalytics] Measurement ID not configured. Please set NEXT_PUBLIC_GA_MEASUREMENT_ID in your environment variables.',
+    );
+    return null;
   }
 
   return (
@@ -64,7 +64,7 @@ export default function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps)
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-          
+
           gtag('config', '${measurementId}', {
             page_title: document.title,
             page_location: window.location.href,
@@ -165,24 +165,24 @@ export default function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps)
         `}
       </Script>
     </>
-  )
+  );
 }
 
 // Hook for tracking events in React components
 export function useAnalytics() {
   const trackEvent = (eventName: string, parameters: AnalyticsParameters = {}) => {
     if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', eventName, parameters)
+      window.gtag('event', eventName, parameters);
     }
-  }
+  };
 
   const trackBookingStep = (step: string, details: BookingDetails = {}) => {
     trackEvent('booking_step_completed', {
       event_category: 'Booking Form',
       event_label: step,
-      ...details
-    })
-  }
+      ...details,
+    });
+  };
 
   const trackQuoteCalculated = (quoteValue: number, details: QuoteDetails = {}) => {
     trackEvent('quote_calculated', {
@@ -190,36 +190,36 @@ export function useAnalytics() {
       event_label: 'Quote Generated',
       value: quoteValue,
       currency: 'USD',
-      ...details
-    })
-  }
+      ...details,
+    });
+  };
 
   const trackPageEngagement = (action: string, element: string) => {
     trackEvent('engagement', {
       event_category: 'Page Interaction',
       event_label: `${element}_${action}`,
-      engagement_time_msec: Date.now()
-    })
-  }
+      engagement_time_msec: Date.now(),
+    });
+  };
 
   return {
     trackEvent,
     trackBookingStep,
     trackQuoteCalculated,
-    trackPageEngagement
-  }
+    trackPageEngagement,
+  };
 }
 
 // TypeScript declarations
 declare global {
   interface Window {
-    gtag: (command: string, ...args: unknown[]) => void
-    trackPageView: (url: string, title: string) => void
-    trackBookingInteraction: (action: string, details?: BookingDetails) => void
-    trackQuoteRequest: (details?: QuoteDetails) => void
-    trackBookingConversion: (bookingData: BookingData) => void
-    trackContactSubmission: (formType?: string) => void
-    trackPhoneCall: () => void
-    trackSocialInteraction: (platform: string, action: string) => void
+    gtag: (command: string, ...args: unknown[]) => void;
+    trackPageView: (url: string, title: string) => void;
+    trackBookingInteraction: (action: string, details?: BookingDetails) => void;
+    trackQuoteRequest: (details?: QuoteDetails) => void;
+    trackBookingConversion: (bookingData: BookingData) => void;
+    trackContactSubmission: (formType?: string) => void;
+    trackPhoneCall: () => void;
+    trackSocialInteraction: (platform: string, action: string) => void;
   }
 }
