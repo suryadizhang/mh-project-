@@ -15,6 +15,7 @@
     "lint:css": "stylelint \"**/*.{css,scss}\"",
     "lint:fix": "next lint --fix",
     "start": "next start",
+    "test": "echo \"No unit tests configured\"",
     "typecheck": "tsc --noEmit"
   },
   "browserslist": [

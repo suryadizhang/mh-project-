@@ -1,4 +1,5 @@
 import logging
+from collections.abc import AsyncGenerator
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import (
@@ -11,6 +12,16 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from app.config import settings
 
 logger = logging.getLogger(__name__)
+
+
+class Base(DeclarativeBase):
+    """Base class for all database models."""
+
+    pass
+
+
+# Import all models for metadata discovery
+# This must be done after Base is defined but before engine creation
 
 # Async engine for async operations
 engine = create_async_engine(
@@ -39,13 +50,7 @@ SessionLocal = sessionmaker(
 )
 
 
-class Base(DeclarativeBase):
-    """Base class for all database models."""
-
-    pass
-
-
-async def get_db() -> AsyncSession:
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Dependency to get database session."""
     async with AsyncSessionLocal() as session:
         try:

@@ -1,0 +1,219 @@
+/* ==========================================================================
+   MY HIBACHI BUTTON COMPONENT - Design System Foundation
+   Centralized button styling to eliminate .btn-primary conflicts
+   ========================================================================== */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-secondary);
+  font-weight: 600;
+  text-decoration: none;
+  border: 0;
+  border-radius: var(--radius-md-custom);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  outline: none;
+  position: relative;
+  overflow: hidden;
+
+  /* Base button ensures consistent styling */
+  text-align: center;
+  white-space: nowrap;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   BUTTON VARIANTS
+   ========================================================================== */
+
+/* Primary Button - Matches existing .btn-primary exactly */
+.primary {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-hover) 100%
+  );
+  color: var(--color-primary-contrast);
+  box-shadow: var(--shadow-sm);
+
+  /* Preserve existing visual characteristics */
+  min-width: 280px;
+}
+
+.primary:where(:hover, :focus-visible):not(:disabled) {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-hover) 0%,
+    #b01a17 100%
+  );
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgb(219 43 40 / 30%);
+}
+
+/* Secondary Button - Matches existing visual style */
+.secondary {
+  background: white;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  box-shadow: var(--shadow-sm);
+  min-width: 280px;
+}
+
+.secondary:where(:hover, :focus-visible):not(:disabled) {
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgb(219 43 40 / 30%);
+}
+
+/* Outline Button - Subtle actions */
+.outline {
+  background: transparent;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+}
+
+.outline:where(:hover, :focus-visible):not(:disabled) {
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+}
+
+/* Ghost Button - Minimal styling */
+.ghost {
+  background: transparent;
+  color: var(--text-default);
+  border: 1px solid var(--color-border-custom);
+}
+
+.ghost:where(:hover, :focus-visible):not(:disabled) {
+  background: var(--color-background-light);
+  border-color: var(--color-primary);
+}
+
+/* ==========================================================================
+   BUTTON SIZES
+   ========================================================================== */
+
+.sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  min-height: 2rem;
+}
+
+.md {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  min-height: 2.5rem;
+  min-width: 280px; /* Maintaining existing button width standard */
+}
+
+.lg {
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+  min-height: 3rem;
+  min-width: 320px;
+}
+
+/* ==========================================================================
+   LOADING STATE
+   ========================================================================== */
+
+.loading {
+  color: transparent;
+}
+
+.spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid transparent;
+  border-top: 2px solid currentcolor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* ==========================================================================
+   LEGACY COMPATIBILITY - Gradual Migration Helper
+   ========================================================================== */
+
+/* This allows existing .btn-primary classes to work during migration */
+.hibachi-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-secondary);
+  font-weight: 600;
+  text-decoration: none;
+  border: 0;
+  border-radius: var(--radius-md-custom);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  outline: none;
+  position: relative;
+  overflow: hidden;
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  box-shadow: var(--shadow-sm);
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  min-height: 2.5rem;
+  min-width: 280px;
+}
+
+.hibachi-btn-primary:where(:hover, :focus-visible):not(:disabled) {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.hibachi-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-secondary);
+  font-weight: 600;
+  text-decoration: none;
+  border: 0;
+  border-radius: var(--radius-md-custom);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  outline: none;
+  position: relative;
+  overflow: hidden;
+  background: var(--color-secondary);
+  color: var(--color-primary-contrast);
+  box-shadow: var(--shadow-sm);
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  min-height: 2.5rem;
+  min-width: 280px;
+}
+
+.hibachi-btn-secondary:where(:hover, :focus-visible):not(:disabled) {
+  background: #e55a2b;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}

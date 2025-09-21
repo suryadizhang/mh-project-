@@ -8,9 +8,12 @@ from sqlalchemy import engine_from_config, pool
 # Add app directory to path
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from app.config import settings
-from app.database import Base
-from app.models import stripe_models  # noqa: F401
+# Import after path manipulation to avoid import errors
+from app.config import settings  # noqa: E402
+from app.database import Base  # noqa: E402
+
+# Import all models for Alembic discovery
+from app.models import booking_models, stripe_models  # noqa: E402, F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

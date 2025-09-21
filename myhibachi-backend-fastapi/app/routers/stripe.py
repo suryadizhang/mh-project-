@@ -79,7 +79,8 @@ async def create_checkout_session(
         # Build success and cancel URLs
         success_url = (
             data.success_url
-            or f"{settings.app_url}/checkout/success?session_id={{CHECKOUT_SESSION_ID}}"
+            or f"{settings.app_url}/checkout/success"
+            "?session_id={{CHECKOUT_SESSION_ID}}"
         )
         cancel_url = data.cancel_url or f"{settings.app_url}/checkout/cancel"
 
@@ -135,7 +136,8 @@ async def create_payment_intent(
         # Calculate automatic tax if enabled
         # Prepare automatic tax configuration for future use
         if settings.enable_automatic_tax:
-            # Automatic tax is configured but not used in current implementation
+            # Automatic tax is configured but not used in current
+            # implementation
             pass
 
         # Create payment intent

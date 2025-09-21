@@ -16,71 +16,29 @@ async def setup_stripe_products() -> None:
     try:
         logger.info("Setting up Stripe products and prices...")
 
-        # Define products to create
+        # Only keep generic products for invoice and deposit payments
         products_to_create = [
             {
-                "name": "Adult Hibachi Menu",
-                "description": "Full hibachi experience for adults",
-                "category": "menu",
-                "prices": [
-                    {
-                        "amount": 4500,
-                        "nickname": "Adult Menu - Standard",
-                    },  # $45
-                    {
-                        "amount": 5500,
-                        "nickname": "Adult Menu - Premium",
-                    },  # $55
-                ],
-            },
-            {
-                "name": "Kids Hibachi Menu",
-                "description": "Kid-friendly hibachi menu",
-                "category": "menu",
-                "prices": [
-                    {"amount": 2500, "nickname": "Kids Menu"},  # $25
-                ],
-            },
-            {
                 "name": "Booking Deposit",
-                "description": "Required deposit for booking confirmation",
+                "description": ("Required deposit for booking confirmation."),
                 "category": "deposit",
                 "prices": [
                     {"amount": 10000, "nickname": "Standard Deposit"},  # $100
-                    {"amount": 15000, "nickname": "Premium Deposit"},  # $150
                 ],
             },
             {
-                "name": "Travel Fee",
-                "description": "Travel fee per mile",
-                "category": "fee",
-                "prices": [
-                    {"amount": 200, "nickname": "Per Mile"},  # $2 per mile
-                ],
-            },
-            {
-                "name": "Protein Upgrade",
-                "description": "Premium protein upgrade",
-                "category": "addon",
-                "prices": [
-                    {"amount": 500, "nickname": "Filet Mignon Upgrade"},  # $5
-                    {"amount": 800, "nickname": "Lobster Upgrade"},  # $8
-                    {"amount": 1000, "nickname": "Wagyu Upgrade"},  # $10
-                ],
-            },
-            {
-                "name": "Gratuity",
-                "description": "Chef gratuity",
-                "category": "gratuity",
+                "name": "Invoice Payment",
+                "description": (
+                    "Pay your event invoice online. Amount will match "
+                    "invoice total set by admin."
+                ),
+                "category": "invoice",
                 "prices": [
                     {
-                        "amount": 1000,
-                        "nickname": "Standard Tip 15%",
-                    },  # $10 (example)
-                    {
-                        "amount": 1500,
-                        "nickname": "Premium Tip 20%",
-                    },  # $15 (example)
+                        # Placeholder, actual amount set dynamically
+                        "amount": 0,
+                        "nickname": "Invoice Payment",
+                    },
                 ],
             },
         ]
@@ -138,7 +96,8 @@ async def setup_stripe_products() -> None:
                         metadata={"category": product_data["category"]},
                     )
                     logger.info(
-                        f"Created price: {price.nickname} - ${price.unit_amount/100}"
+                        f"Created price: {price.nickname} - "
+                        f"${price.unit_amount/100}"
                     )
                 else:
                     logger.info(

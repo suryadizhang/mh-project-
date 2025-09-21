@@ -203,7 +203,8 @@ class QualityReporter:
                 for line in lines:
                     if "SERVER_ENV_IN_FRONTEND" in line:
                         violations.append(
-                            "Server env var in frontend (expected in /lib/server/)"
+                            "Server env var in frontend "
+                            "(expected in /lib/server/)"
                         )
 
             return {
@@ -244,7 +245,8 @@ class QualityReporter:
         print(f"   ✅ Frontend: {frontend['type']}")
         print(f"   ✅ API Routes: {len(frontend['api_routes'])} routes")
         print(
-            f"   ✅ Server-only Files: {len(frontend['server_only'])} files properly isolated"
+            f"   ✅ Server-only Files: {len(frontend['server_only'])} "
+            f"files properly isolated"
         )
 
         backend = self.report["structure"]["backend_fastapi"]

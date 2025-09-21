@@ -15,7 +15,6 @@ import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List
 
 from colorama import Fore, Style, init
 
@@ -39,7 +38,7 @@ class RepositoryGuard:
 
     def __init__(self, repo_root: Path):
         self.repo_root = repo_root
-        self.violations: List[Violation] = []
+        self.violations: list[Violation] = []
         self.stats = {
             "files_scanned": 0,
             "empty_files": 0,
@@ -189,7 +188,7 @@ class RepositoryGuard:
             print(f"Warning: Could not scan {relative_path}: {e}")
 
     def check_secrets(
-        self, file_path: Path, content: str, lines: List[str]
+        self, file_path: Path, content: str, lines: list[str]
     ) -> None:
         """Check for hardcoded secrets"""
         relative_path = str(file_path.relative_to(self.repo_root))
@@ -210,7 +209,7 @@ class RepositoryGuard:
                 self.stats["security_violations"] += 1
 
     def check_placeholders(
-        self, file_path: Path, content: str, lines: List[str]
+        self, file_path: Path, content: str, lines: list[str]
     ) -> None:
         """Check for placeholder content"""
         relative_path = str(file_path.relative_to(self.repo_root))
@@ -231,7 +230,7 @@ class RepositoryGuard:
                 self.stats["placeholder_violations"] += 1
 
     def check_folder_rules(
-        self, file_path: Path, content: str, lines: List[str]
+        self, file_path: Path, content: str, lines: list[str]
     ) -> None:
         """Check folder-specific rules"""
         relative_path = str(file_path.relative_to(self.repo_root))
@@ -259,7 +258,7 @@ class RepositoryGuard:
             self.check_ai_backend_rules(file_path, content, lines)
 
     def check_frontend_rules(
-        self, file_path: Path, content: str, lines: List[str]
+        self, file_path: Path, content: str, lines: list[str]
     ) -> None:
         """Check frontend-specific rules"""
         relative_path = str(file_path.relative_to(self.repo_root))
@@ -303,7 +302,7 @@ class RepositoryGuard:
                     self.stats["separation_violations"] += 1
 
     def check_legacy_backend_rules(
-        self, file_path: Path, content: str, lines: List[str]
+        self, file_path: Path, content: str, lines: list[str]
     ) -> None:
         """Check legacy backend rules"""
         relative_path = str(file_path.relative_to(self.repo_root))
@@ -322,7 +321,7 @@ class RepositoryGuard:
             self.stats["separation_violations"] += 1
 
     def check_ai_backend_rules(
-        self, file_path: Path, content: str, lines: List[str]
+        self, file_path: Path, content: str, lines: list[str]
     ) -> None:
         """Check AI backend rules"""
         relative_path = str(file_path.relative_to(self.repo_root))
@@ -398,7 +397,8 @@ class RepositoryGuard:
                             Violation(
                                 relative_path,
                                 "CROSS_IMPORT_VIOLATION",
-                                f"Cross-folder import from {current_folder} to {other_folder}",
+                                f"Cross-folder import from {current_folder} "
+                                f"to {other_folder}",
                                 line_num,
                                 match.group(),
                             )
@@ -473,7 +473,8 @@ class RepositoryGuard:
                         Violation(
                             relative_path,
                             "PORT_COLLISION",
-                            f"Port {found_port} conflicts with expected {expected_port} for {folder_name}",
+                            f"Port {found_port} conflicts with expected "
+                            f"{expected_port} for {folder_name}",
                             line_num,
                             match.group(),
                         )
@@ -482,7 +483,8 @@ class RepositoryGuard:
     def scan_repository(self) -> None:
         """Main scanning method"""
         print(
-            f"{Fore.CYAN}🛡️ Repository Guard - Scanning {self.repo_root}{Style.RESET_ALL}"
+            f"{Fore.CYAN}🛡️ Repository Guard - Scanning "
+            f"{self.repo_root}{Style.RESET_ALL}"
         )
 
         # Scan all files in the repository
@@ -520,7 +522,8 @@ class RepositoryGuard:
         # Print each type
         for violation_type, type_violations in violations_by_type.items():
             print(
-                f"\n{Fore.YELLOW}{violation_type} ({len(type_violations)} issues):{Style.RESET_ALL}"
+                f"\n{Fore.YELLOW}{violation_type} "
+                f"({len(type_violations)} issues):{Style.RESET_ALL}"
             )
             for violation in type_violations[
                 :10
@@ -588,12 +591,14 @@ class RepositoryGuard:
         # Return success/failure
         if self.violations:
             print(
-                f"\n{Fore.RED}💥 GUARD CHECK FAILED - {len(self.violations)} violations found{Style.RESET_ALL}"
+                f"\n{Fore.RED}💥 GUARD CHECK FAILED - "
+                f"{len(self.violations)} violations found{Style.RESET_ALL}"
             )
             return False
         else:
             print(
-                f"\n{Fore.GREEN}✅ GUARD CHECK PASSED - Repository is clean{Style.RESET_ALL}"
+                f"\n{Fore.GREEN}✅ GUARD CHECK PASSED - "
+                f"Repository is clean{Style.RESET_ALL}"
             )
             return True
 
@@ -622,7 +627,8 @@ def main():
         for folder in ["myhibachi-frontend", "myhibachi-backend-fastapi"]
     ):
         print(
-            f"{Fore.RED}❌ Not a valid My Hibachi repository root{Style.RESET_ALL}"
+            f"{Fore.RED}❌ Not a valid My Hibachi repository "
+            f"root{Style.RESET_ALL}"
         )
         sys.exit(1)
 

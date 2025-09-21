@@ -132,7 +132,8 @@ class ProjectGuard:
                                 GuardViolation(
                                     file_path,
                                     "SECRET_EXPOSED",
-                                    f"{secret_type} found at line {line_num}: {match.group()[:20]}...",
+                                    f"{secret_type} found at line {line_num}: "
+                                    f"{match.group()[:20]}...",
                                 )
                             )
                 except Exception:
@@ -165,7 +166,8 @@ class ProjectGuard:
                                 GuardViolation(
                                     file_path,
                                     "PLACEHOLDER",
-                                    f"Placeholder found at line {line_num}: {match.group()}",
+                                    f"Placeholder found at line {line_num}: "
+                                    f"{match.group()}",
                                 )
                             )
                 except Exception:
@@ -228,7 +230,8 @@ class ProjectGuard:
                                 GuardViolation(
                                     file_path,
                                     "SERVER_ENV_IN_FRONTEND",
-                                    f"Server-only env var {env_var} used in frontend",
+                                    f"Server-only env var {env_var} "
+                                    f"used in frontend",
                                 )
                             )
                 except Exception:

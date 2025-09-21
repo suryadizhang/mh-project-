@@ -1,0 +1,166 @@
+/* Service Areas Section Styles */
+
+.serviceAreasSection {
+  padding: calc(var(--home-section-padding) * 1.5) 0;
+  background: var(--home-gradient-primary);
+  color: white;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all var(--home-animation-slow) ease-in-out;
+}
+
+.serviceAreasSection.animateIn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sectionTitle {
+  font-size: var(--home-section-title-size);
+  font-weight: 700;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+  text-shadow: var(--home-text-shadow);
+}
+
+.sectionSubtitle {
+  font-size: var(--home-subtitle-size);
+  margin-bottom: 3rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+  opacity: 0.95;
+}
+
+.ctaButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 3rem;
+}
+
+.ctaButton {
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--home-animation-fast) ease-in-out;
+  font-size: 1.1rem;
+  display: inline-block;
+  box-shadow: 0 4px 15px rgb(0 0 0 / 20%);
+}
+
+.primaryButton {
+  background: white;
+  color: var(--home-primary);
+  border: 2px solid white;
+}
+
+.primaryButton:hover {
+  background: var(--home-primary-dark);
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgb(0 0 0 / 30%);
+}
+
+.secondaryButton {
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+}
+
+.secondaryButton:hover {
+  background: white;
+  color: var(--home-primary);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgb(255 255 255 / 30%);
+}
+
+.areaCard {
+  background: rgb(255 255 255 / 95%);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: var(--home-card-padding);
+  box-shadow: var(--home-card-shadow);
+  height: 100%;
+  transition: all var(--home-animation-fast) ease-in-out;
+}
+
+.areaCard:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--home-card-shadow-hover);
+}
+
+.cardHeader {
+  margin-bottom: 1.5rem;
+}
+
+.areaTitle {
+  font-size: var(--home-card-title-size);
+  font-weight: 700;
+  color: var(--home-primary);
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.areaSubtitle {
+  font-size: 1rem;
+  color: var(--home-secondary);
+  margin: 0;
+  font-style: italic;
+}
+
+.locationsList {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.locationItem {
+  font-size: 1rem;
+  color: var(--menu-text-primary);
+  padding: 0.75rem 1rem;
+  background: rgb(220 53 69 / 5%);
+  border-radius: 10px;
+  border-left: 4px solid var(--home-primary);
+  transition: all var(--home-animation-fast) ease-in-out;
+}
+
+.locationItem:hover {
+  background: rgb(220 53 69 / 10%);
+  transform: translateX(5px);
+}
+
+/* Responsive Design */
+@media (width <= 768px) {
+  .ctaButtons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .ctaButton {
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+  }
+
+  .areaCard {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .areaTitle {
+    font-size: 1.25rem;
+  }
+}
+
+@media (width <= 576px) {
+  .areaCard {
+    padding: 1rem;
+  }
+
+  .ctaButton {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+}

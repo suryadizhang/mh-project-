@@ -252,7 +252,8 @@ class StripeService:
         await self.db.commit()
 
         logger.warning(
-            f"Dispute created: {dispute['id']}, amount: ${dispute['amount']/100}"
+            f"Dispute created: {dispute['id']}, "
+            f"amount: ${dispute['amount']/100}"
         )
 
     async def _handle_subscription_event(
@@ -260,7 +261,8 @@ class StripeService:
     ) -> None:
         """Handle subscription events."""
         logger.info(
-            f"Subscription event: {event_type}, subscription: {subscription['id']}"
+            f"Subscription event: {event_type}, "
+            f"subscription: {subscription['id']}"
         )
         # Implement subscription handling if needed
 

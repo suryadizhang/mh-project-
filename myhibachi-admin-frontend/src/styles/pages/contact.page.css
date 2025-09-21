@@ -1,0 +1,220 @@
+/* ==========================================================================
+   CONTACT PAGE - SCOPED STYLES (DATA-PAGE="contact")
+   Safe migration from global styles to page-scoped architecture
+   ========================================================================== */
+
+[data-page='contact'] {
+  /* Page-level variables */
+  --contact-hero-bg: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-secondary) 100%
+  );
+  --contact-form-shadow: 0 8px 32px rgb(0 0 0 / 10%);
+  --contact-input-focus: var(--color-primary);
+}
+
+/* ==========================================================================
+   HERO SECTION
+   ========================================================================== */
+[data-page='contact'] .hero-section {
+  background: var(--contact-hero-bg);
+  padding: var(--spacing-2xl) 0;
+  text-align: center;
+  color: var(--text-on-dark);
+}
+
+[data-page='contact'] .hero-title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+  margin-bottom: var(--spacing-lg);
+}
+
+[data-page='contact'] .hero-subtitle {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ==========================================================================
+   CONTACT FORM
+   ========================================================================== */
+[data-page='contact'] .contact-form-container {
+  max-width: 800px;
+  margin: var(--spacing-2xl) auto;
+  padding: var(--spacing-xl);
+  background: var(--color-background);
+  border-radius: var(--radius-lg-custom);
+  box-shadow: var(--contact-form-shadow);
+}
+
+[data-page='contact'] .form-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+[data-page='contact'] .form-label {
+  display: block;
+  font-weight: 600;
+  color: var(--text-strong);
+  margin-bottom: var(--spacing-sm);
+}
+
+[data-page='contact'] .form-input,
+[data-page='contact'] .form-textarea,
+[data-page='contact'] .form-select {
+  width: 100%;
+  padding: var(--spacing-md);
+  border: 2px solid var(--color-border-custom);
+  border-radius: var(--radius-md-custom);
+  font-family: var(--font-secondary);
+  font-size: 1rem;
+  transition: var(--transition-fast);
+  background: var(--color-background);
+}
+
+[data-page='contact'] .form-input:focus,
+[data-page='contact'] .form-textarea:focus,
+[data-page='contact'] .form-select:focus {
+  outline: none;
+  border-color: var(--contact-input-focus);
+  box-shadow: 0 0 0 3px rgb(219 43 40 / 10%);
+}
+
+[data-page='contact'] .form-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+[data-page='contact'] .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+}
+
+/* ==========================================================================
+   CONTACT INFO CARDS
+   ========================================================================== */
+[data-page='contact'] .contact-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-xl);
+  margin: var(--spacing-2xl) 0;
+}
+
+[data-page='contact'] .contact-info-card {
+  background: var(--color-background-light);
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg-custom);
+  text-align: center;
+  transition: var(--transition-normal);
+  border: 1px solid var(--color-border-custom);
+}
+
+[data-page='contact'] .contact-info-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary);
+}
+
+[data-page='contact'] .contact-info-icon {
+  font-size: 2.5rem;
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+[data-page='contact'] .contact-info-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-strong);
+  margin-bottom: var(--spacing-sm);
+}
+
+[data-page='contact'] .contact-info-details {
+  color: var(--text-default);
+  line-height: 1.6;
+}
+
+/* ==========================================================================
+   BUSINESS HOURS
+   ========================================================================== */
+[data-page='contact'] .business-hours {
+  background: var(--color-background-accent);
+  padding: var(--spacing-2xl);
+  border-radius: var(--radius-lg-custom);
+  margin: var(--spacing-xl) 0;
+}
+
+[data-page='contact'] .hours-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-strong);
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+[data-page='contact'] .hours-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+[data-page='contact'] .hours-day {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  background: var(--color-background);
+  border-radius: var(--radius-sm-custom);
+  border: 1px solid var(--color-border-custom);
+}
+
+[data-page='contact'] .hours-day-name {
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+[data-page='contact'] .hours-day-time {
+  color: var(--text-default);
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+@media (width <= 768px) {
+  [data-page='contact'] .contact-form-container {
+    margin: var(--spacing-xl) var(--spacing-md);
+    padding: var(--spacing-lg);
+  }
+
+  [data-page='contact'] .form-row {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  [data-page='contact'] .contact-info-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+
+  [data-page='contact'] .hours-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+}
+
+@media (width <= 480px) {
+  [data-page='contact'] .hero-section {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+
+  [data-page='contact'] .business-hours {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+
+  [data-page='contact'] .contact-info-card {
+    padding: var(--spacing-lg);
+  }
+}

@@ -185,7 +185,8 @@ def scrub_pii(text: str) -> str:
     )
     # Phone pattern
     text = re.sub(
-        r"\b(?:\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})\b",
+        r"\b(?:\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?"
+        r"([0-9]{3})[-.\s]?([0-9]{4})\b",
         "[PHONE]",
         text,
     )
@@ -248,15 +249,18 @@ async def call_openai(message: str, context: str = "") -> tuple[str, float]:
     try:
         client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-        system_prompt = f"""You are a helpful assistant for MyHibachi, a premium hibachi catering service in Northern California.
+        system_prompt = f"""You are a helpful assistant for MyHibachi, a
+premium hibachi catering service in Northern California.
 
 IMPORTANT SERVICE DETAILS:
 - We serve throughout Northern California (Bay Area, Sacramento area)
 - Deposit: $100 refundable (subject to terms and conditions)
 - We DO NOT provide cleanup service, tables, chairs, or dinnerware
-- We DO provide: chef, portable grill, equipment, utensils, vegetables, fried rice, proteins
+- We DO provide: chef, portable grill, equipment, utensils, vegetables,
+fried rice, proteins
 - Travel fees apply based on distance
-- Service areas: San Francisco, San Jose, Oakland, Sacramento, Palo Alto, Mountain View, Santa Clara, Sunnyvale, Fremont, and surrounding areas
+- Service areas: San Francisco, San Jose, Oakland, Sacramento, Palo Alto,
+Mountain View, Santa Clara, Sunnyvale, Fremont, and surrounding areas
 
 Context from our FAQs: {context}
 
@@ -346,7 +350,8 @@ async def chat(request: ChatRequest):
     except Exception as e:
         print(f"Chat error: {e}")
         return ChatResponse(
-            answer="I'm experiencing technical difficulties. Please contact our team directly for immediate assistance.",
+            answer="I'm experiencing technical difficulties. Please contact "
+            "our team directly for immediate assistance.",
             confidence=0.1,
             route="error",
             sources=[],

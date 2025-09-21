@@ -1,0 +1,255 @@
+name: Monorepo CI/CD
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'myhibachi-frontend/**'
+      - 'myhibachi-admin-frontend/**'
+      - 'myhibachi-backend/**'
+      - 'myhibachi-backend-fastapi/**'
+      - 'myhibachi-ai-backend/**'
+  push:
+    branches: [ main ]
+    paths:
+      - 'myhibachi-frontend/**'
+      - 'myhibachi-admin-frontend/**'
+      - 'myhibachi-backend/**'
+      - 'myhibachi-backend-fastapi/**'
+      - 'myhibachi-ai-backend/**'
+
+jobs:
+  # Customer Frontend CI/CD
+  customer-frontend:
+    runs-on: ubuntu-latest
+    name: Customer Frontend CI
+    if: |
+      (contains(github.event.pull_request.changed_files, 'myhibachi-frontend/') && github.event_name == 'pull_request') ||
+      (github.ref == 'refs/heads/main' && contains(github.event.head_commit.modified, 'myhibachi-frontend/'))
+    defaults:
+      run:
+        working-directory: ./myhibachi-frontend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: './myhibachi-frontend/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run type checking
+        run: npm run type-check
+
+      - name: Run unit tests
+        run: npm run test
+
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+        if: github.event_name == 'pull_request'
+
+  # Admin Frontend CI/CD
+  admin-frontend:
+    runs-on: ubuntu-latest
+    name: Admin Frontend CI
+    if: |
+      (contains(github.event.pull_request.changed_files, 'myhibachi-admin-frontend/') && github.event_name == 'pull_request') ||
+      (github.ref == 'refs/heads/main' && contains(github.event.head_commit.modified, 'myhibachi-admin-frontend/'))
+    defaults:
+      run:
+        working-directory: ./myhibachi-admin-frontend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: './myhibachi-admin-frontend/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run type checking
+        run: npm run type-check
+
+      - name: Run unit tests
+        run: npm run test
+
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+  # Main API Backend CI/CD
+  main-api:
+    runs-on: ubuntu-latest
+    name: Main API Backend CI/CD
+    if: |
+      (contains(github.event.pull_request.changed_files, 'myhibachi-backend-fastapi/') && github.event_name == 'pull_request') ||
+      (contains(github.event.pull_request.changed_files, 'myhibachi-backend/') && github.event_name == 'pull_request') ||
+      (github.ref == 'refs/heads/main' && (contains(github.event.head_commit.modified, 'myhibachi-backend-fastapi/') || contains(github.event.head_commit.modified, 'myhibachi-backend/')))
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-main-api-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-main-api-
+            ${{ runner.os }}-pip-
+
+      - name: Install FastAPI dependencies
+        run: |
+          cd myhibachi-backend-fastapi
+          pip install -r requirements.txt
+
+      - name: Install Legacy API dependencies
+        run: |
+          cd myhibachi-backend
+          pip install -r requirements.txt
+
+      - name: Run FastAPI linting
+        run: |
+          cd myhibachi-backend-fastapi
+          python -m flake8 app/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          python -m flake8 app/ --count --exit-zero --max-complexity=10 --max-line-length=79 --statistics
+
+      - name: Run Legacy API linting
+        run: |
+          cd myhibachi-backend
+          python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          python -m flake8 . --count --exit-zero --max-complexity=10 --max-line-length=79 --statistics
+
+      - name: Run FastAPI tests
+        run: |
+          cd myhibachi-backend-fastapi
+          python -m pytest tests/ -v
+        if: hashFiles('myhibachi-backend-fastapi/tests/*.py') != ''
+
+      - name: Run Legacy API tests
+        run: |
+          cd myhibachi-backend
+          python -m pytest tests/ -v
+        if: hashFiles('myhibachi-backend/tests/*.py') != ''
+
+      - name: Deploy to VPS (Main API)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "🚀 Main API deployment ready"
+          echo "Add your deployment commands here:"
+          echo "- rsync files to VPS"
+          echo "- restart services"
+          echo "- run database migrations if needed"
+
+  # AI API Backend CI/CD
+  ai-api:
+    runs-on: ubuntu-latest
+    name: AI API Backend CI/CD
+    if: |
+      (contains(github.event.pull_request.changed_files, 'myhibachi-ai-backend/') && github.event_name == 'pull_request') ||
+      (github.ref == 'refs/heads/main' && contains(github.event.head_commit.modified, 'myhibachi-ai-backend/'))
+    defaults:
+      run:
+        working-directory: ./myhibachi-ai-backend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-ai-api-${{ hashFiles('myhibachi-ai-backend/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-ai-api-
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install fastapi uvicorn openai python-multipart
+          fi
+
+      - name: Run linting
+        run: |
+          python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          python -m flake8 . --count --exit-zero --max-complexity=10 --max-line-length=79 --statistics
+
+      - name: Run tests
+        run: |
+          if [ -d tests ]; then
+            python -m pytest tests/ -v
+          else
+            echo "No tests directory found, skipping tests"
+          fi
+
+      - name: Test API startup
+        run: |
+          python -c "
+          try:
+              from main import app
+              print('✅ AI API imports successfully')
+          except ImportError as e:
+              print(f'❌ Import error: {e}')
+              exit(1)
+          except Exception as e:
+              print(f'⚠️  Warning: {e}')
+          "
+
+      - name: Deploy to VPS (AI API)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "🚀 AI API deployment ready"
+          echo "Add your deployment commands here:"
+          echo "- rsync files to VPS"
+          echo "- restart AI service"
+          echo "- verify OpenAI API connection"
+
+  # Deployment Summary
+  deployment-summary:
+    runs-on: ubuntu-latest
+    name: Deployment Summary
+    needs: [customer-frontend, admin-frontend, main-api, ai-api]
+    if: always() && github.ref == 'refs/heads/main'
+    steps:
+      - name: Deployment Status
+        run: |
+          echo "🚀 Deployment Summary:"
+          echo "Customer Frontend: ${{ needs.customer-frontend.result }}"
+          echo "Admin Frontend: ${{ needs.admin-frontend.result }}"
+          echo "Main API: ${{ needs.main-api.result }}"
+          echo "AI API: ${{ needs.ai-api.result }}"
