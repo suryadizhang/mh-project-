@@ -491,16 +491,18 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
 
                   {message.citations && message.citations.length > 0 && (
                     <div className="mt-2 space-y-1">
-                      {message.citations.map((citation, i) => (
-                        <a
-                          key={i}
-                          href={citation.href}
-                          className="flex items-center text-xs text-blue-600 underline hover:text-blue-800"
-                        >
-                          <ExternalLink size={12} className="mr-1" />
-                          {citation.title}
-                        </a>
-                      ))}
+                      {message.citations.map(
+                        (citation: { href: string; title: string }, i: number) => (
+                          <a
+                            key={i}
+                            href={citation.href}
+                            className="flex items-center text-xs text-blue-600 underline hover:text-blue-800"
+                          >
+                            <ExternalLink size={12} className="mr-1" />
+                            {citation.title}
+                          </a>
+                        ),
+                      )}
                     </div>
                   )}
 

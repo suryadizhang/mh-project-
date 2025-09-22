@@ -81,9 +81,9 @@ async def health_check():
         "status": "healthy",
         "environment": settings.environment,
         "database": "connected",
-        "stripe": "configured"
-        if settings.stripe_secret_key
-        else "not configured",
+        "stripe": (
+            "configured" if settings.stripe_secret_key else "not configured"
+        ),
     }
 
 

@@ -166,9 +166,8 @@ class AIPipeline:
         start_time = time.time()
 
         try:
-            # Step 1: Classify intent and extract entities
+            # Step 1: Classify intent
             intent, intent_confidence = self.classify_intent(message)
-            entities = self.extract_entities(message)
 
             # Step 2: Search knowledge base
             from app.schemas import KBSearchRequest
@@ -246,9 +245,11 @@ class AIPipeline:
 
             ai_message = Message(
                 conversation_id=conversation_id,
-                role=MessageRole.AI.value
-                if "gpt" not in source
-                else MessageRole.GPT.value,
+                role=(
+                    MessageRole.AI.value
+                    if "gpt" not in source
+                    else MessageRole.GPT.value
+                ),
                 text=response_text,
                 confidence=confidence,
                 model_used=source,

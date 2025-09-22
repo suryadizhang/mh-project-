@@ -3,18 +3,15 @@ MyHibachi AI Backend - Main FastAPI Application
 Multi-channel customer support with knowledge base and human escalation
 """
 
-# Load environment variables first
-from dotenv import load_dotenv
-
-load_dotenv()
-
+# Standard library imports
 import os
 import time
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Optional
 from uuid import uuid4
 
+# Third-party imports
+from dotenv import load_dotenv
 from fastapi import (
     Depends,
     FastAPI,
@@ -27,10 +24,8 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Import our models and services
+# Local imports
 from app.database import close_db, get_db, init_db
-
-# Import logging and monitoring
 from app.logging_config import (
     AILogger,
     DatabaseLogger,
@@ -49,7 +44,7 @@ from app.models import (
 )
 from app.monitoring import performance_monitor, start_metrics_server
 from app.routers import webhooks
-from app.schemas import (  # Legacy models
+from app.schemas import (
     ChatIngestRequest,
     ChatIngestResponse,
     ChatReplyRequest,
@@ -68,6 +63,9 @@ from app.schemas import (  # Legacy models
 )
 from app.services.ai_pipeline import ai_pipeline
 from app.services.knowledge_base import kb_service
+
+# Load environment variables after imports
+load_dotenv()
 
 # Global loggers (initialized in lifespan)
 logger = None
@@ -147,7 +145,7 @@ security = HTTPBearer(auto_error=False)
 
 
 def get_current_user(
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
 ):
     """Get current user from JWT token (placeholder for now)"""
     # TODO: Implement proper JWT validation
@@ -192,7 +190,7 @@ class ConnectionManager:
             for connection in self.active_connections[conversation_id]:
                 try:
                     await connection.send_json(message.dict())
-                except:
+                except Exception:
                     pass  # Connection closed
 
 
@@ -369,9 +367,11 @@ async def chat_ingest(
             type="message",
             conversation_id=conversation.id,
             content=ai_response.reply,
-            role=MessageRole.AI
-            if "gpt" not in ai_response.source
-            else MessageRole.GPT,
+            role=(
+                MessageRole.AI
+                if "gpt" not in ai_response.source
+                else MessageRole.GPT
+            ),
         )
         await manager.send_message(ws_message, str(conversation.id))
 
@@ -486,7 +486,7 @@ async def websocket_chat_endpoint(
 
                 # Process through ingest endpoint
                 async for db in get_db():
-                    response = await chat_ingest(ingest_request, db)
+                    await chat_ingest(ingest_request, db)
                     break
 
     except WebSocketDisconnect:
@@ -532,7 +532,6 @@ async def search_kb_chunks(
     request: KBSearchRequest, db: AsyncSession = Depends(get_db)
 ):
     """Search knowledge base chunks"""
-    start_time = time.time()
 
     chunks, query_time = await kb_service.search_chunks(db, request)
 

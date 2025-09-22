@@ -82,7 +82,7 @@ export function FaqList({ items }: FaqListProps) {
     <div className="faq-list">
       <div className="faqs-accordion">
         <div className="faqs-categories">
-          {Object.entries(groupedFAQs).map(([category, faqs]) => (
+          {(Object.entries(groupedFAQs) as [string, FaqItem[]][]).map(([category, faqs]) => (
             <div key={category} className="faq-category">
               {/* Category Header */}
               <div className="category-header">
@@ -107,7 +107,7 @@ export function FaqList({ items }: FaqListProps) {
                 }`}
               >
                 <div className="category-faqs">
-                  {faqs.map((faq) => (
+                  {faqs.map((faq: FaqItem) => (
                     <FaqItemComponent
                       key={faq.id}
                       faq={faq}

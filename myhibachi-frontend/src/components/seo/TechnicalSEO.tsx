@@ -237,7 +237,7 @@ function FAQSchema({ faqs }: { faqs: Array }) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: faqs.map((faq) => ({
+    mainEntity: faqs.map((faq: { question: string; answer: string }) => ({
       '@type': 'Question',
       name: faq.question,
       acceptedAnswer: {
@@ -262,7 +262,7 @@ function BreadcrumbSchema({ items }: { items: Array }) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: items.map((item, index) => ({
+    itemListElement: items.map((item: { name: string; url: string }, index: number) => ({
       '@type': 'ListItem',
       position: index + 1,
       name: item.name,

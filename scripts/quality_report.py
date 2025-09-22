@@ -208,9 +208,9 @@ class QualityReporter:
                         )
 
             return {
-                "guard_script_status": "PASSED"
-                if result.returncode == 0
-                else "MINOR_VIOLATIONS",
+                "guard_script_status": (
+                    "PASSED" if result.returncode == 0 else "MINOR_VIOLATIONS"
+                ),
                 "violations": violations,
                 "node_modules_placeholders": "Ignored (third-party)",
                 "server_separation": "COMPLIANT",

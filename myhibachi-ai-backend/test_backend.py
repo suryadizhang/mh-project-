@@ -57,7 +57,7 @@ async def health_check() -> dict[str, Any]:
         memory = psutil.virtual_memory()
         disk = psutil.disk_usage("/")
         disk_percent = (disk.used / disk.total) * 100
-    except:
+    except Exception:
         cpu_percent = memory.percent = disk_percent = 0.0
 
     # Calculate average response time
@@ -114,9 +114,11 @@ async def metrics_summary():
 
     return {
         "request_count": request_count,
-        "avg_response_time": sum(response_times) / len(response_times)
-        if response_times
-        else 0.0,
+        "avg_response_time": (
+            sum(response_times) / len(response_times)
+            if response_times
+            else 0.0
+        ),
         "error_rate": 0.0,
         "uptime_seconds": uptime_seconds,
         "system_cpu": psutil.cpu_percent() if psutil else 0.0,
