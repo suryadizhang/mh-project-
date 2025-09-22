@@ -1,0 +1,235 @@
+name: Change-Aware Deploy
+
+on:
+  workflow_run:
+    workflows: ["Change-Aware CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: 'Force deploy all components'
+        required: false
+        type: boolean
+        default: false
+      components:
+        description: 'Components to deploy (comma-separated: api,ai-api,admin,customer)'
+        required: false
+        type: string
+        default: ''
+
+env:
+  DEPLOY_USER: ${{ secrets.DEPLOY_USER || 'deployer' }}
+  SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
+
+jobs:
+  # Only deploy if CI passed
+  check-ci-status:
+    runs-on: ubuntu-latest
+    outputs:
+      should-deploy: ${{ steps.check.outputs.should-deploy }}
+    steps:
+      - name: Check CI status
+        id: check
+        run: |
+          if [[ "${{ github.event.workflow_run.conclusion }}" == "success" ]] || [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "should-deploy=true" >> $GITHUB_OUTPUT
+            echo "✅ CI passed or manual deployment - proceeding with deployment"
+          else
+            echo "should-deploy=false" >> $GITHUB_OUTPUT
+            echo "❌ CI failed - skipping deployment"
+          fi
+
+  # Detect changes for deployment
+  detect-changes:
+    if: needs.check-ci-status.outputs.should-deploy == 'true'
+    needs: check-ci-status
+    uses: ./.github/workflows/_filters.yml
+
+  # Build deployment matrix
+  deploy-matrix:
+    runs-on: ubuntu-latest
+    needs: [check-ci-status, detect-changes]
+    outputs:
+      matrix: ${{ steps.matrix.outputs.components }}
+      has-deployments: ${{ steps.matrix.outputs.has-deployments }}
+    steps:
+      - name: Build deployment matrix
+        id: matrix
+        run: |
+          components='[]'
+          has_deployments=false
+
+          # Manual deployment with specific components
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.components }}" != "" ]]; then
+            IFS=',' read -ra COMPONENTS <<< "${{ github.event.inputs.components }}"
+            for component in "${COMPONENTS[@]}"; do
+              components=$(echo "$components" | jq --arg comp "$component" '. + [$comp]')
+              has_deployments=true
+            done
+            echo "🎯 Manual deployment of: ${{ github.event.inputs.components }}"
+
+          # Force deploy all components
+          elif [[ "${{ github.event.inputs.force_deploy }}" == "true" ]]; then
+            components='["api", "ai-api", "admin", "customer"]'
+            has_deployments=true
+            echo "🚀 Force deploying all components"
+
+          # Deploy based on detected changes
+          else
+            if [[ "${{ needs.detect-changes.outputs.api }}" == "true" || "${{ needs.detect-changes.outputs.shared }}" == "true" ]]; then
+              components=$(echo "$components" | jq '. + ["api"]')
+              has_deployments=true
+              echo "🚀 API will be deployed"
+            fi
+
+            if [[ "${{ needs.detect-changes.outputs.ai_api }}" == "true" || "${{ needs.detect-changes.outputs.shared }}" == "true" ]]; then
+              components=$(echo "$components" | jq '. + ["ai-api"]')
+              has_deployments=true
+              echo "🚀 AI API will be deployed"
+            fi
+
+            if [[ "${{ needs.detect-changes.outputs.admin }}" == "true" || "${{ needs.detect-changes.outputs.shared }}" == "true" ]]; then
+              components=$(echo "$components" | jq '. + ["admin"]')
+              has_deployments=true
+              echo "🚀 Admin will be deployed"
+            fi
+
+            if [[ "${{ needs.detect-changes.outputs.customer }}" == "true" || "${{ needs.detect-changes.outputs.shared }}" == "true" ]]; then
+              components=$(echo "$components" | jq '. + ["customer"]')
+              has_deployments=true
+              echo "🚀 Customer will be deployed"
+            fi
+          fi
+
+          echo "components=$components" >> $GITHUB_OUTPUT
+          echo "has-deployments=$has_deployments" >> $GITHUB_OUTPUT
+
+          echo "🎯 Final deployment matrix: $components"
+
+  # Deploy components
+  deploy-components:
+    if: needs.deploy-matrix.outputs.has-deployments == 'true'
+    runs-on: ubuntu-latest
+    needs: [check-ci-status, detect-changes, deploy-matrix]
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        component: ${{ fromJson(needs.deploy-matrix.outputs.matrix) }}
+    env:
+      COMPONENT: ${{ matrix.component }}
+      IMAGE_TAG: ${{ github.sha }}-${{ matrix.component }}
+      APP_DIR: /srv/${{ matrix.component }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate deployment secrets
+        run: |
+          if [[ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]]; then
+            echo "❌ SSH_PRIVATE_KEY secret is required"
+            exit 1
+          fi
+          if [[ -z "${{ secrets.VPS_HOST }}" ]]; then
+            echo "❌ VPS_HOST secret is required"
+            exit 1
+          fi
+          echo "✅ Deployment secrets validated"
+
+      - name: Setup SSH
+        if: env.ACT != 'true'
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p ${{ env.SSH_PORT }} ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Extract component runtime
+        run: |
+          echo "📦 Extracting ${{ matrix.component }} runtime..."
+          ./scripts/ci/extract.sh ${{ matrix.component }} ${{ env.IMAGE_TAG }}
+
+      - name: Deploy to VPS
+        if: env.ACT != 'true'
+        run: |
+          echo "🚀 Deploying ${{ matrix.component }} to VPS..."
+          ./scripts/ci/deploy.sh ${{ matrix.component }} ${{ env.APP_DIR }}
+        env:
+          SSH_HOST: ${{ secrets.VPS_HOST }}
+          SSH_USER: ${{ env.DEPLOY_USER }}
+          SSH_KEY: ~/.ssh/deploy_key
+          SSH_PORT: ${{ env.SSH_PORT }}
+
+      - name: Health check
+        if: env.ACT != 'true'
+        run: |
+          echo "🏥 Running health check for ${{ matrix.component }}..."
+
+          # Determine health check URL based on component
+          case "${{ matrix.component }}" in
+            "api")
+              HEALTH_URL="https://${{ secrets.SITE_URL }}/api/health"
+              ;;
+            "ai-api")
+              HEALTH_URL="https://${{ secrets.SITE_URL }}/ai/health"
+              ;;
+            "admin")
+              HEALTH_URL="https://admin.${{ secrets.SITE_URL }}/healthz"
+              ;;
+            "customer")
+              HEALTH_URL="https://${{ secrets.SITE_URL }}/healthz"
+              ;;
+          esac
+
+          # Retry health check up to 10 times
+          for i in {1..10}; do
+            echo "Health check attempt $i/10..."
+            if curl -fsS --max-time 30 "$HEALTH_URL" > /dev/null; then
+              echo "✅ ${{ matrix.component }} is healthy!"
+              exit 0
+            fi
+            echo "⏳ Waiting 30s before retry..."
+            sleep 30
+          done
+
+          echo "❌ Health check failed for ${{ matrix.component }}"
+          exit 1
+
+      - name: Deployment rollback (on failure)
+        if: failure() && env.ACT != 'true'
+        run: |
+          echo "🔄 Rolling back ${{ matrix.component }} deployment..."
+          ssh -i ~/.ssh/deploy_key -p ${{ env.SSH_PORT }} ${{ env.DEPLOY_USER }}@${{ secrets.VPS_HOST }} "
+            cd ${{ env.APP_DIR }}
+            if [[ -d backup ]]; then
+              sudo systemctl stop ${{ matrix.component }} || true
+              rm -rf current
+              mv backup current
+              sudo systemctl start ${{ matrix.component }}
+              echo '✅ Rollback completed'
+            else
+              echo '❌ No backup found - manual intervention required'
+            fi
+          "
+
+  # Deployment summary
+  deploy-summary:
+    if: always()
+    runs-on: ubuntu-latest
+    needs: [check-ci-status, deploy-matrix, deploy-components]
+    steps:
+      - name: Deployment Summary
+        run: |
+          echo "🚀 **Deployment Summary**"
+          echo ""
+          echo "🎯 **Components Deployed:** ${{ needs.deploy-matrix.outputs.matrix }}"
+          echo "✅ **Deployment Status:** ${{ needs.deploy-components.result }}"
+          echo ""
+          if [[ "${{ needs.deploy-matrix.outputs.has-deployments }}" == "false" ]]; then
+            echo "ℹ️ No components required deployment"
+          fi
+          echo ""
+          echo "🌐 **Site:** https://${{ secrets.SITE_URL }}"
+          echo "⚙️ **Admin:** https://admin.${{ secrets.SITE_URL }}"

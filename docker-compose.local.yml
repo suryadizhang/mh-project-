@@ -1,0 +1,171 @@
+version: '3.8'
+
+services:
+  # Admin Frontend (Next.js)
+  admin:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+      args:
+        SOURCE_PATH: myhibachi-frontend
+        NEXT_BUILD_MODE: standalone
+        COMPONENT_NAME: admin
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8001
+      - NEXT_PUBLIC_AI_API_URL=http://localhost:8002
+    volumes:
+      - ./myhibachi-frontend:/app/src:ro
+      - node_modules_admin:/app/node_modules
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Customer Frontend (Next.js)
+  customer:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+      args:
+        SOURCE_PATH: myhibachi-frontend
+        NEXT_BUILD_MODE: standalone
+        COMPONENT_NAME: customer
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8001
+      - NEXT_PUBLIC_AI_API_URL=http://localhost:8002
+    volumes:
+      - ./myhibachi-frontend:/app/src:ro
+      - node_modules_customer:/app/node_modules
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Main API (FastAPI)
+  api:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+      args:
+        SOURCE_PATH: myhibachi-backend
+        PYTHON_VERSION: 3.11
+    ports:
+      - "8001:8000"
+    environment:
+      - PYTHON_ENV=development
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/myhibachi_db
+      - REDIS_URL=redis://redis:6379
+      - DEBUG=true
+    volumes:
+      - ./myhibachi-backend:/app/src:ro
+      - pip_cache_api:/root/.cache/pip
+    depends_on:
+      - postgres
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # AI API (FastAPI)
+  ai-api:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+      args:
+        SOURCE_PATH: myhibachi-ai-backend
+        PYTHON_VERSION: 3.11
+    ports:
+      - "8002:8000"
+    environment:
+      - PYTHON_ENV=development
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/myhibachi_db
+      - REDIS_URL=redis://redis:6379
+      - DEBUG=true
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./myhibachi-ai-backend:/app/src:ro
+      - pip_cache_ai:/root/.cache/pip
+    depends_on:
+      - postgres
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=myhibachi_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx.local.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - admin
+      - customer
+      - api
+      - ai-api
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+  redis_data:
+  node_modules_admin:
+  node_modules_customer:
+  pip_cache_api:
+  pip_cache_ai:
+
+networks:
+  default:
+    name: myhibachi-local
