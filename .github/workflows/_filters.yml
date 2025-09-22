@@ -1,0 +1,83 @@
+name: Path Filters
+description: "Centralized path filtering for change-aware CI/CD"
+
+on:
+  workflow_call:
+    outputs:
+      api:
+        description: "API backend changed"
+        value: ${{ jobs.filter.outputs.api }}
+      ai_api:
+        description: "AI API backend changed"
+        value: ${{ jobs.filter.outputs.ai_api }}
+      admin:
+        description: "Admin frontend changed"
+        value: ${{ jobs.filter.outputs.admin }}
+      customer:
+        description: "Customer frontend changed"
+        value: ${{ jobs.filter.outputs.customer }}
+      shared:
+        description: "Shared dependencies changed"
+        value: ${{ jobs.filter.outputs.shared }}
+      any_component:
+        description: "Any component changed"
+        value: ${{ jobs.filter.outputs.any_component }}
+
+jobs:
+  filter:
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.changes.outputs.api }}
+      ai_api: ${{ steps.changes.outputs.ai_api }}
+      admin: ${{ steps.changes.outputs.admin }}
+      customer: ${{ steps.changes.outputs.customer }}
+      shared: ${{ steps.changes.outputs.shared }}
+      any_component: ${{ steps.changes.outputs.api == 'true' || steps.changes.outputs.ai_api == 'true' || steps.changes.outputs.admin == 'true' || steps.changes.outputs.customer == 'true' || steps.changes.outputs.shared == 'true' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Fetch enough history for proper diff detection
+          fetch-depth: 0
+
+      - name: Detect changed paths
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            api:
+              - 'myhibachi-backend-fastapi/**'
+              - 'myhibachi-backend/**'
+            ai_api:
+              - 'myhibachi-ai-backend/**'
+            admin:
+              - 'myhibachi-admin-frontend/**'
+            customer:
+              - 'myhibachi-frontend/**'
+            shared:
+              - 'package*.json'
+              - 'tsconfig*.json'
+              - 'pyproject.toml'
+              - 'requirements.txt'
+              - '.pre-commit-config.yaml'
+              - 'Dockerfile*'
+              - 'docker-compose*.yml'
+              - 'scripts/**'
+              - '.github/workflows/_*.yml'
+              - '.github/workflows/*-change-aware.yml'
+
+      - name: Display detected changes
+        run: |
+          echo "🔍 Change Detection Results:"
+          echo "API: ${{ steps.changes.outputs.api }}"
+          echo "AI API: ${{ steps.changes.outputs.ai_api }}"
+          echo "Admin: ${{ steps.changes.outputs.admin }}"
+          echo "Customer: ${{ steps.changes.outputs.customer }}"
+          echo "Shared: ${{ steps.changes.outputs.shared }}"
+          echo ""
+          echo "📁 Changed files:"
+          echo "${{ steps.changes.outputs.api_files }}"
+          echo "${{ steps.changes.outputs.ai_api_files }}"
+          echo "${{ steps.changes.outputs.admin_files }}"
+          echo "${{ steps.changes.outputs.customer_files }}"
+          echo "${{ steps.changes.outputs.shared_files }}"
