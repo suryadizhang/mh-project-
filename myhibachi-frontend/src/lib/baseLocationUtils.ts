@@ -34,7 +34,7 @@ export async function getBaseLocation(): Promise<BaseLocationData> {
       throw new Error(response.error || 'Failed to fetch base location')
     }
 
-    const location = response.data
+    const location = response.data as unknown as BaseLocationData
 
     // Update cache
     baseLocationCache = location

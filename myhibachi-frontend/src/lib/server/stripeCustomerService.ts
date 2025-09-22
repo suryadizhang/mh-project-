@@ -42,7 +42,7 @@ export class StripeCustomerService {
       if (!response.success || !response.data) {
         throw new Error(response.error || 'Failed to create/update customer')
       }
-      return response.data as StripeCustomer
+      return response.data as unknown as StripeCustomer
     } catch (error) {
       console.error('Error creating/updating customer:', error)
       throw error
@@ -62,7 +62,7 @@ export class StripeCustomerService {
       if (!response.success || !response.data) {
         throw new Error(response.error || 'Failed to update preferences')
       }
-      return response.data as StripeCustomer
+      return response.data as unknown as StripeCustomer
     } catch (error) {
       console.error('Error updating customer preferences:', error)
       throw error
@@ -108,7 +108,7 @@ export class StripeCustomerService {
       if (!response.success) {
         return null // Customer not found
       }
-      return response.data as StripeCustomer
+      return response.data as unknown as StripeCustomer
     } catch (error) {
       console.error('Error finding customer by email:', error)
       return null

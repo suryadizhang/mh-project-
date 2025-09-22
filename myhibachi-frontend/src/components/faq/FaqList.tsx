@@ -39,7 +39,7 @@ export function FaqList({ items }: FaqListProps) {
   }, []);
 
   const toggleItem = (id: string) => {
-    setOpenItems((prev) => {
+    setOpenItems((prev: Set) => {
       const newSet = new Set(prev);
       if (newSet.has(id)) {
         newSet.delete(id);
@@ -51,7 +51,7 @@ export function FaqList({ items }: FaqListProps) {
   };
 
   const toggleCategory = (category: string) => {
-    setExpandedCategories((prev) => {
+    setExpandedCategories((prev: Set) => {
       const newSet = new Set(prev);
       if (newSet.has(category)) {
         newSet.delete(category);

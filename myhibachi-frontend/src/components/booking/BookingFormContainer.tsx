@@ -35,6 +35,11 @@ interface BookingFormContainerProps {
   className?: string;
 }
 
+interface ApiResponse {
+  bookedDates?: string[];
+  timeSlots?: Array;
+}
+
 const BookingFormContainer: React.FC = ({ className = '' }) => {
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
@@ -77,7 +82,7 @@ const BookingFormContainer: React.FC = ({ className = '' }) => {
       const result = await apiFetch('/api/v1/bookings/booked-dates');
       if (result.success && result.data) {
         // Convert string dates to Date objects
-        const bookedDates = (result.data as Record)?.bookedDates;
+        const bookedDates = (result.data as ApiResponse)?.bookedDates;
         const dates = Array.isArray(bookedDates)
           ? bookedDates.map((dateStr: string) => new Date(dateStr))
           : [];
@@ -102,7 +107,7 @@ const BookingFormContainer: React.FC = ({ className = '' }) => {
       const response = await apiFetch(`/api/v1/bookings/available-times?date=${dateStr}`);
 
       if (response.success && response.data) {
-        const timeSlots = (response.data as Record)?.timeSlots;
+        const timeSlots = (response.data as ApiResponse)?.timeSlots;
         setAvailableTimeSlots(Array.isArray(timeSlots) ? timeSlots : []);
       } else {
         // Fallback to default time slots if API fails
