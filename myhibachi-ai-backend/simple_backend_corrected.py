@@ -82,7 +82,7 @@ FAQ_DATA = [
     {
         "id": "3",
         "question": "How much is the deposit?",
-        "answer": "We require a $100 refundable deposit to secure your booking. This deposit is refundable according to our terms and conditions (please check the agreement section). The remaining balance is due on the event day.",  # noqa: E501
+        "answer": "We require a $100 refundable deposit to secure your booking. This deposit is refundable according to our terms and conditions (please check the agreement section). The remaining balance is due on the event day. All payments are processed through our secure payment portal for your protection.",  # noqa: E501
         "category": "pricing",
         "keywords": [
             "deposit",
@@ -136,7 +136,7 @@ FAQ_DATA = [
     {
         "id": "6",
         "question": "What's your cancellation policy?",
-        "answer": "Please refer to our terms and conditions in the agreement section for our complete cancellation policy. The $100 deposit refund is subject to these terms and conditions.",  # noqa: E501
+        "answer": "Please refer to our terms and conditions in the agreement section for our complete cancellation policy. The $100 deposit refund is subject to these terms and conditions. All refunds are processed securely through our payment system.",  # noqa: E501
         "category": "policy",
         "keywords": [
             "cancellation",

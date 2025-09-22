@@ -45,9 +45,10 @@ class OpenAIService:
             "allergy",
             "allergic",
             "allergies",
-            "refund",
-            "money back",
             "charge back",
+            "chargeback",
+            "dispute charge",
+            "unauthorized charge",
             "legal",
             "lawsuit",
             "lawyer",
@@ -59,8 +60,6 @@ class OpenAIService:
             "manager",
             "supervisor",
             "speak to someone",
-            "cancel",
-            "cancellation",
             "weather",
             "rain",
             "storm",
@@ -108,6 +107,7 @@ class OpenAIService:
 IMPORTANT SERVICE DETAILS:
 - We serve throughout Northern California (Bay Area: San Francisco, San Jose, Oakland, Palo Alto, Mountain View, Santa Clara, Sunnyvale, Fremont; Sacramento area: Roseville, Folsom, Davis)
 - Deposit: $100 refundable (subject to terms and conditions in our agreement)
+- All payments and refunds are processed through our secure payment portal for customer protection
 - We DO NOT provide cleanup service, tables, chairs, or dinnerware - customers must arrange these separately
 - We DO provide: professional chef, portable hibachi grill, all cooking equipment, utensils, hibachi vegetables (zucchini, onions, mushrooms), fried rice, and premium proteins
 - Travel fees apply based on distance from our base location
@@ -117,12 +117,13 @@ TONE AND APPROACH:
 - Be friendly, professional, and enthusiastic about hibachi catering
 - Use the EXACT information provided above - never invent pricing or policies
 - Keep responses concise but informative
+- For payments, always mention our secure payment portal - never ask for card details
 - If asked about booking, direct customers to contact us directly
 - If uncertain about specific details, recommend contacting our team
 
 ESCALATION TRIGGERS:
 - Allergy/dietary restrictions requiring detailed discussion
-- Refund or billing disputes
+- Complex account issues or chargebacks (simple refund policy questions are OK)
 - Complaints or negative feedback
 - Legal concerns
 - Weather-related cancellations
@@ -138,11 +139,13 @@ ESCALATION TRIGGERS:
 4. Never invent pricing, policies, or service details not provided
 5. If uncertain, suggest the customer contact our team directly
 6. For booking inquiries, provide helpful information but direct them to complete booking through our website or by contacting us
-7. If the query involves allergies, refunds, legal issues, or complaints, acknowledge the concern but recommend direct contact with our team
+7. For payment questions, provide policy information but always direct to our secure payment portal for transactions
+8. NEVER ask for or handle credit card numbers, banking details, or other sensitive payment information
+9. If the query involves allergies, complex account issues, legal issues, or complaints, acknowledge the concern but recommend direct contact with our team
 
 Keep responses under 150 words when possible."""
 
-    def should_escalate(self, message: str) -> tuple[bool, Optional[str]]:
+    def should_escalate(self, message: str) -> tuple[bool, str | None]:
         """Check if message should be escalated to human"""
         message_lower = message.lower()
 
@@ -204,9 +207,9 @@ Keep responses under 150 words when possible."""
     async def generate_response(
         self,
         message: str,
-        context: Optional[str] = None,
-        conversation_history: Optional[list[dict[str, str]]] = None,
-        force_model: Optional[str] = None,
+        context: str | None = None,
+        conversation_history: list[dict[str, str]] | None = None,
+        force_model: str | None = None,
     ) -> tuple[str, float, str, int, int, float]:
         """
         Generate response using OpenAI GPT
@@ -301,7 +304,7 @@ Keep responses under 150 words when possible."""
             )
 
     async def generate_batch_responses(
-        self, messages: list[str], context: Optional[str] = None
+        self, messages: list[str], context: str | None = None
     ) -> list[tuple[str, float, str, int, int, float]]:
         """Generate responses for multiple messages (for batch processing)"""
         tasks = []

@@ -648,16 +648,16 @@ async def seed_initial_knowledge_base(db: AsyncSession):
             ],
         },
         {
-            "title": "Deposit and Pricing Structure",
-            "text": "We require a $100 refundable deposit to secure your booking. This deposit is refundable according to our terms and conditions (please check the agreement section). The remaining balance is due on the event day.",
+            "title": "Pricing and Deposit Information",
+            "text": "We require a $100 refundable deposit to secure your hibachi booking. This deposit is refundable according to our terms and conditions. The remaining balance is due on the event day. All payment processing is handled through our secure payment portal for your safety and convenience.",
             "category": "pricing",
             "tags": [
                 "deposit",
                 "100",
                 "refundable",
-                "terms",
-                "conditions",
                 "pricing",
+                "secure",
+                "portal",
             ],
         },
         {
@@ -675,15 +675,16 @@ async def seed_initial_knowledge_base(db: AsyncSession):
             ],
         },
         {
-            "title": "Cancellation Policy",
-            "text": "Please refer to our terms and conditions in the agreement section for our complete cancellation policy. The $100 deposit refund is subject to these terms and conditions.",
+            "title": "Cancellation and Refund Policy",
+            "text": "Please refer to our terms and conditions for our complete cancellation policy. The $100 deposit refund is subject to these terms and conditions. All refunds are processed securely through our payment system and typically take 3-5 business days to appear on your statement.",
             "category": "policy",
             "tags": [
                 "cancellation",
                 "policy",
                 "refund",
+                "secure",
+                "processing",
                 "terms",
-                "conditions",
             ],
         },
     ]

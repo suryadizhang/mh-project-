@@ -44,6 +44,8 @@ class AIPipeline:
                 "fee",
                 "deposit",
                 "charge",
+                "payment",
+                "pay",
             ],
             "menu": [
                 "food",
