@@ -4,12 +4,17 @@ import { ExternalLink, Send, X } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useRef, useState, useCallback } from 'react';
 
+interface Citation {
+  href: string;
+  title: string;
+}
+
 interface Message {
   id: string;
   type: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  citations?: Array;
+  citations?: Citation[];
   confidence?: 'high' | 'medium' | 'low';
 }
 
