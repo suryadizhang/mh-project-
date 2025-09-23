@@ -1,0 +1,50 @@
+# CODEOWNERS - Automatic code review assignment
+# Each line represents a rule, the last matching rule wins
+# Order: More specific rules should come after more general ones
+
+# Global fallback - Repository owner(s) review everything by default
+* @suryadizhang
+
+# Apps - Component ownership
+/apps/admin/           @suryadizhang
+/apps/customer/        @suryadizhang  
+/apps/api/             @suryadizhang
+/apps/ai-api/          @suryadizhang
+
+# Packages - Shared code requires broader review
+/packages/ui/          @suryadizhang
+/packages/utils/       @suryadizhang
+/packages/config/      @suryadizhang
+
+# Infrastructure and DevOps
+/.github/              @suryadizhang
+/docker/               @suryadizhang
+/scripts/              @suryadizhang
+/ops/                  @suryadizhang
+/monitoring/           @suryadizhang
+docker-compose*.yml    @suryadizhang
+Dockerfile*            @suryadizhang
+
+# Configuration files
+/.nvmrc               @suryadizhang
+/package.json         @suryadizhang
+/package-lock.json    @suryadizhang
+/tsconfig*.json       @suryadizhang
+/pyproject.toml       @suryadizhang
+/requirements.txt     @suryadizhang
+
+# Security and Environment
+/.env*                @suryadizhang
+/.secrets*            @suryadizhang
+/.gitignore           @suryadizhang
+
+# Documentation
+/README.md            @suryadizhang
+/docs/                @suryadizhang
+/**/*.md              @suryadizhang
+
+# Testing
+/e2e/                 @suryadizhang
+/playwright.config.ts @suryadizhang
+/**/*.test.*          @suryadizhang
+/**/*.spec.*          @suryadizhang

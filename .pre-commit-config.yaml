@@ -1,4 +1,7 @@
-# See https://pre-commit.com for more information
+# =============================================================================
+# Pre-commit Configuration for MyHibachi Backend - Enhanced Security & Quality
+# =============================================================================
+
 repos:
   # General file formatting
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -19,6 +22,11 @@ repos:
       - id: mixed-line-ending
         description: Ensure consistent line endings
         args: ['--fix=lf']
+      - id: check-added-large-files
+        description: Check for large files
+        args: ['--maxkb=1000']
+      - id: check-case-conflict
+        description: Check for case conflicts
 
   # Python formatting and linting
   - repo: https://github.com/psf/black
@@ -26,7 +34,7 @@ repos:
     hooks:
       - id: black
         description: Format Python code with Black
-        args: [--line-length=79]
+        args: [--line-length=88]
         language_version: python3
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
@@ -42,7 +50,32 @@ repos:
     hooks:
       - id: isort
         description: Sort Python imports
-        args: [--profile, black, --line-length, "79"]
+        args: [--profile, black, --line-length, "88"]
+
+  # Security scanning
+  - repo: https://github.com/pycqa/bandit
+    rev: '1.7.5'
+    hooks:
+      - id: bandit
+        description: Security linting with Bandit
+        args: ['-r', 'myhibachi-backend-fastapi/app/', '--skip', 'B101']
+
+  # Python Type Checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v1.7.1'
+    hooks:
+      - id: mypy
+        description: Static type checking with MyPy
+        additional_dependencies: [types-requests, types-python-dateutil]
+        args: ['--ignore-missing-imports']
+
+  # Dockerfile Linting
+  - repo: https://github.com/hadolint/hadolint
+    rev: 'v2.12.0'
+    hooks:
+      - id: hadolint-docker
+        description: Lint Dockerfiles
+        args: ['--ignore', 'DL3008', '--ignore', 'DL3009']
 
   # TypeScript/JavaScript formatting
   - repo: https://github.com/pre-commit/mirrors-prettier
@@ -52,3 +85,25 @@ repos:
         description: Format TypeScript/JavaScript with Prettier
         files: \.(ts|tsx|js|jsx|json|css|scss|md)$
         exclude: ^(package-lock\.json|\.next/)
+
+  # Custom security checks
+  - repo: local
+    hooks:
+      - id: check-env-files
+        name: Check for sensitive data in env files
+        description: Prevent committing live keys
+        entry: bash -c 'if grep -r "sk_live_\|pk_live_\|whsec_" *.env* 2>/dev/null; then echo "ERROR: Live keys found in env files!"; exit 1; fi'
+        language: system
+        pass_filenames: false
+
+      - id: check-requirements
+        name: Check requirements.txt format
+        description: Validate Python requirements
+        entry: python -c "import pkg_resources; pkg_resources.require(open('myhibachi-backend-fastapi/requirements.txt').read().splitlines())"
+        language: system
+        files: requirements\.txt$
+
+# Configuration
+default_stages: [commit]
+fail_fast: false
+minimum_pre_commit_version: '3.6.0'

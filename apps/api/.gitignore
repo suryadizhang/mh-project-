@@ -1,0 +1,91 @@
+# Environment variables - NEVER commit sensitive data
+.env
+.env.local
+.env.production
+.env.staging
+.env.*.local
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+mh-bookings.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.env/
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Docker
+.dockerignore
+
+# Testing
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+.coverage.*
+
+# Backup files
+*.bak
+*.backup
+*.tmp
+
+# Security keys and certificates
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Deployment
+docker-compose.override.yml

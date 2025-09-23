@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Pre-push safety checks
+echo "🔍 Running pre-push safety checks..."
+
+# Typecheck
+echo "📝 Running typecheck..."
+npm run typecheck
+
+# Lint
+echo "🧹 Running lint..."
+npm run lint
+
+# Tests
+echo "🧪 Running tests..."
+npm run test
+
+# Quick Docker build check (optional)
+echo "🐳 Running Docker build check..."
+docker build -q --build-arg COMPONENT=customer . > /dev/null
+
+echo "✅ All pre-push checks passed!"
