@@ -16,6 +16,21 @@ pnpm-debug.log*
 # Environment variables
 .env*
 !.env.example
+!.env.template
+!.env.production.template
+
+# Prevent documentation bloat
+**/FINAL_*.md
+**/COMPLETE_*.md
+**/IMPLEMENTATION_*.md
+**/COMPREHENSIVE_*.md
+**/AUDIT_*.md
+**/*_COMPLETE.md
+**/*_FINAL.md
+**/*_IMPLEMENTATION.md
+error_check_report*.json
+phase*-report.md
+step*-report.md
 
 # OS generated files
 .DS_Store

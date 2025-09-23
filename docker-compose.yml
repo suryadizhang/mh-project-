@@ -1,0 +1,256 @@
+# =============================================================================
+# MyHibachi - Unified Docker Compose Stack
+# =============================================================================
+# Unified stack with profiles for development, production, and monitoring
+# Usage:
+#   Development: docker-compose --profile development up
+#   Production:  docker-compose --profile production up  
+#   Monitoring:  docker-compose --profile monitoring up
+#   All:         docker-compose --profile development --profile monitoring up
+
+version: '3.8'
+
+services:
+  # =============================================================================
+  # FastAPI Backend Service
+  # =============================================================================
+  fastapi-backend:
+    profiles: ["development", "production"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        COMPONENT: api
+      target: api
+    container_name: myhibachi-fastapi
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - DATABASE_URL=postgresql+asyncpg://postgres:${DB_PASSWORD:-myhibachi123}@postgres:5432/myhibachi
+      - DATABASE_URL_SYNC=postgresql://postgres:${DB_PASSWORD:-myhibachi123}@postgres:5432/myhibachi
+      - SECRET_KEY=${SECRET_KEY:-your_super_secure_secret_key_replace_in_production}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-sk_test_your_test_key}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY:-pk_test_your_test_key}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-whsec_test_secret}
+      - REDIS_URL=redis://redis:6379/0
+      - ENABLE_METRICS=true
+      - PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus_multiproc_dir
+      - ALLOWED_ORIGINS=["http://localhost:3000","http://localhost:5173","http://127.0.0.1:3000"]
+    volumes:
+      - fastapi_data:/home/appuser/app/data
+      - fastapi_logs:/home/appuser/app/logs
+      - prometheus_multiproc:/tmp/prometheus_multiproc_dir
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - myhibachi-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # =============================================================================
+  # AI Backend Service
+  # =============================================================================
+  # AI Backend Service  
+  # =============================================================================
+  ai-backend:
+    profiles: ["development", "production"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        COMPONENT: ai-api
+      target: ai-api
+    container_name: myhibachi-ai
+    restart: unless-stopped
+    ports:
+      - "8002:8002"
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-your_openai_key_here}
+    networks:
+      - myhibachi-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # =============================================================================
+  # PostgreSQL Database
+  # =============================================================================
+  postgres:
+    profiles: ["development", "production"]
+    image: postgres:15-alpine
+    container_name: myhibachi-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=myhibachi
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-myhibachi123}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - myhibachi-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d myhibachi"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # =============================================================================
+  # Redis Cache & Session Store
+  # =============================================================================
+  redis:
+    profiles: ["development", "production"]
+    image: redis:7-alpine
+    container_name: myhibachi-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - myhibachi-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # =============================================================================
+  # Nginx Reverse Proxy (Production)
+  # =============================================================================
+  nginx:
+    image: nginx:alpine
+    container_name: myhibachi-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - fastapi-backend
+      - ai-backend
+    networks:
+      - myhibachi-network
+    profiles:
+      - production
+
+  # =============================================================================
+  # Prometheus Monitoring
+  # =============================================================================
+  prometheus:
+    profiles: ["monitoring"]
+    image: prom/prometheus:latest
+    container_name: myhibachi-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - myhibachi-network
+
+  # =============================================================================
+  # Grafana Dashboards
+  # =============================================================================
+  grafana:
+    profiles: ["monitoring"]
+    image: grafana/grafana:latest
+    container_name: myhibachi-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - myhibachi-network
+
+  # =============================================================================
+  # PgAdmin Database Management
+  # =============================================================================
+  # PgAdmin Database Management
+  # =============================================================================
+  pgadmin:
+    profiles: ["development", "monitoring"]
+    image: dpage/pgadmin4:latest
+    container_name: myhibachi-pgadmin
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@myhibachi.com}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:-admin123}
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - myhibachi-network
+
+# =============================================================================
+# Named Volumes for Data Persistence
+# =============================================================================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  fastapi_data:
+    driver: local
+  fastapi_logs:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  nginx_logs:
+    driver: local
+  prometheus_multiproc:
+    driver: local
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  myhibachi-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

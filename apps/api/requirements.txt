@@ -1,0 +1,77 @@
+# FastAPI Core
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# Database
+sqlalchemy==2.0.35
+alembic==1.12.1
+psycopg2-binary==2.9.9
+asyncpg==0.29.0
+
+# SQLite Support (compatibility with source backend)
+aiosqlite==0.19.0
+
+# Authentication & Security (Enhanced)
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+cryptography==41.0.7
+bcrypt==4.1.2
+
+# Environment & Configuration
+python-dotenv==1.0.0
+pydantic==2.5.0
+pydantic-settings==2.0.3
+email-validator==2.1.0
+
+# Stripe Integration
+stripe==7.0.0
+
+# HTTP & Requests
+httpx==0.25.2
+requests==2.31.0
+
+# Rate Limiting & Security
+slowapi==0.1.9
+prometheus-client==0.19.0
+
+# WebSocket Support
+websockets==12.0
+
+# Background Tasks & Scheduling
+celery==5.3.4
+redis==5.0.1
+
+# Date/Time
+python-dateutil==2.8.2
+
+# Logging & Monitoring (Enhanced)
+structlog==23.2.0
+rich==13.7.0
+
+# CSV Processing
+pandas==2.1.4
+
+# CORS & Middleware
+fastapi-cors==0.0.6
+
+# Security Headers
+secure==0.3.0
+
+# Testing (Enhanced)
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-httpx==0.26.0
+pytest-mock==3.12.0
+factory-boy==3.3.0
+
+# Development Tools (Enhanced)
+black==23.11.0
+flake8==6.1.0
+mypy==1.7.1
+ruff==0.1.6
+pre-commit==3.6.0
+bandit==1.7.5
+
+# Production Monitoring
+sentry-sdk[fastapi]==1.38.0
