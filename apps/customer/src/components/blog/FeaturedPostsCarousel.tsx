@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 
-import { blogPosts, BlogPost } from '@/data/blogPosts';
+import { blogPosts } from '@/data/blogPosts';
 
 interface FeaturedPostsCarouselProps {
   maxPosts?: number;

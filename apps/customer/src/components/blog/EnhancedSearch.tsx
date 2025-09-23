@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import React, { useEffect, useRef, useState } from 'react';
 
-import { blogPosts, BlogPost } from '@/data/blogPosts';
+import { blogPosts } from '@/data/blogPosts';
 
 interface SearchResult {
   id: number;

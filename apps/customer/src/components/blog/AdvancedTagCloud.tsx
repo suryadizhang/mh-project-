@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import React, { useState } from 'react';
 
-import { blogPosts, BlogPost } from '@/data/blogPosts';
+import { blogPosts } from '@/data/blogPosts';
 
 interface TagData {
   name: string;

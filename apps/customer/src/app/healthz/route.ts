@@ -1,6 +1,4 @@
-import type { NextRequest } from 'next/server';
-
-export function GET(_request: NextRequest) {
+export function GET() {
   try {
     return Response.json(
       {
@@ -22,7 +20,7 @@ export function GET(_request: NextRequest) {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-cache, no-store, must-revalidate',
         },
-      }
+      },
     );
   } catch (error) {
     return Response.json(
@@ -38,7 +36,7 @@ export function GET(_request: NextRequest) {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-cache, no-store, must-revalidate',
         },
-      }
+      },
     );
   }
 }
