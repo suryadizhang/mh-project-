@@ -1,141 +1,143 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import React, { useEffect, useRef, useState } from 'react'
+import Link from 'next/link';
+import React, { useEffect, useRef, useState } from 'react';
 
-import { blogPosts } from '@/data/blogPosts'
+import { blogPosts, BlogPost } from '@/data/blogPosts';
 
 interface SearchResult {
-  id: number
-  title: string
-  slug: string
-  excerpt: string
-  category: string
-  author: string
-  date: string
-  matchType: 'title' | 'excerpt' | 'keyword' | 'content'
-  matchText: string
-  relevanceScore: number
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  category: string;
+  author: string;
+  date: string;
+  matchType: 'title' | 'excerpt' | 'keyword' | 'content';
+  matchText: string;
+  relevanceScore: number;
 }
 
 interface EnhancedSearchProps {
-  onResultClick?: (result: SearchResult) => void
-  placeholder?: string
-  maxResults?: number
-  showCategories?: boolean
-  autoFocus?: boolean
+  onResultClick?: (result: SearchResult) => void;
+  placeholder?: string;
+  maxResults?: number;
+  showCategories?: boolean;
+  autoFocus?: boolean;
 }
 
-const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
+const EnhancedSearch: React.FC = ({
   onResultClick,
   placeholder = 'Search blog posts, topics, locations...',
   maxResults = 8,
   showCategories = true,
-  autoFocus = false
+  autoFocus = false,
 }) => {
-  const [query, setQuery] = useState('')
-  const [results, setResults] = useState<SearchResult[]>([])
-  const [isOpen, setIsOpen] = useState(false)
-  const [selectedIndex, setSelectedIndex] = useState(-1)
-  const [isLoading, setIsLoading] = useState(false)
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const searchRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const searchRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Auto focus if requested
   useEffect(() => {
     if (autoFocus && inputRef.current) {
-      inputRef.current.focus()
+      inputRef.current.focus();
     }
-  }, [autoFocus])
+  }, [autoFocus]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-        setSelectedIndex(-1)
+        setIsOpen(false);
+        setSelectedIndex(-1);
       }
-    }
+    };
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Perform search function
   const performSearch = React.useCallback(
     (searchQuery: string): SearchResult[] => {
-      const normalizedQuery = searchQuery.toLowerCase().trim()
-      const queryWords = normalizedQuery.split(/\s+/)
+      const normalizedQuery = searchQuery.toLowerCase().trim();
+      const queryWords = normalizedQuery.split(/\s+/);
 
-      const searchResults: SearchResult[] = []
+      const searchResults: SearchResult[] = [];
 
-      blogPosts.forEach(post => {
-        let relevanceScore = 0
-        const matches: { type: SearchResult['matchType']; text: string; score: number }[] = []
+      blogPosts.forEach((post) => {
+        let relevanceScore = 0;
+        const matches: { type: SearchResult['matchType']; text: string; score: number }[] = [];
 
         // Search in title (highest priority)
-        const titleMatch = post.title.toLowerCase()
+        const titleMatch = post.title.toLowerCase();
         if (titleMatch.includes(normalizedQuery)) {
-          matches.push({ type: 'title', text: post.title, score: 100 })
-          relevanceScore += 100
+          matches.push({ type: 'title', text: post.title, score: 100 });
+          relevanceScore += 100;
         } else {
           // Check individual words in title
-          const titleWordMatches = queryWords.filter(word => titleMatch.includes(word))
+          const titleWordMatches = queryWords.filter((word) => titleMatch.includes(word));
           if (titleWordMatches.length > 0) {
-            matches.push({ type: 'title', text: post.title, score: titleWordMatches.length * 50 })
-            relevanceScore += titleWordMatches.length * 50
+            matches.push({ type: 'title', text: post.title, score: titleWordMatches.length * 50 });
+            relevanceScore += titleWordMatches.length * 50;
           }
         }
 
         // Search in excerpt
-        const excerptMatch = post.excerpt.toLowerCase()
+        const excerptMatch = post.excerpt.toLowerCase();
         if (excerptMatch.includes(normalizedQuery)) {
-          matches.push({ type: 'excerpt', text: post.excerpt, score: 60 })
-          relevanceScore += 60
+          matches.push({ type: 'excerpt', text: post.excerpt, score: 60 });
+          relevanceScore += 60;
         } else {
-          const excerptWordMatches = queryWords.filter(word => excerptMatch.includes(word))
+          const excerptWordMatches = queryWords.filter((word) => excerptMatch.includes(word));
           if (excerptWordMatches.length > 0) {
             matches.push({
               type: 'excerpt',
               text: post.excerpt,
-              score: excerptWordMatches.length * 30
-            })
-            relevanceScore += excerptWordMatches.length * 30
+              score: excerptWordMatches.length * 30,
+            });
+            relevanceScore += excerptWordMatches.length * 30;
           }
         }
 
         // Search in keywords
         const keywordMatches = post.keywords.filter(
-          keyword =>
+          (keyword) =>
             keyword.toLowerCase().includes(normalizedQuery) ||
-            queryWords.some(word => keyword.toLowerCase().includes(word))
-        )
+            queryWords.some((word) => keyword.toLowerCase().includes(word)),
+        );
         if (keywordMatches.length > 0) {
           matches.push({
             type: 'keyword',
             text: keywordMatches.join(', '),
-            score: keywordMatches.length * 40
-          })
-          relevanceScore += keywordMatches.length * 40
+            score: keywordMatches.length * 40,
+          });
+          relevanceScore += keywordMatches.length * 40;
         }
 
         // Search in category, service area, event type
-        const metaFields = [post.category, post.serviceArea, post.eventType].join(' ').toLowerCase()
+        const metaFields = [post.category, post.serviceArea, post.eventType]
+          .join(' ')
+          .toLowerCase();
         if (metaFields.includes(normalizedQuery)) {
           matches.push({
             type: 'content',
             text: `${post.category} • ${post.serviceArea}`,
-            score: 30
-          })
-          relevanceScore += 30
+            score: 30,
+          });
+          relevanceScore += 30;
         }
 
         // If we have matches, add to results
         if (matches.length > 0) {
           const bestMatch = matches.reduce((best, current) =>
-            current.score > best.score ? current : best
-          )
+            current.score > best.score ? current : best,
+          );
 
           searchResults.push({
             id: post.id,
@@ -147,135 +149,135 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
             date: post.date,
             matchType: bestMatch.type,
             matchText: bestMatch.text,
-            relevanceScore
-          })
+            relevanceScore,
+          });
         }
-      })
+      });
 
       // Sort by relevance and limit results
-      return searchResults.sort((a, b) => b.relevanceScore - a.relevanceScore).slice(0, maxResults)
+      return searchResults.sort((a, b) => b.relevanceScore - a.relevanceScore).slice(0, maxResults);
     },
-    [maxResults]
-  )
+    [maxResults],
+  );
 
   // Perform search
   useEffect(() => {
     if (query.length < 2) {
-      setResults([])
-      setIsOpen(false)
-      return
+      setResults([]);
+      setIsOpen(false);
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     // Simulate search delay for better UX
     const searchTimeout = setTimeout(() => {
-      const searchResults = performSearch(query)
-      setResults(searchResults)
-      setIsOpen(true)
-      setSelectedIndex(-1)
-      setIsLoading(false)
-    }, 150)
+      const searchResults = performSearch(query);
+      setResults(searchResults);
+      setIsOpen(true);
+      setSelectedIndex(-1);
+      setIsLoading(false);
+    }, 150);
 
-    return () => clearTimeout(searchTimeout)
-  }, [query, performSearch])
+    return () => clearTimeout(searchTimeout);
+  }, [query, performSearch]);
 
   const highlightText = (text: string, query: string) => {
-    if (!query) return text
+    if (!query) return text;
 
-    const normalizedQuery = query.toLowerCase()
-    const queryWords = normalizedQuery.split(/\s+/).filter(word => word.length > 1)
+    const normalizedQuery = query.toLowerCase();
+    const queryWords = normalizedQuery.split(/\s+/).filter((word) => word.length > 1);
 
-    let highlightedText = text
+    let highlightedText = text;
 
     // Highlight exact phrase first
-    const exactRegex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+    const exactRegex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
     highlightedText = highlightedText.replace(
       exactRegex,
-      '<mark class="bg-yellow-200 px-1 rounded">$1</mark>'
-    )
+      '<mark class="bg-yellow-200 px-1 rounded">$1</mark>',
+    );
 
     // Then highlight individual words
-    queryWords.forEach(word => {
-      const wordRegex = new RegExp(`(${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
-      highlightedText = highlightedText.replace(wordRegex, match => {
+    queryWords.forEach((word) => {
+      const wordRegex = new RegExp(`(${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      highlightedText = highlightedText.replace(wordRegex, (match) => {
         // Don't double-highlight already marked text
-        if (match.includes('<mark')) return match
-        return `<mark class="bg-blue-100 px-1 rounded">${match}</mark>`
-      })
-    })
+        if (match.includes('<mark')) return match;
+        return `<mark class="bg-blue-100 px-1 rounded">${match}</mark>`;
+      });
+    });
 
-    return highlightedText
-  }
+    return highlightedText;
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!isOpen || results.length === 0) return
+    if (!isOpen || results.length === 0) return;
 
     switch (e.key) {
       case 'ArrowDown':
-        e.preventDefault()
-        setSelectedIndex(prev => Math.min(prev + 1, results.length - 1))
-        break
+        e.preventDefault();
+        setSelectedIndex((prev) => Math.min(prev + 1, results.length - 1));
+        break;
       case 'ArrowUp':
-        e.preventDefault()
-        setSelectedIndex(prev => Math.max(prev - 1, -1))
-        break
+        e.preventDefault();
+        setSelectedIndex((prev) => Math.max(prev - 1, -1));
+        break;
       case 'Enter':
-        e.preventDefault()
+        e.preventDefault();
         if (selectedIndex >= 0 && results[selectedIndex]) {
-          handleResultClick(results[selectedIndex])
+          handleResultClick(results[selectedIndex]);
         }
-        break
+        break;
       case 'Escape':
-        e.preventDefault()
-        setIsOpen(false)
-        setSelectedIndex(-1)
-        inputRef.current?.blur()
-        break
+        e.preventDefault();
+        setIsOpen(false);
+        setSelectedIndex(-1);
+        inputRef.current?.blur();
+        break;
     }
-  }
+  };
 
   const handleResultClick = (result: SearchResult) => {
-    setQuery('')
-    setIsOpen(false)
-    setSelectedIndex(-1)
+    setQuery('');
+    setIsOpen(false);
+    setSelectedIndex(-1);
 
     if (onResultClick) {
-      onResultClick(result)
+      onResultClick(result);
     }
-  }
+  };
 
   const getMatchTypeIcon = (matchType: SearchResult['matchType']) => {
     switch (matchType) {
       case 'title':
-        return '📄'
+        return '📄';
       case 'excerpt':
-        return '📝'
+        return '📝';
       case 'keyword':
-        return '🏷️'
+        return '🏷️';
       case 'content':
-        return '📂'
+        return '📂';
     }
-  }
+  };
 
   const getMatchTypeLabel = (matchType: SearchResult['matchType']) => {
     switch (matchType) {
       case 'title':
-        return 'Title match'
+        return 'Title match';
       case 'excerpt':
-        return 'Content match'
+        return 'Content match';
       case 'keyword':
-        return 'Topic match'
+        return 'Topic match';
       case 'content':
-        return 'Category match'
+        return 'Category match';
     }
-  }
+  };
 
   return (
     <div ref={searchRef} className="relative w-full max-w-2xl">
       {/* Search Input */}
       <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
           <svg
             className="h-5 w-5 text-gray-400"
             fill="none"
@@ -295,25 +297,25 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
           ref={inputRef}
           type="text"
           value={query}
-          onChange={e => setQuery(e.target.value)}
+          onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
+          className="block w-full rounded-lg border border-gray-300 bg-white py-3 pr-12 pl-10 text-sm leading-5 placeholder-gray-500 focus:border-orange-500 focus:placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:outline-none"
         />
 
         {/* Loading/Clear Button */}
-        <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
           {isLoading ? (
-            <div className="animate-spin h-4 w-4 border-2 border-orange-500 border-t-transparent rounded-full"></div>
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-orange-500 border-t-transparent"></div>
           ) : (
             query && (
               <button
                 onClick={() => {
-                  setQuery('')
-                  setIsOpen(false)
-                  inputRef.current?.focus()
+                  setQuery('');
+                  setIsOpen(false);
+                  inputRef.current?.focus();
                 }}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 transition-colors hover:text-gray-600"
               >
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -331,10 +333,10 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
 
       {/* Search Results Dropdown */}
       {isOpen && (
-        <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto">
+        <div className="absolute z-50 mt-2 max-h-96 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
           {results.length > 0 ? (
             <>
-              <div className="px-4 py-2 border-b border-gray-100 bg-gray-50">
+              <div className="border-b border-gray-100 bg-gray-50 px-4 py-2">
                 <span className="text-xs text-gray-600">
                   {results.length} result{results.length !== 1 ? 's' : ''} for &ldquo;{query}&rdquo;
                 </span>
@@ -345,34 +347,34 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
                   key={result.id}
                   href={`/blog/${result.slug}`}
                   onClick={() => handleResultClick(result)}
-                  className={`block px-4 py-3 hover:bg-gray-50 transition-colors ${
-                    index === selectedIndex ? 'bg-orange-50 border-l-4 border-orange-500' : ''
+                  className={`block px-4 py-3 transition-colors hover:bg-gray-50 ${
+                    index === selectedIndex ? 'border-l-4 border-orange-500 bg-orange-50' : ''
                   }`}
                 >
                   <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 mt-1">
+                    <div className="mt-1 flex-shrink-0">
                       <span className="text-lg">{getMatchTypeIcon(result.matchType)}</span>
                     </div>
 
-                    <div className="flex-1 min-w-0">
+                    <div className="min-w-0 flex-1">
                       <h4
-                        className="text-sm font-medium text-gray-900 line-clamp-1"
+                        className="line-clamp-1 text-sm font-medium text-gray-900"
                         dangerouslySetInnerHTML={{
-                          __html: highlightText(result.title, query)
+                          __html: highlightText(result.title, query),
                         }}
                       />
 
                       <p
-                        className="text-sm text-gray-600 line-clamp-2 mt-1"
+                        className="mt-1 line-clamp-2 text-sm text-gray-600"
                         dangerouslySetInnerHTML={{
                           __html: highlightText(
                             result.matchType === 'excerpt' ? result.excerpt : result.matchText,
-                            query
-                          )
+                            query,
+                          ),
                         }}
                       />
 
-                      <div className="flex items-center space-x-2 mt-2">
+                      <div className="mt-2 flex items-center space-x-2">
                         <span className="text-xs text-gray-500">
                           {getMatchTypeLabel(result.matchType)}
                         </span>
@@ -395,10 +397,10 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
               ))}
 
               {results.length === maxResults && (
-                <div className="px-4 py-2 border-t border-gray-100 bg-gray-50">
+                <div className="border-t border-gray-100 bg-gray-50 px-4 py-2">
                   <Link
                     href={`/blog?search=${encodeURIComponent(query)}`}
-                    className="text-xs text-orange-600 hover:text-orange-700 font-medium"
+                    className="text-xs font-medium text-orange-600 hover:text-orange-700"
                   >
                     View all results for &ldquo;{query}&rdquo; →
                   </Link>
@@ -407,7 +409,7 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
             </>
           ) : (
             <div className="px-4 py-8 text-center">
-              <div className="text-gray-400 mb-2">
+              <div className="mb-2 text-gray-400">
                 <svg
                   className="mx-auto h-8 w-8"
                   fill="none"
@@ -423,7 +425,7 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
                 </svg>
               </div>
               <p className="text-sm text-gray-500">No results found for &ldquo;{query}&rdquo;</p>
-              <p className="text-xs text-gray-400 mt-1">Try different keywords or check spelling</p>
+              <p className="mt-1 text-xs text-gray-400">Try different keywords or check spelling</p>
             </div>
           )}
         </div>
@@ -431,9 +433,9 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
 
       {/* Search Tips */}
       {query.length === 0 && isOpen && (
-        <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4">
-          <h4 className="text-sm font-medium text-gray-900 mb-2">Search Tips</h4>
-          <ul className="text-xs text-gray-600 space-y-1">
+        <div className="absolute z-50 mt-2 w-full rounded-lg border border-gray-200 bg-white p-4 shadow-lg">
+          <h4 className="mb-2 text-sm font-medium text-gray-900">Search Tips</h4>
+          <ul className="space-y-1 text-xs text-gray-600">
             <li>• Search by location: &ldquo;San Francisco&rdquo;, &ldquo;Bay Area&rdquo;</li>
             <li>
               • Search by event: &ldquo;birthday&rdquo;, &ldquo;wedding&rdquo;,
@@ -448,7 +450,7 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default EnhancedSearch
+export default EnhancedSearch;

@@ -1,79 +1,79 @@
-'use client'
+'use client';
 
-import Image from 'next/image'
-import Link from 'next/link'
-import React, { useEffect, useState } from 'react'
+import Image from 'next/image';
+import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
 
-import { blogPosts } from '@/data/blogPosts'
+import { blogPosts, BlogPost } from '@/data/blogPosts';
 
 interface FeaturedPostsCarouselProps {
-  maxPosts?: number
-  autoPlay?: boolean
-  autoPlayInterval?: number
-  showDots?: boolean
-  showArrows?: boolean
-  height?: 'sm' | 'md' | 'lg' | 'xl'
+  maxPosts?: number;
+  autoPlay?: boolean;
+  autoPlayInterval?: number;
+  showDots?: boolean;
+  showArrows?: boolean;
+  height?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
-const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
+const FeaturedPostsCarousel: React.FC = ({
   maxPosts = 5,
   autoPlay = true,
   autoPlayInterval = 5000,
   showDots = true,
   showArrows = true,
-  height = 'lg'
+  height = 'lg',
 }) => {
-  const [currentSlide, setCurrentSlide] = useState(0)
-  const [isHovered, setIsHovered] = useState(false)
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
 
   // Get featured posts or top posts
-  const featuredPosts = blogPosts.filter(post => post.featured).slice(0, maxPosts)
+  const featuredPosts = blogPosts.filter((post) => post.featured).slice(0, maxPosts);
 
   // If not enough featured posts, get top posts by ID (simulating popularity)
-  const displayPosts = featuredPosts.length >= 3 ? featuredPosts : blogPosts.slice(0, maxPosts)
+  const displayPosts = featuredPosts.length >= 3 ? featuredPosts : blogPosts.slice(0, maxPosts);
 
   // Auto-play functionality
   useEffect(() => {
-    if (!autoPlay || isHovered || displayPosts.length <= 1) return
+    if (!autoPlay || isHovered || displayPosts.length <= 1) return;
 
     const interval = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % displayPosts.length)
-    }, autoPlayInterval)
+      setCurrentSlide((prev) => (prev + 1) % displayPosts.length);
+    }, autoPlayInterval);
 
-    return () => clearInterval(interval)
-  }, [autoPlay, autoPlayInterval, isHovered, displayPosts.length])
+    return () => clearInterval(interval);
+  }, [autoPlay, autoPlayInterval, isHovered, displayPosts.length]);
 
   const goToSlide = (index: number) => {
-    setCurrentSlide(index)
-  }
+    setCurrentSlide(index);
+  };
 
   const goToPrevious = () => {
-    setCurrentSlide(prev => (prev - 1 + displayPosts.length) % displayPosts.length)
-  }
+    setCurrentSlide((prev) => (prev - 1 + displayPosts.length) % displayPosts.length);
+  };
 
   const goToNext = () => {
-    setCurrentSlide(prev => (prev + 1) % displayPosts.length)
-  }
+    setCurrentSlide((prev) => (prev + 1) % displayPosts.length);
+  };
 
   const getHeightClass = () => {
     switch (height) {
       case 'sm':
-        return 'h-64'
+        return 'h-64';
       case 'md':
-        return 'h-80'
+        return 'h-80';
       case 'lg':
-        return 'h-96'
+        return 'h-96';
       case 'xl':
-        return 'h-[32rem]'
+        return 'h-[32rem]';
     }
-  }
+  };
 
   if (displayPosts.length === 0) {
-    return null
+    return null;
   }
 
   return (
-    <div className="relative w-full bg-gray-100 rounded-xl overflow-hidden shadow-lg">
+    <div className="relative w-full overflow-hidden rounded-xl bg-gray-100 shadow-lg">
       {/* Carousel Container */}
       <div
         className={`relative ${getHeightClass()} overflow-hidden`}
@@ -100,32 +100,32 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
                 />
               )}
               {/* Overlay */}
-              <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+              <div className="bg-opacity-40 absolute inset-0 bg-black"></div>
             </div>
 
             {/* Content */}
-            <div className="relative z-10 h-full flex items-center justify-center p-8">
-              <div className="max-w-4xl mx-auto text-center text-white">
+            <div className="relative z-10 flex h-full items-center justify-center p-8">
+              <div className="mx-auto max-w-4xl text-center text-white">
                 {/* Category Badge */}
-                <div className="inline-flex items-center px-3 py-1 rounded-full bg-white bg-opacity-20 backdrop-blur-sm text-sm font-medium text-white mb-4">
+                <div className="bg-opacity-20 mb-4 inline-flex items-center rounded-full bg-white px-3 py-1 text-sm font-medium text-white backdrop-blur-sm">
                   <span className="mr-2">🎯</span>
                   {post.category}
                 </div>
 
                 {/* Title */}
-                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+                <h2 className="mb-6 text-3xl leading-tight font-bold md:text-4xl lg:text-5xl">
                   {post.title}
                 </h2>
 
                 {/* Excerpt */}
-                <p className="text-lg md:text-xl mb-8 text-gray-100 max-w-3xl mx-auto line-clamp-3">
+                <p className="mx-auto mb-8 line-clamp-3 max-w-3xl text-lg text-gray-100 md:text-xl">
                   {post.excerpt}
                 </p>
 
                 {/* Meta Info */}
-                <div className="flex items-center justify-center space-x-6 mb-8 text-sm text-gray-200">
+                <div className="mb-8 flex items-center justify-center space-x-6 text-sm text-gray-200">
                   <div className="flex items-center space-x-2">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                       <path
                         fillRule="evenodd"
                         d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
@@ -135,7 +135,7 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
                     <span>{post.author}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                       <path
                         fillRule="evenodd"
                         d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
@@ -145,7 +145,7 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
                     <span>{post.date}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                       <path
                         fillRule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
@@ -159,10 +159,10 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
                 {/* CTA Button */}
                 <Link
                   href={`/blog/${post.slug}`}
-                  className="inline-flex items-center px-8 py-3 bg-white text-gray-900 font-semibold rounded-full hover:bg-gray-100 transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  className="inline-flex transform items-center rounded-full bg-white px-8 py-3 font-semibold text-gray-900 shadow-lg transition-colors duration-200 hover:scale-105 hover:bg-gray-100 hover:shadow-xl"
                 >
                   Read Full Article
-                  <svg className="ml-2 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="ml-2 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fillRule="evenodd"
                       d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
@@ -176,7 +176,7 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
             {/* Featured Badge */}
             {post.featured && (
               <div className="absolute top-4 left-4 z-20">
-                <div className="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-bold flex items-center">
+                <div className="flex items-center rounded-full bg-yellow-400 px-3 py-1 text-sm font-bold text-yellow-900">
                   <span className="mr-1">⭐</span>
                   Featured
                 </div>
@@ -190,10 +190,10 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
           <>
             <button
               onClick={goToPrevious}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white bg-opacity-20 hover:bg-opacity-30 backdrop-blur-sm text-white p-3 rounded-full transition-all duration-200 hover:scale-110"
+              className="bg-opacity-20 hover:bg-opacity-30 absolute top-1/2 left-4 z-20 -translate-y-1/2 transform rounded-full bg-white p-3 text-white backdrop-blur-sm transition-all duration-200 hover:scale-110"
               aria-label="Previous slide"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -205,10 +205,10 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
 
             <button
               onClick={goToNext}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white bg-opacity-20 hover:bg-opacity-30 backdrop-blur-sm text-white p-3 rounded-full transition-all duration-200 hover:scale-110"
+              className="bg-opacity-20 hover:bg-opacity-30 absolute top-1/2 right-4 z-20 -translate-y-1/2 transform rounded-full bg-white p-3 text-white backdrop-blur-sm transition-all duration-200 hover:scale-110"
               aria-label="Next slide"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -223,16 +223,16 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
 
       {/* Dots Indicator */}
       {showDots && displayPosts.length > 1 && (
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20">
+        <div className="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 transform">
           <div className="flex space-x-2">
             {displayPosts.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                className={`h-3 w-3 rounded-full transition-all duration-200 ${
                   index === currentSlide
-                    ? 'bg-white scale-125'
-                    : 'bg-white bg-opacity-50 hover:bg-opacity-75'
+                    ? 'scale-125 bg-white'
+                    : 'bg-opacity-50 hover:bg-opacity-75 bg-white'
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
@@ -243,37 +243,37 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
 
       {/* Progress Bar */}
       {autoPlay && !isHovered && displayPosts.length > 1 && (
-        <div className="absolute bottom-0 left-0 w-full h-1 bg-white bg-opacity-20">
+        <div className="bg-opacity-20 absolute bottom-0 left-0 h-1 w-full bg-white">
           <div
             className="h-full bg-white transition-all duration-100 ease-linear"
             style={{
-              width: `${((currentSlide + 1) / displayPosts.length) * 100}%`
+              width: `${((currentSlide + 1) / displayPosts.length) * 100}%`,
             }}
           />
         </div>
       )}
 
       {/* Mini Thumbnails */}
-      <div className="absolute bottom-4 right-4 z-20 hidden lg:flex space-x-2">
+      <div className="absolute right-4 bottom-4 z-20 hidden space-x-2 lg:flex">
         {displayPosts.map((post, index) => (
           <button
             key={post.id}
             onClick={() => goToSlide(index)}
-            className={`w-16 h-12 rounded bg-white bg-opacity-20 backdrop-blur-sm border-2 transition-all duration-200 overflow-hidden ${
+            className={`bg-opacity-20 h-12 w-16 overflow-hidden rounded border-2 bg-white backdrop-blur-sm transition-all duration-200 ${
               index === currentSlide
-                ? 'border-white scale-110'
-                : 'border-transparent hover:border-white hover:scale-105'
+                ? 'scale-110 border-white'
+                : 'border-transparent hover:scale-105 hover:border-white'
             }`}
             title={post.title}
           >
-            <div className="w-full h-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white text-xs font-bold">
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-orange-400 to-red-500 text-xs font-bold text-white">
               {index + 1}
             </div>
           </button>
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default FeaturedPostsCarousel
+export default FeaturedPostsCarousel;

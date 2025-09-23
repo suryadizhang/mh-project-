@@ -1,0 +1,98 @@
+[
+  {
+    "title": "Premium Hibachi Combo",
+    "description": "Our signature hibachi experience with choice of protein, fried rice, mixed vegetables, and our famous yum-yum sauce. The full restaurant experience at your location!",
+    "content": "Includes: Choice of chicken, beef, shrimp, or salmon • Hibachi fried rice • Mixed grilled vegetables • Yum-yum sauce • Ginger sauce • Teriyaki glaze • Interactive cooking show",
+    "category": "entrees",
+    "href": "/menu",
+    "keywords": ["combo", "hibachi", "chicken", "beef", "shrimp", "salmon", "fried rice", "vegetables"]
+  },
+  {
+    "title": "Chicken Teriyaki Hibachi",
+    "description": "Tender chicken breast grilled hibachi-style with our signature teriyaki glaze, served with fried rice and vegetables.",
+    "content": "Juicy chicken breast marinated and grilled fresh on our hibachi grill. Includes hibachi fried rice, mixed vegetables, and choice of sauces. Great for all ages!",
+    "category": "chicken",
+    "href": "/menu",
+    "keywords": ["chicken", "teriyaki", "breast", "popular", "family-friendly"]
+  },
+  {
+    "title": "Hibachi Steak",
+    "description": "Premium steak cuts grilled to perfection with hibachi seasonings, served with signature fried rice and fresh vegetables.",
+    "content": "High-quality beef grilled hibachi-style with our special seasonings. Cooked to your preference and served with hibachi fried rice, grilled vegetables, and our signature sauces.",
+    "category": "beef",
+    "href": "/menu",
+    "keywords": ["steak", "beef", "premium", "grilled", "cooked to order"]
+  },
+  {
+    "title": "Hibachi Shrimp",
+    "description": "Fresh jumbo shrimp grilled hibachi-style with garlic butter and seasonings, served with fried rice and vegetables.",
+    "content": "Large, fresh shrimp grilled with garlic butter and hibachi seasonings. Light, flavorful, and perfect for seafood lovers. Includes fried rice and vegetables.",
+    "category": "seafood",
+    "href": "/menu",
+    "keywords": ["shrimp", "seafood", "garlic butter", "fresh", "jumbo"]
+  },
+  {
+    "title": "Salmon Hibachi",
+    "description": "Fresh salmon fillet grilled hibachi-style with teriyaki glaze, served with signature fried rice and seasonal vegetables.",
+    "content": "Premium salmon fillet grilled fresh with teriyaki glaze and hibachi seasonings. Healthy and delicious option served with fried rice and grilled vegetables.",
+    "category": "seafood",
+    "href": "/menu",
+    "keywords": ["salmon", "fish", "healthy", "teriyaki", "premium"]
+  },
+  {
+    "title": "Vegetarian Hibachi",
+    "description": "Fresh seasonal vegetables grilled hibachi-style with tofu or extra vegetables, served with vegetable fried rice.",
+    "content": "Perfect for vegetarians! Fresh seasonal vegetables and tofu grilled with hibachi seasonings. Includes vegetable fried rice made without meat products. Flavorful and satisfying!",
+    "category": "vegetarian",
+    "href": "/menu",
+    "keywords": ["vegetarian", "vegetables", "tofu", "plant-based", "seasonal", "no meat"]
+  },
+  {
+    "title": "Kid's Hibachi Plate",
+    "description": "Child-friendly hibachi meal with choice of chicken or shrimp, fried rice, and vegetables. Perfect portion for children under 12.",
+    "content": "Specially portioned for kids with mild seasonings. Choice of chicken or shrimp, hibachi fried rice, and vegetables. Interactive cooking show included - kids love watching the chef!",
+    "category": "kids",
+    "href": "/menu",
+    "keywords": ["kids", "children", "small portion", "mild", "family", "under 12"]
+  },
+  {
+    "title": "Surf & Turf Hibachi",
+    "description": "The best of both worlds - premium steak and fresh shrimp grilled hibachi-style, served with fried rice and vegetables.",
+    "content": "Premium combination of hibachi steak and jumbo shrimp. Grilled to perfection with our signature seasonings. Includes hibachi fried rice, vegetables, and full sauce selection.",
+    "category": "premium",
+    "href": "/menu",
+    "keywords": ["surf and turf", "steak", "shrimp", "premium", "combination", "best of both"]
+  },
+  {
+    "title": "Hibachi Fried Rice",
+    "description": "Our signature fried rice made fresh on the hibachi grill with eggs, vegetables, and seasonings. Available as a side or main dish.",
+    "content": "Made fresh on the hibachi grill with eggs, mixed vegetables, and our signature seasonings. Can be made as vegetarian or with choice of protein added.",
+    "category": "sides",
+    "href": "/menu",
+    "keywords": ["fried rice", "side dish", "eggs", "vegetables", "signature"]
+  },
+  {
+    "title": "Hibachi Vegetables",
+    "description": "Fresh seasonal vegetables grilled hibachi-style with garlic butter and seasonings. Perfect side dish or vegetarian option.",
+    "content": "Fresh zucchini, onions, mushrooms, and seasonal vegetables grilled with garlic butter and hibachi seasonings. Healthy and flavorful side dish.",
+    "category": "sides",
+    "href": "/menu",
+    "keywords": ["vegetables", "side dish", "zucchini", "onions", "mushrooms", "healthy"]
+  },
+  {
+    "title": "Yum-Yum Sauce",
+    "description": "Our famous signature sauce! Creamy, tangy, and perfect with any hibachi dish. The sauce everyone asks about!",
+    "content": "The famous sauce that makes everything better! Creamy, slightly sweet and tangy. Made fresh and served with every meal. Guests always want the recipe!",
+    "category": "sauces",
+    "href": "/menu",
+    "keywords": ["yum-yum sauce", "famous", "signature", "creamy", "tangy", "popular"]
+  },
+  {
+    "title": "Ginger Sauce",
+    "description": "Fresh ginger dipping sauce with a mild kick. Traditional Japanese-style sauce perfect for vegetables and seafood.",
+    "content": "Traditional Japanese ginger sauce made fresh. Light, refreshing with a mild ginger kick. Pairs perfectly with vegetables, seafood, and chicken.",
+    "category": "sauces",
+    "href": "/menu",
+    "keywords": ["ginger sauce", "traditional", "japanese", "mild kick", "seafood", "vegetables"]
+  }
+]

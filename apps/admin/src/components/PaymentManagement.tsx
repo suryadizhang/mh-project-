@@ -45,8 +45,8 @@ interface PaymentAnalytics {
   total_payments: number;
   total_amount: number;
   avg_payment: number;
-  payment_methods: Record;
-  monthly_revenue: Array;
+  payment_methods: Record<string, unknown>;
+  monthly_revenue: Array<{ month: string; amount: number }>;
 }
 
 interface RefundRequest {

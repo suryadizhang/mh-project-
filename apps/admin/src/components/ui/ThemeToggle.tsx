@@ -8,7 +8,7 @@ interface ThemeToggleProps {
   showLabel?: boolean;
 }
 
-const ThemeToggle: React.FC = ({
+const ThemeToggle: React.FC<ThemeToggleProps> = ({
   className = '',
   size = 'md',
   showLabel = false,
