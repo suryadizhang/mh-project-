@@ -31,13 +31,20 @@ type BookingFormData = {
   venueZipcode?: string;
 };
 
+interface TimeSlot {
+  time: '12PM' | '3PM' | '6PM' | '9PM';
+  label: string;
+  available: number;
+  isAvailable: boolean;
+}
+
 interface BookingFormContainerProps {
   className?: string;
 }
 
 interface ApiResponse {
   bookedDates?: string[];
-  timeSlots?: Array;
+  timeSlots?: TimeSlot[];
 }
 
 const BookingFormContainer: React.FC = ({ className = '' }) => {
@@ -48,7 +55,7 @@ const BookingFormContainer: React.FC = ({ className = '' }) => {
   const [bookedDates, setBookedDates] = useState<Date[]>([]);
   const [loadingDates, setLoadingDates] = useState(false);
   const [dateError, setDateError] = useState<string | null>(null);
-  const [availableTimeSlots, setAvailableTimeSlots] = useState<Array>([]);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
   const [loadingTimeSlots, setLoadingTimeSlots] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 

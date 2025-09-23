@@ -12,7 +12,7 @@ interface BookedDatesResponse {
 }
 
 interface AvailabilityResponse {
-  timeSlots: Array;
+  timeSlots: TimeSlot[];
 }
 
 export function useBooking() {

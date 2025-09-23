@@ -1,9 +1,10 @@
 import type { NextConfig } from 'next';
 
-// Dynamic import for bundle analyzer to avoid type issues
-const _withBundleAnalyzer =
+// Dynamic import for bundle analyzer
+const withBundleAnalyzer =
   process.env.ANALYZE === 'true'
-    ? require('@next/bundle-analyzer')({ enabled: true })
+    ? // eslint-disable-next-line @typescript-eslint/no-require-imports
+      require('@next/bundle-analyzer')({ enabled: true })
     : (config: NextConfig) => config;
 
 const nextConfig: NextConfig = {
@@ -110,4 +111,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default _withBundleAnalyzer(nextConfig);
+export default withBundleAnalyzer(nextConfig);
