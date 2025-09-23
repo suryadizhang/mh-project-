@@ -92,15 +92,18 @@ repos:
       - id: check-env-files
         name: Check for sensitive data in env files
         description: Prevent committing live keys
-        entry: bash -c 'if grep -r "sk_live_\|pk_live_\|whsec_" *.env* 2>/dev/null; then echo "ERROR: Live keys found in env files!"; exit 1; fi'
+        entry: bash
+        args: ['-c', 'if grep -rq "sk_live_\\|pk_live_\\|whsec_" *.env* 2>/dev/null; then echo "ERROR: Live keys found!"; exit 1; fi']
         language: system
         pass_filenames: false
 
       - id: check-requirements
         name: Check requirements.txt format
         description: Validate Python requirements
-        entry: python -c "import pkg_resources; pkg_resources.require(open('myhibachi-backend-fastapi/requirements.txt').read().splitlines())"
+        entry: python
+        args: ['-c', 'import pkg_resources; [pkg_resources.Requirement.parse(line) for line in open("myhibachi-backend-fastapi/requirements.txt") if line.strip() and not line.startswith("#")]']
         language: system
+        pass_filenames: false
         files: requirements\.txt$
 
 # Configuration

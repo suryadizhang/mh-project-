@@ -125,7 +125,7 @@ export function BaseLocationManager() {
       });
 
       if (response.success) {
-        const updatedData = response.data;
+        const updatedData = response.data as unknown as CompanySettings;
         setCurrentSettings(updatedData);
         setFormData(updatedData);
         setUpdateStatus({

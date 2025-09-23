@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import React, { useState } from 'react';
 
-import { blogPosts } from '@/data/blogPosts';
+import { blogPosts, BlogPost } from '@/data/blogPosts';
 
 interface TagData {
   name: string;
@@ -30,7 +30,7 @@ interface AdvancedTagCloudProps {
   onTagClick?: (tag: string) => void;
 }
 
-const AdvancedTagCloud: React.FC<AdvancedTagCloudProps> = ({
+const AdvancedTagCloud: React.FC = ({
   maxTags = 25,
   showCount = true,
   interactive = true,
