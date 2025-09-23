@@ -40,7 +40,7 @@ export default function BookingPage() {
   const [bookedDates, setBookedDates] = useState<Date[]>([]);
   const [loadingDates, setLoadingDates] = useState(false);
   const [dateError, setDateError] = useState<string | null>(null);
-  const [availableTimeSlots, setAvailableTimeSlots] = useState<Array<{ time: string; label: string; available: number; isAvailable: boolean }>>([]);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<Array>([]);
   const [loadingTimeSlots, setLoadingTimeSlots] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -75,7 +75,7 @@ export default function BookingPage() {
       const result = await apiFetch('/api/v1/bookings/booked-dates');
       if (result.success && result.data) {
         // Convert string dates to Date objects
-        const bookedDates = (result.data as Record<string, any>)?.bookedDates;
+        const bookedDates = (result.data as Record)?.bookedDates;
         const dates = Array.isArray(bookedDates)
           ? bookedDates.map((dateStr: string) => new Date(dateStr))
           : [];
@@ -291,7 +291,7 @@ export default function BookingPage() {
         setFormData(null);
 
         // Show success message with booking ID
-        const bookingId = (response.data as Record<string, any>)?.bookingId || 'N/A';
+        const bookingId = (response.data as Record)?.bookingId || 'N/A';
         alert(
           `Booking Confirmed!\n\nConfirmation Code: ${bookingId}\n\nWe will contact you soon at ${formData.email} to finalize your hibachi experience details.\n\nThank you for choosing My Hibachi!`,
         );

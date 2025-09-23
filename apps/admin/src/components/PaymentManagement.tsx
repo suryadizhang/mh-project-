@@ -45,7 +45,7 @@ interface PaymentAnalytics {
   total_payments: number;
   total_amount: number;
   avg_payment: number;
-  payment_methods: Record<string, unknown>;
+  payment_methods: Record<string, number>;
   monthly_revenue: Array<{ month: string; amount: number }>;
 }
 

@@ -11,6 +11,19 @@ import {
 } from '@/data/booking/types';
 import { apiFetch } from '@/lib/api';
 
+interface BookedDatesResponse {
+  bookedDates: string[];
+}
+
+interface TimeSlotsResponse {
+  timeSlots: Array<{
+    time: string;
+    available: number;
+    label: string;
+    price?: number;
+  }>;
+}
+
 export function useBooking() {
   // Form state
   const {
@@ -51,10 +64,11 @@ export function useBooking() {
     setDateError(null);
     try {
       const result = await apiFetch('/api/v1/bookings/booked-dates');
-      if (result.success) {
+      if (result.success && result.data) {
         console.log('Booked dates response:', result.data);
+        const bookedDatesData = result.data as unknown as BookedDatesResponse;
         const dates =
-          result.data.bookedDates?.map(
+          bookedDatesData.bookedDates?.map(
             (dateStr: string) => new Date(dateStr)
           ) || [];
         setBookedDates(dates);
@@ -78,8 +92,9 @@ export function useBooking() {
         `/api/v1/bookings/availability?date=${dateStr}`
       );
 
-      if (response.success) {
-        const formattedSlots = response.data.timeSlots.map(
+      if (response.success && response.data) {
+        const timeSlotsData = response.data as unknown as TimeSlotsResponse;
+        const formattedSlots = timeSlotsData.timeSlots.map(
           (slot: { time: string; available: number; label: string }) => ({
             time: slot.time,
             label: slot.label,
