@@ -9,10 +9,10 @@ const withBundleAnalyzer =
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  outputFileTracingRoot: '../../',
   experimental: {
     optimizePackageImports: ['lucide-react'],
     optimizeCss: true,
-    outputFileTracingRoot: '../../',
   },
   images: {
     unoptimized: false,

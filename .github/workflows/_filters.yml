@@ -7,9 +7,7 @@ on:
       api:
         description: "API backend changed"
         value: ${{ jobs.filter.outputs.api }}
-      ai_api:
-        description: "AI API backend changed"
-        value: ${{ jobs.filter.outputs.ai_api }}
+
       admin:
         description: "Admin frontend changed"
         value: ${{ jobs.filter.outputs.admin }}
@@ -28,11 +26,10 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       api: ${{ steps.changes.outputs.api }}
-      ai_api: ${{ steps.changes.outputs.ai_api }}
       admin: ${{ steps.changes.outputs.admin }}
       customer: ${{ steps.changes.outputs.customer }}
       shared: ${{ steps.changes.outputs.shared }}
-      any_component: ${{ steps.changes.outputs.api == 'true' || steps.changes.outputs.ai_api == 'true' || steps.changes.outputs.admin == 'true' || steps.changes.outputs.customer == 'true' || steps.changes.outputs.shared == 'true' }}
+      any_component: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -48,8 +45,6 @@ jobs:
             api:
               - 'myhibachi-backend-fastapi/**'
               - 'myhibachi-backend/**'
-            ai_api:
-              - 'myhibachi-ai-backend/**'
             admin:
               - 'myhibachi-admin-frontend/**'
             customer:
@@ -70,14 +65,12 @@ jobs:
         run: |
           echo "🔍 Change Detection Results:"
           echo "API: ${{ steps.changes.outputs.api }}"
-          echo "AI API: ${{ steps.changes.outputs.ai_api }}"
           echo "Admin: ${{ steps.changes.outputs.admin }}"
           echo "Customer: ${{ steps.changes.outputs.customer }}"
           echo "Shared: ${{ steps.changes.outputs.shared }}"
           echo ""
           echo "📁 Changed files:"
           echo "${{ steps.changes.outputs.api_files }}"
-          echo "${{ steps.changes.outputs.ai_api_files }}"
           echo "${{ steps.changes.outputs.admin_files }}"
           echo "${{ steps.changes.outputs.customer_files }}"
           echo "${{ steps.changes.outputs.shared_files }}"
