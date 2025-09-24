@@ -17,6 +17,8 @@ python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 cryptography==41.0.7
 bcrypt==4.1.2
+pyotp==2.9.0  # TOTP MFA support
+qrcode[pil]==7.4.2  # QR code generation for MFA
 
 # Environment & Configuration
 python-dotenv==1.0.0
@@ -30,6 +32,21 @@ stripe==7.0.0
 # HTTP & Requests
 httpx==0.25.2
 requests==2.31.0
+aiohttp==3.9.1  # Async HTTP client for workers
+
+# Social Media Integrations
+google-auth==2.23.4  # Google authentication
+google-cloud-pubsub==2.18.4  # Google Business Profile webhooks
+openai==1.3.8  # AI response generation
+pyjwt==2.8.0  # JWT token handling for webhooks
+
+# Email Services
+sendgrid==6.10.0  # SendGrid integration
+boto3==1.34.0     # AWS SES integration
+aiosmtplib==3.0.1 # Async SMTP client
+
+# SMS/Messaging Services
+ringcentral==0.8.1  # RingCentral SMS integration
 
 # Rate Limiting & Security
 slowapi==0.1.9

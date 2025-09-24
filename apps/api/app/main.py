@@ -1,36 +1,50 @@
+import asyncio
 import logging
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
-import prometheus_client
 from prometheus_client import make_wsgi_app
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 from starlette.middleware.wsgi import WSGIMiddleware
 
+from app.auth.middleware import setup_auth_middleware
 from app.config import settings
-from app.database import Base, engine
-from app.routers import auth, bookings, stripe, health
-from app.utils.stripe_setup import setup_stripe_products
+
+# Import CRM components
+from app.crm.endpoints import router as crm_router
+from app.database import Base, close_database, engine, init_database
+from app.routers import auth, bookings, health, stripe
+
+# Import workers for background processing
+from app.workers.outbox_processors import create_outbox_processor_manager
 
 # Import security middleware
 try:
     from app.middleware.security import (
-        SecurityHeadersMiddleware,
         InputValidationMiddleware,
         MetricsMiddleware,
+        RateLimitByIPMiddleware,
         RequestLoggingMiddleware,
-        RateLimitByIPMiddleware
+        SecurityHeadersMiddleware,
     )
     SECURITY_MIDDLEWARE_AVAILABLE = True
 except ImportError:
     SECURITY_MIDDLEWARE_AVAILABLE = False
     logging.warning("Security middleware not available - using basic setup")
+
+# Import Stripe setup utility
+try:
+    from app.utils.stripe_setup import setup_stripe_products
+    STRIPE_SETUP_AVAILABLE = True
+except ImportError:
+    STRIPE_SETUP_AVAILABLE = False
+    logging.warning("Stripe setup utility not available")
 
 # Configure comprehensive logging with security context
 logging.basicConfig(
@@ -49,16 +63,30 @@ limiter = Limiter(
     default_limits=[f"{getattr(settings, 'rate_limit_requests', 100)}/minute"]
 )
 
+# Global worker manager instance
+worker_manager = None
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager for startup and shutdown events."""
+    global worker_manager
+
     # Startup
-    logger.info("🚀 Starting My Hibachi FastAPI Backend...")
+    logger.info("🚀 Starting My Hibachi CRM FastAPI Backend...")
     logger.info(f"Environment: {settings.environment}")
     logger.info(f"Database: {settings.database_url}")
     logger.info(f"Security: Enhanced security middleware {'enabled' if SECURITY_MIDDLEWARE_AVAILABLE else 'disabled'}")
     logger.info(f"Metrics: {'enabled' if getattr(settings, 'enable_metrics', False) else 'disabled'}")
+    logger.info(f"Workers: {'enabled' if settings.workers_enabled else 'disabled'}")
+
+    # Initialize database
+    try:
+        await init_database()
+        logger.info("✅ Database connection established")
+    except Exception as e:
+        logger.error(f"❌ Database connection failed: {e}")
+        raise
 
     # Create database tables
     try:
@@ -70,12 +98,24 @@ async def lifespan(app: FastAPI):
         raise
 
     # Setup Stripe products and prices (only in development/staging)
-    if settings.environment in ["development", "staging"] and hasattr(settings, 'stripe_secret_key') and settings.stripe_secret_key:
+    if STRIPE_SETUP_AVAILABLE and settings.environment in ["development", "staging"] and settings.stripe_secret_key:
         try:
             await setup_stripe_products()
             logger.info("✅ Stripe products initialized successfully")
         except Exception as e:
             logger.warning(f"⚠️ Stripe setup failed: {e}")
+
+    # Initialize outbox processor workers
+    if settings.workers_enabled:
+        try:
+            worker_configs = settings.get_worker_configs()
+            worker_manager = create_outbox_processor_manager(worker_configs)
+
+            # Start workers in background
+            asyncio.create_task(worker_manager.start_all())
+            logger.info("✅ Background workers started successfully")
+        except Exception as e:
+            logger.warning(f"⚠️ Worker setup failed: {e}")
 
     # Initialize metrics collection
     if getattr(settings, 'enable_metrics', False):
@@ -88,19 +128,35 @@ async def lifespan(app: FastAPI):
             logger.warning(f"⚠️ Metrics setup failed: {e}")
 
     logger.info("🎉 Application startup complete")
-    
+
     yield
 
     # Shutdown
-    logger.info("🛑 Shutting down My Hibachi API...")
+    logger.info("🛑 Shutting down My Hibachi CRM API...")
+
+    # Stop background workers
+    if worker_manager:
+        try:
+            await worker_manager.stop_all()
+            logger.info("✅ Background workers stopped")
+        except Exception as e:
+            logger.error(f"❌ Error stopping workers: {e}")
+
+    # Close database connections
+    try:
+        await close_database()
+        logger.info("✅ Database connections closed")
+    except Exception as e:
+        logger.error(f"❌ Error closing database: {e}")
+
     logger.info("✅ Shutdown complete")
 
 
-# Create FastAPI app with enhanced security
+# Create FastAPI app with enhanced security and CRM features
 app = FastAPI(
     title=settings.app_name,
-    description="Enterprise-grade FastAPI backend for My Hibachi with comprehensive booking, payment, security, and monitoring features",
-    version="1.2.0",
+    description="Enterprise-grade CRM FastAPI backend for My Hibachi with CQRS architecture, event sourcing, comprehensive booking, payment, security, and monitoring features",
+    version="2.0.0",
     docs_url="/docs" if settings.debug else None,
     redoc_url="/redoc" if settings.debug else None,
     openapi_url="/openapi.json" if settings.debug else None,
@@ -112,21 +168,24 @@ app = FastAPI(
     } if settings.debug else None
 )
 
+# Setup authentication middleware
+setup_auth_middleware(app)
+
 # Add security middleware in correct order (last added = first executed)
 if SECURITY_MIDDLEWARE_AVAILABLE:
     # Request logging (should be first)
     app.add_middleware(RequestLoggingMiddleware)
-    
+
     # Security headers
     app.add_middleware(SecurityHeadersMiddleware)
-    
+
     # Input validation
     app.add_middleware(InputValidationMiddleware)
-    
+
     # Metrics collection
     if getattr(settings, 'enable_metrics', False):
         app.add_middleware(MetricsMiddleware)
-    
+
     # Rate limiting (additional layer beyond slowapi)
     if getattr(settings, 'rate_limit_enabled', True):
         app.add_middleware(
@@ -141,7 +200,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
-    expose_headers=["X-Request-ID", "X-API-Version"],
+    expose_headers=["X-Request-ID", "X-API-Version", "X-RateLimit-Remaining"],
 )
 
 # Rate limiting middleware integration
@@ -154,24 +213,27 @@ if getattr(settings, 'enable_metrics', False):
     app.mount("/metrics", WSGIMiddleware(metrics_app))
 
 # Global exception handlers with enhanced error tracking
-# Global exception handlers with enhanced error tracking
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     request_id = request.headers.get("X-Request-ID", "unknown")
     logger.error(f"Unhandled error on {request.method} {request.url}: {exc}", extra={"request_id": request_id})
-    
+
     # Don't expose internal errors in production
     if settings.environment == "production":
         return JSONResponse(
             status_code=500,
-            content={"detail": "Internal server error. Please try again later."},
+            content={
+                "detail": "Internal server error. Please try again later.",
+                "request_id": request_id
+            },
         )
     else:
         return JSONResponse(
             status_code=500,
             content={
                 "detail": "Internal server error",
-                "error": str(exc) if settings.debug else "Error details hidden in production"
+                "error": str(exc) if settings.debug else "Error details hidden in production",
+                "request_id": request_id
             },
         )
 
@@ -179,8 +241,11 @@ async def global_exception_handler(request: Request, exc: Exception):
 @app.exception_handler(404)
 async def not_found_handler(request: Request, exc):
     return JSONResponse(
-        status_code=404, 
-        content={"detail": "The requested resource was not found"}
+        status_code=404,
+        content={
+            "detail": "The requested resource was not found",
+            "path": str(request.url.path)
+        }
     )
 
 
@@ -192,18 +257,26 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         status_code=422,
         content={
             "detail": "Validation error",
-            "errors": exc.errors() if settings.debug else "Invalid request data"
+            "errors": exc.errors() if settings.debug else "Invalid request data",
+            "request_id": request_id
         },
     )
 
 
 # Include routers with comprehensive API structure
 app.include_router(health.router, prefix="/api/health", tags=["health"])
-app.include_router(stripe.router, prefix="/api/stripe", tags=["stripe"])
-app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
-app.include_router(bookings.router, prefix="/api/booking", tags=["booking"])
+
+# Authentication & Authorization
+app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
+
+# CRM Operations (new comprehensive API)
+app.include_router(crm_router, prefix="/api", tags=["crm"])
+
+# Payment Processing
+app.include_router(stripe.router, prefix="/api/stripe", tags=["payments"])
 
 # Legacy API compatibility (for existing frontend)
+app.include_router(bookings.router, prefix="/api/booking", tags=["booking-legacy"])
 app.include_router(bookings.router, prefix="/api/bookings", tags=["bookings-legacy"])
 
 
@@ -211,32 +284,106 @@ app.include_router(bookings.router, prefix="/api/bookings", tags=["bookings-lega
 async def root():
     """Health check endpoint compatible with source backend."""
     return {
-        "message": "My hibachi", 
+        "message": "My Hibachi CRM API",
         "environment": settings.environment,
-        "version": "1.0.0",
-        "status": "healthy"
+        "version": "2.0.0",
+        "status": "healthy",
+        "features": {
+            "cqrs": True,
+            "event_sourcing": True,
+            "field_encryption": settings.enable_field_encryption,
+            "audit_logging": settings.enable_audit_logging,
+            "workers": settings.workers_enabled,
+            "mfa": True,
+            "rbac": True
+        }
     }
 
 
 @app.get("/health")
 async def health_check():
     """Detailed health check endpoint."""
+    worker_status = "running" if worker_manager and worker_manager.running else "stopped"
+
     return {
         "status": "healthy",
         "environment": settings.environment,
         "app_name": settings.app_name,
         "database": "connected",
+        "workers": worker_status,
         "stripe": "configured" if settings.stripe_secret_key else "not configured",
-        "email": "configured" if settings.smtp_user else "not configured",
+        "email": "configured" if settings.smtp_user or settings.sendgrid_api_key else "not configured",
+        "sms": "configured" if settings.ringcentral_enabled else "not configured",
         "rate_limiting": "enabled" if settings.rate_limit_enabled else "disabled",
+        "field_encryption": "enabled" if settings.enable_field_encryption else "disabled",
+        "audit_logging": "enabled" if settings.enable_audit_logging else "disabled",
+        "features": {
+            "oauth2.1": True,
+            "oidc": True,
+            "mfa": True,
+            "rbac": True,
+            "cqrs": True,
+            "event_sourcing": True,
+            "outbox_pattern": True
+        }
     }
 
 
 @app.get("/ready")
 async def readiness_check():
     """Kubernetes readiness probe endpoint."""
-    # Add any readiness checks here (database connectivity, etc.)
-    return {"status": "ready"}
+    # Check database connectivity
+    try:
+        from app.database import get_db_context
+        async with get_db_context() as db:
+            await db.execute("SELECT 1")
+        db_ready = True
+    except Exception:
+        db_ready = False
+
+    # Check worker status if enabled
+    worker_ready = True
+    if settings.workers_enabled:
+        worker_ready = worker_manager is not None
+
+    ready = db_ready and worker_ready
+
+    return {
+        "status": "ready" if ready else "not ready",
+        "checks": {
+            "database": "ready" if db_ready else "not ready",
+            "workers": "ready" if worker_ready else "not ready"
+        }
+    }
+
+
+@app.get("/info")
+async def app_info():
+    """Application information endpoint."""
+    return {
+        "name": settings.app_name,
+        "version": "2.0.0",
+        "environment": settings.environment,
+        "architecture": "CQRS with Event Sourcing",
+        "security": {
+            "authentication": "OAuth 2.1 + OIDC",
+            "authorization": "RBAC",
+            "mfa": "TOTP + Backup Codes",
+            "encryption": "AES-GCM Field-Level",
+            "audit_logging": "Comprehensive"
+        },
+        "integrations": {
+            "payment": "Stripe",
+            "sms": "RingCentral" if settings.ringcentral_enabled else "disabled",
+            "email": settings.email_provider if settings.email_enabled else "disabled"
+        },
+        "worker_stats": {
+            "enabled": settings.workers_enabled,
+            "sms_worker": settings.sms_worker_enabled,
+            "email_worker": settings.email_worker_enabled,
+            "stripe_worker": settings.stripe_worker_enabled
+        }
+    }
 
 
 if __name__ == "__main__":
@@ -248,4 +395,5 @@ if __name__ == "__main__":
         port=settings.port,
         reload=settings.debug,
         log_level=settings.log_level.lower(),
+        workers=1 if settings.debug else 4,  # Multiple workers in production
     )
