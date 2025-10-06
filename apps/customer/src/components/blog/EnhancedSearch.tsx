@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import React, { useEffect, useRef, useState } from 'react';
 
-import { blogPosts } from '@/data/blogPosts';
+import { blogPosts, type BlogPost } from '@/data/blogPosts';
 
 interface SearchResult {
   id: number;
@@ -26,7 +26,7 @@ interface EnhancedSearchProps {
   autoFocus?: boolean;
 }
 
-const EnhancedSearch: React.FC = ({
+const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
   onResultClick,
   placeholder = 'Search blog posts, topics, locations...',
   maxResults = 8,
@@ -70,7 +70,7 @@ const EnhancedSearch: React.FC = ({
 
       const searchResults: SearchResult[] = [];
 
-      blogPosts.forEach((post) => {
+      blogPosts.forEach((post: BlogPost) => {
         let relevanceScore = 0;
         const matches: { type: SearchResult['matchType']; text: string; score: number }[] = [];
 
@@ -107,7 +107,7 @@ const EnhancedSearch: React.FC = ({
 
         // Search in keywords
         const keywordMatches = post.keywords.filter(
-          (keyword) =>
+          (keyword: string) =>
             keyword.toLowerCase().includes(normalizedQuery) ||
             queryWords.some((word) => keyword.toLowerCase().includes(word)),
         );

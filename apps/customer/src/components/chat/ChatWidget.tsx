@@ -24,40 +24,40 @@ interface ChatWidgetProps {
 
 const WELCOME_SUGGESTIONS: Record<string, string[]> = {
   '/BookUs': [
+    "Book a table for tonight",
     "What's included in the menu?",
     'How much is the deposit?',
-    'Do you serve Sacramento?',
-    "What's the minimum notice for booking?",
+    "Modify my reservation",
   ],
   '/menu': [
+    'Book hibachi for this weekend',
     'What proteins do you offer?',
-    'What comes with the hibachi experience?',
-    'Do you have vegetarian options?',
+    'Make a reservation for 6 people',
     "What's included in kids meals?",
   ],
   '/faqs': [
-    'How far do you travel?',
-    'What are your time slots?',
-    'Do you provide the grill?',
-    'How does pricing work?',
+    'How do I make a booking?',
+    'Cancel my reservation',
+    'Change my booking time',
+    'View my reservations',
   ],
   '/contact': [
+    'Book a table now',
     'How do I get a quote?',
-    "What's your phone number?",
-    'How quickly do you respond?',
-    'Can I book over the phone?',
+    'Make a reservation',
+    'Check availability',
   ],
   '/blog': [
-    "What's new with My Hibachi?",
-    'Do you have cooking tips?',
-    'What events do you cater?',
-    'How did My Hibachi start?',
+    'Book hibachi catering',
+    'Make a reservation',
+    'Schedule an event',
+    'How do I book?',
   ],
   default: [
-    'How much does hibachi cost?',
-    "What's included in the service?",
-    'Do you travel to my location?',
-    'How do I book an event?',
+    'Book a table for tonight',
+    'Make a reservation',
+    'Check my booking',
+    'Cancel my reservation',
   ],
 };
 
@@ -100,14 +100,15 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
       return; // Already connected
     }
 
-    const wsUrl = `ws://localhost:8001/ws/chat?user_id=${userIdRef.current}&thread_id=${threadIdRef.current}&channel=website`;
+    // Updated to use new AI API WebSocket endpoint (port 8002) with customer role
+    const wsUrl = `ws://localhost:8002/ws/chat?user_id=${userIdRef.current}&thread_id=${threadIdRef.current}&channel=website&user_role=customer`;
 
     try {
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.onopen = () => {
-        console.log('WebSocket connected');
+        console.log('WebSocket connected to AI API');
         setIsConnected(true);
         if (reconnectTimeoutRef.current) {
           clearTimeout(reconnectTimeoutRef.current);
@@ -119,19 +120,26 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
         try {
           const data = JSON.parse(event.data);
 
-          if (data.type === 'response') {
+          // Handle new AI API WebSocket message format
+          if (data.type === 'ai_response') {
             const assistantMessage: Message = {
               id: data.message_id || (Date.now() + 1).toString(),
               type: 'assistant',
               content: data.content,
               timestamp: new Date(data.timestamp || Date.now()),
-              confidence: data.confidence > 0.7 ? 'high' : data.confidence > 0.4 ? 'medium' : 'low',
+              confidence: data.metadata?.confidence > 0.7 ? 'high' : data.metadata?.confidence > 0.4 ? 'medium' : 'low',
             };
             setMessages((prev) => [...prev, assistantMessage]);
             setIsLoading(false);
             setIsTyping(false);
           } else if (data.type === 'typing') {
-            setIsTyping(true);
+            setIsTyping(data.metadata?.is_typing || false);
+          } else if (data.type === 'connection_status') {
+            console.log('AI API connection status:', data.content);
+          } else if (data.type === 'system') {
+            if (data.content !== 'pong') { // Filter out ping/pong messages
+              console.log('AI API system message:', data.content);
+            }
           } else if (data.type === 'error') {
             const errorMessage: Message = {
               id: (Date.now() + 1).toString(),
@@ -290,13 +298,20 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8001/api/v1/chat', {
+      // Use new AI API REST endpoint (port 8002) with customer role
+      const response = await fetch('http://localhost:8002/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: content,
-          page: page || '/',
-          consent_to_save: false,
+          conversation_id: threadIdRef.current,
+          user_id: userIdRef.current,
+          user_role: 'customer',
+          channel: 'website',
+          context: {
+            page: page || '/',
+            customer_chat: true
+          }
         }),
       });
 
@@ -305,10 +320,10 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
       const data = await response.json();
 
       const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: data.message_id || (Date.now() + 1).toString(),
         type: 'assistant',
-        content: data.answer,
-        timestamp: new Date(),
+        content: data.content,
+        timestamp: new Date(data.timestamp || Date.now()),
         confidence: data.confidence > 0.7 ? 'high' : data.confidence > 0.4 ? 'medium' : 'low',
       };
 
@@ -446,7 +461,7 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
         {messages.length === 0 && (
           <div className="text-center">
             <p className="mb-4 text-gray-600" style={{ fontSize: '14px' }}>
-              👋 Hi! I can help you with:
+              👋 Hi! I can help you with booking reservations:
             </p>
             <div className="flex flex-wrap justify-center gap-2">
               {(WELCOME_SUGGESTIONS[page || ''] || WELCOME_SUGGESTIONS.default).map(
@@ -576,8 +591,8 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
             onKeyPress={handleKeyPress}
             placeholder={
               isConnected
-                ? 'Ask about our menu, booking, or service areas...'
-                : 'Connecting to assistant...'
+                ? 'Ask about bookings, reservations, or menu options...'
+                : 'Connecting to booking assistant...'
             }
             className="flex-1 rounded-lg border border-gray-300 p-1.5 focus:border-transparent focus:ring-2 focus:ring-orange-500 focus:outline-none"
             style={{ fontSize: '14px' }}

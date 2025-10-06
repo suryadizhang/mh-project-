@@ -13,9 +13,9 @@ from fastapi import (
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.main import chat_ingest  # Import from main to reuse the logic
 from app.schemas import ChatIngestRequest
 from app.services.channel_manager import channel_manager
+from app.services.chat_service import chat_service
 
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])
 
@@ -55,7 +55,7 @@ async def ringcentral_sms_webhook(
         )
 
         # Process message
-        response = await chat_ingest(ingest_request, db)
+        response = await chat_service.ingest_chat(ingest_request, db)
 
         # Send reply via SMS (background task to avoid blocking webhook response)
         background_tasks.add_task(
@@ -179,7 +179,7 @@ async def meta_webhook(
                 )
 
                 # Process message
-                response = await chat_ingest(ingest_request, db)
+                response = await chat_service.ingest_chat(ingest_request, db)
 
                 # Send reply via appropriate Meta channel (background task)
                 if message_data["metadata"].get("type") == "comment":

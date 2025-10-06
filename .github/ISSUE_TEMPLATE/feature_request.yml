@@ -1,0 +1,60 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement
+title: '[FEATURE] '
+labels: ['enhancement', 'needs-triage']
+assignees: []
+body:
+
+## ✨ Feature Description
+A clear and concise description of the feature you'd like to see.
+
+## 🎯 Problem Statement
+What problem does this feature solve? What pain point does it address?
+
+## 💡 Proposed Solution
+Describe your ideal solution. How should this feature work?
+
+## 🔄 User Stories
+As a [type of user], I want [goal] so that [benefit].
+
+Example:
+- As a customer, I want to save favorite menu items so that I can quickly reorder them.
+- As an admin, I want to see booking trends so that I can optimize our schedule.
+
+## 🎨 Mockups/Examples
+If applicable, add sketches, mockups, or examples of similar features.
+
+## 🏗️ Technical Considerations
+Any technical requirements or constraints to consider?
+
+## 📊 Success Metrics
+How would we measure the success of this feature?
+
+## 🔄 Alternative Solutions
+Describe any alternative solutions or workarounds you've considered.
+
+## 📱 Affected Apps
+Which parts of the system would this feature affect?
+- [ ] Customer app
+- [ ] Admin dashboard
+- [ ] Core API
+- [ ] AI API
+- [ ] Database schema
+- [ ] Infrastructure
+
+## 🚀 Priority Level
+- [ ] Critical (blocking other features)
+- [ ] High (important for next release)
+- [ ] Medium (nice to have soon)
+- [ ] Low (future consideration)
+
+## 🎯 Target Users
+Who would primarily use this feature?
+- [ ] Customers booking hibachi services
+- [ ] Business owners/managers
+- [ ] Kitchen staff/chefs
+- [ ] System administrators
+- [ ] Other: ___________
+
+## 📝 Additional Context
+Add any other context, requirements, or considerations about the feature request here.

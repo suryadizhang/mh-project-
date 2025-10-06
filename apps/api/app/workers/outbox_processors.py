@@ -44,13 +44,22 @@ class OutboxWorkerBase:
         self.running = True
         logger.info(f"Starting {self.__class__.__name__}")
 
-        while self.running:
-            try:
-                await self._process_batch()
-                await asyncio.sleep(self.config.poll_interval_seconds)
-            except Exception as e:
-                logger.error(f"Worker error in {self.__class__.__name__}: {e}")
-                await asyncio.sleep(self.config.poll_interval_seconds)
+        try:
+            while self.running:
+                try:
+                    await self._process_batch()
+                    await asyncio.sleep(self.config.poll_interval_seconds)
+                except Exception as e:
+                    logger.error(f"Worker error in {self.__class__.__name__}: {e}")
+                    await asyncio.sleep(self.config.poll_interval_seconds)
+        except asyncio.CancelledError:
+            logger.info(f"Worker {self.__class__.__name__} was cancelled")
+            raise
+        except Exception as e:
+            logger.error(f"Fatal error in {self.__class__.__name__}: {e}")
+            raise
+        finally:
+            self.running = False
 
     async def stop(self):
         """Stop the worker."""
@@ -170,7 +179,7 @@ class SMSWorker(OutboxWorkerBase):
         phone_number = event_data.get("phone_number")
         if event_data.get("phone_encrypted", False):
             field_encryption = get_field_encryption()
-            phone_number = decrypt_field(phone_number, field_key)
+            phone_number = decrypt_field(phone_number, field_encryption.key)
 
         message = event_data.get("message", "")
 
@@ -272,7 +281,7 @@ class EmailWorker(OutboxWorkerBase):
         email_address = event_data.get("email")
         if event_data.get("email_encrypted", False):
             field_encryption = get_field_encryption()
-            email_address = decrypt_field(email_address, field_key)
+            email_address = decrypt_field(email_address, field_encryption.key)
 
         subject = event_data.get("subject", "")
         html_body = event_data.get("html_body", "")
@@ -303,15 +312,18 @@ class EmailWorker(OutboxWorkerBase):
     async def _send_via_sendgrid(self, to_email: str, subject: str, html_body: str,
                                 text_body: str = "", attachments: list[dict] = None):
         """Send email via SendGrid API."""
-        import sendgrid
-        from sendgrid.helpers.mail import (
-            Attachment,
-            Disposition,
-            FileContent,
-            FileName,
-            FileType,
-            Mail,
-        )
+        try:
+            import sendgrid
+            from sendgrid.helpers.mail import (
+                Attachment,
+                Disposition,
+                FileContent,
+                FileName,
+                FileType,
+                Mail,
+            )
+        except ImportError:
+            raise Exception("SendGrid package not installed. Install with: pip install sendgrid")
 
         sg = sendgrid.SendGridAPIClient(api_key=self.email_config.get("sendgrid_api_key"))
 
@@ -346,7 +358,10 @@ class EmailWorker(OutboxWorkerBase):
         from email.mime.multipart import MIMEMultipart
         from email.mime.text import MIMEText
 
-        import boto3
+        try:
+            import boto3
+        except ImportError:
+            raise Exception("boto3 package not installed. Install with: pip install boto3")
 
         ses = boto3.client(
             'ses',
@@ -463,7 +478,7 @@ class StripeWorker(OutboxWorkerBase):
         # Decrypt customer email if encrypted
         if event_data.get("email_encrypted", False):
             field_encryption = get_field_encryption()
-            customer_email = decrypt_field(customer_email, field_key)
+            customer_email = decrypt_field(customer_email, field_encryption.key)
 
         # Create or retrieve Stripe customer
         try:
@@ -527,11 +542,11 @@ class StripeWorker(OutboxWorkerBase):
         # Decrypt customer data if encrypted
         if event_data.get("email_encrypted", False):
             field_encryption = get_field_encryption()
-            customer_email = decrypt_field(customer_email, field_key)
+            customer_email = decrypt_field(customer_email, field_encryption.key)
 
         if event_data.get("name_encrypted", False):
             field_encryption = get_field_encryption()
-            customer_name = decrypt_field(customer_name, field_key)
+            customer_name = decrypt_field(customer_name, field_encryption.key)
 
         try:
             customer = stripe.Customer.create(
@@ -565,12 +580,33 @@ class OutboxProcessorManager:
         self.running = True
         logger.info("Starting OutboxProcessorManager")
 
-        # Start each worker as a background task
-        for worker in self.workers:
-            task = asyncio.create_task(worker.start())
-            self.worker_tasks.append(task)
+        if not self.workers:
+            logger.info("No workers configured - skipping worker startup")
+            return
 
-        logger.info(f"Started {len(self.workers)} outbox workers")
+        try:
+            # Start each worker as a background task
+            for worker in self.workers:
+                task = asyncio.create_task(self._run_worker_safely(worker))
+                self.worker_tasks.append(task)
+
+            logger.info(f"Started {len(self.workers)} outbox workers")
+        except Exception as e:
+            logger.error(f"Error starting workers: {e}")
+            # Clean up any started tasks
+            await self.stop_all()
+            raise
+
+    async def _run_worker_safely(self, worker: OutboxWorkerBase):
+        """Run a worker with proper error handling."""
+        try:
+            await worker.start()
+        except asyncio.CancelledError:
+            logger.info(f"Worker {worker.__class__.__name__} cancelled")
+            raise
+        except Exception as e:
+            logger.error(f"Worker {worker.__class__.__name__} failed: {e}")
+            # Don't re-raise to prevent taking down other workers
 
     async def stop_all(self):
         """Stop all workers gracefully."""
@@ -601,37 +637,67 @@ def create_outbox_processor_manager(app_config: dict[str, Any]) -> OutboxProcess
 
     # Configure SMS worker
     if app_config.get("ringcentral", {}).get("enabled", False):
-        sms_worker = SMSWorker(
-            config=WorkerConfig(
-                max_retries=app_config.get("sms_worker", {}).get("max_retries", 5),
-                batch_size=app_config.get("sms_worker", {}).get("batch_size", 10)
-            ),
-            rc_config=app_config.get("ringcentral", {})
-        )
-        manager.add_worker(sms_worker)
+        rc_config = app_config.get("ringcentral", {})
+        # Validate RingCentral configuration
+        required_rc_keys = ["server_url", "client_id", "client_secret", "username", "password", "from_number"]
+        if all(rc_config.get(key) for key in required_rc_keys):
+            sms_worker = SMSWorker(
+                config=WorkerConfig(
+                    max_retries=app_config.get("sms_worker", {}).get("max_retries", 5),
+                    batch_size=app_config.get("sms_worker", {}).get("batch_size", 10)
+                ),
+                rc_config=rc_config
+            )
+            manager.add_worker(sms_worker)
+            logger.info("✅ SMS Worker configured")
+        else:
+            logger.warning("⚠️ SMS Worker disabled - incomplete RingCentral configuration")
 
     # Configure email worker
     if app_config.get("email", {}).get("enabled", False):
-        email_worker = EmailWorker(
-            config=WorkerConfig(
-                max_retries=app_config.get("email_worker", {}).get("max_retries", 3),
-                batch_size=app_config.get("email_worker", {}).get("batch_size", 20)
-            ),
-            email_config=app_config.get("email", {})
-        )
-        manager.add_worker(email_worker)
+        email_config = app_config.get("email", {})
+        # Validate email configuration based on provider
+        provider = email_config.get("provider", "smtp")
+        config_valid = False
+        
+        if provider == "smtp":
+            config_valid = all(email_config.get(key) for key in ["smtp_host", "smtp_username", "smtp_password", "from_email"])
+        elif provider == "sendgrid":
+            config_valid = all(email_config.get(key) for key in ["sendgrid_api_key", "from_email"])
+        elif provider == "ses":
+            config_valid = all(email_config.get(key) for key in ["aws_access_key_id", "aws_secret_access_key", "from_email"])
+            
+        if config_valid:
+            email_worker = EmailWorker(
+                config=WorkerConfig(
+                    max_retries=app_config.get("email_worker", {}).get("max_retries", 3),
+                    batch_size=app_config.get("email_worker", {}).get("batch_size", 20)
+                ),
+                email_config=email_config
+            )
+            manager.add_worker(email_worker)
+            logger.info(f"✅ Email Worker configured (provider: {provider})")
+        else:
+            logger.warning(f"⚠️ Email Worker disabled - incomplete {provider} configuration")
 
     # Configure Stripe worker
     if app_config.get("stripe", {}).get("enabled", False):
-        stripe_worker = StripeWorker(
-            config=WorkerConfig(
-                max_retries=app_config.get("stripe_worker", {}).get("max_retries", 3),
-                batch_size=app_config.get("stripe_worker", {}).get("batch_size", 5)
-            ),
-            stripe_config=app_config.get("stripe", {})
-        )
-        manager.add_worker(stripe_worker)
+        stripe_config = app_config.get("stripe", {})
+        # Validate Stripe configuration
+        if stripe_config.get("secret_key") and stripe_config["secret_key"].startswith(("sk_test_", "sk_live_")):
+            stripe_worker = StripeWorker(
+                config=WorkerConfig(
+                    max_retries=app_config.get("stripe_worker", {}).get("max_retries", 3),
+                    batch_size=app_config.get("stripe_worker", {}).get("batch_size", 5)
+                ),
+                stripe_config=stripe_config
+            )
+            manager.add_worker(stripe_worker)
+            logger.info("✅ Stripe Worker configured")
+        else:
+            logger.warning("⚠️ Stripe Worker disabled - invalid or missing secret key")
 
+    logger.info(f"Worker Manager created with {len(manager.workers)} workers")
     return manager
 
 

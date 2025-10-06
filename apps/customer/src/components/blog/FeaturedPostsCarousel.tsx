@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 
-import { blogPosts } from '@/data/blogPosts';
+import { blogPosts, type BlogPost } from '@/data/blogPosts';
 
 interface FeaturedPostsCarouselProps {
   maxPosts?: number;
@@ -15,7 +15,7 @@ interface FeaturedPostsCarouselProps {
   height?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
-const FeaturedPostsCarousel: React.FC = ({
+const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
   maxPosts = 5,
   autoPlay = true,
   autoPlayInterval = 5000,
@@ -27,7 +27,7 @@ const FeaturedPostsCarousel: React.FC = ({
   const [isHovered, setIsHovered] = useState(false);
 
   // Get featured posts or top posts
-  const featuredPosts = blogPosts.filter((post) => post.featured).slice(0, maxPosts);
+  const featuredPosts = blogPosts.filter((post: BlogPost) => post.featured).slice(0, maxPosts);
 
   // If not enough featured posts, get top posts by ID (simulating popularity)
   const displayPosts = featuredPosts.length >= 3 ? featuredPosts : blogPosts.slice(0, maxPosts);
@@ -225,7 +225,7 @@ const FeaturedPostsCarousel: React.FC = ({
       {showDots && displayPosts.length > 1 && (
         <div className="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 transform">
           <div className="flex space-x-2">
-            {displayPosts.map((_, index) => (
+            {displayPosts.map((_: BlogPost, index: number) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}

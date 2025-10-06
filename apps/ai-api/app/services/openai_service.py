@@ -13,7 +13,12 @@ class OpenAIService:
     """Service for OpenAI GPT integration with intelligent model selection"""
 
     def __init__(self):
-        self.client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key or api_key == "your_openai_api_key_here":
+            self.client = None
+            print("Warning: OpenAI API key not configured. AI features will be limited.")
+        else:
+            self.client = AsyncOpenAI(api_key=api_key)
 
         # Model configuration with pricing (per 1M tokens)
         self.models = {
@@ -215,6 +220,16 @@ Keep responses under 150 words when possible."""
         Generate response using OpenAI GPT
         Returns: (response, confidence, model_used, tokens_in, tokens_out, cost_usd)
         """
+        if not self.client:
+            return (
+                "AI service is not available. Please contact support for assistance.",
+                0.0,
+                "none",
+                0,
+                0,
+                0.0
+            )
+            
         try:
             # Check for escalation
             should_escalate, escalation_reason = self.should_escalate(message)

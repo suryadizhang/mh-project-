@@ -1,3 +1,5 @@
+import path from 'path';
+
 import type { NextConfig } from 'next';
 
 // Dynamic import for bundle analyzer
@@ -9,7 +11,8 @@ const withBundleAnalyzer =
 
 const nextConfig: NextConfig = {
   output: 'standalone',
-  outputFileTracingRoot: '../../',
+  outputFileTracingRoot: path.join(__dirname, '../../'),
+  compress: true, // Enable gzip compression
   experimental: {
     optimizePackageImports: ['lucide-react'],
     optimizeCss: true,

@@ -3,8 +3,8 @@
   "display": "Next.js",
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "ES2020",
-    "lib": ["dom", "dom.iterable", "es2015", "es2017", "es2020"],
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "es6"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -17,6 +17,7 @@
     "jsx": "preserve",
     "incremental": true,
     "downlevelIteration": true,
+    "ignoreDeprecations": "6.0",
     "plugins": [
       {
         "name": "next"
@@ -26,7 +27,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "@myhibachi/ui": ["../../packages/ui/src"],
-      "@myhibachi/utils": ["../../packages/utils/src"]
+      "@myhibachi/types": ["../../packages/types/src"],
+      "@myhibachi/api-client": ["../../packages/api-client/src"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

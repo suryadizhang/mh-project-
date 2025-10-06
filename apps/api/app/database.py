@@ -110,8 +110,9 @@ async def init_database():
     """Initialize database connection on startup."""
     try:
         # Test database connection
+        from sqlalchemy import text
         async with AsyncSessionLocal() as session:
-            await session.execute("SELECT 1")
+            await session.execute(text("SELECT 1"))
 
         logger.info(f"Database connected successfully: {settings.database_url}")
     except Exception as e:
