@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import React, { useState } from 'react';
 
-import { blogPosts } from '@/data/blogPosts';
+import { blogPosts, type BlogPost } from '@/data/blogPosts';
 
 interface TagData {
   name: string;
@@ -22,15 +22,7 @@ interface AdvancedTagCloudProps {
   onTagClick?: (tag: string) => void;
 }
 
-interface AdvancedTagCloudProps {
-  maxTags?: number;
-  showCount?: boolean;
-  interactive?: boolean;
-  colorScheme?: 'gradient' | 'categorical' | 'monochrome';
-  onTagClick?: (tag: string) => void;
-}
-
-const AdvancedTagCloud: React.FC = ({
+const AdvancedTagCloud: React.FC<AdvancedTagCloudProps> = ({
   maxTags = 25,
   showCount = true,
   interactive = true,
@@ -44,8 +36,8 @@ const AdvancedTagCloud: React.FC = ({
     const tagCounts = new Map<string, number>();
 
     // Count tag occurrences
-    blogPosts.forEach((post) => {
-      post.keywords.forEach((keyword) => {
+    blogPosts.forEach((post: BlogPost) => {
+      post.keywords.forEach((keyword: string) => {
         const normalizedTag = keyword.toLowerCase().trim();
         tagCounts.set(normalizedTag, (tagCounts.get(normalizedTag) || 0) + 1);
       });

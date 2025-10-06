@@ -38,7 +38,7 @@ export function CTASection() {
               <p className={styles.ctaSubtitle}>{homeData.cta.subtitle}</p>
 
               <div className={styles.ctaButtons}>
-                {homeData.cta.buttons.map((button, index) => (
+                {homeData.cta.buttons.map((button: any, index: number) => (
                   <Link
                     key={index}
                     href={button.href}

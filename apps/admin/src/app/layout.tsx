@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import AdminLayoutComponent from './AdminLayoutComponent';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 export const metadata: Metadata = {
   title: 'MyHibachi Admin Dashboard',
@@ -15,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body suppressHydrationWarning>
-        <AdminLayoutComponent>{children}</AdminLayoutComponent>
+        <AuthProvider>
+          <AdminLayoutComponent>{children}</AdminLayoutComponent>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -1,0 +1,113 @@
+{
+  "timestamp": "2025-09-25 18:19:09",
+  "tests": {
+    "file_structure": {
+      "operational_api": {
+        "main_file": true,
+        "requirements": true,
+        "dockerfile": true,
+        "models": true,
+        "routers": true,
+        "crm": true,
+        "alembic": true
+      },
+      "ai_api": {
+        "main_file": true,
+        "requirements": true,
+        "dockerfile": true,
+        "models": true,
+        "services": true,
+        "routers": true
+      },
+      "admin_panel": {
+        "package_json": true,
+        "next_config": true,
+        "src": true,
+        "pages": true,
+        "components": true
+      },
+      "docker": {
+        "root_dockerfile": true,
+        "docker_compose": true,
+        "api_dockerfile": true,
+        "ai_api_dockerfile": true
+      },
+      "environment": {
+        "api_env": true,
+        "ai_api_env": true,
+        "admin_env": true
+      }
+    },
+    "documentation_config": {
+      "operational_api": {
+        "fastapi_app": true,
+        "title": true,
+        "description": true,
+        "version": true,
+        "docs_url": true,
+        "redoc_url": true,
+        "openapi_url": true
+      },
+      "ai_api": {
+        "fastapi_app": true,
+        "title": true,
+        "description": true,
+        "version": true,
+        "docs_url": true,
+        "redoc_url": true
+      }
+    },
+    "operational_api_startup": {
+      "can_start": true,
+      "responds_to_health": true,
+      "startup_time": 0.2625129222869873,
+      "error": null,
+      "health_data": {
+        "status": "healthy",
+        "environment": "development",
+        "app_name": "MyHibachi CRM API",
+        "database": "connected",
+        "workers": "running",
+        "stripe": "configured",
+        "email": "configured",
+        "sms": "not configured",
+        "rate_limiting": "enabled",
+        "field_encryption": "enabled",
+        "audit_logging": "enabled",
+        "features": {
+          "oauth2.1": true,
+          "oidc": true,
+          "mfa": true,
+          "rbac": true,
+          "cqrs": true,
+          "event_sourcing": true,
+          "outbox_pattern": true
+        }
+      }
+    },
+    "operational_api_docs": {
+      "swagger_available": true,
+      "redoc_available": true,
+      "openapi_schema": false,
+      "schema_valid": false,
+      "endpoints_count": 0
+    },
+    "ai_api_startup": {
+      "can_start": false,
+      "responds_to_health": false,
+      "startup_time": null,
+      "error": "Connection error: Cannot connect to host localhost:8002 ssl:default [The remote computer refused the network connection]"
+    }
+  },
+  "overall_status": "READY_FOR_TESTING",
+  "recommendations": [
+    "AI API (port 8002) is not responding - check startup and OpenAI API key",
+    "Start both APIs: uvicorn app.main:app --host 0.0.0.0 --port 8003 (operational) and --port 8002 (AI)",
+    "Verify all environment variables are set correctly",
+    "Test all API endpoints using Swagger UI at /docs",
+    "Run frontend tests against both APIs",
+    "Set up SSL certificates for production deployment",
+    "Configure database backups and monitoring",
+    "Implement automated testing in CI/CD pipeline"
+  ]
+}

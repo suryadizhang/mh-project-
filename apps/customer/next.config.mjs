@@ -6,6 +6,7 @@ const _withBundleAnalyzer =
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  outputFileTracingRoot: '../../',
   experimental: {
     optimizePackageImports: ['lucide-react'],
     optimizeCss: true

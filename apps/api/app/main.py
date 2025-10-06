@@ -111,11 +111,12 @@ async def lifespan(app: FastAPI):
             worker_configs = settings.get_worker_configs()
             worker_manager = create_outbox_processor_manager(worker_configs)
 
-            # Start workers in background
-            asyncio.create_task(worker_manager.start_all())
+            # Start workers properly with await
+            await worker_manager.start_all()
             logger.info("✅ Background workers started successfully")
         except Exception as e:
             logger.warning(f"⚠️ Worker setup failed: {e}")
+            worker_manager = None
 
     # Initialize metrics collection
     if getattr(settings, 'enable_metrics', False):
@@ -152,21 +153,22 @@ async def lifespan(app: FastAPI):
     logger.info("✅ Shutdown complete")
 
 
-# Create FastAPI app with enhanced security and CRM features
+# Import OpenAPI configuration
+from app.openapi_config import get_openapi_schema
+
+# Create FastAPI application with enhanced configuration
 app = FastAPI(
-    title=settings.app_name,
-    description="Enterprise-grade CRM FastAPI backend for My Hibachi with CQRS architecture, event sourcing, comprehensive booking, payment, security, and monitoring features",
+    title="MyHibachi AI Sales CRM API",
+    description="Comprehensive hibachi catering booking and management system with AI-powered features",
     version="2.0.0",
-    docs_url="/docs" if settings.debug else None,
-    redoc_url="/redoc" if settings.debug else None,
-    openapi_url="/openapi.json" if settings.debug else None,
+    openapi_url="/openapi.json",
+    docs_url="/docs" if settings.environment != "production" else None,
+    redoc_url="/redoc" if settings.environment != "production" else None,
     lifespan=lifespan,
-    # Security configurations
-    swagger_ui_parameters={
-        "persistAuthorization": True,
-        "displayRequestDuration": True,
-    } if settings.debug else None
 )
+
+# Set custom OpenAPI schema
+app.openapi = lambda: get_openapi_schema(app)
 
 # Setup authentication middleware
 setup_auth_middleware(app)
@@ -386,14 +388,21 @@ async def app_info():
     }
 
 
+# Export OpenAPI schema for TypeScript generation
+@app.get("/openapi.json", include_in_schema=False)
+async def get_openapi_schema():
+    """Export OpenAPI schema for client generation."""
+    return app.openapi()
+
+
 if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
-        port=settings.port,
-        reload=settings.debug,
-        log_level=settings.log_level.lower(),
-        workers=1 if settings.debug else 4,  # Multiple workers in production
+        port=8003,
+        reload=False,  # Disable reload for stability
+        log_level="info",
+        workers=1,  # Single worker for development
     )

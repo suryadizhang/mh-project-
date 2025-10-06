@@ -4,6 +4,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ReactNode, useState } from 'react';
+import { LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import ChatBot from '@/components/ChatBot';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -12,6 +15,12 @@ interface AdminLayoutProps {
 export default function AdminLayoutComponent({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const [imageError, setImageError] = useState(false);
+  const { logout } = useAuth();
+
+  // Don't render the admin layout on the login page
+  if (pathname === '/login') {
+    return <>{children}</>;
+  }
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: '🏠' },
@@ -68,13 +77,22 @@ export default function AdminLayoutComponent({ children }: AdminLayoutProps) {
                 🌐 View Site
               </Link>
               <div className="h-8 w-px bg-gray-200"></div>
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                  A
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center">
+                  <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                    A
+                  </div>
+                  <span className="ml-2 text-sm font-medium text-gray-700">
+                    Admin User
+                  </span>
                 </div>
-                <span className="ml-2 text-sm font-medium text-gray-700">
-                  Admin User
-                </span>
+                <button
+                  onClick={logout}
+                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                  title="Logout"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
               </div>
             </div>
           </div>
@@ -134,6 +152,13 @@ export default function AdminLayoutComponent({ children }: AdminLayoutProps) {
         {/* Main Content */}
         <main className="flex-1 overflow-auto">{children}</main>
       </div>
+
+      {/* AI ChatBot Widget */}
+      <ChatBot 
+        defaultMinimized={true}
+        showDebugInfo={true}
+        className="z-50"
+      />
     </div>
   );
 }

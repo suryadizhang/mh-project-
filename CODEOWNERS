@@ -1,0 +1,57 @@
+# MyHibachi Code Owners
+
+# Global ownership
+* @suryadizhang
+
+# Documentation
+/docs/ @suryadizhang
+/README.md @suryadizhang
+/*.md @suryadizhang
+
+# Infrastructure & DevOps
+/.github/ @suryadizhang
+/docker/ @suryadizhang
+/scripts/ @suryadizhang
+/Dockerfile @suryadizhang
+/docker-compose.yml @suryadizhang
+/.pre-commit-config.yaml @suryadizhang
+
+# Shared Packages
+/packages/ @suryadizhang
+/packages/types/ @suryadizhang
+/packages/api-client/ @suryadizhang
+/packages/ui/ @suryadizhang
+
+# Frontend Applications
+/apps/customer/ @suryadizhang
+/apps/admin/ @suryadizhang
+/myhibachi-frontend/ @suryadizhang
+
+# Backend Services
+/apps/api/ @suryadizhang
+/apps/ai-api/ @suryadizhang
+/myhibachi-backend/ @suryadizhang
+/myhibachi-ai-backend/ @suryadizhang
+
+# Database & Migrations
+/apps/api/alembic/ @suryadizhang
+/apps/api/app/models/ @suryadizhang
+
+# Security & Configuration
+/.env* @suryadizhang
+/apps/*/config* @suryadizhang
+/apps/api/app/auth/ @suryadizhang
+
+# Testing
+/e2e/ @suryadizhang
+/tests/ @suryadizhang
+/playwright.config.ts @suryadizhang
+/**/test* @suryadizhang
+/**/*.test.* @suryadizhang
+/**/*.spec.* @suryadizhang
+
+# Package Management
+/package.json @suryadizhang
+/package-lock.json @suryadizhang
+/requirements.txt @suryadizhang
+/pyproject.toml @suryadizhang

@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Message, MessageRole
 from app.schemas import ChatReplyResponse
-from app.services.knowledge_base import kb_service
+from app.services.knowledge_base_simple import kb_service
 from app.services.openai_service import openai_service
 
 

@@ -1,0 +1,52 @@
+{
+  "organization_date": "2025-10-06T00:00:09.386115",
+  "structure": {
+    "root": {
+      "description": "Essential deployment and configuration files",
+      "files": [
+        "README.md - Project overview",
+        "FINAL_PRODUCTION_DEPLOYMENT_GUIDE.md - Complete deployment guide",
+        "PRODUCTION_DEPLOYMENT_READY_FINAL.md - Deployment readiness",
+        "PLESK_VERCEL_DEPLOYMENT_REPORT.md - Deployment compatibility",
+        "SSL_CONFIGURATION.md - SSL setup guide",
+        "plesk_vercel_audit.py - Deployment audit tool",
+        "PLESK_VERCEL_AUDIT.json - Latest audit results"
+      ]
+    },
+    "apps/": {
+      "description": "Application source code",
+      "subdirs": {
+        "api/": "Main FastAPI backend service",
+        "ai-api/": "AI-powered customer service API",
+        "customer/": "Next.js customer-facing application",
+        "admin/": "Next.js admin dashboard"
+      }
+    },
+    "tests/": {
+      "description": "Organized testing suite",
+      "subdirs": {
+        "system/": "System and integration tests",
+        "production/": "Production readiness and validation tests"
+      }
+    },
+    "archives/": {
+      "description": "Historical reports and documentation",
+      "subdirs": {
+        "old-reports/": "Archived completion reports and audits"
+      }
+    },
+    "docs/": {
+      "description": "Technical documentation",
+      "files": [
+        "Architecture, CI/CD, and workflow documentation"
+      ]
+    }
+  },
+  "deployment_status": "98.5% ready for production",
+  "next_steps": [
+    "Deploy backend to Plesk VPS",
+    "Deploy frontend to Vercel",
+    "Configure production environment variables",
+    "Set up custom domains and SSL"
+  ]
+}

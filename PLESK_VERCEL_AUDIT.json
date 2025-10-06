@@ -1,0 +1,279 @@
+{
+  "timestamp": "2025-10-06T00:01:22.839267",
+  "workspace": "C:\\Users\\surya\\projects\\MH webapps",
+  "plesk_backend_audit": {
+    "python_environments": {
+      "api": {
+        "python_version": "python-3.11.0",
+        "requirements_file": true,
+        "runtime_specification": true,
+        "plesk_compatible": true,
+        "issues": []
+      },
+      "ai-api": {
+        "python_version": "python-3.11.0",
+        "requirements_file": true,
+        "runtime_specification": true,
+        "plesk_compatible": true,
+        "issues": []
+      }
+    },
+    "wsgi_configuration": {
+      "api": {
+        "wsgi_file": "wsgi.py",
+        "app_variable": "app",
+        "framework": "FastAPI",
+        "plesk_compatible": true,
+        "issues": []
+      },
+      "ai-api": {
+        "wsgi_file": "wsgi.py",
+        "app_variable": "app",
+        "framework": "FastAPI",
+        "plesk_compatible": true,
+        "issues": []
+      }
+    },
+    "dependency_analysis": {
+      "api": {
+        "total_dependencies": 53,
+        "problematic_packages": [
+          "pandas"
+        ],
+        "missing_versions": [],
+        "large_packages": [],
+        "issues": [
+          "Some packages may cause issues on shared Plesk hosting"
+        ]
+      },
+      "ai-api": {
+        "total_dependencies": 29,
+        "problematic_packages": [
+          "torch",
+          "numpy",
+          "scikit-learn"
+        ],
+        "missing_versions": [],
+        "large_packages": [
+          "torch"
+        ],
+        "issues": [
+          "Some packages may cause issues on shared Plesk hosting"
+        ]
+      }
+    },
+    "database_compatibility": {
+      "api": {
+        "configured": true,
+        "issues": []
+      },
+      "ai-api": {
+        "configured": true,
+        "issues": []
+      }
+    },
+    "file_structure": {},
+    "plesk_ready": true
+  },
+  "vercel_frontend_audit": {
+    "nextjs_analysis": {
+      "customer": {
+        "nextjs_version": "^15.5.4",
+        "vercel_compatible": true,
+        "app_router": true,
+        "pages_router": false,
+        "configuration": {},
+        "issues": []
+      },
+      "admin": {
+        "nextjs_version": "^15.5.4",
+        "vercel_compatible": true,
+        "app_router": true,
+        "pages_router": false,
+        "configuration": {},
+        "issues": []
+      }
+    },
+    "build_configuration": {
+      "customer": {
+        "next_config": true,
+        "vercel_config": true,
+        "build_output": null,
+        "static_export": false,
+        "issues": []
+      },
+      "admin": {
+        "next_config": true,
+        "vercel_config": true,
+        "build_output": null,
+        "static_export": false,
+        "issues": []
+      }
+    },
+    "environment_variables": {
+      "customer": {
+        "env_example": true,
+        "env_local": true,
+        "public_vars": [
+          "NEXT_PUBLIC_APP_URL",
+          "NEXT_PUBLIC_APP_NAME",
+          "NEXT_PUBLIC_API_URL",
+          "NEXT_PUBLIC_AI_API_URL",
+          "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+          "NEXT_PUBLIC_ZELLE_ENABLED",
+          "NEXT_PUBLIC_ZELLE_EMAIL",
+          "NEXT_PUBLIC_ZELLE_PHONE",
+          "NEXT_PUBLIC_VENMO_ENABLED",
+          "NEXT_PUBLIC_VENMO_USERNAME",
+          "NEXT_PUBLIC_GA_MEASUREMENT_ID",
+          "NEXT_PUBLIC_HOTJAR_ID",
+          "NEXT_PUBLIC_MAINTENANCE_MODE",
+          "NEXT_PUBLIC_BOOKING_ENABLED",
+          "NEXT_PUBLIC_AI_CHAT_ENABLED",
+          "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+          "NEXT_PUBLIC_API_URL",
+          "NEXT_PUBLIC_AI_API_URL",
+          "NEXT_PUBLIC_APP_URL",
+          "NEXT_PUBLIC_BUSINESS_PHONE",
+          "NEXT_PUBLIC_BUSINESS_EMAIL",
+          "NEXT_PUBLIC_BUSINESS_NAME",
+          "NEXT_PUBLIC_WEBSITE_URL",
+          "NEXT_PUBLIC_PAYMENT_PROCESSING_FEE",
+          "NEXT_PUBLIC_DEPOSIT_AMOUNT",
+          "NEXT_PUBLIC_ZELLE_EMAIL",
+          "NEXT_PUBLIC_VENMO_USERNAME"
+        ],
+        "private_vars": [
+          "NODE_ENV",
+          "STRIPE_SECRET_KEY",
+          "STRIPE_WEBHOOK_SECRET",
+          "NEXTAUTH_SECRET",
+          "NEXTAUTH_URL",
+          "RESEND_API_KEY",
+          "UPSTASH_REDIS_REST_URL",
+          "UPSTASH_REDIS_REST_TOKEN",
+          "VERCEL_URL"
+        ],
+        "vercel_vars": [],
+        "issues": [
+          ".env.local file should not be committed"
+        ]
+      },
+      "admin": {
+        "env_example": true,
+        "env_local": true,
+        "public_vars": [
+          "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+          "NEXT_PUBLIC_API_URL",
+          "NEXT_PUBLIC_APP_URL",
+          "NEXT_PUBLIC_API_URL",
+          "NEXT_PUBLIC_APP_URL",
+          "NEXT_PUBLIC_CUSTOMER_URL",
+          "NEXT_PUBLIC_ADMIN_TITLE",
+          "NEXT_PUBLIC_COMPANY_NAME",
+          "NEXT_PUBLIC_ENVIRONMENT"
+        ],
+        "private_vars": [
+          "NEXTAUTH_URL",
+          "NEXTAUTH_SECRET",
+          "NODE_ENV"
+        ],
+        "vercel_vars": [],
+        "issues": [
+          ".env.local file should not be committed"
+        ]
+      }
+    },
+    "static_optimization": {
+      "customer": {
+        "optimized": false,
+        "issues": []
+      },
+      "admin": {
+        "optimized": false,
+        "issues": []
+      }
+    },
+    "api_routes": {
+      "customer": {
+        "has_api_routes": false,
+        "issues": []
+      },
+      "admin": {
+        "has_api_routes": false,
+        "issues": []
+      }
+    },
+    "vercel_ready": true
+  },
+  "deployment_compatibility": {
+    "cors_configuration": {
+      "api": {
+        "cors_configured": true,
+        "allowed_origins": [
+          "http://localhost:3000",
+          "http://localhost:3001"
+        ],
+        "production_ready": true,
+        "issues": []
+      },
+      "ai-api": {
+        "cors_configured": true,
+        "allowed_origins": [
+          "GET",
+          "POST",
+          "PUT",
+          "DELETE",
+          "OPTIONS"
+        ],
+        "production_ready": true,
+        "issues": []
+      }
+    },
+    "ssl_certificates": {},
+    "domain_setup": {},
+    "cdn_configuration": {},
+    "monitoring": {},
+    "backup_strategy": {}
+  },
+  "critical_issues": [],
+  "recommendations": [
+    "\ud83d\udd27 Configure WSGI entry points for Plesk deployment",
+    "\ud83c\udf10 Add vercel.json configuration files",
+    "\ud83d\udd12 Set up environment variables for production",
+    "\u26a1 Enable compression and caching",
+    "\ud83d\udcca Add health check endpoints",
+    "\ud83d\udd10 Configure security headers",
+    "\ud83c\udfaf Set up error tracking and monitoring",
+    "\ud83d\ude80 Optimize bundle sizes for Vercel"
+  ],
+  "deployment_score": 100.0,
+  "security_headers": {
+    "helmet_configured": false,
+    "csp_headers": true,
+    "xss_protection": true,
+    "https_redirect": true,
+    "issues": [
+      "Security headers not configured"
+    ]
+  },
+  "ssl_configuration": {
+    "configured": true,
+    "ssl_template": "SSL_CONFIGURATION.md",
+    "issues": []
+  },
+  "performance_optimization": {
+    "compression": true,
+    "caching": true,
+    "image_optimization": true,
+    "bundle_analysis": true,
+    "issues": []
+  },
+  "monitoring_setup": {
+    "logging_configured": true,
+    "error_tracking": true,
+    "health_checks": true,
+    "metrics": true
+  },
+  "deployment_readiness": {}
+}
