@@ -2,13 +2,18 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { StationContext, tokenManager } from '@/services/api';
 
 interface AuthContextType {
   isAuthenticated: boolean;
   token: string | null;
-  login: (token: string) => void;
+  stationContext: StationContext | null;
+  login: (token: string, stationContext?: StationContext) => void;
   logout: () => void;
   loading: boolean;
+  hasPermission: (permission: string) => boolean;
+  hasRole: (role: string) => boolean;
+  isSuperAdmin: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,16 +33,19 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+  const [stationContext, setStationContext] = useState<StationContext | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    // Check for token in localStorage on component mount
-    const storedToken = localStorage.getItem('admin_token');
+    // Check for token and station context in localStorage on component mount
+    const storedToken = tokenManager.getToken();
+    const storedStationContext = tokenManager.getStationContext();
     
     if (storedToken) {
       setToken(storedToken);
+      setStationContext(storedStationContext);
       setIsAuthenticated(true);
     } else if (pathname !== '/login') {
       // Redirect to login if no token and not already on login page
@@ -47,17 +55,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setLoading(false);
   }, [pathname, router]);
 
-  const login = (newToken: string) => {
-    localStorage.setItem('admin_token', newToken);
+  const login = (newToken: string, newStationContext?: StationContext) => {
+    tokenManager.setToken(newToken);
     setToken(newToken);
     setIsAuthenticated(true);
+    
+    if (newStationContext) {
+      tokenManager.setStationContext(newStationContext);
+      setStationContext(newStationContext);
+    }
   };
 
   const logout = () => {
-    localStorage.removeItem('admin_token');
+    tokenManager.removeToken();
+    tokenManager.removeStationContext();
     setToken(null);
+    setStationContext(null);
     setIsAuthenticated(false);
     router.push('/login');
+  };
+
+  const hasPermission = (permission: string): boolean => {
+    if (!stationContext) return false;
+    
+    // Super admin has all permissions
+    if (stationContext.is_super_admin) return true;
+    
+    return stationContext.permissions.includes(permission);
+  };
+
+  const hasRole = (role: string): boolean => {
+    if (!stationContext) return false;
+    return stationContext.role === role;
+  };
+
+  const isSuperAdmin = (): boolean => {
+    return stationContext?.is_super_admin || false;
   };
 
   // Show loading spinner while checking authentication
@@ -72,7 +105,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Allow access to login page without authentication
   if (pathname === '/login') {
     return (
-      <AuthContext.Provider value={{ isAuthenticated, token, login, logout, loading }}>
+      <AuthContext.Provider value={{ 
+        isAuthenticated, 
+        token, 
+        stationContext, 
+        login, 
+        logout, 
+        loading,
+        hasPermission,
+        hasRole,
+        isSuperAdmin
+      }}>
         {children}
       </AuthContext.Provider>
     );
@@ -88,7 +131,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, token, login, logout, loading }}>
+    <AuthContext.Provider value={{ 
+      isAuthenticated, 
+      token, 
+      stationContext, 
+      login, 
+      logout, 
+      loading,
+      hasPermission,
+      hasRole,
+      isSuperAdmin
+    }}>
       {children}
     </AuthContext.Provider>
   );

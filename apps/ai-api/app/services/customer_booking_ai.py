@@ -10,6 +10,7 @@ import json
 from uuid import uuid4
 
 from app.services.role_based_ai import UserRole, AICapability, role_based_ai
+from app.services.openai_service import openai_service
 
 logger = logging.getLogger(__name__)
 
@@ -33,29 +34,71 @@ class CustomerBookingAI:
         ]
         
     async def process_customer_message(self, message: str, context: Dict[str, Any]) -> Dict[str, Any]:
-        """Process customer message for comprehensive customer service"""
-        message_lower = message.lower()
+        """Process customer message using OpenAI for natural conversation"""
+        try:
+            logger.info(f"Customer AI processing message: '{message[:50]}...' with context: {context}")
+            
+            # Check for escalation first
+            if self._should_escalate(message.lower()):
+                logger.info("Message triggered escalation")
+                return await self._handle_escalation(message, context)
+            
+            # Use OpenAI for natural customer service conversation
+            if openai_service.client:
+                logger.info("OpenAI client available, attempting to generate response")
+                # Create context for OpenAI
+                system_prompt = """You are MyHibachi's friendly customer service AI assistant. You help customers with:
+                
+🥢 **Our Service**: Private hibachi chef experiences at customers' homes
+📅 **Booking**: Schedule hibachi chef visits for parties (2-12 people)
+💰 **Pricing**: $75 per person, 2-hour experience with entertainment
+📍 **Service Area**: Greater Sacramento area
+📧 **Contact**: myhibachichef@gmail.com | 📱 (916) 740-8768
+
+**Always be**:
+- Warm and enthusiastic about hibachi experiences
+- Clear about pricing ($75/person) 
+- Helpful with booking questions
+- Ready to connect them with our team for actual bookings
+
+**For booking requests**: Explain that they can book through our website or contact us directly. Get their preferred date, time, party size, and location.
+
+Keep responses concise but friendly. Use emojis sparingly."""
+
+                ai_response_tuple = await openai_service.generate_response(
+                    message=message,
+                    context=system_prompt
+                )
+                
+                logger.info(f"OpenAI response received: {ai_response_tuple}")
+                
+                # OpenAI service returns a tuple: (response, confidence, model, tokens_in, tokens_out, cost)
+                if isinstance(ai_response_tuple, tuple) and len(ai_response_tuple) >= 2:
+                    response_text = ai_response_tuple[0]
+                    confidence = ai_response_tuple[1]
+                    
+                    logger.info(f"Using OpenAI response: {response_text[:100]}...")
+                    return {
+                        "response": response_text,
+                        "intent": "customer_service",
+                        "confidence": confidence
+                    }
+                else:
+                    # If unexpected response format, use fallback
+                    logger.warning(f"Unexpected OpenAI response format: {ai_response_tuple}")
+                    return self._get_fallback_response(message, context)
+            else:
+                # Fallback to simple responses if OpenAI not available
+                logger.warning("OpenAI client not available, using fallback response")
+                return self._get_fallback_response(message, context)
         
-        # Check for escalation first
-        if self._should_escalate(message_lower):
-            return await self._handle_escalation(message, context)
-        
-        # Identify customer service intent
-        intent = self._identify_customer_intent(message_lower)
-        
-        if intent == "booking":
-            booking_type = self._identify_booking_intent(message_lower)
-            return await self._handle_booking_request(booking_type, message, context)
-        elif intent == "availability":
-            return await self._handle_availability_inquiry(message, context)
-        elif intent == "quote":
-            return await self._handle_quote_request(message, context)
-        elif intent == "faq":
-            return await self._handle_faq_inquiry(message, context)
-        elif intent == "restaurant_info":
-            return await self._handle_restaurant_info(message, context)
-        else:
-            return await self._handle_general_inquiry(message, context)
+        except Exception as e:
+            logger.error(f"Error processing customer message: {e}")
+            return {
+                "response": "I'm having trouble right now. Please click 'Talk to a human' below for immediate help via Instagram, Facebook, text, or phone! 📱💬📞",
+                "intent": "error",
+                "confidence": 0.0
+            }
     
     def _identify_customer_intent(self, message: str) -> str:
         """Identify the type of customer service request"""
@@ -331,13 +374,20 @@ Would you like to:
         if 'contact' not in details:
             missing.append("📱 **Contact number** (for confirmation)")
         
-        return f"I'd be happy to help you book our hibachi chef for your private party! I just need a few more details:\n\n" + "\n".join(missing) + "\n\nPlease provide these details and I'll schedule your hibachi chef!"
+        return f"""I'd be happy to help you book our hibachi chef for your private party! 
+
+I just need a few more details:
+
+{chr(10).join(missing)}
+
+Please provide these details and I'll schedule your hibachi chef!"""
     
     def _generate_booking_confirmation(self, booking_id: str) -> str:
         """Generate booking confirmation message"""
         return f"""✅ **Booking Confirmed!**
 
 Your reservation has been created successfully:
+
 🆔 **Booking Reference**: {booking_id}
 📧 A confirmation email will be sent shortly
 
@@ -441,11 +491,12 @@ How can I help you today?"""
         return """🙋‍♀️ **How can I help you today?**
 
 I can assist you with:
+
 • 📅 **Booking hibachi chef** - Schedule your private party
 • ✏️ **Modifying bookings** - Change date, time, or party size
 • ❌ **Canceling events** - Cancel with our policy
 • 👀 **Viewing your bookings** - Check your scheduled events
-• �️ **Menu information** - Learn about our hibachi experience
+• 🍱 **Menu information** - Learn about our hibachi experience
 • 📍 **Service details** - Coverage areas, pricing, contact
 
 What would you like to do?"""
@@ -495,6 +546,63 @@ Is there anything urgent I can help you with while you wait?""".format(ref_id=st
             "priority": "high",
             "next_action": "transfer_to_agent"
         }
+    
+    def _get_fallback_response(self, message: str, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Provide fallback response when OpenAI is not available"""
+        message_lower = message.lower()
+        
+        if any(word in message_lower for word in ["book", "reserve", "booking"]):
+            return {
+                "response": """🙋‍♀️ **How can I help you today?**
+
+I can assist you with:
+
+• 📅 **Booking hibachi chef** - Schedule your private party
+• ✏️ **Modifying bookings** - Change date, time, or party size  
+• ❌ **Canceling events** - Cancel with our policy
+• 👀 **Viewing your bookings** - Check your scheduled events
+• 🍱 **Menu information** - Learn about our hibachi experience
+• 📍 **Service details** - Coverage areas, pricing, contact
+
+What would you like to do?""",
+                "intent": "booking_help",
+                "confidence": 0.8
+            }
+        elif any(word in message_lower for word in ["price", "cost", "how much"]):
+            return {
+                "response": """💰 **MyHibachi Pricing**
+
+$75 per person for a 2-hour private hibachi chef experience at your location! 
+
+**Includes:**
+• Professional hibachi chef
+• All cooking equipment and setup
+• Fresh ingredients and cooking
+• Entertainment and cleanup
+
+Perfect for parties of 2-12 people. 
+
+📱 Contact us for custom quotes: (916) 740-8768""",
+                "intent": "pricing",
+                "confidence": 0.8
+            }
+        else:
+            return {
+                "response": """🙋‍♀️ **How can I help you today?**
+
+I can assist you with:
+
+• 📅 **Booking hibachi chef** - Schedule your private party
+• ✏️ **Modifying bookings** - Change date, time, or party size
+• ❌ **Canceling events** - Cancel with our policy  
+• 👀 **Viewing your bookings** - Check your scheduled events
+• 🍱 **Menu information** - Learn about our hibachi experience
+• 📍 **Service details** - Coverage areas, pricing, contact
+
+What would you like to do?""",
+                "intent": "general_inquiry",
+                "confidence": 0.7
+            }
     
     async def _handle_availability_inquiry(self, message: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """Handle availability and scheduling inquiries"""

@@ -299,7 +299,7 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
 
     try {
       // Use new AI API REST endpoint (port 8002) with customer role
-      const response = await fetch('http://localhost:8002/api/chat', {
+      const response = await fetch('http://localhost:8002/api/v1/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

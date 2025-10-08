@@ -46,8 +46,9 @@ async def websocket_chat_endpoint(
     
     # Parse user role
     try:
-        parsed_user_role = UserRole(user_role.upper())
+        parsed_user_role = UserRole(user_role.lower())
     except (ValueError, AttributeError):
+        logger.warning(f"Failed to parse user role '{user_role}', defaulting to CUSTOMER")
         parsed_user_role = UserRole.CUSTOMER
     
     # User info for this connection
@@ -135,10 +136,13 @@ async def handle_chat_message_with_role(
         
         # Route to appropriate AI service based on role
         if user_role == UserRole.CUSTOMER:
+            logger.info(f"Routing to customer_booking_ai for message: '{content[:50]}...'")
             ai_response = await customer_booking_ai.process_customer_message(content, context)
         elif user_role in [UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.STAFF]:
+            logger.info(f"Routing to admin_management_ai for message: '{content[:50]}...'")
             ai_response = await admin_management_ai.process_admin_message(content, context)
         else:
+            logger.warning(f"Unknown user role: {user_role}, using default response")
             ai_response = {
                 "response": "Hello! I'm MyHibachi's AI assistant. How can I help you today?",
                 "intent": "general"

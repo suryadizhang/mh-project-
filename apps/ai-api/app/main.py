@@ -18,6 +18,7 @@ from app.routers import webhooks
 from app.routers.chat import router as chat_router
 from app.routers.admin import router as admin_router
 from app.routers.websocket import router as websocket_router
+from app.routers.v1.unified_chat import router as unified_chat_router
 from app.services.ai_pipeline import AIPipeline
 from app.services.knowledge_base_simple import SimpleKnowledgeBaseService as KnowledgeBaseService
 
@@ -86,8 +87,9 @@ setup_security_middleware(app)
 
 # Include routers
 app.include_router(webhooks.router, prefix="/webhooks", tags=["webhooks"])
-app.include_router(chat_router, prefix="/api", tags=["chat"])
-app.include_router(admin_router, prefix="/api", tags=["admin"])
+app.include_router(unified_chat_router, tags=["v1-unified"])  # New unified agent-aware API
+app.include_router(chat_router, prefix="/api", tags=["chat"])  # Legacy chat API
+app.include_router(admin_router, prefix="/api", tags=["admin"])  # Legacy admin API
 app.include_router(websocket_router, tags=["websocket"])
 
 # Health check endpoint
