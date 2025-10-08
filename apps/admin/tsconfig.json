@@ -23,7 +23,6 @@
         "name": "next"
       }
     ],
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "@myhibachi/ui": ["../../packages/ui/src"],

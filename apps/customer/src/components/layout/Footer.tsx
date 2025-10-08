@@ -69,6 +69,27 @@ export default function Footer() {
                 <i className="bi bi-chevron-right footer-link-icon"></i> Get Quote
               </Link>
             </li>
+            <li>
+              <Link href="/contact">
+                <i className="bi bi-chevron-right footer-link-icon"></i> Contact
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        <div className="footer-legal">
+          <h3>Legal</h3>
+          <ul className="footer-links">
+            <li>
+              <Link href="/privacy">
+                <i className="bi bi-shield-check footer-link-icon"></i> Privacy Policy
+              </Link>
+            </li>
+            <li>
+              <Link href="/terms">
+                <i className="bi bi-file-text footer-link-icon"></i> Terms & Conditions
+              </Link>
+            </li>
           </ul>
         </div>
 
