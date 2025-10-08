@@ -4,27 +4,26 @@ import 'react-datepicker/dist/react-datepicker.css';
 import './datepicker.css';
 
 import { addDays, format } from 'date-fns';
+import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { Controller, useForm } from 'react-hook-form';
 
 import Assistant from '@/components/chat/Assistant';
 import { apiFetch } from '@/lib/api';
-
 // Type definitions for booking form
-
 type TimeSlot = {
   time: string;
   label: string;
   available: number;
   isAvailable: boolean;
 };
-
 type BookingFormData = {
   name: string;
   email: string;
   phone: string;
   preferredCommunication: 'phone' | 'text' | 'email' | '';
+  smsConsent?: boolean;
   eventDate: Date;
   eventTime: '12PM' | '3PM' | '6PM' | '9PM';
   guestCount: number;
@@ -38,7 +37,6 @@ type BookingFormData = {
   venueState?: string;
   venueZipcode?: string;
 };
-
 export default function BookingPage() {
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
@@ -50,7 +48,6 @@ export default function BookingPage() {
   const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
   const [loadingTimeSlots, setLoadingTimeSlots] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const {
     register,
     handleSubmit,
@@ -63,9 +60,9 @@ export default function BookingPage() {
       sameAsVenue: false,
       guestCount: undefined,
       preferredCommunication: '',
+      smsConsent: false,
     },
   });
-
   // Watch form values
   const sameAsVenue = watch('sameAsVenue');
   const venueStreet = watch('venueStreet');
@@ -73,7 +70,6 @@ export default function BookingPage() {
   const venueState = watch('venueState');
   const venueZipcode = watch('venueZipcode');
   const selectedDate = watch('eventDate');
-
   // Fetch booked dates from API
   const fetchBookedDates = async () => {
     setLoadingDates(true);
@@ -82,7 +78,7 @@ export default function BookingPage() {
       const result = await apiFetch('/api/v1/bookings/booked-dates');
       if (result.success && result.data) {
         // Convert string dates to Date objects
-        const bookedDates = (result.data as Record<string, any>)?.bookedDates;
+        const bookedDates = (result.data as Record<string, unknown>)?.bookedDates;
         const dates = Array.isArray(bookedDates)
           ? bookedDates.map((dateStr: string) => new Date(dateStr))
           : [];
@@ -98,12 +94,10 @@ export default function BookingPage() {
       setLoadingDates(false);
     }
   };
-
   // Fetch booked dates on component mount
   useEffect(() => {
     fetchBookedDates();
   }, []);
-
   // Fetch availability for selected date
   const fetchAvailability = async (date: Date) => {
     setLoadingTimeSlots(true);
@@ -111,7 +105,6 @@ export default function BookingPage() {
     try {
       const dateStr = format(date, 'yyyy-MM-dd');
       const response = await apiFetch(`/api/v1/bookings/availability?date=${dateStr}`);
-
       if (response.success && response.data?.timeSlots && Array.isArray(response.data.timeSlots)) {
         const formattedSlots = response.data.timeSlots.map(
           (slot: {
@@ -146,7 +139,6 @@ export default function BookingPage() {
       setLoadingTimeSlots(false);
     }
   };
-
   // Fetch availability when date changes
   useEffect(() => {
     if (selectedDate) {
@@ -155,10 +147,8 @@ export default function BookingPage() {
       setAvailableTimeSlots([]);
     }
   }, [selectedDate]);
-
   // Check if venue address is completely filled
   const isVenueAddressComplete = venueStreet && venueCity && venueState && venueZipcode;
-
   // Auto-fill billing address when checkbox is checked and venue address is complete
   useEffect(() => {
     if (sameAsVenue && isVenueAddressComplete) {
@@ -176,22 +166,18 @@ export default function BookingPage() {
     isVenueAddressComplete,
     setValue,
   ]);
-
   // Automatically uncheck if venue address becomes incomplete
   useEffect(() => {
     if (sameAsVenue && !isVenueAddressComplete) {
       setValue('sameAsVenue', false);
     }
   }, [sameAsVenue, isVenueAddressComplete, setValue]);
-
   // Enhanced onSubmit with comprehensive validation
   const onSubmit = async (data: BookingFormData) => {
     setIsSubmitting(true);
-
     try {
       // Check for missing fields
       const missing: string[] = [];
-
       if (!data.name || data.name.length < 2) missing.push('Full Name');
       if (!data.email) missing.push('Email Address');
       if (!data.phone || data.phone.length < 10) missing.push('Phone Number');
@@ -199,13 +185,11 @@ export default function BookingPage() {
       if (!data.eventDate) missing.push('Event Date');
       if (!data.eventTime) missing.push('Event Time');
       if (!data.guestCount || data.guestCount < 1) missing.push('Estimate Number of Guests');
-
       // Check venue address
       if (!data.venueStreet) missing.push('Venue Street Address');
       if (!data.venueCity) missing.push('Venue City');
       if (!data.venueState) missing.push('Venue State');
       if (!data.venueZipcode) missing.push('Venue ZIP Code');
-
       // Check billing address (only if not same as venue)
       if (!data.sameAsVenue) {
         if (!data.addressStreet) missing.push('Billing Street Address');
@@ -213,26 +197,22 @@ export default function BookingPage() {
         if (!data.addressState) missing.push('Billing State');
         if (!data.addressZipcode) missing.push('Billing ZIP Code');
       }
-
       // If there are missing fields, show modal
       if (missing.length > 0) {
         setMissingFields(missing);
         setShowValidationModal(true);
         return;
       }
-
       // Additional validation: Check if selected time slot is still available
       if (data.eventDate && data.eventTime) {
         try {
           const dateStr = format(data.eventDate, 'yyyy-MM-dd');
           const response = await fetch(`/api/v1/bookings/availability?date=${dateStr}`);
-
           if (response.ok) {
             const availabilityData = await response.json();
             const selectedSlot = availabilityData.timeSlots.find(
               (slot: { time: string; isAvailable: boolean }) => slot.time === data.eventTime,
             );
-
             if (!selectedSlot || !selectedSlot.isAvailable) {
               setDateError(
                 `The ${data.eventTime} time slot is no longer available. Please select a different time.`,
@@ -245,7 +225,6 @@ export default function BookingPage() {
           // Continue with booking as a fallback
         }
       }
-
       // If all validation passes, show agreement modal
       setFormData(data);
       setShowAgreementModal(true);
@@ -256,11 +235,9 @@ export default function BookingPage() {
       setIsSubmitting(false);
     }
   };
-
   // Handle agreement confirmation with actual booking submission
   const handleAgreementConfirm = async () => {
     if (!formData) return;
-
     try {
       const bookingData = {
         date: format(formData.eventDate, 'yyyy-MM-dd'),
@@ -270,6 +247,7 @@ export default function BookingPage() {
           email: formData.email,
           phone: formData.phone,
           preferredCommunication: formData.preferredCommunication,
+          smsConsent: formData.smsConsent || false,
           guestCount: formData.guestCount,
           venueAddress: {
             street: formData.venueStreet,
@@ -287,22 +265,18 @@ export default function BookingPage() {
               },
         },
       };
-
       const response = await apiFetch('/api/v1/bookings/availability', {
         method: 'POST',
         body: JSON.stringify(bookingData),
       });
-
       if (response.success) {
         setShowAgreementModal(false);
         setFormData(null);
-
         // Show success message with booking ID
         const bookingId = (response.data as Record<string, unknown>)?.bookingId || 'N/A';
         alert(
           `Booking Confirmed!\n\nConfirmation Code: ${bookingId}\n\nWe will contact you soon at ${formData.email} to finalize your hibachi experience details.\n\nThank you for choosing My Hibachi!`,
         );
-
         // Reset form
         window.location.reload();
       } else {
@@ -310,7 +284,6 @@ export default function BookingPage() {
         if (response.data?.code === 'SLOT_FULL') {
           setShowAgreementModal(false);
           setDateError('This time slot just became fully booked. Please select a different time.');
-
           // Refresh availability data
           if (formData.eventDate) {
             fetchAvailability(formData.eventDate);
@@ -330,16 +303,13 @@ export default function BookingPage() {
       );
     }
   };
-
   const handleAgreementCancel = () => {
     setShowAgreementModal(false);
     setFormData(null);
   };
-
   // Validation Modal Component
   const ValidationModal = () => {
     if (!showValidationModal) return null;
-
     return (
       <div
         className="bg-opacity-50 fixed inset-0 flex items-center justify-center bg-black p-4"
@@ -351,7 +321,6 @@ export default function BookingPage() {
             <h3 className="text-xl font-bold text-red-600">Please Complete Your Booking</h3>
             <p className="mt-2 text-gray-600">The following fields are required:</p>
           </div>
-
           <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
             <ul className="space-y-1">
               {missingFields.map((field, index) => (
@@ -362,7 +331,6 @@ export default function BookingPage() {
               ))}
             </ul>
           </div>
-
           <div className="flex space-x-3">
             <button
               onClick={() => setShowValidationModal(false)}
@@ -375,11 +343,9 @@ export default function BookingPage() {
       </div>
     );
   };
-
   // Agreement Modal Component
   const AgreementModal = () => {
     if (!showAgreementModal) return null;
-
     return (
       <div
         className="bg-opacity-50 fixed inset-0 flex items-center justify-center bg-black p-4"
@@ -391,7 +357,6 @@ export default function BookingPage() {
             <h3 className="text-2xl font-bold">My Hibachi Catering Agreement</h3>
             <p className="mt-2 text-red-100">Please review and confirm the terms below</p>
           </div>
-
           <div className="max-h-[50vh] overflow-y-auto p-6">
             <div className="space-y-6 text-sm">
               <div>
@@ -406,7 +371,6 @@ export default function BookingPage() {
                   responsible for arranging seating and place settings.
                 </p>
               </div>
-
               <div>
                 <h4 className="mb-2 font-bold text-red-600">2. CUSTOMER RESPONSIBILITIES</h4>
                 <p className="mb-2 text-gray-700">Customer must provide:</p>
@@ -419,7 +383,6 @@ export default function BookingPage() {
                   <li>Confirmed guest count and food selections</li>
                 </ul>
               </div>
-
               <div>
                 <h4 className="mb-2 font-bold text-red-600">3. MENU, HEADCOUNT & FINAL DETAILS</h4>
                 <ul className="list-inside list-disc space-y-1 text-gray-700">
@@ -439,7 +402,6 @@ export default function BookingPage() {
                   </li>
                 </ul>
               </div>
-
               <div>
                 <h4 className="mb-2 font-bold text-red-600">4. PAYMENT TERMS</h4>
                 <ul className="list-inside list-disc space-y-1 text-gray-700">
@@ -451,7 +413,6 @@ export default function BookingPage() {
                   <li>Accepted payments: Venmo Business, Zelle Business, Cash, or Card</li>
                 </ul>
               </div>
-
               <div>
                 <h4 className="mb-2 font-bold text-red-600">5. CANCELLATION & WEATHER POLICY</h4>
                 <ul className="list-inside list-disc space-y-1 text-gray-700">
@@ -466,7 +427,6 @@ export default function BookingPage() {
                   </li>
                 </ul>
               </div>
-
               <div>
                 <h4 className="mb-2 font-bold text-red-600">6. LIABILITY WAIVER</h4>
                 <p className="mb-2 font-medium text-gray-700">
@@ -485,7 +445,6 @@ export default function BookingPage() {
                   </li>
                 </ul>
               </div>
-
               <div>
                 <h4 className="mb-2 font-bold text-red-600">7. FORCE MAJEURE</h4>
                 <p className="text-gray-700">
@@ -494,7 +453,6 @@ export default function BookingPage() {
                   flood, government restrictions, or natural disasters.
                 </p>
               </div>
-
               <div>
                 <h4 className="mb-2 font-bold text-red-600">8. FOOD SAFETY & ALLERGIES</h4>
                 <ul className="list-inside list-disc space-y-1 text-gray-700">
@@ -508,7 +466,6 @@ export default function BookingPage() {
                   </li>
                 </ul>
               </div>
-
               {/* Customer Details Confirmation */}
               {formData && (
                 <div className="mt-6 rounded-lg border border-gray-200 bg-white p-4">
@@ -585,7 +542,6 @@ export default function BookingPage() {
               )}
             </div>
           </div>
-
           {/* Fixed Footer with Buttons */}
           <div className="border-t border-gray-200 bg-gray-50 p-6">
             <div className="mb-4 text-center">
@@ -613,12 +569,10 @@ export default function BookingPage() {
       </div>
     );
   };
-
   return (
     <>
       <ValidationModal />
       <AgreementModal />
-
       {/* Hero Section with Company Background */}
       <section className="page-hero-background py-20 text-center text-white">
         <div className="mx-auto max-w-4xl px-4">
@@ -634,7 +588,6 @@ export default function BookingPage() {
           </div>
         </div>
       </section>
-
       {/* Booking Form Section */}
       <div className="section-background py-16">
         <div className="mx-auto max-w-4xl px-4">
@@ -670,7 +623,6 @@ export default function BookingPage() {
                       </div>
                     </div>
                   </div>
-
                   <div className="space-y-2">
                     <div
                       className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold ${
@@ -705,7 +657,6 @@ export default function BookingPage() {
                       </div>
                     </div>
                   </div>
-
                   <div className="space-y-2">
                     <div
                       className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold ${
@@ -740,7 +691,6 @@ export default function BookingPage() {
                       </div>
                     </div>
                   </div>
-
                   <div className="space-y-2">
                     <div
                       className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold ${
@@ -779,7 +729,6 @@ export default function BookingPage() {
                     </div>
                   </div>
                 </div>
-
                 {/* Overall Progress Bar */}
                 <div className="mt-6">
                   <div className="mb-2 flex justify-between text-sm text-gray-600">
@@ -864,7 +813,6 @@ export default function BookingPage() {
                     )}
                   </div>
                 </div>
-
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
@@ -879,7 +827,6 @@ export default function BookingPage() {
                       <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
                     )}
                   </div>
-
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
                       Email Address *
@@ -894,7 +841,6 @@ export default function BookingPage() {
                       <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
                     )}
                   </div>
-
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
                       Phone Number *
@@ -909,7 +855,6 @@ export default function BookingPage() {
                       <p className="mt-1 text-sm text-red-500">{errors.phone.message}</p>
                     )}
                   </div>
-
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
                       Preferred Communication Method *
@@ -936,14 +881,58 @@ export default function BookingPage() {
                     )}
                   </div>
                 </div>
+                {/* SMS Consent Section */}
+                <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
+                  <h3 className="mb-3 text-lg font-semibold text-blue-900">📱 SMS Communication Consent</h3>
+                  <div className="mb-4 space-y-3">
+                    <div className="rounded-md border border-blue-300 bg-white p-3">
+                      <label className="flex items-start space-x-3 cursor-pointer">
+                        <Controller
+                          name="smsConsent"
+                          control={control}
+                          render={({ field }) => (
+                            <input
+                              type="checkbox"
+                              checked={field.value || false}
+                              onChange={field.onChange}
+                              className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                            />
+                          )}
+                        />
+                        <div className="text-sm">
+                          <div className="font-medium text-gray-900">
+                            Yes, I consent to receive SMS text messages from My Hibachi Chef
+                          </div>
+                          <div className="mt-1 text-gray-600">
+                            <p className="mb-2">
+                              <strong>By checking this box, I agree to receive SMS messages</strong> including:
+                            </p>
+                            <ul className="ml-4 list-disc space-y-1 text-xs">
+                              <li>Booking confirmations and order details</li>
+                              <li>Event reminders (48hrs and 24hrs before your event)</li>
+                              <li>Chef updates and arrival notifications</li>
+                              <li>Customer support conversations</li>
+                              <li>Order alerts and booking changes</li>
+                              <li>Account notifications (service-related only)</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                    <div className="text-xs text-gray-600 space-y-1">
+                      <p><strong>Important:</strong> Message frequency varies. Message and data rates may apply. Consent is not required for purchase.</p>
+                      <p><strong>Opt-out:</strong> Reply STOP to opt-out anytime. Reply START to re-subscribe. Reply HELP for support.</p>
+                      <p><strong>Contact:</strong> <a href="tel:+19167408768" className="text-blue-600 hover:underline">(916) 740-8768</a> | <a href="mailto:cs@myhibachichef.com" className="text-blue-600 hover:underline">cs@myhibachichef.com</a></p>
+                      <p><strong>Policies:</strong> <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link> | <Link href="/terms" className="text-blue-600 hover:underline">Terms & Conditions</Link></p>
+                    </div>
+                  </div>
+                </div>
               </div>
-
               {/* Date & Time Selection */}
               <div className="border-b pb-6">
                 <h2 className="mb-4 text-2xl font-semibold text-gray-900">
                   📅 Date & Time Selection
                 </h2>
-
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
@@ -983,43 +972,35 @@ export default function BookingPage() {
                               ) {
                                 return 'bg-red-500 text-white font-bold rounded';
                               }
-
                               // Style for booked dates
                               const isBooked = bookedDates.some(
                                 (bookedDate) => bookedDate.toDateString() === date.toDateString(),
                               );
-
                               if (isBooked) {
                                 return 'bg-red-100 text-red-400 line-through cursor-not-allowed';
                               }
-
                               return '';
                             }}
                             onSelect={(date: Date | null) => {
                               // Additional validation when user selects a date
                               if (!date) return;
-
                               const now = new Date();
                               const timeDiff = date.getTime() - now.getTime();
                               const hoursDiff = timeDiff / (1000 * 60 * 60);
-
                               if (hoursDiff < 48) {
                                 setDateError('Please select a date at least 48 hours in advance');
                                 return;
                               }
-
                               // Check if the date is booked
                               const isBooked = bookedDates.some(
                                 (bookedDate) => bookedDate.toDateString() === date.toDateString(),
                               );
-
                               if (isBooked) {
                                 setDateError(
                                   'This date is fully booked. Please select another date.',
                                 );
                                 return;
                               }
-
                               setDateError(null);
                             }}
                             filterDate={(date: Date) => {
@@ -1027,18 +1008,14 @@ export default function BookingPage() {
                               const now = new Date();
                               const timeDiff = date.getTime() - now.getTime();
                               const hoursDiff = timeDiff / (1000 * 60 * 60);
-
                               // Must be at least 48 hours in future
                               if (hoursDiff < 48) return false;
-
                               // Only allow current year and future years (prevents previous year navigation)
                               if (date.getFullYear() < now.getFullYear()) return false;
-
                               // Check if the date is booked
                               const isBooked = bookedDates.some(
                                 (bookedDate) => bookedDate.toDateString() === date.toDateString(),
                               );
-
                               return !isBooked;
                             }}
                           />
@@ -1071,7 +1048,6 @@ export default function BookingPage() {
                       <p className="mt-1 text-sm text-red-500">{errors.eventDate.message}</p>
                     )}
                   </div>
-
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
                       Event Time *
@@ -1117,7 +1093,6 @@ export default function BookingPage() {
                       <p className="mt-1 text-sm text-red-500">{errors.eventTime.message}</p>
                     )}
                   </div>
-
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
                       Estimate Number of Guests *
@@ -1144,7 +1119,6 @@ export default function BookingPage() {
                   </div>
                 </div>
               </div>
-
               {/* Event Venue - Now above Billing Address */}
               <div className="border-b pb-6">
                 <div className="mb-4 flex items-center justify-between">
@@ -1164,7 +1138,6 @@ export default function BookingPage() {
                     )}
                   </div>
                 </div>
-
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="md:col-span-2">
                     <label className="mb-2 block text-sm font-medium text-gray-700">
@@ -1179,7 +1152,6 @@ export default function BookingPage() {
                       <p className="mt-1 text-sm text-red-500">{errors.venueStreet.message}</p>
                     )}
                   </div>
-
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">City *</label>
                     <input
@@ -1191,7 +1163,6 @@ export default function BookingPage() {
                       <p className="mt-1 text-sm text-red-500">{errors.venueCity.message}</p>
                     )}
                   </div>
-
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">State *</label>
                     <input
@@ -1204,7 +1175,6 @@ export default function BookingPage() {
                       <p className="mt-1 text-sm text-red-500">{errors.venueState.message}</p>
                     )}
                   </div>
-
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
                       ZIP Code *
@@ -1221,7 +1191,6 @@ export default function BookingPage() {
                   </div>
                 </div>
               </div>
-
               {/* Billing Address - Changed from Customer Address */}
               <div className="border-b pb-6">
                 <div className="mb-4 flex items-center justify-between">
@@ -1242,7 +1211,6 @@ export default function BookingPage() {
                     )}
                   </div>
                 </div>
-
                 {/* Checkbox - Disabled until venue address is complete */}
                 <div className="mb-4">
                   <label
@@ -1279,7 +1247,6 @@ export default function BookingPage() {
                     </p>
                   )}
                 </div>
-
                 {/* Show minimized summary when checkbox is checked */}
                 {sameAsVenue && isVenueAddressComplete ? (
                   <div className="rounded-lg border border-green-200 bg-green-50 p-4">
@@ -1313,7 +1280,6 @@ export default function BookingPage() {
                         <p className="mt-1 text-sm text-red-500">{errors.addressStreet.message}</p>
                       )}
                     </div>
-
                     <div>
                       <label className="mb-2 block text-sm font-medium text-gray-700">City *</label>
                       <input
@@ -1326,7 +1292,6 @@ export default function BookingPage() {
                         <p className="mt-1 text-sm text-red-500">{errors.addressCity.message}</p>
                       )}
                     </div>
-
                     <div>
                       <label className="mb-2 block text-sm font-medium text-gray-700">
                         State *
@@ -1342,7 +1307,6 @@ export default function BookingPage() {
                         <p className="mt-1 text-sm text-red-500">{errors.addressState.message}</p>
                       )}
                     </div>
-
                     <div>
                       <label className="mb-2 block text-sm font-medium text-gray-700">
                         ZIP Code *
@@ -1361,7 +1325,6 @@ export default function BookingPage() {
                   </div>
                 )}
               </div>
-
               {/* Submit Button */}
               <div className="text-center">
                 {/* Form completion status */}
@@ -1415,7 +1378,6 @@ export default function BookingPage() {
                           /4 sections complete):
                         </span>
                       </div>
-
                       <div className="space-y-2">
                         {/* Date & Time Section */}
                         {!(watch('eventDate') && watch('eventTime')) && (
@@ -1433,7 +1395,6 @@ export default function BookingPage() {
                             </span>
                           </div>
                         )}
-
                         {/* Customer Information Section */}
                         {!(
                           watch('name') &&
@@ -1458,7 +1419,6 @@ export default function BookingPage() {
                             </span>
                           </div>
                         )}
-
                         {/* Event Venue Section */}
                         {!(
                           watch('venueStreet') &&
@@ -1483,7 +1443,6 @@ export default function BookingPage() {
                             </span>
                           </div>
                         )}
-
                         {/* Billing Address Section */}
                         {!(
                           watch('sameAsVenue') ||
@@ -1504,7 +1463,6 @@ export default function BookingPage() {
                     </div>
                   </div>
                 )}
-
                 <button
                   type="submit"
                   disabled={
@@ -1639,7 +1597,6 @@ export default function BookingPage() {
                     '📝 Complete Form to Continue'
                   )}
                 </button>
-
                 {/* Form completion summary */}
                 <div className="mt-4 text-sm text-gray-600">
                   <div className="flex flex-wrap items-center justify-center gap-2">
@@ -1696,7 +1653,6 @@ export default function BookingPage() {
           </div>
         </div>
       </div>
-
       <Assistant />
     </>
   );

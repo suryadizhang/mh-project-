@@ -24,30 +24,44 @@ export const api = {
       throw new Error(`API error: ${response.status} ${response.statusText}`);
     }
 
-    return response.json();
+    return response.json() as Promise<T>;
   },
 
   get<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET', headers });
+    const requestHeaders = headers || {};
+    return this.request<T>(endpoint, { method: 'GET', headers: requestHeaders });
   },
 
   post<T>(endpoint: string, data?: any, headers?: Record<string, string>): Promise<T> {
-    return this.request<T>(endpoint, {
+    const requestHeaders = headers || {};
+    const requestOptions: RequestInit = {
       method: 'POST',
-      headers,
-      body: data ? JSON.stringify(data) : undefined,
-    });
+      headers: requestHeaders,
+    };
+    
+    if (data) {
+      requestOptions.body = JSON.stringify(data);
+    }
+    
+    return this.request<T>(endpoint, requestOptions);
   },
 
   put<T>(endpoint: string, data?: any, headers?: Record<string, string>): Promise<T> {
-    return this.request<T>(endpoint, {
+    const requestHeaders = headers || {};
+    const requestOptions: RequestInit = {
       method: 'PUT',
-      headers,
-      body: data ? JSON.stringify(data) : undefined,
-    });
+      headers: requestHeaders,
+    };
+    
+    if (data) {
+      requestOptions.body = JSON.stringify(data);
+    }
+    
+    return this.request<T>(endpoint, requestOptions);
   },
 
   delete<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
-    return this.request<T>(endpoint, { method: 'DELETE', headers });
+    const requestHeaders = headers || {};
+    return this.request<T>(endpoint, { method: 'DELETE', headers: requestHeaders });
   },
 };
