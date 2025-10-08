@@ -104,6 +104,11 @@ class Settings(BaseSettings):
     ringcentral_username: str = ""
     ringcentral_password: str = ""
     ringcentral_from_number: str = ""
+    # Additional fields for our enhanced integration
+    ringcentral_jwt_token: str = ""
+    ringcentral_phone_number: str = ""
+    ringcentral_webhook_secret: str = ""
+    ringcentral_sandbox: bool = True
 
     # Stripe Payment Configuration
     stripe_enabled: bool = True
@@ -238,7 +243,11 @@ class Settings(BaseSettings):
                 "client_secret": self.ringcentral_client_secret,
                 "username": self.ringcentral_username,
                 "password": self.ringcentral_password,
-                "from_number": self.ringcentral_from_number
+                "from_number": self.ringcentral_from_number,
+                "jwt_token": self.ringcentral_jwt_token,
+                "phone_number": self.ringcentral_phone_number,
+                "webhook_secret": self.ringcentral_webhook_secret,
+                "sandbox": self.ringcentral_sandbox
             },
 
             "email": {

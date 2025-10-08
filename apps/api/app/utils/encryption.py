@@ -40,17 +40,23 @@ class FieldEncryption:
         if master_key:
             self.master_key = master_key.encode()
         else:
-            # Get from environment - in production this should come from KMS/Vault
-            master_key_b64 = os.environ.get('FIELD_ENCRYPTION_KEY')
+            # Get from settings - in production this should come from KMS/Vault
+            try:
+                from ..config import settings
+                master_key_b64 = settings.field_encryption_key
+            except ImportError:
+                # Fallback to environment variable for standalone usage
+                master_key_b64 = os.environ.get('FIELD_ENCRYPTION_KEY')
+            
             if not master_key_b64:
                 raise ValueError(
-                    "FIELD_ENCRYPTION_KEY environment variable required. "
+                    "field_encryption_key setting or FIELD_ENCRYPTION_KEY environment variable required. "
                     "Generate with: python -c \"import secrets; print(secrets.token_urlsafe(32))\""
                 )
             try:
                 self.master_key = base64.urlsafe_b64decode(master_key_b64)
             except Exception as e:
-                raise ValueError(f"Invalid FIELD_ENCRYPTION_KEY format: {e}")
+                raise ValueError(f"Invalid field_encryption_key format: {e}")
 
         if len(self.master_key) != self.KEY_SIZE:
             raise ValueError(f"Master key must be {self.KEY_SIZE} bytes")

@@ -277,6 +277,17 @@ app.include_router(crm_router, prefix="/api", tags=["crm"])
 # Payment Processing
 app.include_router(stripe.router, prefix="/api/stripe", tags=["payments"])
 
+# Lead and Newsletter Management
+from app.routers.leads import router as leads_router
+from app.routers.newsletter import router as newsletter_router
+from app.routers.ringcentral_webhooks import router as ringcentral_router
+from app.routers.admin_analytics import router as admin_analytics_router
+
+app.include_router(leads_router, prefix="/api", tags=["leads"])
+app.include_router(newsletter_router, prefix="/api", tags=["newsletter"])
+app.include_router(ringcentral_router, prefix="/api", tags=["sms", "webhooks"])
+app.include_router(admin_analytics_router, prefix="/api", tags=["admin", "analytics"])
+
 # Legacy API compatibility (for existing frontend)
 app.include_router(bookings.router, prefix="/api/booking", tags=["booking-legacy"])
 app.include_router(bookings.router, prefix="/api/bookings", tags=["bookings-legacy"])

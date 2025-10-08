@@ -14,7 +14,7 @@ from sqlalchemy import (
     String,
     Text,
 )
-from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
+from sqlalchemy.dialects.postgresql import UUID as PostgresUUID, JSONB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -49,6 +49,9 @@ class Customer(Base):
     # Relationships
     bookings = relationship("Booking", back_populates="customer")
     message_threads = relationship("MessageThread", back_populates="customer")
+    leads = relationship("Lead", back_populates="customer")
+    social_threads = relationship("SocialThread", back_populates="customer")
+    newsletter_subscriptions = relationship("Subscriber", back_populates="customer")
 
 
 class Booking(Base):
@@ -221,10 +224,38 @@ class Message(Base):
     )
 
 
+class Event(Base):
+    """Event logging for system activities."""
+
+    __tablename__ = "events"
+    __table_args__ = {"schema": "core"}
+
+    id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
+    
+    # Event identification
+    event_type = Column(String(100), nullable=False, index=True)
+    entity_type = Column(String(50), nullable=False, index=True)
+    entity_id = Column(String(100), nullable=False, index=True)
+    
+    # Event data
+    data = Column(JSONB, nullable=True)
+    
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
+    
+    # Indexes for common queries
+    __table_args__ = (
+        Index("idx_event_type_created", "event_type", "created_at"),
+        Index("idx_entity_type_id", "entity_type", "entity_id"),
+        {"schema": "core"}
+    )
+
+
 __all__ = [
     "Customer",
     "Booking",
     "Payment",
     "MessageThread",
-    "Message"
+    "Message",
+    "Event"
 ]
