@@ -271,6 +271,12 @@ app.include_router(health.router, prefix="/api/health", tags=["health"])
 # Authentication & Authorization
 app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
 
+# Station-aware Authentication & Administration
+from app.routers.station_auth import router as station_auth_router
+from app.routers.station_admin import router as station_admin_router
+app.include_router(station_auth_router, prefix="/api/station", tags=["station-auth"])
+app.include_router(station_admin_router, prefix="/api/admin/stations", tags=["station-admin"])
+
 # CRM Operations (new comprehensive API)
 app.include_router(crm_router, prefix="/api", tags=["crm"])
 

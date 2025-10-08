@@ -23,15 +23,18 @@ Base = declarative_base()
 
 
 class Customer(Base):
-    """Customer records with encrypted PII."""
+    """Customer records with encrypted PII and station scoping."""
 
     __tablename__ = "customers"
     __table_args__ = {"schema": "core"}
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
+    
+    # Station association for multi-tenant isolation
+    station_id = Column(PostgresUUID(as_uuid=True), ForeignKey("identity.stations.id"), nullable=False, index=True)
 
     # Encrypted fields
-    email_encrypted = Column(String(500), nullable=False, unique=True)
+    email_encrypted = Column(String(500), nullable=False)
     name_encrypted = Column(String(500), nullable=False)
     phone_encrypted = Column(String(500), nullable=False)
 
@@ -47,19 +50,30 @@ class Customer(Base):
     updated_at = Column(DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now())
 
     # Relationships
+    station = relationship("Station", back_populates="customers")
     bookings = relationship("Booking", back_populates="customer")
     message_threads = relationship("MessageThread", back_populates="customer")
     leads = relationship("Lead", back_populates="customer")
     social_threads = relationship("SocialThread", back_populates="customer")
     newsletter_subscriptions = relationship("Subscriber", back_populates="customer")
+    
+    __table_args__ = (
+        # Unique email within station (allow same email across different stations)
+        Index("idx_customer_station_email", "station_id", "email_encrypted", unique=True),
+        Index("idx_customer_station_created", "station_id", "created_at"),
+        {"schema": "core"}
+    )
 
 
 class Booking(Base):
-    """Booking records."""
+    """Booking records with station scoping."""
 
     __tablename__ = "bookings"
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
+    
+    # Station association for multi-tenant isolation
+    station_id = Column(PostgresUUID(as_uuid=True), ForeignKey("identity.stations.id"), nullable=False, index=True)
     customer_id = Column(PostgresUUID(as_uuid=True), ForeignKey("core.customers.id"), nullable=False, index=True)
 
     # Booking details
@@ -89,6 +103,7 @@ class Booking(Base):
     updated_at = Column(DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now())
 
     # Relationships
+    station = relationship("Station", back_populates="bookings")
     customer = relationship("Customer", back_populates="bookings")
     payments = relationship("Payment", back_populates="booking")
 
@@ -97,7 +112,8 @@ class Booking(Base):
         CheckConstraint("total_guests >= 0", name="ck_bookings_check_party_kids_non_negative"),
         CheckConstraint("deposit_due_cents >= 0", name="ck_bookings_check_deposit_non_negative"),
         CheckConstraint("total_due_cents >= deposit_due_cents", name="ck_bookings_check_total_gte_deposit"),
-        Index("idx_booking_date_slot", "date", "slot"),
+        Index("idx_booking_station_date", "station_id", "date", "slot"),
+        Index("idx_booking_station_customer", "station_id", "customer_id"),
         {"schema": "core"},
     )
 
@@ -141,11 +157,14 @@ class Payment(Base):
 
 
 class MessageThread(Base):
-    """Message thread records."""
+    """Message thread records with station scoping."""
 
     __tablename__ = "message_threads"
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
+    
+    # Station association for multi-tenant isolation
+    station_id = Column(PostgresUUID(as_uuid=True), ForeignKey("identity.stations.id"), nullable=False, index=True)
     customer_id = Column(PostgresUUID(as_uuid=True), ForeignKey("core.customers.id"), nullable=True, index=True)
 
     # Contact info (encrypted)
@@ -165,6 +184,7 @@ class MessageThread(Base):
     updated_at = Column(DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now())
 
     # Relationships
+    station = relationship("Station")
     customer = relationship("Customer", back_populates="message_threads")
     messages = relationship("Message", back_populates="thread")
 
@@ -173,6 +193,8 @@ class MessageThread(Base):
             "status IN ('active', 'closed', 'archived')",
             name="thread_status_valid"
         ),
+        Index("idx_thread_station_phone", "station_id", "phone_number_encrypted"),
+        Index("idx_thread_station_customer", "station_id", "customer_id"),
         {"schema": "core"},
     )
 

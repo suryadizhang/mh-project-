@@ -1,8 +1,11 @@
 'use client';
 
 import { format } from 'date-fns';
-import { Calendar, Mail, TrendingUp, Users } from 'lucide-react';
+import { Calendar, Mail, TrendingUp, Users, Building, Shield, Bot } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { AdminChatWidget } from '@/components/AdminChatWidget';
+import { StationManager } from '@/components/StationManager';
 
 // Enhanced booking interface for production
 interface Booking {
@@ -20,13 +23,22 @@ interface Booking {
 }
 
 export default function AdminDashboard() {
+  const { stationContext, hasPermission, isSuperAdmin } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'stations' | 'chat'>('dashboard');
+
+  // Permissions
+  const canViewBookings = hasPermission('view_bookings') || hasPermission('manage_bookings');
+  const canManageStations = isSuperAdmin() || hasPermission('manage_stations');
+  const canUseChat = hasPermission('use_ai_chat') || hasPermission('manage_ai_chat');
 
   // Load bookings (in production, fetch from API)
   useEffect(() => {
+    if (!canViewBookings) return;
+    
     // Simulate API call
     const fetchBookings = async () => {
       // Mock data with realistic booking scenarios
@@ -92,7 +104,7 @@ export default function AdminDashboard() {
     };
 
     fetchBookings();
-  }, []);
+  }, [canViewBookings]);
 
   // Calculate stats from real data
   const stats = [
@@ -217,25 +229,8 @@ export default function AdminDashboard() {
     }
   };
 
-  return (
+  const renderDashboard = () => (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            🍤 MyHibachi Admin Dashboard
-          </h1>
-          <p className="text-gray-600">
-            Manage your hibachi bookings and customer data
-          </p>
-        </div>
-        <button
-          onClick={exportToCSV}
-          className="flex items-center space-x-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
-        >
-          <span>📊 Export CSV</span>
-        </button>
-      </div>
-
       {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, index) => {
@@ -329,119 +324,131 @@ export default function AdminDashboard() {
       </div>
 
       {/* Recent Bookings */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-200 px-6 py-4">
-          <h2 className="text-lg font-semibold text-gray-900">
-            📋 Booking Management
-          </h2>
-        </div>
+      {canViewBookings && (
+        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div className="border-b border-gray-200 px-6 py-4">
+            <h2 className="text-lg font-semibold text-gray-900">
+              📋 Booking Management
+            </h2>
+          </div>
 
-        {loading ? (
-          <div className="p-12 text-center">
-            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-red-600"></div>
-            <p className="mt-4 text-gray-500">Loading bookings...</p>
-          </div>
-        ) : filteredBookings.length === 0 ? (
-          <div className="p-12 text-center">
-            <div className="mb-4 text-6xl">📭</div>
-            <p className="text-lg text-gray-500">No bookings found</p>
-            <p className="mt-2 text-sm text-gray-400">
-              {statusFilter !== 'all' || dateFilter
-                ? 'Try adjusting your filters'
-                : 'Bookings will appear here once customers start booking'}
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                    Booking Details
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                    Customer
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                    Event Info
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {filteredBookings.map(booking => (
-                  <tr key={booking.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm">
-                        <div className="font-mono text-xs font-medium text-gray-900">
-                          {booking.id}
+          {loading ? (
+            <div className="p-12 text-center">
+              <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-red-600"></div>
+              <p className="mt-4 text-gray-500">Loading bookings...</p>
+            </div>
+          ) : filteredBookings.length === 0 ? (
+            <div className="p-12 text-center">
+              <div className="mb-4 text-6xl">📭</div>
+              <p className="text-lg text-gray-500">No bookings found</p>
+              <p className="mt-2 text-sm text-gray-400">
+                {statusFilter !== 'all' || dateFilter
+                  ? 'Try adjusting your filters'
+                  : 'Bookings will appear here once customers start booking'}
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                      Booking Details
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                      Customer
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                      Event Info
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {filteredBookings.map(booking => (
+                    <tr key={booking.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm">
+                          <div className="font-mono text-xs font-medium text-gray-900">
+                            {booking.id}
+                          </div>
+                          <div className="text-gray-500">
+                            Created:{' '}
+                            {format(
+                              new Date(booking.createdAt),
+                              'MMM dd, yyyy HH:mm'
+                            )}
+                          </div>
                         </div>
-                        <div className="text-gray-500">
-                          Created:{' '}
-                          {format(
-                            new Date(booking.createdAt),
-                            'MMM dd, yyyy HH:mm'
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm">
+                          <div className="font-medium text-gray-900">
+                            {booking.customerName}
+                          </div>
+                          <div className="text-gray-500">
+                            {booking.customerEmail}
+                          </div>
+                          <div className="text-gray-500">
+                            {booking.customerPhone}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm">
+                          <div className="font-medium text-gray-900">
+                            📅{' '}
+                            {format(new Date(booking.eventDate), 'MMM dd, yyyy')}
+                          </div>
+                          <div className="text-gray-500">
+                            🕐 {booking.eventTime}
+                          </div>
+                          <div className="text-gray-500">
+                            👥 {booking.guestCount} guests
+                          </div>
+                          <div className="mt-1 text-xs text-gray-400">
+                            {booking.venueAddress}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getStatusColor(
+                            booking.status
+                          )}`}
+                        >
+                          {booking.status.charAt(0).toUpperCase() +
+                            booking.status.slice(1)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
+                        <div className="space-y-1">
+                          {booking.status === 'pending' && (
+                            <>
+                              <button
+                                onClick={() =>
+                                  updateBookingStatus(booking.id, 'confirmed')
+                                }
+                                className="block w-full rounded bg-green-600 px-3 py-1 text-xs text-white transition-colors hover:bg-green-700"
+                              >
+                                ✅ Confirm
+                              </button>
+                              <button
+                                onClick={() =>
+                                  updateBookingStatus(booking.id, 'cancelled')
+                                }
+                                className="block w-full rounded bg-red-600 px-3 py-1 text-xs text-white transition-colors hover:bg-red-700"
+                              >
+                                ❌ Cancel
+                              </button>
+                            </>
                           )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm">
-                        <div className="font-medium text-gray-900">
-                          {booking.customerName}
-                        </div>
-                        <div className="text-gray-500">
-                          {booking.customerEmail}
-                        </div>
-                        <div className="text-gray-500">
-                          {booking.customerPhone}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm">
-                        <div className="font-medium text-gray-900">
-                          📅{' '}
-                          {format(new Date(booking.eventDate), 'MMM dd, yyyy')}
-                        </div>
-                        <div className="text-gray-500">
-                          🕐 {booking.eventTime}
-                        </div>
-                        <div className="text-gray-500">
-                          👥 {booking.guestCount} guests
-                        </div>
-                        <div className="mt-1 text-xs text-gray-400">
-                          {booking.venueAddress}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getStatusColor(
-                          booking.status
-                        )}`}
-                      >
-                        {booking.status.charAt(0).toUpperCase() +
-                          booking.status.slice(1)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                      <div className="space-y-1">
-                        {booking.status === 'pending' && (
-                          <>
-                            <button
-                              onClick={() =>
-                                updateBookingStatus(booking.id, 'confirmed')
-                              }
-                              className="block w-full rounded bg-green-600 px-3 py-1 text-xs text-white transition-colors hover:bg-green-700"
-                            >
-                              ✅ Confirm
-                            </button>
+                          {booking.status === 'confirmed' && (
                             <button
                               onClick={() =>
                                 updateBookingStatus(booking.id, 'cancelled')
@@ -450,40 +457,111 @@ export default function AdminDashboard() {
                             >
                               ❌ Cancel
                             </button>
-                          </>
-                        )}
-                        {booking.status === 'confirmed' && (
-                          <button
-                            onClick={() =>
-                              updateBookingStatus(booking.id, 'cancelled')
-                            }
-                            className="block w-full rounded bg-red-600 px-3 py-1 text-xs text-white transition-colors hover:bg-red-700"
+                          )}
+                          <a
+                            href={`mailto:${
+                              booking.customerEmail
+                            }?subject=Hibachi Booking ${booking.id}&body=Hello ${
+                              booking.customerName
+                            },%0D%0A%0D%0ARegarding your hibachi booking for ${format(
+                              new Date(booking.eventDate),
+                              'MMM dd, yyyy'
+                            )} at ${booking.eventTime}...`}
+                            className="block w-full rounded bg-blue-600 px-3 py-1 text-center text-xs text-white transition-colors hover:bg-blue-700"
                           >
-                            ❌ Cancel
-                          </button>
-                        )}
-                        <a
-                          href={`mailto:${
-                            booking.customerEmail
-                          }?subject=Hibachi Booking ${booking.id}&body=Hello ${
-                            booking.customerName
-                          },%0D%0A%0D%0ARegarding your hibachi booking for ${format(
-                            new Date(booking.eventDate),
-                            'MMM dd, yyyy'
-                          )} at ${booking.eventTime}...`}
-                          className="block w-full rounded bg-blue-600 px-3 py-1 text-center text-xs text-white transition-colors hover:bg-blue-700"
-                        >
-                          ✉️ Email
-                        </a>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                            ✉️ Email
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            🍤 MyHibachi Admin Dashboard
+          </h1>
+          <div className="flex items-center space-x-4 text-gray-600">
+            <p>Station: <strong>{stationContext?.station_name}</strong></p>
+            <p>Role: <strong>{stationContext?.role}</strong></p>
+            {isSuperAdmin() && <span className="text-red-600 font-semibold">SUPER ADMIN</span>}
           </div>
-        )}
+        </div>
+        <div className="flex items-center space-x-4">
+          {canViewBookings && (
+            <button
+              onClick={exportToCSV}
+              className="flex items-center space-x-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
+            >
+              <span>📊 Export CSV</span>
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Navigation Tabs */}
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'dashboard'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <Calendar className="h-4 w-4 inline mr-2" />
+            Dashboard
+          </button>
+          
+          {canManageStations && (
+            <button
+              onClick={() => setActiveTab('stations')}
+              className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'stations'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <Building className="h-4 w-4 inline mr-2" />
+              Station Management
+            </button>
+          )}
+          
+          {canUseChat && (
+            <button
+              onClick={() => setActiveTab('chat')}
+              className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'chat'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <Bot className="h-4 w-4 inline mr-2" />
+              AI Assistant
+            </button>
+          )}
+        </nav>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'dashboard' && renderDashboard()}
+      {activeTab === 'stations' && canManageStations && (
+        <StationManager className="min-h-[600px]" />
+      )}
+      {activeTab === 'chat' && canUseChat && (
+        <AdminChatWidget className="max-w-4xl mx-auto" defaultOpen={true} />
+      )}
     </div>
   );
 }

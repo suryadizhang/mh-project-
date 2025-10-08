@@ -10,6 +10,7 @@ import json
 from enum import Enum
 
 from app.services.role_based_ai import UserRole, AICapability, role_based_ai
+from app.services.openai_service import openai_service
 
 logger = logging.getLogger(__name__)
 
@@ -57,20 +58,139 @@ class AdminManagementAI:
         }
         
     async def process_admin_message(self, message: str, context: Dict[str, Any]) -> Dict[str, Any]:
-        """Process admin message and route to appropriate management function"""
-        user_role = context.get("user_role", UserRole.ADMIN)
+        """Process admin message using OpenAI for natural admin assistance"""
+        try:
+            logger.info(f"Admin AI processing message: {message[:50]}...")
+            
+            user_role = context.get("user_role", UserRole.ADMIN)
+            
+            # Verify admin access
+            if not self._verify_admin_access(user_role):
+                return self._create_access_denied_response()
+            
+            # Use OpenAI for natural admin conversation
+            if openai_service.client:
+                logger.info("Admin AI using OpenAI service")
+                
+                # Create context for OpenAI
+                system_prompt = """You are a helpful AI assistant for MyHibachi restaurant admin users. You can answer any questions naturally and conversationally, including general knowledge, math, or any topic the user asks about.
+
+When asked about MyHibachi-specific tasks, I can help with:
+
+🏢 **Admin Functions**:
+• User & Staff Management
+• Booking Operations  
+• Analytics & Reports
+• System Configuration
+• Operations Support
+
+📊 **Quick Actions**:
+• View booking statistics
+• Manage customer accounts
+• Staff scheduling assistance
+• Generate reports
+• System settings help
+
+**Guidelines**:
+- Answer all questions naturally and helpfully
+- Be professional but conversational
+- For MyHibachi tasks, be security-conscious with sensitive data
+- Provide clear, accurate information
+- Use emojis sparingly for visual appeal
+
+You should respond to ANY question the user asks, not just MyHibachi-related ones."""
+
+                ai_response = await openai_service.generate_response(
+                    message=message,
+                    context={
+                        "system_prompt": system_prompt,
+                        "user_role": "admin",
+                        "service_type": "admin_management",
+                        **context
+                    }
+                )
+                
+                logger.info(f"Admin AI received OpenAI response: {type(ai_response)}")
+                logger.info(f"🔧 Admin AI response content: {ai_response[:2] if isinstance(ai_response, tuple) else str(ai_response)[:100]}")
+                
+                # Handle tuple response format from OpenAI service
+                if isinstance(ai_response, tuple):
+                    response_text = ai_response[0]
+                    confidence = ai_response[1] if len(ai_response) > 1 else 0.9
+                    logger.info(f"🔧 Admin AI final response: {response_text[:100]}...")
+                else:
+                    response_text = ai_response
+                    confidence = 0.9
+                
+                return {
+                    "response": response_text,
+                    "intent": "admin_management",
+                    "confidence": confidence
+                }
+            else:
+                logger.warning("Admin AI OpenAI service not available, using fallback")
+                # Fallback to simple responses if OpenAI not available
+                return self._get_admin_fallback_response(message, context)
         
-        # Verify admin access
-        if not self._verify_admin_access(user_role):
-            return self._create_access_denied_response()
+        except Exception as e:
+            logger.error(f"Error processing admin message: {e}")
+            return {
+                "response": "I'm experiencing technical difficulties. Please contact our team directly for help.",
+                "intent": "error",
+                "confidence": 0.0
+            }
+    
+    def _get_admin_fallback_response(self, message: str, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Provide fallback response for admin when OpenAI is not available"""
+        message_lower = message.lower()
         
-        # Identify admin function intent
-        admin_function = self._identify_admin_function(message.lower())
-        
-        if admin_function:
-            return await self._handle_admin_function(admin_function, message, context)
+        if any(word in message_lower for word in ["booking", "reservation"]):
+            return {
+                "response": """Hello! I'm your AI management assistant.
+
+I can help you with:
+
+• **User & Staff Management** - Manage accounts and permissions
+• **Booking Operations** - Handle reservations and scheduling  
+• **Analytics & Reports** - View performance metrics
+• **System Configuration** - Manage settings and preferences
+• **Operations Support** - Kitchen, inventory, and maintenance
+
+How can I assist you with managing MyHibachi today?""",
+                "intent": "booking_management",
+                "confidence": 0.8
+            }
+        elif any(word in message_lower for word in ["user", "customer", "staff"]):
+            return {
+                "response": """I can help you manage users and staff.
+
+What would you like to do?
+
+• **View user accounts** - See all customer profiles
+• **Manage staff schedules** - Create and modify work schedules  
+• **Update permissions** - Modify user access levels
+• **Review user activity** - Check account usage and behavior
+
+Please let me know which option interests you!""",
+                "intent": "user_management", 
+                "confidence": 0.8
+            }
         else:
-            return await self._handle_general_admin_inquiry(message, context)
+            return {
+                "response": """Hello! I'm your AI management assistant.
+
+I can help you with:
+
+• **User & Staff Management** - Manage accounts and permissions
+• **Booking Operations** - Handle reservations and scheduling
+• **Analytics & Reports** - View performance metrics  
+• **System Configuration** - Manage settings and preferences
+• **Operations Support** - Kitchen, inventory, and maintenance
+
+How can I assist you with managing MyHibachi today?""",
+                "intent": "general_admin",
+                "confidence": 0.7
+            }
     
     def _verify_admin_access(self, user_role: UserRole) -> bool:
         """Verify user has admin access"""
@@ -414,7 +534,7 @@ I can help you manage all aspects of MyHibachi:
 
 **👥 User Management**
 • View/create/modify customer accounts
-• Manage user permissions and access
+• Manage user permissions and access  
 • Handle password resets and account issues
 
 **📅 Booking Management**
@@ -454,7 +574,7 @@ What would you like to manage today?""",
             "response": """👥 **User Management Options**
 
 • **View Users** - Show all user accounts and statistics
-• **Create User** - Add new customer or staff account
+• **Create User** - Add new customer or staff account  
 • **Update User** - Modify user information and preferences
 • **Deactivate User** - Disable problematic accounts
 • **Reset Password** - Help users with login issues

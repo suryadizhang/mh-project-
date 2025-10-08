@@ -67,7 +67,7 @@ const nextConfig: NextConfig = {
           {
             key: 'Permissions-Policy',
             value:
-              'camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), speaker=()',
+              'camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=()',
           },
           {
             key: 'Strict-Transport-Security',
@@ -97,11 +97,11 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
-              "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://cdn.jsdelivr.net",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://use.fontawesome.com https://maxcdn.bootstrapcdn.com",
+              "font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com https://cdn.jsdelivr.net https://use.fontawesome.com https://maxcdn.bootstrapcdn.com",
               "img-src 'self' data: https: blob:",
-              "connect-src 'self' https://www.google-analytics.com https://api.stripe.com https://vitals.vercel-insights.com",
+              "connect-src 'self' https://www.google-analytics.com https://api.stripe.com https://vitals.vercel-insights.com https://cdn.jsdelivr.net ws://localhost:8002 http://localhost:8002",
               "frame-src 'self' https://js.stripe.com https://www.facebook.com",
               "object-src 'none'",
               "base-uri 'self'",

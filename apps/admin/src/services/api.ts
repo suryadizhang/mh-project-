@@ -15,6 +15,74 @@ import type {
   Payment,
 } from '@/types';
 
+// Station-aware types
+export interface StationContext {
+  station_id: number;
+  station_name: string;
+  role: string;
+  permissions: string[];
+  is_super_admin: boolean;
+}
+
+export interface StationLoginRequest {
+  email: string;
+  password: string;
+  station_id?: number;
+}
+
+export interface StationLoginResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  station_context: StationContext;
+}
+
+export interface Station {
+  id: number;
+  name: string;
+  description?: string;
+  location?: string;
+  phone?: string;
+  email?: string;
+  manager_name?: string;
+  settings: Record<string, any>;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  user_count?: number;
+  booking_count?: number;
+  last_activity?: string;
+}
+
+export interface StationUser {
+  id: number;
+  user_id: number;
+  station_id: number;
+  role: string;
+  permissions: string[];
+  assigned_at: string;
+  assigned_by: number;
+  is_active: boolean;
+  user_email?: string;
+  user_name?: string;
+  last_login?: string;
+}
+
+export interface AuditLog {
+  id: number;
+  station_id: number;
+  user_id: number;
+  action: string;
+  resource_type: string;
+  resource_id?: string;
+  details: Record<string, any>;
+  ip_address?: string;
+  user_agent?: string;
+  timestamp: string;
+  user_email?: string;
+  user_role?: string;
+}
+
 // Base API endpoints
 const ENDPOINTS = {
   // CRM endpoints
@@ -25,6 +93,10 @@ const ENDPOINTS = {
   
   // Auth endpoints  
   auth: '/api/auth',
+  stationAuth: '/api/station/station-login',
+  
+  // Station admin endpoints
+  stations: '/api/admin/stations',
   
   // Health endpoints
   health: '/api/health',
@@ -39,7 +111,7 @@ const ENDPOINTS = {
  */
 export const authService = {
   /**
-   * Login with admin credentials
+   * Login with admin credentials (legacy)
    */
   async login(email: string, password: string) {
     return api.post<{ access_token: string; token_type: string }>(
@@ -50,6 +122,27 @@ export const authService = {
         grant_type: 'password'
       }
     );
+  },
+
+  /**
+   * Station-aware login
+   */
+  async stationLogin(email: string, password: string, stationId?: number) {
+    return api.post<StationLoginResponse>(
+      ENDPOINTS.stationAuth,
+      { 
+        email,
+        password,
+        station_id: stationId
+      }
+    );
+  },
+
+  /**
+   * Get available stations for user
+   */
+  async getUserStations(email: string) {
+    return api.get<Station[]>(`/api/station/user-stations?email=${encodeURIComponent(email)}`);
   },
 
   /**
@@ -273,7 +366,120 @@ export const healthService = {
 };
 
 /**
- * Token management utilities
+ * Station management service
+ */
+export const stationService = {
+  /**
+   * Get all stations
+   */
+  async getStations(includeStats: boolean = false) {
+    const params = new URLSearchParams();
+    if (includeStats) params.append('include_stats', 'true');
+    
+    const query = params.toString();
+    const url = query ? `${ENDPOINTS.stations}?${query}` : ENDPOINTS.stations;
+    
+    return api.get<Station[]>(url);
+  },
+
+  /**
+   * Get station by ID
+   */
+  async getStation(stationId: number, includeStats: boolean = false) {
+    const params = new URLSearchParams();
+    if (includeStats) params.append('include_stats', 'true');
+    
+    const query = params.toString();
+    const url = query ? `${ENDPOINTS.stations}/${stationId}?${query}` : `${ENDPOINTS.stations}/${stationId}`;
+    
+    return api.get<Station>(url);
+  },
+
+  /**
+   * Create new station (super admin only)
+   */
+  async createStation(station: Partial<Station>) {
+    return api.post<Station>(ENDPOINTS.stations, station);
+  },
+
+  /**
+   * Update station
+   */
+  async updateStation(stationId: number, updates: Partial<Station>) {
+    return api.put<Station>(`${ENDPOINTS.stations}/${stationId}`, updates);
+  },
+
+  /**
+   * Get station users
+   */
+  async getStationUsers(stationId: number, includeUserDetails: boolean = false) {
+    const params = new URLSearchParams();
+    if (includeUserDetails) params.append('include_user_details', 'true');
+    
+    const query = params.toString();
+    const url = query ? `${ENDPOINTS.stations}/${stationId}/users?${query}` : `${ENDPOINTS.stations}/${stationId}/users`;
+    
+    return api.get<StationUser[]>(url);
+  },
+
+  /**
+   * Assign user to station
+   */
+  async assignUserToStation(stationId: number, assignment: {
+    user_id: number;
+    role: string;
+    permissions?: string[];
+  }) {
+    return api.post<StationUser>(`${ENDPOINTS.stations}/${stationId}/users`, assignment);
+  },
+
+  /**
+   * Update user station assignment
+   */
+  async updateUserStationAssignment(stationId: number, userId: number, updates: {
+    role?: string;
+    permissions?: string[];
+    is_active?: boolean;
+  }) {
+    return api.put<StationUser>(`${ENDPOINTS.stations}/${stationId}/users/${userId}`, updates);
+  },
+
+  /**
+   * Remove user from station
+   */
+  async removeUserFromStation(stationId: number, userId: number) {
+    return api.delete<void>(`${ENDPOINTS.stations}/${stationId}/users/${userId}`);
+  },
+
+  /**
+   * Get station audit logs
+   */
+  async getStationAuditLogs(stationId: number, filters: {
+    action?: string;
+    resource_type?: string;
+    user_id?: number;
+    days?: number;
+    skip?: number;
+    limit?: number;
+  } = {}) {
+    const params = new URLSearchParams();
+    
+    if (filters.action) params.append('action', filters.action);
+    if (filters.resource_type) params.append('resource_type', filters.resource_type);
+    if (filters.user_id) params.append('user_id', filters.user_id.toString());
+    if (filters.days) params.append('days', filters.days.toString());
+    if (filters.skip) params.append('skip', filters.skip.toString());
+    if (filters.limit) params.append('limit', filters.limit.toString());
+
+    const query = params.toString();
+    const url = query ? `${ENDPOINTS.stations}/${stationId}/audit?${query}` : `${ENDPOINTS.stations}/${stationId}/audit`;
+    
+    return api.get<AuditLog[]>(url);
+  },
+};
+
+/**
+ * Token management utilities with station context
  */
 export const tokenManager = {
   getToken(): string | null {
@@ -291,14 +497,58 @@ export const tokenManager = {
     localStorage.removeItem('admin_token');
   },
 
+  getStationContext(): StationContext | null {
+    if (typeof window === 'undefined') return null;
+    const stored = localStorage.getItem('station_context');
+    if (!stored) return null;
+    
+    try {
+      return JSON.parse(stored);
+    } catch {
+      return null;
+    }
+  },
+
+  setStationContext(context: StationContext): void {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('station_context', JSON.stringify(context));
+  },
+
+  removeStationContext(): void {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem('station_context');
+  },
+
   getAuthHeaders(): Record<string, string> {
     const token = this.getToken();
     return token ? { Authorization: `Bearer ${token}` } : {};
   },
+
+  hasPermission(permission: string): boolean {
+    const context = this.getStationContext();
+    if (!context) return false;
+    
+    // Super admin has all permissions
+    if (context.is_super_admin) return true;
+    
+    return context.permissions.includes(permission);
+  },
+
+  hasRole(role: string): boolean {
+    const context = this.getStationContext();
+    if (!context) return false;
+    
+    return context.role === role;
+  },
+
+  isSuperAdmin(): boolean {
+    const context = this.getStationContext();
+    return context?.is_super_admin || false;
+  },
 };
 
 /**
- * Add token to all requests
+ * Enhanced API with automatic authentication and station context
  */
 export const apiWithAuth = {
   get: <T = any>(path: string, options: any = {}) =>
