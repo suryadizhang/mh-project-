@@ -13,11 +13,16 @@ pnpm-debug.log*
 /dist
 *.tsbuildinfo
 
-# Environment variables
+# Environment variables and secrets
 .env*
 !.env.example
 !.env.template
-!.env.production.template
+!.env.*.template
+.secrets
+.secrets.*
+*.pem
+*.key
+config/environments/secrets/
 
 # Prevent documentation bloat
 **/FINAL_*.md
