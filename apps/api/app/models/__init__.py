@@ -25,6 +25,13 @@ from .stripe_models import (
     Refund,
     WebhookEvent,
 )
+from .core import Customer as CoreCustomer, Booking as CoreBooking, MessageThread, Message
+from .lead_newsletter import (
+    Lead, LeadContact, LeadContext, LeadEvent, SocialThread,
+    Subscriber, Campaign, CampaignEvent,
+    LeadSource, LeadStatus, LeadQuality, ContactChannel, SocialPlatform,
+    CampaignChannel, CampaignStatus, CampaignEventType
+)
 
 __all__ = [
     # Stripe models
@@ -49,4 +56,27 @@ __all__ = [
     "BookingMenuItem",
     "BookingAddon",
     "BookingAvailability",
+    # Core CRM models
+    "CoreCustomer",
+    "CoreBooking",
+    "MessageThread",
+    "Message",
+    # Lead and Newsletter models
+    "Lead",
+    "LeadContact",
+    "LeadContext",
+    "LeadEvent",
+    "SocialThread",
+    "Subscriber",
+    "Campaign",
+    "CampaignEvent",
+    # Enums
+    "LeadSource",
+    "LeadStatus",
+    "LeadQuality",
+    "ContactChannel",
+    "SocialPlatform",
+    "CampaignChannel",
+    "CampaignStatus",
+    "CampaignEventType",
 ]

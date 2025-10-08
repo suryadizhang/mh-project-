@@ -5,6 +5,7 @@ from typing import Any, Optional
 from uuid import UUID
 
 import openai
+from pydantic import BaseModel
 
 from app.config import settings
 from app.cqrs.base import CommandBus, QueryBus
@@ -98,7 +99,7 @@ class SocialAIResponseGenerator:
         self.query_bus = query_bus
         self.toolkit = SocialMediaToolKit(command_bus, query_bus)
         self.safety_validator = ResponseSafetyValidator()
-        self.openai_client = openai.AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        self.openai_client = openai.AsyncOpenAI(api_key=settings.openai_api_key)
 
         # Response templates by scenario
         self.response_templates = {
