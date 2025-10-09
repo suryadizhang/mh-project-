@@ -12,17 +12,17 @@ version: '3.8'
 
 services:
   # =============================================================================
-  # FastAPI Backend Service
+  # Unified Backend Service (API + AI)
   # =============================================================================
-  fastapi-backend:
+  unified-backend:
     profiles: ["development", "production"]
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        COMPONENT: api
-      target: api
-    container_name: myhibachi-fastapi
+        COMPONENT: backend
+      target: backend
+    container_name: myhibachi-backend
     restart: unless-stopped
     ports:
       - "8000:8000"
@@ -50,40 +50,11 @@ services:
     networks:
       - myhibachi-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
-
-  # =============================================================================
-  # AI Backend Service
-  # =============================================================================
-  # AI Backend Service  
-  # =============================================================================
-  ai-backend:
-    profiles: ["development", "production"]
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        COMPONENT: ai-api
-      target: ai-api
-    container_name: myhibachi-ai
-    restart: unless-stopped
-    ports:
-      - "8002:8002"
-    environment:
-      - ENVIRONMENT=${ENVIRONMENT:-development}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-your_openai_key_here}
-    networks:
-      - myhibachi-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 
   # =============================================================================
   # PostgreSQL Database
@@ -147,8 +118,7 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - nginx_logs:/var/log/nginx
     depends_on:
-      - fastapi-backend
-      - ai-backend
+      - unified-backend
     networks:
       - myhibachi-network
     profiles:
