@@ -59,21 +59,12 @@ COPY . .
 RUN cd apps/customer && npm run build
 
 # =============================================================================
-# API Backend Build Stage
+# Unified Backend Build Stage
 # =============================================================================
-FROM python-base AS api-builder
-COPY apps/api/requirements.txt .
+FROM python-base AS backend-builder
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY apps/api/ .
-RUN chown -R appuser:appgroup /app
-
-# =============================================================================
-# AI API Backend Build Stage
-# =============================================================================
-FROM python-base AS ai-api-builder
-COPY apps/ai-api/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY apps/ai-api/ .
+COPY apps/backend/ .
 RUN chown -R appuser:appgroup /app
 
 # =============================================================================
@@ -111,33 +102,19 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:3000/healthz || exit 1
 CMD ["node", "server.js"]
 
-# API Backend Runtime
-FROM python:${PYTHON_VERSION}-alpine@sha256:e75de178bc15e72f3f16bf75a6b484e33d39a456f03fc771a2b3abb9146b75f8 AS api
+# Unified Backend Runtime
+FROM python:${PYTHON_VERSION}-alpine@sha256:e75de178bc15e72f3f16bf75a6b484e33d39a456f03fc771a2b3abb9146b75f8 AS backend
 WORKDIR /app
 RUN apk add --no-cache curl && rm -rf /var/cache/apk/*
 RUN addgroup -g 1001 -S appgroup && adduser -S appuser -u 1001 -G appgroup
-COPY --from=api-builder --chown=appuser:appgroup /app .
+COPY --from=backend-builder --chown=appuser:appgroup /app .
 USER appuser
 EXPOSE 8000
-ENV PYTHONPATH=/app
+ENV PYTHONPATH=/app/src
 ENV PYTHONUNBUFFERED=1
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/api/health || exit 1
-CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-
-# AI API Backend Runtime
-FROM python:${PYTHON_VERSION}-alpine@sha256:e75de178bc15e72f3f16bf75a6b484e33d39a456f03fc771a2b3abb9146b75f8 AS ai-api
-WORKDIR /app
-RUN apk add --no-cache curl && rm -rf /var/cache/apk/*
-RUN addgroup -g 1001 -S appgroup && adduser -S appuser -u 1001 -G appgroup
-COPY --from=ai-api-builder --chown=appuser:appgroup /app .
-USER appuser
-EXPOSE 8002
-ENV PYTHONPATH=/app
-ENV PYTHONUNBUFFERED=1
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8002/health || exit 1
-CMD ["python", "main.py"]
+    CMD curl -f http://localhost:8000/health || exit 1
+CMD ["python", "src/main.py"]
 
 # =============================================================================
 # Final Stage - Select Component Based on Build Arg
