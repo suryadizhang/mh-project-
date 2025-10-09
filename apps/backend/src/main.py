@@ -99,8 +99,56 @@ async def log_requests(request: Request, call_next):
 @app.middleware("http")
 async def apply_rate_limiting(request: Request, call_next):
     """Apply tiered rate limiting based on user role"""
-    # TODO: Extract user from JWT token if present
-    user = None  # This will be implemented when auth is added
+    # Extract user from JWT token if present
+    user = None
+    
+    try:
+        # Try to get user from Authorization header
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
+            
+            # Try to extract user from JWT token
+            try:
+                from core.security import extract_user_from_token
+                user_data = extract_user_from_token(token)
+                if user_data:
+                    # Create user object with proper role
+                    class AuthenticatedUser:
+                        def __init__(self, data):
+                            self.id = data.get("id")
+                            self.email = data.get("email") 
+                            self.role = data.get("role")
+                    
+                    user = AuthenticatedUser(user_data)
+                    logger.info(f"Authenticated user: {user.email} with role: {user.role}")
+                else:
+                    # Token invalid, treat as public
+                    user = None
+            except Exception as e:
+                # JWT validation failed, check for mock tokens (development only)
+                if settings.DEBUG and token in ["admin_token", "super_admin_token"]:
+                    from core.config import UserRole
+                    class MockUser:
+                        def __init__(self, role, user_id):
+                            self.role = role
+                            self.id = user_id
+                    
+                    if token == "super_admin_token":
+                        user = MockUser(UserRole.OWNER, "admin_1")
+                        logger.info("Using mock super admin user for development")
+                    else:
+                        user = MockUser(UserRole.ADMIN, "admin_2")
+                        logger.info("Using mock admin user for development")
+                else:
+                    # Invalid token, treat as public
+                    user = None
+                    logger.debug(f"JWT validation failed: {e}")
+    except Exception as e:
+        # If any error in user extraction, treat as public
+        user = None
+        logger.debug(f"Error extracting user: {e}")
+    
     return await rate_limit_middleware(request, call_next, user)
 
 # Health check endpoint
@@ -159,12 +207,13 @@ async def internal_error_handler(request: Request, exc):
         }
     )
 
-# TODO: Include routers when implemented
-# from api.v1.api import api_router
+# Include routers
+from api.v1.api import api_router
+# TODO: Add webhook and websocket routers when implemented
 # from api.webhooks.router import webhook_router
 # from api.websockets.inbox_ws import ws_router
 
-# app.include_router(api_router, prefix="/v1", tags=["API v1"])
+app.include_router(api_router, prefix="/v1", tags=["API v1"])
 # app.include_router(webhook_router, prefix="/webhooks", tags=["Webhooks"])
 # app.include_router(ws_router, prefix="/ws", tags=["WebSockets"])
 

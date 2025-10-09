@@ -4,21 +4,26 @@ Combines operational and AI routes under single API
 """
 from fastapi import APIRouter
 
-# TODO: Import endpoint routers when implemented
-# from .endpoints import auth, bookings, customers, leads, inbox
-# from .endpoints.ai import chat, voice, embeddings
+# Import endpoint routers
+from .endpoints import auth, bookings, customers, leads, inbox, rate_limit_metrics
+from .endpoints.ai import chat
 
 api_router = APIRouter()
 
 # Operational endpoints (CRM functions)
-# api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
-# api_router.include_router(bookings.router, prefix="/bookings", tags=["Bookings"])
-# api_router.include_router(customers.router, prefix="/customers", tags=["Customers"])
-# api_router.include_router(leads.router, prefix="/leads", tags=["Leads"])
-# api_router.include_router(inbox.router, prefix="/inbox", tags=["Inbox"])
+api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+api_router.include_router(bookings.router, prefix="/bookings", tags=["Bookings"])
+api_router.include_router(customers.router, prefix="/customers", tags=["Customers"])
+api_router.include_router(leads.router, prefix="/leads", tags=["Leads"])
+api_router.include_router(inbox.router, prefix="/inbox", tags=["Inbox"])
 
 # AI endpoints (integrated, not separate API)
-# api_router.include_router(chat.router, prefix="/ai/chat", tags=["AI Chat"])
+api_router.include_router(chat.router, prefix="/ai", tags=["AI"])
+
+# Rate limiting monitoring endpoints
+api_router.include_router(rate_limit_metrics.router, prefix="/monitoring", tags=["Monitoring"])
+
+# TODO: Add remaining AI endpoints
 # api_router.include_router(voice.router, prefix="/ai/voice", tags=["AI Voice"])
 # api_router.include_router(embeddings.router, prefix="/ai/embeddings", tags=["AI Embeddings"])
 
