@@ -12,9 +12,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.schemas.health import HealthResponse, ReadinessResponse
-from app.config import settings
+from api.app.database import get_db
+from api.app.schemas.health import HealthResponse, ReadinessResponse
+from api.app.config import settings
 import logging
 
 logger = logging.getLogger(__name__)

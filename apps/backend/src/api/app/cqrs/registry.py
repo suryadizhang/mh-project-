@@ -2,14 +2,14 @@
 Registration module for CQRS handlers.
 Registers all command and query handlers with their respective buses.
 """
-from app.cqrs.base import register_command_handler, register_query_handler
-from app.cqrs.command_handlers import (
+from api.app.cqrs.base import register_command_handler, register_query_handler
+from api.app.cqrs.command_handlers import (
     CreateBookingCommandHandler,
     ReceiveMessageCommandHandler,
     RecordPaymentCommandHandler,
 )
-from app.cqrs.crm_operations import *
-from app.cqrs.query_handlers import (
+from api.app.cqrs.crm_operations import *
+from api.app.cqrs.query_handlers import (
     GetAvailabilitySlotsQueryHandler,
     GetBookingQueryHandler,
     GetBookingsQueryHandler,

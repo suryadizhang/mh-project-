@@ -6,8 +6,8 @@ from uuid import UUID
 
 from pydantic import Field
 
-from app.cqrs.base import Command
-from app.models.social import MessageKind, SocialPlatform, ThreadStatus
+from api.app.cqrs.base import Command
+from api.app.models.social import MessageKind, SocialPlatform, ThreadStatus
 
 
 class CreateLeadFromSocialCommand(Command):

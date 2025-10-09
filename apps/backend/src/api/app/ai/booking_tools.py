@@ -11,10 +11,10 @@ from uuid import UUID, uuid4
 from pydantic import BaseModel, Field, validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.models import User
-from app.cqrs.base import command_bus, query_bus
-from app.cqrs.crm_operations import *
-from app.database import get_db_session
+from api.app.auth.models import User
+from api.app.cqrs.base import command_bus, query_bus
+from api.app.cqrs.crm_operations import *
+from api.app.database import get_db_session
 
 logger = logging.getLogger(__name__)
 

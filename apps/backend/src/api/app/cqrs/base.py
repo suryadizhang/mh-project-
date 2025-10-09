@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.events import DomainEvent, OutboxEntry
+from api.app.models.events import DomainEvent, OutboxEntry
 
 
 class Command(BaseModel):

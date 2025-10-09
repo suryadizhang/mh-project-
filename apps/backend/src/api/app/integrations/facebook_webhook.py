@@ -11,9 +11,9 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import settings
-from app.database import get_async_session
-from app.services.social_service import SocialService
+from api.app.config import settings
+from api.app.database import get_async_session
+from api.app.services.social_service import SocialService
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/integrations/facebook", tags=["social", "facebook"])

@@ -8,7 +8,7 @@ from uuid import UUID
 
 from pydantic import Field, validator
 
-from app.cqrs.base import Command, Event, Query
+from api.app.cqrs.base import Command, Event, Query
 
 # ==================== COMMANDS ====================
 

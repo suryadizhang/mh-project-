@@ -13,12 +13,12 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
-from app.utils.auth import get_current_user, admin_required, superadmin_required
-from app.schemas.booking_schemas import (
+from api.app.database import get_db
+from api.app.utils.auth import get_current_user, admin_required, superadmin_required
+from api.app.schemas.booking_schemas import (
     BookingCreate, WaitlistCreate, CancelBookingRequest, WaitlistEntry
 )
-from app.services.email_service import (
+from api.app.services.email_service import (
     send_booking_email, send_customer_confirmation, send_waitlist_confirmation,
     send_waitlist_slot_opened, send_waitlist_position_email,
     send_deposit_confirmation_email, send_booking_cancellation_email

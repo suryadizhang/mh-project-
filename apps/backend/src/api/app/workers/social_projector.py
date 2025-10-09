@@ -9,8 +9,8 @@ from uuid import UUID
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.events import OutboxEntry
-from app.models.read import CustomerSummary, LeadSummary
+from api.app.models.events import OutboxEntry
+from api.app.models.read import CustomerSummary, LeadSummary
 
 logger = logging.getLogger(__name__)
 

@@ -8,11 +8,11 @@ from uuid import uuid4
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.cqrs.base import CommandHandler, CommandResult, EventStore, OutboxProcessor
-from app.cqrs.crm_operations import *
-from app.models.core import Booking, Customer, Message, MessageThread, Payment
-from app.models.events import IdempotencyKey
-from app.utils.encryption import FieldEncryption
+from api.app.cqrs.base import CommandHandler, CommandResult, EventStore, OutboxProcessor
+from api.app.cqrs.crm_operations import *
+from api.app.models.core import Booking, Customer, Message, MessageThread, Payment
+from api.app.models.events import IdempotencyKey
+from api.app.utils.encryption import FieldEncryption
 
 
 class CreateBookingCommandHandler(CommandHandler):

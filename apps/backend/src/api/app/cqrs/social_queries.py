@@ -6,8 +6,8 @@ from uuid import UUID
 
 from pydantic import Field
 
-from app.cqrs.base import Query
-from app.models.social import MessageKind, ReviewStatus, SocialPlatform, ThreadStatus
+from api.app.cqrs.base import Query
+from api.app.models.social import MessageKind, ReviewStatus, SocialPlatform, ThreadStatus
 
 
 class GetSocialInboxQuery(Query):

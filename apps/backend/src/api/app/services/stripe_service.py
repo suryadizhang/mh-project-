@@ -8,9 +8,9 @@ import stripe
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import settings
-from app.models.stripe_models import Customer, Dispute, Invoice, Payment
-from app.schemas.stripe_schemas import PaymentAnalytics
+from api.app.config import settings
+from api.app.models.stripe_models import Customer, Dispute, Invoice, Payment
+from api.app.schemas.stripe_schemas import PaymentAnalytics
 
 logger = logging.getLogger(__name__)
 

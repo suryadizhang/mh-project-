@@ -9,11 +9,11 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.models import AuthenticationService, User
-from app.auth.station_auth import StationAuthenticationService, StationContext
-from app.auth.station_models import Station
-from app.auth.middleware import get_current_user, get_db_session
-from app.crm.endpoints import ApiResponse
+from api.app.auth.models import AuthenticationService, User
+from api.app.auth.station_auth import StationAuthenticationService, StationContext
+from api.app.auth.station_models import Station
+from api.app.auth.middleware import get_current_user, get_db_session
+from api.app.crm.endpoints import ApiResponse
 
 
 # Request/Response Models

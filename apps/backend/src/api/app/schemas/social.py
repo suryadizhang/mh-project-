@@ -6,7 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models.social import (
+from api.app.models.social import (
     MessageDirection,
     MessageKind,
     ReviewStatus,

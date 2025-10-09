@@ -10,8 +10,8 @@ from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from app.models.events import OutboxEntry
-from app.models.social import SocialAccount, SocialMessage, SocialThread
+from api.app.models.events import OutboxEntry
+from api.app.models.social import SocialAccount, SocialMessage, SocialThread
 
 logger = logging.getLogger(__name__)
 

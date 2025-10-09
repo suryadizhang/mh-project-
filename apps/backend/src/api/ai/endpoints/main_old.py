@@ -25,15 +25,15 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Local imports
-from app.database import close_db, get_db, init_db
-from app.logging_config import (
+from api.ai.endpoints.database import close_db, get_db, init_db
+from api.ai.endpoints.logging_config import (
     AILogger,
     DatabaseLogger,
     RequestLogger,
     WebSocketLogger,
     setup_logging,
 )
-from app.models import (
+from api.ai.endpoints.models import (
     ChannelType,
     Conversation,
     ConversationStatus,
@@ -42,9 +42,9 @@ from app.models import (
     MessageRole,
     TrainingData,
 )
-from app.monitoring import performance_monitor, start_metrics_server
-from app.routers import webhooks
-from app.schemas import (
+from api.ai.endpoints.monitoring import performance_monitor, start_metrics_server
+from api.ai.endpoints.routers import webhooks
+from api.ai.endpoints.schemas import (
     ChatIngestRequest,
     ChatIngestResponse,
     ChatReplyRequest,
@@ -61,8 +61,8 @@ from app.schemas import (
     TrainingDataCreate,
     WebSocketMessage,
 )
-from app.services.ai_pipeline import ai_pipeline
-from app.services.knowledge_base import kb_service
+from api.ai.endpoints.services.ai_pipeline import ai_pipeline
+from api.ai.endpoints.services.knowledge_base import kb_service
 
 # Load environment variables after imports
 load_dotenv()

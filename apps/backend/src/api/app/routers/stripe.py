@@ -7,26 +7,26 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import settings
-from app.database import get_db
-from app.models.stripe_models import Invoice, Payment, Refund, WebhookEvent
-from app.schemas.stripe_schemas import (
+from api.app.config import settings
+from api.app.database import get_db
+from api.app.models.stripe_models import Invoice, Payment, Refund, WebhookEvent
+from api.app.schemas.stripe_schemas import (
     CheckoutSessionResponse,
     CreateCheckoutSession,
     CreatePaymentIntent,
     CustomerPortalResponse,
 )
-from app.schemas.stripe_schemas import Invoice as InvoiceSchema
-from app.schemas.stripe_schemas import Payment as PaymentSchema
-from app.schemas.stripe_schemas import (
+from api.app.schemas.stripe_schemas import Invoice as InvoiceSchema
+from api.app.schemas.stripe_schemas import Payment as PaymentSchema
+from api.app.schemas.stripe_schemas import (
     PaymentAnalytics,
     PaymentIntentResponse,
     RefundCreate,
     SuccessResponse,
     WebhookResponse,
 )
-from app.services.stripe_service import StripeService
-from app.utils.auth import get_admin_user, get_current_user
+from api.app.services.stripe_service import StripeService
+from api.app.utils.auth import get_admin_user, get_current_user
 
 # Configure Stripe
 stripe.api_key = settings.stripe_secret_key

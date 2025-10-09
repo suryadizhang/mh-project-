@@ -9,12 +9,12 @@ from typing import Optional
 import json
 from datetime import datetime
 
-from app.websocket_manager import websocket_manager, MessageType, WebSocketMessage
-from app.services.chat_service import ChatService
-from app.services.role_based_ai import UserRole
-from app.services.customer_booking_ai import customer_booking_ai
-from app.services.admin_management_ai import admin_management_ai
-from app.database import get_db
+from api.ai.endpoints.websocket_manager import websocket_manager, MessageType, WebSocketMessage
+from api.ai.endpoints.services.chat_service import ChatService
+from api.ai.endpoints.services.role_based_ai import UserRole
+from api.ai.endpoints.services.customer_booking_ai import customer_booking_ai
+from api.ai.endpoints.services.admin_management_ai import admin_management_ai
+from api.ai.endpoints.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)

@@ -227,6 +227,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = False
+        extra = "ignore"  # Allow extra fields in .env
 
     def get_worker_configs(self) -> dict[str, Any]:
         """Get worker configuration dictionary."""

@@ -11,7 +11,7 @@ from typing import Any, Optional
 import httpx
 from fastapi import HTTPException
 
-from app.schemas import ChannelType
+from api.ai.endpoints.schemas import ChannelType
 
 
 class ChannelManager:

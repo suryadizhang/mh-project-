@@ -17,7 +17,7 @@ from sqlalchemy.dialects.postgresql import ENUM, JSONB, UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from app.database import Base
+from api.app.database import Base
 
 
 class SocialPlatform(str, Enum):

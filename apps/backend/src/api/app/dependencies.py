@@ -3,8 +3,8 @@ Dependency injection functions for FastAPI endpoints.
 Provides access to CQRS buses and authentication.
 """
 
-from app.cqrs.base import CommandBus, QueryBus, command_bus, query_bus
-from app.utils.auth import get_admin_user
+from api.app.cqrs.base import CommandBus, QueryBus, command_bus, query_bus
+from api.app.utils.auth import get_admin_user
 
 
 def get_command_bus() -> CommandBus:

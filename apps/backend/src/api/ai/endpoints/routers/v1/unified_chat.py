@@ -12,15 +12,15 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.services.agent_gateway import StationAwareAgentGatewayService
-from app.services.prompt_registry import PromptRegistryService
-from app.services.tool_registry import ToolRegistryService
-from app.services.model_ladder import ModelLadderService
-from app.services.monitoring import MonitoringService
+from api.ai.endpoints.database import get_db
+from api.ai.endpoints.services.agent_gateway import StationAwareAgentGatewayService
+from api.ai.endpoints.services.prompt_registry import PromptRegistryService
+from api.ai.endpoints.services.tool_registry import ToolRegistryService
+from api.ai.endpoints.services.model_ladder import ModelLadderService
+from api.ai.endpoints.services.monitoring import MonitoringService
 
 # Station-aware dependencies
-from app.auth import get_station_context_optional, has_agent_access, StationContext
+from api.ai.endpoints.auth import get_station_context_optional, has_agent_access, StationContext
 
 logger = logging.getLogger(__name__)
 

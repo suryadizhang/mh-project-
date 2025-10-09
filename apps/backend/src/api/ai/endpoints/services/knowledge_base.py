@@ -15,8 +15,8 @@ from sentence_transformers import SentenceTransformer
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import KnowledgeBaseChunk
-from app.schemas import KBSearchRequest
+from api.ai.endpoints.models import KnowledgeBaseChunk
+from api.ai.endpoints.schemas import KBSearchRequest
 
 
 class KnowledgeBaseService:

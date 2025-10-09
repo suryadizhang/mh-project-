@@ -13,11 +13,11 @@ from fastapi.security import HTTPBearer
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.models import User, UserSession
-from app.auth.station_auth import StationAuthenticationService, StationContext
-from app.auth.station_models import StationPermission, StationRole
-from app.database import get_db_session
-from app.utils.encryption import FieldEncryption
+from api.app.auth.models import User, UserSession
+from api.app.auth.station_auth import StationAuthenticationService, StationContext
+from api.app.auth.station_models import StationPermission, StationRole
+from api.app.database import get_db_session
+from api.app.utils.encryption import FieldEncryption
 
 logger = logging.getLogger(__name__)
 
