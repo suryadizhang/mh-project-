@@ -175,6 +175,14 @@ except ImportError as e:
             "note": "Full implementation pending import path fixes"
         }
 
+# Unified Inbox endpoints - Week 2 Feature
+try:
+    from api.v1.inbox.endpoints import router as inbox_router
+    app.include_router(inbox_router, tags=["unified-inbox"])
+    logger.info("✅ Unified Inbox endpoints included")
+except ImportError as e:
+    logger.warning(f"Unified Inbox endpoints not available: {e}")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
