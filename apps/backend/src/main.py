@@ -10,6 +10,7 @@ import time
 import logging
 
 from core.config import get_settings
+from core.rate_limiting import RateLimiter
 
 # Configure settings
 settings = get_settings()
@@ -26,9 +27,19 @@ async def lifespan(app: FastAPI):
     logger.info(f"Environment: {settings.ENVIRONMENT}")
     logger.info(f"Debug mode: {settings.DEBUG}")
     
+    # Initialize rate limiter
+    rate_limiter = RateLimiter()
+    await rate_limiter._init_redis()
+    app.state.rate_limiter = rate_limiter
+    logger.info("✅ Rate limiter initialized")
+    
     yield
     
     # Shutdown
+    if hasattr(app.state, 'rate_limiter'):
+        if hasattr(app.state.rate_limiter, 'redis_client') and app.state.rate_limiter.redis_client:
+            await app.state.rate_limiter.redis_client.close()
+        logger.info("✅ Rate limiter closed")
     logger.info("Shutting down application")
 
 app = FastAPI(
@@ -48,6 +59,56 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
     allow_headers=["*"],
 )
+
+# Rate Limiting Middleware
+@app.middleware("http")
+async def rate_limiting_middleware(request: Request, call_next):
+    """Rate limiting middleware wrapper"""
+    # Skip rate limiting for health checks
+    if request.url.path in ["/health", "/", "/docs", "/redoc", "/openapi.json"]:
+        return await call_next(request)
+    
+    if hasattr(app.state, 'rate_limiter'):
+        try:
+            result = await app.state.rate_limiter.check_and_update(request)
+            
+            if not result["allowed"]:
+                # Rate limit exceeded
+                return JSONResponse(
+                    status_code=429,
+                    content={
+                        "error": "Rate limit exceeded",
+                        "tier": result["tier"],
+                        "limit": result["limit_type"],
+                        "limit_value": result["limit"],
+                        "current": result["current"],
+                        "retry_after_seconds": result["reset_seconds"]
+                    },
+                    headers={"Retry-After": str(result["reset_seconds"])}
+                )
+            
+            # Process request
+            response = await call_next(request)
+            
+            # Add rate limit headers
+            response.headers["X-RateLimit-Tier"] = result["tier"]
+            response.headers["X-RateLimit-Remaining-Minute"] = str(result["minute_remaining"])
+            response.headers["X-RateLimit-Remaining-Hour"] = str(result["hour_remaining"])
+            response.headers["X-RateLimit-Reset-Minute"] = str(result["minute_reset"])
+            response.headers["X-RateLimit-Reset-Hour"] = str(result["hour_reset"])
+            response.headers["X-RateLimit-Backend"] = "redis" if app.state.rate_limiter.redis_available else "memory"
+            
+            return response
+            
+        except Exception as e:
+            # If rate limiting fails, allow request but log error
+            logger.warning(f"Rate limiting error: {e}")
+            response = await call_next(request)
+            response.headers["X-RateLimit-Tier"] = "fallback"
+            return response
+    else:
+        # Fallback if rate limiter not initialized
+        return await call_next(request)
 
 # Root endpoints
 @app.get("/")
