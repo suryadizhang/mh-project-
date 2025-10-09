@@ -6,6 +6,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
 from typing import Optional, List
 from enum import Enum
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
 
 class Environment(str, Enum):
     DEVELOPMENT = "development"
@@ -60,39 +65,39 @@ class Settings(BaseSettings):
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]
     
     # RingCentral
-    RC_CLIENT_ID: str
-    RC_CLIENT_SECRET: str
-    RC_JWT_TOKEN: str
-    RC_WEBHOOK_SECRET: str
-    RC_SMS_FROM: str
+    RC_CLIENT_ID: str = "dev-client-id"
+    RC_CLIENT_SECRET: str = "dev-client-secret"
+    RC_JWT_TOKEN: str = "dev-jwt-token"
+    RC_WEBHOOK_SECRET: str = "dev-webhook-secret"
+    RC_SMS_FROM: str = "+19167408768"
     RC_SERVER_URL: str = "https://platform.ringcentral.com"
     
     # OpenAI
-    OPENAI_API_KEY: str
+    OPENAI_API_KEY: str = "sk-dev-placeholder-key"
     OPENAI_MODEL: str = "gpt-4"
     OPENAI_REALTIME_MODEL: str = "gpt-4o-realtime-preview-2024-12-17"
     
     # Stripe
-    STRIPE_SECRET_KEY: str
-    STRIPE_PUBLISHABLE_KEY: str
-    STRIPE_WEBHOOK_SECRET: str
+    STRIPE_SECRET_KEY: str = "sk_test_dev_placeholder"
+    STRIPE_PUBLISHABLE_KEY: str = "pk_test_dev_placeholder"
+    STRIPE_WEBHOOK_SECRET: str = "whsec_dev_placeholder"
     
     # Plaid
-    PLAID_CLIENT_ID: str
-    PLAID_SECRET: str
+    PLAID_CLIENT_ID: str = "dev-plaid-client-id"
+    PLAID_SECRET: str = "dev-plaid-secret"
     PLAID_ENV: str = "sandbox"
     
     # Meta (Facebook/Instagram)
-    META_APP_ID: str
-    META_APP_SECRET: str
-    META_VERIFY_TOKEN: str
-    META_PAGE_ACCESS_TOKEN: str
+    META_APP_ID: str = "dev-meta-app-id"
+    META_APP_SECRET: str = "dev-meta-app-secret"
+    META_VERIFY_TOKEN: str = "dev-meta-verify-token"
+    META_PAGE_ACCESS_TOKEN: str = "dev-meta-page-access-token"
     
     # Google Business
-    GOOGLE_CLOUD_PROJECT: str
-    GOOGLE_CREDENTIALS_JSON: str
-    GBP_ACCOUNT_ID: str
-    GBP_LOCATION_ID: str
+    GOOGLE_CLOUD_PROJECT: str = "dev-google-cloud-project"
+    GOOGLE_CREDENTIALS_JSON: str = "/dev/null/credentials.json"
+    GBP_ACCOUNT_ID: str = "dev-google-business-account-id"
+    GBP_LOCATION_ID: str = "dev-google-business-location-id"
     
     # Business Info (PUBLIC SAFE DATA ONLY)
     BUSINESS_NAME: str = "my Hibachi LLC"
@@ -113,9 +118,11 @@ class Settings(BaseSettings):
     MAX_SMS_PER_THREAD: int = 3
     
     # Rate Limiting Configuration (ADMIN-OPTIMIZED)
+    # Note: Burst limits are defined for future implementation of token bucket algorithm
+    # Currently using sliding window with per-minute and per-hour limits
     RATE_LIMIT_PUBLIC_PER_MINUTE: int = 20
     RATE_LIMIT_PUBLIC_PER_HOUR: int = 1000
-    RATE_LIMIT_PUBLIC_BURST: int = 30
+    RATE_LIMIT_PUBLIC_BURST: int = 30  # For future token bucket implementation
     
     RATE_LIMIT_ADMIN_PER_MINUTE: int = 100
     RATE_LIMIT_ADMIN_PER_HOUR: int = 5000

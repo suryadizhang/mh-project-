@@ -1,25 +1,54 @@
 """
 Advanced Rate Limiting with Tiered Strategy
 Uses Redis for distributed rate limiting (works across multiple workers)
+Falls back to in-memory limiting if Redis unavailable
 """
 import time
 import json
 from typing import Optional, Dict, Any
 from fastapi import Request, HTTPException, status, Response
 from core.config import get_settings, UserRole
-import redis.asyncio as redis
 import hashlib
+
+# Handle Redis import gracefully
+try:
+    import redis.asyncio as redis
+    REDIS_AVAILABLE = True
+except ImportError:
+    redis = None
+    REDIS_AVAILABLE = False
 
 settings = get_settings()
 
-# Redis connection
-redis_client = redis.from_url(settings.REDIS_URL, encoding="utf-8", decode_responses=True)
-
 class RateLimiter:
-    """Advanced rate limiter with Redis backend and tiered strategy"""
+    """Advanced rate limiter with Redis backend and fallback strategy"""
     
     def __init__(self):
         self.settings = settings
+        self.redis_client = None
+        self.redis_available = False
+        # Instance-based memory store for better isolation
+        self._memory_store = {}
+    
+    async def _init_redis(self):
+        """Initialize Redis connection with fallback"""
+        if self.redis_client is None:
+            try:
+                if not REDIS_AVAILABLE:
+                    print("⚠️ Redis module not available, using memory-based rate limiting")
+                    self.redis_client = None
+                    self.redis_available = False
+                    return
+                    
+                self.redis_client = redis.from_url(settings.REDIS_URL, encoding="utf-8", decode_responses=True)
+                # Test connection
+                await self.redis_client.ping()
+                self.redis_available = True
+                print("✅ Redis connected for rate limiting")
+            except Exception as e:
+                print(f"⚠️ Redis unavailable, using memory-based rate limiting: {e}")
+                self.redis_client = None
+                self.redis_available = False
     
     async def _get_user_identifier(self, request: Request, user: Optional[Any] = None) -> tuple[str, UserRole]:
         """Get unique identifier and role for rate limiting"""
@@ -69,16 +98,25 @@ class RateLimiter:
     async def _check_rate_limit(self, identifier: str, config: Dict[str, Any]) -> Dict[str, Any]:
         """Check rate limits using sliding window algorithm"""
         
+        await self._init_redis()
+        
         current_time = int(time.time())
         minute_window = current_time // 60
         hour_window = current_time // 3600
         
+        if self.redis_available and self.redis_client:
+            return await self._check_redis_rate_limit(identifier, config, current_time, minute_window, hour_window)
+        else:
+            return await self._check_memory_rate_limit(identifier, config, current_time, minute_window, hour_window)
+    
+    async def _check_redis_rate_limit(self, identifier: str, config: Dict[str, Any], current_time: int, minute_window: int, hour_window: int) -> Dict[str, Any]:
+        """Check rate limits using Redis"""
         # Redis keys
         minute_key = f"rate_limit:{identifier}:minute:{minute_window}"
         hour_key = f"rate_limit:{identifier}:hour:{hour_window}"
         
         # Get current counts
-        pipe = redis_client.pipeline()
+        pipe = self.redis_client.pipeline()
         pipe.get(minute_key)
         pipe.get(hour_key)
         results = await pipe.execute()
@@ -107,13 +145,63 @@ class RateLimiter:
                 "tier": config["tier"]
             }
         
-        # Increment counters
-        pipe = redis_client.pipeline()
+        # Increment counters atomically
+        # Note: In very high-concurrency scenarios, we could use Lua scripts
+        # for atomic check-and-increment to prevent race conditions
+        pipe = self.redis_client.pipeline()
         pipe.incr(minute_key)
         pipe.expire(minute_key, 120)  # Keep for 2 minutes
         pipe.incr(hour_key)
         pipe.expire(hour_key, 7200)  # Keep for 2 hours
         await pipe.execute()
+        
+        return {
+            "allowed": True,
+            "minute_remaining": config["per_minute"] - minute_count - 1,
+            "hour_remaining": config["per_hour"] - hour_count - 1,
+            "minute_reset": 60 - (current_time % 60),
+            "hour_reset": 3600 - (current_time % 3600),
+            "tier": config["tier"]
+        }
+    
+    async def _check_memory_rate_limit(self, identifier: str, config: Dict[str, Any], current_time: int, minute_window: int, hour_window: int) -> Dict[str, Any]:
+        """Fallback in-memory rate limiting"""
+        
+        # Clean old entries
+        current_time_int = int(current_time)
+        self._memory_store = {k: v for k, v in self._memory_store.items() 
+                        if current_time_int - v.get('timestamp', 0) < 7200}  # Keep for 2 hours
+        
+        minute_key = f"{identifier}:minute:{minute_window}"
+        hour_key = f"{identifier}:hour:{hour_window}"
+        
+        minute_count = self._memory_store.get(minute_key, {}).get('count', 0)
+        hour_count = self._memory_store.get(hour_key, {}).get('count', 0)
+        
+        # Check limits
+        if minute_count >= config["per_minute"]:
+            return {
+                "allowed": False,
+                "limit_type": "per_minute",
+                "current": minute_count,
+                "limit": config["per_minute"],
+                "reset_seconds": 60 - (current_time % 60),
+                "tier": config["tier"]
+            }
+        
+        if hour_count >= config["per_hour"]:
+            return {
+                "allowed": False,
+                "limit_type": "per_hour", 
+                "current": hour_count,
+                "limit": config["per_hour"],
+                "reset_seconds": 3600 - (current_time % 3600),
+                "tier": config["tier"]
+            }
+        
+        # Increment counters
+        self._memory_store[minute_key] = {'count': minute_count + 1, 'timestamp': current_time_int}
+        self._memory_store[hour_key] = {'count': hour_count + 1, 'timestamp': current_time_int}
         
         return {
             "allowed": True,
@@ -165,19 +253,24 @@ async def rate_limit_middleware(request: Request, call_next, user: Optional[Any]
         # Process request
         response = await call_next(request)
         
-        # Add rate limit headers
+        # Add rate limit headers with backend indicator
         response.headers["X-RateLimit-Tier"] = result["tier"]
         response.headers["X-RateLimit-Remaining-Minute"] = str(result["minute_remaining"])
         response.headers["X-RateLimit-Remaining-Hour"] = str(result["hour_remaining"])
         response.headers["X-RateLimit-Reset-Minute"] = str(result["minute_reset"])
         response.headers["X-RateLimit-Reset-Hour"] = str(result["hour_reset"])
+        response.headers["X-RateLimit-Backend"] = "redis" if rate_limiter.redis_available else "memory"
         
         return response
         
+    except HTTPException:
+        # Re-raise HTTP exceptions (like 429)
+        raise
     except Exception as e:
         # If rate limiting fails, allow request but log error
-        print(f"Rate limiting error: {e}")
+        print(f"⚠️ Rate limiting error: {e}")
         response = await call_next(request)
+        response.headers["X-RateLimit-Tier"] = "fallback"
         return response
 
 def get_rate_limit_dependency(tier: str = "public"):
