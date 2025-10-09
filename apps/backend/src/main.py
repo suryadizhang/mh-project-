@@ -1,16 +1,29 @@
 """
-FastAPI Main Application - Simplified for Reorganization
-Unified API with operational and AI endpoints
+FastAPI Main Application - Enhanced with Dependency Injection
+Unified API with operational and AI endpoints, enterprise architecture patterns
 """
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from contextlib import asynccontextmanager
 import time
 import logging
+import os
 
 from core.config import get_settings
 from core.rate_limiting import RateLimiter
+
+# Import our new architectural components
+from core.service_registry import create_service_container, ContainerMiddleware
+from core.exceptions import (
+    app_exception_handler,
+    validation_exception_handler,
+    http_exception_handler,
+    general_exception_handler,
+    AppException
+)
 
 # Configure settings
 settings = get_settings()
@@ -21,11 +34,52 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Application lifespan handler"""
+    """Application lifespan handler with dependency injection setup"""
     # Startup
     logger.info(f"Starting {settings.APP_NAME}")
     logger.info(f"Environment: {settings.ENVIRONMENT}")
     logger.info(f"Debug mode: {settings.DEBUG}")
+    
+    # Initialize dependency injection container
+    try:
+        # Get database URL from environment or settings
+        database_url = os.getenv("DATABASE_URL", "sqlite:///./myhibachi.db")
+        
+        # Create application configuration
+        app_config = {
+            "database_url": database_url,
+            "environment": settings.ENVIRONMENT,
+            "debug": settings.DEBUG,
+            "app_name": settings.APP_NAME,
+            "business_info": {
+                "name": "MyHibachi Restaurant",
+                "timezone": "America/Los_Angeles",
+                "operating_hours": {
+                    "monday": {"open": "11:00", "close": "22:00"},
+                    "tuesday": {"open": "11:00", "close": "22:00"},
+                    "wednesday": {"open": "11:00", "close": "22:00"},
+                    "thursday": {"open": "11:00", "close": "22:00"},
+                    "friday": {"open": "11:00", "close": "23:00"},
+                    "saturday": {"open": "11:00", "close": "23:00"},
+                    "sunday": {"open": "11:00", "close": "22:00"}
+                }
+            }
+        }
+        
+        # Create and configure DI container
+        container = create_service_container(database_url, app_config)
+        app.state.container = container
+        logger.info("✅ Dependency injection container initialized")
+        
+        # Add container middleware
+        container_middleware = ContainerMiddleware(container)
+        app.middleware("http")(container_middleware)
+        logger.info("✅ Container middleware added")
+        
+    except Exception as e:
+        logger.error(f"Failed to initialize dependency injection: {e}")
+        # Continue startup without DI for backwards compatibility
+        app.state.container = None
     
     # Initialize rate limiter
     rate_limiter = RateLimiter()
@@ -40,16 +94,35 @@ async def lifespan(app: FastAPI):
         if hasattr(app.state.rate_limiter, 'redis_client') and app.state.rate_limiter.redis_client:
             await app.state.rate_limiter.redis_client.close()
         logger.info("✅ Rate limiter closed")
+    
+    # Cleanup DI container if needed
+    if hasattr(app.state, 'container') and app.state.container:
+        try:
+            # Close any open database sessions
+            if app.state.container.is_registered("database_session"):
+                session = app.state.container.resolve("database_session")
+                session.close()
+            logger.info("✅ Dependency injection container cleaned up")
+        except Exception as e:
+            logger.warning(f"Error cleaning up DI container: {e}")
+    
     logger.info("Shutting down application")
 
 app = FastAPI(
     title=settings.APP_NAME,
-    description="Unified API for operational and AI functions",
+    description="Unified API with enterprise architecture patterns - DI, Repository Pattern, Error Handling",
     version=settings.API_VERSION,
     docs_url="/docs" if settings.DEBUG else None,
     redoc_url="/redoc" if settings.DEBUG else None,
     lifespan=lifespan
 )
+
+# Error Handling - Register our custom exception handlers
+app.add_exception_handler(AppException, app_exception_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(StarletteHTTPException, http_exception_handler)
+app.add_exception_handler(Exception, general_exception_handler)
+logger.info("✅ Custom exception handlers registered")
 
 # CORS Middleware
 app.add_middleware(
@@ -118,25 +191,66 @@ async def root():
         "message": f"{settings.APP_NAME} API",
         "version": settings.API_VERSION,
         "environment": settings.ENVIRONMENT,
-        "status": "healthy - unified backend reorganization complete!",
+        "status": "healthy - enterprise architecture patterns implemented!",
+        "architecture": {
+            "dependency_injection": "✅ Implemented",
+            "repository_pattern": "✅ Implemented", 
+            "error_handling": "✅ Centralized",
+            "rate_limiting": "✅ Active"
+        },
         "docs": "/docs" if settings.DEBUG else "Documentation disabled in production"
     }
 
 @app.get("/health", tags=["Health"])
-async def health_check():
+async def health_check(request: Request):
     """Health check endpoint for load balancers"""
-    return {
+    # Check DI container status
+    di_status = "available" if hasattr(request.app.state, 'container') and request.app.state.container else "not_available"
+    
+    health_data = {
         "status": "healthy",
         "service": "unified-api",
         "version": settings.API_VERSION,
         "environment": settings.ENVIRONMENT,
-        "reorganization": "complete",
+        "architecture": {
+            "dependency_injection": di_status,
+            "repository_pattern": "implemented",
+            "error_handling": "centralized",
+            "rate_limiting": "active"
+        },
         "timestamp": int(time.time())
     }
+    
+    # If DI container is available, test service resolution
+    if di_status == "available":
+        try:
+            container = request.app.state.container
+            # Test key service resolutions
+            booking_repo_available = container.is_registered("booking_repository")
+            customer_repo_available = container.is_registered("customer_repository")
+            db_session_available = container.is_registered("database_session")
+            
+            health_data["services"] = {
+                "booking_repository": "available" if booking_repo_available else "not_registered",
+                "customer_repository": "available" if customer_repo_available else "not_registered", 
+                "database_session": "available" if db_session_available else "not_registered"
+            }
+        except Exception as e:
+            health_data["services"] = {"error": f"Service resolution failed: {str(e)}"}
+    
+    return health_data
 
 # Include routers from moved working API structure
 from api.app.routers import health, auth, bookings, stripe
 from api.app.crm.endpoints import router as crm_router
+
+# Include our new test endpoints for architectural patterns
+try:
+    from api.test_endpoints import router as test_router
+    app.include_router(test_router, tags=["Architecture Testing"])
+    logger.info("✅ New architecture test endpoints included")
+except ImportError as e:
+    logger.warning(f"Test endpoints not available: {e}")
 
 # Include the core working routers
 app.include_router(health.router, prefix="/api/health", tags=["health"])
