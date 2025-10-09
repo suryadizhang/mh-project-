@@ -12,12 +12,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.models import Conversation, Message
-from app.services.chat_service import ChatService
-from app.services.role_based_ai import role_based_ai, UserRole
-from app.services.customer_booking_ai import customer_booking_ai
-from app.services.admin_management_ai import admin_management_ai
+from api.ai.endpoints.database import get_db
+from api.ai.endpoints.models import Conversation, Message
+from api.ai.endpoints.services.chat_service import ChatService
+from api.ai.endpoints.services.role_based_ai import role_based_ai, UserRole
+from api.ai.endpoints.services.customer_booking_ai import customer_booking_ai
+from api.ai.endpoints.services.admin_management_ai import admin_management_ai
 
 logger = logging.getLogger(__name__)
 

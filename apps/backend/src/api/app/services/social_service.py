@@ -9,8 +9,8 @@ from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.cqrs.registry import get_command_bus
-from app.models.social import (
+from api.app.cqrs.registry import get_command_bus
+from api.app.models.social import (
     MessageDirection,
     MessageKind,
     SocialAccount,
@@ -19,7 +19,7 @@ from app.models.social import (
     SocialPlatform,
     SocialThread,
 )
-from app.schemas.social import SocialMessageCreate
+from api.app.schemas.social import SocialMessageCreate
 
 logger = logging.getLogger(__name__)
 

@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.middleware import (
+from api.app.auth.middleware import (
     AuthenticatedUser,
     audit_log_action,
     get_current_active_user,
@@ -17,10 +17,10 @@ from app.auth.middleware import (
     require_any_permission,
     require_permission,
 )
-from app.auth.models import Permission
-from app.cqrs.base import CommandResult, QueryResult, command_bus, query_bus
-from app.cqrs.crm_operations import *
-from app.database import get_db_session
+from api.app.auth.models import Permission
+from api.app.cqrs.base import CommandResult, QueryResult, command_bus, query_bus
+from api.app.cqrs.crm_operations import *
+from api.app.database import get_db_session
 
 router = APIRouter(prefix="/crm", tags=["CRM Operations"])
 

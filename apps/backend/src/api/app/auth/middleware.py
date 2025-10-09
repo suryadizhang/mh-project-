@@ -15,7 +15,7 @@ from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.auth.models import (
+from api.app.auth.models import (
     AuditLog,
     AuthenticationService,
     Permission,
@@ -25,8 +25,8 @@ from app.auth.models import (
     UserSession,
     UserStatus,
 )
-from app.database import get_db_session
-from app.utils.encryption import FieldEncryption
+from api.app.database import get_db_session
+from api.app.utils.encryption import FieldEncryption
 
 
 class SecurityHeaders:

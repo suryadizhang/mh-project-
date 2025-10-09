@@ -7,9 +7,9 @@ from typing import Any
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.cqrs.base import QueryHandler, QueryResult
-from app.cqrs.crm_operations import *
-from app.utils.encryption import FieldEncryption
+from api.app.cqrs.base import QueryHandler, QueryResult
+from api.app.cqrs.crm_operations import *
+from api.app.utils.encryption import FieldEncryption
 
 
 class GetBookingQueryHandler(QueryHandler):

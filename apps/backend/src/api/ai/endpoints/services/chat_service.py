@@ -8,16 +8,16 @@ from uuid import uuid4
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import (
+from api.ai.endpoints.models import (
     ChannelType,
     Conversation,
     ConversationStatus,
     Message,
     MessageRole,
 )
-from app.schemas import ChatIngestRequest, ChatIngestResponse
-from app.services.ai_pipeline import AIPipeline
-from app.services.knowledge_base_simple import SimpleKnowledgeBaseService as KnowledgeBaseService
+from api.ai.endpoints.schemas import ChatIngestRequest, ChatIngestResponse
+from api.ai.endpoints.services.ai_pipeline import AIPipeline
+from api.ai.endpoints.services.knowledge_base_simple import SimpleKnowledgeBaseService as KnowledgeBaseService
 
 
 class ChatService:

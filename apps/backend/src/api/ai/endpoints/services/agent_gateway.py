@@ -9,12 +9,12 @@ from typing import Any, AsyncGenerator, Dict, List, Optional
 from enum import Enum
 from uuid import UUID
 
-from app.services.prompt_registry import PromptRegistryService
-from app.services.tool_registry import ToolRegistryService
-from app.services.model_ladder import ModelLadderService
-from app.services.agent_namespace import AgentNamespaceService
-from app.services.openai_service import OpenAIService
-from app.services.role_based_ai import UserRole, role_based_ai
+from api.ai.endpoints.services.prompt_registry import PromptRegistryService
+from api.ai.endpoints.services.tool_registry import ToolRegistryService
+from api.ai.endpoints.services.model_ladder import ModelLadderService
+from api.ai.endpoints.services.agent_namespace import AgentNamespaceService
+from api.ai.endpoints.services.openai_service import OpenAIService
+from api.ai.endpoints.services.role_based_ai import UserRole, role_based_ai
 
 logger = logging.getLogger(__name__)
 

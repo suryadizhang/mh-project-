@@ -8,7 +8,7 @@ from collections.abc import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.models import Base
+from api.ai.endpoints.models import Base
 
 # Database URL from environment
 DATABASE_URL = os.getenv("SYNC_DATABASE_URL", "sqlite:///./ai_chat.db")

@@ -13,7 +13,7 @@ from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.auth.models import (
+from api.app.auth.models import (
     AuthenticationService as BaseAuthenticationService,
     Permission,
     Role,
@@ -21,7 +21,7 @@ from app.auth.models import (
     UserSession,
     UserStatus,
 )
-from app.auth.station_models import (
+from api.app.auth.station_models import (
     Station,
     StationAccessToken,
     StationAuditLog,
@@ -33,7 +33,7 @@ from app.auth.station_models import (
     can_perform_cross_station_action,
     get_station_permissions,
 )
-from app.utils.encryption import FieldEncryption
+from api.app.utils.encryption import FieldEncryption
 
 
 class StationContext:

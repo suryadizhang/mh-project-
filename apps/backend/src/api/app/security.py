@@ -25,7 +25,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import base64
 
-from app.config import settings
+from api.app.config import settings
 
 logger = logging.getLogger(__name__)
 

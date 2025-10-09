@@ -12,9 +12,9 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.database import get_db
-from app.models import Conversation, Message
-from app.services.chat_service import ChatService
+from api.ai.endpoints.database import get_db
+from api.ai.endpoints.models import Conversation, Message
+from api.ai.endpoints.services.chat_service import ChatService
 
 logger = logging.getLogger(__name__)
 

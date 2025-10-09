@@ -12,10 +12,10 @@ from fastapi import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
-from app.schemas import ChatIngestRequest
-from app.services.channel_manager import channel_manager
-from app.services.chat_service import chat_service
+from api.ai.endpoints.database import get_db
+from api.ai.endpoints.schemas import ChatIngestRequest
+from api.ai.endpoints.services.channel_manager import channel_manager
+from api.ai.endpoints.services.chat_service import chat_service
 
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])
 

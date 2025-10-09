@@ -3,7 +3,7 @@ from typing import Any
 
 import stripe
 
-from app.config import settings
+from api.app.config import settings
 
 logger = logging.getLogger(__name__)
 

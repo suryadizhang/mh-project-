@@ -7,8 +7,8 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.cqrs.base import CommandHandler
-from app.cqrs.social_commands import (
+from api.app.cqrs.base import CommandHandler
+from api.app.cqrs.social_commands import (
     AcknowledgeReviewCommand,
     CreateLeadFromSocialCommand,
     CreateSocialAccountCommand,
@@ -16,16 +16,16 @@ from app.cqrs.social_commands import (
     SendSocialReplyCommand,
     UpdateThreadStatusCommand,
 )
-from app.models.core import Customer, Lead
-from app.models.events import OutboxEntry
-from app.models.social import (
+from api.app.models.core import Customer, Lead
+from api.app.models.events import OutboxEntry
+from api.app.models.social import (
     Review,
     SocialAccount,
     SocialIdentity,
     SocialMessage,
     SocialThread,
 )
-from app.services.social_service import SocialService
+from api.app.services.social_service import SocialService
 
 logger = logging.getLogger(__name__)
 

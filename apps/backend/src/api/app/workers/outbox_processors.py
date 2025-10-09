@@ -14,9 +14,9 @@ import stripe
 from sqlalchemy import and_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db_session
-from app.models.events import OutboxEntry
-from app.utils.encryption import decrypt_field, get_field_encryption
+from api.app.database import get_db_session
+from api.app.models.events import OutboxEntry
+from api.app.utils.encryption import decrypt_field, get_field_encryption
 
 logger = logging.getLogger(__name__)
 

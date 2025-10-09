@@ -8,7 +8,7 @@ from email.mime.text import MimeText
 from email.mime.multipart import MimeMultipart
 from typing import List, Optional
 
-from app.config import settings
+from api.app.config import settings
 
 logger = logging.getLogger(__name__)
 

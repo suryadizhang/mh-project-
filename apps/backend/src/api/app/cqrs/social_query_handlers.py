@@ -7,15 +7,15 @@ from sqlalchemy import and_, asc, desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
-from app.cqrs.base import QueryHandler
-from app.cqrs.social_queries import (
+from api.app.cqrs.base import QueryHandler
+from api.app.cqrs.social_queries import (
     GetReviewsBoardQuery,
     GetSocialInboxQuery,
     GetThreadDetailQuery,
     GetUnreadCountsQuery,
 )
-from app.models.core import Customer
-from app.models.social import Review, SocialAccount, SocialMessage, SocialThread
+from api.app.models.core import Customer
+from api.app.models.social import Review, SocialAccount, SocialMessage, SocialThread
 
 logger = logging.getLogger(__name__)
 

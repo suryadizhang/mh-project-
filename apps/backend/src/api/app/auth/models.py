@@ -31,7 +31,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from app.utils.encryption import FieldEncryption
+from api.app.utils.encryption import FieldEncryption
 
 Base = declarative_base()
 

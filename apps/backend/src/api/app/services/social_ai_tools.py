@@ -7,18 +7,18 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from app.cqrs.base import CommandBus, QueryBus
-from app.cqrs.social_commands import (
+from api.app.cqrs.base import CommandBus, QueryBus
+from api.app.cqrs.social_commands import (
     CreateLeadFromSocialCommand,
     SendSocialReplyCommand,
     UpdateThreadStatusCommand,
 )
-from app.cqrs.social_queries import (
+from api.app.cqrs.social_queries import (
     GetSocialInboxQuery,
     GetThreadDetailQuery,
     SearchSocialContentQuery,
 )
-from app.models.social import MessageKind, SocialPlatform, ThreadStatus
+from api.app.models.social import MessageKind, SocialPlatform, ThreadStatus
 
 logger = logging.getLogger(__name__)
 

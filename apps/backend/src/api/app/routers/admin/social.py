@@ -9,15 +9,15 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi import Query as QueryParam
 from fastapi.responses import JSONResponse
 
-from app.cqrs.base import CommandBus, QueryBus
-from app.cqrs.social_commands import (
+from api.app.cqrs.base import CommandBus, QueryBus
+from api.app.cqrs.social_commands import (
     AcknowledgeReviewCommand,
     CreateLeadFromSocialCommand,
     EscalateReviewCommand,
     SendSocialReplyCommand,
     UpdateThreadStatusCommand,
 )
-from app.cqrs.social_queries import (
+from api.app.cqrs.social_queries import (
     GetReviewsBoardQuery,
     GetSocialAnalyticsQuery,
     GetSocialInboxQuery,
@@ -25,9 +25,9 @@ from app.cqrs.social_queries import (
     GetThreadDetailQuery,
     GetUnreadCountsQuery,
 )
-from app.dependencies import get_command_bus, get_current_admin_user, get_query_bus
-from app.models.social import ReviewStatus, SocialPlatform, ThreadStatus
-from app.schemas.social import (
+from api.app.dependencies import get_command_bus, get_current_admin_user, get_query_bus
+from api.app.models.social import ReviewStatus, SocialPlatform, ThreadStatus
+from api.app.schemas.social import (
     AcknowledgeReviewRequest,
     CreateLeadRequest,
     EscalateReviewRequest,
@@ -37,11 +37,11 @@ from app.schemas.social import (
     ThreadDetailResponse,
     UpdateThreadStatusRequest,
 )
-from app.services.social_ai_generator import (
+from api.app.services.social_ai_generator import (
     SocialAIResponseGenerator,
     SocialResponseContext,
 )
-from app.services.social_ai_tools import SocialMediaToolKit
+from api.app.services.social_ai_tools import SocialMediaToolKit
 
 logger = logging.getLogger(__name__)
 

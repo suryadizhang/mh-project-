@@ -12,14 +12,14 @@ from sqlalchemy import and_, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.middleware import (
+from api.app.auth.middleware import (
     AuthenticatedUser,
     audit_log_action,
     get_current_active_user,
     rate_limit,
     require_permission,
 )
-from app.auth.models import (
+from api.app.auth.models import (
     AuthenticationService,
     Permission,
     Role,
@@ -28,8 +28,8 @@ from app.auth.models import (
     UserSession,
     UserStatus,
 )
-from app.database import get_db_session
-from app.utils.encryption import FieldEncryption
+from api.app.database import get_db_session
+from api.app.utils.encryption import FieldEncryption
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 

@@ -7,8 +7,8 @@ from datetime import datetime
 from typing import Dict, Any
 import os
 
-from app.database import get_db
-from app.core.logging import get_logger
+from api.app.database import get_db
+from api.app.core.logging import get_logger
 
 router = APIRouter(prefix="/health", tags=["Health Check"])
 logger = get_logger(__name__)

@@ -10,17 +10,17 @@ from contextlib import asynccontextmanager
 import logging
 from typing import AsyncGenerator
 
-from app.config import get_settings, validate_configuration
-from app.database import engine, init_db, close_db
-from app.logging_config import setup_logging
-from app.security import setup_security_middleware, get_current_user
-from app.routers import webhooks
-from app.routers.chat import router as chat_router
-from app.routers.admin import router as admin_router
-from app.routers.websocket import router as websocket_router
-from app.routers.v1.unified_chat import router as unified_chat_router
-from app.services.ai_pipeline import AIPipeline
-from app.services.knowledge_base_simple import SimpleKnowledgeBaseService as KnowledgeBaseService
+from api.ai.endpoints.config import get_settings, validate_configuration
+from api.ai.endpoints.database import engine, init_db, close_db
+from api.ai.endpoints.logging_config import setup_logging
+from api.ai.endpoints.security import setup_security_middleware, get_current_user
+from api.ai.endpoints.routers import webhooks
+from api.ai.endpoints.routers.chat import router as chat_router
+from api.ai.endpoints.routers.admin import router as admin_router
+from api.ai.endpoints.routers.websocket import router as websocket_router
+from api.ai.endpoints.routers.v1.unified_chat import router as unified_chat_router
+from api.ai.endpoints.services.ai_pipeline import AIPipeline
+from api.ai.endpoints.services.knowledge_base_simple import SimpleKnowledgeBaseService as KnowledgeBaseService
 
 # Setup logging
 setup_logging()

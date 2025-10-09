@@ -13,16 +13,16 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from starlette.middleware.wsgi import WSGIMiddleware
 
-from app.auth.middleware import setup_auth_middleware
-from app.config import settings
+from api.app.auth.middleware import setup_auth_middleware
+from api.app.config import settings
 
 # Import CRM components
-from app.crm.endpoints import router as crm_router
-from app.database import Base, close_database, engine, init_database
-from app.routers import auth, bookings, health, stripe
+from api.app.crm.endpoints import router as crm_router
+from api.app.database import Base, close_database, engine, init_database
+from api.app.routers import auth, bookings, health, stripe
 
 # Import workers for background processing
-from app.workers.outbox_processors import create_outbox_processor_manager
+from api.app.workers.outbox_processors import create_outbox_processor_manager
 
 # Import security middleware
 try:
@@ -154,7 +154,7 @@ async def lifespan(app: FastAPI):
 
 
 # Import OpenAPI configuration
-from app.openapi_config import get_openapi_schema
+from api.app.openapi_config import get_openapi_schema
 
 # Create FastAPI application with enhanced configuration
 app = FastAPI(
@@ -272,8 +272,8 @@ app.include_router(health.router, prefix="/api/health", tags=["health"])
 app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
 
 # Station-aware Authentication & Administration
-from app.routers.station_auth import router as station_auth_router
-from app.routers.station_admin import router as station_admin_router
+from api.app.routers.station_auth import router as station_auth_router
+from api.app.routers.station_admin import router as station_admin_router
 app.include_router(station_auth_router, prefix="/api/station", tags=["station-auth"])
 app.include_router(station_admin_router, prefix="/api/admin/stations", tags=["station-admin"])
 
@@ -284,10 +284,10 @@ app.include_router(crm_router, prefix="/api", tags=["crm"])
 app.include_router(stripe.router, prefix="/api/stripe", tags=["payments"])
 
 # Lead and Newsletter Management
-from app.routers.leads import router as leads_router
-from app.routers.newsletter import router as newsletter_router
-from app.routers.ringcentral_webhooks import router as ringcentral_router
-from app.routers.admin_analytics import router as admin_analytics_router
+from api.app.routers.leads import router as leads_router
+from api.app.routers.newsletter import router as newsletter_router
+from api.app.routers.ringcentral_webhooks import router as ringcentral_router
+from api.app.routers.admin_analytics import router as admin_analytics_router
 
 app.include_router(leads_router, prefix="/api", tags=["leads"])
 app.include_router(newsletter_router, prefix="/api", tags=["newsletter"])

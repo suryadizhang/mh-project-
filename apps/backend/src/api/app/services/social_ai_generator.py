@@ -7,10 +7,10 @@ from uuid import UUID
 import openai
 from pydantic import BaseModel
 
-from app.config import settings
-from app.cqrs.base import CommandBus, QueryBus
-from app.models.social import SocialPlatform
-from app.services.social_ai_tools import SocialMediaToolKit
+from api.app.config import settings
+from api.app.cqrs.base import CommandBus, QueryBus
+from api.app.models.social import SocialPlatform
+from api.app.services.social_ai_tools import SocialMediaToolKit
 
 logger = logging.getLogger(__name__)
 

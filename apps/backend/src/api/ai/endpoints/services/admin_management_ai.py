@@ -9,8 +9,8 @@ import logging
 import json
 from enum import Enum
 
-from app.services.role_based_ai import UserRole, AICapability, role_based_ai
-from app.services.openai_service import openai_service
+from api.ai.endpoints.services.role_based_ai import UserRole, AICapability, role_based_ai
+from api.ai.endpoints.services.openai_service import openai_service
 
 logger = logging.getLogger(__name__)
 
