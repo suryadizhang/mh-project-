@@ -165,15 +165,17 @@ class DependencyInjectionContainer:
         # Resolve dependencies
         resolved_deps = {}
         for dep_name, dep_service in config.dependencies.items():
-            if dep_service in self._services:
-                # Resolve by service name
-                resolved_deps[dep_name] = self.resolve_by_name(dep_service)
+            if dep_service in self._services or dep_service in self._instances:
+                # Resolve by service name (either registered service or value)
+                resolved_deps[dep_name] = self.resolve(dep_service)
             else:
                 # Try to resolve as class
                 try:
                     dep_class = globals().get(dep_service) or locals().get(dep_service)
                     if dep_class:
                         resolved_deps[dep_name] = self.resolve(dep_class)
+                    else:
+                        raise ValueError(f"Cannot resolve dependency: {dep_service}")
                 except:
                     raise ValueError(f"Cannot resolve dependency: {dep_service}")
         
