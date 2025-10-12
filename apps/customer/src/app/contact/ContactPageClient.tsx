@@ -1,5 +1,7 @@
 'use client'
 
+import { logger } from '@/lib/logger'
+
 // Type definitions
 declare global {
   interface Window {
@@ -27,17 +29,17 @@ function InlineMessengerButton() {
       // Try to show Facebook Customer Chat if available
       if (typeof window !== 'undefined' && window.FB?.CustomerChat?.show) {
         window.FB.CustomerChat.show()
-        console.log('Facebook Customer Chat opened')
+        logger.debug('Facebook Customer Chat opened')
       } else {
         // Fallback: Open Messenger directly
         const pageId = '61577483702847' // My-hibachi page ID
         const messengerUrl = `https://m.me/${pageId}`
 
-        console.log('Opening Messenger directly:', messengerUrl)
+        logger.debug('Opening Messenger directly', { url: messengerUrl })
         window.open(messengerUrl, '_blank', 'noopener,noreferrer')
       }
     } catch (error) {
-      console.warn('Error opening Messenger:', error)
+      logger.warn('Error opening Messenger', { error })
       // Final fallback: Open Messenger directly
       const pageId = '61577483702847'
       const messengerUrl = `https://m.me/${pageId}`
@@ -77,7 +79,7 @@ function InlineInstagramButton() {
       if (isMobile) {
         // Try to open Instagram app first with the ig.me URL (works best on mobile)
         const igMeUrl = 'https://ig.me/m/my_hibachi_chef'
-        console.log('Opening Instagram DM (mobile):', igMeUrl)
+        logger.debug('Opening Instagram DM (mobile)', { url: igMeUrl })
 
         // Try Instagram app deep link first
         const iframe = document.createElement('iframe')
@@ -93,11 +95,11 @@ function InlineInstagramButton() {
       } else {
         // Desktop - use ig.me URL which redirects properly
         const igMeUrl = 'https://ig.me/m/my_hibachi_chef'
-        console.log('Opening Instagram DM (desktop):', igMeUrl)
+        logger.debug('Opening Instagram DM (desktop)', { url: igMeUrl })
         window.open(igMeUrl, '_blank', 'noopener,noreferrer')
       }
     } catch (error) {
-      console.warn('Error opening Instagram:', error)
+      logger.warn('Error opening Instagram', { error })
       // Ultimate fallback to profile page
       window.open('https://www.instagram.com/my_hibachi_chef/', '_blank', 'noopener,noreferrer')
     }

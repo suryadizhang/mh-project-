@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 
+import { logger } from '@/lib/logger'
+
 interface PaymentDetails {
   id: string
   status: string
@@ -46,7 +48,7 @@ function PaymentSuccessContent() {
           setError(data.error || 'Failed to retrieve payment details')
         }
       } catch (err) {
-        console.error('Error fetching payment details:', err)
+        logger.error('Error fetching payment details', err as Error)
         setError('Failed to load payment information')
       } finally {
         setIsLoading(false)
@@ -95,7 +97,7 @@ Contact: (916) 740-8768 | info@myhibachi.com
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
     } catch (err) {
-      console.error('Error downloading receipt:', err)
+      logger.error('Error downloading receipt', err as Error)
     }
   }
 
