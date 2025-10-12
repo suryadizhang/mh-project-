@@ -2,6 +2,8 @@
 
 import Script from 'next/script';
 
+import { logger } from '@/lib/logger';
+
 interface GoogleAnalyticsProps {
   measurementId: string;
 }
@@ -46,7 +48,7 @@ interface AnalyticsParameters {
 export default function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps) {
   // Don't render analytics if measurement ID is missing or placeholder
   if (!measurementId || measurementId === 'G-XXXXXXXXXX' || measurementId.trim() === '') {
-    console.warn(
+    logger.warn(
       '[GoogleAnalytics] Measurement ID not configured. Please set NEXT_PUBLIC_GA_MEASUREMENT_ID in your environment variables.',
     );
     return null;
