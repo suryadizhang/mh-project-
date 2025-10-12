@@ -10,6 +10,7 @@ import AlternativePaymentOptions from '@/components/payment/AlternativePaymentOp
 import BookingLookup from '@/components/payment/BookingLookup';
 import PaymentForm from '@/components/payment/PaymentForm';
 import { apiFetch } from '@/lib/api';
+import { logger } from '@/lib/logger';
 
 // Initialize Stripe
 const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
@@ -94,7 +95,10 @@ export default function PaymentPage() {
         setClientSecret(newClientSecret);
         setStripeElementsKey((prev) => prev + 1); // Force Elements re-render
       } catch (error) {
-        console.error('Error creating payment intent:', error);
+        logger.error('Error creating payment intent', error as Error, {
+          amount: totalAmount,
+          method: paymentMethod,
+        });
         setClientSecret(null);
       } finally {
         setIsLoading(false);
