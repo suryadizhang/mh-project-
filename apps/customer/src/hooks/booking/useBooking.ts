@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 
 import { BookingFormData, DEFAULT_FORM_VALUES, TimeSlot } from '@/data/booking/types';
 import { apiFetch } from '@/lib/api';
+import { logger } from '@/lib/logger';
 
 interface BookedDatesResponse {
   bookedDates?: string[];
@@ -56,7 +57,7 @@ export function useBooking() {
     try {
       const result = await apiFetch('/api/v1/bookings/booked-dates');
       if (result.success && result.data) {
-        console.log('Booked dates response:', result.data);
+        logger.debug('Booked dates response received');
         const responseData = result.data as BookedDatesResponse;
         const dates = responseData.bookedDates?.map((dateStr: string) => new Date(dateStr)) || [];
         setBookedDates(dates);
@@ -64,7 +65,7 @@ export function useBooking() {
         throw new Error('Failed to fetch booked dates');
       }
     } catch (error) {
-      console.error('Error fetching booked dates:', error);
+      logger.error('Error fetching booked dates', error as Error);
       setDateError('Unable to load booked dates. Please try again.');
     } finally {
       setLoadingDates(false);
@@ -90,11 +91,11 @@ export function useBooking() {
         );
         setAvailableTimeSlots(formattedSlots);
       } else {
-        console.error('Failed to fetch availability');
+        logger.error('Failed to fetch availability');
         setAvailableTimeSlots([]);
       }
     } catch (error) {
-      console.error('Error fetching availability:', error);
+      logger.error('Error fetching availability', error as Error);
       setAvailableTimeSlots([]);
     } finally {
       setLoadingTimeSlots(false);
@@ -165,7 +166,7 @@ export function useBooking() {
       setFormData(data);
       setShowAgreementModal(true);
     } catch (error) {
-      console.error('Error in form submission:', error);
+      logger.error('Error in form submission', error as Error);
       setIsSubmitting(false);
     }
   };

@@ -16,6 +16,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 
 import { apiFetch } from '@/lib/api';
+import { logger } from '@/lib/logger';
 
 // Initialize Stripe
 const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
@@ -84,7 +85,7 @@ function CheckoutContent() {
           setError(response.error || 'Failed to retrieve session');
         }
       } catch (err) {
-        console.error('Error retrieving session:', err);
+        logger.error('Error retrieving session', err as Error);
         setError('Failed to retrieve checkout session');
       } finally {
         setLoading(false);
