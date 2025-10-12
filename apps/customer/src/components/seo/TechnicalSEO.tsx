@@ -349,13 +349,28 @@ function PerformanceMonitoring() {
     <script
       dangerouslySetInnerHTML={{
         __html: `
-          // Core Web Vitals monitoring
+          // Core Web Vitals monitoring - sends to analytics in production
           import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-            getCLS(console.log);
-            getFID(console.log);
-            getFCP(console.log);
-            getLCP(console.log);
-            getTTFB(console.log);
+            const logVital = (metric) => {
+              // Send to analytics service in production
+              if (typeof gtag !== 'undefined') {
+                gtag('event', metric.name, {
+                  value: Math.round(metric.value),
+                  metric_id: metric.id,
+                  metric_delta: Math.round(metric.delta),
+                });
+              }
+              // Only log to console in development
+              if (${process.env.NODE_ENV === 'development'}) {
+                console.log('[Web Vital]', metric.name, Math.round(metric.value));
+              }
+            };
+            
+            getCLS(logVital);
+            getFID(logVital);
+            getFCP(logVital);
+            getLCP(logVital);
+            getTTFB(logVital);
           });
         `,
       }}
