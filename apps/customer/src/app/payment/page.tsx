@@ -6,9 +6,8 @@ import { Calendar, CreditCard, DollarSign, Loader2, MapPin, Shield, Users } from
 import { useEffect, useState } from 'react';
 
 import CustomerSavingsDisplay from '@/components/CustomerSavingsDisplay';
-import AlternativePaymentOptions from '@/components/payment/AlternativePaymentOptions';
 import BookingLookup from '@/components/payment/BookingLookup';
-import PaymentForm from '@/components/payment/PaymentForm';
+import { LazyAlternativePaymentOptions, LazyPaymentForm } from '@/components/lazy';
 import { apiFetch } from '@/lib/api';
 import { logger } from '@/lib/logger';
 
@@ -436,7 +435,7 @@ export default function PaymentPage() {
               stripePromise ? (
                 clientSecret ? (
                   <Elements key={stripeElementsKey} stripe={stripePromise} options={options}>
-                    <PaymentForm
+                    <LazyPaymentForm
                       amount={totalAmount}
                       bookingData={selectedBooking}
                       paymentType={paymentType}
@@ -482,7 +481,7 @@ export default function PaymentPage() {
                 </div>
               )
             ) : (
-              <AlternativePaymentOptions
+              <LazyAlternativePaymentOptions
                 method={paymentMethod}
                 amount={totalAmount}
                 bookingData={selectedBooking}
