@@ -40,6 +40,18 @@ async def lifespan(app: FastAPI):
     logger.info(f"Environment: {settings.ENVIRONMENT}")
     logger.info(f"Debug mode: {settings.DEBUG}")
     
+    # Initialize Cache Service
+    try:
+        from core.cache import CacheService
+        redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+        cache_service = CacheService(redis_url)
+        await cache_service.connect()
+        app.state.cache = cache_service
+        logger.info("✅ Cache service initialized")
+    except Exception as e:
+        logger.error(f"Failed to initialize cache service: {e}")
+        app.state.cache = None
+    
     # Initialize dependency injection container
     try:
         # Get database URL from environment or settings
@@ -68,6 +80,11 @@ async def lifespan(app: FastAPI):
         
         # Create and configure DI container
         container = create_service_container(database_url, app_config)
+        
+        # Register cache service in container
+        if app.state.cache:
+            container.register_singleton("cache_service", lambda: app.state.cache)
+        
         app.state.container = container
         logger.info("✅ Dependency injection container initialized")
         
@@ -90,6 +107,11 @@ async def lifespan(app: FastAPI):
     yield
     
     # Shutdown
+    # Close cache service
+    if hasattr(app.state, 'cache') and app.state.cache:
+        await app.state.cache.disconnect()
+        logger.info("✅ Cache service closed")
+    
     if hasattr(app.state, 'rate_limiter'):
         if hasattr(app.state.rate_limiter, 'redis_client') and app.state.rate_limiter.redis_client:
             await app.state.rate_limiter.redis_client.close()
