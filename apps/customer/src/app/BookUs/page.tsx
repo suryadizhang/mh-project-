@@ -11,6 +11,7 @@ import { Controller, useForm } from 'react-hook-form';
 
 import Assistant from '@/components/chat/Assistant';
 import { apiFetch } from '@/lib/api';
+import { logger } from '@/lib/logger';
 // Type definitions for booking form
 type TimeSlot = {
   time: string;
@@ -84,11 +85,11 @@ export default function BookingPage() {
           : [];
         setBookedDates(dates);
       } else {
-        console.warn('Could not fetch booked dates, continuing without blocking dates');
+        logger.warn('Could not fetch booked dates, continuing without blocking dates');
         setBookedDates([]);
       }
     } catch (error) {
-      console.warn('Error fetching booked dates:', error);
+      logger.warn('Error fetching booked dates', { error });
       setBookedDates([]);
     } finally {
       setLoadingDates(false);
@@ -129,11 +130,11 @@ export default function BookingPage() {
         );
         setAvailableTimeSlots(formattedSlots);
       } else {
-        console.warn('Could not fetch availability, using default slots');
+        logger.warn('Could not fetch availability, using default slots');
         setAvailableTimeSlots([]);
       }
     } catch (error) {
-      console.warn('Error fetching availability:', error);
+      logger.warn('Error fetching availability', { error });
       setAvailableTimeSlots([]);
     } finally {
       setLoadingTimeSlots(false);
@@ -221,7 +222,7 @@ export default function BookingPage() {
             }
           }
         } catch (error) {
-          console.warn('Could not verify slot availability:', error);
+          logger.warn('Could not verify slot availability', { error });
           // Continue with booking as a fallback
         }
       }
@@ -229,7 +230,7 @@ export default function BookingPage() {
       setFormData(data);
       setShowAgreementModal(true);
     } catch (error) {
-      console.error('Form submission error:', error);
+      logger.error('Form submission error', error as Error);
       setDateError('An unexpected error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -297,7 +298,7 @@ export default function BookingPage() {
         }
       }
     } catch (error) {
-      console.error('Booking submission error:', error);
+      logger.error('Booking submission error', error as Error);
       alert(
         '❌ Network Error\n\nPlease check your connection and try again.\nYour information has been preserved.',
       );

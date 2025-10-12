@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { apiFetch } from '@/lib/api';
+import { logger } from '@/lib/logger';
 
 import ContactInfoSection from './ContactInfoSection';
 import CustomerAddressSection from './CustomerAddressSection';
@@ -99,11 +100,11 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ className =
           : [];
         setBookedDates(dates);
       } else {
-        console.warn('Could not fetch booked dates, continuing without blocking dates');
+        logger.warn('Could not fetch booked dates, continuing without blocking dates');
         setBookedDates([]);
       }
     } catch (error) {
-      console.warn('Error fetching booked dates:', error);
+      logger.warn('Error fetching booked dates', { error });
       setBookedDates([]);
     } finally {
       setLoadingDates(false);
@@ -130,7 +131,7 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ className =
         ]);
       }
     } catch (error) {
-      console.warn('Error fetching time slots:', error);
+      logger.warn('Error fetching time slots', { error });
       // Fallback to default time slots
       setAvailableTimeSlots([
         { time: '12PM', label: '12:00 PM - 2:00 PM', available: 2, isAvailable: true },
@@ -167,7 +168,7 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ className =
 
   // Enhanced onSubmit with comprehensive validation
   const onSubmit = async (data: BookingFormData) => {
-    console.log('Form submission started with data:', data);
+    logger.debug('Form submission started'); // DO NOT log data - contains PII
 
     // Validate required fields manually
     const requiredFields = [];
@@ -210,7 +211,7 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ className =
     setShowAgreementModal(false);
 
     try {
-      console.log('Submitting booking request:', formData);
+      logger.debug('Submitting booking request'); // DO NOT log formData - contains PII
 
       const submissionData = {
         ...formData,
@@ -225,18 +226,18 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ className =
       });
 
       if (response.success) {
-        console.log('Booking submitted successfully');
+        logger.info('Booking submitted successfully');
         // Redirect to success page
         window.location.href = '/booking-success';
       } else {
         const errorData = response.data || response;
-        console.error('Booking submission failed:', errorData);
+        logger.error('Booking submission failed', undefined, { error: errorData });
         alert(
           'Sorry, there was an error submitting your booking. Please try again or contact us directly.',
         );
       }
     } catch (error) {
-      console.error('Error submitting booking:', error);
+      logger.error('Error submitting booking', error as Error);
       alert(
         'Sorry, there was an error submitting your booking. Please try again or contact us directly.',
       );

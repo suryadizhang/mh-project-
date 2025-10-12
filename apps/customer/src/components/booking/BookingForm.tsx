@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 
 import { apiFetch } from '@/lib/api'
+import { logger } from '@/lib/logger'
 
 interface BookingFormProps {
   className?: string
@@ -41,9 +42,9 @@ export default function BookingForm({ className = '' }: BookingFormProps) {
         body: JSON.stringify(formData)
       })
 
-      console.log('Booking created:', result)
+      logger.info('Booking created')
     } catch (error) {
-      console.error('Error creating booking:', error)
+      logger.error('Error creating booking', error as Error)
     } finally {
       setIsSubmitting(false)
     }

@@ -11,6 +11,7 @@ import Assistant from '@/components/chat/Assistant';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { logger } from '@/lib/logger';
 
 interface BookingDetails {
   bookingId: string;
@@ -109,7 +110,7 @@ function BookingSuccessContent() {
         window.open(`/invoice/${booking.bookingId}`, '_blank');
       }
     } catch (error) {
-      console.error('Error downloading invoice:', error);
+      logger.error('Error downloading invoice', error as Error);
       // Fallback to opening invoice page
       window.open(`/invoice/${booking.bookingId}`, '_blank');
     } finally {

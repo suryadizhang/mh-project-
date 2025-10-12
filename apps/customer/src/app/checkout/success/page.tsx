@@ -15,6 +15,7 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 
 import { apiFetch } from '@/lib/api';
+import { logger } from '@/lib/logger';
 
 interface PaymentSuccess {
   payment_intent: string;
@@ -63,7 +64,7 @@ function CheckoutSuccessContent() {
           setError(response.error || 'Failed to retrieve payment details');
         }
       } catch (err) {
-        console.error('Error fetching session data:', err);
+        logger.error('Error fetching session data', err as Error);
         setError('Failed to load payment information');
       } finally {
         setIsLoading(false);
@@ -133,7 +134,7 @@ We look forward to serving you an unforgettable experience.
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (err) {
-      console.error('Error downloading receipt:', err);
+      logger.error('Error downloading receipt', err as Error);
     }
   };
 
