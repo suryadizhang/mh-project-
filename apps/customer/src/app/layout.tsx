@@ -27,6 +27,7 @@ import Footer from '@/components/layout/Footer'
 import Navbar from '@/components/layout/Navbar'
 import { PerformanceMonitoring } from '@/components/seo/TechnicalSEO'
 import BackToTopButton from '@/components/ui/BackToTopButton'
+import RateLimitBanner from '@/components/RateLimitBanner'
 import {
   generateLocalBusinessSchema,
   generateOrganizationSchema,
@@ -115,6 +116,9 @@ export default function RootLayout({
 
         {/* Core Web Vitals Performance Monitoring */}
         <PerformanceMonitoring />
+
+        {/* Rate Limit Warning Banner (HIGH PRIORITY #12) */}
+        <RateLimitBanner />
 
         <ClientLayout>
           <Navbar />
