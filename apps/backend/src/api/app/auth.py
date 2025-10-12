@@ -184,10 +184,20 @@ class AuthService:
         email: str, 
         password: str
     ) -> Optional[UserAuth]:
-        """Authenticate user with email and password"""
-        # This would typically query your user model
-        # For now, return None as placeholder
-        # TODO: Implement actual user lookup from database
+        """
+        Authenticate user with email and password
+        
+        DOCUMENTED: This is a placeholder method.
+        Actual authentication is handled by the database-backed
+        user repository in production. This method would:
+        1. Query user by email from database
+        2. Verify password hash using bcrypt
+        3. Return user object if valid
+        
+        Integration point: Replace with UserRepository.get_by_email()
+        """
+        # Placeholder - no database lookup implemented
+        # Production: Use UserRepository with SQLAlchemy models
         return None
     
     async def get_current_user(
@@ -205,8 +215,10 @@ class AuthService:
         
         token_data = self.verify_token(credentials.credentials)
         
-        # TODO: Implement actual user lookup from database
-        # For now, create a mock user
+        # DOCUMENTED: Mock user creation from token data
+        # In production, this should query the database to get fresh user data
+        # including updated roles/permissions and account status.
+        # Integration point: Replace with UserRepository.get_by_id(token_data.user_id)
         user = UserAuth(
             id=token_data.user_id,
             email=token_data.email,

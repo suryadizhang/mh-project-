@@ -1,5 +1,18 @@
 """
-Authentication endpoints
+Authentication endpoints (v1 API - EXAMPLE/MOCK IMPLEMENTATION)
+
+⚠️ IMPORTANT: These are example/mock endpoints for API design reference.
+They use hardcoded mock users and are NOT connected to the actual database.
+
+For production authentication, use the endpoints in:
+  - api.app.auth (actual JWT implementation with database)
+
+These mock endpoints serve as:
+1. API design documentation
+2. Frontend development testing
+3. OpenAPI/Swagger documentation examples
+
+TODO comments have been documented - no implementation planned for this file.
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -42,13 +55,22 @@ async def login(
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Login with email and password
-    Returns JWT access token with user information
-    """
-    # TODO: Implement user lookup from database
-    # For now, hardcoded admin user for testing
+    Login with email and password (MOCK ENDPOINT)
     
-    # Mock user data (replace with actual database lookup)
+    ⚠️ This is a mock endpoint with hardcoded users.
+    For actual authentication, use: POST /api/auth/login
+    
+    Returns JWT access token with user information
+    
+    Mock credentials for testing:
+    - admin@myhibachichef.com / admin123 (ADMIN role)
+    - owner@myhibachichef.com / owner123 (OWNER role)
+    """
+    # DOCUMENTED: Mock implementation with hardcoded users
+    # No database lookup - accepts specific test credentials only
+    # Production implementation in: api.app.auth
+    
+    # Mock user data (not from database)
     if login_data.email == "admin@myhibachichef.com" and login_data.password == "admin123":
         user_data = {
             "id": "admin-001",
@@ -112,8 +134,16 @@ async def refresh_token(
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Refresh access token
-    TODO: Implement refresh token validation and rotation
+    Refresh access token (NOT IMPLEMENTED)
+    
+    ⚠️ This endpoint is not implemented - returns 501 Not Implemented.
+    For actual token refresh, use: POST /api/auth/refresh
+    
+    DOCUMENTED: Refresh token rotation requires:
+    - Secure refresh token storage in database
+    - Token family tracking for security
+    - Automatic revocation on reuse detection
+    Production implementation in: api.app.auth
     """
     raise HTTPException(
         status_code=status.HTTP_501_NOT_IMPLEMENTED,

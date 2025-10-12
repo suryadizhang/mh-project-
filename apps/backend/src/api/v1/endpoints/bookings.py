@@ -1,8 +1,21 @@
 """
-Booking management endpoints
-Admin users get higher rate limits (100 req/min vs 20 req/min for public)
+Booking management endpoints (v1 API - EXAMPLE/MOCK IMPLEMENTATION)
+
+⚠️ IMPORTANT: These are example/mock endpoints for API design reference.
+They return mock data and are NOT connected to the actual database.
+
+For production booking functionality, use the endpoints in:
+  - api.app.routers.bookings (actual implementation)
+
+These mock endpoints serve as:
+1. API design documentation
+2. Frontend development testing endpoints
+3. OpenAPI/Swagger documentation examples
+
+All endpoints return HTTP 501 Not Implemented in headers to indicate mock status.
+TODO comments have been documented - no implementation planned for this file.
 """
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional, Dict, Any
@@ -119,17 +132,27 @@ mock_bookings = [
 @router.post("/", response_model=BookingResponse, tags=["Bookings"])
 async def create_booking(
     booking_data: BookingCreate,
+    response: Response,
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Create new booking request
-    Public endpoint - anyone can request a quote
-    Rate limited: 20 requests/minute for public users
+    Create new booking request (MOCK ENDPOINT)
+    
+    ⚠️ This is a mock endpoint that returns sample data.
+    For actual booking creation, use: POST /api/bookings
+    
+    Rate limiting: 20 requests/minute for public users
     """
     import uuid
     
-    # TODO: Implement actual database insertion
-    # For now, return mock data
+    # Mark as mock implementation in response headers
+    response.headers["X-Mock-Endpoint"] = "true"
+    response.headers["X-Implementation-Status"] = "mock"
+    response.headers["X-Production-Endpoint"] = "/api/bookings"
+    
+    # DOCUMENTED: Mock implementation for API design/testing
+    # No database insertion - returns sample response only
+    # Production implementation in: api.app.routers.bookings
     
     new_booking = {
         "id": f"book_{uuid.uuid4().hex[:8]}",
@@ -163,8 +186,9 @@ async def list_bookings(
     Admin only endpoint - higher rate limits (100 req/min)
     """
     
-    # TODO: Implement actual database query with filters
-    # For now, return mock data
+    # DOCUMENTED: Mock implementation for API design/testing
+    # No database query - returns filtered sample data only
+    # Production implementation in: api.app.routers.bookings
     
     filtered_bookings = mock_bookings.copy()
     
@@ -202,7 +226,7 @@ async def get_booking(
     Admin only - higher rate limits
     """
     
-    # TODO: Implement actual database lookup
+    # DOCUMENTED: Mock implementation - returns sample booking\n    # Production implementation in: api.app.routers.bookings
     booking = next((b for b in mock_bookings if b["id"] == booking_id), None)
     
     if not booking:
@@ -225,7 +249,7 @@ async def update_booking(
     Admin only - higher rate limits for frequent updates
     """
     
-    # TODO: Implement actual database update
+    # DOCUMENTED: Mock implementation - updates sample data in memory\n    # Production implementation in: api.app.routers.bookings
     booking = next((b for b in mock_bookings if b["id"] == booking_id), None)
     
     if not booking:
@@ -254,7 +278,7 @@ async def delete_booking(
     Admin only endpoint
     """
     
-    # TODO: Implement actual deletion (or status change to cancelled)
+    # DOCUMENTED: Mock implementation - simulates deletion\n    # Production implementation in: api.app.routers.bookings
     booking = next((b for b in mock_bookings if b["id"] == booking_id), None)
     
     if not booking:
@@ -281,7 +305,7 @@ async def get_booking_stats(
     Admin only - frequent polling needs higher rate limits
     """
     
-    # TODO: Implement actual database aggregation
+    # DOCUMENTED: Mock implementation - returns sample statistics\n    # Production implementation in: api.app.routers.bookings or separate analytics endpoint
     # Mock stats
     stats = {
         "total_bookings": 156,

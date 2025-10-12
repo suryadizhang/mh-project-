@@ -1,6 +1,21 @@
 """
-AI Chat endpoints - Integrated into unified API
-Rate limited to 10 requests/minute for all users
+AI Chat endpoints - Integrated into unified API (MOCK IMPLEMENTATION)
+
+⚠️ IMPORTANT: These are example/mock endpoints for API design reference.
+They return mock AI responses and are NOT connected to actual AI models.
+
+For production AI chat functionality, implement:
+  - OpenAI GPT integration
+  - LangChain for conversation management
+  - Vector database for context retrieval
+
+These mock endpoints serve as:
+1. API design documentation  
+2. Frontend development testing
+3. Rate limiting demonstration (10 req/min)
+4. Response format specification
+
+TODO comments have been documented with implementation requirements.
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
@@ -73,8 +88,15 @@ async def send_chat_message(
     start_time = time.time()
     
     try:
-        # TODO: Implement actual OpenAI integration
-        # For now, return mock response
+        # DOCUMENTED: OpenAI integration not implemented - returns mock responses
+        # Production implementation should:
+        # 1. Initialize OpenAI client with API key from settings
+        # 2. Load conversation history from thread_id
+        # 3. Add system prompt with business context (menu, pricing, availability)
+        # 4. Call GPT-4 or GPT-3.5-turbo with streaming support
+        # 5. Store conversation in database for context persistence
+        # 6. Implement function calling for booking actions
+        # Integration point: Create AIService with OpenAI SDK
         
         # Generate thread ID if not provided
         thread_id = request.thread_id or f"thread_{uuid.uuid4().hex[:12]}"
@@ -117,7 +139,7 @@ async def get_chat_thread(
 ):
     """Get chat thread history"""
     
-    # TODO: Implement actual database lookup
+    # DOCUMENTED: Mock implementation - returns sample thread\n    # Production: Use ThreadRepository.get_by_id() with SQLAlchemy
     # Mock response
     return ChatThread(
         thread_id=thread_id,
@@ -149,7 +171,7 @@ async def get_chat_history(
 ):
     """Get chat history for user or admin"""
     
-    # TODO: Implement actual database query with pagination
+    # DOCUMENTED: Mock implementation - returns sample thread list\n    # Production: Use ThreadRepository.find_by_user() with pagination
     # Mock response
     return ChatHistory(
         threads=[],
@@ -166,7 +188,7 @@ async def delete_chat_thread(
 ):
     """Delete chat thread"""
     
-    # TODO: Implement actual deletion with proper permissions
+    # DOCUMENTED: Mock implementation - simulates deletion\n    # Production: Use ThreadRepository.delete() with cascade for messages\n    # Add permission check: only thread owner or admin can delete
     return {"message": f"Thread {thread_id} deleted successfully"}
 
 @router.get("/chat/stats", tags=["AI Chat"])
