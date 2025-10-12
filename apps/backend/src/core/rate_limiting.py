@@ -6,6 +6,7 @@ Falls back to in-memory limiting if Redis unavailable
 import time
 import json
 from typing import Optional, Dict, Any
+from pathlib import Path
 from fastapi import Request, HTTPException, status, Response
 from core.config import get_settings, UserRole
 import hashlib
@@ -27,6 +28,7 @@ class RateLimiter:
         self.settings = settings
         self.redis_client = None
         self.redis_available = False
+        self.rate_limit_script = None
         # Instance-based memory store for better isolation
         self._memory_store = {}
     
@@ -44,7 +46,13 @@ class RateLimiter:
                 # Test connection
                 await self.redis_client.ping()
                 self.redis_available = True
-                print("✅ Redis connected for rate limiting")
+                
+                # Load atomic rate limiting Lua script
+                script_path = Path(__file__).parent / 'rate_limit.lua'
+                with open(script_path, 'r') as f:
+                    self.rate_limit_script = self.redis_client.register_script(f.read())
+                
+                print("✅ Redis connected for rate limiting with atomic Lua script")
             except Exception as e:
                 print(f"⚠️ Redis unavailable, using memory-based rate limiting: {e}")
                 self.redis_client = None
@@ -110,55 +118,61 @@ class RateLimiter:
             return await self._check_memory_rate_limit(identifier, config, current_time, minute_window, hour_window)
     
     async def _check_redis_rate_limit(self, identifier: str, config: Dict[str, Any], current_time: int, minute_window: int, hour_window: int) -> Dict[str, Any]:
-        """Check rate limits using Redis"""
+        """Check rate limits using Redis with atomic Lua script to prevent race conditions"""
         # Redis keys
         minute_key = f"rate_limit:{identifier}:minute:{minute_window}"
         hour_key = f"rate_limit:{identifier}:hour:{hour_window}"
         
-        # Get current counts
-        pipe = self.redis_client.pipeline()
-        pipe.get(minute_key)
-        pipe.get(hour_key)
-        results = await pipe.execute()
+        # Execute atomic rate limit check using Lua script
+        # This prevents race conditions in high-concurrency scenarios by ensuring
+        # check and increment happen atomically in a single Redis operation
+        result = await self.rate_limit_script(
+            keys=[minute_key, hour_key],
+            args=[
+                config["per_minute"],  # minute_limit
+                config["per_hour"],    # hour_limit
+                120,                   # minute_ttl (2 minutes)
+                7200                   # hour_ttl (2 hours)
+            ]
+        )
         
-        minute_count = int(results[0] or 0)
-        hour_count = int(results[1] or 0)
+        # Parse Lua script result
+        # result[0] = 1 if allowed, 0 if denied
+        # result[1] = minute_count (current or incremented)
+        # result[2] = hour_count (current or incremented)
+        # result[3] = limit_type (only if denied)
+        allowed = result[0] == 1
+        minute_count = result[1]
+        hour_count = result[2]
         
-        # Check limits
-        if minute_count >= config["per_minute"]:
-            return {
-                "allowed": False,
-                "limit_type": "per_minute",
-                "current": minute_count,
-                "limit": config["per_minute"],
-                "reset_seconds": 60 - (current_time % 60),
-                "tier": config["tier"]
-            }
+        if not allowed:
+            # Request denied - limit exceeded
+            limit_type = result[3] if len(result) > 3 else "unknown"
+            
+            if limit_type == "per_minute":
+                return {
+                    "allowed": False,
+                    "limit_type": "per_minute",
+                    "current": minute_count,
+                    "limit": config["per_minute"],
+                    "reset_seconds": 60 - (current_time % 60),
+                    "tier": config["tier"]
+                }
+            else:  # per_hour
+                return {
+                    "allowed": False,
+                    "limit_type": "per_hour",
+                    "current": hour_count,
+                    "limit": config["per_hour"],
+                    "reset_seconds": 3600 - (current_time % 3600),
+                    "tier": config["tier"]
+                }
         
-        if hour_count >= config["per_hour"]:
-            return {
-                "allowed": False,
-                "limit_type": "per_hour",
-                "current": hour_count,
-                "limit": config["per_hour"],
-                "reset_seconds": 3600 - (current_time % 3600),
-                "tier": config["tier"]
-            }
-        
-        # Increment counters atomically
-        # Note: In very high-concurrency scenarios, we could use Lua scripts
-        # for atomic check-and-increment to prevent race conditions
-        pipe = self.redis_client.pipeline()
-        pipe.incr(minute_key)
-        pipe.expire(minute_key, 120)  # Keep for 2 minutes
-        pipe.incr(hour_key)
-        pipe.expire(hour_key, 7200)  # Keep for 2 hours
-        await pipe.execute()
-        
+        # Request allowed - counters already incremented atomically
         return {
             "allowed": True,
-            "minute_remaining": config["per_minute"] - minute_count - 1,
-            "hour_remaining": config["per_hour"] - hour_count - 1,
+            "minute_remaining": config["per_minute"] - minute_count,
+            "hour_remaining": config["per_hour"] - hour_count,
             "minute_reset": 60 - (current_time % 60),
             "hour_reset": 3600 - (current_time % 3600),
             "tier": config["tier"]
