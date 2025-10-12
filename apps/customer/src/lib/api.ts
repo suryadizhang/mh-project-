@@ -5,12 +5,15 @@
  * Features:
  * - Configurable timeouts per endpoint type
  * - Automatic retry logic for failed requests
+ * - Client-side rate limiting (token bucket)
+ * - 429 response handling with Retry-After
  * - Request/response logging
  * - Error handling with user-friendly messages
  * - Abort controller for timeout management
  */
 
 import { logger, logApiRequest } from '@/lib/logger';
+import { getRateLimiter } from '@/lib/rateLimiter';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -125,8 +128,10 @@ function sleep(ms: number): Promise<void> {
  * Main API fetch function - all backend calls should use this
  *
  * Features:
+ * - Client-side rate limiting (checked before request)
  * - Automatic timeout based on endpoint type
- * - Retry logic for transient failures (network errors, 5xx errors)
+ * - Retry logic for transient failures (network errors, 5xx, 429 errors)
+ * - 429 response handling with Retry-After header
  * - Request/response logging
  * - User-friendly error messages
  * - Abort controller for proper cancellation
@@ -153,6 +158,39 @@ export async function apiFetch<T = Record<string, unknown>>(
 
   const url = `${API_BASE_URL}${path}`;
   const startTime = performance.now();
+
+  // Get rate limiter instance
+  const rateLimiter = getRateLimiter();
+
+  // Check client-side rate limit BEFORE making request
+  if (!rateLimiter.checkLimit(path)) {
+    const waitTime = rateLimiter.getWaitTime(path);
+    const info = rateLimiter.getInfo(path);
+
+    logger.warn('Client-side rate limit exceeded', {
+      path,
+      category: info.category,
+      waitTime,
+      remaining: info.remaining
+    });
+
+    // Emit rate limit event for UI
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('rate-limit-exceeded', {
+        detail: {
+          endpoint: path,
+          waitTime,
+          category: info.category,
+          remaining: info.remaining
+        }
+      }));
+    }
+
+    return {
+      error: `Rate limit exceeded. Please wait ${waitTime} second${waitTime !== 1 ? 's' : ''} before trying again.`,
+      success: false
+    };
+  }
 
   let lastError: Error | null = null;
   let attempt = 0;
@@ -191,6 +229,67 @@ export async function apiFetch<T = Record<string, unknown>>(
         // Server returned error status
         const errorText = await response.text().catch(() => 'Unknown error');
 
+        // Handle 429 Rate Limit Exceeded with Retry-After
+        if (response.status === 429) {
+          const retryAfter = response.headers.get('Retry-After');
+          let waitSeconds = parseInt(retryAfter || '60', 10);
+
+          // Retry-After can be seconds or HTTP date
+          if (isNaN(waitSeconds)) {
+            // Try parsing as HTTP date
+            const retryDate = new Date(retryAfter || '');
+            if (!isNaN(retryDate.getTime())) {
+              waitSeconds = Math.ceil((retryDate.getTime() - Date.now()) / 1000);
+            } else {
+              waitSeconds = 60; // Default to 60 seconds
+            }
+          }
+
+          logger.warn('Server rate limit exceeded (429)', {
+            path,
+            waitSeconds,
+            retryAfter,
+            attempt,
+            maxRetries
+          });
+
+          // Store rate limit info in sessionStorage for UI
+          if (typeof window !== 'undefined') {
+            const rateLimitInfo = {
+              endpoint: path,
+              until: Date.now() + (waitSeconds * 1000),
+              waitSeconds
+            };
+            sessionStorage.setItem(`rate-limit-429-${path}`, JSON.stringify(rateLimitInfo));
+
+            // Emit event for UI components
+            window.dispatchEvent(new CustomEvent('server-rate-limit-exceeded', {
+              detail: rateLimitInfo
+            }));
+          }
+
+          // Retry with exponential backoff if enabled
+          if (retry && attempt < maxRetries) {
+            const backoffDelay = Math.min(waitSeconds * 1000, retryDelay * Math.pow(2, attempt));
+            logger.info(`Retrying after ${backoffDelay}ms due to 429...`, {
+              attempt,
+              maxRetries,
+              path,
+              waitSeconds,
+              backoffDelay
+            });
+
+            lastError = new Error(`Rate limit exceeded: ${errorText}`);
+            await sleep(backoffDelay);
+            continue;
+          }
+
+          return {
+            error: `Too many requests. Please wait ${waitSeconds} second${waitSeconds !== 1 ? 's' : ''} before trying again.`,
+            success: false
+          };
+        }
+
         // Retry on 5xx errors (server errors) if retry is enabled
         if (retry && response.status >= 500 && attempt < maxRetries) {
           logger.warn(`API Request failed with ${response.status}, retrying...`, {
@@ -217,6 +316,9 @@ export async function apiFetch<T = Record<string, unknown>>(
 
       // Parse response
       const data = await response.json();
+
+      // Record successful request in rate limiter
+      rateLimiter.recordRequest(path);
 
       return {
         data,
