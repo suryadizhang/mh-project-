@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 
 import contactData from '@/data/contact.json'
+import { logger } from '@/lib/logger'
 
 declare global {
   interface Window {
@@ -24,7 +25,7 @@ export default function MetaMessenger() {
     // Check if Facebook App ID is properly configured
     const appId = contactData.facebookAppId
     if (!appId || appId === '1234567890123456') {
-      console.warn(
+      logger.warn(
         'Facebook Messenger: App ID not configured. Please set up a real Facebook App ID to enable Messenger chat.'
       )
       return
@@ -48,12 +49,12 @@ export default function MetaMessenger() {
             xfbml: true,
             version: 'v18.0'
           })
-          console.log('Facebook SDK loaded successfully with App ID:', appId)
+          logger.debug('Facebook SDK loaded', { appId })
         }
       }
 
       script.onerror = () => {
-        console.error('Failed to load Facebook SDK')
+        logger.error('Failed to load Facebook SDK')
       }
 
       document.head.appendChild(script)
