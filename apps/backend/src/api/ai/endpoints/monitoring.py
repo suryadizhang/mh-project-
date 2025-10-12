@@ -264,7 +264,8 @@ class PerformanceMonitor:
             memory = psutil.virtual_memory()
             disk = psutil.disk_usage("/")
             disk_percent = (disk.used / disk.total) * 100
-        except:
+        except (OSError, AttributeError, ZeroDivisionError) as e:
+            logger.warning(f"Failed to get system resources: {e}")
             cpu_percent = memory.percent = disk_percent = 0.0
 
         return PerformanceMetrics(

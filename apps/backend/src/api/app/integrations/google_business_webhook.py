@@ -129,7 +129,8 @@ async def google_business_webhook_handler(
                 .params(error=str(e), sig=signature)
             )
             await db.commit()
-        except:
+        except Exception as db_error:
+            logger.error(f"Failed to update error record in database: {db_error}")
             pass
 
         raise HTTPException(status_code=500, detail="Webhook processing failed")

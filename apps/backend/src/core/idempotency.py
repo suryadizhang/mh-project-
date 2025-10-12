@@ -117,8 +117,9 @@ class IdempotencyMiddleware(BaseHTTPMiddleware):
             # Parse body as JSON
             try:
                 body_json = json.loads(body.decode())
-            except:
-                body_json = {"data": body.decode()}
+            except (json.JSONDecodeError, UnicodeDecodeError, AttributeError) as e:
+                logger.warning(f"Failed to decode response body as JSON: {e}")
+                body_json = {"data": body.decode('utf-8', errors='ignore')}
             
             # Build cache entry
             cache_entry = {

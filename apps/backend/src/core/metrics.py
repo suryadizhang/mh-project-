@@ -396,19 +396,22 @@ class HealthCheckMetrics:
                 (cache_hits._value.get() / total_cache_ops * 100)
                 if total_cache_ops > 0 else 0
             )
-        except:
+        except (AttributeError, TypeError, ZeroDivisionError) as e:
+            logger.warning(f"Failed to calculate cache hit rate: {e}")
             cache_hit_rate = 0
         
         # Get average response time (approximate)
         try:
             avg_response_time = request_duration._sum.get() / request_duration._count.get()
-        except:
+        except (AttributeError, TypeError, ZeroDivisionError) as e:
+            logger.warning(f"Failed to calculate average response time: {e}")
             avg_response_time = 0
         
         # Get active connections from gauge
         try:
             active_conns = active_connections._value.get()
-        except:
+        except (AttributeError, TypeError) as e:
+            logger.warning(f"Failed to get active connections: {e}")
             active_conns = 0
         
         return {

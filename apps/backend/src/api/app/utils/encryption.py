@@ -179,7 +179,8 @@ class FieldEncryption:
             envelope_json = base64.b64decode(value.encode('ascii')).decode('utf-8')
             envelope = json.loads(envelope_json)
             return envelope.get("version") == self.VERSION
-        except:
+        except (ValueError, json.JSONDecodeError, UnicodeDecodeError, KeyError) as e:
+            logger.warning(f"Failed to validate encryption format: {e}")
             return False
 
 
@@ -261,7 +262,8 @@ def validate_phone(phone: str) -> bool:
     try:
         normalized = normalize_phone(phone)
         return len(normalized) in [12, 13]  # +1xxxxxxxxxx or +xxxxxxxxxxxx
-    except:
+    except (ValueError, TypeError, AttributeError) as e:
+        logger.warning(f"Failed to validate phone number: {e}")
         return False
 
 
