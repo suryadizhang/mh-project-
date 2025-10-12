@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 
+import { logger } from '@/lib/logger';
 // Disable static generation for this page to avoid Next.js 15 issues
 export const dynamic = 'force-dynamic'
 
@@ -13,7 +14,7 @@ export default function GlobalError({
   reset: () => void
 }) {
   useEffect(() => {
-    console.error(error)
+    logger.error('Global error caught', error)
   }, [error])
 
   return (
@@ -34,3 +35,5 @@ export default function GlobalError({
     </html>
   )
 }
+
+

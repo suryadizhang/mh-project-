@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 
+import { logger } from '@/lib/logger'
+
 interface QuoteData {
   adults: number
   children: number
@@ -95,7 +97,7 @@ export function QuoteCalculator() {
 
       setQuoteResult(result)
     } catch (error) {
-      console.error('Calculation error:', error)
+      logger.error('Calculation error', error as Error)
       setCalculationError('Error calculating quote. Please try again.')
     } finally {
       setIsCalculating(false)
@@ -396,3 +398,5 @@ export function QuoteCalculator() {
     </div>
   )
 }
+
+

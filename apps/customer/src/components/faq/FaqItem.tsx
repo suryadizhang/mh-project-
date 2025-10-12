@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import type { FaqItem } from '@/data/faqsData';
 
+import { logger } from '@/lib/logger';
 interface FaqItemComponentProps {
   faq: FaqItem;
   isOpen: boolean;
@@ -28,7 +29,7 @@ export function FaqItemComponent({ faq, isOpen, onToggle }: FaqItemComponentProp
   const trackHelpfulness = (helpful: boolean) => {
     setWasHelpful(helpful);
     // Analytics tracking would go here
-    console.log('FAQ Feedback:', { faq_id: faq.id, helpful, category: faq.category });
+    logger.debug('FAQ Feedback', { faq_id: faq.id, helpful, category: faq.category });
   };
 
   return (
@@ -114,3 +115,5 @@ export function FaqItemComponent({ faq, isOpen, onToggle }: FaqItemComponentProp
     </div>
   );
 }
+
+

@@ -5,6 +5,7 @@ import QRCodeGenerator from 'qrcode';
 import { useState } from 'react';
 
 import { apiFetch } from '@/lib/api';
+import { logger } from '@/lib/logger';
 
 interface BookingData {
   id: string;
@@ -70,7 +71,7 @@ export default function AlternativePaymentOptions({
       setCopied(type);
       setTimeout(() => setCopied(null), 2000);
     } catch (err) {
-      console.error('Failed to copy:', err);
+      logger.error('Failed to copy', err as Error);
     }
   };
 
@@ -132,7 +133,7 @@ export default function AlternativePaymentOptions({
       setQrCode(qrCodeDataUrl);
       setShowQR(true);
     } catch (error) {
-      console.error('Error generating QR code:', error);
+      logger.error('Error generating QR code', error as Error);
     }
   };
 
@@ -159,7 +160,7 @@ export default function AlternativePaymentOptions({
         }),
       });
     } catch (error) {
-      console.error('Error recording payment:', error);
+      logger.error('Error recording payment', error as Error);
     }
   };
 
@@ -504,3 +505,4 @@ export default function AlternativePaymentOptions({
     </div>
   );
 }
+
