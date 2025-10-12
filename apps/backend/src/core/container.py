@@ -176,8 +176,9 @@ class DependencyInjectionContainer:
                         resolved_deps[dep_name] = self.resolve(dep_class)
                     else:
                         raise ValueError(f"Cannot resolve dependency: {dep_service}")
-                except:
-                    raise ValueError(f"Cannot resolve dependency: {dep_service}")
+                except (KeyError, TypeError, AttributeError, ValueError) as e:
+                    logger.error(f"Failed to resolve dependency {dep_service}: {e}")
+                    raise ValueError(f"Cannot resolve dependency: {dep_service}") from e
         
         # Create instance
         if config.factory_method:
