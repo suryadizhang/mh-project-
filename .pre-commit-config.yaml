@@ -36,6 +36,7 @@ repos:
         description: Format Python code with Black
         args: [--line-length=88]
         language_version: python3
+        files: ^apps/backend/.*\.py$
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.1.8
@@ -43,6 +44,7 @@ repos:
       - id: ruff
         description: Lint and fix Python code with Ruff
         args: [--fix, --exit-non-zero-on-fix]
+        files: ^apps/backend/.*\.py$
 
   # Import sorting
   - repo: https://github.com/pycqa/isort
@@ -51,6 +53,7 @@ repos:
       - id: isort
         description: Sort Python imports
         args: [--profile, black, --line-length, "88"]
+        files: ^apps/backend/.*\.py$
 
   # Security scanning
   - repo: https://github.com/pycqa/bandit
@@ -58,7 +61,8 @@ repos:
     hooks:
       - id: bandit
         description: Security linting with Bandit
-        args: ['-r', 'myhibachi-backend-fastapi/app/', '--skip', 'B101']
+        args: ['-r', 'apps/backend/src/', '--skip', 'B101']
+        files: ^apps/backend/src/.*\.py$
 
   # Python Type Checking
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -66,8 +70,9 @@ repos:
     hooks:
       - id: mypy
         description: Static type checking with MyPy
-        additional_dependencies: [types-requests, types-python-dateutil]
-        args: ['--ignore-missing-imports']
+        additional_dependencies: [types-requests, types-python-dateutil, types-redis]
+        args: ['--ignore-missing-imports', '--strict']
+        files: ^apps/backend/src/.*\.py$
 
   # Dockerfile Linting
   - repo: https://github.com/hadolint/hadolint
@@ -101,7 +106,7 @@ repos:
         name: Check requirements.txt format
         description: Validate Python requirements
         entry: python
-        args: ['-c', 'import pkg_resources; [pkg_resources.Requirement.parse(line) for line in open("myhibachi-backend-fastapi/requirements.txt") if line.strip() and not line.startswith("#")]']
+        args: ['-c', 'import pkg_resources; [pkg_resources.Requirement.parse(line) for line in open("requirements.txt") if line.strip() and not line.startswith("#")]']
         language: system
         pass_filenames: false
         files: requirements\.txt$
