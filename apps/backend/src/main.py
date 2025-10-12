@@ -319,6 +319,14 @@ try:
 except ImportError as e:
     logger.warning(f"Unified Inbox endpoints not available: {e}")
 
+# Enhanced Health Check endpoints for production K8s
+try:
+    from api.v1.endpoints.health import router as v1_health_router
+    app.include_router(v1_health_router, prefix="/api/v1/health", tags=["Health Checks"])
+    logger.info("✅ Enhanced health check endpoints included (K8s ready)")
+except ImportError as e:
+    logger.warning(f"Enhanced health check endpoints not available: {e}")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
