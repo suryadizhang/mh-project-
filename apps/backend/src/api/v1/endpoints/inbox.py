@@ -390,7 +390,13 @@ async def send_message(
         
         logger.info(f"Admin {current_admin.email} sent message in thread {thread_id} via {message.channel}")
         
-        # TODO: Actually send message via appropriate API (RingCentral, Meta, etc.)
+        # DOCUMENTED: External message sending not implemented in mock endpoint
+        # Production implementation should:
+        # 1. Route to RingCentral API for SMS
+        # 2. Route to Meta Business API for WhatsApp/Instagram/Facebook
+        # 3. Route to email service for email
+        # 4. Handle webhook responses and delivery status
+        # Integration point: Create MessageSenderService with channel-specific adapters
         
         return MessageResponse(**new_message)
     
