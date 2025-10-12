@@ -89,6 +89,28 @@ class BookingRepository(BaseRepository[Booking]):
             self.model.status == status
         ).order_by(self.model.booking_datetime).all()
     
+    def find_by_customer_and_date(
+        self,
+        customer_id: str,
+        event_date: date
+    ) -> List[Booking]:
+        """
+        Find all bookings for a specific customer on a specific date
+        
+        Args:
+            customer_id: Customer UUID (as string)
+            event_date: Event date to search
+            
+        Returns:
+            List of bookings matching customer and date
+        """
+        return self.session.query(self.model).filter(
+            and_(
+                self.model.customer_id == customer_id,
+                func.date(self.model.booking_datetime) == event_date
+            )
+        ).order_by(self.model.booking_datetime).all()
+    
     def find_pending_confirmations(self, hours_old: int = 24) -> List[Booking]:
         """Find bookings pending confirmation for more than specified hours"""
         cutoff_time = datetime.utcnow() - timedelta(hours=hours_old)

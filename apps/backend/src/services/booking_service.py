@@ -16,6 +16,7 @@ from ..core.exceptions import (
 from ..core.cache import CacheService, cached, invalidate_cache
 from ..repositories.booking_repository import BookingRepository
 from ..models.booking import Booking, BookingStatus
+from ..schemas.booking import BookingCreate, BookingUpdate
 
 logger = logging.getLogger(__name__)
 
@@ -209,21 +210,19 @@ class BookingService:
     @invalidate_cache("booking:*")
     async def create_booking(
         self,
-        customer_id: UUID,
-        event_date: date,
-        event_time: str,
-        party_size: int,
-        **kwargs
+        booking_data: BookingCreate
     ) -> Booking:
         """
-        Create a new booking
+        Create a new booking with validated input
         
         Args:
-            customer_id: Customer UUID
-            event_date: Date of event
-            event_time: Time of event (HH:MM format)
-            party_size: Number of guests
-            **kwargs: Additional booking data
+            booking_data: Validated booking creation schema (Pydantic model)
+                - All inputs validated against schema constraints
+                - No **kwargs injection possible
+                - Time format validated (HH:MM 24-hour)
+                - Party size validated (1-50 guests)
+                - Date validated (must be in future)
+                - Text fields sanitized (XSS prevention)
             
         Returns:
             Created booking
@@ -231,50 +230,90 @@ class BookingService:
         Raises:
             BusinessLogicException: If business rules are violated
             ConflictException: If time slot is not available
+            
+        Security:
+            ✅ No **kwargs injection
+            ✅ All fields explicitly validated by Pydantic
+            ✅ Time format enforced (HH:MM 24-hour)
+            ✅ Party size constrained (1-50)
+            ✅ Date cannot be in past
+            ✅ Text fields sanitized
         """
-        logger.info(f"Creating booking for customer {customer_id} on {event_date} at {event_time}")
+        logger.info(
+            f"Creating booking for customer {booking_data.customer_id} "
+            f"on {booking_data.event_date} at {booking_data.event_time}"
+        )
         
-        # Validate event is in the future
-        if event_date < date.today():
-            raise BusinessLogicException(
-                message="Cannot book events in the past",
-                error_code=ErrorCode.BOOKING_NOT_AVAILABLE
-            )
-        
-        # Validate party size
-        if party_size < 1 or party_size > 50:
-            raise BusinessLogicException(
-                message="Party size must be between 1 and 50",
-                error_code=ErrorCode.BOOKING_NOT_AVAILABLE
-            )
+        # Date validation already done by Pydantic (event_date >= today)
+        # Time format already validated by Pydantic (HH:MM 24-hour)
+        # Party size already validated by Pydantic (1-50)
         
         # Check availability
         is_available = self.repository.check_availability(
-            event_date=event_date,
-            event_time=event_time,
-            duration_hours=kwargs.get('duration_hours', 2)
+            event_date=booking_data.event_date,
+            event_time=booking_data.event_time,
+            duration_hours=booking_data.duration_hours or 2
         )
         
         if not is_available:
             raise ConflictException(
-                message=f"Time slot {event_time} on {event_date} is not available",
+                message=f"Time slot {booking_data.event_time} on {booking_data.event_date} is not available",
                 error_code=ErrorCode.BOOKING_NOT_AVAILABLE
             )
         
-        # Create booking
-        booking_data = {
-            "customer_id": customer_id,
-            "event_date": event_date,
-            "event_time": event_time,
-            "party_size": party_size,
-            "status": BookingStatus.PENDING,
-            **kwargs
-        }
+        # Check for duplicate bookings (same customer, same date/time)
+        existing_booking = await self._check_duplicate_booking(
+            customer_id=booking_data.customer_id,
+            event_date=booking_data.event_date,
+            event_time=booking_data.event_time
+        )
         
-        booking = self.repository.create(Booking(**booking_data))
+        if existing_booking:
+            raise ConflictException(
+                message=f"Booking already exists for this customer at {booking_data.event_time} on {booking_data.event_date}",
+                error_code=ErrorCode.BOOKING_NOT_AVAILABLE
+            )
+        
+        # Create booking from validated data
+        # Use model_dump() to convert Pydantic model to dict
+        booking_dict = booking_data.model_dump(exclude_unset=True)
+        booking_dict["status"] = BookingStatus.PENDING
+        
+        booking = self.repository.create(Booking(**booking_dict))
         
         logger.info(f"✅ Booking created: {booking.id}")
         return booking
+    
+    async def _check_duplicate_booking(
+        self,
+        customer_id: UUID,
+        event_date: date,
+        event_time: str
+    ) -> Optional[Booking]:
+        """
+        Check if customer already has a booking at this date/time
+        
+        Args:
+            customer_id: Customer UUID
+            event_date: Event date
+            event_time: Event time (HH:MM)
+            
+        Returns:
+            Existing booking if found, None otherwise
+        """
+        # Query for existing active bookings
+        existing_bookings = self.repository.find_by_customer_and_date(
+            customer_id=customer_id,
+            event_date=event_date
+        )
+        
+        # Check if any booking matches the time slot
+        for booking in existing_bookings:
+            if (booking.event_time == event_time and 
+                booking.status not in [BookingStatus.CANCELLED, BookingStatus.COMPLETED]):
+                return booking
+        
+        return None
     
     @invalidate_cache("booking:*")
     async def confirm_booking(self, booking_id: UUID) -> Booking:
