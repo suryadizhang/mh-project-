@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import { apiFetch } from '@/lib/api'
 
+import { logger } from '@/lib/logger';
 interface CustomerSavings {
   totalSavingsFromZelle: number
   potentialSavingsIfAllZelle: number
@@ -94,7 +95,7 @@ export default function CustomerSavingsDisplay({
         window.open(data.portalUrl as string, '_blank');
       }
     } catch (err) {
-      console.error('Error opening customer portal:', err)
+      logger.error('Error opening customer portal', err as Error)
     }
   }
 
@@ -256,3 +257,5 @@ export default function CustomerSavingsDisplay({
     </div>
   )
 }
+
+

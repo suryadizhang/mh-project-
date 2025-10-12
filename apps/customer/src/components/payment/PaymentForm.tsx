@@ -4,6 +4,8 @@ import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { CheckCircle, CreditCard, Loader2, Lock, Shield } from 'lucide-react'
 import { FormEvent, useState } from 'react'
 
+import { logger } from '@/lib/logger'
+
 interface BookingData {
   id: string
   customerName: string
@@ -98,7 +100,7 @@ export default function PaymentForm({
         setPaymentSuccess(true)
       }
     } catch (error) {
-      console.error('Payment error:', error)
+      logger.error('Payment error', error as Error)
       setPaymentError(error instanceof Error ? error.message : 'Payment failed. Please try again.')
     } finally {
       setIsLoading(false)
@@ -296,3 +298,4 @@ export default function PaymentForm({
     </div>
   )
 }
+

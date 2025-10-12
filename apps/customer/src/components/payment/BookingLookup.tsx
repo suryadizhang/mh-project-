@@ -3,6 +3,8 @@
 import { Calendar, DollarSign, MapPin, Search, User } from 'lucide-react'
 import { useState } from 'react'
 
+import { logger } from '@/lib/logger'
+
 interface BookingData {
   id: string
   customerName: string
@@ -131,7 +133,7 @@ export default function BookingLookup({
       }
     } catch (error) {
       setSearchError('Error searching for booking. Please try again.')
-      console.error('Search error:', error)
+      logger.error('Search error', error as Error)
     } finally {
       setIsLoading(false)
     }
@@ -295,3 +297,4 @@ export default function BookingLookup({
     </div>
   )
 }
+

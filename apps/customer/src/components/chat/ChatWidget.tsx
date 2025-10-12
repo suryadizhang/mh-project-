@@ -175,13 +175,13 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
       };
 
       ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
+        logWebSocket('error', { error });
         setIsConnected(false);
         setIsLoading(false);
         setIsTyping(false);
       };
     } catch (error) {
-      console.error('Failed to create WebSocket connection:', error);
+      logger.error('Failed to create WebSocket connection', error as Error);
       setIsConnected(false);
     }
   }, []);
@@ -213,7 +213,7 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
           const parsed = JSON.parse(stored) as Message[];
           setMessages(parsed.map((m) => ({ ...m, timestamp: new Date(m.timestamp) })));
         } catch (e) {
-          console.warn('Failed to parse stored chat:', e);
+          logger.warn('Failed to parse stored chat', { error: e });
         }
       }
     }
@@ -276,7 +276,7 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
         }),
       );
     } catch (error) {
-      console.error('WebSocket send error:', error);
+      logWebSocket('error', { error });
       // Fallback to HTTP
       setIsLoading(false);
       return sendMessageHTTP(content);
@@ -330,7 +330,7 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
-      console.error('Chat error:', error);
+      logger.error('Chat error', error as Error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
