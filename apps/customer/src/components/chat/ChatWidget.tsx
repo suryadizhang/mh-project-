@@ -3,6 +3,7 @@
 import { ExternalLink, Send, X } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { logger, logWebSocket } from '@/lib/logger';
 
 interface Citation {
   href: string;
@@ -108,7 +109,7 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
       wsRef.current = ws;
 
       ws.onopen = () => {
-        console.log('WebSocket connected to AI API');
+        logWebSocket('connected', { url: wsUrl });
         setIsConnected(true);
         if (reconnectTimeoutRef.current) {
           clearTimeout(reconnectTimeoutRef.current);
@@ -135,10 +136,10 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
           } else if (data.type === 'typing') {
             setIsTyping(data.metadata?.is_typing || false);
           } else if (data.type === 'connection_status') {
-            console.log('AI API connection status:', data.content);
+            logWebSocket('status', { content: data.content });
           } else if (data.type === 'system') {
             if (data.content !== 'pong') { // Filter out ping/pong messages
-              console.log('AI API system message:', data.content);
+              logger.debug('AI API system message', { content: data.content });
             }
           } else if (data.type === 'error') {
             const errorMessage: Message = {
@@ -155,12 +156,12 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
             setIsTyping(false);
           }
         } catch (error) {
-          console.error('Failed to parse WebSocket message:', error);
+          logger.error('Failed to parse WebSocket message', error as Error);
         }
       };
 
       ws.onclose = () => {
-        console.log('WebSocket disconnected');
+        logWebSocket('close', { code: 1000 });
         setIsConnected(false);
         setIsLoading(false);
         setIsTyping(false);

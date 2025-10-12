@@ -11,6 +11,7 @@ import { Controller, useForm } from 'react-hook-form';
 
 import Assistant from '@/components/chat/Assistant';
 import { apiFetch } from '@/lib/api';
+import { logger } from '@/lib/logger';
 
 // Type definitions for booking form
 type BookingFormData = {
@@ -79,11 +80,11 @@ export default function BookUsPageClient() {
           : [];
         setBookedDates(dates);
       } else {
-        console.warn('Could not fetch booked dates, continuing without blocking dates');
+        logger.warn('Could not fetch booked dates, continuing without blocking dates');
         setBookedDates([]);
       }
     } catch (error) {
-      console.warn('Error fetching booked dates:', error);
+      logger.warn('Error fetching booked dates', { error });
       setBookedDates([]);
     } finally {
       setLoadingDates(false);
@@ -110,7 +111,7 @@ export default function BookUsPageClient() {
         ]);
       }
     } catch (error) {
-      console.warn('Error fetching time slots:', error);
+      logger.warn('Error fetching time slots', { error });
       // Fallback to default time slots
       setAvailableTimeSlots([
         { time: '12PM', label: '12:00 PM - 2:00 PM', available: 2, isAvailable: true },
@@ -147,7 +148,7 @@ export default function BookUsPageClient() {
 
   // Enhanced onSubmit with comprehensive validation
   const onSubmit = async (data: BookingFormData) => {
-    console.log('Form submission started with data:', data);
+    logger.debug('Form submission started');
 
     // Validate required fields manually
     const requiredFields = [];
@@ -190,7 +191,8 @@ export default function BookUsPageClient() {
     setShowAgreementModal(false);
 
     try {
-      console.log('Submitting booking request:', formData);
+      // DO NOT log formData - contains PII (name, email, phone, address)
+      logger.debug('Submitting booking request');
 
       const submissionData = {
         ...formData,
@@ -205,17 +207,17 @@ export default function BookUsPageClient() {
       });
 
       if (response.success) {
-        console.log('Booking submitted successfully');
+        logger.info('Booking submitted successfully');
         // Redirect to success page
         window.location.href = '/booking-success';
       } else {
-        console.error('Booking submission failed:', response.error);
+        logger.error('Booking submission failed', undefined, { error: response.error });
         alert(
           'Sorry, there was an error submitting your booking. Please try again or contact us directly.',
         );
       }
     } catch (error) {
-      console.error('Error submitting booking:', error);
+      logger.error('Error submitting booking', error as Error);
       alert(
         'Sorry, there was an error submitting your booking. Please try again or contact us directly.',
       );
