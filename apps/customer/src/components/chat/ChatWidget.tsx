@@ -3,7 +3,9 @@
 import { ExternalLink, Send, X } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useRef, useState, useCallback } from 'react';
+
 import { logger, logWebSocket } from '@/lib/logger';
+import { ApiErrorBoundary } from '@/components/ErrorBoundary';
 
 interface Citation {
   href: string;
@@ -62,7 +64,7 @@ const WELCOME_SUGGESTIONS: Record<string, string[]> = {
   ],
 };
 
-export default function ChatWidget({ page }: ChatWidgetProps) {
+function ChatWidgetComponent({ page }: ChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -697,4 +699,13 @@ export default function ChatWidget({ page }: ChatWidgetProps) {
       )}
     </div>
   );
+}
+
+// Wrap component with error boundary
+export default function ChatWidget(props: ChatWidgetProps) {
+  return (
+    <ApiErrorBoundary apiEndpoint="/api/chat">
+      <ChatWidgetComponent {...props} />
+    </ApiErrorBoundary>
+  )
 }
