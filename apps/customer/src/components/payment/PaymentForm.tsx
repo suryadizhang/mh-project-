@@ -5,6 +5,7 @@ import { CheckCircle, CreditCard, Loader2, Lock, Shield } from 'lucide-react'
 import { FormEvent, useState } from 'react'
 
 import { logger } from '@/lib/logger'
+import { FormErrorBoundary } from '@/components/ErrorBoundary'
 
 interface BookingData {
   id: string
@@ -28,7 +29,7 @@ interface PaymentFormProps {
   clientSecret: string
 }
 
-export default function PaymentForm({
+function PaymentFormComponent({
   amount,
   bookingData,
   paymentType,
@@ -299,3 +300,11 @@ export default function PaymentForm({
   )
 }
 
+// Wrap component with error boundary
+export default function PaymentForm(props: PaymentFormProps) {
+  return (
+    <FormErrorBoundary formName="PaymentForm">
+      <PaymentFormComponent {...props} />
+    </FormErrorBoundary>
+  )
+}

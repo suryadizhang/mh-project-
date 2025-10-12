@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 
 import { apiFetch } from '@/lib/api'
 import { logger } from '@/lib/logger'
+import { FormErrorBoundary } from '@/components/ErrorBoundary'
 
 interface BookingFormProps {
   className?: string
@@ -19,7 +20,7 @@ interface BookingData {
   specialRequests?: string
 }
 
-export default function BookingForm({ className = '' }: BookingFormProps) {
+function BookingFormComponent({ className = '' }: BookingFormProps) {
   const [formData, setFormData] = useState<BookingData>({
     name: '',
     email: '',
@@ -37,7 +38,7 @@ export default function BookingForm({ className = '' }: BookingFormProps) {
     setIsSubmitting(true)
 
     try {
-      const result = await apiFetch('/api/v1/bookings', {
+      await apiFetch('/api/v1/bookings', {
         method: 'POST',
         body: JSON.stringify(formData)
       })
@@ -171,5 +172,14 @@ export default function BookingForm({ className = '' }: BookingFormProps) {
         </button>
       </form>
     </div>
+  )
+}
+
+// Wrap component with error boundary
+export default function BookingForm(props: BookingFormProps) {
+  return (
+    <FormErrorBoundary formName="BookingForm">
+      <BookingFormComponent {...props} />
+    </FormErrorBoundary>
   )
 }
