@@ -94,7 +94,7 @@ function CheckoutContent() {
         logger.error('Error retrieving session', err as Error);
         setError('Failed to retrieve checkout session');
       } finally {
-        setLoadingLoggedIn(false);
+        setLoading(false);
       }
     };
 
