@@ -9,7 +9,9 @@
     "./api": "./src/api/index.ts",
     "./booking": "./src/booking/index.ts",
     "./auth": "./src/auth/index.ts",
-    "./payment": "./src/payment/index.ts"
+    "./payment": "./src/payment/index.ts",
+    "./schemas": "./src/schemas/index.ts",
+    "./validators": "./src/validators/index.ts"
   },
   "scripts": {
     "build": "tsc",
@@ -18,7 +20,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "zod": "^3.22.4"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
