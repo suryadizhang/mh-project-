@@ -1,20 +1,23 @@
 name: 🚀 Change-Aware CI/CD
 
+# TEMPORARILY DISABLED - Pending deployment readiness (Oct 12, 2025)
+# Will re-enable after completing HIGH #14-17 and final testing
+# on:
+#   push:
+#     branches: [main]
+#     paths-ignore:
+#       - 'docs/**'
+#       - '**/*.md'
+#       - '.vscode/**'
+#       - '.gitignore'
+#   pull_request:
+#     branches: [main]
+#     paths-ignore:
+#       - 'docs/**'
+#       - '**/*.md'
+#       - '.vscode/**'
+#       - '.gitignore'
 on:
-  push:
-    branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
-      - '.vscode/**'
-      - '.gitignore'
-  pull_request:
-    branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
-      - '.vscode/**'
-      - '.gitignore'
   workflow_dispatch:
     inputs:
       force_deploy:
