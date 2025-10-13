@@ -2,7 +2,8 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { StationContext, tokenManager } from '@/services/api';
+import { tokenManager } from '@/services/api';
+import type { StationContext } from '@/services/api';
 
 interface AuthContextType {
   isAuthenticated: boolean;

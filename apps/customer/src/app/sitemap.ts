@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 
-import { blogPosts } from '@/data/blogPosts';
+import { blogPosts, type BlogPost } from '@/data/blogPosts';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://myhibachi.com';
@@ -46,7 +46,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   // Blog posts
-  const blogPages = blogPosts.map((post) => ({
+  const blogPages = blogPosts.map((post: BlogPost) => ({
     url: `${baseUrl}/blog/${post.slug}`,
     lastModified: new Date(post.date),
     changeFrequency: 'monthly' as const,

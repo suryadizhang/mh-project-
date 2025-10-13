@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff, LogIn, Building } from 'lucide-react';
-import { authService, stationService, Station } from '@/services/api';
+import { authService, stationService } from '@/services/api';
+import type { Station } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {

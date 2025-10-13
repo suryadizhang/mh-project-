@@ -26,6 +26,7 @@
     "verification/**/*",
     "docs/**/*",
     "myhibachi-frontend/**/*",
-    "myhibachi-admin-frontend/**/*"
+    "myhibachi-admin-frontend/**/*",
+    "apps/frontend/**/*"
   ]
 }

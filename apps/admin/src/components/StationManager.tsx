@@ -17,7 +17,8 @@ import {
   Eye,
   UserPlus
 } from 'lucide-react';
-import { stationService, Station, StationUser, AuditLog } from '@/services/api';
+import { stationService } from '@/services/api';
+import type { Station, StationUser, AuditLog } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface StationManagerProps {

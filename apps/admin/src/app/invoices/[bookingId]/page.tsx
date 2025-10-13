@@ -451,7 +451,7 @@ export default function AdminInvoicePage() {
                   max={booking.totalAmount}
                   step="0.01"
                   value={invoiceSettings.depositAmount || ''}
-                  onChange={e => {
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     const value = e.target.value;
                     // Prevent leading zeros and ensure valid number
                     const numValue =
