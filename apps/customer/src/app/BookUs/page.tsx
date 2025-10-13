@@ -90,6 +90,10 @@ export default function BookingPage() {
     try {
       const result = await apiFetch<BookedDatesResponse>('/api/v1/bookings/booked-dates', {
         schema: BookedDatesResponseSchema,
+        cacheStrategy: {
+          strategy: 'cache-first',
+          ttl: 5 * 60 * 1000, // 5 minutes
+        },
       });
 
       if (result.success && result.data) {
@@ -121,6 +125,10 @@ export default function BookingPage() {
         `/api/v1/bookings/availability?date=${dateStr}`,
         {
           schema: AvailabilityResponseSchema,
+          cacheStrategy: {
+            strategy: 'cache-first',
+            ttl: 3 * 60 * 1000, // 3 minutes
+          },
         },
       );
 

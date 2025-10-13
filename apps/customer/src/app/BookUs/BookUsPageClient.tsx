@@ -71,7 +71,12 @@ export default function BookUsPageClient() {
     setLoadingDates(true);
     setDateError(null);
     try {
-      const result = await apiFetch('/api/v1/bookings/booked-dates');
+      const result = await apiFetch('/api/v1/bookings/booked-dates', {
+        cacheStrategy: {
+          strategy: 'cache-first',
+          ttl: 5 * 60 * 1000, // 5 minutes
+        },
+      });
       if (result.success && result.data) {
         // Convert string dates to Date objects
         const bookedDates = (result.data as Record<string, unknown>)?.bookedDates;
@@ -96,7 +101,12 @@ export default function BookUsPageClient() {
     setLoadingTimeSlots(true);
     try {
       const dateStr = format(date, 'yyyy-MM-dd');
-      const response = await apiFetch(`/api/v1/bookings/available-times?date=${dateStr}`);
+      const response = await apiFetch(`/api/v1/bookings/available-times?date=${dateStr}`, {
+        cacheStrategy: {
+          strategy: 'cache-first',
+          ttl: 3 * 60 * 1000, // 3 minutes
+        },
+      });
 
       if (response.success && response.data) {
         const timeSlots = (response.data as Record<string, unknown>)?.timeSlots;

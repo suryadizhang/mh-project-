@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { apiFetch } from '@/lib/api'
-
 import { logger } from '@/lib/logger';
 interface CustomerSavings {
   totalSavingsFromZelle: number
@@ -61,10 +60,21 @@ export default function CustomerSavingsDisplay({
       if (customerId) params.append('customer_id', customerId)
       if (customerEmail) params.append('email', customerEmail)
 
-      const response = await fetch(`/api/v1/customers/dashboard?${params}`)
-      const data = await response.json()
+      const response = await apiFetch<CustomerDashboardData>(
+        `/api/v1/customers/dashboard?${params}`,
+        {
+          cacheStrategy: {
+            strategy: 'stale-while-revalidate',
+            ttl: 2 * 60 * 1000, // 2 minutes
+          },
+        }
+      )
 
-      setDashboardData(data)
+      if (response.success && response.data) {
+        setDashboardData(response.data)
+      } else {
+        setError(response.error || 'Failed to fetch dashboard data')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
