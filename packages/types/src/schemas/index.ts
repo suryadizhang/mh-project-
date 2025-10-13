@@ -45,23 +45,17 @@ export {
   PaymentIntentResponseSchema,
   CheckoutSessionResponseSchema,
   CheckoutSessionVerifyResponseSchema,
-  AlternativePaymentResponseSchema,
-  PaymentConfirmationResponseSchema,
   PaymentResponseSchemas,
   type PaymentIntentResponse,
   type CheckoutSessionResponse,
   type CheckoutSessionVerifyResponse,
-  type AlternativePaymentResponse,
-  type PaymentConfirmationResponse,
 } from './payment-responses';
 
 // Export all customer response schemas
 export {
   CustomerDashboardResponseSchema,
-  CustomerProfileResponseSchema,
   CustomerResponseSchemas,
   type CustomerDashboardResponse,
-  type CustomerProfileResponse,
 } from './customer-responses';
 
 // Export all common response schemas
@@ -101,12 +95,9 @@ export const AllResponseSchemas = {
     PaymentIntent: 'PaymentIntentResponseSchema',
     CheckoutSession: 'CheckoutSessionResponseSchema',
     CheckoutSessionVerify: 'CheckoutSessionVerifyResponseSchema',
-    AlternativePayment: 'AlternativePaymentResponseSchema',
-    PaymentConfirmation: 'PaymentConfirmationResponseSchema',
   },
   Customer: {
     Dashboard: 'CustomerDashboardResponseSchema',
-    Profile: 'CustomerProfileResponseSchema',
   },
   Common: {
     Base: 'BaseResponseSchema',
@@ -137,14 +128,11 @@ export const SCHEMA_REGISTRY = {
   
   // Payment endpoints
   'POST /api/v1/payments/create-intent': 'PaymentIntentResponseSchema',
-  'POST /api/v1/payments/checkout-session': 'CheckoutSessionResponseSchema',
-  'GET /api/v1/payments/checkout-session/verify': 'CheckoutSessionVerifyResponseSchema',
-  'GET /api/v1/payments/alternative-payment': 'AlternativePaymentResponseSchema',
-  'POST /api/v1/payments/confirm': 'PaymentConfirmationResponseSchema',
+  'POST /create-checkout-session': 'CheckoutSessionResponseSchema',
+  'POST /api/v1/payments/checkout-session': 'CheckoutSessionVerifyResponseSchema',
   
   // Customer endpoints
   'GET /api/v1/customers/dashboard': 'CustomerDashboardResponseSchema',
-  'GET /api/v1/customers/profile': 'CustomerProfileResponseSchema',
 } as const;
 
 /**
@@ -159,8 +147,7 @@ export const SCHEMA_REGISTRY = {
  * | GET /api/v1/bookings | BookingListResponseSchema | BookingForm (future) |
  * | GET /api/v1/bookings/:id | BookingDetailResponseSchema | Booking detail pages (future) |
  * | POST /api/v1/payments/create-intent | PaymentIntentResponseSchema | payment/page |
- * | POST /api/v1/payments/checkout-session | CheckoutSessionResponseSchema | checkout/page |
- * | GET /api/v1/payments/checkout-session/verify | CheckoutSessionVerifyResponseSchema | checkout/success/page |
- * | GET /api/v1/payments/alternative-payment | AlternativePaymentResponseSchema | AlternativePaymentOptions |
+ * | POST /create-checkout-session | CheckoutSessionResponseSchema | checkout/page |
+ * | POST /api/v1/payments/checkout-session | CheckoutSessionVerifyResponseSchema | checkout/page, checkout/success/page (⚠️ NOT IMPLEMENTED) |
  * | GET /api/v1/customers/dashboard | CustomerDashboardResponseSchema | CustomerSavingsDisplay |
  */

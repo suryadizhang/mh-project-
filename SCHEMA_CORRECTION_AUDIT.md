@@ -1,12 +1,12 @@
 # Schema Correction Audit - API Response Validation (HIGH #13)
 
 **Date**: 2025-10-12  
-**Status**: ✅ BOOKING SCHEMAS CORRECTED  
-**Next Steps**: Validate payment and customer schemas
+**Status**: ✅ ALL SCHEMAS CORRECTED TO MATCH STRIPE INTEGRATION  
+**Phase**: READY FOR COMPILATION & COMMIT
 
 ## Summary
 
-Fixed booking response schemas to match ACTUAL API responses used by frontend, not theoretical REST API design. Discovered critical mismatches between created schemas and real implementation.
+Successfully corrected ALL response schemas (booking, payment, customer) to match ACTUAL API responses from Stripe-integrated backend. Discovered and documented missing endpoints. Zero TypeScript compilation errors. Ready to commit and proceed with API client integration.
 
 ## Investigation Results
 
@@ -310,11 +310,221 @@ Fixed booking response schemas to match ACTUAL API responses used by frontend, n
 
 ---
 
+## Payment & Customer Schemas - Corrections Applied (2025-10-12)
+
+### Payment Schemas Corrected to Match Stripe Integration
+
+#### 1. PaymentIntentResponseSchema ✅ SIMPLIFIED
+
+**Original (OVER-ENGINEERED)**:
+```typescript
+{
+  success: boolean,
+  data: {
+    clientSecret: string,
+    paymentIntentId: string,
+    amount: number,           // ❌ Not returned
+    currency: string,         // ❌ Not returned
+    status: enum,             // ❌ Not returned
+    bookingId: string,        // ❌ Not returned
+    description?: string,     // ❌ Not returned
+    metadata?: object         // ❌ Not returned
+  },
+  timestamp: string,          // ❌ Not returned
+  requestId: string           // ❌ Not returned
+}
+```
+
+**Actual Backend Response (stripe.py line 743-747)**:
+```python
+return {
+    "clientSecret": payment_intent.client_secret,
+    "paymentIntentId": payment_intent.id,
+    "stripeCustomerId": stripe_customer.id,
+}
+```
+
+**Corrected Schema**:
+```typescript
+{
+  clientSecret: string,
+  paymentIntentId: string,
+  stripeCustomerId: string
+}
+```
+
+**Frontend Usage**: payment/page.tsx line 93 - extracts only `clientSecret`  
+**Backend Pattern**: Minimal response design for security (doesn't expose full Stripe PaymentIntent)
+
+#### 2. CheckoutSessionResponseSchema ✅ ALREADY CORRECT
+
+**Schema**:
+```typescript
+{
+  url: string,
+  session_id: string
+}
+```
+
+**Backend Response (stripe.py line 103)**:
+```python
+return CheckoutSessionResponse(url=session.url, session_id=session.id)
+```
+
+**Status**: No changes needed - schema matches backend perfectly.
+
+#### 3. CheckoutSessionVerifyResponseSchema ⚠️ ENDPOINT NOT IMPLEMENTED
+
+**Frontend Calls** (checkout/page.tsx line 70, checkout/success/page.tsx line 56):
+```typescript
+await apiFetch('/api/v1/payments/checkout-session', {
+  method: 'POST',
+  body: JSON.stringify({ session_id: sessionId }),
+});
+```
+
+**Backend**: ❌ **ENDPOINT DOES NOT EXIST**
+
+**Investigation Results**:
+- Searched all backend routes: No `/v1/payments/checkout-session` POST endpoint found
+- Only CREATE endpoint exists: `/create-checkout-session` (different route)
+- No `stripe.checkout.Session.retrieve()` calls in backend
+- Frontend uses `as unknown as CheckoutSession` type assertion to bypass validation
+
+**Schema Status**: Documented as "NOT IMPLEMENTED" with future implementation guide
+
+**Recommendation**: 
+- Option A (DONE): Keep schema documented for future use, mark as not implemented
+- Option B (FUTURE): Implement backend endpoint with `stripe.checkout.Session.retrieve()`
+
+### Customer Schemas Corrected to Match Backend
+
+#### 1. CustomerDashboardResponseSchema ✅ SIMPLIFIED
+
+**Original (OVER-DESIGNED)**:
+```typescript
+{
+  success: boolean,
+  data: {
+    customer: { ... },
+    stats: { totalBookings, upcomingBookings, completedBookings, ... },
+    savings: { totalSaved, savingsPercentage, comparedToMarket, ... },
+    upcomingBookings: [...],
+    recentBookings: [...],
+    notifications: [...]
+  },
+  timestamp: string,
+  requestId: string
+}
+```
+
+**Actual Backend Response (stripe.py line 566-604)**:
+```python
+return {
+    "customer": {
+        "id": stripe_customer.id,
+        "email": stripe_customer.email,
+        "name": stripe_customer.name,
+        "phone": stripe_customer.phone,
+    },
+    "analytics": analytics,
+    "savingsInsights": savings_insights,
+    "loyaltyStatus": loyalty_status,
+}
+```
+
+**Corrected Schema**:
+```typescript
+{
+  customer: { id, email, name, phone },
+  analytics: { totalSpent, totalBookings, zelleAdoptionRate, totalSavingsFromZelle },
+  savingsInsights: { 
+    totalSavingsFromZelle, 
+    potentialSavingsIfAllZelle, 
+    zelleAdoptionRate,
+    recommendedAction,
+    nextBookingPotentialSavings: { smallEvent, mediumEvent, largeEvent }
+  },
+  loyaltyStatus: { tier, benefits, nextTierProgress, ... }
+}
+```
+
+**Frontend Usage**: CustomerSavingsDisplay.tsx line 85  
+**Backend Feature**: Zelle adoption tracking and 8% Stripe fee savings calculations
+
+---
+
+## Key Discoveries
+
+### 1. Backend Design Pattern: Minimal Responses
+- **Stripe Integration**: Returns only essential fields (3-5), not full Stripe SDK objects
+- **Security**: Doesn't expose sensitive Stripe data to frontend
+- **Performance**: Smaller payloads, faster responses
+- **Example**: PaymentIntent returns 3 fields vs 20+ in Stripe SDK
+
+### 2. Over-Engineering in Original Schemas
+- **Root Cause**: Schemas designed from Stripe API documentation, not actual backend code
+- **Impact**: Schemas expected 9 fields when backend returns 3
+- **Validation**: Would fail when enabled due to missing fields
+- **Solution**: Simplified schemas to match actual minimal responses
+
+### 3. Incomplete Features Discovered
+- **Missing Endpoint**: Checkout session verification endpoint doesn't exist
+- **Frontend Workaround**: Uses `as unknown as` type assertions to bypass TypeScript
+- **Checkout Flow**: Can CREATE sessions but cannot VERIFY payment status
+- **Status**: Documented for future Phase 2B implementation
+
+### 4. Alternative Payments (Zelle/Venmo)
+- **Backend**: Hardcoded in AlternativePaymentOptions.tsx component
+- **No API Endpoint**: Alternative payment methods not fetched from backend
+- **Frontend Only**: QR codes, payment details all in component
+- **Schema**: Removed (no corresponding endpoint)
+
+### 5. BaseResponseSchema Pattern
+- **Designed**: All responses should have `success`, `timestamp`, `requestId`
+- **Reality**: Backend returns simpler responses without wrappers
+- **Decision**: Removed BaseResponseSchema dependency from all schemas
+- **Future**: Can add optional wrappers when backend standardizes
+
+---
+
+## Compilation & Testing Results
+
+### TypeScript Compilation
+```bash
+npm run build (in packages/types)
+✅ Result: 0 errors
+✅ All schemas compile successfully
+✅ All exports updated in index.ts
+```
+
+### Schemas Corrected Summary
+- ✅ **Booking Schemas**: 3 schemas corrected (BookedDates, Availability, BookingSubmit)
+- ✅ **Payment Schemas**: 1 simplified (PaymentIntent), 1 correct (CheckoutSession), 1 documented (CheckoutSessionVerify)
+- ✅ **Customer Schemas**: 1 corrected (CustomerDashboard)
+- ✅ **Common Schemas**: BaseResponseSchema removed from dependencies
+- ✅ **Index Exports**: Cleaned up to export only existing schemas
+
+### Files Modified
+1. `packages/types/src/schemas/payment-responses.ts` (418 → 177 lines)
+2. `packages/types/src/schemas/customer-responses.ts` (234 → 161 lines)
+3. `packages/types/src/schemas/index.ts` (cleaned exports)
+4. `SCHEMA_CORRECTION_AUDIT.md` (this file - comprehensive documentation)
+
+---
+
 ## Approval for Next Phase
 
 ✅ **Booking Schemas**: CORRECTED and VERIFIED  
-⏳ **Payment Schemas**: Ready for validation  
-⏳ **Customer Schemas**: Ready for validation  
-⏳ **Common Schemas**: Update planned  
+✅ **Payment Schemas**: CORRECTED to match Stripe integration  
+✅ **Customer Schemas**: CORRECTED to match backend analytics  
+✅ **TypeScript Compilation**: 0 errors  
+✅ **Documentation**: Complete with backend code references  
 
-**Recommendation**: Proceed with payment and customer schema validation following same verification process (check actual frontend usage first, then update schemas to match).
+**Next Steps**:
+1. ✅ Compile types package (DONE - 0 errors)
+2. ⏭️ Commit all corrected schemas with comprehensive message
+3. ⏭️ Update PAYMENT_SCHEMA_ANALYSIS.md as final reference
+4. ⏭️ Proceed to HIGH #13 Step 8: Integrate validation into API client
+
+**Recommendation**: READY TO COMMIT. All schemas match actual Stripe-integrated backend responses. Zero breaking changes (schemas not yet used for validation).
