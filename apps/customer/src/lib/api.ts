@@ -18,6 +18,7 @@ import { safeValidateResponse } from '@myhibachi/types/validators';
 
 import { logger, logApiRequest } from '@/lib/logger';
 import { getRateLimiter } from '@/lib/rateLimiter';
+import { getCacheService, type CacheStrategy } from '@/lib/cacheService';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -35,6 +36,11 @@ export interface ApiRequestOptions extends RequestInit {
   maxRetries?: number
   retryDelay?: number
   schema?: z.ZodType  // Zod schema for automatic response validation
+  cacheStrategy?: {
+    strategy: CacheStrategy     // Cache strategy to use
+    ttl: number                  // Time-to-live in milliseconds
+    key?: string                 // Custom cache key (defaults to method:path)
+  }
 }
 
 export interface StripePaymentData {
@@ -155,6 +161,7 @@ export async function apiFetch<T = Record<string, unknown>>(
     maxRetries = 3,
     retryDelay = 1000,
     schema,
+    cacheStrategy: cacheConfig,
     ...fetchOptions
   } = options;
 
@@ -167,6 +174,147 @@ export async function apiFetch<T = Record<string, unknown>>(
 
   // Get rate limiter instance
   const rateLimiter = getRateLimiter();
+
+  // Generate cache key
+  const cacheKey = cacheConfig?.key || `${method}:${path}`;
+
+  // Check if caching is enabled and method is cacheable (GET requests only)
+  const isCacheable = cacheConfig && method === 'GET';
+
+  // If caching enabled, try to fetch from cache using the appropriate strategy
+  if (isCacheable) {
+    const cacheService = getCacheService();
+    const { strategy, ttl } = cacheConfig;
+
+    logger.debug(`Using cache strategy: ${strategy}`, {
+      path,
+      cacheKey,
+      ttl
+    });
+
+    try {
+      // Define the fetcher function for cache strategies
+      const fetcher = async (): Promise<T> => {
+        // Execute the full API fetch logic (rate limiting, retries, validation)
+        const response = await executeFetch<T>(
+          url,
+          path,
+          method,
+          timeoutMs,
+          fetchOptions,
+          retry,
+          maxRetries,
+          retryDelay,
+          schema,
+          rateLimiter,
+          startTime
+        );
+
+        if (!response.success || !response.data) {
+          throw new Error(response.error || 'API request failed');
+        }
+
+        return response.data;
+      };
+
+      // Use the appropriate cache strategy
+      let data: T;
+
+      switch (strategy) {
+        case 'cache-first':
+          data = await cacheService.cacheFirst<T>(cacheKey, ttl, fetcher);
+          break;
+
+        case 'stale-while-revalidate':
+          data = await cacheService.staleWhileRevalidate<T>(cacheKey, ttl, fetcher);
+          break;
+
+        case 'network-first':
+          data = await cacheService.networkFirst<T>(cacheKey, ttl, fetcher);
+          break;
+
+        default:
+          // Fallback to network fetch if strategy unknown
+          logger.warn(`Unknown cache strategy: ${strategy}, falling back to network fetch`);
+          return await executeFetch<T>(
+            url,
+            path,
+            method,
+            timeoutMs,
+            fetchOptions,
+            retry,
+            maxRetries,
+            retryDelay,
+            schema,
+            rateLimiter,
+            startTime
+          );
+      }
+
+      return {
+        data,
+        success: true
+      };
+    } catch (error) {
+      // Cache strategy failed, return error
+      logger.error('Cache strategy execution failed', error instanceof Error ? error : undefined, {
+        path,
+        strategy,
+        cacheKey
+      });
+
+      return {
+        error: error instanceof Error ? error.message : 'Cache operation failed',
+        success: false
+      };
+    }
+  }
+
+  // No caching - execute normal fetch
+  // For mutations (POST, PUT, PATCH, DELETE), also invalidate related cache
+  if (!isCacheable && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+    logger.debug(`Mutation detected: ${method} ${path}, will invalidate cache after success`);
+  }
+
+  const response = await executeFetch<T>(
+    url,
+    path,
+    method,
+    timeoutMs,
+    fetchOptions,
+    retry,
+    maxRetries,
+    retryDelay,
+    schema,
+    rateLimiter,
+    startTime
+  );
+
+  // If mutation was successful, invalidate related cache entries
+  if (response.success && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+    invalidateCacheForMutation(method, path);
+  }
+
+  return response;
+}
+
+/**
+ * Execute the actual fetch request with all retry/timeout/validation logic
+ * Extracted into separate function to be reusable by cache strategies
+ */
+async function executeFetch<T>(
+  url: string,
+  path: string,
+  method: string,
+  timeoutMs: number,
+  fetchOptions: RequestInit,
+  retry: boolean,
+  maxRetries: number,
+  retryDelay: number,
+  schema: z.ZodType | undefined,
+  rateLimiter: ReturnType<typeof getRateLimiter>,
+  startTime: number
+): Promise<ApiResponse<T>> {
 
   // Check client-side rate limit BEFORE making request
   if (!rateLimiter.checkLimit(path)) {
@@ -499,6 +647,74 @@ function getUserFriendlyError(status: number, errorText: string): string {
       return 'Request timed out. Please try again.';
     default:
       return errorText || `An error occurred (${status}). Please try again.`;
+  }
+}
+
+/**
+ * Invalidate cache entries based on mutation type and endpoint
+ * This ensures cache stays fresh after data modifications
+ *
+ * Invalidation Rules:
+ * - Booking mutations: Clear booked-dates, availability, dashboard
+ * - Customer mutations: Clear dashboard, profile
+ * - Payment mutations: Clear dashboard
+ * - Menu mutations: Clear menu cache
+ */
+function invalidateCacheForMutation(method: string, path: string): void {
+  const cacheService = getCacheService();
+
+  logger.debug(`Invalidating cache after ${method} ${path}`);
+
+  try {
+    // Booking mutations
+    if (path.includes('/bookings')) {
+      // Clear booking-related caches
+      cacheService.invalidate('GET:/api/v1/bookings/booked-dates');
+      cacheService.invalidate('GET:/api/v1/bookings/availability*'); // Wildcard for query params
+      cacheService.invalidate('GET:/api/v1/customers/dashboard');
+
+      // If specific booking modified, clear that too
+      if (method !== 'POST') {
+        cacheService.invalidate(`GET:${path}`);
+      }
+
+      logger.debug('Invalidated booking-related caches', { method, path });
+    }
+
+    // Customer mutations
+    if (path.includes('/customers')) {
+      cacheService.invalidate('GET:/api/v1/customers/dashboard');
+      cacheService.invalidate('GET:/api/v1/customers/profile*');
+
+      logger.debug('Invalidated customer-related caches', { method, path });
+    }
+
+    // Payment mutations
+    if (path.includes('/payment')) {
+      cacheService.invalidate('GET:/api/v1/customers/dashboard');
+
+      logger.debug('Invalidated payment-related caches', { method, path });
+    }
+
+    // Menu mutations (admin only, but be safe)
+    if (path.includes('/menu')) {
+      cacheService.invalidate('GET:/api/v1/menu*');
+
+      logger.debug('Invalidated menu caches', { method, path });
+    }
+
+    // Content mutations
+    if (path.includes('/content')) {
+      cacheService.invalidate('GET:/api/v1/content*');
+
+      logger.debug('Invalidated content caches', { method, path });
+    }
+  } catch (error) {
+    // Don't fail the request if cache invalidation fails
+    logger.error('Cache invalidation failed', error instanceof Error ? error : undefined, {
+      method,
+      path
+    });
   }
 }
 
