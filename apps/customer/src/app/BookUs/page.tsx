@@ -8,10 +8,22 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { Controller, useForm } from 'react-hook-form';
+import type { z } from 'zod';
+import {
+  BookedDatesResponseSchema,
+  AvailabilityResponseSchema,
+  BookingSubmitResponseSchema,
+} from '@myhibachi/types/schemas';
 
 import Assistant from '@/components/chat/Assistant';
 import { apiFetch } from '@/lib/api';
 import { logger } from '@/lib/logger';
+
+// Infer types from schemas for type-safe responses
+type BookedDatesResponse = z.infer<typeof BookedDatesResponseSchema>;
+type AvailabilityResponse = z.infer<typeof AvailabilityResponseSchema>;
+type BookingSubmitResponse = z.infer<typeof BookingSubmitResponseSchema>;
+
 // Type definitions for booking form
 type TimeSlot = {
   time: string;
@@ -76,13 +88,13 @@ export default function BookingPage() {
     setLoadingDates(true);
     setDateError(null);
     try {
-      const result = await apiFetch('/api/v1/bookings/booked-dates');
+      const result = await apiFetch<BookedDatesResponse>('/api/v1/bookings/booked-dates', {
+        schema: BookedDatesResponseSchema,
+      });
+
       if (result.success && result.data) {
-        // Convert string dates to Date objects
-        const bookedDates = (result.data as Record<string, unknown>)?.bookedDates;
-        const dates = Array.isArray(bookedDates)
-          ? bookedDates.map((dateStr: string) => new Date(dateStr))
-          : [];
+        // Type-safe access to bookedDates
+        const dates = result.data.data.bookedDates.map((dateStr) => new Date(dateStr));
         setBookedDates(dates);
       } else {
         logger.warn('Could not fetch booked dates, continuing without blocking dates');
@@ -105,29 +117,28 @@ export default function BookingPage() {
     setDateError(null);
     try {
       const dateStr = format(date, 'yyyy-MM-dd');
-      const response = await apiFetch(`/api/v1/bookings/availability?date=${dateStr}`);
-      if (response.success && response.data?.timeSlots && Array.isArray(response.data.timeSlots)) {
-        const formattedSlots = response.data.timeSlots.map(
-          (slot: {
-            time: string;
-            available: number;
-            maxCapacity: number;
-            booked: number;
-            isAvailable: boolean;
-          }) => ({
-            time: slot.time,
-            label:
-              slot.time === '12PM'
-                ? '12:00 PM'
-                : slot.time === '3PM'
-                  ? '3:00 PM'
-                  : slot.time === '6PM'
-                    ? '6:00 PM'
-                    : '9:00 PM',
-            available: slot.available,
-            isAvailable: slot.isAvailable,
-          }),
-        );
+      const response = await apiFetch<AvailabilityResponse>(
+        `/api/v1/bookings/availability?date=${dateStr}`,
+        {
+          schema: AvailabilityResponseSchema,
+        },
+      );
+
+      if (response.success && response.data) {
+        // Type-safe access to timeSlots
+        const formattedSlots = response.data.data.timeSlots.map((slot) => ({
+          time: slot.time,
+          label:
+            slot.time === '12PM'
+              ? '12:00 PM'
+              : slot.time === '3PM'
+                ? '3:00 PM'
+                : slot.time === '6PM'
+                  ? '6:00 PM'
+                  : '9:00 PM',
+          available: slot.available,
+          isAvailable: slot.isAvailable,
+        }));
         setAvailableTimeSlots(formattedSlots);
       } else {
         logger.warn('Could not fetch availability, using default slots');
@@ -266,15 +277,17 @@ export default function BookingPage() {
               },
         },
       };
-      const response = await apiFetch('/api/v1/bookings/availability', {
+      const response = await apiFetch<BookingSubmitResponse>('/api/v1/bookings/availability', {
         method: 'POST',
         body: JSON.stringify(bookingData),
+        schema: BookingSubmitResponseSchema,
       });
-      if (response.success) {
+
+      if (response.success && response.data?.data) {
         setShowAgreementModal(false);
         setFormData(null);
-        // Show success message with booking ID
-        const bookingId = (response.data as Record<string, unknown>)?.bookingId || 'N/A';
+        // Type-safe access to bookingId
+        const bookingId = response.data.data.bookingId;
         alert(
           `Booking Confirmed!\n\nConfirmation Code: ${bookingId}\n\nWe will contact you soon at ${formData.email} to finalize your hibachi experience details.\n\nThank you for choosing My Hibachi!`,
         );
@@ -282,7 +295,8 @@ export default function BookingPage() {
         window.location.reload();
       } else {
         // Handle booking errors
-        if (response.data?.code === 'SLOT_FULL') {
+        const errorData = response.data as Record<string, unknown> | undefined;
+        if (errorData?.code === 'SLOT_FULL') {
           setShowAgreementModal(false);
           setDateError('This time slot just became fully booked. Please select a different time.');
           // Refresh availability data
