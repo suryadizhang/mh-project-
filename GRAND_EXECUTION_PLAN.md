@@ -206,11 +206,137 @@ Total: ~18 hours (2 days)
 
 #### Week 2: Issues #15-17
 
-**Day 6-7: HIGH #15-17 (TBD based on FIXES_PROGRESS_TRACKER.md)**
+**Day 6: HIGH #15 - TypeScript Strict Mode & Build Configuration (4-6 hours)**
 ```
-To be detailed after reviewing tracker
-Estimated: 2-3 days per issue
+Objective: Enable strict TypeScript mode, fix type errors, enable CI/CD checks
+
+Phase 1: Enable Strict Checks (2 hours)
+─────────────────────────────────────────
+1. Update all tsconfig.json files:
+   - apps/customer/tsconfig.json
+   - apps/admin/tsconfig.json
+   - apps/frontend/tsconfig.json
+   - Enable: strict, strictNullChecks, strictFunctionTypes, etc.
+
+2. Run typecheck to identify errors:
+   npm run typecheck
+   Document error count and categories
+
+Phase 2: Fix Type Errors (2-4 hours)
+─────────────────────────────────────
+1. Fix by priority:
+   - Critical: Payment, booking, auth
+   - High: API client, data fetching
+   - Medium: UI components
+   - Low: Utilities
+
+2. Common fixes:
+   - Add | null | undefined to types
+   - Use optional chaining ?.
+   - Add type guards
+   - Replace any with proper types
+
+Phase 3: Validation (30 minutes)
+─────────────────────────────────
+1. npm run build - must pass
+2. npm run typecheck - 0 errors
+3. Verify pre-push checks work
+4. Test critical user flows
+
+Total: 4-6 hours (varies by error count)
 ```
+
+**Day 7: HIGH #16 - Environment Variable Validation (2-3 hours)**
+```
+Objective: Validate all env vars at build time, prevent runtime crashes
+
+Phase 1: Frontend Validation (1 hour)
+──────────────────────────────────────
+1. Create config.ts with Zod schemas:
+   - apps/customer/src/lib/config.ts
+   - apps/admin/src/lib/config.ts
+   
+2. Validate env vars:
+   - NEXT_PUBLIC_API_URL (URL format)
+   - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY (pk_ prefix)
+   - NEXT_PUBLIC_GA_ID (G- prefix)
+   - etc.
+
+3. Replace process.env.* with config.*
+
+Phase 2: Backend Validation (30 minutes)
+─────────────────────────────────────────
+1. Enhance apps/backend/src/core/config.py
+2. Add Pydantic validators:
+   - DATABASE_URL (no SQLite in prod)
+   - STRIPE_SECRET_KEY (sk_ prefix)
+   - JWT_SECRET (min 32 chars)
+   - etc.
+
+Phase 3: Documentation (30 minutes)
+────────────────────────────────────
+1. Create .env.example for each app
+2. Update README with setup instructions
+3. Document all required variables
+
+Total: 2-3 hours
+```
+
+**Day 7-8: HIGH #17 - DB Connection Pooling & Request ID Tracking (3-4 hours)**
+```
+Objective: Configure database pool, implement request tracing
+
+Phase 1: Database Connection Pooling (1.5 hours)
+─────────────────────────────────────────────────
+1. Modify apps/backend/src/core/database.py:
+   - Apply pool_size=10, max_overflow=20
+   - Add pool_timeout=30s
+   - Add pool_recycle=3600s (1 hour)
+   - Enable pool_pre_ping=True
+   
+2. Add pool monitoring:
+   - GET /health/database endpoint
+   - Return pool metrics (size, checked in/out, overflow)
+
+Phase 2: Request ID Middleware (1 hour)
+────────────────────────────────────────
+1. Create apps/backend/src/core/middleware.py:
+   - RequestIDMiddleware class
+   - Generate/extract X-Request-ID
+   - Add to request.state
+   - Return in response header
+
+2. Register in main.py:
+   app.add_middleware(RequestIDMiddleware)
+
+3. Update logging:
+   - Add request_id to all log statements
+   - Use structured logging
+
+Phase 3: Frontend Request ID (30 minutes)
+──────────────────────────────────────────
+1. Update apps/customer/src/lib/api.ts:
+   - Generate request ID (crypto.randomUUID())
+   - Send in X-Request-ID header
+   - Log with request ID
+
+2. Repeat for admin app
+
+Phase 4: Testing (30 minutes)
+──────────────────────────────
+1. Load test database pool (100 concurrent requests)
+2. Verify pool metrics
+3. Test request ID flow end-to-end
+4. Verify log correlation
+
+Total: 3-4 hours
+```
+
+**Week 2 Summary:**
+- HIGH #15: TypeScript Strict Mode (4-6 hours)
+- HIGH #16: Env Var Validation (2-3 hours)
+- HIGH #17: DB Pooling & Request ID (3-4 hours)
+- **Total: 9-13 hours (1-2 days)**
 
 ---
 
@@ -789,8 +915,21 @@ Risk: Medium to High depending on file
 
 ### Next Sprint (Week 2)
 
-**HIGH #15-17**
-- [ ] ⏳ To be defined after current sprint
+**HIGH #15-17** (Defined - See FIXES_PROGRESS_TRACKER.md for full specifications)
+- [ ] ⏳ HIGH #15: TypeScript Strict Mode & Build Configuration (4-6 hours, Day 6)
+  - Enable strict type checking across all frontend apps
+  - Fix all type errors systematically
+  - Enable pre-push hooks for CI/CD
+- [ ] ⏳ HIGH #16: Environment Variable Validation (2-3 hours, Day 7)
+  - Implement Zod validation for frontend config
+  - Add Pydantic validation for backend config
+  - Prevent runtime crashes from missing env vars
+- [ ] ⏳ HIGH #17: Database Connection Pooling & Request ID Tracking (3-4 hours, Day 7-8)
+  - Apply proper connection pool configuration
+  - Add request ID middleware for tracing
+  - Enable correlation across frontend/backend logs
+
+**Total Week 2 Effort:** 9-13 hours across 3 HIGH priority issues
 
 ### Week 3-4: blogPosts.ts Refactoring
 - [ ] ⏳ Planning & setup
