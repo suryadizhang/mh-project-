@@ -66,10 +66,16 @@ function CheckoutContent() {
           throw new Error('Stripe not initialized');
         }
 
-        // This would be replaced with your backend call
+        // NOTE: This endpoint is NOT IMPLEMENTED in the backend yet.
+        // Documented in PAYMENT_SCHEMA_ANALYSIS.md - Phase 2B future work.
+        // Backend needs: GET /api/v1/payments/checkout-session/:session_id
+        // Should use: stripe.checkout.sessions.retrieve(session_id)
+        // Schema ready: CheckoutSessionVerifyResponseSchema (when implemented)
         const response = await apiFetch('/api/v1/payments/checkout-session', {
           method: 'POST',
           body: JSON.stringify({ session_id: sessionId }),
+          // TODO: Add schema validation when endpoint implemented:
+          // schema: CheckoutSessionVerifyResponseSchema,
         });
 
         if (response.success && response.data) {
@@ -88,7 +94,7 @@ function CheckoutContent() {
         logger.error('Error retrieving session', err as Error);
         setError('Failed to retrieve checkout session');
       } finally {
-        setLoading(false);
+        setLoadingLoggedIn(false);
       }
     };
 
