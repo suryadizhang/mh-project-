@@ -496,35 +496,91 @@ npm run build (in packages/types)
 ✅ Result: 0 errors
 ✅ All schemas compile successfully
 ✅ All exports updated in index.ts
+✅ Common schemas updated with optional fields
 ```
 
 ### Schemas Corrected Summary
 - ✅ **Booking Schemas**: 3 schemas corrected (BookedDates, Availability, BookingSubmit)
 - ✅ **Payment Schemas**: 1 simplified (PaymentIntent), 1 correct (CheckoutSession), 1 documented (CheckoutSessionVerify)
 - ✅ **Customer Schemas**: 1 corrected (CustomerDashboard)
-- ✅ **Common Schemas**: BaseResponseSchema removed from dependencies
+- ✅ **Common Schemas**: Updated to support both direct data and wrapped responses (timestamp/requestId optional)
 - ✅ **Index Exports**: Cleaned up to export only existing schemas
 
 ### Files Modified
-1. `packages/types/src/schemas/payment-responses.ts` (418 → 177 lines)
-2. `packages/types/src/schemas/customer-responses.ts` (234 → 161 lines)
-3. `packages/types/src/schemas/index.ts` (cleaned exports)
-4. `SCHEMA_CORRECTION_AUDIT.md` (this file - comprehensive documentation)
+1. `packages/types/src/schemas/booking-responses.ts` (commit b2786b1)
+2. `packages/types/src/schemas/payment-responses.ts` (418 → 177 lines, commit 10752dc)
+3. `packages/types/src/schemas/customer-responses.ts` (234 → 161 lines, commit 10752dc)
+4. `packages/types/src/schemas/common.ts` (UPDATED - supports both direct and wrapped patterns)
+5. `packages/types/src/schemas/index.ts` (cleaned exports)
+6. `SCHEMA_CORRECTION_AUDIT.md` (this file - comprehensive documentation)
+7. `PAYMENT_SCHEMA_ANALYSIS.md` (Stripe integration analysis)
+8. `SECURITY_AUDIT_SCHEMAS.md` (security audit - all clear)
+
+---
+
+## Common Schemas Update (FINAL)
+
+### Changes Applied
+
+**Problem**: BaseResponseSchema required `timestamp` and `requestId`, but actual backend doesn't use these fields.
+
+**Discovery**: 
+- Current backend pattern: Returns DIRECT DATA (no wrappers)
+- Examples:
+  * Booking: `[{ id, date, ... }]` (arrays/objects directly)
+  * Payment: `{ clientSecret, paymentIntentId, ... }` (minimal objects)
+  * Customer: `{ customer, analytics, ... }` (nested objects)
+- No `success`/`timestamp`/`requestId` wrappers in most responses
+
+**Solution**: Updated `BaseResponseSchema` to make `timestamp` and `requestId` **OPTIONAL**:
+```typescript
+// Before
+timestamp: z.string().datetime()  // Required
+requestId: z.string().uuid()      // Required
+
+// After
+timestamp: z.string().datetime().optional()  // Optional
+requestId: z.string().uuid().optional()      // Optional
+```
+
+**Documentation Added**:
+- Added comprehensive file header explaining backend patterns
+- Documented "Direct Data" pattern (most common)
+- Documented "Simple Success/Error" pattern (rare)
+- Documented "Standardized Wrapper" pattern (future)
+- Usage guidelines (DO/DON'T)
+- References to actual implementation examples
+
+**Impact**:
+- ✅ Supports current backend pattern (direct data)
+- ✅ Supports future migration to standardized wrappers
+- ✅ No breaking changes (schemas weren't enforcing wrappers anyway)
+- ✅ Clear documentation for future developers
+
+**File**: `packages/types/src/schemas/common.ts`
+- Lines 1-60: Comprehensive documentation header
+- Lines 61-85: BaseResponseSchema with optional fields
+- Lines 86-115: ApiResponseSchema with usage notes
+- Lines 255-285: All helper schemas preserved
 
 ---
 
 ## Approval for Next Phase
 
-✅ **Booking Schemas**: CORRECTED and VERIFIED  
-✅ **Payment Schemas**: CORRECTED to match Stripe integration  
-✅ **Customer Schemas**: CORRECTED to match backend analytics  
-✅ **TypeScript Compilation**: 0 errors  
-✅ **Documentation**: Complete with backend code references  
+✅ **Booking Schemas**: CORRECTED and VERIFIED (commit b2786b1)
+✅ **Payment Schemas**: CORRECTED to match Stripe integration (commit 10752dc)
+✅ **Customer Schemas**: CORRECTED to match backend analytics (commit 10752dc)
+✅ **Common Schemas**: UPDATED to support both patterns (ready to commit)
+✅ **Security Audit**: PASSED - No secrets exposed (commit 55ed095)
+✅ **TypeScript Compilation**: 0 errors consistently
+✅ **Documentation**: Complete with backend code references
 
 **Next Steps**:
 1. ✅ Compile types package (DONE - 0 errors)
-2. ⏭️ Commit all corrected schemas with comprehensive message
-3. ⏭️ Update PAYMENT_SCHEMA_ANALYSIS.md as final reference
-4. ⏭️ Proceed to HIGH #13 Step 8: Integrate validation into API client
+2. ⏭️ Commit common schemas update with comprehensive message
+3. ⏭️ Proceed to HIGH #13 Step 8: Integrate validation into API client (2 hours)
+4. ⏭️ Update booking components with schemas (1.5 hours)
+5. ⏭️ Update payment components with schemas (1 hour)
+6. ⏭️ Final documentation and testing (4.5 hours)
 
-**Recommendation**: READY TO COMMIT. All schemas match actual Stripe-integrated backend responses. Zero breaking changes (schemas not yet used for validation).
+**Recommendation**: READY TO COMMIT. All schemas (booking, payment, customer, common) match actual backend responses. Security audit passed. Zero breaking changes. Time to integrate validation into API client!

@@ -1,15 +1,71 @@
 import { z } from 'zod';
 
 /**
+ * ============================================================================
+ * Common Response Schemas for My Hibachi Chef API
+ * ============================================================================
+ * 
+ * IMPORTANT: This file defines GENERIC response structures, but most current
+ * endpoints use DIRECT DATA formats without wrappers.
+ * 
+ * CURRENT BACKEND PATTERNS:
+ * 
+ * 1. DIRECT DATA (Most Common):
+ *    - Booking endpoints: Return arrays/objects directly
+ *      Example: [{ id: "123", date: "2025-01-01", ... }]
+ *    
+ *    - Payment endpoints: Return minimal objects directly
+ *      Example: { clientSecret: "...", paymentIntentId: "pi_...", ... }
+ *    
+ *    - Customer endpoints: Return nested objects directly
+ *      Example: { customer: {...}, analytics: {...}, ... }
+ * 
+ * 2. SIMPLE SUCCESS/ERROR (Rare):
+ *    - Some endpoints may return { success: true } or { success: false, error: "..." }
+ *    - BUT: No timestamp or requestId fields in current implementation
+ * 
+ * 3. STANDARDIZED WRAPPER (Future):
+ *    - These schemas support future migration to:
+ *      { success: true, data: {...}, timestamp: "...", requestId: "..." }
+ *    - Currently NOT used by endpoints
+ * 
+ * USAGE GUIDELINES:
+ * 
+ * ✅ DO: Define response schemas directly for new endpoints
+ *    const MyResponseSchema = z.object({ field1: z.string(), field2: z.number() });
+ * 
+ * ✅ DO: Use BaseResponseSchema only if endpoint actually returns success/timestamp/requestId
+ * 
+ * ❌ DON'T: Assume all responses have success/timestamp/requestId wrappers
+ * 
+ * ❌ DON'T: Use ApiResponseSchema unless implementing new standardized endpoints
+ * 
+ * See booking-responses.ts, payment-responses.ts, customer-responses.ts for
+ * examples of correctly matching actual backend responses.
+ * ============================================================================
+ */
+
+/**
  * Base Response Schema
  * Standard wrapper for all API responses
  * Includes success flag, timestamp, and request ID for tracing
  * 
- * @example
+ * NOTE: Many existing endpoints return direct data without this wrapper.
+ * This schema is kept for consistency but timestamp and requestId are OPTIONAL
+ * to support both patterns:
+ * 1. Wrapped: { success: true, data: {...}, timestamp: "...", requestId: "..." }
+ * 2. Simple: { success: true, data: {...} } or just direct data
+ * 
+ * @example Wrapped response (full)
  * {
  *   success: true,
  *   timestamp: "2025-10-12T10:30:00.000Z",
  *   requestId: "123e4567-e89b-12d3-a456-426614174000"
+ * }
+ * 
+ * @example Simple response (common in current backend)
+ * {
+ *   success: true
  * }
  */
 export const BaseResponseSchema = z.object({
@@ -19,11 +75,13 @@ export const BaseResponseSchema = z.object({
   timestamp: z
     .string()
     .datetime()
-    .describe('ISO 8601 timestamp of the response'),
+    .optional()
+    .describe('ISO 8601 timestamp of the response (OPTIONAL - not all endpoints use this)'),
   requestId: z
     .string()
     .uuid()
-    .describe('Unique identifier for request tracing'),
+    .optional()
+    .describe('Unique identifier for request tracing (OPTIONAL - not all endpoints use this)'),
 });
 
 export type BaseResponse = z.infer<typeof BaseResponseSchema>;
@@ -33,8 +91,27 @@ export type BaseResponse = z.infer<typeof BaseResponseSchema>;
  * Wraps any data type with standard response fields
  * Used as a base for all endpoint-specific response schemas
  * 
- * @example
+ * NOTE: Most current endpoints return DIRECT DATA without the wrapper.
+ * For example:
+ * - Booking endpoints: Return direct arrays/objects
+ * - Payment endpoints: Return { clientSecret, paymentIntentId, ... } directly
+ * - Customer endpoints: Return { customer, analytics, ... } directly
+ * 
+ * This schema is kept for:
+ * 1. Future endpoints that may use standardized format
+ * 2. Backward compatibility if we add wrappers later
+ * 3. Error responses that may need structured format
+ * 
+ * CURRENT PATTERN: Define response schemas directly without this wrapper.
+ * See booking-responses.ts, payment-responses.ts, customer-responses.ts for examples.
+ * 
+ * @example Full wrapped response (NOT commonly used)
  * const UserResponseSchema = ApiResponseSchema(z.object({ name: z.string() }));
+ * // { success: true, data: { name: "John" }, timestamp: "...", requestId: "..." }
+ * 
+ * @example Direct response (COMMON in current backend)
+ * const UserResponseSchema = z.object({ name: z.string() });
+ * // { name: "John" }
  */
 export function ApiResponseSchema<T extends z.ZodType>(dataSchema: T) {
   return BaseResponseSchema.extend({
