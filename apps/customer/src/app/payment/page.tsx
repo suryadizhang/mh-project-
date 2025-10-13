@@ -4,12 +4,17 @@ import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { Calendar, CreditCard, DollarSign, Loader2, MapPin, Shield, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import type { z } from 'zod';
+import { PaymentIntentResponseSchema } from '@myhibachi/types/schemas';
 
 import CustomerSavingsDisplay from '@/components/CustomerSavingsDisplay';
 import BookingLookup from '@/components/payment/BookingLookup';
 import { LazyAlternativePaymentOptions, LazyPaymentForm } from '@/components/lazy';
 import { apiFetch } from '@/lib/api';
 import { logger } from '@/lib/logger';
+
+// Infer type from schema for type-safe responses
+type PaymentIntentResponse = z.infer<typeof PaymentIntentResponseSchema>;
 
 // Initialize Stripe
 const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
@@ -60,7 +65,7 @@ export default function PaymentPage() {
     const createPaymentIntent = async () => {
       try {
         setIsLoading(true);
-        const response = await apiFetch('/api/v1/payments/create-intent', {
+        const response = await apiFetch<PaymentIntentResponse>('/api/v1/payments/create-intent', {
           method: 'POST',
           body: JSON.stringify({
             amount: Math.round(totalAmount * 100), // Convert to cents
@@ -84,13 +89,15 @@ export default function PaymentPage() {
               paymentType,
             },
           }),
+          schema: PaymentIntentResponseSchema,
         });
 
-        if (!response.success) {
+        if (!response.success || !response.data) {
           throw new Error(response.error || 'Failed to create payment intent');
         }
 
-        const { clientSecret: newClientSecret } = response.data as { clientSecret: string };
+        // Type-safe access to clientSecret
+        const newClientSecret = response.data.clientSecret;
         setClientSecret(newClientSecret);
         setStripeElementsKey((prev) => prev + 1); // Force Elements re-render
       } catch (error) {

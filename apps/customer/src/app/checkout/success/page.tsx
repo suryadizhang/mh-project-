@@ -52,10 +52,16 @@ function CheckoutSuccessContent() {
       }
 
       try {
-        // Call backend to retrieve checkout session details
+        // NOTE: This endpoint is NOT IMPLEMENTED in the backend yet.
+        // Documented in PAYMENT_SCHEMA_ANALYSIS.md - Phase 2B future work.
+        // Backend needs: POST /api/v1/payments/checkout-session
+        // Should use: stripe.checkout.sessions.retrieve(session_id)
+        // Schema ready: CheckoutSessionVerifyResponseSchema (when implemented)
         const response = await apiFetch('/api/v1/payments/checkout-session', {
           method: 'POST',
           body: JSON.stringify({ session_id: sessionId }),
+          // TODO: Add schema validation when endpoint implemented:
+          // schema: CheckoutSessionVerifyResponseSchema,
         });
 
         if (response.success && response.data) {
