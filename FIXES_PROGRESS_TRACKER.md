@@ -792,6 +792,464 @@ rateLimiter.recordRequest(path);
 
 ---
 
+### Issue #15: TypeScript Strict Mode & Build Configuration
+**Status:** ⏳ NOT STARTED (Promoted from MEDIUM - Oct 12, 2025)  
+**Priority:** HIGH  
+**Reason for Promotion:** Git pre-push checks are being bypassed due to TypeScript configuration issues. This compromises production deployment safety and code quality gates.
+
+**Problem Statement:**
+- TypeScript strict mode disabled across all frontends (`"strict": false`)
+- Pre-push safety checks display warnings: "⚠️ Skipping all checks - need to fix TypeScript and ESLint configuration"
+- Type safety compromised, allowing implicit `any`, null/undefined bugs
+- No `strictNullChecks`, `strictFunctionTypes`, `noImplicitAny`, etc.
+- Production deployment safety gates not functioning
+
+**Security & Quality Impact:**
+- Runtime errors from uncaught null/undefined (HIGH risk)
+- Type coercion bugs (MEDIUM risk)
+- Implicit `any` bypasses type system (HIGH risk)
+- Cannot enable automated CI/CD until fixed (BLOCKER)
+
+**Files Affected:**
+```
+apps/customer/tsconfig.json
+apps/admin/tsconfig.json  
+apps/frontend/tsconfig.json (if exists)
+tsconfig.json (root)
+Multiple .ts/.tsx files (will need fixes)
+```
+
+**Solution Approach:**
+
+**Phase 1: Enable Strict Checks (2 hours)**
+1. Update tsconfig.json files:
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": true,
+    "noFallthroughCasesInSwitch": true
+  }
+}
+```
+
+2. Run `npm run typecheck` to identify all errors
+3. Document error count and categorize by severity
+
+**Phase 2: Fix Type Errors (2-4 hours, varies by error count)**
+1. Fix by priority:
+   - **Critical:** Payment processing, booking forms, authentication
+   - **High:** API client, data fetching, state management
+   - **Medium:** UI components, layouts
+   - **Low:** Utility functions, helpers
+
+2. Common fixes:
+   - Add `| null | undefined` to types
+   - Use optional chaining `?.` and nullish coalescing `??`
+   - Add type guards `if (x !== null)`
+   - Replace `any` with proper types
+   - Add function return types
+   - Fix array access with proper checks
+
+**Phase 3: Validation (30 minutes)**
+1. Run `npm run build` - must pass
+2. Run `npm run typecheck` - 0 errors
+3. Run `npm run lint` - verify no new errors
+4. Test key user flows manually
+5. Verify pre-push checks work
+
+**Time Estimate:** 4-6 hours (depends on error count)
+
+**Acceptance Criteria:**
+- ✅ All tsconfig.json files have `"strict": true`
+- ✅ `npm run typecheck` passes with 0 errors
+- ✅ `npm run build` succeeds for all apps
+- ✅ Pre-push checks no longer display "skipping" warnings
+- ✅ No regression in existing functionality
+- ✅ Git pre-push hooks enforce type checking
+
+**Dependencies:**
+- None (can start immediately)
+
+**Risks:**
+- May uncover 100+ type errors (estimate based on disabled strict mode)
+- Some fixes may require refactoring
+- Potential breaking changes if implicit assumptions existed
+
+**Mitigation:**
+- Fix incrementally, one module at a time
+- Use `@ts-expect-error` with TODO comments for complex issues
+- Prioritize critical paths (payment, booking)
+- Extensive manual testing after fixes
+
+---
+
+### Issue #16: Environment Variable Validation
+**Status:** ⏳ NOT STARTED (Promoted from MEDIUM - Oct 12, 2025)  
+**Priority:** HIGH  
+**Reason for Promotion:** Missing env var validation causes runtime crashes in production. Build should fail early if configuration is invalid.
+
+**Problem Statement:**
+- Environment variables accessed directly via `process.env.VAR_NAME`
+- No validation if variables exist or have correct format
+- App crashes at runtime if variable undefined (e.g., `API_URL.includes()` → TypeError)
+- No documentation of required environment variables
+- Stripe keys, API URLs, etc. could be misconfigured in production
+
+**Security & Quality Impact:**
+- Production crashes from missing vars (HIGH risk)
+- Invalid API URLs cause all requests to fail (CRITICAL risk)
+- Invalid Stripe keys prevent payments (BUSINESS CRITICAL)
+- Security keys could be malformed, exposing vulnerabilities (HIGH risk)
+- No audit trail of required configuration
+
+**Files Affected:**
+```
+apps/customer/src/lib/config.ts (new file)
+apps/admin/src/lib/config.ts (new file)
+apps/backend/src/core/config.py (enhance)
+.env.example (customer, admin, backend - create)
+apps/customer/.env.local (documented)
+apps/admin/.env.local (documented)
+```
+
+**Solution Approach:**
+
+**Phase 1: Frontend Validation (1 hour)**
+1. Create `apps/customer/src/lib/config.ts`:
+```typescript
+import { z } from 'zod';
+
+const envSchema = z.object({
+  NEXT_PUBLIC_API_URL: z.string().url('Invalid API URL'),
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().startsWith('pk_', 'Invalid Stripe key'),
+  NEXT_PUBLIC_GA_ID: z.string().regex(/^G-/, 'Invalid GA ID'),
+  NEXT_PUBLIC_WS_URL: z.string().url('Invalid WebSocket URL').optional(),
+  NEXT_PUBLIC_FACEBOOK_APP_ID: z.string().min(1, 'Facebook App ID required').optional(),
+  NEXT_PUBLIC_GOOGLE_CLIENT_ID: z.string().min(1, 'Google Client ID required').optional(),
+});
+
+// Validate at build time - fails if invalid
+const env = envSchema.parse({
+  NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+  NEXT_PUBLIC_GA_ID: process.env.NEXT_PUBLIC_GA_ID,
+  NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL,
+  NEXT_PUBLIC_FACEBOOK_APP_ID: process.env.NEXT_PUBLIC_FACEBOOK_APP_ID,
+  NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+});
+
+export const config = {
+  apiUrl: env.NEXT_PUBLIC_API_URL,
+  stripeKey: env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+  gaId: env.NEXT_PUBLIC_GA_ID,
+  wsUrl: env.NEXT_PUBLIC_WS_URL,
+  facebookAppId: env.NEXT_PUBLIC_FACEBOOK_APP_ID,
+  googleClientId: env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+} as const;
+```
+
+2. Replace all `process.env.NEXT_PUBLIC_*` references with `config.*`
+3. Repeat for admin app
+
+**Phase 2: Backend Validation (30 minutes)**
+1. Enhance `apps/backend/src/core/config.py`:
+```python
+from pydantic import Field, validator, AnyHttpUrl
+from pydantic_settings import BaseSettings
+
+class Settings(BaseSettings):
+    # Database
+    DATABASE_URL: PostgresDsn
+    DB_POOL_SIZE: int = Field(default=10, ge=1, le=100)
+    
+    # Redis
+    REDIS_URL: str
+    REDIS_MAX_CONNECTIONS: int = Field(default=50, ge=1, le=500)
+    
+    # Security
+    SECRET_KEY: str = Field(min_length=32)
+    JWT_SECRET: str = Field(min_length=32)
+    
+    # External APIs
+    STRIPE_SECRET_KEY: str = Field(regex=r'^sk_')
+    STRIPE_WEBHOOK_SECRET: str = Field(regex=r'^whsec_')
+    
+    @validator('DATABASE_URL')
+    def validate_database_url(cls, v):
+        if 'sqlite' in str(v):
+            raise ValueError('SQLite not allowed in production')
+        return v
+    
+    class Config:
+        env_file = '.env'
+        case_sensitive = True
+
+# Validate on import - fails fast if invalid
+settings = Settings()
+```
+
+**Phase 3: Documentation (30 minutes)**
+1. Create `.env.example` files for each app:
+```bash
+# apps/customer/.env.example
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+# Add all required variables with example values
+```
+
+2. Update README files with setup instructions
+3. Document variable purposes and requirements
+
+**Time Estimate:** 2-3 hours
+
+**Acceptance Criteria:**
+- ✅ All env vars validated with Zod (frontend) / Pydantic (backend)
+- ✅ Build fails immediately if vars missing or invalid
+- ✅ Clear error messages indicate which var is problematic
+- ✅ `.env.example` files exist for all apps
+- ✅ README updated with environment setup instructions
+- ✅ All `process.env.*` direct access replaced with validated config
+- ✅ No runtime errors from missing/invalid env vars
+
+**Dependencies:**
+- Zod already installed (used for API validation)
+- Pydantic already installed (used for schemas)
+
+**Risks:**
+- May discover missing env vars in some environments
+- Deployment pipelines need updated with all required vars
+
+**Mitigation:**
+- Audit all environments before rollout
+- Update CI/CD secrets/variables
+- Coordinate with DevOps for production deployment
+
+---
+
+### Issue #17: Database Connection Pooling & Request ID Tracking
+**Status:** ⏳ NOT STARTED (Promoted from MEDIUM - Oct 12, 2025)  
+**Priority:** HIGH  
+**Reason for Promotion:** Database performance and debugging capabilities are essential for production stability. Request tracing critical for troubleshooting user issues.
+
+**Problem Statement:**
+**Part A - Database Pooling:**
+- Config defines `DB_POOL_SIZE=10` and `DB_MAX_OVERFLOW=20` but never applied
+- No pool timeout configured (requests wait forever)
+- No connection recycling (stale connections accumulate)
+- No pool pre-ping (dead connections used, causing errors)
+- Under load, database becomes bottleneck
+
+**Part B - Request ID Tracking:**
+- No correlation ID between frontend and backend
+- Cannot trace user request through logs
+- Debugging production issues extremely difficult
+- Frontend errors can't be matched to backend logs
+- No way to track request lifecycle
+
+**Impact:**
+- Database: Connection exhaustion under load, slow queries, timeout errors (HIGH risk)
+- Debugging: Hours wasted searching logs for related events (MEDIUM risk)
+- Support: Cannot troubleshoot user-reported issues effectively (HIGH risk)
+- Monitoring: No request-level observability (MEDIUM risk)
+
+**Files Affected:**
+```
+apps/backend/src/core/database.py (modify engine creation)
+apps/backend/src/core/middleware.py (new file)
+apps/backend/src/main.py (add middleware)
+apps/customer/src/lib/api.ts (add request ID header)
+apps/admin/src/lib/api.ts (add request ID header)
+```
+
+**Solution Approach:**
+
+**Phase 1: Database Connection Pooling (1.5 hours)**
+1. Modify `apps/backend/src/core/database.py`:
+```python
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
+from core.config import settings
+
+engine = create_async_engine(
+    settings.DATABASE_URL,
+    
+    # Pool configuration
+    pool_size=settings.DB_POOL_SIZE,           # 10 connections in pool
+    max_overflow=settings.DB_MAX_OVERFLOW,     # 20 additional if needed
+    pool_timeout=30,                            # Wait max 30s for connection
+    pool_recycle=3600,                          # Recycle after 1 hour
+    pool_pre_ping=True,                         # Test connection before use
+    
+    # Logging
+    echo=settings.DB_ECHO,
+    echo_pool=settings.DB_ECHO_POOL,
+    
+    # Connection arguments
+    connect_args={
+        "server_settings": {"jit": "off"},     # Disable JIT for faster simple queries
+        "command_timeout": 60,                  # Query timeout: 60s
+        "timeout": 10,                          # Connection timeout: 10s
+    }
+)
+
+# Export for use
+async_session_maker = sessionmaker(
+    engine, class_=AsyncSession, expire_on_commit=False
+)
+```
+
+2. Add pool monitoring endpoint:
+```python
+@router.get("/health/database")
+async def check_database_pool():
+    pool = engine.pool
+    return {
+        "pool_size": pool.size(),
+        "checked_in": pool.checkedin(),
+        "checked_out": pool.checkedout(),
+        "overflow": pool.overflow(),
+        "total": pool.size() + pool.overflow()
+    }
+```
+
+**Phase 2: Request ID Middleware (1 hour)**
+1. Create `apps/backend/src/core/middleware.py`:
+```python
+import uuid
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+import logging
+
+logger = logging.getLogger(__name__)
+
+class RequestIDMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # Get or generate request ID
+        request_id = request.headers.get('X-Request-ID', str(uuid.uuid4()))
+        
+        # Store in request state
+        request.state.request_id = request_id
+        
+        # Add to logging context
+        with logger.contextualize(request_id=request_id):
+            # Process request
+            response = await call_next(request)
+            
+            # Return request ID in response
+            response.headers['X-Request-ID'] = request_id
+            
+            return response
+```
+
+2. Register middleware in `apps/backend/src/main.py`:
+```python
+from core.middleware import RequestIDMiddleware
+
+app.add_middleware(RequestIDMiddleware)
+```
+
+3. Update logger usage:
+```python
+# In any endpoint
+logger.info(
+    "Booking created",
+    extra={
+        "request_id": request.state.request_id,
+        "booking_id": booking.id,
+        "customer_id": customer.id
+    }
+)
+```
+
+**Phase 3: Frontend Request ID (30 minutes)**
+1. Update `apps/customer/src/lib/api.ts`:
+```typescript
+export async function apiFetch<T>(
+  endpoint: string,
+  options?: ApiRequestOptions
+): Promise<ApiResponse<T>> {
+  // Generate request ID
+  const requestId = crypto.randomUUID();
+  
+  const headers = {
+    'Content-Type': 'application/json',
+    'X-Request-ID': requestId,
+    ...options?.headers,
+  };
+  
+  try {
+    const response = await fetch(url, { ...options, headers });
+    
+    // Log with request ID
+    logger.debug('API Response', {
+      endpoint,
+      requestId,
+      status: response.status,
+      responseRequestId: response.headers.get('X-Request-ID'),
+    });
+    
+    return data;
+  } catch (error) {
+    logger.error('API Error', {
+      endpoint,
+      requestId,
+      error: error.message,
+    });
+    throw error;
+  }
+}
+```
+
+2. Repeat for admin app
+
+**Phase 4: Testing & Validation (30 minutes)**
+1. Load test database pool:
+   - Simulate 100 concurrent requests
+   - Verify pool metrics in `/health/database`
+   - Ensure no connection exhaustion
+   
+2. Test request ID flow:
+   - Make request from frontend
+   - Verify request ID in backend logs
+   - Verify same ID returned in response
+   - Check both frontend and backend logs match
+
+**Time Estimate:** 3-4 hours
+
+**Acceptance Criteria:**
+- ✅ Database pool properly configured with all settings
+- ✅ `/health/database` endpoint shows pool metrics
+- ✅ Pool pre-ping prevents stale connection errors
+- ✅ Request ID middleware generates/propagates IDs
+- ✅ All backend logs include request_id field
+- ✅ Frontend sends X-Request-ID header on all API calls
+- ✅ Response includes X-Request-ID header
+- ✅ Request ID matches between frontend and backend logs
+- ✅ Load testing shows no connection exhaustion
+- ✅ Documentation updated with debugging guide
+
+**Dependencies:**
+- None (can start immediately)
+
+**Risks:**
+- Pool configuration may need tuning based on actual load
+- Request ID might not propagate through all log statements initially
+
+**Mitigation:**
+- Start with conservative pool settings, monitor and adjust
+- Gradually update all logger calls to include request_id
+- Use structured logging to make request_id automatic
+
+---
+
 ## 📊 PROGRESS STATISTICS
 
 ### Overall Progress
@@ -805,13 +1263,13 @@ Critical (4):
   ✅ Complete: 4 (100% ✅ ALL CRITICAL ISSUES FIXED!)
   ⏳ Not Started: 0
 
-High (12):
-  ✅ Complete: 9 (75%)
+High (15):  ← Updated: 12 + 3 promoted from MEDIUM
+  ✅ Complete: 9 (60%)
   🔶 In Progress: 0 (0%)
-  ⏳ Not Started: 3 (25%)
+  ⏳ Not Started: 6 (40%) - #15, #16, #17 (newly defined)
 
-Medium (18):
-  ⏳ Not Started: 18
+Medium (15):  ← Updated: 18 - 3 promoted to HIGH
+  ⏳ Not Started: 15
 
 Low (15):
   ⏳ Not Started: 15
@@ -863,13 +1321,17 @@ Low (15):
 11. ✅ **Add frontend rate limiting - DONE (client-side + 429 handling + UI)**
 12. ✅ **Add API response validation - DONE (Zod schemas, 8 endpoints protected)**
 13. ✅ **Add client-side caching - DONE (3-tier system, 3620x speedup, 89% hit rate, 71% test pass)**
-14. 🎯 **NEXT: Define HIGH #15, #16, #17 - Identify and specify remaining HIGH priority work**
+14. ✅ **Define HIGH #15-17 - DONE (TypeScript strict mode, env validation, DB pooling)**
+15. 🎯 **NEXT: HIGH #15 - TypeScript Strict Mode & Build Configuration (4-6 hours)**
 
-### This Week
-15. ⏳ Define HIGH #15, #16, #17 from MEDIUM priorities
-16. ⏳ Implement HIGH #15
-17. ⏳ Implement HIGH #16
-18. ⏳ Implement HIGH #17
+### This Week (Remaining HIGH Priorities)
+16. ⏳ HIGH #16: Environment Variable Validation (2-3 hours)
+17. ⏳ HIGH #17: Database Connection Pooling & Request ID Tracking (3-4 hours)
+
+### After Current HIGH Issues Complete
+18. ⏳ Begin MEDIUM priority issues (15 remaining)
+19. ⏳ Implement comprehensive API documentation
+20. ⏳ Configure static asset caching
 14. ⏳ Implement client-side caching strategy
 15. ⏳ Fix remaining high priority issues (#15-18)
 ```
