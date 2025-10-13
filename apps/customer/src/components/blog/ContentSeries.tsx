@@ -38,7 +38,7 @@ export default function ContentSeries({
     const weddingPosts = posts.filter(
       (post) =>
         post.keywords?.some(
-          (keyword) =>
+          (keyword: string) =>
             keyword.toLowerCase().includes('wedding') ||
             keyword.toLowerCase().includes('reception'),
         ) || post.title.toLowerCase().includes('wedding'),
@@ -60,7 +60,7 @@ export default function ContentSeries({
     const corporatePosts = posts.filter(
       (post) =>
         post.keywords?.some(
-          (keyword) =>
+          (keyword: string) =>
             keyword.toLowerCase().includes('corporate') ||
             keyword.toLowerCase().includes('team building') ||
             keyword.toLowerCase().includes('business'),
@@ -83,7 +83,7 @@ export default function ContentSeries({
     const familyPosts = posts.filter(
       (post) =>
         post.keywords?.some(
-          (keyword) =>
+          (keyword: string) =>
             keyword.toLowerCase().includes('family') ||
             keyword.toLowerCase().includes('birthday') ||
             keyword.toLowerCase().includes('anniversary') ||
@@ -107,7 +107,7 @@ export default function ContentSeries({
     const seasonalPosts = posts.filter(
       (post) =>
         post.seasonal ||
-        post.keywords?.some((keyword) =>
+        post.keywords?.some((keyword: string) =>
           ['spring', 'summer', 'fall', 'winter', 'holiday', 'christmas', 'thanksgiving'].includes(
             keyword.toLowerCase(),
           ),
@@ -147,7 +147,7 @@ export default function ContentSeries({
     const techPosts = posts.filter(
       (post) =>
         post.keywords?.some(
-          (keyword) =>
+          (keyword: string) =>
             keyword.toLowerCase().includes('tech') ||
             keyword.toLowerCase().includes('silicon valley') ||
             keyword.toLowerCase().includes('startup'),
@@ -243,7 +243,7 @@ export default function ContentSeries({
               {selectedSeries === series.id && (
                 <div className="border-t border-gray-200 bg-gray-50 p-4">
                   <div className="grid gap-3">
-                    {series.posts.map((post, index) => (
+                    {series.posts.map((post: any, index: number) => (
                       <div
                         key={post.id}
                         className="flex items-center space-x-3 rounded-lg border border-gray-200 bg-white p-3"

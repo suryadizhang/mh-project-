@@ -224,7 +224,7 @@ export default function BookingPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Upcoming Events</p>
               <p className="text-2xl font-bold text-gray-900">
-                {bookings.filter(b => isUpcoming(b.date)).length}
+                {bookings.filter((b: any) => isUpcoming(b.date)).length}
               </p>
             </div>
           </div>
@@ -238,7 +238,7 @@ export default function BookingPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Pending</p>
               <p className="text-2xl font-bold text-gray-900">
-                {bookings.filter(b => b.status === 'pending').length}
+                {bookings.filter((b: any) => b.status === 'pending').length}
               </p>
             </div>
           </div>
@@ -252,7 +252,7 @@ export default function BookingPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
               <p className="text-2xl font-bold text-gray-900">
-                {formatCurrency(bookings.reduce((sum, b) => sum + b.total_due_cents, 0))}
+                {formatCurrency(bookings.reduce((sum: number, b: any) => sum + b.total_due_cents, 0))}
               </p>
             </div>
           </div>
@@ -404,7 +404,7 @@ export default function BookingPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {bookings.map((booking) => (
+                {bookings.map((booking: any) => (
                   <tr 
                     key={booking.booking_id} 
                     className={`hover:bg-gray-50 ${isUpcoming(booking.date) ? 'bg-blue-50' : ''}`}

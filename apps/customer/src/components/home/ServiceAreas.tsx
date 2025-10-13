@@ -42,7 +42,7 @@ export function ServiceAreas() {
         <div className="row justify-content-center mb-5">
           <div className="col-md-8 text-center">
             <div className={styles.ctaButtons}>
-              {homeData.serviceAreas.ctaButtons.map((button, index) => (
+              {homeData.serviceAreas.ctaButtons.map((button: any, index: number) => (
                 <Link
                   key={index}
                   href={button.href}
@@ -69,7 +69,7 @@ export function ServiceAreas() {
                 </p>
               </div>
               <div className={styles.locationsList}>
-                {homeData.serviceAreas.areas.primary.locations.map((location, index) => (
+                {homeData.serviceAreas.areas.primary.locations.map((location: string, index: number) => (
                   <div key={index} className={styles.locationItem}>
                     {location}
                   </div>
@@ -88,7 +88,7 @@ export function ServiceAreas() {
                 </p>
               </div>
               <div className={styles.locationsList}>
-                {homeData.serviceAreas.areas.extended.locations.map((location, index) => (
+                {homeData.serviceAreas.areas.extended.locations.map((location: string, index: number) => (
                   <div key={index} className={styles.locationItem}>
                     {location}
                   </div>

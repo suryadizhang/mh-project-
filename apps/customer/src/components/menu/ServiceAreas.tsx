@@ -26,7 +26,7 @@ export default function ServiceAreas() {
           <h4 className={styles.areaTitle}>{serviceAreas.primary.title}</h4>
           <p className={styles.areaSubtitle}>{serviceAreas.primary.subtitle}</p>
           <ul className={styles.areaList}>
-            {serviceAreas.primary.locations.map((location, index) => (
+            {serviceAreas.primary.locations.map((location: string, index: number) => (
               <li key={index}>{location}</li>
             ))}
           </ul>
@@ -36,7 +36,7 @@ export default function ServiceAreas() {
           <h4 className={styles.areaTitle}>{serviceAreas.extended.title}</h4>
           <p className={styles.areaSubtitle}>{serviceAreas.extended.subtitle}</p>
           <ul className={styles.areaList}>
-            {serviceAreas.extended.locations.map((location, index) => (
+            {serviceAreas.extended.locations.map((location: string, index: number) => (
               <li key={index}>{location}</li>
             ))}
           </ul>

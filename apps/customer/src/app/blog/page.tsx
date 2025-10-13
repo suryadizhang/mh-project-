@@ -62,7 +62,7 @@ export default function BlogPage() {
       if (
         filters.locations.length > 0 &&
         !filters.locations.some(
-          loc =>
+          (loc: string) =>
             post.serviceArea.toLowerCase().includes(loc.toLowerCase()) ||
             post.title.toLowerCase().includes(loc.toLowerCase()) ||
             post.keywords.some((keyword: string) => keyword.toLowerCase().includes(loc.toLowerCase()))
@@ -74,7 +74,7 @@ export default function BlogPage() {
       if (
         filters.eventSizes.length > 0 &&
         !filters.eventSizes.some(
-          size =>
+          (size: string) =>
             post.eventType.toLowerCase().includes(size.toLowerCase()) ||
             post.title.toLowerCase().includes(size.toLowerCase())
         )

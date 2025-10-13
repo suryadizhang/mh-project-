@@ -49,7 +49,7 @@ export default function MenuHero() {
 
         {/* Value Proposition */}
         <div className={styles.valueProposition}>
-          {hero.valueProposition.map((item, index) => (
+          {hero.valueProposition.map((item: string, index: number) => (
             <div key={index}>
               <div className={styles.valueItem}>
                 <span className={`${styles.valueIcon} emoji-visible`}>{item.icon}</span>
@@ -64,7 +64,7 @@ export default function MenuHero() {
 
         {/* Feature badges */}
         <div className={styles.heroFeaturesGrid}>
-          {hero.features.map((feature, index) => (
+          {hero.features.map((feature: any, index: number) => (
             <div key={index} className={styles.featureBadge}>
               <div className={styles.featureIconBg}>
                 <span className={`${styles.featureIcon} emoji-visible`}>{feature.icon}</span>
