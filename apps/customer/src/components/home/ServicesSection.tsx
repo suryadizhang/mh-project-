@@ -50,7 +50,7 @@ export function ServicesSection() {
         <div className="row">
           <div className="col-12">
             <div className={styles.servicesGrid}>
-              {homeData.services.items.map((service, index) => (
+              {homeData.services.items.map((service: any, index: number) => (
                 <div key={index} className={styles.serviceCard}>
                   <div className={styles.cardContent}>
                     <div className={styles.serviceIcon}>{service.icon}</div>

@@ -32,7 +32,7 @@ export default function BlogSearch({ posts, onFilteredPosts }: BlogSearchProps) 
           post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
           (post.content && post.content.toLowerCase().includes(searchQuery.toLowerCase())) ||
-          post.keywords.some(keyword => keyword.toLowerCase().includes(searchQuery.toLowerCase()))
+          post.keywords.some((keyword: string) => keyword.toLowerCase().includes(searchQuery.toLowerCase()))
       )
     }
 

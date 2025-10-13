@@ -18,7 +18,7 @@ export default function PricingSection() {
         </div>
 
         <div className={styles.pricingGrid}>
-          {pricing.tiers.map(tier => (
+          {pricing.tiers.map((tier: any) => (
             <div
               key={tier.id}
               className={`${styles.pricingTier} ${tier.popular ? styles.popularTier : ''}`}
@@ -40,7 +40,7 @@ export default function PricingSection() {
               </div>
 
               <div className={styles.tierFeatures}>
-                {tier.features.map((feature, index) => (
+                {tier.features.map((feature: any, index: number) => (
                   <div key={index} className={styles.feature}>
                     <span className={`${styles.featureIcon} emoji-visible`}>✓</span>
                     <span>{feature}</span>

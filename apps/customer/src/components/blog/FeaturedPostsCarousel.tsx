@@ -81,7 +81,7 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* Slides */}
-        {displayPosts.map((post, index) => (
+        {displayPosts.map((post: any, index: number) => (
           <div
             key={post.id}
             className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
@@ -255,7 +255,7 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
 
       {/* Mini Thumbnails */}
       <div className="absolute right-4 bottom-4 z-20 hidden space-x-2 lg:flex">
-        {displayPosts.map((post, index) => (
+        {displayPosts.map((post: any, index: number) => (
           <button
             key={post.id}
             onClick={() => goToSlide(index)}

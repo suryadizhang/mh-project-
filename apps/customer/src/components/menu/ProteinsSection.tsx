@@ -16,11 +16,11 @@ export default function ProteinsSection() {
         </div>
 
         <div className={styles.proteinsGrid}>
-          {proteins.categories.map((category, index) => (
+          {proteins.categories.map((category: any, index: number) => (
             <div key={index} className={styles.proteinCategory}>
               <h3 className={styles.categoryTitle}>{category.name}</h3>
               <div className={styles.proteinItems}>
-                {category.items.map((item, itemIndex) => (
+                {category.items.map((item: any, itemIndex: number) => (
                   <div key={itemIndex} className={styles.proteinItem}>
                     <div className={styles.proteinName}>{item.name}</div>
                     <div className={styles.proteinDescription}>{item.description}</div>

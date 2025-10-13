@@ -49,7 +49,7 @@ export function FeaturesGrid() {
         <div className="row">
           <div className="col-12">
             <div className={styles.featuresGrid}>
-              {homeData.features.map((feature, index) => (
+              {homeData.features.map((feature: any, index: number) => (
                 <div key={index} className={styles.featureCard}>
                   <div className={styles.cardContent}>
                     <div className={styles.featureIcon}>{feature.icon}</div>

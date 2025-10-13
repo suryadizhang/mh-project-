@@ -525,13 +525,13 @@ export default function AdminInvoicePage() {
                   min="0"
                   step="0.1"
                   value={invoiceSettings.travelMiles || ''}
-                  onChange={e => {
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     const value = e.target.value;
                     const numValue =
                       value === ''
                         ? 0
                         : parseFloat(value.replace(/^0+/, '') || '0');
-                    setInvoiceSettings(prev => ({
+                    setInvoiceSettings((prev) => ({
                       ...prev,
                       travelMiles: isNaN(numValue) ? 0 : Math.max(0, numValue),
                     }));
@@ -553,13 +553,13 @@ export default function AdminInvoicePage() {
                     min="0"
                     step="0.01"
                     value={invoiceSettings.discountAmount || ''}
-                    onChange={e => {
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       const value = e.target.value;
                       const numValue =
                         value === ''
                           ? 0
                           : parseFloat(value.replace(/^0+/, '') || '0');
-                      setInvoiceSettings(prev => ({
+                      setInvoiceSettings((prev) => ({
                         ...prev,
                         discountAmount: isNaN(numValue)
                           ? 0
@@ -571,8 +571,8 @@ export default function AdminInvoicePage() {
                   <Input
                     id="discountDescription"
                     value={invoiceSettings.discountDescription}
-                    onChange={e =>
-                      setInvoiceSettings(prev => ({
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setInvoiceSettings((prev) => ({
                         ...prev,
                         discountDescription: e.target.value,
                       }))
@@ -591,8 +591,8 @@ export default function AdminInvoicePage() {
                 <Input
                   id="paymentTerms"
                   value={invoiceSettings.paymentTerms}
-                  onChange={e =>
-                    setInvoiceSettings(prev => ({
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setInvoiceSettings((prev) => ({
                       ...prev,
                       paymentTerms: e.target.value,
                     }))
@@ -607,8 +607,8 @@ export default function AdminInvoicePage() {
                 <Textarea
                   id="additionalNotes"
                   value={invoiceSettings.additionalNotes}
-                  onChange={e =>
-                    setInvoiceSettings(prev => ({
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    setInvoiceSettings((prev) => ({
                       ...prev,
                       additionalNotes: e.target.value,
                     }))

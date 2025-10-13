@@ -16,7 +16,7 @@ export default function AdditionalSection() {
         </div>
 
         <div className={styles.servicesGrid}>
-          {additionalServices.items.map((service, index) => (
+          {additionalServices.items.map((service: any, index: number) => (
             <div key={index} className={styles.serviceItem}>
               <div className={styles.serviceHeader}>
                 <h3 className={styles.serviceName}>{service.name}</h3>

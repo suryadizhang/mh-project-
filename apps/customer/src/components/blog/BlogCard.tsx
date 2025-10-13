@@ -79,7 +79,7 @@ export default function BlogCard({ post, category }: BlogCardProps) {
         {/* Tags */}
         {post.keywords && post.keywords.length > 0 && (
           <div className="blog-card-tags">
-            {post.keywords.slice(0, 3).map((tag, index) => (
+            {post.keywords.slice(0, 3).map((tag: string, index: number) => (
               <span key={index} className="blog-card-tag">
                 {tag}
               </span>

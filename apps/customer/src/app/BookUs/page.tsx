@@ -98,7 +98,7 @@ export default function BookingPage() {
 
       if (result.success && result.data) {
         // Type-safe access to bookedDates
-        const dates = result.data.data.bookedDates.map((dateStr) => new Date(dateStr));
+        const dates = result.data.data.bookedDates.map((dateStr: string) => new Date(dateStr));
         setBookedDates(dates);
       } else {
         logger.warn('Could not fetch booked dates, continuing without blocking dates');
@@ -134,7 +134,7 @@ export default function BookingPage() {
 
       if (response.success && response.data) {
         // Type-safe access to timeSlots
-        const formattedSlots = response.data.data.timeSlots.map((slot) => ({
+        const formattedSlots = response.data.data.timeSlots.map((slot: any) => ({
           time: slot.time,
           label:
             slot.time === '12PM'

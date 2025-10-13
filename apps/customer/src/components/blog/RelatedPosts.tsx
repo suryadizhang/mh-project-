@@ -41,7 +41,7 @@ export default function RelatedPosts({ currentPost, allPosts, maxPosts = 3 }: Re
       // Shared keywords/tags
       const currentKeywords = currentPost.keywords || []
       const postKeywords = post.keywords || []
-      const sharedKeywords = currentKeywords.filter(keyword => postKeywords.includes(keyword))
+      const sharedKeywords = currentKeywords.filter((keyword: string) => postKeywords.includes(keyword))
       score += sharedKeywords.length * 2
 
       // Same author gets moderate score

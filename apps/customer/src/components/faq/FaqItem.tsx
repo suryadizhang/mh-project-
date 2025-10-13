@@ -97,7 +97,7 @@ export function FaqItemComponent({ faq, isOpen, onToggle }: FaqItemComponentProp
             <span className="faq-category">{faq.category}</span>
             {faq.tags.length > 0 && (
               <div className="faq-tags">
-                {faq.tags.slice(0, 3).map((tag) => (
+                {faq.tags.slice(0, 3).map((tag: string) => (
                   <span key={tag} className="faq-tag">
                     {tag}
                   </span>
