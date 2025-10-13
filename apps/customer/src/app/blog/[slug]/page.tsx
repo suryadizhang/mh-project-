@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 import BlogStructuredData from '@/components/blog/BlogStructuredData';
 import Assistant from '@/components/chat/Assistant';
 import { BreadcrumbSchema, LocalBusinessSchema } from '@/components/seo/TechnicalSEO';
-import blogPosts, { getPostsByEventType, getPostsByServiceArea } from '@/data/blogPosts';
+import blogPosts, { getPostsByEventType, getPostsByServiceArea, type BlogPost } from '@/data/blogPosts';
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
@@ -15,7 +15,7 @@ interface BlogPostPageProps {
 // Generate metadata for SEO
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = blogPosts.find((p) => p.slug === slug);
+  const post = blogPosts.find((p: BlogPost) => p.slug === slug);
 
   if (!post) {
     return {
@@ -44,14 +44,14 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 
 // Generate static params for all blog posts
 export async function generateStaticParams() {
-  return blogPosts.map((post) => ({
+  return blogPosts.map((post: BlogPost) => ({
     slug: post.slug,
   }));
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
-  const post = blogPosts.find((p) => p.slug === slug);
+  const post = blogPosts.find((p: BlogPost) => p.slug === slug);
 
   if (!post) {
     notFound();
@@ -59,17 +59,17 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   // Get related posts based on event type and service area
   const relatedByEvent = getPostsByEventType(post.eventType)
-    .filter((p) => p.id !== post.id)
+    .filter((p: BlogPost) => p.id !== post.id)
     .slice(0, 2);
 
   const relatedByArea = getPostsByServiceArea(post.serviceArea)
-    .filter((p) => p.id !== post.id && !relatedByEvent.includes(p))
+    .filter((p: BlogPost) => p.id !== post.id && !relatedByEvent.includes(p))
     .slice(0, 1);
 
   const relatedPosts = [...relatedByEvent, ...relatedByArea].slice(0, 3);
 
   // Generate full article content based on the post data
-  const generateFullContent = (post: (typeof blogPosts)[0]) => {
+  const generateFullContent = (post: BlogPost) => {
     const sections = [];
 
     // Introduction
@@ -251,7 +251,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <div className="mb-8 rounded-lg bg-white p-6 shadow-sm">
           <h3 className="mb-4 text-lg font-semibold text-gray-900">Tags</h3>
           <div className="flex flex-wrap gap-2">
-            {post.keywords.map((keyword, index) => (
+            {post.keywords.map((keyword: string, index: number) => (
               <span
                 key={index}
                 className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700"

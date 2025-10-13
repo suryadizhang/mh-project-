@@ -6,7 +6,7 @@ import { Calendar, User } from 'lucide-react'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
-import AdvancedFilters, { FilterState } from '@/components/blog/AdvancedFilters'
+import AdvancedFilters, { type FilterState } from '@/components/blog/AdvancedFilters'
 import BlogCardImage from '@/components/blog/BlogCardImage'
 import Pagination from '@/components/blog/Pagination'
 import Assistant from '@/components/chat/Assistant'
@@ -65,7 +65,7 @@ export default function BlogPage() {
           loc =>
             post.serviceArea.toLowerCase().includes(loc.toLowerCase()) ||
             post.title.toLowerCase().includes(loc.toLowerCase()) ||
-            post.keywords.some(keyword => keyword.toLowerCase().includes(loc.toLowerCase()))
+            post.keywords.some((keyword: string) => keyword.toLowerCase().includes(loc.toLowerCase()))
         )
       )
         return false
@@ -102,8 +102,8 @@ export default function BlogPage() {
       // Tags filter
       if (
         filters.tags.length > 0 &&
-        !filters.tags.some(tag =>
-          post.keywords.some(keyword => keyword.toLowerCase().includes(tag.toLowerCase()))
+        !filters.tags.some((tag: string) =>
+          post.keywords.some((keyword: string) => keyword.toLowerCase().includes(tag.toLowerCase()))
         )
       )
         return false

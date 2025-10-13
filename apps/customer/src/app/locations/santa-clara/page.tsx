@@ -64,7 +64,7 @@ export default function SantaClaraHibachiPage() {
             Santa Clara Hibachi Catering Services
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {locationData.content.services.map((service, index) => (
+            {locationData.content.services.map((service: string, index: number) => (
               <div key={index} className="bg-white p-6 rounded-lg shadow-sm text-center">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">{service}</h3>
                 <p className="text-gray-600 text-sm">
@@ -107,7 +107,7 @@ export default function SantaClaraHibachiPage() {
             What Santa Clara Customers Say
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {locationData.content.testimonials.map((testimonial, index) => (
+            {locationData.content.testimonials.map((testimonial: string, index: number) => (
               <div key={index} className="bg-white p-6 rounded-lg shadow-sm">
                 <p className="text-gray-600 italic mb-4">
                   &ldquo;
@@ -141,7 +141,7 @@ export default function SantaClaraHibachiPage() {
             Santa Clara Hibachi Catering FAQ
           </h2>
           <div className="space-y-6">
-            {locationData.content.faq.map((faq, index) => (
+            {locationData.content.faq.map((faq: { question: string; answer: string }, index: number) => (
               <div key={index} className="bg-white p-6 rounded-lg shadow-sm">
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">{faq.question}</h3>
                 <p className="text-gray-600">{faq.answer}</p>
