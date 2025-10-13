@@ -10,7 +10,11 @@
  * - Request/response logging
  * - Error handling with user-friendly messages
  * - Abort controller for timeout management
+ * - **NEW**: Automatic response validation with Zod schemas
  */
+
+import type { z } from 'zod';
+import { safeValidateResponse } from '@myhibachi/types/validators';
 
 import { logger, logApiRequest } from '@/lib/logger';
 import { getRateLimiter } from '@/lib/rateLimiter';
@@ -30,6 +34,7 @@ export interface ApiRequestOptions extends RequestInit {
   retry?: boolean
   maxRetries?: number
   retryDelay?: number
+  schema?: z.ZodType  // Zod schema for automatic response validation
 }
 
 export interface StripePaymentData {
@@ -149,6 +154,7 @@ export async function apiFetch<T = Record<string, unknown>>(
     retry = true,
     maxRetries = 3,
     retryDelay = 1000,
+    schema,
     ...fetchOptions
   } = options;
 
@@ -320,6 +326,54 @@ export async function apiFetch<T = Record<string, unknown>>(
       // Record successful request in rate limiter
       rateLimiter.recordRequest(path);
 
+      // Validate response if schema provided
+      if (schema) {
+        const validationResult = safeValidateResponse(schema, data, {
+          endpoint: path,
+          method
+        });
+
+        if (!validationResult.success) {
+          // Validation failed - log detailed error
+          logger.error('API Response validation failed', new Error(validationResult.error || 'Unknown validation error'), {
+            path,
+            method,
+            zodError: validationResult.zodError?.errors,
+            receivedData: data
+          });
+
+          // Emit validation error event for UI
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('api-validation-error', {
+              detail: {
+                endpoint: path,
+                method,
+                error: validationResult.error,
+                zodError: validationResult.zodError,
+                data
+              }
+            }));
+          }
+
+          return {
+            error: 'Invalid response from server. Please try again or contact support if the problem persists.',
+            success: false
+          };
+        }
+
+        // Validation successful - return validated data
+        logger.debug('API Response validated successfully', {
+          path,
+          method
+        });
+
+        return {
+          data: validationResult.data as T,
+          success: true
+        };
+      }
+
+      // No schema provided - return raw data (backward compatible)
       return {
         data,
         success: true
