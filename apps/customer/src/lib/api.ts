@@ -177,6 +177,9 @@ export async function apiFetch<T = Record<string, unknown>>(
 
   // Generate cache key
   const cacheKey = cacheConfig?.key || `${method}:${path}`;
+  
+  // Generate request ID for distributed tracing
+  const requestId = crypto.randomUUID();
 
   // Check if caching is enabled and method is cacheable (GET requests only)
   const isCacheable = cacheConfig && method === 'GET';
@@ -207,7 +210,8 @@ export async function apiFetch<T = Record<string, unknown>>(
           retryDelay,
           schema,
           rateLimiter,
-          startTime
+          startTime,
+          requestId  // Pass request ID
         );
 
         if (!response.success || !response.data) {
@@ -247,7 +251,8 @@ export async function apiFetch<T = Record<string, unknown>>(
             retryDelay,
             schema,
             rateLimiter,
-            startTime
+            startTime,
+            requestId  // Pass request ID
           );
       }
 
@@ -287,7 +292,8 @@ export async function apiFetch<T = Record<string, unknown>>(
     retryDelay,
     schema,
     rateLimiter,
-    startTime
+    startTime,
+    requestId  // Pass request ID
   );
 
   // If mutation was successful, invalidate related cache entries
@@ -313,7 +319,8 @@ async function executeFetch<T>(
   retryDelay: number,
   schema: z.ZodType | undefined,
   rateLimiter: ReturnType<typeof getRateLimiter>,
-  startTime: number
+  startTime: number,
+  requestId: string  // Add request ID parameter
 ): Promise<ApiResponse<T>> {
 
   // Check client-side rate limit BEFORE making request
@@ -360,7 +367,8 @@ async function executeFetch<T>(
       logger.debug(`API Request [${method}] ${path}`, {
         attempt,
         maxRetries,
-        timeout: timeoutMs
+        timeout: timeoutMs,
+        requestId  // Log request ID for tracing
       });
 
       const response = await fetch(url, {
@@ -368,6 +376,7 @@ async function executeFetch<T>(
         signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
+          'X-Request-ID': requestId,  // Add request ID for distributed tracing
           ...fetchOptions.headers
         }
       });

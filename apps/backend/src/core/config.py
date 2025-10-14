@@ -3,6 +3,7 @@ Centralized configuration using Pydantic Settings
 All environment variables validated here
 """
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import validator
 from functools import lru_cache
 from typing import Optional, List
 from enum import Enum
@@ -139,6 +140,62 @@ class Settings(BaseSettings):
     RATE_LIMIT_WEBHOOK_PER_MINUTE: int = 100
     RATE_LIMIT_WEBHOOK_PER_HOUR: int = 5000
     RATE_LIMIT_WEBHOOK_BURST: int = 200
+    
+    # Pydantic Validators for Critical Environment Variables
+    
+    @validator('SECRET_KEY')
+    def validate_secret_key(cls, v: str) -> str:
+        """Ensure SECRET_KEY is at least 32 characters for security"""
+        if len(v) < 32:
+            raise ValueError(
+                'SECRET_KEY must be at least 32 characters long for cryptographic security'
+            )
+        return v
+    
+    @validator('ENCRYPTION_KEY')
+    def validate_encryption_key(cls, v: str) -> str:
+        """Ensure ENCRYPTION_KEY is at least 32 characters"""
+        if len(v) < 32:
+            raise ValueError(
+                'ENCRYPTION_KEY must be at least 32 characters long for proper encryption'
+            )
+        return v
+    
+    @validator('STRIPE_SECRET_KEY')
+    def validate_stripe_secret_key(cls, v: str) -> str:
+        """Validate Stripe secret key format"""
+        if not v.startswith(('sk_test_', 'sk_live_')):
+            raise ValueError(
+                'STRIPE_SECRET_KEY must start with sk_test_ (development) or sk_live_ (production)'
+            )
+        return v
+    
+    @validator('STRIPE_WEBHOOK_SECRET')
+    def validate_stripe_webhook_secret(cls, v: str) -> str:
+        """Validate Stripe webhook secret format"""
+        if not v.startswith('whsec_'):
+            raise ValueError(
+                'STRIPE_WEBHOOK_SECRET must start with whsec_ (Stripe webhook signing secret)'
+            )
+        return v
+    
+    @validator('DATABASE_URL')
+    def validate_database_url(cls, v: str) -> str:
+        """Validate PostgreSQL database URL format"""
+        if not v.startswith('postgresql'):
+            raise ValueError(
+                'DATABASE_URL must be a PostgreSQL connection string (postgresql:// or postgresql+asyncpg://)'
+            )
+        return v
+    
+    @validator('REDIS_URL')
+    def validate_redis_url(cls, v: str) -> str:
+        """Validate Redis URL format"""
+        if not v.startswith('redis://'):
+            raise ValueError(
+                'REDIS_URL must be a valid Redis connection string starting with redis://'
+            )
+        return v
     
     def get_rate_limit_for_user(self, user_role: Optional[UserRole] = None) -> dict:
         """Get rate limit configuration based on user role"""
