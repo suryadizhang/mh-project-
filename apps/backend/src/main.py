@@ -4,6 +4,7 @@ Unified API with operational and AI endpoints, enterprise architecture patterns
 """
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from core.middleware import RequestIDMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -145,6 +146,10 @@ app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)
 app.add_exception_handler(Exception, general_exception_handler)
 logger.info("✅ Custom exception handlers registered")
+
+# Request ID Middleware (must be first to trace all requests)
+app.add_middleware(RequestIDMiddleware)
+logger.info("✅ Request ID middleware registered for distributed tracing")
 
 # CORS Middleware
 app.add_middleware(
