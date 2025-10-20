@@ -2,6 +2,7 @@
 
 import '@/styles/blog.css'
 
+import type { BlogPost } from '@my-hibachi/blog-types';
 import { Calendar, User } from 'lucide-react'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
@@ -10,21 +11,40 @@ import AdvancedFilters, { type FilterState } from '@/components/blog/AdvancedFil
 import BlogCardImage from '@/components/blog/BlogCardImage'
 import Pagination from '@/components/blog/Pagination'
 import Assistant from '@/components/chat/Assistant'
-import {
-  getEventSpecificPosts,
-  getFeaturedPosts,
-  getRecentPosts,
-  getSeasonalPosts
-} from '@/data/blogPosts'
+import { useFeaturedPosts, useSeasonalPosts, useRecentPosts } from '@/hooks/useBlogAPI'
+import { getAuthorName } from '@/lib/blog/helpers'
 
 // Constants for pagination
 const POSTS_PER_PAGE = 9
 
 export default function BlogPage() {
-  const featuredPosts = getFeaturedPosts()
-  const seasonalPosts = getSeasonalPosts()
-  const eventSpecificPosts = getEventSpecificPosts().slice(0, 6)
-  const allRecentPosts = getRecentPosts(84) // Get all posts
+  // Use cached hooks for blog data
+  const {
+    data: featuredData,
+    isLoading: featuredLoading,
+  } = useFeaturedPosts()
+  const {
+    data: seasonalData,
+    isLoading: seasonalLoading,
+  } = useSeasonalPosts()
+  const {
+    data: recentData,
+    isLoading: recentLoading,
+  } = useRecentPosts(84)
+
+  // Extract posts from API responses with memoization
+  const featuredPosts = useMemo(() => featuredData?.posts ?? [], [featuredData])
+  const seasonalPosts = useMemo(() => seasonalData?.posts ?? [], [seasonalData])
+  const allRecentPosts = useMemo(() => recentData?.posts ?? [], [recentData])
+
+  // Get event-specific posts (first 6)
+  const eventSpecificPosts = useMemo(() => {
+    return allRecentPosts
+      .filter((post: BlogPost) => post.eventType && post.eventType !== 'General')
+      .slice(0, 6)
+  }, [allRecentPosts])
+
+  const isLoading = featuredLoading || seasonalLoading || recentLoading
 
   // All posts with memoization - ensure unique posts and consistent ordering
   const allPosts = useMemo(() => {
@@ -40,7 +60,7 @@ export default function BlogPage() {
       (post, index, self) => index === self.findIndex(p => p.id === post.id)
     )
 
-    return uniquePosts.sort((a, b) => a.id - b.id)
+    return uniquePosts.sort((a, b) => Number(a.id) - Number(b.id))
   }, [featuredPosts, seasonalPosts, eventSpecificPosts, allRecentPosts])
 
   // Advanced filter state
@@ -172,16 +192,29 @@ export default function BlogPage() {
 
   return (
     <div className="min-h-screen bg-white" data-page="blog">
-      {/* Clean Hero Section */}
-      <section className="bg-slate-50 border-b border-slate-200">
-        <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-          <h1 className="text-4xl font-bold text-slate-900 mb-4">My Hibachi Blog</h1>
-          <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto">
-            Professional insights, culinary expertise, and event planning guidance for premium
-            hibachi catering
-          </p>
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 mx-auto mb-4"></div>
+            <p className="text-slate-600">Loading posts...</p>
+          </div>
         </div>
-      </section>
+      )}
+
+      {/* Content */}
+      {!isLoading && (
+        <>
+          {/* Clean Hero Section */}
+          <section className="bg-slate-50 border-b border-slate-200">
+            <div className="max-w-4xl mx-auto px-4 py-16 text-center">
+              <h1 className="text-4xl font-bold text-slate-900 mb-4">My Hibachi Blog</h1>
+              <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto">
+                Professional insights, culinary expertise, and event planning guidance for premium
+                hibachi catering
+              </p>
+            </div>
+          </section>
 
       {/* Advanced Filters - Collapsed by default */}
       <div className="max-w-6xl mx-auto px-4 py-8">
@@ -213,7 +246,7 @@ export default function BlogPage() {
                             <Calendar className="w-4 h-4 mr-1" />
                             <span className="mr-3">{post.date}</span>
                             <User className="w-4 h-4 mr-1" />
-                            <span>{post.author}</span>
+                            <span>{getAuthorName(post.author)}</span>
                           </div>
                           <h3 className="text-xl font-bold text-slate-900 mb-3 hover:text-slate-700">
                             {post.title}
@@ -245,7 +278,7 @@ export default function BlogPage() {
                           <Calendar className="w-4 h-4 mr-1" />
                           <span className="mr-3">{post.date}</span>
                           <User className="w-4 h-4 mr-1" />
-                          <span>{post.author}</span>
+                          <span>{getAuthorName(post.author)}</span>
                         </div>
                         <h3 className="text-xl font-bold text-slate-900 mb-3 hover:text-slate-700">
                           {post.title}
@@ -301,7 +334,7 @@ export default function BlogPage() {
                         <Calendar className="w-4 h-4 mr-1" />
                         <span className="mr-3">{post.date}</span>
                         <User className="w-4 h-4 mr-1" />
-                        <span>{post.author}</span>
+                        <span>{getAuthorName(post.author)}</span>
                       </div>
                       <h3 className="text-xl font-bold text-slate-900 mb-3 hover:text-slate-700">
                         {post.title}
@@ -369,7 +402,7 @@ export default function BlogPage() {
                             <Calendar className="w-4 h-4 mr-1" />
                             <span className="mr-3">{post.date}</span>
                             <User className="w-4 h-4 mr-1" />
-                            <span>{post.author}</span>
+                            <span>{getAuthorName(post.author)}</span>
                           </div>
                           <h3 className="text-xl font-bold text-slate-900 mb-3 hover:text-slate-700">
                             {post.title}
@@ -412,6 +445,8 @@ export default function BlogPage() {
       </div>
 
       <Assistant page="/blog" />
+      </>
+      )}
     </div>
   )
 }

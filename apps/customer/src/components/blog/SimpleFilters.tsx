@@ -1,9 +1,8 @@
 'use client'
 
+import type { BlogPost } from '@my-hibachi/blog-types';
 import { ChevronDown, MapPin, Search, Users, X } from 'lucide-react'
 import React, { useState } from 'react'
-
-import { BlogPost } from '@/data/blogPosts'
 
 interface SimpleFiltersProps {
   posts: BlogPost[]

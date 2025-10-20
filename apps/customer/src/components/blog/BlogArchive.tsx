@@ -4,7 +4,7 @@ import { Archive, Calendar, ChevronDown, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
 
-import { BlogPost } from '@/data/blogPosts';
+import type { BlogPost } from '@my-hibachi/blog-types';
 
 interface BlogArchiveProps {
   posts: BlogPost[];

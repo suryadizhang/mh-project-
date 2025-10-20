@@ -49,7 +49,7 @@ export default function MenuHero() {
 
         {/* Value Proposition */}
         <div className={styles.valueProposition}>
-          {hero.valueProposition.map((item: string, index: number) => (
+          {hero.valueProposition.map((item, index) => (
             <div key={index}>
               <div className={styles.valueItem}>
                 <span className={`${styles.valueIcon} emoji-visible`}>{item.icon}</span>

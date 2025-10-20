@@ -1,0 +1,23 @@
+{
+  "name": "@my-hibachi/blog-types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types for My Hibachi blog system",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "blog",
+    "types",
+    "typescript"
+  ],
+  "author": "My Hibachi Team",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

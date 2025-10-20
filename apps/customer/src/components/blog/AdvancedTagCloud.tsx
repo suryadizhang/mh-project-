@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import type { BlogPost } from '@my-hibachi/blog-types';
 
-import { blogPosts, type BlogPost } from '@/data/blogPosts';
+import { useAllPosts } from '@/hooks/useBlogAPI';
 
 interface TagData {
   name: string;
@@ -30,97 +31,101 @@ const AdvancedTagCloud: React.FC<AdvancedTagCloudProps> = ({
   onTagClick,
 }) => {
   const [hoveredTag, setHoveredTag] = useState<string | null>(null);
+  const [tags, setTags] = useState<TagData[]>([]);
 
-  // Extract and count all tags
-  const generateTagData = (): TagData[] => {
-    const tagCounts = new Map<string, number>();
+  // Use cached hook for all posts
+  const { data, isLoading: loading } = useAllPosts();
+  const allPosts = useMemo(() => data?.posts ?? [], [data]);
 
-    // Count tag occurrences
-    blogPosts.forEach((post: BlogPost) => {
-      post.keywords.forEach((keyword: string) => {
-        const normalizedTag = keyword.toLowerCase().trim();
-        tagCounts.set(normalizedTag, (tagCounts.get(normalizedTag) || 0) + 1);
+  // Calculate tags when posts are loaded
+  useEffect(() => {
+    if (allPosts.length === 0) return;
+
+    try {
+      const posts = allPosts;
+      // Count tag occurrences
+      const tagCounts = new Map<string, number>();
+      posts.forEach((post: BlogPost) => {
+        post.keywords.forEach((keyword: string) => {
+          const normalizedTag = keyword.toLowerCase().trim();
+          tagCounts.set(normalizedTag, (tagCounts.get(normalizedTag) || 0) + 1);
+        });
       });
-    });
 
-    // Convert to array and calculate percentages
-    const totalPosts = blogPosts.length;
-    const tagArray = Array.from(tagCounts.entries()).map(([tag, count]) => ({
-      name: tag,
-      count,
-      percentage: (count / totalPosts) * 100,
-    }));
+      // Convert to array and calculate percentages
+      const totalPosts = posts.length;
+      const tagArray: TagData[] = Array.from(tagCounts.entries())
+        .map(([tag, count]) => ({
+          name: tag,
+          count,
+          percentage: (count / totalPosts) * 100,
+          color: '',
+          size: 'base' as TagData['size'],
+          weight: 'normal' as TagData['weight'],
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, maxTags);
 
-    // Sort by count and take top tags
-    const sortedTags = tagArray.sort((a, b) => b.count - a.count).slice(0, maxTags);
+      // Calculate tag sizes and weights based on count
+      const maxCount = Math.max(...tagArray.map(t => t.count));
+      const minCount = Math.min(...tagArray.map(t => t.count));
+      const range = maxCount - minCount || 1;
 
-    // Calculate sizes and weights based on usage
-    const maxCount = Math.max(...sortedTags.map((t) => t.count));
-    const minCount = Math.min(...sortedTags.map((t) => t.count));
+      tagArray.forEach(tag => {
+        const normalized = (tag.count - minCount) / range;
 
-    return sortedTags.map((tag, index) => {
-      // Calculate relative size
-      const normalizedSize = (tag.count - minCount) / (maxCount - minCount);
+        // Set size
+        if (normalized > 0.8) tag.size = '2xl';
+        else if (normalized > 0.6) tag.size = 'xl';
+        else if (normalized > 0.4) tag.size = 'lg';
+        else if (normalized > 0.2) tag.size = 'base';
+        else tag.size = 'sm';
 
-      const size =
-        normalizedSize > 0.8
-          ? '2xl'
-          : normalizedSize > 0.6
-            ? 'xl'
-            : normalizedSize > 0.4
-              ? 'lg'
-              : normalizedSize > 0.2
-                ? 'base'
-                : 'sm';
+        // Set weight
+        if (normalized > 0.7) tag.weight = 'bold';
+        else if (normalized > 0.5) tag.weight = 'semibold';
+        else if (normalized > 0.3) tag.weight = 'medium';
+        else tag.weight = 'normal';
 
-      const weight =
-        normalizedSize > 0.7
-          ? 'bold'
-          : normalizedSize > 0.5
-            ? 'semibold'
-            : normalizedSize > 0.3
-              ? 'medium'
-              : 'normal';
+        // Set color based on scheme
+        tag.color = getTagColor(tag.name, colorScheme);
+      });
 
-      // Generate colors based on scheme
-      let color = '';
-      switch (colorScheme) {
-        case 'gradient':
-          const hue = (index * 137.5) % 360; // Golden angle distribution
-          color = `hsl(${hue}, 70%, 50%)`;
-          break;
-        case 'categorical':
-          const categories = [
-            'text-slate-600',
-            'text-slate-700',
-            'text-slate-500',
-            'text-slate-800',
-            'text-slate-400',
-            'text-slate-900',
-            'text-slate-600',
-            'text-slate-500',
-          ];
-          color = categories[index % categories.length];
-          break;
-        case 'monochrome':
-          const intensities = [
-            'text-slate-400',
-            'text-slate-500',
-            'text-slate-600',
-            'text-slate-700',
-            'text-slate-800',
-          ];
-          color = intensities[Math.floor(normalizedSize * (intensities.length - 1))];
-          break;
-      }
+      setTags(tagArray);
+    } catch (error) {
+      console.error('Failed to load tags:', error);
+    }
+  }, [allPosts, maxTags, colorScheme]);
 
-      return {
-        ...tag,
-        color,
-        size,
-        weight,
-      };
-    });
+  // Extract and count all tags (kept for backwards compatibility)
+  const generateTagData = (): TagData[] => {
+    return tags;
+  };
+
+  // Color generation helper
+  const getTagColor = (tagName: string, scheme: string) => {
+    const hash = tagName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    
+    switch (scheme) {
+      case 'gradient':
+        const hue = (hash * 137.5) % 360; // Golden angle distribution
+        return `hsl(${hue}, 70%, 50%)`;
+      case 'categorical':
+        const categories = [
+          'text-blue-600', 'text-purple-600', 'text-pink-600',
+          'text-red-600', 'text-orange-600', 'text-yellow-600',
+          'text-green-600', 'text-teal-600', 'text-cyan-600'
+        ];
+        return categories[hash % categories.length];
+      case 'monochrome':
+        const intensities = [
+          'text-slate-400', 'text-slate-500', 'text-slate-600',
+          'text-slate-700', 'text-slate-800'
+        ];
+        return intensities[hash % intensities.length];
+      default:
+        return 'text-slate-600';
+    }
   };
 
   const tagData = generateTagData();
@@ -160,6 +165,19 @@ const AdvancedTagCloud: React.FC<AdvancedTagCloudProps> = ({
       onTagClick(tag);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-slate-900">Popular Topics</h2>
+        </div>
+        <div className="flex items-center justify-center py-8">
+          <div className="text-sm text-slate-500">Loading topics...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
@@ -280,7 +298,7 @@ const AdvancedTagCloud: React.FC<AdvancedTagCloudProps> = ({
             <div className="text-xs text-slate-500">Avg Usage</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-slate-700">{blogPosts.length}</div>
+            <div className="text-2xl font-bold text-slate-700">{allPosts.length}</div>
             <div className="text-xs text-slate-500">Total Posts</div>
           </div>
         </div>
