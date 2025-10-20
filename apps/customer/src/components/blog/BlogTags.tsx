@@ -1,9 +1,8 @@
 'use client'
 
+import type { BlogPost } from '@my-hibachi/blog-types';
 import { Filter, Tag, X } from 'lucide-react'
 import { useState } from 'react'
-
-import type { BlogPost } from '@/data/blogPosts'
 
 interface BlogTagsProps {
   posts: BlogPost[]

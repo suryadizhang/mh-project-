@@ -1,9 +1,8 @@
 'use client';
 
+import type { BlogPost } from '@my-hibachi/blog-types';
 import { ChevronRight, Folder, Grid, List } from 'lucide-react';
 import { useState } from 'react';
-
-import type { BlogPost } from '@/data/blogPosts';
 
 interface BlogCategoriesProps {
   posts: BlogPost[];

@@ -1,3 +1,4 @@
+import type { BlogPost } from '@my-hibachi/blog-types';
 import { ArrowLeft, Calendar, Share2, User } from 'lucide-react';
 import { Metadata } from 'next';
 import Link from 'next/link';
@@ -5,8 +6,8 @@ import { notFound } from 'next/navigation';
 
 import BlogStructuredData from '@/components/blog/BlogStructuredData';
 import Assistant from '@/components/chat/Assistant';
+import { blogService } from '@/lib/blog/blogService';
 import { BreadcrumbSchema, LocalBusinessSchema } from '@/components/seo/TechnicalSEO';
-import blogPosts, { getPostsByEventType, getPostsByServiceArea, type BlogPost } from '@/data/blogPosts';
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
@@ -15,7 +16,7 @@ interface BlogPostPageProps {
 // Generate metadata for SEO
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = blogPosts.find((p: BlogPost) => p.slug === slug);
+  const post = await blogService.getPostBySlug(slug);
 
   if (!post) {
     return {
@@ -23,6 +24,8 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     };
   }
 
+  const authorName = typeof post.author === 'string' ? post.author : post.author?.name || 'My Hibachi Team';
+  
   return {
     title: `${post.title} | My Hibachi Blog`,
     description: post.metaDescription,
@@ -31,7 +34,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       title: post.title,
       description: post.metaDescription,
       type: 'article',
-      authors: [post.author],
+      authors: [authorName],
       publishedTime: new Date(post.date).toISOString(),
     },
     twitter: {
@@ -44,25 +47,26 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 
 // Generate static params for all blog posts
 export async function generateStaticParams() {
-  return blogPosts.map((post: BlogPost) => ({
+  const posts = await blogService.getAllPosts();
+  return posts.map((post: BlogPost) => ({
     slug: post.slug,
   }));
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
-  const post = blogPosts.find((p: BlogPost) => p.slug === slug);
+  const post = await blogService.getPostBySlug(slug);
 
   if (!post) {
     notFound();
   }
 
   // Get related posts based on event type and service area
-  const relatedByEvent = getPostsByEventType(post.eventType)
+  const relatedByEvent = (await blogService.getPostsByEventType(post.eventType))
     .filter((p: BlogPost) => p.id !== post.id)
     .slice(0, 2);
 
-  const relatedByArea = getPostsByServiceArea(post.serviceArea)
+  const relatedByArea = (await blogService.getPostsByServiceArea(post.serviceArea))
     .filter((p: BlogPost) => p.id !== post.id && !relatedByEvent.includes(p))
     .slice(0, 1);
 
@@ -228,7 +232,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               </div>
               <div className="flex items-center">
                 <User className="mr-2 h-4 w-4" />
-                <span>{post.author}</span>
+                <span>{typeof post.author === 'string' ? post.author : post.author?.name || 'My Hibachi Team'}</span>
               </div>
               <span>{post.readTime}</span>
             </div>

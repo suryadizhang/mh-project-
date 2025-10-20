@@ -1,10 +1,11 @@
 'use client'
 
+import type { BlogPost } from '@my-hibachi/blog-types';
 import { ArrowRight, Calendar, User } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 
-import { BlogPost } from '@/data/blogPosts'
+import { getAuthorName } from '@/lib/blog/helpers'
 
 import BlogCardImage from './BlogCardImage'
 
@@ -105,7 +106,7 @@ export default function RelatedPosts({ currentPost, allPosts, maxPosts = 3 }: Re
                   <Calendar className="w-3 h-3 mr-1" />
                   <span className="mr-3">{post.date}</span>
                   <User className="w-3 h-3 mr-1" />
-                  <span>{post.author}</span>
+                  <span>{getAuthorName(post.author)}</span>
                 </div>
 
                 <h4 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2">

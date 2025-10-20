@@ -1,8 +1,10 @@
 import { MetadataRoute } from 'next';
 
-import { blogPosts, type BlogPost } from '@/data/blogPosts';
+import type { BlogPost } from '@my-hibachi/blog-types';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+import { blogService } from '@/lib/blog/blogService';
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://myhibachi.com';
 
   // Static pages
@@ -45,7 +47,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // Blog posts
+  // Blog posts - load dynamically
+  const blogPosts = await blogService.getAllPosts();
   const blogPages = blogPosts.map((post: BlogPost) => ({
     url: `${baseUrl}/blog/${post.slug}`,
     lastModified: new Date(post.date),

@@ -1,6 +1,5 @@
-import Script from 'next/script'
-
-import { type BlogPost } from '@/data/blogPosts'
+import type { BlogPost } from '@my-hibachi/blog-types';
+import Script from 'next/script';
 
 interface BlogStructuredDataProps {
   post: BlogPost

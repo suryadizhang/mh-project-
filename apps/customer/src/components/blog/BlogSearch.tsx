@@ -1,10 +1,10 @@
 'use client'
 
 import { Filter, Search, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
+import type { BlogPost } from '@my-hibachi/blog-types'
 
-import type { BlogPost } from '@/data/blogPosts'
-import { getAllCategories, getAllEventTypes, getAllServiceAreas } from '@/data/blogPosts'
+import { useCategories, useServiceAreas, useEventTypes } from '@/hooks/useBlogAPI'
 
 interface BlogSearchProps {
   posts: BlogPost[]
@@ -18,9 +18,24 @@ export default function BlogSearch({ posts, onFilteredPosts }: BlogSearchProps) 
   const [selectedEvent, setSelectedEvent] = useState('All')
   const [showFilters, setShowFilters] = useState(false)
 
-  const categories = ['All', ...getAllCategories()]
-  const serviceAreas = ['All', ...getAllServiceAreas()]
-  const eventTypes = ['All', ...getAllEventTypes()]
+  // Use cached hooks for filter options
+  const { data: categoriesData } = useCategories()
+  const { data: serviceAreasData } = useServiceAreas()
+  const { data: eventTypesData } = useEventTypes()
+
+  // Extract arrays from API responses
+  const categories = useMemo(
+    () => ['All', ...(categoriesData?.categories ?? [])],
+    [categoriesData]
+  )
+  const serviceAreas = useMemo(
+    () => ['All', ...(serviceAreasData?.serviceAreas ?? [])],
+    [serviceAreasData]
+  )
+  const eventTypes = useMemo(
+    () => ['All', ...(eventTypesData?.eventTypes ?? [])],
+    [eventTypesData]
+  )
 
   useEffect(() => {
     let filtered = posts

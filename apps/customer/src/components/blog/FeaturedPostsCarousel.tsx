@@ -2,9 +2,11 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import type { BlogPost } from '@my-hibachi/blog-types';
 
-import { blogPosts, type BlogPost } from '@/data/blogPosts';
+import { useFeaturedPosts, useRecentPosts } from '@/hooks/useBlogAPI';
+import { getAuthorName } from '@/lib/blog/helpers';
 
 interface FeaturedPostsCarouselProps {
   maxPosts?: number;
@@ -26,11 +28,18 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Get featured posts or top posts
-  const featuredPosts = blogPosts.filter((post: BlogPost) => post.featured).slice(0, maxPosts);
+  // Use cached hooks for blog data
+  const { data: featuredData, isLoading: featuredLoading } = useFeaturedPosts(maxPosts);
+  const { data: recentData, isLoading: recentLoading } = useRecentPosts(maxPosts);
 
-  // If not enough featured posts, get top posts by ID (simulating popularity)
-  const displayPosts = featuredPosts.length >= 3 ? featuredPosts : blogPosts.slice(0, maxPosts);
+  // Select posts: featured if available (>= 3), otherwise recent
+  const displayPosts = useMemo(() => {
+    const featuredPosts = featuredData?.posts ?? [];
+    const recentPosts = recentData?.posts ?? [];
+    return featuredPosts.length >= 3 ? featuredPosts : recentPosts;
+  }, [featuredData, recentData]);
+
+  const loading = featuredLoading || recentLoading;
 
   // Auto-play functionality
   useEffect(() => {
@@ -65,8 +74,22 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
         return 'h-96';
       case 'xl':
         return 'h-[32rem]';
+      default:
+        return 'h-96';
     }
   };
+
+  if (loading || displayPosts.length === 0) {
+    return (
+      <div className={`relative overflow-hidden rounded-xl bg-slate-100 ${getHeightClass()}`}>
+        <div className="flex h-full items-center justify-center">
+          <div className="text-slate-400">
+            {loading ? 'Loading featured posts...' : 'No featured posts available'}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (displayPosts.length === 0) {
     return null;
@@ -81,7 +104,7 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* Slides */}
-        {displayPosts.map((post: any, index: number) => (
+        {displayPosts.map((post: BlogPost, index: number) => (
           <div
             key={post.id}
             className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
@@ -132,7 +155,7 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
                         clipRule="evenodd"
                       />
                     </svg>
-                    <span>{post.author}</span>
+                    <span>{getAuthorName(post.author)}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
@@ -255,7 +278,7 @@ const FeaturedPostsCarousel: React.FC<FeaturedPostsCarouselProps> = ({
 
       {/* Mini Thumbnails */}
       <div className="absolute right-4 bottom-4 z-20 hidden space-x-2 lg:flex">
-        {displayPosts.map((post: any, index: number) => (
+        {displayPosts.map((post: BlogPost, index: number) => (
           <button
             key={post.id}
             onClick={() => goToSlide(index)}

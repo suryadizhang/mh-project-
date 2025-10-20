@@ -4,7 +4,7 @@ import { BookOpen, Calendar, ChevronRight, Tag, Users } from 'lucide-react';
 import Link from 'next/link';
 import React, { useState } from 'react';
 
-import { BlogPost } from '@/data/blogPosts';
+import type { BlogPost } from '@my-hibachi/blog-types';
 
 import BlogCardImage from './BlogCardImage';
 
@@ -243,7 +243,7 @@ export default function ContentSeries({
               {selectedSeries === series.id && (
                 <div className="border-t border-gray-200 bg-gray-50 p-4">
                   <div className="grid gap-3">
-                    {series.posts.map((post: any, index: number) => (
+                    {series.posts.map((post: BlogPost, index: number) => (
                       <div
                         key={post.id}
                         className="flex items-center space-x-3 rounded-lg border border-gray-200 bg-white p-3"

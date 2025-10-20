@@ -1,10 +1,11 @@
 'use client'
 
+import type { BlogPost } from '@my-hibachi/blog-types';
 import { Calendar, ChevronDown, ChevronUp, Clock, User } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 
-import type { BlogPost } from '@/data/blogPosts'
+import { getAuthorName } from '@/lib/blog/helpers'
 
 interface BlogCardProps {
   post: BlogPost
@@ -39,7 +40,7 @@ export default function BlogCard({ post, category }: BlogCardProps) {
           </div>
           <div className="flex items-center">
             <User className="w-4 h-4 mr-1" />
-            <span className="mr-4">{post.author}</span>
+            <span className="mr-4">{getAuthorName(post.author)}</span>
           </div>
           <div className="flex items-center">
             <Clock className="w-4 h-4 mr-1" />

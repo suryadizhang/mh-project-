@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
+import type { BlogPost } from '@my-hibachi/blog-types';
 
-import { blogPosts, type BlogPost } from '@/data/blogPosts';
+import { useAllPosts } from '@/hooks/useBlogAPI';
 
 interface SearchResult {
   id: number;
@@ -42,6 +43,10 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Use cached hook for all posts
+  const { data } = useAllPosts();
+  const allPosts = useMemo(() => data?.posts ?? [], [data]);
+
   // Auto focus if requested
   useEffect(() => {
     if (autoFocus && inputRef.current) {
@@ -70,7 +75,7 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
 
       const searchResults: SearchResult[] = [];
 
-      blogPosts.forEach((post: BlogPost) => {
+      allPosts.forEach((post: BlogPost) => {
         let relevanceScore = 0;
         const matches: { type: SearchResult['matchType']; text: string; score: number }[] = [];
 
@@ -140,12 +145,12 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
           );
 
           searchResults.push({
-            id: post.id,
+            id: typeof post.id === 'number' ? post.id : parseInt(String(post.id)),
             title: post.title,
             slug: post.slug,
             excerpt: post.excerpt,
             category: post.category,
-            author: post.author,
+            author: typeof post.author === 'string' ? post.author : post.author?.name || 'My Hibachi Team',
             date: post.date,
             matchType: bestMatch.type,
             matchText: bestMatch.text,
@@ -157,7 +162,7 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
       // Sort by relevance and limit results
       return searchResults.sort((a, b) => b.relevanceScore - a.relevanceScore).slice(0, maxResults);
     },
-    [maxResults],
+    [maxResults, allPosts],
   );
 
   // Perform search

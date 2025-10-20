@@ -1,10 +1,9 @@
 'use client'
 
+import type { BlogPost } from '@my-hibachi/blog-types';
 import { Calendar, Eye, Star, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
-
-import { BlogPost } from '@/data/blogPosts'
 
 import BlogCardImage from './BlogCardImage'
 
@@ -67,7 +66,8 @@ export default function PopularPosts({
     if (post.serviceArea && post.serviceArea !== 'All Areas') score += 8
 
     // Add deterministic variance based on post ID to simulate engagement
-    score += post.id % 20
+    const postId = typeof post.id === 'number' ? post.id : parseInt(String(post.id), 10) || 0
+    score += postId % 20
 
     return score
   }
@@ -164,11 +164,11 @@ export default function PopularPosts({
                   <div className="flex items-center space-x-3 text-xs text-gray-400">
                     <div className="flex items-center">
                       <Eye className="w-3 h-3 mr-1" />
-                      <span>{((post.id * 37) % 900) + 100}</span>
+                      <span>{((Number(post.id) * 37) % 900) + 100}</span>
                     </div>
                     <div className="flex items-center">
                       <TrendingUp className="w-3 h-3 mr-1" />
-                      <span className="text-green-600">+{((post.id * 23) % 40) + 10}%</span>
+                      <span className="text-green-600">+{((Number(post.id) * 23) % 40) + 10}%</span>
                     </div>
                   </div>
                 </div>

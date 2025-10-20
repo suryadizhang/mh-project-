@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import React from 'react';
+import React, { useMemo } from 'react';
+import type { BlogPost } from '@my-hibachi/blog-types';
 
-import { blogPosts, type BlogPost } from '@/data/blogPosts';
+import { useAllPosts } from '@/hooks/useBlogAPI';
 
 interface TrendingPost {
   id: number;
@@ -30,26 +31,31 @@ const TrendingPosts: React.FC<TrendingPostsProps> = ({
   showTrend = true,
   compact = false,
 }) => {
+  // Use cached hook for all posts
+  const { data, isLoading: loading } = useAllPosts();
+  const blogPosts = useMemo(() => data?.posts ?? [], [data]);
+
   // Generate trending data based on post ID for consistency
-  const generateTrendingData = (posts: typeof blogPosts): TrendingPost[] => {
+  const generateTrendingData = (posts: BlogPost[]): TrendingPost[] => {
     return posts.map((post: BlogPost) => {
-      const baseViews = ((post.id * 47) % 1000) + 500; // 500-1500 base views
+      const postId = typeof post.id === 'number' ? post.id : parseInt(String(post.id));
+      const baseViews = ((postId * 47) % 1000) + 500; // 500-1500 base views
       const timeMultiplier = timeframe === 'week' ? 0.3 : timeframe === 'month' ? 0.7 : 1;
       const views = Math.floor(baseViews * timeMultiplier);
 
       // Deterministic trend calculation
-      const trendSeed = (post.id * 23) % 100;
+      const trendSeed = (postId * 23) % 100;
       const trend: 'up' | 'down' | 'stable' =
         trendSeed > 70 ? 'up' : trendSeed < 30 ? 'down' : 'stable';
 
-      const trendPercentage = ((post.id * 13) % 50) + 5; // 5-55% change
+      const trendPercentage = ((postId * 13) % 50) + 5; // 5-55% change
 
       // Extract reading time number from string like "6 min read"
       const readingTimeMatch = post.readTime.match(/\d+/);
       const readingTime = readingTimeMatch ? parseInt(readingTimeMatch[0]) : 5;
 
       return {
-        id: post.id,
+        id: postId,
         title: post.title,
         slug: post.slug,
         category: post.category,
@@ -61,6 +67,16 @@ const TrendingPosts: React.FC<TrendingPostsProps> = ({
       };
     });
   };
+
+  if (loading) {
+    return (
+      <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex items-center justify-center">
+          <div className="text-sm text-slate-500">Loading trending posts...</div>
+        </div>
+      </div>
+    );
+  }
 
   const trendingPosts = generateTrendingData(blogPosts)
     .sort((a, b) => b.views - a.views)
