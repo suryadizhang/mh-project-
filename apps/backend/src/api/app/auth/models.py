@@ -27,13 +27,13 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from api.app.utils.encryption import FieldEncryption
 
-Base = declarative_base()
+# Import unified Base (avoid circular import)
+from api.app.models.declarative_base import Base
 
 
 class UserStatus(str, Enum):

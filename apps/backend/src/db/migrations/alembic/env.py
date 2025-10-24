@@ -5,15 +5,17 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-# Add app directory to path
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+# Add src directory to path (go up from alembic/versions to src)
+backend_src = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+if backend_src not in sys.path:
+    sys.path.insert(0, backend_src)
 
 # Import after path manipulation to avoid import errors
-from app.config import settings  # noqa: E402
-from app.database import Base  # noqa: E402
+from api.app.config import settings  # noqa: E402
+from api.app.database import Base  # noqa: E402
 
 # Import all models for Alembic discovery
-from app.models import booking_models, stripe_models  # noqa: E402, F401
+from api.app.models import booking_models, stripe_models, core  # noqa: E402, F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

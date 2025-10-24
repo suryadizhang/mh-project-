@@ -21,11 +21,11 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-Base = declarative_base()
+# Import unified Base (avoid circular import)
+from api.app.models.declarative_base import Base
 
 
 class StationStatus(str, Enum):
@@ -250,9 +250,9 @@ class Station(Base):
     phone = Column(String(50), nullable=True)
     address = Column(Text, nullable=True)
     city = Column(String(100), nullable=True)
-    state = Column(String(50), nullable=True)
+    state = Column(String(50), nullable=True)  # US State code (e.g., "NY", "CA")
     postal_code = Column(String(20), nullable=True)
-    country = Column(String(100), nullable=False, default="US")
+    country = Column(String(100), nullable=True, default="US")  # Optional, auto-detect from location
     timezone = Column(String(50), nullable=False, default="America/New_York")
     
     # Operational settings

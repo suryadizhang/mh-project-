@@ -16,10 +16,10 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 
-Base = declarative_base()
+# Use unified Base from models package
+from api.app.models.declarative_base import Base
 
 
 class DomainEvent(Base):

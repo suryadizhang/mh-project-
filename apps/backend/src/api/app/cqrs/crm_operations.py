@@ -2,11 +2,11 @@
 CRM-specific commands, queries, and events for booking operations.
 """
 from datetime import date as Date
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Literal, Optional
 from uuid import UUID
 
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 
 from api.app.cqrs.base import Command, Event, Query
 
@@ -37,18 +37,22 @@ class CreateBookingCommand(Command):
     # Idempotency
     idempotency_key: Optional[str] = None
 
-    @validator('total_due_cents')
-    def validate_total_matches_calculation(cls, v, values):
+    @field_validator('total_due_cents')
+    @classmethod
+    def validate_total_matches_calculation(cls, v, info):
         """Validate total matches price per person * guests."""
+        values = info.data
         if 'price_per_person_cents' in values and 'total_guests' in values:
             expected = values['price_per_person_cents'] * values['total_guests']
             if v != expected:
                 raise ValueError(f'Total due ({v}) must equal price per person ({values["price_per_person_cents"]}) × guests ({values["total_guests"]}) = {expected}')
         return v
 
-    @validator('deposit_due_cents')
-    def validate_deposit_reasonable(cls, v, values):
+    @field_validator('deposit_due_cents')
+    @classmethod
+    def validate_deposit_reasonable(cls, v, info):
         """Validate deposit is reasonable percentage of total."""
+        values = info.data
         if 'total_due_cents' in values:
             if v < 0 or v > values['total_due_cents']:
                 raise ValueError(f'Deposit ({v}) must be between 0 and total due ({values["total_due_cents"]})')
@@ -139,7 +143,7 @@ class ReceiveMessageCommand(Command):
     thread_id: Optional[UUID] = None  # If known thread
     phone_number: str = Field(..., pattern=r'^\+?[\d\s\-\(\)]+$')
     content: str = Field(..., min_length=1, max_length=1000)
-    received_at: datetime = Field(default_factory=datetime.utcnow)
+    received_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     # Integration details
     external_message_id: str  # RingCentral message ID
@@ -191,9 +195,11 @@ class GetCustomer360Query(Query):
     include_payments: bool = True
     include_messages: bool = True
 
-    @validator('customer_id')
-    def validate_one_identifier(cls, v, values):
+    @field_validator('customer_id')
+    @classmethod
+    def validate_one_identifier(cls, v, info):
         """Ensure exactly one identifier is provided."""
+        values = info.data
         identifiers = [v, values.get('customer_email'), values.get('customer_phone')]
         provided = [x for x in identifiers if x is not None]
         if len(provided) != 1:

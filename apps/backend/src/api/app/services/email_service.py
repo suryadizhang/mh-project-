@@ -4,8 +4,8 @@ Compatible with the source backend email functionality.
 """
 import logging
 import smtplib
-from email.mime.text import MimeText
-from email.mime.multipart import MimeMultipart
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from typing import List, Optional
 
 from api.app.config import settings
@@ -19,8 +19,8 @@ class EmailService:
     def __init__(self):
         self.smtp_host = settings.smtp_host
         self.smtp_port = settings.smtp_port
-        self.smtp_user = settings.smtp_user or settings.email_user
-        self.smtp_password = settings.smtp_password or settings.email_pass
+        self.smtp_user = settings.smtp_user
+        self.smtp_password = settings.smtp_password
         self.from_email = settings.from_email
         self.enabled = not settings.disable_email and bool(self.smtp_user)
         
@@ -31,18 +31,18 @@ class EmailService:
             return
             
         try:
-            msg = MimeMultipart('alternative')
+            msg = MIMEMultipart('alternative')
             msg['Subject'] = subject
             msg['From'] = self.from_email
             msg['To'] = ', '.join(to_emails)
             
             # Add plain text part
-            text_part = MimeText(body, 'plain')
+            text_part = MIMEText(body, 'plain')
             msg.attach(text_part)
             
             # Add HTML part if provided
             if html_body:
-                html_part = MimeText(html_body, 'html')
+                html_part = MIMEText(html_body, 'html')
                 msg.attach(html_part)
                 
             with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:

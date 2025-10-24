@@ -107,9 +107,10 @@ class PasswordResetConfirmModel(BaseModel):
 # Initialize services
 def get_auth_service() -> AuthenticationService:
     """Get authentication service instance."""
+    from api.app.config import settings
     return AuthenticationService(
         FieldEncryption(),
-        jwt_secret="your-jwt-secret-here"  # This should come from config
+        jwt_secret=settings.secret_key  # From environment variable JWT_SECRET
     )
 
 
