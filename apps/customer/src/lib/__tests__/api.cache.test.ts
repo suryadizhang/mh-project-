@@ -53,7 +53,7 @@ describe('API Client Caching Integration', () => {
         },
       })
 
-      expect(result1).toEqual(mockData)
+      expect(result1).toEqual({ data: mockData, success: true })
       expect(mockFetch).toHaveBeenCalledTimes(1)
 
       // Second call - should use cache
@@ -65,7 +65,7 @@ describe('API Client Caching Integration', () => {
         },
       })
 
-      expect(result2).toEqual(mockData)
+      expect(result2).toEqual({ data: mockData, success: true })
       expect(mockFetch).toHaveBeenCalledTimes(1) // Still 1 - cached
     })
 
@@ -99,7 +99,7 @@ describe('API Client Caching Integration', () => {
         },
       })
 
-      expect(result).toEqual(mockData)
+      expect(result).toEqual({ data: mockData, success: true })
       expect(mockFetch).toHaveBeenCalledTimes(1) // Used same cache key
     })
 
@@ -166,7 +166,7 @@ describe('API Client Caching Integration', () => {
       })
       const duration = Date.now() - startTime
 
-      expect(result).toEqual(mockData)
+      expect(result).toEqual({ data: mockData, success: true })
       expect(duration).toBeLessThan(50) // Should be near-instant
       expect(mockFetch).toHaveBeenCalledTimes(1)
     })
@@ -196,7 +196,7 @@ describe('API Client Caching Integration', () => {
           ttl,
         },
       })
-      expect(result1).toEqual({ version: 1 })
+      expect(result1).toEqual({ data: { version: 1 }, success: true })
 
       // Wait for expiration
       await new Promise(resolve => setTimeout(resolve, ttl + 50))
@@ -208,7 +208,7 @@ describe('API Client Caching Integration', () => {
           ttl,
         },
       })
-      expect(result2).toEqual({ version: 2 })
+      expect(result2).toEqual({ data: { version: 2 }, success: true })
       expect(mockFetch).toHaveBeenCalledTimes(2)
     })
   })
@@ -239,7 +239,7 @@ describe('API Client Caching Integration', () => {
           ttl,
         },
       })
-      expect(result1).toEqual({ count: 1 })
+      expect(result1).toEqual({ data: { count: 1 }, success: true })
 
       // Wait for expiration
       await new Promise(resolve => setTimeout(resolve, ttl + 50))
@@ -251,7 +251,7 @@ describe('API Client Caching Integration', () => {
           ttl,
         },
       })
-      expect(result2).toEqual({ count: 1 }) // Still stale
+      expect(result2).toEqual({ data: { count: 1 }, success: true }) // Still stale
       expect(mockFetch).toHaveBeenCalledTimes(2) // But triggered revalidation
 
       // Wait for revalidation
@@ -264,7 +264,7 @@ describe('API Client Caching Integration', () => {
           ttl,
         },
       })
-      expect(result3).toEqual({ count: 2 })
+      expect(result3).toEqual({ data: { count: 2 }, success: true })
     })
   })
 
@@ -292,7 +292,7 @@ describe('API Client Caching Integration', () => {
           ttl: 60000,
         },
       })
-      expect(result1).toEqual({ value: 'first' })
+      expect(result1).toEqual({ data: { value: 'first' }, success: true })
 
       // Second call - should try network again
       const result2 = await apiFetch('/api/v1/data', {
@@ -301,7 +301,7 @@ describe('API Client Caching Integration', () => {
           ttl: 60000,
         },
       })
-      expect(result2).toEqual({ value: 'second' })
+      expect(result2).toEqual({ data: { value: 'second' }, success: true })
       expect(mockFetch).toHaveBeenCalledTimes(2)
     })
 
@@ -332,7 +332,7 @@ describe('API Client Caching Integration', () => {
         },
       })
 
-      expect(result).toEqual({ data: 'cached' })
+      expect(result).toEqual({ data: { data: 'cached' }, success: true })
       expect(mockFetch).toHaveBeenCalledTimes(2)
     })
   })
@@ -542,7 +542,7 @@ describe('API Client Caching Integration', () => {
         },
       })
 
-      expect(result).toEqual({ data: 'success' })
+      expect(result).toEqual({ data: { data: 'success' }, success: true })
       expect(mockFetch).toHaveBeenCalledTimes(2)
     })
 
@@ -561,7 +561,7 @@ describe('API Client Caching Integration', () => {
         new Error('Cache error')
       )
 
-      // Should fallback to normal fetch
+      // Should return error response when cache fails
       const result = await apiFetch('/api/v1/data', {
         cacheStrategy: {
           strategy: 'cache-first',
@@ -569,7 +569,9 @@ describe('API Client Caching Integration', () => {
         },
       })
 
-      expect(result).toEqual({ data: 'test' })
+      // When cache strategy fails, it returns an error response
+      expect(result.success).toBe(false)
+      expect(result.error).toBeTruthy()
     })
   })
 
