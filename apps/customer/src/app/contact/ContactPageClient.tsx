@@ -1,6 +1,7 @@
 'use client'
 
 import { logger } from '@/lib/logger'
+import { ContactForm } from '@/components/forms/ContactForm'
 
 // Type definitions
 declare global {
@@ -324,6 +325,29 @@ export default function ContactPageClient() {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Contact Form Section */}
+        <div className="row mb-5">
+          <div className="col-lg-8 mx-auto">
+            <div className="card contact-card">
+              <div className="card-body p-4 p-md-5">
+                <ContactForm
+                  onSuccess={() => {
+                    // Track conversion
+                    if (typeof window !== 'undefined' && window.dataLayer) {
+                      window.dataLayer.push({
+                        event: 'contact_form_submit',
+                        form_type: 'contact',
+                        page: '/contact',
+                      })
+                    }
+                    logger.info('Contact form submitted on contact page')
+                  }}
+                />
               </div>
             </div>
           </div>
