@@ -1,82 +1,24 @@
 # Models package init
+"""
+Unified database models with single declarative base.
 
-# Import all models for Alembic discovery
-from .booking_models import (
-    AddonItem,
-    Booking,
-    BookingAddon,
-    BookingAvailability,
-    BookingMenuItem,
-    BookingStatus,
-    MenuItem,
-    PreferredCommunication,
-    TimeSlotConfiguration,
-    TimeSlotEnum,
-    User,
-    UserRole,
-)
-from .stripe_models import (
-    Customer,
-    Dispute,
-    Invoice,
-    Payment,
-    Price,
-    Product,
-    Refund,
-    WebhookEvent,
-)
-from .core import Customer as CoreCustomer, Booking as CoreBooking, MessageThread, Message
-from .lead_newsletter import (
-    Lead, LeadContact, LeadContext, LeadEvent, SocialThread,
-    Subscriber, Campaign, CampaignEvent,
-    LeadSource, LeadStatus, LeadQuality, ContactChannel, SocialPlatform,
-    CampaignChannel, CampaignStatus, CampaignEventType
-)
+This module provides a single declarative_base() instance that all models
+must use to avoid cross-Base relationship issues and mapper initialization errors.
 
-__all__ = [
-    # Stripe models
-    "Customer",
-    "Payment",
-    "Invoice",
-    "Product",
-    "Price",
-    "WebhookEvent",
-    "Refund",
-    "Dispute",
-    # Booking models
-    "User",
-    "UserRole",
-    "BookingStatus",
-    "TimeSlotEnum",
-    "PreferredCommunication",
-    "TimeSlotConfiguration",
-    "Booking",
-    "MenuItem",
-    "AddonItem",
-    "BookingMenuItem",
-    "BookingAddon",
-    "BookingAvailability",
-    # Core CRM models
-    "CoreCustomer",
-    "CoreBooking",
-    "MessageThread",
-    "Message",
-    # Lead and Newsletter models
-    "Lead",
-    "LeadContact",
-    "LeadContext",
-    "LeadEvent",
-    "SocialThread",
-    "Subscriber",
-    "Campaign",
-    "CampaignEvent",
-    # Enums
-    "LeadSource",
-    "LeadStatus",
-    "LeadQuality",
-    "ContactChannel",
-    "SocialPlatform",
-    "CampaignChannel",
-    "CampaignStatus",
-    "CampaignEventType",
-]
+Architecture:
+- Single Base for all models across all schemas (core, identity, public, lead, newsletter)
+- Schema isolation via __table_args__ = {"schema": "schema_name"}
+- Proper ForeignKey references using fully qualified names (schema.table.column)
+
+IMPORTANT: Models are NOT automatically imported here to avoid circular imports.
+Import them directly from their modules as needed:
+  - from api.app.auth.station_models import Station
+  - from api.app.auth.models import User
+  - from api.app.models.core import Customer, Booking, Payment
+  - etc.
+"""
+
+# Only export Base - do NOT import model classes here
+from .declarative_base import Base
+
+__all__ = ["Base"]

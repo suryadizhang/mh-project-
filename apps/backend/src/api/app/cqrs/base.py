@@ -4,11 +4,11 @@ Base classes for CQRS Command and Query patterns with event sourcing.
 import hashlib
 import json
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional, Union
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -18,19 +18,19 @@ from api.app.models.events import DomainEvent, OutboxEntry
 class Command(BaseModel):
     """Base class for all commands."""
 
-    class Config:
-        # Allow arbitrary types for UUID, datetime, etc.
-        arbitrary_types_allowed = True
-        # Use enum values instead of enum objects
-        use_enum_values = True
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        use_enum_values=True
+    )
 
 
 class Query(BaseModel):
     """Base class for all queries."""
 
-    class Config:
-        arbitrary_types_allowed = True
-        use_enum_values = True
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        use_enum_values=True
+    )
 
 
 class Event(BaseModel):
@@ -40,11 +40,12 @@ class Event(BaseModel):
     aggregate_type: str
     event_type: str
     version: int = 1
-    occurred_at: datetime = Field(default_factory=datetime.utcnow)
+    occurred_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-    class Config:
-        arbitrary_types_allowed = True
-        use_enum_values = True
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        use_enum_values=True
+    )
 
 
 class CommandResult(BaseModel):
@@ -55,8 +56,7 @@ class CommandResult(BaseModel):
     events: list[Event] = Field(default_factory=list)
     error: Optional[str] = None
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class QueryResult(BaseModel):
@@ -67,8 +67,7 @@ class QueryResult(BaseModel):
     error: Optional[str] = None
     total_count: Optional[int] = None
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class CommandHandler(ABC):
@@ -235,7 +234,7 @@ class OutboxProcessor:
                     payload=self._build_outbox_payload(event, target),
                     attempts=0,
                     max_attempts=3,
-                    next_attempt_at=datetime.utcnow(),
+                    next_attempt_at=datetime.now(timezone.utc),
                     status='pending'
                 )
 
@@ -319,7 +318,7 @@ class OutboxProcessor:
         stmt = (
             select(OutboxEntry)
             .where(OutboxEntry.status == 'pending')
-            .where(OutboxEntry.next_attempt_at <= datetime.utcnow())
+            .where(OutboxEntry.next_attempt_at <= datetime.now(timezone.utc))
         )
 
         if target:

@@ -2,7 +2,7 @@ import logging
 from typing import Any, Optional
 import os
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import secrets
 import string
 
@@ -81,7 +81,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     
     # Add timestamp and jti for token tracking
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     to_encode.update({
         "iat": now,
         "jti": secrets.token_urlsafe(16)  # Unique token ID

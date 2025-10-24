@@ -4,8 +4,8 @@ from datetime import datetime
 from sqlalchemy import Column, DateTime
 from sqlalchemy.sql import func
 
-# Import the same Base used by core models
-from .core import Base
+# Import unified Base from models package
+from api.app.models.declarative_base import Base
 
 
 class BaseModel(Base):

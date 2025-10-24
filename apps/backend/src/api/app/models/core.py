@@ -15,11 +15,11 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.dialects.postgresql import UUID as PostgresUUID, JSONB
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-Base = declarative_base()
+# Use unified Base from models package
+from api.app.models.declarative_base import Base
 
 
 class Customer(Base):
@@ -50,7 +50,7 @@ class Customer(Base):
     updated_at = Column(DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now())
 
     # Relationships
-    station = relationship("Station", back_populates="customers")
+    station = relationship("Station", foreign_keys=[station_id])  # Now works with unified Base!
     bookings = relationship("Booking", back_populates="customer")
     message_threads = relationship("MessageThread", back_populates="customer")
     leads = relationship("Lead", back_populates="customer")
@@ -103,7 +103,7 @@ class Booking(Base):
     updated_at = Column(DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now())
 
     # Relationships
-    station = relationship("Station", back_populates="bookings")
+    station = relationship("Station", foreign_keys=[station_id])  # Now works with unified Base!
     customer = relationship("Customer", back_populates="bookings")
     payments = relationship("Payment", back_populates="booking")
 
@@ -184,7 +184,7 @@ class MessageThread(Base):
     updated_at = Column(DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now())
 
     # Relationships
-    station = relationship("Station")
+    station = relationship("Station", foreign_keys=[station_id])  # Now works with unified Base!
     customer = relationship("Customer", back_populates="message_threads")
     messages = relationship("Message", back_populates="thread")
 

@@ -75,7 +75,7 @@ try {
 } catch (error) {
   if (error instanceof z.ZodError) {
     console.error('\n❌ Admin Environment Variable Validation Failed:\n');
-    error.errors.forEach((err) => {
+    error.issues.forEach((err: z.ZodIssue) => {
       console.error(`  • ${err.path.join('.')}: ${err.message}`);
     });
     console.error('\nPlease check your .env.local file and ensure all required variables are set correctly.\n');

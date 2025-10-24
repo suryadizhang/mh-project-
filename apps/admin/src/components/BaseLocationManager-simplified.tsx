@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { apiFetch } from '@/lib/api';
+import { logger } from '@/lib/logger';
 
 interface CompanySettings {
   baseFeeStructure: {
@@ -68,7 +69,7 @@ export function BaseLocationManager() {
         setFormData(result.data as unknown as CompanySettings);
       }
     } catch (err) {
-      console.error('Error loading company settings:', err);
+      logger.error('Error loading company settings', { error: err });
     }
   };
 
@@ -140,7 +141,7 @@ export function BaseLocationManager() {
         });
       }
     } catch (err) {
-      console.error('Update error:', err);
+      logger.error('Company settings update failed', { error: err });
       setUpdateStatus({
         type: 'error',
         message: 'Network error. Please try again.',

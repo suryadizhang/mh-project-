@@ -7,7 +7,8 @@ from sqlalchemy import ForeignKey, Index, Integer, Numeric, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from api.app.database import Base
+# Use unified Base from models package
+from api.app.models.declarative_base import Base
 
 
 class UserRole(str, enum.Enum):
@@ -44,8 +45,8 @@ class PreferredCommunication(str, enum.Enum):
     EMAIL = "email"
 
 
-class User(Base):
-    """User model for authentication and profile management."""
+class LegacyUser(Base):
+    """Legacy user model for public.users table (authentication and profile management)."""
 
     __tablename__ = "users"
 
@@ -64,7 +65,7 @@ class User(Base):
     )
 
     # Relationships
-    bookings = relationship("Booking", back_populates="user")
+    bookings = relationship("LegacyBooking", back_populates="user")
 
     @property
     def full_name(self):
@@ -86,10 +87,11 @@ class TimeSlotConfiguration(Base):
     )
 
 
-class Booking(Base):
-    """Main booking model linking all booking information."""
+class LegacyBooking(Base):
+    """Legacy booking model from public schema (linking all booking information)."""
 
-    __tablename__ = "bookings"
+    __tablename__ = "bookings_legacy"  # Changed from "bookings" to avoid conflict with core.Booking
+    __table_args__ = {"schema": "public"}  # Use public schema for legacy model
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     booking_reference = Column(
@@ -152,7 +154,7 @@ class Booking(Base):
     completed_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    user = relationship("User", back_populates="bookings")
+    user = relationship("LegacyUser", back_populates="bookings")
     menu_items = relationship(
         "BookingMenuItem",
         back_populates="booking",
@@ -231,7 +233,7 @@ class BookingMenuItem(Base):
     __tablename__ = "booking_menu_items"
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    booking_id = Column(String, ForeignKey("bookings.id"), nullable=False)
+    booking_id = Column(String, ForeignKey("public.bookings_legacy.id"), nullable=False)
     menu_item_id = Column(String, ForeignKey("menu_items.id"), nullable=False)
     quantity = Column(Integer, nullable=False, default=1)
     unit_price = Column(
@@ -242,7 +244,7 @@ class BookingMenuItem(Base):
     )  # quantity * unit_price
 
     # Relationships
-    booking = relationship("Booking", back_populates="menu_items")
+    booking = relationship("LegacyBooking", back_populates="menu_items")
     menu_item = relationship("MenuItem")
 
 
@@ -252,7 +254,7 @@ class BookingAddon(Base):
     __tablename__ = "booking_addons"
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    booking_id = Column(String, ForeignKey("bookings.id"), nullable=False)
+    booking_id = Column(String, ForeignKey("public.bookings_legacy.id"), nullable=False)
     addon_item_id = Column(
         String, ForeignKey("addon_items.id"), nullable=False
     )
@@ -265,7 +267,7 @@ class BookingAddon(Base):
     )  # quantity * unit_price
 
     # Relationships
-    booking = relationship("Booking", back_populates="addons")
+    booking = relationship("LegacyBooking", back_populates="addons")
     addon_item = relationship("AddonItem")
 
 
@@ -291,14 +293,14 @@ class BookingAvailability(Base):
         return max(0, self.max_capacity - self.booked_count)
 
 
-# Create performance indexes
-Index("idx_bookings_date_time", Booking.event_date, Booking.event_time)
-Index("idx_bookings_status_date", Booking.status, Booking.event_date)
-Index("idx_bookings_customer_email", Booking.customer_email)
-Index("idx_bookings_reference", Booking.booking_reference)
+# Create performance indexes for legacy models
+Index("idx_bookings_date_time", LegacyBooking.event_date, LegacyBooking.event_time)
+Index("idx_bookings_status_date", LegacyBooking.status, LegacyBooking.event_date)
+Index("idx_bookings_customer_email", LegacyBooking.customer_email)
+Index("idx_bookings_reference", LegacyBooking.booking_reference)
 Index(
     "idx_booking_availability_date_time",
     BookingAvailability.date,
     BookingAvailability.time_slot,
 )
-Index("idx_users_email", User.email)
+Index("idx_users_email", LegacyUser.email)

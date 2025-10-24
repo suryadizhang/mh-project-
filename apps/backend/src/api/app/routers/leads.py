@@ -7,7 +7,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Query, BackgroundTasks
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, desc, asc
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from ..database import get_db
 from ..models.lead_newsletter import (
@@ -71,12 +71,11 @@ class LeadResponse(BaseModel):
     lost_reason: Optional[str]
     utm_source: Optional[str]
     utm_medium: Optional[str]
-    utm_campaign: Optional[str]
+    utm_campaign: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class LeadDetailResponse(LeadResponse):
@@ -104,8 +103,7 @@ class SocialThreadResponse(BaseModel):
     last_message_at: Optional[datetime]
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 @router.post("/", response_model=LeadResponse)
@@ -189,8 +187,8 @@ async def list_leads(
     follow_up_overdue: Optional[bool] = Query(None),
     limit: int = Query(50, le=100),
     offset: int = Query(0),
-    sort_by: str = Query("score", regex="^(score|created_at|follow_up_date|last_contact_date)$"),
-    sort_order: str = Query("desc", regex="^(asc|desc)$"),
+    sort_by: str = Query("score", pattern=r'^(score|created_at|follow_up_date|last_contact_date)$'),
+    sort_order: str = Query("desc", pattern=r'^(asc|desc)$'),
     db: Session = Depends(get_db)
 ):
     """List leads with filtering and sorting."""
