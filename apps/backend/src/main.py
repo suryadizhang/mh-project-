@@ -299,6 +299,14 @@ try:
 except ImportError as e:
     logger.warning(f"Some additional routers not available: {e}")
 
+# Include public lead capture endpoints (no auth required)
+try:
+    from api.v1.endpoints.public_leads import router as public_leads_router
+    app.include_router(public_leads_router, prefix="/api/v1/public", tags=["Public Lead Capture"])
+    logger.info("✅ Public lead capture endpoints included")
+except ImportError as e:
+    logger.warning(f"Public lead endpoints not available: {e}")
+
 # AI Chat endpoints from moved AI API
 try:
     from api.ai.endpoints.routers.chat import router as ai_chat_router
