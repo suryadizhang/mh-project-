@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
+import { logger } from '@/lib/logger';
+
 interface Payment {
   id: string;
   user_id: string;
@@ -98,7 +100,7 @@ export default function PaymentManagement() {
         setPayments(data);
       }
     } catch (error) {
-      console.error('Error fetching payments:', error);
+      logger.error(error as Error, { context: 'fetch_payments', filter });
     } finally {
       setLoading(false);
     }
@@ -116,7 +118,7 @@ export default function PaymentManagement() {
         setAnalytics(data);
       }
     } catch (error) {
-      console.error('Error fetching analytics:', error);
+      logger.error(error as Error, { context: 'fetch_analytics', filter });
     }
   }, [filter]);
 
@@ -144,7 +146,7 @@ export default function PaymentManagement() {
         alert(`Refund failed: ${error.detail}`);
       }
     } catch (error) {
-      console.error('Error processing refund:', error);
+      logger.error(error as Error, { context: 'process_refund', payment_id: selectedPayment?.stripe_payment_intent_id || selectedPayment?.id });
       alert('Refund failed. Please try again.');
     } finally {
       setRefundLoading(false);

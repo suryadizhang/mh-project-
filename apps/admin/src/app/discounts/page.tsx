@@ -5,6 +5,8 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { logger } from '@/lib/logger';
+
 // Validation schemas
 const discountSchema = z.object({
   name: z.string().min(1, 'Discount name is required'),
@@ -178,7 +180,7 @@ export default function AdminDiscountsPage() {
       }
       closeModal();
     } catch (error) {
-      console.error('Error saving discount:', error);
+      logger.error(error as Error, { context: 'save_discount', discount_id: editingDiscount?.id });
     } finally {
       setLoading(false);
     }

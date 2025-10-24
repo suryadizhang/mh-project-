@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { apiFetch } from '@/lib/api';
 
@@ -68,7 +69,7 @@ export function BaseLocationManager() {
         setFormData(result.data as unknown as CompanySettings);
       }
     } catch (err) {
-      console.error('Error loading company settings:', err);
+      logger.error(err as Error, { context: 'load_company_settings' });
     }
   };
 
@@ -144,7 +145,7 @@ export function BaseLocationManager() {
         });
       }
     } catch (err) {
-      console.error('Update error:', err);
+      logger.error(err as Error, { context: 'update_company_settings' });
       setUpdateStatus({
         type: 'error',
         message: 'Network error. Please try again.',

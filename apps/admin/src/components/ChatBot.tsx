@@ -23,6 +23,7 @@ import {
   Wifi,
   WifiOff
 } from 'lucide-react';
+import { logger } from '@/lib/logger';
 import { aiApiService, type AdminChatResponse, type ChatMessage } from '@/services/ai-api';
 import { useWebSocket, type WebSocketMessage } from '@/hooks/useWebSocket';
 
@@ -115,7 +116,7 @@ export default function ChatBot({
         break;
 
       case 'connection_status':
-        console.log('WebSocket connection status:', message.content);
+        logger.debug('WebSocket connection status', { status: message.content });
         break;
 
       case 'system':
@@ -142,7 +143,7 @@ export default function ChatBot({
         break;
 
       default:
-        console.log('Unknown WebSocket message type:', message.type);
+        logger.debug('Unknown WebSocket message type', { type: message.type });
     }
   }, [wsLastMessage, enableWebSocket]);
 
@@ -168,7 +169,7 @@ export default function ChatBot({
       const available = await aiApiService.isAvailable();
       setIsConnected(available);
     } catch (error) {
-      console.error('Failed to check AI API connection:', error);
+      logger.error(error as Error, { context: 'check_ai_api_connection' });
       setIsConnected(false);
     }
   };
@@ -242,7 +243,7 @@ export default function ChatBot({
         setMessages(prev => [...prev, botMessage]);
         
       } catch (error) {
-        console.error('Failed to send message:', error);
+        logger.error(error as Error, { context: 'send_message', conversation_id: conversationId });
         
         const errorMessage: Message = {
           id: Date.now().toString(),

@@ -13,6 +13,7 @@ import {
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { logger } from '@/lib/logger';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -156,7 +157,7 @@ export default function AdminInvoicePage() {
 
         setBooking(mockBooking);
       } catch (error) {
-        console.error('Error fetching booking:', error);
+        logger.error(error as Error, { context: 'fetch_booking', booking_id: bookingId });
       } finally {
         setLoading(false);
       }
@@ -259,7 +260,7 @@ export default function AdminInvoicePage() {
         window.open(url, '_blank');
       }
     } catch (error) {
-      console.error('Error generating invoice:', error);
+      logger.error(error as Error, { context: 'generate_invoice', booking_id: bookingId });
       alert('Error generating invoice. Please try again.');
     } finally {
       setGenerating(false);

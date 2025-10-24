@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
@@ -70,7 +71,7 @@ export const StationManager: React.FC<StationManagerProps> = ({ className }) => 
         setStationUsers(response.data);
       }
     } catch (err: any) {
-      console.error('Failed to load station users:', err);
+      logger.error(err as Error, { context: 'load_station_users', station_id: stationId });
     }
   };
 
@@ -81,7 +82,7 @@ export const StationManager: React.FC<StationManagerProps> = ({ className }) => 
         setAuditLogs(response.data);
       }
     } catch (err: any) {
-      console.error('Failed to load audit logs:', err);
+      logger.error(err as Error, { context: 'load_audit_logs', station_id: stationId });
     }
   };
 

@@ -6,6 +6,7 @@
 'use client';
 
 import { useEffect, useRef, useCallback, useState } from 'react';
+import { logger } from '@/lib/logger';
 
 export interface WebSocketMessage {
   type: 'message' | 'typing' | 'system' | 'error' | 'connection_status' | 'ai_response';
@@ -82,12 +83,12 @@ export function useWebSocket(config: WebSocketConfig): WebSocketHookResult {
 
     try {
       const wsUrl = buildWebSocketUrl();
-      console.log('Connecting to WebSocket:', wsUrl);
+      logger.websocket('connect', { url: wsUrl });
       
       ws.current = new WebSocket(wsUrl);
 
       ws.current.onopen = () => {
-        console.log('WebSocket connected');
+        logger.websocket('connect', { status: 'connected' });
         setIsConnected(true);
         setIsConnecting(false);
         setConnectionError(null);
@@ -105,22 +106,25 @@ export function useWebSocket(config: WebSocketConfig): WebSocketHookResult {
       ws.current.onmessage = (event) => {
         try {
           const message: WebSocketMessage = JSON.parse(event.data);
-          console.log('WebSocket message received:', message);
+          logger.websocket('message', { type: message.type, conversation_id: message.conversation_id });
           setLastMessage(message);
         } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
+          logger.error(error as Error, { context: 'websocket_parse' });
         }
       };
 
       ws.current.onclose = (event) => {
-        console.log('WebSocket closed:', event.code, event.reason);
+        logger.websocket('disconnect', { code: event.code, reason: event.reason });
         setIsConnected(false);
         setIsConnecting(false);
 
         // Attempt reconnection if enabled
         if (autoReconnect && reconnectAttempts.current < maxReconnectAttempts) {
           reconnectAttempts.current++;
-          console.log(`Reconnecting... Attempt ${reconnectAttempts.current}/${maxReconnectAttempts}`);
+          logger.websocket('reconnect', { 
+            attempt: reconnectAttempts.current, 
+            maxAttempts: maxReconnectAttempts 
+          });
           
           reconnectTimeout.current = setTimeout(() => {
             connect();
@@ -131,13 +135,13 @@ export function useWebSocket(config: WebSocketConfig): WebSocketHookResult {
       };
 
       ws.current.onerror = (error) => {
-        console.error('WebSocket error:', error);
+        logger.websocket('error', { error: String(error) });
         setConnectionError('WebSocket connection error');
         setIsConnecting(false);
       };
 
     } catch (error) {
-      console.error('Error creating WebSocket:', error);
+      logger.error(error as Error, { context: 'websocket_creation' });
       setConnectionError('Failed to create WebSocket connection');
       setIsConnecting(false);
     }
@@ -239,7 +243,7 @@ export class WebSocketService {
         this.ws = new WebSocket(wsUrl);
 
         this.ws.onopen = () => {
-          console.log('WebSocket service connected');
+          logger.websocket('connect', { service: 'WebSocketService', status: 'connected' });
           resolve();
         };
 
@@ -252,17 +256,17 @@ export class WebSocketService {
               handler(message);
             });
           } catch (error) {
-            console.error('Error parsing WebSocket message:', error);
+            logger.error(error as Error, { context: 'websocket_service_parse' });
           }
         };
 
         this.ws.onerror = (error) => {
-          console.error('WebSocket service error:', error);
+          logger.websocket('error', { service: 'WebSocketService', error: String(error) });
           reject(error);
         };
 
         this.ws.onclose = () => {
-          console.log('WebSocket service disconnected');
+          logger.websocket('disconnect', { service: 'WebSocketService' });
         };
 
       } catch (error) {

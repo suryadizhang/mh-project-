@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { Calendar, Mail, TrendingUp, Users, Building, Shield, Bot } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/lib/logger';
 import { AdminChatWidget } from '@/components/AdminChatWidget';
 import { StationManager } from '@/components/StationManager';
 
@@ -208,9 +209,9 @@ export default function AdminDashboard() {
       );
 
       // Show success message (you could add a toast notification here)
-      console.log(`Booking ${bookingId} updated to ${newStatus}`);
+      logger.info('Booking status updated', { booking_id: bookingId, new_status: newStatus });
     } catch (error) {
-      console.error('Failed to update booking:', error);
+      logger.error(error as Error, { context: 'update_booking_status', booking_id: bookingId });
     }
   };
 
