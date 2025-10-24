@@ -256,6 +256,29 @@ class BookingService:
         )
         
         if not is_available:
+            # Capture failed booking as lead for follow-up
+            try:
+                from ..services.lead_service import LeadService
+                lead_service = LeadService(db=self.repository.db)
+                
+                await lead_service.capture_failed_booking(
+                    contact_info={
+                        "email": booking_data.contact_email,
+                        "phone": booking_data.contact_phone
+                    },
+                    booking_data={
+                        "event_date": booking_data.event_date,
+                        "party_size": booking_data.party_size,
+                        "event_time": booking_data.event_time,
+                        "special_requests": booking_data.special_requests
+                    },
+                    failure_reason=f"Time slot {booking_data.event_time} already booked"
+                )
+                logger.info(f"Captured failed booking as lead for {booking_data.contact_email}")
+            except Exception as e:
+                # Don't fail the booking flow if lead capture fails
+                logger.warning(f"Failed to capture lead from failed booking: {e}")
+            
             raise ConflictException(
                 message=f"Time slot {booking_data.event_time} on {booking_data.event_date} is not available",
                 error_code=ErrorCode.BOOKING_NOT_AVAILABLE
