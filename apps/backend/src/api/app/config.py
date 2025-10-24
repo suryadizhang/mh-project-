@@ -55,6 +55,12 @@ class Settings(BaseSettings):
     enable_metrics: bool = True
     metrics_port: int = 8001
     prometheus_multiproc_dir: str = "/tmp/prometheus_multiproc_dir"
+    
+    # Sentry Configuration
+    sentry_dsn: str = ""
+    sentry_environment: str = ""  # Will use environment if not set
+    sentry_traces_sample_rate: float = 0.1  # 10% of transactions
+    sentry_profiles_sample_rate: float = 0.1  # 10% profiling
 
     # CORS Configuration
     cors_origins: list[str] = [

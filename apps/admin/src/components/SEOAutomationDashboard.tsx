@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 
+import { logger } from '@/lib/logger';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -75,9 +76,9 @@ export default function SEOAutomationDashboard() {
         lastRun: new Date().toISOString(),
         automationStatus: 'active',
       });
-      console.log('Automation completed:', result);
+      logger.info('Automation completed', { result });
     } catch (error) {
-      console.error('Automation failed:', error);
+      logger.error(error as Error, { context: 'run_automation' });
     } finally {
       setIsRunning(false);
     }

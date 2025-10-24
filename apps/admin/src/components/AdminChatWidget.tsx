@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { logger } from '@/lib/logger';
 
 interface Message {
   id: string;
@@ -77,7 +78,7 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
       wsRef.current = ws;
 
       ws.onopen = () => {
-        console.log('Admin chat WebSocket connected');
+        logger.websocket('connect', { status: 'connected', channel: 'admin_chat' });
         setIsConnected(true);
         if (reconnectTimeoutRef.current) {
           clearTimeout(reconnectTimeoutRef.current);
@@ -127,12 +128,12 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
             setIsTyping(false);
           }
         } catch (error) {
-          console.error('Failed to parse WebSocket message:', error);
+          logger.error(error as Error, { context: 'websocket_message_parse', channel: 'admin_chat' });
         }
       };
 
       ws.onclose = () => {
-        console.log('Admin chat WebSocket disconnected');
+        logger.websocket('disconnect', { channel: 'admin_chat' });
         setIsConnected(false);
         setIsLoading(false);
         setIsTyping(false);
@@ -146,13 +147,13 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
       };
 
       ws.onerror = (error) => {
-        console.error('Admin chat WebSocket error:', error);
+        logger.websocket('error', { error, channel: 'admin_chat' });
         setIsConnected(false);
         setIsLoading(false);
         setIsTyping(false);
       };
     } catch (error) {
-      console.error('Failed to create admin chat WebSocket connection:', error);
+      logger.error(error as Error, { context: 'websocket_create', channel: 'admin_chat' });
       setIsConnected(false);
     }
   }, [canUseChat, token, stationContext]);
@@ -210,7 +211,7 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
           timestamp: new Date().toISOString(),
         }));
       } catch (error) {
-        console.error('WebSocket send error:', error);
+        logger.error(error as Error, { context: 'websocket_send', channel: 'admin_chat' });
         setIsLoading(false);
         await sendMessageHTTP(content);
       }
@@ -258,7 +259,7 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
-      console.error('Admin chat HTTP error:', error);
+      logger.error(error as Error, { context: 'http_chat', channel: 'admin_chat' });
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',

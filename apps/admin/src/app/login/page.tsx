@@ -7,6 +7,7 @@ import { Eye, EyeOff, LogIn, Building } from 'lucide-react';
 import { authService, stationService } from '@/services/api';
 import type { Station } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/lib/logger';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -53,7 +54,7 @@ export default function LoginPage() {
         setError('Login failed. Please try again.');
       }
     } catch (err: any) {
-      console.error('Login error:', err);
+      logger.error(err as Error, { context: 'login', email: formData.email });
       setError(err.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
@@ -80,7 +81,7 @@ export default function LoginPage() {
         setError('Station login failed. Please try again.');
       }
     } catch (err: any) {
-      console.error('Station login error:', err);
+      logger.error(err as Error, { context: 'station_login', email: formData.email, station_id: stationId });
       setError(err.message || 'Station login failed. Please try again.');
     } finally {
       setLoading(false);

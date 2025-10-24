@@ -3,6 +3,7 @@
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { logger } from '@/lib/logger';
 
 import {
   BookingFormData,
@@ -65,8 +66,8 @@ export function useBooking() {
     try {
       const result = await apiFetch('/api/v1/bookings/booked-dates');
       if (result.success && result.data) {
-        console.log('Booked dates response:', result.data);
         const bookedDatesData = result.data as unknown as BookedDatesResponse;
+        logger.debug('Booked dates fetched', { count: bookedDatesData.bookedDates?.length });
         const dates =
           bookedDatesData.bookedDates?.map(
             (dateStr: string) => new Date(dateStr)
@@ -76,7 +77,7 @@ export function useBooking() {
         throw new Error('Failed to fetch booked dates');
       }
     } catch (error) {
-      console.error('Error fetching booked dates:', error);
+      logger.error(error as Error, { context: 'fetch_booked_dates' });
       setDateError('Unable to load booked dates. Please try again.');
     } finally {
       setLoadingDates(false);
@@ -104,11 +105,11 @@ export function useBooking() {
         );
         setAvailableTimeSlots(formattedSlots);
       } else {
-        console.error('Failed to fetch availability');
+        logger.warn('Failed to fetch availability', { date: format(date, 'yyyy-MM-dd') });
         setAvailableTimeSlots([]);
       }
     } catch (error) {
-      console.error('Error fetching availability:', error);
+      logger.error(error as Error, { context: 'fetch_availability', date: format(date, 'yyyy-MM-dd') });
       setAvailableTimeSlots([]);
     } finally {
       setLoadingTimeSlots(false);
@@ -184,7 +185,7 @@ export function useBooking() {
       setFormData(data);
       setShowAgreementModal(true);
     } catch (error) {
-      console.error('Error in form submission:', error);
+      logger.error(error as Error, { context: 'form_submission' });
       setIsSubmitting(false);
     }
   };

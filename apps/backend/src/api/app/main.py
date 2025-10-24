@@ -13,8 +13,48 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from starlette.middleware.wsgi import WSGIMiddleware
 
+# Import Sentry for error tracking and performance monitoring
+import sentry_sdk
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
+from sentry_sdk.integrations.logging import LoggingIntegration
+
 from api.app.auth.middleware import setup_auth_middleware
 from api.app.config import settings
+
+# Initialize Sentry if DSN is configured
+if settings.sentry_dsn:
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        environment=settings.sentry_environment or settings.environment,
+        integrations=[
+            FastApiIntegration(transaction_style="endpoint"),
+            SqlalchemyIntegration(),
+            RedisIntegration(),
+            LoggingIntegration(
+                level=logging.INFO,  # Capture info and above as breadcrumbs
+                event_level=logging.ERROR  # Send errors as events
+            ),
+        ],
+        # Performance Monitoring
+        traces_sample_rate=settings.sentry_traces_sample_rate,
+        profiles_sample_rate=settings.sentry_profiles_sample_rate,
+        
+        # Additional options
+        send_default_pii=False,  # Don't send personally identifiable information
+        attach_stacktrace=True,
+        enable_tracing=True,
+        
+        # Before send hook to filter sensitive data
+        before_send=lambda event, hint: (
+            None if settings.environment == "development" and not settings.debug 
+            else event
+        ),
+    )
+    logging.info(f"✅ Sentry monitoring initialized (environment: {settings.sentry_environment or settings.environment})")
+else:
+    logging.info("⚠️ Sentry DSN not configured - monitoring disabled")
 
 # Import CRM components
 from api.app.crm.endpoints import router as crm_router
@@ -219,6 +259,18 @@ if getattr(settings, 'enable_metrics', False):
 async def global_exception_handler(request: Request, exc: Exception):
     request_id = request.headers.get("X-Request-ID", "unknown")
     logger.error(f"Unhandled error on {request.method} {request.url}: {exc}", extra={"request_id": request_id})
+    
+    # Capture exception in Sentry with context
+    if settings.sentry_dsn:
+        with sentry_sdk.push_scope() as scope:
+            scope.set_context("request", {
+                "url": str(request.url),
+                "method": request.method,
+                "headers": dict(request.headers),
+                "request_id": request_id,
+            })
+            scope.set_tag("endpoint", request.url.path)
+            sentry_sdk.capture_exception(exc)
 
     # Don't expose internal errors in production
     if settings.environment == "production":
@@ -283,6 +335,10 @@ app.include_router(crm_router, prefix="/api", tags=["crm"])
 # Payment Processing
 app.include_router(stripe.router, prefix="/api/stripe", tags=["payments"])
 
+# Payment Analytics (separate router for /api/payments/analytics)
+from api.app.routers.payments import router as payments_router
+app.include_router(payments_router, prefix="/api/payments", tags=["payment-analytics"])
+
 # Lead and Newsletter Management
 from api.app.routers.leads import router as leads_router
 from api.app.routers.newsletter import router as newsletter_router
@@ -297,6 +353,10 @@ app.include_router(admin_analytics_router, prefix="/api", tags=["admin", "analyt
 # Legacy API compatibility (for existing frontend)
 app.include_router(bookings.router, prefix="/api/booking", tags=["booking-legacy"])
 app.include_router(bookings.router, prefix="/api/bookings", tags=["bookings-legacy"])
+
+# Enhanced Booking Admin API (includes /admin/kpis and /admin/customer-analytics)
+from api.app.routers.booking_enhanced import router as booking_enhanced_router
+app.include_router(booking_enhanced_router, prefix="/api", tags=["booking-enhanced", "admin"])
 
 
 @app.get("/")
