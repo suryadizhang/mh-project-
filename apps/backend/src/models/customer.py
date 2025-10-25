@@ -58,8 +58,8 @@ class Customer(BaseModel):
     last_booking_date = Column(DateTime)
     last_visit_date = Column(DateTime)
     
-    # Relationships (commented out to avoid circular imports for now)
-    # bookings = relationship("Booking", back_populates="customer")
+    # Relationships
+    bookings = relationship("Booking", back_populates="customer", lazy="select")
     
     def __repr__(self):
         return f"<Customer(id={self.id}, email={self.email}, name={self.full_name})>"
