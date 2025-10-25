@@ -37,7 +37,7 @@ class RateLimiter:
         if self.redis_client is None:
             try:
                 if not REDIS_AVAILABLE:
-                    print("⚠️ Redis module not available, using memory-based rate limiting")
+                    print("[WARNING] Redis module not available, using memory-based rate limiting")
                     self.redis_client = None
                     self.redis_available = False
                     return
@@ -52,9 +52,9 @@ class RateLimiter:
                 with open(script_path, 'r') as f:
                     self.rate_limit_script = self.redis_client.register_script(f.read())
                 
-                print("✅ Redis connected for rate limiting with atomic Lua script")
+                print("[SUCCESS] Redis connected for rate limiting with atomic Lua script")
             except Exception as e:
-                print(f"⚠️ Redis unavailable, using memory-based rate limiting: {e}")
+                print(f"[WARNING] Redis unavailable, using memory-based rate limiting: {e}")
                 self.redis_client = None
                 self.redis_available = False
     

@@ -128,7 +128,11 @@ class Lead(BaseModel):
     source = Column(Enum(LeadSource), nullable=False)
     status = Column(Enum(LeadStatus), nullable=False, default=LeadStatus.NEW)
     quality = Column(Enum(LeadQuality), nullable=True)
-    customer_id = Column(UUID(as_uuid=True), ForeignKey('core.customers.id', ondelete='SET NULL'), nullable=True)
+    customer_id = Column(
+        UUID(as_uuid=True), 
+        nullable=True,
+        comment="Soft reference to customer (validated at application level)"
+    )  # No FK - keeps modules decoupled, validated in service layer
     score = Column(Numeric(5,2), nullable=False, default=0)
     assigned_to = Column(String(100), nullable=True)
     last_contact_date = Column(DateTime(timezone=True), nullable=True)
@@ -140,7 +144,7 @@ class Lead(BaseModel):
     utm_campaign = Column(String(100), nullable=True)
 
     # Relationships
-    customer = relationship("Customer", back_populates="leads")
+    # customer = relationship("Customer", back_populates="leads")  # Commented out - Customer model not in this module
     contacts = relationship("LeadContact", back_populates="lead", cascade="all, delete-orphan")
     context = relationship("LeadContext", back_populates="lead", uselist=False, cascade="all, delete-orphan")
     events = relationship("LeadEvent", back_populates="lead", cascade="all, delete-orphan")
@@ -280,7 +284,7 @@ class SocialThread(BaseModel):
     platform = Column(Enum(SocialPlatform), nullable=False)
     thread_external_id = Column(String(255), nullable=False)  # External platform thread ID
     lead_id = Column(UUID(as_uuid=True), ForeignKey('lead.leads.id', ondelete='SET NULL'), nullable=True)
-    customer_id = Column(UUID(as_uuid=True), ForeignKey('core.customers.id', ondelete='SET NULL'), nullable=True)
+    customer_id = Column(UUID(as_uuid=True), nullable=True)  # FK removed - Customer model not in this module
     
     # Thread management
     status = Column(Enum(ThreadStatus), nullable=False, default=ThreadStatus.OPEN)
@@ -294,7 +298,7 @@ class SocialThread(BaseModel):
 
     # Relationships
     lead = relationship("Lead", back_populates="social_threads")
-    customer = relationship("Customer", back_populates="social_threads")
+    # customer = relationship("Customer", back_populates="social_threads")  # Commented out - Customer model not in this module
 
 
 # Newsletter models
@@ -307,7 +311,7 @@ class Subscriber(BaseModel):
     )
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    customer_id = Column(UUID(as_uuid=True), ForeignKey('core.customers.id', ondelete='SET NULL'), nullable=True)
+    customer_id = Column(UUID(as_uuid=True), nullable=True)  # FK removed - Customer model not in this module
     email_enc = Column(LargeBinary, nullable=False)
     phone_enc = Column(LargeBinary, nullable=True)
     subscribed = Column(Boolean, nullable=False, default=True)
@@ -326,7 +330,7 @@ class Subscriber(BaseModel):
     unsubscribed_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    customer = relationship("Customer", back_populates="newsletter_subscriptions")
+    # customer = relationship("Customer", back_populates="newsletter_subscriptions")  # Commented out - Customer model not in this module
     campaign_events = relationship("CampaignEvent", back_populates="subscriber", cascade="all, delete-orphan")
 
     @property

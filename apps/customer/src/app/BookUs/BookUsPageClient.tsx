@@ -194,7 +194,7 @@ export default function BookUsPageClient() {
     setShowAgreementModal(true);
   };
 
-  const handleAgreementConfirm = async () => {
+    const handleAgreementConfirm = async () => {
     if (!formData) return;
 
     setIsSubmitting(true);
@@ -204,14 +204,31 @@ export default function BookUsPageClient() {
       // DO NOT log formData - contains PII (name, email, phone, address)
       logger.debug('Submitting booking request');
 
-      const submissionData = {
-        ...formData,
-        eventDate: format(formData.eventDate, 'yyyy-MM-dd'),
-        submittedAt: new Date().toISOString(),
-        status: 'pending',
+      // Map form data to backend schema
+      const fullAddress = formData.sameAsVenue
+        ? `${formData.addressStreet}, ${formData.addressCity}, ${formData.addressState} ${formData.addressZipcode}`
+        : `${formData.venueStreet}, ${formData.venueCity}, ${formData.venueState} ${formData.venueZipcode}`;
+
+      // Convert 12-hour time to 24-hour format
+      const timeMap: Record<string, string> = {
+        '12PM': '12:00',
+        '3PM': '15:00',
+        '6PM': '18:00',
+        '9PM': '21:00',
       };
 
-      const response = await apiFetch('/api/v1/bookings/submit', {
+      const submissionData = {
+        customer_name: formData.name,
+        customer_phone: formData.phone,
+        customer_email: formData.email,
+        date: format(formData.eventDate, 'yyyy-MM-dd'),
+        time: timeMap[formData.eventTime] || '18:00',
+        guests: formData.guestCount,
+        location_address: fullAddress,
+        special_requests: '', // Form doesn't have special requests field yet
+      };
+
+      const response = await apiFetch('/api/v1/public/bookings', {
         method: 'POST',
         body: JSON.stringify(submissionData),
       });
@@ -677,6 +694,17 @@ export default function BookUsPageClient() {
                       </div>
                     </>
                   )}
+                </div>
+
+                {/* Newsletter Auto-Subscribe Notice */}
+                <div className="form-section">
+                  <div className="mb-4 p-3" style={{ backgroundColor: '#fff7ed', border: '1px solid #fed7aa', borderRadius: '0.5rem' }}>
+                    <p className="text-xs" style={{ color: '#374151', margin: 0 }}>
+                      📧 <strong>You&apos;ll automatically receive our newsletter</strong> with exclusive offers and hibachi tips.
+                      <br />
+                      <span style={{ color: '#6b7280' }}>Don&apos;t want updates? Simply reply <strong>&quot;STOP&quot;</strong> anytime to unsubscribe.</span>
+                    </p>
+                  </div>
                 </div>
 
                 {/* Submit Button */}

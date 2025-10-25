@@ -9,10 +9,11 @@ from fastapi import APIRouter, Request, HTTPException, status, Depends, Backgrou
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 
-from ..database import get_db
-from ..models.lead_newsletter import Lead, LeadContact, SocialThread, ContactChannel
-from ..services.ringcentral_sms import ringcentral_sms, SMSMessage
-from ..services.ai_lead_management import get_ai_lead_manager, get_social_media_ai
+from api.app.database import get_db
+from api.app.models.lead_newsletter import Lead, LeadContact, SocialThread, ContactChannel
+from api.app.services.ringcentral_sms import ringcentral_sms, SMSMessage
+from api.app.services.ai_lead_management import get_ai_lead_manager, get_social_media_ai
+from api.app.services.newsletter_service import NewsletterService
 
 
 logger = logging.getLogger(__name__)
@@ -116,7 +117,54 @@ async def _process_sms_message(message: SMSMessage, db: Session):
         phone_number = message.from_number
         message_content = message.body
         
-        # Find existing lead or customer by phone number
+        # Check for STOP/START commands first (newsletter opt-out system)
+        newsletter_service = NewsletterService(db)
+        
+        if newsletter_service.is_stop_command(message_content):
+            success, response_msg = await newsletter_service.process_stop_command(
+                phone=phone_number,
+                channel='sms'
+            )
+            
+            # Send confirmation message
+            async with ringcentral_sms as sms_service:
+                await sms_service.send_sms(
+                    to_number=phone_number,
+                    message=response_msg
+                )
+            
+            logger.info(f"Processed STOP command from {phone_number}: {success}")
+            return  # Don't process with AI
+        
+        if newsletter_service.is_start_command(message_content):
+            # Try to get name from existing lead or ask for it
+            lead = await _find_lead_by_phone(phone_number, db)
+            name = None
+            
+            if lead:
+                # Get name from lead contacts
+                for contact in lead.contacts:
+                    if hasattr(contact, 'name') and contact.name:
+                        name = contact.name
+                        break
+            
+            success, response_msg = await newsletter_service.process_start_command(
+                phone=phone_number,
+                name=name,
+                channel='sms'
+            )
+            
+            # Send confirmation message
+            async with ringcentral_sms as sms_service:
+                await sms_service.send_sms(
+                    to_number=phone_number,
+                    message=response_msg
+                )
+            
+            logger.info(f"Processed START command from {phone_number}: {success}")
+            return  # Don't process with AI
+        
+        # Normal message processing - find existing lead or customer by phone number
         lead = await _find_lead_by_phone(phone_number, db)
         customer = await _find_customer_by_phone(phone_number, db)
         

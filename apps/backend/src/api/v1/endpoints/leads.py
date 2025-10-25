@@ -7,6 +7,8 @@ from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_db
 from api.deps import get_current_admin_user, AdminUser
+from api.app.services.lead_service import LeadService
+from api.app.models.lead_newsletter import LeadStatus, LeadSource, LeadQuality
 import logging
 
 logger = logging.getLogger(__name__)
@@ -15,27 +17,9 @@ router = APIRouter()
 
 # Pydantic models for request/response
 from pydantic import BaseModel, EmailStr, Field
-from datetime import datetime
+from datetime import datetime, date
 from enum import Enum
-
-class LeadStatus(str, Enum):
-    NEW = "new"
-    CONTACTED = "contacted"
-    QUALIFIED = "qualified"
-    QUOTED = "quoted"
-    NEGOTIATING = "negotiating"
-    WON = "won"
-    LOST = "lost"
-
-class LeadSource(str, Enum):
-    WEBSITE = "website"
-    REFERRAL = "referral"
-    SOCIAL_MEDIA = "social_media"
-    GOOGLE_ADS = "google_ads"
-    INSTAGRAM = "instagram"
-    FACEBOOK = "facebook"
-    PHONE = "phone"
-    OTHER = "other"
+from uuid import UUID
 
 class LeadBase(BaseModel):
     first_name: str = Field(..., min_length=1, max_length=50)

@@ -23,13 +23,13 @@ from enum import Enum
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 
-from ..database import get_db
-from ..config import settings
-from ..models.lead_newsletter import Lead, LeadSource, LeadStatus, SocialThread, ThreadStatus, SocialPlatform
-from ..models.core import Event, Customer
-from ..services.ai_lead_management import get_ai_lead_manager
-from ..services.ringcentral_sms import RingCentralSMSService, send_sms_notification
-from ..websockets.unified_inbox import manager
+from api.app.database import get_db
+from api.app.config import settings
+from api.app.models.lead_newsletter import Lead, LeadSource, LeadStatus, SocialThread, ThreadStatus, SocialPlatform
+from api.app.models.core import Event, Customer
+from api.app.services.ai_lead_management import get_ai_lead_manager
+from api.app.services.ringcentral_sms import RingCentralSMSService, send_sms_notification
+from api.app.websockets.unified_inbox import manager
 
 logger = logging.getLogger(__name__)
 

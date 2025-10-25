@@ -14,8 +14,6 @@ interface QuoteFormData {
   budget: string
   location: string
   message: string
-  emailConsent: boolean
-  smsConsent: boolean
 }
 
 interface QuoteRequestFormProps {
@@ -41,9 +39,7 @@ export function QuoteRequestForm({ className = '', onSuccess }: QuoteRequestForm
     guestCount: 1,
     budget: '',
     location: '',
-    message: '',
-    emailConsent: true,
-    smsConsent: false
+    message: ''
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -61,10 +57,43 @@ export function QuoteRequestForm({ className = '', onSuccess }: QuoteRequestForm
     }))
   }
 
+  // Format phone number as user types
+  const formatPhoneForDisplay = (value: string): string => {
+    // Remove all non-digit characters
+    const digits = value.replace(/\D/g, '')
+    
+    // Format as (XXX) XXX-XXXX
+    if (digits.length <= 3) {
+      return digits
+    } else if (digits.length <= 6) {
+      return `(${digits.slice(0, 3)}) ${digits.slice(3)}`
+    } else {
+      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`
+    }
+  }
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneForDisplay(e.target.value)
+    setFormData(prev => ({ ...prev, phone: formatted }))
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
     setError(null)
+
+    // Validate required fields
+    if (!formData.name || formData.name.trim().length < 2) {
+      setError('Please enter your full name')
+      setIsSubmitting(false)
+      return
+    }
+
+    if (!formData.phone || formData.phone.replace(/\D/g, '').length < 10) {
+      setError('Please enter a valid phone number with at least 10 digits')
+      setIsSubmitting(false)
+      return
+    }
 
     try {
       // Call public lead capture endpoint (no auth required)
@@ -72,15 +101,13 @@ export function QuoteRequestForm({ className = '', onSuccess }: QuoteRequestForm
         method: 'POST',
         body: JSON.stringify({
           name: formData.name,
+          phone: formData.phone,  // Now required
           email: formData.email || undefined,
-          phone: formData.phone || undefined,
           event_date: formData.eventDate || undefined,
           guest_count: formData.guestCount || undefined,
           budget: formData.budget || undefined,
           location: formData.location || undefined,
           message: formData.message || undefined,
-          email_consent: formData.emailConsent,
-          sms_consent: formData.smsConsent,
           source: 'quote'
         })
       })
@@ -104,9 +131,7 @@ export function QuoteRequestForm({ className = '', onSuccess }: QuoteRequestForm
             guestCount: 1,
             budget: '',
             location: '',
-            message: '',
-            emailConsent: true,
-            smsConsent: false
+            message: ''
           })
           setSubmitted(false)
         }, 3000)
@@ -176,7 +201,7 @@ export function QuoteRequestForm({ className = '', onSuccess }: QuoteRequestForm
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address *
+              Email Address
             </label>
             <input
               type="email"
@@ -184,27 +209,28 @@ export function QuoteRequestForm({ className = '', onSuccess }: QuoteRequestForm
               name="email"
               value={formData.email}
               onChange={handleChange}
-              required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
               placeholder="john@example.com"
             />
+            <p className="text-sm text-gray-500 mt-1">Optional, but recommended for confirmations</p>
           </div>
 
           <div>
             <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-              Phone Number
+              Phone Number *
             </label>
             <input
               type="tel"
               id="phone"
               name="phone"
               value={formData.phone}
-              onChange={handleChange}
-              pattern="[0-9]{10,15}"
+              onChange={handlePhoneChange}
+              required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
               placeholder="(555) 123-4567"
+              maxLength={14}
             />
-            <p className="text-sm text-gray-500 mt-1">We may call to confirm details</p>
+            <p className="text-sm text-gray-500 mt-1">Required - We&apos;ll call to confirm your quote</p>
           </div>
         </div>
 
@@ -295,35 +321,13 @@ export function QuoteRequestForm({ className = '', onSuccess }: QuoteRequestForm
           </div>
         </div>
 
-        {/* Consent */}
-        <div className="space-y-3 mb-6">
-          <div className="flex items-start">
-            <input
-              type="checkbox"
-              id="emailConsent"
-              name="emailConsent"
-              checked={formData.emailConsent}
-              onChange={handleChange}
-              className="mt-1 h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
-            />
-            <label htmlFor="emailConsent" className="ml-2 text-sm text-gray-600">
-              I consent to receive email communications about my quote and event
-            </label>
-          </div>
-
-          <div className="flex items-start">
-            <input
-              type="checkbox"
-              id="smsConsent"
-              name="smsConsent"
-              checked={formData.smsConsent}
-              onChange={handleChange}
-              className="mt-1 h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
-            />
-            <label htmlFor="smsConsent" className="ml-2 text-sm text-gray-600">
-              I consent to receive SMS/text updates about my event (optional)
-            </label>
-          </div>
+        {/* Newsletter Auto-Subscribe Notice */}
+        <div className="mb-6 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+          <p className="text-xs text-gray-700">
+            📧 <strong>You&apos;ll automatically receive our newsletter</strong> with exclusive offers and hibachi tips.
+            <br />
+            <span className="text-gray-600">Don&apos;t want updates? Simply reply <strong>&quot;STOP&quot;</strong> anytime to unsubscribe.</span>
+          </p>
         </div>
 
         <button

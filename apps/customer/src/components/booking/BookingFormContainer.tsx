@@ -223,14 +223,31 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ className =
     try {
       logger.debug('Submitting booking request'); // DO NOT log formData - contains PII
 
-      const submissionData = {
-        ...formData,
-        eventDate: format(formData.eventDate, 'yyyy-MM-dd'),
-        submittedAt: new Date().toISOString(),
-        status: 'pending',
+      // Map form data to backend schema
+      const fullAddress = formData.sameAsVenue
+        ? `${formData.addressStreet}, ${formData.addressCity}, ${formData.addressState} ${formData.addressZipcode}`
+        : `${formData.venueStreet}, ${formData.venueCity}, ${formData.venueState} ${formData.venueZipcode}`;
+
+      // Convert 12-hour time to 24-hour format
+      const timeMap: Record<string, string> = {
+        '12PM': '12:00',
+        '3PM': '15:00',
+        '6PM': '18:00',
+        '9PM': '21:00',
       };
 
-      const response = await apiFetch('/api/v1/bookings/submit', {
+      const submissionData = {
+        customer_name: formData.name,
+        customer_phone: formData.phone,
+        customer_email: formData.email,
+        date: format(formData.eventDate, 'yyyy-MM-dd'),
+        time: timeMap[formData.eventTime] || '18:00',
+        guests: formData.guestCount,
+        location_address: fullAddress,
+        special_requests: '', // Form doesn't have special requests field yet
+      };
+
+      const response = await apiFetch('/api/v1/public/bookings', {
         method: 'POST',
         body: JSON.stringify(submissionData),
       });

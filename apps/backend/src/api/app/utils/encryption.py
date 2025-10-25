@@ -10,12 +10,15 @@ import base64
 import json
 import os
 import secrets
+import logging
 from functools import lru_cache
 from typing import Optional
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
+logger = logging.getLogger(__name__)
 
 
 class FieldEncryption:
@@ -42,7 +45,7 @@ class FieldEncryption:
         else:
             # Get from settings - in production this should come from KMS/Vault
             try:
-                from ..config import settings
+                from api.app.config import settings
                 master_key_b64 = settings.field_encryption_key
             except ImportError:
                 # Fallback to environment variable for standalone usage

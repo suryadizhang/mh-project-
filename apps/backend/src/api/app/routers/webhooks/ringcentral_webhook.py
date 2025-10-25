@@ -11,9 +11,9 @@ import json
 import logging
 from datetime import datetime
 
-from ...database import get_db
-from ...config import settings
-from ...services.ringcentral_sms import RingCentralSMSService, send_sms_notification
+from api.app.database import get_db
+from api.app.config import settings
+from api.app.services.ringcentral_sms import RingCentralSMSService, send_sms_notification
 
 logger = logging.getLogger(__name__)
 

@@ -4,7 +4,6 @@ import '@/styles/quote-calculator.css'
 
 import Assistant from '@/components/chat/Assistant'
 import { QuoteCalculator } from '@/components/quote/QuoteCalculator'
-import { QuoteRequestForm } from '@/components/forms/QuoteRequestForm'
 
 export default function QuotePage() {
   return (
@@ -107,37 +106,6 @@ export default function QuotePage() {
                 <div className="included-item">
                   <span className="included-icon">👨‍🍳</span>
                   <span>Professional chef & cooking entertainment</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Quote Request Form */}
-        <section className="section-background">
-          <div className="container">
-            <div className="row">
-              <div className="col-lg-8 mx-auto">
-                <div className="card" style={{ padding: '2rem' }}>
-                  <div className="mb-4 text-center">
-                    <h2 className="mb-2">Or Request a Custom Quote</h2>
-                    <p className="text-muted">
-                      Fill out the form below and we&apos;ll get back to you within 24 hours with a
-                      personalized quote.
-                    </p>
-                  </div>
-                  <QuoteRequestForm
-                    onSuccess={() => {
-                      // Track conversion
-                      if (typeof window !== 'undefined' && window.dataLayer) {
-                        window.dataLayer.push({
-                          event: 'quote_request_submit',
-                          form_type: 'quote',
-                          page: '/quote',
-                        })
-                      }
-                    }}
-                  />
                 </div>
               </div>
             </div>

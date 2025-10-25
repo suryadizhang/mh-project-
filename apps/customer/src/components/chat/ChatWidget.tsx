@@ -87,6 +87,22 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
       : Math.random().toString(36).substring(7),
   );
 
+  // User contact information state
+  const [userName, setUserName] = useState<string | null>(
+    typeof window !== 'undefined' ? localStorage.getItem('mh_user_name') : null
+  );
+  const [userPhone, setUserPhone] = useState<string | null>(
+    typeof window !== 'undefined' ? localStorage.getItem('mh_user_phone') : null
+  );
+  const [userEmail, setUserEmail] = useState<string | null>(
+    typeof window !== 'undefined' ? localStorage.getItem('mh_user_email') : null
+  );
+  const [showContactPrompt, setShowContactPrompt] = useState(false);
+  const [tempName, setTempName] = useState('');
+  const [tempPhone, setTempPhone] = useState('');
+  const [tempEmail, setTempEmail] = useState('');
+  const [contactError, setContactError] = useState('');
+
   const storageKey = `mh_chat_${page}`;
 
   // Store user and thread IDs
@@ -96,6 +112,21 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
       localStorage.setItem(`mh_thread_${page}`, threadIdRef.current);
     }
   }, [page]);
+
+  // Store user contact information when it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (userName) {
+        localStorage.setItem('mh_user_name', userName);
+      }
+      if (userPhone) {
+        localStorage.setItem('mh_user_phone', userPhone);
+      }
+      if (userEmail) {
+        localStorage.setItem('mh_user_email', userEmail);
+      }
+    }
+  }, [userName, userPhone, userEmail]);
 
   // WebSocket connection management
   const connectWebSocket = useCallback(() => {
@@ -248,12 +279,19 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
   };
 
   const sendMessage = async (content: string = inputValue.trim()) => {
-    if (!content || isLoading || !isConnected || !wsRef.current) {
-      if (!isConnected) {
-        // Fallback to HTTP if WebSocket is not connected
-        return sendMessageHTTP(content);
-      }
+    if (!content || isLoading) {
       return;
+    }
+
+    // Check if we need to collect user contact info first
+    if (!userName || !userPhone) {
+      setShowContactPrompt(true);
+      return;
+    }
+
+    if (!isConnected || !wsRef.current) {
+      // Fallback to HTTP if WebSocket is not connected
+      return sendMessageHTTP(content);
     }
 
     const userMessage: Message = {
@@ -268,13 +306,19 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
     setIsLoading(true);
 
     try {
-      // Send message via WebSocket
+      // Send message via WebSocket with user contact info
+      // Note: All users are automatically added to newsletter (opt-out via STOP command)
       wsRef.current.send(
         JSON.stringify({
           type: 'message',
           content: content,
           page: page || '/',
           timestamp: new Date().toISOString(),
+          userName: userName,
+          userPhone: userPhone,
+          userEmail: userEmail,
+          autoSubscribeNewsletter: true, // Always true - opt-out system
+          userId: userIdRef.current,
         }),
       );
     } catch (error) {
@@ -283,6 +327,70 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
       setIsLoading(false);
       return sendMessageHTTP(content);
     }
+  };
+
+  // Phone formatting helper
+  const formatPhoneForDisplay = (value: string): string => {
+    const digits = value.replace(/\D/g, '');
+    
+    if (digits.length <= 3) {
+      return digits;
+    } else if (digits.length <= 6) {
+      return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    } else {
+      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+    }
+  };
+
+  // Save contact info and continue with message
+  const saveContactAndContinue = () => {
+    const trimmedName = tempName.trim();
+    const cleanedPhone = tempPhone.replace(/\D/g, '');
+    
+    // Validation
+    if (trimmedName.length < 2) {
+      setContactError('Please enter your full name (at least 2 characters)');
+      return;
+    }
+    
+    if (cleanedPhone.length < 10) {
+      setContactError('Please enter a valid phone number (at least 10 digits)');
+      return;
+    }
+    
+    // Validate email if provided (optional but recommended for newsletter)
+    if (tempEmail.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(tempEmail.trim())) {
+        setContactError('Please enter a valid email address');
+        return;
+      }
+    }
+    
+    // Save to state (will trigger localStorage save via useEffect)
+    setUserName(trimmedName);
+    setUserPhone(cleanedPhone);
+    if (tempEmail.trim()) {
+      setUserEmail(tempEmail.trim().toLowerCase());
+    }
+    setShowContactPrompt(false);
+    setContactError('');
+    setTempName('');
+    setTempPhone('');
+    setTempEmail('');
+    
+    // Log for debugging
+    logger.info('User contact info collected', {
+      name: trimmedName,
+      phoneLength: cleanedPhone.length,
+      email: tempEmail.trim() || 'not provided',
+      autoSubscribe: true
+    });
+    
+    // Send the original message after contact info is saved
+    setTimeout(() => {
+      sendMessage(inputValue);
+    }, 100);
   };
 
   // Fallback HTTP method for when WebSocket is not available
@@ -621,6 +729,138 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
           <p className="text-xs text-gray-400">Press Enter to send</p>
         </div>
       </div>
+
+      {/* Contact Information Collection Modal */}
+      {showContactPrompt && (
+        <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/50 p-4 z-50">
+          <div className="relative w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl">
+            {/* Welcome Header */}
+            <div className="text-center mb-4">
+              <div className="text-4xl mb-2">👋</div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                Welcome to MyHibachi!
+              </h3>
+              <p className="text-sm text-gray-600">
+                Please provide your contact information so we can serve you better and create a personalized experience.
+              </p>
+            </div>
+            
+            {/* Error Message */}
+            {contactError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-800">{contactError}</p>
+              </div>
+            )}
+            
+            {/* Name Input */}
+            <div className="mb-4">
+              <label htmlFor="chat-name" className="block text-sm font-medium text-gray-700 mb-1">
+                Full Name *
+              </label>
+              <input
+                id="chat-name"
+                type="text"
+                placeholder="John Doe"
+                value={tempName}
+                onChange={(e) => {
+                  setTempName(e.target.value);
+                  setContactError('');
+                }}
+                required
+                minLength={2}
+                maxLength={100}
+                autoFocus
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent focus:outline-none text-base"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    // Move to phone input if name is valid
+                    if (tempName.trim().length >= 2) {
+                      document.getElementById('chat-phone')?.focus();
+                    }
+                  }
+                }}
+              />
+            </div>
+            
+            {/* Phone Input */}
+            <div className="mb-4">
+              <label htmlFor="chat-phone" className="block text-sm font-medium text-gray-700 mb-1">
+                Phone Number *
+              </label>
+              <input
+                id="chat-phone"
+                type="tel"
+                placeholder="(555) 123-4567"
+                value={formatPhoneForDisplay(tempPhone)}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '');
+                  setTempPhone(value);
+                  setContactError('');
+                }}
+                required
+                maxLength={14}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent focus:outline-none text-base"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && tempName.trim().length >= 2 && tempPhone.replace(/\D/g, '').length >= 10) {
+                    e.preventDefault();
+                    saveContactAndContinue();
+                  }
+                }}
+              />
+              <p className="text-xs text-gray-500 mt-1">Required - So we can follow up on your inquiries</p>
+            </div>
+
+            {/* Email Input (optional) */}
+            <div className="mb-4">
+              <label htmlFor="chat-email" className="block text-sm font-medium text-gray-700 mb-1">
+                Email Address (Optional)
+              </label>
+              <input
+                id="chat-email"
+                type="email"
+                placeholder="john@example.com"
+                value={tempEmail}
+                onChange={(e) => {
+                  setTempEmail(e.target.value);
+                  setContactError('');
+                }}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent focus:outline-none text-base"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && tempName.trim().length >= 2 && tempPhone.replace(/\D/g, '').length >= 10) {
+                    e.preventDefault();
+                    saveContactAndContinue();
+                  }
+                }}
+              />
+              <p className="text-xs text-gray-500 mt-1">Recommended - For exclusive hibachi deals and updates</p>
+            </div>
+
+            {/* Newsletter Auto-Subscribe Notice */}
+            <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <p className="text-xs text-gray-700">
+                📧 <strong>You&apos;ll automatically receive our newsletter</strong> with exclusive offers and hibachi tips.
+                <br />
+                <span className="text-gray-600">Don&apos;t want updates? Simply reply <strong>&quot;STOP&quot;</strong> anytime to unsubscribe.</span>
+              </p>
+            </div>
+            
+            {/* Continue Button */}
+            <button
+              onClick={saveContactAndContinue}
+              disabled={tempName.trim().length < 2 || tempPhone.replace(/\D/g, '').length < 10}
+              className="w-full rounded-lg bg-gradient-to-r from-[#ffb800] to-[#db2b28] p-3 text-white font-medium transition-all hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:from-gray-400 disabled:to-gray-400"
+            >
+              Start Chatting 💬
+            </button>
+            
+            {/* Privacy Note */}
+            <p className="mt-3 text-xs text-gray-500 text-center">
+              🔒 Your information is safe and only used to provide you with the best service and follow up on your booking inquiries.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Contact Options Modal */}
       {showHandoff && (

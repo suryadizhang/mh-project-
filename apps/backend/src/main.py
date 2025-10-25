@@ -84,15 +84,13 @@ async def lifespan(app: FastAPI):
         
         # Register cache service in container
         if app.state.cache:
-            container.register_singleton("cache_service", lambda: app.state.cache)
+            container.register_value("cache_service", app.state.cache)
         
         app.state.container = container
         logger.info("✅ Dependency injection container initialized")
         
-        # Add container middleware
-        container_middleware = ContainerMiddleware(container)
-        app.middleware("http")(container_middleware)
-        logger.info("✅ Container middleware added")
+        # Note: ContainerMiddleware must be added before app starts (see below)
+        # We'll store container in app.state for dependency injection via Depends()
         
     except Exception as e:
         logger.error(f"Failed to initialize dependency injection: {e}")

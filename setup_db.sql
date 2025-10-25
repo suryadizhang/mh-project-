@@ -1,3 +1,7 @@
+-- PostgreSQL Database Setup Script
+-- NOTE: This file contains PostgreSQL-specific syntax
+-- Do not use with SQL Server or other databases
+
 -- Create user for the application
 CREATE ROLE "user" WITH LOGIN PASSWORD 'password';
 

@@ -7,25 +7,32 @@ from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 from datetime import date, datetime
 from sqlalchemy.ext.asyncio import AsyncSession
-from ...core.database import get_db
-from ...services.lead_service import LeadService
-from ...api.app.models.lead_newsletter import LeadSource
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from api.app.database import get_db
+from api.app.services.lead_service import LeadService
+from api.app.services.newsletter_service import NewsletterService
+from api.app.models.lead_newsletter import LeadSource
 import logging
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+# Initialize rate limiter
+limiter = Limiter(key_func=get_remote_address)
+
 
 class PublicLeadCreate(BaseModel):
-    """Public lead submission schema"""
-    name: str = Field(..., min_length=2, max_length=100, description="Full name")
-    email: Optional[EmailStr] = Field(None, description="Email address")
-    phone: Optional[str] = Field(
-        None, 
-        pattern=r"^\+?1?\d{10,15}$",
-        description="Phone number (10-15 digits)"
+    """Public lead submission schema - Name and Phone are REQUIRED for lead generation"""
+    name: str = Field(..., min_length=2, max_length=100, description="Full name (required)")
+    phone: str = Field(
+        ...,
+        min_length=10,
+        max_length=20,
+        description="Phone number (required - accepts various formats like (555) 123-4567)"
     )
+    email: Optional[EmailStr] = Field(None, description="Email address (optional but recommended)")
     event_date: Optional[date] = Field(None, description="Preferred event date")
     guest_count: Optional[int] = Field(None, ge=1, le=500, description="Number of guests")
     budget: Optional[str] = Field(None, max_length=50, description="Budget range (e.g., $500-1000)")
@@ -48,7 +55,31 @@ class PublicLeadResponse(BaseModel):
     lead_id: Optional[str] = None
 
 
+def clean_phone_number(phone: Optional[str]) -> Optional[str]:
+    """
+    Clean and format phone number to digits only.
+    Accepts formats like: (555) 123-4567, 555-123-4567, 555.123.4567, etc.
+    Returns: digits only (e.g., "5551234567" or "+15551234567")
+    """
+    if not phone:
+        return None
+    
+    # Keep only digits and leading +
+    cleaned = ''.join(c for c in phone if c.isdigit() or (c == '+' and phone.index(c) == 0))
+    
+    # Validate length (10-15 digits for international)
+    digit_count = len(cleaned.replace('+', ''))
+    if digit_count < 10 or digit_count > 15:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Phone number must contain 10-15 digits, got {digit_count}"
+        )
+    
+    return cleaned
+
+
 @router.post("/leads", response_model=PublicLeadResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit("10/minute")
 async def capture_public_lead(
     lead_data: PublicLeadCreate,
     request: Request,
@@ -57,7 +88,7 @@ async def capture_public_lead(
     """
     Public endpoint to capture leads from website forms
     
-    Rate limit: 10 requests/minute per IP
+    Rate limit: 10 requests/minute per IP (enforced)
     No authentication required
     
     Use cases:
@@ -67,6 +98,9 @@ async def capture_public_lead(
     - Newsletter signups with event interest
     """
     try:
+        # Clean phone number (remove formatting, keep digits)
+        cleaned_phone = clean_phone_number(lead_data.phone)
+        
         # Spam prevention - honeypot check
         if lead_data.honeypot:
             logger.warning(f"Honeypot triggered from IP {request.client.host}")
@@ -76,11 +110,12 @@ async def capture_public_lead(
                 message="Thank you! We'll be in touch soon."
             )
         
-        # Validate at least one contact method
-        if not lead_data.email and not lead_data.phone:
+        # Name and phone are required (enforced by Pydantic)
+        # Email is optional but recommended
+        if not cleaned_phone:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Please provide at least email or phone number"
+                detail="Phone number is required to contact you about your quote"
             )
         
         # Map source string to LeadSource enum
@@ -99,11 +134,11 @@ async def capture_public_lead(
         # Create lead service
         lead_service = LeadService(db=db)
         
-        # Capture lead using quote request method
+        # Capture lead using quote request method (with cleaned phone)
         lead = await lead_service.capture_quote_request(
             name=lead_data.name,
-            email=lead_data.email,
-            phone=lead_data.phone,
+            phone=cleaned_phone,  # Required - cleaned phone number
+            email=lead_data.email,  # Optional
             event_date=lead_data.event_date,
             guest_count=lead_data.guest_count,
             budget=lead_data.budget,
@@ -115,6 +150,28 @@ async def capture_public_lead(
             f"Public lead captured: {lead.id} from {request.client.host} "
             f"(name={lead_data.name}, email={lead_data.email}, source={source.value})"
         )
+        
+        # Auto-subscribe to newsletter (opt-out system)
+        try:
+            newsletter_service = NewsletterService(db)
+            subscriber = await newsletter_service.subscribe(
+                phone=cleaned_phone,
+                email=lead_data.email,
+                name=lead_data.name,
+                source='web_quote',
+                auto_subscribed=True
+            )
+            logger.info(
+                f"Auto-subscribed {lead_data.name} to newsletter from quote form. "
+                f"Subscriber ID: {subscriber.id}"
+            )
+            await db.commit()
+        except Exception as newsletter_error:
+            # Don't fail lead creation if newsletter subscription fails
+            logger.error(f"Newsletter subscription failed for lead {lead.id}: {newsletter_error}")
+            await db.rollback()
+            # Re-commit the lead
+            await db.commit()
         
         # TODO: Send email notification to admin
         # TODO: Send confirmation email to customer (if consent given)
@@ -129,9 +186,13 @@ async def capture_public_lead(
         raise
     except Exception as e:
         logger.error(f"Error capturing public lead: {e}", exc_info=True)
+        # Return detailed error in development
+        import traceback
+        error_details = traceback.format_exc()
+        logger.error(f"Full traceback:\n{error_details}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="We're unable to process your request right now. Please try again or call us directly."
+            detail=f"Error: {str(e)}"  # More detailed in development
         )
 
 
@@ -189,3 +250,156 @@ async def public_health_check():
         "service": "public-lead-capture",
         "timestamp": datetime.utcnow().isoformat()
     }
+
+
+# ===== PUBLIC BOOKING ENDPOINT =====
+
+class PublicBookingCreate(BaseModel):
+    """Public booking submission schema - NO authentication required"""
+    # Customer info (required)
+    customer_name: str = Field(..., min_length=2, max_length=100, description="Full name")
+    customer_phone: str = Field(..., min_length=10, max_length=20, description="Phone number")
+    customer_email: EmailStr = Field(..., description="Email address")
+    
+    # Event details (required)
+    date: str = Field(..., description="Event date (YYYY-MM-DD)")
+    time: str = Field(..., description="Event time (HH:MM 24-hour format)")
+    guests: int = Field(..., ge=1, le=50, description="Number of guests")
+    location_address: str = Field(..., min_length=10, max_length=500, description="Full event address")
+    
+    # Optional fields
+    special_requests: Optional[str] = Field(None, max_length=2000, description="Special requests or dietary needs")
+    
+    # Spam prevention
+    honeypot: Optional[str] = Field(default=None, description="Honeypot field (should be empty)")
+
+
+class PublicBookingResponse(BaseModel):
+    success: bool
+    message: str
+    booking_id: Optional[str] = None
+
+
+@router.post("/bookings", response_model=PublicBookingResponse)
+@limiter.limit("5/minute")  # More restrictive than leads since bookings are heavier
+async def create_public_booking(
+    booking_data: PublicBookingCreate,
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Public booking submission endpoint - NO authentication required
+    
+    This endpoint:
+    1. Creates a booking lead (since user may not be registered)
+    2. Auto-subscribes to newsletter with opt-out capability
+    3. Rate limited to 5 requests/minute
+    4. Validates all inputs
+    
+    Returns:
+        Booking confirmation with ID
+        
+    Raises:
+        HTTPException(400): Invalid input or spam detected
+        HTTPException(429): Too many requests
+    """
+    # Honeypot spam check
+    if booking_data.honeypot:
+        logger.warning(f"Spam booking attempt detected from {request.client.host}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid submission"
+        )
+    
+    try:
+        # Clean phone number (remove formatting)
+        cleaned_phone = ''.join(filter(str.isdigit, booking_data.customer_phone))
+        if not (10 <= len(cleaned_phone) <= 15):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Please provide a valid phone number"
+            )
+        
+        # Add country code if missing (assume US)
+        if len(cleaned_phone) == 10:
+            cleaned_phone = f"+1{cleaned_phone}"
+        elif not cleaned_phone.startswith('+'):
+            cleaned_phone = f"+{cleaned_phone}"
+        
+        # Validate date/time format
+        try:
+            event_date_obj = datetime.strptime(booking_data.date, "%Y-%m-%d").date()
+            datetime.strptime(booking_data.time, "%H:%M")  # Validate time format
+        except ValueError as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid date or time format: {str(e)}"
+            )
+        
+        # Check date is in future
+        if event_date_obj < date.today():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Event date must be in the future"
+            )
+        
+        # Create lead with booking intent
+        lead_service = LeadService(db=db)
+        lead = await lead_service.capture_quote_request(
+            name=booking_data.customer_name,
+            phone=cleaned_phone,
+            email=booking_data.customer_email,
+            event_date=event_date_obj,
+            guest_count=booking_data.guests,
+            location=booking_data.location_address,
+            message=f"BOOKING REQUEST - Time: {booking_data.time}, Guests: {booking_data.guests}\n{booking_data.special_requests or ''}",
+            source="web_booking",
+            ip_address=request.client.host if request.client else None
+        )
+        
+        await db.commit()
+        await db.refresh(lead)
+        
+        logger.info(
+            f"✅ Public booking lead created: {lead.id} for {booking_data.customer_name} "
+            f"on {booking_data.date} at {booking_data.time}"
+        )
+        
+        # Auto-subscribe to newsletter (opt-out system)
+        try:
+            newsletter_service = NewsletterService(db)
+            subscriber = await newsletter_service.subscribe(
+                phone=cleaned_phone,
+                email=booking_data.customer_email,
+                name=booking_data.customer_name,
+                source='web_booking',
+                auto_subscribed=True
+            )
+            logger.info(
+                f"Auto-subscribed {booking_data.customer_name} to newsletter from booking form. "
+                f"Subscriber ID: {subscriber.id}"
+            )
+            await db.commit()
+        except Exception as newsletter_error:
+            # Don't fail booking if newsletter subscription fails
+            logger.error(f"Newsletter subscription failed for lead {lead.id}: {newsletter_error}")
+            # Don't rollback the lead - we still want to capture it
+            await db.rollback()
+            await db.commit()  # Re-commit the lead
+        
+        return PublicBookingResponse(
+            success=True,
+            message="Thank you! We've received your booking request and will contact you shortly to confirm details.",
+            booking_id=str(lead.id)
+        )
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
+    except Exception as e:
+        logger.error(f"Error creating public booking: {e}", exc_info=True)
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Sorry, we couldn't process your booking request. Please try again or contact us directly."
+        )

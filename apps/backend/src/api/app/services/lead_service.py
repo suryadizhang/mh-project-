@@ -7,18 +7,17 @@ from datetime import date, datetime, timedelta
 from uuid import UUID, uuid4
 import logging
 
-from ..core.exceptions import (
+from core.exceptions import (
     NotFoundException, 
     BusinessLogicException,
     ErrorCode
 )
-from ..core.cache import CacheService
-from ..models.base import get_db_session
-from ..api.app.models.lead_newsletter import (
+from core.cache import CacheService
+from api.app.models.lead_newsletter import (
     Lead, LeadContact, LeadContext, LeadEvent,
     LeadSource, LeadStatus, LeadQuality, ContactChannel
 )
-from sqlalchemy import select, and_, or_, func
+from sqlalchemy import select, and_, or_, func, String
 from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
@@ -136,7 +135,7 @@ class LeadService:
             
             # Calculate initial score
             await self.db.flush()  # Ensure relationships are loaded
-            await self.db.refresh(lead, ['contacts', 'context'])
+            await self.db.refresh(lead, ['contacts', 'context', 'events'])  # Load all relationships
             score = lead.calculate_score()
             lead.score = score
             
@@ -229,21 +228,21 @@ class LeadService:
     async def capture_quote_request(
         self,
         name: str,
-        email: Optional[str],
-        phone: Optional[str],
-        event_date: Optional[date],
-        guest_count: Optional[int],
-        budget: Optional[str],
-        message: Optional[str],
+        phone: str,  # Required for lead generation
+        email: Optional[str] = None,
+        event_date: Optional[date] = None,
+        guest_count: Optional[int] = None,
+        budget: Optional[str] = None,
+        message: Optional[str] = None,
         location: Optional[str] = None
     ) -> Lead:
         """
         Create lead from quote request form
         
         Args:
-            name: Customer name
-            email: Email address
-            phone: Phone number
+            name: Customer name (required)
+            phone: Phone number (required - primary contact method)
+            email: Email address (optional but recommended)
             event_date: Preferred event date
             guest_count: Number of guests
             budget: Budget range string (e.g., "$500-1000")
@@ -253,6 +252,12 @@ class LeadService:
         Returns:
             Created Lead object
         """
+        # Validate required fields
+        if not phone:
+            raise BusinessLogicException(
+                message="Phone number is required for lead generation",
+                error_code=ErrorCode.VALIDATION_ERROR
+            )
         # Parse budget to cents
         budget_cents = None
         if budget:
@@ -269,11 +274,12 @@ class LeadService:
             except:
                 pass
         
-        contact_info = {}
+        # Phone is required, email is optional
+        contact_info = {
+            'phone': phone  # Always present (required)
+        }
         if email:
             contact_info['email'] = email
-        if phone:
-            contact_info['phone'] = phone
         
         context = {
             'party_size_adults': guest_count,

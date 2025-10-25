@@ -7,9 +7,9 @@ import asyncio
 import json
 from dataclasses import dataclass
 
-from .openai_service import OpenAIService
-from ..models.lead_newsletter import Lead, LeadStatus, LeadQuality, LeadSource, SocialThread
-from .ringcentral_sms import send_sms_notification
+from api.app.services.openai_service import OpenAIService
+from api.app.models.lead_newsletter import Lead, LeadStatus, LeadQuality, LeadSource, SocialThread
+from api.app.services.ringcentral_sms import send_sms_notification
 
 logger = logging.getLogger(__name__)
 
