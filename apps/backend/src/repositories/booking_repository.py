@@ -49,8 +49,10 @@ class BookingRepository(BaseRepository[Booking]):
         end_date: date,
         include_cancelled: bool = False
     ) -> List[Booking]:
-        """Find bookings within a date range"""
-        query = self.session.query(self.model).filter(
+        """Find bookings within a date range with eager loading"""
+        query = self.session.query(self.model).options(
+            joinedload(self.model.customer)  # Eager load customer to avoid N+1
+        ).filter(
             and_(
                 func.date(self.model.booking_datetime) >= start_date,
                 func.date(self.model.booking_datetime) <= end_date
@@ -68,8 +70,10 @@ class BookingRepository(BaseRepository[Booking]):
         limit: Optional[int] = None,
         include_cancelled: bool = True
     ) -> List[Booking]:
-        """Find bookings by customer ID"""
-        query = self.session.query(self.model).filter(
+        """Find bookings by customer ID with eager loading"""
+        query = self.session.query(self.model).options(
+            joinedload(self.model.customer)  # Eager load customer to avoid N+1
+        ).filter(
             self.model.customer_id == customer_id
         )
         
@@ -84,8 +88,10 @@ class BookingRepository(BaseRepository[Booking]):
         return query.all()
     
     def find_by_status(self, status: BookingStatus) -> List[Booking]:
-        """Find bookings by status"""
-        return self.session.query(self.model).filter(
+        """Find bookings by status with eager loading"""
+        return self.session.query(self.model).options(
+            joinedload(self.model.customer)  # Eager load customer to avoid N+1
+        ).filter(
             self.model.status == status
         ).order_by(self.model.booking_datetime).all()
     
@@ -102,9 +108,11 @@ class BookingRepository(BaseRepository[Booking]):
             event_date: Event date to search
             
         Returns:
-            List of bookings matching customer and date
+            List of bookings matching customer and date with eager loading
         """
-        return self.session.query(self.model).filter(
+        return self.session.query(self.model).options(
+            joinedload(self.model.customer)  # Eager load customer to avoid N+1
+        ).filter(
             and_(
                 self.model.customer_id == customer_id,
                 func.date(self.model.booking_datetime) == event_date
@@ -112,10 +120,12 @@ class BookingRepository(BaseRepository[Booking]):
         ).order_by(self.model.booking_datetime).all()
     
     def find_pending_confirmations(self, hours_old: int = 24) -> List[Booking]:
-        """Find bookings pending confirmation for more than specified hours"""
+        """Find bookings pending confirmation for more than specified hours with eager loading"""
         cutoff_time = datetime.utcnow() - timedelta(hours=hours_old)
         
-        return self.session.query(self.model).filter(
+        return self.session.query(self.model).options(
+            joinedload(self.model.customer)  # Eager load customer to avoid N+1
+        ).filter(
             and_(
                 self.model.status == BookingStatus.PENDING,
                 self.model.created_at <= cutoff_time
@@ -127,11 +137,13 @@ class BookingRepository(BaseRepository[Booking]):
         customer_id: Optional[int] = None,
         days_ahead: int = 30
     ) -> List[Booking]:
-        """Find upcoming confirmed bookings"""
+        """Find upcoming confirmed bookings with eager loading"""
         start_date = datetime.utcnow()
         end_date = start_date + timedelta(days=days_ahead)
         
-        query = self.session.query(self.model).filter(
+        query = self.session.query(self.model).options(
+            joinedload(self.model.customer)  # Eager load customer to avoid N+1
+        ).filter(
             and_(
                 self.model.booking_datetime >= start_date,
                 self.model.booking_datetime <= end_date,
@@ -211,13 +223,15 @@ class BookingRepository(BaseRepository[Booking]):
         party_size: int,
         exclude_booking_id: Optional[int] = None
     ) -> List[Booking]:
-        """Find bookings that would conflict with the proposed booking"""
+        """Find bookings that would conflict with the proposed booking with eager loading"""
         # Check for exact time conflicts (±1 hour)
         time_buffer = timedelta(hours=1)
         start_time = booking_datetime - time_buffer
         end_time = booking_datetime + time_buffer
         
-        query = self.session.query(self.model).filter(
+        query = self.session.query(self.model).options(
+            joinedload(self.model.customer)  # Eager load customer to avoid N+1
+        ).filter(
             and_(
                 self.model.booking_datetime >= start_time,
                 self.model.booking_datetime <= end_time,
@@ -553,8 +567,10 @@ class BookingRepository(BaseRepository[Booking]):
         page: int = 1,
         page_size: int = 50
     ) -> Tuple[List[Booking], int]:
-        """Advanced booking search with multiple criteria"""
-        query = self.session.query(self.model)
+        """Advanced booking search with multiple criteria and eager loading"""
+        query = self.session.query(self.model).options(
+            joinedload(self.model.customer)  # Eager load customer to avoid N+1
+        )
         
         # Apply filters based on search criteria
         if "date_range" in search_criteria:

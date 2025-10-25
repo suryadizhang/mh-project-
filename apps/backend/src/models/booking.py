@@ -45,8 +45,8 @@ class Booking(BaseModel):
     # Table assignment
     table_number = Column(String(10))
     
-    # Relationships (commented out to avoid circular imports for now)
-    # customer = relationship("Customer", back_populates="bookings")
+    # Relationships
+    customer = relationship("Customer", back_populates="bookings", lazy="select")
     
     def __repr__(self):
         return f"<Booking(id={self.id}, customer_id={self.customer_id}, datetime={self.booking_datetime}, status={self.status})>"
