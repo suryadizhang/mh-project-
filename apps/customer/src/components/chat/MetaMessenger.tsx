@@ -1,9 +1,8 @@
-'use client'
+﻿'use client'
 
-import { useEffect } from 'react'
-
-import contactData from '@/data/contact.json'
-import { logger } from '@/lib/logger'
+import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
+import { getContactData } from '@/lib/contactData'
 
 declare global {
   interface Window {
@@ -14,84 +13,100 @@ declare global {
         hide: () => void
       }
     }
+    fbAsyncInit?: () => void
   }
 }
 
 export default function MetaMessenger() {
-  useEffect(() => {
-    // Only run in browser environment
-    if (typeof window === 'undefined') return
+  const pathname = usePathname()
+  const onContact = pathname === '/contact'
+  const [hasConsent, setHasConsent] = useState(false)
+  const [sdkLoaded, setSdkLoaded] = useState(false)
 
-    // Check if Facebook App ID is properly configured
-    const appId = contactData.facebookAppId
-    if (!appId || appId === '1234567890123456') {
-      logger.warn(
-        'Facebook Messenger: App ID not configured. Please set up a real Facebook App ID to enable Messenger chat.'
-      )
+  useEffect(() => {
+    if (!onContact) return
+
+    const checkConsent = () => {
+      const consent = localStorage.getItem('mh_consent')
+      setHasConsent(consent === 'true')
+    }
+
+    checkConsent()
+
+    // Listen for consent changes
+    const handleConsentGranted = () => {
+      checkConsent()
+    }
+
+    window.addEventListener('consentGranted', handleConsentGranted)
+
+    // Also check periodically in case consent changes
+    const interval = setInterval(checkConsent, 1000)
+
+    return () => {
+      window.removeEventListener('consentGranted', handleConsentGranted)
+      clearInterval(interval)
+    }
+  }, [onContact])
+
+  useEffect(() => {
+    if (!onContact || !hasConsent || sdkLoaded) return
+
+    const { pageId, appId } = getContactData()
+
+    if (!pageId || !appId) {
+      console.warn('Facebook Page ID or App ID not configured')
       return
     }
 
+    // Initialize Facebook SDK
+    window.fbAsyncInit = function() {
+      if (window.FB) {
+        window.FB.init({
+          xfbml: true,
+          version: 'v18.0'
+        })
+      }
+      setSdkLoaded(true)
+    }
+
     // Load Facebook SDK
-    const loadFacebookSDK = () => {
-      // Prevent multiple SDK loads
-      if (window.FB) return
+    const script = document.createElement('script')
+    script.async = true
+    script.defer = true
+    script.crossOrigin = 'anonymous'
+    script.src = `https://connect.facebook.net/en_US/sdk/xfbml.customerchat.js#xfbml=1&version=v18.0&autoLogAppEvents=1&appId=${appId}`
+    script.id = 'facebook-jssdk'
 
-      // Create Facebook SDK script with App ID
-      const script = document.createElement('script')
-      script.async = true
-      script.defer = true
-      script.crossOrigin = 'anonymous'
-      script.src = `https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0&appId=${appId}`
-
-      script.onload = () => {
-        if (window.FB) {
-          window.FB.init({
-            xfbml: true,
-            version: 'v18.0'
-          })
-          logger.debug('Facebook SDK loaded', { appId })
-        }
-      }
-
-      script.onerror = () => {
-        logger.error('Failed to load Facebook SDK')
-      }
-
+    if (!document.getElementById('facebook-jssdk')) {
       document.head.appendChild(script)
     }
 
-    loadFacebookSDK()
-
     return () => {
-      // Cleanup function - remove SDK script if component unmounts
-      const script = document.querySelector('script[src*="facebook.net"]')
-      if (script) {
-        script.remove()
+      // Cleanup if needed
+      const existingScript = document.getElementById('facebook-jssdk')
+      if (existingScript) {
+        existingScript.remove()
       }
     }
-  }, [])
+  }, [onContact, hasConsent, sdkLoaded])
 
-  // Check if Facebook App ID is configured
-  const appId = contactData.facebookAppId
-  const pageId = contactData.facebookPageId
+  if (!onContact || !hasConsent) return null
 
-  if (!appId || appId === '1234567890123456') {
-    // Return null if not configured - no Facebook Messenger widget will show
-    return null
-  }
+  const { pageId, greetings } = getContactData()
+
+  if (!pageId) return null
 
   return (
-    <>
-      {/* Facebook Customer Chat Plugin */}
-      <div id="fb-root"></div>
-      <div
-        className="fb-customerchat"
-        data-attribution="page_inbox"
-        data-page-id={pageId}
-        data-theme-color="#db2b28"
-        data-logged-in-greeting={contactData.greetings.loggedIn}
-        data-logged-out-greeting={contactData.greetings.loggedOut}
-      ></div>
-    </>
+    <div
+      id="fb-customer-chat"
+      className="fb-customerchat"
+      data-page-id={pageId}
+      data-attribution="biz_inbox"
+      data-greeting-dialog-display="hide"
+      data-logged-in-greeting={greetings.loggedIn}
+      data-logged-out-greeting={greetings.loggedOut}
+      data-theme-color="#DB2B28"
+    />
   )
 }
