@@ -77,10 +77,27 @@ export interface DashboardStats {
 }
 
 export interface PaginationParams {
+  // Modern cursor-based pagination (preferred - MEDIUM #34 Phase 2)
+  cursor?: string;
+  
+  // Legacy page-based pagination (deprecated, use cursor instead)
   page?: number;
+  
   limit?: number;
   sort_by?: string;
   sort_order?: 'asc' | 'desc';
+}
+
+// Cursor-based pagination response (MEDIUM #34 Phase 2)
+// Provides O(1) performance regardless of page depth
+export interface CursorPaginatedResponse<T = any> {
+  items: T[];
+  next_cursor: string | null;
+  prev_cursor: string | null;
+  has_next: boolean;
+  has_prev: boolean;
+  count: number;
+  total_count?: number; // Optional, expensive operation
 }
 
 export interface BookingFilters extends PaginationParams {
