@@ -9,10 +9,10 @@ from pydantic import BaseModel
 import logging
 
 # Import our new DI system
-from ..core.container import DependencyInjectionContainer
-from ..core.service_registry import get_container
-from ..repositories.booking_repository import BookingRepository
-from ..repositories.customer_repository import CustomerRepository
+from core.container import DependencyInjectionContainer
+from core.service_registry import get_container
+from repositories.booking_repository import BookingRepository
+from repositories.customer_repository import CustomerRepository
 
 # Legacy imports (to be gradually replaced)
 from core.security import extract_user_from_token, is_admin_user, is_super_admin

@@ -5,7 +5,7 @@ Provides WebSocket endpoints for real-time communication updates.
 from fastapi import APIRouter, WebSocket, Query
 from typing import Optional
 
-from ..websockets.unified_inbox import (
+from api.app.websockets.unified_inbox import (
     websocket_endpoint,
     get_websocket_stats,
     send_test_message,

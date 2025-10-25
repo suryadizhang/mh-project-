@@ -4,7 +4,7 @@ Simple wrapper around the OpenAI client to match existing architecture.
 """
 import openai
 from typing import Dict, List, Any, Optional
-from ..config import settings
+from api.app.config import settings
 import logging
 
 logger = logging.getLogger(__name__)

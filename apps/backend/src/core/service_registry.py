@@ -7,16 +7,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-try:
-    # Try relative imports first
-    from .container import DependencyInjectionContainer
-    from ..repositories.booking_repository import BookingRepository
-    from ..repositories.customer_repository import CustomerRepository
-except ImportError:
-    # Fall back to absolute imports for validation script
-    from core.container import DependencyInjectionContainer
-    from repositories.booking_repository import BookingRepository
-    from repositories.customer_repository import CustomerRepository
+# Use absolute imports for consistency
+from core.container import DependencyInjectionContainer
+from repositories.booking_repository import BookingRepository
+from repositories.customer_repository import CustomerRepository
 
 class ServiceRegistry:
     """
@@ -49,9 +43,9 @@ class ServiceRegistry:
         engine = create_engine(database_url, **engine_config)
         self._session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
         
-        # Register session factory
-        self.container.register_factory("database_session_factory", lambda: self._session_factory)
-        self.container.register_factory("database_session", self._create_database_session)
+        # Register session factory as values (not factory pattern)
+        self.container.register_value("database_session_factory", self._session_factory)
+        self.container.register_value("database_session", self._create_database_session)
         
         return self
     

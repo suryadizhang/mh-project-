@@ -9,12 +9,12 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, desc, asc, func
 from pydantic import BaseModel, Field, EmailStr
 
-from ..database import get_db
-from ..models.lead_newsletter import (
+from api.app.database import get_db
+from api.app.models.lead_newsletter import (
     Subscriber, Campaign, CampaignEvent,
     CampaignChannel, CampaignStatus, CampaignEventType
 )
-from ..services.ai_lead_management import get_social_media_ai
+from api.app.services.ai_lead_management import get_social_media_ai
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/newsletter", tags=["newsletter"])

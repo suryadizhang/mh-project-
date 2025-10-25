@@ -27,7 +27,7 @@ from core.exceptions import (
 from core.container import DependencyInjectionContainer
 
 # Service and Repository imports
-from services.booking_service import BookingService
+from api.app.services.booking_service import BookingService
 from repositories.booking_repository import BookingRepository
 from core.cache import CacheService
 

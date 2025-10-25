@@ -8,12 +8,12 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, or_, desc
 from pydantic import BaseModel
 
-from ..database import get_db
-from ..models.lead_newsletter import (
+from api.app.database import get_db
+from api.app.models.lead_newsletter import (
     Lead, LeadStatus, LeadQuality, LeadSource,
     Subscriber, Campaign, CampaignStatus, CampaignEvent, CampaignEventType
 )
-from ..models.core import Customer, Booking
+from api.app.models.core import Customer, Booking
 
 
 router = APIRouter(prefix="/admin/analytics", tags=["admin", "analytics"])

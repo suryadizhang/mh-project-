@@ -9,13 +9,13 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, desc, asc
 from pydantic import BaseModel, ConfigDict, Field
 
-from ..database import get_db
-from ..models.lead_newsletter import (
+from api.app.database import get_db
+from api.app.models.lead_newsletter import (
     Lead, LeadContact, LeadContext, LeadEvent, SocialThread,
     LeadSource, LeadStatus, LeadQuality, ContactChannel, SocialPlatform
 )
-from ..services.ai_lead_management import get_ai_lead_manager, get_social_media_ai
-from ..services.ringcentral_sms import send_sms_notification
+from api.app.services.ai_lead_management import get_ai_lead_manager, get_social_media_ai
+from api.app.services.ringcentral_sms import send_sms_notification
 
 
 logger = logging.getLogger(__name__)
@@ -362,7 +362,7 @@ async def get_nurture_sequence(lead_id: UUID, db: Session = Depends(get_db)):
             detail="Lead not found"
         )
     
-    from ..services.ai_lead_management import get_lead_nurture_ai
+    from api.app.services.ai_lead_management import get_lead_nurture_ai
     
     nurture_ai = await get_lead_nurture_ai()
     sequence = await nurture_ai.create_nurture_sequence(lead)

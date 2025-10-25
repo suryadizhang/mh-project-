@@ -5,7 +5,7 @@ Test service layer business logic, caching, and validation
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime, timedelta
-from services.booking_service import BookingService
+from api.app.services.booking_service import BookingService
 from core.exceptions import NotFoundException, BusinessLogicException
 
 

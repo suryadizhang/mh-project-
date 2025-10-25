@@ -10,6 +10,15 @@ interface SubmitSectionProps {
 const SubmitSection: React.FC<SubmitSectionProps> = ({ isSubmitting, className = '' }) => {
   return (
     <div className={`form-section text-center ${className}`}>
+      {/* Newsletter Auto-Subscribe Notice */}
+      <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+        <p className="text-xs text-gray-700">
+          📧 <strong>You&apos;ll automatically receive our newsletter</strong> with exclusive offers and hibachi tips.
+          <br />
+          <span className="text-gray-600">Don&apos;t want updates? Simply reply <strong>&quot;STOP&quot;</strong> anytime to unsubscribe.</span>
+        </p>
+      </div>
+
       <button
         type="submit"
         className="btn btn-primary btn-lg booking-submit-btn"

@@ -8,7 +8,7 @@ from datetime import datetime, date
 from pydantic import BaseModel, Field
 
 # Import our new architectural components
-from ..api.deps_enhanced import (
+from api.deps_enhanced import (
     get_admin_booking_context,
     get_customer_service_context,
     get_authenticated_booking_service,
@@ -17,9 +17,9 @@ from ..api.deps_enhanced import (
     AdminUser,
     AuthenticatedUser
 )
-from ..repositories.booking_repository import BookingRepository, BookingSearchFilters
-from ..repositories.customer_repository import CustomerRepository, CustomerSearchFilters
-from ..core.exceptions import (
+from repositories.booking_repository import BookingRepository, BookingSearchFilters
+from repositories.customer_repository import CustomerRepository, CustomerSearchFilters
+from core.exceptions import (
     create_success_response,
     NotFoundException,
     ValidationException,
@@ -27,8 +27,8 @@ from ..core.exceptions import (
     raise_not_found,
     raise_validation_error
 )
-from ..models.booking import BookingStatus
-from ..models.customer import CustomerStatus
+from models.booking import BookingStatus
+from models.customer import CustomerStatus
 
 # Create router
 router = APIRouter(prefix="/test", tags=["Testing - New Architecture"])

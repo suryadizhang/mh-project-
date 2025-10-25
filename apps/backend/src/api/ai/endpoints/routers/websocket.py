@@ -17,6 +17,11 @@ from api.ai.endpoints.services.admin_management_ai import admin_management_ai
 from api.ai.endpoints.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# Lead generation and newsletter services
+from api.app.services.lead_service import LeadService
+from api.app.services.newsletter_service import NewsletterService
+from api.app.models.lead_newsletter import LeadSource
+
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
@@ -76,6 +81,59 @@ async def websocket_chat_endpoint(
                 
                 # Handle different message types
                 if message_type == "message" and content.strip():
+                    # Extract contact information for lead generation
+                    user_name = message_data.get("userName")
+                    user_phone = message_data.get("userPhone")
+                    user_email = message_data.get("userEmail")
+                    auto_subscribe = message_data.get("autoSubscribeNewsletter", False)
+                    
+                    # Process lead generation and newsletter subscription if contact info provided
+                    if user_name and user_phone:
+                        try:
+                            # Get database session
+                            db_gen = get_db()
+                            db = await anext(db_gen)
+                            
+                            try:
+                                # Create or update lead
+                                lead_service = LeadService(db)
+                                lead = await lead_service.capture_quote_request(
+                                    name=user_name,
+                                    phone=user_phone,
+                                    email=user_email,
+                                    message=f"Chat conversation: {content[:100]}..."
+                                )
+                                logger.info(f"Created/updated lead {lead.id} from chat for {user_name}")
+                                
+                                # Subscribe to newsletter (opt-out system)
+                                if auto_subscribe:
+                                    newsletter_service = NewsletterService(db)
+                                    subscriber = await newsletter_service.subscribe(
+                                        phone=user_phone,
+                                        email=user_email,
+                                        name=user_name,
+                                        source='chat',
+                                        auto_subscribed=True
+                                    )
+                                    logger.info(
+                                        f"Auto-subscribed {user_name} to newsletter. "
+                                        f"Subscriber ID: {subscriber.id}"
+                                    )
+                                
+                                await db.commit()
+                                
+                            except Exception as lead_error:
+                                await db.rollback()
+                                logger.error(f"Error creating lead or subscribing to newsletter: {lead_error}")
+                                # Continue processing the chat message even if lead creation fails
+                            
+                            finally:
+                                await db.close()
+                                
+                        except Exception as db_error:
+                            logger.error(f"Error getting database session: {db_error}")
+                            # Continue processing the chat message even if database fails
+                    
                     # Process AI chat message with role-based routing
                     await handle_chat_message_with_role(
                         conversation_id, content, user_id, channel, parsed_user_role

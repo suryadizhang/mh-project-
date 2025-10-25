@@ -7,7 +7,7 @@ import httpx
 import asyncio
 from dataclasses import dataclass
 
-from ..config import settings
+from api.app.config import settings
 
 
 logger = logging.getLogger(__name__)

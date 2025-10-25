@@ -7,16 +7,16 @@ from datetime import date, datetime, timedelta
 from uuid import UUID
 import logging
 
-from ..core.exceptions import (
+from core.exceptions import (
     NotFoundException, 
     BusinessLogicException, 
     ConflictException,
     ErrorCode
 )
-from ..core.cache import CacheService, cached, invalidate_cache
-from ..repositories.booking_repository import BookingRepository
-from ..models.booking import Booking, BookingStatus
-from ..schemas.booking import BookingCreate, BookingUpdate
+from core.cache import CacheService, cached, invalidate_cache
+from repositories.booking_repository import BookingRepository
+from models.booking import Booking, BookingStatus
+from schemas.booking import BookingCreate, BookingUpdate
 
 logger = logging.getLogger(__name__)
 
@@ -258,7 +258,7 @@ class BookingService:
         if not is_available:
             # Capture failed booking as lead for follow-up
             try:
-                from ..services.lead_service import LeadService
+                from services.lead_service import LeadService
                 lead_service = LeadService(db=self.repository.db)
                 
                 await lead_service.capture_failed_booking(

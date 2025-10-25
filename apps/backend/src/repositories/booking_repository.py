@@ -8,12 +8,12 @@ from sqlalchemy import and_, or_, func, text
 from sqlalchemy.orm import Session, joinedload
 from enum import Enum
 
-from ..core.repository import BaseRepository, FilterCriteria, SortCriteria
-from ..core.exceptions import (
+from core.repository import BaseRepository, FilterCriteria, SortCriteria
+from core.exceptions import (
     NotFoundException, ConflictException, BusinessLogicException,
     ErrorCode, raise_not_found, raise_business_error
 )
-from ..models.booking import Booking, BookingStatus
+from models.booking import Booking, BookingStatus
 
 class BookingSearchFilters(str, Enum):
     """Available search filters for bookings"""

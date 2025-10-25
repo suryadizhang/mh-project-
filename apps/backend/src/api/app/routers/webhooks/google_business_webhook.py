@@ -11,11 +11,11 @@ from datetime import datetime
 import hmac
 import hashlib
 
-from ...database import get_db
-from ...config import settings
-from ...models.lead_newsletter import Lead, LeadSource, LeadStatus, SocialThread, ThreadStatus
-from ...models.core import Event
-from ...services.ai_lead_management import get_ai_lead_manager
+from api.app.database import get_db
+from api.app.config import settings
+from api.app.models.lead_newsletter import Lead, LeadSource, LeadStatus, SocialThread, ThreadStatus
+from api.app.models.core import Event
+from api.app.services.ai_lead_management import get_ai_lead_manager
 
 logger = logging.getLogger(__name__)
 
