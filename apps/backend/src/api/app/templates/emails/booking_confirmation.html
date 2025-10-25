@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e74c3c;
+        }
+        .header h1 {
+            color: #e74c3c;
+            margin: 0;
+            font-size: 28px;
+        }
+        .content {
+            padding: 20px 0;
+        }
+        .booking-details {
+            background-color: #f9f9f9;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .booking-details h3 {
+            margin-top: 0;
+            color: #e74c3c;
+        }
+        .detail-row {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: bold;
+            display: inline-block;
+            width: 120px;
+        }
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #777;
+            font-size: 14px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #e74c3c;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍱 My Hibachi Chef</h1>
+            <p style="margin: 10px 0 0 0; color: #666;">Booking Confirmation</p>
+        </div>
+        
+        <div class="content">
+            <p>Dear {{customer_name}},</p>
+            
+            <p>Thank you for choosing My Hibachi Chef! We're excited to bring an authentic Japanese hibachi experience to your event.</p>
+            
+            <div class="booking-details">
+                <h3>📋 Booking Details</h3>
+                <div class="detail-row">
+                    <span class="detail-label">📅 Date:</span>
+                    <span>{{booking_date}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">⏰ Time:</span>
+                    <span>{{booking_time}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">👥 Party Size:</span>
+                    <span>{{party_size}} guests</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">📍 Location:</span>
+                    <span>{{address}}, {{city}}, CA {{zipcode}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">📱 Phone:</span>
+                    <span>{{phone}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">✉️ Contact Via:</span>
+                    <span>{{contact_preference}}</span>
+                </div>
+            </div>
+            
+            <div class="highlight">
+                <strong>⚡ What's Next?</strong>
+                <p style="margin: 10px 0 0 0;">Our team will contact you via {{contact_preference}} within 24 hours to confirm details and arrange payment.</p>
+            </div>
+            
+            <p style="margin-top: 20px;">If you have any immediate questions or need to make changes, please contact us:</p>
+            
+            <p style="text-align: center;">
+                📞 <strong>(916) 740-8768</strong><br>
+                📧 <strong>cs@myhibachichef.com</strong>
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>My Hibachi Chef</strong></p>
+            <p>Authentic Japanese Hibachi Catering<br>
+            Serving Sacramento, Bay Area & Central Valley</p>
+            <p style="font-size: 12px; color: #999;">
+                This is an automated confirmation email. Please do not reply directly to this email.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
