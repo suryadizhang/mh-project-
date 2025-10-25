@@ -8,6 +8,7 @@ export interface ApiResponse<T = unknown> {
   requestId: string;
 }
 
+// Legacy page-based pagination (deprecated, use CursorPaginatedResponse)
 export interface PaginatedResponse<T = unknown> {
   items: T[];
   total: number;
@@ -15,6 +16,21 @@ export interface PaginatedResponse<T = unknown> {
   pageSize: number;
   totalPages: number;
 }
+
+// Modern cursor-based pagination (MEDIUM #34 Phase 2)
+// Provides consistent O(1) performance regardless of page depth
+export interface CursorPaginatedResponse<T = unknown> {
+  items: T[];
+  next_cursor: string | null;
+  prev_cursor: string | null;
+  has_next: boolean;
+  has_prev: boolean;
+  count: number;
+  total_count?: number; // Optional, expensive operation
+}
+
+// Alias for convenience
+export type PaginatedData<T> = CursorPaginatedResponse<T>;
 
 // Type-safe API client configuration
 export interface ApiClientConfig {
