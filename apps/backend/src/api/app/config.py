@@ -82,24 +82,26 @@ class Settings(BaseSettings):
     email_enabled: bool = True
     email_provider: str = "smtp"  # smtp, sendgrid, ses
 
-    # SMTP Configuration
+    # SMTP Configuration (IONOS Business Email)
     smtp_host: str = ""
     smtp_port: int = 587
     smtp_user: str = ""
     smtp_password: str = ""
     smtp_use_tls: bool = True
+    email_timeout: int = 30  # Connection timeout in seconds
 
-    # SendGrid Configuration
+    # SendGrid Configuration (Backup/Future)
     sendgrid_api_key: str = ""
 
-    # AWS SES Configuration
+    # AWS SES Configuration (Backup/Future)
     aws_region: str = "us-east-1"
     aws_access_key_id: str = ""
     aws_secret_access_key: str = ""
 
     # Email Settings
+    emails_from_name: str = "My Hibachi Chef"
     emails_from_email: str = "no-reply@myhibachichef.com"
-    from_email: str = "myhibachichef@gmail.com"
+    from_email: str = ""  # Must match SMTP_USER for IONOS
     disable_email: bool = False
 
     # RingCentral SMS Configuration

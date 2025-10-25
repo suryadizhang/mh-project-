@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Receipt</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #27ae60;
+        }
+        .header h1 {
+            color: #27ae60;
+            margin: 0;
+            font-size: 28px;
+        }
+        .success-badge {
+            background-color: #27ae60;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 10px 0;
+        }
+        .payment-summary {
+            background-color: #f9f9f9;
+            border-left: 4px solid #27ae60;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .amount-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .total-row {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #27ae60;
+            border-top: 2px solid #27ae60;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #777;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍱 My Hibachi Chef</h1>
+            <div class="success-badge">✓ Payment Confirmed</div>
+        </div>
+        
+        <div style="padding: 20px 0;">
+            <p>Dear {{customer_name}},</p>
+            
+            <p>Thank you for your payment! Your booking is now confirmed.</p>
+            
+            <div class="payment-summary">
+                <h3 style="margin-top: 0; color: #27ae60;">💳 Payment Receipt</h3>
+                
+                <div class="amount-row">
+                    <span>Receipt Number:</span>
+                    <strong>{{receipt_number}}</strong>
+                </div>
+                <div class="amount-row">
+                    <span>Payment Date:</span>
+                    <span>{{payment_date}}</span>
+                </div>
+                <div class="amount-row">
+                    <span>Payment Method:</span>
+                    <span>{{payment_method}}</span>
+                </div>
+                <div class="amount-row">
+                    <span>{{payment_type}}:</span>
+                    <span>${{amount}}</span>
+                </div>
+                
+                <div class="amount-row total-row">
+                    <span>Total Paid:</span>
+                    <span>${{amount}}</span>
+                </div>
+            </div>
+            
+            <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                <strong>📅 Event Details:</strong>
+                <p style="margin: 10px 0 0 0;">
+                    <strong>Date:</strong> {{booking_date}}<br>
+                    <strong>Time:</strong> {{booking_time}}<br>
+                    <strong>Location:</strong> {{address}}, {{city}}, CA {{zipcode}}
+                </p>
+            </div>
+            
+            <p>We're looking forward to serving you!</p>
+            
+            <p style="text-align: center; margin-top: 30px;">
+                Questions? Contact us:<br>
+                📞 <strong>(916) 740-8768</strong><br>
+                📧 <strong>cs@myhibachichef.com</strong>
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>My Hibachi Chef</strong></p>
+            <p>This receipt has been sent to {{customer_email}}</p>
+            <p style="font-size: 12px; color: #999;">
+                Keep this receipt for your records.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
