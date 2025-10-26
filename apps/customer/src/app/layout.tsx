@@ -28,6 +28,7 @@ import Navbar from '@/components/layout/Navbar'
 import { PerformanceMonitoring } from '@/components/seo/TechnicalSEO'
 import BackToTopButton from '@/components/ui/BackToTopButton'
 import RateLimitBanner from '@/components/RateLimitBanner'
+import RingCentralWidget from '@/components/RingCentralWidget'
 import {
   generateLocalBusinessSchema,
   generateOrganizationSchema,
@@ -107,6 +108,12 @@ export default function RootLayout({
           src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
           async
         ></script>
+
+        {/* RingCentral Embeddable Widget - Live Chat Integration */}
+        <script
+          src="https://apps.ringcentral.com/integration/ringcentral-embeddable-voice/latest/adapter.js"
+          async
+        ></script>
       </head>
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} ${poppins.variable} antialiased min-h-screen flex flex-col company-background`}
@@ -116,6 +123,9 @@ export default function RootLayout({
 
         {/* Core Web Vitals Performance Monitoring */}
         <PerformanceMonitoring />
+
+        {/* RingCentral Widget Initialization */}
+        <RingCentralWidget />
 
         {/* Rate Limit Warning Banner (HIGH PRIORITY #12) */}
         <RateLimitBanner />
