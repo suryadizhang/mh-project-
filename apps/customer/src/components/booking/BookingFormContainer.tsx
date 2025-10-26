@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 
 import { apiFetch } from '@/lib/api';
 import { logger } from '@/lib/logger';
+import { submitFailedBookingLead } from '@/lib/leadService';
 
 import ContactInfoSection from './ContactInfoSection';
 import CustomerAddressSection from './CustomerAddressSection';
@@ -278,85 +279,59 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ className =
           failureReason = 'date_unavailable';
           userMessage = 'Sorry, this date is no longer available. We\'ve saved your information and will contact you with alternative dates.';
         }
-        
-        // Capture lead for failed booking
-        await captureFailedBookingLead(formData, failureReason, errorData);
-        
+
+        // Capture lead for failed booking using centralized service
+        const fullAddress = formData.sameAsVenue
+          ? `${formData.addressStreet}, ${formData.addressCity}, ${formData.addressState} ${formData.addressZipcode}`
+          : `${formData.venueStreet}, ${formData.venueCity}, ${formData.venueState} ${formData.venueZipcode}`;
+
+        await submitFailedBookingLead({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          eventDate: formData.eventDate,
+          eventTime: formData.eventTime,
+          guestCount: formData.guestCount,
+          addressZipcode: formData.addressZipcode,
+          venueZipcode: formData.venueZipcode,
+          fullAddress
+        }, failureReason, errorData).catch(err => {
+          logger.error('Failed to capture booking failure lead', err as Error);
+          // Don't throw - we don't want to disrupt user experience
+        });
+
         alert(userMessage);
       }
     } catch (error) {
       logger.error('Error submitting booking', error as Error);
-      
-      // Capture lead for failed booking
-      await captureFailedBookingLead(formData, 'booking_error', error);
-      
+
+      // Capture lead for failed booking using centralized service
+      const fullAddress = formData.sameAsVenue
+        ? `${formData.addressStreet}, ${formData.addressCity}, ${formData.addressState} ${formData.addressZipcode}`
+        : `${formData.venueStreet}, ${formData.venueCity}, ${formData.venueState} ${formData.venueZipcode}`;
+
+      await submitFailedBookingLead({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        eventDate: formData.eventDate,
+        eventTime: formData.eventTime,
+        guestCount: formData.guestCount,
+        addressZipcode: formData.addressZipcode,
+        venueZipcode: formData.venueZipcode,
+        fullAddress
+      }, 'booking_error', error).catch(err => {
+        logger.error('Failed to capture booking failure lead', err as Error);
+        // Don't throw - we don't want to disrupt user experience
+      });
+
       alert(
         'Sorry, there was an error submitting your booking. Please try again or contact us directly.',
       );
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const captureFailedBookingLead = async (
-    bookingData: BookingFormData,
-    failureReason: string,
-    errorDetails?: unknown
-  ) => {
-    try {
-      const fullAddress = bookingData.sameAsVenue
-        ? `${bookingData.addressStreet}, ${bookingData.addressCity}, ${bookingData.addressState} ${bookingData.addressZipcode}`
-        : `${bookingData.venueStreet}, ${bookingData.venueCity}, ${bookingData.venueState} ${bookingData.venueZipcode}`;
-
-      const leadData = {
-        source: 'BOOKING_FAILED',
-        contacts: [
-          {
-            channel: 'SMS',
-            handle_or_address: bookingData.phone,
-            verified: false,
-          },
-          {
-            channel: 'EMAIL',
-            handle_or_address: bookingData.email,
-            verified: false,
-          },
-        ],
-        context: {
-          party_size_adults: bookingData.guestCount,
-          party_size_kids: 0,
-          estimated_budget_dollars: bookingData.guestCount * 65, // Estimate based on guest count
-          zip_code: bookingData.addressZipcode || bookingData.venueZipcode,
-          service_type: 'hibachi_catering',
-          preferred_date: format(bookingData.eventDate, 'yyyy-MM-dd'),
-          preferred_time: bookingData.eventTime,
-          notes: `Failed booking attempt. Name: ${bookingData.name}. Reason: ${failureReason}. Date: ${format(bookingData.eventDate, 'yyyy-MM-dd')} at ${bookingData.eventTime}. Location: ${fullAddress}. ${errorDetails ? `Error: ${JSON.stringify(errorDetails)}` : ''}`,
-        },
-        utm_source: 'website',
-        utm_medium: 'booking_form',
-        utm_campaign: 'failed_booking_recovery',
-      };
-
-      const response = await fetch('/api/leads', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(leadData),
-      });
-
-      if (response.ok) {
-        logger.info('Failed booking lead captured successfully');
-      } else {
-        logger.warn('Failed to capture booking failure lead', { status: response.status });
-      }
-    } catch (error) {
-      logger.error('Error capturing failed booking lead', error as Error);
-      // Don't throw - we don't want to disrupt user experience
-    }
-  };
-
-  const handleAgreementCancel = () => {
+  };  const handleAgreementCancel = () => {
     setShowAgreementModal(false);
     setFormData(null);
   };

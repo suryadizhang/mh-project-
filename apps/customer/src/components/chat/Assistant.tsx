@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation'
 
 import { getContactData, openIG } from '@/lib/contactData'
 import { logger } from '@/lib/logger'
+import { submitChatLead } from '@/lib/leadService'
 
 interface Message {
   id: string
@@ -154,38 +155,18 @@ export default function Assistant({ page }: AssistantProps) {
     setLeadCaptureError('')
 
     try {
-      const leadData = {
-        source: 'CHAT',
-        contacts: [
-          {
-            channel: 'SMS',
-            handle_or_address: leadPhone,
-            verified: false
-          }
-        ],
-        context: {
-          service_type: 'hibachi_catering',
-          notes: `Chat lead captured. Name: ${leadName}`
-        },
-        utm_source: 'website',
-        utm_medium: 'chat_widget',
-        utm_campaign: 'chat_page'
-      }
-
-      const response = await fetch('/api/leads', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(leadData)
+      // Use centralized lead service
+      const result = await submitChatLead({
+        name: leadName,
+        phone: leadPhone
       })
 
-      if (response.ok) {
+      if (result.success) {
         // Mark lead as captured
         localStorage.setItem('mh_chat_lead_captured', 'true')
         setShowLeadCapture(false)
-        logger.info('Chat lead captured successfully')
-        
+        logger.info('Chat lead captured successfully', { leadId: result.data.id })
+
         // Add welcome message
         const welcomeMessage: Message = {
           id: Date.now().toString(),
@@ -196,7 +177,7 @@ export default function Assistant({ page }: AssistantProps) {
         }
         setMessages([welcomeMessage])
       } else {
-        logger.warn('Chat lead submission failed', { status: response.status })
+        logger.warn('Chat lead submission failed', { error: result.error })
         setLeadCaptureError('Failed to save your information. Please try again.')
       }
     } catch (error) {
