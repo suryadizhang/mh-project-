@@ -10,6 +10,20 @@
  * - Conversation tracking in CRM
  */
 
+// Extend window interface for RingCentral widget
+declare global {
+  interface Window {
+    RingCentralWidget?: {
+      call?: (phoneNumber: string) => void;
+      sendMessage?: (message: string) => void;
+      show?: () => void;
+      hide?: () => void;
+      open?: () => void;
+      close?: () => void;
+    };
+  }
+}
+
 /**
  * RingCentral configuration
  */
@@ -17,6 +31,8 @@ const RINGCENTRAL_CONFIG = {
   // This should match your backend RingCentral phone number
   BUSINESS_PHONE: '+19167408768', // Your MyHibachi business number
   SMS_ENDPOINT: '/api/ringcentral/sms/send',
+  // RingCentral Engage Widget URL (if using web widget)
+  WIDGET_URL: 'https://ringcentral.github.io/engage-voice-embeddable/',
 } as const;
 
 export interface SMSMessage {
@@ -166,4 +182,40 @@ export function getBusinessPhone(): string {
  */
 export function isRingCentralAvailable(): boolean {
   return typeof window !== 'undefined';
+}
+
+/**
+ * Opens RingCentral live chat widget
+ * This opens the RingCentral Engage widget for live chat with a real person
+ */
+export function openRingCentralChat(): void {
+  if (typeof window !== 'undefined') {
+    // If RingCentral widget is loaded
+    if (window.RingCentralWidget?.show) {
+      window.RingCentralWidget.show();
+    } else if (window.RingCentralWidget?.open) {
+      window.RingCentralWidget.open();
+    } else {
+      // Fallback: Initiate a call if widget not available
+      initiateCall();
+    }
+  }
+}
+
+/**
+ * Sends a message via RingCentral live chat widget
+ *
+ * @param message - The message to send
+ */
+export function sendRingCentralMessage(message: string): void {
+  if (typeof window !== 'undefined' && window.RingCentralWidget?.sendMessage) {
+    window.RingCentralWidget.sendMessage(message);
+  }
+}
+
+/**
+ * Checks if RingCentral live chat widget is loaded
+ */
+export function isRingCentralWidgetLoaded(): boolean {
+  return typeof window !== 'undefined' && !!window.RingCentralWidget;
 }
