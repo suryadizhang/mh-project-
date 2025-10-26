@@ -1,5 +1,5 @@
 ﻿"use client";
-import { openTawkChat } from '@/lib/tawk';
+import { initiateCall } from '@/lib/ringcentral';
 
 interface LiveChatButtonProps {
   className?: string;
@@ -12,8 +12,8 @@ export default function LiveChatButton({
   variant = 'primary',
   size = 'md'
 }: LiveChatButtonProps) {
-  const handleChatClick = () => {
-    openTawkChat();
+  const handleCallClick = () => {
+    initiateCall(); // Opens phone dialer with MyHibachi business number
   };
 
   const getButtonClasses = () => {
@@ -36,12 +36,12 @@ export default function LiveChatButton({
 
   return (
     <button
-      onClick={handleChatClick}
+      onClick={handleCallClick}
       className={getButtonClasses()}
-      title="Start live chat with our team"
+      title="Call MyHibachi - Click to dial (916) 740-8768"
     >
-      <i className="bi bi-chat-dots-fill"></i>
-      <span>Live Chat</span>
+      <i className="bi bi-telephone-fill"></i>
+      <span>Call Us</span>
     </button>
   );
 }
