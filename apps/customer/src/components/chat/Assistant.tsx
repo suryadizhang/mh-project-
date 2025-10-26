@@ -1,13 +1,14 @@
 ﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { X, Send, ExternalLink, MessageCircle, Instagram, Phone, Mail } from 'lucide-react'
+import { X, Send, ExternalLink, MessageCircle, Instagram, Phone, Mail, Headset } from 'lucide-react'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 
 import { getContactData, openIG } from '@/lib/contactData'
 import { logger } from '@/lib/logger'
 import { submitChatLead } from '@/lib/leadService'
+import { openRingCentralChat } from '@/lib/ringcentral'
 
 interface Message {
   id: string
@@ -579,6 +580,34 @@ export default function Assistant({ page }: AssistantProps) {
 
             {/* Contact Options */}
             <div className="space-y-3 mb-4">
+              {/* RingCentral Live Chat Option */}
+              <button
+                onClick={() => {
+                  try {
+                    openRingCentralChat()
+                    // GTM tracking
+                    if (typeof window !== 'undefined' && (window as unknown as { dataLayer?: unknown[] }).dataLayer) {
+                      ;(window as unknown as { dataLayer: unknown[] }).dataLayer.push({ event: 'chat_open', channel: 'ringcentral' })
+                    }
+                    setShowHandoff(false)
+                  } catch (error) {
+                    console.warn('Error opening RingCentral:', error)
+                    // Fallback to phone call
+                    window.location.href = 'tel:+19167408768'
+                  }
+                }}
+                className="w-full flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border-2 border-blue-200 hover:border-blue-300"
+                style={{ fontSize: '14px' }}
+              >
+                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Headset size={20} className="text-white" />
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="font-medium">RingCentral Live Chat</div>
+                  <div className="text-xs text-gray-500">Connect with our team instantly</div>
+                </div>
+              </button>
+
               {/* Messenger Option */}
               <button
                 onClick={() => {
