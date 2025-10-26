@@ -9,6 +9,7 @@ import { getContactData, openIG } from '@/lib/contactData'
 import { logger } from '@/lib/logger'
 import { submitChatLead } from '@/lib/leadService'
 import { openRingCentralChat } from '@/lib/ringcentral'
+import { setRingCentralUserInfo } from '@/components/RingCentralWidget'
 
 interface Message {
   id: string
@@ -584,10 +585,24 @@ export default function Assistant({ page }: AssistantProps) {
               <button
                 onClick={() => {
                   try {
+                    // Capture lead info before opening RingCentral
+                    if (leadName && leadPhone) {
+                      setRingCentralUserInfo({
+                        name: leadName,
+                        phone: leadPhone,
+                        context: `Chat from ${pathname || 'website'}`
+                      })
+                    }
+                    
                     openRingCentralChat()
+                    
                     // GTM tracking
                     if (typeof window !== 'undefined' && (window as unknown as { dataLayer?: unknown[] }).dataLayer) {
-                      ;(window as unknown as { dataLayer: unknown[] }).dataLayer.push({ event: 'chat_open', channel: 'ringcentral' })
+                      ;(window as unknown as { dataLayer: unknown[] }).dataLayer.push({
+                        event: 'chat_open',
+                        channel: 'ringcentral',
+                        has_lead_info: !!(leadName && leadPhone)
+                      })
                     }
                     setShowHandoff(false)
                   } catch (error) {
