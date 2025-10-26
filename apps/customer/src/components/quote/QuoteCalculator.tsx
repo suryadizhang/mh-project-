@@ -3,6 +3,7 @@
 import { useState } from 'react'
 
 import { logger } from '@/lib/logger'
+import { submitQuoteLead } from '@/lib/leadService'
 
 interface QuoteData {
   adults: number
@@ -121,8 +122,16 @@ export function QuoteCalculator() {
 
       setQuoteResult(result)
 
-      // Submit lead data to backend
-      submitLeadData(result).catch(err => {
+      // Submit lead data to backend using centralized service
+      submitQuoteLead({
+        name: quoteData.name,
+        phone: quoteData.phone,
+        adults: quoteData.adults,
+        children: quoteData.children,
+        location: quoteData.location,
+        zipCode: quoteData.zipCode,
+        grandTotal: result.grandTotal
+      }).catch(err => {
         logger.warn('Failed to submit lead data', err as Error)
         // Don't block the quote display if lead submission fails
       })
@@ -131,49 +140,6 @@ export function QuoteCalculator() {
       setCalculationError('Error calculating quote. Please try again.')
     } finally {
       setIsCalculating(false)
-    }
-  }
-
-  const submitLeadData = async (result: QuoteResult) => {
-    try {
-      const leadData = {
-        source: 'WEB_QUOTE',
-        contacts: [
-          {
-            channel: 'SMS',
-            handle_or_address: quoteData.phone,
-            verified: false
-          }
-        ],
-        context: {
-          party_size_adults: quoteData.adults,
-          party_size_kids: quoteData.children,
-          estimated_budget_dollars: result.grandTotal,
-          zip_code: quoteData.zipCode || undefined,
-          service_type: 'hibachi_catering',
-          notes: `Quote requested via calculator. Location: ${quoteData.location || 'Not specified'}. Name: ${quoteData.name}`
-        },
-        utm_source: 'website',
-        utm_medium: 'quote_calculator',
-        utm_campaign: 'quote_page'
-      }
-
-      const response = await fetch('/api/leads', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(leadData)
-      })
-
-      if (response.ok) {
-        logger.info('Lead data submitted successfully')
-      } else {
-        logger.warn('Lead submission failed', { status: response.status })
-      }
-    } catch (error) {
-      logger.error('Error submitting lead data', error as Error)
-      throw error
     }
   }
 
