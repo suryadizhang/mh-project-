@@ -53,7 +53,7 @@ class Customer(Base):
     station = relationship("Station", foreign_keys=[station_id])  # Now works with unified Base!
     bookings = relationship("Booking", back_populates="customer")
     message_threads = relationship("MessageThread", back_populates="customer")
-    leads = relationship("Lead", back_populates="customer")
+    # leads = relationship("Lead", back_populates="customer")  # Disabled - Lead.customer is commented out
     social_threads = relationship("SocialThread", back_populates="customer")
     newsletter_subscriptions = relationship("Subscriber", back_populates="customer")
     

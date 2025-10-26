@@ -65,7 +65,7 @@ class ChatHistory(BaseModel):
     per_page: int
 
 @router.post("/chat", response_model=ChatResponse, 
-            dependencies=[Depends(RateLimitTier.ai())],
+            dependencies=[RateLimitTier.ai()],
             tags=["AI Chat"])
 async def send_chat_message(
     request: ChatRequest,

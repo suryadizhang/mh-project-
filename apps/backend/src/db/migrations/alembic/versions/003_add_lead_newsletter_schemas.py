@@ -1,6 +1,6 @@
 """Add Lead and Newsletter schemas for enterprise CRM
 
-Revision ID: 003
+Revision ID: 003_add_lead_newsletter_schemas
 Revises: 002
 Create Date: 2025-10-06 10:00:00.000000
 
@@ -10,7 +10,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '003'
+revision = '003_add_lead_newsletter_schemas'
 down_revision = '002'
 branch_labels = None
 depends_on = None

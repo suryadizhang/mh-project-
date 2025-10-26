@@ -14,7 +14,7 @@ import stripe
 from sqlalchemy import and_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.app.database import get_db_session
+from api.app.database import get_db_session, get_db_context
 from api.app.models.events import OutboxEntry
 from api.app.utils.encryption import decrypt_field, get_field_encryption
 
@@ -68,7 +68,8 @@ class OutboxWorkerBase:
 
     async def _process_batch(self):
         """Process a batch of outbox events."""
-        async with get_db_session() as db:
+        # use get_db_context() which is an asynccontextmanager for non-FastAPI usage
+        async with get_db_context() as db:
             # Get pending events for this worker
             events = await self._get_pending_events(db)
 
@@ -85,22 +86,29 @@ class OutboxWorkerBase:
 
     async def _get_pending_events(self, db: AsyncSession) -> list[OutboxEntry]:
         """Get pending events for this worker type."""
+        # First, fetch candidate pending entries (no JSON extraction in SQL)
         query = (
             select(OutboxEntry)
             .where(
                 and_(
-                    OutboxEntry.event_type.in_(self.get_supported_event_types()),
-                    OutboxEntry.processed_at == None,
-                    OutboxEntry.retry_count < self.config.max_retries,
-                    OutboxEntry.next_retry_at <= datetime.utcnow()
+                    OutboxEntry.status == 'pending',
+                    OutboxEntry.attempts < self.config.max_retries,
+                    OutboxEntry.next_attempt_at <= datetime.utcnow()
                 )
             )
             .order_by(OutboxEntry.created_at)
-            .limit(self.config.batch_size)
+            .limit(self.config.batch_size * 4)  # fetch some extra to filter in-Python
         )
 
         result = await db.execute(query)
-        return result.scalars().all()
+        candidates = result.scalars().all()
+
+        # Filter by payload.event_type in Python to support multiple DB backends
+        supported = set(self.get_supported_event_types())
+        selected = [e for e in candidates if (e.payload or {}).get('event_type') in supported]
+
+        # Respect batch_size
+        return selected[: self.config.batch_size]
 
     async def _mark_event_processed(self, event_id: str, db: AsyncSession):
         """Mark event as processed."""
@@ -108,14 +116,14 @@ class OutboxWorkerBase:
             update(OutboxEntry)
             .where(OutboxEntry.id == event_id)
             .values(
-                processed_at=datetime.utcnow(),
-                status="processed"
+                completed_at=datetime.utcnow(),
+                status="completed"
             )
         )
 
     async def _handle_event_error(self, event: OutboxEntry, error_message: str, db: AsyncSession):
         """Handle event processing error with exponential backoff."""
-        retry_count = event.retry_count + 1
+        retry_count = (getattr(event, "attempts", None) or 0) + 1
 
         # Calculate next retry time with exponential backoff
         delay_seconds = min(
@@ -131,9 +139,9 @@ class OutboxWorkerBase:
                 .where(OutboxEntry.id == event.id)
                 .values(
                     status="failed",
-                    error_message=error_message,
-                    processed_at=datetime.utcnow(),
-                    retry_count=retry_count
+                    last_error=error_message,
+                    completed_at=datetime.utcnow(),
+                    attempts=retry_count
                 )
             )
             logger.error(f"Event {event.id} failed after {retry_count} retries: {error_message}")
@@ -143,9 +151,9 @@ class OutboxWorkerBase:
                 update(OutboxEntry)
                 .where(OutboxEntry.id == event.id)
                 .values(
-                    retry_count=retry_count,
-                    error_message=error_message,
-                    next_retry_at=next_retry_at
+                    attempts=retry_count,
+                    last_error=error_message,
+                    next_attempt_at=next_retry_at
                 )
             )
             logger.warning(f"Event {event.id} retry {retry_count} scheduled for {next_retry_at}: {error_message}")

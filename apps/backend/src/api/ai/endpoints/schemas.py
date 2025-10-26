@@ -7,7 +7,7 @@ from enum import Enum
 from typing import Any, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
 
 
 class ChannelType(str, Enum):
@@ -100,13 +100,40 @@ class EscalationResponse(BaseModel):
 # WebSocket Models
 class WebSocketMessage(BaseModel):
     """WebSocket message format"""
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "type": "message",
+            "content": "Hello, how can I help?",
+            "role": "assistant",
+            "timestamp": "2024-10-25T10:30:00Z"
+        }
+    })
 
     type: str  # "message", "typing", "takeover", "system"
     conversation_id: Optional[UUID] = None
     content: str
     role: Optional[MessageRole] = None
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
-    metadata: Optional[dict[str, Any]] = Field(default_factory=dict)
+    timestamp: datetime = Field(description="Message timestamp")
+    metadata: Optional[dict[str, Any]] = None
+
+    @classmethod
+    def create(
+        cls,
+        type: str,
+        content: str,
+        conversation_id: Optional[UUID] = None,
+        role: Optional[MessageRole] = None,
+        metadata: Optional[dict[str, Any]] = None
+    ) -> "WebSocketMessage":
+        """Factory method to create WebSocketMessage with automatic timestamp."""
+        return cls(
+            type=type,
+            content=content,
+            conversation_id=conversation_id,
+            role=role,
+            timestamp=datetime.utcnow(),
+            metadata=metadata
+        )
 
 
 # Knowledge Base Models

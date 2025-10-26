@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from typing import Any, Optional, Union
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, field_serializer, model_validator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -35,17 +35,42 @@ class Query(BaseModel):
 
 class Event(BaseModel):
     """Base class for domain events."""
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        use_enum_values=True,
+        json_schema_extra={
+            "example": {
+                "aggregate_id": "550e8400-e29b-41d4-a716-446655440000",
+                "aggregate_type": "Booking",
+                "event_type": "BookingCreated",
+                "version": 1,
+                "occurred_at": "2024-10-25T10:30:00Z"
+            }
+        }
+    )
 
     aggregate_id: UUID
     aggregate_type: str
     event_type: str
     version: int = 1
-    occurred_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    occurred_at: datetime = Field(description="When the event occurred")
 
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        use_enum_values=True
-    )
+    @classmethod
+    def create(
+        cls,
+        aggregate_id: UUID,
+        aggregate_type: str,
+        event_type: str,
+        version: int = 1
+    ) -> "Event":
+        """Factory method to create Event with automatic timestamp."""
+        return cls(
+            aggregate_id=aggregate_id,
+            aggregate_type=aggregate_type,
+            event_type=event_type,
+            version=version,
+            occurred_at=datetime.now(timezone.utc)
+        )
 
 
 class CommandResult(BaseModel):

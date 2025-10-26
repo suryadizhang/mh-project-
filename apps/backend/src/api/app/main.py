@@ -208,7 +208,7 @@ app = FastAPI(
 )
 
 # Set custom OpenAPI schema
-app.openapi = lambda: get_openapi_schema(app)
+app.openapi = get_openapi_schema(app)
 
 # Setup authentication middleware
 setup_auth_middleware(app)
@@ -358,6 +358,14 @@ app.include_router(bookings.router, prefix="/api/bookings", tags=["bookings-lega
 from api.app.routers.booking_enhanced import router as booking_enhanced_router
 app.include_router(booking_enhanced_router, prefix="/api", tags=["booking-enhanced", "admin"])
 
+# Customer Review System
+from api.app.routers.reviews import router as reviews_router
+app.include_router(reviews_router, prefix="/api/reviews", tags=["reviews", "feedback"])
+
+# QR Code Tracking System
+from api.app.routers.qr_tracking import router as qr_tracking_router
+app.include_router(qr_tracking_router, prefix="/api/qr", tags=["qr-tracking", "marketing"])
+
 
 @app.get("/")
 async def root():
@@ -467,7 +475,7 @@ async def app_info():
 
 # Export OpenAPI schema for TypeScript generation
 @app.get("/openapi.json", include_in_schema=False)
-async def get_openapi_schema():
+async def export_openapi_schema():
     """Export OpenAPI schema for client generation."""
     return app.openapi()
 

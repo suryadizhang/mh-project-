@@ -189,76 +189,66 @@ def require_station_permission(
     station_id: Optional[UUID] = None,
     allow_cross_station: bool = False
 ):
-    """Decorator to require specific station permission."""
+    """
+    FastAPI dependency to require specific station permission.
     
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-            # Extract authenticated user from kwargs
-            auth_user = None
-            for arg in args:
-                if isinstance(arg, AuthenticatedUser):
-                    auth_user = arg
-                    break
-            
-            if not auth_user:
-                for value in kwargs.values():
-                    if isinstance(value, AuthenticatedUser):
-                        auth_user = value
-                        break
-            
-            if not auth_user:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Authentication required"
-                )
-            
-            # Convert permission to enum if needed
-            if isinstance(permission, str):
-                try:
-                    perm = StationPermission(permission)
-                except ValueError:
-                    raise HTTPException(
-                        status_code=status.HTTP_403_FORBIDDEN,
-                        detail=f"Invalid permission: {permission}"
-                    )
-            else:
-                perm = permission
-            
-            # Determine target station
-            target_station = station_id or auth_user.current_station_id
-            if not target_station:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="No station context available"
-                )
-            
-            # Check cross-station permission if needed
-            if allow_cross_station and target_station != auth_user.current_station_id:
-                if not auth_user.can_perform_cross_station_action(perm):
-                    raise HTTPException(
-                        status_code=status.HTTP_403_FORBIDDEN,
-                        detail="Cross-station access not permitted"
-                    )
-            
-            # Check specific permission
-            if not auth_user.has_permission(perm, target_station):
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail=f"Insufficient permissions: {perm.value} required"
-                )
-            
-            return await func(*args, **kwargs)
+    Returns a dependency function that validates permissions and returns the authenticated user.
+    """
+    
+    async def permission_checker(
+        auth_user: AuthenticatedUser = Depends(get_current_station_user)
+    ) -> AuthenticatedUser:
+        """Check if user has required permission."""
         
-        return wrapper
-    return decorator
+        # Convert permission to enum if needed
+        if isinstance(permission, str):
+            try:
+                perm = StationPermission(permission)
+            except ValueError:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"Invalid permission: {permission}"
+                )
+        else:
+            perm = permission
+        
+        # Determine target station
+        target_station = station_id or auth_user.current_station_id
+        if not target_station:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No station context available"
+            )
+        
+        # Check cross-station permission if needed
+        if allow_cross_station and target_station != auth_user.current_station_id:
+            if not auth_user.can_perform_cross_station_action(perm):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Cross-station access not permitted"
+                )
+        
+        # Check specific permission
+        if not auth_user.has_permission(perm, target_station):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Insufficient permissions: {perm.value} required"
+            )
+        
+        return auth_user
+    
+    return permission_checker
 
 
 def require_station_role(
     minimum_role: Union[StationRole, str],
     station_id: Optional[UUID] = None
 ):
-    """Decorator to require minimum station role."""
+    """
+    FastAPI dependency to require minimum station role.
+    
+    Returns a dependency function that validates role and returns the authenticated user.
+    """
     
     role_hierarchy = {
         StationRole.CUSTOMER_SUPPORT: 1,
@@ -267,123 +257,96 @@ def require_station_role(
         StationRole.SUPER_ADMIN: 4
     }
     
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-            # Extract authenticated user
-            auth_user = None
-            for arg in args:
-                if isinstance(arg, AuthenticatedUser):
-                    auth_user = arg
-                    break
-            
-            if not auth_user:
-                for value in kwargs.values():
-                    if isinstance(value, AuthenticatedUser):
-                        auth_user = value
-                        break
-            
-            if not auth_user:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Authentication required"
-                )
-            
-            # Convert role to enum if needed
-            if isinstance(minimum_role, str):
-                try:
-                    min_role = StationRole(minimum_role)
-                except ValueError:
-                    raise HTTPException(
-                        status_code=status.HTTP_403_FORBIDDEN,
-                        detail=f"Invalid role: {minimum_role}"
-                    )
-            else:
-                min_role = minimum_role
-            
-            # Determine target station
-            target_station = station_id or auth_user.current_station_id
-            if not target_station:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="No station context available"
-                )
-            
-            # Check user's role in target station
-            user_role = auth_user.station_context.get_role_for_station(target_station)
-            if not user_role:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="No role assigned for this station"
-                )
-            
-            # Check role hierarchy
-            user_level = role_hierarchy.get(user_role, 0)
-            required_level = role_hierarchy.get(min_role, 999)
-            
-            if user_level < required_level:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail=f"Minimum role required: {min_role.value}"
-                )
-            
-            return await func(*args, **kwargs)
+    async def role_checker(
+        auth_user: AuthenticatedUser = Depends(get_current_station_user)
+    ) -> AuthenticatedUser:
+        """Check if user has required role."""
         
-        return wrapper
-    return decorator
-
-
-def require_station_access(station_id: Union[UUID, str, Callable]):
-    """Decorator to require access to a specific station."""
+        # Convert role to enum if needed
+        if isinstance(minimum_role, str):
+            try:
+                min_role = StationRole(minimum_role)
+            except ValueError:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"Invalid role: {minimum_role}"
+                )
+        else:
+            min_role = minimum_role
+        
+        # Determine target station
+        target_station = station_id or auth_user.current_station_id
+        if not target_station:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No station context available"
+            )
+        
+        # Check user's role in target station
+        user_role = auth_user.station_context.get_role_for_station(target_station)
+        if not user_role:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No role assigned for this station"
+            )
+        
+        # Check role hierarchy
+        user_level = role_hierarchy.get(user_role, 0)
+        required_level = role_hierarchy.get(min_role, 999)
+        
+        if user_level < required_level:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Minimum role required: {min_role.value}"
+            )
+        
+        return auth_user
     
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-            # Extract authenticated user
-            auth_user = None
-            for arg in args:
-                if isinstance(arg, AuthenticatedUser):
-                    auth_user = arg
-                    break
-            
-            if not auth_user:
-                for value in kwargs.values():
-                    if isinstance(value, AuthenticatedUser):
-                        auth_user = value
-                        break
-            
-            if not auth_user:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Authentication required"
-                )
-            
-            # Resolve station ID
-            target_station_id = None
-            if callable(station_id):
-                target_station_id = station_id(*args, **kwargs)
-            elif isinstance(station_id, str):
-                target_station_id = UUID(station_id)
-            else:
-                target_station_id = station_id
-            
-            if not target_station_id:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Station ID required"
-                )
-            
-            # Check access
-            if not auth_user.can_access_station(target_station_id):
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Access to this station not permitted"
-                )
-            
-            return await func(*args, **kwargs)
+    return role_checker
+
+
+def require_station_access(station_id_param: Union[UUID, str, Callable]):
+    """
+    FastAPI dependency to require access to a specific station.
+    
+    Returns a dependency function that validates station access and returns the authenticated user.
+    """
+    
+    async def access_checker(
+        auth_user: AuthenticatedUser = Depends(get_current_station_user)
+    ) -> AuthenticatedUser:
+        """Check if user has access to required station."""
         
-        return wrapper
-    return decorator
+        # Resolve station ID
+        target_station_id = None
+        if callable(station_id_param):
+            # If station_id is a callable, we can't resolve it here
+            # This pattern needs to be refactored - for now, raise error
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Dynamic station ID resolution not supported in dependency pattern"
+            )
+        elif isinstance(station_id_param, str):
+            target_station_id = UUID(station_id_param)
+        else:
+            target_station_id = station_id_param
+        
+        if not target_station_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Station ID required"
+            )
+        
+        # Check access
+        if not auth_user.can_access_station(target_station_id):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access to this station not permitted"
+            )
+        
+        return auth_user
+    
+    return access_checker
 
 
 async def audit_log_action(

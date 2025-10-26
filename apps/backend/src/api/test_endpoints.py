@@ -2,7 +2,7 @@
 Sample API Endpoints demonstrating the new architectural patterns
 This file tests integration of DI container, repository pattern, and error handling
 """
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from typing import List, Dict, Any, Optional
 from datetime import datetime, date
 from pydantic import BaseModel, Field
@@ -86,7 +86,7 @@ class CustomerResponse(BaseModel):
 @router.post("/bookings", response_model=Dict[str, Any])
 async def create_booking(
     request: CreateBookingRequest,
-    context = get_authenticated_booking_service()
+    context = Depends(get_authenticated_booking_service)
 ) -> Dict[str, Any]:
     """
     Create a new booking
@@ -131,7 +131,7 @@ async def create_booking(
 @router.get("/bookings/{booking_id}", response_model=Dict[str, Any])
 async def get_booking(
     booking_id: int,
-    context = get_authenticated_booking_service()
+    context = Depends(get_authenticated_booking_service)
 ) -> Dict[str, Any]:
     """
     Get a specific booking
@@ -162,7 +162,7 @@ async def get_booking(
 @router.put("/bookings/{booking_id}/confirm", response_model=Dict[str, Any])
 async def confirm_booking(
     booking_id: int,
-    context = get_admin_booking_context()
+    context = Depends(get_admin_booking_context)
 ) -> Dict[str, Any]:
     """
     Confirm a pending booking
@@ -190,7 +190,7 @@ async def list_bookings(
     status: Optional[BookingStatus] = None,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
-    context = get_admin_booking_context()
+    context = Depends(get_admin_booking_context)
 ) -> Dict[str, Any]:
     """
     List bookings with filtering
@@ -248,7 +248,7 @@ async def list_bookings(
 @router.post("/customers", response_model=Dict[str, Any])
 async def create_customer(
     request: CreateCustomerRequest,
-    context = get_customer_service_context()
+    context = Depends(get_customer_service_context)
 ) -> Dict[str, Any]:
     """
     Create a new customer
@@ -292,8 +292,8 @@ async def search_customers(
     email: Optional[str] = None,
     phone: Optional[str] = None,
     status: Optional[CustomerStatus] = None,
-    context = get_customer_service_context(),
-    pagination: PaginationParams = get_pagination_params()
+    context = Depends(get_customer_service_context),
+    pagination: PaginationParams = Depends(get_pagination_params)
 ) -> Dict[str, Any]:
     """
     Search customers
@@ -355,7 +355,7 @@ async def get_customer_bookings(
     customer_id: int,
     include_cancelled: bool = False,
     limit: Optional[int] = 50,
-    context = get_customer_service_context()
+    context = Depends(get_customer_service_context)
 ) -> Dict[str, Any]:
     """
     Get customer booking history
@@ -385,7 +385,7 @@ async def get_customer_bookings(
 async def get_booking_analytics(
     start_date: date,
     end_date: date,
-    context = get_admin_booking_context()
+    context = Depends(get_admin_booking_context)
 ) -> Dict[str, Any]:
     """
     Get booking analytics
@@ -403,7 +403,7 @@ async def get_booking_analytics(
 
 @router.get("/analytics/customers", response_model=Dict[str, Any])
 async def get_customer_analytics(
-    context = get_customer_service_context()
+    context = Depends(get_customer_service_context)
 ) -> Dict[str, Any]:
     """
     Get customer analytics
@@ -429,14 +429,18 @@ async def get_customer_analytics(
 
 @router.get("/health", response_model=Dict[str, Any])
 async def health_check(
-    booking_repo: BookingRepository = get_authenticated_booking_service(),
-    customer_repo: CustomerRepository = get_customer_service_context()
+    booking_context = Depends(get_authenticated_booking_service),
+    customer_context = Depends(get_customer_service_context)
 ) -> Dict[str, Any]:
     """
     Health check endpoint
     Tests: DI container resolution, service availability
     """
     try:
+        # Unpack contexts returned by the composed dependencies
+        current_user, booking_repo = booking_context
+        _, customer_repo, _ = customer_context
+
         # Test database connectivity
         booking_count = len(booking_repo.get_all(limit=1))
         customer_count = len(customer_repo.get_all(limit=1))

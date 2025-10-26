@@ -47,20 +47,23 @@ security = HTTPBearer(auto_error=False)
 
 # Dependency Injection Dependencies
 
-def get_di_container() -> DependencyInjectionContainer:
-    """Get the dependency injection container"""
-    def _get_container(request: Request) -> DependencyInjectionContainer:
-        if not hasattr(request.state, 'container'):
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Dependency injection container not available"
-            )
-        return request.state.container
-    
-    return Depends(_get_container)
+def get_di_container(request: Request) -> DependencyInjectionContainer:
+    """Get the dependency injection container from request.state.
+
+    Long-term design: expose this as a standard FastAPI dependency so
+    callers should use Depends(get_di_container). Previously this
+    function returned a Depends(...) object which led to nested
+    Depends and schema generation issues.
+    """
+    if not hasattr(request.state, 'container'):
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Dependency injection container not available"
+        )
+    return request.state.container
 
 def get_booking_repository(
-    container: DependencyInjectionContainer = get_di_container()
+    container: DependencyInjectionContainer = Depends(get_di_container)
 ) -> BookingRepository:
     """Get booking repository from DI container"""
     try:
@@ -73,7 +76,7 @@ def get_booking_repository(
         )
 
 def get_customer_repository(
-    container: DependencyInjectionContainer = get_di_container()
+    container: DependencyInjectionContainer = Depends(get_di_container)
 ) -> CustomerRepository:
     """Get customer repository from DI container"""
     try:
@@ -86,7 +89,7 @@ def get_customer_repository(
         )
 
 def get_database_session(
-    container: DependencyInjectionContainer = get_di_container()
+    container: DependencyInjectionContainer = Depends(get_di_container)
 ):
     """Get database session from DI container"""
     try:
@@ -174,45 +177,33 @@ async def get_super_admin_user(
 
 # Service-aware Dependencies (combining auth + services)
 
-def get_authenticated_booking_service():
-    """Get booking repository with authenticated user context"""
-    def _get_service(
-        current_user: AuthenticatedUser = Depends(get_current_user),
-        booking_repo: BookingRepository = Depends(get_booking_repository)
-    ) -> tuple[AuthenticatedUser, BookingRepository]:
-        return current_user, booking_repo
-    
-    return Depends(_get_service)
+async def get_authenticated_booking_service(
+    current_user: AuthenticatedUser = Depends(get_current_user),
+    booking_repo: BookingRepository = Depends(get_booking_repository)
+) -> tuple[AuthenticatedUser, BookingRepository]:
+    """Dependency that returns (current_user, booking_repo)."""
+    return current_user, booking_repo
 
-def get_admin_booking_service():
-    """Get booking repository with admin user context"""
-    def _get_service(
-        admin_user: AdminUser = Depends(get_admin_user),
-        booking_repo: BookingRepository = Depends(get_booking_repository)
-    ) -> tuple[AdminUser, BookingRepository]:
-        return admin_user, booking_repo
-    
-    return Depends(_get_service)
+async def get_admin_booking_service(
+    admin_user: AdminUser = Depends(get_admin_user),
+    booking_repo: BookingRepository = Depends(get_booking_repository)
+) -> tuple[AdminUser, BookingRepository]:
+    """Dependency that returns (admin_user, booking_repo)."""
+    return admin_user, booking_repo
 
-def get_authenticated_customer_service():
-    """Get customer repository with authenticated user context"""
-    def _get_service(
-        current_user: AuthenticatedUser = Depends(get_current_user),
-        customer_repo: CustomerRepository = Depends(get_customer_repository)
-    ) -> tuple[AuthenticatedUser, CustomerRepository]:
-        return current_user, customer_repo
-    
-    return Depends(_get_service)
+async def get_authenticated_customer_service(
+    current_user: AuthenticatedUser = Depends(get_current_user),
+    customer_repo: CustomerRepository = Depends(get_customer_repository)
+) -> tuple[AuthenticatedUser, CustomerRepository]:
+    """Dependency that returns (current_user, customer_repo)."""
+    return current_user, customer_repo
 
-def get_admin_customer_service():
-    """Get customer repository with admin user context"""
-    def _get_service(
-        admin_user: AdminUser = Depends(get_admin_user),
-        customer_repo: CustomerRepository = Depends(get_customer_repository)
-    ) -> tuple[AdminUser, CustomerRepository]:
-        return admin_user, customer_repo
-    
-    return Depends(_get_service)
+async def get_admin_customer_service(
+    admin_user: AdminUser = Depends(get_admin_user),
+    customer_repo: CustomerRepository = Depends(get_customer_repository)
+) -> tuple[AdminUser, CustomerRepository]:
+    """Dependency that returns (admin_user, customer_repo)."""
+    return admin_user, customer_repo
 
 # Rate limiting dependencies (unchanged for now)
 class RateLimitTier:
@@ -422,24 +413,16 @@ def require_any_permission(*required_permissions: str):
 
 # Convenience Composition Dependencies
 
-def get_admin_booking_context():
-    """Get admin user with booking repository and pagination"""
-    def _get_context(
-        admin_user: AdminUser = Depends(get_admin_user),
-        booking_repo: BookingRepository = Depends(get_booking_repository),
-        pagination: PaginationParams = Depends(get_pagination_params)
-    ) -> tuple[AdminUser, BookingRepository, PaginationParams]:
-        return admin_user, booking_repo, pagination
-    
-    return Depends(_get_context)
+async def get_admin_booking_context(
+    admin_user: AdminUser = Depends(get_admin_user),
+    booking_repo: BookingRepository = Depends(get_booking_repository),
+    pagination: PaginationParams = Depends(get_pagination_params)
+) -> tuple[AdminUser, BookingRepository, PaginationParams]:
+    return admin_user, booking_repo, pagination
 
-def get_customer_service_context():
-    """Get authenticated user with customer repository and business context"""
-    def _get_context(
-        current_user: AuthenticatedUser = Depends(get_current_user),
-        customer_repo: CustomerRepository = Depends(get_customer_repository),
-        business_context: Dict[str, Any] = Depends(get_business_context)
-    ) -> tuple[AuthenticatedUser, CustomerRepository, Dict[str, Any]]:
-        return current_user, customer_repo, business_context
-    
-    return Depends(_get_context)
+async def get_customer_service_context(
+    current_user: AuthenticatedUser = Depends(get_current_user),
+    customer_repo: CustomerRepository = Depends(get_customer_repository),
+    business_context: Dict[str, Any] = Depends(get_business_context)
+) -> tuple[AuthenticatedUser, CustomerRepository, Dict[str, Any]]:
+    return current_user, customer_repo, business_context
