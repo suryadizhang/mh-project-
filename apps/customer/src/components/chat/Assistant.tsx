@@ -4,7 +4,9 @@ import { useState, useEffect, useRef } from 'react'
 import { X, Send, ExternalLink, MessageCircle, Instagram, Phone, Mail } from 'lucide-react'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+
 import { getContactData, openIG } from '@/lib/contactData'
+import { logger } from '@/lib/logger'
 
 interface Message {
   id: string
@@ -70,6 +72,11 @@ export default function Assistant({ page }: AssistantProps) {
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [showHandoff, setShowHandoff] = useState(false)
+  const [showLeadCapture, setShowLeadCapture] = useState(false)
+  const [leadName, setLeadName] = useState('')
+  const [leadPhone, setLeadPhone] = useState('')
+  const [leadCaptureError, setLeadCaptureError] = useState('')
+  const [isSubmittingLead, setIsSubmittingLead] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const pathname = usePathname()
@@ -113,8 +120,97 @@ export default function Assistant({ page }: AssistantProps) {
     }
   }, [])
 
+  // Check if lead has been captured for this chat
+  useEffect(() => {
+    if (typeof window !== 'undefined' && isOpen) {
+      const leadCaptured = localStorage.getItem('mh_chat_lead_captured')
+      if (!leadCaptured && messages.length === 0) {
+        setShowLeadCapture(true)
+      }
+    }
+  }, [isOpen, messages.length])
+
   const handleSuggestionClick = (suggestion: string) => {
     sendMessage(suggestion)
+  }
+
+  const submitLeadCapture = async () => {
+    // Validate inputs
+    if (!leadName.trim()) {
+      setLeadCaptureError('Please enter your name')
+      return
+    }
+    if (!leadPhone.trim()) {
+      setLeadCaptureError('Please enter your phone number')
+      return
+    }
+    const digitsOnly = leadPhone.replace(/\D/g, '')
+    if (digitsOnly.length < 10) {
+      setLeadCaptureError('Please enter a valid phone number with at least 10 digits')
+      return
+    }
+
+    setIsSubmittingLead(true)
+    setLeadCaptureError('')
+
+    try {
+      const leadData = {
+        source: 'CHAT',
+        contacts: [
+          {
+            channel: 'SMS',
+            handle_or_address: leadPhone,
+            verified: false
+          }
+        ],
+        context: {
+          service_type: 'hibachi_catering',
+          notes: `Chat lead captured. Name: ${leadName}`
+        },
+        utm_source: 'website',
+        utm_medium: 'chat_widget',
+        utm_campaign: 'chat_page'
+      }
+
+      const response = await fetch('/api/leads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(leadData)
+      })
+
+      if (response.ok) {
+        // Mark lead as captured
+        localStorage.setItem('mh_chat_lead_captured', 'true')
+        setShowLeadCapture(false)
+        logger.info('Chat lead captured successfully')
+        
+        // Add welcome message
+        const welcomeMessage: Message = {
+          id: Date.now().toString(),
+          type: 'assistant',
+          content: `Hi ${leadName}! ≡ƒæï Thanks for reaching out. How can I help you today?`,
+          timestamp: new Date(),
+          confidence: 'high'
+        }
+        setMessages([welcomeMessage])
+      } else {
+        logger.warn('Chat lead submission failed', { status: response.status })
+        setLeadCaptureError('Failed to save your information. Please try again.')
+      }
+    } catch (error) {
+      logger.error('Lead capture error', error as Error)
+      setLeadCaptureError('An error occurred. Please try again.')
+    } finally {
+      setIsSubmittingLead(false)
+    }
+  }
+
+  const skipLeadCapture = () => {
+    // Allow user to skip lead capture
+    localStorage.setItem('mh_chat_lead_captured', 'skip')
+    setShowLeadCapture(false)
   }
 
   const sendMessage = async (content: string = inputValue.trim()) => {
@@ -393,6 +489,103 @@ export default function Assistant({ page }: AssistantProps) {
           </p>
         </div>
       </div>
+
+      {/* Lead Capture Modal */}
+      {showLeadCapture && (
+        <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-sm">
+            <div className="text-center mb-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-[#ffb800] to-[#db2b28] rounded-full mx-auto mb-3 flex items-center justify-center">
+                <MessageCircle size={24} className="text-white" />
+              </div>
+              <h3 className="font-semibold mb-2" style={{ fontSize: '16px' }}>
+                Welcome to My Hibachi! ≡ƒæï
+              </h3>
+              <p className="text-gray-600" style={{ fontSize: '13px' }}>
+                Before we start, let us know who we&apos;re chatting with
+              </p>
+            </div>
+
+            {leadCaptureError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg mb-4" style={{ fontSize: '13px' }}>
+                {leadCaptureError}
+              </div>
+            )}
+
+            <div className="space-y-3 mb-4">
+              <div>
+                <label htmlFor="lead-name" className="block text-sm font-medium text-gray-700 mb-1">
+                  Your Name *
+                </label>
+                <input
+                  id="lead-name"
+                  type="text"
+                  value={leadName}
+                  onChange={(e) => setLeadName(e.target.value)}
+                  placeholder="Enter your name"
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  style={{ fontSize: '14px' }}
+                  disabled={isSubmittingLead}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      submitLeadCapture()
+                    }
+                  }}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="lead-phone" className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone Number *
+                </label>
+                <input
+                  id="lead-phone"
+                  type="tel"
+                  value={leadPhone}
+                  onChange={(e) => setLeadPhone(e.target.value)}
+                  placeholder="(555) 123-4567"
+                  maxLength={20}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  style={{ fontSize: '14px' }}
+                  disabled={isSubmittingLead}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      submitLeadCapture()
+                    }
+                  }}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  We&apos;ll use this to follow up on your inquiry
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <button
+                onClick={submitLeadCapture}
+                disabled={isSubmittingLead}
+                className="w-full p-3 bg-gradient-to-r from-[#ffb800] to-[#db2b28] text-white rounded-lg hover:shadow-md transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ fontSize: '14px' }}
+              >
+                {isSubmittingLead ? 'Starting Chat...' : 'Start Chatting ≡ƒæï'}
+              </button>
+
+              <button
+                onClick={skipLeadCapture}
+                disabled={isSubmittingLead}
+                className="w-full p-2 text-gray-600 hover:text-gray-800 transition-colors"
+                style={{ fontSize: '13px' }}
+              >
+                Skip for now
+              </button>
+            </div>
+
+            <p className="text-xs text-gray-400 text-center mt-4">
+              By continuing, you agree to our Privacy Policy
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Handoff Modal */}
       {showHandoff && (

@@ -86,7 +86,8 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
                   <h6 className="mt-3">Pricing & Payment:</h6>
                   <ul>
                     <li>Final pricing will be confirmed based on guest count and menu selection</li>
-                    <li>50% deposit required to secure booking</li>
+                    <li>$100 refundable deposit required to secure booking</li>
+                    <li>Deposit is refundable if canceled 7+ days before event, non-refundable within 7 days</li>
                     <li>Remaining balance due on event day</li>
                     <li>Travel fees may apply for locations outside our standard service area</li>
                   </ul>
@@ -94,8 +95,8 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
                   <h6 className="mt-3">Cancellation Policy:</h6>
                   <ul>
                     <li>Full refund if cancelled 7+ days before event</li>
-                    <li>50% refund if cancelled 3-6 days before event</li>
-                    <li>No refund if cancelled within 48 hours of event</li>
+                    <li>No refund if cancelled within 7 days of event</li>
+                    <li>One free reschedule within 48 hours of booking; additional reschedules cost $100</li>
                   </ul>
 
                   <h6 className="mt-3">Client Responsibilities:</h6>

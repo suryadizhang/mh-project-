@@ -106,9 +106,10 @@ export default function TermsPage() {
             </ul>
             <h3>3.2 Payment Schedule</h3>
             <ul>
-              <li><strong>Deposit:</strong> 30% of total cost required to secure booking</li>
-              <li><strong>Final Payment:</strong> Remaining balance due 48 hours before event</li>
-              <li><strong>Payment Methods:</strong> Credit cards (Visa, MasterCard, American Express), Zelle, cash</li>
+              <li><strong>Deposit:</strong> $100 refundable deposit required to secure booking</li>
+              <li><strong>Deposit Refund:</strong> Deposit is refundable if canceled 7+ days before event, non-refundable within 7 days</li>
+              <li><strong>Final Payment:</strong> Remaining balance due on event day</li>
+              <li><strong>Payment Methods:</strong> Credit cards (Visa, MasterCard, American Express), Venmo Business, Zelle Business, Cash</li>
               <li><strong>Processing:</strong> All credit card payments processed securely through Stripe</li>
             </ul>
             <h3>3.3 Pricing</h3>
@@ -124,16 +125,12 @@ export default function TermsPage() {
             <div className="cancellation-tiers">
               <h3>4.1 Cancellation Timeline</h3>
               <div className="policy-tier">
-                <h4>14+ Days Before Event</h4>
-                <p>Full refund minus 10% processing fee</p>
-              </div>
-              <div className="policy-tier">
-                <h4>7-14 Days Before Event</h4>
-                <p>50% refund of total amount paid</p>
+                <h4>7+ Days Before Event</h4>
+                <p>Full refund including $100 deposit</p>
               </div>
               <div className="policy-tier">
                 <h4>Less than 7 Days Before Event</h4>
-                <p>No refund available</p>
+                <p>$100 deposit is non-refundable. No refund for remaining balance.</p>
               </div>
             </div>
             <h3>4.2 Emergency Cancellations</h3>
@@ -144,11 +141,12 @@ export default function TermsPage() {
           <section className="terms-section">
             <h2>5. Rescheduling Policy</h2>
             <ul>
-              <li><strong>Rescheduling Fee:</strong> $50 fee applies to all date changes</li>
-              <li><strong>Notice Required:</strong> Minimum 7 days advance notice required</li>
+              <li><strong>First Reschedule:</strong> One free reschedule allowed within 48 hours of booking</li>
+              <li><strong>Additional Reschedules:</strong> $100 fee applies to any reschedules after the first one</li>
+              <li><strong>Notice Required:</strong> Minimum 7 days advance notice recommended</li>
               <li><strong>Availability:</strong> New date subject to chef availability</li>
               <li><strong>Peak Seasons:</strong> Limited rescheduling options during holidays</li>
-              <li><strong>Weather:</strong> No fee for weather-related rescheduling</li>
+              <li><strong>Weather:</strong> No fee for weather-related rescheduling if proper notice is given</li>
             </ul>
           </section>
           <section className="terms-section">
@@ -279,7 +277,7 @@ export default function TermsPage() {
               <p><strong>Email:</strong> <a href="mailto:cs@myhibachichef.com">cs@myhibachichef.com</a></p>
               <p><strong>Website:</strong> <a href="https://myhibachichef.com">https://myhibachichef.com</a></p>
               <h4>Business Hours:</h4>
-              <p>Monday - Sunday: 8:00 AM - 10:00 PM PST</p>
+              <p>Monday - Sunday: 12:00 PM - 9:00 PM PST</p>
               <p>Emergency Contact: Same phone number available 24/7</p>
               <p style={{ marginTop: '15px', fontSize: '14px', color: '#666', fontStyle: 'italic' }}>
                 <em>We are a mobile catering service. Events are held at your location or venue of choice.</em>

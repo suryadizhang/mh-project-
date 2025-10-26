@@ -284,7 +284,7 @@ export default function PrivacyPage() {
                 <li>Central Valley Region</li>
               </ul>
               <h4>Business Hours:</h4>
-              <p>Monday - Sunday: 8:00 AM - 10:00 PM PST</p>
+              <p>Monday - Sunday: 12:00 PM - 9:00 PM PST</p>
               <div className="gdpr-notice">
                 <h4>EU/UK Residents:</h4>
                 <p>If you are located in the European Union or United Kingdom, you may have additional rights under GDPR. Contact us at the above information for assistance with GDPR-related requests.</p>
