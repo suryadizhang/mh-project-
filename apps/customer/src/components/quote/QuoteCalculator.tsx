@@ -9,6 +9,8 @@ interface QuoteData {
   children: number
   location: string
   zipCode: string
+  name: string
+  phone: string
   salmon: number
   scallops: number
   filetMignon: number
@@ -33,6 +35,8 @@ export function QuoteCalculator() {
     children: 0,
     location: '',
     zipCode: '',
+    name: '',
+    phone: '',
     salmon: 0,
     scallops: 0,
     filetMignon: 0,
@@ -67,6 +71,26 @@ export function QuoteCalculator() {
         return
       }
 
+      if (!quoteData.name.trim()) {
+        setCalculationError('Please enter your name.')
+        setIsCalculating(false)
+        return
+      }
+
+      if (!quoteData.phone.trim()) {
+        setCalculationError('Please enter your phone number.')
+        setIsCalculating(false)
+        return
+      }
+
+      // Validate phone number (basic check for at least 10 digits)
+      const digitsOnly = quoteData.phone.replace(/\D/g, '')
+      if (digitsOnly.length < 10) {
+        setCalculationError('Please enter a valid phone number with at least 10 digits.')
+        setIsCalculating(false)
+        return
+      }
+
       // Calculate base pricing
       const adultPrice = 55 // $55 per adult
       const childPrice = 30 // $30 per child
@@ -96,6 +120,12 @@ export function QuoteCalculator() {
       }
 
       setQuoteResult(result)
+
+      // Submit lead data to backend
+      submitLeadData(result).catch(err => {
+        logger.warn('Failed to submit lead data', err as Error)
+        // Don't block the quote display if lead submission fails
+      })
     } catch (error) {
       logger.error('Calculation error', error as Error)
       setCalculationError('Error calculating quote. Please try again.')
@@ -104,9 +134,91 @@ export function QuoteCalculator() {
     }
   }
 
+  const submitLeadData = async (result: QuoteResult) => {
+    try {
+      const leadData = {
+        source: 'WEB_QUOTE',
+        contacts: [
+          {
+            channel: 'SMS',
+            handle_or_address: quoteData.phone,
+            verified: false
+          }
+        ],
+        context: {
+          party_size_adults: quoteData.adults,
+          party_size_kids: quoteData.children,
+          estimated_budget_dollars: result.grandTotal,
+          zip_code: quoteData.zipCode || undefined,
+          service_type: 'hibachi_catering',
+          notes: `Quote requested via calculator. Location: ${quoteData.location || 'Not specified'}. Name: ${quoteData.name}`
+        },
+        utm_source: 'website',
+        utm_medium: 'quote_calculator',
+        utm_campaign: 'quote_page'
+      }
+
+      const response = await fetch('/api/leads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(leadData)
+      })
+
+      if (response.ok) {
+        logger.info('Lead data submitted successfully')
+      } else {
+        logger.warn('Lead submission failed', { status: response.status })
+      }
+    } catch (error) {
+      logger.error('Error submitting lead data', error as Error)
+      throw error
+    }
+  }
+
   return (
     <div className="quote-calculator">
       <div className="calculator-form">
+        <div className="form-section">
+          <h3>Contact Information</h3>
+          <p className="section-subtitle">Required for instant quote and lead generation</p>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="name">Your Name *</label>
+              <input
+                id="name"
+                type="text"
+                value={quoteData.name}
+                onChange={e => handleInputChange('name', e.target.value)}
+                placeholder="Enter your name"
+                className="form-input"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="phone">Phone Number *</label>
+              <input
+                id="phone"
+                type="tel"
+                value={quoteData.phone}
+                onChange={e =>
+                  handleInputChange(
+                    'phone',
+                    e.target.value.replace(/[^\d\s\-\(\)\+]/g, '').slice(0, 20)
+                  )
+                }
+                placeholder="(916) 740-8768"
+                className="form-input"
+                required
+              />
+              <span className="field-note">We&apos;ll text you the quote instantly</span>
+            </div>
+          </div>
+        </div>
+
         <div className="form-section">
           <h3>Event Details</h3>
 

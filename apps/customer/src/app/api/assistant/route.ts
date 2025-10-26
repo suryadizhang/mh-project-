@@ -1,4 +1,5 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
+
 import { cosineSearch } from '../../../lib/vectorSearch'
 
 interface AssistantRequest {
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Assistant
     }
 
     if (message.toLowerCase().includes('deposit')) {
-      answer = "≡ƒÆ│ We require a 50% deposit to secure your booking. The remaining balance is due on the day of service. No surprise fees!"
+      answer = "💰 We require a $100 refundable deposit to secure your booking. The deposit is refundable if canceled 7+ days before the event. The remaining balance is due on the day of service. No surprise fees!"
       citations = [{ title: 'Booking & Payment', href: '/faqs' }]
     }
 
