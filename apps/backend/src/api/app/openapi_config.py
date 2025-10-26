@@ -3,20 +3,22 @@ OpenAPI configuration and documentation setup for MyHibachi API.
 """
 
 from fastapi.openapi.utils import get_openapi
-from typing import Dict, Any
+from typing import Dict, Any, Callable
 
 
-def get_openapi_schema(app) -> Dict[str, Any]:
+def get_openapi_schema(app) -> Callable[[], Dict[str, Any]]:
     """
-    Generate comprehensive OpenAPI schema for MyHibachi API.
+    Generate a function that returns comprehensive OpenAPI schema for MyHibachi API.
     """
-    if app.openapi_schema:
-        return app.openapi_schema
+    def custom_openapi() -> Dict[str, Any]:
+        if app.openapi_schema:
+            return app.openapi_schema
 
-    openapi_schema = get_openapi(
-        title="MyHibachi AI Sales CRM API",
-        version="2.0.0",
-        description="""
+        try:
+            openapi_schema = get_openapi(
+                title="MyHibachi AI Sales CRM API",
+                version="2.0.0",
+                description="""
 # MyHibachi AI Sales CRM API
 
 A comprehensive hibachi catering booking and management system with AI-powered features.
@@ -71,104 +73,139 @@ All errors follow a consistent format:
 - **Phone**: +1 (916) 740-8768
 - **Documentation**: https://api.myhibachichef.com/docs
         """.strip(),
-        routes=app.routes,
-        servers=[
-            {
-                "url": "https://api.myhibachichef.com",
-                "description": "Production server"
-            },
-            {
-                "url": "https://staging-api.myhibachichef.com", 
-                "description": "Staging server"
-            },
-            {
-                "url": "http://localhost:8000",
-                "description": "Development server"
+                routes=app.routes,
+                servers=[
+                    {
+                        "url": "https://api.myhibachichef.com",
+                        "description": "Production server"
+                    },
+                    {
+                        "url": "https://staging-api.myhibachichef.com", 
+                        "description": "Staging server"
+                    },
+                    {
+                        "url": "http://localhost:8000",
+                        "description": "Development server"
+                    }
+                ],
+                tags=[
+                    {
+                        "name": "Authentication",
+                        "description": "User authentication and authorization endpoints"
+                    },
+                    {
+                        "name": "Bookings",
+                        "description": "Hibachi booking management operations"
+                    },
+                    {
+                        "name": "Customers", 
+                        "description": "Customer management and CRM operations"
+                    },
+                    {
+                        "name": "Payments",
+                        "description": "Payment processing and refund operations"
+                    },
+                    {
+                        "name": "AI Services",
+                        "description": "AI-powered booking assistance and automation"
+                    },
+                    {
+                        "name": "Analytics",
+                        "description": "Business intelligence and reporting"
+                    },
+                    {
+                        "name": "Notifications",
+                        "description": "SMS, email, and push notification services"
+                    },
+                    {
+                        "name": "Health",
+                        "description": "System health and monitoring endpoints"
+                    },
+                    {
+                        "name": "Admin",
+                        "description": "Administrative operations and system management"
+                    }
+                ]
+            )
+
+            # Add security schemes
+            openapi_schema["components"]["securitySchemes"] = {
+                "BearerAuth": {
+                    "type": "http",
+                    "scheme": "bearer",
+                    "bearerFormat": "JWT",
+                    "description": "JWT token obtained from login endpoint"
+                },
+                "ApiKeyAuth": {
+                    "type": "apiKey",
+                    "in": "header",
+                    "name": "X-API-Key",
+                    "description": "API key for service-to-service authentication"
+                }
             }
-        ],
-        tags=[
-            {
-                "name": "Authentication",
-                "description": "User authentication and authorization endpoints"
-            },
-            {
-                "name": "Bookings",
-                "description": "Hibachi booking management operations"
-            },
-            {
-                "name": "Customers", 
-                "description": "Customer management and CRM operations"
-            },
-            {
-                "name": "Payments",
-                "description": "Payment processing and refund operations"
-            },
-            {
-                "name": "AI Services",
-                "description": "AI-powered booking assistance and automation"
-            },
-            {
-                "name": "Analytics",
-                "description": "Business intelligence and reporting"
-            },
-            {
-                "name": "Notifications",
-                "description": "SMS, email, and push notification services"
-            },
-            {
-                "name": "Health",
-                "description": "System health and monitoring endpoints"
-            },
-            {
-                "name": "Admin",
-                "description": "Administrative operations and system management"
+
+            # Add global security requirement
+            openapi_schema["security"] = [
+                {"BearerAuth": []},
+                {"ApiKeyAuth": []}
+            ]
+
+            # Add contact information
+            openapi_schema["info"]["contact"] = {
+                "name": "MyHibachi API Support",
+                "email": "support@myhibachichef.com",
+                "url": "https://myhibachichef.com/contact"
             }
-        ]
-    )
 
-    # Add security schemes
-    openapi_schema["components"]["securitySchemes"] = {
-        "BearerAuth": {
-            "type": "http",
-            "scheme": "bearer",
-            "bearerFormat": "JWT",
-            "description": "JWT token obtained from login endpoint"
-        },
-        "ApiKeyAuth": {
-            "type": "apiKey",
-            "in": "header",
-            "name": "X-API-Key",
-            "description": "API key for service-to-service authentication"
-        }
-    }
+            # Add license information
+            openapi_schema["info"]["license"] = {
+                "name": "Proprietary",
+                "url": "https://myhibachichef.com/terms"
+            }
 
-    # Add global security requirement
-    openapi_schema["security"] = [
-        {"BearerAuth": []},
-        {"ApiKeyAuth": []}
-    ]
+            # Add external documentation
+            openapi_schema["externalDocs"] = {
+                "description": "MyHibachi Developer Portal",
+                "url": "https://developers.myhibachichef.com"
+            }
 
-    # Add contact information
-    openapi_schema["info"]["contact"] = {
-        "name": "MyHibachi API Support",
-        "email": "support@myhibachichef.com",
-        "url": "https://myhibachichef.com/contact"
-    }
-
-    # Add license information
-    openapi_schema["info"]["license"] = {
-        "name": "Proprietary",
-        "url": "https://myhibachichef.com/terms"
-    }
-
-    # Add external documentation
-    openapi_schema["externalDocs"] = {
-        "description": "MyHibachi Developer Portal",
-        "url": "https://developers.myhibachichef.com"
-    }
-
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
+            app.openapi_schema = openapi_schema
+            return app.openapi_schema
+            
+        except Exception as e:
+            # Fallback with detailed error logging
+            import logging
+            import traceback
+            import sys
+            
+            logging.error(f"Failed to generate full OpenAPI schema: {e}")
+            logging.error(f"Error type: {type(e).__name__}")
+            logging.error(f"Traceback: {traceback.format_exc()}")
+            
+            # Try to extract more info about which model failed
+            tb = sys.exc_info()[2]
+            if tb:
+                frame = tb.tb_frame
+                while frame:
+                    local_vars = frame.f_locals
+                    if 'schema' in local_vars or 'model' in local_vars:
+                        logging.error(f"Frame locals: {list(local_vars.keys())}")
+                    frame = frame.f_back if hasattr(frame, 'f_back') else None
+            
+            # Return a minimal working schema
+            app.openapi_schema = {
+                "openapi": "3.1.0",
+                "info": {
+                    "title": "MyHibachi AI Sales CRM API",
+                    "version": "2.0.0",
+                    "description": f"API schema generation failed: {str(e)}\n\nCheck server logs for details."
+                },
+                "paths": {},
+                "components": {}
+            }
+            return app.openapi_schema
+    
+    return custom_openapi
 
 
 # Standard response schemas for reuse

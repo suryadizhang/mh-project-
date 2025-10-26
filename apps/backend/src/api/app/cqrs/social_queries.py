@@ -1,13 +1,13 @@
 """Social media CQRS queries."""
 
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Any, Optional, Literal
 from uuid import UUID
 
-from pydantic import Field
+from pydantic import Field, ConfigDict
 
 from api.app.cqrs.base import Query
-from api.app.models.social import MessageKind, ReviewStatus, SocialPlatform, ThreadStatus
+from api.app.models.social import MessageKind, SocialPlatform, ThreadStatus, ReviewStatus
 
 
 class GetSocialInboxQuery(Query):
@@ -27,8 +27,7 @@ class GetSocialInboxQuery(Query):
     sort_by: str = Field("updated_at", description="Field to sort by")
     sort_order: Literal["asc", "desc"] = "desc"
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(json_schema_extra={
             "example": {
                 "platforms": ["instagram", "facebook"],
                 "statuses": ["new", "pending"],
@@ -42,7 +41,7 @@ class GetSocialInboxQuery(Query):
                 "sort_by": "updated_at",
                 "sort_order": "desc"
             }
-        }
+        })
 
 
 class GetReviewsBoardQuery(Query):
@@ -63,8 +62,7 @@ class GetReviewsBoardQuery(Query):
     sort_by: str = Field("created_at", description="Field to sort by")
     sort_order: Literal["asc", "desc"] = "desc"
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(json_schema_extra={
             "example": {
                 "platforms": ["google", "yelp"],
                 "statuses": ["new", "acknowledged"],
@@ -77,7 +75,7 @@ class GetReviewsBoardQuery(Query):
                 "page": 1,
                 "page_size": 25
             }
-        }
+        })
 
 
 class GetThreadDetailQuery(Query):
@@ -88,15 +86,14 @@ class GetThreadDetailQuery(Query):
     include_customer_profile: bool = True
     include_related_threads: bool = False
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(json_schema_extra={
             "example": {
                 "thread_id": "550e8400-e29b-41d4-a716-446655440000",
                 "include_messages": True,
                 "include_customer_profile": True,
                 "include_related_threads": True
             }
-        }
+        })
 
 
 class GetSocialAnalyticsQuery(Query):
@@ -111,8 +108,7 @@ class GetSocialAnalyticsQuery(Query):
         description="Specific metrics to include: messages, threads, leads, reviews, response_time"
     )
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(json_schema_extra={
             "example": {
                 "platforms": ["instagram", "facebook"],
                 "date_from": "2025-09-01T00:00:00Z",
@@ -120,7 +116,7 @@ class GetSocialAnalyticsQuery(Query):
                 "granularity": "day",
                 "metrics": ["messages", "threads", "leads", "response_time"]
             }
-        }
+        })
 
 
 class GetSocialAccountsQuery(Query):
@@ -130,14 +126,13 @@ class GetSocialAccountsQuery(Query):
     is_active: Optional[bool] = None
     include_stats: bool = False
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(json_schema_extra={
             "example": {
                 "platforms": ["instagram", "google"],
                 "is_active": True,
                 "include_stats": True
             }
-        }
+        })
 
 
 class GetCustomerSocialProfileQuery(Query):
@@ -150,8 +145,7 @@ class GetCustomerSocialProfileQuery(Query):
     include_reviews: bool = True
     threads_limit: int = Field(10, ge=1, le=50)
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(json_schema_extra={
             "example": {
                 "customer_id": "660e8400-e29b-41d4-a716-446655440000",
                 "social_handle": "@viviana.sac",
@@ -160,7 +154,7 @@ class GetCustomerSocialProfileQuery(Query):
                 "include_reviews": True,
                 "threads_limit": 20
             }
-        }
+        })
 
 
 class SearchSocialContentQuery(Query):
@@ -176,8 +170,7 @@ class SearchSocialContentQuery(Query):
     page: int = Field(1, ge=1)
     page_size: int = Field(25, ge=1, le=100)
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(json_schema_extra={
             "example": {
                 "search_term": "party of 12",
                 "platforms": ["instagram", "facebook"],
@@ -186,7 +179,7 @@ class SearchSocialContentQuery(Query):
                 "page": 1,
                 "page_size": 25
             }
-        }
+        })
 
 
 class GetUnreadCountsQuery(Query):
@@ -196,14 +189,13 @@ class GetUnreadCountsQuery(Query):
     assigned_to: Optional[UUID] = None
     group_by: Literal["platform", "status", "priority"] = "platform"
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(json_schema_extra={
             "example": {
                 "platforms": ["instagram", "facebook", "google"],
                 "assigned_to": "770e8400-e29b-41d4-a716-446655440000",
                 "group_by": "platform"
             }
-        }
+        })
 
 
 class GetSocialLeadsQuery(Query):
@@ -222,8 +214,7 @@ class GetSocialLeadsQuery(Query):
     sort_by: str = Field("created_at", description="Field to sort by")
     sort_order: Literal["asc", "desc"] = "desc"
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(json_schema_extra={
             "example": {
                 "platforms": ["instagram"],
                 "date_from": "2025-09-01T00:00:00Z",
@@ -233,7 +224,7 @@ class GetSocialLeadsQuery(Query):
                 "page": 1,
                 "page_size": 25
             }
-        }
+        })
 
 
 class GetRecentActivityQuery(Query):
@@ -245,8 +236,7 @@ class GetRecentActivityQuery(Query):
     limit: int = Field(50, ge=1, le=200)
     include_internal: bool = False
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(json_schema_extra={
             "example": {
                 "platforms": ["instagram", "facebook"],
                 "activity_types": ["message", "comment", "review"],
@@ -254,7 +244,7 @@ class GetRecentActivityQuery(Query):
                 "limit": 100,
                 "include_internal": False
             }
-        }
+        })
 
 
 class GetThreadMessagesQuery(Query):
@@ -269,8 +259,7 @@ class GetThreadMessagesQuery(Query):
     sort_order: Literal["asc", "desc"] = "asc"
     include_sender_profile: bool = True
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(json_schema_extra={
             "example": {
                 "thread_id": "550e8400-e29b-41d4-a716-446655440000",
                 "message_types": ["dm", "comment"],
@@ -279,7 +268,7 @@ class GetThreadMessagesQuery(Query):
                 "sort_order": "asc",
                 "include_sender_profile": True
             }
-        }
+        })
 
 
 class GetSocialMetricsQuery(Query):
@@ -294,8 +283,7 @@ class GetSocialMetricsQuery(Query):
     ]]] = None
     granularity: Literal["day", "week", "month"] = "day"
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(json_schema_extra={
             "example": {
                 "date_from": "2025-09-01T00:00:00Z",
                 "date_to": "2025-09-23T23:59:59Z",
@@ -303,4 +291,4 @@ class GetSocialMetricsQuery(Query):
                 "metric_types": ["response_time", "lead_conversion", "review_sentiment"],
                 "granularity": "week"
             }
-        }
+        })

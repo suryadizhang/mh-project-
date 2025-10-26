@@ -24,7 +24,7 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
 import logging
 
 # Prometheus metrics
@@ -65,40 +65,127 @@ STARTUP_TIME = time.time()
 
 class ServiceHealthCheck(BaseModel):
     """Individual service health check result."""
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "status": "healthy",
+            "response_time_ms": 45.2,
+            "details": "Service is operational",
+            "timestamp": "2024-10-25T10:30:00Z"
+        }
+    })
+    
     status: str = Field(..., description="healthy, degraded, or unhealthy")
     response_time_ms: Optional[float] = Field(None, description="Response time in milliseconds")
     details: str = Field(..., description="Health check details")
     error: Optional[str] = Field(None, description="Error message if unhealthy")
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(description="Timestamp of the health check")
+
+    @classmethod
+    def create(cls, status: str, details: str, response_time_ms: Optional[float] = None, error: Optional[str] = None) -> "ServiceHealthCheck":
+        """Factory method to create ServiceHealthCheck with automatic timestamp."""
+        return cls(
+            status=status,
+            details=details,
+            response_time_ms=response_time_ms,
+            error=error,
+            timestamp=datetime.utcnow()
+        )
 
 
 class ReadinessResponse(BaseModel):
     """Kubernetes readiness probe response."""
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "status": "ready",
+            "timestamp": "2024-10-25T10:30:00Z",
+            "checks": {},
+            "ready": True
+        }
+    })
+    
     status: str = Field(..., description="ready or not_ready")
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(description="Response timestamp")
     checks: Dict[str, ServiceHealthCheck] = Field(..., description="Individual service checks")
     ready: bool = Field(..., description="Overall readiness status")
     details: Optional[str] = Field(None, description="Additional details")
 
+    @classmethod
+    def create(cls, status: str, checks: Dict[str, ServiceHealthCheck], ready: bool, details: Optional[str] = None) -> "ReadinessResponse":
+        """Factory method to create ReadinessResponse with automatic timestamp."""
+        return cls(
+            status=status,
+            checks=checks,
+            ready=ready,
+            details=details,
+            timestamp=datetime.utcnow()
+        )
+
 
 class LivenessResponse(BaseModel):
     """Kubernetes liveness probe response."""
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "status": "alive",
+            "timestamp": "2024-10-25T10:30:00Z",
+            "uptime_seconds": 3600.5,
+            "pid": 12345
+        }
+    })
+    
     status: str = Field(default="alive", description="Service liveness status")
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(description="Response timestamp")
     uptime_seconds: float = Field(..., description="Service uptime in seconds")
     pid: int = Field(..., description="Process ID")
+
+    @classmethod
+    def create(cls, uptime_seconds: float, pid: int, status: str = "alive") -> "LivenessResponse":
+        """Factory method to create LivenessResponse with automatic timestamp."""
+        return cls(
+            status=status,
+            uptime_seconds=uptime_seconds,
+            pid=pid,
+            timestamp=datetime.utcnow()
+        )
 
 
 class DetailedHealthResponse(BaseModel):
     """Comprehensive health check response."""
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "status": "healthy",
+            "timestamp": "2024-10-25T10:30:00Z",
+            "uptime_seconds": 3600.5,
+            "version": "2.0.0",
+            "environment": "production",
+            "services": {},
+            "system": {},
+            "configuration": {}
+        }
+    })
+    
     status: str = Field(..., description="Overall health status")
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(description="Response timestamp")
     uptime_seconds: float = Field(..., description="Service uptime")
     version: str = Field(..., description="Service version")
     environment: str = Field(..., description="Environment name")
     services: Dict[str, ServiceHealthCheck] = Field(..., description="Service health checks")
     system: Dict[str, Any] = Field(..., description="System metrics")
     configuration: Dict[str, Any] = Field(..., description="Configuration status")
+
+    @classmethod
+    def create(cls, status: str, uptime_seconds: float, version: str, environment: str,
+               services: Dict[str, ServiceHealthCheck], system: Dict[str, Any], configuration: Dict[str, Any]) -> "DetailedHealthResponse":
+        """Factory method to create DetailedHealthResponse with automatic timestamp."""
+        return cls(
+            status=status,
+            uptime_seconds=uptime_seconds,
+            version=version,
+            environment=environment,
+            services=services,
+            system=system,
+            configuration=configuration,
+            timestamp=datetime.utcnow()
+        )
 
 
 # === Health Check Functions ===

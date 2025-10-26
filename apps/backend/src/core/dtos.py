@@ -3,7 +3,7 @@ Common Data Transfer Objects (DTOs)
 Standardized response schemas for API consistency
 """
 from typing import Generic, TypeVar, Optional, List, Any, Dict
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 from uuid import UUID
 
@@ -16,22 +16,38 @@ class ApiResponse(BaseModel, Generic[T]):
     
     Ensures consistent response structure across all endpoints
     """
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "success": True,
+            "data": {"id": "123", "name": "Example"},
+            "message": "Operation completed successfully",
+            "timestamp": "2025-10-09T12:00:00Z",
+            "request_id": "req_abc123"
+        }
+    })
+
     success: bool = Field(..., description="Whether the request was successful")
     data: Optional[T] = Field(None, description="Response data")
     message: Optional[str] = Field(None, description="Human-readable message")
-    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Response timestamp")
+    timestamp: datetime = Field(description="Response timestamp")
     request_id: Optional[str] = Field(None, description="Unique request identifier for tracing")
     
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "success": True,
-                "data": {"id": "123", "name": "Example"},
-                "message": "Operation completed successfully",
-                "timestamp": "2025-10-09T12:00:00Z",
-                "request_id": "req_abc123"
-            }
-        }
+    @classmethod
+    def create(
+        cls,
+        success: bool,
+        data: Optional[T] = None,
+        message: Optional[str] = None,
+        request_id: Optional[str] = None
+    ) -> "ApiResponse[T]":
+        """Factory method to create ApiResponse with automatic timestamp."""
+        return cls(
+            success=success,
+            data=data,
+            message=message,
+            timestamp=datetime.utcnow(),
+            request_id=request_id
+        )
 
 
 class ErrorDetail(BaseModel):
@@ -48,25 +64,37 @@ class ErrorResponse(BaseModel):
     
     Used for all error cases to provide consistent error handling
     """
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "success": False,
+            "error": {
+                "code": "NOT_FOUND",
+                "message": "Resource not found",
+                "field": None,
+                "details": {"resource_id": "123"}
+            },
+            "timestamp": "2025-10-09T12:00:00Z",
+            "request_id": "req_abc123"
+        }
+    })
+
     success: bool = Field(False, description="Always false for errors")
     error: ErrorDetail = Field(..., description="Error details")
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(description="Error timestamp")
     request_id: Optional[str] = Field(None, description="Request ID for support/debugging")
     
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "success": False,
-                "error": {
-                    "code": "NOT_FOUND",
-                    "message": "Resource not found",
-                    "field": None,
-                    "details": {"resource_id": "123"}
-                },
-                "timestamp": "2025-10-09T12:00:00Z",
-                "request_id": "req_abc123"
-            }
-        }
+    @classmethod
+    def create(
+        cls,
+        error: ErrorDetail,
+        request_id: Optional[str] = None
+    ) -> "ErrorResponse":
+        """Factory method to create ErrorResponse with automatic timestamp."""
+        return cls(
+            error=error,
+            timestamp=datetime.utcnow(),
+            request_id=request_id
+        )
 
 
 class PaginationMetadata(BaseModel):
@@ -104,52 +132,82 @@ class PaginatedResponse(BaseModel, Generic[T]):
     
     Used for list endpoints with pagination
     """
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "success": True,
+            "data": [{"id": "1", "name": "Item 1"}, {"id": "2", "name": "Item 2"}],
+            "pagination": {
+                "page": 1,
+                "per_page": 20,
+                "total_items": 100,
+                "total_pages": 5,
+                "has_next": True,
+                "has_prev": False
+            },
+            "timestamp": "2025-10-09T12:00:00Z",
+            "request_id": "req_abc123"
+        }
+    })
+
     success: bool = Field(True, description="Request success status")
     data: List[T] = Field(..., description="Page of items")
     pagination: PaginationMetadata = Field(..., description="Pagination metadata")
     message: Optional[str] = Field(None, description="Optional message")
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(description="Response timestamp")
     request_id: Optional[str] = Field(None)
     
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "success": True,
-                "data": [{"id": "1", "name": "Item 1"}, {"id": "2", "name": "Item 2"}],
-                "pagination": {
-                    "page": 1,
-                    "per_page": 20,
-                    "total_items": 100,
-                    "total_pages": 5,
-                    "has_next": True,
-                    "has_prev": False
-                },
-                "timestamp": "2025-10-09T12:00:00Z",
-                "request_id": "req_abc123"
-            }
-        }
+    @classmethod
+    def create(
+        cls,
+        data: List[T],
+        pagination: PaginationMetadata,
+        message: Optional[str] = None,
+        request_id: Optional[str] = None
+    ) -> "PaginatedResponse[T]":
+        """Factory method to create PaginatedResponse with automatic timestamp."""
+        return cls(
+            data=data,
+            pagination=pagination,
+            message=message,
+            timestamp=datetime.utcnow(),
+            request_id=request_id
+        )
 
 
 class HealthCheckResponse(BaseModel):
     """Health check response"""
-    status: str = Field(..., description="Service status: healthy, degraded, or unhealthy")
-    version: str = Field(..., description="API version")
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
-    checks: Dict[str, bool] = Field(..., description="Individual component health checks")
-    
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "status": "healthy",
-                "version": "1.0.0",
-                "timestamp": "2025-10-09T12:00:00Z",
-                "checks": {
-                    "database": True,
-                    "redis": True,
-                    "external_api": True
-                }
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "status": "healthy",
+            "version": "1.0.0",
+            "timestamp": "2025-10-09T12:00:00Z",
+            "checks": {
+                "database": True,
+                "redis": True,
+                "external_api": True
             }
         }
+    })
+
+    status: str = Field(..., description="Service status: healthy, degraded, or unhealthy")
+    version: str = Field(..., description="API version")
+    timestamp: datetime = Field(description="Health check timestamp")
+    checks: Dict[str, bool] = Field(..., description="Individual component health checks")
+    
+    @classmethod
+    def create(
+        cls,
+        status: str,
+        version: str,
+        checks: Dict[str, bool]
+    ) -> "HealthCheckResponse":
+        """Factory method to create HealthCheckResponse with automatic timestamp."""
+        return cls(
+            status=status,
+            version=version,
+            timestamp=datetime.utcnow(),
+            checks=checks
+        )
 
 
 # Helper functions for creating responses

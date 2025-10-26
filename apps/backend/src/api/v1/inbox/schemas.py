@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Optional, Dict, Any, List
 from uuid import UUID
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, field_validator, model_validator, ConfigDict
 
 from .models import MessageChannel, MessageDirection, MessageStatus, TCPAStatus
 
@@ -231,9 +231,22 @@ class WebSocketConnectionResponse(BaseModel):
 # WebSocket message schemas
 class WebSocketMessage(BaseModel):
     """WebSocket message structure"""
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "type": "message",
+            "data": {"content": "Hello"},
+            "timestamp": "2024-10-25T10:30:00Z"
+        }
+    })
+    
     type: str  # message, status, notification, etc.
     data: Dict[str, Any]
-    timestamp: datetime = Field(default_factory=lambda: datetime.now())
+    timestamp: datetime = Field(description="Message timestamp")
+
+    @classmethod
+    def create(cls, type: str, data: Dict[str, Any]) -> "WebSocketMessage":
+        """Factory method to create WebSocketMessage with automatic timestamp."""
+        return cls(type=type, data=data, timestamp=datetime.now())
 
 
 class WebSocketMessageNotification(BaseModel):
@@ -245,11 +258,31 @@ class WebSocketMessageNotification(BaseModel):
 
 class WebSocketStatusUpdate(BaseModel):
     """WebSocket status update notification"""
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "type": "status_update",
+            "message_id": "550e8400-e29b-41d4-a716-446655440000",
+            "old_status": "sent",
+            "new_status": "delivered",
+            "timestamp": "2024-10-25T10:30:00Z"
+        }
+    })
+    
     type: str = "status_update" 
     message_id: UUID
     old_status: MessageStatus
     new_status: MessageStatus
-    timestamp: datetime = Field(default_factory=lambda: datetime.now())
+    timestamp: datetime = Field(description="Update timestamp")
+
+    @classmethod
+    def create(cls, message_id: UUID, old_status: MessageStatus, new_status: MessageStatus) -> "WebSocketStatusUpdate":
+        """Factory method to create WebSocketStatusUpdate with automatic timestamp."""
+        return cls(
+            message_id=message_id,
+            old_status=old_status,
+            new_status=new_status,
+            timestamp=datetime.now()
+        )
 
 
 # Bulk operation schemas

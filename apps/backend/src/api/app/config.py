@@ -13,14 +13,14 @@ class Settings(BaseSettings):
 
     # Database Configuration
     # PostgreSQL for production
-    database_url: str
-    database_url_sync: str
+    database_url: str = "sqlite+aiosqlite:///./test_myhibachi.db"
+    database_url_sync: str = "sqlite:///./test_myhibachi.db"
     # SQLite for development/testing (compatibility with source backend)
     sqlite_url: str = "sqlite:///./mh-bookings.db"
 
     # Security & Authentication
-    secret_key: str
-    jwt_secret: str
+    secret_key: str = "test_secret_key_please_change_in_production"
+    jwt_secret: str = "test_jwt_secret_please_change_in_production"
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
     refresh_token_expire_days: int = 30
@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     default_admin_password: str = "ChangeThisPassword123!"
 
     # Rate Limiting
-    rate_limit_enabled: bool = True
+    rate_limit_enabled: bool = False
     rate_limit_requests: int = 100
     rate_limit_window: int = 60
 
@@ -52,7 +52,7 @@ class Settings(BaseSettings):
     rate_limit_sms: str = "30/minute"
 
     # Monitoring & Metrics
-    enable_metrics: bool = True
+    enable_metrics: bool = False
     metrics_port: int = 8001
     prometheus_multiproc_dir: str = "/tmp/prometheus_multiproc_dir"
     
@@ -79,7 +79,7 @@ class Settings(BaseSettings):
     ]
 
     # Email Configuration
-    email_enabled: bool = True
+    email_enabled: bool = False
     email_provider: str = "smtp"  # smtp, sendgrid, ses
 
     # SMTP Configuration (IONOS Business Email)
@@ -128,10 +128,18 @@ class Settings(BaseSettings):
     app_url: str = "http://localhost:3000"
     api_base_url: str = "http://localhost:8000"
     webhook_path: str = "/api/stripe/webhook"
+    customer_app_url: str = "https://myhibachi.com"
 
     # Admin Configuration
     admin_email: str = "admin@myhibachi.com"
     admin_phone: str = "+19167408768"
+
+    # Review System Configuration
+    yelp_review_url: str = "https://www.yelp.com/biz/my-hibachi-chef"
+    google_review_url: str = "https://g.page/r/YOUR_GOOGLE_PLACE_ID/review"
+    review_coupon_discount_percentage: int = 10
+    review_coupon_validity_days: int = 90
+    review_coupon_minimum_order_cents: int = 5000
 
     # Alternative Payment Options
     zelle_email: str = "myhibachichef@gmail.com"
@@ -149,7 +157,9 @@ class Settings(BaseSettings):
     enable_field_encryption: bool = True
 
     # Worker Configuration
-    workers_enabled: bool = True
+    # Disabled by default in local/test to avoid background worker startup
+    # which can trigger DB/model initialization issues during OpenAPI generation.
+    workers_enabled: bool = False
     worker_batch_size: int = 10
     worker_poll_interval: int = 5
     worker_max_retries: int = 5
@@ -157,17 +167,17 @@ class Settings(BaseSettings):
     worker_max_delay: int = 300
 
     # SMS Worker Configuration
-    sms_worker_enabled: bool = True
+    sms_worker_enabled: bool = False
     sms_worker_max_retries: int = 5
     sms_worker_batch_size: int = 10
 
     # Email Worker Configuration
-    email_worker_enabled: bool = True
+    email_worker_enabled: bool = False
     email_worker_max_retries: int = 3
     email_worker_batch_size: int = 20
 
     # Stripe Worker Configuration
-    stripe_worker_enabled: bool = True
+    stripe_worker_enabled: bool = False
     stripe_worker_max_retries: int = 3
     stripe_worker_batch_size: int = 5
 

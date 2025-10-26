@@ -1,6 +1,6 @@
 """Add social media integration schemas
 
-Revision ID: 003
+Revision ID: 003_add_social_media_integration
 Revises: 002
 Create Date: 2025-09-23 14:00:00.000000
 
@@ -10,7 +10,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '003'
+revision = '003_add_social_media_integration'
 down_revision = '002'
 branch_labels = None
 depends_on = None

@@ -8,11 +8,11 @@ from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_, desc
+from pydantic import BaseModel, Field, ConfigDict
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import and_, or_, desc, select
 
-from api.app.database import get_db
+from api.app.database import get_db_session
 from api.app.auth.station_models import Station, StationUser, StationAuditLog, StationAccessToken
 from api.app.auth.station_auth import StationAuthenticationService
 from api.app.auth.station_middleware import (
@@ -36,10 +36,9 @@ class StationCreateRequest(BaseModel):
     phone: Optional[str] = Field(None, max_length=20, description="Contact phone")
     email: Optional[str] = Field(None, description="Contact email")
     manager_name: Optional[str] = Field(None, max_length=100, description="Manager name")
-    settings: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Station-specific settings")
+    settings: Optional[Dict[str, Any]] = None
     
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(json_schema_extra={
             "example": {
                 "name": "Downtown Location",
                 "description": "Main downtown branch serving the city center",
@@ -53,7 +52,7 @@ class StationCreateRequest(BaseModel):
                     "auto_confirmation": True
                 }
             }
-        }
+        })
 
 
 class StationUpdateRequest(BaseModel):
@@ -156,7 +155,7 @@ async def list_stations(
     active_only: bool = Query(True, description="Only return active stations"),
     include_stats: bool = Query(False, description="Include user and booking statistics"),
     current_user: AuthenticatedUser = Depends(require_station_permission("view_stations")),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ) -> List[StationResponse]:
     """
     List all stations with optional filtering and statistics.
@@ -203,10 +202,9 @@ async def list_stations(
             response.append(station_data)
         
         await log_station_activity(
-            db=db,
-            user_id=current_user.user_id,
-            station_id=current_user.station_id,
             action="view_stations",
+            auth_user=current_user,
+            db=db,
             resource_type="station",
             details={"count": len(response), "include_stats": include_stats}
         )
@@ -225,7 +223,7 @@ async def list_stations(
 async def create_station(
     request: StationCreateRequest,
     current_user: AuthenticatedUser = Depends(require_station_permission("manage_stations")),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ) -> StationResponse:
     """
     Create a new station.
@@ -257,10 +255,9 @@ async def create_station(
         db.refresh(station)
         
         await log_station_activity(
-            db=db,
-            user_id=current_user.user_id,
-            station_id=current_user.station_id,
             action="create_station",
+            auth_user=current_user,
+            db=db,
             resource_type="station",
             resource_id=str(station.id),
             details={"station_name": station.name}
@@ -282,7 +279,7 @@ async def get_station(
     station_id: int,
     include_stats: bool = Query(False, description="Include detailed statistics"),
     current_user: AuthenticatedUser = Depends(require_station_permission("view_stations")),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ) -> StationResponse:
     """
     Get detailed information about a specific station.
@@ -324,10 +321,9 @@ async def get_station(
             response.last_activity = last_activity[0] if last_activity else None
         
         await log_station_activity(
-            db=db,
-            user_id=current_user.user_id,
-            station_id=current_user.station_id,
             action="view_station",
+            auth_user=current_user,
+            db=db,
             resource_type="station",
             resource_id=str(station_id)
         )
@@ -349,7 +345,7 @@ async def update_station(
     station_id: int,
     request: StationUpdateRequest,
     current_user: AuthenticatedUser = Depends(require_station_permission("manage_stations")),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ) -> StationResponse:
     """
     Update an existing station.
@@ -414,10 +410,9 @@ async def update_station(
         db.refresh(station)
         
         await log_station_activity(
-            db=db,
-            user_id=current_user.user_id,
-            station_id=current_user.station_id,
             action="update_station",
+            auth_user=current_user,
+            db=db,
             resource_type="station",
             resource_id=str(station_id),
             details={"changes": changes}
@@ -446,7 +441,7 @@ async def list_station_users(
     active_only: bool = Query(True, description="Only return active assignments"),
     include_user_details: bool = Query(False, description="Include user profile information"),
     current_user: AuthenticatedUser = Depends(require_station_permission("view_station_users")),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ) -> List[StationUserResponse]:
     """
     List users assigned to a station.
@@ -486,10 +481,9 @@ async def list_station_users(
             response.append(user_data)
         
         await log_station_activity(
-            db=db,
-            user_id=current_user.user_id,
-            station_id=current_user.station_id,
             action="view_station_users",
+            auth_user=current_user,
+            db=db,
             resource_type="station_user",
             details={"station_id": station_id, "count": len(response)}
         )
@@ -511,7 +505,7 @@ async def assign_user_to_station(
     station_id: int,
     request: UserStationAssignmentRequest,
     current_user: AuthenticatedUser = Depends(require_station_permission("manage_station_users")),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ) -> StationUserResponse:
     """
     Assign a user to a station with specific role and permissions.
@@ -570,10 +564,9 @@ async def assign_user_to_station(
         db.refresh(station_user)
         
         await log_station_activity(
-            db=db,
-            user_id=current_user.user_id,
-            station_id=current_user.station_id,
             action="assign_user_to_station",
+            auth_user=current_user,
+            db=db,
             resource_type="station_user",
             resource_id=str(station_user.id),
             details={
@@ -607,7 +600,7 @@ async def get_station_audit_log(
     user_id: Optional[int] = Query(None, description="Filter by user ID"),
     days: int = Query(30, ge=1, le=365, description="Number of days to look back"),
     current_user: AuthenticatedUser = Depends(require_station_permission("view_audit_logs")),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ) -> List[AuditLogResponse]:
     """
     Get audit log for a station.
@@ -652,10 +645,9 @@ async def get_station_audit_log(
         response = [AuditLogResponse.from_orm(log) for log in audit_logs]
         
         await log_station_activity(
-            db=db,
-            user_id=current_user.user_id,
-            station_id=current_user.station_id,
             action="view_audit_logs",
+            auth_user=current_user,
+            db=db,
             resource_type="audit_log",
             details={
                 "station_id": station_id,

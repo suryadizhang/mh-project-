@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
 
 from api.ai.endpoints.database import get_db
@@ -29,30 +29,56 @@ router = APIRouter(prefix="/v1", tags=["v1-unified-chat"])
 # Pydantic models for unified chat API
 class UnifiedChatRequest(BaseModel):
     """Unified chat request supporting all agent types."""
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "message": "I want to book a hibachi chef for my party",
+            "conversation_id": "550e8400-e29b-41d4-a716-446655440000",
+            "user_id": "customer_123",
+            "context": {
+                "location": "San Francisco",
+                "party_size": 12
+            },
+            "stream": False
+        }
+    })
+    
     message: str = Field(..., min_length=1, max_length=4000, description="The user's message")
     conversation_id: Optional[str] = Field(None, description="Optional conversation ID for continuity")
     user_id: Optional[str] = Field(None, description="User identifier for personalization")
-    context: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Additional context")
+    context: Optional[Dict[str, Any]] = None
     stream: bool = Field(default=False, description="Enable streaming response")
     model_override: Optional[str] = Field(None, description="Force specific model selection")
-    
-    class Config:
-        schema_extra = {
-            "example": {
-                "message": "I want to book a hibachi chef for my party",
-                "conversation_id": "550e8400-e29b-41d4-a716-446655440000",
-                "user_id": "customer_123",
-                "context": {
-                    "location": "San Francisco",
-                    "party_size": 12
-                },
-                "stream": False
-            }
-        }
 
 
 class UnifiedChatResponse(BaseModel):
     """Unified chat response with agent-aware metadata."""
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "message_id": "msg_123456",
+            "conversation_id": "conv_789012",
+            "agent": "customer",
+            "content": "I'd be happy to help you book a hibachi chef! Let me gather some details...",
+            "timestamp": "2024-12-19T10:30:00Z",
+            "confidence": 0.92,
+            "model_used": "gpt-4-mini",
+            "intent": "booking_inquiry",
+            "suggestions": ["Tell me about pricing", "What's included?", "Check availability"],
+            "agent_capabilities": {
+                "can_book": True,
+                "can_manage_users": False,
+                "can_view_analytics": False
+            },
+            "tools_used": ["booking_search"],
+            "cost": {"input_tokens": 0.001, "output_tokens": 0.002},
+            "station_context": {
+                "station_id": 1,
+                "station_name": "Main Location",
+                "role": "customer_support"
+            },
+            "permission_level": "station_scoped"
+        }
+    })
+    
     message_id: str = Field(..., description="Unique message identifier")
     conversation_id: str = Field(..., description="Conversation identifier")
     agent: str = Field(..., description="Agent that processed the request")
@@ -67,40 +93,12 @@ class UnifiedChatResponse(BaseModel):
     
     # Agent-aware metadata
     agent_capabilities: Dict[str, bool] = Field(..., description="Current agent capabilities")
-    tools_used: List[str] = Field(default_factory=list, description="Tools used in processing")
+    tools_used: List[str] = []
     cost: Optional[Dict[str, float]] = Field(None, description="Request cost breakdown")
     
     # Station-aware metadata
     station_context: Optional[Dict[str, Any]] = Field(None, description="Station context information")
     permission_level: str = Field(..., description="Permission level used for request")
-    
-    class Config:
-        schema_extra = {
-            "example": {
-                "message_id": "msg_123456",
-                "conversation_id": "conv_789012",
-                "agent": "customer",
-                "content": "I'd be happy to help you book a hibachi chef! Let me gather some details...",
-                "timestamp": "2024-12-19T10:30:00Z",
-                "confidence": 0.92,
-                "model_used": "gpt-4-mini",
-                "intent": "booking_inquiry",
-                "suggestions": ["Tell me about pricing", "What's included?", "Check availability"],
-                "agent_capabilities": {
-                    "can_book": True,
-                    "can_manage_users": False,
-                    "can_view_analytics": False
-                },
-                "tools_used": ["booking_search"],
-                "cost": {"input_tokens": 0.001, "output_tokens": 0.002},
-                "station_context": {
-                    "station_id": 1,
-                    "station_name": "Main Location",
-                    "role": "customer_support"
-                },
-                "permission_level": "station_scoped"
-            }
-        }
 
 
 class StreamChatResponse(BaseModel):

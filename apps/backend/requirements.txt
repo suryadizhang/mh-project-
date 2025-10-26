@@ -83,3 +83,6 @@ mypy==1.7.1
 
 # Performance
 orjson==3.9.10  # Faster JSON serialization
+
+# QR Code Tracking
+user-agents==2.2.0  # User agent parsing for device detection

@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from typing import Any, Literal, Optional
 from uuid import UUID
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator, ConfigDict
 
 from api.app.cqrs.base import Command, Event, Query
 
@@ -139,11 +139,20 @@ class SendMessageCommand(Command):
 
 class ReceiveMessageCommand(Command):
     """Record a message received from a customer."""
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "phone_number": "+19167408768",
+            "content": "I'd like to book a hibachi chef",
+            "received_at": "2024-10-25T10:30:00Z",
+            "external_message_id": "msg_12345",
+            "source": "ringcentral"
+        }
+    })
 
     thread_id: Optional[UUID] = None  # If known thread
     phone_number: str = Field(..., pattern=r'^\+?[\d\s\-\(\)]+$')
     content: str = Field(..., min_length=1, max_length=1000)
-    received_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    received_at: datetime = Field(description="When the message was received")
 
     # Integration details
     external_message_id: str  # RingCentral message ID
@@ -151,6 +160,27 @@ class ReceiveMessageCommand(Command):
 
     # Idempotency
     idempotency_key: Optional[str] = None
+
+    @classmethod
+    def create(
+        cls,
+        phone_number: str,
+        content: str,
+        external_message_id: str,
+        thread_id: Optional[UUID] = None,
+        source: str = "ringcentral",
+        idempotency_key: Optional[str] = None
+    ) -> "ReceiveMessageCommand":
+        """Factory method to create ReceiveMessageCommand with automatic timestamp."""
+        return cls(
+            thread_id=thread_id,
+            phone_number=phone_number,
+            content=content,
+            received_at=datetime.now(timezone.utc),
+            external_message_id=external_message_id,
+            source=source,
+            idempotency_key=idempotency_key
+        )
 
 
 # ==================== QUERIES ====================

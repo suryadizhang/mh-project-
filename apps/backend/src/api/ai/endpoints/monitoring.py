@@ -91,7 +91,12 @@ class PerformanceMetrics:
     system_memory: float = 0.0
     system_disk: float = 0.0
     uptime_seconds: float = 0.0
-    last_updated: datetime = field(default_factory=datetime.utcnow)
+    last_updated: datetime = None
+    
+    def __post_init__(self):
+        """Set timestamp after initialization."""
+        if self.last_updated is None:
+            self.last_updated = datetime.utcnow()
 
 
 class PerformanceMonitor:
