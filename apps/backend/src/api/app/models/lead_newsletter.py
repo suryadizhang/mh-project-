@@ -22,6 +22,7 @@ class LeadSource(str, enum.Enum):
     """Lead acquisition sources."""
     WEB_QUOTE = "web_quote"
     CHAT = "chat"
+    BOOKING_FAILED = "booking_failed"
     INSTAGRAM = "instagram"
     FACEBOOK = "facebook"
     GOOGLE = "google"
