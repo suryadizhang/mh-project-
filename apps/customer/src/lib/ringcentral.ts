@@ -20,8 +20,28 @@ declare global {
       hide?: () => void;
       open?: () => void;
       close?: () => void;
+      configure?: (config: RingCentralConfig) => void;
+      setUserInfo?: (userInfo: RingCentralUserInfo) => void;
     };
   }
+}
+
+interface RingCentralConfig {
+  enableVoice?: boolean;
+  enableSMS?: boolean;
+  enableVideo?: boolean;
+  enableScreenShare?: boolean;
+  enableConference?: boolean;
+  enableMeeting?: boolean;
+  hideWidget?: boolean;
+  startMinimized?: boolean;
+}
+
+interface RingCentralUserInfo {
+  name?: string;
+  phoneNumber?: string;
+  email?: string;
+  notes?: string;
 }
 
 /**
