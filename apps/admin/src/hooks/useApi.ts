@@ -10,6 +10,7 @@ import {
   paymentService,
   invoiceService,
 } from '@/services/api';
+import { requestDeduplicator } from '@/lib/cache/RequestDeduplicator';
 import type {
   Booking,
   BookingFilters,
@@ -42,8 +43,13 @@ function useApiData<T>(
     try {
       setLoading(true);
       setError(null);
-      const response = await fetchFunction();
-      
+
+      // Create a cache key from the fetch function and deps
+      const cacheKey = JSON.stringify({ fn: fetchFunction.toString(), deps });
+
+      // Use request deduplicator to prevent duplicate simultaneous calls
+      const response = await requestDeduplicator.dedupe(cacheKey, fetchFunction);
+
       if (response.success) {
         setData(response.data || response);
       } else {
@@ -54,6 +60,8 @@ function useApiData<T>(
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // CRITICAL: Use deps array passed from parent, don't include data/loading/error
   }, deps);
 
   useEffect(() => {

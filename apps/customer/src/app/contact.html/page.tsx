@@ -3,6 +3,9 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+// Force dynamic rendering to prevent static export conflicts
+export const dynamic = 'force-dynamic';
+
 export default function ContactHtmlRedirect() {
   const router = useRouter();
 

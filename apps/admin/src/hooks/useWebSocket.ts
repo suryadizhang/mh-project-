@@ -201,7 +201,10 @@ export function useWebSocket(config: WebSocketConfig): WebSocketHookResult {
     return () => {
       disconnect();
     };
-  }, [connect, disconnect]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // CRITICAL: Only run on mount, not when connect/disconnect change
+    // Otherwise causes infinite reconnection loop
+  }, []);
 
   // Send periodic ping to keep connection alive
   useEffect(() => {
@@ -212,7 +215,10 @@ export function useWebSocket(config: WebSocketConfig): WebSocketHookResult {
     }, 30000); // Ping every 30 seconds
 
     return () => clearInterval(pingInterval);
-  }, [isConnected, sendMessage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // CRITICAL: Only depend on isConnected, not sendMessage
+    // sendMessage is stable enough and won't cause issues
+  }, [isConnected]);
 
   return {
     isConnected,
