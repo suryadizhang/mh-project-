@@ -91,28 +91,44 @@ class BookingRepository(BaseRepository[Booking]):
         
         return query.all()
     
-    def find_by_status(self, status: BookingStatus) -> List[Booking]:
-        """Find bookings by status with eager loading"""
+    def find_by_status(
+        self, 
+        status: BookingStatus,
+        limit: int = 100,
+        offset: int = 0
+    ) -> List[Booking]:
+        """Find bookings by status with eager loading (paginated for performance)
+        
+        Args:
+            status: Booking status to filter by
+            limit: Maximum number of records to return (default: 100)
+            offset: Number of records to skip (default: 0)
+            
+        Returns:
+            List of bookings matching status, limited for performance
+        """
         return self.session.query(self.model).options(
             joinedload(self.model.customer)  # Eager load customer to avoid N+1
         ).filter(
             self.model.status == status
-        ).order_by(self.model.booking_datetime).all()
+        ).order_by(self.model.booking_datetime).limit(limit).offset(offset).all()
     
     def find_by_customer_and_date(
         self,
         customer_id: str,
-        event_date: date
+        event_date: date,
+        limit: int = 20
     ) -> List[Booking]:
         """
-        Find all bookings for a specific customer on a specific date
+        Find all bookings for a specific customer on a specific date (paginated for performance)
         
         Args:
             customer_id: Customer UUID (as string)
             event_date: Event date to search
+            limit: Maximum number of bookings to return (default: 20, usually sufficient)
             
         Returns:
-            List of bookings matching customer and date with eager loading
+            List of bookings matching customer and date with eager loading, limited for performance
         """
         return self.session.query(self.model).options(
             joinedload(self.model.customer)  # Eager load customer to avoid N+1
@@ -121,10 +137,22 @@ class BookingRepository(BaseRepository[Booking]):
                 self.model.customer_id == customer_id,
                 func.date(self.model.booking_datetime) == event_date
             )
-        ).order_by(self.model.booking_datetime).all()
+        ).order_by(self.model.booking_datetime).limit(limit).all()
     
-    def find_pending_confirmations(self, hours_old: int = 24) -> List[Booking]:
-        """Find bookings pending confirmation for more than specified hours with eager loading"""
+    def find_pending_confirmations(
+        self, 
+        hours_old: int = 24,
+        limit: int = 100
+    ) -> List[Booking]:
+        """Find bookings pending confirmation for more than specified hours (paginated for performance)
+        
+        Args:
+            hours_old: Number of hours old to consider (default: 24)
+            limit: Maximum number of pending bookings to return (default: 100)
+            
+        Returns:
+            List of pending bookings with eager loading, limited for performance
+        """
         cutoff_time = datetime.utcnow() - timedelta(hours=hours_old)
         
         return self.session.query(self.model).options(
@@ -134,14 +162,24 @@ class BookingRepository(BaseRepository[Booking]):
                 self.model.status == BookingStatus.PENDING,
                 self.model.created_at <= cutoff_time
             )
-        ).all()
+        ).limit(limit).all()
     
     def find_upcoming_bookings(
         self,
         customer_id: Optional[int] = None,
-        days_ahead: int = 30
+        days_ahead: int = 30,
+        limit: int = 200
     ) -> List[Booking]:
-        """Find upcoming confirmed bookings with eager loading"""
+        """Find upcoming confirmed bookings (paginated for performance)
+        
+        Args:
+            customer_id: Optional customer ID to filter by
+            days_ahead: Number of days ahead to search (default: 30)
+            limit: Maximum number of bookings to return (default: 200)
+            
+        Returns:
+            List of upcoming bookings with eager loading, limited for performance
+        """
         start_date = datetime.utcnow()
         end_date = start_date + timedelta(days=days_ahead)
         
@@ -158,7 +196,7 @@ class BookingRepository(BaseRepository[Booking]):
         if customer_id:
             query = query.filter(self.model.customer_id == customer_id)
         
-        return query.order_by(self.model.booking_datetime).all()
+        return query.order_by(self.model.booking_datetime).limit(limit).all()
     
     # Availability Methods
     

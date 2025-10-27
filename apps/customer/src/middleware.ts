@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // Security configuration
 const SECURITY_HEADERS = {
-  // HSTS - Force HTTPS for 1 year
-  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+  // HSTS - Force HTTPS for 1 year (disabled in development)
+  ...(process.env.NODE_ENV === 'production' && {
+    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+  }),
 
   // Prevent MIME sniffing
   'X-Content-Type-Options': 'nosniff',

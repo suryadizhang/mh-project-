@@ -1,15 +1,13 @@
 ﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { X, Send, ExternalLink, MessageCircle, Instagram, Phone, Mail, Headset } from 'lucide-react'
+import { X, Send, ExternalLink, MessageCircle, Instagram, Phone, Mail } from 'lucide-react'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 
 import { getContactData, openIG } from '@/lib/contactData'
 import { logger } from '@/lib/logger'
 import { submitChatLead } from '@/lib/leadService'
-import { openRingCentralChat } from '@/lib/ringcentral'
-import { setRingCentralUserInfo } from '@/components/RingCentralWidget'
 
 interface Message {
   id: string
@@ -80,11 +78,36 @@ export default function Assistant({ page }: AssistantProps) {
   const [leadPhone, setLeadPhone] = useState('')
   const [leadCaptureError, setLeadCaptureError] = useState('')
   const [isSubmittingLead, setIsSubmittingLead] = useState(false)
+  const [isEscalated, setIsEscalated] = useState(false) // AI pause when human escalation requested
+  const [escalationReason, setEscalationReason] = useState<string>('') // Track why user escalated
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const pathname = usePathname()
 
   const storageKey = `mh_chat_${page}`
+  
+  // Smart keywords that AI can handle even after escalation
+  const aiCanHandleKeywords = [
+    // Booking/Rebooking
+    'book', 'booking', 'rebook', 'reschedule', 'new booking', 'another event', 'next party',
+    // Pricing/Quotes
+    'price', 'cost', 'quote', 'how much', 'pricing', 'rate', 'fee',
+    // Menu/Service info
+    'menu', 'food', 'options', 'vegetarian', 'protein', 'included', 'what do you serve',
+    // Availability
+    'available', 'availability', 'open', 'schedule', 'calendar', 'date',
+    // General questions
+    'how does it work', 'what is', 'tell me about', 'information', 'details',
+    // Location/Travel
+    'location', 'area', 'travel', 'service area', 'do you go to',
+  ]
+  
+  // Issues that need human attention (don't auto-resume AI)
+  const humanOnlyKeywords = [
+    'complaint', 'complain', 'problem', 'issue', 'wrong', 'mistake', 'error',
+    'refund', 'cancel', 'dispute', 'unhappy', 'disappointed', 'bad experience',
+    'speak to manager', 'supervisor', 'urgent', 'emergency'
+  ]
 
   // Load chat from localStorage
   useEffect(() => {
@@ -208,6 +231,95 @@ export default function Assistant({ page }: AssistantProps) {
 
     setMessages(prev => [...prev, userMessage])
     setInputValue('')
+
+    // SMART ESCALATION LOGIC
+    // Check if user escalated but now asking something AI can handle
+    if (isEscalated) {
+      const messageLower = content.toLowerCase()
+      
+      // Check if it's a human-only issue (complaint, refund, etc.)
+      const isHumanOnlyIssue = humanOnlyKeywords.some(keyword =>
+        messageLower.includes(keyword)
+      )
+      
+      // Check if it's something AI can help with (booking, pricing, info)
+      const isAiHandleable = aiCanHandleKeywords.some(keyword =>
+        messageLower.includes(keyword)
+      )
+      
+      if (isHumanOnlyIssue) {
+        // Keep escalated for serious issues
+        const blockedMessage: Message = {
+          id: Date.now().toString(),
+          type: 'assistant',
+          content: "🙋 I understand this requires human attention. A team member will contact you shortly to resolve this issue. For urgent matters, please call us directly at (916) 740-8768.",
+          timestamp: new Date(),
+          confidence: 'high'
+        }
+        setMessages(prev => [...prev, blockedMessage])
+        return
+      }
+      
+      if (isAiHandleable) {
+        // Auto-resume AI for simple questions/bookings
+        setIsEscalated(false)
+        const resumeMessage: Message = {
+          id: Date.now().toString(),
+          type: 'assistant',
+          content: "👋 I can help you with that! Let me answer your question...",
+          timestamp: new Date(),
+          confidence: 'high'
+        }
+        setMessages(prev => [...prev, resumeMessage])
+        
+        // GTM tracking - AI auto-resumed
+        if (typeof window !== 'undefined' && (window as unknown as { dataLayer?: unknown[] }).dataLayer) {
+          ;(window as unknown as { dataLayer: unknown[] }).dataLayer.push({
+            event: 'ai_auto_resumed',
+            previous_escalation: escalationReason,
+            user_intent: content.toLowerCase().substring(0, 50)
+          })
+        }
+        // Continue to AI processing below
+      } else {
+        // Ambiguous case - offer choice
+        const choiceMessage: Message = {
+          id: Date.now().toString(),
+          type: 'assistant',
+          content: "I can try to help with that, or you can wait for a team member to contact you. Would you like me to answer, or would you prefer to speak with our staff? (Type 'AI help' or 'wait for human')",
+          timestamp: new Date(),
+          confidence: 'medium'
+        }
+        setMessages(prev => [...prev, choiceMessage])
+        return
+      }
+    }
+    
+    // Handle user's choice in ambiguous case
+    const contentLower = content.toLowerCase()
+    if (contentLower.includes('ai help') || contentLower.includes('yes') && messages[messages.length - 1]?.content.includes('Would you like me to answer')) {
+      setIsEscalated(false)
+      const resumeMessage: Message = {
+        id: Date.now().toString(),
+        type: 'assistant',
+        content: "✅ Great! Let me help you with that...",
+        timestamp: new Date(),
+        confidence: 'high'
+      }
+      setMessages(prev => [...prev, resumeMessage])
+      // Continue to AI processing
+    } else if (contentLower.includes('wait for human') || contentLower.includes('human')) {
+      const waitMessage: Message = {
+        id: Date.now().toString(),
+        type: 'assistant',
+        content: "👍 No problem. A team member will contact you shortly via phone or text.",
+        timestamp: new Date(),
+        confidence: 'high'
+      }
+      setMessages(prev => [...prev, waitMessage])
+      return
+    }
+
     setIsLoading(true)
 
     // Check if user wants to contact a person
@@ -439,6 +551,38 @@ export default function Assistant({ page }: AssistantProps) {
 
       {/* Input */}
       <div className="p-4 border-t border-gray-200">
+        {/* Escalation Status Banner */}
+        {isEscalated && (
+          <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-blue-800 mb-1">
+                  🙋 Waiting for human contact
+                </p>
+                <p className="text-xs text-blue-600">
+                  A team member will reach out soon. Or ask me anything - I can help with bookings, pricing, and more!
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setIsEscalated(false)
+                  const resumeMsg: Message = {
+                    id: Date.now().toString(),
+                    type: 'assistant',
+                    content: "✅ AI chat resumed! How can I help you?",
+                    timestamp: new Date(),
+                    confidence: 'high'
+                  }
+                  setMessages(prev => [...prev, resumeMsg])
+                }}
+                className="ml-2 text-xs text-blue-600 hover:text-blue-800 underline whitespace-nowrap"
+              >
+                Resume AI
+              </button>
+            </div>
+          </div>
+        )}
+        
         <div className="flex space-x-2">
           <input
             ref={inputRef}
@@ -446,7 +590,7 @@ export default function Assistant({ page }: AssistantProps) {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Ask about our menu, booking, or service areas..."
+            placeholder={isEscalated ? "Ask me anything (or wait for human contact)..." : "Ask about our menu, booking, or service areas..."}
             className="flex-1 p-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             style={{ fontSize: '14px' }}
             disabled={isLoading}
@@ -581,47 +725,99 @@ export default function Assistant({ page }: AssistantProps) {
 
             {/* Contact Options */}
             <div className="space-y-3 mb-4">
-              {/* RingCentral Live Chat Option */}
-              <button
-                onClick={() => {
-                  try {
-                    // Capture lead info before opening RingCentral
-                    if (leadName && leadPhone) {
-                      setRingCentralUserInfo({
-                        name: leadName,
-                        phone: leadPhone,
-                        context: `Chat from ${pathname || 'website'}`
-                      })
-                    }
-                    
-                    openRingCentralChat()
-                    
-                    // GTM tracking
-                    if (typeof window !== 'undefined' && (window as unknown as { dataLayer?: unknown[] }).dataLayer) {
-                      ;(window as unknown as { dataLayer: unknown[] }).dataLayer.push({
-                        event: 'chat_open',
-                        channel: 'ringcentral',
-                        has_lead_info: !!(leadName && leadPhone)
-                      })
-                    }
-                    setShowHandoff(false)
-                  } catch (error) {
-                    console.warn('Error opening RingCentral:', error)
-                    // Fallback to phone call
-                    window.location.href = 'tel:+19167408768'
-                  }
-                }}
-                className="w-full flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border-2 border-blue-200 hover:border-blue-300"
-                style={{ fontSize: '14px' }}
-              >
-                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Headset size={20} className="text-white" />
-                </div>
-                <div className="flex-1 text-left">
-                  <div className="font-medium">RingCentral Live Chat</div>
-                  <div className="text-xs text-gray-500">Connect with our team instantly</div>
-                </div>
-              </button>
+              {/* SMS Text Message - Primary Human Contact */}
+              {(() => {
+                const { phone } = getContactData()
+                return phone ? (
+                  <a
+                    href={`sms:${phone}${/iPhone|iPad|iPod/.test(navigator.userAgent) ? '&' : '?'}body=Hi, I need help with my hibachi catering inquiry.`}
+                    className="w-full flex items-center gap-3 p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors border-2 border-green-200 hover:border-green-300"
+                    style={{ fontSize: '14px' }}
+                    onClick={() => {
+                      // Set escalation state - AI will stop responding
+                      setIsEscalated(true)
+                      setEscalationReason('sms_requested')
+                      setShowHandoff(false)
+                      
+                      // Add escalation message with smart hint
+                      const escalationMessage: Message = {
+                        id: Date.now().toString(),
+                        type: 'assistant',
+                        content: "📱 Perfect! A team member will text you back shortly. Meanwhile, I'm still here if you need help with bookings, pricing, or any questions!",
+                        timestamp: new Date(),
+                        confidence: 'high'
+                      }
+                      setMessages(prev => [...prev, escalationMessage])
+                      
+                      // GTM tracking
+                      if (typeof window !== 'undefined' && (window as unknown as { dataLayer?: unknown[] }).dataLayer) {
+                        ;(window as unknown as { dataLayer: unknown[] }).dataLayer.push({
+                          event: 'contact_initiated',
+                          channel: 'sms',
+                          from: 'chat_assistant',
+                          escalated: true,
+                          escalation_reason: 'sms_requested'
+                        })
+                      }
+                    }}
+                  >
+                    <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                      <MessageCircle size={20} className="text-white" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <div className="font-medium">Text Us (SMS)</div>
+                      <div className="text-xs text-gray-500">Get instant response from our team</div>
+                    </div>
+                  </a>
+                ) : null
+              })()}
+
+              {/* Phone Call - Direct Voice Contact */}
+              {(() => {
+                const { phone } = getContactData()
+                return phone ? (
+                  <a
+                    href={`tel:${phone}`}
+                    className="w-full flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border-2 border-blue-200 hover:border-blue-300"
+                    style={{ fontSize: '14px' }}
+                    onClick={() => {
+                      // Set escalation state - AI will stop responding
+                      setIsEscalated(true)
+                      setEscalationReason('phone_requested')
+                      setShowHandoff(false)
+                      
+                      // Add escalation message with smart hint
+                      const escalationMessage: Message = {
+                        id: Date.now().toString(),
+                        type: 'assistant',
+                        content: "📞 Great! Feel free to call us now. Meanwhile, I'm still here if you need help with bookings, pricing, or any questions!",
+                        timestamp: new Date(),
+                        confidence: 'high'
+                      }
+                      setMessages(prev => [...prev, escalationMessage])
+                      
+                      // GTM tracking
+                      if (typeof window !== 'undefined' && (window as unknown as { dataLayer?: unknown[] }).dataLayer) {
+                        ;(window as unknown as { dataLayer: unknown[] }).dataLayer.push({
+                          event: 'contact_initiated',
+                          channel: 'phone',
+                          from: 'chat_assistant',
+                          escalated: true,
+                          escalation_reason: 'phone_requested'
+                        })
+                      }
+                    }}
+                  >
+                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Phone size={20} className="text-white" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <div className="font-medium">Call Us</div>
+                      <div className="text-xs text-gray-500">Speak with our team directly</div>
+                    </div>
+                  </a>
+                ) : null
+              })()}
 
               {/* Messenger Option */}
               <button

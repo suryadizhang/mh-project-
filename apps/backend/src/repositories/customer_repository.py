@@ -97,21 +97,54 @@ class CustomerRepository(BaseRepository[Customer]):
         
         return query.order_by(self.model.first_name, self.model.last_name).all()
     
-    def find_by_status(self, status: CustomerStatus) -> List[Customer]:
-        """Find customers by status"""
+    def find_by_status(
+        self, 
+        status: CustomerStatus,
+        limit: int = 100,
+        offset: int = 0
+    ) -> List[Customer]:
+        """Find customers by status (paginated for performance)
+        
+        Args:
+            status: Customer status to filter by
+            limit: Maximum number of records to return (default: 100)
+            offset: Number of records to skip (default: 0)
+            
+        Returns:
+            List of customers matching status, limited for performance
+        """
         return self.session.query(self.model).filter(
             and_(
                 self.model.status == status,
                 self.model.is_deleted == False
             )
-        ).order_by(self.model.created_at.desc()).all()
+        ).order_by(self.model.created_at.desc()).limit(limit).offset(offset).all()
     
-    def find_vip_customers(self) -> List[Customer]:
-        """Find VIP customers"""
-        return self.find_by_status(CustomerStatus.VIP)
+    def find_vip_customers(self, limit: int = 100) -> List[Customer]:
+        """Find VIP customers (limited for performance)
+        
+        Args:
+            limit: Maximum number of VIP customers to return (default: 100)
+            
+        Returns:
+            List of VIP customers, limited for performance
+        """
+        return self.find_by_status(CustomerStatus.VIP, limit=limit)
     
-    def find_inactive_customers(self, days_inactive: int = 90) -> List[Customer]:
-        """Find customers who haven't visited in X days"""
+    def find_inactive_customers(
+        self, 
+        days_inactive: int = 90,
+        limit: int = 500
+    ) -> List[Customer]:
+        """Find customers who haven't visited in X days (paginated for batch processing)
+        
+        Args:
+            days_inactive: Number of days without visit to consider inactive (default: 90)
+            limit: Maximum number of inactive customers to return (default: 500 for batch jobs)
+            
+        Returns:
+            List of inactive customers, limited for performance
+        """
         cutoff_date = datetime.utcnow() - timedelta(days=days_inactive)
         
         return self.session.query(self.model).filter(
@@ -123,10 +156,22 @@ class CustomerRepository(BaseRepository[Customer]):
                     self.model.last_visit_date.is_(None)
                 )
             )
-        ).order_by(self.model.last_visit_date.asc()).all()
+        ).order_by(self.model.last_visit_date.asc()).limit(limit).all()
     
-    def find_new_customers(self, days_ago: int = 30) -> List[Customer]:
-        """Find customers registered in the last X days"""
+    def find_new_customers(
+        self, 
+        days_ago: int = 30,
+        limit: int = 200
+    ) -> List[Customer]:
+        """Find customers registered in the last X days (paginated for performance)
+        
+        Args:
+            days_ago: Number of days back to search (default: 30)
+            limit: Maximum number of new customers to return (default: 200)
+            
+        Returns:
+            List of new customers, limited for performance
+        """
         cutoff_date = datetime.utcnow() - timedelta(days=days_ago)
         
         return self.session.query(self.model).filter(
@@ -134,25 +179,49 @@ class CustomerRepository(BaseRepository[Customer]):
                 self.model.created_at >= cutoff_date,
                 self.model.is_deleted == False
             )
-        ).order_by(self.model.created_at.desc()).all()
+        ).order_by(self.model.created_at.desc()).limit(limit).all()
     
-    def find_high_value_customers(self, min_spent_cents: int = 100000) -> List[Customer]:
-        """Find customers who have spent more than X amount"""
+    def find_high_value_customers(
+        self, 
+        min_spent_cents: int = 100000,
+        limit: int = 50
+    ) -> List[Customer]:
+        """Find customers who have spent more than X amount (paginated for performance)
+        
+        Args:
+            min_spent_cents: Minimum spend threshold in cents (default: 100000 = $1000)
+            limit: Maximum number of high-value customers to return (default: 50)
+            
+        Returns:
+            List of high-value customers, limited for performance
+        """
         return self.session.query(self.model).filter(
             and_(
                 self.model.total_spent >= min_spent_cents,
                 self.model.is_deleted == False
             )
-        ).order_by(self.model.total_spent.desc()).all()
+        ).order_by(self.model.total_spent.desc()).limit(limit).all()
     
-    def find_customers_with_dietary_restrictions(self, restriction: str) -> List[Customer]:
-        """Find customers with specific dietary restrictions"""
+    def find_customers_with_dietary_restrictions(
+        self, 
+        restriction: str,
+        limit: int = 100
+    ) -> List[Customer]:
+        """Find customers with specific dietary restrictions (paginated for performance)
+        
+        Args:
+            restriction: Dietary restriction to search for
+            limit: Maximum number of customers to return (default: 100)
+            
+        Returns:
+            List of customers with the dietary restriction, limited for performance
+        """
         return self.session.query(self.model).filter(
             and_(
                 self.model.dietary_preferences.ilike(f'%"{restriction}"%'),
                 self.model.is_deleted == False
             )
-        ).all()
+        ).limit(limit).all()
     
     # Customer Creation and Validation
     

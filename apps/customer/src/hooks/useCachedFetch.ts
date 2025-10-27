@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 import { CacheService } from '@/lib/cache/CacheService';
+import { requestDeduplicator } from '@/lib/cache/RequestDeduplicator';
 
 interface UseCachedFetchOptions<T> {
   cache?: CacheService<T>;
@@ -52,6 +53,12 @@ export function useCachedFetch<T>(
 
   const isMountedRef = useRef(true);
   const refetchIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const dataRef = useRef<T | null>(null);
+
+  // Keep dataRef in sync with data state
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
 
   /**
    * Fetch data with caching logic
@@ -72,19 +79,21 @@ export function useCachedFetch<T>(
             // If stale-while-revalidate, fetch in background
             if (staleWhileRevalidate) {
               setIsStale(true);
-              fetchData(true); // Revalidate in background
+              // Use setTimeout to avoid recursive call during render
+              setTimeout(() => fetchData(true), 0);
             }
             return;
           }
         }
 
         // Set loading state (only if not doing background revalidation)
-        if (!staleWhileRevalidate || !data) {
+        // Check if we already have data to avoid showing loading on revalidation
+        if (!bypassCache && !dataRef.current) {
           setIsLoading(true);
         }
 
-        // Fetch fresh data
-        const freshData = await fetcher();
+        // Fetch fresh data with deduplication to prevent duplicate simultaneous requests
+        const freshData = await requestDeduplicator.dedupe(key, fetcher);
 
         // Only update state if component is still mounted
         if (!isMountedRef.current) return;
@@ -111,7 +120,10 @@ export function useCachedFetch<T>(
         onError?.(error);
       }
     },
-    [key, enabled, cache, ttl, fetcher, onSuccess, onError, staleWhileRevalidate, data]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // CRITICAL: Intentionally excluding 'data' from deps to prevent infinite loop
+    // We use dataRef.current to check for existing data instead
+    [key, enabled, cache, ttl, fetcher, onSuccess, onError, staleWhileRevalidate]
   );
 
   /**

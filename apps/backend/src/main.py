@@ -312,6 +312,22 @@ try:
     logger.info("✅ AI Chat endpoints included")
 except ImportError as e:
     logger.warning(f"AI Chat endpoints not available: {e}")
+
+# Customer Review Blog System (Production-grade with video support)
+try:
+    from api.v1.customer_reviews import router as customer_reviews_router
+    app.include_router(customer_reviews_router, tags=["customer-reviews"])
+    logger.info("✅ Customer Review Blog endpoints included (image + video support)")
+except ImportError as e:
+    logger.warning(f"Customer Review Blog endpoints not available: {e}")
+
+# Admin Review Moderation System (Approval workflow)
+try:
+    from api.admin.review_moderation import router as admin_moderation_router
+    app.include_router(admin_moderation_router, tags=["admin-review-moderation"])
+    logger.info("✅ Admin Review Moderation endpoints included (approve/reject/bulk)")
+except ImportError as e:
+    logger.warning(f"Admin Review Moderation endpoints not available: {e}")
     
     # Add a placeholder AI endpoint
     @app.post("/api/v1/ai/chat", tags=["ai-chat"])

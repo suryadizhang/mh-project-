@@ -44,6 +44,8 @@ const nextConfig: NextConfig = {
   },
   // Enhanced Security headers for Phase 9
   async headers() {
+    const isProduction = process.env.NODE_ENV === 'production';
+    
     return [
       {
         source: '/(.*)',
@@ -69,10 +71,11 @@ const nextConfig: NextConfig = {
             value:
               'camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=()',
           },
-          {
+          // Only enable HSTS in production
+          ...(isProduction ? [{
             key: 'Strict-Transport-Security',
             value: 'max-age=31536000; includeSubDomains; preload',
-          },
+          }] : []),
           {
             key: 'X-DNS-Prefetch-Control',
             value: 'on',
@@ -107,7 +110,8 @@ const nextConfig: NextConfig = {
               "base-uri 'self'",
               "form-action 'self'",
               "frame-ancestors 'none'",
-              'upgrade-insecure-requests',
+              // Only upgrade to HTTPS in production
+              ...(isProduction ? ['upgrade-insecure-requests'] : []),
             ].join('; '),
           },
         ],

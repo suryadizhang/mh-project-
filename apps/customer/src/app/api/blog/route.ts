@@ -30,39 +30,39 @@ export async function GET(request: NextRequest) {
 
     switch (type) {
       case 'featured':
-        data = await blogService.getFeaturedPosts(limit);
+        data = { posts: await blogService.getFeaturedPosts(limit) };
         break;
 
       case 'seasonal':
-        data = await blogService.getSeasonalPosts(limit);
+        data = { posts: await blogService.getSeasonalPosts(limit) };
         break;
 
       case 'recent':
-        data = await blogService.getRecentPosts(limit || 10);
+        data = { posts: await blogService.getRecentPosts(limit || 10) };
         break;
 
       case 'all':
-        data = await blogService.getAllPosts();
+        data = { posts: await blogService.getAllPosts() };
         break;
 
       case 'search':
-        data = await blogService.searchPosts(query);
+        data = { posts: await blogService.searchPosts(query) };
         break;
 
       case 'tags':
-        data = await blogService.getAllTags();
+        data = { tags: await blogService.getAllTags() };
         break;
 
       case 'categories':
-        data = await blogService.getCategories();
+        data = { categories: await blogService.getCategories() };
         break;
 
       case 'serviceAreas':
-        data = await blogService.getServiceAreas();
+        data = { serviceAreas: await blogService.getServiceAreas() };
         break;
 
       case 'eventTypes':
-        data = await blogService.getEventTypes();
+        data = { eventTypes: await blogService.getEventTypes() };
         break;
 
       default:

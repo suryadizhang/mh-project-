@@ -46,9 +46,7 @@ class CustomerReviewBlogPost(BaseModel):
     google_review_link = Column(Text, nullable=True)
     yelp_review_link = Column(Text, nullable=True)
     
-    # Metadata
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    # Note: created_at, updated_at, is_deleted inherited from BaseModel
     
     # SEO
     slug = Column(String(255), unique=True, nullable=True, index=True)

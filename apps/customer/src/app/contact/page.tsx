@@ -9,6 +9,9 @@ import ConsentBar from '@/components/consent/ConsentBar'
 
 import ContactPageClient from './ContactPageClient'
 
+// Force dynamic rendering to prevent conflicts with contact.html redirect page
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Book Private Hibachi Chef | Bay Area & Sacramento Catering Contact',
   description:

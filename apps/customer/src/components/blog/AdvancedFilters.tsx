@@ -3,6 +3,7 @@
 import type { BlogPost } from '@my-hibachi/blog-types';
 import { ChevronDown, Filter, MapPin, Users, X } from 'lucide-react'
 import React, { useState } from 'react'
+import { useDebouncedCallback } from 'use-debounce'
 
 interface AdvancedFiltersProps {
   posts: BlogPost[]
@@ -32,6 +33,17 @@ export default function AdvancedFilters({
   activeFilters
 }: AdvancedFiltersProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [localSearchQuery, setLocalSearchQuery] = useState(activeFilters.searchQuery)
+
+  // ENTERPRISE OPTIMIZATION: Debounced search (Instagram/Facebook pattern)
+  // Wait 300ms after user stops typing before triggering filter
+  // Prevents excessive re-renders and filter calculations
+  const debouncedSearch = useDebouncedCallback(
+    (query: string) => {
+      handleFilterChange('searchQuery', query)
+    },
+    300 // 300ms delay - sweet spot for UX
+  )
 
   // Extract unique values from posts
   const uniqueLocations = [...new Set(posts.map(post => post.serviceArea))].filter(Boolean).sort()
@@ -126,14 +138,21 @@ export default function AdvancedFilters({
           <input
             type="text"
             placeholder="Search articles by title, content, or keywords..."
-            value={activeFilters.searchQuery}
-            onChange={e => handleFilterChange('searchQuery', e.target.value)}
+            value={localSearchQuery}
+            onChange={e => {
+              const newQuery = e.target.value
+              setLocalSearchQuery(newQuery) // Update input immediately (responsive UI)
+              debouncedSearch(newQuery) // Trigger filter after 300ms delay
+            }}
             className="w-full pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
             style={{ paddingLeft: '3.5rem' }}
           />
-          {activeFilters.searchQuery && (
+          {localSearchQuery && (
             <button
-              onClick={() => handleFilterChange('searchQuery', '')}
+              onClick={() => {
+                setLocalSearchQuery('')
+                handleFilterChange('searchQuery', '')
+              }}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
             >
               <X className="w-4 h-4" />
