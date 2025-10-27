@@ -25,10 +25,10 @@ import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 import ClientLayout from '@/components/layout/ClientLayout'
 import Footer from '@/components/layout/Footer'
 import Navbar from '@/components/layout/Navbar'
+import { QueryProvider } from '@/components/providers/QueryProvider'
 import { PerformanceMonitoring } from '@/components/seo/TechnicalSEO'
 import BackToTopButton from '@/components/ui/BackToTopButton'
 import RateLimitBanner from '@/components/RateLimitBanner'
-import RingCentralWidget from '@/components/RingCentralWidget'
 import {
   generateLocalBusinessSchema,
   generateOrganizationSchema,
@@ -108,34 +108,27 @@ export default function RootLayout({
           src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
           async
         ></script>
-
-        {/* RingCentral Embeddable Widget - Live Chat Integration */}
-        <script
-          src="https://apps.ringcentral.com/integration/ringcentral-embeddable-voice/latest/adapter.js"
-          async
-        ></script>
       </head>
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} ${poppins.variable} antialiased min-h-screen flex flex-col company-background`}
       >
-        {/* Google Analytics 4 */}
-        <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || ''} />
+        <QueryProvider>
+          {/* Google Analytics 4 */}
+          <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || ''} />
 
-        {/* Core Web Vitals Performance Monitoring */}
-        <PerformanceMonitoring />
+          {/* Core Web Vitals Performance Monitoring */}
+          <PerformanceMonitoring />
 
-        {/* RingCentral Widget Initialization */}
-        <RingCentralWidget />
+          {/* Rate Limit Warning Banner (HIGH PRIORITY #12) */}
+          <RateLimitBanner />
 
-        {/* Rate Limit Warning Banner (HIGH PRIORITY #12) */}
-        <RateLimitBanner />
-
-        <ClientLayout>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <BackToTopButton />
-        </ClientLayout>
+          <ClientLayout>
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+            <BackToTopButton />
+          </ClientLayout>
+        </QueryProvider>
       </body>
     </html>
   )
