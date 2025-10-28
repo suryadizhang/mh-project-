@@ -9,6 +9,13 @@ import {
   dashboardService,
   paymentService,
   invoiceService,
+  leadService,
+  socialService,
+  reviewService,
+  analyticsService,
+  qrService,
+  smsService,
+  couponService,
 } from '@/services/api';
 import { requestDeduplicator } from '@/lib/cache/RequestDeduplicator';
 import type {
@@ -240,4 +247,124 @@ export function useSort<T extends string>(initialSortBy?: T, initialSortOrder: '
     setSortOrder,
     toggleSort,
   };
+}
+
+/**
+ * Hook for fetching leads with filters
+ */
+export function useLeads(filters: any = {}) {
+  return useApiData<{ data: any[]; total_count: number }>(
+    () => leadService.getLeads(filters),
+    [JSON.stringify(filters)]
+  );
+}
+
+/**
+ * Hook for fetching a single lead
+ */
+export function useLead(leadId: string | null) {
+  return useApiData<any>(
+    () => leadId ? leadService.getLead(leadId) : Promise.resolve({ data: null, success: true }),
+    [leadId]
+  );
+}
+
+/**
+ * Hook for fetching social media threads
+ */
+export function useSocialThreads(filters: any = {}) {
+  return useApiData<{ data: any[]; total_count: number }>(
+    () => socialService.getSocialThreads(filters),
+    [JSON.stringify(filters)]
+  );
+}
+
+/**
+ * Hook for fetching a single social thread
+ */
+export function useSocialThread(threadId: string | null) {
+  return useApiData<any>(
+    () => threadId ? socialService.getSocialThread(threadId) : Promise.resolve({ data: null, success: true }),
+    [threadId]
+  );
+}
+
+/**
+ * Hook for fetching reviews with filters
+ */
+export function useReviews(filters: any = {}) {
+  return useApiData<{ data: any[]; total_count: number }>(
+    () => reviewService.getReviews(filters),
+    [JSON.stringify(filters)]
+  );
+}
+
+/**
+ * Hook for fetching escalated reviews
+ */
+export function useEscalatedReviews() {
+  return useApiData<{ data: any[] }>(
+    () => reviewService.getEscalatedReviews(),
+    []
+  );
+}
+
+/**
+ * Hook for fetching review analytics
+ */
+export function useReviewAnalytics() {
+  return useApiData<any>(
+    () => reviewService.getReviewAnalytics(),
+    []
+  );
+}
+
+/**
+ * Hook for fetching analytics overview
+ */
+export function useAnalyticsOverview(filters: any = {}) {
+  return useApiData<any>(
+    () => analyticsService.getOverview(filters),
+    [JSON.stringify(filters)]
+  );
+}
+
+/**
+ * Hook for fetching lead analytics
+ */
+export function useLeadAnalytics(filters: any = {}) {
+  return useApiData<any>(
+    () => analyticsService.getLeadAnalytics(filters),
+    [JSON.stringify(filters)]
+  );
+}
+
+/**
+ * Hook for fetching conversion funnel
+ */
+export function useConversionFunnel() {
+  return useApiData<any>(
+    () => analyticsService.getConversionFunnel(),
+    []
+  );
+}
+
+/**
+ * Hook for fetching QR codes
+ */
+export function useQRCodes(filters: any = {}) {
+  return useApiData<{ data: any[] }>(
+    () => qrService.listQRCodes(filters),
+    [JSON.stringify(filters)]
+  );
+}
+
+/**
+ * Hook for fetching QR analytics
+ */
+export function useQRAnalytics(code: string | null) {
+  return useApiData<any>(
+    () => code ? qrService.getQRAnalytics(code) : Promise.resolve({ data: null, success: true }),
+    [code]
+  );
 }

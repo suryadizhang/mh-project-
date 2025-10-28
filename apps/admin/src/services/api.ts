@@ -612,3 +612,240 @@ export const apiWithAuth = {
       },
     }),
 };
+
+/**
+ * Leads Management Service (CRM)
+ */
+export const leadService = {
+  async getLeads(filters: any = {}) {
+    const params = new URLSearchParams();
+    Object.keys(filters).forEach(key => {
+      if (filters[key] !== undefined && filters[key] !== '') {
+        params.append(key, filters[key]);
+      }
+    });
+    return authenticatedApi.get<{ data: any[]; total_count: number }>(
+      `/api/leads?${params.toString()}`
+    );
+  },
+
+  async getLead(leadId: string) {
+    return authenticatedApi.get(`/api/leads/${leadId}`);
+  },
+
+  async createLead(data: any) {
+    return authenticatedApi.post('/api/leads', data);
+  },
+
+  async updateLead(leadId: string, data: any) {
+    return authenticatedApi.put(`/api/leads/${leadId}`, data);
+  },
+
+  async trackLeadEvent(leadId: string, event: any) {
+    return authenticatedApi.post(`/api/leads/${leadId}/events`, event);
+  },
+
+  async getAIAnalysis(leadId: string) {
+    return authenticatedApi.post(`/api/leads/${leadId}/ai-analysis`, {});
+  },
+
+  async getNurtureSequence(leadId: string) {
+    return authenticatedApi.get(`/api/leads/${leadId}/nurture-sequence`);
+  },
+};
+
+/**
+ * Social Media Management Service
+ */
+export const socialService = {
+  async getSocialThreads(filters: any = {}) {
+    const params = new URLSearchParams();
+    Object.keys(filters).forEach(key => {
+      if (filters[key] !== undefined && filters[key] !== '') {
+        params.append(key, filters[key]);
+      }
+    });
+    return authenticatedApi.get<{ data: any[]; total_count: number }>(
+      `/api/leads/social-threads?${params.toString()}`
+    );
+  },
+
+  async getSocialThread(threadId: string) {
+    return authenticatedApi.get(`/api/leads/social-threads/${threadId}`);
+  },
+
+  async createSocialThread(data: any) {
+    return authenticatedApi.post('/api/leads/social-threads', data);
+  },
+
+  async respondToThread(threadId: string, message: string) {
+    return authenticatedApi.post(`/api/leads/social-threads/${threadId}/respond`, {
+      message,
+    });
+  },
+
+  async convertThreadToLead(threadId: string) {
+    return authenticatedApi.post(`/api/leads/social-threads/${threadId}/convert`, {});
+  },
+};
+
+/**
+ * Reviews Management Service
+ */
+export const reviewService = {
+  async getReviews(filters: any = {}) {
+    const params = new URLSearchParams();
+    Object.keys(filters).forEach(key => {
+      if (filters[key] !== undefined && filters[key] !== '') {
+        params.append(key, filters[key]);
+      }
+    });
+    return authenticatedApi.get<{ data: any[]; total_count: number }>(
+      `/api/reviews?${params.toString()}`
+    );
+  },
+
+  async getReview(reviewId: string) {
+    return authenticatedApi.get(`/api/reviews/${reviewId}`);
+  },
+
+  async getEscalatedReviews() {
+    return authenticatedApi.get<{ data: any[] }>('/api/reviews/admin/escalated');
+  },
+
+  async resolveReview(reviewId: string, resolution: any) {
+    return authenticatedApi.post(`/api/reviews/${reviewId}/resolve`, resolution);
+  },
+
+  async issueAICoupon(reviewId: string) {
+    return authenticatedApi.post(`/api/reviews/ai/issue-coupon`, { review_id: reviewId });
+  },
+
+  async getReviewAnalytics() {
+    return authenticatedApi.get('/api/reviews/admin/analytics');
+  },
+
+  async getCustomerReviews(customerId: string) {
+    return authenticatedApi.get(`/api/reviews/customers/${customerId}/reviews`);
+  },
+
+  async trackExternalReview(data: any) {
+    return authenticatedApi.post('/api/reviews/track-external', data);
+  },
+};
+
+/**
+ * Coupon Management Service
+ */
+export const couponService = {
+  async validateCoupon(code: string) {
+    return authenticatedApi.post('/api/reviews/coupons/validate', { code });
+  },
+
+  async applyCoupon(bookingId: string, code: string) {
+    return authenticatedApi.post('/api/reviews/coupons/apply', {
+      booking_id: bookingId,
+      code,
+    });
+  },
+
+  async getCustomerCoupons(customerId: string) {
+    return authenticatedApi.get(`/api/reviews/customers/${customerId}/coupons`);
+  },
+};
+
+/**
+ * Analytics Service
+ */
+export const analyticsService = {
+  async getOverview(filters: any = {}) {
+    const params = new URLSearchParams();
+    Object.keys(filters).forEach(key => {
+      if (filters[key]) params.append(key, filters[key]);
+    });
+    return authenticatedApi.get(`/api/admin/analytics/overview?${params.toString()}`);
+  },
+
+  async getLeadAnalytics(filters: any = {}) {
+    const params = new URLSearchParams();
+    Object.keys(filters).forEach(key => {
+      if (filters[key]) params.append(key, filters[key]);
+    });
+    return authenticatedApi.get(`/api/admin/analytics/leads?${params.toString()}`);
+  },
+
+  async getNewsletterAnalytics() {
+    return authenticatedApi.get('/api/admin/analytics/newsletter');
+  },
+
+  async getConversionFunnel() {
+    return authenticatedApi.get('/api/admin/analytics/funnel');
+  },
+
+  async getLeadScoring() {
+    return authenticatedApi.get('/api/admin/analytics/lead-scoring');
+  },
+
+  async getEngagementTrends(filters: any = {}) {
+    const params = new URLSearchParams();
+    Object.keys(filters).forEach(key => {
+      if (filters[key]) params.append(key, filters[key]);
+    });
+    return authenticatedApi.get(`/api/admin/analytics/engagement-trends?${params.toString()}`);
+  },
+
+  async getPaymentAnalytics(filters: any = {}) {
+    const params = new URLSearchParams();
+    Object.keys(filters).forEach(key => {
+      if (filters[key]) params.append(key, filters[key]);
+    });
+    return authenticatedApi.get(`/api/stripe/analytics/payments?${params.toString()}`);
+  },
+};
+
+/**
+ * QR Code Management Service
+ */
+export const qrService = {
+  async listQRCodes(filters: any = {}) {
+    const params = new URLSearchParams();
+    Object.keys(filters).forEach(key => {
+      if (filters[key]) params.append(key, filters[key]);
+    });
+    return authenticatedApi.get<{ data: any[] }>(`/api/qr/list?${params.toString()}`);
+  },
+
+  async createQRCode(data: any) {
+    return authenticatedApi.post('/api/qr/create', data);
+  },
+
+  async getQRAnalytics(code: string) {
+    return authenticatedApi.get(`/api/qr/analytics/${code}`);
+  },
+
+  async trackScan(code: string, data: any) {
+    return api.get(`/api/qr/scan/${code}`); // Public endpoint
+  },
+
+  async trackConversion(data: any) {
+    return authenticatedApi.post('/api/qr/conversion', data);
+  },
+};
+
+/**
+ * SMS Messaging Service
+ */
+export const smsService = {
+  async sendSMS(data: { to: string; message: string }) {
+    return authenticatedApi.post('/api/ringcentral/send-sms', data);
+  },
+
+  async syncMessages() {
+    return authenticatedApi.post('/api/ringcentral/sync-messages', {});
+  },
+
+  async getMessages(filters: any = {}) {
+    // Note: This endpoint may need to be created in backend
+    return authenticatedApi.get('/api/ringcentral/messages');
+  },
+};
