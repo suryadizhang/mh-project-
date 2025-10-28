@@ -119,10 +119,8 @@ async def lifespan(app: FastAPI):
     # Cleanup DI container if needed
     if hasattr(app.state, 'container') and app.state.container:
         try:
-            # Close any open database sessions
-            if app.state.container.is_registered("database_session"):
-                session = app.state.container.resolve("database_session")
-                session.close()
+            # The DI container itself doesn't need cleanup
+            # Database sessions are managed per-request and closed automatically
             logger.info("✅ Dependency injection container cleaned up")
         except Exception as e:
             logger.warning(f"Error cleaning up DI container: {e}")

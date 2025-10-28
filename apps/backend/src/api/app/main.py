@@ -21,7 +21,9 @@ from sentry_sdk.integrations.redis import RedisIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 
 from api.app.auth.middleware import setup_auth_middleware
-from api.app.config import settings
+from core.config import get_settings
+
+settings = get_settings()
 
 # Initialize Sentry if DSN is configured
 if settings.sentry_dsn:

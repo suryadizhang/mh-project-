@@ -8,7 +8,10 @@ import stripe
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.app.config import settings
+from core.config import get_settings
+
+settings = get_settings()
+from api.app.models.core import Customer, Payment
 from api.app.models.stripe_models import StripeCustomer, Dispute, Invoice, StripePayment
 from api.app.schemas.stripe_schemas import PaymentAnalytics
 from utils.query_optimizer import get_payment_analytics_optimized
@@ -49,19 +52,19 @@ class StripeService:
         )
 
         # Create StripeCustomer record
-        StripeCustomer = StripeCustomer(
+        new_customer = StripeCustomer(
             user_id=user_id,
             email=email,
             name=name,
-            stripe_StripeCustomer_id=stripe_customer.id,
+            stripe_StripeCustomer_id=stripe_StripeCustomer.id,
             preferred_payment_method="zelle",
         )
 
-        self.db.add(StripeCustomer)
+        self.db.add(new_customer)
         await self.db.commit()
-        await self.db.refresh(StripeCustomer)
+        await self.db.refresh(new_customer)
 
-        return StripeCustomer
+        return new_customer
 
     async def get_StripeCustomer_by_user_id(self, user_id: str) -> StripeCustomer | None:
         """Get StripeCustomer by user ID."""
@@ -202,7 +205,7 @@ class StripeService:
 
     async def _handle_StripeCustomer_created(self, StripeCustomer: dict[str, Any]) -> None:
         """Handle StripeCustomer creation."""
-        metadata = customer.get("metadata", {})
+        metadata = StripeCustomer.get("metadata", {})
         user_id = metadata.get("user_id")
 
         if not user_id:
@@ -224,7 +227,7 @@ class StripeService:
             StripeCustomer_record = StripeCustomer(
                 user_id=user_id,
                 email=StripeCustomer["email"],
-                name=customer.get("name"),
+                name=StripeCustomer.get("name"),
                 stripe_StripeCustomer_id=StripeCustomer["id"],
                 preferred_payment_method="zelle",
             )
@@ -333,29 +336,29 @@ class StripeService:
         result = await self.db.execute(
             select(StripeCustomer).where(Customer.stripe_StripeCustomer_id == StripeCustomer_id)
         )
-        StripeCustomer = result.scalar_one_or_none()
+        customer_record = result.scalar_one_or_none()
 
-        if StripeCustomer:
+        if customer_record:
             amount = Decimal(str(payment_intent["amount"] / 100))
-            customer.total_spent += amount
-            customer.total_bookings += 1
+            customer_record.total_spent += amount
+            customer_record.total_bookings += 1
 
             # Calculate Zelle savings (8% of Stripe payments)
             if (
                 payment_intent.get("payment_method_types", ["card"])[0]
                 == "card"
             ):
-                customer.zelle_savings += amount * Decimal("0.08")
+                customer_record.zelle_savings += amount * Decimal("0.08")
 
             # Update loyalty tier
-            if customer.total_spent >= 5000:
-                customer.loyalty_tier = "platinum"
-            elif customer.total_spent >= 2000:
-                customer.loyalty_tier = "gold"
-            elif customer.total_spent >= 500:
-                customer.loyalty_tier = "silver"
+            if customer_record.total_spent >= 5000:
+                customer_record.loyalty_tier = "platinum"
+            elif customer_record.total_spent >= 2000:
+                customer_record.loyalty_tier = "gold"
+            elif customer_record.total_spent >= 500:
+                customer_record.loyalty_tier = "silver"
 
-            customer.updated_at = datetime.utcnow()
+            customer_record.updated_at = datetime.utcnow()
             await self.db.commit()
 
     async def get_payment_analytics(

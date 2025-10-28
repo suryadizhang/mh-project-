@@ -12,7 +12,9 @@ import hmac
 import hashlib
 
 from api.app.database import get_db
-from api.app.config import settings
+from core.config import get_settings
+
+settings = get_settings()
 from api.app.models.lead_newsletter import Lead, LeadSource, LeadStatus, SocialThread, ThreadStatus
 from api.app.models.core import Event
 from api.app.services.ai_lead_management import get_ai_lead_manager

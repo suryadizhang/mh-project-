@@ -45,7 +45,8 @@ class FieldEncryption:
         else:
             # Get from settings - in production this should come from KMS/Vault
             try:
-                from api.app.config import settings
+                from core.config import get_settings
+                settings = get_settings()
                 master_key_b64 = settings.field_encryption_key
             except ImportError:
                 # Fallback to environment variable for standalone usage

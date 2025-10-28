@@ -13,7 +13,9 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 import bcrypt
 
-from api.app.config import settings
+from core.config import get_settings
+
+settings = get_settings()
 
 logger = logging.getLogger(__name__)
 security = HTTPBearer()

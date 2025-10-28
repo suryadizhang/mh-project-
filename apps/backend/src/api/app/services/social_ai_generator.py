@@ -7,7 +7,9 @@ from uuid import UUID
 import openai
 from pydantic import BaseModel
 
-from api.app.config import settings
+from core.config import get_settings
+
+settings = get_settings()
 from api.app.cqrs.base import CommandBus, QueryBus
 from api.app.models.social import SocialPlatform
 from api.app.services.social_ai_tools import SocialMediaToolKit

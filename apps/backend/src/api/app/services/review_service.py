@@ -13,7 +13,9 @@ from sqlalchemy.orm import selectinload
 from api.app.models.feedback import CustomerReview, DiscountCoupon, ReviewEscalation
 from api.app.models.core import Customer, Booking
 from api.app.services.ringcentral_sms import ringcentral_sms
-from api.app.config import settings
+from core.config import get_settings
+
+settings = get_settings()
 
 logger = logging.getLogger(__name__)
 

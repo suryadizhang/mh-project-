@@ -11,7 +11,9 @@ if backend_src not in sys.path:
     sys.path.insert(0, backend_src)
 
 # Import after path manipulation to avoid import errors
-from api.app.config import settings  # noqa: E402
+from core.config import get_settings  # noqa: E402
+
+settings = get_settings()
 from api.app.database import Base  # noqa: E402
 
 # Import all models for Alembic discovery
