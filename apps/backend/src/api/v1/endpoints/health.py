@@ -309,7 +309,8 @@ async def check_stripe() -> ServiceHealthCheck:
     start_time = time.time()
     
     try:
-        from api.app.config import settings
+        from core.config import get_settings
+        settings = get_settings()
         
         # Check if Stripe is configured
         stripe_key = getattr(settings, 'STRIPE_SECRET_KEY', None) or getattr(settings, 'stripe_secret_key', None)
@@ -426,7 +427,8 @@ def get_system_metrics() -> Dict[str, Any]:
 def get_configuration_status() -> Dict[str, Any]:
     """Get application configuration status."""
     try:
-        from api.app.config import settings
+        from core.config import get_settings
+        settings = get_settings()
         
         return {
             "environment": getattr(settings, 'ENVIRONMENT', 'unknown'),
@@ -641,7 +643,8 @@ async def detailed_health_check(request: Request):
     
     try:
         from api.app.database import get_db
-        from api.app.config import settings
+        from core.config import get_settings
+        settings = get_settings()
         
         # Get database session
         db = next(get_db())

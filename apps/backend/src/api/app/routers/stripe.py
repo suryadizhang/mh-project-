@@ -7,11 +7,16 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.app.config import settings
+from core.config import get_settings
+
+settings = get_settings()
 from api.app.database import get_db
+from api.app.models.core import Payment
 from api.app.models.stripe_models import Invoice, StripePayment, Refund, WebhookEvent
 from api.app.schemas.stripe_schemas import (
     CheckoutSessionResponse,
+    CheckoutSessionVerifyRequest,
+    CheckoutSessionVerifyResponse,
     CreateCheckoutSession,
     CreatePaymentIntent,
     CustomerPortalResponse,
@@ -113,6 +118,56 @@ async def create_checkout_session(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create checkout session",
+        )
+
+
+@router.post("/checkout-session", response_model=CheckoutSessionVerifyResponse)
+async def verify_checkout_session(
+    data: CheckoutSessionVerifyRequest,
+    current_user=Depends(get_current_user),
+):
+    """
+    Verify and retrieve a Stripe Checkout session.
+    
+    This endpoint retrieves the session details from Stripe to verify
+    payment status after checkout completion.
+    """
+    try:
+        # Retrieve the session from Stripe
+        session = stripe.checkout.Session.retrieve(data.session_id)
+        
+        # Extract payment information
+        response_data = {
+            "success": True,
+            "session_id": session.id,
+            "payment_status": session.payment_status,
+            "payment_intent": session.payment_intent if hasattr(session, 'payment_intent') else None,
+            "amount_total": session.amount_total,
+            "currency": session.currency,
+            "customer_email": session.customer_details.email if session.customer_details else None,
+            "booking_id": session.metadata.get("booking_id") if session.metadata else None,
+            "metadata": dict(session.metadata) if session.metadata else None,
+        }
+        
+        return CheckoutSessionVerifyResponse(**response_data)
+        
+    except stripe.error.InvalidRequestError as e:
+        logger.error(f"Invalid session ID: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Checkout session not found",
+        )
+    except stripe.error.StripeError as e:
+        logger.error(f"Stripe error retrieving session: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to retrieve session: {str(e)}",
+        )
+    except Exception as e:
+        logger.error(f"Error verifying checkout session: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to verify checkout session",
         )
 
 

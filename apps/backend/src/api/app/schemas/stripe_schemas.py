@@ -217,6 +217,22 @@ class CheckoutSessionResponse(BaseModel):
     session_id: str
 
 
+class CheckoutSessionVerifyRequest(BaseModel):
+    session_id: str
+
+
+class CheckoutSessionVerifyResponse(BaseModel):
+    success: bool
+    session_id: str
+    payment_status: str  # unpaid, paid, no_payment_required
+    payment_intent: str | None = None
+    amount_total: int | None = None  # in cents
+    currency: str | None = None
+    customer_email: str | None = None
+    booking_id: str | None = None
+    metadata: dict[str, str] | None = None
+
+
 class PaymentIntentResponse(BaseModel):
     client_secret: str
     payment_intent_id: str

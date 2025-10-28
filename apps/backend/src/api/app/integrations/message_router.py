@@ -24,7 +24,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 
 from api.app.database import get_db
-from api.app.config import settings
+from core.config import get_settings
+
+settings = get_settings()
 from api.app.models.lead_newsletter import Lead, LeadSource, LeadStatus, SocialThread, ThreadStatus, SocialPlatform
 from api.app.models.core import Event, Customer
 from api.app.services.ai_lead_management import get_ai_lead_manager

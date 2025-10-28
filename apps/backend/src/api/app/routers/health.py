@@ -14,7 +14,9 @@ from sqlalchemy.orm import Session
 
 from api.app.database import get_db
 from api.app.schemas.health import HealthResponse, ReadinessResponse
-from api.app.config import settings
+from core.config import get_settings
+
+settings = get_settings()
 import logging
 
 logger = logging.getLogger(__name__)

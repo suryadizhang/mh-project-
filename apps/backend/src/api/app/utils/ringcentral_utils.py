@@ -11,7 +11,9 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 from urllib.parse import urljoin
 
-from api.app.config import settings
+from core.config import get_settings
+
+settings = get_settings()
 from api.app.services.ringcentral_sms import RingCentralSMSService, send_sms_notification
 
 logger = logging.getLogger(__name__)

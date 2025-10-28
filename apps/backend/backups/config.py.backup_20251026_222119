@@ -1,9 +1,25 @@
-from typing import Any
+"""
+DEPRECATED: This file is kept for backward compatibility only.
+All new code should import from core.config instead.
 
-from pydantic_settings import BaseSettings
+This module now re-exports settings from core.config to maintain
+compatibility with existing code that imports from api.app.config.
+"""
+from core.config import get_settings, Settings as CoreSettings
 
+# Re-export for backward compatibility
+Settings = CoreSettings
+settings = get_settings()
 
-class Settings(BaseSettings):
+# Ensure all attributes work (the properties in CoreSettings handle lowercase aliases)
+__all__ = ['Settings', 'settings', 'get_settings']
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore"
+    )
+    
     # Core Configuration
     app_name: str = "MyHibachi CRM API"
     environment: str = "development"
@@ -242,10 +258,7 @@ class Settings(BaseSettings):
     social_sentiment_threshold: float = 0.3  # Below this is considered negative
     social_response_delay_minutes: int = 2  # Minimum delay before AI response
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
-        extra = "ignore"  # Allow extra fields in .env
+    # Removed old Config class - using model_config instead (defined at top of class)
 
     def get_worker_configs(self) -> dict[str, Any]:
         """Get worker configuration dictionary."""
@@ -305,5 +318,14 @@ class Settings(BaseSettings):
         }
 
 
-# Global settings instance
-settings = Settings()
+"""
+Legacy config file - now imports from core.config
+Use core.config.get_settings() for new code
+"""
+from core.config import get_settings, Settings as CoreSettings
+
+# Alias for backward compatibility
+Settings = CoreSettings
+
+# Global settings instance (backward compatibility)
+settings = get_settings()

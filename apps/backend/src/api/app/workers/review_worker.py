@@ -14,7 +14,9 @@ from api.app.database import AsyncSessionLocal
 from api.app.models.core import Booking, Customer
 from api.app.models.feedback import CustomerReview
 from api.app.services.review_service import ReviewService
-from api.app.config import settings
+from core.config import get_settings
+
+settings = get_settings()
 
 logger = logging.getLogger(__name__)
 
