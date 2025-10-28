@@ -352,6 +352,14 @@ try:
 except ImportError as e:
     logger.warning(f"Enhanced health check endpoints not available: {e}")
 
+# Admin Analytics endpoints - Composite service
+try:
+    from api.v1.endpoints.analytics import router as analytics_router
+    app.include_router(analytics_router, prefix="/api/admin/analytics", tags=["Admin Analytics"])
+    logger.info("✅ Admin Analytics endpoints included (6 composite endpoints)")
+except ImportError as e:
+    logger.warning(f"Admin Analytics endpoints not available: {e}")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(

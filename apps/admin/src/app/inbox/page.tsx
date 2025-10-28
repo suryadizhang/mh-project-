@@ -14,6 +14,7 @@ import {
   Circle,
   Sparkles,
   Phone,
+  UserPlus,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ import { StatsCard } from '@/components/ui/stats-card';
 import { FilterBar } from '@/components/ui/filter-bar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { Modal } from '@/components/ui/modal';
 import {
   useSocialThreads,
   usePagination,
@@ -231,9 +233,31 @@ export default function UnifiedInboxPage() {
     setSelectedThread(null); // Clear selection when switching channels
   };
 
-  const handleThreadClick = (thread: any) => {
+  const handleThreadClick = async (thread: any) => {
     setSelectedThread(thread);
-    // TODO: Mark as read API call
+    
+    // Mark as read if unread
+    if (thread.status === 'unread') {
+      try {
+        await fetch(`/api/v1/inbox/threads/${thread.thread_id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          },
+          body: JSON.stringify({ status: 'read' })
+        });
+        
+        // Refresh threads to show updated status
+        if (thread.channel === CHANNELS.SMS) {
+          await loadSmsThreads();
+        } else {
+          await refetchSocial();
+        }
+      } catch (err) {
+        console.error('Failed to mark as read:', err);
+      }
+    }
   };
 
   const handleSendMessage = async () => {
@@ -247,9 +271,19 @@ export default function UnifiedInboxPage() {
           message: messageText,
         });
       } else {
-        // Send social media message
-        // TODO: Call social service API
-        console.log('Sending message:', messageText, 'to thread:', selectedThread.thread_id);
+        // Send social media message via inbox API
+        await fetch(`/api/v1/inbox/threads/${selectedThread.thread_id}/messages`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          },
+          body: JSON.stringify({
+            content: messageText,
+            direction: 'outbound',
+            message_type: 'text'
+          })
+        });
       }
 
       setMessageText('');
@@ -272,9 +306,109 @@ export default function UnifiedInboxPage() {
     setShowQuickReplies(false);
   };
 
-  const handleConvertToLead = (thread: any) => {
-    // TODO: Call convert to lead API
-    console.log('Converting thread to lead:', thread.thread_id || thread.id);
+  const handleConvertToLead = async (thread: any) => {
+    try {
+      const threadId = thread.thread_id || thread.id;
+      const response = await fetch('/api/leads/social-threads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        },
+        body: JSON.stringify({
+          thread_id: threadId,
+          name: thread.customer_name || thread.from_name || 'Unknown',
+          email: thread.customer_email || '',
+          phone: thread.phone_number || '',
+          source: thread.channel || 'social',
+          notes: `Converted from ${thread.channel} thread`,
+        })
+      });
+      
+      if (response.ok) {
+        alert('Thread converted to lead successfully!');
+        // Optionally refresh threads
+        if (thread.channel === CHANNELS.SMS) {
+          await loadSmsThreads();
+        } else {
+          await refetchSocial();
+        }
+      } else {
+        throw new Error('Failed to convert');
+      }
+    } catch (err) {
+      console.error('Failed to convert to lead:', err);
+      alert('Failed to convert thread to lead. Please try again.');
+    }
+  };
+
+  // AI Auto-Reply
+  const [aiGenerating, setAiGenerating] = useState(false);
+  
+  const handleAIAutoReply = async () => {
+    if (!selectedThread) return;
+
+    try {
+      setAiGenerating(true);
+      const threadId = selectedThread.thread_id || selectedThread.id;
+      
+      const response = await fetch(`/api/v1/inbox/threads/${threadId}/ai-reply`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to generate AI reply');
+
+      const data = await response.json();
+      setMessageText(data.reply || data.suggested_reply || '');
+    } catch (err) {
+      console.error('Failed to generate AI reply:', err);
+      alert('Failed to generate AI reply. Please try again.');
+    } finally {
+      setAiGenerating(false);
+    }
+  };
+
+  // Thread Assignment
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [assigneeId, setAssigneeId] = useState('');
+  
+  const handleAssignThread = async () => {
+    if (!selectedThread || !assigneeId) return;
+
+    try {
+      const threadId = selectedThread.thread_id || selectedThread.id;
+      
+      const response = await fetch(`/api/v1/inbox/threads/${threadId}/assign`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        },
+        body: JSON.stringify({
+          assignee_id: parseInt(assigneeId)
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to assign thread');
+
+      alert('Thread assigned successfully!');
+      setAssignModalOpen(false);
+      setAssigneeId('');
+
+      // Refresh threads
+      if (selectedThread.channel === CHANNELS.SMS) {
+        await loadSmsThreads();
+      } else {
+        await refetchSocial();
+      }
+    } catch (err) {
+      console.error('Failed to assign thread:', err);
+      alert('Failed to assign thread. Please try again.');
+    }
   };
 
   const handleClearFilters = () => {
@@ -648,6 +782,32 @@ export default function UnifiedInboxPage() {
 
                   {/* Message Input */}
                   <div className="p-4 border-t border-gray-200 bg-white">
+                    {/* AI Actions Bar */}
+                    <div className="mb-3 flex items-center justify-between gap-2 p-2 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleAIAutoReply}
+                          disabled={aiGenerating}
+                          className="text-purple-600 border-purple-300 hover:bg-purple-50"
+                        >
+                          <Sparkles className={`w-4 h-4 mr-1 ${aiGenerating ? 'animate-spin' : ''}`} />
+                          {aiGenerating ? 'Generating...' : 'AI Reply'}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setAssignModalOpen(true)}
+                          className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                        >
+                          <UserPlus className="w-4 h-4 mr-1" />
+                          Assign
+                        </Button>
+                      </div>
+                      <span className="text-xs text-gray-500">AI-powered features</span>
+                    </div>
+
                     {/* Quick Replies */}
                     {showQuickReplies && (
                       <div className="mb-3 flex flex-wrap gap-2">
@@ -669,7 +829,7 @@ export default function UnifiedInboxPage() {
                         className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
                         title="Quick Replies"
                       >
-                        <Sparkles className="w-5 h-5" />
+                        <MessageSquare className="w-5 h-5" />
                       </button>
                       <textarea
                         value={messageText}
@@ -716,6 +876,73 @@ export default function UnifiedInboxPage() {
           </div>
         )}
       </div>
+
+      {/* Assignment Modal */}
+      {assignModalOpen && (
+        <Modal
+          isOpen={assignModalOpen}
+          onClose={() => {
+            setAssignModalOpen(false);
+            setAssigneeId('');
+          }}
+          title="Assign Thread"
+        >
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Assign to Team Member
+              </label>
+              <select
+                value={assigneeId}
+                onChange={(e) => setAssigneeId(e.target.value)}
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              >
+                <option value="">Select a team member</option>
+                <option value="1">Admin User</option>
+                <option value="2">Sales Team</option>
+                <option value="3">Support Team</option>
+                <option value="4">Manager</option>
+              </select>
+              <p className="mt-1 text-xs text-gray-500">
+                The assigned team member will be notified
+              </p>
+            </div>
+
+            {selectedThread && (
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-sm text-gray-700">
+                  <span className="font-medium">Thread:</span>{' '}
+                  {selectedThread.customer_name || selectedThread.from_name || selectedThread.phone_number}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Channel: {CHANNEL_CONFIG[selectedThread.channel as keyof typeof CHANNEL_CONFIG]?.label || 'Unknown'}
+                </p>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3 mt-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setAssignModalOpen(false);
+                  setAssigneeId('');
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleAssignThread}
+                disabled={!assigneeId}
+              >
+                <UserPlus className="w-4 h-4 mr-2" />
+                Assign Thread
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

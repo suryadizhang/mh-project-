@@ -679,13 +679,18 @@ export const socialService = {
   },
 
   async respondToThread(threadId: string, message: string) {
-    return api.post(`/api/leads/social-threads/${threadId}/respond`, {
-      message,
+    return api.post(`/api/v1/inbox/threads/${threadId}/messages`, {
+      content: message,
+      direction: 'outbound',
+      message_type: 'text'
     });
   },
 
-  async convertThreadToLead(threadId: string) {
-    return api.post(`/api/leads/social-threads/${threadId}/convert`, {});
+  async convertThreadToLead(threadId: string, leadData?: Partial<any>) {
+    return api.post(`/api/leads/social-threads`, {
+      thread_id: threadId,
+      ...leadData
+    });
   },
 };
 
@@ -845,7 +850,13 @@ export const smsService = {
   },
 
   async getMessages(filters: any = {}) {
-    // Note: This endpoint may need to be created in backend
-    return api.get('/api/ringcentral/messages');
+    const params = new URLSearchParams();
+    if (filters.channel) params.append('channel', filters.channel);
+    if (filters.status) params.append('status', filters.status);
+    if (filters.phone_number) params.append('phone_number', filters.phone_number);
+    
+    const query = params.toString();
+    const url = query ? `/api/v1/inbox/messages?${query}` : '/api/v1/inbox/messages';
+    return api.get(url);
   },
 };
