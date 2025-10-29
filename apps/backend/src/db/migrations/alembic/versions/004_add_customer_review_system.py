@@ -1,6 +1,6 @@
 """Add Customer Review System
 
-Revision ID: 004_add_customer_review_system
+Revision ID: 004_review_system
 Revises: 9fd62e8ed3b4
 Create Date: 2025-10-25 10:00:00.000000
 
@@ -10,16 +10,17 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '004_add_customer_review_system'
+revision = '004_review_system'
 down_revision = '9fd62e8ed3b4'
 branch_labels = None
-depends_on = None
+depends_on = '004_station_rbac'  # Must run after station migration
 
 
 def upgrade() -> None:
     """Add customer review and discount coupon system."""
 
-    # Create review schema
+    # Create schemas (identity schema might be created by station migration, but ensure it exists)
+    op.execute("CREATE SCHEMA IF NOT EXISTS identity")
     op.execute("CREATE SCHEMA IF NOT EXISTS feedback")
 
     # Create enums using native Alembic Enum with create_type=False since we'll create them manually if needed

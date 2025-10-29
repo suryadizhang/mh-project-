@@ -295,6 +295,14 @@ try:
 except ImportError as e:
     logger.warning(f"Some additional routers not available: {e}")
 
+# Station Management endpoints - Multi-tenant RBAC
+try:
+    from api.app.routers.station_admin import router as station_admin_router
+    app.include_router(station_admin_router, prefix="/api/stations", tags=["Station Management"])
+    logger.info("✅ Station Management endpoints included (CRUD + RBAC)")
+except ImportError as e:
+    logger.warning(f"Station Management endpoints not available: {e}")
+
 # Include public lead capture endpoints (no auth required)
 try:
     from api.v1.endpoints.public_leads import router as public_leads_router

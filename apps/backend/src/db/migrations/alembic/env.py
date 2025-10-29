@@ -24,7 +24,10 @@ from api.app.models import booking_models, stripe_models, core  # noqa: E402, F4
 config = context.config
 
 # Override the database URL from settings
-config.set_main_option("sqlalchemy.url", settings.database_url_sync)
+# TEMPORARY: Hardcoded for Supabase migration
+supabase_sync_url = "postgresql+psycopg2://postgres:DkYokZB945vm3itM@db.yuchqvpctookhjovvdwi.supabase.co:5432/postgres"
+config.set_main_option("sqlalchemy.url", supabase_sync_url)
+# Original line: config.set_main_option("sqlalchemy.url", settings.database_url_sync)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

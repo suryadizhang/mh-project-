@@ -54,8 +54,8 @@ class Customer(Base):
     bookings = relationship("Booking", back_populates="customer")
     message_threads = relationship("MessageThread", back_populates="customer")
     # leads = relationship("Lead", back_populates="customer")  # Disabled - Lead.customer is commented out
-    social_threads = relationship("SocialThread", back_populates="customer")
-    newsletter_subscriptions = relationship("Subscriber", back_populates="customer")
+    # social_threads = relationship("SocialThread", back_populates="customer")  # Disabled - no FK in SocialThread
+    # newsletter_subscriptions = relationship("Subscriber", back_populates="customer")  # Disabled - check FK
     
     __table_args__ = (
         # Unique email within station (allow same email across different stations)

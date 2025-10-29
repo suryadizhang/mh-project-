@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { 
   Filter, 
   Plus, 
@@ -21,6 +22,8 @@ import { useBookings, usePagination, useFilters, useSearch, useSort } from '@/ho
 import type { BookingFilters } from '@/types';
 
 export default function BookingPage() {
+  const router = useRouter();
+  
   // Pagination state
   const { page, limit, setPage, nextPage, prevPage } = usePagination(1, 20);
   
@@ -168,10 +171,19 @@ export default function BookingPage() {
           <h1 className="text-3xl font-bold text-gray-900">Bookings</h1>
           <p className="text-gray-600">Manage all your hibachi bookings</p>
         </div>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          New Booking
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => router.push('/booking/calendar')}
+          >
+            <Calendar className="w-4 h-4 mr-2" />
+            Calendar View
+          </Button>
+          <Button>
+            <Plus className="w-4 h-4 mr-2" />
+            New Booking
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}

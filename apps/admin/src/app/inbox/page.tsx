@@ -23,6 +23,7 @@ import { FilterBar } from '@/components/ui/filter-bar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Modal } from '@/components/ui/modal';
+import { useToast } from '@/components/ui/Toast';
 import {
   useSocialThreads,
   usePagination,
@@ -119,6 +120,9 @@ const QUICK_REPLIES = {
 };
 
 export default function UnifiedInboxPage() {
+  // Toast notifications
+  const toast = useToast();
+  
   // State
   const [activeChannel, setActiveChannel] = useState<ChannelType>(CHANNELS.ALL);
   const [selectedThread, setSelectedThread] = useState<any>(null);
@@ -297,7 +301,7 @@ export default function UnifiedInboxPage() {
       }
     } catch (err) {
       console.error('Failed to send message:', err);
-      alert('Failed to send message. Please try again.');
+      toast.error('Failed to send message', 'Please check your connection and try again');
     }
   };
 
@@ -326,7 +330,7 @@ export default function UnifiedInboxPage() {
       });
       
       if (response.ok) {
-        alert('Thread converted to lead successfully!');
+        toast.success('Converted to lead!', 'Thread has been added to leads pipeline');
         // Optionally refresh threads
         if (thread.channel === CHANNELS.SMS) {
           await loadSmsThreads();
@@ -338,7 +342,7 @@ export default function UnifiedInboxPage() {
       }
     } catch (err) {
       console.error('Failed to convert to lead:', err);
-      alert('Failed to convert thread to lead. Please try again.');
+      toast.error('Conversion failed', 'Unable to create lead from this thread');
     }
   };
 
@@ -366,7 +370,7 @@ export default function UnifiedInboxPage() {
       setMessageText(data.reply || data.suggested_reply || '');
     } catch (err) {
       console.error('Failed to generate AI reply:', err);
-      alert('Failed to generate AI reply. Please try again.');
+      toast.error('AI generation failed', 'Please try generating reply again');
     } finally {
       setAiGenerating(false);
     }
@@ -395,7 +399,7 @@ export default function UnifiedInboxPage() {
 
       if (!response.ok) throw new Error('Failed to assign thread');
 
-      alert('Thread assigned successfully!');
+      toast.success('Thread assigned!', 'Team member has been notified');
       setAssignModalOpen(false);
       setAssigneeId('');
 
@@ -407,7 +411,7 @@ export default function UnifiedInboxPage() {
       }
     } catch (err) {
       console.error('Failed to assign thread:', err);
-      alert('Failed to assign thread. Please try again.');
+      toast.error('Assignment failed', 'Unable to assign thread at this time');
     }
   };
 
@@ -639,10 +643,10 @@ export default function UnifiedInboxPage() {
 
         {/* Inbox Layout */}
         {!loading && allThreads.length > 0 && (
-          <div className="flex h-[600px]">
+          <div className="flex flex-col md:flex-row h-auto md:h-[600px]">
             {/* Thread List Sidebar */}
-            <div className="w-1/3 border-r border-gray-200 overflow-y-auto">
-              <div className="p-4 border-b border-gray-200 bg-gray-50">
+            <div className="w-full md:w-1/3 border-r-0 md:border-r border-b md:border-b-0 border-gray-200 overflow-y-auto max-h-96 md:max-h-none">
+              <div className="p-4 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
                 <h3 className="font-semibold text-gray-900">
                   Conversations ({allThreads.length})
                 </h3>
@@ -702,28 +706,28 @@ export default function UnifiedInboxPage() {
             </div>
 
             {/* Conversation View */}
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col w-full md:w-2/3">
               {selectedThread ? (
                 <>
                   {/* Conversation Header */}
                   <div className="p-4 border-b border-gray-200 bg-gray-50">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                        <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
                           <span className="text-sm font-medium text-gray-700">
                             {(selectedThread.customer_name || selectedThread.from_name || selectedThread.phone_number || 'U')[0].toUpperCase()}
                           </span>
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900">
+                          <h3 className="font-semibold text-gray-900 text-sm sm:text-base">
                             {selectedThread.customer_name || selectedThread.from_name || selectedThread.phone_number || 'Unknown'}
                           </h3>
-                          <p className="text-xs text-gray-500 flex items-center gap-2">
-                            {CHANNEL_CONFIG[selectedThread.channel as keyof typeof CHANNEL_CONFIG]?.label || 'Unknown'}
+                          <p className="text-xs text-gray-500 flex flex-wrap items-center gap-2">
+                            <span>{CHANNEL_CONFIG[selectedThread.channel as keyof typeof CHANNEL_CONFIG]?.label || 'Unknown'}</span>
                             {selectedThread.channel === CHANNELS.SMS && selectedThread.phone_number && (
                               <span className="flex items-center">
                                 <Phone className="w-3 h-3 mr-1" />
-                                {selectedThread.phone_number}
+                                <span className="text-xs">{selectedThread.phone_number}</span>
                               </span>
                             )}
                           </p>
@@ -732,9 +736,10 @@ export default function UnifiedInboxPage() {
                       <Button
                         size="sm"
                         onClick={() => handleConvertToLead(selectedThread)}
+                        className="w-full sm:w-auto"
                       >
                         <Target className="w-4 h-4 mr-1" />
-                        Convert to Lead
+                        <span className="text-xs sm:text-sm">Convert to Lead</span>
                       </Button>
                     </div>
                   </div>
@@ -783,29 +788,29 @@ export default function UnifiedInboxPage() {
                   {/* Message Input */}
                   <div className="p-4 border-t border-gray-200 bg-white">
                     {/* AI Actions Bar */}
-                    <div className="mb-3 flex items-center justify-between gap-2 p-2 bg-gray-50 rounded-lg">
-                      <div className="flex items-center gap-2">
+                    <div className="mb-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 p-2 bg-gray-50 rounded-lg">
+                      <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={handleAIAutoReply}
                           disabled={aiGenerating}
-                          className="text-purple-600 border-purple-300 hover:bg-purple-50"
+                          className="flex-1 sm:flex-none text-purple-600 border-purple-300 hover:bg-purple-50 min-w-0"
                         >
-                          <Sparkles className={`w-4 h-4 mr-1 ${aiGenerating ? 'animate-spin' : ''}`} />
-                          {aiGenerating ? 'Generating...' : 'AI Reply'}
+                          <Sparkles className={`w-4 h-4 mr-1 flex-shrink-0 ${aiGenerating ? 'animate-spin' : ''}`} />
+                          <span className="truncate">{aiGenerating ? 'Generating...' : 'AI Reply'}</span>
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => setAssignModalOpen(true)}
-                          className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                          className="flex-1 sm:flex-none text-blue-600 border-blue-300 hover:bg-blue-50 min-w-0"
                         >
-                          <UserPlus className="w-4 h-4 mr-1" />
-                          Assign
+                          <UserPlus className="w-4 h-4 mr-1 flex-shrink-0" />
+                          <span className="truncate">Assign</span>
                         </Button>
                       </div>
-                      <span className="text-xs text-gray-500">AI-powered features</span>
+                      <span className="text-xs text-gray-500 text-center sm:text-right">AI-powered features</span>
                     </div>
 
                     {/* Quick Replies */}

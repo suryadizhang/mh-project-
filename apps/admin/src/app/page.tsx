@@ -7,21 +7,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 import { AdminChatWidget } from '@/components/AdminChatWidget';
 import { StationManager } from '@/components/StationManager';
+import { mockDataService, type MockBooking } from '@/services/mockDataService';
 
-// Enhanced booking interface for production
-interface Booking {
-  id: string;
-  customerName: string;
-  customerEmail: string;
-  customerPhone: string;
-  eventDate: string;
-  eventTime: string;
-  guestCount: number;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  createdAt: string;
-  venueAddress: string;
-  billingAddress: string;
-}
+// Use MockBooking type from service
+type Booking = MockBooking;
 
 export default function AdminDashboard() {
   const { stationContext, hasPermission, isSuperAdmin } = useAuth();
@@ -36,76 +25,28 @@ export default function AdminDashboard() {
   const canManageStations = isSuperAdmin() || hasPermission('manage_stations');
   const canUseChat = hasPermission('use_ai_chat') || hasPermission('manage_ai_chat');
 
-  // Load bookings (in production, fetch from API)
+  // Load bookings using centralized mock data service
+  // FUTURE: Replace mockDataService with real API when database is ready
   useEffect(() => {
     if (!canViewBookings) return;
     
-    // Simulate API call
     const fetchBookings = async () => {
-      // Mock data with realistic booking scenarios
-      const mockBookings: Booking[] = [
-        {
-          id: 'MH-1691234567890-ABC123',
-          customerName: 'John Smith',
-          customerEmail: 'john.smith@email.com',
-          customerPhone: '(555) 123-4567',
-          eventDate: '2025-08-10',
-          eventTime: '6PM',
-          guestCount: 25,
-          status: 'confirmed',
-          createdAt: '2025-08-07T14:30:00Z',
-          venueAddress: '123 Main St, Anytown, CA 12345',
-          billingAddress: '123 Main St, Anytown, CA 12345',
-        },
-        {
-          id: 'MH-1691234567891-DEF456',
-          customerName: 'Sarah Johnson',
-          customerEmail: 'sarah.j@email.com',
-          customerPhone: '(555) 987-6543',
-          eventDate: '2025-08-12',
-          eventTime: '3PM',
-          guestCount: 15,
-          status: 'pending',
-          createdAt: '2025-08-07T16:45:00Z',
-          venueAddress: '456 Oak Ave, Somewhere, NY 54321',
-          billingAddress: '789 Pine St, Elsewhere, NY 98765',
-        },
-        {
-          id: 'MH-1691234567892-GHI789',
-          customerName: 'Mike Chen',
-          customerEmail: 'mike.chen@email.com',
-          customerPhone: '(555) 456-7890',
-          eventDate: '2025-08-15',
-          eventTime: '12PM',
-          guestCount: 40,
-          status: 'confirmed',
-          createdAt: '2025-08-07T18:20:00Z',
-          venueAddress: '789 Elm Blvd, Cityville, TX 67890',
-          billingAddress: '789 Elm Blvd, Cityville, TX 67890',
-        },
-        {
-          id: 'MH-1691234567893-JKL012',
-          customerName: 'Lisa Rodriguez',
-          customerEmail: 'lisa.r@email.com',
-          customerPhone: '(555) 321-0987',
-          eventDate: '2025-08-18',
-          eventTime: '9PM',
-          guestCount: 30,
-          status: 'pending',
-          createdAt: '2025-08-07T20:10:00Z',
-          venueAddress: '321 Maple Dr, Hometown, FL 13579',
-          billingAddress: '321 Maple Dr, Hometown, FL 13579',
-        },
-      ];
-
-      setTimeout(() => {
-        setBookings(mockBookings);
+      try {
+        // Fetch from centralized mock data service
+        const data = await mockDataService.getBookings({
+          stationId: stationContext?.station_id?.toString()
+        });
+        
+        setBookings(data);
         setLoading(false);
-      }, 1000);
+      } catch (error) {
+        logger.error(error as Error, { context: 'fetch_bookings' });
+        setLoading(false);
+      }
     };
 
     fetchBookings();
-  }, [canViewBookings]);
+  }, [canViewBookings, stationContext]);
 
   // Calculate stats from real data
   const stats = [
@@ -201,15 +142,20 @@ export default function AdminDashboard() {
     newStatus: 'confirmed' | 'cancelled'
   ) => {
     try {
-      // In production, this would be an API call
-      setBookings(prev =>
-        prev.map(booking =>
-          booking.id === bookingId ? { ...booking, status: newStatus } : booking
-        )
-      );
+      // Use mock data service to update booking
+      const updatedBooking = await mockDataService.updateBookingStatus(bookingId, newStatus);
+      
+      if (updatedBooking) {
+        // Update local state
+        setBookings(prev =>
+          prev.map(booking =>
+            booking.id === bookingId ? updatedBooking : booking
+          )
+        );
 
-      // Show success message (you could add a toast notification here)
-      logger.info('Booking status updated', { booking_id: bookingId, new_status: newStatus });
+        // Show success message (you could add a toast notification here)
+        logger.info('Booking status updated', { booking_id: bookingId, new_status: newStatus });
+      }
     } catch (error) {
       logger.error(error as Error, { context: 'update_booking_status', booking_id: bookingId });
     }
@@ -349,31 +295,34 @@ export default function AdminDashboard() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                      Booking Details
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                      Customer
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                      Event Info
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
+            <div className="overflow-x-auto -mx-4 sm:mx-0">
+              <div className="inline-block min-w-full align-middle">
+                <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50 hidden sm:table-header-group">
+                      <tr>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                          Booking Details
+                        </th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                          Customer
+                        </th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                          Event Info
+                        </th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                          Status
+                        </th>
+                        <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {filteredBookings.map(booking => (
-                    <tr key={booking.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                    <tr key={booking.id} className="hover:bg-gray-50 flex flex-col sm:table-row border-b-4 sm:border-b-0 border-gray-100">
+                      {/* Mobile Card Layout */}
+                      <td className="px-4 sm:px-6 py-4 sm:whitespace-nowrap block sm:table-cell" data-label="Booking Details">
                         <div className="text-sm">
                           <div className="font-mono text-xs font-medium text-gray-900">
                             {booking.id}
@@ -387,20 +336,20 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 sm:px-6 py-2 sm:py-4 block sm:table-cell" data-label="Customer">
                         <div className="text-sm">
                           <div className="font-medium text-gray-900">
                             {booking.customerName}
                           </div>
-                          <div className="text-gray-500">
+                          <div className="text-gray-500 text-xs sm:text-sm">
                             {booking.customerEmail}
                           </div>
-                          <div className="text-gray-500">
+                          <div className="text-gray-500 text-xs sm:text-sm">
                             {booking.customerPhone}
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 sm:px-6 py-2 sm:py-4 block sm:table-cell" data-label="Event Info">
                         <div className="text-sm">
                           <div className="font-medium text-gray-900">
                             📅{' '}
@@ -412,12 +361,12 @@ export default function AdminDashboard() {
                           <div className="text-gray-500">
                             👥 {booking.guestCount} guests
                           </div>
-                          <div className="mt-1 text-xs text-gray-400">
+                          <div className="mt-1 text-xs text-gray-400 line-clamp-2">
                             {booking.venueAddress}
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 sm:px-6 py-2 sm:py-4 sm:whitespace-nowrap block sm:table-cell" data-label="Status">
                         <span
                           className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getStatusColor(
                             booking.status
@@ -427,15 +376,15 @@ export default function AdminDashboard() {
                             booking.status.slice(1)}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                        <div className="space-y-1">
+                      <td className="px-4 sm:px-6 py-2 sm:py-4 text-sm font-medium block sm:table-cell sm:whitespace-nowrap" data-label="Actions">
+                        <div className="flex flex-wrap gap-2 sm:flex-col sm:space-y-1 sm:gap-0">
                           {booking.status === 'pending' && (
                             <>
                               <button
                                 onClick={() =>
                                   updateBookingStatus(booking.id, 'confirmed')
                                 }
-                                className="block w-full rounded bg-green-600 px-3 py-1 text-xs text-white transition-colors hover:bg-green-700"
+                                className="flex-1 sm:flex-none sm:block w-auto sm:w-full rounded bg-green-600 px-3 py-1.5 sm:py-1 text-xs text-white transition-colors hover:bg-green-700"
                               >
                                 ✅ Confirm
                               </button>
@@ -443,7 +392,7 @@ export default function AdminDashboard() {
                                 onClick={() =>
                                   updateBookingStatus(booking.id, 'cancelled')
                                 }
-                                className="block w-full rounded bg-red-600 px-3 py-1 text-xs text-white transition-colors hover:bg-red-700"
+                                className="flex-1 sm:flex-none sm:block w-auto sm:w-full rounded bg-red-600 px-3 py-1.5 sm:py-1 text-xs text-white transition-colors hover:bg-red-700"
                               >
                                 ❌ Cancel
                               </button>
@@ -454,7 +403,7 @@ export default function AdminDashboard() {
                               onClick={() =>
                                 updateBookingStatus(booking.id, 'cancelled')
                               }
-                              className="block w-full rounded bg-red-600 px-3 py-1 text-xs text-white transition-colors hover:bg-red-700"
+                              className="flex-1 sm:flex-none sm:block w-auto sm:w-full rounded bg-red-600 px-3 py-1.5 sm:py-1 text-xs text-white transition-colors hover:bg-red-700"
                             >
                               ❌ Cancel
                             </button>
@@ -478,6 +427,8 @@ export default function AdminDashboard() {
                   ))}
                 </tbody>
               </table>
+                </div>
+              </div>
             </div>
           )}
         </div>

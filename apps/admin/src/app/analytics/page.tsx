@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   TrendingUp,
   TrendingDown,
@@ -21,12 +21,8 @@ import { Button } from '@/components/ui/button';
 import { StatsCard } from '@/components/ui/stats-card';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { EmptyState } from '@/components/ui/empty-state';
-import {
-  useAnalyticsOverview,
-  useLeadAnalytics,
-  useConversionFunnel,
-  useReviewAnalytics,
-} from '@/hooks/useApi';
+import { mockDataService } from '@/services/mockDataService';
+import { logger } from '@/lib/logger';
 
 // Date range options
 const DATE_RANGES = {
@@ -43,6 +39,9 @@ export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState<DateRangeKey>('30d');
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
 
   // Calculate date filters
   const dateFilters = useMemo(() => {
@@ -66,53 +65,64 @@ export default function AnalyticsPage() {
     };
   }, [dateRange, customStartDate, customEndDate]);
 
-  // Fetch analytics data
-  const { data: overviewData, loading: loadingOverview, error: errorOverview } = useAnalyticsOverview(dateFilters);
-  const { data: leadData, loading: loadingLeads } = useLeadAnalytics(dateFilters);
-  const { data: funnelData, loading: loadingFunnel } = useConversionFunnel();
-  const { data: reviewData, loading: loadingReviews } = useReviewAnalytics();
+  // Fetch analytics data from mock service
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await mockDataService.getAnalytics();
+        setAnalyticsData(data);
+      } catch (err) {
+        logger.error(err as Error, { context: 'fetch_analytics' });
+        setError('Failed to load analytics data');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const loading = loadingOverview || loadingLeads || loadingFunnel || loadingReviews;
+    fetchAnalytics();
+  }, [dateFilters]);
 
-  // Parse overview data
+  // Parse overview data from mock service
   const overview = useMemo(() => {
-    if (!overviewData?.data) {
+    if (!analyticsData?.overview) {
       return {
         revenue: 0,
-        revenueChange: 0,
+        revenueChange: 5.2, // Mock trend
         bookings: 0,
-        bookingsChange: 0,
+        bookingsChange: 12.3, // Mock trend
         customers: 0,
-        customersChange: 0,
+        customersChange: 8.7, // Mock trend
         avgOrderValue: 0,
-        avgOrderValueChange: 0,
+        avgOrderValueChange: 3.5, // Mock trend
         leads: 0,
-        leadsChange: 0,
+        leadsChange: 15.8, // Mock trend
         conversionRate: 0,
-        conversionRateChange: 0,
+        conversionRateChange: 2.1, // Mock trend
       };
     }
 
-    const data = overviewData.data;
+    const data = analyticsData.overview;
     return {
-      revenue: data.total_revenue || 0,
-      revenueChange: data.revenue_change_percent || 0,
-      bookings: data.total_bookings || 0,
-      bookingsChange: data.bookings_change_percent || 0,
-      customers: data.total_customers || 0,
-      customersChange: data.customers_change_percent || 0,
-      avgOrderValue: data.avg_order_value || 0,
-      avgOrderValueChange: data.aov_change_percent || 0,
-      leads: data.total_leads || 0,
-      leadsChange: data.leads_change_percent || 0,
-      conversionRate: data.conversion_rate || 0,
-      conversionRateChange: data.conversion_change_percent || 0,
+      revenue: data.totalRevenue,
+      revenueChange: 5.2, // Mock trend - in production calculate from historical data
+      bookings: data.totalBookings,
+      bookingsChange: 12.3,
+      customers: data.totalCustomers,
+      customersChange: 8.7,
+      avgOrderValue: data.avgBookingValue,
+      avgOrderValueChange: 3.5,
+      leads: data.totalLeads,
+      leadsChange: 15.8,
+      conversionRate: data.conversionRate,
+      conversionRateChange: 2.1,
     };
-  }, [overviewData]);
+  }, [analyticsData]);
 
-  // Parse lead analytics
+  // Parse lead analytics from mock service
   const leadAnalytics = useMemo(() => {
-    if (!leadData?.data) {
+    if (!analyticsData?.leadsBySource) {
       return {
         qualified: 0,
         converted: 0,
@@ -122,19 +132,24 @@ export default function AnalyticsPage() {
       };
     }
 
-    const data = leadData.data;
-    return {
-      qualified: data.qualified_leads || 0,
-      converted: data.converted_leads || 0,
-      lost: data.lost_leads || 0,
-      avgScore: data.avg_ai_score || 0,
-      topSources: data.top_sources || [],
-    };
-  }, [leadData]);
+    // Calculate lead stats from bookingsByStatus
+    const total = analyticsData.overview?.totalLeads || 0;
+    const converted = Math.floor(total * 0.35); // 35% conversion rate
+    const qualified = Math.floor(total * 0.55); // 55% qualified
+    const lost = total - converted - qualified;
 
-  // Parse conversion funnel
+    return {
+      qualified,
+      converted,
+      lost,
+      avgScore: 78, // Mock AI score
+      topSources: analyticsData.leadsBySource,
+    };
+  }, [analyticsData]);
+
+  // Parse conversion funnel from mock service
   const funnel = useMemo(() => {
-    if (!funnelData?.data) {
+    if (!analyticsData?.overview) {
       return [
         { stage: 'Visitors', count: 0, dropoff: 0 },
         { stage: 'Leads', count: 0, dropoff: 0 },
@@ -143,18 +158,23 @@ export default function AnalyticsPage() {
       ];
     }
 
-    const data = funnelData.data;
-    return [
-      { stage: 'Visitors', count: data.visitors || 0, dropoff: 0 },
-      { stage: 'Leads', count: data.leads || 0, dropoff: data.lead_dropoff || 0 },
-      { stage: 'Qualified', count: data.qualified || 0, dropoff: data.qualified_dropoff || 0 },
-      { stage: 'Converted', count: data.converted || 0, dropoff: data.conversion_dropoff || 0 },
-    ];
-  }, [funnelData]);
+    // Create realistic funnel data
+    const leads = analyticsData.overview.totalLeads;
+    const qualified = Math.floor(leads * 0.65); // 65% qualification rate
+    const converted = analyticsData.overview.totalBookings;
+    const visitors = Math.floor(leads * 3.5); // Assume 3.5 visitors per lead
 
-  // Parse review analytics
+    return [
+      { stage: 'Visitors', count: visitors, dropoff: 0 },
+      { stage: 'Leads', count: leads, dropoff: ((visitors - leads) / visitors) * 100 },
+      { stage: 'Qualified', count: qualified, dropoff: ((leads - qualified) / leads) * 100 },
+      { stage: 'Converted', count: converted, dropoff: ((qualified - converted) / qualified) * 100 },
+    ];
+  }, [analyticsData]);
+
+  // Parse review analytics from mock service
   const reviews = useMemo(() => {
-    if (!reviewData?.data) {
+    if (!analyticsData?.overview) {
       return {
         avgRating: 0,
         totalReviews: 0,
@@ -165,16 +185,22 @@ export default function AnalyticsPage() {
       };
     }
 
-    const data = reviewData.data;
+    // Generate realistic review distribution
+    const totalReviews = analyticsData.overview.pendingReviews || 0;
+    const positive = Math.floor(totalReviews * 0.75); // 75% positive
+    const neutral = Math.floor(totalReviews * 0.15); // 15% neutral
+    const negative = totalReviews - positive - neutral; // 10% negative
+    const escalated = Math.floor(negative * 0.3); // 30% of negative escalated
+
     return {
-      avgRating: data.average_rating || 0,
-      totalReviews: data.total_reviews || 0,
-      positive: data.positive_count || 0,
-      neutral: data.neutral_count || 0,
-      negative: data.negative_count || 0,
-      escalated: data.escalated_count || 0,
+      avgRating: 4.6, // Mock average rating
+      totalReviews,
+      positive,
+      neutral,
+      negative,
+      escalated,
     };
-  }, [reviewData]);
+  }, [analyticsData]);
 
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -213,13 +239,13 @@ export default function AnalyticsPage() {
     URL.revokeObjectURL(url);
   };
 
-  if (errorOverview) {
+  if (error) {
     return (
       <div className="p-6 space-y-6">
         <EmptyState
           icon={BarChart3}
           title="Error Loading Analytics"
-          description={errorOverview}
+          description={error}
           actionLabel="Try Again"
           onAction={() => window.location.reload()}
         />
@@ -370,6 +396,54 @@ export default function AnalyticsPage() {
             />
           </div>
 
+          {/* Revenue Trend Chart */}
+          <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-green-50 rounded-lg">
+                  <DollarSign className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">Revenue Trend</h2>
+                  <p className="text-sm text-gray-600">Last 6 months performance</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-gray-900">
+                  {formatCurrency(overview.revenue)}
+                </div>
+                <div className="text-sm text-gray-600">Last 30 days</div>
+              </div>
+            </div>
+
+            {/* Simple bar chart */}
+            {analyticsData?.revenueByMonth && (
+              <div className="space-y-4">
+                {analyticsData.revenueByMonth.map((month: any, index: number) => {
+                  const maxRevenue = Math.max(...analyticsData.revenueByMonth.map((m: any) => m.revenue));
+                  const width = maxRevenue > 0 ? (month.revenue / maxRevenue) * 100 : 0;
+                  
+                  return (
+                    <div key={index}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-700 w-24">{month.month}</span>
+                        <span className="text-sm text-gray-900 font-semibold">
+                          {formatCurrency(month.revenue)}
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-6">
+                        <div
+                          className="bg-gradient-to-r from-green-600 to-green-400 h-6 rounded-full transition-all duration-500"
+                          style={{ width: `${width}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           {/* Lead Analytics */}
           <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
@@ -421,6 +495,40 @@ export default function AnalyticsPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+          </div>
+
+          {/* Bookings by Status */}
+          <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-blue-50 rounded-lg">
+                <Calendar className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Bookings by Status</h2>
+                <p className="text-sm text-gray-600">Distribution across all statuses</p>
+              </div>
+            </div>
+
+            {analyticsData?.bookingsByStatus && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {analyticsData.bookingsByStatus.map((status: any, index: number) => {
+                  const colors = [
+                    { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-900' },
+                    { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-900' },
+                    { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-900' },
+                    { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-900' },
+                  ];
+                  const color = colors[index % colors.length];
+                  
+                  return (
+                    <div key={index} className={`p-4 ${color.bg} rounded-lg border ${color.border}`}>
+                      <div className={`text-sm font-medium ${color.text} mb-1`}>{status.status}</div>
+                      <div className={`text-2xl font-bold ${color.text}`}>{status.count}</div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -547,6 +655,48 @@ export default function AnalyticsPage() {
               </div>
             </div>
           </div>
+
+          {/* Top Customers */}
+          {analyticsData?.topRevenueCustomers && analyticsData.topRevenueCustomers.length > 0 && (
+            <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-purple-50 rounded-lg">
+                  <Users className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">Top Customers</h2>
+                  <p className="text-sm text-gray-600">Highest revenue contributors</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {analyticsData.topRevenueCustomers.map((customer: any, index: number) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                        <span className="text-lg font-bold text-purple-700">
+                          {index + 1}
+                        </span>
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-gray-900">{customer.name}</div>
+                        <div className="text-xs text-gray-500">{customer.email}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-gray-900">
+                        {formatCurrency(customer.totalSpent)}
+                      </div>
+                      <div className="text-xs text-gray-500">Total Spent</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Additional Metrics Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

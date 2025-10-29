@@ -2,11 +2,10 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-import { CacheService } from '@/lib/cache/CacheService';
+import { getCacheService } from '@/lib/cacheService';
 import { requestDeduplicator } from '@/lib/cache/RequestDeduplicator';
 
 interface UseCachedFetchOptions<T> {
-  cache?: CacheService<T>;
   ttl?: number;
   enabled?: boolean;
   onSuccess?: (data: T) => void;
@@ -37,8 +36,7 @@ export function useCachedFetch<T>(
   options: UseCachedFetchOptions<T> = {}
 ): UseCachedFetchResult<T> {
   const {
-    cache,
-    ttl,
+    ttl = 5 * 60 * 1000, // Default 5 minutes
     enabled = true,
     onSuccess,
     onError,
@@ -67,12 +65,15 @@ export function useCachedFetch<T>(
     async (bypassCache = false) => {
       if (!key || !enabled) return;
 
+      // Get cache service instance (singleton, stable reference)
+      const cache = getCacheService();
+
       try {
         // Check cache first (unless bypassing)
-        if (!bypassCache && cache) {
-          const cachedData = cache.get(key);
-          if (cachedData) {
-            setData(cachedData);
+        if (!bypassCache) {
+          const cachedEntry = cache.get<T>(key);
+          if (cachedEntry) {
+            setData(cachedEntry.data);
             setError(null);
             setIsStale(false);
 
@@ -99,9 +100,7 @@ export function useCachedFetch<T>(
         if (!isMountedRef.current) return;
 
         // Cache the data
-        if (cache) {
-          cache.set(key, freshData, ttl);
-        }
+        cache.set(key, freshData, ttl);
 
         setData(freshData);
         setError(null);
@@ -123,18 +122,20 @@ export function useCachedFetch<T>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
     // CRITICAL: Intentionally excluding 'data' from deps to prevent infinite loop
     // We use dataRef.current to check for existing data instead
-    [key, enabled, cache, ttl, fetcher, onSuccess, onError, staleWhileRevalidate]
+    // cache is from singleton getInstance, so it's stable and doesn't need to be in deps
+    [key, enabled, ttl, fetcher, onSuccess, onError, staleWhileRevalidate]
   );
 
   /**
    * Invalidate cache and refetch
    */
   const invalidate = useCallback(() => {
-    if (key && cache) {
-      cache.delete(key);
+    const cache = getCacheService();
+    if (key) {
+      cache.remove(key);
     }
     setIsStale(true);
-  }, [key, cache]);
+  }, [key]);
 
   /**
    * Manual refetch

@@ -21,10 +21,13 @@ import { FilterBar } from '@/components/ui/filter-bar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Modal } from '@/components/ui/modal';
+import { useToast } from '@/components/ui/Toast';
 import { useQRCodes, useQRAnalytics, useFilters, useSearch } from '@/hooks/useApi';
 import { qrService } from '@/services/api';
 
 export default function QRCodeManagementPage() {
+  const toast = useToast();
+  
   // State
   const [selectedCode, setSelectedCode] = useState<any>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -87,7 +90,7 @@ export default function QRCodeManagementPage() {
   // Handlers
   const handleCreateQR = async () => {
     if (!newQRForm.name || !newQRForm.url) {
-      alert('Please fill in Name and URL fields');
+      toast.warning('Missing information', 'Please fill in Name and URL fields');
       return;
     }
 
@@ -99,12 +102,13 @@ export default function QRCodeManagementPage() {
         description: newQRForm.description,
       });
 
+      toast.success('QR code created!', 'Your QR code is ready to use');
       setShowCreateModal(false);
       setNewQRForm({ name: '', url: '', campaign: '', description: '' });
       refetch();
     } catch (err) {
       console.error('Failed to create QR code:', err);
-      alert('Failed to create QR code. Please try again.');
+      toast.error('Creation failed', 'Unable to create QR code. Please try again');
     }
   };
 

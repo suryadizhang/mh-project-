@@ -14,7 +14,8 @@ settings = get_settings()
 from api.app.models.core import Customer, Payment
 from api.app.models.stripe_models import StripeCustomer, Dispute, Invoice, StripePayment
 from api.app.schemas.stripe_schemas import PaymentAnalytics
-from utils.query_optimizer import get_payment_analytics_optimized
+# Temporarily commented out - function not implemented yet
+# from utils.query_optimizer import get_payment_analytics_optimized
 
 logger = logging.getLogger(__name__)
 
