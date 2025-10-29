@@ -12,7 +12,8 @@ from core.database import get_db
 from core.security import get_current_user
 from models.user import User, UserStatus
 from api.v1.schemas.user import UserResponse, UserListResponse
-from core.exceptions import ValidationException, AuthorizationException
+from core.exceptions import ValidationException, ForbiddenException
+from services.email_service import email_service
 import logging
 
 logger = logging.getLogger(__name__)
@@ -23,7 +24,7 @@ router = APIRouter()
 def require_super_admin(current_user: User = Depends(get_current_user)):
     """Dependency to ensure user is a super admin"""
     if not current_user.is_super_admin:
-        raise AuthorizationException("Only super admins can access this resource")
+        raise ForbiddenException("Only super admins can access this resource")
     return current_user
 
 
@@ -133,6 +134,12 @@ async def approve_user(
         await db.commit()
         await db.refresh(user)
         
+        # Send approval email
+        try:
+            email_service.send_approval_email(user.email, user.full_name)
+        except Exception as e:
+            logger.warning(f"Failed to send approval email to {user.email}: {e}")
+        
         logger.info(f"User {user.email} approved by super admin {current_user.email}")
         
         return {
@@ -188,6 +195,12 @@ async def reject_user(
         await db.commit()
         await db.refresh(user)
         
+        # Send rejection email
+        try:
+            email_service.send_rejection_email(user.email, user.full_name, reason=None)
+        except Exception as e:
+            logger.warning(f"Failed to send rejection email to {user.email}: {e}")
+        
         logger.info(f"User {user.email} rejected by super admin {current_user.email}")
         
         return {
@@ -232,7 +245,7 @@ async def suspend_user(
             )
         
         if user.is_super_admin:
-            raise AuthorizationException("Cannot suspend a super admin")
+            raise ForbiddenException("Cannot suspend a super admin")
         
         if user.status != UserStatus.ACTIVE:
             raise ValidationException(
@@ -246,6 +259,12 @@ async def suspend_user(
         await db.commit()
         await db.refresh(user)
         
+        # Send suspension email
+        try:
+            email_service.send_suspension_email(user.email, user.full_name, reason=None)
+        except Exception as e:
+            logger.warning(f"Failed to send suspension email to {user.email}: {e}")
+        
         logger.info(f"User {user.email} suspended by super admin {current_user.email}")
         
         return {
@@ -257,7 +276,7 @@ async def suspend_user(
         raise
     except ValidationException as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    except AuthorizationException as e:
+    except ForbiddenException as e:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
     except Exception as e:
         logger.error(f"Error suspending user {user_id}: {e}", exc_info=True)
