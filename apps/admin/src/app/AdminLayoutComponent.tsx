@@ -36,6 +36,7 @@ export default function AdminLayoutComponent({ children }: AdminLayoutProps) {
     { name: 'Newsletter', href: '/newsletter', icon: '📧' },
     { name: 'QR Codes', href: '/qr', icon: '📍' },
     { name: 'Schedule', href: '/schedule', icon: '📅' },
+    { name: 'Stations', href: '/stations', icon: '🏢' },
     { name: 'AI Learning', href: '/ai-learning', icon: '🤖' },
     { name: 'SEO Automation', href: '/automation', icon: '🚀' },
     { name: 'Super Admin', href: '/superadmin', icon: '⚡' },

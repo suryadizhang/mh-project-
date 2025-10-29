@@ -1,6 +1,6 @@
 """Multi-tenant station architecture migration
 
-Revision ID: 004_add_station_multi_tenant_rbac
+Revision ID: 004_station_rbac
 Revises: 003_add_lead_newsletter_schemas
 Create Date: 2025-01-15 00:00:00.000000
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '004_add_station_multi_tenant_rbac'
+revision = '004_station_rbac'
 down_revision = '003_add_lead_newsletter_schemas'
 branch_labels = None
 depends_on = None
@@ -18,6 +18,9 @@ depends_on = None
 
 def upgrade() -> None:
     """Add multi-tenant station architecture with RBAC."""
+    
+    # Create identity schema for station/user/RBAC tables
+    op.execute("CREATE SCHEMA IF NOT EXISTS identity")
     
     # Create stations table
     op.create_table(
@@ -71,9 +74,10 @@ def upgrade() -> None:
         sa.Column('created_at', sa.TIMESTAMP(timezone=True), nullable=False, server_default=sa.text('NOW()')),
         sa.Column('updated_at', sa.TIMESTAMP(timezone=True), nullable=False, server_default=sa.text('NOW()')),
         sa.PrimaryKeyConstraint('id'),
-        sa.ForeignKeyConstraint(['user_id'], ['identity.users.id'], ondelete='CASCADE'),
+        # Reference public.users table (created in 000_create_base_users migration)
+        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
         sa.ForeignKeyConstraint(['station_id'], ['identity.stations.id'], ondelete='CASCADE'),
-        sa.ForeignKeyConstraint(['assigned_by'], ['identity.users.id'], ondelete='SET NULL'),
+        sa.ForeignKeyConstraint(['assigned_by'], ['users.id'], ondelete='SET NULL'),
         sa.UniqueConstraint('user_id', 'station_id', name='unique_user_station'),
         sa.CheckConstraint("role IN ('super_admin', 'admin', 'station_admin', 'customer_support')", name='station_user_role_valid'),
         schema='identity'
@@ -103,8 +107,10 @@ def upgrade() -> None:
         sa.Column('created_at', sa.TIMESTAMP(timezone=True), nullable=False, server_default=sa.text('NOW()')),
         sa.PrimaryKeyConstraint('id'),
         sa.ForeignKeyConstraint(['station_id'], ['identity.stations.id'], ondelete='CASCADE'),
-        sa.ForeignKeyConstraint(['user_id'], ['identity.users.id'], ondelete='SET NULL'),
-        sa.ForeignKeyConstraint(['session_id'], ['identity.user_sessions.id'], ondelete='SET NULL'),
+        # Reference public.users table
+        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='SET NULL'),
+        # Note: user_sessions table doesn't exist yet, will be added in future migration
+        # sa.ForeignKeyConstraint(['session_id'], ['identity.user_sessions.id'], ondelete='SET NULL'),
         schema='identity'
     )
     
@@ -130,9 +136,11 @@ def upgrade() -> None:
         sa.Column('revoked_at', sa.TIMESTAMP(timezone=True), nullable=True),
         sa.Column('is_revoked', sa.Boolean(), nullable=False, server_default="false"),
         sa.PrimaryKeyConstraint('id'),
-        sa.ForeignKeyConstraint(['user_id'], ['identity.users.id'], ondelete='CASCADE'),
+        # Reference public.users table
+        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
         sa.ForeignKeyConstraint(['station_id'], ['identity.stations.id'], ondelete='CASCADE'),
-        sa.ForeignKeyConstraint(['session_id'], ['identity.user_sessions.id'], ondelete='CASCADE'),
+        # Note: user_sessions table doesn't exist yet, will be added in future migration
+        # sa.ForeignKeyConstraint(['session_id'], ['identity.user_sessions.id'], ondelete='CASCADE'),
         sa.UniqueConstraint('token_hash', name='unique_station_token_hash'),
         sa.UniqueConstraint('jwt_id', name='unique_station_jwt_id'),
         schema='identity'
@@ -168,11 +176,12 @@ def upgrade() -> None:
     op.create_index('idx_customer_station_created', 'customers', ['station_id', 'created_at'], schema='core')
     op.create_index('idx_booking_station_date', 'bookings', ['station_id', 'date', 'slot'], schema='core')
     op.create_index('idx_booking_station_customer', 'bookings', ['station_id', 'customer_id'], schema='core')
-    op.create_index('idx_thread_station_phone', 'message_threads', ['station_id', 'phone_number_encrypted'], schema='core')
-    op.create_index('idx_thread_station_customer', 'message_threads', ['station_id', 'customer_id'], schema='core')
+    # NOTE: message_threads table doesn't exist in current migrations, will be added in future migration
+    # op.create_index('idx_thread_station_phone', 'message_threads', ['station_id', 'phone_number'], schema='core')
+    # op.create_index('idx_thread_station_customer', 'message_threads', ['station_id', 'customer_id'], schema='core')
     
     # Drop existing unique constraint on customers.email_encrypted (now unique per station)
-    op.drop_constraint('customers_email_encrypted_key', 'customers', schema='core', type_='unique')
+    op.execute('ALTER TABLE core.customers DROP CONSTRAINT IF EXISTS customers_email_encrypted_key CASCADE')
     
     # Create default station for existing data
     op.execute("""

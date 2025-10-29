@@ -34,6 +34,8 @@ For developers joining the project, read these **in order**:
 |----------|---------|--------------|
 | [API_DOCUMENTATION.md](API_DOCUMENTATION.md) | Complete REST API reference (all endpoints, authentication, examples) | Building features, API integration |
 | [TESTING_COMPREHENSIVE_GUIDE.md](TESTING_COMPREHENSIVE_GUIDE.md) | All testing procedures (backend, frontend, API, CI/CD) | Writing tests, debugging failures |
+| [GOOGLE_OAUTH_IMPLEMENTATION_GUIDE.md](GOOGLE_OAUTH_IMPLEMENTATION_GUIDE.md) | Complete Google OAuth setup (backend + frontend, step-by-step) | Implementing user authentication |
+| [GOOGLE_OAUTH_PROGRESS.md](GOOGLE_OAUTH_PROGRESS.md) | OAuth integration progress tracker (status, next steps) | Tracking OAuth implementation status |
 
 ### 🚀 Operations
 | Document | Purpose | When to Read |

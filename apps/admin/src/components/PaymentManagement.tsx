@@ -19,6 +19,7 @@ import {
 import { useCallback, useEffect, useState } from 'react';
 
 import { logger } from '@/lib/logger';
+import { useToast } from '@/components/ui/Toast';
 
 interface Payment {
   id: string;
@@ -59,6 +60,7 @@ interface RefundRequest {
 }
 
 export default function PaymentManagement() {
+  const toast = useToast();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [analytics, setAnalytics] = useState<PaymentAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
@@ -137,17 +139,17 @@ export default function PaymentManagement() {
 
       if (response.ok) {
         const result = await response.json();
-        alert(`Refund successful: ${result.message}`);
+        toast.success('Refund successful', result.message || 'Payment has been refunded');
         setShowRefundModal(false);
         setSelectedPayment(null);
         fetchPayments(); // Refresh payments list
       } else {
         const error = await response.json();
-        alert(`Refund failed: ${error.detail}`);
+        toast.error('Refund failed', error.detail || 'Unable to process refund');
       }
     } catch (error) {
       logger.error(error as Error, { context: 'process_refund', payment_id: selectedPayment?.stripe_payment_intent_id || selectedPayment?.id });
-      alert('Refund failed. Please try again.');
+      toast.error('Refund failed', 'Please try again or contact support');
     } finally {
       setRefundLoading(false);
     }

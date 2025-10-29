@@ -13,7 +13,7 @@ from typing import AsyncGenerator
 from api.ai.endpoints.config import get_settings, validate_configuration
 from api.ai.endpoints.database import engine, init_db, close_db
 from api.ai.endpoints.logging_config import setup_logging
-from api.ai.endpoints.security import setup_security_middleware, get_current_user
+from core.security import setup_security_middleware, get_current_user
 from api.ai.endpoints.routers import webhooks
 from api.ai.endpoints.routers.chat import router as chat_router
 from api.ai.endpoints.routers.admin import router as admin_router

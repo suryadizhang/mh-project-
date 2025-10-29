@@ -16,7 +16,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.app.database import get_db
 from api.app.utils.auth import admin_required
 from api.app.utils.timezone_utils import get_date_range_for_station, to_station_timezone
-from utils.query_optimizer import get_payment_analytics_optimized
+# Temporarily commented out - function not implemented yet
+# from utils.query_optimizer import get_payment_analytics_optimized
 
 import logging
 

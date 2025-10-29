@@ -3,8 +3,6 @@
 import { useMemo } from 'react';
 import type { BlogPost } from '@my-hibachi/blog-types';
 
-import { blogCache } from '@/lib/cache/CacheService';
-
 import { useCachedFetch } from './useCachedFetch';
 
 type BlogAPIType =
@@ -68,7 +66,6 @@ export function useBlogAPI(options: UseBlogAPIOptions) {
 
   // Use cached fetch hook
   const result = useCachedFetch<BlogAPIResponse>(cacheKey, fetcher, {
-    cache: blogCache,
     ttl,
     enabled,
     staleWhileRevalidate: true, // Show cached data while revalidating

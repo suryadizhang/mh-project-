@@ -16,6 +16,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useToast } from '@/components/ui/Toast';
 
 // ============================================================================
 // Types
@@ -54,6 +55,9 @@ interface PendingReview {
 // ============================================================================
 
 export default function PendingReviewsList() {
+  // Toast notifications
+  const toast = useToast();
+  
   // Data state
   const [reviews, setReviews] = useState<PendingReview[]>([]);
   const [loading, setLoading] = useState(true);
@@ -92,7 +96,7 @@ export default function PendingReviewsList() {
       }
     } catch (error) {
       console.error('Error fetching reviews:', error);
-      alert('Failed to load reviews');
+      toast.error('Failed to load reviews', 'Please refresh the page to try again');
     } finally {
       setLoading(false);
     }
@@ -126,7 +130,7 @@ export default function PendingReviewsList() {
       );
 
       if (response.ok) {
-        alert('Review approved successfully!');
+        toast.success('Review approved!', 'The review is now public');
         fetchReviews(); // Refresh list
         setSelectedReviews(new Set()); // Clear selection
       } else {
@@ -134,7 +138,7 @@ export default function PendingReviewsList() {
       }
     } catch (error) {
       console.error('Approve error:', error);
-      alert('Failed to approve review');
+      toast.error('Failed to approve review', 'Please try again');
     } finally {
       const newProcessing = new Set(processingIds);
       newProcessing.delete(reviewId);
@@ -144,7 +148,7 @@ export default function PendingReviewsList() {
 
   const handleReject = async () => {
     if (!rejectReviewId || !rejectReason.trim()) {
-      alert('Please provide a reason for rejection');
+      toast.warning('Rejection reason required', 'Please provide a reason for rejection');
       return;
     }
 
@@ -165,7 +169,7 @@ export default function PendingReviewsList() {
       );
 
       if (response.ok) {
-        alert('Review rejected successfully!');
+        toast.success('Review rejected', 'Customer has been notified');
         setShowRejectModal(false);
         setRejectReviewId(null);
         setRejectReason('');
@@ -176,7 +180,7 @@ export default function PendingReviewsList() {
       }
     } catch (error) {
       console.error('Reject error:', error);
-      alert('Failed to reject review');
+      toast.error('Failed to reject review', 'Please try again');
     } finally {
       const newProcessing = new Set(processingIds);
       newProcessing.delete(rejectReviewId);
@@ -186,7 +190,7 @@ export default function PendingReviewsList() {
 
   const handleBulkAction = async (action: 'approve' | 'reject') => {
     if (selectedReviews.size === 0) {
-      alert('Please select reviews first');
+      toast.warning('No reviews selected', 'Please select reviews first');
       return;
     }
 
@@ -194,7 +198,7 @@ export default function PendingReviewsList() {
     if (action === 'reject') {
       reason = prompt('Enter rejection reason for all selected reviews:') || '';
       if (!reason.trim()) {
-        alert('Rejection reason is required');
+        toast.warning('Rejection reason required', 'Cannot reject without a reason');
         return;
       }
     }
@@ -222,8 +226,9 @@ export default function PendingReviewsList() {
       const data = await response.json();
 
       if (data.success) {
-        alert(
-          `Bulk action completed!\nSuccess: ${data.data.success_count}\nFailed: ${data.data.failed_count}`
+        toast.success(
+          'Bulk action completed!',
+          `Success: ${data.data.success_count}, Failed: ${data.data.failed_count}`
         );
         fetchReviews(); // Refresh list
         setSelectedReviews(new Set()); // Clear selection
@@ -232,7 +237,7 @@ export default function PendingReviewsList() {
       }
     } catch (error) {
       console.error('Bulk action error:', error);
-      alert('Failed to perform bulk action');
+      toast.error('Bulk action failed', 'Please try again');
     }
   };
 

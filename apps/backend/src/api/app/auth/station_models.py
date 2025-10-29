@@ -274,8 +274,8 @@ class Station(Base):
     
     # Relationships
     station_users = relationship("StationUser", back_populates="station")
-    bookings = relationship("Booking", back_populates="station", foreign_keys="Booking.station_id")
-    customers = relationship("Customer", back_populates="station", foreign_keys="Customer.station_id")
+    # Note: Booking and Customer relationships are defined in their respective models
+    # to avoid circular import issues. They will use back_populates="station"
     
     __table_args__ = (
         CheckConstraint(f"status IN {tuple(s.value for s in StationStatus)}", name="station_status_valid"),

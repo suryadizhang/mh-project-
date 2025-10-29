@@ -291,3 +291,270 @@ async def get_optional_user(
         return await get_current_user(credentials)
     except HTTPException:
         return None
+
+
+# ============================================================================
+# 4-TIER RBAC SYSTEM (New Implementation)
+# ============================================================================
+
+from enum import Enum
+from typing import List, Callable
+
+
+class UserRole(str, Enum):
+    """
+    4-tier role hierarchy for admin access control.
+    
+    Roles (highest to lowest):
+    - SUPER_ADMIN: Full system access, can manage admins
+    - ADMIN: Most operations, cannot manage admin accounts
+    - CUSTOMER_SUPPORT: Customer-facing operations only
+    - STATION_MANAGER: Station-specific operations
+    """
+    SUPER_ADMIN = "SUPER_ADMIN"
+    ADMIN = "ADMIN"
+    CUSTOMER_SUPPORT = "CUSTOMER_SUPPORT"
+    STATION_MANAGER = "STATION_MANAGER"
+
+
+class Permission:
+    """
+    Granular permission definitions for each role.
+    Each permission is a list of roles that have access.
+    """
+    
+    # ========== BOOKING PERMISSIONS ==========
+    BOOKING_VIEW_ALL = [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT]
+    BOOKING_CREATE = [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT]
+    BOOKING_UPDATE = [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT]
+    BOOKING_DELETE = [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT]
+    BOOKING_VIEW_STATION = [UserRole.STATION_MANAGER]  # View own station only
+    
+    # ========== CUSTOMER PERMISSIONS ==========
+    CUSTOMER_VIEW = [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT]
+    CUSTOMER_CREATE = [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT]
+    CUSTOMER_UPDATE = [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT]
+    CUSTOMER_DELETE = [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT]
+    
+    # ========== LEAD PERMISSIONS ==========
+    LEAD_VIEW = [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT]
+    LEAD_MANAGE = [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT]
+    LEAD_DELETE = [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT]
+    
+    # ========== REVIEW PERMISSIONS ==========
+    REVIEW_VIEW = [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT]
+    REVIEW_MODERATE = [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT]
+    REVIEW_DELETE = [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT]
+    
+    # ========== CHEF PERMISSIONS ==========
+    CHEF_VIEW_ALL = [UserRole.SUPER_ADMIN, UserRole.ADMIN]
+    CHEF_VIEW_STATION = [UserRole.STATION_MANAGER]  # View own station only
+    CHEF_ASSIGN = [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STATION_MANAGER]
+    CHEF_SCHEDULE = [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STATION_MANAGER]
+    
+    # ========== STATION PERMISSIONS ==========
+    STATION_VIEW_ALL = [UserRole.SUPER_ADMIN, UserRole.ADMIN]
+    STATION_VIEW_OWN = [UserRole.STATION_MANAGER]
+    STATION_MANAGE = [UserRole.SUPER_ADMIN, UserRole.ADMIN]
+    STATION_MANAGE_OWN = [UserRole.STATION_MANAGER]  # Edit own station only
+    STATION_DELETE = [UserRole.SUPER_ADMIN]
+    
+    # ========== ADMIN PERMISSIONS ==========
+    ADMIN_VIEW = [UserRole.SUPER_ADMIN]
+    ADMIN_CREATE = [UserRole.SUPER_ADMIN]
+    ADMIN_UPDATE = [UserRole.SUPER_ADMIN]
+    ADMIN_DELETE = [UserRole.SUPER_ADMIN]
+    ADMIN_ASSIGN_ROLES = [UserRole.SUPER_ADMIN]
+    
+    # ========== FINANCIAL PERMISSIONS ==========
+    FINANCIAL_VIEW = [UserRole.SUPER_ADMIN, UserRole.ADMIN]
+    FINANCIAL_REFUND = [UserRole.SUPER_ADMIN, UserRole.ADMIN]
+    FINANCIAL_REPORTS = [UserRole.SUPER_ADMIN, UserRole.ADMIN]
+    
+    # ========== AUDIT PERMISSIONS ==========
+    AUDIT_VIEW_ALL = [UserRole.SUPER_ADMIN, UserRole.ADMIN]
+    AUDIT_VIEW_OWN = [UserRole.CUSTOMER_SUPPORT, UserRole.STATION_MANAGER]
+    AUDIT_EXPORT = [UserRole.SUPER_ADMIN, UserRole.ADMIN]
+    
+    # ========== SYSTEM PERMISSIONS ==========
+    SYSTEM_SETTINGS = [UserRole.SUPER_ADMIN, UserRole.ADMIN]
+    SYSTEM_ANALYTICS = [UserRole.SUPER_ADMIN, UserRole.ADMIN]
+    SYSTEM_ANALYTICS_STATION = [UserRole.STATION_MANAGER]  # Station analytics only
+
+
+def require_role(allowed_roles: List[UserRole]) -> Callable:
+    """
+    Dependency factory to require specific roles.
+    
+    Usage:
+        @router.get("/admin/bookings")
+        async def get_bookings(
+            current_user: dict = Depends(require_role([UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT]))
+        ):
+            # Only SUPER_ADMIN, ADMIN, or CUSTOMER_SUPPORT can access
+            ...
+    
+    Args:
+        allowed_roles: List of roles that can access the endpoint
+        
+    Returns:
+        Dependency function that validates user role
+    """
+    async def role_checker(current_user: dict = Depends(get_current_user)) -> dict:
+        # Get user role (support both new and legacy formats)
+        user_role_str = current_user.get("role")
+        
+        # Handle legacy roles (convert to new format)
+        role_mapping = {
+            "superadmin": UserRole.SUPER_ADMIN,
+            "admin": UserRole.ADMIN,
+            "staff": UserRole.CUSTOMER_SUPPORT,
+            "support": UserRole.CUSTOMER_SUPPORT,
+            "manager": UserRole.STATION_MANAGER,
+        }
+        
+        # Try to get role from enum or mapping
+        try:
+            if user_role_str in [r.value for r in UserRole]:
+                user_role = UserRole(user_role_str)
+            else:
+                user_role = role_mapping.get(user_role_str.lower(), None)
+        except (ValueError, AttributeError):
+            user_role = None
+        
+        if user_role is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Invalid user role: {user_role_str}"
+            )
+        
+        if user_role not in allowed_roles:
+            allowed_role_names = ", ".join([r.value for r in allowed_roles])
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Access denied. Required role: {allowed_role_names}. Your role: {user_role.value}"
+            )
+        
+        return current_user
+    
+    return role_checker
+
+
+# ========== CONVENIENCE DEPENDENCIES ==========
+
+def require_super_admin() -> Callable:
+    """Require SUPER_ADMIN role (full system access)."""
+    return require_role([UserRole.SUPER_ADMIN])
+
+
+def require_admin() -> Callable:
+    """Require ADMIN or SUPER_ADMIN role (most operations)."""
+    return require_role([UserRole.SUPER_ADMIN, UserRole.ADMIN])
+
+
+def require_customer_support() -> Callable:
+    """Require CUSTOMER_SUPPORT, ADMIN, or SUPER_ADMIN role (customer-facing operations)."""
+    return require_role([UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT])
+
+
+def require_station_manager() -> Callable:
+    """Require STATION_MANAGER role (station-specific operations)."""
+    return require_role([UserRole.STATION_MANAGER])
+
+
+def require_any_admin() -> Callable:
+    """Require any admin role (any authenticated admin user)."""
+    return require_role([UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT, UserRole.STATION_MANAGER])
+
+
+# ========== UTILITY FUNCTIONS ==========
+
+def has_permission(user: dict, allowed_roles: List[UserRole]) -> bool:
+    """
+    Check if user has permission (utility function for non-endpoint logic).
+    
+    Usage:
+        if has_permission(current_user, Permission.BOOKING_DELETE):
+            # User can delete bookings
+            ...
+    
+    Args:
+        user: User dictionary
+        allowed_roles: List of roles that have permission
+        
+    Returns:
+        True if user has permission, False otherwise
+    """
+    user_role_str = user.get("role")
+    
+    # Handle legacy roles
+    role_mapping = {
+        "superadmin": UserRole.SUPER_ADMIN,
+        "admin": UserRole.ADMIN,
+        "staff": UserRole.CUSTOMER_SUPPORT,
+        "support": UserRole.CUSTOMER_SUPPORT,
+        "manager": UserRole.STATION_MANAGER,
+    }
+    
+    try:
+        if user_role_str in [r.value for r in UserRole]:
+            user_role = UserRole(user_role_str)
+        else:
+            user_role = role_mapping.get(user_role_str.lower(), None)
+    except (ValueError, AttributeError):
+        return False
+    
+    return user_role in allowed_roles
+
+
+def get_role_hierarchy_level(role: UserRole) -> int:
+    """
+    Get numeric level for role hierarchy (higher = more permissions).
+    
+    Returns:
+        4: SUPER_ADMIN
+        3: ADMIN
+        2: CUSTOMER_SUPPORT
+        1: STATION_MANAGER
+        0: Unknown
+    """
+    hierarchy = {
+        UserRole.SUPER_ADMIN: 4,
+        UserRole.ADMIN: 3,
+        UserRole.CUSTOMER_SUPPORT: 2,
+        UserRole.STATION_MANAGER: 1,
+    }
+    return hierarchy.get(role, 0)
+
+
+def can_access_station(user: dict, station_id: str) -> bool:
+    """
+    Check if user can access a specific station.
+    
+    - SUPER_ADMIN and ADMIN can access all stations
+    - CUSTOMER_SUPPORT can access all stations (read-only for internal ops)
+    - STATION_MANAGER can only access their assigned station
+    
+    Args:
+        user: User dictionary
+        station_id: Station ID to check access for
+        
+    Returns:
+        True if user can access station, False otherwise
+    """
+    user_role_str = user.get("role")
+    
+    # SUPER_ADMIN and ADMIN can access everything
+    if user_role_str in [UserRole.SUPER_ADMIN.value, UserRole.ADMIN.value, "superadmin", "admin"]:
+        return True
+    
+    # CUSTOMER_SUPPORT can view all stations (for booking management)
+    if user_role_str in [UserRole.CUSTOMER_SUPPORT.value, "support", "staff"]:
+        return True
+    
+    # STATION_MANAGER can only access their assigned station
+    if user_role_str in [UserRole.STATION_MANAGER.value, "manager"]:
+        assigned_station_id = user.get("assigned_station_id")
+        return assigned_station_id == station_id
+    
+    return False

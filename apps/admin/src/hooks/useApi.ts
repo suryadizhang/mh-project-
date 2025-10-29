@@ -16,6 +16,9 @@ import {
   qrService,
   smsService,
   couponService,
+  stationService,
+  type Station,
+  type StationUser,
 } from '@/services/api';
 import { requestDeduplicator } from '@/lib/cache/RequestDeduplicator';
 import type {
@@ -366,5 +369,35 @@ export function useQRAnalytics(code: string | null) {
   return useApiData<any>(
     () => code ? qrService.getQRAnalytics(code) : Promise.resolve({ data: null, success: true }),
     [code]
+  );
+}
+
+/**
+ * Hook for fetching stations
+ */
+export function useStations(includeStats: boolean = false) {
+  return useApiData<Station[]>(
+    () => stationService.getStations(includeStats),
+    [includeStats]
+  );
+}
+
+/**
+ * Hook for fetching a single station
+ */
+export function useStation(stationId: number | null, includeStats: boolean = false) {
+  return useApiData<Station>(
+    () => stationId ? stationService.getStation(stationId, includeStats) : Promise.resolve({ data: null, success: true }),
+    [stationId, includeStats]
+  );
+}
+
+/**
+ * Hook for fetching station users
+ */
+export function useStationUsers(stationId: number | null, includeUserDetails: boolean = false) {
+  return useApiData<StationUser[]>(
+    () => stationId ? stationService.getStationUsers(stationId, includeUserDetails) : Promise.resolve({ data: [], success: true }),
+    [stationId, includeUserDetails]
   );
 }
