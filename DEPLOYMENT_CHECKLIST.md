@@ -69,7 +69,7 @@ Copy these to your production environment:
 ### Critical (Required)
 ```bash
 # Database
-DATABASE_URL=postgresql://user:pass@host:5432/dbname
+DATABASE_URL=postgresql://<username>:<password>@<host>:5432/<database>
 
 # Backend URL
 BACKEND_URL=https://api.yourdomain.com

@@ -103,7 +103,7 @@ DEBUG=true
 
 # Database Configuration
 DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/myhibachi
-DATABASE_URL_SYNC=postgresql://postgres:postgres@localhost:5432/myhibachi
+DATABASE_URL_SYNC=postgresql://<username>:<password>@localhost:5432/myhibachi
 # Alternative: SQLite for simple testing
 # SQLITE_URL=sqlite:///./mh-bookings.db
 

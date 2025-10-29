@@ -214,9 +214,11 @@ async def google_callback(
         raise
     except Exception as e:
         logger.error(f"Google OAuth callback error: {str(e)}", exc_info=True)
+        logger.error(f"Error type: {type(e).__name__}")
+        logger.error(f"Code received: {code[:20] if code else 'None'}...")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred during Google authentication"
+            detail=f"An error occurred during Google authentication: {str(e)}"
         )
 
 

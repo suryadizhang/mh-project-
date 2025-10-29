@@ -62,7 +62,7 @@ cp .env.example .env
 ```bash
 # Database
 DATABASE_URL=postgresql+asyncpg://username:password@localhost:5432/myhibachi_db
-DATABASE_URL_SYNC=postgresql://username:password@localhost:5432/myhibachi_db
+DATABASE_URL_SYNC=postgresql://<username>:<password>@localhost:5432/myhibachi_db
 
 # Stripe (Get from https://dashboard.stripe.com/test/apikeys)
 STRIPE_SECRET_KEY=sk_test_your_test_secret_key_here

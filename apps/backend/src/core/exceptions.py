@@ -98,7 +98,7 @@ class AppException(Exception):
         
         log_data = {
             "error_code": self.error_code.value,
-            "message": self.message,
+            "error_message": self.message,  # Changed from 'message' to avoid LogRecord conflict
             "status_code": self.status_code,
             "details": self.details,
             "context": self.context
