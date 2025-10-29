@@ -123,7 +123,7 @@ nano /opt/myhibachi/config/.env
 **Required Environment Variables:**
 ```env
 # Database
-DATABASE_URL=postgresql://myhibachi:secure_password@postgres:5432/myhibachi
+DATABASE_URL=postgresql://<username>:<password>@postgres:5432/myhibachi
 REDIS_URL=redis://redis:6379/0
 
 # Security

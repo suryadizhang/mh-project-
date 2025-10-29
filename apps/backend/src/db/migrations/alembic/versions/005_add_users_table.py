@@ -58,7 +58,7 @@ def upgrade():
         
         # Metadata
         sa.Column('settings', postgresql.JSONB, nullable=False, server_default='{}'),
-        sa.Column('metadata', postgresql.JSONB, nullable=False, server_default='{}'),
+        sa.Column('user_metadata', postgresql.JSONB, nullable=False, server_default='{}'),  # Renamed from 'metadata' to avoid SQLAlchemy conflict
         
         # Timestamps
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),

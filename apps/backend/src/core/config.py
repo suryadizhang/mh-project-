@@ -8,10 +8,12 @@ from functools import lru_cache
 from typing import Optional, List
 from enum import Enum
 from dotenv import load_dotenv
+from pathlib import Path
 import os
 
-# Load environment variables from .env file
-load_dotenv()
+# Load environment variables from .env file (in parent directory)
+env_path = Path(__file__).parent.parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 class Environment(str, Enum):
     DEVELOPMENT = "development"
@@ -28,7 +30,7 @@ class Settings(BaseSettings):
     """Application settings with type validation"""
     
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=str(env_path),  # Use the calculated path
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore"
@@ -102,6 +104,15 @@ class Settings(BaseSettings):
     GOOGLE_CREDENTIALS_JSON: str
     GBP_ACCOUNT_ID: str
     GBP_LOCATION_ID: str
+    
+    # Google OAuth - REQUIRED: Must come from .env
+    GOOGLE_CLIENT_ID: str
+    GOOGLE_CLIENT_SECRET: str
+    GOOGLE_REDIRECT_URI: str
+    
+    # Frontend URLs
+    FRONTEND_URL: str = "http://localhost:3001"
+    ADMIN_URL: str = "http://localhost:3001"
     
     # Cloudinary (Image Upload) - REQUIRED: Must come from .env
     CLOUDINARY_CLOUD_NAME: str

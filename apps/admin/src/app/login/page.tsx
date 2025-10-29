@@ -8,6 +8,8 @@ import { authService, stationService } from '@/services/api';
 import type { Station } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -176,6 +178,21 @@ export default function LoginPage() {
           )}
         </Button>
       </div>
+
+      {/* Divider */}
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-300"></div>
+        </div>
+        <div className="relative flex justify-center text-sm">
+          <span className="px-2 bg-gray-50 text-gray-500">Or continue with</span>
+        </div>
+      </div>
+
+      {/* Google OAuth Button */}
+      <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''}>
+        <GoogleSignInButton />
+      </GoogleOAuthProvider>
 
       <div className="text-center">
         <p className="text-sm text-gray-600">

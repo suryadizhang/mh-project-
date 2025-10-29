@@ -267,6 +267,22 @@ async def health_check(request: Request):
 from api.app.routers import health, auth, bookings, stripe
 from api.app.crm.endpoints import router as crm_router
 
+# Include OAuth endpoints
+try:
+    from api.v1.endpoints.google_oauth import router as google_oauth_router
+    app.include_router(google_oauth_router, tags=["Authentication - OAuth"])
+    logger.info("✅ Google OAuth endpoints included")
+except ImportError as e:
+    logger.warning(f"Google OAuth endpoints not available: {e}")
+
+# Include User Management endpoints (Super Admin)
+try:
+    from api.v1.endpoints.user_management import router as user_management_router
+    app.include_router(user_management_router, tags=["User Management"])
+    logger.info("✅ User Management endpoints included")
+except ImportError as e:
+    logger.warning(f"User Management endpoints not available: {e}")
+
 # Include our new test endpoints for architectural patterns
 try:
     from api.test_endpoints import router as test_router

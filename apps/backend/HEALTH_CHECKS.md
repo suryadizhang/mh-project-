@@ -838,7 +838,7 @@ docker run -d --name redis \
   redis:7-alpine
 
 # Set environment variables
-export DATABASE_URL="postgresql://myhibachi:dev_password@localhost:5432/myhibachi"
+export DATABASE_URL="postgresql://<username>:<password>@localhost:5432/myhibachi"
 export REDIS_URL="redis://localhost:6379/0"
 export STRIPE_SECRET_KEY="sk_test_..."
 ```

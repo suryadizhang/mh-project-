@@ -46,7 +46,11 @@ class User(Base):
     avatar_url = Column(Text, nullable=True)
     
     # Authentication
-    auth_provider = Column(SQLEnum(AuthProvider), default=AuthProvider.EMAIL, nullable=False)
+    auth_provider = Column(
+        SQLEnum(AuthProvider, values_callable=lambda x: [e.value for e in x]),
+        default=AuthProvider.EMAIL,
+        nullable=False
+    )
     google_id = Column(String(255), unique=True, nullable=True, index=True)  # Google OAuth ID
     microsoft_id = Column(String(255), unique=True, nullable=True)
     apple_id = Column(String(255), unique=True, nullable=True)
@@ -56,7 +60,12 @@ class User(Base):
     password_changed_at = Column(DateTime(timezone=True), nullable=True)
     
     # Status and permissions
-    status = Column(SQLEnum(UserStatus), default=UserStatus.PENDING, nullable=False, index=True)
+    status = Column(
+        SQLEnum(UserStatus, values_callable=lambda x: [e.value for e in x]),
+        default=UserStatus.PENDING,
+        nullable=False,
+        index=True
+    )
     is_super_admin = Column(Boolean, default=False, nullable=False)  # Global super admin
     is_email_verified = Column(Boolean, default=False, nullable=False)
     email_verified_at = Column(DateTime(timezone=True), nullable=True)
@@ -80,7 +89,7 @@ class User(Base):
     
     # Metadata
     settings = Column(JSONB, default={}, nullable=False)  # User preferences
-    metadata = Column(JSONB, default={}, nullable=False)  # Additional data
+    user_metadata = Column(JSONB, default={}, nullable=False)  # Additional data (renamed from metadata to avoid SQLAlchemy conflict)
     
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
