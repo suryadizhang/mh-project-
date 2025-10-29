@@ -174,6 +174,14 @@ async def google_callback(
         await db.commit()
         await db.refresh(user)
         
+        # Send welcome email for new users
+        if is_new_user:
+            try:
+                from services.email_service import email_service
+                email_service.send_welcome_email(user.email, user.full_name)
+            except Exception as e:
+                logger.warning(f"Failed to send welcome email to {user.email}: {e}")
+        
         # Check if user is approved
         if user.status == UserStatus.PENDING:
             requires_approval = True

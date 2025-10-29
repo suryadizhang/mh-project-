@@ -96,11 +96,32 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     deleted_at = Column(DateTime(timezone=True), nullable=True)  # Soft delete
     
-    # Relationships (defined in station models to avoid circular imports)
-    # station_assignments = relationship("StationUser", back_populates="user")
+    # Relationships
+    roles = relationship(
+        "Role",
+        secondary="identity.user_roles",
+        back_populates="users",
+        lazy="selectin"
+    )
     
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email}, provider={self.auth_provider}, status={self.status})>"
+    
+    def has_permission(self, permission_name: str) -> bool:
+        """Check if user has a specific permission through their roles"""
+        if self.is_super_admin:
+            return True
+        for role in self.roles:
+            for permission in role.permissions:
+                if permission.name == permission_name:
+                    return True
+        return False
+    
+    def has_role(self, role_name: str) -> bool:
+        """Check if user has a specific role"""
+        if self.is_super_admin:
+            return True
+        return any(role.name == role_name for role in self.roles)
 
 
 # Indexes for performance
