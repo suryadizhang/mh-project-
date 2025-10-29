@@ -134,9 +134,12 @@ export function useWebSocket(config: WebSocketConfig): WebSocketHookResult {
         }
       };
 
-      ws.current.onerror = (error) => {
-        logger.websocket('error', { error: String(error) });
-        setConnectionError('WebSocket connection error');
+      ws.current.onerror = (event) => {
+        const errorMessage = event instanceof ErrorEvent 
+          ? event.message || 'WebSocket connection error'
+          : 'WebSocket connection error';
+        logger.websocket('error', { error: errorMessage, url: wsUrl });
+        setConnectionError(errorMessage);
         setIsConnecting(false);
       };
 
@@ -266,9 +269,12 @@ export class WebSocketService {
           }
         };
 
-        this.ws.onerror = (error) => {
-          logger.websocket('error', { service: 'WebSocketService', error: String(error) });
-          reject(error);
+        this.ws.onerror = (event) => {
+          const errorMessage = event instanceof ErrorEvent 
+            ? event.message || 'WebSocket connection error'
+            : 'WebSocket connection error';
+          logger.websocket('error', { service: 'WebSocketService', error: errorMessage });
+          reject(new Error(errorMessage));
         };
 
         this.ws.onclose = () => {

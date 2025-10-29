@@ -191,7 +191,11 @@ class Logger {
         this.info('WebSocket reconnecting', context);
         break;
       case 'error':
-        this.error('WebSocket error', context);
+        // Handle error data properly - could be string, Error, or object
+        const errorMessage = typeof data?.error === 'string' 
+          ? data.error 
+          : data?.error?.message || 'WebSocket error';
+        this.error(errorMessage, context);
         break;
       default:
         this.debug(`WebSocket event: ${event}`, context);
