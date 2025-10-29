@@ -283,6 +283,14 @@ try:
 except ImportError as e:
     logger.warning(f"User Management endpoints not available: {e}")
 
+# Include Role Management endpoints (Super Admin)
+try:
+    from api.v1.endpoints.role_management import router as role_management_router
+    app.include_router(role_management_router, tags=["Role Management"])
+    logger.info("✅ Role Management endpoints included")
+except ImportError as e:
+    logger.warning(f"Role Management endpoints not available: {e}")
+
 # Include our new test endpoints for architectural patterns
 try:
     from api.test_endpoints import router as test_router

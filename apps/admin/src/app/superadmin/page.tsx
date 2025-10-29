@@ -1,4 +1,5 @@
-import { AlertTriangle, Database, Settings, Shield, Users } from 'lucide-react';
+import { AlertTriangle, Database, Settings, Shield, Users, Key } from 'lucide-react';
+import Link from 'next/link';
 
 import { BaseLocationManager } from '@/components/BaseLocationManager';
 import { Button } from '@/components/ui/button';
@@ -91,10 +92,20 @@ export default function SuperAdminPage() {
       <div className="bg-white rounded-lg shadow border border-gray-200">
         <div className="p-6 border-b border-gray-200 flex justify-between items-center">
           <h2 className="text-xl font-semibold text-gray-900">Admin Users</h2>
-          <Button>
-            <Users className="w-4 h-4 mr-2" />
-            Add Admin
-          </Button>
+          <div className="flex gap-2">
+            <Link href="/superadmin/users">
+              <Button variant="outline">
+                <Users className="w-4 h-4 mr-2" />
+                User Management
+              </Button>
+            </Link>
+            <Link href="/superadmin/roles">
+              <Button variant="outline">
+                <Key className="w-4 h-4 mr-2" />
+                Role Management
+              </Button>
+            </Link>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
