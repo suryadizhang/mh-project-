@@ -440,34 +440,28 @@ class PlaidService:
         
         Returns:
             {
-                "verification_fee": 0.05,
-                "balance_check_fee": 0.05,
-                "transfer_fee": 5.00,
-                "total_fees": 5.10,
-                "net_amount": 494.90,
-                "savings_vs_stripe": 34.90
+                "transfer_fee": 0.00,
+                "total_fees": 0.00,
+                "net_amount": 500.00,
+                "savings_vs_stripe": 15.00
             }
         """
-        verification_fee = Decimal("0.05")
-        balance_check_fee = Decimal("0.05")
-        transfer_fee = amount * Decimal("0.01")  # 1% of transaction
+        # Plaid RTP is FREE for us (0% processing fee)
+        transfer_fee = Decimal("0.00")
+        total_fees = Decimal("0.00")
+        net_amount = amount
         
-        total_fees = verification_fee + balance_check_fee + transfer_fee
-        net_amount = amount - total_fees
-        
-        # Compare to Stripe (8% fee)
-        stripe_fee = amount * Decimal("0.08")
+        # Compare to Stripe (3% fee)
+        stripe_fee = amount * Decimal("0.03")
         savings = stripe_fee - total_fees
         
         return {
-            "verification_fee": float(verification_fee),
-            "balance_check_fee": float(balance_check_fee),
             "transfer_fee": float(transfer_fee),
             "total_fees": float(total_fees),
             "net_amount": float(net_amount),
             "savings_vs_stripe": float(savings),
-            "percentage_fee": "1.01%",  # ~1% + $0.10
-            "stripe_percentage": "8.00%"
+            "percentage_fee": "0.00%",  # FREE!
+            "stripe_percentage": "3.00%"
         }
 
 
