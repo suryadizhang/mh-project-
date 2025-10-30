@@ -299,6 +299,14 @@ try:
 except ImportError as e:
     logger.warning(f"Plaid RTP endpoints not available: {e}")
 
+# Include Payment Calculator endpoints (for fee calculations)
+try:
+    from api.v1.endpoints.payment_calculator import router as payment_calculator_router
+    app.include_router(payment_calculator_router, prefix="/api/v1/payments", tags=["Payment Calculator"])
+    logger.info("✅ Payment Calculator endpoints included")
+except ImportError as e:
+    logger.warning(f"Payment Calculator endpoints not available: {e}")
+
 # Include our new test endpoints for architectural patterns
 try:
     from api.test_endpoints import router as test_router

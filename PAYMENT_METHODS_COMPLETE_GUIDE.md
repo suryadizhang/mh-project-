@@ -3,10 +3,10 @@
 ## Overview
 My Hibachi offers **4 online payment methods** to give customers flexibility while minimizing processing fees:
 
-1. **Zelle** (0% fees) - Manual confirmation
-2. **Plaid RTP** (1% fees) - Instant bank transfer  
-3. **Venmo** (3% fees) - Peer-to-peer
-4. **Stripe** (8% fees) - Credit cards
+1. **Zelle** (0% fees) - Manual confirmation, FREE
+2. **Plaid RTP** (0% fees) - Instant bank transfer, FREE ✨ BEST!  
+3. **Venmo** (3% fees) - Peer-to-peer with fee
+4. **Stripe** (3% fees) - Credit cards with fee
 
 ---
 
@@ -15,31 +15,31 @@ My Hibachi offers **4 online payment methods** to give customers flexibility whi
 | Method | Fees | Speed | Best For | Customer Experience |
 |--------|------|-------|----------|---------------------|
 | **Zelle** | 0% | 1-2 hours | Cost-conscious customers | Manual confirmation email |
-| **Plaid RTP** | ~1% | Instant | Large orders ($500+) | Automated, seamless |
-| **Venmo** | 3% | 1-2 hours | Small-medium orders | Familiar, easy |
-| **Stripe** | 8% | Instant | Quick checkout, cards | Most convenient |
+| **Plaid RTP** | 0% | Instant | **ALL ORDERS** ⭐ | Automated, seamless, FREE! |
+| **Venmo** | 3% | 1-2 hours | Venmo users willing to pay fee | Familiar, easy |
+| **Stripe** | 3% | Instant | Quick checkout, cards | Most convenient |
 
 ---
 
 ## 💰 Cost Breakdown by Order Size
 
 ### **$100 Order**
-- **Zelle**: $100.00 total (save $8.00)
-- **Plaid RTP**: $101.10 total ($0.05 verify + $0.05 balance + $1.00 transfer = save $6.90)
-- **Venmo**: $103.00 total (save $5.00)
-- **Stripe**: $108.00 total (full cost)
+- **Zelle**: $100.00 total → **Save $3.00** ✨
+- **Plaid RTP**: $100.00 total → **Save $3.00** ✨ (INSTANT!)
+- **Venmo**: $103.00 total (3% fee)
+- **Stripe**: $103.00 total (3% fee)
 
 ### **$500 Order**
-- **Zelle**: $500.00 total (save $40.00)
-- **Plaid RTP**: $505.10 total ($0.05 + $0.05 + $5.00 = save $34.90)
-- **Venmo**: $515.00 total (save $25.00)
-- **Stripe**: $540.00 total (full cost)
+- **Zelle**: $500.00 total → **Save $15.00** ✨
+- **Plaid RTP**: $500.00 total → **Save $15.00** ✨ (INSTANT!)
+- **Venmo**: $515.00 total (3% fee)
+- **Stripe**: $515.00 total (3% fee)
 
 ### **$1,000 Order**
-- **Zelle**: $1,000.00 total (save $80.00)
-- **Plaid RTP**: $1,010.10 total ($0.05 + $0.05 + $10.00 = save $69.90)
-- **Venmo**: $1,030.00 total (save $50.00)
-- **Stripe**: $1,080.00 total (full cost)
+- **Zelle**: $1,000.00 total → **Save $30.00** ✨
+- **Plaid RTP**: $1,000.00 total → **Save $30.00** ✨ (INSTANT!)
+- **Venmo**: $1,030.00 total (3% fee)
+- **Stripe**: $1,030.00 total (3% fee)
 
 ---
 
@@ -47,23 +47,15 @@ My Hibachi offers **4 online payment methods** to give customers flexibility whi
 
 ### **Step 1: Show Smart Recommendation**
 ```
-For orders $500+:
-  Primary: Plaid RTP ($505.10, instant, save $34.90)
-  Secondary: Zelle ($500, 1-2 hours, save $40.00)
-  Tertiary: Venmo ($515, save $25.00)
-  Last Resort: Credit Card ($540)
+For ALL orders:
+  Primary: Plaid RTP ($500, instant, FREE) ⭐ BEST OPTION!
+  Secondary: Zelle ($500, 1-2 hours, FREE)
+  If customer prefers:
+    - Venmo: $515 (3% fee)
+    - Credit Card: $515 (3% fee)
 
-For orders $100-$499:
-  Primary: Zelle ($100, save $8.00)
-  Secondary: Plaid RTP ($101.10, instant, save $6.90)
-  Tertiary: Venmo ($103, save $5.00)
-  Last Resort: Credit Card ($108)
-
-For orders <$100:
-  Primary: Venmo (convenient, low fee)
-  Secondary: Zelle (best savings)
-  Tertiary: Plaid RTP (overhead not worth it)
-  Last Resort: Credit Card
+Recommendation Message:
+"💰 Save $15! Use FREE Bank Transfer (instant) or Zelle (1-2 hours)"
 ```
 
 ---

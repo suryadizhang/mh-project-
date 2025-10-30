@@ -8,15 +8,13 @@ Provides endpoints for Real-Time Payment processing via Plaid:
 - Payment status tracking
 
 Cost Breakdown:
-- Verification: $0.05
-- Balance Check: $0.05
-- RTP Transfer: ~1% of amount
-- Total: ~1.01% + $0.10
+- RTP Transfer: 0% (FREE!)
+- Total: 0% (no fees)
 
-Savings Example (vs Stripe 8%):
-- $100 order: Save $6.90
-- $500 order: Save $34.90
-- $1000 order: Save $69.90
+Savings Example (vs Stripe 3%):
+- $100 order: Save $3.00
+- $500 order: Save $15.00
+- $1000 order: Save $30.00
 """
 
 from decimal import Decimal
@@ -80,7 +78,7 @@ class VerifyAccountResponse(BaseModel):
     """Verified bank account details"""
     accounts: list[BankAccount]
     message: str = "Bank account verified successfully"
-    cost: float = Field(0.05, description="Verification fee ($0.05)")
+    cost: float = Field(0.00, description="Verification fee (FREE)")
 
 
 class BalanceCheckRequest(BaseModel):
@@ -97,7 +95,7 @@ class BalanceCheckResponse(BaseModel):
     account_id: str
     name: str
     mask: str
-    cost: float = Field(0.05, description="Balance check fee ($0.05)")
+    cost: float = Field(0.00, description="Balance check fee (FREE)")
 
 
 class InitiatePaymentRequest(BaseModel):
@@ -144,8 +142,6 @@ class CalculateFeesRequest(BaseModel):
 class CalculateFeesResponse(BaseModel):
     """Fee calculation breakdown"""
     amount: float
-    verification_fee: float
-    balance_check_fee: float
     transfer_fee: float
     total_fees: float
     net_amount: float
@@ -265,14 +261,13 @@ async def verify_bank_account(
     **Step 3** of Plaid RTP flow. Verify account ownership and retrieve
     account details for payment processing.
     
-    **Cost**: $0.05 per verification
+    **Cost**: FREE (no fees!)
     
     Returns:
     - accounts: List of verified bank accounts
-    - cost: Verification fee ($0.05)
+    - cost: Verification fee (FREE)
     
-    **Note**: This charge applies once per account verification.
-    Subsequent payments to same account don't require re-verification.
+    **Note**: No charges for bank verification with Plaid RTP.
     """
     try:
         result = await plaid_service.verify_bank_account(request.access_token)
@@ -303,15 +298,15 @@ async def check_account_balance(
     **Optional** step before payment. Prevents insufficient funds errors
     by checking balance before initiating payment.
     
-    **Cost**: $0.05 per balance check
+    **Cost**: FREE (no fees!)
     
-    **Recommendation**: Only check balance for large transactions ($500+)
-    or if customer requests it. For most payments, skip this step to save $0.05.
+    **Recommendation**: Check balance for large transactions ($500+)
+    to prevent payment failures.
     
     Returns:
     - available: Available balance
     - current: Current balance
-    - cost: Balance check fee ($0.05)
+    - cost: Balance check fee (FREE)
     """
     try:
         result = await plaid_service.check_balance(
@@ -342,22 +337,22 @@ async def initiate_rtp_payment(
     
     **Step 4** of Plaid RTP flow. Process instant bank-to-bank payment.
     
-    **Cost**: ~1% of transaction amount
-    - $100 payment = $1.00 fee
-    - $500 payment = $5.00 fee
-    - $1000 payment = $10.00 fee
+    **Cost**: 0% (FREE!)
+    - $100 payment = $0.00 fee
+    - $500 payment = $0.00 fee
+    - $1000 payment = $0.00 fee
     
-    **Savings vs Stripe (8%)**:
-    - $100: Save $7.00
-    - $500: Save $35.00
-    - $1000: Save $70.00
+    **Savings vs Stripe (3%)**:
+    - $100: Save $3.00
+    - $500: Save $15.00
+    - $1000: Save $30.00
     
     **Processing Time**: Instant (Real-Time Payment)
     
     Returns:
     - payment_id: Plaid payment ID for tracking
     - status: Payment status (initiated, pending, executed)
-    - fees: Detailed fee breakdown
+    - fees: Detailed fee breakdown (all $0)
     - savings_vs_stripe: How much customer saved vs credit card
     """
     try:
@@ -448,15 +443,14 @@ async def calculate_plaid_fees(request: CalculateFeesRequest):
     instead of credit card.
     
     **Fee Structure**:
-    - Verification: $0.05 (one-time per account)
-    - Balance check: $0.05 (optional)
-    - Transfer: ~1% of amount
-    - Total: ~1.01% + $0.10
+    - RTP Transfer: 0% (FREE!)
+    - Total: 0% (no fees)
     
     **Compare to**:
-    - Stripe (credit card): 8.00%
+    - Stripe (credit card): 3.00%
     - Zelle: 0% (but manual confirmation)
     - Venmo: 3.00%
+    - Plaid RTP: 0% (instant + automated!)
     
     Returns detailed fee breakdown and savings calculation.
     """
