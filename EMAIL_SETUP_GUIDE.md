@@ -1,9 +1,11 @@
 # Email Configuration Guide
 
 ## Overview
-The system uses two email accounts for different purposes:
-- **IONOS (cs@myhibachichef.com)**: Customer-facing emails (approvals, notifications)
-- **Gmail (myhibachichef@gmail.com)**: Internal admin communications
+The system uses **exactly 2 active email accounts**:
+- **IONOS (cs@myhibachichef.com)**: Official external/customer-facing emails (provided by IONOS webmail)
+- **Gmail (myhibachichef@gmail.com)**: Internal admin communications only (free Gmail account)
+
+**Note**: These are the only two emails in use. No other email accounts are needed.
 
 ## Environment Variables
 
