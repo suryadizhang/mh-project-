@@ -10,6 +10,7 @@ class PaymentMethod(str, Enum):
     STRIPE = "stripe"
     ZELLE = "zelle"
     VENMO = "venmo"
+    PLAID = "plaid"  # RTP via Plaid (1% fee)
 
 
 class PaymentStatus(str, Enum):
@@ -34,7 +35,7 @@ class CustomerBase(BaseModel):
     email: EmailStr
     name: str | None = None
     phone: str | None = None
-    preferred_payment_method: PaymentMethod = PaymentMethod.ZELLE
+    preferred_payment_method: PaymentMethod = PaymentMethod.PLAID  # Default to Plaid RTP (lowest fees)
 
 
 class CustomerCreate(CustomerBase):
