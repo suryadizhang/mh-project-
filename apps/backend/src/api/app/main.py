@@ -80,6 +80,16 @@ except ImportError:
     SECURITY_MIDDLEWARE_AVAILABLE = False
     logging.warning("Security middleware not available - using basic setup")
 
+# Import new advanced middlewares
+try:
+    from middleware.rate_limit import RateLimitMiddleware
+    from middleware.structured_logging import StructuredLoggingMiddleware
+    ADVANCED_MIDDLEWARE_AVAILABLE = True
+    logging.info("✅ Advanced middleware (rate limiting, structured logging) available")
+except ImportError as e:
+    ADVANCED_MIDDLEWARE_AVAILABLE = False
+    logging.warning(f"⚠️ Advanced middleware not available: {e}")
+
 # Import Stripe setup utility
 try:
     from app.utils.stripe_setup import setup_stripe_products
@@ -215,6 +225,20 @@ app.openapi = get_openapi_schema(app)
 # Setup authentication middleware
 setup_auth_middleware(app)
 
+# Add advanced middleware (added first = executed last)
+if ADVANCED_MIDDLEWARE_AVAILABLE:
+    # Structured logging with error tracking
+    app.add_middleware(
+        StructuredLoggingMiddleware,
+        log_request_body=settings.debug,  # Only log request bodies in debug mode
+        log_response_body=False  # Don't log response bodies (can be large)
+    )
+    
+    # Advanced rate limiting with role-based limits and login attempt tracking
+    app.add_middleware(RateLimitMiddleware, redis_url=settings.redis_url)
+    
+    logger.info("✅ Advanced middleware enabled: structured logging, role-based rate limiting")
+
 # Add security middleware in correct order (last added = first executed)
 if SECURITY_MIDDLEWARE_AVAILABLE:
     # Request logging (should be first)
@@ -322,6 +346,10 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 # Include routers with comprehensive API structure
 app.include_router(health.router, prefix="/api/health", tags=["health"])
 
+# Add new comprehensive health checks
+from api.app.routers.health_checks import router as health_checks_router
+app.include_router(health_checks_router, prefix="/api/health", tags=["health", "monitoring"])
+
 # Authentication & Authorization
 app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
 
@@ -346,11 +374,17 @@ from api.app.routers.leads import router as leads_router
 from api.app.routers.newsletter import router as newsletter_router
 from api.app.routers.ringcentral_webhooks import router as ringcentral_router
 from api.app.routers.admin_analytics import router as admin_analytics_router
+from api.app.routers.admin.notification_groups import router as notification_groups_router
 
 app.include_router(leads_router, prefix="/api", tags=["leads"])
 app.include_router(newsletter_router, prefix="/api", tags=["newsletter"])
 app.include_router(ringcentral_router, prefix="/api", tags=["sms", "webhooks"])
 app.include_router(admin_analytics_router, prefix="/api", tags=["admin", "analytics"])
+app.include_router(notification_groups_router, prefix="/api/admin/notification-groups", tags=["admin", "notifications"])
+
+# Admin Error Logs (for monitoring and debugging)
+from api.app.routers.admin.error_logs import router as error_logs_router
+app.include_router(error_logs_router, prefix="/api", tags=["admin", "error-logs", "monitoring"])
 
 # Legacy API compatibility (for existing frontend)
 app.include_router(bookings.router, prefix="/api/booking", tags=["booking-legacy"])

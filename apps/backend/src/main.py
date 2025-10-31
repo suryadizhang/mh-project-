@@ -5,10 +5,12 @@ Unified API with operational and AI endpoints, enterprise architecture patterns
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from core.middleware import RequestIDMiddleware
+from core.security_middleware import SecurityHeadersMiddleware, RequestSizeLimiter
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from contextlib import asynccontextmanager
+import asyncio
 import time
 import logging
 import os
@@ -41,19 +43,24 @@ async def lifespan(app: FastAPI):
     logger.info(f"Environment: {settings.ENVIRONMENT}")
     logger.info(f"Debug mode: {settings.DEBUG}")
     
-    # Initialize Cache Service
+    # Initialize Cache Service with timeout (non-blocking)
     try:
         from core.cache import CacheService
         redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
         cache_service = CacheService(redis_url)
-        await cache_service.connect()
+        
+        # Add timeout to prevent hanging
+        await asyncio.wait_for(cache_service.connect(), timeout=3.0)
         app.state.cache = cache_service
         logger.info("✅ Cache service initialized")
+    except asyncio.TimeoutError:
+        logger.warning("⚠️ Cache service connection timeout - continuing without cache")
+        app.state.cache = None
     except Exception as e:
-        logger.error(f"Failed to initialize cache service: {e}")
+        logger.warning(f"⚠️ Cache service unavailable: {e} - continuing without cache")
         app.state.cache = None
     
-    # Initialize dependency injection container
+    # Initialize dependency injection container (synchronous, fast)
     try:
         # Get database URL from environment or settings
         database_url = os.getenv("DATABASE_URL", "sqlite:///./myhibachi.db")
@@ -89,23 +96,53 @@ async def lifespan(app: FastAPI):
         app.state.container = container
         logger.info("✅ Dependency injection container initialized")
         
-        # Note: ContainerMiddleware must be added before app starts (see below)
-        # We'll store container in app.state for dependency injection via Depends()
-        
     except Exception as e:
-        logger.error(f"Failed to initialize dependency injection: {e}")
-        # Continue startup without DI for backwards compatibility
+        logger.warning(f"⚠️ DI container initialization failed: {e} - continuing without DI")
         app.state.container = None
     
-    # Initialize rate limiter
-    rate_limiter = RateLimiter()
-    await rate_limiter._init_redis()
-    app.state.rate_limiter = rate_limiter
-    logger.info("✅ Rate limiter initialized")
+    # Initialize rate limiter with timeout (non-blocking)
+    try:
+        rate_limiter = RateLimiter()
+        
+        # Add timeout to prevent hanging
+        await asyncio.wait_for(rate_limiter._init_redis(), timeout=3.0)
+        app.state.rate_limiter = rate_limiter
+        logger.info("✅ Rate limiter initialized")
+    except asyncio.TimeoutError:
+        logger.warning("⚠️ Rate limiter connection timeout - using memory-based fallback")
+        rate_limiter = RateLimiter()
+        rate_limiter.redis_available = False
+        app.state.rate_limiter = rate_limiter
+    except Exception as e:
+        logger.warning(f"⚠️ Rate limiter Redis unavailable: {e} - using memory-based fallback")
+        rate_limiter = RateLimiter()
+        rate_limiter.redis_available = False
+        app.state.rate_limiter = rate_limiter
+    
+    # Start payment email monitoring scheduler (non-blocking)
+    try:
+        from services.payment_email_scheduler import start_payment_email_scheduler
+        # Start in background - don't wait for first email check
+        start_payment_email_scheduler()
+        logger.info("✅ Payment email monitoring scheduler started")
+    except ImportError as e:
+        logger.warning(f"⚠️ Payment email scheduler not available (missing dependencies): {e}")
+    except Exception as e:
+        logger.warning(f"⚠️ Payment email scheduler not available: {e}")
+    
+    logger.info("🚀 Application startup complete - ready to accept requests")
     
     yield
     
     # Shutdown
+    # Stop payment email monitoring scheduler
+    try:
+        from services.payment_email_scheduler import stop_payment_email_scheduler
+        stop_payment_email_scheduler()
+        logger.info("✅ Payment email monitoring scheduler stopped")
+    except Exception as e:
+        logger.warning(f"Error stopping payment email scheduler: {e}")
+    
     # Close cache service
     if hasattr(app.state, 'cache') and app.state.cache:
         await app.state.cache.disconnect()
@@ -147,7 +184,15 @@ logger.info("✅ Custom exception handlers registered")
 app.add_middleware(RequestIDMiddleware)
 logger.info("✅ Request ID middleware registered for distributed tracing")
 
-# CORS Middleware
+# Security Headers Middleware (PRODUCTION SECURITY)
+app.add_middleware(SecurityHeadersMiddleware)
+logger.info("✅ Security headers middleware registered (HSTS, CSP, X-Frame-Options)")
+
+# Request Size Limiter (PREVENT DOS ATTACKS)
+app.add_middleware(RequestSizeLimiter, max_size=10 * 1024 * 1024)  # 10 MB limit
+logger.info("✅ Request size limiter registered (10 MB maximum)")
+
+# CORS Middleware (MULTI-DOMAIN SUPPORT)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
@@ -155,6 +200,7 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
     allow_headers=["*"],
 )
+logger.info(f"✅ CORS middleware registered for origins: {settings.cors_origins_list}")
 
 # Rate Limiting Middleware
 @app.middleware("http")
@@ -400,6 +446,14 @@ try:
 except ImportError as e:
     logger.warning(f"Enhanced health check endpoints not available: {e}")
 
+# Comprehensive Health Check endpoints with dependency monitoring
+try:
+    from api.app.routers.health_checks import router as comprehensive_health_router
+    app.include_router(comprehensive_health_router, prefix="/api/health", tags=["Health Monitoring"])
+    logger.info("✅ Comprehensive health monitoring endpoints included")
+except ImportError as e:
+    logger.warning(f"Comprehensive health check endpoints not available: {e}")
+
 # Admin Analytics endpoints - Composite service
 try:
     from api.v1.endpoints.analytics import router as analytics_router
@@ -407,6 +461,30 @@ try:
     logger.info("✅ Admin Analytics endpoints included (6 composite endpoints)")
 except ImportError as e:
     logger.warning(f"Admin Analytics endpoints not available: {e}")
+
+# Payment Email Notification endpoints - Auto payment confirmation
+try:
+    from routes.payment_email_routes import router as payment_email_router
+    app.include_router(payment_email_router, tags=["Payment Email Notifications"])
+    logger.info("✅ Payment Email Notification endpoints included")
+except ImportError as e:
+    logger.warning(f"Payment Email Notification endpoints not available: {e}")
+
+# Multi-Channel AI Communication endpoints - Handle email, SMS, Instagram, Facebook, phone
+try:
+    from api.v1.endpoints.multi_channel_ai import router as multi_channel_router
+    app.include_router(multi_channel_router, prefix="/api/v1/ai/multi-channel", tags=["AI Multi-Channel Communication"])
+    logger.info("✅ Multi-Channel AI Communication endpoints included (email, SMS, Instagram, Facebook, phone)")
+except ImportError as e:
+    logger.warning(f"Multi-Channel AI Communication endpoints not available: {e}")
+
+# Admin Email Review Dashboard - Review and approve AI-generated email responses
+try:
+    from api.admin.email_review import router as email_review_router
+    app.include_router(email_review_router, prefix="/api/admin/emails", tags=["Admin Email Review"])
+    logger.info("✅ Admin Email Review Dashboard endpoints included (approve/edit/reject AI responses)")
+except ImportError as e:
+    logger.warning(f"Admin Email Review endpoints not available: {e}")
 
 if __name__ == "__main__":
     import uvicorn

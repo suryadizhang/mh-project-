@@ -30,9 +30,10 @@ export default function VenmoPaymentPage() {
   const [qrCodeGenerated, setQrCodeGenerated] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [copiedField, setCopiedField] = useState<string>('');
+  const [customerPhone, setCustomerPhone] = useState('');
 
   // Venmo payment info
-  const venmoUsername = '@myhibachi-chef'; // Replace with actual Venmo username
+  const venmoUsername = '@myhibachichef'; // Venmo username
 
   useEffect(() => {
     // Load payment data from sessionStorage
@@ -45,6 +46,13 @@ export default function VenmoPaymentPage() {
     const data: PaymentData = JSON.parse(storedData);
     setPaymentData(data);
 
+    // Load customer phone from booking data
+    const bookingData = sessionStorage.getItem('bookingData');
+    if (bookingData) {
+      const booking = JSON.parse(bookingData);
+      setCustomerPhone(booking.customer_phone || booking.phone || '');
+    }
+
     // Calculate fee (3%)
     const fee = data.subtotal * 0.03;
     const total = data.subtotal + fee;
@@ -53,6 +61,7 @@ export default function VenmoPaymentPage() {
 
     // Generate QR code
     generateQRCode(total);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
   // Generate Venmo QR code
@@ -60,9 +69,11 @@ export default function VenmoPaymentPage() {
     if (!canvasRef.current) return;
 
     try {
-      // Venmo deep link format
-      // venmo://paycharge?txn=pay&recipients=USERNAME&amount=AMOUNT&note=NOTE
-      const venmoDeepLink = `venmo://paycharge?txn=pay&recipients=${encodeURIComponent(venmoUsername)}&amount=${amount.toFixed(2)}&note=${encodeURIComponent('My Hibachi Payment')}`;
+      // Venmo deep link format with customer phone in note for auto-matching
+      // venmo://paycharge?txn=pay&recipients=USERNAME&amount=AMOUNT&note=PHONE
+      const phoneNote = customerPhone.replace(/\D/g, ''); // Remove non-digits for clean format
+      const noteText = phoneNote || 'Hibachi Payment';
+      const venmoDeepLink = `venmo://paycharge?txn=pay&recipients=${encodeURIComponent(venmoUsername)}&amount=${amount.toFixed(2)}&note=${encodeURIComponent(noteText)}`;
 
       await QRCode.toCanvas(canvasRef.current, venmoDeepLink, {
         width: 256,
