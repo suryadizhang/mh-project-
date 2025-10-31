@@ -3,14 +3,15 @@ Analytics Endpoints - Composite Service
 Aggregates data from bookings, payments, reviews, leads, newsletter
 """
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func, text
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
 from pydantic import BaseModel
 import logging
 
 from core.database import get_db
-from core.auth import get_current_user
+from core.security import get_current_user
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -113,7 +114,7 @@ def calculate_trend(current: float, previous: float) -> Dict[str, Any]:
 @router.get("/overview", response_model=OverviewStats)
 async def get_overview(
     period: str = Query("30d", description="Time period: 7d, 30d, 90d, 1y"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: Dict = Depends(get_current_user)
 ):
     """
@@ -124,41 +125,45 @@ async def get_overview(
         start_date, end_date = get_date_range(period)
         
         # Get booking statistics
-        booking_query = """
+        booking_query = text("""
             SELECT 
                 COUNT(*) as total_bookings,
                 COALESCE(SUM(total_amount_cents), 0) / 100.0 as total_revenue,
                 COUNT(DISTINCT customer_email) as unique_customers
             FROM bookings 
             WHERE created_at >= :start_date AND created_at <= :end_date
-        """
-        booking_stats = db.execute(booking_query, {"start_date": start_date, "end_date": end_date}).fetchone()
+        """)
+        booking_result = await db.execute(booking_query, {"start_date": start_date, "end_date": end_date})
+        booking_stats = booking_result.fetchone()
         
         # Get lead statistics
-        lead_query = """
+        lead_query = text("""
             SELECT 
                 COUNT(*) as total_leads,
                 SUM(CASE WHEN status = 'converted' THEN 1 ELSE 0 END) as converted_leads
             FROM leads 
             WHERE created_at >= :start_date AND created_at <= :end_date
-        """
-        lead_stats = db.execute(lead_query, {"start_date": start_date, "end_date": end_date}).fetchone()
+        """)
+        lead_result = await db.execute(lead_query, {"start_date": start_date, "end_date": end_date})
+        lead_stats = lead_result.fetchone()
         
         # Get review statistics
-        review_query = """
+        review_query = text("""
             SELECT COUNT(*) as pending_reviews
             FROM reviews 
             WHERE status = 'pending'
-        """
-        review_stats = db.execute(review_query).fetchone()
+        """)
+        review_result = await db.execute(review_query)
+        review_stats = review_result.fetchone()
         
         # Get newsletter statistics
-        campaign_query = """
+        campaign_query = text("""
             SELECT COUNT(*) as active_campaigns
             FROM newsletter_campaigns 
             WHERE status = 'active'
-        """
-        campaign_stats = db.execute(campaign_query).fetchone()
+        """)
+        campaign_result = await db.execute(campaign_query)
+        campaign_stats = campaign_result.fetchone()
         
         # Calculate metrics
         total_bookings = booking_stats.total_bookings or 0
@@ -171,7 +176,7 @@ async def get_overview(
         conversion_rate = (converted_leads / total_leads * 100) if total_leads > 0 else 0
         
         # Get revenue trend (daily for last period)
-        revenue_trend_query = """
+        revenue_trend_query = text("""
             SELECT 
                 DATE(created_at) as date,
                 COUNT(*) as bookings,
@@ -180,14 +185,15 @@ async def get_overview(
             WHERE created_at >= :start_date AND created_at <= :end_date
             GROUP BY DATE(created_at)
             ORDER BY date
-        """
+        """)
+        revenue_trend_result = await db.execute(revenue_trend_query, {"start_date": start_date, "end_date": end_date})
         revenue_trend = [
             {"date": str(row.date), "bookings": row.bookings, "revenue": row.revenue}
-            for row in db.execute(revenue_trend_query, {"start_date": start_date, "end_date": end_date})
+            for row in revenue_trend_result
         ]
         
         # Get top revenue sources
-        source_query = """
+        source_query = text("""
             SELECT 
                 COALESCE(source, 'direct') as source,
                 COUNT(*) as count,
@@ -197,10 +203,11 @@ async def get_overview(
             GROUP BY source
             ORDER BY revenue DESC
             LIMIT 5
-        """
+        """)
+        source_result = await db.execute(source_query, {"start_date": start_date, "end_date": end_date})
         top_sources = [
             {"source": row.source, "count": row.count, "revenue": row.revenue}
-            for row in db.execute(source_query, {"start_date": start_date, "end_date": end_date})
+            for row in source_result
         ]
         
         return OverviewStats(
@@ -225,7 +232,7 @@ async def get_overview(
 @router.get("/leads", response_model=LeadAnalytics)
 async def get_lead_analytics(
     period: str = Query("30d", description="Time period: 7d, 30d, 90d, 1y"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: Dict = Depends(get_current_user)
 ):
     """
@@ -236,7 +243,7 @@ async def get_lead_analytics(
         start_date, end_date = get_date_range(period)
         
         # Total leads and conversions
-        lead_stats_query = """
+        lead_stats_query = text("""
             SELECT 
                 COUNT(*) as total_leads,
                 SUM(CASE WHEN status = 'converted' THEN 1 ELSE 0 END) as converted_leads,
@@ -247,15 +254,16 @@ async def get_lead_analytics(
                 END) as avg_days_to_convert
             FROM leads
             WHERE created_at >= :start_date AND created_at <= :end_date
-        """
-        stats = db.execute(lead_stats_query, {"start_date": start_date, "end_date": end_date}).fetchone()
+        """)
+        stats_result = await db.execute(lead_stats_query, {"start_date": start_date, "end_date": end_date})
+        stats = stats_result.fetchone()
         
         total_leads = stats.total_leads or 0
         converted = stats.converted_leads or 0
         conversion_rate = (converted / total_leads * 100) if total_leads > 0 else 0
         
         # Leads by source
-        source_query = """
+        source_query = text("""
             SELECT 
                 COALESCE(source, 'unknown') as source,
                 COUNT(*) as count,
@@ -264,7 +272,8 @@ async def get_lead_analytics(
             WHERE created_at >= :start_date AND created_at <= :end_date
             GROUP BY source
             ORDER BY count DESC
-        """
+        """)
+        source_result = await db.execute(source_query, {"start_date": start_date, "end_date": end_date})
         leads_by_source = [
             {
                 "source": row.source, 
@@ -272,11 +281,11 @@ async def get_lead_analytics(
                 "converted": row.converted,
                 "conversion_rate": (row.converted / row.count * 100) if row.count > 0 else 0
             }
-            for row in db.execute(source_query, {"start_date": start_date, "end_date": end_date})
+            for row in source_result
         ]
         
         # Leads by stage
-        stage_query = """
+        stage_query = text("""
             SELECT 
                 COALESCE(stage, 'new') as stage,
                 COUNT(*) as count
@@ -284,14 +293,15 @@ async def get_lead_analytics(
             WHERE created_at >= :start_date AND created_at <= :end_date
             GROUP BY stage
             ORDER BY count DESC
-        """
+        """)
+        stage_result = await db.execute(stage_query, {"start_date": start_date, "end_date": end_date})
         leads_by_stage = [
             {"stage": row.stage, "count": row.count}
-            for row in db.execute(stage_query, {"start_date": start_date, "end_date": end_date})
+            for row in stage_result
         ]
         
         # Lead quality (using AI score)
-        quality_query = """
+        quality_query = text("""
             SELECT 
                 CASE 
                     WHEN ai_score >= 80 THEN 'high'
@@ -302,10 +312,11 @@ async def get_lead_analytics(
             FROM leads
             WHERE created_at >= :start_date AND created_at <= :end_date AND ai_score IS NOT NULL
             GROUP BY quality
-        """
+        """)
+        quality_result = await db.execute(quality_query, {"start_date": start_date, "end_date": end_date})
         quality_dist = [
             {"quality": row.quality, "count": row.count}
-            for row in db.execute(quality_query, {"start_date": start_date, "end_date": end_date})
+            for row in quality_result
         ]
         
         # Top campaigns (if campaign tracking exists)
@@ -333,7 +344,7 @@ async def get_lead_analytics(
 
 @router.get("/newsletter", response_model=NewsletterAnalytics)
 async def get_newsletter_analytics(
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: Dict = Depends(get_current_user)
 ):
     """
@@ -342,27 +353,29 @@ async def get_newsletter_analytics(
     """
     try:
         # Subscriber stats
-        subscriber_query = """
+        subscriber_query = text("""
             SELECT 
                 COUNT(*) as total,
                 SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active
             FROM newsletter_subscribers
-        """
-        sub_stats = db.execute(subscriber_query).fetchone()
+        """)
+        sub_result = await db.execute(subscriber_query)
+        sub_stats = sub_result.fetchone()
         
         # Campaign stats
-        campaign_query = """
+        campaign_query = text("""
             SELECT 
                 COUNT(*) as total,
                 SUM(CASE WHEN status = 'sent' THEN 1 ELSE 0 END) as sent,
                 AVG(CASE WHEN total_sent > 0 THEN (opened * 100.0 / total_sent) ELSE 0 END) as avg_open,
                 AVG(CASE WHEN total_sent > 0 THEN (clicked * 100.0 / total_sent) ELSE 0 END) as avg_click
             FROM newsletter_campaigns
-        """
-        camp_stats = db.execute(campaign_query).fetchone()
+        """)
+        camp_result = await db.execute(campaign_query)
+        camp_stats = camp_result.fetchone()
         
         # Subscriber growth (last 30 days)
-        growth_query = """
+        growth_query = text("""
             SELECT 
                 DATE(created_at) as date,
                 COUNT(*) as new_subscribers
@@ -370,15 +383,16 @@ async def get_newsletter_analytics(
             WHERE created_at >= :start_date
             GROUP BY DATE(created_at)
             ORDER BY date
-        """
+        """)
         start_date = datetime.now() - timedelta(days=30)
+        growth_result = await db.execute(growth_query, {"start_date": start_date})
         growth = [
             {"date": str(row.date), "count": row.new_subscribers}
-            for row in db.execute(growth_query, {"start_date": start_date})
+            for row in growth_result
         ]
         
         # Top campaigns
-        top_campaigns_query = """
+        top_campaigns_query = text("""
             SELECT 
                 subject,
                 total_sent,
@@ -390,7 +404,8 @@ async def get_newsletter_analytics(
             WHERE status = 'sent'
             ORDER BY opened DESC
             LIMIT 5
-        """
+        """)
+        top_result = await db.execute(top_campaigns_query)
         top_camps = [
             {
                 "subject": row.subject,
@@ -400,7 +415,7 @@ async def get_newsletter_analytics(
                 "open_rate": row.open_rate or 0,
                 "click_rate": row.click_rate or 0
             }
-            for row in db.execute(top_campaigns_query)
+            for row in top_result
         ]
         
         return NewsletterAnalytics(
@@ -426,7 +441,7 @@ async def get_newsletter_analytics(
 @router.get("/funnel", response_model=ConversionFunnel)
 async def get_conversion_funnel(
     period: str = Query("30d", description="Time period"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: Dict = Depends(get_current_user)
 ):
     """
@@ -437,7 +452,7 @@ async def get_conversion_funnel(
         start_date, end_date = get_date_range(period)
         
         # Get funnel stages
-        funnel_query = """
+        funnel_query = text("""
             SELECT 
                 COUNT(DISTINCT l.id) as total_leads,
                 SUM(CASE WHEN l.stage IN ('qualified', 'proposal', 'negotiation') THEN 1 ELSE 0 END) as qualified,
@@ -446,8 +461,9 @@ async def get_conversion_funnel(
                 (SELECT COUNT(*) FROM bookings WHERE created_at >= :start_date AND payment_status = 'paid') as paid
             FROM leads l
             WHERE l.created_at >= :start_date AND l.created_at <= :end_date
-        """
-        funnel = db.execute(funnel_query, {"start_date": start_date, "end_date": end_date}).fetchone()
+        """)
+        funnel_result = await db.execute(funnel_query, {"start_date": start_date, "end_date": end_date})
+        funnel = funnel_result.fetchone()
         
         total_leads = funnel.total_leads or 1  # Avoid division by zero
         qualified = funnel.qualified or 0
@@ -498,7 +514,7 @@ async def get_conversion_funnel(
 
 @router.get("/lead-scoring", response_model=LeadScoring)
 async def get_lead_scoring(
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: Dict = Depends(get_current_user)
 ):
     """
@@ -507,7 +523,7 @@ async def get_lead_scoring(
     """
     try:
         # Score distribution
-        score_dist_query = """
+        score_dist_query = text("""
             SELECT 
                 CASE 
                     WHEN ai_score >= 90 THEN '90-100'
@@ -522,14 +538,15 @@ async def get_lead_scoring(
             WHERE ai_score IS NOT NULL
             GROUP BY score_range
             ORDER BY score_range DESC
-        """
+        """)
+        score_result = await db.execute(score_dist_query)
         score_dist = [
             {"range": row.score_range, "count": row.count}
-            for row in db.execute(score_dist_query)
+            for row in score_result
         ]
         
         # High-value leads
-        high_value_query = """
+        high_value_query = text("""
             SELECT 
                 id,
                 name,
@@ -542,7 +559,8 @@ async def get_lead_scoring(
             WHERE ai_score >= 80
             ORDER BY ai_score DESC
             LIMIT 10
-        """
+        """)
+        high_value_result = await db.execute(high_value_query)
         high_value = [
             {
                 "id": row.id,
@@ -552,7 +570,7 @@ async def get_lead_scoring(
                 "stage": row.stage,
                 "source": row.source
             }
-            for row in db.execute(high_value_query)
+            for row in high_value_result
         ]
         
         # Scoring factors (static for now)
@@ -565,7 +583,7 @@ async def get_lead_scoring(
         ]
         
         # Conversion by score
-        conversion_query = """
+        conversion_query = text("""
             SELECT 
                 CASE 
                     WHEN ai_score >= 80 THEN 'high'
@@ -577,7 +595,8 @@ async def get_lead_scoring(
             FROM leads
             WHERE ai_score IS NOT NULL
             GROUP BY score_category
-        """
+        """)
+        conversion_result = await db.execute(conversion_query)
         conversion = [
             {
                 "category": row.score_category,
@@ -585,7 +604,7 @@ async def get_lead_scoring(
                 "converted": row.converted,
                 "rate": round(row.converted / row.total * 100, 1) if row.total > 0 else 0
             }
-            for row in db.execute(conversion_query)
+            for row in conversion_result
         ]
         
         return LeadScoring(
@@ -603,7 +622,7 @@ async def get_lead_scoring(
 @router.get("/engagement-trends", response_model=EngagementTrends)
 async def get_engagement_trends(
     period: str = Query("30d", description="Time period"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user: Dict = Depends(get_current_user)
 ):
     """
@@ -614,7 +633,7 @@ async def get_engagement_trends(
         start_date, end_date = get_date_range(period)
         
         # Daily active users (based on bookings, reviews, messages)
-        dau_query = """
+        dau_query = text("""
             SELECT 
                 DATE(created_at) as date,
                 COUNT(DISTINCT customer_email) as active_users
@@ -625,10 +644,11 @@ async def get_engagement_trends(
             ) combined
             GROUP BY DATE(created_at)
             ORDER BY date
-        """
+        """)
+        dau_result = await db.execute(dau_query, {"start_date": start_date})
         dau = [
             {"date": str(row.date), "users": row.active_users}
-            for row in db.execute(dau_query, {"start_date": start_date})
+            for row in dau_result
         ]
         
         # Page views (simulated - would need tracking implementation)
@@ -638,7 +658,7 @@ async def get_engagement_trends(
         ]
         
         # Interaction rate
-        interaction_query = """
+        interaction_query = text("""
             SELECT 
                 COUNT(DISTINCT customer_email) as interacted,
                 (SELECT COUNT(DISTINCT email) FROM customers) as total
@@ -647,8 +667,9 @@ async def get_engagement_trends(
                 UNION
                 SELECT customer_email FROM reviews WHERE created_at >= :start_date
             ) interactions
-        """
-        interaction = db.execute(interaction_query, {"start_date": start_date}).fetchone()
+        """)
+        interaction_result = await db.execute(interaction_query, {"start_date": start_date})
+        interaction = interaction_result.fetchone()
         interaction_rate = (interaction.interacted / interaction.total * 100) if interaction.total > 0 else 0
         
         # Popular features

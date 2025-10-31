@@ -18,6 +18,7 @@ from api.app.database import Base  # noqa: E402
 
 # Import all models for Alembic discovery
 from api.app.models import booking_models, stripe_models, core  # noqa: E402, F401
+from models import review  # noqa: E402, F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

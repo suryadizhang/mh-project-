@@ -20,7 +20,7 @@ from api.ai.endpoints.routers.admin import router as admin_router
 from api.ai.endpoints.routers.websocket import router as websocket_router
 from api.ai.endpoints.routers.v1.unified_chat import router as unified_chat_router
 from api.ai.endpoints.services.ai_pipeline import AIPipeline
-from api.ai.endpoints.services.knowledge_base_simple import SimpleKnowledgeBaseService as KnowledgeBaseService
+from api.ai.endpoints.services.knowledge_base_simple import ProductionKnowledgeBaseService as KnowledgeBaseService
 
 # Setup logging
 setup_logging()
