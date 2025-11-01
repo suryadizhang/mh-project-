@@ -4,6 +4,9 @@ Handles: Email, SMS/Text, Instagram DM, Facebook Messenger, Phone Transcripts
 
 This service provides a unified interface for processing customer inquiries across
 all communication channels with channel-specific optimizations and response formatting.
+
+Version: 2.0 - Integrated with AI Orchestrator (Tool Calling)
+Updated: October 31, 2025
 """
 
 import re
@@ -11,6 +14,14 @@ from typing import Dict, List, Optional, Tuple, Any
 from datetime import datetime, timedelta
 import logging
 import json
+
+# Import AI Orchestrator (Tool Calling System)
+from api.ai.orchestrator import (
+    AIOrchestrator,
+    OrchestratorRequest,
+    OrchestratorResponse,
+    get_ai_orchestrator
+)
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +33,14 @@ class MultiChannelAIHandler:
     
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
+        
+        # Initialize AI Orchestrator (Tool Calling System)
+        try:
+            self.orchestrator = get_ai_orchestrator()
+            self.logger.info("✅ AI Orchestrator initialized successfully")
+        except Exception as e:
+            self.logger.error(f"❌ Failed to initialize AI Orchestrator: {str(e)}")
+            self.orchestrator = None
         
         # Channel-specific configuration
         self.channel_config = {
@@ -484,25 +503,108 @@ Subtotal: ${inquiry_details.get('party_size', 0) * 75 if inquiry_details.get('pa
         self, 
         message: str, 
         channel: str,
-        customer_booking_ai  # Pass the AI service instance
+        customer_booking_ai = None,  # Made optional, orchestrator is primary
+        customer_context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Complete pipeline for processing customer inquiry from any channel.
         
+        **NEW (v2.0)**: Integrated with AI Orchestrator for tool calling.
+        The orchestrator automatically:
+        - Calculates accurate pricing via PricingTool
+        - Computes travel fees via TravelFeeTool
+        - Handles protein upgrades via ProteinTool
+        
         Args:
             message: Raw customer message
             channel: Communication channel (email, sms, instagram, facebook, phone_transcript)
-            customer_booking_ai: Instance of CustomerBookingAI service
+            customer_booking_ai: Legacy AI service instance (deprecated, optional)
+            customer_context: Customer information (name, email, phone, location)
         
         Returns:
             Formatted response with metadata and suggested actions
         """
         self.logger.info(f"🔄 Processing {channel} inquiry: {message[:100]}...")
         
-        # Step 1: Extract inquiry details
+        # Step 1: Extract inquiry details (keep existing extraction)
         inquiry_details = await self.extract_inquiry_details(message, channel)
         
-        # Step 1.5: Calculate protein costs if selections provided
+        # Step 2: Use AI Orchestrator (Tool Calling System)
+        if self.orchestrator:
+            try:
+                self.logger.info("🤖 Using AI Orchestrator with tool calling...")
+                
+                # Build orchestrator request
+                orchestrator_request = OrchestratorRequest(
+                    message=message,
+                    channel=channel,
+                    customer_context=customer_context or {},
+                    metadata={
+                        "inquiry_details": inquiry_details,
+                        "extracted_at": datetime.now().isoformat()
+                    }
+                )
+                
+                # Process through orchestrator
+                orchestrator_response = await self.orchestrator.process_inquiry(orchestrator_request)
+                
+                if orchestrator_response.success:
+                    self.logger.info(
+                        f"✅ Orchestrator processed inquiry successfully",
+                        extra={
+                            "tools_used": len(orchestrator_response.tools_used),
+                            "execution_time_ms": orchestrator_response.metadata.get("execution_time_ms")
+                        }
+                    )
+                    
+                    # Format orchestrator response for channel
+                    formatted_response = self.format_response_for_channel(
+                        orchestrator_response.response,
+                        channel,
+                        inquiry_details
+                    )
+                    
+                    # Add orchestrator metadata
+                    formatted_response["ai_metadata"] = {
+                        "model_used": orchestrator_response.metadata.get("model"),
+                        "tools_used": [tool.tool_name for tool in orchestrator_response.tools_used],
+                        "tool_execution_time_ms": sum(
+                            tool.execution_time_ms for tool in orchestrator_response.tools_used
+                        ),
+                        "total_execution_time_ms": orchestrator_response.metadata.get("execution_time_ms"),
+                        "orchestrator_version": "2.0",
+                        "phase": "Phase 1"
+                    }
+                    
+                    # Extract tool results for metadata
+                    for tool_call in orchestrator_response.tools_used:
+                        if tool_call.tool_name == "calculate_party_quote" and tool_call.success:
+                            formatted_response["metadata"]["pricing_breakdown"] = tool_call.result
+                        elif tool_call.tool_name == "calculate_protein_costs" and tool_call.success:
+                            formatted_response["metadata"]["protein_breakdown"] = tool_call.result
+                        elif tool_call.tool_name == "calculate_travel_fee" and tool_call.success:
+                            formatted_response["metadata"]["travel_fee_details"] = tool_call.result
+                    
+                    # Add conversation ID
+                    formatted_response["conversation_id"] = orchestrator_response.conversation_id
+                    formatted_response["requires_admin_review"] = orchestrator_response.requires_admin_review
+                    
+                    self.logger.info(f"✅ Multi-channel processing complete (orchestrator) for {channel}")
+                    return formatted_response
+                
+                else:
+                    # Orchestrator failed, fall back to legacy method
+                    self.logger.warning(
+                        f"⚠️ Orchestrator failed: {orchestrator_response.error}. Falling back to legacy method."
+                    )
+                    
+            except Exception as e:
+                self.logger.error(f"❌ Orchestrator error: {str(e)}. Falling back to legacy method.")
+        
+        # FALLBACK: Legacy method (if orchestrator unavailable or failed)
+        self.logger.info("🔄 Using legacy AI processing method...")
+        
+        # Step 1.5: Calculate protein costs if selections provided (LEGACY)
         protein_info = None
         if inquiry_details.get("protein_selections") and inquiry_details.get("party_size"):
             try:
@@ -512,14 +614,14 @@ Subtotal: ${inquiry_details.get('party_size', 0) * 75 if inquiry_details.get('pa
                     guest_count=inquiry_details["party_size"],
                     protein_selections=inquiry_details["protein_selections"]
                 )
-                self.logger.info(f"🥩 Protein cost calculated: ${protein_info['total_protein_cost']}")
+                self.logger.info(f"🥩 Protein cost calculated (legacy): ${protein_info['total_protein_cost']}")
             except Exception as e:
                 self.logger.error(f"❌ Error calculating protein cost: {str(e)}")
         
-        # Step 2: Build channel-specific system prompt
+        # Step 2: Build channel-specific system prompt (LEGACY)
         system_prompt = self.build_system_prompt_for_channel(channel, inquiry_details)
         
-        # Step 3: Build context for AI
+        # Step 3: Build context for AI (LEGACY)
         context = {
             "user_role": "customer",
             "channel": channel,
@@ -528,7 +630,7 @@ Subtotal: ${inquiry_details.get('party_size', 0) * 75 if inquiry_details.get('pa
             "system_prompt_override": system_prompt
         }
         
-        # Add protein details to system prompt if available
+        # Add protein details to system prompt if available (LEGACY)
         if protein_info:
             protein_context = f"""
 
@@ -544,35 +646,46 @@ Include this information naturally in your response!
 """
             context["system_prompt_override"] += protein_context
         
-        # Step 4: Process through optimized AI pipeline
-        ai_response = await customer_booking_ai.process_customer_message(
-            message=message,
-            context=context
-        )
+        # Step 4: Process through legacy AI pipeline
+        if customer_booking_ai:
+            ai_response = await customer_booking_ai.process_customer_message(
+                message=message,
+                context=context
+            )
+        else:
+            # If no customer_booking_ai provided, use fallback response
+            ai_response = {
+                "content": "I apologize, but I'm having trouble processing your request right now. Please call us at (916) 740-8768 and we'll help you immediately!",
+                "model_used": "fallback",
+                "confidence": 0.0,
+                "response_time_ms": 0
+            }
         
-        # Step 5: Format response for channel
+        # Step 5: Format response for channel (LEGACY)
         formatted_response = self.format_response_for_channel(
             ai_response["content"],
             channel,
             inquiry_details
         )
         
-        # Add protein information to metadata if available
+        # Add protein information to metadata if available (LEGACY)
         if protein_info:
             formatted_response["metadata"]["protein_breakdown"] = protein_info["breakdown"]
             formatted_response["metadata"]["protein_summary"] = protein_info["proteins_summary"]
             formatted_response["metadata"]["protein_cost"] = float(protein_info["total_protein_cost"])
         
-        # Add AI metadata
+        # Add AI metadata (LEGACY)
         formatted_response["ai_metadata"] = {
             "model_used": ai_response.get("model_used"),
             "confidence": ai_response.get("confidence"),
             "response_time_ms": ai_response.get("response_time_ms"),
             "from_cache": ai_response.get("from_cache", False),
-            "complexity_score": ai_response.get("model_analysis", {}).get("complexity_score")
+            "complexity_score": ai_response.get("model_analysis", {}).get("complexity_score"),
+            "orchestrator_version": "legacy",
+            "fallback_mode": True
         }
         
-        self.logger.info(f"✅ Multi-channel processing complete for {channel}")
+        self.logger.info(f"✅ Multi-channel processing complete (legacy) for {channel}")
         return formatted_response
 
 
