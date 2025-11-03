@@ -105,10 +105,10 @@ class Settings(BaseSettings):
     GBP_ACCOUNT_ID: str
     GBP_LOCATION_ID: str
     
-    # Google OAuth - REQUIRED: Must come from .env
-    GOOGLE_CLIENT_ID: str
-    GOOGLE_CLIENT_SECRET: str
-    GOOGLE_REDIRECT_URI: str
+    # Google OAuth - For admin panel authentication (optional in dev/test)
+    GOOGLE_CLIENT_ID: Optional[str] = "test-google-client-id"
+    GOOGLE_CLIENT_SECRET: Optional[str] = "test-google-client-secret"
+    GOOGLE_REDIRECT_URI: Optional[str] = "http://localhost:3001/auth/google/callback"
     
     # Frontend URLs
     FRONTEND_URL: str = "http://localhost:3001"
