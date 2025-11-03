@@ -269,5 +269,56 @@ Would require:
 
 ---
 
+## 🔔 GitGuardian Alert - November 3, 2025 (RESOLVED ✅)
+
+### Alert Details
+**Incident:** PostgreSQL URI detected in commit ae43c94  
+**Detected by:** GitGuardian  
+**Time:** 2025-11-03 07:40:53 PM (UTC)
+
+### Issue
+The previous security fix (commit ae43c94) removed hardcoded credentials but left insecure fallback values in environment variable calls:
+
+```python
+# ❌ INSECURE - Contains credentials in fallback
+DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://postgres:password@localhost:5432/postgres')
+```
+
+### Resolution (Commit: 27a7d25)
+
+**Fixed 9 Python files by removing all fallback credentials:**
+
+1. ✅ `merge_heads.py` - Removed `postgres:password@localhost`
+2. ✅ `test_db_connection.py` - Removed `postgres:password@localhost`
+3. ✅ `verify_database.py` - Removed `postgres:password@localhost`
+4. ✅ `check_bookings_schema.py` - Removed `postgres:mysecretpassword@localhost`
+5. ✅ `check_identity_schema.py` - Removed `user:password@localhost`
+6. ✅ `check_db.py` - Removed `user:password@localhost`
+7. ✅ `create_station_groups.py` - Removed `user:password@localhost`
+8. ✅ `initialize_notification_groups.py` - Removed `user:password@localhost`
+9. ✅ `test_add_member.py` - Removed `user:password@localhost`
+
+**New secure pattern:**
+
+```python
+# ✅ SECURE - No credentials in code
+DATABASE_URL = os.getenv('DATABASE_URL')
+if not DATABASE_URL:
+    print("❌ ERROR: DATABASE_URL environment variable is required")
+    sys.exit(1)
+```
+
+### Verification
+
+```powershell
+# Confirmed: All hardcoded credentials removed
+git log -1 HEAD --stat
+# 9 files changed, 61 insertions(+), 22 deletions(-)
+```
+
+**Status:** ✅ Alert resolved - No credentials in codebase
+
+---
+
 *Generated: November 3, 2025*
-*Last Updated: After commit ae43c94*
+*Last Updated: After commit 27a7d25 (GitGuardian alert resolved)*
