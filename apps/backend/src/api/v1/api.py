@@ -6,7 +6,7 @@ Combines operational and AI routes under single API
 from fastapi import APIRouter
 
 # Import endpoint routers
-from .endpoints import auth, bookings, customers, leads, inbox, rate_limit_metrics
+from .endpoints import auth, bookings, customers, leads, inbox, rate_limit_metrics, ai_costs, shadow_learning
 from .endpoints.ai import chat, orchestrator
 
 api_router = APIRouter()
@@ -21,6 +21,12 @@ api_router.include_router(inbox.router, prefix="/inbox", tags=["Inbox"])
 # AI endpoints (integrated, not separate API)
 api_router.include_router(chat.router, prefix="/ai", tags=["AI"])
 api_router.include_router(orchestrator.router, prefix="/ai/orchestrator", tags=["AI Orchestrator"])
+
+# AI Cost Monitoring endpoints
+api_router.include_router(ai_costs.router, tags=["AI Cost Monitoring"])
+
+# Shadow Learning endpoints (Phase 1.5)
+api_router.include_router(shadow_learning.router, tags=["Shadow Learning"])
 
 # Rate limiting monitoring endpoints
 api_router.include_router(rate_limit_metrics.router, prefix="/monitoring", tags=["Monitoring"])
