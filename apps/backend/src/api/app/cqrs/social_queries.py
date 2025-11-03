@@ -1,33 +1,38 @@
 """Social media CQRS queries."""
 
 from datetime import datetime
-from typing import Any, Optional, Literal
+from typing import Literal
 from uuid import UUID
 
-from pydantic import Field, ConfigDict
-
 from api.app.cqrs.base import Query
-from api.app.models.social import MessageKind, SocialPlatform, ThreadStatus, ReviewStatus
+from api.app.models.social import (
+    MessageKind,
+    ReviewStatus,
+    SocialPlatform,
+    ThreadStatus,
+)
+from pydantic import ConfigDict, Field
 
 
 class GetSocialInboxQuery(Query):
     """Query to get social media inbox messages."""
 
-    platforms: Optional[list[SocialPlatform]] = None
-    statuses: Optional[list[ThreadStatus]] = None
-    assigned_to: Optional[UUID] = None
-    date_from: Optional[datetime] = None
-    date_to: Optional[datetime] = None
-    search: Optional[str] = Field(None, max_length=100)
-    has_unread: Optional[bool] = None
-    priority_min: Optional[int] = Field(None, ge=1, le=5)
-    tags: Optional[list[str]] = None
+    platforms: list[SocialPlatform] | None = None
+    statuses: list[ThreadStatus] | None = None
+    assigned_to: UUID | None = None
+    date_from: datetime | None = None
+    date_to: datetime | None = None
+    search: str | None = Field(None, max_length=100)
+    has_unread: bool | None = None
+    priority_min: int | None = Field(None, ge=1, le=5)
+    tags: list[str] | None = None
     page: int = Field(1, ge=1)
     page_size: int = Field(25, ge=1, le=100)
     sort_by: str = Field("updated_at", description="Field to sort by")
     sort_order: Literal["asc", "desc"] = "desc"
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "platforms": ["instagram", "facebook"],
                 "statuses": ["new", "pending"],
@@ -39,30 +44,32 @@ class GetSocialInboxQuery(Query):
                 "page": 1,
                 "page_size": 25,
                 "sort_by": "updated_at",
-                "sort_order": "desc"
+                "sort_order": "desc",
             }
-        })
+        }
+    )
 
 
 class GetReviewsBoardQuery(Query):
     """Query to get reviews dashboard."""
 
-    platforms: Optional[list[SocialPlatform]] = None
-    statuses: Optional[list[ReviewStatus]] = None
-    rating_min: Optional[int] = Field(None, ge=1, le=5)
-    rating_max: Optional[int] = Field(None, ge=1, le=5)
-    date_from: Optional[datetime] = None
-    date_to: Optional[datetime] = None
-    search: Optional[str] = Field(None, max_length=100)
-    priority_min: Optional[int] = Field(None, ge=1, le=5)
-    assigned_to: Optional[UUID] = None
+    platforms: list[SocialPlatform] | None = None
+    statuses: list[ReviewStatus] | None = None
+    rating_min: int | None = Field(None, ge=1, le=5)
+    rating_max: int | None = Field(None, ge=1, le=5)
+    date_from: datetime | None = None
+    date_to: datetime | None = None
+    search: str | None = Field(None, max_length=100)
+    priority_min: int | None = Field(None, ge=1, le=5)
+    assigned_to: UUID | None = None
     escalated_only: bool = False
     page: int = Field(1, ge=1)
     page_size: int = Field(25, ge=1, le=100)
     sort_by: str = Field("created_at", description="Field to sort by")
     sort_order: Literal["asc", "desc"] = "desc"
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "platforms": ["google", "yelp"],
                 "statuses": ["new", "acknowledged"],
@@ -73,9 +80,10 @@ class GetReviewsBoardQuery(Query):
                 "priority_min": 2,
                 "escalated_only": False,
                 "page": 1,
-                "page_size": 25
+                "page_size": 25,
             }
-        })
+        }
+    )
 
 
 class GetThreadDetailQuery(Query):
@@ -86,135 +94,148 @@ class GetThreadDetailQuery(Query):
     include_customer_profile: bool = True
     include_related_threads: bool = False
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "thread_id": "550e8400-e29b-41d4-a716-446655440000",
                 "include_messages": True,
                 "include_customer_profile": True,
-                "include_related_threads": True
+                "include_related_threads": True,
             }
-        })
+        }
+    )
 
 
 class GetSocialAnalyticsQuery(Query):
     """Query to get social media analytics."""
 
-    platforms: Optional[list[SocialPlatform]] = None
+    platforms: list[SocialPlatform] | None = None
     date_from: datetime
     date_to: datetime
     granularity: Literal["hour", "day", "week", "month"] = "day"
-    metrics: Optional[list[str]] = Field(
+    metrics: list[str] | None = Field(
         default=None,
-        description="Specific metrics to include: messages, threads, leads, reviews, response_time"
+        description="Specific metrics to include: messages, threads, leads, reviews, response_time",
     )
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "platforms": ["instagram", "facebook"],
                 "date_from": "2025-09-01T00:00:00Z",
                 "date_to": "2025-09-23T23:59:59Z",
                 "granularity": "day",
-                "metrics": ["messages", "threads", "leads", "response_time"]
+                "metrics": ["messages", "threads", "leads", "response_time"],
             }
-        })
+        }
+    )
 
 
 class GetSocialAccountsQuery(Query):
     """Query to get connected social media accounts."""
 
-    platforms: Optional[list[SocialPlatform]] = None
-    is_active: Optional[bool] = None
+    platforms: list[SocialPlatform] | None = None
+    is_active: bool | None = None
     include_stats: bool = False
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "platforms": ["instagram", "google"],
                 "is_active": True,
-                "include_stats": True
+                "include_stats": True,
             }
-        })
+        }
+    )
 
 
 class GetCustomerSocialProfileQuery(Query):
     """Query to get customer's social media profile."""
 
-    customer_id: Optional[UUID] = None
-    social_handle: Optional[str] = None
-    platform: Optional[SocialPlatform] = None
+    customer_id: UUID | None = None
+    social_handle: str | None = None
+    platform: SocialPlatform | None = None
     include_threads: bool = True
     include_reviews: bool = True
     threads_limit: int = Field(10, ge=1, le=50)
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "customer_id": "660e8400-e29b-41d4-a716-446655440000",
                 "social_handle": "@viviana.sac",
                 "platform": "instagram",
                 "include_threads": True,
                 "include_reviews": True,
-                "threads_limit": 20
+                "threads_limit": 20,
             }
-        })
+        }
+    )
 
 
 class SearchSocialContentQuery(Query):
     """Query to search across social media content."""
 
     search_term: str = Field(..., min_length=2, max_length=100)
-    platforms: Optional[list[SocialPlatform]] = None
-    content_types: Optional[list[Literal["message", "comment", "review", "mention"]]] = None
-    date_from: Optional[datetime] = None
-    date_to: Optional[datetime] = None
-    customer_id: Optional[UUID] = None
-    thread_id: Optional[UUID] = None
+    platforms: list[SocialPlatform] | None = None
+    content_types: list[Literal["message", "comment", "review", "mention"]] | None = None
+    date_from: datetime | None = None
+    date_to: datetime | None = None
+    customer_id: UUID | None = None
+    thread_id: UUID | None = None
     page: int = Field(1, ge=1)
     page_size: int = Field(25, ge=1, le=100)
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "search_term": "party of 12",
                 "platforms": ["instagram", "facebook"],
                 "content_types": ["message", "comment"],
                 "date_from": "2025-09-01T00:00:00Z",
                 "page": 1,
-                "page_size": 25
+                "page_size": 25,
             }
-        })
+        }
+    )
 
 
 class GetUnreadCountsQuery(Query):
     """Query to get unread message counts by platform."""
 
-    platforms: Optional[list[SocialPlatform]] = None
-    assigned_to: Optional[UUID] = None
+    platforms: list[SocialPlatform] | None = None
+    assigned_to: UUID | None = None
     group_by: Literal["platform", "status", "priority"] = "platform"
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "platforms": ["instagram", "facebook", "google"],
                 "assigned_to": "770e8400-e29b-41d4-a716-446655440000",
-                "group_by": "platform"
+                "group_by": "platform",
             }
-        })
+        }
+    )
 
 
 class GetSocialLeadsQuery(Query):
     """Query to get social media leads."""
 
-    platforms: Optional[list[SocialPlatform]] = None
-    date_from: Optional[datetime] = None
-    date_to: Optional[datetime] = None
-    consent_dm: Optional[bool] = None
-    consent_sms: Optional[bool] = None
-    consent_email: Optional[bool] = None
-    interest_category: Optional[str] = None
+    platforms: list[SocialPlatform] | None = None
+    date_from: datetime | None = None
+    date_to: datetime | None = None
+    consent_dm: bool | None = None
+    consent_sms: bool | None = None
+    consent_email: bool | None = None
+    interest_category: str | None = None
     converted_only: bool = False
     page: int = Field(1, ge=1)
     page_size: int = Field(25, ge=1, le=100)
     sort_by: str = Field("created_at", description="Field to sort by")
     sort_order: Literal["asc", "desc"] = "desc"
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "platforms": ["instagram"],
                 "date_from": "2025-09-01T00:00:00Z",
@@ -222,53 +243,58 @@ class GetSocialLeadsQuery(Query):
                 "interest_category": "private_hibachi",
                 "converted_only": False,
                 "page": 1,
-                "page_size": 25
+                "page_size": 25,
             }
-        })
+        }
+    )
 
 
 class GetRecentActivityQuery(Query):
     """Query to get recent social media activity."""
 
-    platforms: Optional[list[SocialPlatform]] = None
-    activity_types: Optional[list[Literal["message", "comment", "review", "mention", "reply"]]] = None
+    platforms: list[SocialPlatform] | None = None
+    activity_types: list[Literal["message", "comment", "review", "mention", "reply"]] | None = None
     hours_back: int = Field(24, ge=1, le=168, description="Hours to look back")
     limit: int = Field(50, ge=1, le=200)
     include_internal: bool = False
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "platforms": ["instagram", "facebook"],
                 "activity_types": ["message", "comment", "review"],
                 "hours_back": 48,
                 "limit": 100,
-                "include_internal": False
+                "include_internal": False,
             }
-        })
+        }
+    )
 
 
 class GetThreadMessagesQuery(Query):
     """Query to get messages in a social thread."""
 
     thread_id: UUID
-    message_types: Optional[list[MessageKind]] = None
-    date_from: Optional[datetime] = None
-    date_to: Optional[datetime] = None
+    message_types: list[MessageKind] | None = None
+    date_from: datetime | None = None
+    date_to: datetime | None = None
     page: int = Field(1, ge=1)
     page_size: int = Field(50, ge=1, le=200)
     sort_order: Literal["asc", "desc"] = "asc"
     include_sender_profile: bool = True
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "thread_id": "550e8400-e29b-41d4-a716-446655440000",
                 "message_types": ["dm", "comment"],
                 "page": 1,
                 "page_size": 50,
                 "sort_order": "asc",
-                "include_sender_profile": True
+                "include_sender_profile": True,
             }
-        })
+        }
+    )
 
 
 class GetSocialMetricsQuery(Query):
@@ -276,19 +302,30 @@ class GetSocialMetricsQuery(Query):
 
     date_from: datetime
     date_to: datetime
-    platforms: Optional[list[SocialPlatform]] = None
-    metric_types: Optional[list[Literal[
-        "response_time", "resolution_time", "customer_satisfaction",
-        "lead_conversion", "review_sentiment", "engagement_rate"
-    ]]] = None
+    platforms: list[SocialPlatform] | None = None
+    metric_types: (
+        list[
+            Literal[
+                "response_time",
+                "resolution_time",
+                "customer_satisfaction",
+                "lead_conversion",
+                "review_sentiment",
+                "engagement_rate",
+            ]
+        ]
+        | None
+    ) = None
     granularity: Literal["day", "week", "month"] = "day"
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "date_from": "2025-09-01T00:00:00Z",
                 "date_to": "2025-09-23T23:59:59Z",
                 "platforms": ["instagram", "facebook"],
                 "metric_types": ["response_time", "lead_conversion", "review_sentiment"],
-                "granularity": "week"
+                "granularity": "week",
             }
-        })
+        }
+    )

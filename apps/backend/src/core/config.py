@@ -381,7 +381,10 @@ class Settings(BaseSettings):
                 "aws_access_key_id": self.aws_access_key_id,
                 "aws_secret_access_key": self.aws_secret_access_key,
             },
-            "stripe": {"enabled": self.stripe_enabled, "secret_key": self.stripe_secret_key},
+            "stripe": {
+                "enabled": self.stripe_enabled,
+                "secret_key": self.stripe_secret_key,
+            },
             "sms_worker": {
                 "max_retries": self.sms_worker_max_retries,
                 "batch_size": self.sms_worker_batch_size,
@@ -456,13 +459,42 @@ class Settings(BaseSettings):
     OLLAMA_TIMEOUT_SECONDS: int = 60
     OLLAMA_MAX_TOKENS: int = 500
     OLLAMA_TEMPERATURE: float = 0.7
-    SHADOW_LEARNING_ENABLED: bool = True
+
+    # Shadow Learning Control
+    SHADOW_LEARNING_ENABLED: bool = True  # Always collecting data
     # 1.0 = 100% of requests (reduce in production)
     SHADOW_LEARNING_SAMPLE_RATE: float = 1.0
-    # Threshold for high-quality pairs
+
+    # Local AI Activation Mode
+    # "shadow" = Learning only, customers see OpenAI
+    # "active" = Production use based on confidence
+    LOCAL_AI_MODE: str = "shadow"
+
+    # Quality Thresholds (for readiness assessment)
+    # Threshold for high-quality training pairs
     SHADOW_MIN_SIMILARITY_SCORE: float = 0.85
     # Minimum pairs before fine-tuning export
     SHADOW_EXPORT_MIN_PAIRS: int = 100
+    # Minimum confidence to use local model (when active)
+    LOCAL_AI_MIN_CONFIDENCE: float = 0.75
+
+    # Intent-Specific Readiness Thresholds
+    READINESS_FAQ_MIN_PAIRS: int = 50
+    READINESS_FAQ_MIN_SIMILARITY: float = 0.80
+    READINESS_QUOTE_MIN_PAIRS: int = 100
+    READINESS_QUOTE_MIN_SIMILARITY: float = 0.85
+    READINESS_BOOKING_MIN_PAIRS: int = 200
+    READINESS_BOOKING_MIN_SIMILARITY: float = 0.90
+
+    # ML Confidence Predictor Settings
+    ML_PREDICTOR_ENABLED: bool = True
+    ML_PREDICTOR_MIN_TRAINING_SAMPLES: int = 100
+    ML_PREDICTOR_RETRAIN_INTERVAL_HOURS: int = 24
+
+    # Quality Monitoring & Auto-Rollback
+    QUALITY_MONITOR_ENABLED: bool = True
+    QUALITY_DEGRADATION_THRESHOLD: float = 0.10  # 10% drop triggers alert
+    AUTO_ROLLBACK_ENABLED: bool = True  # Auto switch to OpenAI if quality drops
 
     # Business Rules
     QUIET_HOURS_START: int = 21

@@ -11,10 +11,10 @@ Created: October 31, 2025
 Phase: 1B - Intelligence Layer
 """
 
-from .emotion_service import EmotionService, EmotionResult, get_emotion_service
+from .emotion_service import EmotionResult, EmotionService, get_emotion_service
 
 __all__ = [
-    "EmotionService",
     "EmotionResult",
+    "EmotionService",
     "get_emotion_service",
 ]

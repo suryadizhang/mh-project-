@@ -1,11 +1,9 @@
 """Social media function calling tools for AI API."""
 
-import logging
 from datetime import datetime, timedelta
-from typing import Any, Optional
+import logging
+from typing import Any
 from uuid import UUID
-
-from pydantic import BaseModel
 
 from api.app.cqrs.base import CommandBus, QueryBus
 from api.app.cqrs.social_commands import (
@@ -19,17 +17,19 @@ from api.app.cqrs.social_queries import (
     SearchSocialContentQuery,
 )
 from api.app.models.social import MessageKind, SocialPlatform, ThreadStatus
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
 
 class SocialToolResult(BaseModel):
     """Result from social media tool execution."""
+
     success: bool
     message: str
-    data: Optional[dict[str, Any]] = None
+    data: dict[str, Any] | None = None
     requires_approval: bool = False
-    metadata: Optional[dict[str, Any]] = None
+    metadata: dict[str, Any] | None = None
 
 
 class GetSocialInboxTool:
@@ -44,25 +44,22 @@ class GetSocialInboxTool:
             "platforms": {
                 "type": "array",
                 "items": {"type": "string", "enum": ["instagram", "facebook", "google", "yelp"]},
-                "description": "Filter by specific platforms"
+                "description": "Filter by specific platforms",
             },
             "statuses": {
                 "type": "array",
                 "items": {"type": "string", "enum": ["new", "pending", "resolved", "closed"]},
-                "description": "Filter by thread statuses"
+                "description": "Filter by thread statuses",
             },
-            "search": {
-                "type": "string",
-                "description": "Search term to filter messages"
-            },
+            "search": {"type": "string", "description": "Search term to filter messages"},
             "limit": {
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 50,
                 "default": 10,
-                "description": "Number of threads to return"
-            }
-        }
+                "description": "Number of threads to return",
+            },
+        },
     }
 
     def __init__(self, query_bus: QueryBus):
@@ -76,14 +73,14 @@ class GetSocialInboxTool:
                 statuses=kwargs.get("statuses"),
                 search=kwargs.get("search"),
                 page_size=kwargs.get("limit", 10),
-                page=1
+                page=1,
             )
 
             result = await self.query_bus.execute(query)
 
             # Format for AI consumption
             threads_summary = []
-            for thread in result["threads"][:kwargs.get("limit", 10)]:
+            for thread in result["threads"][: kwargs.get("limit", 10)]:
                 latest_msg = thread.get("latest_message", {})
                 summary = {
                     "thread_id": thread["id"],
@@ -94,7 +91,7 @@ class GetSocialInboxTool:
                     "latest_message": latest_msg.get("body", "")[:100],
                     "message_kind": latest_msg.get("kind"),
                     "created_at": thread["created_at"],
-                    "priority": thread["priority"]
+                    "priority": thread["priority"],
                 }
                 threads_summary.append(summary)
 
@@ -103,16 +100,13 @@ class GetSocialInboxTool:
                 message=f"Retrieved {len(threads_summary)} social inbox threads",
                 data={
                     "threads": threads_summary,
-                    "total_count": result["pagination"]["total_count"]
-                }
+                    "total_count": result["pagination"]["total_count"],
+                },
             )
 
         except Exception as e:
-            logger.error(f"Error getting social inbox: {e}")
-            return SocialToolResult(
-                success=False,
-                message=f"Failed to get social inbox: {str(e)}"
-            )
+            logger.exception(f"Error getting social inbox: {e}")
+            return SocialToolResult(success=False, message=f"Failed to get social inbox: {e!s}")
 
 
 class GetThreadDetailTool:
@@ -124,17 +118,14 @@ class GetThreadDetailTool:
     parameters = {
         "type": "object",
         "properties": {
-            "thread_id": {
-                "type": "string",
-                "description": "The ID of the thread to retrieve"
-            },
+            "thread_id": {"type": "string", "description": "The ID of the thread to retrieve"},
             "include_customer_profile": {
                 "type": "boolean",
                 "default": True,
-                "description": "Whether to include customer profile information"
-            }
+                "description": "Whether to include customer profile information",
+            },
         },
-        "required": ["thread_id"]
+        "required": ["thread_id"],
     }
 
     def __init__(self, query_bus: QueryBus):
@@ -149,7 +140,7 @@ class GetThreadDetailTool:
                 thread_id=thread_id,
                 include_messages=True,
                 include_customer_profile=kwargs.get("include_customer_profile", True),
-                include_related_threads=False
+                include_related_threads=False,
             )
 
             result = await self.query_bus.execute(query)
@@ -162,7 +153,7 @@ class GetThreadDetailTool:
                     "body": msg["body"],
                     "sender": msg["sender_name"] or msg["sender_handle"],
                     "created_at": msg["created_at"],
-                    "kind": msg["kind"]
+                    "kind": msg["kind"],
                 }
                 messages_summary.append(msg_summary)
 
@@ -175,7 +166,7 @@ class GetThreadDetailTool:
                     "email": customer_profile.get("email"),
                     "phone": customer_profile.get("phone"),
                     "social_handle": customer_profile.get("social_identity", {}).get("handle"),
-                    "linked": customer_profile.get("linked", True)
+                    "linked": customer_profile.get("linked", True),
                 }
 
             return SocialToolResult(
@@ -187,20 +178,17 @@ class GetThreadDetailTool:
                         "platform": result["platform"],
                         "status": result["status"],
                         "priority": result["priority"],
-                        "created_at": result["created_at"]
+                        "created_at": result["created_at"],
                     },
                     "messages": messages_summary,
                     "customer_context": customer_context,
-                    "conversation_summary": self._generate_conversation_summary(messages_summary)
-                }
+                    "conversation_summary": self._generate_conversation_summary(messages_summary),
+                },
             )
 
         except Exception as e:
-            logger.error(f"Error getting thread detail: {e}")
-            return SocialToolResult(
-                success=False,
-                message=f"Failed to get thread detail: {str(e)}"
-            )
+            logger.exception(f"Error getting thread detail: {e}")
+            return SocialToolResult(success=False, message=f"Failed to get thread detail: {e!s}")
 
     def _generate_conversation_summary(self, messages: list[dict[str, Any]]) -> str:
         """Generate a brief conversation summary for AI context."""
@@ -213,13 +201,15 @@ class GetThreadDetailTool:
         summary_parts = [
             f"Thread has {len(messages)} total messages",
             f"Customer sent {len(customer_messages)} messages",
-            f"Business sent {len(business_messages)} replies"
+            f"Business sent {len(business_messages)} replies",
         ]
 
         # Add latest customer message context
         if customer_messages:
             latest_customer_msg = customer_messages[-1]
-            summary_parts.append(f"Latest customer message: \"{latest_customer_msg['body'][:100]}...\"")
+            summary_parts.append(
+                f"Latest customer message: \"{latest_customer_msg['body'][:100]}...\""
+            )
 
         return ". ".join(summary_parts)
 
@@ -233,36 +223,30 @@ class SendSocialReplyTool:
     parameters = {
         "type": "object",
         "properties": {
-            "thread_id": {
-                "type": "string",
-                "description": "The ID of the thread to reply to"
-            },
-            "message": {
-                "type": "string",
-                "description": "The message to send to the customer"
-            },
+            "thread_id": {"type": "string", "description": "The ID of the thread to reply to"},
+            "message": {"type": "string", "description": "The message to send to the customer"},
             "reply_type": {
                 "type": "string",
                 "enum": ["dm", "comment", "review_response"],
                 "default": "dm",
-                "description": "Type of reply to send"
+                "description": "Type of reply to send",
             },
             "skip_approval": {
                 "type": "boolean",
                 "default": False,
-                "description": "Whether to skip human approval (emergency only)"
+                "description": "Whether to skip human approval (emergency only)",
             },
             "safety_context": {
                 "type": "object",
                 "properties": {
                     "profanity_checked": {"type": "boolean"},
                     "policy_compliant": {"type": "boolean"},
-                    "confidence_score": {"type": "number"}
+                    "confidence_score": {"type": "number"},
                 },
-                "description": "Safety validation context"
-            }
+                "description": "Safety validation context",
+            },
         },
-        "required": ["thread_id", "message"]
+        "required": ["thread_id", "message"],
     }
 
     def __init__(self, command_bus: CommandBus):
@@ -290,8 +274,8 @@ class SendSocialReplyTool:
                     "safety_score": safety_score,
                     "profanity_check": safety_context.get("profanity_checked", False),
                     "policy_compliant": safety_context.get("policy_compliant", True),
-                    "generated_at": datetime.utcnow().isoformat()
-                }
+                    "generated_at": datetime.utcnow().isoformat(),
+                },
             )
 
             result = await self.command_bus.execute(command)
@@ -310,16 +294,13 @@ class SendSocialReplyTool:
                     "message_id": result["message_id"],
                     "thread_id": result["thread_id"],
                     "sent_immediately": result["sent"],
-                    "safety_score": safety_score
-                }
+                    "safety_score": safety_score,
+                },
             )
 
         except Exception as e:
-            logger.error(f"Error sending social reply: {e}")
-            return SocialToolResult(
-                success=False,
-                message=f"Failed to send social reply: {str(e)}"
-            )
+            logger.exception(f"Error sending social reply: {e}")
+            return SocialToolResult(success=False, message=f"Failed to send social reply: {e!s}")
 
     async def _calculate_safety_score(self, message: str, safety_context: dict[str, Any]) -> float:
         """Calculate safety score for message."""
@@ -334,7 +315,9 @@ class SendSocialReplyTool:
             base_score += 0.1
 
         # Check message length and complexity
-        if len(message) < 500 and not any(word in message.lower() for word in ["refund", "discount", "free", "money"]):
+        if len(message) < 500 and not any(
+            word in message.lower() for word in ["refund", "discount", "free", "money"]
+        ):
             base_score += 0.05
 
         return min(base_score, 1.0)
@@ -356,39 +339,36 @@ class CreateLeadFromSocialTool:
         "properties": {
             "thread_id": {
                 "type": "string",
-                "description": "The thread ID where lead was identified"
+                "description": "The thread ID where lead was identified",
             },
             "platform": {
                 "type": "string",
                 "enum": ["instagram", "facebook", "google", "yelp"],
-                "description": "Social media platform"
+                "description": "Social media platform",
             },
-            "customer_handle": {
-                "type": "string",
-                "description": "Customer's social media handle"
-            },
+            "customer_handle": {"type": "string", "description": "Customer's social media handle"},
             "interest_signals": {
                 "type": "array",
                 "items": {"type": "string"},
-                "description": "List of interest signals detected (e.g., 'party size', 'date mention', 'pricing inquiry')"
+                "description": "List of interest signals detected (e.g., 'party size', 'date mention', 'pricing inquiry')",
             },
             "consent_dm": {
                 "type": "boolean",
                 "default": True,
-                "description": "Customer consented to DM follow-up"
+                "description": "Customer consented to DM follow-up",
             },
             "consent_sms": {
                 "type": "boolean",
                 "default": False,
-                "description": "Customer provided phone for SMS"
+                "description": "Customer provided phone for SMS",
             },
             "consent_email": {
                 "type": "boolean",
                 "default": False,
-                "description": "Customer provided email"
-            }
+                "description": "Customer provided email",
+            },
         },
-        "required": ["platform", "customer_handle", "interest_signals"]
+        "required": ["platform", "customer_handle", "interest_signals"],
     }
 
     def __init__(self, command_bus: CommandBus):
@@ -416,8 +396,8 @@ class CreateLeadFromSocialTool:
                 metadata={
                     "interest_signals": interest_signals,
                     "ai_created": True,
-                    "created_at": datetime.utcnow().isoformat()
-                }
+                    "created_at": datetime.utcnow().isoformat(),
+                },
             )
 
             result = await self.command_bus.execute(command)
@@ -433,29 +413,28 @@ class CreateLeadFromSocialTool:
                         "consent_status": {
                             "dm": command.consent_dm,
                             "sms": command.consent_sms,
-                            "email": command.consent_email
-                        }
-                    }
+                            "email": command.consent_email,
+                        },
+                    },
                 )
             else:
                 return SocialToolResult(
                     success=False,
                     message=f"Lead already exists for {handle} on {platform}",
-                    data={"existing_lead_id": result["lead_id"]}
+                    data={"existing_lead_id": result["lead_id"]},
                 )
 
         except Exception as e:
-            logger.error(f"Error creating lead from social: {e}")
-            return SocialToolResult(
-                success=False,
-                message=f"Failed to create social lead: {str(e)}"
-            )
+            logger.exception(f"Error creating lead from social: {e}")
+            return SocialToolResult(success=False, message=f"Failed to create social lead: {e!s}")
 
     def _infer_interest_category(self, signals: list[str]) -> str:
         """Infer customer interest category from signals."""
         signals_text = " ".join(signals).lower()
 
-        if any(word in signals_text for word in ["party", "group", "people", "birthday", "celebration"]):
+        if any(
+            word in signals_text for word in ["party", "group", "people", "birthday", "celebration"]
+        ):
             return "private_hibachi"
         elif any(word in signals_text for word in ["catering", "event", "office", "wedding"]):
             return "catering"
@@ -469,34 +448,36 @@ class SearchSocialContentTool:
     """Tool to search across social media content."""
 
     name = "search_social_content"
-    description = "Search across social media messages, comments, and reviews for specific content or topics."
+    description = (
+        "Search across social media messages, comments, and reviews for specific content or topics."
+    )
 
     parameters = {
         "type": "object",
         "properties": {
             "search_term": {
                 "type": "string",
-                "description": "Term to search for in social content"
+                "description": "Term to search for in social content",
             },
             "platforms": {
                 "type": "array",
                 "items": {"type": "string", "enum": ["instagram", "facebook", "google", "yelp"]},
-                "description": "Platforms to search"
+                "description": "Platforms to search",
             },
             "content_types": {
                 "type": "array",
                 "items": {"type": "string", "enum": ["message", "comment", "review", "mention"]},
-                "description": "Types of content to search"
+                "description": "Types of content to search",
             },
             "days_back": {
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 90,
                 "default": 7,
-                "description": "Number of days back to search"
-            }
+                "description": "Number of days back to search",
+            },
         },
-        "required": ["search_term"]
+        "required": ["search_term"],
     }
 
     def __init__(self, query_bus: QueryBus):
@@ -517,7 +498,7 @@ class SearchSocialContentTool:
                 platforms=platforms,
                 content_types=content_types,
                 date_from=date_from,
-                page_size=20
+                page_size=20,
             )
 
             result = await self.query_bus.execute(query)
@@ -532,7 +513,7 @@ class SearchSocialContentTool:
                     "author": item.get("author"),
                     "created_at": item.get("created_at"),
                     "thread_id": item.get("thread_id"),
-                    "relevance_score": item.get("relevance_score", 0)
+                    "relevance_score": item.get("relevance_score", 0),
                 }
                 search_results.append(search_result)
 
@@ -546,16 +527,15 @@ class SearchSocialContentTool:
                     "search_parameters": {
                         "platforms": platforms,
                         "content_types": content_types,
-                        "days_back": days_back
-                    }
-                }
+                        "days_back": days_back,
+                    },
+                },
             )
 
         except Exception as e:
-            logger.error(f"Error searching social content: {e}")
+            logger.exception(f"Error searching social content: {e}")
             return SocialToolResult(
-                success=False,
-                message=f"Failed to search social content: {str(e)}"
+                success=False, message=f"Failed to search social content: {e!s}"
             )
 
 
@@ -563,30 +543,26 @@ class UpdateThreadStatusTool:
     """Tool to update social media thread status."""
 
     name = "update_thread_status"
-    description = "Update the status of a social media thread (e.g., mark as resolved, escalate, assign)."
+    description = (
+        "Update the status of a social media thread (e.g., mark as resolved, escalate, assign)."
+    )
 
     parameters = {
         "type": "object",
         "properties": {
-            "thread_id": {
-                "type": "string",
-                "description": "The ID of the thread to update"
-            },
+            "thread_id": {"type": "string", "description": "The ID of the thread to update"},
             "status": {
                 "type": "string",
                 "enum": ["new", "pending", "resolved", "closed", "escalated"],
-                "description": "New status for the thread"
+                "description": "New status for the thread",
             },
-            "reason": {
-                "type": "string",
-                "description": "Reason for the status change"
-            },
+            "reason": {"type": "string", "description": "Reason for the status change"},
             "assigned_to": {
                 "type": "string",
-                "description": "User ID to assign thread to (optional)"
-            }
+                "description": "User ID to assign thread to (optional)",
+            },
         },
-        "required": ["thread_id", "status"]
+        "required": ["thread_id", "status"],
     }
 
     def __init__(self, command_bus: CommandBus):
@@ -605,7 +581,7 @@ class UpdateThreadStatusTool:
                 status=status,
                 updated_by=UUID(int=0),  # AI system user ID
                 reason=reason,
-                assigned_to=assigned_to
+                assigned_to=assigned_to,
             )
 
             result = await self.command_bus.execute(command)
@@ -618,16 +594,13 @@ class UpdateThreadStatusTool:
                     "old_status": result["old_status"],
                     "new_status": result["new_status"],
                     "assigned_to": result.get("assigned_to"),
-                    "reason": reason
-                }
+                    "reason": reason,
+                },
             )
 
         except Exception as e:
-            logger.error(f"Error updating thread status: {e}")
-            return SocialToolResult(
-                success=False,
-                message=f"Failed to update thread status: {str(e)}"
-            )
+            logger.exception(f"Error updating thread status: {e}")
+            return SocialToolResult(success=False, message=f"Failed to update thread status: {e!s}")
 
 
 class SocialMediaToolKit:
@@ -640,21 +613,21 @@ class SocialMediaToolKit:
             "send_social_reply": SendSocialReplyTool(command_bus),
             "create_lead_from_social": CreateLeadFromSocialTool(command_bus),
             "search_social_content": SearchSocialContentTool(query_bus),
-            "update_thread_status": UpdateThreadStatusTool(command_bus)
+            "update_thread_status": UpdateThreadStatusTool(command_bus),
         }
 
     def get_tools_schema(self) -> list[dict[str, Any]]:
         """Get OpenAI function calling schema for all tools."""
         schemas = []
 
-        for tool_name, tool in self.tools.items():
+        for _tool_name, tool in self.tools.items():
             schema = {
                 "type": "function",
                 "function": {
                     "name": tool.name,
                     "description": tool.description,
-                    "parameters": tool.parameters
-                }
+                    "parameters": tool.parameters,
+                },
             }
             schemas.append(schema)
 
@@ -664,9 +637,6 @@ class SocialMediaToolKit:
         """Execute a social media tool."""
         tool = self.tools.get(tool_name)
         if not tool:
-            return SocialToolResult(
-                success=False,
-                message=f"Unknown tool: {tool_name}"
-            )
+            return SocialToolResult(success=False, message=f"Unknown tool: {tool_name}")
 
         return await tool.execute(**kwargs)

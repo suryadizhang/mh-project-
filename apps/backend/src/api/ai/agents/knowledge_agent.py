@@ -12,8 +12,8 @@ Author: MH Backend Team
 Created: 2025-10-31 (Phase 1A)
 """
 
-from typing import Dict, List, Any, Optional
 import logging
+from typing import Any
 
 from .base_agent import BaseAgent
 
@@ -23,20 +23,20 @@ logger = logging.getLogger(__name__)
 class KnowledgeAgent(BaseAgent):
     """
     Knowledge Agent - Expert in company policies, pricing, and FAQs.
-    
+
     Expertise:
     - RAG (search knowledge base, cite sources)
     - Policy interpretation (cancellation, refunds, terms)
     - Pricing details (packages, add-ons, seasonal rates)
     - FAQ answering (with source attribution)
     - Technical documentation (equipment, setup, requirements)
-    
+
     Tools:
     - search_knowledge_base: Semantic search across documents
     - get_policy_details: Look up specific policies
     - calculate_pricing: Detailed pricing breakdowns
     - find_faq_answer: Search FAQs
-    
+
     Usage:
         agent = KnowledgeAgent()
         response = await agent.process(
@@ -44,14 +44,14 @@ class KnowledgeAgent(BaseAgent):
             context={"conversation_id": "123"}
         )
     """
-    
+
     def __init__(self):
         super().__init__(
             agent_type="knowledge",
             temperature=0.3,  # Very factual, low creativity
-            max_tokens=600    # Longer for detailed explanations
+            max_tokens=600,  # Longer for detailed explanations
         )
-    
+
     def get_system_prompt(self) -> str:
         return """You are the knowledge expert for MyHibachi, specializing in accurate information retrieval and policy interpretation.
 
@@ -147,7 +147,7 @@ Example:
 "For 60 guests with our Premium Package:
 - **Base**: $65/person × 60 = $3,900
 - **Included**: Filet mignon + lobster tail, premium fried rice, vegetables, chef performance, setup, cleanup
-- **Popular add-ons**: 
+- **Popular add-ons**:
   - Sushi station: +$1,200 ($20/person)
   - Extra protein: +$900 ($15/person)
 - **Discount**: None (need 75+ guests for volume discount)
@@ -207,7 +207,7 @@ Always cite sources:
 - Update awareness - flag if information seems outdated
 """
 
-    def get_tools(self) -> List[Dict[str, Any]]:
+    def get_tools(self) -> list[dict[str, Any]]:
         return [
             {
                 "type": "function",
@@ -219,21 +219,21 @@ Always cite sources:
                         "properties": {
                             "query": {
                                 "type": "string",
-                                "description": "Search query (question or keywords)"
+                                "description": "Search query (question or keywords)",
                             },
                             "document_type": {
                                 "type": "string",
                                 "enum": ["all", "policies", "pricing", "faq", "technical_docs"],
-                                "description": "Filter by document type"
+                                "description": "Filter by document type",
                             },
                             "top_k": {
                                 "type": "integer",
-                                "description": "Number of results to return (default 3)"
-                            }
+                                "description": "Number of results to return (default 3)",
+                            },
                         },
-                        "required": ["query"]
-                    }
-                }
+                        "required": ["query"],
+                    },
+                },
             },
             {
                 "type": "function",
@@ -253,14 +253,14 @@ Always cite sources:
                                     "weather_policy",
                                     "liability_insurance",
                                     "privacy_policy",
-                                    "dietary_accommodations"
+                                    "dietary_accommodations",
                                 ],
-                                "description": "Name of policy to retrieve"
+                                "description": "Name of policy to retrieve",
                             }
                         },
-                        "required": ["policy_name"]
-                    }
-                }
+                        "required": ["policy_name"],
+                    },
+                },
             },
             {
                 "type": "function",
@@ -273,32 +273,34 @@ Always cite sources:
                             "package": {
                                 "type": "string",
                                 "enum": ["standard", "premium", "deluxe"],
-                                "description": "Package type"
+                                "description": "Package type",
                             },
-                            "num_guests": {
-                                "type": "integer",
-                                "description": "Number of guests"
-                            },
+                            "num_guests": {"type": "integer", "description": "Number of guests"},
                             "addons": {
                                 "type": "array",
                                 "items": {
                                     "type": "string",
-                                    "enum": ["extra_protein", "sushi_station", "sake_bar", "extended_time"]
+                                    "enum": [
+                                        "extra_protein",
+                                        "sushi_station",
+                                        "sake_bar",
+                                        "extended_time",
+                                    ],
                                 },
-                                "description": "Selected add-ons"
+                                "description": "Selected add-ons",
                             },
                             "travel_distance": {
                                 "type": "integer",
-                                "description": "Distance from headquarters in miles"
+                                "description": "Distance from headquarters in miles",
                             },
                             "is_peak_season": {
                                 "type": "boolean",
-                                "description": "Is event during peak season (May-Sep)?"
-                            }
+                                "description": "Is event during peak season (May-Sep)?",
+                            },
                         },
-                        "required": ["package", "num_guests"]
-                    }
-                }
+                        "required": ["package", "num_guests"],
+                    },
+                },
             },
             {
                 "type": "function",
@@ -308,70 +310,63 @@ Always cite sources:
                     "parameters": {
                         "type": "object",
                         "properties": {
-                            "question": {
-                                "type": "string",
-                                "description": "Customer's question"
-                            },
+                            "question": {"type": "string", "description": "Customer's question"},
                             "category": {
                                 "type": "string",
-                                "enum": ["booking", "pricing", "menu", "logistics", "policies", "general"],
-                                "description": "FAQ category to search"
-                            }
+                                "enum": [
+                                    "booking",
+                                    "pricing",
+                                    "menu",
+                                    "logistics",
+                                    "policies",
+                                    "general",
+                                ],
+                                "description": "FAQ category to search",
+                            },
                         },
-                        "required": ["question"]
-                    }
-                }
-            }
+                        "required": ["question"],
+                    },
+                },
+            },
         ]
-    
+
     async def process_tool_call(
-        self,
-        tool_name: str,
-        arguments: Dict[str, Any],
-        context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, tool_name: str, arguments: dict[str, Any], context: dict[str, Any]
+    ) -> dict[str, Any]:
         """Execute tool functions"""
-        
+
         try:
             if tool_name == "search_knowledge_base":
                 return await self._search_knowledge_base(arguments)
-            
+
             elif tool_name == "get_policy_details":
                 return await self._get_policy_details(arguments)
-            
+
             elif tool_name == "calculate_pricing":
                 return await self._calculate_pricing(arguments)
-            
+
             elif tool_name == "find_faq_answer":
                 return await self._find_faq_answer(arguments)
-            
+
             else:
-                return {
-                    "success": False,
-                    "result": None,
-                    "error": f"Unknown tool: {tool_name}"
-                }
-                
+                return {"success": False, "result": None, "error": f"Unknown tool: {tool_name}"}
+
         except Exception as e:
             logger.error(f"Tool execution error: {tool_name} - {e}", exc_info=True)
-            return {
-                "success": False,
-                "result": None,
-                "error": str(e)
-            }
-    
+            return {"success": False, "result": None, "error": str(e)}
+
     # ===== Tool Implementations =====
-    
-    async def _search_knowledge_base(self, args: Dict[str, Any]) -> Dict[str, Any]:
+
+    async def _search_knowledge_base(self, args: dict[str, Any]) -> dict[str, Any]:
         """Search knowledge base using RAG"""
-        
+
         query = args["query"]
         document_type = args.get("document_type", "all")
         top_k = args.get("top_k", 3)
-        
+
         # TODO: Integrate with actual vector database (Pinecone, Weaviate, or PostgreSQL pgvector)
         # This is a mock implementation showing the structure
-        
+
         # Simulate embedding generation + similarity search
         mock_results = [
             {
@@ -379,46 +374,46 @@ Always cite sources:
                 "source": "Booking Terms & Conditions - Section 4.2 (Cancellation Policy)",
                 "document_type": "policies",
                 "relevance_score": 0.95,
-                "last_updated": "2024-10-01"
+                "last_updated": "2024-10-01",
             },
             {
                 "content": "Deposit requirement: We require a 50% deposit to secure your booking. The deposit is non-refundable but can be transferred to a different date if changed with 14+ days notice. The remaining 50% balance is due 24 hours before your event.",
                 "source": "Payment Terms Document - Section 2.1",
                 "document_type": "policies",
                 "relevance_score": 0.88,
-                "last_updated": "2024-10-01"
+                "last_updated": "2024-10-01",
             },
             {
                 "content": "For events cancelled due to weather (outdoor events only), we offer full rescheduling at no charge. We monitor weather forecasts 48 hours before your event and will proactively reach out if conditions look unfavorable.",
                 "source": "Weather Policy FAQ",
                 "document_type": "faq",
                 "relevance_score": 0.82,
-                "last_updated": "2024-09-15"
-            }
+                "last_updated": "2024-09-15",
+            },
         ]
-        
+
         # Filter by document type if specified
         if document_type != "all":
             mock_results = [r for r in mock_results if r["document_type"] == document_type]
-        
+
         # Limit to top_k
         results = mock_results[:top_k]
-        
+
         return {
             "success": True,
             "result": {
                 "query": query,
                 "results_found": len(results),
                 "results": results,
-                "note": "Results ranked by semantic relevance"
-            }
+                "note": "Results ranked by semantic relevance",
+            },
         }
-    
-    async def _get_policy_details(self, args: Dict[str, Any]) -> Dict[str, Any]:
+
+    async def _get_policy_details(self, args: dict[str, Any]) -> dict[str, Any]:
         """Get specific policy document"""
-        
+
         policy_name = args["policy_name"]
-        
+
         # Mock policy database
         policies = {
             "cancellation_policy": {
@@ -428,29 +423,45 @@ Always cite sources:
                 "content": {
                     "overview": "Flexible cancellation with sliding scale refunds based on notice period",
                     "tiers": [
-                        {"notice": "14+ days", "refund": "100%", "notes": "Full refund, no questions asked"},
-                        {"notice": "7-13 days", "refund": "50%", "notes": "Partial refund to cover committed resources"},
-                        {"notice": "Less than 7 days", "refund": "0%", "notes": "No refund, but event credit offered"}
+                        {
+                            "notice": "14+ days",
+                            "refund": "100%",
+                            "notes": "Full refund, no questions asked",
+                        },
+                        {
+                            "notice": "7-13 days",
+                            "refund": "50%",
+                            "notes": "Partial refund to cover committed resources",
+                        },
+                        {
+                            "notice": "Less than 7 days",
+                            "refund": "0%",
+                            "notes": "No refund, but event credit offered",
+                        },
                     ],
                     "exceptions": [
                         "Medical emergencies with documentation",
                         "Weather emergencies (outdoor events)",
-                        "Venue cancellations beyond customer control"
+                        "Venue cancellations beyond customer control",
                     ],
                     "process": "Contact us via email or phone, cancellation effective upon our confirmation",
-                    "refund_timeline": "Refunds processed within 5-7 business days"
-                }
+                    "refund_timeline": "Refunds processed within 5-7 business days",
+                },
             },
             "refund_policy": {
                 "title": "Refund Policy",
                 "version": "2.0",
                 "last_updated": "2024-10-01",
                 "content": {
-                    "methods": ["Original payment method", "Account credit", "Check (for certain cases)"],
+                    "methods": [
+                        "Original payment method",
+                        "Account credit",
+                        "Check (for certain cases)",
+                    ],
                     "timeline": "5-7 business days for card refunds, immediate for account credits",
                     "partial_refunds": "Available for service issues, calculated based on severity",
-                    "dispute_process": "Contact customer care → escalate to manager if unresolved → third-party mediation if needed"
-                }
+                    "dispute_process": "Contact customer care → escalate to manager if unresolved → third-party mediation if needed",
+                },
             },
             "deposit_policy": {
                 "title": "Deposit Policy",
@@ -462,8 +473,8 @@ Always cite sources:
                     "payment_methods": ["Credit card", "Debit card", "Check", "Venmo", "Zelle"],
                     "refundable": "Yes, subject to cancellation policy terms",
                     "transferable": "Yes, to different date with 14+ days notice (no fee)",
-                    "hold_period": "We'll hold your date for 48 hours without deposit, then release if not paid"
-                }
+                    "hold_period": "We'll hold your date for 48 hours without deposit, then release if not paid",
+                },
             },
             "payment_terms": {
                 "title": "Payment Terms",
@@ -473,10 +484,15 @@ Always cite sources:
                     "deposit": "50% upfront to secure booking",
                     "balance": "50% due 24 hours before event",
                     "late_payment": "Event may be cancelled if balance not received on time",
-                    "payment_methods": ["All major credit cards", "Checks (7 days before event)", "Venmo/Zelle", "Wire transfer (corporate only)"],
+                    "payment_methods": [
+                        "All major credit cards",
+                        "Checks (7 days before event)",
+                        "Venmo/Zelle",
+                        "Wire transfer (corporate only)",
+                    ],
                     "invoicing": "Automatic via email upon booking",
-                    "payment_plans": "Available for events >$5,000 (split into 3 payments)"
-                }
+                    "payment_plans": "Available for events >$5,000 (split into 3 payments)",
+                },
             },
             "weather_policy": {
                 "title": "Weather Policy (Outdoor Events)",
@@ -488,8 +504,8 @@ Always cite sources:
                     "proactive_outreach": "We'll contact you if weather looks unfavorable",
                     "rescheduling": "Free rescheduling for weather-related cancellations",
                     "equipment_protection": "We cannot operate in rain (electrical safety) or extreme winds (safety hazard)",
-                    "customer_decision": "Final decision to proceed or reschedule is yours, made 24 hours before event"
-                }
+                    "customer_decision": "Final decision to proceed or reschedule is yours, made 24 hours before event",
+                },
             },
             "liability_insurance": {
                 "title": "Liability Insurance & Coverage",
@@ -497,76 +513,97 @@ Always cite sources:
                 "last_updated": "2024-08-01",
                 "content": {
                     "coverage_amount": "$2M general liability insurance",
-                    "what_covered": ["Property damage to venue", "Injury from equipment", "Food safety incidents"],
-                    "what_not_covered": ["Guest injuries unrelated to our service", "Venue-provided equipment damage", "Pre-existing venue damage"],
+                    "what_covered": [
+                        "Property damage to venue",
+                        "Injury from equipment",
+                        "Food safety incidents",
+                    ],
+                    "what_not_covered": [
+                        "Guest injuries unrelated to our service",
+                        "Venue-provided equipment damage",
+                        "Pre-existing venue damage",
+                    ],
                     "certificate": "Certificate of insurance available upon request (needed for some venues)",
-                    "claims_process": "Report immediately → we file claim → insurance handles settlement"
-                }
+                    "claims_process": "Report immediately → we file claim → insurance handles settlement",
+                },
             },
             "privacy_policy": {
                 "title": "Privacy Policy",
                 "version": "4.0",
                 "last_updated": "2024-07-01",
                 "content": {
-                    "data_collected": ["Name, email, phone", "Event details", "Payment information (encrypted)", "Communication history"],
-                    "data_usage": ["Event coordination", "Payment processing", "Marketing (opt-in only)", "Service improvements"],
+                    "data_collected": [
+                        "Name, email, phone",
+                        "Event details",
+                        "Payment information (encrypted)",
+                        "Communication history",
+                    ],
+                    "data_usage": [
+                        "Event coordination",
+                        "Payment processing",
+                        "Marketing (opt-in only)",
+                        "Service improvements",
+                    ],
                     "data_sharing": "Never sold to third parties; shared only with payment processors and service providers",
                     "data_retention": "5 years for business records, then securely deleted",
-                    "your_rights": ["Access your data", "Request deletion", "Opt out of marketing", "Correct inaccuracies"]
-                }
+                    "your_rights": [
+                        "Access your data",
+                        "Request deletion",
+                        "Opt out of marketing",
+                        "Correct inaccuracies",
+                    ],
+                },
             },
             "dietary_accommodations": {
                 "title": "Dietary Accommodations Guide",
                 "version": "2.0",
                 "last_updated": "2024-10-15",
                 "content": {
-                    "supported": ["Vegetarian/vegan", "Gluten-free", "Common allergies (nuts, dairy, shellfish)", "Religious restrictions (halal, kosher-style)"],
+                    "supported": [
+                        "Vegetarian/vegan",
+                        "Gluten-free",
+                        "Common allergies (nuts, dairy, shellfish)",
+                        "Religious restrictions (halal, kosher-style)",
+                    ],
                     "notice_required": "7 days advance notice for best accommodation",
                     "allergy_protocol": "Separate prep area, dedicated equipment, ingredient verification",
                     "limitations": "Cannot guarantee 100% allergen-free environment (shared kitchen)",
                     "recommendations": "For severe allergies, consider our private kitchen events",
-                    "no_extra_charge": "Standard dietary modifications included; custom menus may incur additional cost"
-                }
-            }
+                    "no_extra_charge": "Standard dietary modifications included; custom menus may incur additional cost",
+                },
+            },
         }
-        
+
         policy = policies.get(policy_name)
-        
+
         if not policy:
-            return {
-                "success": False,
-                "result": None,
-                "error": f"Policy not found: {policy_name}"
-            }
-        
-        return {
-            "success": True,
-            "result": policy
-        }
-    
-    async def _calculate_pricing(self, args: Dict[str, Any]) -> Dict[str, Any]:
+            return {"success": False, "result": None, "error": f"Policy not found: {policy_name}"}
+
+        return {"success": True, "result": policy}
+
+    async def _calculate_pricing(self, args: dict[str, Any]) -> dict[str, Any]:
         """Calculate detailed pricing"""
-        
+
         package = args["package"]
         num_guests = args["num_guests"]
         addons = args.get("addons", [])
         travel_distance = args.get("travel_distance", 0)
-        is_peak_season = args.get("is_peak_season", False)
-        
+        args.get("is_peak_season", False)
+
         # Base pricing
         base_prices = {"standard": 45, "premium": 65, "deluxe": 85}
         base_cost = base_prices[package] * num_guests
-        
+
         # Add-ons
         addon_costs = {
             "extra_protein": 15 * num_guests,
             "sushi_station": 20 * num_guests,
             "sake_bar": 400,
-            "extended_time": 200  # per hour
+            "extended_time": 200,  # per hour
         }
-        
+
         addons_cost = sum(addon_costs.get(addon, 0) for addon in addons)
-        
+
         # Travel fee
         travel_fee = 0
         if travel_distance > 50:
@@ -574,7 +611,7 @@ Always cite sources:
                 travel_fee = (travel_distance - 50) * 3  # $3/mile over 50
             else:
                 travel_fee = 150 + ((travel_distance - 100) * 5)  # Custom quote
-        
+
         # Volume discount
         discount = 0
         discount_reason = None
@@ -584,12 +621,12 @@ Always cite sources:
         elif num_guests >= 75:
             discount = (base_cost + addons_cost) * 0.10
             discount_reason = "10% volume discount (75+ guests)"
-        
+
         # Calculate totals
         subtotal = base_cost + addons_cost + travel_fee
         total = subtotal - discount
         deposit = total * 0.5
-        
+
         return {
             "success": True,
             "result": {
@@ -598,17 +635,16 @@ Always cite sources:
                         "name": package.title(),
                         "guests": num_guests,
                         "price_per_person": f"${base_prices[package]}",
-                        "subtotal": f"${base_cost:,.2f}"
+                        "subtotal": f"${base_cost:,.2f}",
                     },
                     "addons": [
-                        {"name": addon, "cost": f"${addon_costs[addon]:,.2f}"}
-                        for addon in addons
+                        {"name": addon, "cost": f"${addon_costs[addon]:,.2f}"} for addon in addons
                     ],
                     "addons_total": f"${addons_cost:,.2f}",
                     "travel_fee": f"${travel_fee:,.2f}" if travel_fee > 0 else "Included",
                     "subtotal": f"${subtotal:,.2f}",
                     "discount": f"-${discount:,.2f}" if discount > 0 else "$0.00",
-                    "discount_reason": discount_reason
+                    "discount_reason": discount_reason,
                 },
                 "total": f"${total:,.2f}",
                 "deposit_required": f"${deposit:,.2f} (50%)",
@@ -617,67 +653,70 @@ Always cite sources:
                 "notes": [
                     "Deposit due within 48 hours of booking",
                     "Balance due 24 hours before event",
-                    "Prices valid for 30 days"
-                ]
-            }
+                    "Prices valid for 30 days",
+                ],
+            },
         }
-    
-    async def _find_faq_answer(self, args: Dict[str, Any]) -> Dict[str, Any]:
+
+    async def _find_faq_answer(self, args: dict[str, Any]) -> dict[str, Any]:
         """Search FAQ database"""
-        
+
         question = args["question"].lower()
         category = args.get("category", "general")
-        
+
         # Mock FAQ database
         faqs = [
             {
                 "category": "booking",
                 "question": "How far in advance should I book?",
                 "answer": "We recommend booking 30-45 days in advance for weekends and peak season (May-September), and 14-21 days for weekdays and off-season. Last-minute bookings (less than 7 days) may be possible with a rush fee.",
-                "related": ["What's your availability?", "Do you charge rush fees?"]
+                "related": ["What's your availability?", "Do you charge rush fees?"],
             },
             {
                 "category": "pricing",
                 "question": "What's included in the package price?",
                 "answer": "All packages include: hibachi chef performance, all food (protein, fried rice, vegetables), cooking equipment, setup and breakdown, plates/utensils, and cleanup. We bring everything - you just provide the space and guests!",
-                "related": ["Do I need to provide anything?", "What add-ons are available?"]
+                "related": ["Do I need to provide anything?", "What add-ons are available?"],
             },
             {
                 "category": "menu",
                 "question": "Can you accommodate dietary restrictions?",
                 "answer": "Yes! We handle vegetarian, vegan, gluten-free, and most allergies regularly. Please notify us at least 7 days before your event so we can prepare properly. For severe allergies, we use separate equipment and prep areas.",
-                "related": ["Do you charge extra for dietary accommodations?", "Can you do kosher/halal?"]
+                "related": [
+                    "Do you charge extra for dietary accommodations?",
+                    "Can you do kosher/halal?",
+                ],
             },
             {
                 "category": "logistics",
                 "question": "What do you need from the venue?",
                 "answer": "We need: (1) access to a standard electrical outlet, (2) flat surface area of at least 10x10 feet, (3) setup time of 1 hour before event, (4) water access nearby (for cleanup). For outdoor events, we also need a covered backup area.",
-                "related": ["Can you do outdoor events?", "Do you need a kitchen?"]
+                "related": ["Can you do outdoor events?", "Do you need a kitchen?"],
             },
             {
                 "category": "policies",
                 "question": "What's your cancellation policy?",
                 "answer": "Full refund for cancellations 14+ days before event, 50% refund for 7-13 days, no refund less than 7 days (but we offer event credit). We understand emergencies happen and will work with you on extenuating circumstances.",
-                "related": ["Can I reschedule my event?", "What if there's bad weather?"]
-            }
+                "related": ["Can I reschedule my event?", "What if there's bad weather?"],
+            },
         ]
-        
+
         # Simple keyword matching (in production, would use semantic search)
         matches = []
         for faq in faqs:
             if category == "general" or faq["category"] == category:
                 if any(word in faq["question"].lower() for word in question.split()):
                     matches.append(faq)
-        
+
         if not matches:
             # Return top 3 from category
             matches = [f for f in faqs if f["category"] == category][:3]
-        
+
         return {
             "success": True,
             "result": {
                 "matches_found": len(matches),
                 "faqs": matches,
-                "source": "MyHibachi FAQ Database (updated October 2024)"
-            }
+                "source": "MyHibachi FAQ Database (updated October 2024)",
+            },
         }

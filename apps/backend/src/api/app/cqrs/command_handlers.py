@@ -1,18 +1,29 @@
 """
 Command handlers for CRM operations.
 """
+
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 from uuid import uuid4
 
-from sqlalchemy import and_, select
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from api.app.cqrs.base import CommandHandler, CommandResult, EventStore, OutboxProcessor
+from api.app.cqrs.base import (
+    CommandHandler,
+    CommandResult,
+    EventStore,
+    OutboxProcessor,
+)
 from api.app.cqrs.crm_operations import *
-from api.app.models.core import Booking, Customer, Message, MessageThread, Payment
+from api.app.models.core import (
+    Booking,
+    Customer,
+    Message,
+    MessageThread,
+    Payment,
+)
 from api.app.models.events import IdempotencyKey
 from api.app.utils.encryption import FieldEncryption
+from sqlalchemy import and_, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class CreateBookingCommandHandler(CommandHandler):
@@ -29,23 +40,25 @@ class CreateBookingCommandHandler(CommandHandler):
         try:
             # Check idempotency
             if command.idempotency_key:
-                existing = await self._check_idempotency(command.idempotency_key, "CreateBookingCommand")
+                existing = await self._check_idempotency(
+                    command.idempotency_key, "CreateBookingCommand"
+                )
                 if existing:
                     return existing
 
             # Validate slot availability
-            is_available = await self._check_slot_availability(command.date, command.slot, command.total_guests)
+            is_available = await self._check_slot_availability(
+                command.date, command.slot, command.total_guests
+            )
             if not is_available:
                 return CommandResult(
                     success=False,
-                    error=f"Slot {command.slot} on {command.date} is not available for {command.total_guests} guests"
+                    error=f"Slot {command.slot} on {command.date} is not available for {command.total_guests} guests",
                 )
 
             # Find or create customer
             customer = await self._find_or_create_customer(
-                command.customer_email,
-                command.customer_name,
-                command.customer_phone
+                command.customer_email, command.customer_name, command.customer_phone
             )
 
             # Create booking
@@ -59,12 +72,16 @@ class CreateBookingCommandHandler(CommandHandler):
                 price_per_person_cents=command.price_per_person_cents,
                 total_due_cents=command.total_due_cents,
                 deposit_due_cents=command.deposit_due_cents,
-                special_requests=self.encryption.encrypt(command.special_requests) if command.special_requests else None,
+                special_requests=(
+                    self.encryption.encrypt(command.special_requests)
+                    if command.special_requests
+                    else None
+                ),
                 source=command.source,
                 ai_conversation_id=command.ai_conversation_id,
                 status="confirmed",
                 balance_due_cents=command.total_due_cents - command.deposit_due_cents,
-                created_at=datetime.utcnow()
+                created_at=datetime.utcnow(),
             )
 
             self.session.add(booking)
@@ -82,7 +99,7 @@ class CreateBookingCommandHandler(CommandHandler):
                 deposit_due_cents=command.deposit_due_cents,
                 source=command.source,
                 special_requests=command.special_requests,
-                ai_conversation_id=command.ai_conversation_id
+                ai_conversation_id=command.ai_conversation_id,
             )
 
             # Store events
@@ -91,7 +108,7 @@ class CreateBookingCommandHandler(CommandHandler):
             # Create outbox entries for integrations
             await self.outbox_processor.create_outbox_entries(
                 domain_events,
-                targets=["email", "stripe"] if command.deposit_due_cents > 0 else ["email"]
+                targets=["email", "stripe"] if command.deposit_due_cents > 0 else ["email"],
             )
 
             # Save idempotency
@@ -99,7 +116,7 @@ class CreateBookingCommandHandler(CommandHandler):
                 await self._save_idempotency(
                     command.idempotency_key,
                     "CreateBookingCommand",
-                    {"booking_id": str(booking_id), "customer_id": str(customer.id)}
+                    {"booking_id": str(booking_id), "customer_id": str(customer.id)},
                 )
 
             await self.session.commit()
@@ -109,9 +126,9 @@ class CreateBookingCommandHandler(CommandHandler):
                 data={
                     "booking_id": str(booking_id),
                     "customer_id": str(customer.id),
-                    "confirmation_number": f"MH-{booking_id.hex[:8].upper()}"
+                    "confirmation_number": f"MH-{booking_id.hex[:8].upper()}",
                 },
-                events=[event]
+                events=[event],
             )
 
         except Exception as e:
@@ -121,13 +138,12 @@ class CreateBookingCommandHandler(CommandHandler):
     async def _check_slot_availability(self, date, slot: str, party_size: int) -> bool:
         """Check if the requested slot is available."""
         # Get existing bookings for that date/slot
-        stmt = (
-            select(Booking.total_guests)
-            .where(and_(
+        stmt = select(Booking.total_guests).where(
+            and_(
                 Booking.date == date,
                 Booking.slot == slot,
-                Booking.status.in_(["confirmed", "pending"])
-            ))
+                Booking.status.in_(["confirmed", "pending"]),
+            )
         )
 
         result = await self.session.execute(stmt)
@@ -173,7 +189,7 @@ class CreateBookingCommandHandler(CommandHandler):
             name_encrypted=self.encryption.encrypt(name),
             phone_encrypted=self.encryption.encrypt(phone),
             source="booking",
-            created_at=datetime.utcnow()
+            created_at=datetime.utcnow(),
         )
 
         self.session.add(customer)
@@ -181,7 +197,7 @@ class CreateBookingCommandHandler(CommandHandler):
 
         return customer
 
-    async def _check_idempotency(self, key: str, command_type: str) -> Optional[CommandResult]:
+    async def _check_idempotency(self, key: str, command_type: str) -> CommandResult | None:
         """Check if this command was already processed."""
         stmt = select(IdempotencyKey).where(IdempotencyKey.key == key)
         result = await self.session.execute(stmt)
@@ -207,7 +223,7 @@ class CreateBookingCommandHandler(CommandHandler):
             result=result_data,
             status="completed",
             completed_at=datetime.utcnow(),
-            expires_at=datetime.utcnow() + timedelta(days=7)  # Keep for a week
+            expires_at=datetime.utcnow() + timedelta(days=7),  # Keep for a week
         )
 
         self.session.add(idem)
@@ -226,7 +242,9 @@ class RecordPaymentCommandHandler(CommandHandler):
         try:
             # Check idempotency
             if command.idempotency_key:
-                existing = await self._check_idempotency(command.idempotency_key, "RecordPaymentCommand")
+                existing = await self._check_idempotency(
+                    command.idempotency_key, "RecordPaymentCommand"
+                )
                 if existing:
                     return existing
 
@@ -239,17 +257,21 @@ class RecordPaymentCommandHandler(CommandHandler):
                 return CommandResult(success=False, error=f"Booking {command.booking_id} not found")
 
             if booking.status == "cancelled":
-                return CommandResult(success=False, error="Cannot record payment for cancelled booking")
+                return CommandResult(
+                    success=False, error="Cannot record payment for cancelled booking"
+                )
 
             # Check payment doesn't exceed what's due
-            existing_payments_stmt = select(Payment.amount_cents).where(Payment.booking_id == command.booking_id)
+            existing_payments_stmt = select(Payment.amount_cents).where(
+                Payment.booking_id == command.booking_id
+            )
             payments_result = await self.session.execute(existing_payments_stmt)
             total_paid = sum(row[0] for row in payments_result.fetchall())
 
             if (total_paid + command.amount_cents) > booking.total_due_cents:
                 return CommandResult(
                     success=False,
-                    error=f"Payment amount ({command.amount_cents}) would exceed remaining balance"
+                    error=f"Payment amount ({command.amount_cents}) would exceed remaining balance",
                 )
 
             # Create payment record
@@ -262,7 +284,7 @@ class RecordPaymentCommandHandler(CommandHandler):
                 payment_reference=command.payment_reference,
                 notes=command.notes,
                 processed_by=command.processed_by,
-                processed_at=datetime.utcnow()
+                processed_at=datetime.utcnow(),
             )
 
             self.session.add(payment)
@@ -286,24 +308,21 @@ class RecordPaymentCommandHandler(CommandHandler):
                 payment_method=command.payment_method,
                 payment_reference=command.payment_reference,
                 processed_by=command.processed_by,
-                notes=command.notes
+                notes=command.notes,
             )
 
             # Store event
             domain_events = await self.event_store.append_events([event])
 
             # Create outbox entries (for confirmation emails, etc.)
-            await self.outbox_processor.create_outbox_entries(
-                domain_events,
-                targets=["email"]
-            )
+            await self.outbox_processor.create_outbox_entries(domain_events, targets=["email"])
 
             # Save idempotency
             if command.idempotency_key:
                 await self._save_idempotency(
                     command.idempotency_key,
                     "RecordPaymentCommand",
-                    {"payment_id": str(payment_id), "new_balance": new_balance}
+                    {"payment_id": str(payment_id), "new_balance": new_balance},
                 )
 
             await self.session.commit()
@@ -313,16 +332,16 @@ class RecordPaymentCommandHandler(CommandHandler):
                 data={
                     "payment_id": str(payment_id),
                     "new_balance_cents": new_balance,
-                    "payment_status": booking.payment_status
+                    "payment_status": booking.payment_status,
                 },
-                events=[event]
+                events=[event],
             )
 
         except Exception as e:
             await self.session.rollback()
             return CommandResult(success=False, error=str(e))
 
-    async def _check_idempotency(self, key: str, command_type: str) -> Optional[CommandResult]:
+    async def _check_idempotency(self, key: str, command_type: str) -> CommandResult | None:
         """Check if this command was already processed."""
         stmt = select(IdempotencyKey).where(IdempotencyKey.key == key)
         result = await self.session.execute(stmt)
@@ -348,7 +367,7 @@ class RecordPaymentCommandHandler(CommandHandler):
             result=result_data,
             status="completed",
             completed_at=datetime.utcnow(),
-            expires_at=datetime.utcnow() + timedelta(days=7)
+            expires_at=datetime.utcnow() + timedelta(days=7),
         )
 
         self.session.add(idem)
@@ -368,7 +387,9 @@ class ReceiveMessageCommandHandler(CommandHandler):
         try:
             # Check idempotency
             if command.idempotency_key:
-                existing = await self._check_idempotency(command.idempotency_key, "ReceiveMessageCommand")
+                existing = await self._check_idempotency(
+                    command.idempotency_key, "ReceiveMessageCommand"
+                )
                 if existing:
                     return existing
 
@@ -403,7 +424,7 @@ class ReceiveMessageCommandHandler(CommandHandler):
                     phone_number_encrypted=self.encryption.encrypt(command.phone_number),
                     customer_id=None,  # Will be linked later if customer found
                     status="active",
-                    created_at=datetime.utcnow()
+                    created_at=datetime.utcnow(),
                 )
                 self.session.add(thread)
                 await self.session.flush()
@@ -418,7 +439,7 @@ class ReceiveMessageCommandHandler(CommandHandler):
                 external_message_id=command.external_message_id,
                 source=command.source,
                 sent_at=command.received_at,
-                created_at=datetime.utcnow()
+                created_at=datetime.utcnow(),
             )
 
             self.session.add(message)
@@ -436,7 +457,7 @@ class ReceiveMessageCommandHandler(CommandHandler):
                 content=command.content,
                 received_at=command.received_at,
                 external_message_id=command.external_message_id,
-                source=command.source
+                source=command.source,
             )
 
             # Store event
@@ -444,8 +465,7 @@ class ReceiveMessageCommandHandler(CommandHandler):
 
             # Create outbox entry for AI processing
             await self.outbox_processor.create_outbox_entries(
-                domain_events,
-                targets=["ai_processing"]
+                domain_events, targets=["ai_processing"]
             )
 
             # Save idempotency
@@ -453,7 +473,7 @@ class ReceiveMessageCommandHandler(CommandHandler):
                 await self._save_idempotency(
                     command.idempotency_key,
                     "ReceiveMessageCommand",
-                    {"message_id": str(message_id), "thread_id": str(thread.id)}
+                    {"message_id": str(message_id), "thread_id": str(thread.id)},
                 )
 
             await self.session.commit()
@@ -463,16 +483,16 @@ class ReceiveMessageCommandHandler(CommandHandler):
                 data={
                     "message_id": str(message_id),
                     "thread_id": str(thread.id),
-                    "created_new_thread": thread.created_at == thread.updated_at
+                    "created_new_thread": thread.created_at == thread.updated_at,
                 },
-                events=[event]
+                events=[event],
             )
 
         except Exception as e:
             await self.session.rollback()
             return CommandResult(success=False, error=str(e))
 
-    async def _check_idempotency(self, key: str, command_type: str) -> Optional[CommandResult]:
+    async def _check_idempotency(self, key: str, command_type: str) -> CommandResult | None:
         """Check if this command was already processed."""
         stmt = select(IdempotencyKey).where(IdempotencyKey.key == key)
         result = await self.session.execute(stmt)
@@ -498,7 +518,7 @@ class ReceiveMessageCommandHandler(CommandHandler):
             result=result_data,
             status="completed",
             completed_at=datetime.utcnow(),
-            expires_at=datetime.utcnow() + timedelta(days=7)
+            expires_at=datetime.utcnow() + timedelta(days=7),
         )
 
         self.session.add(idem)

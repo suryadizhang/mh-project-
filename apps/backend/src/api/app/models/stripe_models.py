@@ -1,5 +1,7 @@
 import uuid
 
+# Use unified Base from models package
+from api.app.models.declarative_base import Base
 from sqlalchemy import (
     Boolean,
     Column,
@@ -14,9 +16,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-# Use unified Base from models package
-from api.app.models.declarative_base import Base
-
 
 class StripeCustomer(Base):
     """Legacy Stripe customer model from public schema (linking users to Stripe customers)."""
@@ -26,9 +25,7 @@ class StripeCustomer(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String, nullable=False, unique=True, index=True)
     email = Column(String, nullable=False, unique=True, index=True)
-    stripe_customer_id = Column(
-        String, nullable=False, unique=True, index=True
-    )
+    stripe_customer_id = Column(String, nullable=False, unique=True, index=True)
     name = Column(String)
     phone = Column(String)
     preferred_payment_method = Column(String, default="zelle")
@@ -58,9 +55,7 @@ class StripePayment(Base):
     user_id = Column(String, nullable=False, index=True)
     booking_id = Column(String, index=True)
     stripe_payment_intent_id = Column(String, unique=True, index=True)
-    stripe_customer_id = Column(
-        String, ForeignKey("customers.stripe_customer_id")
-    )
+    stripe_customer_id = Column(String, ForeignKey("customers.stripe_customer_id"))
 
     # Payment details
     amount = Column(Numeric(10, 2), nullable=False)
@@ -95,9 +90,7 @@ class Invoice(Base):
     user_id = Column(String, nullable=False, index=True)
     booking_id = Column(String, index=True)
     stripe_invoice_id = Column(String, unique=True, index=True)
-    stripe_customer_id = Column(
-        String, ForeignKey("customers.stripe_customer_id")
-    )
+    stripe_customer_id = Column(String, ForeignKey("customers.stripe_customer_id"))
 
     # Invoice details
     amount_due = Column(Numeric(10, 2), nullable=False)

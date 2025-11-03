@@ -1,8 +1,9 @@
-import logging
-import os
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+import logging
+import os
 
+from core.config import get_settings
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -11,8 +12,6 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
-
-from core.config import get_settings
 
 settings = get_settings()
 
@@ -28,7 +27,7 @@ class Base(DeclarativeBase):
             "uq": "uq_%(table_name)s_%(column_0_name)s",
             "ck": "ck_%(table_name)s_%(constraint_name)s",
             "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
-            "pk": "pk_%(table_name)s"
+            "pk": "pk_%(table_name)s",
         }
     )
 
@@ -56,14 +55,10 @@ sync_engine = create_engine(
 )
 
 # Async session maker
-AsyncSessionLocal = async_sessionmaker(
-    engine, class_=AsyncSession, expire_on_commit=False
-)
+AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 # Sync session maker for migrations
-SessionLocal = sessionmaker(
-    autocommit=False, autoflush=False, bind=sync_engine
-)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=sync_engine)
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -113,12 +108,13 @@ async def init_database():
     try:
         # Test database connection
         from sqlalchemy import text
+
         async with AsyncSessionLocal() as session:
             await session.execute(text("SELECT 1"))
 
         logger.info(f"Database connected successfully: {settings.database_url}")
     except Exception as e:
-        logger.error(f"Failed to connect to database: {e}")
+        logger.exception(f"Failed to connect to database: {e}")
         raise
 
 
@@ -128,7 +124,7 @@ async def close_database():
         await engine.dispose()
         logger.info("Database connections closed")
     except Exception as e:
-        logger.error(f"Error closing database connections: {e}")
+        logger.exception(f"Error closing database connections: {e}")
 
 
 # Database configuration instance for direct access

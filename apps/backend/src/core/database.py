@@ -11,11 +11,13 @@ Provides both async and sync database sessions for different use cases:
 - Async sessions for FastAPI endpoints (recommended)
 - Sync sessions for scripts, migrations, and workers
 """
-import logging
-import os
+
 from collections.abc import AsyncGenerator, Generator
 from contextlib import asynccontextmanager
+import logging
+import os
 
+from core.config import get_settings
 from sqlalchemy import MetaData, create_engine, text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -25,14 +27,13 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-from core.config import get_settings
-
 settings = get_settings()
 logger = logging.getLogger(__name__)
 
 # =============================================================================
 # BASE MODEL
 # =============================================================================
+
 
 class Base(DeclarativeBase):
     """Base class for all database models with consistent naming convention."""
@@ -43,7 +44,7 @@ class Base(DeclarativeBase):
             "uq": "uq_%(table_name)s_%(column_0_name)s",
             "ck": "ck_%(table_name)s_%(constraint_name)s",
             "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
-            "pk": "pk_%(table_name)s"
+            "pk": "pk_%(table_name)s",
         }
     )
 
@@ -64,15 +65,13 @@ engine = create_async_engine(
 )
 
 # Async session maker
-AsyncSessionLocal = async_sessionmaker(
-    engine, class_=AsyncSession, expire_on_commit=False
-)
+AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
     Dependency to get async database session.
-    
+
     Usage in FastAPI:
     ```python
     @router.get("/items")
@@ -101,7 +100,7 @@ async def get_db_context() -> AsyncGenerator[AsyncSession, None]:
     """
     Get async database session as context manager.
     This version can be used in non-FastAPI contexts like workers.
-    
+
     Usage in workers/scripts:
     ```python
     async with get_db_context() as db:
@@ -124,7 +123,7 @@ async def get_async_session() -> AsyncSession:
     """
     Get async session directly (not as generator).
     Remember to close the session manually!
-    
+
     Usage:
     ```python
     session = await get_async_session()
@@ -153,15 +152,13 @@ sync_engine = create_engine(
 )
 
 # Sync session maker for migrations
-SessionLocal = sessionmaker(
-    autocommit=False, autoflush=False, bind=sync_engine
-)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=sync_engine)
 
 
 def get_sync_db() -> Generator[Session, None, None]:
     """
     Sync database session for migrations and scripts.
-    
+
     Usage in scripts:
     ```python
     for db in get_sync_db():
@@ -184,7 +181,7 @@ def get_sync_session() -> Session:
     """
     Get sync session directly.
     Remember to close the session manually!
-    
+
     Usage:
     ```python
     session = get_sync_session()
@@ -202,11 +199,12 @@ def get_sync_session() -> Session:
 # DATABASE LIFECYCLE MANAGEMENT
 # =============================================================================
 
+
 async def init_database():
     """
     Initialize database connection on startup.
     Tests the connection and logs status.
-    
+
     Usage in FastAPI lifespan:
     ```python
     @asynccontextmanager
@@ -220,10 +218,10 @@ async def init_database():
         # Test database connection
         async with AsyncSessionLocal() as session:
             await session.execute(text("SELECT 1"))
-        
+
         logger.info(f"✅ Async database connected: {settings.database_url}")
     except Exception as e:
-        logger.error(f"❌ Failed to connect to async database: {e}")
+        logger.exception(f"❌ Failed to connect to async database: {e}")
         raise
 
 
@@ -236,17 +234,17 @@ async def close_database():
         await engine.dispose()
         logger.info("✅ Async database connections closed")
     except Exception as e:
-        logger.error(f"❌ Error closing async database connections: {e}")
+        logger.exception(f"❌ Error closing async database connections: {e}")
 
 
 def init_db():
     """
     Initialize database tables (sync version).
     Creates all tables defined in Base.metadata.
-    
+
     ⚠️ WARNING: Only use for development/testing!
     Use Alembic migrations for production.
-    
+
     Usage:
     ```python
     init_db()  # Creates all tables
@@ -256,7 +254,7 @@ def init_db():
         Base.metadata.create_all(bind=sync_engine)
         logger.info("✅ Database tables created (sync)")
     except Exception as e:
-        logger.error(f"❌ Failed to create database tables: {e}")
+        logger.exception(f"❌ Failed to create database tables: {e}")
         raise
 
 
@@ -269,25 +267,26 @@ def close_db():
         sync_engine.dispose()
         logger.info("✅ Sync database connections closed")
     except Exception as e:
-        logger.error(f"❌ Error closing sync database connections: {e}")
+        logger.exception(f"❌ Error closing sync database connections: {e}")
 
 
 # =============================================================================
 # DATABASE CONFIGURATION HELPER
 # =============================================================================
 
+
 class DatabaseConfig:
     """
     Database configuration helper class.
     Provides easy access to engines and session factories.
-    
+
     Usage:
     ```python
     from core.database import db_config
-    
+
     # Get async engine
     engine = db_config.async_engine
-    
+
     # Get session factory
     SessionFactory = db_config.async_session_factory
     ```
@@ -312,11 +311,11 @@ class DatabaseConfig:
     def sync_session_factory(self):
         """Get sync session factory"""
         return SessionLocal
-    
+
     def get_database_url(self, async_url: bool = True) -> str:
         """Get database URL (async or sync)"""
         return settings.database_url if async_url else settings.database_url_sync
-    
+
     def get_pool_stats(self) -> dict:
         """Get connection pool statistics"""
         return {
@@ -335,13 +334,14 @@ db_config = DatabaseConfig()
 # HEALTH CHECK
 # =============================================================================
 
+
 async def check_database_health() -> dict:
     """
     Check database health and return status.
-    
+
     Returns:
         dict: Health status with connection details
-        
+
     Usage:
     ```python
     status = await check_database_health()
@@ -351,12 +351,12 @@ async def check_database_health() -> dict:
     """
     try:
         async with AsyncSessionLocal() as session:
-            start_time = __import__('time').time()
+            start_time = __import__("time").time()
             await session.execute(text("SELECT 1"))
-            response_time = __import__('time').time() - start_time
-            
+            response_time = __import__("time").time() - start_time
+
         pool_stats = db_config.get_pool_stats()
-        
+
         return {
             "healthy": True,
             "database": "postgresql",
@@ -365,11 +365,8 @@ async def check_database_health() -> dict:
             "connections_in_use": pool_stats["async_checked_out"],
         }
     except Exception as e:
-        logger.error(f"Database health check failed: {e}")
-        return {
-            "healthy": False,
-            "error": str(e)
-        }
+        logger.exception(f"Database health check failed: {e}")
+        return {"healthy": False, "error": str(e)}
 
 
 # =============================================================================
@@ -377,33 +374,28 @@ async def check_database_health() -> dict:
 # =============================================================================
 
 __all__ = [
+    "AsyncSessionLocal",
     # Base
     "Base",
-    
-    # Async database (primary)
-    "engine",
-    "AsyncSessionLocal",
-    "get_db",
-    "get_db_session",
-    "get_db_context",
-    "get_async_session",
-    
-    # Sync database (migrations/scripts)
-    "sync_engine",
-    "SessionLocal",
-    "get_sync_db",
-    "get_sync_session",
-    
-    # Lifecycle
-    "init_database",
-    "close_database",
-    "init_db",
-    "close_db",
-    
-    # Configuration
-    "db_config",
     "DatabaseConfig",
-    
+    "SessionLocal",
     # Health
     "check_database_health",
+    "close_database",
+    "close_db",
+    # Configuration
+    "db_config",
+    # Async database (primary)
+    "engine",
+    "get_async_session",
+    "get_db",
+    "get_db_context",
+    "get_db_session",
+    "get_sync_db",
+    "get_sync_session",
+    # Lifecycle
+    "init_database",
+    "init_db",
+    # Sync database (migrations/scripts)
+    "sync_engine",
 ]

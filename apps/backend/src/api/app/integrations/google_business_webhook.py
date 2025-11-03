@@ -1,18 +1,17 @@
 """Google Business Profile webhook handler for reviews and messages."""
 
 import base64
+from datetime import datetime
 import hashlib
 import json
 import logging
-from datetime import datetime
 from typing import Any
 
-import jwt
+from core.config import get_settings
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
+import jwt
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from core.config import get_settings
 
 settings = get_settings()
 from api.app.database import get_async_session
@@ -30,7 +29,7 @@ def verify_google_webhook_token(token: str) -> bool:
         decoded = jwt.decode(
             token,
             options={"verify_signature": False},  # For demo - in production, verify signature
-            algorithms=["RS256"]
+            algorithms=["RS256"],
         )
 
         # Verify the token is from Google and for your project
@@ -40,7 +39,7 @@ def verify_google_webhook_token(token: str) -> bool:
         return issuer == "accounts.google.com" and audience == settings.google_project_id
 
     except Exception as e:
-        logger.error(f"Google webhook token verification failed: {e}")
+        logger.exception(f"Google webhook token verification failed: {e}")
         return False
 
 
@@ -56,7 +55,7 @@ async def google_business_webhook_handler(
         payload_body = await request.body()
 
         # Google sends Pub/Sub messages, verify JWT if present
-        if authorization and authorization.startswith('Bearer '):
+        if authorization and authorization.startswith("Bearer "):
             token = authorization[7:]
             if not verify_google_webhook_token(token):
                 logger.warning("Google webhook token verification failed")
@@ -74,7 +73,7 @@ async def google_business_webhook_handler(
         # Decode the base64 data
         data = message.get("data", "")
         if data:
-            decoded_data = json.loads(base64.b64decode(data).decode('utf-8'))
+            decoded_data = json.loads(base64.b64decode(data).decode("utf-8"))
         else:
             decoded_data = {}
 
@@ -84,7 +83,8 @@ async def google_business_webhook_handler(
 
         # Check for duplicate processing
         existing = await db.execute(
-            select(1).select_from("integra.social_inbox")
+            select(1)
+            .select_from("integra.social_inbox")
             .where("signature = :sig")
             .params(sig=signature)
         )
@@ -95,13 +95,15 @@ async def google_business_webhook_handler(
 
         # Insert into inbox for idempotency
         await db.execute(
-            insert("integra.social_inbox").values({
-                "signature": signature,
-                "platform": "google_business",
-                "webhook_type": decoded_data.get("eventType", "unknown"),
-                "payload_hash": hashlib.sha256(payload_body).hexdigest(),
-                "received_at": datetime.utcnow()
-            })
+            insert("integra.social_inbox").values(
+                {
+                    "signature": signature,
+                    "platform": "google_business",
+                    "webhook_type": decoded_data.get("eventType", "unknown"),
+                    "payload_hash": hashlib.sha256(payload_body).hexdigest(),
+                    "received_at": datetime.utcnow(),
+                }
+            )
         )
 
         # Process the webhook
@@ -110,8 +112,9 @@ async def google_business_webhook_handler(
 
         # Mark as processed
         await db.execute(
-            "UPDATE integra.social_inbox SET processed = TRUE, processed_at = :now WHERE signature = :sig"
-            .params(now=datetime.utcnow(), sig=signature)
+            "UPDATE integra.social_inbox SET processed = TRUE, processed_at = :now WHERE signature = :sig".params(
+                now=datetime.utcnow(), sig=signature
+            )
         )
 
         await db.commit()
@@ -127,21 +130,18 @@ async def google_business_webhook_handler(
         try:
             await db.execute(
                 "UPDATE integra.social_inbox SET processing_attempts = processing_attempts + 1, "
-                "last_error = :error WHERE signature = :sig"
-                .params(error=str(e), sig=signature)
+                "last_error = :error WHERE signature = :sig".params(error=str(e), sig=signature)
             )
             await db.commit()
         except Exception as db_error:
-            logger.error(f"Failed to update error record in database: {db_error}")
-            pass
+            logger.exception(f"Failed to update error record in database: {db_error}")
 
         raise HTTPException(status_code=500, detail="Webhook processing failed")
 
 
 @router.post("/setup-notifications")
 async def setup_google_business_notifications(
-    account_data: dict[str, Any],
-    db: AsyncSession = Depends(get_async_session)
+    account_data: dict[str, Any], db: AsyncSession = Depends(get_async_session)
 ):
     """Set up Google Business Profile notifications."""
     try:
@@ -152,13 +152,12 @@ async def setup_google_business_notifications(
 
     except Exception as e:
         logger.error(f"Google Business notification setup error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Notification setup failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Notification setup failed: {e!s}")
 
 
 @router.delete("/notifications/{account_id}")
 async def remove_google_business_notifications(
-    account_id: str,
-    db: AsyncSession = Depends(get_async_session)
+    account_id: str, db: AsyncSession = Depends(get_async_session)
 ):
     """Remove Google Business Profile notifications for a location."""
     try:
@@ -169,13 +168,12 @@ async def remove_google_business_notifications(
 
     except Exception as e:
         logger.error(f"Google Business notification removal error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Notification removal failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Notification removal failed: {e!s}")
 
 
 @router.get("/locations")
 async def list_google_business_locations(
-    access_token: str,
-    db: AsyncSession = Depends(get_async_session)
+    access_token: str, db: AsyncSession = Depends(get_async_session)
 ):
     """List Google Business Profile locations for account setup."""
     try:
@@ -186,13 +184,12 @@ async def list_google_business_locations(
 
     except Exception as e:
         logger.error(f"Failed to list Google Business locations: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Failed to list locations: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to list locations: {e!s}")
 
 
 @router.post("/poll-reviews")
 async def poll_google_business_reviews(
-    account_id: str,
-    db: AsyncSession = Depends(get_async_session)
+    account_id: str, db: AsyncSession = Depends(get_async_session)
 ):
     """Manually trigger polling of Google Business reviews (fallback when webhooks aren't available)."""
     try:
@@ -202,9 +199,9 @@ async def poll_google_business_reviews(
         return {
             "status": "polling_complete",
             "new_reviews": results.get("new_reviews", 0),
-            "updated_reviews": results.get("updated_reviews", 0)
+            "updated_reviews": results.get("updated_reviews", 0),
         }
 
     except Exception as e:
         logger.error(f"Google Business review polling error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Review polling failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Review polling failed: {e!s}")

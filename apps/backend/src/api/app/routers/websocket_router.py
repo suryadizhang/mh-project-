@@ -2,15 +2,13 @@
 WebSocket router for unified inbox.
 Provides WebSocket endpoints for real-time communication updates.
 """
-from fastapi import APIRouter, WebSocket, Query
-from typing import Optional
 
 from api.app.websockets.unified_inbox import (
-    websocket_endpoint,
     get_websocket_stats,
     send_test_message,
-    start_websocket_background_tasks
+    websocket_endpoint,
 )
+from fastapi import APIRouter, Query, WebSocket
 
 router = APIRouter(prefix="/ws", tags=["websocket"])
 
@@ -18,9 +16,9 @@ router = APIRouter(prefix="/ws", tags=["websocket"])
 @router.websocket("/unified-inbox")
 async def websocket_unified_inbox(
     websocket: WebSocket,
-    token: Optional[str] = Query(None),
-    client_type: Optional[str] = Query("web"),
-    client_version: Optional[str] = Query(None)
+    token: str | None = Query(None),
+    client_type: str | None = Query("web"),
+    client_version: str | None = Query(None),
 ):
     """WebSocket endpoint for unified inbox real-time updates."""
     await websocket_endpoint(websocket, token, client_type, client_version)

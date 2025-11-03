@@ -7,19 +7,16 @@ optimized CTE queries with timezone-aware date range calculations.
 Endpoints:
 - GET /analytics - Payment analytics with date range filtering (station timezone-aware)
 """
-from datetime import datetime, timedelta, timezone
-from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.ext.asyncio import AsyncSession
+# Temporarily commented out - function not implemented yet
+# from utils.query_optimizer import get_payment_analytics_optimized
+import logging
 
 from api.app.database import get_db
 from api.app.utils.auth import admin_required
-from api.app.utils.timezone_utils import get_date_range_for_station, to_station_timezone
-# Temporarily commented out - function not implemented yet
-# from utils.query_optimizer import get_payment_analytics_optimized
-
-import logging
+from api.app.utils.timezone_utils import get_date_range_for_station
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
@@ -29,26 +26,28 @@ router = APIRouter()
 @router.get("/analytics")
 async def get_payment_analytics(
     days: int = Query(30, ge=1, le=365, description="Number of days to analyze"),
-    station_timezone: str = Query("America/Los_Angeles", description="Station timezone (e.g., America/New_York)"),
+    station_timezone: str = Query(
+        "America/Los_Angeles", description="Station timezone (e.g., America/New_York)"
+    ),
     db: AsyncSession = Depends(get_db),
     user=Depends(admin_required),
 ):
     """
     Get payment analytics for the specified time period.
-    
+
     **Timezone Support**: Analytics respect station local time.
     - Date ranges calculated in station timezone
     - Automatically handles DST transitions
     - Results include both UTC and local timestamps
-    
+
     Performance Improvement: ~20x faster
     - Before: Multiple queries (~200ms)
     - After: 1 CTE query (~10ms)
-    
+
     Query Parameters:
     - days: Number of days to analyze (default: 30, max: 365)
     - station_timezone: IANA timezone (e.g., "America/New_York", "America/Chicago")
-    
+
     Returns:
     - total_payments: Number of completed payments
     - total_amount: Total revenue in cents
@@ -58,7 +57,7 @@ async def get_payment_analytics(
     - first_payment: Timestamp of first payment in range (UTC)
     - last_payment: Timestamp of last payment in range (UTC)
     - date_range: Query date range in station local time
-    
+
     Example Response:
     ```json
     {
@@ -86,20 +85,19 @@ async def get_payment_analytics(
         "timestamp": "2025-10-23T18:55:20Z"
     }
     ```
-    
+
     Performance Target: <15ms response time
     """
     try:
         # Calculate date range in station timezone
         # This ensures "last 30 days" means 30 full days in the station's local time
         start_utc, end_utc = get_date_range_for_station(
-            days=days,
-            station_timezone=station_timezone
+            days=days, station_timezone=station_timezone
         )
-        
+
         # Get station_id from user if available (multi-tenancy)
-        station_id = getattr(user, 'station_id', None)
-        
+        station_id = getattr(user, "station_id", None)
+
         # Use optimized CTE query with UTC timestamps
         analytics = await get_payment_analytics_optimized(
             db=db,
@@ -107,29 +105,31 @@ async def get_payment_analytics(
             end_date=end_utc,
             station_id=station_id,
         )
-        
+
         # Convert first/last payment timestamps to station local time for context
         first_payment_utc = analytics.get("first_payment")
         last_payment_utc = analytics.get("last_payment")
-        
+
         date_range_info = {
             "start_utc": start_utc.isoformat(),
             "end_utc": end_utc.isoformat(),
             "timezone": station_timezone,
         }
-        
+
         # Add local time formatting if we have payment data
         if first_payment_utc:
             from api.app.utils.timezone_utils import format_for_display
+
             date_range_info["first_payment_local"] = format_for_display(
                 first_payment_utc, station_timezone
             )
         if last_payment_utc:
             from api.app.utils.timezone_utils import format_for_display
+
             date_range_info["last_payment_local"] = format_for_display(
                 last_payment_utc, station_timezone
             )
-        
+
         # Format response - return data directly for simpler API
         return {
             "total_payments": int(analytics.get("total_payments", 0) or 0),
@@ -141,10 +141,7 @@ async def get_payment_analytics(
             "last_payment": last_payment_utc,
             "date_range": date_range_info,
         }
-        
+
     except Exception as e:
         logger.error(f"Error fetching payment analytics: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to fetch payment analytics: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to fetch payment analytics: {e!s}")

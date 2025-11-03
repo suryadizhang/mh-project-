@@ -1,14 +1,23 @@
 import enum
 import uuid
 
-from sqlalchemy import Boolean, Column, Date, DateTime
-from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import ForeignKey, Index, Integer, Numeric, String, Text
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
-
 # Use unified Base from models package
 from api.app.models.declarative_base import Base
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    Numeric,
+    String,
+    Text,
+)
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 
 class UserRole(str, enum.Enum):
@@ -60,9 +69,7 @@ class LegacyUser(Base):
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     # Relationships
     bookings = relationship("LegacyBooking", back_populates="user")
@@ -82,9 +89,7 @@ class TimeSlotConfiguration(Base):
     max_capacity = Column(Integer, nullable=False, default=2)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 
 class LegacyBooking(Base):
@@ -99,15 +104,11 @@ class LegacyBooking(Base):
     )  # e.g., MH-20250828-EF56
 
     # User information
-    user_id = Column(
-        String, ForeignKey("users.id"), nullable=True
-    )  # Nullable for guest bookings
+    user_id = Column(String, ForeignKey("users.id"), nullable=True)  # Nullable for guest bookings
     customer_name = Column(String(255), nullable=False)
     customer_email = Column(String(255), nullable=False)
     customer_phone = Column(String(20), nullable=False)
-    preferred_communication = Column(
-        SQLEnum(PreferredCommunication), nullable=True
-    )
+    preferred_communication = Column(SQLEnum(PreferredCommunication), nullable=True)
 
     # Event details
     event_date = Column(Date, nullable=False)
@@ -128,9 +129,7 @@ class LegacyBooking(Base):
     same_as_venue = Column(Boolean, default=True)
 
     # Booking status and financials
-    status = Column(
-        SQLEnum(BookingStatus), nullable=False, default=BookingStatus.PENDING
-    )
+    status = Column(SQLEnum(BookingStatus), nullable=False, default=BookingStatus.PENDING)
     total_amount = Column(Numeric(10, 2), nullable=False, default=0.00)
     deposit_amount = Column(Numeric(10, 2), nullable=False, default=100.00)
     deposit_paid = Column(Boolean, default=False)
@@ -146,9 +145,7 @@ class LegacyBooking(Base):
 
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     confirmed_at = Column(DateTime(timezone=True), nullable=True)
     cancelled_at = Column(DateTime(timezone=True), nullable=True)
     completed_at = Column(DateTime(timezone=True), nullable=True)
@@ -160,9 +157,7 @@ class LegacyBooking(Base):
         back_populates="booking",
         cascade="all, delete-orphan",
     )
-    addons = relationship(
-        "BookingAddon", back_populates="booking", cascade="all, delete-orphan"
-    )
+    addons = relationship("BookingAddon", back_populates="booking", cascade="all, delete-orphan")
 
     @property
     def venue_address(self):
@@ -194,16 +189,12 @@ class MenuItem(Base):
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     base_price = Column(Numeric(8, 2), nullable=False)
-    category = Column(
-        String(100), nullable=False
-    )  # "Adult Menu", "Kids Menu", etc.
+    category = Column(String(100), nullable=False)  # "Adult Menu", "Kids Menu", etc.
     is_active = Column(Boolean, default=True)
     sort_order = Column(Integer, default=0)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 
 class AddonItem(Base):
@@ -215,16 +206,12 @@ class AddonItem(Base):
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     price = Column(Numeric(8, 2), nullable=False)
-    category = Column(
-        String(100), nullable=False
-    )  # "Protein Upgrades", "Equipment", etc.
+    category = Column(String(100), nullable=False)  # "Protein Upgrades", "Equipment", etc.
     is_active = Column(Boolean, default=True)
     sort_order = Column(Integer, default=0)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 
 class BookingMenuItem(Base):
@@ -236,12 +223,8 @@ class BookingMenuItem(Base):
     booking_id = Column(String, ForeignKey("public.bookings_legacy.id"), nullable=False)
     menu_item_id = Column(String, ForeignKey("menu_items.id"), nullable=False)
     quantity = Column(Integer, nullable=False, default=1)
-    unit_price = Column(
-        Numeric(8, 2), nullable=False
-    )  # Price at time of booking
-    total_price = Column(
-        Numeric(8, 2), nullable=False
-    )  # quantity * unit_price
+    unit_price = Column(Numeric(8, 2), nullable=False)  # Price at time of booking
+    total_price = Column(Numeric(8, 2), nullable=False)  # quantity * unit_price
 
     # Relationships
     booking = relationship("LegacyBooking", back_populates="menu_items")
@@ -255,16 +238,10 @@ class BookingAddon(Base):
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     booking_id = Column(String, ForeignKey("public.bookings_legacy.id"), nullable=False)
-    addon_item_id = Column(
-        String, ForeignKey("addon_items.id"), nullable=False
-    )
+    addon_item_id = Column(String, ForeignKey("addon_items.id"), nullable=False)
     quantity = Column(Integer, nullable=False, default=1)
-    unit_price = Column(
-        Numeric(8, 2), nullable=False
-    )  # Price at time of booking
-    total_price = Column(
-        Numeric(8, 2), nullable=False
-    )  # quantity * unit_price
+    unit_price = Column(Numeric(8, 2), nullable=False)  # Price at time of booking
+    total_price = Column(Numeric(8, 2), nullable=False)  # quantity * unit_price
 
     # Relationships
     booking = relationship("LegacyBooking", back_populates="addons")
@@ -284,9 +261,7 @@ class BookingAvailability(Base):
     is_available = Column(Boolean, default=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     @property
     def available_slots(self):

@@ -1,24 +1,29 @@
 """
 Chat service for handling chat ingestion and processing
 """
+
 import time
-from typing import Optional
 from uuid import uuid4
 
-from sqlalchemy import select, update
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from api.ai.endpoints.models import (
-    ChannelType,
     Conversation,
     ConversationStatus,
     Message,
     MessageRole,
 )
 from api.ai.endpoints.schemas import ChatIngestRequest, ChatIngestResponse
-from api.ai.endpoints.services.ai_pipeline import AIPipeline
-from api.ai.endpoints.services.knowledge_base_simple import ProductionKnowledgeBaseService as KnowledgeBaseService
 from api.ai.endpoints.services.ai_cache_service import get_ai_cache
+from api.ai.endpoints.services.ai_pipeline import AIPipeline
+from api.ai.endpoints.services.knowledge_base_simple import (
+    ProductionKnowledgeBaseService as KnowledgeBaseService,
+)
+from api.ai.shadow.chat_integration import (
+    classify_intent,
+    process_with_shadow_learning,
+)
+from core.config import get_settings
+from sqlalchemy import select, update
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class ChatService:
@@ -26,12 +31,12 @@ class ChatService:
         self.ai_service = AIPipeline()
         self.kb_service = KnowledgeBaseService()
         self.cache = get_ai_cache()  # ✅ Initialize cache
+        self.settings = get_settings()  # ✅ Get settings for shadow learning
 
-    async def ingest_chat(
-        self, request: ChatIngestRequest, db: AsyncSession
-    ) -> ChatIngestResponse:
+    async def ingest_chat(self, request: ChatIngestRequest, db: AsyncSession) -> ChatIngestResponse:
         """
-        Main entry point for all channels (website, SMS, DMs, voice transcripts)
+        Main entry point for all channels
+        (website, SMS, DMs, voice transcripts)
         Normalizes messages and processes through AI pipeline
         """
         start_time = time.time()
@@ -41,23 +46,26 @@ class ChatService:
             cache_context = {
                 "user_role": "customer",
                 "channel": request.channel.value,
-                "user_id": request.user_id
+                "user_id": request.user_id,
             }
-            
+
             cached_response = await self.cache.get_cached_response(
-                message=request.text,  # ✅ Use request.text
-                context=cache_context
+                message=request.text, context=cache_context  # ✅ Use request.text
             )
-            
+
             if cached_response:
                 # Cache hit! Return immediately (skip AI processing)
+                conv_id = cached_response.get("conversation_id", str(uuid4()))
+                msg_id = cached_response.get("message_id", str(uuid4()))
+                source = cached_response.get("source", "cache")
+
                 return ChatIngestResponse(
-                    conversation_id=cached_response.get("conversation_id", str(uuid4())),
-                    message_id=cached_response.get("message_id", str(uuid4())),
+                    conversation_id=conv_id,
+                    message_id=msg_id,
                     response=cached_response["response"],
                     confidence=cached_response.get("confidence", 0.95),
-                    source=f"{cached_response.get('source', 'cache')} (cached)",
-                    processing_time=time.time() - start_time,  # <50ms for cache hits
+                    source=f"{source} (cached)",
+                    processing_time=time.time() - start_time,
                     needs_human_review=False,
                 )
 
@@ -92,14 +100,62 @@ class ChatService:
             )
             db.add(incoming_message)
 
-            # Process through AI pipeline
-            ai_response = await self.ai_service.process_message(
-                message=request.text,  # ✅ Use request.text
-                conversation_id=conversation.id,
-                channel=request.channel,
-                user_context=request.metadata or {},
-                db=db,
-            )
+            # ✅ SHADOW LEARNING: Process with teacher-student logging
+            if self.settings.SHADOW_LEARNING_ENABLED:
+                try:
+                    # Classify intent for routing
+                    intent = await classify_intent(request.text)
+
+                    # Process with shadow learning
+                    response_tuple = await process_with_shadow_learning(
+                        db=db,
+                        message=request.text,
+                        intent=intent,
+                        context=request.metadata,
+                        teacher_generate_func=(self.ai_service.process_message),
+                        # Teacher function parameters
+                        conversation_id=conversation.id,
+                        channel=request.channel,
+                        user_context=request.metadata or {},
+                    )
+                    ai_response_text, shadow_metadata = response_tuple
+
+                    # Create response object from shadow learning result
+                    class ShadowResponse:
+                        def __init__(self, message, confidence, source):
+                            self.message = message
+                            self.confidence = confidence
+                            self.source = source
+
+                    model = shadow_metadata.get("model", "openai")
+                    ai_response = ShadowResponse(
+                        message=ai_response_text,
+                        confidence=shadow_metadata.get("confidence", 0.85),
+                        source=f"{model} (shadow learning)",
+                    )
+
+                except Exception as e:
+                    # Shadow learning failed, fall back to normal
+                    import logging  # noqa: PLC0415
+
+                    msg = f"Shadow learning failed, fallback: {e}"
+                    logging.warning(msg)
+                    ai_response = await self.ai_service.process_message(
+                        message=request.text,
+                        conversation_id=conversation.id,
+                        channel=request.channel,
+                        user_context=request.metadata or {},
+                        db=db,
+                    )
+            else:
+                # Shadow learning disabled - use normal processing
+                ai_response = await self.ai_service.process_message(
+                    message=request.text,
+                    conversation_id=conversation.id,
+                    channel=request.channel,
+                    user_context=request.metadata or {},
+                    db=db,
+                )
 
             # Store AI response
             response_message = Message(
@@ -135,11 +191,11 @@ class ChatService:
                 "confidence": ai_response.confidence,
                 "source": ai_response.source,
             }
-            
+
             await self.cache.cache_response(
                 message=request.text,  # ✅ Use request.text
                 response=cache_data,
-                context=cache_context
+                context=cache_context,
             )
 
             return ChatIngestResponse(
@@ -152,9 +208,9 @@ class ChatService:
                 needs_human_review=ai_response.confidence < 0.5,
             )
 
-        except Exception as e:
+        except Exception:
             await db.rollback()
-            raise e
+            raise
 
 
 # Create a global instance

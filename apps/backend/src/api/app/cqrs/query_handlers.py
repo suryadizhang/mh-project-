@@ -1,15 +1,15 @@
 """
 Query handlers for CRM read operations using materialized views.
 """
+
 from datetime import datetime
 from typing import Any
-
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.app.cqrs.base import QueryHandler, QueryResult
 from api.app.cqrs.crm_operations import *
 from api.app.utils.encryption import FieldEncryption
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class GetBookingQueryHandler(QueryHandler):
@@ -23,7 +23,8 @@ class GetBookingQueryHandler(QueryHandler):
         """Get booking details with related data."""
         try:
             # Use the booking_detail materialized view for optimized reads
-            stmt = text("""
+            stmt = text(
+                """
                 SELECT
                     bd.*,
                     CASE WHEN :include_payments THEN
@@ -66,41 +67,54 @@ class GetBookingQueryHandler(QueryHandler):
                          bd.total_due_cents, bd.deposit_due_cents, bd.balance_due_cents,
                          bd.status, bd.payment_status, bd.special_requests_encrypted,
                          bd.source, bd.ai_conversation_id, bd.created_at, bd.updated_at
-            """)
+            """
+            )
 
-            result = await self.session.execute(stmt, {
-                'booking_id': str(query.booking_id),
-                'include_payments': query.include_payments,
-                'include_messages': query.include_messages
-            })
+            result = await self.session.execute(
+                stmt,
+                {
+                    "booking_id": str(query.booking_id),
+                    "include_payments": query.include_payments,
+                    "include_messages": query.include_messages,
+                },
+            )
 
             row = result.fetchone()
             if not row:
-                return QueryResult(
-                    success=False,
-                    error=f"Booking {query.booking_id} not found"
-                )
+                return QueryResult(success=False, error=f"Booking {query.booking_id} not found")
 
             # Decrypt sensitive fields
             booking_data = dict(row._mapping)
-            booking_data['customer_email'] = self.encryption.decrypt(booking_data['customer_email_encrypted'])
-            booking_data['customer_name'] = self.encryption.decrypt(booking_data['customer_name_encrypted'])
-            booking_data['customer_phone'] = self.encryption.decrypt(booking_data['customer_phone_encrypted'])
+            booking_data["customer_email"] = self.encryption.decrypt(
+                booking_data["customer_email_encrypted"]
+            )
+            booking_data["customer_name"] = self.encryption.decrypt(
+                booking_data["customer_name_encrypted"]
+            )
+            booking_data["customer_phone"] = self.encryption.decrypt(
+                booking_data["customer_phone_encrypted"]
+            )
 
             # Decrypt special requests if present
-            if booking_data.get('special_requests_encrypted'):
-                booking_data['special_requests'] = self.encryption.decrypt(booking_data['special_requests_encrypted'])
+            if booking_data.get("special_requests_encrypted"):
+                booking_data["special_requests"] = self.encryption.decrypt(
+                    booking_data["special_requests_encrypted"]
+                )
 
             # Remove encrypted fields from response
-            for field in ['customer_email_encrypted', 'customer_name_encrypted',
-                         'customer_phone_encrypted', 'special_requests_encrypted']:
+            for field in [
+                "customer_email_encrypted",
+                "customer_name_encrypted",
+                "customer_phone_encrypted",
+                "special_requests_encrypted",
+            ]:
                 booking_data.pop(field, None)
 
             # Decrypt phone numbers in message threads if included
-            if query.include_messages and booking_data.get('message_threads'):
-                for thread in booking_data['message_threads']:
-                    if thread.get('phone_number'):
-                        thread['phone_number'] = self.encryption.decrypt(thread['phone_number'])
+            if query.include_messages and booking_data.get("message_threads"):
+                for thread in booking_data["message_threads"]:
+                    if thread.get("phone_number"):
+                        thread["phone_number"] = self.encryption.decrypt(thread["phone_number"])
 
             return QueryResult(success=True, data=booking_data)
 
@@ -120,37 +134,34 @@ class GetBookingsQueryHandler(QueryHandler):
         try:
             # Build dynamic query conditions
             conditions = []
-            params = {
-                'limit': query.page_size,
-                'offset': (query.page - 1) * query.page_size
-            }
+            params = {"limit": query.page_size, "offset": (query.page - 1) * query.page_size}
 
             if query.customer_email:
                 # We need to encrypt the email to search
                 encrypted_email = self.encryption.encrypt(query.customer_email)
                 conditions.append("bd.customer_email_encrypted = :customer_email")
-                params['customer_email'] = encrypted_email
+                params["customer_email"] = encrypted_email
 
             if query.customer_phone:
                 encrypted_phone = self.encryption.encrypt(query.customer_phone)
                 conditions.append("bd.customer_phone_encrypted = :customer_phone")
-                params['customer_phone'] = encrypted_phone
+                params["customer_phone"] = encrypted_phone
 
             if query.date_from:
                 conditions.append("bd.date >= :date_from")
-                params['date_from'] = query.date_from
+                params["date_from"] = query.date_from
 
             if query.date_to:
                 conditions.append("bd.date <= :date_to")
-                params['date_to'] = query.date_to
+                params["date_to"] = query.date_to
 
             if query.status:
                 conditions.append("bd.status = :status")
-                params['status'] = query.status
+                params["status"] = query.status
 
             if query.source:
                 conditions.append("bd.source = :source")
-                params['source'] = query.source
+                params["source"] = query.source
 
             where_clause = " WHERE " + " AND ".join(conditions) if conditions else ""
 
@@ -159,7 +170,8 @@ class GetBookingsQueryHandler(QueryHandler):
             order_by = f"ORDER BY bd.{query.sort_by} {sort_direction}"
 
             # Main query
-            stmt = text(f"""
+            stmt = text(
+                f"""
                 SELECT
                     bd.booking_id,
                     bd.customer_email_encrypted,
@@ -179,14 +191,17 @@ class GetBookingsQueryHandler(QueryHandler):
                 {where_clause}
                 {order_by}
                 LIMIT :limit OFFSET :offset
-            """)
+            """
+            )
 
             # Count query for pagination
-            count_stmt = text(f"""
+            count_stmt = text(
+                f"""
                 SELECT COUNT(*) as total
                 FROM read.booking_detail bd
                 {where_clause}
-            """)
+            """
+            )
 
             # Execute both queries
             result = await self.session.execute(stmt, params)
@@ -197,23 +212,29 @@ class GetBookingsQueryHandler(QueryHandler):
                 booking_data = dict(row._mapping)
 
                 # Decrypt sensitive fields
-                booking_data['customer_email'] = self.encryption.decrypt(booking_data['customer_email_encrypted'])
-                booking_data['customer_name'] = self.encryption.decrypt(booking_data['customer_name_encrypted'])
-                booking_data['customer_phone'] = self.encryption.decrypt(booking_data['customer_phone_encrypted'])
+                booking_data["customer_email"] = self.encryption.decrypt(
+                    booking_data["customer_email_encrypted"]
+                )
+                booking_data["customer_name"] = self.encryption.decrypt(
+                    booking_data["customer_name_encrypted"]
+                )
+                booking_data["customer_phone"] = self.encryption.decrypt(
+                    booking_data["customer_phone_encrypted"]
+                )
 
                 # Remove encrypted fields
-                for field in ['customer_email_encrypted', 'customer_name_encrypted', 'customer_phone_encrypted']:
+                for field in [
+                    "customer_email_encrypted",
+                    "customer_name_encrypted",
+                    "customer_phone_encrypted",
+                ]:
                     booking_data.pop(field)
 
                 bookings.append(booking_data)
 
             total_count = count_result.scalar()
 
-            return QueryResult(
-                success=True,
-                data=bookings,
-                total_count=total_count
-            )
+            return QueryResult(success=True, data=bookings, total_count=total_count)
 
         except Exception as e:
             return QueryResult(success=False, error=str(e))
@@ -232,21 +253,22 @@ class GetCustomer360QueryHandler(QueryHandler):
             # Build WHERE condition based on provided identifier
             if query.customer_id:
                 where_condition = "c360.customer_id = :identifier"
-                params = {'identifier': str(query.customer_id)}
+                params = {"identifier": str(query.customer_id)}
             elif query.customer_email:
                 where_condition = "c360.customer_email_encrypted = :identifier"
-                params = {'identifier': self.encryption.encrypt(query.customer_email)}
+                params = {"identifier": self.encryption.encrypt(query.customer_email)}
             elif query.customer_phone:
                 where_condition = "c360.customer_phone_encrypted = :identifier"
-                params = {'identifier': self.encryption.encrypt(query.customer_phone)}
+                params = {"identifier": self.encryption.encrypt(query.customer_phone)}
             else:
                 return QueryResult(
                     success=False,
-                    error="Must provide customer_id, customer_email, or customer_phone"
+                    error="Must provide customer_id, customer_email, or customer_phone",
                 )
 
             # Use customer_360 materialized view
-            stmt = text(f"""
+            stmt = text(
+                f"""
                 SELECT
                     c360.*,
                     CASE WHEN :include_bookings THEN
@@ -306,40 +328,50 @@ class GetCustomer360QueryHandler(QueryHandler):
                          c360.customer_phone_encrypted, c360.source, c360.first_booking_at,
                          c360.last_booking_at, c360.total_bookings, c360.total_spent_cents,
                          c360.created_at, c360.updated_at
-            """)
+            """
+            )
 
-            params.update({
-                'include_bookings': query.include_bookings,
-                'include_payments': query.include_payments,
-                'include_messages': query.include_messages
-            })
+            params.update(
+                {
+                    "include_bookings": query.include_bookings,
+                    "include_payments": query.include_payments,
+                    "include_messages": query.include_messages,
+                }
+            )
 
             result = await self.session.execute(stmt, params)
             row = result.fetchone()
 
             if not row:
-                return QueryResult(
-                    success=False,
-                    error="Customer not found"
-                )
+                return QueryResult(success=False, error="Customer not found")
 
             # Decrypt and format response
             customer_data = dict(row._mapping)
 
             # Decrypt PII fields
-            customer_data['customer_email'] = self.encryption.decrypt(customer_data['customer_email_encrypted'])
-            customer_data['customer_name'] = self.encryption.decrypt(customer_data['customer_name_encrypted'])
-            customer_data['customer_phone'] = self.encryption.decrypt(customer_data['customer_phone_encrypted'])
+            customer_data["customer_email"] = self.encryption.decrypt(
+                customer_data["customer_email_encrypted"]
+            )
+            customer_data["customer_name"] = self.encryption.decrypt(
+                customer_data["customer_name_encrypted"]
+            )
+            customer_data["customer_phone"] = self.encryption.decrypt(
+                customer_data["customer_phone_encrypted"]
+            )
 
             # Remove encrypted fields
-            for field in ['customer_email_encrypted', 'customer_name_encrypted', 'customer_phone_encrypted']:
+            for field in [
+                "customer_email_encrypted",
+                "customer_name_encrypted",
+                "customer_phone_encrypted",
+            ]:
                 customer_data.pop(field, None)
 
             # Decrypt phone numbers in message threads
-            if query.include_messages and customer_data.get('message_threads'):
-                for thread in customer_data['message_threads']:
-                    if thread.get('phone_number'):
-                        thread['phone_number'] = self.encryption.decrypt(thread['phone_number'])
+            if query.include_messages and customer_data.get("message_threads"):
+                for thread in customer_data["message_threads"]:
+                    if thread.get("phone_number"):
+                        thread["phone_number"] = self.encryption.decrypt(thread["phone_number"])
 
             return QueryResult(success=True, data=customer_data)
 
@@ -358,7 +390,8 @@ class GetMessageThreadQueryHandler(QueryHandler):
         """Get message thread with decrypted messages."""
         try:
             # Get thread details with messages using raw SQL for better performance
-            stmt = text("""
+            stmt = text(
+                """
                 SELECT
                     mt.id as thread_id,
                     mt.phone_number_encrypted,
@@ -412,43 +445,48 @@ class GetMessageThreadQueryHandler(QueryHandler):
                          mt.last_message_at, mt.booking_id, mt.subject, mt.created_at,
                          c.id, c.name_encrypted, c.email_encrypted, c.total_bookings, c.total_spent_cents,
                          b.id, b.date, b.slot, b.total_guests, b.status
-            """)
+            """
+            )
 
-            result = await self.session.execute(stmt, {
-                'thread_id': str(query.thread_id),
-                'include_customer_details': query.include_customer_details,
-                'include_booking_context': query.include_booking_context,
-                'limit': query.limit
-            })
+            result = await self.session.execute(
+                stmt,
+                {
+                    "thread_id": str(query.thread_id),
+                    "include_customer_details": query.include_customer_details,
+                    "include_booking_context": query.include_booking_context,
+                    "limit": query.limit,
+                },
+            )
 
             row = result.fetchone()
             if not row:
                 return QueryResult(
-                    success=False,
-                    error=f"Message thread {query.thread_id} not found"
+                    success=False, error=f"Message thread {query.thread_id} not found"
                 )
 
             # Process and decrypt response
             thread_data = dict(row._mapping)
 
             # Decrypt phone number
-            thread_data['phone_number'] = self.encryption.decrypt(thread_data['phone_number_encrypted'])
-            thread_data.pop('phone_number_encrypted')
+            thread_data["phone_number"] = self.encryption.decrypt(
+                thread_data["phone_number_encrypted"]
+            )
+            thread_data.pop("phone_number_encrypted")
 
             # Decrypt customer details if included
-            if query.include_customer_details and thread_data.get('customer'):
-                customer = thread_data['customer']
-                if customer.get('name'):
-                    customer['name'] = self.encryption.decrypt(customer['name'])
-                if customer.get('email'):
-                    customer['email'] = self.encryption.decrypt(customer['email'])
+            if query.include_customer_details and thread_data.get("customer"):
+                customer = thread_data["customer"]
+                if customer.get("name"):
+                    customer["name"] = self.encryption.decrypt(customer["name"])
+                if customer.get("email"):
+                    customer["email"] = self.encryption.decrypt(customer["email"])
 
             # Decrypt message contents
-            if thread_data.get('messages'):
-                for message in thread_data['messages']:
-                    if message.get('content_encrypted'):
-                        message['content'] = self.encryption.decrypt(message['content_encrypted'])
-                        message.pop('content_encrypted')
+            if thread_data.get("messages"):
+                for message in thread_data["messages"]:
+                    if message.get("content_encrypted"):
+                        message["content"] = self.encryption.decrypt(message["content_encrypted"])
+                        message.pop("content_encrypted")
 
             return QueryResult(success=True, data=thread_data)
 
@@ -463,7 +501,8 @@ class GetAvailabilitySlotsQueryHandler(QueryHandler):
         """Get available slots using schedule_board view."""
         try:
             # Use the schedule_board materialized view for optimized availability
-            stmt = text("""
+            stmt = text(
+                """
                 SELECT
                     slot,
                     max_capacity,
@@ -485,33 +524,31 @@ class GetAvailabilitySlotsQueryHandler(QueryHandler):
                 WHERE date_slot = :date
                 GROUP BY slot, max_capacity, current_bookings, available_capacity
                 ORDER BY slot
-            """)
+            """
+            )
 
-            result = await self.session.execute(stmt, {
-                'date': query.date,
-                'party_size': query.party_size
-            })
+            result = await self.session.execute(
+                stmt, {"date": query.date, "party_size": query.party_size}
+            )
 
             slots = []
             for row in result.fetchall():
                 slot_data = dict(row._mapping)
 
                 # Decrypt customer names in reservations (for staff view)
-                if slot_data.get('current_reservations'):
-                    for reservation in slot_data['current_reservations']:
-                        if reservation.get('customer_name_encrypted'):
-                            reservation['customer_name'] = self.encryption.decrypt(reservation['customer_name_encrypted'])
-                            reservation.pop('customer_name_encrypted')
+                if slot_data.get("current_reservations"):
+                    for reservation in slot_data["current_reservations"]:
+                        if reservation.get("customer_name_encrypted"):
+                            reservation["customer_name"] = self.encryption.decrypt(
+                                reservation["customer_name_encrypted"]
+                            )
+                            reservation.pop("customer_name_encrypted")
 
                 slots.append(slot_data)
 
             return QueryResult(
                 success=True,
-                data={
-                    'date': query.date,
-                    'party_size': query.party_size,
-                    'slots': slots
-                }
+                data={"date": query.date, "party_size": query.party_size, "slots": slots},
             )
 
         except Exception as e:
@@ -527,6 +564,7 @@ class GetDashboardStatsQueryHandler(QueryHandler):
             # Default to current month if no dates provided
             if not query.date_from or not query.date_to:
                 from datetime import date
+
                 today = date.today()
                 if not query.date_from:
                     query.date_from = today.replace(day=1)
@@ -549,13 +587,7 @@ class GetDashboardStatsQueryHandler(QueryHandler):
 
             return QueryResult(
                 success=True,
-                data={
-                    'period': {
-                        'from': query.date_from,
-                        'to': query.date_to
-                    },
-                    'stats': stats
-                }
+                data={"period": {"from": query.date_from, "to": query.date_to}, "stats": stats},
             )
 
         except Exception as e:
@@ -563,7 +595,8 @@ class GetDashboardStatsQueryHandler(QueryHandler):
 
     async def _get_booking_stats(self, date_from, date_to) -> dict[str, Any]:
         """Get booking statistics."""
-        stmt = text("""
+        stmt = text(
+            """
             SELECT
                 COUNT(*) as total_bookings,
                 COUNT(*) FILTER (WHERE status = 'confirmed') as confirmed_bookings,
@@ -575,19 +608,18 @@ class GetDashboardStatsQueryHandler(QueryHandler):
                 COUNT(*) FILTER (WHERE source = 'website') as website_bookings
             FROM core.bookings
             WHERE date BETWEEN :date_from AND :date_to
-        """)
+        """
+        )
 
-        result = await self.session.execute(stmt, {
-            'date_from': date_from,
-            'date_to': date_to
-        })
+        result = await self.session.execute(stmt, {"date_from": date_from, "date_to": date_to})
 
         row = result.fetchone()
         return dict(row._mapping) if row else {}
 
     async def _get_revenue_stats(self, date_from, date_to) -> dict[str, Any]:
         """Get revenue statistics."""
-        stmt = text("""
+        stmt = text(
+            """
             SELECT
                 COALESCE(SUM(b.total_due_cents), 0) as total_revenue_cents,
                 COALESCE(SUM(p.amount_cents), 0) as collected_revenue_cents,
@@ -597,19 +629,18 @@ class GetDashboardStatsQueryHandler(QueryHandler):
             FROM core.bookings b
             LEFT JOIN core.payments p ON p.booking_id = b.id
             WHERE b.date BETWEEN :date_from AND :date_to
-        """)
+        """
+        )
 
-        result = await self.session.execute(stmt, {
-            'date_from': date_from,
-            'date_to': date_to
-        })
+        result = await self.session.execute(stmt, {"date_from": date_from, "date_to": date_to})
 
         row = result.fetchone()
         return dict(row._mapping) if row else {}
 
     async def _get_message_stats(self, date_from, date_to) -> dict[str, Any]:
         """Get message statistics."""
-        stmt = text("""
+        stmt = text(
+            """
             SELECT
                 COUNT(DISTINCT mt.id) as active_threads,
                 COUNT(*) FILTER (WHERE m.direction = 'inbound') as inbound_messages,
@@ -626,22 +657,26 @@ class GetDashboardStatsQueryHandler(QueryHandler):
                 GROUP BY thread_id
             ) thread_message_count ON thread_message_count.thread_id = mt.id
             WHERE mt.created_at BETWEEN :date_from AND :date_to
-        """)
+        """
+        )
 
-        result = await self.session.execute(stmt, {
-            'date_from': datetime.combine(date_from, datetime.min.time()),
-            'date_to': datetime.combine(date_to, datetime.max.time())
-        })
+        result = await self.session.execute(
+            stmt,
+            {
+                "date_from": datetime.combine(date_from, datetime.min.time()),
+                "date_to": datetime.combine(date_to, datetime.max.time()),
+            },
+        )
 
         row = result.fetchone()
         return dict(row._mapping) if row else {}
 
 
 __all__ = [
+    "GetAvailabilitySlotsQueryHandler",
     "GetBookingQueryHandler",
     "GetBookingsQueryHandler",
     "GetCustomer360QueryHandler",
+    "GetDashboardStatsQueryHandler",
     "GetMessageThreadQueryHandler",
-    "GetAvailabilitySlotsQueryHandler",
-    "GetDashboardStatsQueryHandler"
 ]

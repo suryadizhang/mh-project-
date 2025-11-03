@@ -3,30 +3,29 @@ Prompt Registry Service
 Manages agent-specific prompts with inheritance and proper isolation.
 Prevents prompt bleed while allowing general reasoning capabilities.
 """
+
+from datetime import datetime
 import logging
 import os
-from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
 class PromptRegistryService:
     """Registry for agent-specific prompts with inheritance and isolation."""
-    
+
     def __init__(self):
-        self.prompts_dir = os.path.join(
-            os.path.dirname(__file__), "..", "..", "prompts"
-        )
+        self.prompts_dir = os.path.join(os.path.dirname(__file__), "..", "..", "prompts")
         self._prompt_cache = {}
         self._cache_timestamp = {}
-        
+
         # Ensure prompts directory exists
         os.makedirs(self.prompts_dir, exist_ok=True)
-        
+
         # Initialize default agent prompts
         self._initialize_agent_prompts()
-    
+
     def _initialize_agent_prompts(self):
         """Initialize default agent prompt files if they don't exist."""
         agent_prompts = {
@@ -73,9 +72,8 @@ class PromptRegistryService:
 • Complex account issues
 • Weather-related cancellations
 
-You can discuss any topic naturally, but always maintain your helpful, professional demeanor and focus on how you can assist with MyHibachi services when relevant."""
+You can discuss any topic naturally, but always maintain your helpful, professional demeanor and focus on how you can assist with MyHibachi services when relevant.""",
             },
-            
             "admin": {
                 "description": "Administrative management agent with full system access",
                 "system_prompt": """You are MyHibachi's administrative AI assistant with full management capabilities.
@@ -121,9 +119,8 @@ You can discuss any topic naturally, but always maintain your helpful, professio
 • System configuration access
 • Analytics and reporting tools
 
-You can engage in natural conversation on any topic while maintaining your professional expertise in restaurant management and operational excellence."""
+You can engage in natural conversation on any topic while maintaining your professional expertise in restaurant management and operational excellence.""",
             },
-            
             "staff": {
                 "description": "Staff operations agent for workflow guidance and support",
                 "system_prompt": """You are MyHibachi's staff operations AI assistant, designed to help team members with daily workflows and operational guidance.
@@ -171,9 +168,8 @@ You can engage in natural conversation on any topic while maintaining your profe
 • Encourage professional development
 • Maintain positive team morale
 
-You can discuss any topic naturally while focusing on being a helpful resource for staff members to excel in their roles and provide outstanding customer service."""
+You can discuss any topic naturally while focusing on being a helpful resource for staff members to excel in their roles and provide outstanding customer service.""",
             },
-            
             "support": {
                 "description": "Customer support agent for issue resolution and escalation",
                 "system_prompt": """You are MyHibachi's specialized customer support AI assistant, focused on issue resolution and customer satisfaction.
@@ -223,9 +219,8 @@ You can discuss any topic naturally while focusing on being a helpful resource f
 • Offer multiple solution options when possible
 • Ensure customer feels heard and valued
 
-You can engage naturally on any topic while maintaining your focus on providing exceptional customer support and turning negative experiences into positive outcomes."""
+You can engage naturally on any topic while maintaining your focus on providing exceptional customer support and turning negative experiences into positive outcomes.""",
             },
-            
             "analytics": {
                 "description": "Analytics and reporting agent for data insights",
                 "system_prompt": """You are MyHibachi's analytics and business intelligence AI assistant, specializing in data analysis and strategic insights.
@@ -277,17 +272,17 @@ You can engage naturally on any topic while maintaining your focus on providing 
 • Highlight key trends and outliers
 • Suggest follow-up analysis when appropriate
 
-You can discuss any topic naturally while bringing your analytical perspective to help understand patterns, trends, and insights that drive business success."""
-            }
+You can discuss any topic naturally while bringing your analytical perspective to help understand patterns, trends, and insights that drive business success.""",
+            },
         }
-        
+
         for agent, config in agent_prompts.items():
             self._create_agent_prompt_file(agent, config)
-    
-    def _create_agent_prompt_file(self, agent: str, config: Dict[str, Any]):
+
+    def _create_agent_prompt_file(self, agent: str, config: dict[str, Any]):
         """Create agent prompt file if it doesn't exist."""
         file_path = os.path.join(self.prompts_dir, f"system.{agent}.md")
-        
+
         if not os.path.exists(file_path):
             content = f"""# {config['description'].title()}
 
@@ -298,54 +293,50 @@ You can discuss any topic naturally while bringing your analytical perspective t
 *Created: {datetime.utcnow().isoformat()}*
 *Purpose: {config['description']}*
 """
-            
+
             try:
-                with open(file_path, 'w', encoding='utf-8') as f:
+                with open(file_path, "w", encoding="utf-8") as f:
                     f.write(content)
                 logger.info(f"Created prompt file for agent: {agent}")
             except Exception as e:
-                logger.error(f"Failed to create prompt file for {agent}: {e}")
-    
-    async def get_agent_prompt(
-        self,
-        agent: str,
-        context: Optional[Dict[str, Any]] = None
-    ) -> str:
+                logger.exception(f"Failed to create prompt file for {agent}: {e}")
+
+    async def get_agent_prompt(self, agent: str, context: dict[str, Any] | None = None) -> str:
         """
         Get agent-specific prompt with context injection.
-        
+
         Args:
             agent: Agent identifier
             context: Optional context for prompt customization
-            
+
         Returns:
             Complete system prompt for the agent
         """
         try:
             # Get base prompt for agent
             base_prompt = await self._load_agent_prompt(agent)
-            
+
             if not base_prompt:
                 logger.warning(f"No prompt found for agent: {agent}, using fallback")
                 return self._get_fallback_prompt(agent)
-            
+
             # Apply context injection if provided
             if context:
                 base_prompt = self._inject_context(base_prompt, context)
-            
+
             # Add agent isolation headers
             isolated_prompt = self._add_isolation_headers(agent, base_prompt)
-            
+
             return isolated_prompt
-            
+
         except Exception as e:
-            logger.error(f"Error getting prompt for agent {agent}: {e}")
+            logger.exception(f"Error getting prompt for agent {agent}: {e}")
             return self._get_fallback_prompt(agent)
-    
-    async def _load_agent_prompt(self, agent: str) -> Optional[str]:
+
+    async def _load_agent_prompt(self, agent: str) -> str | None:
         """Load agent prompt from file with caching."""
         file_path = os.path.join(self.prompts_dir, f"system.{agent}.md")
-        
+
         # Check cache first
         if agent in self._prompt_cache:
             # Check if file was modified
@@ -355,56 +346,56 @@ You can discuss any topic naturally while bringing your analytical perspective t
                     return self._prompt_cache[agent]
             except OSError:
                 pass
-        
+
         # Load from file
         try:
             if os.path.exists(file_path):
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding="utf-8") as f:
                     content = f.read()
-                
+
                 # Cache the prompt
                 self._prompt_cache[agent] = content
                 self._cache_timestamp[agent] = os.path.getmtime(file_path)
-                
+
                 return content
             else:
                 logger.warning(f"Prompt file not found: {file_path}")
                 return None
-                
+
         except Exception as e:
-            logger.error(f"Error loading prompt file for {agent}: {e}")
+            logger.exception(f"Error loading prompt file for {agent}: {e}")
             return None
-    
-    def _inject_context(self, prompt: str, context: Dict[str, Any]) -> str:
+
+    def _inject_context(self, prompt: str, context: dict[str, Any]) -> str:
         """Inject context variables into prompt template."""
         try:
             # Simple context injection - could be enhanced with template engine
             injected_prompt = prompt
-            
+
             # Add conversation context
             if context.get("conversation_id"):
                 injected_prompt += f"\n\n**Current Conversation:** {context['conversation_id']}"
-            
+
             # Add user context
             if context.get("user_id"):
                 injected_prompt += f"\n**User Context:** User ID {context['user_id']}"
-            
+
             # Add capabilities context
             if context.get("capabilities"):
                 caps = ", ".join(context["capabilities"])
                 injected_prompt += f"\n**Available Capabilities:** {caps}"
-            
+
             # Add tool context
             if context.get("available_tools"):
                 tools = ", ".join(context["available_tools"])
                 injected_prompt += f"\n**Available Tools:** {tools}"
-            
+
             return injected_prompt
-            
+
         except Exception as e:
-            logger.error(f"Error injecting context: {e}")
+            logger.exception(f"Error injecting context: {e}")
             return prompt
-    
+
     def _add_isolation_headers(self, agent: str, prompt: str) -> str:
         """Add agent isolation headers to prevent prompt bleed."""
         isolation_header = f"""
@@ -420,52 +411,45 @@ You can discuss any topic naturally while bringing your analytical perspective t
 ---
 
 """
-        
+
         return isolation_header + prompt
-    
+
     def _get_fallback_prompt(self, agent: str) -> str:
         """Get fallback prompt when agent-specific prompt is unavailable."""
         fallback_prompts = {
             "customer": """You are MyHibachi's customer service assistant. Help with bookings, menu questions, and restaurant information. Be friendly and professional.""",
-            
             "admin": """You are MyHibachi's administrative assistant with full management capabilities. Help with user management, operations, analytics, and system configuration.""",
-            
             "staff": """You are MyHibachi's staff operations assistant. Provide workflow guidance, training support, and operational help to team members.""",
-            
             "support": """You are MyHibachi's customer support specialist. Focus on issue resolution, complaint handling, and ensuring customer satisfaction.""",
-            
-            "analytics": """You are MyHibachi's analytics assistant. Provide data insights, generate reports, and help with business intelligence analysis."""
+            "analytics": """You are MyHibachi's analytics assistant. Provide data insights, generate reports, and help with business intelligence analysis.""",
         }
-        
+
         return fallback_prompts.get(
             agent,
-            f"You are MyHibachi's {agent} assistant. Provide helpful and professional assistance."
+            f"You are MyHibachi's {agent} assistant. Provide helpful and professional assistance.",
         )
-    
-    async def get_agent_prompt_template(self, agent: str) -> Optional[str]:
+
+    async def get_agent_prompt_template(self, agent: str) -> str | None:
         """Get the raw prompt template for an agent."""
         return await self._load_agent_prompt(agent)
-    
+
     async def update_agent_prompt(
-        self,
-        agent: str,
-        prompt: str,
-        description: Optional[str] = None
+        self, agent: str, prompt: str, description: str | None = None
     ) -> bool:
         """
         Update agent prompt file.
-        
+
         Args:
             agent: Agent identifier
             prompt: New prompt content
             description: Optional description update
-            
+
         Returns:
             Success status
         """
         try:
             file_path = os.path.join(self.prompts_dir, f"system.{agent}.md")
-            
+
             # Add metadata
             content = f"""# {description or f'{agent.title()} Agent Prompt'}
 
@@ -476,24 +460,24 @@ You can discuss any topic naturally while bringing your analytical perspective t
 *Updated: {datetime.utcnow().isoformat()}*
 *Purpose: {description or f'{agent} agent prompt'}*
 """
-            
-            with open(file_path, 'w', encoding='utf-8') as f:
+
+            with open(file_path, "w", encoding="utf-8") as f:
                 f.write(content)
-            
+
             # Clear cache to force reload
             if agent in self._prompt_cache:
                 del self._prompt_cache[agent]
             if agent in self._cache_timestamp:
                 del self._cache_timestamp[agent]
-            
+
             logger.info(f"Updated prompt for agent: {agent}")
             return True
-            
+
         except Exception as e:
-            logger.error(f"Error updating prompt for agent {agent}: {e}")
+            logger.exception(f"Error updating prompt for agent {agent}: {e}")
             return False
-    
-    async def list_agents(self) -> List[str]:
+
+    async def list_agents(self) -> list[str]:
         """List all available agent prompts."""
         try:
             agents = []
@@ -502,67 +486,67 @@ You can discuss any topic naturally while bringing your analytical perspective t
                     agent = filename[7:-3]  # Remove "system." prefix and ".md" suffix
                     agents.append(agent)
             return sorted(agents)
-            
+
         except Exception as e:
-            logger.error(f"Error listing agents: {e}")
+            logger.exception(f"Error listing agents: {e}")
             return []
-    
-    async def validate_agent_prompt(self, agent: str) -> Dict[str, Any]:
+
+    async def validate_agent_prompt(self, agent: str) -> dict[str, Any]:
         """
         Validate agent prompt exists and is properly formatted.
-        
+
         Args:
             agent: Agent identifier
-            
+
         Returns:
             Validation result
         """
         try:
             prompt = await self._load_agent_prompt(agent)
-            
+
             if not prompt:
                 return {
                     "valid": False,
                     "error": f"No prompt file found for agent: {agent}",
-                    "suggestions": ["Create prompt file", "Use fallback prompt"]
+                    "suggestions": ["Create prompt file", "Use fallback prompt"],
                 }
-            
+
             # Basic validation checks
             checks = {
                 "has_content": len(prompt.strip()) > 0,
                 "reasonable_length": 100 <= len(prompt) <= 10000,
                 "has_agent_mention": agent.lower() in prompt.lower(),
-                "has_myhibachi_mention": "myhibachi" in prompt.lower()
+                "has_myhibachi_mention": "myhibachi" in prompt.lower(),
             }
-            
+
             issues = [check for check, passed in checks.items() if not passed]
-            
+
             return {
                 "valid": len(issues) == 0,
                 "checks": checks,
                 "issues": issues,
                 "prompt_length": len(prompt),
-                "file_path": f"system.{agent}.md"
+                "file_path": f"system.{agent}.md",
             }
-            
+
         except Exception as e:
             return {
                 "valid": False,
-                "error": f"Validation error: {str(e)}",
-                "suggestions": ["Check file permissions", "Verify file exists"]
+                "error": f"Validation error: {e!s}",
+                "suggestions": ["Check file permissions", "Verify file exists"],
             }
-    
-    async def health_check(self) -> Dict[str, Any]:
+
+    async def health_check(self) -> dict[str, Any]:
         """Perform health check on prompt registry."""
         try:
             agents = await self.list_agents()
-            
+
             validation_results = {}
             for agent in agents:
                 validation_results[agent] = await self.validate_agent_prompt(agent)
-            
+
             healthy_agents = sum(1 for result in validation_results.values() if result["valid"])
-            
+
             return {
                 "healthy": healthy_agents > 0,
                 "total_agents": len(agents),
@@ -570,12 +554,8 @@ You can discuss any topic naturally while bringing your analytical perspective t
                 "agents": agents,
                 "validation_results": validation_results,
                 "prompts_directory": self.prompts_dir,
-                "cache_size": len(self._prompt_cache)
+                "cache_size": len(self._prompt_cache),
             }
-            
+
         except Exception as e:
-            return {
-                "healthy": False,
-                "error": str(e),
-                "last_check": datetime.utcnow()
-            }
+            return {"healthy": False, "error": str(e), "last_check": datetime.utcnow()}

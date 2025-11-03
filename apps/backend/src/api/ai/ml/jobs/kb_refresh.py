@@ -13,9 +13,10 @@ Author: MyHibachi Development Team
 Created: October 31, 2025
 """
 
+from datetime import datetime
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, Any
+from typing import Any
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Import services (adjust paths as needed)
@@ -28,7 +29,7 @@ logger = logging.getLogger(__name__)
 async def weekly_kb_refresh(db: AsyncSession):
     """
     Weekly KB refresh job
-    
+
     Process:
     1. Fetch approved training data from past 7 days
     2. Extract Q&A pairs
@@ -38,28 +39,24 @@ async def weekly_kb_refresh(db: AsyncSession):
     """
     try:
         logger.info("🔄 Starting weekly KB refresh...")
-        
+
         # Get services
         # kb_service = get_kb_service()
         # dataset_builder = get_dataset_builder()
-        
+
         # Fetch approved Q&A pairs from past 7 days
         # new_qa_pairs = await dataset_builder.fetch_approved_pairs(
         #     db,
         #     days=7,
         #     min_quality_score=0.8
         # )
-        
+
         new_qa_pairs = []  # Placeholder
-        
+
         if not new_qa_pairs:
             logger.info("✅ No new Q&A pairs to add to KB")
-            return {
-                "success": True,
-                "pairs_added": 0,
-                "message": "No new content"
-            }
-        
+            return {"success": True, "pairs_added": 0, "message": "No new content"}
+
         # Add each Q&A to KB
         added_count = 0
         # for qa in new_qa_pairs:
@@ -76,33 +73,27 @@ async def weekly_kb_refresh(db: AsyncSession):
         #         added_count += 1
         #     except Exception as e:
         #         logger.error(f"Error adding Q&A to KB: {e}")
-        
+
         # Rebuild FAISS index
         # await kb_service.rebuild_index()
-        
-        logger.info(
-            f"✅ KB refresh complete: {added_count} new Q&A pairs added"
-        )
-        
+
+        logger.info(f"✅ KB refresh complete: {added_count} new Q&A pairs added")
+
         return {
             "success": True,
             "pairs_added": added_count,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
-        
+
     except Exception as e:
-        logger.error(f"❌ Error during KB refresh: {e}")
-        return {
-            "success": False,
-            "error": str(e),
-            "timestamp": datetime.utcnow().isoformat()
-        }
+        logger.exception(f"❌ Error during KB refresh: {e}")
+        return {"success": False, "error": str(e), "timestamp": datetime.utcnow().isoformat()}
 
 
-async def get_kb_refresh_stats(db: AsyncSession) -> Dict[str, Any]:
+async def get_kb_refresh_stats(db: AsyncSession) -> dict[str, Any]:
     """
     Get KB refresh statistics
-    
+
     Returns:
         {
             "total_kb_entries": int,
@@ -117,20 +108,19 @@ async def get_kb_refresh_stats(db: AsyncSession) -> Dict[str, Any]:
             "total_kb_entries": 0,
             "last_refresh": None,
             "entries_added_last_week": 0,
-            "avg_quality_score": 0.0
+            "avg_quality_score": 0.0,
         }
-        
+
         # TODO: Calculate real stats from KB service
-        
+
         return stats
-        
+
     except Exception as e:
-        logger.error(f"Error getting KB stats: {e}")
+        logger.exception(f"Error getting KB stats: {e}")
         return {"error": str(e)}
 
 
 # APScheduler job registration
-from . import scheduler
 
 # Register job: Every Sunday at 2:00 AM UTC
 # scheduler.add_job(

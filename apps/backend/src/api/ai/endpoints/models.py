@@ -3,9 +3,9 @@ Database models for MyHibachi AI Customer Support System
 Supports multi-channel conversations, knowledge base, and self-learning
 """
 
-import uuid
 from datetime import datetime
 from enum import Enum
+import uuid
 
 from sqlalchemy import (
     JSON,
@@ -67,30 +67,22 @@ class Conversation(Base):
     id = Column(String(36), primary_key=True, default=generate_uuid)
     channel = Column(String(20), nullable=False)  # ChannelType enum
     user_id = Column(String(255), nullable=False)  # External user identifier
-    thread_id = Column(
-        String(255), nullable=False
-    )  # Channel-specific thread ID
-    status = Column(
-        String(20), default=ConversationStatus.AI.value
-    )  # ConversationStatus enum
+    thread_id = Column(String(255), nullable=False)  # Channel-specific thread ID
+    status = Column(String(20), default=ConversationStatus.AI.value)  # ConversationStatus enum
 
     # Metadata for different channels
-    channel_metadata = Column(
-        JSON, default=dict
-    )  # Phone numbers, FB page IDs, etc.
+    channel_metadata = Column(JSON, default=dict)  # Phone numbers, FB page IDs, etc.
 
     # Conversation lifecycle
     created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
-    )
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     closed_at = Column(DateTime, nullable=True)
 
     # Human takeover tracking
     escalated_at = Column(DateTime, nullable=True)
     assigned_agent_id = Column(String(255), nullable=True)
     escalation_reason = Column(Text, nullable=True)
-    
+
     # Option 2 foundations (ready, not used yet)
     customer_id = Column(String(36), ForeignKey("customers.id"), nullable=True, index=True)
     confidence_score = Column(Float, default=1.0, nullable=True)  # For hybrid routing
@@ -100,9 +92,7 @@ class Conversation(Base):
     reward_score = Column(Float, nullable=True)  # For RLHF-Lite
 
     # Relationships
-    messages = relationship(
-        "Message", back_populates="conversation", cascade="all, delete-orphan"
-    )
+    messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
     usage_records = relationship(
         "AIUsage", back_populates="conversation", cascade="all, delete-orphan"
     )
@@ -123,9 +113,7 @@ class Message(Base):
     __tablename__ = "messages"
 
     id = Column(String(36), primary_key=True, default=generate_uuid)
-    conversation_id = Column(
-        String(36), ForeignKey("conversations.id"), nullable=False
-    )
+    conversation_id = Column(String(36), ForeignKey("conversations.id"), nullable=False)
 
     # Message content
     role = Column(String(20), nullable=False)  # MessageRole enum
@@ -133,9 +121,7 @@ class Message(Base):
 
     # AI/GPT metadata
     confidence = Column(Float, nullable=True)  # AI confidence score
-    model_used = Column(
-        String(50), nullable=True
-    )  # gpt-5-nano, gpt-4-1-mini, etc.
+    model_used = Column(String(50), nullable=True)  # gpt-5-nano, gpt-4-1-mini, etc.
     tokens_in = Column(Integer, nullable=True)
     tokens_out = Column(Integer, nullable=True)
     cost_usd = Column(Float, nullable=True)
@@ -150,9 +136,7 @@ class Message(Base):
     edited_at = Column(DateTime, nullable=True)
 
     # Quality tracking for self-learning
-    human_feedback = Column(
-        String(20), nullable=True
-    )  # thumbs_up, thumbs_down
+    human_feedback = Column(String(20), nullable=True)  # thumbs_up, thumbs_down
     human_correction = Column(Text, nullable=True)
     is_training_data = Column(Boolean, default=False)
 
@@ -181,16 +165,12 @@ class KnowledgeBaseChunk(Base):
     text = Column(Text, nullable=False)
 
     # Vector embeddings (using JSON for now, will be VECTOR in production with pgvector)
-    vector = Column(
-        JSON, nullable=True
-    )  # Will be VECTOR(384) in production with pgvector
+    vector = Column(JSON, nullable=True)  # Will be VECTOR(384) in production with pgvector
 
     # Categorization
     tags = Column(JSON, default=list)  # List of tags for categorization
     category = Column(String(100), nullable=True)
-    source_type = Column(
-        String(50), nullable=True
-    )  # faq, policy, procedure, learned
+    source_type = Column(String(50), nullable=True)  # faq, policy, procedure, learned
 
     # Quality and usage tracking
     usage_count = Column(Integer, default=0)
@@ -198,9 +178,7 @@ class KnowledgeBaseChunk(Base):
 
     # Content lifecycle
     created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
-    )
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Source tracking for learned content
     source_message_id = Column(String(36), nullable=True)
@@ -228,12 +206,8 @@ class EscalationRule(Base):
 
     # Trigger conditions
     keywords = Column(JSON, default=list)  # Keywords that trigger escalation
-    confidence_threshold = Column(
-        Float, nullable=True
-    )  # Below this confidence
-    sentiment_threshold = Column(
-        Float, nullable=True
-    )  # Below this sentiment score
+    confidence_threshold = Column(Float, nullable=True)  # Below this confidence
+    sentiment_threshold = Column(Float, nullable=True)  # Below this sentiment score
 
     # Rule metadata
     is_active = Column(Boolean, default=True)
@@ -241,9 +215,7 @@ class EscalationRule(Base):
 
     # Lifecycle
     created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
-    )
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Indexes
     __table_args__ = (
@@ -258,9 +230,7 @@ class ConversationAnalytics(Base):
     __tablename__ = "conversation_analytics"
 
     id = Column(String(36), primary_key=True, default=generate_uuid)
-    conversation_id = Column(
-        String(36), ForeignKey("conversations.id"), nullable=False
-    )
+    conversation_id = Column(String(36), ForeignKey("conversations.id"), nullable=False)
 
     # Metrics
     total_messages = Column(Integer, default=0)
@@ -269,9 +239,7 @@ class ConversationAnalytics(Base):
 
     # Quality scores
     avg_confidence = Column(Float, nullable=True)
-    resolution_status = Column(
-        String(20), nullable=True
-    )  # resolved, unresolved, escalated
+    resolution_status = Column(String(20), nullable=True)  # resolved, unresolved, escalated
     customer_satisfaction = Column(Integer, nullable=True)  # 1-5 rating
 
     # Timing metrics
@@ -284,9 +252,7 @@ class ConversationAnalytics(Base):
 
     # Lifecycle
     created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
-    )
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Indexes
     __table_args__ = (
@@ -313,9 +279,7 @@ class TrainingData(Base):
     confidence_score = Column(Float, nullable=True)
 
     # Source tracking
-    source_type = Column(
-        String(50), nullable=False
-    )  # gpt_answer, human_answer, imported
+    source_type = Column(String(50), nullable=False)  # gpt_answer, human_answer, imported
     source_conversation_id = Column(String(36), nullable=True)
     source_message_id = Column(String(36), nullable=True)
 
@@ -326,9 +290,7 @@ class TrainingData(Base):
 
     # Lifecycle
     created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
-    )
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     last_used_at = Column(DateTime, nullable=True)
 
     # Indexes
@@ -344,40 +306,43 @@ class TrainingData(Base):
 class AIUsage(Base):
     """
     Track AI API usage for cost monitoring and optimization.
-    
+
     Enables:
     1. Cost monitoring and alerts ($500/month trigger)
     2. Usage analytics by model, agent, channel
     3. Budget forecasting
     4. Optimization opportunities
     """
+
     __tablename__ = "ai_usage"
-    
+
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    
+
     # Model information
     model = Column(String(100), nullable=False, index=True)  # e.g., "gpt-4o-mini"
-    
+
     # Token usage
     input_tokens = Column(Integer, nullable=False)
     output_tokens = Column(Integer, nullable=False)
     total_tokens = Column(Integer, nullable=False)
-    
+
     # Cost (USD)
     cost_usd = Column(Float, nullable=False, index=True)
-    
+
     # Context (optional)
     conversation_id = Column(String(36), ForeignKey("conversations.id"), nullable=True, index=True)
     customer_id = Column(String(36), nullable=True, index=True)
     channel = Column(String(50), nullable=True, index=True)  # web, email, sms, voice
-    agent_type = Column(String(50), nullable=True, index=True)  # lead_nurturing, customer_care, etc.
-    
+    agent_type = Column(
+        String(50), nullable=True, index=True
+    )  # lead_nurturing, customer_care, etc.
+
     # Timestamp
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
-    
+
     # Relationships
     conversation = relationship("Conversation", back_populates="usage_records")
-    
+
     # Indexes for cost monitoring queries
     __table_args__ = (
         Index("idx_usage_date_cost", "created_at", "cost_usd"),
@@ -389,23 +354,23 @@ class AIUsage(Base):
 class Customer(Base):
     """
     Customer model for growth tracking.
-    
+
     Used by growth_tracker to monitor customer count and trigger
     Neo4j migration alert at 1,000 customers.
     """
+
     __tablename__ = "customers"
-    
+
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    
+
     # Customer info
     email = Column(String(255), unique=True, nullable=False, index=True)
     name = Column(String(255), nullable=True)
     phone = Column(String(50), nullable=True)
-    
+
     # Lifecycle
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+
     # Relationships
     conversations = relationship("Conversation", back_populates="customer")
-

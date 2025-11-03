@@ -10,13 +10,13 @@ Date: September 1, 2025
 """
 
 import argparse
+from dataclasses import dataclass
 import json
+from pathlib import Path
 import re
 import sys
-from dataclasses import dataclass
-from pathlib import Path
 
-from colorama import Fore, Style, init
+from colorama import init
 
 # Initialize colorama for cross-platform colored output
 init()
@@ -153,9 +153,7 @@ class RepositoryGuard:
 
             # Read file content
             try:
-                content = file_path.read_text(
-                    encoding="utf-8", errors="ignore"
-                )
+                content = file_path.read_text(encoding="utf-8", errors="ignore")
             except Exception:
                 return  # Skip binary files
 
@@ -183,13 +181,11 @@ class RepositoryGuard:
             # Check folder-specific rules
             self.check_folder_rules(file_path, content, lines)
 
-        except Exception as e:
+        except Exception:
             # Log but don't fail on file access issues
-            print(f"Warning: Could not scan {relative_path}: {e}")
+            pass
 
-    def check_secrets(
-        self, file_path: Path, content: str, lines: list[str]
-    ) -> None:
+    def check_secrets(self, file_path: Path, content: str, lines: list[str]) -> None:
         """Check for hardcoded secrets"""
         relative_path = str(file_path.relative_to(self.repo_root))
 
@@ -208,9 +204,7 @@ class RepositoryGuard:
                 )
                 self.stats["security_violations"] += 1
 
-    def check_placeholders(
-        self, file_path: Path, content: str, lines: list[str]
-    ) -> None:
+    def check_placeholders(self, file_path: Path, content: str, lines: list[str]) -> None:
         """Check for placeholder content"""
         relative_path = str(file_path.relative_to(self.repo_root))
 
@@ -229,15 +223,13 @@ class RepositoryGuard:
                 )
                 self.stats["placeholder_violations"] += 1
 
-    def check_folder_rules(
-        self, file_path: Path, content: str, lines: list[str]
-    ) -> None:
+    def check_folder_rules(self, file_path: Path, content: str, lines: list[str]) -> None:
         """Check folder-specific rules"""
         relative_path = str(file_path.relative_to(self.repo_root))
 
         # Determine which folder this file belongs to
         folder_name = None
-        for folder in self.folders.keys():
+        for folder in self.folders:
             if relative_path.startswith(folder + "/"):
                 folder_name = folder
                 break
@@ -257,9 +249,7 @@ class RepositoryGuard:
         elif folder_name == "myhibachi-ai-backend":
             self.check_ai_backend_rules(file_path, content, lines)
 
-    def check_frontend_rules(
-        self, file_path: Path, content: str, lines: list[str]
-    ) -> None:
+    def check_frontend_rules(self, file_path: Path, content: str, lines: list[str]) -> None:
         """Check frontend-specific rules"""
         relative_path = str(file_path.relative_to(self.repo_root))
 
@@ -301,9 +291,7 @@ class RepositoryGuard:
                     )
                     self.stats["separation_violations"] += 1
 
-    def check_legacy_backend_rules(
-        self, file_path: Path, content: str, lines: list[str]
-    ) -> None:
+    def check_legacy_backend_rules(self, file_path: Path, content: str, lines: list[str]) -> None:
         """Check legacy backend rules"""
         relative_path = str(file_path.relative_to(self.repo_root))
 
@@ -320,9 +308,7 @@ class RepositoryGuard:
             )
             self.stats["separation_violations"] += 1
 
-    def check_ai_backend_rules(
-        self, file_path: Path, content: str, lines: list[str]
-    ) -> None:
+    def check_ai_backend_rules(self, file_path: Path, content: str, lines: list[str]) -> None:
         """Check AI backend rules"""
         relative_path = str(file_path.relative_to(self.repo_root))
 
@@ -347,7 +333,7 @@ class RepositoryGuard:
 
     def check_cross_imports(self) -> None:
         """Check for cross-folder imports"""
-        for folder_name in self.folders.keys():
+        for folder_name in self.folders:
             folder_path = self.repo_root / folder_name
             if not folder_path.exists():
                 continue
@@ -364,23 +350,17 @@ class RepositoryGuard:
                         continue
 
                     try:
-                        content = file_path.read_text(
-                            encoding="utf-8", errors="ignore"
-                        )
-                        self.check_file_cross_imports(
-                            file_path, content, folder_name
-                        )
+                        content = file_path.read_text(encoding="utf-8", errors="ignore")
+                        self.check_file_cross_imports(file_path, content, folder_name)
                     except Exception:
                         continue
 
-    def check_file_cross_imports(
-        self, file_path: Path, content: str, current_folder: str
-    ) -> None:
+    def check_file_cross_imports(self, file_path: Path, content: str, current_folder: str) -> None:
         """Check a single file for cross-folder imports"""
         relative_path = str(file_path.relative_to(self.repo_root))
 
         # Look for imports to other project folders
-        for other_folder in self.folders.keys():
+        for other_folder in self.folders:
             if other_folder != current_folder:
                 # Pattern to match imports to other folders
                 patterns = [
@@ -397,8 +377,7 @@ class RepositoryGuard:
                             Violation(
                                 relative_path,
                                 "CROSS_IMPORT_VIOLATION",
-                                f"Cross-folder import from {current_folder} "
-                                f"to {other_folder}",
+                                f"Cross-folder import from {current_folder} " f"to {other_folder}",
                                 line_num,
                                 match.group(),
                             )
@@ -434,9 +413,7 @@ class RepositoryGuard:
                 if config_path.exists():
                     try:
                         content = config_path.read_text(encoding="utf-8")
-                        self.check_port_in_file(
-                            config_path, content, expected_port, folder_name
-                        )
+                        self.check_port_in_file(config_path, content, expected_port, folder_name)
                     except Exception:
                         continue
 
@@ -482,35 +459,24 @@ class RepositoryGuard:
 
     def scan_repository(self) -> None:
         """Main scanning method"""
-        print(
-            f"{Fore.CYAN}🛡️ Repository Guard - Scanning "
-            f"{self.repo_root}{Style.RESET_ALL}"
-        )
 
         # Scan all files in the repository
-        for folder_name in self.folders.keys():
+        for folder_name in self.folders:
             folder_path = self.repo_root / folder_name
             if folder_path.exists():
-                print(f"  📁 Scanning {folder_name}...")
                 for file_path in folder_path.rglob("*"):
                     if file_path.is_file():
                         self.scan_file_for_violations(file_path)
 
         # Perform cross-cutting checks
-        print("  🔗 Checking cross-imports...")
         self.check_cross_imports()
 
-        print("  🔌 Checking port assignments...")
         self.check_port_collisions()
 
     def print_violations_table(self) -> None:
         """Print violations in a formatted table"""
         if not self.violations:
-            print(f"{Fore.GREEN}✅ No violations found!{Style.RESET_ALL}")
             return
-
-        print(f"\n{Fore.RED}❌ VIOLATIONS DETECTED:{Style.RESET_ALL}")
-        print("=" * 100)
 
         # Group violations by type
         violations_by_type = {}
@@ -520,41 +486,16 @@ class RepositoryGuard:
             violations_by_type[violation.violation_type].append(violation)
 
         # Print each type
-        for violation_type, type_violations in violations_by_type.items():
-            print(
-                f"\n{Fore.YELLOW}{violation_type} "
-                f"({len(type_violations)} issues):{Style.RESET_ALL}"
-            )
-            for violation in type_violations[
-                :10
-            ]:  # Limit to first 10 per type
-                line_info = (
-                    f" (line {violation.line_number})"
-                    if violation.line_number
-                    else ""
-                )
-                print(f"  📁 {violation.file_path}{line_info}")
-                print(f"     {violation.description}")
+        for _violation_type, type_violations in violations_by_type.items():
+            for violation in type_violations[:10]:  # Limit to first 10 per type
                 if violation.content:
-                    print(f"     Content: {violation.content[:100]}...")
+                    pass
 
             if len(type_violations) > 10:
-                print(f"     ... and {len(type_violations) - 10} more")
+                pass
 
     def print_statistics(self) -> None:
         """Print scanning statistics"""
-        print(f"\n{Fore.CYAN}📊 SCAN STATISTICS:{Style.RESET_ALL}")
-        print(f"Files scanned: {self.stats['files_scanned']}")
-        print(f"Empty files: {self.stats['empty_files']}")
-        print(
-            f"Placeholder violations: {self.stats['placeholder_violations']}"
-        )
-        print(f"Security violations: {self.stats['security_violations']}")
-        print(f"Separation violations: {self.stats['separation_violations']}")
-        print(
-            f"Cross-import violations: {self.stats['cross_import_violations']}"
-        )
-        print(f"Total violations: {len(self.violations)}")
 
     def generate_json_report(self, output_path: Path) -> None:
         """Generate JSON report for CI integration"""
@@ -577,9 +518,8 @@ class RepositoryGuard:
         }
 
         output_path.write_text(json.dumps(report, indent=2))
-        print(f"📄 JSON report written to: {output_path}")
 
-    def run(self, json_output: Path = None) -> bool:
+    def run(self, json_output: Path | None = None) -> bool:
         """Run the complete guard check"""
         self.scan_repository()
         self.print_violations_table()
@@ -589,18 +529,7 @@ class RepositoryGuard:
             self.generate_json_report(json_output)
 
         # Return success/failure
-        if self.violations:
-            print(
-                f"\n{Fore.RED}💥 GUARD CHECK FAILED - "
-                f"{len(self.violations)} violations found{Style.RESET_ALL}"
-            )
-            return False
-        else:
-            print(
-                f"\n{Fore.GREEN}✅ GUARD CHECK PASSED - "
-                f"Repository is clean{Style.RESET_ALL}"
-            )
-            return True
+        return not self.violations
 
 
 def main():
@@ -608,9 +537,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="Repository Guard - Security & Quality Enforcement"
     )
-    parser.add_argument(
-        "--json-output", type=Path, help="Output JSON report to file"
-    )
+    parser.add_argument("--json-output", type=Path, help="Output JSON report to file")
     parser.add_argument(
         "--repo-root",
         type=Path,
@@ -626,10 +553,6 @@ def main():
         (repo_root / folder).exists()
         for folder in ["myhibachi-frontend", "myhibachi-backend-fastapi"]
     ):
-        print(
-            f"{Fore.RED}❌ Not a valid My Hibachi repository "
-            f"root{Style.RESET_ALL}"
-        )
         sys.exit(1)
 
     # Run the guard

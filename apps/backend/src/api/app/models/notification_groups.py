@@ -16,18 +16,19 @@ Tables:
 3. notification_group_events - Event subscriptions per group
 """
 
-from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, Table, Text, Enum as SQLEnum
-from sqlalchemy.dialects.postgresql import UUID, JSONB
-from sqlalchemy.orm import relationship
 from datetime import datetime
-import uuid
 import enum
+import uuid
 
 from api.app.models.base import Base
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String, Text
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 
 
 class NotificationEventType(str, enum.Enum):
     """Types of notification events"""
+
     NEW_BOOKING = "new_booking"
     BOOKING_EDIT = "booking_edit"
     BOOKING_CANCELLATION = "booking_cancellation"
@@ -40,7 +41,7 @@ class NotificationEventType(str, enum.Enum):
 class NotificationGroup(Base):
     """
     Notification groups for organizing team members.
-    
+
     Examples:
     - "All Admins" - Receives all notifications
     - "Customer Service Team" - Receives all notifications
@@ -48,32 +49,37 @@ class NotificationGroup(Base):
     - "Booking Team" - Only receives booking-related notifications
     - "Payment Team" - Only receives payment notifications
     """
+
     __tablename__ = "notification_groups"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    
+
     # Group Information
     name = Column(String(100), nullable=False, unique=True, index=True)
     description = Column(Text, nullable=True)
-    
+
     # Station Filtering (NULL = all stations, specific UUID = only that station)
     station_id = Column(UUID(as_uuid=True), nullable=True, index=True)
-    
+
     # WhatsApp Configuration
     whatsapp_group_id = Column(String(100), nullable=True)  # Future: WhatsApp group ID
-    
+
     # Status
     is_active = Column(Boolean, default=True, nullable=False)
-    
+
     # Metadata
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     created_by = Column(UUID(as_uuid=True), nullable=False)  # User who created group
-    
+
     # Relationships
-    members = relationship("NotificationGroupMember", back_populates="group", cascade="all, delete-orphan")
-    event_subscriptions = relationship("NotificationGroupEvent", back_populates="group", cascade="all, delete-orphan")
-    
+    members = relationship(
+        "NotificationGroupMember", back_populates="group", cascade="all, delete-orphan"
+    )
+    event_subscriptions = relationship(
+        "NotificationGroupEvent", back_populates="group", cascade="all, delete-orphan"
+    )
+
     def __repr__(self):
         station_info = f" (Station {self.station_id})" if self.station_id else " (All Stations)"
         return f"<NotificationGroup {self.name}{station_info}>"
@@ -82,40 +88,46 @@ class NotificationGroup(Base):
 class NotificationGroupMember(Base):
     """
     Members of notification groups.
-    
+
     Each member receives notifications for events the group is subscribed to,
     filtered by station if applicable.
     """
+
     __tablename__ = "notification_group_members"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    
+
     # Group Relationship
-    group_id = Column(UUID(as_uuid=True), ForeignKey("notification_groups.id", ondelete="CASCADE"), nullable=False, index=True)
-    
+    group_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("notification_groups.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
     # Member Information
     phone_number = Column(String(20), nullable=False, index=True)  # WhatsApp phone number
     name = Column(String(100), nullable=False)
     email = Column(String(255), nullable=True)
-    
+
     # Notification Preferences
     receive_whatsapp = Column(Boolean, default=True, nullable=False)
     receive_sms = Column(Boolean, default=False, nullable=False)
     receive_email = Column(Boolean, default=False, nullable=False)
-    
+
     # Priority level (low, medium, high)
-    priority = Column(String(20), default='medium', nullable=False)
-    
+    priority = Column(String(20), default="medium", nullable=False)
+
     # Status
     is_active = Column(Boolean, default=True, nullable=False)
-    
+
     # Metadata
     added_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     added_by = Column(UUID(as_uuid=True), nullable=True)  # User who added member
-    
+
     # Relationships
     group = relationship("NotificationGroup", back_populates="members")
-    
+
     def __repr__(self):
         return f"<NotificationGroupMember {self.name} ({self.phone_number}) in {self.group.name}>"
 
@@ -123,29 +135,35 @@ class NotificationGroupMember(Base):
 class NotificationGroupEvent(Base):
     """
     Event subscriptions for notification groups.
-    
+
     Defines which notification events each group should receive.
     """
+
     __tablename__ = "notification_group_events"
-    
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    
+
     # Group Relationship
-    group_id = Column(UUID(as_uuid=True), ForeignKey("notification_groups.id", ondelete="CASCADE"), nullable=False, index=True)
-    
+    group_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("notification_groups.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
     # Event Configuration
     event_type = Column(String(50), nullable=False, index=True)  # Changed from enum to string
-    
+
     # Status
     is_active = Column(Boolean, default=True, nullable=False)
-    
+
     # Metadata
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     created_by = Column(UUID(as_uuid=True), nullable=False)
-    
+
     # Relationships
     group = relationship("NotificationGroup", back_populates="event_subscriptions")
-    
+
     def __repr__(self):
         return f"<NotificationGroupEvent {self.group.name} -> {self.event_type.value}>"
 

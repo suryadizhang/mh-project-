@@ -1,40 +1,39 @@
 """
 Base classes for CQRS Command and Query patterns with event sourcing.
 """
+
+from abc import ABC, abstractmethod
+from datetime import UTC, datetime
 import hashlib
 import json
-from abc import ABC, abstractmethod
-from datetime import datetime, timezone
-from typing import Any, Optional, Union
+from typing import Any
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, field_serializer, model_validator
+from api.app.models.events import DomainEvent, OutboxEntry
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+)
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from api.app.models.events import DomainEvent, OutboxEntry
 
 
 class Command(BaseModel):
     """Base class for all commands."""
 
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        use_enum_values=True
-    )
+    model_config = ConfigDict(arbitrary_types_allowed=True, use_enum_values=True)
 
 
 class Query(BaseModel):
     """Base class for all queries."""
 
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        use_enum_values=True
-    )
+    model_config = ConfigDict(arbitrary_types_allowed=True, use_enum_values=True)
 
 
 class Event(BaseModel):
     """Base class for domain events."""
+
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         use_enum_values=True,
@@ -44,9 +43,9 @@ class Event(BaseModel):
                 "aggregate_type": "Booking",
                 "event_type": "BookingCreated",
                 "version": 1,
-                "occurred_at": "2024-10-25T10:30:00Z"
+                "occurred_at": "2024-10-25T10:30:00Z",
             }
-        }
+        },
     )
 
     aggregate_id: UUID
@@ -57,11 +56,7 @@ class Event(BaseModel):
 
     @classmethod
     def create(
-        cls,
-        aggregate_id: UUID,
-        aggregate_type: str,
-        event_type: str,
-        version: int = 1
+        cls, aggregate_id: UUID, aggregate_type: str, event_type: str, version: int = 1
     ) -> "Event":
         """Factory method to create Event with automatic timestamp."""
         return cls(
@@ -69,7 +64,7 @@ class Event(BaseModel):
             aggregate_type=aggregate_type,
             event_type=event_type,
             version=version,
-            occurred_at=datetime.now(timezone.utc)
+            occurred_at=datetime.now(UTC),
         )
 
 
@@ -77,9 +72,9 @@ class CommandResult(BaseModel):
     """Result of command execution."""
 
     success: bool
-    data: Optional[dict[str, Any]] = None
+    data: dict[str, Any] | None = None
     events: list[Event] = Field(default_factory=list)
-    error: Optional[str] = None
+    error: str | None = None
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -88,9 +83,9 @@ class QueryResult(BaseModel):
     """Result of query execution."""
 
     success: bool
-    data: Optional[Union[dict[str, Any], list[dict[str, Any]]]] = None
-    error: Optional[str] = None
-    total_count: Optional[int] = None
+    data: dict[str, Any] | list[dict[str, Any]] | None = None
+    error: str | None = None
+    total_count: int | None = None
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -104,7 +99,6 @@ class CommandHandler(ABC):
     @abstractmethod
     async def handle(self, command: Command) -> CommandResult:
         """Handle the command and return result."""
-        pass
 
 
 class QueryHandler(ABC):
@@ -116,7 +110,6 @@ class QueryHandler(ABC):
     @abstractmethod
     async def handle(self, query: Query) -> QueryResult:
         """Handle the query and return result."""
-        pass
 
 
 class EventStore:
@@ -124,12 +117,10 @@ class EventStore:
 
     def __init__(self, session: AsyncSession):
         self.session = session
-        self._last_hash: Optional[str] = None
+        self._last_hash: str | None = None
 
     async def append_events(
-        self,
-        events: list[Event],
-        expected_version: Optional[int] = None
+        self, events: list[Event], expected_version: int | None = None
     ) -> list[DomainEvent]:
         """
         Append events to the event store with hash chaining for audit trail.
@@ -147,9 +138,7 @@ class EventStore:
         # Get the last hash for chaining
         if self._last_hash is None:
             last_event_stmt = (
-                select(DomainEvent.hash_current)
-                .order_by(DomainEvent.created_at.desc())
-                .limit(1)
+                select(DomainEvent.hash_current).order_by(DomainEvent.created_at.desc()).limit(1)
             )
             result = await self.session.execute(last_event_stmt)
             self._last_hash = result.scalar() or "genesis"
@@ -161,15 +150,18 @@ class EventStore:
             event_dict = event.dict()
 
             # Calculate hash for audit chain
-            event_content = json.dumps({
-                "aggregate_id": str(event.aggregate_id),
-                "aggregate_type": event.aggregate_type,
-                "event_type": event.event_type,
-                "payload": event_dict,
-                "version": event.version,
-                "occurred_at": event.occurred_at.isoformat(),
-                "previous_hash": self._last_hash
-            }, sort_keys=True)
+            event_content = json.dumps(
+                {
+                    "aggregate_id": str(event.aggregate_id),
+                    "aggregate_type": event.aggregate_type,
+                    "event_type": event.event_type,
+                    "payload": event_dict,
+                    "version": event.version,
+                    "occurred_at": event.occurred_at.isoformat(),
+                    "previous_hash": self._last_hash,
+                },
+                sort_keys=True,
+            )
 
             current_hash = hashlib.sha256(event_content.encode()).hexdigest()
 
@@ -182,7 +174,7 @@ class EventStore:
                 version=event.version,
                 occurred_at=event.occurred_at,
                 hash_previous=self._last_hash,
-                hash_current=current_hash
+                hash_current=current_hash,
             )
 
             self.session.add(domain_event)
@@ -195,10 +187,7 @@ class EventStore:
         return persisted_events
 
     async def get_events(
-        self,
-        aggregate_id: UUID,
-        from_version: int = 0,
-        to_version: Optional[int] = None
+        self, aggregate_id: UUID, from_version: int = 0, to_version: int | None = None
     ) -> list[DomainEvent]:
         """Get events for an aggregate."""
         stmt = (
@@ -217,9 +206,9 @@ class EventStore:
 
     async def get_all_events(
         self,
-        event_types: Optional[list[str]] = None,
-        from_timestamp: Optional[datetime] = None,
-        limit: int = 1000
+        event_types: list[str] | None = None,
+        from_timestamp: datetime | None = None,
+        limit: int = 1000,
     ) -> list[DomainEvent]:
         """Get all events for projection rebuilding."""
         stmt = select(DomainEvent)
@@ -243,9 +232,7 @@ class OutboxProcessor:
         self.session = session
 
     async def create_outbox_entries(
-        self,
-        events: list[DomainEvent],
-        targets: list[str]
+        self, events: list[DomainEvent], targets: list[str]
     ) -> list[OutboxEntry]:
         """Create outbox entries for reliable delivery."""
         outbox_entries = []
@@ -259,8 +246,8 @@ class OutboxProcessor:
                     payload=self._build_outbox_payload(event, target),
                     attempts=0,
                     max_attempts=3,
-                    next_attempt_at=datetime.now(timezone.utc),
-                    status='pending'
+                    next_attempt_at=datetime.now(UTC),
+                    status="pending",
                 )
 
                 self.session.add(entry)
@@ -277,7 +264,7 @@ class OutboxProcessor:
             "aggregate_id": str(event.aggregate_id),
             "aggregate_type": event.aggregate_type,
             "occurred_at": event.occurred_at.isoformat(),
-            "payload": event.payload
+            "payload": event.payload,
         }
 
         # Customize payload based on target
@@ -299,13 +286,13 @@ class OutboxProcessor:
                 **base,
                 "phone_number": event.payload.get("phone_number"),
                 "message": event.payload.get("content"),
-                "thread_id": event.payload.get("thread_id")
+                "thread_id": event.payload.get("thread_id"),
             }
         elif event.event_type == "MessageSent":
             return {
                 **base,
                 "phone_number": event.payload.get("phone_number"),
-                "message": event.payload.get("content")
+                "message": event.payload.get("content"),
             }
         return base
 
@@ -317,7 +304,7 @@ class OutboxProcessor:
                 "customer_email": event.payload.get("customer_email"),
                 "booking_id": str(event.aggregate_id),
                 "amount_cents": event.payload.get("deposit_due_cents"),
-                "description": f"Hibachi booking deposit for {event.payload.get('date')} at {event.payload.get('slot')}"
+                "description": f"Hibachi booking deposit for {event.payload.get('date')} at {event.payload.get('slot')}",
             }
         return base
 
@@ -333,17 +320,19 @@ class OutboxProcessor:
                     "booking_date": event.payload.get("date"),
                     "booking_slot": event.payload.get("slot"),
                     "total_guests": event.payload.get("total_guests"),
-                    "total_amount": event.payload.get("total_due_cents")
-                }
+                    "total_amount": event.payload.get("total_due_cents"),
+                },
             }
         return base
 
-    async def get_pending_entries(self, target: Optional[str] = None, limit: int = 100) -> list[OutboxEntry]:
+    async def get_pending_entries(
+        self, target: str | None = None, limit: int = 100
+    ) -> list[OutboxEntry]:
         """Get pending outbox entries for processing."""
         stmt = (
             select(OutboxEntry)
-            .where(OutboxEntry.status == 'pending')
-            .where(OutboxEntry.next_attempt_at <= datetime.now(timezone.utc))
+            .where(OutboxEntry.status == "pending")
+            .where(OutboxEntry.next_attempt_at <= datetime.now(UTC))
         )
 
         if target:
@@ -380,9 +369,8 @@ class AggregateRoot(ABC):
 
     @classmethod
     @abstractmethod
-    def from_events(cls, events: list[Event]) -> 'AggregateRoot':
+    def from_events(cls, events: list[Event]) -> "AggregateRoot":
         """Reconstruct aggregate from events."""
-        pass
 
 
 class CommandBus:
@@ -401,8 +389,7 @@ class CommandBus:
 
         if command_type not in self._handlers:
             return CommandResult(
-                success=False,
-                error=f"No handler registered for command: {command_type.__name__}"
+                success=False, error=f"No handler registered for command: {command_type.__name__}"
             )
 
         handler_type = self._handlers[command_type]
@@ -412,10 +399,7 @@ class CommandBus:
             result = await handler.handle(command)
             return result
         except Exception as e:
-            return CommandResult(
-                success=False,
-                error=str(e)
-            )
+            return CommandResult(success=False, error=str(e))
 
 
 class QueryBus:
@@ -434,8 +418,7 @@ class QueryBus:
 
         if query_type not in self._handlers:
             return QueryResult(
-                success=False,
-                error=f"No handler registered for query: {query_type.__name__}"
+                success=False, error=f"No handler registered for query: {query_type.__name__}"
             )
 
         handler_type = self._handlers[query_type]
@@ -445,10 +428,7 @@ class QueryBus:
             result = await handler.handle(query)
             return result
         except Exception as e:
-            return QueryResult(
-                success=False,
-                error=str(e)
-            )
+            return QueryResult(success=False, error=str(e))
 
 
 # Global instances
@@ -458,15 +438,19 @@ query_bus = QueryBus()
 
 def register_command_handler(command_type: type[Command]):
     """Decorator to register command handlers."""
+
     def decorator(handler_class: type[CommandHandler]):
         command_bus.register_handler(command_type, handler_class)
         return handler_class
+
     return decorator
 
 
 def register_query_handler(query_type: type[Query]):
     """Decorator to register query handlers."""
+
     def decorator(handler_class: type[QueryHandler]):
         query_bus.register_handler(query_type, handler_class)
         return handler_class
+
     return decorator

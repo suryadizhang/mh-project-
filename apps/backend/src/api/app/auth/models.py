@@ -2,14 +2,18 @@
 OAuth 2.1 + OIDC + MFA Identity System with RBAC.
 Implements modern authentication with proper security controls.
 """
-import hashlib
-import secrets
+
 from datetime import datetime, timedelta
 from enum import Enum
+import hashlib
 from io import BytesIO
-from typing import Any, Optional
+import secrets
+from typing import Any
 from uuid import UUID, uuid4
 
+# Import unified Base (avoid circular import)
+from api.app.models.declarative_base import Base
+from api.app.utils.encryption import FieldEncryption
 import bcrypt
 import jwt
 import pyotp
@@ -17,11 +21,9 @@ import qrcode
 from sqlalchemy import (
     JSON,
     Boolean,
-    CheckConstraint,
     Column,
     DateTime,
     ForeignKey,
-    Index,
     Integer,
     String,
     Text,
@@ -30,14 +32,10 @@ from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-from api.app.utils.encryption import FieldEncryption
-
-# Import unified Base (avoid circular import)
-from api.app.models.declarative_base import Base
-
 
 class UserStatus(str, Enum):
     """User account status."""
+
     ACTIVE = "active"
     INACTIVE = "inactive"
     SUSPENDED = "suspended"
@@ -47,6 +45,7 @@ class UserStatus(str, Enum):
 
 class SessionStatus(str, Enum):
     """Session status."""
+
     ACTIVE = "active"
     EXPIRED = "expired"
     REVOKED = "revoked"
@@ -55,16 +54,18 @@ class SessionStatus(str, Enum):
 
 class Role(str, Enum):
     """User roles with hierarchical permissions."""
-    SUPER_ADMIN = "super_admin"      # Full system access
-    ADMIN = "admin"                  # Full CRM access
-    MANAGER = "manager"              # Booking management + reports
-    STAFF = "staff"                  # Basic booking operations
-    VIEWER = "viewer"                # Read-only access
-    AI_SYSTEM = "ai_system"          # AI system permissions
+
+    SUPER_ADMIN = "super_admin"  # Full system access
+    ADMIN = "admin"  # Full CRM access
+    MANAGER = "manager"  # Booking management + reports
+    STAFF = "staff"  # Basic booking operations
+    VIEWER = "viewer"  # Read-only access
+    AI_SYSTEM = "ai_system"  # AI system permissions
 
 
 class Permission(str, Enum):
     """Granular permissions."""
+
     # Booking permissions
     BOOKING_CREATE = "booking.create"
     BOOKING_READ = "booking.read"
@@ -100,35 +101,55 @@ class Permission(str, Enum):
 ROLE_PERMISSIONS: dict[Role, set[Permission]] = {
     Role.SUPER_ADMIN: set(Permission),  # All permissions
     Role.ADMIN: {
-        Permission.BOOKING_CREATE, Permission.BOOKING_READ, Permission.BOOKING_UPDATE, Permission.BOOKING_CANCEL,
-        Permission.PAYMENT_RECORD, Permission.PAYMENT_READ, Permission.PAYMENT_REFUND,
-        Permission.CUSTOMER_READ, Permission.CUSTOMER_UPDATE, Permission.CUSTOMER_DELETE,
-        Permission.MESSAGE_READ, Permission.MESSAGE_SEND, Permission.MESSAGE_DELETE,
-        Permission.REPORTS_VIEW, Permission.REPORTS_EXPORT, Permission.AUDIT_READ
+        Permission.BOOKING_CREATE,
+        Permission.BOOKING_READ,
+        Permission.BOOKING_UPDATE,
+        Permission.BOOKING_CANCEL,
+        Permission.PAYMENT_RECORD,
+        Permission.PAYMENT_READ,
+        Permission.PAYMENT_REFUND,
+        Permission.CUSTOMER_READ,
+        Permission.CUSTOMER_UPDATE,
+        Permission.CUSTOMER_DELETE,
+        Permission.MESSAGE_READ,
+        Permission.MESSAGE_SEND,
+        Permission.MESSAGE_DELETE,
+        Permission.REPORTS_VIEW,
+        Permission.REPORTS_EXPORT,
+        Permission.AUDIT_READ,
     },
     Role.MANAGER: {
-        Permission.BOOKING_CREATE, Permission.BOOKING_READ, Permission.BOOKING_UPDATE, Permission.BOOKING_CANCEL,
-        Permission.PAYMENT_RECORD, Permission.PAYMENT_READ,
-        Permission.CUSTOMER_READ, Permission.CUSTOMER_UPDATE,
-        Permission.MESSAGE_READ, Permission.MESSAGE_SEND,
-        Permission.REPORTS_VIEW, Permission.REPORTS_EXPORT
+        Permission.BOOKING_CREATE,
+        Permission.BOOKING_READ,
+        Permission.BOOKING_UPDATE,
+        Permission.BOOKING_CANCEL,
+        Permission.PAYMENT_RECORD,
+        Permission.PAYMENT_READ,
+        Permission.CUSTOMER_READ,
+        Permission.CUSTOMER_UPDATE,
+        Permission.MESSAGE_READ,
+        Permission.MESSAGE_SEND,
+        Permission.REPORTS_VIEW,
+        Permission.REPORTS_EXPORT,
     },
     Role.STAFF: {
-        Permission.BOOKING_CREATE, Permission.BOOKING_READ, Permission.BOOKING_UPDATE,
-        Permission.PAYMENT_RECORD, Permission.PAYMENT_READ,
+        Permission.BOOKING_CREATE,
+        Permission.BOOKING_READ,
+        Permission.BOOKING_UPDATE,
+        Permission.PAYMENT_RECORD,
+        Permission.PAYMENT_READ,
         Permission.CUSTOMER_READ,
-        Permission.MESSAGE_READ, Permission.MESSAGE_SEND
+        Permission.MESSAGE_READ,
+        Permission.MESSAGE_SEND,
     },
-    Role.VIEWER: {
+    Role.VIEWER: {Permission.BOOKING_READ, Permission.CUSTOMER_READ, Permission.MESSAGE_READ},
+    Role.AI_SYSTEM: {
+        Permission.BOOKING_CREATE,
         Permission.BOOKING_READ,
         Permission.CUSTOMER_READ,
-        Permission.MESSAGE_READ
+        Permission.MESSAGE_READ,
+        Permission.MESSAGE_SEND,
     },
-    Role.AI_SYSTEM: {
-        Permission.BOOKING_CREATE, Permission.BOOKING_READ,
-        Permission.CUSTOMER_READ,
-        Permission.MESSAGE_READ, Permission.MESSAGE_SEND
-    }
 }
 
 
@@ -146,12 +167,12 @@ class User(Base):
 
     # Authentication
     password_hash = Column(String(100), nullable=False)  # bcrypt hash
-    password_salt = Column(String(32), nullable=False)   # Additional salt
+    password_salt = Column(String(32), nullable=False)  # Additional salt
 
     # MFA
     mfa_enabled = Column(Boolean, nullable=False, default=False)
     mfa_secret_encrypted = Column(String(500), nullable=True)  # TOTP secret
-    backup_codes_encrypted = Column(JSON, nullable=True)       # Recovery codes
+    backup_codes_encrypted = Column(JSON, nullable=True)  # Recovery codes
 
     # Profile (encrypted)
     first_name_encrypted = Column(String(500), nullable=True)
@@ -161,7 +182,9 @@ class User(Base):
     # Access Control
     role = Column(String(20), nullable=False, default=Role.STAFF.value)
     status = Column(String(20), nullable=False, default=UserStatus.PENDING_VERIFICATION.value)
-    additional_permissions = Column(JSON, nullable=False, default=list)  # Extra permissions beyond role
+    additional_permissions = Column(
+        JSON, nullable=False, default=list
+    )  # Extra permissions beyond role
 
     # Security tracking
     failed_login_attempts = Column(Integer, nullable=False, default=0)
@@ -175,20 +198,13 @@ class User(Base):
 
     # Timestamps
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
-    updated_at = Column(DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now()
+    )
 
     # Relationships
     sessions = relationship("UserSession", back_populates="user")
     audit_logs = relationship("AuditLog", back_populates="user")
-
-    __table_args__ = (
-        CheckConstraint(f"role IN {tuple(r.value for r in Role)}", name="user_role_valid"),
-        CheckConstraint(f"status IN {tuple(s.value for s in UserStatus)}", name="user_status_valid"),
-        CheckConstraint("failed_login_attempts >= 0", name="user_failed_attempts_non_negative"),
-        Index("idx_user_email_hash", "email_encrypted"),
-        Index("idx_user_status_role", "status", "role"),
-        {"schema": "identity"}
-    )
 
 
 class UserSession(Base):
@@ -198,21 +214,23 @@ class UserSession(Base):
     __table_args__ = {"schema": "identity"}
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
-    user_id = Column(PostgresUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=False, index=True)
+    user_id = Column(
+        PostgresUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=False, index=True
+    )
 
     # Session identification
     session_token = Column(String(64), nullable=False, unique=True)  # Secure random token
     refresh_token_hash = Column(String(100), nullable=False, unique=True)  # Hashed refresh token
 
     # JWT details
-    access_token_jti = Column(String(36), nullable=False, unique=True)    # JWT ID for access token
-    refresh_token_jti = Column(String(36), nullable=False, unique=True)   # JWT ID for refresh token
+    access_token_jti = Column(String(36), nullable=False, unique=True)  # JWT ID for access token
+    refresh_token_jti = Column(String(36), nullable=False, unique=True)  # JWT ID for refresh token
 
     # Session metadata
     device_fingerprint = Column(String(64), nullable=True)  # Device identification
     user_agent = Column(Text, nullable=True)
     ip_address = Column(String(45), nullable=True)  # Support IPv6
-    location = Column(String(100), nullable=True)   # City, Country
+    location = Column(String(100), nullable=True)  # City, Country
 
     # MFA tracking
     mfa_verified = Column(Boolean, nullable=False, default=False)
@@ -225,17 +243,12 @@ class UserSession(Base):
 
     # Timestamps
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
-    updated_at = Column(DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now()
+    )
 
     # Relationships
     user = relationship("User", back_populates="sessions")
-
-    __table_args__ = (
-        CheckConstraint(f"status IN {tuple(s.value for s in SessionStatus)}", name="session_status_valid"),
-        Index("idx_session_user_status", "user_id", "status"),
-        Index("idx_session_expires", "expires_at"),
-        {"schema": "identity"}
-    )
 
 
 class AuditLog(Base):
@@ -247,16 +260,20 @@ class AuditLog(Base):
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Who
-    user_id = Column(PostgresUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=True, index=True)
-    session_id = Column(PostgresUUID(as_uuid=True), ForeignKey("identity.user_sessions.id"), nullable=True)
+    user_id = Column(
+        PostgresUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=True, index=True
+    )
+    session_id = Column(
+        PostgresUUID(as_uuid=True), ForeignKey("identity.user_sessions.id"), nullable=True
+    )
 
     # What
     action = Column(String(50), nullable=False, index=True)  # LOGIN, LOGOUT, CREATE_BOOKING, etc.
-    resource_type = Column(String(50), nullable=True)       # booking, customer, payment, etc.
-    resource_id = Column(String(50), nullable=True)         # ID of affected resource
+    resource_type = Column(String(50), nullable=True)  # booking, customer, payment, etc.
+    resource_id = Column(String(50), nullable=True)  # ID of affected resource
 
     # Context
-    details = Column(JSON, nullable=False, default=dict)    # Action-specific details
+    details = Column(JSON, nullable=False, default=dict)  # Action-specific details
     ip_address = Column(String(45), nullable=True)
     user_agent = Column(Text, nullable=True)
 
@@ -270,13 +287,6 @@ class AuditLog(Base):
     # Relationships
     user = relationship("User", back_populates="audit_logs")
 
-    __table_args__ = (
-        Index("idx_audit_user_action", "user_id", "action"),
-        Index("idx_audit_created", "created_at"),
-        Index("idx_audit_resource", "resource_type", "resource_id"),
-        {"schema": "identity"}
-    )
-
 
 class PasswordResetToken(Base):
     """Password reset tokens."""
@@ -285,7 +295,9 @@ class PasswordResetToken(Base):
     __table_args__ = {"schema": "identity"}
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
-    user_id = Column(PostgresUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=False, index=True)
+    user_id = Column(
+        PostgresUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=False, index=True
+    )
 
     token_hash = Column(String(100), nullable=False, unique=True)
     expires_at = Column(DateTime(timezone=True), nullable=False)
@@ -293,16 +305,13 @@ class PasswordResetToken(Base):
 
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
 
-    __table_args__ = (
-        Index("idx_reset_token_expires", "expires_at"),
-        {"schema": "identity"}
-    )
-
 
 class AuthenticationService:
     """Core authentication service with comprehensive security."""
 
-    def __init__(self, encryption: FieldEncryption, jwt_secret: str, jwt_issuer: str = "myhibachi-crm"):
+    def __init__(
+        self, encryption: FieldEncryption, jwt_secret: str, jwt_issuer: str = "myhibachi-crm"
+    ):
         self.encryption = encryption
         self.jwt_secret = jwt_secret
         self.jwt_issuer = jwt_issuer
@@ -324,7 +333,9 @@ class AuthenticationService:
         salted_password = f"{password}{additional_salt}"
 
         # Bcrypt hash (includes its own salt)
-        bcrypt_hash = bcrypt.hashpw(salted_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        bcrypt_hash = bcrypt.hashpw(salted_password.encode("utf-8"), bcrypt.gensalt()).decode(
+            "utf-8"
+        )
 
         return bcrypt_hash, additional_salt
 
@@ -332,7 +343,7 @@ class AuthenticationService:
         """Verify password against hash."""
         try:
             salted_password = f"{password}{password_salt}"
-            return bcrypt.checkpw(salted_password.encode('utf-8'), password_hash.encode('utf-8'))
+            return bcrypt.checkpw(salted_password.encode("utf-8"), password_hash.encode("utf-8"))
         except Exception:
             return False
 
@@ -343,10 +354,7 @@ class AuthenticationService:
     def generate_mfa_qr_code(self, email: str, secret: str) -> bytes:
         """Generate QR code for MFA setup."""
         totp = pyotp.TOTP(secret)
-        provisioning_uri = totp.provisioning_uri(
-            name=email,
-            issuer_name="My Hibachi CRM"
-        )
+        provisioning_uri = totp.provisioning_uri(name=email, issuer_name="My Hibachi CRM")
 
         qr = qrcode.QRCode(version=1, box_size=10, border=5)
         qr.add_data(provisioning_uri)
@@ -354,7 +362,7 @@ class AuthenticationService:
 
         img = qr.make_image(fill_color="black", back_color="white")
         img_buffer = BytesIO()
-        img.save(img_buffer, format='PNG')
+        img.save(img_buffer, format="PNG")
         return img_buffer.getvalue()
 
     def verify_mfa_token(self, secret: str, token: str, window: int = 1) -> bool:
@@ -370,7 +378,7 @@ class AuthenticationService:
         codes = []
         for _ in range(count):
             # Generate 8-character alphanumeric codes
-            code = ''.join(secrets.choice('ABCDEFGHJKLMNPQRSTUVWXYZ23456789') for _ in range(8))
+            code = "".join(secrets.choice("ABCDEFGHJKLMNPQRSTUVWXYZ23456789") for _ in range(8))
             codes.append(f"{code[:4]}-{code[4:]}")
         return codes
 
@@ -379,22 +387,22 @@ class AuthenticationService:
         hashed_codes = []
         for code in codes:
             code_hash = hashlib.sha256(code.encode()).hexdigest()
-            hashed_codes.append({
-                'hash': code_hash,
-                'used': False,
-                'created_at': datetime.utcnow().isoformat()
-            })
+            hashed_codes.append(
+                {"hash": code_hash, "used": False, "created_at": datetime.utcnow().isoformat()}
+            )
         return hashed_codes
 
-    def verify_backup_code(self, hashed_codes: list[dict[str, Any]], provided_code: str) -> tuple[bool, list[dict[str, Any]]]:
+    def verify_backup_code(
+        self, hashed_codes: list[dict[str, Any]], provided_code: str
+    ) -> tuple[bool, list[dict[str, Any]]]:
         """Verify backup code and mark as used."""
         provided_hash = hashlib.sha256(provided_code.encode()).hexdigest()
 
         for i, code_data in enumerate(hashed_codes):
-            if code_data['hash'] == provided_hash and not code_data['used']:
+            if code_data["hash"] == provided_hash and not code_data["used"]:
                 # Mark as used
-                hashed_codes[i]['used'] = True
-                hashed_codes[i]['used_at'] = datetime.utcnow().isoformat()
+                hashed_codes[i]["used"] = True
+                hashed_codes[i]["used_at"] = datetime.utcnow().isoformat()
                 return True, hashed_codes
 
         return False, hashed_codes
@@ -406,29 +414,29 @@ class AuthenticationService:
         # Access token (short-lived)
         access_jti = str(uuid4())
         access_payload = {
-            'iss': self.jwt_issuer,
-            'sub': str(user.id),
-            'aud': 'myhibachi-api',
-            'iat': now,
-            'exp': now + timedelta(minutes=15),  # 15 minute access tokens
-            'jti': access_jti,
-            'typ': 'access',
-            'session_id': str(session_id),
-            'role': user.role,
-            'permissions': list(self.get_user_permissions(user))
+            "iss": self.jwt_issuer,
+            "sub": str(user.id),
+            "aud": "myhibachi-api",
+            "iat": now,
+            "exp": now + timedelta(minutes=15),  # 15 minute access tokens
+            "jti": access_jti,
+            "typ": "access",
+            "session_id": str(session_id),
+            "role": user.role,
+            "permissions": list(self.get_user_permissions(user)),
         }
 
         # Refresh token (long-lived)
         refresh_jti = str(uuid4())
         refresh_payload = {
-            'iss': self.jwt_issuer,
-            'sub': str(user.id),
-            'aud': 'myhibachi-api',
-            'iat': now,
-            'exp': now + self.refresh_lifetime,
-            'jti': refresh_jti,
-            'typ': 'refresh',
-            'session_id': str(session_id)
+            "iss": self.jwt_issuer,
+            "sub": str(user.id),
+            "aud": "myhibachi-api",
+            "iat": now,
+            "exp": now + self.refresh_lifetime,
+            "jti": refresh_jti,
+            "typ": "refresh",
+            "session_id": str(session_id),
         }
 
         access_token = jwt.encode(access_payload, self.jwt_secret, algorithm=self.jwt_algorithm)
@@ -436,18 +444,18 @@ class AuthenticationService:
 
         return access_token, refresh_token, access_jti, refresh_jti
 
-    def verify_jwt_token(self, token: str, token_type: str = 'access') -> Optional[dict[str, Any]]:
+    def verify_jwt_token(self, token: str, token_type: str = "access") -> dict[str, Any] | None:
         """Verify JWT token and return payload."""
         try:
             payload = jwt.decode(
                 token,
                 self.jwt_secret,
                 algorithms=[self.jwt_algorithm],
-                audience='myhibachi-api',
-                issuer=self.jwt_issuer
+                audience="myhibachi-api",
+                issuer=self.jwt_issuer,
             )
 
-            if payload.get('typ') != token_type:
+            if payload.get("typ") != token_type:
                 return None
 
             return payload
@@ -505,14 +513,14 @@ class AuthenticationService:
 
 
 __all__ = [
+    "ROLE_PERMISSIONS",
+    "AuditLog",
+    "AuthenticationService",
+    "PasswordResetToken",
+    "Permission",
+    "Role",
+    "SessionStatus",
     "User",
     "UserSession",
-    "AuditLog",
-    "PasswordResetToken",
-    "AuthenticationService",
     "UserStatus",
-    "SessionStatus",
-    "Role",
-    "Permission",
-    "ROLE_PERMISSIONS"
 ]

@@ -1,30 +1,30 @@
 """Social media CQRS commands."""
 
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
-
-from pydantic import Field, ConfigDict
 
 from api.app.cqrs.base import Command
 from api.app.models.social import MessageKind, SocialPlatform, ThreadStatus
+from pydantic import ConfigDict, Field
 
 
 class CreateLeadFromSocialCommand(Command):
     """Command to create a lead from social media interaction."""
 
     source: SocialPlatform
-    thread_id: Optional[UUID] = None
+    thread_id: UUID | None = None
     handle: str = Field(..., description="Social media handle of the lead")
-    post_url: Optional[str] = None
-    message_excerpt: Optional[str] = None
-    inferred_interest: Optional[str] = None
+    post_url: str | None = None
+    message_excerpt: str | None = None
+    inferred_interest: str | None = None
     consent_dm: bool = False
     consent_sms: bool = False
     consent_email: bool = False
-    metadata: Optional[dict[str, Any]] = None
+    metadata: dict[str, Any] | None = None
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "source": "instagram",
                 "thread_id": "550e8400-e29b-41d4-a716-446655440000",
@@ -33,9 +33,10 @@ class CreateLeadFromSocialCommand(Command):
                 "message_excerpt": "Price for 12 people in 95823?",
                 "inferred_interest": "private_hibachi",
                 "consent_dm": True,
-                "metadata": {"utm": {"source": "instagram", "medium": "comment"}}
+                "metadata": {"utm": {"source": "instagram", "medium": "comment"}},
             }
-        })
+        }
+    )
 
 
 class SendSocialReplyCommand(Command):
@@ -44,15 +45,13 @@ class SendSocialReplyCommand(Command):
     thread_id: UUID
     reply_kind: MessageKind
     body: str = Field(..., min_length=1, max_length=2000)
-    safety: dict[str, Any] = Field(
-        default={},
-        description="Safety and approval metadata"
-    )
-    schedule_send_at: Optional[datetime] = None
+    safety: dict[str, Any] = Field(default={}, description="Safety and approval metadata")
+    schedule_send_at: datetime | None = None
     requires_approval: bool = True
-    metadata: Optional[dict[str, Any]] = None
+    metadata: dict[str, Any] | None = None
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "thread_id": "550e8400-e29b-41d4-a716-446655440000",
                 "reply_kind": "dm",
@@ -60,10 +59,11 @@ class SendSocialReplyCommand(Command):
                 "safety": {
                     "approved_by_human": True,
                     "policy_score": 0.02,
-                    "profanity_check": "clean"
-                }
+                    "profanity_check": "clean",
+                },
             }
-        })
+        }
+    )
 
 
 class LinkSocialIdentityToCustomerCommand(Command):
@@ -73,17 +73,19 @@ class LinkSocialIdentityToCustomerCommand(Command):
     customer_id: UUID
     confidence_score: float = Field(1.0, ge=0.0, le=1.0)
     verification_method: str = Field("manual", description="How the link was verified")
-    notes: Optional[str] = None
+    notes: str | None = None
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "social_identity_id": "550e8400-e29b-41d4-a716-446655440000",
                 "customer_id": "660e8400-e29b-41d4-a716-446655440000",
                 "confidence_score": 0.95,
                 "verification_method": "phone_number_match",
-                "notes": "Phone number matched in customer profile"
+                "notes": "Phone number matched in customer profile",
             }
-        })
+        }
+    )
 
 
 class AcknowledgeReviewCommand(Command):
@@ -91,19 +93,21 @@ class AcknowledgeReviewCommand(Command):
 
     review_id: UUID
     acknowledged_by: UUID
-    notes: Optional[str] = None
+    notes: str | None = None
     priority_level: int = Field(3, ge=1, le=5, description="1=urgent, 5=low")
-    assigned_to: Optional[UUID] = None
+    assigned_to: UUID | None = None
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "review_id": "550e8400-e29b-41d4-a716-446655440000",
                 "acknowledged_by": "770e8400-e29b-41d4-a716-446655440000",
                 "notes": "Customer mentioned poor service on 2/15",
                 "priority_level": 2,
-                "assigned_to": "880e8400-e29b-41d4-a716-446655440000"
+                "assigned_to": "880e8400-e29b-41d4-a716-446655440000",
             }
-        })
+        }
+    )
 
 
 class EscalateReviewCommand(Command):
@@ -112,12 +116,13 @@ class EscalateReviewCommand(Command):
     review_id: UUID
     escalated_by: UUID
     escalation_reason: str = Field(..., min_length=10, max_length=500)
-    assigned_to: Optional[UUID] = None
+    assigned_to: UUID | None = None
     urgency_level: int = Field(3, ge=1, le=5, description="1=critical, 5=low")
     escalation_type: str = Field("general", description="Type of escalation")
-    deadline: Optional[datetime] = None
+    deadline: datetime | None = None
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "review_id": "550e8400-e29b-41d4-a716-446655440000",
                 "escalated_by": "770e8400-e29b-41d4-a716-446655440000",
@@ -125,9 +130,10 @@ class EscalateReviewCommand(Command):
                 "assigned_to": "990e8400-e29b-41d4-a716-446655440000",
                 "urgency_level": 1,
                 "escalation_type": "health_safety",
-                "deadline": "2025-09-24T12:00:00Z"
+                "deadline": "2025-09-24T12:00:00Z",
             }
-        })
+        }
+    )
 
 
 class CloseReviewCommand(Command):
@@ -135,20 +141,22 @@ class CloseReviewCommand(Command):
 
     review_id: UUID
     closed_by: UUID
-    resolution_notes: Optional[str] = None
-    customer_satisfied: Optional[bool] = None
+    resolution_notes: str | None = None
+    customer_satisfied: bool | None = None
     follow_up_required: bool = False
-    follow_up_date: Optional[datetime] = None
+    follow_up_date: datetime | None = None
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "review_id": "550e8400-e29b-41d4-a716-446655440000",
                 "closed_by": "770e8400-e29b-41d4-a716-446655440000",
                 "resolution_notes": "Customer received full refund and apology. Issue resolved.",
                 "customer_satisfied": True,
-                "follow_up_required": False
+                "follow_up_required": False,
             }
-        })
+        }
+    )
 
 
 class UpdateThreadStatusCommand(Command):
@@ -157,19 +165,21 @@ class UpdateThreadStatusCommand(Command):
     thread_id: UUID
     status: ThreadStatus
     updated_by: UUID
-    reason: Optional[str] = None
-    assigned_to: Optional[UUID] = None
-    tags: Optional[list[str]] = None
+    reason: str | None = None
+    assigned_to: UUID | None = None
+    tags: list[str] | None = None
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "thread_id": "550e8400-e29b-41d4-a716-446655440000",
                 "status": "resolved",
                 "updated_by": "770e8400-e29b-41d4-a716-446655440000",
                 "reason": "Customer booking completed successfully",
-                "tags": ["booking_completed", "positive_outcome"]
+                "tags": ["booking_completed", "positive_outcome"],
             }
-        })
+        }
+    )
 
 
 class CreateSocialAccountCommand(Command):
@@ -178,14 +188,15 @@ class CreateSocialAccountCommand(Command):
     platform: SocialPlatform
     page_id: str = Field(..., description="Platform-specific page/business ID")
     page_name: str = Field(..., description="Display name of the business page")
-    handle: Optional[str] = None
-    profile_url: Optional[str] = None
-    avatar_url: Optional[str] = None
+    handle: str | None = None
+    profile_url: str | None = None
+    avatar_url: str | None = None
     connected_by: UUID
-    token_ref: Optional[str] = Field(None, description="Encrypted reference to access tokens")
-    metadata: Optional[dict[str, Any]] = None
+    token_ref: str | None = Field(None, description="Encrypted reference to access tokens")
+    metadata: dict[str, Any] | None = None
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "platform": "instagram",
                 "page_id": "17841400047205",
@@ -195,26 +206,29 @@ class CreateSocialAccountCommand(Command):
                 "connected_by": "770e8400-e29b-41d4-a716-446655440000",
                 "metadata": {
                     "capabilities": ["messaging", "comments", "mentions"],
-                    "webhook_verified": True
-                }
+                    "webhook_verified": True,
+                },
             }
-        })
+        }
+    )
 
 
 class ScheduleSocialFollowUpCommand(Command):
     """Command to schedule a social media follow-up."""
 
     thread_id: UUID
-    follow_up_type: str = Field(..., description="Type of follow-up: dm, comment_reply, review_response")
+    follow_up_type: str = Field(
+        ..., description="Type of follow-up: dm, comment_reply, review_response"
+    )
     scheduled_for: datetime
     message_template: str
-    conditions: Optional[dict[str, Any]] = Field(
-        None,
-        description="Conditions for sending (e.g., no customer response by X time)"
+    conditions: dict[str, Any] | None = Field(
+        None, description="Conditions for sending (e.g., no customer response by X time)"
     )
     created_by: UUID
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "thread_id": "550e8400-e29b-41d4-a716-446655440000",
                 "follow_up_type": "dm",
@@ -222,11 +236,12 @@ class ScheduleSocialFollowUpCommand(Command):
                 "message_template": "Hi! Just following up on your hibachi inquiry. Are you still interested in booking for this weekend?",
                 "conditions": {
                     "if_no_response_by": "2025-09-24T18:00:00Z",
-                    "respect_quiet_hours": True
+                    "respect_quiet_hours": True,
                 },
-                "created_by": "770e8400-e29b-41d4-a716-446655440000"
+                "created_by": "770e8400-e29b-41d4-a716-446655440000",
             }
-        })
+        }
+    )
 
 
 class BulkUpdateThreadsCommand(Command):
@@ -235,19 +250,18 @@ class BulkUpdateThreadsCommand(Command):
     thread_ids: list[UUID] = Field(..., min_items=1, max_items=100)
     updates: dict[str, Any] = Field(..., description="Fields to update")
     updated_by: UUID
-    reason: Optional[str] = None
+    reason: str | None = None
 
-    model_config = ConfigDict(json_schema_extra={
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "thread_ids": [
                     "550e8400-e29b-41d4-a716-446655440000",
-                    "660e8400-e29b-41d4-a716-446655440000"
+                    "660e8400-e29b-41d4-a716-446655440000",
                 ],
-                "updates": {
-                    "status": "resolved",
-                    "tags": ["bulk_resolved", "campaign_complete"]
-                },
+                "updates": {"status": "resolved", "tags": ["bulk_resolved", "campaign_complete"]},
                 "updated_by": "770e8400-e29b-41d4-a716-446655440000",
-                "reason": "Campaign promotion ended - closing all related threads"
+                "reason": "Campaign promotion ended - closing all related threads",
             }
-        })
+        }
+    )

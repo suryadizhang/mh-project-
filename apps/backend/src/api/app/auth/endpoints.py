@@ -1,16 +1,11 @@
 """
 Authentication endpoints for login, logout, MFA, and user management.
 """
+
 import base64
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 from uuid import uuid4
-
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from pydantic import BaseModel, Field, validator
-from sqlalchemy import and_, or_, select
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.app.auth.middleware import (
     AuthenticatedUser,
@@ -30,6 +25,11 @@ from api.app.auth.models import (
 )
 from api.app.database import get_db_session
 from api.app.utils.encryption import FieldEncryption
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from pydantic import BaseModel, Field, validator
+from sqlalchemy import and_, or_, select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -37,14 +37,16 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 # Request/Response Models
 class LoginRequest(BaseModel):
     """Login request model."""
+
     username: str = Field(..., min_length=3, max_length=100)
     password: str = Field(..., min_length=1, max_length=200)
-    mfa_token: Optional[str] = Field(None, pattern=r'^[0-9]{6}$')
+    mfa_token: str | None = Field(None, pattern=r"^[0-9]{6}$")
     remember_me: bool = False
 
 
 class LoginResponse(BaseModel):
     """Login response model."""
+
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
@@ -55,11 +57,13 @@ class LoginResponse(BaseModel):
 
 class RefreshTokenRequest(BaseModel):
     """Refresh token request."""
+
     refresh_token: str
 
 
 class MFASetupResponse(BaseModel):
     """MFA setup response."""
+
     secret: str
     qr_code: str  # Base64 encoded image
     backup_codes: list[str]
@@ -67,39 +71,44 @@ class MFASetupResponse(BaseModel):
 
 class EnableMFARequest(BaseModel):
     """Enable MFA request."""
-    verification_code: str = Field(..., pattern=r'^[0-9]{6}$')
+
+    verification_code: str = Field(..., pattern=r"^[0-9]{6}$")
 
 
 class CreateUserRequest(BaseModel):
     """Create user request."""
-    username: str = Field(..., min_length=3, max_length=100, pattern=r'^[a-zA-Z0-9_-]+$')
-    email: str = Field(..., pattern=r'^[^@]+@[^@]+\.[^@]+$')
+
+    username: str = Field(..., min_length=3, max_length=100, pattern=r"^[a-zA-Z0-9_-]+$")
+    email: str = Field(..., pattern=r"^[^@]+@[^@]+\.[^@]+$")
     password: str = Field(..., min_length=8, max_length=200)
-    first_name: Optional[str] = Field(None, max_length=100)
-    last_name: Optional[str] = Field(None, max_length=100)
-    phone: Optional[str] = Field(None, pattern=r'^\+?[\d\s\-\(\)]+$')
+    first_name: str | None = Field(None, max_length=100)
+    last_name: str | None = Field(None, max_length=100)
+    phone: str | None = Field(None, pattern=r"^\+?[\d\s\-\(\)]+$")
     role: Role = Role.STAFF
 
 
 class ChangePasswordRequest(BaseModel):
     """Change password request."""
+
     current_password: str
     new_password: str = Field(..., min_length=8, max_length=200)
 
-    @validator('new_password')
-    def passwords_must_differ(cls, v, values):
-        if 'current_password' in values and v == values['current_password']:
-            raise ValueError('New password must be different from current password')
+    @validator("new_password")
+    def passwords_must_differ(self, v, values):
+        if "current_password" in values and v == values["current_password"]:
+            raise ValueError("New password must be different from current password")
         return v
 
 
 class PasswordResetRequestModel(BaseModel):
     """Password reset request."""
-    email: str = Field(..., pattern=r'^[^@]+@[^@]+\.[^@]+$')
+
+    email: str = Field(..., pattern=r"^[^@]+@[^@]+\.[^@]+$")
 
 
 class PasswordResetConfirmModel(BaseModel):
     """Password reset confirmation."""
+
     token: str
     new_password: str = Field(..., min_length=8, max_length=200)
 
@@ -108,10 +117,10 @@ class PasswordResetConfirmModel(BaseModel):
 def get_auth_service() -> AuthenticationService:
     """Get authentication service instance."""
     from core.config import get_settings
+
     settings = get_settings()
     return AuthenticationService(
-        FieldEncryption(),
-        jwt_secret=settings.secret_key  # From environment variable JWT_SECRET
+        FieldEncryption(), jwt_secret=settings.secret_key  # From environment variable JWT_SECRET
     )
 
 
@@ -121,7 +130,7 @@ async def login(
     request: Request,
     login_data: LoginRequest,
     db: AsyncSession = Depends(get_db_session),
-    auth_service: AuthenticationService = Depends(get_auth_service)
+    auth_service: AuthenticationService = Depends(get_auth_service),
 ):
     """Authenticate user and create session."""
 
@@ -139,11 +148,10 @@ async def login(
                 db,
                 details={"username": login_data.username, "reason": "user_not_found"},
                 success=False,
-                error_message="User not found"
+                error_message="User not found",
             )
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid username or password"
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password"
             )
 
         # Check if account is locked
@@ -154,15 +162,17 @@ async def login(
                 db,
                 details={"username": login_data.username, "reason": "account_locked"},
                 success=False,
-                error_message="Account locked"
+                error_message="Account locked",
             )
             raise HTTPException(
                 status_code=status.HTTP_423_LOCKED,
-                detail="Account is temporarily locked due to multiple failed login attempts"
+                detail="Account is temporarily locked due to multiple failed login attempts",
             )
 
         # Verify password
-        if not auth_service.verify_password(login_data.password, user.password_hash, user.password_salt):
+        if not auth_service.verify_password(
+            login_data.password, user.password_hash, user.password_salt
+        ):
             # Increment failed attempts
             user.failed_login_attempts += 1
             user.last_failed_login = datetime.utcnow()
@@ -179,12 +189,11 @@ async def login(
                 db,
                 details={"username": login_data.username, "reason": "invalid_password"},
                 success=False,
-                error_message="Invalid password"
+                error_message="Invalid password",
             )
 
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid username or password"
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password"
             )
 
         # Check user status
@@ -195,11 +204,10 @@ async def login(
                 db,
                 details={"username": login_data.username, "reason": "inactive_account"},
                 success=False,
-                error_message="Account inactive"
+                error_message="Account inactive",
             )
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Account is not active"
+                status_code=status.HTTP_403_FORBIDDEN, detail="Account is not active"
             )
 
         # Check MFA if enabled
@@ -212,7 +220,7 @@ async def login(
                     refresh_token="",
                     expires_in=0,
                     mfa_required=True,
-                    user={"username": user.username, "mfa_enabled": True}
+                    user={"username": user.username, "mfa_enabled": True},
                 )
 
             # Verify MFA token
@@ -223,7 +231,9 @@ async def login(
                 # Check if it's a backup code
                 if user.backup_codes_encrypted:
                     backup_codes = encryption.decrypt_json(user.backup_codes_encrypted)
-                    code_valid, updated_codes = auth_service.verify_backup_code(backup_codes, login_data.mfa_token)
+                    code_valid, updated_codes = auth_service.verify_backup_code(
+                        backup_codes, login_data.mfa_token
+                    )
 
                     if code_valid:
                         user.backup_codes_encrypted = encryption.encrypt_json(updated_codes)
@@ -240,11 +250,10 @@ async def login(
                     db,
                     details={"username": login_data.username, "reason": "invalid_mfa"},
                     success=False,
-                    error_message="Invalid MFA token"
+                    error_message="Invalid MFA token",
                 )
                 raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid MFA token"
+                    status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid MFA token"
                 )
 
         # Reset failed login attempts on successful login
@@ -259,7 +268,9 @@ async def login(
         session_token = auth_service.generate_session_token()
 
         # Generate JWT tokens
-        access_token, refresh_token, access_jti, refresh_jti = auth_service.create_jwt_tokens(user, session_id)
+        access_token, refresh_token, access_jti, refresh_jti = auth_service.create_jwt_tokens(
+            user, session_id
+        )
 
         # Create session record
         session = UserSession(
@@ -270,17 +281,18 @@ async def login(
             access_token_jti=access_jti,
             refresh_token_jti=refresh_jti,
             device_fingerprint=auth_service.generate_device_fingerprint(
-                request.headers.get("user-agent", ""),
-                request.client.host
+                request.headers.get("user-agent", ""), request.client.host
             ),
             user_agent=request.headers.get("user-agent"),
             ip_address=request.client.host,
             mfa_verified=mfa_verified,
             mfa_verified_at=datetime.utcnow() if mfa_verified else None,
-            expires_at=datetime.utcnow() + (
-                auth_service.refresh_lifetime if login_data.remember_me
+            expires_at=datetime.utcnow()
+            + (
+                auth_service.refresh_lifetime
+                if login_data.remember_me
                 else auth_service.session_lifetime
-            )
+            ),
         )
 
         db.add(session)
@@ -295,9 +307,9 @@ async def login(
                 "username": user.username,
                 "ip_address": request.client.host,
                 "user_agent": request.headers.get("user-agent"),
-                "mfa_used": user.mfa_enabled
+                "mfa_used": user.mfa_enabled,
             },
-            success=True
+            success=True,
         )
 
         # Prepare user data for response (decrypt sensitive fields)
@@ -308,7 +320,7 @@ async def login(
             "email": encryption.decrypt(user.email_encrypted),
             "role": user.role,
             "permissions": list(auth_service.get_user_permissions(user)),
-            "mfa_enabled": user.mfa_enabled
+            "mfa_enabled": user.mfa_enabled,
         }
 
         if user.first_name_encrypted:
@@ -320,7 +332,7 @@ async def login(
             access_token=access_token,
             refresh_token=refresh_token,
             expires_in=900,  # 15 minutes
-            user=user_data
+            user=user_data,
         )
 
     except HTTPException:
@@ -329,7 +341,7 @@ async def login(
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred during login"
+            detail="An error occurred during login",
         )
 
 
@@ -338,44 +350,42 @@ async def refresh_token(
     request: Request,
     refresh_data: RefreshTokenRequest,
     db: AsyncSession = Depends(get_db_session),
-    auth_service: AuthenticationService = Depends(get_auth_service)
+    auth_service: AuthenticationService = Depends(get_auth_service),
 ):
     """Refresh access token using refresh token."""
 
     try:
         # Verify refresh token
-        payload = auth_service.verify_jwt_token(refresh_data.refresh_token, 'refresh')
+        payload = auth_service.verify_jwt_token(refresh_data.refresh_token, "refresh")
         if not payload:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid refresh token"
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
             )
 
-        user_id = payload.get('sub')
-        session_id = payload.get('session_id')
-        refresh_jti = payload.get('jti')
+        user_id = payload.get("sub")
+        session_id = payload.get("session_id")
+        refresh_jti = payload.get("jti")
 
         # Get user and session
         stmt = (
             select(User, UserSession)
             .join(UserSession, User.id == UserSession.user_id)
-            .where(and_(
-                User.id == user_id,
-                UserSession.id == session_id,
-                UserSession.refresh_token_jti == refresh_jti,
-                UserSession.status == SessionStatus.ACTIVE.value,
-                UserSession.expires_at > datetime.utcnow()
-            ))
+            .where(
+                and_(
+                    User.id == user_id,
+                    UserSession.id == session_id,
+                    UserSession.refresh_token_jti == refresh_jti,
+                    UserSession.status == SessionStatus.ACTIVE.value,
+                    UserSession.expires_at > datetime.utcnow(),
+                )
+            )
         )
 
         result = await db.execute(stmt)
         row = result.first()
 
         if not row:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid session"
-            )
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid session")
 
         user, session = row
 
@@ -383,12 +393,13 @@ async def refresh_token(
         provided_hash = auth_service.hash_refresh_token(refresh_data.refresh_token)
         if session.refresh_token_hash != provided_hash:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid refresh token"
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
             )
 
         # Generate new tokens
-        new_access_token, new_refresh_token, new_access_jti, new_refresh_jti = auth_service.create_jwt_tokens(user, session.id)
+        new_access_token, new_refresh_token, new_access_jti, new_refresh_jti = (
+            auth_service.create_jwt_tokens(user, session.id)
+        )
 
         # Update session with new token info
         session.access_token_jti = new_access_jti
@@ -408,14 +419,14 @@ async def refresh_token(
             "email": encryption.decrypt(user.email_encrypted),
             "role": user.role,
             "permissions": list(auth_service.get_user_permissions(user)),
-            "mfa_enabled": user.mfa_enabled
+            "mfa_enabled": user.mfa_enabled,
         }
 
         return LoginResponse(
             access_token=new_access_token,
             refresh_token=new_refresh_token,
             expires_in=900,
-            user=user_data
+            user=user_data,
         )
 
     except HTTPException:
@@ -423,14 +434,14 @@ async def refresh_token(
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred during token refresh"
+            detail="An error occurred during token refresh",
         )
 
 
 @router.post("/logout")
 async def logout(
     current_user: AuthenticatedUser = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_db_session)
+    db: AsyncSession = Depends(get_db_session),
 ):
     """Logout current user and revoke session."""
 
@@ -447,7 +458,7 @@ async def logout(
             current_user,
             db,
             details={"session_id": str(current_user.session.id)},
-            success=True
+            success=True,
         )
 
         return {"message": "Successfully logged out"}
@@ -456,14 +467,12 @@ async def logout(
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred during logout"
+            detail="An error occurred during logout",
         )
 
 
 @router.get("/me")
-async def get_current_user_info(
-    current_user: AuthenticatedUser = Depends(get_current_active_user)
-):
+async def get_current_user_info(current_user: AuthenticatedUser = Depends(get_current_active_user)):
     """Get current user information."""
 
     encryption = FieldEncryption()
@@ -475,7 +484,7 @@ async def get_current_user_info(
         "permissions": list(current_user.permissions),
         "mfa_enabled": current_user.user.mfa_enabled,
         "last_login_at": current_user.user.last_login_at,
-        "created_at": current_user.user.created_at
+        "created_at": current_user.user.created_at,
     }
 
     if current_user.user.first_name_encrypted:
@@ -492,14 +501,13 @@ async def get_current_user_info(
 async def setup_mfa(
     current_user: AuthenticatedUser = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db_session),
-    auth_service: AuthenticationService = Depends(get_auth_service)
+    auth_service: AuthenticationService = Depends(get_auth_service),
 ):
     """Setup MFA for current user."""
 
     if current_user.user.mfa_enabled:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="MFA is already enabled"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="MFA is already enabled"
         )
 
     try:
@@ -528,20 +536,16 @@ async def setup_mfa(
             current_user,
             db,
             details={"backup_codes_generated": len(backup_codes)},
-            success=True
+            success=True,
         )
 
-        return MFASetupResponse(
-            secret=secret,
-            qr_code=qr_code_b64,
-            backup_codes=backup_codes
-        )
+        return MFASetupResponse(secret=secret, qr_code=qr_code_b64, backup_codes=backup_codes)
 
     except Exception:
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred during MFA setup"
+            detail="An error occurred during MFA setup",
         )
 
 
@@ -550,20 +554,18 @@ async def enable_mfa(
     request_data: EnableMFARequest,
     current_user: AuthenticatedUser = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db_session),
-    auth_service: AuthenticationService = Depends(get_auth_service)
+    auth_service: AuthenticationService = Depends(get_auth_service),
 ):
     """Enable MFA after verification."""
 
     if current_user.user.mfa_enabled:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="MFA is already enabled"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="MFA is already enabled"
         )
 
     if not current_user.user.mfa_secret_encrypted:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="MFA must be set up first"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="MFA must be set up first"
         )
 
     try:
@@ -573,8 +575,7 @@ async def enable_mfa(
         # Verify the token
         if not auth_service.verify_mfa_token(secret, request_data.verification_code):
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid verification code"
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid verification code"
             )
 
         # Enable MFA
@@ -582,11 +583,7 @@ async def enable_mfa(
         await db.commit()
 
         await audit_log_action(
-            "MFA_ENABLED",
-            current_user,
-            db,
-            details={"verification_successful": True},
-            success=True
+            "MFA_ENABLED", current_user, db, details={"verification_successful": True}, success=True
         )
 
         return {"message": "MFA enabled successfully"}
@@ -597,7 +594,7 @@ async def enable_mfa(
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while enabling MFA"
+            detail="An error occurred while enabling MFA",
         )
 
 
@@ -607,17 +604,22 @@ async def create_user(
     user_data: CreateUserRequest,
     current_user: AuthenticatedUser = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db_session),
-    auth_service: AuthenticationService = Depends(get_auth_service)
+    auth_service: AuthenticationService = Depends(get_auth_service),
 ):
     """Create a new user account."""
 
     try:
         # Validate password strength
-        password_valid, password_errors = auth_service.validate_password_strength(user_data.password)
+        password_valid, password_errors = auth_service.validate_password_strength(
+            user_data.password
+        )
         if not password_valid:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail={"message": "Password does not meet requirements", "errors": password_errors}
+                detail={
+                    "message": "Password does not meet requirements",
+                    "errors": password_errors,
+                },
             )
 
         encryption = FieldEncryption()
@@ -626,7 +628,7 @@ async def create_user(
         stmt = select(User).where(
             or_(
                 User.username == user_data.username,
-                User.email_encrypted == encryption.encrypt(user_data.email)
+                User.email_encrypted == encryption.encrypt(user_data.email),
             )
         )
         result = await db.execute(stmt)
@@ -635,13 +637,11 @@ async def create_user(
         if existing_user:
             if existing_user.username == user_data.username:
                 raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Username already exists"
+                    status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists"
                 )
             else:
                 raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Email already exists"
+                    status_code=status.HTTP_400_BAD_REQUEST, detail="Email already exists"
                 )
 
         # Hash password
@@ -655,9 +655,13 @@ async def create_user(
             password_salt=password_salt,
             role=user_data.role.value,
             status=UserStatus.ACTIVE.value,
-            first_name_encrypted=encryption.encrypt(user_data.first_name) if user_data.first_name else None,
-            last_name_encrypted=encryption.encrypt(user_data.last_name) if user_data.last_name else None,
-            phone_encrypted=encryption.encrypt(user_data.phone) if user_data.phone else None
+            first_name_encrypted=(
+                encryption.encrypt(user_data.first_name) if user_data.first_name else None
+            ),
+            last_name_encrypted=(
+                encryption.encrypt(user_data.last_name) if user_data.last_name else None
+            ),
+            phone_encrypted=encryption.encrypt(user_data.phone) if user_data.phone else None,
         )
 
         db.add(new_user)
@@ -672,15 +676,15 @@ async def create_user(
             details={
                 "username": user_data.username,
                 "email": user_data.email,
-                "role": user_data.role.value
+                "role": user_data.role.value,
             },
-            success=True
+            success=True,
         )
 
         return {
             "message": "User created successfully",
             "user_id": str(new_user.id),
-            "username": user_data.username
+            "username": user_data.username,
         }
 
     except HTTPException:
@@ -688,14 +692,13 @@ async def create_user(
     except IntegrityError:
         await db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username or email already exists"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Username or email already exists"
         )
     except Exception:
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while creating user"
+            detail="An error occurred while creating user",
         )
 
 

@@ -2,13 +2,12 @@
 Database configuration and session management for MyHibachi AI Backend
 """
 
-import os
 from collections.abc import Generator
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+import os
 
 from api.ai.endpoints.models import Base
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
 
 # Database URL from environment
 DATABASE_URL = os.getenv("SYNC_DATABASE_URL", "sqlite:///./ai_chat.db")

@@ -9,18 +9,16 @@ Created: October 31, 2025
 Version: 1.0.0 (Phase 1)
 """
 
-from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
-from fastapi.responses import JSONResponse
-from typing import Optional
 import logging
 
 from api.ai.orchestrator import (
     AIOrchestrator,
     OrchestratorRequest,
     OrchestratorResponse,
-    OrchestratorConfig,
-    get_ai_orchestrator
+    get_ai_orchestrator,
 )
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -29,35 +27,31 @@ router = APIRouter()
 def get_orchestrator() -> AIOrchestrator:
     """
     Dependency to get orchestrator singleton.
-    
+
     Returns:
         AIOrchestrator instance
     """
     try:
         return get_ai_orchestrator()
     except Exception as e:
-        logger.error(f"Failed to get orchestrator: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to initialize AI orchestrator"
-        )
+        logger.exception(f"Failed to get orchestrator: {e!s}")
+        raise HTTPException(status_code=500, detail="Failed to initialize AI orchestrator")
 
 
 @router.post("/process", response_model=OrchestratorResponse)
 async def process_inquiry(
-    request: OrchestratorRequest,
-    orchestrator: AIOrchestrator = Depends(get_orchestrator)
+    request: OrchestratorRequest, orchestrator: AIOrchestrator = Depends(get_orchestrator)
 ):
     """
     Process customer inquiry with AI orchestrator.
-    
+
     This endpoint:
     1. Receives customer inquiry from any channel
     2. Uses OpenAI function calling to determine tool usage
     3. Executes tools (pricing, travel fees, protein costs)
     4. Generates AI response with tool results
     5. Returns response for admin review
-    
+
     **Example Request:**
     ```json
     {
@@ -71,7 +65,7 @@ async def process_inquiry(
         }
     }
     ```
-    
+
     **Example Response:**
     ```json
     {
@@ -90,60 +84,60 @@ async def process_inquiry(
         "conversation_id": "conv_20251031_123456"
     }
     ```
-    
+
     Args:
         request: Customer inquiry request
         orchestrator: AI orchestrator instance
-    
+
     Returns:
         AI-generated response with tool execution details
-    
+
     Raises:
         HTTPException: If inquiry processing fails
     """
     try:
         logger.info(
-            f"Processing inquiry via orchestrator",
+            "Processing inquiry via orchestrator",
             extra={
                 "channel": request.channel,
                 "has_customer_id": request.customer_id is not None,
-                "has_conversation_id": request.conversation_id is not None
-            }
+                "has_conversation_id": request.conversation_id is not None,
+            },
         )
-        
+
         # Process inquiry through orchestrator
         response = await orchestrator.process_inquiry(request)
-        
+
         # Log success
         logger.info(
-            f"Inquiry processed successfully",
+            "Inquiry processed successfully",
             extra={
                 "conversation_id": response.conversation_id,
                 "tools_used": len(response.tools_used),
                 "success": response.success,
-                "requires_admin_review": response.requires_admin_review
-            }
+                "requires_admin_review": response.requires_admin_review,
+            },
         )
-        
+
         return response
-        
+
     except Exception as e:
         logger.error(
-            f"Failed to process inquiry: {str(e)}",
+            f"Failed to process inquiry: {e!s}",
             exc_info=True,
             extra={
                 "channel": request.channel,
-                "message_preview": request.message[:100] if request.message else None
-            }
+                "message_preview": request.message[:100] if request.message else None,
+            },
         )
-        
+
         raise HTTPException(
             status_code=500,
             detail={
                 "error": "Failed to process inquiry",
                 "message": str(e),
-                "fallback": "Please call us at (916) 740-8768 for immediate assistance"
-            }
+                "fallback": "Please call us at (916) 740-8768 for immediate assistance",
+            },
         )
 
 
@@ -151,16 +145,16 @@ async def process_inquiry(
 async def batch_process_inquiries(
     requests: list[OrchestratorRequest],
     background_tasks: BackgroundTasks,
-    orchestrator: AIOrchestrator = Depends(get_orchestrator)
+    orchestrator: AIOrchestrator = Depends(get_orchestrator),
 ):
     """
     Process multiple inquiries in batch.
-    
+
     This endpoint is useful for:
     - Processing multiple customer inquiries at once
     - Bulk email responses
     - Admin review queue processing
-    
+
     **Example Request:**
     ```json
     [
@@ -176,57 +170,45 @@ async def batch_process_inquiries(
         }
     ]
     ```
-    
+
     Args:
         requests: List of customer inquiry requests
         background_tasks: FastAPI background tasks
         orchestrator: AI orchestrator instance
-    
+
     Returns:
         List of AI-generated responses
     """
     if len(requests) > 50:
-        raise HTTPException(
-            status_code=400,
-            detail="Maximum 50 inquiries per batch"
-        )
-    
+        raise HTTPException(status_code=400, detail="Maximum 50 inquiries per batch")
+
     try:
         responses = []
         for request in requests:
             response = await orchestrator.process_inquiry(request)
             responses.append(response)
-        
+
         logger.info(
-            f"Batch processing completed",
+            "Batch processing completed",
             extra={
                 "count": len(responses),
                 "successful": sum(1 for r in responses if r.success),
-                "failed": sum(1 for r in responses if not r.success)
-            }
+                "failed": sum(1 for r in responses if not r.success),
+            },
         )
-        
-        return {
-            "success": True,
-            "count": len(responses),
-            "responses": responses
-        }
-        
+
+        return {"success": True, "count": len(responses), "responses": responses}
+
     except Exception as e:
-        logger.error(f"Batch processing failed: {str(e)}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Batch processing failed: {str(e)}"
-        )
+        logger.error(f"Batch processing failed: {e!s}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Batch processing failed: {e!s}")
 
 
 @router.get("/config")
-async def get_orchestrator_config(
-    orchestrator: AIOrchestrator = Depends(get_orchestrator)
-):
+async def get_orchestrator_config(orchestrator: AIOrchestrator = Depends(get_orchestrator)):
     """
     Get current orchestrator configuration.
-    
+
     Returns:
         Current orchestrator configuration including Phase 3 feature flags
     """
@@ -239,24 +221,24 @@ async def get_orchestrator_config(
             "rag": {
                 "enabled": orchestrator.config.enable_rag,
                 "status": "Phase 3 - Data Collection",
-                "criteria": "Build IF ai_error_rate >30%"
+                "criteria": "Build IF ai_error_rate >30%",
             },
             "voice": {
                 "enabled": orchestrator.config.enable_voice,
                 "status": "Phase 3 - Data Collection",
-                "criteria": "Build IF phone_call_rate >30%"
+                "criteria": "Build IF phone_call_rate >30%",
             },
             "threading": {
                 "enabled": orchestrator.config.enable_threading,
                 "status": "Phase 3 - Data Collection",
-                "criteria": "Build IF follow_up_rate >50%"
+                "criteria": "Build IF follow_up_rate >50%",
             },
             "identity": {
                 "enabled": orchestrator.config.enable_identity,
                 "status": "Phase 3 - Data Collection",
-                "criteria": "Build IF multi_channel_rate >30%"
-            }
-        }
+                "criteria": "Build IF multi_channel_rate >30%",
+            },
+        },
     }
 
 
@@ -264,52 +246,44 @@ async def get_orchestrator_config(
 async def health_check():
     """
     Health check endpoint for orchestrator.
-    
+
     Returns:
         Health status of orchestrator service
     """
     try:
         # Check if orchestrator can be initialized
         orchestrator = get_ai_orchestrator()
-        
+
         return {
             "status": "healthy",
             "version": "1.0.0",
             "phase": "Phase 1",
             "tools_count": len(orchestrator.tool_registry.list_tools()),
-            "openai_configured": bool(orchestrator.client.api_key)
+            "openai_configured": bool(orchestrator.client.api_key),
         }
     except Exception as e:
-        logger.error(f"Health check failed: {str(e)}")
-        return JSONResponse(
-            status_code=503,
-            content={
-                "status": "unhealthy",
-                "error": str(e)
-            }
-        )
+        logger.exception(f"Health check failed: {e!s}")
+        return JSONResponse(status_code=503, content={"status": "unhealthy", "error": str(e)})
 
 
 @router.get("/tools")
-async def list_tools(
-    orchestrator: AIOrchestrator = Depends(get_orchestrator)
-):
+async def list_tools(orchestrator: AIOrchestrator = Depends(get_orchestrator)):
     """
     List all available tools.
-    
+
     Returns:
         List of tools with their schemas
     """
     tools = orchestrator.tool_registry.to_openai_functions()
-    
+
     return {
         "count": len(tools),
         "tools": [
             {
                 "name": tool["function"]["name"],
                 "description": tool["function"]["description"],
-                "parameters": tool["function"]["parameters"]
+                "parameters": tool["function"]["parameters"],
             }
             for tool in tools
-        ]
+        ],
     }

@@ -2,17 +2,15 @@
 QR Code Tracking Router
 Handles QR code redirects and tracking analytics
 """
-from typing import Optional
-from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request, Response
-from fastapi.responses import RedirectResponse
-from sqlalchemy.ext.asyncio import AsyncSession
 import secrets
 
 from api.app.database import get_db
-from api.app.services.qr_tracking_service import QRTrackingService
 from api.app.models.qr_tracking import QRCodeType
+from api.app.services.qr_tracking_service import QRTrackingService
+from fastapi import APIRouter, Depends, Request, Response
+from fastapi.responses import RedirectResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/api/qr", tags=["qr_tracking"])
 
@@ -83,7 +81,7 @@ async def track_conversion(
     session_id: str,
     converted_to_lead: bool = False,
     converted_to_booking: bool = False,
-    conversion_value: Optional[float] = None,
+    conversion_value: float | None = None,
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -125,8 +123,8 @@ async def get_qr_analytics(
 
 @router.get("/list")
 async def list_qr_codes(
-    type: Optional[QRCodeType] = None,
-    is_active: Optional[bool] = None,
+    type: QRCodeType | None = None,
+    is_active: bool | None = None,
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -161,8 +159,8 @@ async def create_qr_code(
     code: str,
     type: QRCodeType,
     destination_url: str,
-    description: Optional[str] = None,
-    campaign_name: Optional[str] = None,
+    description: str | None = None,
+    campaign_name: str | None = None,
     db: AsyncSession = Depends(get_db),
 ):
     """

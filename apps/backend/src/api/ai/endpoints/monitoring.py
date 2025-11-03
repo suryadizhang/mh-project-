@@ -3,14 +3,12 @@ Performance Monitoring and Metrics Collection for MyHibachi AI Backend
 Real-time metrics, health checks, and system resource monitoring
 """
 
-import time
 from collections import defaultdict, deque
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timedelta
+import time
 from typing import Any
 
-import psutil
-import structlog
 from fastapi import Request
 from prometheus_client import (
     Counter,
@@ -19,6 +17,8 @@ from prometheus_client import (
     Info,
     start_http_server,
 )
+import psutil
+import structlog
 
 logger = structlog.get_logger(__name__)
 
@@ -40,17 +40,11 @@ AI_MODEL_REQUESTS = Counter(
     "ai_model_requests_total", "Total AI model requests", ["model", "success"]
 )
 
-AI_MODEL_TOKENS = Counter(
-    "ai_model_tokens_total", "Total AI model tokens used", ["model"]
-)
+AI_MODEL_TOKENS = Counter("ai_model_tokens_total", "Total AI model tokens used", ["model"])
 
-AI_RESPONSE_TIME = Histogram(
-    "ai_response_duration_seconds", "AI model response time", ["model"]
-)
+AI_RESPONSE_TIME = Histogram("ai_response_duration_seconds", "AI model response time", ["model"])
 
-WEBSOCKET_CONNECTIONS = Gauge(
-    "websocket_connections_active", "Active WebSocket connections"
-)
+WEBSOCKET_CONNECTIONS = Gauge("websocket_connections_active", "Active WebSocket connections")
 
 DATABASE_QUERY_DURATION = Histogram(
     "database_query_duration_seconds",
@@ -69,9 +63,7 @@ SYSTEM_INFO = Info("myhibachi_ai_system_info", "System information")
 # System resource metrics
 CPU_USAGE = Gauge("system_cpu_usage_percent", "CPU usage percentage")
 MEMORY_USAGE = Gauge("system_memory_usage_bytes", "Memory usage in bytes")
-MEMORY_USAGE_PERCENT = Gauge(
-    "system_memory_usage_percent", "Memory usage percentage"
-)
+MEMORY_USAGE_PERCENT = Gauge("system_memory_usage_percent", "Memory usage percentage")
 DISK_USAGE = Gauge("system_disk_usage_percent", "Disk usage percentage")
 
 
@@ -92,7 +84,7 @@ class PerformanceMetrics:
     system_disk: float = 0.0
     uptime_seconds: float = 0.0
     last_updated: datetime = None
-    
+
     def __post_init__(self):
         """Set timestamp after initialization."""
         if self.last_updated is None:
@@ -104,9 +96,7 @@ class PerformanceMonitor:
 
     def __init__(self):
         self.start_time = time.time()
-        self.metrics_history: deque = deque(
-            maxlen=1440
-        )  # 24 hours of minute data
+        self.metrics_history: deque = deque(maxlen=1440)  # 24 hours of minute data
         self.response_times: deque = deque(maxlen=1000)
         self.error_counts: dict[str, int] = defaultdict(int)
         self.ai_usage_stats: dict[str, dict[str, Any]] = defaultdict(
@@ -153,18 +143,12 @@ class PerformanceMonitor:
             )
 
         except Exception as e:
-            logger.error("Failed to collect system metrics", error=str(e))
+            logger.exception("Failed to collect system metrics", error=str(e))
 
-    def record_request(
-        self, method: str, endpoint: str, status_code: int, duration: float
-    ):
+    def record_request(self, method: str, endpoint: str, status_code: int, duration: float):
         """Record HTTP request metrics"""
-        REQUEST_COUNT.labels(
-            method=method, endpoint=endpoint, status=str(status_code)
-        ).inc()
-        REQUEST_DURATION.labels(method=method, endpoint=endpoint).observe(
-            duration
-        )
+        REQUEST_COUNT.labels(method=method, endpoint=endpoint, status=str(status_code)).inc()
+        REQUEST_DURATION.labels(method=method, endpoint=endpoint).observe(duration)
 
         self.response_times.append(duration)
 
@@ -179,9 +163,7 @@ class PerformanceMonitor:
             duration=duration,
         )
 
-    def record_ai_request(
-        self, model: str, tokens: int, duration: float, success: bool = True
-    ):
+    def record_ai_request(self, model: str, tokens: int, duration: float, success: bool = True):
         """Record AI model usage metrics"""
         AI_MODEL_REQUESTS.labels(model=model, success=str(success)).inc()
         AI_MODEL_TOKENS.labels(model=model).inc(tokens)
@@ -208,9 +190,7 @@ class PerformanceMonitor:
         if connected:
             self.websocket_connections_count += 1
         else:
-            self.websocket_connections_count = max(
-                0, self.websocket_connections_count - 1
-            )
+            self.websocket_connections_count = max(0, self.websocket_connections_count - 1)
 
         WEBSOCKET_CONNECTIONS.set(self.websocket_connections_count)
 
@@ -220,13 +200,9 @@ class PerformanceMonitor:
             total_connections=self.websocket_connections_count,
         )
 
-    def record_database_query(
-        self, operation: str, table: str, duration: float
-    ):
+    def record_database_query(self, operation: str, table: str, duration: float):
         """Record database query metrics"""
-        DATABASE_QUERY_DURATION.labels(
-            operation=operation, table=table
-        ).observe(duration)
+        DATABASE_QUERY_DURATION.labels(operation=operation, table=table).observe(duration)
 
         logger.debug(
             "Database query recorded",
@@ -251,17 +227,13 @@ class PerformanceMonitor:
 
         # Calculate average response time
         avg_response_time = (
-            sum(self.response_times) / len(self.response_times)
-            if self.response_times
-            else 0.0
+            sum(self.response_times) / len(self.response_times) if self.response_times else 0.0
         )
 
         # Calculate error rate
         total_errors = sum(self.error_counts.values())
         total_requests = len(self.response_times)
-        error_rate = (
-            (total_errors / total_requests) if total_requests > 0 else 0.0
-        )
+        error_rate = (total_errors / total_requests) if total_requests > 0 else 0.0
 
         # Get system resources
         try:
@@ -277,12 +249,8 @@ class PerformanceMonitor:
             request_count=total_requests,
             avg_response_time=avg_response_time,
             error_rate=error_rate,
-            ai_requests=sum(
-                stats["requests"] for stats in self.ai_usage_stats.values()
-            ),
-            ai_tokens_used=sum(
-                stats["tokens"] for stats in self.ai_usage_stats.values()
-            ),
+            ai_requests=sum(stats["requests"] for stats in self.ai_usage_stats.values()),
+            ai_tokens_used=sum(stats["tokens"] for stats in self.ai_usage_stats.values()),
             websocket_connections=self.websocket_connections_count,
             system_cpu=cpu_percent,
             system_memory=memory.percent,
@@ -301,22 +269,16 @@ class PerformanceMonitor:
             health_issues.append(f"High error rate: {metrics.error_rate:.2%}")
 
         if metrics.avg_response_time > 2.0:  # More than 2 seconds average
-            health_issues.append(
-                f"Slow response time: {metrics.avg_response_time:.2f}s"
-            )
+            health_issues.append(f"Slow response time: {metrics.avg_response_time:.2f}s")
 
         if metrics.system_cpu > 80:
             health_issues.append(f"High CPU usage: {metrics.system_cpu:.1f}%")
 
         if metrics.system_memory > 85:
-            health_issues.append(
-                f"High memory usage: {metrics.system_memory:.1f}%"
-            )
+            health_issues.append(f"High memory usage: {metrics.system_memory:.1f}%")
 
         if metrics.system_disk > 90:
-            health_issues.append(
-                f"High disk usage: {metrics.system_disk:.1f}%"
-            )
+            health_issues.append(f"High disk usage: {metrics.system_disk:.1f}%")
 
         status = "unhealthy" if health_issues else "healthy"
 
@@ -324,9 +286,7 @@ class PerformanceMonitor:
             "status": status,
             "timestamp": datetime.utcnow().isoformat(),
             "uptime_seconds": metrics.uptime_seconds,
-            "uptime_human": str(
-                timedelta(seconds=int(metrics.uptime_seconds))
-            ),
+            "uptime_human": str(timedelta(seconds=int(metrics.uptime_seconds))),
             "metrics": {
                 "requests_total": metrics.request_count,
                 "avg_response_time": metrics.avg_response_time,
@@ -370,9 +330,7 @@ class PerformanceMiddleware:
         duration = time.time() - start_time
 
         # Record metrics
-        self.monitor.record_request(
-            method, endpoint, response.status_code, duration
-        )
+        self.monitor.record_request(method, endpoint, response.status_code, duration)
 
         return response
 
@@ -384,14 +342,14 @@ def start_metrics_server(port: int = 8000):
         logger.info(f"Metrics server started on port {port}")
         logger.info(f"Metrics available at http://localhost:{port}/metrics")
     except Exception as e:
-        logger.error(f"Failed to start metrics server: {e}")
+        logger.exception(f"Failed to start metrics server: {e}")
 
 
 # Export main components
 __all__ = [
-    "performance_monitor",
-    "PerformanceMonitor",
-    "PerformanceMiddleware",
-    "start_metrics_server",
     "PerformanceMetrics",
+    "PerformanceMiddleware",
+    "PerformanceMonitor",
+    "performance_monitor",
+    "start_metrics_server",
 ]

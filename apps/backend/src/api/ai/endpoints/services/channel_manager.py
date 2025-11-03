@@ -6,12 +6,11 @@ Supports RingCentral SMS/Voice, Meta (Facebook/Instagram), and Website chat
 import hashlib
 import hmac
 import os
-from typing import Any, Optional
-
-import httpx
-from fastapi import HTTPException
+from typing import Any
 
 from api.ai.endpoints.schemas import ChannelType
+from fastapi import HTTPException
+import httpx
 
 
 class ChannelManager:
@@ -23,25 +22,19 @@ class ChannelManager:
         self.rc_client_secret = os.getenv("RINGCENTRAL_CLIENT_SECRET")
         self.rc_jwt = os.getenv("RINGCENTRAL_JWT")
         self.rc_webhook_secret = os.getenv("RINGCENTRAL_WEBHOOK_SECRET")
-        self.rc_server_url = os.getenv(
-            "RINGCENTRAL_SERVER_URL", "https://platform.ringcentral.com"
-        )
+        self.rc_server_url = os.getenv("RINGCENTRAL_SERVER_URL", "https://platform.ringcentral.com")
 
         # Meta configuration
         self.meta_app_id = os.getenv("META_APP_ID")
         self.meta_app_secret = os.getenv("META_APP_SECRET")
         self.meta_page_access_token = os.getenv("META_PAGE_ACCESS_TOKEN")
-        self.meta_verify_token = os.getenv(
-            "META_VERIFY_TOKEN", "myhibachi_verify_2024"
-        )
+        self.meta_verify_token = os.getenv("META_VERIFY_TOKEN", "myhibachi_verify_2024")
 
         # HTTP client for API calls
         self.http_client = httpx.AsyncClient()
 
     # RingCentral SMS/Voice Handlers
-    def validate_ringcentral_webhook(
-        self, body: bytes, signature: str
-    ) -> bool:
+    def validate_ringcentral_webhook(self, body: bytes, signature: str) -> bool:
         """Validate RingCentral webhook signature"""
         if not self.rc_webhook_secret:
             return True  # Skip validation if no secret configured
@@ -52,9 +45,7 @@ class ChannelManager:
 
         return hmac.compare_digest(signature, expected_signature)
 
-    def parse_ringcentral_sms(
-        self, webhook_data: dict[str, Any]
-    ) -> dict[str, Any]:
+    def parse_ringcentral_sms(self, webhook_data: dict[str, Any]) -> dict[str, Any]:
         """Parse RingCentral SMS webhook data"""
         try:
             message = webhook_data.get("body", {})
@@ -76,25 +67,17 @@ class ChannelManager:
                     "timestamp": message.get("creationTime"),
                 },
             }
-        except Exception as e:
-            print(f"Error parsing RingCentral SMS: {e}")
-            raise HTTPException(
-                status_code=400, detail="Invalid SMS webhook data"
-            )
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid SMS webhook data")
 
-    def parse_ringcentral_voice(
-        self, webhook_data: dict[str, Any]
-    ) -> Optional[dict[str, Any]]:
+    def parse_ringcentral_voice(self, webhook_data: dict[str, Any]) -> dict[str, Any] | None:
         """Parse RingCentral voice webhook data"""
         try:
             event_type = webhook_data.get("event")
-            telephony_status = webhook_data.get("body", {}).get(
-                "telephonyStatus"
-            )
+            telephony_status = webhook_data.get("body", {}).get("telephonyStatus")
 
             if (
-                event_type
-                == "/restapi/v1.0/account/~/extension/~/telephony/sessions"
+                event_type == "/restapi/v1.0/account/~/extension/~/telephony/sessions"
                 and telephony_status in ["Answered", "Disconnected"]
             ):
                 session = webhook_data.get("body", {})
@@ -108,9 +91,7 @@ class ChannelManager:
                         break
 
                 if customer_party:
-                    from_number = customer_party.get("from", {}).get(
-                        "phoneNumber", ""
-                    )
+                    from_number = customer_party.get("from", {}).get("phoneNumber", "")
 
                     return {
                         "channel": ChannelType.VOICE,
@@ -127,8 +108,7 @@ class ChannelManager:
 
             return None  # Not a relevant voice event
 
-        except Exception as e:
-            print(f"Error parsing RingCentral voice: {e}")
+        except Exception:
             return None
 
     async def send_sms(self, to_number: str, message: str) -> bool:
@@ -136,7 +116,6 @@ class ChannelManager:
         try:
             # Get access token (simplified - in production, implement proper OAuth)
             if not self.rc_jwt:
-                print("RingCentral JWT not configured")
                 return False
 
             headers = {
@@ -145,33 +124,17 @@ class ChannelManager:
             }
 
             payload = {
-                "from": {
-                    "phoneNumber": os.getenv(
-                        "RINGCENTRAL_FROM_NUMBER", "+1234567890"
-                    )
-                },
+                "from": {"phoneNumber": os.getenv("RINGCENTRAL_FROM_NUMBER", "+1234567890")},
                 "to": [{"phoneNumber": to_number}],
                 "text": message,
             }
 
-            url = (
-                f"{self.rc_server_url}/restapi/v1.0/account/~/extension/~/sms"
-            )
-            response = await self.http_client.post(
-                url, headers=headers, json=payload
-            )
+            url = f"{self.rc_server_url}/restapi/v1.0/account/~/extension/~/sms"
+            response = await self.http_client.post(url, headers=headers, json=payload)
 
-            if response.status_code == 200:
-                print(f"SMS sent to {to_number}")
-                return True
-            else:
-                print(
-                    f"Failed to send SMS: {response.status_code} - {response.text}"
-                )
-                return False
+            return response.status_code == 200
 
-        except Exception as e:
-            print(f"Error sending SMS: {e}")
+        except Exception:
             return False
 
     # Meta (Facebook/Instagram) Handlers
@@ -186,17 +149,13 @@ class ChannelManager:
 
         return hmac.compare_digest(signature, f"sha1={expected_signature}")
 
-    def verify_meta_webhook(
-        self, mode: str, token: str, challenge: str
-    ) -> Optional[str]:
+    def verify_meta_webhook(self, mode: str, token: str, challenge: str) -> str | None:
         """Verify Meta webhook subscription"""
         if mode == "subscribe" and token == self.meta_verify_token:
             return challenge
         return None
 
-    def parse_meta_webhook(
-        self, webhook_data: dict[str, Any]
-    ) -> list[dict[str, Any]]:
+    def parse_meta_webhook(self, webhook_data: dict[str, Any]) -> list[dict[str, Any]]:
         """Parse Meta webhook data for messages"""
         messages = []
 
@@ -220,18 +179,14 @@ class ChannelManager:
                                         "platform": "facebook",
                                         "sender_id": sender_id,
                                         "recipient_id": recipient_id,
-                                        "timestamp": messaging.get(
-                                            "timestamp"
-                                        ),
+                                        "timestamp": messaging.get("timestamp"),
                                     },
                                 }
                             )
 
                 # Handle Instagram messages
                 for messaging in entry.get("messaging", []):
-                    if "message" in messaging and "instagram" in str(
-                        entry.get("id", "")
-                    ):
+                    if "message" in messaging and "instagram" in str(entry.get("id", "")):
                         sender_id = messaging["sender"]["id"]
                         message_text = messaging["message"].get("text", "")
 
@@ -245,9 +200,7 @@ class ChannelManager:
                                     "metadata": {
                                         "platform": "instagram",
                                         "sender_id": sender_id,
-                                        "timestamp": messaging.get(
-                                            "timestamp"
-                                        ),
+                                        "timestamp": messaging.get("timestamp"),
                                     },
                                 }
                             )
@@ -281,18 +234,15 @@ class ChannelManager:
                                 }
                             )
 
-        except Exception as e:
-            print(f"Error parsing Meta webhook: {e}")
+        except Exception:
+            pass
 
         return messages
 
-    async def send_facebook_message(
-        self, recipient_id: str, message: str
-    ) -> bool:
+    async def send_facebook_message(self, recipient_id: str, message: str) -> bool:
         """Send message via Facebook Messenger"""
         try:
             if not self.meta_page_access_token:
-                print("Meta page access token not configured")
                 return False
 
             url = "https://graph.facebook.com/v18.0/me/messages"
@@ -303,28 +253,17 @@ class ChannelManager:
                 "message": {"text": message},
             }
 
-            response = await self.http_client.post(
-                url, params=params, json=payload
-            )
+            response = await self.http_client.post(url, params=params, json=payload)
 
-            if response.status_code == 200:
-                print(f"Facebook message sent to {recipient_id}")
-                return True
-            else:
-                print(
-                    f"Failed to send Facebook message: {response.status_code} - {response.text}"
-                )
-                return False
+            return response.status_code == 200
 
-        except Exception as e:
-            print(f"Error sending Facebook message: {e}")
+        except Exception:
             return False
 
     async def reply_to_comment(self, comment_id: str, message: str) -> bool:
         """Reply to a Facebook/Instagram comment"""
         try:
             if not self.meta_page_access_token:
-                print("Meta page access token not configured")
                 return False
 
             url = f"https://graph.facebook.com/v18.0/{comment_id}/comments"
@@ -332,21 +271,11 @@ class ChannelManager:
 
             payload = {"message": message}
 
-            response = await self.http_client.post(
-                url, params=params, json=payload
-            )
+            response = await self.http_client.post(url, params=params, json=payload)
 
-            if response.status_code == 200:
-                print(f"Comment reply sent to {comment_id}")
-                return True
-            else:
-                print(
-                    f"Failed to reply to comment: {response.status_code} - {response.text}"
-                )
-                return False
+            return response.status_code == 200
 
-        except Exception as e:
-            print(f"Error replying to comment: {e}")
+        except Exception:
             return False
 
     # Unified outbound messaging
@@ -355,7 +284,7 @@ class ChannelManager:
         channel: ChannelType,
         recipient_id: str,
         message: str,
-        metadata: Optional[dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> bool:
         """Send message through appropriate channel"""
         try:
@@ -363,21 +292,15 @@ class ChannelManager:
                 return await self.send_sms(recipient_id, message)
             elif channel == ChannelType.FACEBOOK:
                 if metadata and metadata.get("type") == "comment":
-                    return await self.reply_to_comment(
-                        metadata["comment_id"], message
-                    )
+                    return await self.reply_to_comment(metadata["comment_id"], message)
                 else:
-                    return await self.send_facebook_message(
-                        recipient_id, message
-                    )
+                    return await self.send_facebook_message(recipient_id, message)
             elif channel == ChannelType.INSTAGRAM:
                 return await self.send_facebook_message(recipient_id, message)
             else:
-                print(f"Unsupported channel for outbound messaging: {channel}")
                 return False
 
-        except Exception as e:
-            print(f"Error sending message via {channel}: {e}")
+        except Exception:
             return False
 
     async def close(self):

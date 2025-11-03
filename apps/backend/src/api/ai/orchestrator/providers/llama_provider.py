@@ -11,19 +11,11 @@ Author: MH Backend Team
 Created: 2025-10-31 (Phase 1A - stub for Option 2)
 """
 
-import time
-from typing import Dict, List, Optional, Any, AsyncIterator
-from datetime import datetime
+from collections.abc import AsyncIterator
 import logging
+from typing import Any
 
-from .base import (
-    ModelProvider,
-    ModelType,
-    ModelCapability,
-    ProviderConfig,
-    ProviderError,
-    ModelNotFoundError
-)
+from .base import ModelCapability, ModelType, ProviderConfig
 
 logger = logging.getLogger(__name__)
 
@@ -31,131 +23,121 @@ logger = logging.getLogger(__name__)
 class LlamaProvider:
     """
     Llama 3 (Ollama) provider - STUB FOR FUTURE USE.
-    
+
     When to activate:
     - API costs exceed $500/month
     - Handling 500+ daily conversations
     - Need 75% cost reduction
-    
+
     Setup steps (when ready):
     1. Install Ollama: https://ollama.ai/download
     2. Pull Llama 3: `ollama pull llama3:70b`
     3. Set env: LLAMA_API_BASE=http://localhost:11434
     4. Enable provider: AI_PROVIDER=llama (or hybrid)
     5. Run migration: See MIGRATION_GUIDE_LLAMA3.md
-    
+
     Expected performance:
     - Cost: ~$0 (runs locally)
     - Latency: ~500ms (vs 200ms OpenAI)
     - Quality: 90% of GPT-4o-mini
     - Capacity: 100 req/sec (8xGPU server)
-    
+
     NOT IMPLEMENTED YET - This is infrastructure code only.
     """
-    
+
     def __init__(self, config: ProviderConfig):
         self.config = config
         self._default_chat_model = config.default_chat_model or "llama3:70b"
         self._default_embedding_model = config.default_embedding_model or "nomic-embed-text"
-        
+
         logger.warning(
             "⚠️ LlamaProvider initialized but NOT FUNCTIONAL - "
             "This is a stub for Option 2. See MIGRATION_GUIDE_LLAMA3.md"
         )
-    
+
     @property
     def provider_type(self) -> ModelType:
         return ModelType.LLAMA
-    
+
     @property
-    def capabilities(self) -> List[ModelCapability]:
+    def capabilities(self) -> list[ModelCapability]:
         return [
             ModelCapability.CHAT,
             ModelCapability.EMBEDDING,
             ModelCapability.STREAMING,
             # Note: Function calling support depends on Llama 3 fine-tuning
         ]
-    
+
     async def complete(
         self,
-        messages: List[Dict[str, str]],
-        model: Optional[str] = None,
+        messages: list[dict[str, str]],
+        model: str | None = None,
         temperature: float = 0.7,
-        max_tokens: Optional[int] = None,
-        tools: Optional[List[Dict]] = None,
-        tool_choice: Optional[str] = None,
-        response_format: Optional[Dict] = None,
+        max_tokens: int | None = None,
+        tools: list[dict] | None = None,
+        tool_choice: str | None = None,
+        response_format: dict | None = None,
         stream: bool = False,
-        metadata: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        metadata: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """STUB: Not implemented yet"""
-        
+
         raise NotImplementedError(
             "LlamaProvider is not implemented yet. "
             "This is Option 2 infrastructure. "
             "To activate: See MIGRATION_GUIDE_LLAMA3.md"
         )
-    
+
     async def complete_stream(
         self,
-        messages: List[Dict[str, str]],
-        model: Optional[str] = None,
+        messages: list[dict[str, str]],
+        model: str | None = None,
         temperature: float = 0.7,
-        max_tokens: Optional[int] = None,
-        tools: Optional[List[Dict]] = None,
-        metadata: Optional[Dict[str, Any]] = None
-    ) -> AsyncIterator[Dict[str, Any]]:
+        max_tokens: int | None = None,
+        tools: list[dict] | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
         """STUB: Not implemented yet"""
-        
+
         raise NotImplementedError(
-            "LlamaProvider streaming is not implemented yet. "
-            "This is Option 2 infrastructure."
+            "LlamaProvider streaming is not implemented yet. " "This is Option 2 infrastructure."
         )
-        
+
         # Make this async generator syntactically valid
         if False:
             yield {}
-    
+
     async def embed(
-        self,
-        texts: List[str],
-        model: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        self, texts: list[str], model: str | None = None, metadata: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """STUB: Not implemented yet"""
-        
+
         raise NotImplementedError(
-            "LlamaProvider embeddings not implemented yet. "
-            "This is Option 2 infrastructure."
+            "LlamaProvider embeddings not implemented yet. " "This is Option 2 infrastructure."
         )
-    
-    async def health_check(self) -> Dict[str, Any]:
+
+    async def health_check(self) -> dict[str, Any]:
         """STUB: Always reports unhealthy until implemented"""
-        
+
         return {
             "healthy": False,
             "provider": "llama",
             "latency_ms": 0,
             "models_available": [],
-            "error": "LlamaProvider not implemented - Option 2 stub only"
+            "error": "LlamaProvider not implemented - Option 2 stub only",
         }
-    
+
     def get_default_model(self, capability: ModelCapability) -> str:
         """Return default models (even though not functional yet)"""
-        
+
         if capability == ModelCapability.CHAT:
             return self._default_chat_model
         elif capability == ModelCapability.EMBEDDING:
             return self._default_embedding_model
         else:
             return self._default_chat_model
-    
-    def estimate_cost(
-        self,
-        input_tokens: int,
-        output_tokens: int,
-        model: str
-    ) -> float:
+
+    def estimate_cost(self, input_tokens: int, output_tokens: int, model: str) -> float:
         """Llama 3 is free (runs locally)"""
         return 0.0
 
@@ -221,7 +203,7 @@ OLLAMA API INTEGRATION GUIDE
    - Phase 2: Route simple queries to Llama (confidence-based)
    - Phase 3: Route 80% traffic to Llama, 20% to OpenAI
    - Phase 4: Use OpenAI only for function calling + edge cases
-   
+
 10. Monitoring:
     - Track Llama vs OpenAI quality (CSAT scores)
     - Track routing decisions (confidence thresholds)

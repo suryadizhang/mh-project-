@@ -4,35 +4,30 @@ Demonstrates enterprise patterns: Service Layer + DTOs + Caching + DI
 
 This shows the transformation from a typical endpoint to an enterprise-grade endpoint.
 """
-from typing import Optional
+
 from datetime import date
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, status
-from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
+# Service and Repository imports
+from api.app.services.booking_service import BookingService
+from core.cache import CacheService
+from core.container import DependencyInjectionContainer
 
 # Core imports
 from core.dtos import (
     ApiResponse,
     PaginatedResponse,
+    create_paginated_response,
     create_success_response,
-    create_paginated_response
 )
 from core.exceptions import (
-    NotFoundException, 
     BusinessLogicException,
-    ConflictException
+    ConflictException,
+    NotFoundException,
 )
-from core.container import DependencyInjectionContainer
-
-# Service and Repository imports
-from api.app.services.booking_service import BookingService
-from repositories.booking_repository import BookingRepository
-from core.cache import CacheService
+from fastapi import APIRouter, Depends, Query, status
 
 # Models and Schemas
-from models.booking import Booking
 # Note: These schemas need to be created based on your actual booking model
 # from api.v1.bookings.schemas import (
 #     BookingResponse,
@@ -41,17 +36,22 @@ from models.booking import Booking
 #     BookingListFilters
 # )
 from pydantic import BaseModel
+from repositories.booking_repository import BookingRepository
+from sqlalchemy.orm import Session
+
 
 # Placeholder schemas (replace with your actual schemas)
 class BookingResponse(BaseModel):
     class Config:
         from_attributes = True
-        
+
+
 class BookingCreate(BaseModel):
     customer_id: UUID
     event_date: date
     event_time: str
     party_size: int
+
 
 router = APIRouter(prefix="/api/v1/bookings", tags=["bookings"])
 
@@ -60,28 +60,28 @@ router = APIRouter(prefix="/api/v1/bookings", tags=["bookings"])
 # DEPENDENCY PROVIDERS
 # ============================================================================
 
+
 async def get_db() -> Session:
     """Database session dependency"""
     # Implementation from your existing code
-    pass
+
 
 async def get_container() -> DependencyInjectionContainer:
     """Get DI container from app state"""
     # Implementation from your existing code
-    pass
+
 
 async def get_cache() -> CacheService:
     """Get cache service from app state"""
     # Implementation from your existing code
-    pass
+
 
 async def get_booking_service(
-    db: Session = Depends(get_db),
-    cache: CacheService = Depends(get_cache)
+    db: Session = Depends(get_db), cache: CacheService = Depends(get_cache)
 ) -> BookingService:
     """
     Provide BookingService with dependencies
-    
+
     This is a factory function that creates a BookingService instance
     with all required dependencies injected.
     """
@@ -110,17 +110,17 @@ async def get_bookings_old(
 ):
     # Business logic mixed with data access
     query = db.query(Booking)
-    
+
     # Filtering logic in endpoint
     if status:
         query = query.filter(Booking.status == status)
     if customer_id:
         query = query.filter(Booking.customer_id == customer_id)
-    
+
     # Pagination logic in endpoint
     total = query.count()
     bookings = query.offset((page - 1) * per_page).limit(per_page).all()
-    
+
     # Manual response construction
     return {
         "items": [booking.dict() for booking in bookings],
@@ -140,13 +140,13 @@ async def create_booking_old(
             status_code=400,
             content={"error": "Cannot book events in the past"}
         )
-    
+
     # Data access logic in endpoint
     booking = Booking(**data.dict())
     db.add(booking)
     db.commit()
     db.refresh(booking)
-    
+
     # Inconsistent response format
     return {"booking": booking.dict()}
 """
@@ -156,27 +156,28 @@ async def create_booking_old(
 # ✅ AFTER: Enterprise Pattern (RECOMMENDED)
 # ============================================================================
 
+
 @router.get(
     "",
     response_model=PaginatedResponse[BookingResponse],
     summary="List bookings with pagination",
-    description="Get a paginated list of bookings with optional filtering"
+    description="Get a paginated list of bookings with optional filtering",
 )
 async def list_bookings(
     service: BookingService = Depends(get_booking_service),
     page: int = Query(1, ge=1, description="Page number"),
     per_page: int = Query(20, ge=1, le=100, description="Items per page"),
-    status: Optional[str] = Query(None, description="Filter by status"),
-    customer_id: Optional[UUID] = Query(None, description="Filter by customer"),
-    start_date: Optional[date] = Query(None, description="Start of date range"),
-    end_date: Optional[date] = Query(None, description="End of date range")
+    status: str | None = Query(None, description="Filter by status"),
+    customer_id: UUID | None = Query(None, description="Filter by customer"),
+    start_date: date | None = Query(None, description="Start of date range"),
+    end_date: date | None = Query(None, description="End of date range"),
 ) -> dict:
     """
     ✅ Endpoint concerns ONLY:
     - Request validation (via Pydantic)
     - Dependency injection
     - Response formatting
-    
+
     ✅ Business logic in SERVICE layer
     ✅ Data access in REPOSITORY layer
     ✅ Consistent response via DTOs
@@ -188,16 +189,16 @@ async def list_bookings(
         status=status,
         customer_id=customer_id,
         start_date=start_date,
-        end_date=end_date
+        end_date=end_date,
     )
-    
+
     # Return standardized response
     return create_paginated_response(
         items=[BookingResponse.from_orm(b) for b in result.items],
         total_items=result.total_count,
         page=page,
         per_page=per_page,
-        message="Bookings retrieved successfully"
+        message="Bookings retrieved successfully",
     )
 
 
@@ -205,12 +206,12 @@ async def list_bookings(
     "/stats",
     response_model=ApiResponse[dict],
     summary="Get booking statistics",
-    description="Get cached dashboard statistics (cached for 5 minutes)"
+    description="Get cached dashboard statistics (cached for 5 minutes)",
 )
 async def get_booking_stats(
     service: BookingService = Depends(get_booking_service),
-    start_date: Optional[date] = Query(None),
-    end_date: Optional[date] = Query(None)
+    start_date: date | None = Query(None),
+    end_date: date | None = Query(None),
 ) -> dict:
     """
     ✅ Demonstrates caching:
@@ -218,28 +219,19 @@ async def get_booking_stats(
     - Expensive queries are cached
     - No caching logic in endpoint
     """
-    stats = await service.get_dashboard_stats(
-        start_date=start_date,
-        end_date=end_date
-    )
-    
-    return create_success_response(
-        data=stats,
-        message="Statistics retrieved successfully"
-    )
+    stats = await service.get_dashboard_stats(start_date=start_date, end_date=end_date)
+
+    return create_success_response(data=stats, message="Statistics retrieved successfully")
 
 
 @router.get(
     "/{booking_id}",
     response_model=ApiResponse[BookingResponse],
     summary="Get booking by ID",
-    responses={
-        404: {"description": "Booking not found"}
-    }
+    responses={404: {"description": "Booking not found"}},
 )
 async def get_booking(
-    booking_id: UUID,
-    service: BookingService = Depends(get_booking_service)
+    booking_id: UUID, service: BookingService = Depends(get_booking_service)
 ) -> dict:
     """
     ✅ Demonstrates error handling:
@@ -249,12 +241,11 @@ async def get_booking(
     """
     try:
         booking = await service.get_booking_by_id(booking_id)
-        
+
         return create_success_response(
-            data=BookingResponse.from_orm(booking),
-            message="Booking retrieved successfully"
+            data=BookingResponse.from_orm(booking), message="Booking retrieved successfully"
         )
-    except NotFoundException as e:
+    except NotFoundException:
         # Middleware will convert this to proper HTTP response
         raise
 
@@ -267,12 +258,11 @@ async def get_booking(
     responses={
         201: {"description": "Booking created successfully"},
         400: {"description": "Invalid booking data"},
-        409: {"description": "Time slot not available"}
-    }
+        409: {"description": "Time slot not available"},
+    },
 )
 async def create_booking(
-    data: BookingCreate,
-    service: BookingService = Depends(get_booking_service)
+    data: BookingCreate, service: BookingService = Depends(get_booking_service)
 ) -> dict:
     """
     ✅ Demonstrates:
@@ -287,14 +277,13 @@ async def create_booking(
             event_date=data.event_date,
             event_time=data.event_time,
             party_size=data.party_size,
-            **data.dict(exclude={'customer_id', 'event_date', 'event_time', 'party_size'})
+            **data.dict(exclude={"customer_id", "event_date", "event_time", "party_size"}),
         )
-        
+
         return create_success_response(
-            data=BookingResponse.from_orm(booking),
-            message="Booking created successfully"
+            data=BookingResponse.from_orm(booking), message="Booking created successfully"
         )
-    except (BusinessLogicException, ConflictException) as e:
+    except (BusinessLogicException, ConflictException):
         # Middleware will convert to appropriate HTTP response
         raise
 
@@ -305,12 +294,11 @@ async def create_booking(
     summary="Confirm a pending booking",
     responses={
         404: {"description": "Booking not found"},
-        400: {"description": "Booking cannot be confirmed"}
-    }
+        400: {"description": "Booking cannot be confirmed"},
+    },
 )
 async def confirm_booking(
-    booking_id: UUID,
-    service: BookingService = Depends(get_booking_service)
+    booking_id: UUID, service: BookingService = Depends(get_booking_service)
 ) -> dict:
     """
     ✅ Demonstrates state transitions:
@@ -320,12 +308,11 @@ async def confirm_booking(
     """
     try:
         booking = await service.confirm_booking(booking_id)
-        
+
         return create_success_response(
-            data=BookingResponse.from_orm(booking),
-            message="Booking confirmed successfully"
+            data=BookingResponse.from_orm(booking), message="Booking confirmed successfully"
         )
-    except (NotFoundException, BusinessLogicException) as e:
+    except (NotFoundException, BusinessLogicException):
         raise
 
 
@@ -335,13 +322,13 @@ async def confirm_booking(
     summary="Cancel a booking",
     responses={
         404: {"description": "Booking not found"},
-        400: {"description": "Booking cannot be cancelled"}
-    }
+        400: {"description": "Booking cannot be cancelled"},
+    },
 )
 async def cancel_booking(
     booking_id: UUID,
-    reason: Optional[str] = Query(None, description="Cancellation reason"),
-    service: BookingService = Depends(get_booking_service)
+    reason: str | None = Query(None, description="Cancellation reason"),
+    service: BookingService = Depends(get_booking_service),
 ) -> dict:
     """
     ✅ Demonstrates:
@@ -350,16 +337,13 @@ async def cancel_booking(
     - Cache invalidation
     """
     try:
-        booking = await service.cancel_booking(
-            booking_id=booking_id,
-            reason=reason
-        )
-        
+        booking = await service.cancel_booking(booking_id=booking_id, reason=reason)
+
         return create_success_response(
             data={"id": str(booking.id), "status": booking.status},
-            message="Booking cancelled successfully"
+            message="Booking cancelled successfully",
         )
-    except (NotFoundException, BusinessLogicException) as e:
+    except (NotFoundException, BusinessLogicException):
         raise
 
 

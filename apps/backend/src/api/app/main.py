@@ -1,27 +1,25 @@
-import asyncio
+from contextlib import asynccontextmanager
 import logging
 import os
-from contextlib import asynccontextmanager
 
+from api.app.auth.middleware import setup_auth_middleware
+from core.config import get_settings
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from prometheus_client import make_wsgi_app
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
-from starlette.middleware.wsgi import WSGIMiddleware
 
 # Import Sentry for error tracking and performance monitoring
 import sentry_sdk
 from sentry_sdk.integrations.fastapi import FastApiIntegration
-from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
-from sentry_sdk.integrations.redis import RedisIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
-
-from api.app.auth.middleware import setup_auth_middleware
-from core.config import get_settings
+from sentry_sdk.integrations.redis import RedisIntegration
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
+from starlette.middleware.wsgi import WSGIMiddleware
 
 settings = get_settings()
 
@@ -36,25 +34,24 @@ if settings.sentry_dsn:
             RedisIntegration(),
             LoggingIntegration(
                 level=logging.INFO,  # Capture info and above as breadcrumbs
-                event_level=logging.ERROR  # Send errors as events
+                event_level=logging.ERROR,  # Send errors as events
             ),
         ],
         # Performance Monitoring
         traces_sample_rate=settings.sentry_traces_sample_rate,
         profiles_sample_rate=settings.sentry_profiles_sample_rate,
-        
         # Additional options
         send_default_pii=False,  # Don't send personally identifiable information
         attach_stacktrace=True,
         enable_tracing=True,
-        
         # Before send hook to filter sensitive data
         before_send=lambda event, hint: (
-            None if settings.environment == "development" and not settings.debug 
-            else event
+            None if settings.environment == "development" and not settings.debug else event
         ),
     )
-    logging.info(f"✅ Sentry monitoring initialized (environment: {settings.sentry_environment or settings.environment})")
+    logging.info(
+        f"✅ Sentry monitoring initialized (environment: {settings.sentry_environment or settings.environment})"
+    )
 else:
     logging.info("⚠️ Sentry DSN not configured - monitoring disabled")
 
@@ -75,6 +72,7 @@ try:
         RequestLoggingMiddleware,
         SecurityHeadersMiddleware,
     )
+
     SECURITY_MIDDLEWARE_AVAILABLE = True
 except ImportError:
     SECURITY_MIDDLEWARE_AVAILABLE = False
@@ -84,6 +82,7 @@ except ImportError:
 try:
     from middleware.rate_limit import RateLimitMiddleware
     from middleware.structured_logging import StructuredLoggingMiddleware
+
     ADVANCED_MIDDLEWARE_AVAILABLE = True
     logging.info("✅ Advanced middleware (rate limiting, structured logging) available")
 except ImportError as e:
@@ -93,6 +92,7 @@ except ImportError as e:
 # Import Stripe setup utility
 try:
     from app.utils.stripe_setup import setup_stripe_products
+
     STRIPE_SETUP_AVAILABLE = True
 except ImportError:
     STRIPE_SETUP_AVAILABLE = False
@@ -101,18 +101,26 @@ except ImportError:
 # Configure comprehensive logging with security context
 logging.basicConfig(
     level=getattr(logging, settings.log_level.upper()),
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s - [%(request_id)s]" if hasattr(logging, 'request_id') else "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    format=(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s - [%(request_id)s]"
+        if hasattr(logging, "request_id")
+        else "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    ),
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler("app.log") if settings.environment == "production" else logging.NullHandler()
-    ]
+        (
+            logging.FileHandler("app.log")
+            if settings.environment == "production"
+            else logging.NullHandler()
+        ),
+    ],
 )
 logger = logging.getLogger(__name__)
 
 # Set up enhanced rate limiter with configurable limits
 limiter = Limiter(
     key_func=get_remote_address,
-    default_limits=[f"{getattr(settings, 'rate_limit_requests', 100)}/minute"]
+    default_limits=[f"{getattr(settings, 'rate_limit_requests', 100)}/minute"],
 )
 
 # Global worker manager instance
@@ -128,8 +136,12 @@ async def lifespan(app: FastAPI):
     logger.info("🚀 Starting My Hibachi CRM FastAPI Backend...")
     logger.info(f"Environment: {settings.environment}")
     logger.info(f"Database: {settings.database_url}")
-    logger.info(f"Security: Enhanced security middleware {'enabled' if SECURITY_MIDDLEWARE_AVAILABLE else 'disabled'}")
-    logger.info(f"Metrics: {'enabled' if getattr(settings, 'enable_metrics', False) else 'disabled'}")
+    logger.info(
+        f"Security: Enhanced security middleware {'enabled' if SECURITY_MIDDLEWARE_AVAILABLE else 'disabled'}"
+    )
+    logger.info(
+        f"Metrics: {'enabled' if getattr(settings, 'enable_metrics', False) else 'disabled'}"
+    )
     logger.info(f"Workers: {'enabled' if settings.workers_enabled else 'disabled'}")
 
     # Initialize database
@@ -137,7 +149,7 @@ async def lifespan(app: FastAPI):
         await init_database()
         logger.info("✅ Database connection established")
     except Exception as e:
-        logger.error(f"❌ Database connection failed: {e}")
+        logger.exception(f"❌ Database connection failed: {e}")
         raise
 
     # Create database tables
@@ -146,11 +158,15 @@ async def lifespan(app: FastAPI):
             await conn.run_sync(Base.metadata.create_all)
         logger.info("✅ Database tables created successfully")
     except Exception as e:
-        logger.error(f"❌ Database setup failed: {e}")
+        logger.exception(f"❌ Database setup failed: {e}")
         raise
 
     # Setup Stripe products and prices (only in development/staging)
-    if STRIPE_SETUP_AVAILABLE and settings.environment in ["development", "staging"] and settings.stripe_secret_key:
+    if (
+        STRIPE_SETUP_AVAILABLE
+        and settings.environment in ["development", "staging"]
+        and settings.stripe_secret_key
+    ):
         try:
             await setup_stripe_products()
             logger.info("✅ Stripe products initialized successfully")
@@ -171,10 +187,12 @@ async def lifespan(app: FastAPI):
             worker_manager = None
 
     # Initialize metrics collection
-    if getattr(settings, 'enable_metrics', False):
+    if getattr(settings, "enable_metrics", False):
         try:
             # Ensure prometheus multiproc directory exists
-            metrics_dir = getattr(settings, 'prometheus_multiproc_dir', '/tmp/prometheus_multiproc_dir')
+            metrics_dir = getattr(
+                settings, "prometheus_multiproc_dir", "/tmp/prometheus_multiproc_dir"
+            )
             os.makedirs(metrics_dir, exist_ok=True)
             logger.info("✅ Metrics collection initialized")
         except Exception as e:
@@ -193,14 +211,14 @@ async def lifespan(app: FastAPI):
             await worker_manager.stop_all()
             logger.info("✅ Background workers stopped")
         except Exception as e:
-            logger.error(f"❌ Error stopping workers: {e}")
+            logger.exception(f"❌ Error stopping workers: {e}")
 
     # Close database connections
     try:
         await close_database()
         logger.info("✅ Database connections closed")
     except Exception as e:
-        logger.error(f"❌ Error closing database: {e}")
+        logger.exception(f"❌ Error closing database: {e}")
 
     logger.info("✅ Shutdown complete")
 
@@ -231,12 +249,12 @@ if ADVANCED_MIDDLEWARE_AVAILABLE:
     app.add_middleware(
         StructuredLoggingMiddleware,
         log_request_body=settings.debug,  # Only log request bodies in debug mode
-        log_response_body=False  # Don't log response bodies (can be large)
+        log_response_body=False,  # Don't log response bodies (can be large)
     )
-    
+
     # Advanced rate limiting with role-based limits and login attempt tracking
     app.add_middleware(RateLimitMiddleware, redis_url=settings.redis_url)
-    
+
     logger.info("✅ Advanced middleware enabled: structured logging, role-based rate limiting")
 
 # Add security middleware in correct order (last added = first executed)
@@ -251,14 +269,14 @@ if SECURITY_MIDDLEWARE_AVAILABLE:
     app.add_middleware(InputValidationMiddleware)
 
     # Metrics collection
-    if getattr(settings, 'enable_metrics', False):
+    if getattr(settings, "enable_metrics", False):
         app.add_middleware(MetricsMiddleware)
 
     # Rate limiting (additional layer beyond slowapi)
-    if getattr(settings, 'rate_limit_enabled', True):
+    if getattr(settings, "rate_limit_enabled", True):
         app.add_middleware(
             RateLimitByIPMiddleware,
-            requests_per_minute=getattr(settings, 'rate_limit_requests', 100)
+            requests_per_minute=getattr(settings, "rate_limit_requests", 100),
         )
 
 # CORS middleware (should be after security middleware)
@@ -276,25 +294,32 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Add Prometheus metrics endpoint
-if getattr(settings, 'enable_metrics', False):
+if getattr(settings, "enable_metrics", False):
     metrics_app = make_wsgi_app()
     app.mount("/metrics", WSGIMiddleware(metrics_app))
+
 
 # Global exception handlers with enhanced error tracking
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     request_id = request.headers.get("X-Request-ID", "unknown")
-    logger.error(f"Unhandled error on {request.method} {request.url}: {exc}", extra={"request_id": request_id})
-    
+    logger.error(
+        f"Unhandled error on {request.method} {request.url}: {exc}",
+        extra={"request_id": request_id},
+    )
+
     # Capture exception in Sentry with context
     if settings.sentry_dsn:
         with sentry_sdk.push_scope() as scope:
-            scope.set_context("request", {
-                "url": str(request.url),
-                "method": request.method,
-                "headers": dict(request.headers),
-                "request_id": request_id,
-            })
+            scope.set_context(
+                "request",
+                {
+                    "url": str(request.url),
+                    "method": request.method,
+                    "headers": dict(request.headers),
+                    "request_id": request_id,
+                },
+            )
             scope.set_tag("endpoint", request.url.path)
             sentry_sdk.capture_exception(exc)
 
@@ -304,7 +329,7 @@ async def global_exception_handler(request: Request, exc: Exception):
             status_code=500,
             content={
                 "detail": "Internal server error. Please try again later.",
-                "request_id": request_id
+                "request_id": request_id,
             },
         )
     else:
@@ -313,7 +338,7 @@ async def global_exception_handler(request: Request, exc: Exception):
             content={
                 "detail": "Internal server error",
                 "error": str(exc) if settings.debug else "Error details hidden in production",
-                "request_id": request_id
+                "request_id": request_id,
             },
         )
 
@@ -322,23 +347,23 @@ async def global_exception_handler(request: Request, exc: Exception):
 async def not_found_handler(request: Request, exc):
     return JSONResponse(
         status_code=404,
-        content={
-            "detail": "The requested resource was not found",
-            "path": str(request.url.path)
-        }
+        content={"detail": "The requested resource was not found", "path": str(request.url.path)},
     )
 
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     request_id = request.headers.get("X-Request-ID", "unknown")
-    logger.warning(f"Validation error for {request.method} {request.url}: {exc.errors()}", extra={"request_id": request_id})
+    logger.warning(
+        f"Validation error for {request.method} {request.url}: {exc.errors()}",
+        extra={"request_id": request_id},
+    )
     return JSONResponse(
         status_code=422,
         content={
             "detail": "Validation error",
             "errors": exc.errors() if settings.debug else "Invalid request data",
-            "request_id": request_id
+            "request_id": request_id,
         },
     )
 
@@ -348,14 +373,16 @@ app.include_router(health.router, prefix="/api/health", tags=["health"])
 
 # Add new comprehensive health checks
 from api.app.routers.health_checks import router as health_checks_router
+
 app.include_router(health_checks_router, prefix="/api/health", tags=["health", "monitoring"])
 
 # Authentication & Authorization
 app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
 
 # Station-aware Authentication & Administration
-from api.app.routers.station_auth import router as station_auth_router
 from api.app.routers.station_admin import router as station_admin_router
+from api.app.routers.station_auth import router as station_auth_router
+
 app.include_router(station_auth_router, prefix="/api/station", tags=["station-auth"])
 app.include_router(station_admin_router, prefix="/api/admin/stations", tags=["station-admin"])
 
@@ -367,23 +394,31 @@ app.include_router(stripe.router, prefix="/api/stripe", tags=["payments"])
 
 # Payment Analytics (separate router for /api/payments/analytics)
 from api.app.routers.payments import router as payments_router
+
 app.include_router(payments_router, prefix="/api/payments", tags=["payment-analytics"])
 
 # Lead and Newsletter Management
+from api.app.routers.admin.notification_groups import (
+    router as notification_groups_router,
+)
+from api.app.routers.admin_analytics import router as admin_analytics_router
 from api.app.routers.leads import router as leads_router
 from api.app.routers.newsletter import router as newsletter_router
 from api.app.routers.ringcentral_webhooks import router as ringcentral_router
-from api.app.routers.admin_analytics import router as admin_analytics_router
-from api.app.routers.admin.notification_groups import router as notification_groups_router
 
 app.include_router(leads_router, prefix="/api", tags=["leads"])
 app.include_router(newsletter_router, prefix="/api", tags=["newsletter"])
 app.include_router(ringcentral_router, prefix="/api", tags=["sms", "webhooks"])
 app.include_router(admin_analytics_router, prefix="/api", tags=["admin", "analytics"])
-app.include_router(notification_groups_router, prefix="/api/admin/notification-groups", tags=["admin", "notifications"])
+app.include_router(
+    notification_groups_router,
+    prefix="/api/admin/notification-groups",
+    tags=["admin", "notifications"],
+)
 
 # Admin Error Logs (for monitoring and debugging)
 from api.app.routers.admin.error_logs import router as error_logs_router
+
 app.include_router(error_logs_router, prefix="/api", tags=["admin", "error-logs", "monitoring"])
 
 # Legacy API compatibility (for existing frontend)
@@ -392,14 +427,17 @@ app.include_router(bookings.router, prefix="/api/bookings", tags=["bookings-lega
 
 # Enhanced Booking Admin API (includes /admin/kpis and /admin/customer-analytics)
 from api.app.routers.booking_enhanced import router as booking_enhanced_router
+
 app.include_router(booking_enhanced_router, prefix="/api", tags=["booking-enhanced", "admin"])
 
 # Customer Review System
 from api.app.routers.reviews import router as reviews_router
+
 app.include_router(reviews_router, prefix="/api/reviews", tags=["reviews", "feedback"])
 
 # QR Code Tracking System
 from api.app.routers.qr_tracking import router as qr_tracking_router
+
 app.include_router(qr_tracking_router, prefix="/api/qr", tags=["qr-tracking", "marketing"])
 
 
@@ -418,8 +456,8 @@ async def root():
             "audit_logging": settings.enable_audit_logging,
             "workers": settings.workers_enabled,
             "mfa": True,
-            "rbac": True
-        }
+            "rbac": True,
+        },
     }
 
 
@@ -435,7 +473,9 @@ async def health_check():
         "database": "connected",
         "workers": worker_status,
         "stripe": "configured" if settings.stripe_secret_key else "not configured",
-        "email": "configured" if settings.smtp_user or settings.sendgrid_api_key else "not configured",
+        "email": (
+            "configured" if settings.smtp_user or settings.sendgrid_api_key else "not configured"
+        ),
         "sms": "configured" if settings.ringcentral_enabled else "not configured",
         "rate_limiting": "enabled" if settings.rate_limit_enabled else "disabled",
         "field_encryption": "enabled" if settings.enable_field_encryption else "disabled",
@@ -447,8 +487,8 @@ async def health_check():
             "rbac": True,
             "cqrs": True,
             "event_sourcing": True,
-            "outbox_pattern": True
-        }
+            "outbox_pattern": True,
+        },
     }
 
 
@@ -458,6 +498,7 @@ async def readiness_check():
     # Check database connectivity
     try:
         from app.database import get_db_context
+
         async with get_db_context() as db:
             await db.execute("SELECT 1")
         db_ready = True
@@ -475,8 +516,8 @@ async def readiness_check():
         "status": "ready" if ready else "not ready",
         "checks": {
             "database": "ready" if db_ready else "not ready",
-            "workers": "ready" if worker_ready else "not ready"
-        }
+            "workers": "ready" if worker_ready else "not ready",
+        },
     }
 
 
@@ -493,19 +534,19 @@ async def app_info():
             "authorization": "RBAC",
             "mfa": "TOTP + Backup Codes",
             "encryption": "AES-GCM Field-Level",
-            "audit_logging": "Comprehensive"
+            "audit_logging": "Comprehensive",
         },
         "integrations": {
             "payment": "Stripe",
             "sms": "RingCentral" if settings.ringcentral_enabled else "disabled",
-            "email": settings.email_provider if settings.email_enabled else "disabled"
+            "email": settings.email_provider if settings.email_enabled else "disabled",
         },
         "worker_stats": {
             "enabled": settings.workers_enabled,
             "sms_worker": settings.sms_worker_enabled,
             "email_worker": settings.email_worker_enabled,
-            "stripe_worker": settings.stripe_worker_enabled
-        }
+            "stripe_worker": settings.stripe_worker_enabled,
+        },
     }
 
 

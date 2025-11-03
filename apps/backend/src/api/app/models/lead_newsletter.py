@@ -1,17 +1,29 @@
 """Lead and Newsletter SQLAlchemy models with encryption."""
 
-from datetime import datetime, date
-from typing import Optional, List, Dict, Any
+from datetime import date, datetime
+import enum
+from typing import Any, Optional
+import uuid
+
 from sqlalchemy import (
-    Column, String, Text, Integer, Boolean, DateTime, Date, Enum, 
-    ForeignKey, CheckConstraint, Index, LargeBinary, ARRAY, Numeric
+    ARRAY,
+    Boolean,
+    CheckConstraint,
+    Column,
+    Date,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Index,
+    Integer,
+    LargeBinary,
+    Numeric,
+    String,
+    Text,
 )
-from sqlalchemy.dialects.postgresql import UUID, JSONB
-from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-import enum
-import uuid
 
 from .base import BaseModel
 from .encryption import CryptoUtil
@@ -20,6 +32,7 @@ from .encryption import CryptoUtil
 # Enums for type safety
 class LeadSource(str, enum.Enum):
     """Lead acquisition sources."""
+
     WEB_QUOTE = "web_quote"
     CHAT = "chat"
     BOOKING_FAILED = "booking_failed"
@@ -40,6 +53,7 @@ class LeadSource(str, enum.Enum):
 
 class LeadStatus(str, enum.Enum):
     """Lead lifecycle status."""
+
     NEW = "new"
     WORKING = "working"
     QUALIFIED = "qualified"
@@ -51,6 +65,7 @@ class LeadStatus(str, enum.Enum):
 
 class LeadQuality(str, enum.Enum):
     """Lead quality scoring."""
+
     HOT = "hot"
     WARM = "warm"
     COLD = "cold"
@@ -58,6 +73,7 @@ class LeadQuality(str, enum.Enum):
 
 class ContactChannel(str, enum.Enum):
     """Communication channels."""
+
     EMAIL = "email"
     SMS = "sms"
     INSTAGRAM = "instagram"
@@ -69,6 +85,7 @@ class ContactChannel(str, enum.Enum):
 
 class SocialPlatform(str, enum.Enum):
     """Social media platforms."""
+
     INSTAGRAM = "instagram"
     FACEBOOK = "facebook"
     GOOGLE = "google"
@@ -82,6 +99,7 @@ class SocialPlatform(str, enum.Enum):
 
 class ThreadStatus(str, enum.Enum):
     """Social thread status."""
+
     OPEN = "open"
     PENDING = "pending"
     RESOLVED = "resolved"
@@ -91,6 +109,7 @@ class ThreadStatus(str, enum.Enum):
 
 class CampaignChannel(str, enum.Enum):
     """Marketing campaign channels."""
+
     EMAIL = "email"
     SMS = "sms"
     BOTH = "both"
@@ -98,6 +117,7 @@ class CampaignChannel(str, enum.Enum):
 
 class CampaignStatus(str, enum.Enum):
     """Campaign lifecycle status."""
+
     DRAFT = "draft"
     SCHEDULED = "scheduled"
     SENDING = "sending"
@@ -107,6 +127,7 @@ class CampaignStatus(str, enum.Enum):
 
 class CampaignEventType(str, enum.Enum):
     """Campaign interaction events."""
+
     SENT = "sent"
     DELIVERED = "delivered"
     OPENED = "opened"
@@ -119,10 +140,11 @@ class CampaignEventType(str, enum.Enum):
 
 class Lead(BaseModel):
     """Lead management with comprehensive tracking."""
+
     __tablename__ = "leads"
     __table_args__ = (
-        CheckConstraint('score >= 0 AND score <= 100', name='check_lead_score_range'),
-        {'schema': 'lead'}
+        CheckConstraint("score >= 0 AND score <= 100", name="check_lead_score_range"),
+        {"schema": "lead"},
     )
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -130,11 +152,11 @@ class Lead(BaseModel):
     status = Column(Enum(LeadStatus), nullable=False, default=LeadStatus.NEW)
     quality = Column(Enum(LeadQuality), nullable=True)
     customer_id = Column(
-        UUID(as_uuid=True), 
+        UUID(as_uuid=True),
         nullable=True,
-        comment="Soft reference to customer (validated at application level)"
+        comment="Soft reference to customer (validated at application level)",
     )  # No FK - keeps modules decoupled, validated in service layer
-    score = Column(Numeric(5,2), nullable=False, default=0)
+    score = Column(Numeric(5, 2), nullable=False, default=0)
     assigned_to = Column(String(100), nullable=True)
     last_contact_date = Column(DateTime(timezone=True), nullable=True)
     follow_up_date = Column(DateTime(timezone=True), nullable=True)
@@ -147,7 +169,9 @@ class Lead(BaseModel):
     # Relationships
     # customer = relationship("Customer", back_populates="leads")  # Commented out - Customer model not in this module
     contacts = relationship("LeadContact", back_populates="lead", cascade="all, delete-orphan")
-    context = relationship("LeadContext", back_populates="lead", uselist=False, cascade="all, delete-orphan")
+    context = relationship(
+        "LeadContext", back_populates="lead", uselist=False, cascade="all, delete-orphan"
+    )
     events = relationship("LeadEvent", back_populates="lead", cascade="all, delete-orphan")
     social_threads = relationship("SocialThread", back_populates="lead")
 
@@ -159,19 +183,15 @@ class Lead(BaseModel):
                 return contact
         return self.contacts[0] if self.contacts else None
 
-    def add_event(self, event_type: str, payload: Optional[Dict[str, Any]] = None):
+    def add_event(self, event_type: str, payload: dict[str, Any] | None = None):
         """Add a tracking event."""
-        event = LeadEvent(
-            lead_id=self.id,
-            type=event_type,
-            payload=payload or {}
-        )
+        event = LeadEvent(lead_id=self.id, type=event_type, payload=payload or {})
         self.events.append(event)
 
     def calculate_score(self) -> float:
         """Calculate lead score based on context and engagement."""
         score = 0.0
-        
+
         # Source quality scoring
         source_scores = {
             LeadSource.WEB_QUOTE: 20,
@@ -183,7 +203,7 @@ class Lead(BaseModel):
             LeadSource.GOOGLE: 8,
             LeadSource.YELP: 8,
             LeadSource.SMS: 5,
-            LeadSource.EVENT: 12
+            LeadSource.EVENT: 12,
         }
         score += source_scores.get(self.source, 0)
 
@@ -206,8 +226,11 @@ class Lead(BaseModel):
         score += len(verified_contacts) * 5
 
         # Engagement scoring
-        recent_events = [e for e in self.events if e.occurred_at and 
-                        (datetime.now(e.occurred_at.tzinfo) - e.occurred_at).days <= 7]
+        recent_events = [
+            e
+            for e in self.events
+            if e.occurred_at and (datetime.now(e.occurred_at.tzinfo) - e.occurred_at).days <= 7
+        ]
         score += len(recent_events) * 3
 
         return min(score, 100.0)
@@ -215,11 +238,14 @@ class Lead(BaseModel):
 
 class LeadContact(BaseModel):
     """Lead contact information across channels."""
+
     __tablename__ = "lead_contacts"
-    __table_args__ = {'schema': 'lead'}
+    __table_args__ = {"schema": "lead"}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    lead_id = Column(UUID(as_uuid=True), ForeignKey('lead.leads.id', ondelete='CASCADE'), nullable=False)
+    lead_id = Column(
+        UUID(as_uuid=True), ForeignKey("lead.leads.id", ondelete="CASCADE"), nullable=False
+    )
     channel = Column(Enum(ContactChannel), nullable=False)
     handle_or_address = Column(Text, nullable=False)
     verified = Column(Boolean, nullable=False, default=False)
@@ -230,10 +256,13 @@ class LeadContact(BaseModel):
 
 class LeadContext(BaseModel):
     """Event context and preferences for leads."""
-    __tablename__ = "lead_context"
-    __table_args__ = {'schema': 'lead'}
 
-    lead_id = Column(UUID(as_uuid=True), ForeignKey('lead.leads.id', ondelete='CASCADE'), primary_key=True)
+    __tablename__ = "lead_context"
+    __table_args__ = {"schema": "lead"}
+
+    lead_id = Column(
+        UUID(as_uuid=True), ForeignKey("lead.leads.id", ondelete="CASCADE"), primary_key=True
+    )
     party_size_adults = Column(Integer, nullable=True)
     party_size_kids = Column(Integer, nullable=True)
     estimated_budget_cents = Column(Integer, nullable=True)
@@ -248,23 +277,26 @@ class LeadContext(BaseModel):
     lead = relationship("Lead", back_populates="context")
 
     @property
-    def estimated_budget_dollars(self) -> Optional[float]:
+    def estimated_budget_dollars(self) -> float | None:
         """Convert cents to dollars."""
         return self.estimated_budget_cents / 100 if self.estimated_budget_cents else None
 
     @estimated_budget_dollars.setter
-    def estimated_budget_dollars(self, value: Optional[float]):
+    def estimated_budget_dollars(self, value: float | None):
         """Convert dollars to cents."""
         self.estimated_budget_cents = int(value * 100) if value else None
 
 
 class LeadEvent(BaseModel):
     """Lead activity tracking."""
+
     __tablename__ = "lead_events"
-    __table_args__ = {'schema': 'lead'}
+    __table_args__ = {"schema": "lead"}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    lead_id = Column(UUID(as_uuid=True), ForeignKey('lead.leads.id', ondelete='CASCADE'), nullable=False)
+    lead_id = Column(
+        UUID(as_uuid=True), ForeignKey("lead.leads.id", ondelete="CASCADE"), nullable=False
+    )
     type = Column(String(50), nullable=False)
     payload = Column(JSONB, nullable=True)
     occurred_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
@@ -275,25 +307,30 @@ class LeadEvent(BaseModel):
 
 class SocialThread(BaseModel):
     """Social media conversation tracking."""
+
     __tablename__ = "social_threads"
     __table_args__ = (
-        Index('ix_social_threads_platform', 'platform', 'thread_external_id', unique=True),
-        {'schema': 'lead'}
+        Index("ix_social_threads_platform", "platform", "thread_external_id", unique=True),
+        {"schema": "lead"},
     )
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     platform = Column(Enum(SocialPlatform), nullable=False)
     thread_external_id = Column(String(255), nullable=False)  # External platform thread ID
-    lead_id = Column(UUID(as_uuid=True), ForeignKey('lead.leads.id', ondelete='SET NULL'), nullable=True)
-    customer_id = Column(UUID(as_uuid=True), nullable=True)  # FK removed - Customer model not in this module
-    
+    lead_id = Column(
+        UUID(as_uuid=True), ForeignKey("lead.leads.id", ondelete="SET NULL"), nullable=True
+    )
+    customer_id = Column(
+        UUID(as_uuid=True), nullable=True
+    )  # FK removed - Customer model not in this module
+
     # Thread management
     status = Column(Enum(ThreadStatus), nullable=False, default=ThreadStatus.OPEN)
     customer_handle = Column(String(255), nullable=True)  # Customer's display name/handle
     unread_count = Column(Integer, nullable=False, default=0)
     last_message_at = Column(DateTime(timezone=True), nullable=True)
     closed_at = Column(DateTime(timezone=True), nullable=True)
-    
+
     # Platform-specific data
     platform_metadata = Column(JSONB, nullable=True)
 
@@ -305,14 +342,19 @@ class SocialThread(BaseModel):
 # Newsletter models
 class Subscriber(BaseModel):
     """Newsletter subscriber with engagement tracking."""
+
     __tablename__ = "subscribers"
     __table_args__ = (
-        CheckConstraint('engagement_score >= 0 AND engagement_score <= 100', name='check_engagement_score_range'),
-        {'schema': 'newsletter'}
+        CheckConstraint(
+            "engagement_score >= 0 AND engagement_score <= 100", name="check_engagement_score_range"
+        ),
+        {"schema": "newsletter"},
     )
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    customer_id = Column(UUID(as_uuid=True), nullable=True)  # FK removed - Customer model not in this module
+    customer_id = Column(
+        UUID(as_uuid=True), nullable=True
+    )  # FK removed - Customer model not in this module
     email_enc = Column(LargeBinary, nullable=False)
     phone_enc = Column(LargeBinary, nullable=True)
     subscribed = Column(Boolean, nullable=False, default=True)
@@ -332,32 +374,38 @@ class Subscriber(BaseModel):
 
     # Relationships
     # customer = relationship("Customer", back_populates="newsletter_subscriptions")  # Commented out - Customer model not in this module
-    campaign_events = relationship("CampaignEvent", back_populates="subscriber", cascade="all, delete-orphan")
+    campaign_events = relationship(
+        "CampaignEvent", back_populates="subscriber", cascade="all, delete-orphan"
+    )
 
     @property
-    def email(self) -> Optional[str]:
+    def email(self) -> str | None:
         """Decrypt email address."""
         return CryptoUtil.decrypt_text(self.email_enc) if self.email_enc else None
 
     @email.setter
-    def email(self, value: Optional[str]):
+    def email(self, value: str | None):
         """Encrypt email address."""
         self.email_enc = CryptoUtil.encrypt_text(value) if value else None
 
     @property
-    def phone(self) -> Optional[str]:
+    def phone(self) -> str | None:
         """Decrypt phone number."""
         return CryptoUtil.decrypt_text(self.phone_enc) if self.phone_enc else None
 
     @phone.setter
-    def phone(self, value: Optional[str]):
+    def phone(self, value: str | None):
         """Encrypt phone number."""
         self.phone_enc = CryptoUtil.encrypt_text(value) if value else None
 
     @property
     def open_rate(self) -> float:
         """Calculate email open rate."""
-        return (self.total_emails_opened / self.total_emails_sent) if self.total_emails_sent > 0 else 0.0
+        return (
+            (self.total_emails_opened / self.total_emails_sent)
+            if self.total_emails_sent > 0
+            else 0.0
+        )
 
     @property
     def click_rate(self) -> float:
@@ -367,32 +415,35 @@ class Subscriber(BaseModel):
     def update_engagement_score(self):
         """Update engagement score based on recent activity."""
         score = 0
-        
+
         # Base score from open rate
         score += self.open_rate * 40
-        
+
         # Click rate bonus
         score += self.click_rate * 30
-        
+
         # Recency bonus
         if self.last_opened_date:
-            days_since_open = (datetime.now(self.last_opened_date.tzinfo) - self.last_opened_date).days
+            days_since_open = (
+                datetime.now(self.last_opened_date.tzinfo) - self.last_opened_date
+            ).days
             if days_since_open <= 7:
                 score += 20
             elif days_since_open <= 30:
                 score += 10
-        
+
         # Consent and subscription status
         if self.subscribed and self.email_consent:
             score += 10
-        
+
         self.engagement_score = int(min(score, 100))
 
 
 class Campaign(BaseModel):
     """Marketing campaign management."""
+
     __tablename__ = "campaigns"
-    __table_args__ = {'schema': 'newsletter'}
+    __table_args__ = {"schema": "newsletter"}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String(200), nullable=False)
@@ -430,12 +481,21 @@ class Campaign(BaseModel):
 
 class CampaignEvent(BaseModel):
     """Campaign interaction tracking."""
+
     __tablename__ = "campaign_events"
-    __table_args__ = {'schema': 'newsletter'}
+    __table_args__ = {"schema": "newsletter"}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    campaign_id = Column(UUID(as_uuid=True), ForeignKey('newsletter.campaigns.id', ondelete='CASCADE'), nullable=False)
-    subscriber_id = Column(UUID(as_uuid=True), ForeignKey('newsletter.subscribers.id', ondelete='CASCADE'), nullable=False)
+    campaign_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("newsletter.campaigns.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    subscriber_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("newsletter.subscribers.id", ondelete="CASCADE"),
+        nullable=False,
+    )
     type = Column(Enum(CampaignEventType), nullable=False)
     payload = Column(JSONB, nullable=True)
     occurred_at = Column(DateTime(timezone=True), nullable=False, default=func.now())

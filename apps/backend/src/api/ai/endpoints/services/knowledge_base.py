@@ -3,20 +3,19 @@ Knowledge Base service for semantic search and embeddings
 Uses sentence-transformers for embeddings and FAISS for similarity search
 """
 
+from datetime import datetime
 import json
 import os
-from datetime import datetime
 from typing import Any
 from uuid import UUID
 
+from api.ai.endpoints.models import KnowledgeBaseChunk
+from api.ai.endpoints.schemas import KBSearchRequest
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from api.ai.endpoints.models import KnowledgeBaseChunk
-from api.ai.endpoints.schemas import KBSearchRequest
 
 
 class KnowledgeBaseService:
@@ -24,15 +23,11 @@ class KnowledgeBaseService:
 
     def __init__(self):
         # Initialize sentence transformer model
-        self.encoder = SentenceTransformer(
-            "sentence-transformers/all-MiniLM-L6-v2"
-        )
+        self.encoder = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
         self.embedding_dim = 384  # Dimension for all-MiniLM-L6-v2
 
         # FAISS index for similarity search
-        self.index = faiss.IndexFlatIP(
-            self.embedding_dim
-        )  # Inner product (cosine similarity)
+        self.index = faiss.IndexFlatIP(self.embedding_dim)  # Inner product (cosine similarity)
         self.chunk_ids = []  # Maps FAISS index to UUID
 
         # Load index if it exists
@@ -40,15 +35,11 @@ class KnowledgeBaseService:
 
     def _get_index_path(self) -> str:
         """Get the path for FAISS index storage"""
-        return os.path.join(
-            os.path.dirname(__file__), "..", "..", "data", "faiss_index.bin"
-        )
+        return os.path.join(os.path.dirname(__file__), "..", "..", "data", "faiss_index.bin")
 
     def _get_ids_path(self) -> str:
         """Get the path for chunk IDs storage"""
-        return os.path.join(
-            os.path.dirname(__file__), "..", "..", "data", "chunk_ids.json"
-        )
+        return os.path.join(os.path.dirname(__file__), "..", "..", "data", "chunk_ids.json")
 
     def _load_index(self):
         """Load FAISS index and chunk IDs from disk"""
@@ -60,9 +51,7 @@ class KnowledgeBaseService:
                 self.index = faiss.read_index(index_path)
                 with open(ids_path) as f:
                     self.chunk_ids = json.load(f)
-                print(f"Loaded FAISS index with {self.index.ntotal} vectors")
-        except Exception as e:
-            print(f"Error loading FAISS index: {e}")
+        except Exception:
             # Reset index if corrupted
             self.index = faiss.IndexFlatIP(self.embedding_dim)
             self.chunk_ids = []
@@ -75,8 +64,8 @@ class KnowledgeBaseService:
             faiss.write_index(self.index, self._get_index_path())
             with open(self._get_ids_path(), "w") as f:
                 json.dump(self.chunk_ids, f)
-        except Exception as e:
-            print(f"Error saving FAISS index: {e}")
+        except Exception:
+            pass
 
     def encode_text(self, text: str) -> np.ndarray:
         """Encode text into embeddings"""
@@ -86,9 +75,7 @@ class KnowledgeBaseService:
         """Encode multiple texts into embeddings"""
         return self.encoder.encode(texts)
 
-    async def add_chunk(
-        self, db: AsyncSession, chunk: KnowledgeBaseChunk
-    ) -> bool:
+    async def add_chunk(self, db: AsyncSession, chunk: KnowledgeBaseChunk) -> bool:
         """Add a new knowledge base chunk with embeddings"""
         try:
             # Generate embedding
@@ -109,8 +96,7 @@ class KnowledgeBaseService:
             self._save_index()
 
             return True
-        except Exception as e:
-            print(f"Error adding chunk: {e}")
+        except Exception:
             await db.rollback()
             return False
 
@@ -127,31 +113,22 @@ class KnowledgeBaseService:
             # Search FAISS index
             scores, indices = self.index.search(
                 query_embedding.reshape(1, -1),
-                min(
-                    request.limit * 2, len(self.chunk_ids)
-                ),  # Get more results for filtering
+                min(request.limit * 2, len(self.chunk_ids)),  # Get more results for filtering
             )
 
             # Filter by minimum score
             valid_results = []
-            for score, idx in zip(scores[0], indices[0]):
+            for score, idx in zip(scores[0], indices[0], strict=False):
                 if idx >= 0 and score >= request.min_score:
                     chunk_id = self.chunk_ids[idx]
                     valid_results.append((chunk_id, float(score)))
 
             # Fetch chunk details from database
-            chunk_ids = [
-                UUID(chunk_id)
-                for chunk_id, _ in valid_results[: request.limit]
-            ]
+            chunk_ids = [UUID(chunk_id) for chunk_id, _ in valid_results[: request.limit]]
 
-            query = select(KnowledgeBaseChunk).where(
-                KnowledgeBaseChunk.id.in_(chunk_ids)
-            )
+            query = select(KnowledgeBaseChunk).where(KnowledgeBaseChunk.id.in_(chunk_ids))
             if request.category:
-                query = query.where(
-                    KnowledgeBaseChunk.category == request.category
-                )
+                query = query.where(KnowledgeBaseChunk.category == request.category)
 
             result = await db.execute(query)
             chunks = result.scalars().all()
@@ -185,14 +162,11 @@ class KnowledgeBaseService:
                 )
                 await db.commit()
 
-            query_time_ms = int(
-                (datetime.now() - start_time).total_seconds() * 1000
-            )
+            query_time_ms = int((datetime.now() - start_time).total_seconds() * 1000)
 
             return response_chunks, query_time_ms
 
-        except Exception as e:
-            print(f"Error searching chunks: {e}")
+        except Exception:
             return [], 0
 
     async def rebuild_index(self, db: AsyncSession) -> bool:
@@ -219,7 +193,7 @@ class KnowledgeBaseService:
             self.chunk_ids = [str(chunk.id) for chunk in chunks]
 
             # Update database with embeddings
-            for chunk, embedding in zip(chunks, embeddings):
+            for chunk, embedding in zip(chunks, embeddings, strict=False):
                 chunk.vector = embedding.tolist()
 
             await db.commit()
@@ -227,11 +201,9 @@ class KnowledgeBaseService:
             # Save index
             self._save_index()
 
-            print(f"Rebuilt index with {len(chunks)} chunks")
             return True
 
-        except Exception as e:
-            print(f"Error rebuilding index: {e}")
+        except Exception:
             return False
 
     def get_similar_chunks_text(self, query: str, limit: int = 3) -> list[str]:
@@ -248,13 +220,10 @@ class KnowledgeBaseService:
             # For now, return placeholder text since we need database access
             # This method will be enhanced to work with cached chunk text
             return [
-                f"Similar content found (score: {score:.3f})"
-                for score in scores[0]
-                if score > 0.5
+                f"Similar content found (score: {score:.3f})" for score in scores[0] if score > 0.5
             ]
 
-        except Exception as e:
-            print(f"Error getting similar chunks: {e}")
+        except Exception:
             return []
 
 

@@ -6,13 +6,13 @@ Automated engagement system for catering service using APScheduler.
 """
 
 from api.ai.scheduler.follow_up_scheduler import (
+    FOLLOW_UP_TEMPLATES,
+    FollowUpJob,
     FollowUpScheduler,
-    FollowUpTriggerType,
     FollowUpStatus,
     FollowUpTemplate,
-    FollowUpJob,
+    FollowUpTriggerType,
     ScheduledFollowUp,
-    FOLLOW_UP_TEMPLATES,
     schedule_followup_in_background,
 )
 
@@ -32,14 +32,14 @@ def get_scheduler() -> FollowUpScheduler:
 
 
 __all__ = [
+    "FOLLOW_UP_TEMPLATES",
+    "FollowUpJob",
     "FollowUpScheduler",
-    "FollowUpTriggerType",
     "FollowUpStatus",
     "FollowUpTemplate",
-    "FollowUpJob",
+    "FollowUpTriggerType",
     "ScheduledFollowUp",
-    "FOLLOW_UP_TEMPLATES",
-    "schedule_followup_in_background",
     "get_scheduler",
+    "schedule_followup_in_background",
     "set_scheduler",
 ]

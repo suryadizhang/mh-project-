@@ -1,17 +1,16 @@
 """Yelp integration handler for reviews (polling-based due to limited webhook support)."""
 
+from datetime import datetime, timedelta
 import hashlib
 import json
 import logging
-from datetime import datetime, timedelta
 from typing import Any
 
 import aiohttp
+from core.config import get_settings
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from core.config import get_settings
 
 settings = get_settings()
 from api.app.database import get_async_session
@@ -28,18 +27,17 @@ class YelpAPIClient:
 
     def __init__(self, api_key: str):
         self.api_key = api_key
-        self.headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
-        }
+        self.headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
 
-    async def get_business_reviews(self, business_id: str, limit: int = 20, offset: int = 0) -> dict[str, Any]:
+    async def get_business_reviews(
+        self, business_id: str, limit: int = 20, offset: int = 0
+    ) -> dict[str, Any]:
         """Get reviews for a business."""
         url = f"{self.BASE_URL}/businesses/{business_id}/reviews"
         params = {
             "limit": min(limit, 50),  # Yelp max is 50
             "offset": offset,
-            "sort_by": "date_desc"
+            "sort_by": "date_desc",
         }
 
         async with aiohttp.ClientSession() as session:
@@ -49,8 +47,7 @@ class YelpAPIClient:
                 else:
                     error_data = await response.text()
                     raise HTTPException(
-                        status_code=response.status,
-                        detail=f"Yelp API error: {error_data}"
+                        status_code=response.status, detail=f"Yelp API error: {error_data}"
                     )
 
     async def get_business_details(self, business_id: str) -> dict[str, Any]:
@@ -64,15 +61,13 @@ class YelpAPIClient:
                 else:
                     error_data = await response.text()
                     raise HTTPException(
-                        status_code=response.status,
-                        detail=f"Yelp API error: {error_data}"
+                        status_code=response.status, detail=f"Yelp API error: {error_data}"
                     )
 
 
 @router.post("/setup-polling")
 async def setup_yelp_polling(
-    account_data: dict[str, Any],
-    db: AsyncSession = Depends(get_async_session)
+    account_data: dict[str, Any], db: AsyncSession = Depends(get_async_session)
 ):
     """Set up Yelp review polling for a business."""
     try:
@@ -96,7 +91,7 @@ async def setup_yelp_polling(
 
     except Exception as e:
         logger.error(f"Yelp polling setup error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Polling setup failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Polling setup failed: {e!s}")
 
 
 @router.post("/poll-reviews/{account_id}")
@@ -104,25 +99,20 @@ async def poll_yelp_reviews(
     account_id: str,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_async_session),
-    force_full: bool = False
+    force_full: bool = False,
 ):
     """Poll Yelp reviews for a business account."""
     try:
-        social_service = SocialService(db)
+        SocialService(db)
 
         # Add to background tasks for async processing
-        background_tasks.add_task(
-            _poll_yelp_reviews_task,
-            db,
-            account_id,
-            force_full
-        )
+        background_tasks.add_task(_poll_yelp_reviews_task, db, account_id, force_full)
 
         return {"status": "polling_started", "account_id": account_id}
 
     except Exception as e:
         logger.error(f"Yelp review polling error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Polling failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Polling failed: {e!s}")
 
 
 async def _poll_yelp_reviews_task(db: AsyncSession, account_id: str, force_full: bool = False):
@@ -163,9 +153,7 @@ async def _poll_yelp_reviews_task(db: AsyncSession, account_id: str, force_full:
         while True:
             try:
                 reviews_data = await client.get_business_reviews(
-                    business_id,
-                    limit=limit,
-                    offset=offset
+                    business_id, limit=limit, offset=offset
                 )
 
                 reviews = reviews_data.get("reviews", [])
@@ -175,7 +163,7 @@ async def _poll_yelp_reviews_task(db: AsyncSession, account_id: str, force_full:
                 for review_data in reviews:
                     # Convert Yelp review data to our format
                     review_date = datetime.fromisoformat(
-                        review_data.get("time_created", "").replace('Z', '+00:00')
+                        review_data.get("time_created", "").replace("Z", "+00:00")
                     )
 
                     # Skip old reviews if not doing full sync
@@ -184,13 +172,13 @@ async def _poll_yelp_reviews_task(db: AsyncSession, account_id: str, force_full:
 
                     # Create idempotency signature
                     signature = hashlib.sha256(
-                        f"yelp_review_{business_id}_{review_data.get('id', '')}"
-                        .encode()
+                        f"yelp_review_{business_id}_{review_data.get('id', '')}".encode()
                     ).hexdigest()
 
                     # Check if already processed
                     existing = await db.execute(
-                        select(1).select_from("integra.social_inbox")
+                        select(1)
+                        .select_from("integra.social_inbox")
                         .where("signature = :sig")
                         .params(sig=signature)
                     )
@@ -201,16 +189,18 @@ async def _poll_yelp_reviews_task(db: AsyncSession, account_id: str, force_full:
 
                     # Insert into inbox for idempotency
                     await db.execute(
-                        insert("integra.social_inbox").values({
-                            "signature": signature,
-                            "platform": "yelp",
-                            "webhook_type": "review",
-                            "account_id": account.id,
-                            "payload_hash": hashlib.sha256(
-                                json.dumps(review_data, sort_keys=True).encode('utf-8')
-                            ).hexdigest(),
-                            "received_at": datetime.utcnow()
-                        })
+                        insert("integra.social_inbox").values(
+                            {
+                                "signature": signature,
+                                "platform": "yelp",
+                                "webhook_type": "review",
+                                "account_id": account.id,
+                                "payload_hash": hashlib.sha256(
+                                    json.dumps(review_data, sort_keys=True).encode("utf-8")
+                                ).hexdigest(),
+                                "received_at": datetime.utcnow(),
+                            }
+                        )
                     )
 
                     # Process the review
@@ -220,8 +210,7 @@ async def _poll_yelp_reviews_task(db: AsyncSession, account_id: str, force_full:
                     # Mark as processed
                     await db.execute(
                         "UPDATE integra.social_inbox SET processed = TRUE, processed_at = :now "
-                        "WHERE signature = :sig"
-                        .params(now=datetime.utcnow(), sig=signature)
+                        "WHERE signature = :sig".params(now=datetime.utcnow(), sig=signature)
                     )
 
                 # Check if we have more reviews to fetch
@@ -232,14 +221,13 @@ async def _poll_yelp_reviews_task(db: AsyncSession, account_id: str, force_full:
                 offset += limit
 
             except Exception as e:
-                logger.error(f"Error polling Yelp reviews at offset {offset}: {e}")
+                logger.exception(f"Error polling Yelp reviews at offset {offset}: {e}")
                 break
 
         # Update last sync timestamp
         await db.execute(
             "UPDATE core.social_accounts SET last_sync_at = :now "
-            "WHERE id = :account_id"
-            .params(now=datetime.utcnow(), account_id=account.id)
+            "WHERE id = :account_id".params(now=datetime.utcnow(), account_id=account.id)
         )
 
         await db.commit()
@@ -256,9 +244,7 @@ async def _poll_yelp_reviews_task(db: AsyncSession, account_id: str, force_full:
 
 @router.post("/reply-to-review")
 async def reply_to_yelp_review(
-    review_id: str,
-    reply_data: dict[str, Any],
-    db: AsyncSession = Depends(get_async_session)
+    review_id: str, reply_data: dict[str, Any], db: AsyncSession = Depends(get_async_session)
 ):
     """
     Handle Yelp review reply (manual process).
@@ -277,19 +263,17 @@ async def reply_to_yelp_review(
             "status": "reply_draft_created",
             "draft_id": result.get("draft_id"),
             "deep_link": result.get("deep_link"),
-            "instructions": "Please use the provided deep link to manually post this reply via your Yelp Business account."
+            "instructions": "Please use the provided deep link to manually post this reply via your Yelp Business account.",
         }
 
     except Exception as e:
         logger.error(f"Yelp reply creation error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Reply creation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Reply creation failed: {e!s}")
 
 
 @router.get("/review-deep-link/{review_id}")
 async def get_yelp_review_deep_link(
-    review_id: str,
-    business_id: str,
-    db: AsyncSession = Depends(get_async_session)
+    review_id: str, business_id: str, db: AsyncSession = Depends(get_async_session)
 ):
     """Generate deep link to Yelp Business account for manual review response."""
     try:
@@ -299,19 +283,16 @@ async def get_yelp_review_deep_link(
 
         return {
             "deep_link": deep_link,
-            "instructions": "Click this link to respond to the review in your Yelp Business account"
+            "instructions": "Click this link to respond to the review in your Yelp Business account",
         }
 
     except Exception as e:
         logger.error(f"Yelp deep link generation error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Deep link generation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Deep link generation failed: {e!s}")
 
 
 @router.delete("/polling/{account_id}")
-async def remove_yelp_polling(
-    account_id: str,
-    db: AsyncSession = Depends(get_async_session)
-):
+async def remove_yelp_polling(account_id: str, db: AsyncSession = Depends(get_async_session)):
     """Remove Yelp polling configuration for an account."""
     try:
         social_service = SocialService(db)
@@ -321,4 +302,4 @@ async def remove_yelp_polling(
 
     except Exception as e:
         logger.error(f"Yelp polling removal error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Polling removal failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Polling removal failed: {e!s}")

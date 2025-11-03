@@ -13,10 +13,10 @@ Architecture:
 
 Usage:
     from api.ai.memory import create_memory_backend
-    
+
     # Automatically selects backend from environment
     memory = await create_memory_backend()
-    
+
     # Store conversation
     await memory.store_message(
         conversation_id="conv_123",
@@ -24,13 +24,13 @@ Usage:
         role="user",
         metadata={"channel": "web"}
     )
-    
+
     # Retrieve history
     history = await memory.get_conversation_history(
         conversation_id="conv_123",
         limit=10
     )
-    
+
     # Cross-channel retrieval
     all_history = await memory.get_user_history(
         user_id="user_456",
@@ -39,41 +39,41 @@ Usage:
 """
 
 from api.ai.memory.memory_backend import (
-    MemoryBackend,
+    ConversationChannel,
     ConversationMessage,
     ConversationMetadata,
+    MemoryBackend,
+    MemoryBackendError,
+    MemoryConnectionError,
+    MemoryNotFoundError,
     MemorySearchResult,
     MessageRole,
-    ConversationChannel,
-    MemoryBackendError,
-    MemoryNotFoundError,
-    MemoryConnectionError
 )
-
-from api.ai.memory.postgresql_memory import PostgreSQLMemory
+from api.ai.memory.memory_factory import (
+    MemoryBackendType,
+    create_memory_backend,
+    get_memory_backend,
+)
 from api.ai.memory.neo4j_memory import Neo4jMemory
-from api.ai.memory.memory_factory import create_memory_backend, get_memory_backend, MemoryBackendType
+from api.ai.memory.postgresql_memory import PostgreSQLMemory
 
 __all__ = [
-    # Abstract interface
-    "MemoryBackend",
+    "ConversationChannel",
     "ConversationMessage",
     "ConversationMetadata",
-    "MemorySearchResult",
-    "MessageRole",
-    "ConversationChannel",
-    
+    # Abstract interface
+    "MemoryBackend",
     # Exceptions
     "MemoryBackendError",
-    "MemoryNotFoundError",
+    "MemoryBackendType",
     "MemoryConnectionError",
-    
+    "MemoryNotFoundError",
+    "MemorySearchResult",
+    "MessageRole",
+    "Neo4jMemory",
     # Implementations
     "PostgreSQLMemory",
-    "Neo4jMemory",
-    
     # Factory
     "create_memory_backend",
     "get_memory_backend",
-    "MemoryBackendType"
 ]

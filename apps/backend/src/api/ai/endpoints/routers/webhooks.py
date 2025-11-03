@@ -2,6 +2,10 @@
 Webhook endpoints for RingCentral and Meta integrations
 """
 
+from api.ai.endpoints.database import get_db
+from api.ai.endpoints.schemas import ChatIngestRequest
+from api.ai.endpoints.services.channel_manager import channel_manager
+from api.ai.endpoints.services.chat_service import chat_service
 from fastapi import (
     APIRouter,
     BackgroundTasks,
@@ -11,11 +15,6 @@ from fastapi import (
     Request,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from api.ai.endpoints.database import get_db
-from api.ai.endpoints.schemas import ChatIngestRequest
-from api.ai.endpoints.services.channel_manager import channel_manager
-from api.ai.endpoints.services.chat_service import chat_service
 
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])
 
@@ -35,9 +34,7 @@ async def ringcentral_sms_webhook(
 
         # Validate signature
         if not channel_manager.validate_ringcentral_webhook(body, signature):
-            raise HTTPException(
-                status_code=401, detail="Invalid webhook signature"
-            )
+            raise HTTPException(status_code=401, detail="Invalid webhook signature")
 
         # Parse webhook data
         webhook_data = await request.json()
@@ -66,11 +63,8 @@ async def ringcentral_sms_webhook(
 
         return {"status": "processed", "message_id": str(response.message_id)}
 
-    except Exception as e:
-        print(f"Error processing RingCentral SMS webhook: {e}")
-        raise HTTPException(
-            status_code=500, detail="Failed to process SMS webhook"
-        )
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to process SMS webhook")
 
 
 @router.post("/ringcentral/voice")
@@ -87,9 +81,7 @@ async def ringcentral_voice_webhook(
 
         # Validate signature
         if not channel_manager.validate_ringcentral_webhook(body, signature):
-            raise HTTPException(
-                status_code=401, detail="Invalid webhook signature"
-            )
+            raise HTTPException(status_code=401, detail="Invalid webhook signature")
 
         # Parse webhook data
         webhook_data = await request.json()
@@ -105,9 +97,6 @@ async def ringcentral_voice_webhook(
 
         # For voice calls, we might want to handle differently
         # For now, just log the call event
-        print(
-            f"Voice call event: {ingest_data['text']} from {ingest_data['user_id']}"
-        )
 
         # If this is a call that needs IVR response, we could:
         # 1. Generate an AI response
@@ -116,11 +105,8 @@ async def ringcentral_voice_webhook(
 
         return {"status": "logged", "event": ingest_data["text"]}
 
-    except Exception as e:
-        print(f"Error processing RingCentral voice webhook: {e}")
-        raise HTTPException(
-            status_code=500, detail="Failed to process voice webhook"
-        )
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to process voice webhook")
 
 
 # Meta (Facebook/Instagram) Webhooks
@@ -131,9 +117,7 @@ async def meta_webhook_verify(
     hub_challenge: str = Query(..., alias="hub.challenge"),
 ):
     """Meta webhook verification endpoint"""
-    challenge = channel_manager.verify_meta_webhook(
-        hub_mode, hub_token, hub_challenge
-    )
+    challenge = channel_manager.verify_meta_webhook(hub_mode, hub_token, hub_challenge)
 
     if challenge:
         return int(challenge)  # Meta expects an integer response
@@ -155,9 +139,7 @@ async def meta_webhook(
 
         # Validate signature
         if not channel_manager.validate_meta_webhook(body.decode(), signature):
-            raise HTTPException(
-                status_code=401, detail="Invalid webhook signature"
-            )
+            raise HTTPException(status_code=401, detail="Invalid webhook signature")
 
         # Parse webhook data
         webhook_data = await request.json()
@@ -204,8 +186,7 @@ async def meta_webhook(
                     }
                 )
 
-            except Exception as e:
-                print(f"Error processing individual message: {e}")
+            except Exception:
                 continue
 
         return {
@@ -214,11 +195,8 @@ async def meta_webhook(
             "messages": processed_messages,
         }
 
-    except Exception as e:
-        print(f"Error processing Meta webhook: {e}")
-        raise HTTPException(
-            status_code=500, detail="Failed to process Meta webhook"
-        )
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to process Meta webhook")
 
 
 # Webhook status and testing endpoints
@@ -261,13 +239,9 @@ async def test_facebook_send(
     recipient_id: str, message: str, current_user=None  # Skip auth for testing
 ):
     """Test Facebook message sending functionality"""
-    success = await channel_manager.send_facebook_message(
-        recipient_id, message
-    )
+    success = await channel_manager.send_facebook_message(recipient_id, message)
 
     if success:
         return {"status": "sent", "recipient_id": recipient_id}
     else:
-        raise HTTPException(
-            status_code=500, detail="Failed to send Facebook message"
-        )
+        raise HTTPException(status_code=500, detail="Failed to send Facebook message")

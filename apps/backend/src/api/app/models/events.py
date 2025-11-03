@@ -1,10 +1,13 @@
 """
 Database models for CQRS event sourcing and outbox patterns.
 """
+
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 from uuid import uuid4
 
+# Use unified Base from models package
+from api.app.models.declarative_base import Base
 from sqlalchemy import (
     JSON,
     CheckConstraint,
@@ -17,9 +20,6 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
 from sqlalchemy.sql import func
-
-# Use unified Base from models package
-from api.app.models.declarative_base import Base
 
 
 class DomainEvent(Base):
@@ -43,16 +43,16 @@ class DomainEvent(Base):
 
     def __init__(
         self,
-        id: Optional[str] = None,
-        aggregate_id: str = None,
-        aggregate_type: str = None,
-        event_type: str = None,
-        version: int = None,
-        payload: dict[str, Any] = None,
-        occurred_at: Optional[datetime] = None,
-        hash_previous: str = None,
-        hash_current: str = None,
-        **kwargs
+        id: str | None = None,
+        aggregate_id: str | None = None,
+        aggregate_type: str | None = None,
+        event_type: str | None = None,
+        version: int | None = None,
+        payload: dict[str, Any] | None = None,
+        occurred_at: datetime | None = None,
+        hash_previous: str | None = None,
+        hash_current: str | None = None,
+        **kwargs,
     ):
         self.id = id or uuid4()
         self.aggregate_id = aggregate_id
@@ -75,28 +75,26 @@ class OutboxEntry(Base):
         PostgresUUID(as_uuid=True),
         ForeignKey("events.domain_events.id"),
         nullable=False,
-        index=True
+        index=True,
     )
     target = Column(String(50), nullable=False, index=True)  # ringcentral, stripe, email, etc.
     payload = Column(JSON, nullable=False)
     status = Column(
-        String(20),
-        nullable=False,
-        default="pending",
-        index=True
+        String(20), nullable=False, default="pending", index=True
     )  # pending, processing, completed, failed
     attempts = Column(Integer, nullable=False, default=0)
     max_attempts = Column(Integer, nullable=False, default=3)
     last_error = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
-    updated_at = Column(DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now()
+    )
     next_attempt_at = Column(DateTime(timezone=True), nullable=False)
     completed_at = Column(DateTime(timezone=True), nullable=True)
 
     __table_args__ = (
         CheckConstraint(
-            "status IN ('pending', 'processing', 'completed', 'failed')",
-            name="outbox_status_check"
+            "status IN ('pending', 'processing', 'completed', 'failed')", name="outbox_status_check"
         ),
         CheckConstraint("attempts >= 0", name="outbox_attempts_positive"),
         CheckConstraint("max_attempts > 0", name="outbox_max_attempts_positive"),
@@ -105,15 +103,15 @@ class OutboxEntry(Base):
 
     def __init__(
         self,
-        id: Optional[str] = None,
-        event_id: str = None,
-        target: str = None,
-        payload: dict[str, Any] = None,
+        id: str | None = None,
+        event_id: str | None = None,
+        target: str | None = None,
+        payload: dict[str, Any] | None = None,
         status: str = "pending",
         attempts: int = 0,
         max_attempts: int = 3,
-        next_attempt_at: Optional[datetime] = None,
-        **kwargs
+        next_attempt_at: datetime | None = None,
+        **kwargs,
     ):
         self.id = id or uuid4()
         self.event_id = event_id
@@ -140,11 +138,11 @@ class Snapshot(Base):
 
     def __init__(
         self,
-        aggregate_id: str = None,
-        aggregate_type: str = None,
-        version: int = None,
-        data: dict[str, Any] = None,
-        **kwargs
+        aggregate_id: str | None = None,
+        aggregate_type: str | None = None,
+        version: int | None = None,
+        data: dict[str, Any] | None = None,
+        **kwargs,
     ):
         self.aggregate_id = aggregate_id
         self.aggregate_type = aggregate_type
@@ -162,13 +160,12 @@ class ProjectionPosition(Base):
     last_event_id = Column(PostgresUUID(as_uuid=True), nullable=True)
     last_processed_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
-    updated_at = Column(DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now()
+    )
 
     def __init__(
-        self,
-        projection_name: str = None,
-        last_event_id: Optional[str] = None,
-        **kwargs
+        self, projection_name: str | None = None, last_event_id: str | None = None, **kwargs
     ):
         self.projection_name = projection_name
         self.last_event_id = last_event_id
@@ -182,35 +179,30 @@ class IdempotencyKey(Base):
     key = Column(String(255), primary_key=True)
     command_type = Column(String(100), nullable=False)
     result = Column(JSON, nullable=True)
-    status = Column(String(20), nullable=False, default="processing")  # processing, completed, failed
+    status = Column(
+        String(20), nullable=False, default="processing"
+    )  # processing, completed, failed
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
     completed_at = Column(DateTime(timezone=True), nullable=True)
     expires_at = Column(DateTime(timezone=True), nullable=False)
 
     __table_args__ = (
         CheckConstraint(
-            "status IN ('processing', 'completed', 'failed')",
-            name="idempotency_status_check"
+            "status IN ('processing', 'completed', 'failed')", name="idempotency_status_check"
         ),
-        {"schema": "events"}
+        {"schema": "events"},
     )
 
     def __init__(
         self,
-        key: str = None,
-        command_type: str = None,
-        expires_at: Optional[datetime] = None,
-        **kwargs
+        key: str | None = None,
+        command_type: str | None = None,
+        expires_at: datetime | None = None,
+        **kwargs,
     ):
         self.key = key
         self.command_type = command_type
         self.expires_at = expires_at or datetime.utcnow()
 
 
-__all__ = [
-    "DomainEvent",
-    "OutboxEntry",
-    "Snapshot",
-    "ProjectionPosition",
-    "IdempotencyKey"
-]
+__all__ = ["DomainEvent", "IdempotencyKey", "OutboxEntry", "ProjectionPosition", "Snapshot"]
