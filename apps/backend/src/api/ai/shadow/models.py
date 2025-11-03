@@ -6,7 +6,7 @@ Stores teacher-student pairs, RLHF scores, and training data exports
 from datetime import datetime
 import enum
 
-from db.base_class import Base
+from models.base import Base
 from sqlalchemy import (
     Boolean,
     Column,

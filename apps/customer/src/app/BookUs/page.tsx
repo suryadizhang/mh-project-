@@ -5,7 +5,7 @@ import './datepicker.css';
 
 import { addDays, format } from 'date-fns';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import DatePicker from 'react-datepicker';
 import { Controller, useForm } from 'react-hook-form';
 import type { z } from 'zod';
@@ -18,6 +18,37 @@ import {
 import Assistant from '@/components/chat/Assistant';
 import { apiFetch } from '@/lib/api';
 import { logger } from '@/lib/logger';
+
+// Google Maps types
+declare global {
+  interface Window {
+    google: {
+      maps: {
+        places: {
+          Autocomplete: new (
+            input: HTMLInputElement,
+            options?: {
+              types?: string[];
+              componentRestrictions?: { country: string };
+              fields?: string[];
+            }
+          ) => {
+            addListener: (event: string, handler: () => void) => void;
+            getPlace: () => {
+              formatted_address?: string;
+              address_components?: Array<{
+                long_name: string;
+                short_name: string;
+                types: string[];
+              }>;
+              geometry?: unknown;
+            };
+          };
+        };
+      };
+    };
+  }
+}
 
 // Infer types from schemas for type-safe responses
 type BookedDatesResponse = z.infer<typeof BookedDatesResponseSchema>;
@@ -61,6 +92,11 @@ export default function BookingPage() {
   const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
   const [loadingTimeSlots, setLoadingTimeSlots] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Google Places Autocomplete refs
+  const venueAddressInputRef = useRef<HTMLInputElement>(null);
+  const autocompleteRef = useRef<ReturnType<typeof window.google.maps.places.Autocomplete> | null>(null);
+  
   const {
     register,
     handleSubmit,
@@ -115,6 +151,75 @@ export default function BookingPage() {
   useEffect(() => {
     fetchBookedDates();
   }, []);
+  
+  // Initialize Google Places Autocomplete for venue address
+  useEffect(() => {
+    const initializeAutocomplete = () => {
+      if (!venueAddressInputRef.current || !window.google) return;
+
+      try {
+        // Initialize autocomplete with US-only restriction
+        autocompleteRef.current = new window.google.maps.places.Autocomplete(
+          venueAddressInputRef.current,
+          {
+            types: ['address'],
+            componentRestrictions: { country: 'us' },
+            fields: ['formatted_address', 'address_components', 'geometry'],
+          }
+        );
+
+        // Listen for place selection
+        autocompleteRef.current.addListener('place_changed', () => {
+          const place = autocompleteRef.current?.getPlace();
+          if (!place || !place.formatted_address) return;
+
+          // Set the full formatted address
+          setValue('venueStreet', place.formatted_address);
+
+          // Extract city, state, and ZIP from address components
+          if (place.address_components) {
+            let city = '';
+            let state = '';
+            let zipCode = '';
+
+            place.address_components.forEach((component) => {
+              const types = component.types;
+              if (types.includes('locality')) {
+                city = component.long_name;
+              } else if (types.includes('administrative_area_level_1')) {
+                state = component.short_name;
+              } else if (types.includes('postal_code')) {
+                zipCode = component.long_name;
+              }
+            });
+
+            // Auto-fill city, state, and ZIP
+            if (city) setValue('venueCity', city);
+            if (state) setValue('venueState', state);
+            if (zipCode) setValue('venueZipcode', zipCode);
+          }
+        });
+      } catch (error) {
+        logger.error('Error initializing Google Places Autocomplete', error as Error);
+      }
+    };
+
+    // Load Google Maps script if not already loaded
+    if (!window.google) {
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`;
+      script.async = true;
+      script.defer = true;
+      script.onload = initializeAutocomplete;
+      script.onerror = () => {
+        logger.error('Failed to load Google Maps script', new Error('Script load failed'));
+      };
+      document.head.appendChild(script);
+    } else {
+      initializeAutocomplete();
+    }
+  }, [setValue]);
+  
   // Fetch availability for selected date
   const fetchAvailability = async (date: Date) => {
     setLoadingTimeSlots(true);
@@ -1168,9 +1273,14 @@ export default function BookingPage() {
                     </label>
                     <input
                       {...register('venueStreet')}
+                      ref={venueAddressInputRef}
                       className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
-                      placeholder="456 Event Venue Street"
+                      placeholder="Start typing your venue address..."
+                      autoComplete="off"
                     />
+                    <p className="mt-1 text-xs text-gray-500">
+                      📍 Smart Address Search: Start typing and select from Google suggestions
+                    </p>
                     {errors.venueStreet && (
                       <p className="mt-1 text-sm text-red-500">{errors.venueStreet.message}</p>
                     )}

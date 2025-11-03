@@ -435,6 +435,11 @@ Service files are provided in `systemd/` directory for VPS deployment.
 - 🚀 [**Deployment Guide**](./DEPLOYMENT_STRATEGY.md) - Production deployment instructions
 - 📊 [**Project Summary**](./PROJECT_SUMMARY.md) - Technical overview and features
 
+### **Setup & Configuration** 🔧
+- 🗂️ [**Environment Files Guide**](./ENVIRONMENT_FILES_GUIDE.md) - Complete environment configuration reference
+- ✅ [**Environment Consolidation**](./ENVIRONMENT_CONSOLIDATION_COMPLETE.md) - File structure cleanup summary
+- 🗺️ [**Google Maps API Setup**](./GOOGLE_MAPS_API_QUICK_START.md) - Maps & Places Autocomplete configuration
+
 ### **AI System Documentation** 🆕
 - 🎯 [**Future Scaling Plan**](./FUTURE_SCALING_PLAN.md) - Upgrade triggers and timeline
 - 📐 [**Option 1.5 Architecture**](./OPTION_1.5_FUTURE_PROOF_ARCHITECTURE.md) - Current architecture + future-proofing
