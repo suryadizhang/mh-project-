@@ -18,6 +18,7 @@ redis==5.0.1
 hiredis==2.2.3  # Faster Redis parser
 slowapi==0.1.9  # Rate limiting for FastAPI
 schedule==1.2.0  # Background job scheduling for payment email monitoring
+apscheduler==3.10.4  # Advanced Python Scheduler for follow-ups
 
 # Authentication and security
 python-jose[cryptography]==3.3.0

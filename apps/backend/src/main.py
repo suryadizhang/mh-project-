@@ -130,11 +130,33 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"⚠️ Payment email scheduler not available: {e}")
     
+    # Initialize and start AI Orchestrator with Follow-Up Scheduler (Phase 1B)
+    try:
+        from api.ai.orchestrator import AIOrchestrator
+        orchestrator = AIOrchestrator()
+        await orchestrator.start()
+        app.state.orchestrator = orchestrator
+        logger.info("✅ AI Orchestrator with Follow-Up Scheduler started")
+    except ImportError as e:
+        logger.warning(f"⚠️ AI Orchestrator not available (missing dependencies): {e}")
+        app.state.orchestrator = None
+    except Exception as e:
+        logger.warning(f"⚠️ AI Orchestrator initialization failed: {e}")
+        app.state.orchestrator = None
+    
     logger.info("🚀 Application startup complete - ready to accept requests")
     
     yield
     
     # Shutdown
+    # Stop AI Orchestrator and Follow-Up Scheduler
+    if hasattr(app.state, 'orchestrator') and app.state.orchestrator:
+        try:
+            await app.state.orchestrator.stop()
+            logger.info("✅ AI Orchestrator and Follow-Up Scheduler stopped")
+        except Exception as e:
+            logger.warning(f"Error stopping orchestrator: {e}")
+    
     # Stop payment email monitoring scheduler
     try:
         from services.payment_email_scheduler import stop_payment_email_scheduler
