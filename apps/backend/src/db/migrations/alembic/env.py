@@ -25,10 +25,9 @@ from models import review  # noqa: E402, F401
 config = context.config
 
 # Override the database URL from settings
-# TEMPORARY: Hardcoded for Supabase migration
-supabase_sync_url = "postgresql+psycopg2://postgres:DkYokZB945vm3itM@db.yuchqvpctookhjovvdwi.supabase.co:5432/postgres"
-config.set_main_option("sqlalchemy.url", supabase_sync_url)
-# Original line: config.set_main_option("sqlalchemy.url", settings.database_url_sync)
+# Use environment variable or settings
+database_url = os.getenv('DATABASE_URL', settings.database_url_sync)
+config.set_main_option("sqlalchemy.url", database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
