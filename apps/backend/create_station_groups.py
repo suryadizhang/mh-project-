@@ -20,7 +20,11 @@ from datetime import datetime
 # Load environment
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://user:password@localhost:5432/myhibachi")
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    print("❌ ERROR: DATABASE_URL environment variable is required")
+    print("   Set it in your apps/backend/.env file")
+    sys.exit(1)
 
 # Create async engine
 engine = create_async_engine(DATABASE_URL, echo=False)

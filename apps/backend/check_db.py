@@ -1,6 +1,14 @@
+import os
+import sys
 import psycopg2
 
-conn = psycopg2.connect('postgresql://user:password@localhost:5432/myhibachi_crm')
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    print("❌ ERROR: DATABASE_URL environment variable is required")
+    print("   Set it in your apps/backend/.env file")
+    sys.exit(1)
+
+conn = psycopg2.connect(DATABASE_URL)
 cursor = conn.cursor()
 
 # Get all schemas

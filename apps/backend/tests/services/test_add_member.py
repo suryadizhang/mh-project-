@@ -13,7 +13,9 @@ from sqlalchemy import select
 # Load environment first
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://user:password@localhost:5432/myhibachi")
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL environment variable is required for tests")
 
 # Create async engine
 engine = create_async_engine(DATABASE_URL, echo=False)

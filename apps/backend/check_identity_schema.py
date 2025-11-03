@@ -1,7 +1,13 @@
 """Check if identity schema exists."""
+import os
+import sys
 from sqlalchemy import create_engine, text
 
-DATABASE_URL = "postgresql://user:password@localhost:5432/myhibachi_crm"
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    print("❌ ERROR: DATABASE_URL environment variable is required")
+    print("   Set it in your apps/backend/.env file")
+    sys.exit(1)
 
 engine = create_engine(DATABASE_URL)
 conn = engine.connect()

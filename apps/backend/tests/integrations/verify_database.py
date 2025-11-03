@@ -1,12 +1,14 @@
 """Final database state verification"""
 import os
+import sys
 from sqlalchemy import create_engine, text, inspect
 
-# Get database URL from environment variable
-DATABASE_URL = os.getenv(
-    'DATABASE_URL',
-    'postgresql+psycopg2://postgres:password@localhost:5432/postgres'
-)
+# Get database URL from environment variable (required)
+DATABASE_URL = os.getenv('DATABASE_URL')
+if not DATABASE_URL:
+    print("❌ ERROR: DATABASE_URL environment variable is required")
+    print("   Set it in your apps/backend/.env file")
+    sys.exit(1)
 
 engine = create_engine(DATABASE_URL)
 inspector = inspect(engine)
