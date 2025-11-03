@@ -6,14 +6,16 @@ and response generation. It integrates with existing services while maintaining
 modularity and scalability.
 
 Architecture:
-- Uses existing pricing_service.py and protein_calculator_service.py
+- Uses Intent Router for intelligent agent selection (Phase 1A)
+- Specialized agents (Lead Nurturing, Customer Care, Operations, Knowledge)
+- Provider-agnostic design (OpenAI/Llama/Hybrid via ModelProvider)
 - Integrates with multi_channel_ai_handler.py for channel-specific formatting
 - Supports admin review workflow via email_review.py
 - ChatGPT-ready design with Phase 3 extension points
 
 Author: MyHibachi Development Team
 Created: October 31, 2025
-Version: 1.0.0 (Phase 1)
+Version: 2.0.0 (Phase 1A - Multi-Agent Foundation)
 """
 
 import os
@@ -46,6 +48,23 @@ from .services import (
     get_identity_resolver
 )
 
+# Phase 1A: Import router and provider
+try:
+    from ..routers import get_intent_router
+    ROUTER_ENABLED = True
+except ImportError:
+    ROUTER_ENABLED = False
+    logger = logging.getLogger(__name__)
+    logger.warning("Intent router not available - using legacy mode")
+
+try:
+    from .providers import get_provider
+    PROVIDER_ENABLED = True
+except ImportError:
+    PROVIDER_ENABLED = False
+    logger = logging.getLogger(__name__)
+    logger.warning("Model provider not available - using OpenAI client directly")
+
 logger = logging.getLogger(__name__)
 
 
@@ -55,14 +74,24 @@ class AIOrchestrator:
     
     This orchestrator:
     1. Receives customer inquiries via OrchestratorRequest
-    2. Determines which tools to use via OpenAI function calling
-    3. Executes tools (pricing, travel fees, protein costs)
-    4. Feeds results back to OpenAI for final response
-    5. Returns formatted response via OrchestratorResponse
+    2. Routes to specialized agents via Intent Router (Phase 1A)
+    3. Agents execute tools as needed (pricing, booking, support, knowledge)
+    4. Returns formatted response via OrchestratorResponse
     
-    Phase 1 Features:
+    Phase 1A Features (NEW):
+    - Intent Router: Semantic routing to 4 specialized agents
+    - Model Provider: Provider-agnostic (OpenAI/Llama/Hybrid)
+    - Specialized Agents:
+      * Lead Nurturing: Sales psychology, upselling, conversion
+      * Customer Care: Empathy, de-escalation, CSAT optimization
+      * Operations: Logistics, scheduling, booking management
+      * Knowledge: RAG integration, policy lookup, FAQs
+    - Tool calling: 16 tools across all agents
+    - Conversation history management
+    
+    Phase 1 Features (Legacy, still supported):
+    - Direct OpenAI integration (fallback if router disabled)
     - Tool calling (pricing, travel, protein)
-    - OpenAI GPT-4 Turbo integration
     - Error handling and retry logic
     - Admin review workflow
     
@@ -85,29 +114,47 @@ class AIOrchestrator:
         response = await orchestrator.process_inquiry(request)
         print(response.response)  # AI-generated quote
         print(response.tools_used)  # [PricingTool, ...]
+        print(response.metadata["agent_type"])  # "lead_nurturing"
         ```
     """
     
-    def __init__(self, config: Optional[OrchestratorConfig] = None):
+    def __init__(self, config: Optional[OrchestratorConfig] = None, use_router: bool = True):
         """
         Initialize the AI orchestrator.
         
         Args:
             config: Optional configuration (uses defaults if not provided)
+            use_router: Whether to use Intent Router (default: True)
         """
         self.config = config or OrchestratorConfig()
         self.logger = logging.getLogger(__name__)
+        self.use_router = use_router and ROUTER_ENABLED
         
-        # Initialize OpenAI client
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            raise ValueError("OPENAI_API_KEY environment variable is required")
+        # Initialize router (Phase 1A)
+        if self.use_router:
+            self.router = get_intent_router()
+            self.logger.info("Intent router enabled - using multi-agent system")
+        else:
+            self.router = None
+            self.logger.info("Intent router disabled - using legacy OpenAI client")
+            
+            # Initialize OpenAI client (legacy mode)
+            api_key = os.getenv("OPENAI_API_KEY")
+            if not api_key:
+                raise ValueError("OPENAI_API_KEY environment variable is required")
+            
+            self.client = OpenAI(api_key=api_key)
+            
+            # Initialize tool registry (legacy mode)
+            self.tool_registry = ToolRegistry()
+            self._register_tools()
         
-        self.client = OpenAI(api_key=api_key)
-        
-        # Initialize tool registry
-        self.tool_registry = ToolRegistry()
-        self._register_tools()
+        # Initialize provider (Phase 1A)
+        if PROVIDER_ENABLED:
+            self.provider = get_provider()
+            self.logger.info(f"Model provider initialized: {self.provider.__class__.__name__}")
+        else:
+            self.provider = None
         
         # Initialize services
         self.conversation_service = get_conversation_service(
@@ -123,12 +170,22 @@ class AIOrchestrator:
             enable_identity=self.config.enable_identity
         )
         
+        # Phase 1B: Initialize memory backend and emotion service (deferred to start())
+        self.memory_backend = None
+        self.emotion_service = None
+        self.scheduler = None
+        
+        # Conversation history cache (in-memory for now, will be database in Phase 1B)
+        self._conversation_history: Dict[str, List[Dict[str, str]]] = {}
+        
         self.logger.info(
             f"AIOrchestrator initialized",
             extra={
                 "model": self.config.model,
-                "phase": "Phase 1",
-                "tools_registered": len(self.tool_registry.list_tools()),
+                "phase": "Phase 1A" if self.use_router else "Phase 1 (Legacy)",
+                "router_enabled": self.use_router,
+                "provider_enabled": PROVIDER_ENABLED,
+                "tools_registered": len(self.tool_registry.list_tools()) if not self.use_router else "N/A (agents have tools)",
                 "phase3_features_enabled": {
                     "rag": self.config.enable_rag,
                     "voice": self.config.enable_voice,
@@ -137,6 +194,209 @@ class AIOrchestrator:
                 }
             }
         )
+    
+    async def start(self) -> None:
+        """
+        Start the orchestrator and all its services.
+        
+        Phase 1B: Initializes memory backend, emotion service, and starts the follow-up scheduler.
+        """
+        # Phase 1B: Initialize memory backend and emotion service
+        if not self.memory_backend or not self.emotion_service:
+            try:
+                from ..memory import get_memory_backend
+                from ..services import get_emotion_service
+                self.memory_backend = await get_memory_backend()
+                self.emotion_service = get_emotion_service()
+                self.logger.info("✅ Memory backend and emotion service initialized")
+            except ImportError as e:
+                self.logger.warning(f"⚠️ Memory backend or emotion service not available: {e}")
+                self.memory_backend = None
+                self.emotion_service = None
+            except Exception as e:
+                self.logger.error(f"❌ Failed to initialize memory backend: {e}")
+                self.memory_backend = None
+                self.emotion_service = None
+        
+        # Phase 1B: Initialize Follow-Up Scheduler
+        if not self.scheduler and self.memory_backend and self.emotion_service:
+            try:
+                from ..scheduler import FollowUpScheduler
+                import os
+                timezone = os.getenv("SCHEDULER_TIMEZONE", "UTC")
+                self.scheduler = FollowUpScheduler(
+                    memory=self.memory_backend,
+                    emotion_service=self.emotion_service,
+                    timezone=timezone,
+                    orchestrator_callback=self._send_followup_message
+                )
+                self.logger.info(f"✅ Follow-up scheduler initialized (timezone: {timezone})")
+            except ImportError as e:
+                self.logger.warning(f"⚠️ Follow-up scheduler not available: {e}")
+                self.scheduler = None
+            except Exception as e:
+                self.logger.error(f"❌ Failed to initialize scheduler: {e}")
+                self.scheduler = None
+        
+        # Start scheduler
+        if self.scheduler:
+            try:
+                await self.scheduler.start()
+                self.logger.info("✅ Follow-up scheduler started")
+                
+                # Schedule daily inactive user detection (runs at 9 AM daily)
+                from ..scheduler.inactive_user_detection import run_daily_reengagement_check
+                self.scheduler.scheduler.add_job(
+                    run_daily_reengagement_check,
+                    'cron',
+                    args=[self.scheduler],
+                    hour=9,
+                    minute=0,
+                    id='daily_reengagement_check',
+                    replace_existing=True
+                )
+                self.logger.info("✅ Daily inactive user re-engagement check scheduled (9 AM)")
+            except Exception as e:
+                self.logger.error(f"❌ Failed to start scheduler: {e}")
+    
+    async def stop(self) -> None:
+        """
+        Stop the orchestrator and gracefully shutdown all services.
+        
+        Phase 1B: Stops the follow-up scheduler if running.
+        """
+        if self.scheduler:
+            try:
+                await self.scheduler.stop()
+                self.logger.info("✅ Follow-up scheduler stopped")
+            except Exception as e:
+                self.logger.error(f"❌ Failed to stop scheduler: {e}")
+    
+    async def schedule_post_event_followup(
+        self,
+        conversation_id: str,
+        user_id: str,
+        event_date: datetime,
+        booking_id: Optional[str] = None
+    ) -> Optional[str]:
+        """
+        Schedule a post-event follow-up for a booking.
+        
+        Args:
+            conversation_id: Conversation ID
+            user_id: User ID
+            event_date: Date of the event
+            booking_id: Optional booking ID
+        
+        Returns:
+            Job ID if scheduled, None if not scheduled (e.g., duplicate or scheduler disabled)
+        """
+        if not self.scheduler:
+            self.logger.warning("Scheduler not available - cannot schedule follow-up")
+            return None
+        
+        try:
+            from datetime import timedelta
+            job_id = await self.scheduler.schedule_post_event_followup(
+                conversation_id=conversation_id,
+                user_id=user_id,
+                event_date=event_date,
+                booking_id=booking_id,
+                followup_delay=timedelta(hours=24)
+            )
+            if job_id:
+                self.logger.info(f"Scheduled post-event follow-up: {job_id}")
+            else:
+                self.logger.debug(f"Follow-up not scheduled (duplicate): {user_id}")
+            return job_id
+        except Exception as e:
+            self.logger.error(f"Failed to schedule post-event follow-up: {e}")
+            return None
+    
+    async def schedule_reengagement(
+        self,
+        user_id: str,
+        last_activity: datetime
+    ) -> Optional[str]:
+        """
+        Schedule a re-engagement campaign for an inactive user.
+        
+        Args:
+            user_id: User ID
+            last_activity: Last activity timestamp
+        
+        Returns:
+            Job ID if scheduled, None if not scheduled
+        """
+        if not self.scheduler:
+            self.logger.warning("Scheduler not available - cannot schedule re-engagement")
+            return None
+        
+        try:
+            from datetime import timedelta
+            job_id = await self.scheduler.schedule_reengagement(
+                user_id=user_id,
+                last_activity=last_activity,
+                inactive_threshold=timedelta(days=30)
+            )
+            if job_id:
+                self.logger.info(f"Scheduled re-engagement: {job_id}")
+            else:
+                self.logger.debug(f"Re-engagement not scheduled (duplicate): {user_id}")
+            return job_id
+        except Exception as e:
+            self.logger.error(f"Failed to schedule re-engagement: {e}")
+            return None
+    
+    async def _send_followup_message(
+        self,
+        user_id: str,
+        conversation_id: str,
+        content: str,
+        metadata: Dict[str, Any]
+    ) -> None:
+        """
+        Send a follow-up message to the user.
+        
+        This is the callback used by the scheduler to send automated messages.
+        
+        Args:
+            user_id: User ID
+            conversation_id: Conversation ID
+            content: Message content
+            metadata: Additional metadata (followup_id, trigger_type, etc.)
+        """
+        try:
+            # Store the follow-up message in memory
+            if self.memory_backend:
+                from ..memory.memory_backend import MessageRole
+                await self.memory_backend.store_message(
+                    conversation_id=conversation_id,
+                    role=MessageRole.ASSISTANT,
+                    content=content,
+                    user_id=user_id,
+                    metadata=metadata
+                )
+            
+            # TODO: Actually send the message via appropriate channel
+            # This would involve:
+            # 1. Looking up user's preferred channel (email, SMS, etc.)
+            # 2. Formatting message for that channel
+            # 3. Sending via the appropriate service
+            # For now, we just log it
+            self.logger.info(
+                f"Follow-up message queued for user {user_id}",
+                extra={
+                    "conversation_id": conversation_id,
+                    "followup_id": metadata.get("followup_id"),
+                    "trigger_type": metadata.get("trigger_type"),
+                    "content_preview": content[:100] + "..." if len(content) > 100 else content
+                }
+            )
+            
+        except Exception as e:
+            self.logger.error(f"Failed to send follow-up message: {e}")
+            raise
     
     def _register_tools(self) -> None:
         """
@@ -228,13 +488,19 @@ Generate accurate, helpful responses that make customers excited to book!"""
         """
         Process customer inquiry with AI orchestration.
         
-        This is the main entry point that:
+        Phase 1A Mode (Router Enabled):
         1. Resolves customer identity (Phase 3)
-        2. Retrieves conversation history (Phase 3)
-        3. Gets RAG knowledge context (Phase 3)
-        4. Calls OpenAI with function calling
-        5. Executes requested tools
-        6. Generates final response
+        2. Retrieves conversation history from cache
+        3. Routes to appropriate agent via Intent Router
+        4. Agent executes tools as needed
+        5. Returns response with routing metadata
+        
+        Legacy Mode (Router Disabled):
+        1. Resolves customer identity (Phase 3)
+        2. Gets RAG knowledge context (Phase 3)
+        3. Calls OpenAI with function calling
+        4. Executes requested tools
+        5. Generates final response
         
         Args:
             request: Customer inquiry request
@@ -260,33 +526,36 @@ Generate accurate, helpful responses that make customers excited to book!"""
                     message=request.message
                 )
             
-            # Step 3: Get conversation history (Phase 3 - currently empty)
-            history = await self.conversation_service.get_conversation_history(
-                request.conversation_id
+            # Step 3: Get conversation history
+            conversation_history = self._conversation_history.get(
+                request.conversation_id,
+                []
             )
             
-            # Step 4: Retrieve RAG knowledge (Phase 3 - currently None)
-            rag_knowledge = await self.rag_service.retrieve_knowledge(
-                request.message
-            )
+            # Phase 1A: Route to specialized agent
+            if self.use_router:
+                response = await self._process_with_router(
+                    request,
+                    customer_id,
+                    conversation_history,
+                    start_time
+                )
+            else:
+                # Legacy: Direct OpenAI call
+                response = await self._process_with_legacy(
+                    request,
+                    customer_id,
+                    conversation_history,
+                    start_time
+                )
             
-            # Step 5: Build messages for OpenAI
-            messages = self._build_messages(
-                request.message,
-                request.channel,
-                request.customer_context,
-                history,
-                rag_knowledge
-            )
+            # Update conversation history
+            self._conversation_history[request.conversation_id] = conversation_history + [
+                {"role": "user", "content": request.message},
+                {"role": "assistant", "content": response.response}
+            ]
             
-            # Step 6: Call OpenAI with function calling
-            tools_used = []
-            response_text = await self._call_openai_with_tools(
-                messages,
-                tools_used
-            )
-            
-            # Step 7: Add message to conversation (Phase 3 - currently no-op)
+            # Add to conversation service (Phase 3)
             await self.conversation_service.add_message(
                 conversation_id=request.conversation_id,
                 role="user",
@@ -295,44 +564,7 @@ Generate accurate, helpful responses that make customers excited to book!"""
             await self.conversation_service.add_message(
                 conversation_id=request.conversation_id,
                 role="assistant",
-                content=response_text
-            )
-            
-            # Step 8: Calculate metadata
-            execution_time_ms = (datetime.now() - start_time).total_seconds() * 1000
-            
-            # Step 9: Determine if admin review needed
-            requires_admin_review = self.config.auto_admin_review
-            
-            # Step 10: Build response
-            response = OrchestratorResponse(
-                success=True,
-                response=response_text,
-                tools_used=tools_used,
-                conversation_id=request.conversation_id,
-                requires_admin_review=requires_admin_review,
-                metadata={
-                    "model": self.config.model,
-                    "execution_time_ms": round(execution_time_ms, 2),
-                    "customer_id": customer_id,
-                    "channel": request.channel,
-                    "tools_count": len(tools_used),
-                    "phase": "Phase 1",
-                    "phase3_features_used": {
-                        "rag": rag_knowledge is not None,
-                        "threading": len(history) > 0,
-                        "identity": customer_id != request.customer_id
-                    }
-                }
-            )
-            
-            self.logger.info(
-                f"Inquiry processed successfully",
-                extra={
-                    "conversation_id": request.conversation_id,
-                    "tools_used": [t.tool_name for t in tools_used],
-                    "execution_time_ms": execution_time_ms
-                }
+                content=response.response
             )
             
             return response
@@ -341,7 +573,7 @@ Generate accurate, helpful responses that make customers excited to book!"""
             self.logger.error(
                 f"Inquiry processing failed: {str(e)}",
                 exc_info=True,
-                extra={"request": request.dict()}
+                extra={"request": request.dict() if hasattr(request, 'dict') else str(request)}
             )
             
             execution_time_ms = (datetime.now() - start_time).total_seconds() * 1000
@@ -356,6 +588,154 @@ Generate accurate, helpful responses that make customers excited to book!"""
                     "error_type": type(e).__name__
                 }
             )
+    
+    async def _process_with_router(
+        self,
+        request: OrchestratorRequest,
+        customer_id: str,
+        conversation_history: List[Dict[str, str]],
+        start_time: datetime
+    ) -> OrchestratorResponse:
+        """
+        Process inquiry using Intent Router and specialized agents.
+        
+        This is the Phase 1A multi-agent flow.
+        """
+        # Build context for router
+        context = {
+            "conversation_id": request.conversation_id,
+            "customer_id": customer_id,
+            "channel": request.channel,
+            **request.customer_context
+        }
+        
+        # Route to appropriate agent
+        agent_response = await self.router.route(
+            message=request.message,
+            context=context,
+            conversation_history=conversation_history
+        )
+        
+        # Convert agent tool calls to orchestrator format
+        tools_used = []
+        if agent_response.get("tool_calls"):
+            for tool_call in agent_response["tool_calls"]:
+                function_name = tool_call["function"]["name"]
+                function_args = json.loads(tool_call["function"]["arguments"])
+                
+                # Find matching tool result
+                tool_result = next(
+                    (tr for tr in agent_response.get("tool_results", [])
+                     if tr.get("tool_call_id") == tool_call["id"]),
+                    None
+                )
+                
+                tools_used.append(ToolCall(
+                    tool_name=function_name,
+                    parameters=function_args,
+                    result=tool_result.get("result", {}) if tool_result else {},
+                    execution_time_ms=tool_result.get("execution_time_ms", 0) if tool_result else 0,
+                    success=tool_result.get("success", False) if tool_result else False
+                ))
+        
+        # Calculate metadata
+        execution_time_ms = (datetime.now() - start_time).total_seconds() * 1000
+        routing_metadata = agent_response.get("routing", {})
+        
+        # Determine if admin review needed
+        requires_admin_review = self.config.auto_admin_review
+        
+        # Build response
+        return OrchestratorResponse(
+            success=True,
+            response=agent_response["content"],
+            tools_used=tools_used,
+            conversation_id=request.conversation_id,
+            requires_admin_review=requires_admin_review,
+            metadata={
+                "model": self.config.model,
+                "execution_time_ms": round(execution_time_ms, 2),
+                "customer_id": customer_id,
+                "channel": request.channel,
+                "tools_count": len(tools_used),
+                "phase": "Phase 1A",
+                "router_enabled": True,
+                "agent_type": routing_metadata.get("agent_type"),
+                "routing_confidence": routing_metadata.get("confidence"),
+                "classification_latency_ms": routing_metadata.get("classification_latency_ms"),
+                "agent_latency_ms": routing_metadata.get("agent_latency_ms"),
+                "intent_transition": routing_metadata.get("intent_transition"),
+                "usage": agent_response.get("usage", {}),
+                "finish_reason": agent_response.get("finish_reason"),
+                "phase3_features_used": {
+                    "rag": False,  # Phase 3
+                    "threading": len(conversation_history) > 0,
+                    "identity": customer_id != request.customer_id
+                }
+            }
+        )
+    
+    async def _process_with_legacy(
+        self,
+        request: OrchestratorRequest,
+        customer_id: str,
+        conversation_history: List[Dict[str, str]],
+        start_time: datetime
+    ) -> OrchestratorResponse:
+        """
+        Process inquiry using legacy OpenAI direct integration.
+        
+        This maintains backward compatibility with Phase 1.
+        """
+        # Get RAG knowledge (Phase 3 - currently None)
+        rag_knowledge = await self.rag_service.retrieve_knowledge(
+            request.message
+        )
+        
+        # Build messages for OpenAI
+        messages = self._build_messages(
+            request.message,
+            request.channel,
+            request.customer_context,
+            conversation_history,
+            rag_knowledge
+        )
+        
+        # Call OpenAI with function calling
+        tools_used = []
+        response_text = await self._call_openai_with_tools(
+            messages,
+            tools_used
+        )
+        
+        # Calculate metadata
+        execution_time_ms = (datetime.now() - start_time).total_seconds() * 1000
+        
+        # Determine if admin review needed
+        requires_admin_review = self.config.auto_admin_review
+        
+        # Build response
+        return OrchestratorResponse(
+            success=True,
+            response=response_text,
+            tools_used=tools_used,
+            conversation_id=request.conversation_id,
+            requires_admin_review=requires_admin_review,
+            metadata={
+                "model": self.config.model,
+                "execution_time_ms": round(execution_time_ms, 2),
+                "customer_id": customer_id,
+                "channel": request.channel,
+                "tools_count": len(tools_used),
+                "phase": "Phase 1 (Legacy)",
+                "router_enabled": False,
+                "phase3_features_used": {
+                    "rag": rag_knowledge is not None,
+                    "threading": len(conversation_history) > 0,
+                    "identity": customer_id != request.customer_id
+                }
+            }
+        )
     
     def _build_messages(
         self,
@@ -547,6 +927,55 @@ Generate accurate, helpful responses that make customers excited to book!"""
         else:
             # No tools used, return direct response
             return message.content
+    
+    def get_conversation_history(self, conversation_id: str) -> List[Dict[str, str]]:
+        """
+        Get conversation history for a given conversation ID.
+        
+        Args:
+            conversation_id: Conversation ID to retrieve
+        
+        Returns:
+            List of messages (role + content)
+        """
+        return self._conversation_history.get(conversation_id, [])
+    
+    def clear_conversation_history(self, conversation_id: str) -> None:
+        """
+        Clear conversation history for a given conversation ID.
+        
+        Useful when a conversation ends or for testing.
+        
+        Args:
+            conversation_id: Conversation ID to clear
+        """
+        if conversation_id in self._conversation_history:
+            del self._conversation_history[conversation_id]
+            self.logger.info(f"Cleared conversation history: {conversation_id}")
+    
+    def get_statistics(self) -> Dict[str, Any]:
+        """
+        Get orchestrator statistics.
+        
+        Returns:
+            Statistics about orchestrator usage
+        """
+        stats = {
+            "mode": "router" if self.use_router else "legacy",
+            "total_conversations": len(self._conversation_history),
+            "phase": "Phase 1A" if self.use_router else "Phase 1 (Legacy)",
+        }
+        
+        # Add router statistics if enabled
+        if self.use_router and self.router:
+            router_stats = self.router.get_statistics()
+            stats["router"] = router_stats
+        
+        # Add legacy statistics if applicable
+        if not self.use_router:
+            stats["tools_registered"] = len(self.tool_registry.list_tools())
+        
+        return stats
 
 
 # Singleton instance

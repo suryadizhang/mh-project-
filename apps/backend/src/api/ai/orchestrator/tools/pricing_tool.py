@@ -116,7 +116,8 @@ Valid addons:
 - "premium_sake_service" (+$25)
 - "extended_performance" (+$50)
 - "custom_menu_planning" (+$35)""",
-                required=False
+                required=False,
+                items={"type": "string"}  # Required for OpenAI array schema validation
             ),
             ToolParameter(
                 name="customer_address",

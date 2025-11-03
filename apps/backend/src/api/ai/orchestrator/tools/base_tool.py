@@ -36,6 +36,7 @@ class ToolParameter(BaseModel):
         required: Whether this parameter is required
         enum: Optional list of allowed values
         properties: For object types, nested parameter definitions
+        items: For array types, specification of array element type (REQUIRED by OpenAI)
     """
     name: str
     type: str
@@ -43,6 +44,7 @@ class ToolParameter(BaseModel):
     required: bool = False
     enum: Optional[List[str]] = None
     properties: Optional[Dict[str, Any]] = None
+    items: Optional[Dict[str, Any]] = None  # Required for array types!
 
 
 class ToolResult(BaseModel):
@@ -231,6 +233,10 @@ class BaseTool(ABC):
             
             if param.properties:
                 param_schema["properties"] = param.properties
+            
+            # CRITICAL: OpenAI requires 'items' for array types
+            if param.items:
+                param_schema["items"] = param.items
             
             properties[param.name] = param_schema
             
