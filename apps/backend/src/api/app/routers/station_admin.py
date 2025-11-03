@@ -402,6 +402,23 @@ async def create_station(
         await db.commit()
         await db.refresh(station)
         
+        # Auto-create notification group for this station
+        try:
+            from services.station_notification_sync import sync_station_with_notification_group
+            station_location = f"{station.city}, {station.state}" if station.city and station.state else station.name
+            await sync_station_with_notification_group(
+                db=db,
+                station_id=station.id,
+                station_name=station.name,
+                station_location=station_location,
+                is_active=True,
+                created_by=current_user.id
+            )
+            logger.info(f"✅ Auto-created notification group for station: {station.name}")
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to create notification group for station: {e}")
+            # Don't fail station creation if notification group fails
+        
         await log_station_activity(
             action="create_station",
             auth_user=current_user,
@@ -606,6 +623,24 @@ async def update_station(
         await db.commit()
         await db.refresh(station)
         
+        # Sync notification group with updated station info
+        if "name" in changes or "city" in changes or "state" in changes or "status" in changes:
+            try:
+                from services.station_notification_sync import sync_station_with_notification_group
+                station_location = f"{station.city}, {station.state}" if station.city and station.state else station.name
+                is_active = station.status == "active" if hasattr(station, 'status') else True
+                await sync_station_with_notification_group(
+                    db=db,
+                    station_id=station.id,
+                    station_name=station.name,
+                    station_location=station_location,
+                    is_active=is_active,
+                    created_by=current_user.id
+                )
+                logger.info(f"✅ Synced notification group for station: {station.name}")
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to sync notification group: {e}")
+        
         await log_station_activity(
             action="update_station",
             auth_user=current_user,
@@ -747,6 +782,14 @@ async def delete_station(
         # Perform deletion
         await db.delete(station)
         await db.commit()
+        
+        # Delete notification group for this station
+        try:
+            from services.station_notification_sync import delete_station_notification_group
+            await delete_station_notification_group(db=db, station_id=station.id)
+            logger.info(f"✅ Deleted notification group for station: {station.name}")
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to delete notification group: {e}")
         
         logger.warning(
             f"Station deleted: {station.code} (ID: {station_id}) by user {current_user.user_id}. "

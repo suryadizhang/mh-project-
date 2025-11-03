@@ -17,7 +17,7 @@ from api.ai.endpoints.models import (
 )
 from api.ai.endpoints.schemas import ChatIngestRequest, ChatIngestResponse
 from api.ai.endpoints.services.ai_pipeline import AIPipeline
-from api.ai.endpoints.services.knowledge_base_simple import SimpleKnowledgeBaseService as KnowledgeBaseService
+from api.ai.endpoints.services.knowledge_base_simple import ProductionKnowledgeBaseService as KnowledgeBaseService
 
 
 class ChatService:

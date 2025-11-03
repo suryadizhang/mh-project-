@@ -6,7 +6,7 @@ from fastapi import APIRouter
 
 # Import endpoint routers
 from .endpoints import auth, bookings, customers, leads, inbox, rate_limit_metrics
-from .endpoints.ai import chat
+from .endpoints.ai import chat, orchestrator
 
 api_router = APIRouter()
 
@@ -19,6 +19,7 @@ api_router.include_router(inbox.router, prefix="/inbox", tags=["Inbox"])
 
 # AI endpoints (integrated, not separate API)
 api_router.include_router(chat.router, prefix="/ai", tags=["AI"])
+api_router.include_router(orchestrator.router, prefix="/ai/orchestrator", tags=["AI Orchestrator"])
 
 # Rate limiting monitoring endpoints
 api_router.include_router(rate_limit_metrics.router, prefix="/monitoring", tags=["Monitoring"])
@@ -44,6 +45,7 @@ async def api_status():
             ],
             "ai": [
                 "/v1/ai/chat",
+                "/v1/ai/orchestrator",
                 "/v1/ai/voice", 
                 "/v1/ai/embeddings"
             ]
@@ -93,6 +95,13 @@ async def list_endpoints():
                 "send": "POST /v1/ai/chat",
                 "history": "GET /v1/ai/chat/history",
                 "thread": "GET /v1/ai/chat/threads/{id}"
+            },
+            "orchestrator": {
+                "process": "POST /v1/ai/orchestrator/process",
+                "batch_process": "POST /v1/ai/orchestrator/batch-process",
+                "config": "GET /v1/ai/orchestrator/config",
+                "health": "GET /v1/ai/orchestrator/health",
+                "tools": "GET /v1/ai/orchestrator/tools"
             },
             "voice": {
                 "transcribe": "POST /v1/ai/voice/transcribe",

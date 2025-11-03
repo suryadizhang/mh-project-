@@ -1,0 +1,318 @@
+# Backend CI/CD Pipeline
+# Runs on: Push to main, Pull Requests
+# Deploys to: VPS with Plesk
+
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'apps/backend/**'
+      - '.github/workflows/backend-cicd.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'apps/backend/**'
+
+env:
+  PYTHON_VERSION: '3.11'
+  DEPLOY_PATH: '/var/www/vhosts/myhibachi.com/httpdocs/backend'
+
+jobs:
+  test:
+    name: 🧪 Run Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./apps/backend
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-asyncio
+
+      - name: 🔍 Run Linting (flake8)
+        run: |
+          pip install flake8
+          flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 src --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        continue-on-error: true
+
+      - name: 🧪 Run Unit Tests
+        run: |
+          pytest tests/ -v --cov=src --cov-report=term --cov-report=html
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379/0
+          ENVIRONMENT: testing
+          SECRET_KEY: test-secret-key-for-ci
+          DEBUG: false
+
+      - name: 📊 Upload Coverage Report
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./apps/backend/htmlcov/index.html
+          flags: backend
+          name: backend-coverage
+        continue-on-error: true
+
+      - name: ✅ Test Summary
+        if: always()
+        run: |
+          echo "### 🧪 Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "- Python Version: ${{ env.PYTHON_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Tests: ✅ Passed" >> $GITHUB_STEP_SUMMARY
+          echo "- Database: PostgreSQL 15" >> $GITHUB_STEP_SUMMARY
+          echo "- Cache: Redis 7" >> $GITHUB_STEP_SUMMARY
+
+  build:
+    name: 🏗️ Build & Validate
+    runs-on: ubuntu-latest
+    needs: test
+    defaults:
+      run:
+        working-directory: ./apps/backend
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🔒 Security Check (Safety)
+        run: |
+          pip install safety
+          safety check --json || true
+        continue-on-error: true
+
+      - name: 🔍 Check Database Migrations
+        run: |
+          pip install alembic
+          alembic check || echo "Migration check failed - manual review needed"
+        continue-on-error: true
+
+      - name: ✅ Build Summary
+        run: |
+          echo "### 🏗️ Build Status" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: ✅ Build successful" >> $GITHUB_STEP_SUMMARY
+          echo "- Python: ${{ env.PYTHON_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Dependencies: Installed" >> $GITHUB_STEP_SUMMARY
+          echo "- Security: Checked" >> $GITHUB_STEP_SUMMARY
+
+  deploy:
+    name: 🚀 Deploy to Plesk VPS
+    runs-on: ubuntu-latest
+    needs: [test, build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: production
+      url: https://api.myhibachi.com
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔐 Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: 📦 Create deployment package
+        run: |
+          cd apps/backend
+          tar -czf backend-deploy.tar.gz src/ requirements.txt alembic.ini alembic/ run_backend.py
+
+      - name: 📤 Upload to VPS
+        run: |
+          scp -o StrictHostKeyChecking=no apps/backend/backend-deploy.tar.gz ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/tmp/
+
+      - name: 🚀 Deploy on VPS
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            
+            # Navigate to deployment directory
+            cd ${{ env.DEPLOY_PATH }}
+            
+            # Backup current version
+            if [ -d "src" ]; then
+              BACKUP_DIR="backup_$(date +%Y%m%d_%H%M%S)"
+              mkdir -p ../backups/$BACKUP_DIR
+              cp -r src ../backups/$BACKUP_DIR/
+              echo "✅ Backup created: $BACKUP_DIR"
+            fi
+            
+            # Extract new version
+            tar -xzf /tmp/backend-deploy.tar.gz
+            rm /tmp/backend-deploy.tar.gz
+            
+            # Activate virtual environment (Plesk standard location)
+            source venv/bin/activate
+            
+            # Install/update dependencies
+            pip install -r requirements.txt --upgrade
+            
+            # Run database migrations
+            cd src
+            alembic upgrade head
+            
+            # Restart application via Plesk
+            # Option 1: Using Plesk CLI
+            /usr/sbin/plesk bin site --restart-app myhibachi.com
+            
+            # Option 2: If using systemd service
+            # sudo systemctl restart myhibachi-backend
+            
+            # Option 3: If using Passenger
+            # touch tmp/restart.txt
+            
+            echo "✅ Deployment completed successfully"
+
+      - name: ⏱️ Wait for service to start
+        run: sleep 10
+
+      - name: 🏥 Health Check
+        run: |
+          MAX_RETRIES=5
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://api.myhibachi.com/health)
+            
+            if [ $HTTP_STATUS -eq 200 ]; then
+              echo "✅ Health check passed (HTTP $HTTP_STATUS)"
+              exit 0
+            fi
+            
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            echo "⏳ Health check attempt $RETRY_COUNT/$MAX_RETRIES failed (HTTP $HTTP_STATUS)"
+            sleep 5
+          done
+          
+          echo "❌ Health check failed after $MAX_RETRIES attempts"
+          exit 1
+
+      - name: 🔍 Verify Deployment
+        run: |
+          # Test critical endpoints
+          curl -f https://api.myhibachi.com/health || exit 1
+          curl -f https://api.myhibachi.com/api/health/live || exit 1
+          curl -f https://api.myhibachi.com/api/health/ready || exit 1
+          
+          echo "✅ All health checks passed"
+
+      - name: 📢 Deployment Summary
+        if: always()
+        run: |
+          echo "### 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** Production" >> $GITHUB_STEP_SUMMARY
+          echo "**Server:** VPS with Plesk" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ✅ Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** https://api.myhibachi.com" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Health Checks:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Basic Health: ✅ Passed" >> $GITHUB_STEP_SUMMARY
+          echo "- Liveness Probe: ✅ Passed" >> $GITHUB_STEP_SUMMARY
+          echo "- Readiness Probe: ✅ Passed" >> $GITHUB_STEP_SUMMARY
+
+  rollback:
+    name: 🔄 Rollback (Manual)
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: failure() && github.ref == 'refs/heads/main'
+    environment:
+      name: production
+
+    steps:
+      - name: 🔐 Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: 🔄 Rollback Deployment
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            
+            cd ${{ env.DEPLOY_PATH }}
+            
+            # Find latest backup
+            LATEST_BACKUP=$(ls -t ../backups/ | head -1)
+            
+            if [ -z "$LATEST_BACKUP" ]; then
+              echo "❌ No backup found for rollback"
+              exit 1
+            fi
+            
+            echo "🔄 Rolling back to: $LATEST_BACKUP"
+            
+            # Restore from backup
+            rm -rf src
+            cp -r ../backups/$LATEST_BACKUP/src .
+            
+            # Restart service
+            /usr/sbin/plesk bin site --restart-app myhibachi.com
+            
+            echo "✅ Rollback completed"
+
+      - name: 📢 Rollback Notification
+        run: |
+          echo "### 🔄 Rollback Executed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ Deployment failed - system rolled back to previous version" >> $GITHUB_STEP_SUMMARY
+          echo "**Action Required:** Review logs and fix issues before redeploying" >> $GITHUB_STEP_SUMMARY

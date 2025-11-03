@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.app.database import get_db
 from api.app.services.review_service import ReviewService
+from services.unified_notification_service import notify_review, notify_complaint
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +101,8 @@ async def submit_review(
     db: AsyncSession = Depends(get_db)
 ):
     """Submit a customer review."""
+    import asyncio
+    
     service = ReviewService(db)
     
     # Get client IP and user agent
@@ -120,6 +123,35 @@ async def submit_review(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=result.get("error", "Failed to submit review")
         )
+    
+    # Send WhatsApp notification based on rating (non-blocking)
+    # Get review details from result
+    review_data = result.get("review", {})
+    customer_name = review_data.get("customer_name", "Customer")
+    customer_phone = review_data.get("customer_phone")
+    rating_text = data.rating.replace("_", " ").title()
+    
+    # Determine if this is a complaint or positive review
+    is_complaint = data.rating in ("could_be_better", "okay")
+    
+    if is_complaint and data.complaint_text:
+        # Send complaint notification
+        asyncio.create_task(notify_complaint(
+            customer_name=customer_name,
+            customer_phone=customer_phone,
+            booking_id=str(review_data.get("booking_id", "Unknown")),
+            complaint_text=data.complaint_text,
+            priority="high" if data.rating == "could_be_better" else "medium"
+        ))
+        logger.info(f"📧 WhatsApp complaint notification queued for review {review_id}")
+    else:
+        # Send positive review notification
+        asyncio.create_task(notify_review(
+            customer_name=customer_name,
+            rating=rating_text,
+            review_text=f"{data.improvement_suggestions[:100] if data.improvement_suggestions else 'No additional feedback'}"
+        ))
+        logger.info(f"📧 WhatsApp review notification queued for review {review_id}")
     
     return result
 

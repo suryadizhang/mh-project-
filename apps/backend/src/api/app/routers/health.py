@@ -94,7 +94,7 @@ async def health_check():
         return HealthResponse(
             status=overall_status,
             service="myhibachi-backend-fastapi",
-            environment=settings.environment,
+            environment=getattr(settings, 'ENVIRONMENT', 'development'),
             version="1.2.0",
             timestamp=datetime.utcnow(),
             uptime_seconds=round(time.time() - startup_time, 2),
@@ -104,7 +104,7 @@ async def health_check():
                 "database": db_check,
                 "stripe_configured": bool(getattr(settings, 'stripe_secret_key', None)),
                 "email_configured": bool(getattr(settings, 'smtp_user', None)),
-                "environment": settings.environment
+                "environment": getattr(settings, 'ENVIRONMENT', 'development')
             }
         )
     except Exception as e:
@@ -142,7 +142,7 @@ async def readiness_check():
         return ReadinessResponse(
             status=status,
             service="myhibachi-backend-fastapi",
-            environment=settings.environment,
+            environment=getattr(settings, 'ENVIRONMENT', 'development'),
             checks=checks,
             database_connected=checks["database"],
             stripe_configured=checks["stripe"],
@@ -187,7 +187,7 @@ async def detailed_health_check():
             "stripe_configured": bool(getattr(settings, 'stripe_secret_key', None)),
             "email_configured": bool(getattr(settings, 'smtp_user', None)),
             "debug_mode": getattr(settings, 'debug', False),
-            "environment": settings.environment,
+            "environment": getattr(settings, 'ENVIRONMENT', 'development'),
             "log_level": getattr(settings, 'log_level', 'info')
         }
         
@@ -200,7 +200,7 @@ async def detailed_health_check():
             "version": "1.2.0",
             "timestamp": datetime.utcnow().isoformat(),
             "uptime_seconds": round(time.time() - startup_time, 2),
-            "environment": settings.environment,
+            "environment": getattr(settings, 'ENVIRONMENT', 'development'),
             "database": db_check,
             "system": system_info,
             "configuration": config_status,

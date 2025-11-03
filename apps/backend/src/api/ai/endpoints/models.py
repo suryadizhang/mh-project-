@@ -90,11 +90,23 @@ class Conversation(Base):
     escalated_at = Column(DateTime, nullable=True)
     assigned_agent_id = Column(String(255), nullable=True)
     escalation_reason = Column(Text, nullable=True)
+    
+    # Option 2 foundations (ready, not used yet)
+    customer_id = Column(String(36), ForeignKey("customers.id"), nullable=True, index=True)
+    confidence_score = Column(Float, default=1.0, nullable=True)  # For hybrid routing
+    route_decision = Column(String(50), default="teacher", nullable=True)  # student/teacher/human
+    student_response = Column(Text, nullable=True)  # For tutor pairs
+    teacher_response = Column(Text, nullable=True)  # For tutor pairs
+    reward_score = Column(Float, nullable=True)  # For RLHF-Lite
 
     # Relationships
     messages = relationship(
         "Message", back_populates="conversation", cascade="all, delete-orphan"
     )
+    usage_records = relationship(
+        "AIUsage", back_populates="conversation", cascade="all, delete-orphan"
+    )
+    customer = relationship("Customer", back_populates="conversations")
 
     # Indexes
     __table_args__ = (
@@ -327,3 +339,73 @@ class TrainingData(Base):
         Index("idx_training_active", "is_active"),
         Index("idx_training_quality", "quality_score"),
     )
+
+
+class AIUsage(Base):
+    """
+    Track AI API usage for cost monitoring and optimization.
+    
+    Enables:
+    1. Cost monitoring and alerts ($500/month trigger)
+    2. Usage analytics by model, agent, channel
+    3. Budget forecasting
+    4. Optimization opportunities
+    """
+    __tablename__ = "ai_usage"
+    
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    
+    # Model information
+    model = Column(String(100), nullable=False, index=True)  # e.g., "gpt-4o-mini"
+    
+    # Token usage
+    input_tokens = Column(Integer, nullable=False)
+    output_tokens = Column(Integer, nullable=False)
+    total_tokens = Column(Integer, nullable=False)
+    
+    # Cost (USD)
+    cost_usd = Column(Float, nullable=False, index=True)
+    
+    # Context (optional)
+    conversation_id = Column(String(36), ForeignKey("conversations.id"), nullable=True, index=True)
+    customer_id = Column(String(36), nullable=True, index=True)
+    channel = Column(String(50), nullable=True, index=True)  # web, email, sms, voice
+    agent_type = Column(String(50), nullable=True, index=True)  # lead_nurturing, customer_care, etc.
+    
+    # Timestamp
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    
+    # Relationships
+    conversation = relationship("Conversation", back_populates="usage_records")
+    
+    # Indexes for cost monitoring queries
+    __table_args__ = (
+        Index("idx_usage_date_cost", "created_at", "cost_usd"),
+        Index("idx_usage_model_date", "model", "created_at"),
+        Index("idx_usage_agent_date", "agent_type", "created_at"),
+    )
+
+
+class Customer(Base):
+    """
+    Customer model for growth tracking.
+    
+    Used by growth_tracker to monitor customer count and trigger
+    Neo4j migration alert at 1,000 customers.
+    """
+    __tablename__ = "customers"
+    
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    
+    # Customer info
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    name = Column(String(255), nullable=True)
+    phone = Column(String(50), nullable=True)
+    
+    # Lifecycle
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    conversations = relationship("Conversation", back_populates="customer")
+

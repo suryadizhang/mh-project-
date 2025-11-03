@@ -13,6 +13,7 @@ Admin endpoints require specific role permissions (RBAC).
 """
 from typing import Any
 from datetime import datetime
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,8 +22,14 @@ from pydantic import BaseModel, Field, EmailStr
 from api.app.database import get_db
 from api.app.utils.auth import get_current_user, require_customer_support, can_access_station
 from core.audit_logger import audit_logger
+from services.unified_notification_service import (
+    notify_new_booking,
+    notify_booking_edit,
+    notify_cancellation
+)
 
 router = APIRouter(tags=["bookings"])
+logger = logging.getLogger(__name__)
 
 
 # Pydantic Schemas
@@ -637,15 +644,38 @@ async def create_booking(
                 "created_at": "2024-10-19T10:30:00Z"
             }
     """
+    import asyncio
+    from datetime import datetime
+    
     # Placeholder implementation
     # In real implementation, validate and create booking
-    return {
-        "id": "booking-new-123",
+    booking_id = "booking-new-123"
+    
+    # Create booking response
+    response = {
+        "id": booking_id,
         "user_id": current_user["id"],
         "status": "pending",
         "message": "Booking created successfully",
         **booking_data.model_dump(),
     }
+    
+    # Send WhatsApp notification asynchronously (non-blocking)
+    # This runs in the background and doesn't block the response
+    asyncio.create_task(notify_new_booking(
+        customer_name=booking_data.customer_name,
+        customer_phone=booking_data.customer_phone,
+        event_date=booking_data.date,  # Format: "2024-12-25"
+        event_time=booking_data.time,  # Format: "18:00"
+        guest_count=booking_data.guests,
+        location=booking_data.location_address,
+        booking_id=booking_id,
+        special_requests=booking_data.special_requests
+    ))
+    
+    logger.info(f"📧 WhatsApp notification queued for booking {booking_id}")
+    
+    return response
 
 
 @router.put(
@@ -744,12 +774,42 @@ async def update_booking(
         HTTPException(403): User trying to update another user's booking
         HTTPException(404): Booking not found
     """
+    import asyncio
+    from datetime import datetime
+    
     # Placeholder implementation
-    return {
+    response = {
         "id": booking_id,
         "message": "Booking updated successfully",
         **booking_data.model_dump(exclude_none=True),
     }
+    
+    # Determine what changed for notification
+    changes = []
+    if booking_data.date:
+        changes.append(f"Date changed to {booking_data.date}")
+    if booking_data.time:
+        changes.append(f"Time changed to {booking_data.time}")
+    if booking_data.guests:
+        changes.append(f"Guest count changed to {booking_data.guests}")
+    if booking_data.location_address:
+        changes.append(f"Location changed")
+    
+    # Only send notification if there are actual changes
+    if changes:
+        # Send WhatsApp notification asynchronously (non-blocking)
+        asyncio.create_task(notify_booking_edit(
+            customer_name="Customer Name",  # Get from DB in real implementation
+            customer_phone="+14155551234",  # Get from DB in real implementation
+            booking_id=booking_id,
+            changes=", ".join(changes),
+            event_date=booking_data.date or "Original Date",
+            event_time=booking_data.time or "Original Time"
+        ))
+        
+        logger.info(f"📧 WhatsApp edit notification queued for booking {booking_id}")
+    
+    return response
 
 
 @router.delete(
@@ -975,6 +1035,26 @@ async def delete_booking(
         ip_address=request.client.host if request.client else None,
         station_id=str(booking.station_id) if booking.station_id else None,
     )
+    
+    # Send cancellation notification asynchronously (non-blocking)
+    from core.security import decrypt_pii
+    import asyncio
+    
+    # Decrypt customer PII for notification
+    customer_name = decrypt_pii(booking.customer.name_encrypted) if hasattr(booking, 'customer') and booking.customer and booking.customer.name_encrypted else "Customer"
+    customer_phone = decrypt_pii(booking.customer.phone_encrypted) if hasattr(booking, 'customer') and booking.customer and booking.customer.phone_encrypted else None
+    
+    asyncio.create_task(notify_cancellation(
+        customer_name=customer_name,
+        customer_phone=customer_phone,
+        booking_id=booking_id,
+        event_date=booking.date.strftime("%B %d, %Y") if booking.date else "Unknown Date",
+        event_time=booking.slot if booking.slot else "Unknown Time",
+        cancellation_reason=delete_request.reason,
+        refund_amount=booking.total_due_cents / 100.0 if booking.payment_status in ("deposit_paid", "paid") else None
+    ))
+    
+    logger.info(f"📧 WhatsApp cancellation notification queued for booking {booking_id}")
     
     # Calculate restore deadline (30 days)
     restore_until = now + timedelta(days=30)
