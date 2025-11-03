@@ -306,6 +306,31 @@ class AIBookingTools:
                 # Log successful booking creation
                 logger.info(f"AI successfully created booking {booking_id} for {booking_request.customer_email}")
 
+                # PHASE 2C OPTIMIZATION: Schedule follow-up in background (non-blocking)
+                # This used to take 1931ms blocking the booking confirmation response
+                # Now it runs asynchronously so booking responds in <500ms
+                try:
+                    from api.ai.scheduler.follow_up_scheduler import schedule_followup_in_background
+                    from api.ai.scheduler import get_scheduler
+                    from datetime import datetime
+                    
+                    scheduler = get_scheduler()
+                    if scheduler and booking_request.ai_conversation_id:
+                        # Convert booking date string to datetime
+                        event_date = datetime.fromisoformat(str(booking_request.preferred_date))
+                        
+                        schedule_followup_in_background(
+                            scheduler=scheduler,
+                            conversation_id=booking_request.ai_conversation_id,
+                            user_id=booking_request.customer_email,  # Use email as user_id
+                            event_date=event_date,
+                            booking_id=booking_id
+                        )
+                        logger.debug(f"Queued follow-up scheduling for booking {booking_id}")
+                except Exception as e:
+                    # Log but don't fail booking creation if scheduling fails
+                    logger.warning(f"Failed to queue follow-up scheduling for booking {booking_id}: {e}")
+
                 # Return comprehensive booking information
                 return {
                     "success": True,

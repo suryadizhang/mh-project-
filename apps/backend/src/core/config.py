@@ -63,8 +63,8 @@ class Settings(BaseSettings):
     ENCRYPTION_KEY: str  # REQUIRED: Must come from .env (32+ chars)
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
-    # CORS
-    CORS_ORIGINS: str = "https://myhibachichef.com,https://admin.myhibachichef.com"
+    # CORS - Multi-Domain Configuration (PRODUCTION)
+    CORS_ORIGINS: str = "https://myhibachichef.com,https://admin.mysticdatanode.net"
     
     @property
     def cors_origins_list(self) -> List[str]:
@@ -138,6 +138,13 @@ class Settings(BaseSettings):
     FROM_EMAIL: str = "cs@myhibachichef.com"  # Public business email
     EMAILS_FROM_NAME: str = "My Hibachi Chef"
     EMAIL_TIMEOUT: int = 30
+    
+    # Gmail Configuration (for payment email monitoring)
+    GMAIL_USER: Optional[str] = None
+    GMAIL_APP_PASSWORD: Optional[str] = None
+    GMAIL_APP_PASSWORD_IMAP: Optional[str] = None
+    PAYMENT_EMAIL_CHECK_INTERVAL_MINUTES: int = 5
+    PAYMENT_EMAIL_USE_IMAP_IDLE: bool = True  # Enabled with imapclient library for reliability
 
     # Backwards-compatibility aliases (legacy lowercase accessors)
     @property
