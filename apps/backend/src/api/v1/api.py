@@ -15,12 +15,18 @@ from .endpoints import (
     customers,
     inbox,
     leads,
+    public_leads,
+    public_quote,
     rate_limit_metrics,
     shadow_learning,
 )
 from .endpoints.ai import chat, orchestrator
 
 api_router = APIRouter()
+
+# Public endpoints (no authentication required)
+api_router.include_router(public_leads.router, prefix="/public", tags=["Public"])
+api_router.include_router(public_quote.router, prefix="/public/quote", tags=["Public", "Quotes"])
 
 # Operational endpoints (CRM functions)
 api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])

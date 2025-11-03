@@ -1,6 +1,8 @@
 # 🔑 Google Maps API Key - Final Configuration Checklist
 
-**API Key:** `AIzaSyCxdQ9eZCYwWKcr4j1DHX4rvv02H_KIvhs`
+**⚠️ SECURITY NOTICE:** Your API key should NEVER be committed to git! Get it from:
+- Backend: `apps/backend/.env` file (gitignored)
+- Frontend: `apps/customer/.env.local` file (gitignored)
 
 ---
 

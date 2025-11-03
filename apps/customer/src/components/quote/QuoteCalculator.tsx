@@ -149,7 +149,7 @@ export function QuoteCalculator() {
     }
   }, [])
 
-  const calculateQuote = () => {
+  const calculateQuote = async () => {
     setIsCalculating(true)
     setCalculationError('')
 
@@ -181,32 +181,45 @@ export function QuoteCalculator() {
         return
       }
 
-      // Calculate base pricing
-      const adultPrice = 55 // $55 per adult
-      const childPrice = 30 // $30 per child
-      const baseTotal = quoteData.adults * adultPrice + quoteData.children * childPrice
+      // Call backend API to calculate quote with travel fee
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${API_BASE}/api/v1/public/quote/calculate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          adults: quoteData.adults,
+          children: quoteData.children,
+          salmon: quoteData.salmon,
+          scallops: quoteData.scallops,
+          filet_mignon: quoteData.filetMignon,
+          lobster_tail: quoteData.lobsterTail,
+          third_proteins: quoteData.thirdProteins,
+          yakisoba_noodles: quoteData.yakisobaNoodles,
+          extra_fried_rice: quoteData.extraFriedRice,
+          extra_vegetables: quoteData.extraVegetables,
+          edamame: quoteData.edamame,
+          gyoza: quoteData.gyoza,
+          venue_address: quoteData.venueAddress,
+          zip_code: quoteData.zipCode,
+        }),
+      })
 
-      // Calculate upgrades
-      let upgradeTotal = 0
-      upgradeTotal += quoteData.salmon * 5 // Salmon +$5 each
-      upgradeTotal += quoteData.scallops * 5 // Scallops +$5 each
-      upgradeTotal += quoteData.filetMignon * 5 // Filet Mignon +$5 each
-      upgradeTotal += quoteData.lobsterTail * 15 // Lobster Tail +$15 each
-      upgradeTotal += quoteData.thirdProteins * 10 // 3rd Protein +$10 each
-      upgradeTotal += quoteData.yakisobaNoodles * 5 // Yakisoba Noodles +$5 each
-      upgradeTotal += quoteData.extraFriedRice * 5 // Extra Fried Rice +$5 each
-      upgradeTotal += quoteData.extraVegetables * 5 // Extra Vegetables +$5 each
-      upgradeTotal += quoteData.edamame * 5 // Edamame +$5 each
-      upgradeTotal += quoteData.gyoza * 10 // Gyoza +$10 each
+      if (!response.ok) {
+        throw new Error('Failed to calculate quote')
+      }
 
-      // Apply $550 minimum
-      const subtotal = baseTotal + upgradeTotal
-      const finalSubtotal = Math.max(subtotal, 550)
+      const data = await response.json()
 
+      // Set quote result with travel fee information
       const result: QuoteResult = {
-        baseTotal: baseTotal,
-        upgradeTotal: upgradeTotal,
-        grandTotal: finalSubtotal
+        baseTotal: data.base_total,
+        upgradeTotal: data.upgrade_total,
+        grandTotal: data.grand_total,
+        travelFee: data.travel_info?.travel_fee || 0,
+        travelDistance: data.travel_info?.distance_miles || undefined,
+        finalTotal: data.grand_total, // Already includes travel fee
       }
 
       setQuoteResult(result)
@@ -219,8 +232,8 @@ export function QuoteCalculator() {
         children: quoteData.children,
         location: quoteData.location,
         zipCode: quoteData.zipCode,
-        grandTotal: result.grandTotal
-      }).catch(err => {
+        grandTotal: result.grandTotal,
+      }).catch((err) => {
         logger.warn('Failed to submit lead data', err as Error)
         // Don't block the quote display if lead submission fails
       })
@@ -506,16 +519,15 @@ export function QuoteCalculator() {
         {/* Travel Fee Notice */}
         <div className="travel-notice">
           <div className="notice-content">
-            <h4>🚗 Travel Fees</h4>
+            <h4>🚗 Smart Travel Fee Calculation</h4>
             <p>
-              Travel fees may apply depending on your location. The first 30 miles are free, then $2
-              per mile for distances beyond that.
+              <strong>Enter your venue address above</strong> and we&apos;ll calculate your exact
+              travel fee using Google Maps! The first 30 miles are FREE, then $2 per mile for
+              distances beyond that.
             </p>
-            <p className="contact-note">
-              <strong>Contact our customer service</strong> at{' '}
-              <a href="tel:9167408768">(916) 740-8768</a> or
-              <a href="mailto:cs@myhibachichef.com"> cs@myhibachichef.com</a> for exact travel fee
-              calculation for your area.
+            <p className="feature-highlight">
+              ✨ <strong>New!</strong> Get instant travel fee calculation when you enter your venue
+              address
             </p>
           </div>
         </div>
@@ -552,14 +564,32 @@ export function QuoteCalculator() {
               </div>
             )}
 
-            <div className="result-item travel-note">
-              <span className="result-label">Travel Fee:</span>
-              <span className="result-value">Calculated at checkout</span>
-            </div>
+            {/* Travel Fee Display */}
+            {quoteResult.travelDistance !== undefined && quoteResult.travelFee !== undefined ? (
+              <div className="result-item travel-calculated">
+                <span className="result-label">
+                  Travel Fee ({quoteResult.travelDistance.toFixed(1)} miles):
+                </span>
+                <span className="result-value">
+                  {quoteResult.travelFee === 0 ? (
+                    <span className="free-badge">FREE ✨</span>
+                  ) : (
+                    `$${quoteResult.travelFee.toFixed(2)}`
+                  )}
+                </span>
+              </div>
+            ) : (
+              <div className="result-item travel-note">
+                <span className="result-label">Travel Fee:</span>
+                <span className="result-value">Enter address for calculation</span>
+              </div>
+            )}
 
             <div className="result-item total">
-              <span className="result-label">Estimated Subtotal:</span>
-              <span className="result-value">${quoteResult.grandTotal}</span>
+              <span className="result-label">
+                {quoteResult.travelFee !== undefined ? 'Total:' : 'Estimated Subtotal:'}
+              </span>
+              <span className="result-value">${quoteResult.grandTotal.toFixed(2)}</span>
             </div>
           </div>
 
