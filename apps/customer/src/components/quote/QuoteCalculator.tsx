@@ -1,15 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 import { logger } from '@/lib/logger'
 import { submitQuoteLead } from '@/lib/leadService'
+
+// Google Maps Autocomplete types
+declare global {
+  interface Window {
+    google: any;
+    initAutocomplete?: () => void;
+  }
+}
 
 interface QuoteData {
   adults: number
   children: number
   location: string
   zipCode: string
+  venueAddress: string  // NEW: Full venue address for accurate travel fee
   name: string
   phone: string
   salmon: number
@@ -28,6 +37,9 @@ interface QuoteResult {
   baseTotal: number
   upgradeTotal: number
   grandTotal: number
+  travelFee?: number  // NEW: Travel fee from backend calculation
+  travelDistance?: number  // NEW: Distance in miles
+  finalTotal?: number  // NEW: Grand total + travel fee
 }
 
 export function QuoteCalculator() {
@@ -36,6 +48,7 @@ export function QuoteCalculator() {
     children: 0,
     location: '',
     zipCode: '',
+    venueAddress: '',  // NEW: Full venue address
     name: '',
     phone: '',
     salmon: 0,
@@ -53,12 +66,88 @@ export function QuoteCalculator() {
   const [quoteResult, setQuoteResult] = useState<QuoteResult | null>(null)
   const [isCalculating, setIsCalculating] = useState(false)
   const [calculationError, setCalculationError] = useState('')
+  const [isCalculatingTravelFee, setIsCalculatingTravelFee] = useState(false)
+
+  // Google Places Autocomplete refs
+  const venueAddressInputRef = useRef<HTMLInputElement>(null)
+  const autocompleteRef = useRef<any>(null)
 
   const handleInputChange = (field: keyof QuoteData, value: number | string) => {
     setQuoteData(prev => ({ ...prev, [field]: value }))
     setQuoteResult(null) // Clear results when input changes
     setCalculationError('')
   }
+
+  // Initialize Google Places Autocomplete
+  useEffect(() => {
+    // Load Google Maps script if not already loaded
+    if (!window.google) {
+      const script = document.createElement('script')
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`
+      script.async = true
+      script.defer = true
+      script.onload = initializeAutocomplete
+      document.head.appendChild(script)
+    } else {
+      initializeAutocomplete()
+    }
+
+    function initializeAutocomplete() {
+      if (!venueAddressInputRef.current || !window.google) return
+
+      // Initialize autocomplete
+      autocompleteRef.current = new window.google.maps.places.Autocomplete(
+        venueAddressInputRef.current,
+        {
+          types: ['address'],
+          componentRestrictions: { country: 'us' }, // Restrict to US addresses
+          fields: ['formatted_address', 'address_components', 'geometry']
+        }
+      )
+
+      // Listen for place selection
+      autocompleteRef.current.addListener('place_changed', () => {
+        const place = autocompleteRef.current.getPlace()
+        
+        if (place.formatted_address) {
+          // Update venue address with formatted address from Google
+          setQuoteData(prev => ({ 
+            ...prev, 
+            venueAddress: place.formatted_address 
+          }))
+
+          // Extract city and ZIP from address components
+          if (place.address_components) {
+            let city = ''
+            let zipCode = ''
+
+            place.address_components.forEach((component: any) => {
+              if (component.types.includes('locality')) {
+                city = component.long_name
+              }
+              if (component.types.includes('postal_code')) {
+                zipCode = component.short_name
+              }
+            })
+
+            // Auto-fill location and zipCode fields
+            setQuoteData(prev => ({
+              ...prev,
+              location: city || prev.location,
+              zipCode: zipCode || prev.zipCode
+            }))
+          }
+        }
+      })
+    }
+
+    return () => {
+      // Cleanup
+      if (autocompleteRef.current) {
+        window.google?.maps.event.clearInstanceListeners(autocompleteRef.current)
+      }
+    }
+  }, [])
 
   const calculateQuote = () => {
     setIsCalculating(true)
@@ -252,6 +341,31 @@ export function QuoteCalculator() {
               <span className="field-note">For service area confirmation</span>
             </div>
           </div>
+
+          <div className="form-row">
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label htmlFor="venueAddress">
+                Full Venue Address *
+                <span className="text-xs text-blue-600 ml-2">
+                  (Required for accurate travel fee calculation)
+                </span>
+              </label>
+              <input
+                ref={venueAddressInputRef}
+                id="venueAddress"
+                type="text"
+                value={quoteData.venueAddress}
+                onChange={e => handleInputChange('venueAddress', e.target.value)}
+                placeholder="Start typing your address... (e.g., 123 Main Street)"
+                className="form-input"
+                required
+                autoComplete="off"
+              />
+              <span className="field-note">
+                📍 <strong>Smart Address Search:</strong> Start typing and select from suggestions for automatic travel fee calculation via Google Maps
+              </span>
+            </div>
+          </div>
         </div>
 
         <div className="form-section">
@@ -440,7 +554,7 @@ export function QuoteCalculator() {
 
             <div className="result-item travel-note">
               <span className="result-label">Travel Fee:</span>
-              <span className="result-value">Contact us for calculation</span>
+              <span className="result-value">Calculated at checkout</span>
             </div>
 
             <div className="result-item total">
@@ -449,26 +563,62 @@ export function QuoteCalculator() {
             </div>
           </div>
 
+          {/* Gratuity/Tip Recommendation */}
+          <div className="gratuity-notice">
+            <div className="gratuity-content">
+              <h4>💝 Show Your Appreciation</h4>
+              <p className="gratuity-message">
+                <strong>Please note:</strong> This quote does not include gratuity for our talented chefs
+                who pour their hearts into making your event unforgettable. Our chefs work tirelessly to
+                deliver an exceptional hibachi experience, bringing the excitement, skill, and entertainment
+                that makes your celebration truly special.
+              </p>
+              <div className="gratuity-recommendation">
+                <p className="gratuity-subtitle">
+                  <strong>Recommended Gratuity:</strong>
+                </p>
+                <div className="gratuity-tiers">
+                  <div className="gratuity-tier">
+                    <span className="tier-percentage">20%</span>
+                    <span className="tier-label">Good Service</span>
+                    <span className="tier-amount">${(quoteResult.grandTotal * 0.20).toFixed(2)}</span>
+                  </div>
+                  <div className="gratuity-tier highlighted">
+                    <span className="tier-percentage">25%</span>
+                    <span className="tier-label">Great Service ⭐</span>
+                    <span className="tier-amount">${(quoteResult.grandTotal * 0.25).toFixed(2)}</span>
+                  </div>
+                  <div className="gratuity-tier">
+                    <span className="tier-percentage">30-35%</span>
+                    <span className="tier-label">Exceptional Service</span>
+                    <span className="tier-amount">${(quoteResult.grandTotal * 0.30).toFixed(2)} - ${(quoteResult.grandTotal * 0.35).toFixed(2)}</span>
+                  </div>
+                </div>
+                <p className="gratuity-note">
+                  💡 <em>Gratuity is based on your satisfaction and is paid directly to your chef at the end of your event.
+                  Cash, Venmo, or Zelle are greatly appreciated!</em>
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="quote-notes">
-            <h4>Important Notes:</h4>
+            <h4>Important Information:</h4>
             <ul>
-              <li>• $550 minimum party total automatically applied</li>
-              <li>• This is an initial estimate only - final pricing confirmed upon booking</li>
-              <li>• Travel fees calculated separately based on your exact location</li>
-              <li>• Gratuity (20-35% suggested) paid directly to chef</li>
-              <li>
-                • $100 refundable deposit required to secure booking (refundable if canceled 7+ days
-                before event)
-              </li>
+              <li>✓ <strong>Minimum:</strong> $550 party total automatically applied</li>
+              <li>✓ <strong>Pricing:</strong> This is an initial estimate - final pricing confirmed during booking consultation</li>
+              <li>✓ <strong>Travel Fee:</strong> First 30 miles FREE, then $2/mile (calculated based on your venue address)</li>
+              <li>✓ <strong>Deposit:</strong> $100 refundable deposit required to secure your date (refunded if canceled 7+ days before event)</li>
+              <li>✓ <strong>What&apos;s Included:</strong> Professional chef, all equipment, ingredients, setup, performance, and cleanup</li>
             </ul>
           </div>
 
           <div className="quote-actions">
             <a href="/BookUs" className="book-now-btn">
-              Book Your Event Now
+              🎉 Book Your Event Now
             </a>
-            <a href="/contact" className="call-btn">
-              Contact Us
+            <a href="tel:9167408768" className="call-btn">
+              📞 Call Us: (916) 740-8768
             </a>
           </div>
         </div>
