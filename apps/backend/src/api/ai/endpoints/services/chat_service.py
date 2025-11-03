@@ -18,12 +18,14 @@ from api.ai.endpoints.models import (
 from api.ai.endpoints.schemas import ChatIngestRequest, ChatIngestResponse
 from api.ai.endpoints.services.ai_pipeline import AIPipeline
 from api.ai.endpoints.services.knowledge_base_simple import ProductionKnowledgeBaseService as KnowledgeBaseService
+from api.ai.endpoints.services.ai_cache_service import get_ai_cache
 
 
 class ChatService:
     def __init__(self):
         self.ai_service = AIPipeline()
         self.kb_service = KnowledgeBaseService()
+        self.cache = get_ai_cache()  # ✅ Initialize cache
 
     async def ingest_chat(
         self, request: ChatIngestRequest, db: AsyncSession
@@ -35,6 +37,30 @@ class ChatService:
         start_time = time.time()
 
         try:
+            # ✅ STEP 1: Check cache first
+            cache_context = {
+                "user_role": "customer",
+                "channel": request.channel.value,
+                "user_id": request.user_id
+            }
+            
+            cached_response = await self.cache.get_cached_response(
+                message=request.text,  # ✅ Use request.text
+                context=cache_context
+            )
+            
+            if cached_response:
+                # Cache hit! Return immediately (skip AI processing)
+                return ChatIngestResponse(
+                    conversation_id=cached_response.get("conversation_id", str(uuid4())),
+                    message_id=cached_response.get("message_id", str(uuid4())),
+                    response=cached_response["response"],
+                    confidence=cached_response.get("confidence", 0.95),
+                    source=f"{cached_response.get('source', 'cache')} (cached)",
+                    processing_time=time.time() - start_time,  # <50ms for cache hits
+                    needs_human_review=False,
+                )
+
             # Find or create conversation
             conversation_query = select(Conversation).where(
                 Conversation.channel == request.channel.value,
@@ -60,7 +86,7 @@ class ChatService:
             incoming_message = Message(
                 conversation_id=conversation.id,
                 role=MessageRole.USER.value,
-                content=request.message,
+                content=request.text,  # ✅ Use request.text
                 channel=request.channel.value,
                 metadata=request.metadata or {},
             )
@@ -68,7 +94,7 @@ class ChatService:
 
             # Process through AI pipeline
             ai_response = await self.ai_service.process_message(
-                message=request.message,
+                message=request.text,  # ✅ Use request.text
                 conversation_id=conversation.id,
                 channel=request.channel,
                 user_context=request.metadata or {},
@@ -100,6 +126,21 @@ class ChatService:
             )
 
             await db.commit()
+
+            # ✅ STEP 2: Cache the AI response for future use
+            cache_data = {
+                "conversation_id": str(conversation.id),
+                "message_id": str(response_message.id),
+                "response": ai_response.message,
+                "confidence": ai_response.confidence,
+                "source": ai_response.source,
+            }
+            
+            await self.cache.cache_response(
+                message=request.text,  # ✅ Use request.text
+                response=cache_data,
+                context=cache_context
+            )
 
             return ChatIngestResponse(
                 conversation_id=str(conversation.id),
