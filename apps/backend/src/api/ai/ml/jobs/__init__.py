@@ -10,9 +10,10 @@ Author: MyHibachi Development Team
 Created: October 31, 2025
 """
 
+import logging
+
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
-import logging
 
 logger = logging.getLogger(__name__)
 

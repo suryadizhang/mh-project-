@@ -7,10 +7,10 @@ Available routers:
 - IntentRouter: Embedding-based semantic routing to agents
 """
 
-from api.ai.routers.intent_router import IntentRouter, get_intent_router, AgentType
+from api.ai.routers.intent_router import (
+    AgentType,
+    IntentRouter,
+    get_intent_router,
+)
 
-__all__ = [
-    "IntentRouter",
-    "get_intent_router",
-    "AgentType"
-]
+__all__ = ["AgentType", "IntentRouter", "get_intent_router"]

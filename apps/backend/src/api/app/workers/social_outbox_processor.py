@@ -1,17 +1,16 @@
 """Social media outbox processor for webhook deliveries."""
 
-import logging
 from datetime import datetime, timedelta
-from typing import Any, Optional
+import logging
+from typing import Any
 from uuid import UUID
 
 import aiohttp
+from api.app.models.events import OutboxEntry
+from api.app.models.social import SocialAccount, SocialMessage, SocialThread
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
-
-from api.app.models.events import OutboxEntry
-from api.app.models.social import SocialAccount, SocialMessage, SocialThread
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +23,7 @@ class SocialOutboxProcessor:
             "instagram": {"requests_per_hour": 200, "current": 0, "reset_at": None},
             "facebook": {"requests_per_hour": 200, "current": 0, "reset_at": None},
             "google": {"requests_per_hour": 1000, "current": 0, "reset_at": None},
-            "yelp": {"requests_per_hour": 5000, "current": 0, "reset_at": None}
+            "yelp": {"requests_per_hour": 5000, "current": 0, "reset_at": None},
         }
 
         self.handlers = {
@@ -32,7 +31,7 @@ class SocialOutboxProcessor:
             "social_message_schedule": self._handle_message_schedule,
             "social_followup_due": self._handle_followup_due,
             "webhook_delivery_failed": self._handle_webhook_retry,
-            "social_account_sync": self._handle_account_sync
+            "social_account_sync": self._handle_account_sync,
         }
 
     async def process_event(self, event: OutboxEntry, session: AsyncSession) -> bool:
@@ -57,7 +56,7 @@ class SocialOutboxProcessor:
             return success
 
         except Exception as e:
-            logger.error(f"Error processing social outbox event {event.id}: {e}")
+            logger.exception(f"Error processing social outbox event {event.id}: {e}")
             raise
 
     async def _handle_reply_approved(self, event: OutboxEntry, session: AsyncSession) -> bool:
@@ -76,9 +75,12 @@ class SocialOutboxProcessor:
                 logger.error(f"Message {message_id} not found for approved reply")
                 return False
 
-            thread_stmt = select(SocialThread).join(SocialAccount).where(
-                SocialThread.id == thread_id
-            ).options(joinedload(SocialThread.account))
+            thread_stmt = (
+                select(SocialThread)
+                .join(SocialAccount)
+                .where(SocialThread.id == thread_id)
+                .options(joinedload(SocialThread.account))
+            )
             thread_result = await session.execute(thread_stmt)
             thread = thread_result.scalar_one_or_none()
 
@@ -93,7 +95,7 @@ class SocialOutboxProcessor:
                 account=thread.account,
                 message=message,
                 thread=thread,
-                session=session
+                session=session,
             )
 
             if success:
@@ -102,7 +104,7 @@ class SocialOutboxProcessor:
                 message.metadata = {
                     **(message.metadata or {}),
                     "sent_via_outbox": True,
-                    "approved_at": event.created_at.isoformat()
+                    "approved_at": event.created_at.isoformat(),
                 }
 
                 logger.info(f"Successfully sent approved reply {message_id}")
@@ -112,7 +114,7 @@ class SocialOutboxProcessor:
                 return False
 
         except Exception as e:
-            logger.error(f"Error handling approved reply {message_id}: {e}")
+            logger.exception(f"Error handling approved reply {message_id}: {e}")
             return False
 
     async def _handle_message_schedule(self, event: OutboxEntry, session: AsyncSession) -> bool:
@@ -122,7 +124,7 @@ class SocialOutboxProcessor:
         scheduled_for = data.get("scheduled_for")
 
         # Check if it's time to send
-        if datetime.fromisoformat(scheduled_for.replace('Z', '+00:00')) > datetime.utcnow():
+        if datetime.fromisoformat(scheduled_for.replace("Z", "+00:00")) > datetime.utcnow():
             logger.debug(f"Message {message_id} not yet scheduled to send")
             return False  # Will retry later
 
@@ -144,10 +146,7 @@ class SocialOutboxProcessor:
 
             # Create and send follow-up message
             follow_up_message = await self._create_followup_message(
-                thread_id=thread_id,
-                follow_up_type=follow_up_type,
-                data=data,
-                session=session
+                thread_id=thread_id, follow_up_type=follow_up_type, data=data, session=session
             )
 
             if follow_up_message:
@@ -159,8 +158,8 @@ class SocialOutboxProcessor:
                     event_data={
                         "message_id": follow_up_message.id,
                         "thread_id": thread_id,
-                        "is_followup": True
-                    }
+                        "is_followup": True,
+                    },
                 )
 
                 return await self._handle_reply_approved(follow_up_event, session)
@@ -168,7 +167,7 @@ class SocialOutboxProcessor:
             return False
 
         except Exception as e:
-            logger.error(f"Error handling follow-up for thread {thread_id}: {e}")
+            logger.exception(f"Error handling follow-up for thread {thread_id}: {e}")
             return False
 
     async def _handle_webhook_retry(self, event: OutboxEntry, session: AsyncSession) -> bool:
@@ -190,8 +189,8 @@ class SocialOutboxProcessor:
                     timeout=aiohttp.ClientTimeout(total=10),
                     headers={
                         "Content-Type": "application/json",
-                        "User-Agent": "MyHibachiChef-Webhook/1.0"
-                    }
+                        "User-Agent": "MyHibachiChef-Webhook/1.0",
+                    },
                 ) as response:
                     if response.status == 200:
                         logger.info(f"Webhook retry successful: {webhook_url}")
@@ -205,17 +204,14 @@ class SocialOutboxProcessor:
                                 event_type="webhook_delivery_failed",
                                 aggregate_type="WebhookDelivery",
                                 aggregate_id=UUID(int=0),  # Dummy ID
-                                event_data={
-                                    **data,
-                                    "retry_count": retry_count + 1
-                                }
+                                event_data={**data, "retry_count": retry_count + 1},
                             )
                             session.add(retry_event)
 
                         return False
 
         except Exception as e:
-            logger.error(f"Error retrying webhook {webhook_url}: {e}")
+            logger.exception(f"Error retrying webhook {webhook_url}: {e}")
             return False
 
     async def _handle_account_sync(self, event: OutboxEntry, session: AsyncSession) -> bool:
@@ -242,7 +238,7 @@ class SocialOutboxProcessor:
                 account.metadata = {
                     **(account.metadata or {}),
                     "last_sync": datetime.utcnow().isoformat(),
-                    "platform_data": platform_data
+                    "platform_data": platform_data,
                 }
 
                 logger.info(f"Synced account {account_id} with platform")
@@ -252,7 +248,7 @@ class SocialOutboxProcessor:
                 return False
 
         except Exception as e:
-            logger.error(f"Error syncing account {account_id}: {e}")
+            logger.exception(f"Error syncing account {account_id}: {e}")
             return False
 
     async def _send_platform_message(
@@ -261,7 +257,7 @@ class SocialOutboxProcessor:
         account: SocialAccount,
         message: SocialMessage,
         thread: SocialThread,
-        session: AsyncSession
+        session: AsyncSession,
     ) -> bool:
         """Send message via platform API."""
         try:
@@ -278,10 +274,12 @@ class SocialOutboxProcessor:
                 return False
 
         except Exception as e:
-            logger.error(f"Error sending {platform} message: {e}")
+            logger.exception(f"Error sending {platform} message: {e}")
             return False
 
-    async def _send_meta_message(self, account: SocialAccount, message: SocialMessage, thread: SocialThread) -> bool:
+    async def _send_meta_message(
+        self, account: SocialAccount, message: SocialMessage, thread: SocialThread
+    ) -> bool:
         """Send message via Meta Graph API (Instagram/Facebook)."""
         if not account.token_ref:
             logger.error("No access token for Meta account")
@@ -297,24 +295,21 @@ class SocialOutboxProcessor:
                 "recipient": {
                     "id": thread.metadata.get("customer_id") or thread.metadata.get("sender_id")
                 },
-                "message": {
-                    "text": message.body
-                },
-                "access_token": access_token
+                "message": {"text": message.body},
+                "access_token": access_token,
             }
         elif message.kind == "comment":
             # Reply to comment/post
             url = f"https://graph.facebook.com/v18.0/{thread.metadata.get('post_id')}/comments"
-            payload = {
-                "message": message.body,
-                "access_token": access_token
-            }
+            payload = {"message": message.body, "access_token": access_token}
         else:
             logger.error(f"Unsupported message kind for Meta: {message.kind}")
             return False
 
         async with aiohttp.ClientSession() as client_session:
-            async with client_session.post(url, json=payload, timeout=aiohttp.ClientTimeout(total=15)) as response:
+            async with client_session.post(
+                url, json=payload, timeout=aiohttp.ClientTimeout(total=15)
+            ) as response:
                 if response.status == 200:
                     response_data = await response.json()
                     message.platform_message_id = response_data.get("id")
@@ -324,7 +319,9 @@ class SocialOutboxProcessor:
                     logger.error(f"Meta API error: {response.status} - {error_text}")
                     return False
 
-    async def _send_google_message(self, account: SocialAccount, message: SocialMessage, thread: SocialThread) -> bool:
+    async def _send_google_message(
+        self, account: SocialAccount, message: SocialMessage, thread: SocialThread
+    ) -> bool:
         """Send message via Google Business Profile API."""
         # Google Business Profile doesn't support direct messaging
         # This would typically be for review responses
@@ -360,7 +357,9 @@ class SocialOutboxProcessor:
         if rate_info:
             rate_info["current"] += 1
 
-    async def _check_followup_conditions(self, thread_id: UUID, conditions: dict[str, Any], session: AsyncSession) -> bool:
+    async def _check_followup_conditions(
+        self, thread_id: UUID, conditions: dict[str, Any], session: AsyncSession
+    ) -> bool:
         """Check if follow-up conditions are met."""
         if not conditions:
             return True
@@ -368,14 +367,14 @@ class SocialOutboxProcessor:
         # Check if no response by specified time
         no_response_by = conditions.get("if_no_response_by")
         if no_response_by:
-            cutoff_time = datetime.fromisoformat(no_response_by.replace('Z', '+00:00'))
+            cutoff_time = datetime.fromisoformat(no_response_by.replace("Z", "+00:00"))
 
             # Check for customer messages after cutoff
             recent_messages_stmt = select(SocialMessage).where(
                 and_(
                     SocialMessage.thread_id == thread_id,
                     SocialMessage.direction == "inbound",
-                    SocialMessage.created_at > cutoff_time
+                    SocialMessage.created_at > cutoff_time,
                 )
             )
 
@@ -395,12 +394,8 @@ class SocialOutboxProcessor:
         return True
 
     async def _create_followup_message(
-        self,
-        thread_id: UUID,
-        follow_up_type: str,
-        data: dict[str, Any],
-        session: AsyncSession
-    ) -> Optional[SocialMessage]:
+        self, thread_id: UUID, follow_up_type: str, data: dict[str, Any], session: AsyncSession
+    ) -> SocialMessage | None:
         """Create follow-up message."""
         try:
             message_template = data.get("message_template", "")
@@ -416,8 +411,8 @@ class SocialOutboxProcessor:
                 metadata={
                     "is_followup": True,
                     "followup_type": follow_up_type,
-                    "auto_generated": True
-                }
+                    "auto_generated": True,
+                },
             )
 
             session.add(followup_message)
@@ -426,7 +421,7 @@ class SocialOutboxProcessor:
             return followup_message
 
         except Exception as e:
-            logger.error(f"Error creating follow-up message: {e}")
+            logger.exception(f"Error creating follow-up message: {e}")
             return None
 
     async def _decrypt_token(self, token_ref: str) -> str:
@@ -435,16 +430,16 @@ class SocialOutboxProcessor:
         # For now, return placeholder
         return "placeholder_access_token"
 
-    async def _fetch_account_details(self, account: SocialAccount) -> Optional[dict[str, Any]]:
+    async def _fetch_account_details(self, account: SocialAccount) -> dict[str, Any] | None:
         """Fetch account details from platform API."""
         # Placeholder implementation
         return {
             "page_name": account.page_name,
             "avatar_url": account.avatar_url,
-            "last_updated": datetime.utcnow().isoformat()
+            "last_updated": datetime.utcnow().isoformat(),
         }
 
-    def _extract_platform_from_event(self, event: OutboxEntry) -> Optional[str]:
+    def _extract_platform_from_event(self, event: OutboxEntry) -> str | None:
         """Extract platform from event data."""
         data = event.event_data
         return data.get("platform") or data.get("source", "").replace("social_", "")

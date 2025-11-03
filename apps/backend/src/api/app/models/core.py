@@ -1,8 +1,11 @@
 """
 Core database models for CRM system.
 """
+
 from uuid import uuid4
 
+# Use unified Base from models package
+from api.app.models.declarative_base import Base
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
@@ -14,12 +17,10 @@ from sqlalchemy import (
     String,
     Text,
 )
-from sqlalchemy.dialects.postgresql import UUID as PostgresUUID, JSONB
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-
-# Use unified Base from models package
-from api.app.models.declarative_base import Base
 
 
 class Customer(Base):
@@ -29,9 +30,11 @@ class Customer(Base):
     __table_args__ = {"schema": "core"}
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
-    
+
     # Station association for multi-tenant isolation
-    station_id = Column(PostgresUUID(as_uuid=True), ForeignKey("identity.stations.id"), nullable=False, index=True)
+    station_id = Column(
+        PostgresUUID(as_uuid=True), ForeignKey("identity.stations.id"), nullable=False, index=True
+    )
 
     # Encrypted fields
     email_encrypted = Column(String(500), nullable=False)
@@ -47,7 +50,9 @@ class Customer(Base):
 
     # Timestamps
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
-    updated_at = Column(DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now()
+    )
 
     # Relationships
     station = relationship("Station", foreign_keys=[station_id])  # Now works with unified Base!
@@ -56,13 +61,6 @@ class Customer(Base):
     # leads = relationship("Lead", back_populates="customer")  # Disabled - Lead.customer is commented out
     # social_threads = relationship("SocialThread", back_populates="customer")  # Disabled - no FK in SocialThread
     # newsletter_subscriptions = relationship("Subscriber", back_populates="customer")  # Disabled - check FK
-    
-    __table_args__ = (
-        # Unique email within station (allow same email across different stations)
-        Index("idx_customer_station_email", "station_id", "email_encrypted", unique=True),
-        Index("idx_customer_station_created", "station_id", "created_at"),
-        {"schema": "core"}
-    )
 
 
 class Booking(Base):
@@ -71,10 +69,14 @@ class Booking(Base):
     __tablename__ = "bookings"
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
-    
+
     # Station association for multi-tenant isolation
-    station_id = Column(PostgresUUID(as_uuid=True), ForeignKey("identity.stations.id"), nullable=False, index=True)
-    customer_id = Column(PostgresUUID(as_uuid=True), ForeignKey("core.customers.id"), nullable=False, index=True)
+    station_id = Column(
+        PostgresUUID(as_uuid=True), ForeignKey("identity.stations.id"), nullable=False, index=True
+    )
+    customer_id = Column(
+        PostgresUUID(as_uuid=True), ForeignKey("core.customers.id"), nullable=False, index=True
+    )
 
     # Booking details
     date = Column(DateTime(timezone=True), nullable=False)
@@ -88,8 +90,12 @@ class Booking(Base):
     balance_due_cents = Column(Integer, nullable=False, default=0)
 
     # Status tracking
-    status = Column(String(20), nullable=False, default="confirmed")  # confirmed, cancelled, completed
-    payment_status = Column(String(20), nullable=False, default="pending")  # pending, deposit_paid, paid
+    status = Column(
+        String(20), nullable=False, default="confirmed"
+    )  # confirmed, cancelled, completed
+    payment_status = Column(
+        String(20), nullable=False, default="pending"
+    )  # pending, deposit_paid, paid
 
     # Optional encrypted fields
     special_requests_encrypted = Column(String(1000), nullable=True)
@@ -100,7 +106,9 @@ class Booking(Base):
 
     # Timestamps
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
-    updated_at = Column(DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now()
+    )
 
     # Relationships
     station = relationship("Station", foreign_keys=[station_id])  # Now works with unified Base!
@@ -111,7 +119,9 @@ class Booking(Base):
         CheckConstraint("total_guests > 0", name="ck_bookings_check_party_adults_positive"),
         CheckConstraint("total_guests >= 0", name="ck_bookings_check_party_kids_non_negative"),
         CheckConstraint("deposit_due_cents >= 0", name="ck_bookings_check_deposit_non_negative"),
-        CheckConstraint("total_due_cents >= deposit_due_cents", name="ck_bookings_check_total_gte_deposit"),
+        CheckConstraint(
+            "total_due_cents >= deposit_due_cents", name="ck_bookings_check_total_gte_deposit"
+        ),
         Index("idx_booking_station_date", "station_id", "date", "slot"),
         Index("idx_booking_station_customer", "station_id", "customer_id"),
         {"schema": "core"},
@@ -124,13 +134,17 @@ class Payment(Base):
     __tablename__ = "payments"
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
-    booking_id = Column(PostgresUUID(as_uuid=True), ForeignKey("core.bookings.id"), nullable=False, index=True)
+    booking_id = Column(
+        PostgresUUID(as_uuid=True), ForeignKey("core.bookings.id"), nullable=False, index=True
+    )
 
     # Payment details
     amount_cents = Column(Integer, nullable=False)
     payment_method = Column(String(50), nullable=False)  # stripe, cash, check, etc.
     payment_reference = Column(String(100), nullable=True)  # Stripe payment ID, check number
-    status = Column(String(20), nullable=False, default="completed")  # completed, pending, failed, refunded
+    status = Column(
+        String(20), nullable=False, default="completed"
+    )  # completed, pending, failed, refunded
 
     # Optional fields
     notes = Column(Text, nullable=True)
@@ -141,7 +155,9 @@ class Payment(Base):
 
     # Timestamps
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
-    updated_at = Column(DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now()
+    )
 
     # Relationships
     booking = relationship("Booking", back_populates="payments")
@@ -149,8 +165,7 @@ class Payment(Base):
     __table_args__ = (
         CheckConstraint("amount_cents > 0", name="payment_amount_positive"),
         CheckConstraint(
-            "status IN ('completed', 'pending', 'failed', 'refunded')",
-            name="payment_status_valid"
+            "status IN ('completed', 'pending', 'failed', 'refunded')", name="payment_status_valid"
         ),
         {"schema": "core"},
     )
@@ -162,10 +177,14 @@ class MessageThread(Base):
     __tablename__ = "message_threads"
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
-    
+
     # Station association for multi-tenant isolation
-    station_id = Column(PostgresUUID(as_uuid=True), ForeignKey("identity.stations.id"), nullable=False, index=True)
-    customer_id = Column(PostgresUUID(as_uuid=True), ForeignKey("core.customers.id"), nullable=True, index=True)
+    station_id = Column(
+        PostgresUUID(as_uuid=True), ForeignKey("identity.stations.id"), nullable=False, index=True
+    )
+    customer_id = Column(
+        PostgresUUID(as_uuid=True), ForeignKey("core.customers.id"), nullable=True, index=True
+    )
 
     # Contact info (encrypted)
     phone_number_encrypted = Column(String(500), nullable=False, index=True)
@@ -181,7 +200,9 @@ class MessageThread(Base):
 
     # Timestamps
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
-    updated_at = Column(DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now()
+    )
 
     # Relationships
     station = relationship("Station", foreign_keys=[station_id])  # Now works with unified Base!
@@ -189,10 +210,7 @@ class MessageThread(Base):
     messages = relationship("Message", back_populates="thread")
 
     __table_args__ = (
-        CheckConstraint(
-            "status IN ('active', 'closed', 'archived')",
-            name="thread_status_valid"
-        ),
+        CheckConstraint("status IN ('active', 'closed', 'archived')", name="thread_status_valid"),
         Index("idx_thread_station_phone", "station_id", "phone_number_encrypted"),
         Index("idx_thread_station_customer", "station_id", "customer_id"),
         {"schema": "core"},
@@ -205,7 +223,12 @@ class Message(Base):
     __tablename__ = "messages"
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
-    thread_id = Column(PostgresUUID(as_uuid=True), ForeignKey("core.message_threads.id"), nullable=False, index=True)
+    thread_id = Column(
+        PostgresUUID(as_uuid=True),
+        ForeignKey("core.message_threads.id"),
+        nullable=False,
+        index=True,
+    )
 
     # Message content (encrypted)
     content_encrypted = Column(String(2000), nullable=False)
@@ -227,19 +250,17 @@ class Message(Base):
 
     # Timestamps
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
-    updated_at = Column(DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now()
+    )
 
     # Relationships
     thread = relationship("MessageThread", back_populates="messages")
 
     __table_args__ = (
+        CheckConstraint("direction IN ('inbound', 'outbound')", name="message_direction_valid"),
         CheckConstraint(
-            "direction IN ('inbound', 'outbound')",
-            name="message_direction_valid"
-        ),
-        CheckConstraint(
-            "status IN ('delivered', 'failed', 'pending')",
-            name="message_status_valid"
+            "status IN ('delivered', 'failed', 'pending')", name="message_status_valid"
         ),
         Index("idx_message_thread_sent", "thread_id", "sent_at"),
         {"schema": "core"},
@@ -253,31 +274,19 @@ class Event(Base):
     __table_args__ = {"schema": "core"}
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
-    
+
     # Event identification
     event_type = Column(String(100), nullable=False, index=True)
     entity_type = Column(String(50), nullable=False, index=True)
     entity_id = Column(String(100), nullable=False, index=True)
-    
+
     # Event data
     data = Column(JSONB, nullable=True)
-    
+
     # Timestamps
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
-    
+
     # Indexes for common queries
-    __table_args__ = (
-        Index("idx_event_type_created", "event_type", "created_at"),
-        Index("idx_entity_type_id", "entity_type", "entity_id"),
-        {"schema": "core"}
-    )
 
 
-__all__ = [
-    "Customer",
-    "Booking",
-    "Payment",
-    "MessageThread",
-    "Message",
-    "Event"
-]
+__all__ = ["Booking", "Customer", "Event", "Message", "MessageThread", "Payment"]

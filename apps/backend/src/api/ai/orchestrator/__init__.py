@@ -41,40 +41,33 @@ Created: October 31, 2025
 Version: 1.0.0 (Phase 1)
 """
 
-from .tools import (
-    BaseTool,
-    ToolParameter,
-    ToolResult,
-    ToolRegistry,
-    PricingTool,
-    TravelFeeTool,
-    ProteinTool
-)
-
+from .ai_orchestrator import AIOrchestrator, get_ai_orchestrator
 from .schemas.orchestrator_schemas import (
+    OrchestratorConfig,
     OrchestratorRequest,
     OrchestratorResponse,
-    OrchestratorConfig,
-    ToolCall
+    ToolCall,
 )
-
 from .services.conversation_service import (
     ConversationService,
-    get_conversation_service
+    get_conversation_service,
 )
-
 from .services.phase3_services import (
+    IdentityResolver,
     RAGService,
     VoiceAIService,
-    IdentityResolver,
+    get_identity_resolver,
     get_rag_service,
     get_voice_service,
-    get_identity_resolver
 )
-
-from .ai_orchestrator import (
-    AIOrchestrator,
-    get_ai_orchestrator
+from .tools import (
+    BaseTool,
+    PricingTool,
+    ProteinTool,
+    ToolParameter,
+    ToolRegistry,
+    ToolResult,
+    TravelFeeTool,
 )
 
 __version__ = "1.0.0"
@@ -83,34 +76,30 @@ __phase__ = "Phase 1"
 __all__ = [
     # Main Orchestrator
     "AIOrchestrator",
-    "get_ai_orchestrator",
-    
     # Tools
     "BaseTool",
-    "ToolParameter",
-    "ToolResult",
-    "ToolRegistry",
-    "PricingTool",
-    "TravelFeeTool",
-    "ProteinTool",
-    
+    # Services
+    "ConversationService",
+    "IdentityResolver",
+    "OrchestratorConfig",
     # Schemas
     "OrchestratorRequest",
     "OrchestratorResponse",
-    "OrchestratorConfig",
-    "ToolCall",
-    
-    # Services
-    "ConversationService",
-    "get_conversation_service",
+    "PricingTool",
+    "ProteinTool",
     "RAGService",
+    "ToolCall",
+    "ToolParameter",
+    "ToolRegistry",
+    "ToolResult",
+    "TravelFeeTool",
     "VoiceAIService",
-    "IdentityResolver",
-    "get_rag_service",
-    "get_voice_service",
-    "get_identity_resolver",
-    
+    "__phase__",
     # Metadata
     "__version__",
-    "__phase__"
+    "get_ai_orchestrator",
+    "get_conversation_service",
+    "get_identity_resolver",
+    "get_rag_service",
+    "get_voice_service",
 ]

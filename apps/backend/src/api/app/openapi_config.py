@@ -2,15 +2,18 @@
 OpenAPI configuration and documentation setup for MyHibachi API.
 """
 
+from collections.abc import Callable
+from typing import Any
+
 from fastapi.openapi.utils import get_openapi
-from typing import Dict, Any, Callable
 
 
-def get_openapi_schema(app) -> Callable[[], Dict[str, Any]]:
+def get_openapi_schema(app) -> Callable[[], dict[str, Any]]:
     """
     Generate a function that returns comprehensive OpenAPI schema for MyHibachi API.
     """
-    def custom_openapi() -> Dict[str, Any]:
+
+    def custom_openapi() -> dict[str, Any]:
         if app.openapi_schema:
             return app.openapi_schema
 
@@ -47,7 +50,7 @@ Get your token by calling the `/api/auth/login` endpoint with valid credentials.
 ## Rate Limits
 
 - **Authentication**: 5 requests/minute
-- **Booking Operations**: 10 requests/minute  
+- **Booking Operations**: 10 requests/minute
 - **General API**: 100 requests/minute
 - **SMS Notifications**: 30 requests/minute
 
@@ -75,57 +78,36 @@ All errors follow a consistent format:
         """.strip(),
                 routes=app.routes,
                 servers=[
+                    {"url": "https://api.myhibachichef.com", "description": "Production server"},
                     {
-                        "url": "https://api.myhibachichef.com",
-                        "description": "Production server"
+                        "url": "https://staging-api.myhibachichef.com",
+                        "description": "Staging server",
                     },
-                    {
-                        "url": "https://staging-api.myhibachichef.com", 
-                        "description": "Staging server"
-                    },
-                    {
-                        "url": "http://localhost:8000",
-                        "description": "Development server"
-                    }
+                    {"url": "http://localhost:8000", "description": "Development server"},
                 ],
                 tags=[
                     {
                         "name": "Authentication",
-                        "description": "User authentication and authorization endpoints"
+                        "description": "User authentication and authorization endpoints",
                     },
-                    {
-                        "name": "Bookings",
-                        "description": "Hibachi booking management operations"
-                    },
-                    {
-                        "name": "Customers", 
-                        "description": "Customer management and CRM operations"
-                    },
-                    {
-                        "name": "Payments",
-                        "description": "Payment processing and refund operations"
-                    },
+                    {"name": "Bookings", "description": "Hibachi booking management operations"},
+                    {"name": "Customers", "description": "Customer management and CRM operations"},
+                    {"name": "Payments", "description": "Payment processing and refund operations"},
                     {
                         "name": "AI Services",
-                        "description": "AI-powered booking assistance and automation"
+                        "description": "AI-powered booking assistance and automation",
                     },
-                    {
-                        "name": "Analytics",
-                        "description": "Business intelligence and reporting"
-                    },
+                    {"name": "Analytics", "description": "Business intelligence and reporting"},
                     {
                         "name": "Notifications",
-                        "description": "SMS, email, and push notification services"
+                        "description": "SMS, email, and push notification services",
                     },
-                    {
-                        "name": "Health",
-                        "description": "System health and monitoring endpoints"
-                    },
+                    {"name": "Health", "description": "System health and monitoring endpoints"},
                     {
                         "name": "Admin",
-                        "description": "Administrative operations and system management"
-                    }
-                ]
+                        "description": "Administrative operations and system management",
+                    },
+                ],
             )
 
             # Add security schemes
@@ -134,77 +116,74 @@ All errors follow a consistent format:
                     "type": "http",
                     "scheme": "bearer",
                     "bearerFormat": "JWT",
-                    "description": "JWT token obtained from login endpoint"
+                    "description": "JWT token obtained from login endpoint",
                 },
                 "ApiKeyAuth": {
                     "type": "apiKey",
                     "in": "header",
                     "name": "X-API-Key",
-                    "description": "API key for service-to-service authentication"
-                }
+                    "description": "API key for service-to-service authentication",
+                },
             }
 
             # Add global security requirement
-            openapi_schema["security"] = [
-                {"BearerAuth": []},
-                {"ApiKeyAuth": []}
-            ]
+            openapi_schema["security"] = [{"BearerAuth": []}, {"ApiKeyAuth": []}]
 
             # Add contact information
             openapi_schema["info"]["contact"] = {
                 "name": "MyHibachi API Support",
                 "email": "support@myhibachichef.com",
-                "url": "https://myhibachichef.com/contact"
+                "url": "https://myhibachichef.com/contact",
             }
 
             # Add license information
             openapi_schema["info"]["license"] = {
                 "name": "Proprietary",
-                "url": "https://myhibachichef.com/terms"
+                "url": "https://myhibachichef.com/terms",
             }
 
             # Add external documentation
             openapi_schema["externalDocs"] = {
                 "description": "MyHibachi Developer Portal",
-                "url": "https://developers.myhibachichef.com"
+                "url": "https://developers.myhibachichef.com",
             }
 
             app.openapi_schema = openapi_schema
             return app.openapi_schema
-            
+
         except Exception as e:
             # Fallback with detailed error logging
             import logging
-            import traceback
             import sys
-            
-            logging.error(f"Failed to generate full OpenAPI schema: {e}")
-            logging.error(f"Error type: {type(e).__name__}")
-            logging.error(f"Traceback: {traceback.format_exc()}")
-            
+            import traceback
+
+            logging.exception(f"Failed to generate full OpenAPI schema: {e}")
+            logging.exception(f"Error type: {type(e).__name__}")
+            logging.exception(f"Traceback: {traceback.format_exc()}")
+
             # Try to extract more info about which model failed
             tb = sys.exc_info()[2]
             if tb:
                 frame = tb.tb_frame
                 while frame:
                     local_vars = frame.f_locals
-                    if 'schema' in local_vars or 'model' in local_vars:
-                        logging.error(f"Frame locals: {list(local_vars.keys())}")
-                    frame = frame.f_back if hasattr(frame, 'f_back') else None
-            
+                    if "schema" in local_vars or "model" in local_vars:
+                        logging.exception(f"Frame locals: {list(local_vars.keys())}")
+                    frame = frame.f_back if hasattr(frame, "f_back") else None
+
             # Return a minimal working schema
             app.openapi_schema = {
                 "openapi": "3.1.0",
                 "info": {
                     "title": "MyHibachi AI Sales CRM API",
                     "version": "2.0.0",
-                    "description": f"API schema generation failed: {str(e)}\n\nCheck server logs for details."
+                    "description": f"API schema generation failed: {e!s}\n\nCheck server logs for details.",
                 },
                 "paths": {},
-                "components": {}
+                "components": {},
             }
             return app.openapi_schema
-    
+
     return custom_openapi
 
 
@@ -224,13 +203,13 @@ STANDARD_RESPONSES = {
                                 "message": {"type": "string", "example": "Invalid input data"},
                                 "details": {"type": "object"},
                                 "timestamp": {"type": "string", "format": "date-time"},
-                                "request_id": {"type": "string"}
-                            }
+                                "request_id": {"type": "string"},
+                            },
                         }
-                    }
+                    },
                 }
             }
-        }
+        },
     },
     "401": {
         "description": "Unauthorized",
@@ -245,13 +224,13 @@ STANDARD_RESPONSES = {
                                 "code": {"type": "string", "example": "AUTHENTICATION_REQUIRED"},
                                 "message": {"type": "string", "example": "Authentication required"},
                                 "timestamp": {"type": "string", "format": "date-time"},
-                                "request_id": {"type": "string"}
-                            }
+                                "request_id": {"type": "string"},
+                            },
                         }
-                    }
+                    },
                 }
             }
-        }
+        },
     },
     "403": {
         "description": "Forbidden",
@@ -264,15 +243,18 @@ STANDARD_RESPONSES = {
                             "type": "object",
                             "properties": {
                                 "code": {"type": "string", "example": "INSUFFICIENT_PERMISSIONS"},
-                                "message": {"type": "string", "example": "Insufficient permissions"},
+                                "message": {
+                                    "type": "string",
+                                    "example": "Insufficient permissions",
+                                },
                                 "timestamp": {"type": "string", "format": "date-time"},
-                                "request_id": {"type": "string"}
-                            }
+                                "request_id": {"type": "string"},
+                            },
                         }
-                    }
+                    },
                 }
             }
-        }
+        },
     },
     "404": {
         "description": "Not Found",
@@ -287,13 +269,13 @@ STANDARD_RESPONSES = {
                                 "code": {"type": "string", "example": "RESOURCE_NOT_FOUND"},
                                 "message": {"type": "string", "example": "Resource not found"},
                                 "timestamp": {"type": "string", "format": "date-time"},
-                                "request_id": {"type": "string"}
-                            }
+                                "request_id": {"type": "string"},
+                            },
                         }
-                    }
+                    },
                 }
             }
-        }
+        },
     },
     "422": {
         "description": "Validation Error",
@@ -306,7 +288,10 @@ STANDARD_RESPONSES = {
                             "type": "object",
                             "properties": {
                                 "code": {"type": "string", "example": "VALIDATION_ERROR"},
-                                "message": {"type": "string", "example": "Input data validation failed"},
+                                "message": {
+                                    "type": "string",
+                                    "example": "Input data validation failed",
+                                },
                                 "details": {
                                     "type": "array",
                                     "items": {
@@ -314,18 +299,18 @@ STANDARD_RESPONSES = {
                                         "properties": {
                                             "field": {"type": "string"},
                                             "message": {"type": "string"},
-                                            "code": {"type": "string"}
-                                        }
-                                    }
+                                            "code": {"type": "string"},
+                                        },
+                                    },
                                 },
                                 "timestamp": {"type": "string", "format": "date-time"},
-                                "request_id": {"type": "string"}
-                            }
+                                "request_id": {"type": "string"},
+                            },
                         }
-                    }
+                    },
                 }
             }
-        }
+        },
     },
     "429": {
         "description": "Rate Limit Exceeded",
@@ -341,13 +326,13 @@ STANDARD_RESPONSES = {
                                 "message": {"type": "string", "example": "Too many requests"},
                                 "retry_after": {"type": "integer", "example": 60},
                                 "timestamp": {"type": "string", "format": "date-time"},
-                                "request_id": {"type": "string"}
-                            }
+                                "request_id": {"type": "string"},
+                            },
                         }
-                    }
+                    },
                 }
             }
-        }
+        },
     },
     "500": {
         "description": "Internal Server Error",
@@ -360,14 +345,17 @@ STANDARD_RESPONSES = {
                             "type": "object",
                             "properties": {
                                 "code": {"type": "string", "example": "INTERNAL_SERVER_ERROR"},
-                                "message": {"type": "string", "example": "An internal error occurred"},
+                                "message": {
+                                    "type": "string",
+                                    "example": "An internal error occurred",
+                                },
                                 "timestamp": {"type": "string", "format": "date-time"},
-                                "request_id": {"type": "string"}
-                            }
+                                "request_id": {"type": "string"},
+                            },
                         }
-                    }
+                    },
                 }
             }
-        }
-    }
+        },
+    },
 }

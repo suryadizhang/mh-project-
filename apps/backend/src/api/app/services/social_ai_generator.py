@@ -1,13 +1,12 @@
 """Context-aware AI response generator for social media."""
 
 import logging
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
+from core.config import get_settings
 import openai
 from pydantic import BaseModel
-
-from core.config import get_settings
 
 settings = get_settings()
 from api.app.cqrs.base import CommandBus, QueryBus
@@ -26,9 +25,9 @@ class SocialResponseContext(BaseModel):
     thread_id: UUID
     platform: SocialPlatform
     customer_handle: str
-    customer_name: Optional[str] = None
+    customer_name: str | None = None
     conversation_history: list[dict[str, Any]]
-    customer_profile: Optional[dict[str, Any]] = None
+    customer_profile: dict[str, Any] | None = None
     business_context: dict[str, Any] = {}
     response_tone: str = "friendly"
     urgency_level: int = 3  # 1-5 scale
@@ -44,16 +43,18 @@ class ResponseSafetyValidator:
             "medical claims",
             "guarantees about outcomes",
             "personal information requests",
-            "off-topic discussions"
+            "off-topic discussions",
         ]
 
         self.required_disclaimers = {
             "pricing": "Prices may vary based on location, group size, and specific requirements.",
             "booking": "Final booking details subject to availability and confirmation.",
-            "dietary": "Please inform us of any allergies or dietary restrictions."
+            "dietary": "Please inform us of any allergies or dietary restrictions.",
         }
 
-    async def validate_response(self, response: str, context: SocialResponseContext) -> tuple[bool, float, list[str]]:
+    async def validate_response(
+        self, response: str, context: SocialResponseContext
+    ) -> tuple[bool, float, list[str]]:
         """Validate AI response for safety and compliance."""
         issues = []
         safety_score = 1.0
@@ -78,7 +79,10 @@ class ResponseSafetyValidator:
 
         # Check tone appropriateness
         if context.urgency_level <= 2:  # High urgency
-            if not any(urgent_word in response_lower for urgent_word in ["sorry", "apologize", "understand", "immediate"]):
+            if not any(
+                urgent_word in response_lower
+                for urgent_word in ["sorry", "apologize", "understand", "immediate"]
+            ):
                 issues.append("Response tone may not match urgency level")
                 safety_score -= 0.1
 
@@ -108,23 +112,23 @@ class SocialAIResponseGenerator:
             "pricing_inquiry": {
                 "template": "Thanks for your interest! Our hibachi chef services start at ${base_price} for groups of {min_people}. The final price depends on your group size, location, and specific menu preferences. Would you like me to get you a personalized quote?",
                 "requires_approval": False,
-                "tone": "helpful"
+                "tone": "helpful",
             },
             "booking_request": {
                 "template": "I'd love to help you book a hibachi chef experience! To give you the best service, I'll need a few details: How many guests? What date are you thinking? And what's your location? Once I have these details, I can check availability and pricing.",
                 "requires_approval": False,
-                "tone": "enthusiastic"
+                "tone": "enthusiastic",
             },
             "complaint_response": {
                 "template": "I'm really sorry to hear about your experience. This definitely doesn't meet our standards, and I want to make it right. Let me connect you with our manager who can address this personally. Can you DM me your contact info?",
                 "requires_approval": True,
-                "tone": "apologetic"
+                "tone": "apologetic",
             },
             "general_inquiry": {
                 "template": "Thanks for reaching out! I'd be happy to help answer your questions about our hibachi chef services. What would you like to know?",
                 "requires_approval": False,
-                "tone": "friendly"
-            }
+                "tone": "friendly",
+            },
         }
 
     async def generate_response(self, context: SocialResponseContext) -> dict[str, Any]:
@@ -140,14 +144,16 @@ class SocialAIResponseGenerator:
             ai_response = await self._generate_ai_response(context, conversation_analysis, scenario)
 
             # Validate response safety
-            is_safe, safety_score, safety_issues = await self.safety_validator.validate_response(ai_response, context)
+            is_safe, safety_score, safety_issues = await self.safety_validator.validate_response(
+                ai_response, context
+            )
 
             # Determine if approval is required
             requires_approval = (
-                safety_score < 0.9 or
-                len(safety_issues) > 0 or
-                context.urgency_level <= 2 or
-                scenario == "complaint_response"
+                safety_score < 0.9
+                or len(safety_issues) > 0
+                or context.urgency_level <= 2
+                or scenario == "complaint_response"
             )
 
             # Prepare response data
@@ -163,16 +169,18 @@ class SocialAIResponseGenerator:
                     "conversation_length": len(context.conversation_history),
                     "customer_profile_available": context.customer_profile is not None,
                     "urgency_level": context.urgency_level,
-                    "platform": context.platform
-                }
+                    "platform": context.platform,
+                },
             }
 
-            logger.info(f"Generated AI response for thread {context.thread_id}: scenario={scenario}, safety_score={safety_score:.2f}")
+            logger.info(
+                f"Generated AI response for thread {context.thread_id}: scenario={scenario}, safety_score={safety_score:.2f}"
+            )
 
             return response_data
 
         except Exception as e:
-            logger.error(f"Error generating AI response: {e}")
+            logger.exception(f"Error generating AI response: {e}")
             return {
                 "response": "Thanks for reaching out! Let me connect you with someone who can help you right away.",
                 "scenario": "fallback",
@@ -180,7 +188,7 @@ class SocialAIResponseGenerator:
                 "safety_issues": [],
                 "requires_approval": True,
                 "confidence": 0.0,
-                "error": str(e)
+                "error": str(e),
             }
 
     async def _analyze_conversation(self, context: SocialResponseContext) -> dict[str, Any]:
@@ -212,17 +220,21 @@ class SocialAIResponseGenerator:
             response = await self.openai_client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role": "system", "content": "You are an expert at analyzing customer service conversations. Always respond with valid JSON."},
-                    {"role": "user", "content": analysis_prompt}
+                    {
+                        "role": "system",
+                        "content": "You are an expert at analyzing customer service conversations. Always respond with valid JSON.",
+                    },
+                    {"role": "user", "content": analysis_prompt},
                 ],
                 temperature=0.1,
-                max_tokens=500
+                max_tokens=500,
             )
 
             analysis_text = response.choices[0].message.content.strip()
 
             # Parse JSON response
             import json
+
             analysis = json.loads(analysis_text)
 
             # Map intent to scenario
@@ -232,7 +244,7 @@ class SocialAIResponseGenerator:
                 "booking_request": "booking_request",
                 "complaint": "complaint_response",
                 "general_inquiry": "general_inquiry",
-                "compliment": "general_inquiry"
+                "compliment": "general_inquiry",
             }
 
             analysis["scenario"] = scenario_mapping.get(intent, "general_inquiry")
@@ -245,20 +257,24 @@ class SocialAIResponseGenerator:
             return analysis
 
         except Exception as e:
-            logger.error(f"Error analyzing conversation: {e}")
+            logger.exception(f"Error analyzing conversation: {e}")
             return {
                 "scenario": "general_inquiry",
                 "primary_intent": "general_inquiry",
                 "urgency_level": 3,
                 "sentiment": "neutral",
-                "confidence": 0.5
+                "confidence": 0.5,
             }
 
-    async def _generate_ai_response(self, context: SocialResponseContext, analysis: dict[str, Any], scenario: str) -> str:
+    async def _generate_ai_response(
+        self, context: SocialResponseContext, analysis: dict[str, Any], scenario: str
+    ) -> str:
         """Generate AI response using GPT."""
         try:
             # Get response template
-            template_info = self.response_templates.get(scenario, self.response_templates["general_inquiry"])
+            template_info = self.response_templates.get(
+                scenario, self.response_templates["general_inquiry"]
+            )
 
             # Build context for AI
             conversation_text = self._format_conversation_for_analysis(context.conversation_history)
@@ -266,7 +282,9 @@ class SocialAIResponseGenerator:
             # Customer profile context
             customer_context = ""
             if context.customer_profile:
-                customer_context = f"Customer info: {context.customer_name or context.customer_handle}"
+                customer_context = (
+                    f"Customer info: {context.customer_name or context.customer_handle}"
+                )
                 if context.customer_profile.get("previous_bookings"):
                     customer_context += " (returning customer)"
 
@@ -321,10 +339,10 @@ class SocialAIResponseGenerator:
                 model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
+                    {"role": "user", "content": user_prompt},
                 ],
                 temperature=0.7,
-                max_tokens=300
+                max_tokens=300,
             )
 
             generated_response = response.choices[0].message.content.strip()
@@ -337,7 +355,7 @@ class SocialAIResponseGenerator:
             return generated_response
 
         except Exception as e:
-            logger.error(f"Error generating AI response: {e}")
+            logger.exception(f"Error generating AI response: {e}")
             # Fallback to template
             return template_info["template"]
 
@@ -359,25 +377,31 @@ class SocialAIResponseGenerator:
         actions = []
 
         if scenario == "pricing_inquiry":
-            actions.extend([
-                "Gather group size and location details",
-                "Send personalized quote within 2 hours",
-                "Follow up in 24 hours if no response"
-            ])
+            actions.extend(
+                [
+                    "Gather group size and location details",
+                    "Send personalized quote within 2 hours",
+                    "Follow up in 24 hours if no response",
+                ]
+            )
 
         elif scenario == "booking_request":
-            actions.extend([
-                "Check calendar availability",
-                "Send booking link if dates available",
-                "Create lead in CRM system"
-            ])
+            actions.extend(
+                [
+                    "Check calendar availability",
+                    "Send booking link if dates available",
+                    "Create lead in CRM system",
+                ]
+            )
 
         elif scenario == "complaint_response":
-            actions.extend([
-                "Escalate to manager immediately",
-                "Schedule follow-up call within 4 hours",
-                "Document complaint details"
-            ])
+            actions.extend(
+                [
+                    "Escalate to manager immediately",
+                    "Schedule follow-up call within 4 hours",
+                    "Document complaint details",
+                ]
+            )
 
         # Add urgency-based actions
         urgency = analysis.get("urgency_level", 3)
@@ -401,7 +425,7 @@ class SocialAIResponseGenerator:
                     "status": "pending_approval",
                     "message": "Response generated and queued for human approval",
                     "response_preview": response_data["response"][:100] + "...",
-                    "safety_score": response_data["safety_score"]
+                    "safety_score": response_data["safety_score"],
                 }
             else:
                 # Send automatically using toolkit
@@ -414,20 +438,17 @@ class SocialAIResponseGenerator:
                     safety_context={
                         "profanity_checked": True,
                         "policy_compliant": True,
-                        "confidence_score": response_data["safety_score"]
-                    }
+                        "confidence_score": response_data["safety_score"],
+                    },
                 )
 
                 return {
                     "status": "sent_automatically",
                     "message": "Response sent automatically",
                     "send_result": send_result.model_dump(),
-                    "response_text": response_data["response"]
+                    "response_text": response_data["response"],
                 }
 
         except Exception as e:
-            logger.error(f"Error in auto-respond: {e}")
-            return {
-                "status": "error",
-                "message": f"Failed to generate/send response: {str(e)}"
-            }
+            logger.exception(f"Error in auto-respond: {e}")
+            return {"status": "error", "message": f"Failed to generate/send response: {e!s}"}

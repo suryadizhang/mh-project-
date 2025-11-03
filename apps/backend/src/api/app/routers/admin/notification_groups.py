@@ -8,17 +8,16 @@ Super admin endpoints for:
 - Managing station-specific groups
 """
 
-from typing import List, Optional, Any
+from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel, Field, validator
-
 from api.app.database import get_db
-from api.app.utils.auth import get_current_user, require_super_admin
-from services.notification_group_service import NotificationGroupService
 from api.app.models.notification_groups import NotificationEventType
+from api.app.utils.auth import require_super_admin
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel, Field, validator
+from services.notification_group_service import NotificationGroupService
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/notification-groups", tags=["notification-groups", "admin"])
 
@@ -27,15 +26,17 @@ router = APIRouter(prefix="/notification-groups", tags=["notification-groups", "
 # PYDANTIC SCHEMAS
 # ============================================================================
 
+
 class GroupCreateRequest(BaseModel):
     """Request to create a new notification group"""
+
     name: str = Field(..., min_length=3, max_length=100)
     description: str = Field(..., min_length=10)
-    station_id: Optional[UUID] = Field(None, description="Station ID (null = all stations)")
-    event_types: List[str] = Field(default=["all"], description="Event types to subscribe to")
-    
-    @validator('event_types')
-    def validate_event_types(cls, v):
+    station_id: UUID | None = Field(None, description="Station ID (null = all stations)")
+    event_types: list[str] = Field(default=["all"], description="Event types to subscribe to")
+
+    @validator("event_types")
+    def validate_event_types(self, v):
         valid_events = [e.value for e in NotificationEventType]
         for event in v:
             if event not in valid_events:
@@ -45,17 +46,19 @@ class GroupCreateRequest(BaseModel):
 
 class GroupUpdateRequest(BaseModel):
     """Request to update a notification group"""
-    name: Optional[str] = Field(None, min_length=3, max_length=100)
-    description: Optional[str] = Field(None, min_length=10)
-    is_active: Optional[bool] = None
+
+    name: str | None = Field(None, min_length=3, max_length=100)
+    description: str | None = Field(None, min_length=10)
+    is_active: bool | None = None
 
 
 class MemberAddRequest(BaseModel):
     """Request to add a member to a group"""
-    phone_number: str = Field(..., regex=r'^\+?[1-9]\d{1,14}$')
+
+    phone_number: str = Field(..., regex=r"^\+?[1-9]\d{1,14}$")
     name: str = Field(..., min_length=2, max_length=100)
-    email: Optional[str] = None
-    user_id: Optional[UUID] = None
+    email: str | None = None
+    user_id: UUID | None = None
     receive_whatsapp: bool = True
     receive_sms: bool = False
     receive_email: bool = False
@@ -63,20 +66,22 @@ class MemberAddRequest(BaseModel):
 
 class MemberUpdateRequest(BaseModel):
     """Request to update member preferences"""
-    is_active: Optional[bool] = None
-    receive_whatsapp: Optional[bool] = None
-    receive_sms: Optional[bool] = None
-    receive_email: Optional[bool] = None
+
+    is_active: bool | None = None
+    receive_whatsapp: bool | None = None
+    receive_sms: bool | None = None
+    receive_email: bool | None = None
 
 
 class EventSubscriptionRequest(BaseModel):
     """Request to add event subscription"""
+
     event_type: str = Field(...)
-    priority_filter: Optional[dict] = None
-    custom_filters: Optional[dict] = None
-    
-    @validator('event_type')
-    def validate_event_type(cls, v):
+    priority_filter: dict | None = None
+    custom_filters: dict | None = None
+
+    @validator("event_type")
+    def validate_event_type(self, v):
         valid_events = [e.value for e in NotificationEventType]
         if v not in valid_events:
             raise ValueError(f"Invalid event type: {v}")
@@ -85,10 +90,11 @@ class EventSubscriptionRequest(BaseModel):
 
 class GroupResponse(BaseModel):
     """Response model for notification group"""
+
     id: UUID
     name: str
     description: str
-    station_id: Optional[UUID]
+    station_id: UUID | None
     is_active: bool
     member_count: int
     event_count: int
@@ -97,10 +103,11 @@ class GroupResponse(BaseModel):
 
 class MemberResponse(BaseModel):
     """Response model for group member"""
+
     id: UUID
     name: str
     phone_number: str
-    email: Optional[str]
+    email: str | None
     is_active: bool
     receive_whatsapp: bool
     receive_sms: bool
@@ -112,6 +119,7 @@ class MemberResponse(BaseModel):
 # GROUP MANAGEMENT ENDPOINTS
 # ============================================================================
 
+
 @router.post(
     "/",
     response_model=GroupResponse,
@@ -119,30 +127,30 @@ class MemberResponse(BaseModel):
     summary="Create notification group",
     description="""
     Create a new notification group (Super Admin only).
-    
+
     ## Examples:
     - "All Admins" - Receives all events from all stations
     - "Station CA-BAY-001 Managers" - Only receives events for CA-BAY-001
     - "Payment Team" - Only receives payment-related events
-    """
+    """,
 )
 async def create_group(
     data: GroupCreateRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(require_super_admin())
+    current_user: dict[str, Any] = Depends(require_super_admin()),
 ):
     """Create a new notification group"""
     service = NotificationGroupService(db)
-    
+
     try:
         group = await service.create_group(
             name=data.name,
             description=data.description,
             created_by=UUID(current_user["id"]),
             station_id=data.station_id,
-            event_types=data.event_types
+            event_types=data.event_types,
         )
-        
+
         return GroupResponse(
             id=group.id,
             name=group.name,
@@ -151,35 +159,29 @@ async def create_group(
             is_active=group.is_active,
             member_count=len(group.members),
             event_count=len(group.event_subscriptions),
-            created_at=group.created_at.isoformat()
+            created_at=group.created_at.isoformat(),
         )
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.get(
     "/",
-    response_model=List[GroupResponse],
+    response_model=list[GroupResponse],
     summary="List notification groups",
-    description="Get all notification groups (optionally filtered by station)"
+    description="Get all notification groups (optionally filtered by station)",
 )
 async def list_groups(
-    station_id: Optional[UUID] = None,
+    station_id: UUID | None = None,
     include_inactive: bool = False,
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(require_super_admin())
+    current_user: dict[str, Any] = Depends(require_super_admin()),
 ):
     """List all notification groups"""
     service = NotificationGroupService(db)
-    
-    groups = await service.list_groups(
-        station_id=station_id,
-        include_inactive=include_inactive
-    )
-    
+
+    groups = await service.list_groups(station_id=station_id, include_inactive=include_inactive)
+
     return [
         GroupResponse(
             id=g.id,
@@ -189,7 +191,7 @@ async def list_groups(
             is_active=g.is_active,
             member_count=len(g.members),
             event_count=len(g.event_subscriptions),
-            created_at=g.created_at.isoformat()
+            created_at=g.created_at.isoformat(),
         )
         for g in groups
     ]
@@ -198,23 +200,20 @@ async def list_groups(
 @router.get(
     "/{group_id}",
     summary="Get notification group details",
-    description="Get detailed information about a notification group"
+    description="Get detailed information about a notification group",
 )
 async def get_group(
     group_id: UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(require_super_admin())
+    current_user: dict[str, Any] = Depends(require_super_admin()),
 ):
     """Get notification group details"""
     service = NotificationGroupService(db)
-    
+
     group = await service.get_group(group_id)
     if not group:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Group not found"
-        )
-    
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group not found")
+
     return {
         "id": str(group.id),
         "name": group.name,
@@ -232,7 +231,7 @@ async def get_group(
                 "receive_whatsapp": m.receive_whatsapp,
                 "receive_sms": m.receive_sms,
                 "receive_email": m.receive_email,
-                "joined_at": m.joined_at.isoformat()
+                "joined_at": m.joined_at.isoformat(),
             }
             for m in group.members
         ],
@@ -242,10 +241,10 @@ async def get_group(
                 "event_type": e.event_type.value,
                 "priority_filter": e.priority_filter,
                 "custom_filters": e.custom_filters,
-                "is_active": e.is_active
+                "is_active": e.is_active,
             }
             for e in group.event_subscriptions
-        ]
+        ],
     }
 
 
@@ -253,25 +252,25 @@ async def get_group(
     "/{group_id}",
     response_model=GroupResponse,
     summary="Update notification group",
-    description="Update group name, description, or active status"
+    description="Update group name, description, or active status",
 )
 async def update_group(
     group_id: UUID,
     data: GroupUpdateRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(require_super_admin())
+    current_user: dict[str, Any] = Depends(require_super_admin()),
 ):
     """Update notification group"""
     service = NotificationGroupService(db)
-    
+
     try:
         group = await service.update_group(
             group_id=group_id,
             name=data.name,
             description=data.description,
-            is_active=data.is_active
+            is_active=data.is_active,
         )
-        
+
         return GroupResponse(
             id=group.id,
             name=group.name,
@@ -280,57 +279,52 @@ async def update_group(
             is_active=group.is_active,
             member_count=len(group.members),
             event_count=len(group.event_subscriptions),
-            created_at=group.created_at.isoformat()
+            created_at=group.created_at.isoformat(),
         )
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
 @router.delete(
     "/{group_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete notification group",
-    description="Delete a notification group (cascade deletes all members and subscriptions)"
+    description="Delete a notification group (cascade deletes all members and subscriptions)",
 )
 async def delete_group(
     group_id: UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(require_super_admin())
+    current_user: dict[str, Any] = Depends(require_super_admin()),
 ):
     """Delete notification group"""
     service = NotificationGroupService(db)
-    
+
     success = await service.delete_group(group_id)
     if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Group not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group not found")
 
 
 # ============================================================================
 # MEMBER MANAGEMENT ENDPOINTS
 # ============================================================================
 
+
 @router.post(
     "/{group_id}/members",
     response_model=MemberResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Add member to group",
-    description="Add a team member to a notification group"
+    description="Add a team member to a notification group",
 )
 async def add_member(
     group_id: UUID,
     data: MemberAddRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(require_super_admin())
+    current_user: dict[str, Any] = Depends(require_super_admin()),
 ):
     """Add member to notification group"""
     service = NotificationGroupService(db)
-    
+
     try:
         member = await service.add_member(
             group_id=group_id,
@@ -341,9 +335,9 @@ async def add_member(
             email=data.email,
             receive_whatsapp=data.receive_whatsapp,
             receive_sms=data.receive_sms,
-            receive_email=data.receive_email
+            receive_email=data.receive_email,
         )
-        
+
         return MemberResponse(
             id=member.id,
             name=member.name,
@@ -353,35 +347,29 @@ async def add_member(
             receive_whatsapp=member.receive_whatsapp,
             receive_sms=member.receive_sms,
             receive_email=member.receive_email,
-            joined_at=member.joined_at.isoformat()
+            joined_at=member.joined_at.isoformat(),
         )
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.get(
     "/{group_id}/members",
-    response_model=List[MemberResponse],
+    response_model=list[MemberResponse],
     summary="List group members",
-    description="Get all members of a notification group"
+    description="Get all members of a notification group",
 )
 async def list_members(
     group_id: UUID,
     include_inactive: bool = False,
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(require_super_admin())
+    current_user: dict[str, Any] = Depends(require_super_admin()),
 ):
     """List group members"""
     service = NotificationGroupService(db)
-    
-    members = await service.list_group_members(
-        group_id=group_id,
-        include_inactive=include_inactive
-    )
-    
+
+    members = await service.list_group_members(group_id=group_id, include_inactive=include_inactive)
+
     return [
         MemberResponse(
             id=m.id,
@@ -392,7 +380,7 @@ async def list_members(
             receive_whatsapp=m.receive_whatsapp,
             receive_sms=m.receive_sms,
             receive_email=m.receive_email,
-            joined_at=m.joined_at.isoformat()
+            joined_at=m.joined_at.isoformat(),
         )
         for m in members
     ]
@@ -402,27 +390,27 @@ async def list_members(
     "/{group_id}/members/{member_id}",
     response_model=MemberResponse,
     summary="Update member preferences",
-    description="Update member's notification preferences"
+    description="Update member's notification preferences",
 )
 async def update_member(
     group_id: UUID,
     member_id: UUID,
     data: MemberUpdateRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(require_super_admin())
+    current_user: dict[str, Any] = Depends(require_super_admin()),
 ):
     """Update member preferences"""
     service = NotificationGroupService(db)
-    
+
     try:
         member = await service.update_member(
             member_id=member_id,
             is_active=data.is_active,
             receive_whatsapp=data.receive_whatsapp,
             receive_sms=data.receive_sms,
-            receive_email=data.receive_email
+            receive_email=data.receive_email,
         )
-        
+
         return MemberResponse(
             id=member.id,
             name=member.name,
@@ -432,101 +420,92 @@ async def update_member(
             receive_whatsapp=member.receive_whatsapp,
             receive_sms=member.receive_sms,
             receive_email=member.receive_email,
-            joined_at=member.joined_at.isoformat()
+            joined_at=member.joined_at.isoformat(),
         )
     except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
 @router.delete(
     "/{group_id}/members/{member_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Remove member from group",
-    description="Remove a team member from a notification group"
+    description="Remove a team member from a notification group",
 )
 async def remove_member(
     group_id: UUID,
     member_id: UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(require_super_admin())
+    current_user: dict[str, Any] = Depends(require_super_admin()),
 ):
     """Remove member from group"""
     service = NotificationGroupService(db)
-    
+
     success = await service.remove_member(member_id)
     if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Member not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Member not found")
 
 
 # ============================================================================
 # EVENT SUBSCRIPTION ENDPOINTS
 # ============================================================================
 
+
 @router.post(
     "/{group_id}/events",
     status_code=status.HTTP_201_CREATED,
     summary="Add event subscription",
-    description="Subscribe group to a notification event type"
+    description="Subscribe group to a notification event type",
 )
 async def add_event_subscription(
     group_id: UUID,
     data: EventSubscriptionRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(require_super_admin())
+    current_user: dict[str, Any] = Depends(require_super_admin()),
 ):
     """Add event subscription to group"""
     service = NotificationGroupService(db)
-    
+
     try:
         event = await service.add_event_subscription(
             group_id=group_id,
             event_type=data.event_type,
             created_by=UUID(current_user["id"]),
             priority_filter=data.priority_filter,
-            custom_filters=data.custom_filters
+            custom_filters=data.custom_filters,
         )
-        
+
         return {
             "id": str(event.id),
             "event_type": event.event_type.value,
             "priority_filter": event.priority_filter,
             "custom_filters": event.custom_filters,
             "is_active": event.is_active,
-            "created_at": event.created_at.isoformat()
+            "created_at": event.created_at.isoformat(),
         }
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.delete(
     "/{group_id}/events/{event_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Remove event subscription",
-    description="Unsubscribe group from a notification event type"
+    description="Unsubscribe group from a notification event type",
 )
 async def remove_event_subscription(
     group_id: UUID,
     event_id: UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(require_super_admin())
+    current_user: dict[str, Any] = Depends(require_super_admin()),
 ):
     """Remove event subscription from group"""
     service = NotificationGroupService(db)
-    
+
     success = await service.remove_event_subscription(event_id)
     if not success:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Event subscription not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Event subscription not found"
         )
 
 
@@ -534,33 +513,28 @@ async def remove_event_subscription(
 # UTILITY ENDPOINTS
 # ============================================================================
 
+
 @router.post(
     "/initialize-defaults",
     summary="Initialize default groups",
-    description="Create default notification groups if they don't exist"
+    description="Create default notification groups if they don't exist",
 )
 async def initialize_defaults(
     db: AsyncSession = Depends(get_db),
-    current_user: dict[str, Any] = Depends(require_super_admin())
+    current_user: dict[str, Any] = Depends(require_super_admin()),
 ):
     """Initialize default notification groups"""
     service = NotificationGroupService(db)
-    
-    groups = await service.initialize_default_groups(
-        created_by=UUID(current_user["id"])
-    )
-    
-    return {
-        "success": True,
-        "created_count": len(groups),
-        "groups": [g.name for g in groups]
-    }
+
+    groups = await service.initialize_default_groups(created_by=UUID(current_user["id"]))
+
+    return {"success": True, "created_count": len(groups), "groups": [g.name for g in groups]}
 
 
 @router.get(
     "/event-types",
     summary="List available event types",
-    description="Get list of all notification event types"
+    description="Get list of all notification event types",
 )
 async def list_event_types():
     """List all available notification event types"""
@@ -575,8 +549,8 @@ async def list_event_types():
                     "payment_received": "Payment confirmed",
                     "review_received": "Customer review submitted",
                     "complaint_received": "Customer complaint submitted",
-                    "all": "All event types"
-                }[e.value]
+                    "all": "All event types",
+                }[e.value],
             }
             for e in NotificationEventType
         ]

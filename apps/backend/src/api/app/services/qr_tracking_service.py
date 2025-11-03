@@ -2,34 +2,30 @@
 QR Code Tracking Service
 Handles QR code scanning, tracking, and analytics
 """
-from datetime import datetime
-from typing import Optional, Dict, Any, List
-from uuid import UUID
-import re
 
-from sqlalchemy import select, func
+from datetime import datetime
+from typing import Any
+from uuid import UUID
+
+from api.app.models.qr_tracking import QRCode, QRCodeType, QRScan
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from user_agents import parse
-
-from api.app.models.qr_tracking import QRCode, QRScan, QRCodeType
 
 
 class QRTrackingService:
     """Service for QR code tracking and analytics"""
 
-    def __init__(
-        self,
-        db: AsyncSession
-    ):
+    def __init__(self, db: AsyncSession):
         self.db = db
 
     async def track_qr_scan(
         self,
         code: str,
-        ip_address: Optional[str] = None,
-        user_agent: Optional[str] = None,
-        referrer: Optional[str] = None,
-        session_id: Optional[str] = None,
+        ip_address: str | None = None,
+        user_agent: str | None = None,
+        referrer: str | None = None,
+        session_id: str | None = None,
     ) -> tuple[QRScan, str]:
         """
         Track a QR code scan and return the destination URL.
@@ -48,10 +44,7 @@ class QRTrackingService:
             ValueError: If QR code not found or inactive
         """
         # Find QR code
-        stmt = select(QRCode).where(
-            QRCode.code == code.upper(),
-            QRCode.is_active == True
-        )
+        stmt = select(QRCode).where(QRCode.code == code.upper(), QRCode.is_active)
         result = await self.db.execute(stmt)
         qr_code = result.scalar_one_or_none()
 
@@ -89,7 +82,7 @@ class QRTrackingService:
         session_id: str,
         converted_to_lead: bool = False,
         converted_to_booking: bool = False,
-        conversion_value: Optional[float] = None,
+        conversion_value: float | None = None,
     ) -> bool:
         """
         Mark a QR scan as converted to lead or booking.
@@ -126,10 +119,10 @@ class QRTrackingService:
         code: str,
         type: QRCodeType,
         destination_url: str,
-        description: Optional[str] = None,
-        campaign_name: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-        created_by: Optional[UUID] = None,
+        description: str | None = None,
+        campaign_name: str | None = None,
+        metadata: dict[str, Any] | None = None,
+        created_by: UUID | None = None,
     ) -> QRCode:
         """
         Create a new QR code.
@@ -164,9 +157,9 @@ class QRTrackingService:
 
     async def get_qr_analytics(
         self,
-        code: Optional[str] = None,
-        qr_code_id: Optional[UUID] = None,
-    ) -> Dict[str, Any]:
+        code: str | None = None,
+        qr_code_id: UUID | None = None,
+    ) -> dict[str, Any]:
         """
         Get analytics for a specific QR code.
 
@@ -197,8 +190,8 @@ class QRTrackingService:
 
         # Calculate analytics
         total_scans = len(scans)
-        unique_ips = len(set(scan.ip_address for scan in scans if scan.ip_address))
-        unique_sessions = len(set(scan.session_id for scan in scans if scan.session_id))
+        unique_ips = len({scan.ip_address for scan in scans if scan.ip_address})
+        unique_sessions = len({scan.session_id for scan in scans if scan.session_id})
 
         leads = sum(1 for scan in scans if scan.converted_to_lead)
         bookings = sum(1 for scan in scans if scan.converted_to_booking)
@@ -234,8 +227,12 @@ class QRTrackingService:
                 "leads_generated": leads,
                 "bookings_generated": bookings,
                 "total_revenue": float(revenue),
-                "conversion_rate": round((bookings / unique_sessions * 100), 2) if unique_sessions > 0 else 0,
-                "lead_rate": round((leads / unique_sessions * 100), 2) if unique_sessions > 0 else 0,
+                "conversion_rate": (
+                    round((bookings / unique_sessions * 100), 2) if unique_sessions > 0 else 0
+                ),
+                "lead_rate": (
+                    round((leads / unique_sessions * 100), 2) if unique_sessions > 0 else 0
+                ),
             },
             "devices": device_counts,
             "locations": location_counts,
@@ -252,9 +249,9 @@ class QRTrackingService:
 
     async def list_qr_codes(
         self,
-        type: Optional[QRCodeType] = None,
-        is_active: Optional[bool] = None,
-    ) -> List[QRCode]:
+        type: QRCodeType | None = None,
+        is_active: bool | None = None,
+    ) -> list[QRCode]:
         """
         List all QR codes with optional filtering.
 
@@ -277,7 +274,7 @@ class QRTrackingService:
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
-    def _parse_user_agent(self, user_agent_string: str) -> Dict[str, str]:
+    def _parse_user_agent(self, user_agent_string: str) -> dict[str, str]:
         """
         Parse user agent string to extract device information.
 
@@ -302,5 +299,7 @@ class QRTrackingService:
         return {
             "device_type": device_type,
             "os": f"{ua.os.family} {ua.os.version_string}" if ua.os.family else None,
-            "browser": f"{ua.browser.family} {ua.browser.version_string}" if ua.browser.family else None,
+            "browser": (
+                f"{ua.browser.family} {ua.browser.version_string}" if ua.browser.family else None
+            ),
         }

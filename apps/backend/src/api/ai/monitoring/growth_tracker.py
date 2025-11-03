@@ -5,14 +5,14 @@ Monitors customer growth and triggers alerts when milestones are reached.
 This enables proactive scaling decisions (e.g., migrating to Neo4j).
 """
 
+from datetime import datetime, timedelta
 import logging
 import os
-from typing import Dict
-from datetime import datetime, timedelta
-from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.models import Customer
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from .alerts import AlertManager
 
 logger = logging.getLogger(__name__)
@@ -20,36 +20,33 @@ logger = logging.getLogger(__name__)
 
 class GrowthTracker:
     """Monitor customer growth and trigger alerts"""
-    
+
     def __init__(self):
         self.alert_manager = AlertManager()
         self.customer_threshold = int(os.getenv("CUSTOMER_COUNT_THRESHOLD", "1000"))
         self.logger = logger
-        
+
         # Track if we've already alerted (avoid spam)
         self._growth_alert_sent = False
-    
-    async def check_customer_count(self, db: AsyncSession) -> Dict:
+
+    async def check_customer_count(self, db: AsyncSession) -> dict:
         """
         Check customer count and send alert if threshold crossed.
-        
+
         Returns:
             Dict with customer count and alert status
         """
         # Get total customer count
-        result = await db.execute(
-            select(func.count(Customer.id))
-        )
+        result = await db.execute(select(func.count(Customer.id)))
         customer_count = result.scalar() or 0
-        
+
         # Get growth rate (last 30 days)
         thirty_days_ago = datetime.utcnow() - timedelta(days=30)
         result = await db.execute(
-            select(func.count(Customer.id))
-            .where(Customer.created_at >= thirty_days_ago)
+            select(func.count(Customer.id)).where(Customer.created_at >= thirty_days_ago)
         )
         recent_customers = result.scalar() or 0
-        
+
         # Check if threshold crossed
         alert_triggered = False
         if customer_count >= self.customer_threshold and not self._growth_alert_sent:
@@ -57,31 +54,26 @@ class GrowthTracker:
             await self._send_growth_alert(
                 customer_count=customer_count,
                 recent_growth=recent_customers,
-                threshold=self.customer_threshold
+                threshold=self.customer_threshold,
             )
             self._growth_alert_sent = True
             alert_triggered = True
-            
+
             self.logger.warning(
                 f"🔥 Customer count threshold crossed: "
                 f"{customer_count} >= {self.customer_threshold}"
             )
-        
+
         return {
             "customer_count": customer_count,
             "recent_growth_30d": recent_customers,
             "threshold": self.customer_threshold,
             "threshold_crossed": customer_count >= self.customer_threshold,
             "alert_sent": alert_triggered,
-            "percent_to_threshold": (customer_count / self.customer_threshold) * 100
+            "percent_to_threshold": (customer_count / self.customer_threshold) * 100,
         }
-    
-    async def _send_growth_alert(
-        self,
-        customer_count: int,
-        recent_growth: int,
-        threshold: int
-    ):
+
+    async def _send_growth_alert(self, customer_count: int, recent_growth: int, threshold: int):
         """Send alert when customer threshold is crossed."""
         message = f"""
 🔥 **CUSTOMER GROWTH ALERT: Time to Migrate to Neo4j**
@@ -115,27 +107,26 @@ Migrate to Neo4j graph database (6-hour upgrade) for 10x query speedup.
 5. Enable dual-write (7 days)
 6. Switch to Neo4j
         """.strip()
-        
+
         # Send to Slack + Email
         await self.alert_manager.send_slack_alert(message)
         await self.alert_manager.send_email_alert(
-            subject=f"🔥 Customer Growth Alert: {customer_count:,} customers",
-            body=message
+            subject=f"🔥 Customer Growth Alert: {customer_count:,} customers", body=message
         )
-        
+
         self.logger.info(f"Sent growth alert: {customer_count} >= {threshold}")
-    
-    async def get_growth_summary(self, db: AsyncSession) -> Dict:
+
+    async def get_growth_summary(self, db: AsyncSession) -> dict:
         """
         Get comprehensive growth summary for dashboard.
-        
+
         Returns:
             Dict with customer counts, growth rates, and recommendations
         """
         # Total customers
         result = await db.execute(select(func.count(Customer.id)))
         total_customers = result.scalar() or 0
-        
+
         # Growth over different periods
         now = datetime.utcnow()
         periods = {
@@ -143,19 +134,18 @@ Migrate to Neo4j graph database (6-hour upgrade) for 10x query speedup.
             "30d": now - timedelta(days=30),
             "90d": now - timedelta(days=90),
         }
-        
+
         growth = {}
         for period_name, start_date in periods.items():
             result = await db.execute(
-                select(func.count(Customer.id))
-                .where(Customer.created_at >= start_date)
+                select(func.count(Customer.id)).where(Customer.created_at >= start_date)
             )
             count = result.scalar() or 0
             growth[period_name] = count
-        
+
         # Calculate if Neo4j upgrade is recommended
         neo4j_recommended = total_customers >= (self.customer_threshold * 0.8)  # 80% of threshold
-        
+
         return {
             "total_customers": total_customers,
             "threshold": self.customer_threshold,
@@ -166,9 +156,13 @@ Migrate to Neo4j graph database (6-hour upgrade) for 10x query speedup.
             "recommendations": {
                 "neo4j_upgrade": {
                     "recommended": neo4j_recommended,
-                    "reason": f"Customers approaching {self.customer_threshold:,}" if neo4j_recommended else None
+                    "reason": (
+                        f"Customers approaching {self.customer_threshold:,}"
+                        if neo4j_recommended
+                        else None
+                    ),
                 }
-            }
+            },
         }
 
 

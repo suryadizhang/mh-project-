@@ -22,19 +22,16 @@ Future Implementation:
 - Graph analytics
 """
 
+from datetime import datetime
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
+from typing import Any
 
 from api.ai.memory.memory_backend import (
-    MemoryBackend,
+    ConversationChannel,
     ConversationMessage,
     ConversationMetadata,
-    MemorySearchResult,
+    MemoryBackend,
     MessageRole,
-    ConversationChannel,
-    MemoryBackendError,
-    MemoryConnectionError
 )
 
 logger = logging.getLogger(__name__)
@@ -43,73 +40,73 @@ logger = logging.getLogger(__name__)
 class Neo4jMemory(MemoryBackend):
     """
     Neo4j-based conversation memory (STUB for Option 2).
-    
+
     Graph Model:
     - (:User)-[:STARTED]->(:Conversation)
     - (:Conversation)-[:CONTAINS]->(:Message)
     - (:Message)-[:NEXT]->(:Message)
     - (:Message)-[:HAS_EMOTION]->(:Emotion)
     - (:User)-[:INTERACTED_VIA]->(:Channel)
-    
+
     Future Features:
     - Semantic search with vector indexes
     - Relationship-based context discovery
     - User journey analysis
     - Entity extraction and linking
     - Graph analytics for insights
-    
+
     Current Status: STUB - Returns empty results
     """
-    
-    def __init__(self, neo4j_uri: Optional[str] = None, **kwargs):
+
+    def __init__(self, neo4j_uri: str | None = None, **kwargs):
         super().__init__(**kwargs)
         self.neo4j_uri = neo4j_uri
         self._driver = None
         logger.warning("Neo4j memory backend is a STUB - not yet implemented")
-    
+
     async def initialize(self) -> None:
         """Initialize Neo4j connection (STUB)"""
         logger.warning("Neo4j memory initialize() called - STUB implementation")
         self._initialized = True
-        
+
         # TODO: Connect to Neo4j
         # from neo4j import AsyncGraphDatabase
         # self._driver = AsyncGraphDatabase.driver(self.neo4j_uri, auth=(user, password))
-    
-    async def health_check(self) -> Dict[str, Any]:
+
+    async def health_check(self) -> dict[str, Any]:
         """Check Neo4j health (STUB)"""
         return {
             "status": "stub",
             "backend": "neo4j",
             "message": "Neo4j memory backend not yet implemented",
             "latency_ms": 0,
-            "message_count": 0
+            "message_count": 0,
         }
-    
+
     async def close(self) -> None:
         """Close Neo4j connection (STUB)"""
         logger.info("Neo4j memory backend closed (STUB)")
         self._initialized = False
-    
+
     # =========================================================================
     # MESSAGE OPERATIONS (STUB)
     # =========================================================================
-    
+
     async def store_message(
         self,
         conversation_id: str,
         role: MessageRole,
         content: str,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
         channel: ConversationChannel = ConversationChannel.WEB,
-        emotion_score: Optional[float] = None,
-        emotion_label: Optional[str] = None,
-        detected_emotions: Optional[List[str]] = None,
-        user_id: Optional[str] = None
+        emotion_score: float | None = None,
+        emotion_label: str | None = None,
+        detected_emotions: list[str] | None = None,
+        user_id: str | None = None,
     ) -> ConversationMessage:
         """Store message in Neo4j graph (STUB)"""
-        logger.debug(f"Neo4j store_message() called - STUB implementation")
-        
+        logger.debug("Neo4j store_message() called - STUB implementation")
+
         # Return mock message
         return ConversationMessage(
             id=f"neo4j_msg_{conversation_id}",
@@ -121,131 +118,108 @@ class Neo4jMemory(MemoryBackend):
             channel=channel,
             emotion_score=emotion_score,
             emotion_label=emotion_label,
-            detected_emotions=detected_emotions
+            detected_emotions=detected_emotions,
         )
-    
+
     async def get_conversation_history(
         self,
         conversation_id: str,
-        limit: Optional[int] = None,
+        limit: int | None = None,
         offset: int = 0,
-        include_system: bool = True
-    ) -> List[ConversationMessage]:
+        include_system: bool = True,
+    ) -> list[ConversationMessage]:
         """Retrieve conversation history (STUB)"""
-        logger.debug(f"Neo4j get_conversation_history() called - STUB implementation")
+        logger.debug("Neo4j get_conversation_history() called - STUB implementation")
         return []
-    
+
     async def get_recent_messages(
-        self,
-        conversation_id: str,
-        count: int = 10
-    ) -> List[ConversationMessage]:
+        self, conversation_id: str, count: int = 10
+    ) -> list[ConversationMessage]:
         """Get recent messages (STUB)"""
-        logger.debug(f"Neo4j get_recent_messages() called - STUB implementation")
+        logger.debug("Neo4j get_recent_messages() called - STUB implementation")
         return []
-    
+
     # =========================================================================
     # CROSS-CHANNEL OPERATIONS (STUB)
     # =========================================================================
-    
+
     async def get_user_history(
         self,
         user_id: str,
-        channels: Optional[List[ConversationChannel]] = None,
+        channels: list[ConversationChannel] | None = None,
         limit: int = 50,
-        days: Optional[int] = None
-    ) -> List[ConversationMessage]:
+        days: int | None = None,
+    ) -> list[ConversationMessage]:
         """Get user history across channels (STUB)"""
-        logger.debug(f"Neo4j get_user_history() called - STUB implementation")
+        logger.debug("Neo4j get_user_history() called - STUB implementation")
         return []
-    
+
     async def get_user_conversations(
-        self,
-        user_id: str,
-        include_inactive: bool = False
-    ) -> List[ConversationMetadata]:
+        self, user_id: str, include_inactive: bool = False
+    ) -> list[ConversationMetadata]:
         """Get user conversations (STUB)"""
-        logger.debug(f"Neo4j get_user_conversations() called - STUB implementation")
+        logger.debug("Neo4j get_user_conversations() called - STUB implementation")
         return []
-    
+
     # =========================================================================
     # CONVERSATION MANAGEMENT (STUB)
     # =========================================================================
-    
-    async def get_conversation_metadata(
-        self,
-        conversation_id: str
-    ) -> Optional[ConversationMetadata]:
+
+    async def get_conversation_metadata(self, conversation_id: str) -> ConversationMetadata | None:
         """Get conversation metadata (STUB)"""
-        logger.debug(f"Neo4j get_conversation_metadata() called - STUB implementation")
+        logger.debug("Neo4j get_conversation_metadata() called - STUB implementation")
         return None
-    
+
     async def update_conversation_metadata(
         self,
         conversation_id: str,
-        context: Optional[Dict[str, Any]] = None,
-        emotion_score: Optional[float] = None,
-        escalated: Optional[bool] = None
+        context: dict[str, Any] | None = None,
+        emotion_score: float | None = None,
+        escalated: bool | None = None,
     ) -> None:
         """Update conversation metadata (STUB)"""
-        logger.debug(f"Neo4j update_conversation_metadata() called - STUB implementation")
-        pass
-    
-    async def close_conversation(
-        self,
-        conversation_id: str,
-        reason: Optional[str] = None
-    ) -> None:
+        logger.debug("Neo4j update_conversation_metadata() called - STUB implementation")
+
+    async def close_conversation(self, conversation_id: str, reason: str | None = None) -> None:
         """Close conversation (STUB)"""
-        logger.debug(f"Neo4j close_conversation() called - STUB implementation")
-        pass
-    
+        logger.debug("Neo4j close_conversation() called - STUB implementation")
+
     # =========================================================================
     # EMOTION TRACKING (STUB)
     # =========================================================================
-    
+
     async def get_emotion_history(
-        self,
-        conversation_id: str,
-        limit: int = 20
-    ) -> List[Dict[str, Any]]:
+        self, conversation_id: str, limit: int = 20
+    ) -> list[dict[str, Any]]:
         """Get emotion history (STUB)"""
-        logger.debug(f"Neo4j get_emotion_history() called - STUB implementation")
+        logger.debug("Neo4j get_emotion_history() called - STUB implementation")
         return []
-    
+
     async def get_escalated_conversations(
-        self,
-        channel: Optional[ConversationChannel] = None,
-        hours: int = 24
-    ) -> List[ConversationMetadata]:
+        self, channel: ConversationChannel | None = None, hours: int = 24
+    ) -> list[ConversationMetadata]:
         """Get escalated conversations (STUB)"""
-        logger.debug(f"Neo4j get_escalated_conversations() called - STUB implementation")
+        logger.debug("Neo4j get_escalated_conversations() called - STUB implementation")
         return []
-    
+
     # =========================================================================
     # CONTEXT MANAGEMENT (STUB)
     # =========================================================================
-    
+
     async def get_context_window(
-        self,
-        conversation_id: str,
-        max_tokens: int = 4000
-    ) -> List[ConversationMessage]:
+        self, conversation_id: str, max_tokens: int = 4000
+    ) -> list[ConversationMessage]:
         """Get context window (STUB)"""
-        logger.debug(f"Neo4j get_context_window() called - STUB implementation")
+        logger.debug("Neo4j get_context_window() called - STUB implementation")
         return []
-    
+
     # =========================================================================
     # STATISTICS (STUB)
     # =========================================================================
-    
-    async def get_statistics(
-        self,
-        user_id: Optional[str] = None,
-        days: int = 30
-    ) -> Dict[str, Any]:
+
+    async def get_statistics(self, user_id: str | None = None, days: int = 30) -> dict[str, Any]:
         """Get statistics (STUB)"""
-        logger.debug(f"Neo4j get_statistics() called - STUB implementation")
+        logger.debug("Neo4j get_statistics() called - STUB implementation")
         return {
             "total_conversations": 0,
             "total_messages": 0,
@@ -255,7 +229,7 @@ class Neo4jMemory(MemoryBackend):
             "escalation_rate": 0.0,
             "channels": {},
             "period_days": days,
-            "note": "Neo4j backend not yet implemented"
+            "note": "Neo4j backend not yet implemented",
         }
 
 
@@ -271,22 +245,22 @@ Neo4j Implementation Roadmap
    - Install neo4j driver: pip install neo4j
    - Configure connection pooling
    - Setup authentication
-   
+
 2. Graph Model:
    ```cypher
    // Create user node
    CREATE (u:User {id: $user_id, created_at: timestamp()})
-   
+
    // Create conversation
    CREATE (c:Conversation {
        id: $conv_id,
        channel: $channel,
        started_at: timestamp()
    })
-   
+
    // Create relationship
    CREATE (u)-[:STARTED {timestamp: timestamp()}]->(c)
-   
+
    // Create message chain
    CREATE (c)-[:CONTAINS]->(m1:Message {
        id: $msg_id,
@@ -295,7 +269,7 @@ Neo4j Implementation Roadmap
        timestamp: timestamp()
    })
    CREATE (m1)-[:NEXT]->(m2:Message {...})
-   
+
    // Add emotion tracking
    CREATE (m1)-[:HAS_EMOTION]->(e:Emotion {
        score: $score,
@@ -308,7 +282,7 @@ Neo4j Implementation Roadmap
    - Create vector index on message content
    - Use OpenAI embeddings for semantic search
    - Find similar conversations
-   
+
    ```cypher
    CALL db.index.vector.queryNodes(
        'message_embeddings',
@@ -323,14 +297,14 @@ Neo4j Implementation Roadmap
    - Conversation patterns
    - Entity relationships
    - Emotion trends over time
-   
+
 5. Advanced Queries:
    ```cypher
    // Find all conversations with negative emotion
    MATCH (u:User)-[:STARTED]->(c:Conversation)-[:CONTAINS]->(m:Message)-[:HAS_EMOTION]->(e:Emotion)
    WHERE e.score < 0.3
    RETURN c, collect(m) as messages, avg(e.score) as avg_emotion
-   
+
    // Track user journey across channels
    MATCH (u:User)-[:STARTED]->(c:Conversation)
    WITH u, c

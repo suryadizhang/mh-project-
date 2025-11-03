@@ -1,10 +1,10 @@
 """Rate-limited social platform API clients."""
 
 import asyncio
-import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Any, Optional
+import logging
+from typing import Any
 
 import aiohttp
 
@@ -14,15 +14,16 @@ logger = logging.getLogger(__name__)
 @dataclass
 class RateLimitInfo:
     """Rate limit information for a platform."""
+
     requests_per_minute: int
     requests_per_hour: int
     requests_per_day: int
     current_minute: int = 0
     current_hour: int = 0
     current_day: int = 0
-    minute_reset_at: Optional[datetime] = None
-    hour_reset_at: Optional[datetime] = None
-    day_reset_at: Optional[datetime] = None
+    minute_reset_at: datetime | None = None
+    hour_reset_at: datetime | None = None
+    day_reset_at: datetime | None = None
 
 
 class RateLimitedClient:
@@ -55,9 +56,9 @@ class RateLimitedClient:
 
             # Check all limits
             return (
-                self.rate_limits.current_minute < self.rate_limits.requests_per_minute and
-                self.rate_limits.current_hour < self.rate_limits.requests_per_hour and
-                self.rate_limits.current_day < self.rate_limits.requests_per_day
+                self.rate_limits.current_minute < self.rate_limits.requests_per_minute
+                and self.rate_limits.current_hour < self.rate_limits.requests_per_hour
+                and self.rate_limits.current_day < self.rate_limits.requests_per_day
             )
 
     async def track_request(self):
@@ -95,10 +96,8 @@ class InstagramClient(RateLimitedClient):
         super().__init__(
             platform="instagram",
             rate_limits=RateLimitInfo(
-                requests_per_minute=60,
-                requests_per_hour=200,
-                requests_per_day=200000
-            )
+                requests_per_minute=60, requests_per_hour=200, requests_per_day=200000
+            ),
         )
         self.access_token = access_token
         self.base_url = "https://graph.facebook.com/v18.0"
@@ -114,12 +113,14 @@ class InstagramClient(RateLimitedClient):
         payload = {
             "recipient": {"id": recipient_id},
             "message": {"text": message},
-            "access_token": self.access_token
+            "access_token": self.access_token,
         }
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.post(url, json=payload, timeout=aiohttp.ClientTimeout(total=15)) as response:
+                async with session.post(
+                    url, json=payload, timeout=aiohttp.ClientTimeout(total=15)
+                ) as response:
                     if response.status == 200:
                         await self.track_request()
                         result = await response.json()
@@ -131,7 +132,7 @@ class InstagramClient(RateLimitedClient):
                         return {"success": False, "error": error_text}
 
         except Exception as e:
-            logger.error(f"Instagram API request failed: {e}")
+            logger.exception(f"Instagram API request failed: {e}")
             return {"success": False, "error": str(e)}
 
     async def reply_to_comment(self, comment_id: str, message: str) -> dict[str, Any]:
@@ -141,25 +142,26 @@ class InstagramClient(RateLimitedClient):
             await asyncio.sleep(wait_time)
 
         url = f"{self.base_url}/{comment_id}/replies"
-        payload = {
-            "message": message,
-            "access_token": self.access_token
-        }
+        payload = {"message": message, "access_token": self.access_token}
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.post(url, json=payload, timeout=aiohttp.ClientTimeout(total=15)) as response:
+                async with session.post(
+                    url, json=payload, timeout=aiohttp.ClientTimeout(total=15)
+                ) as response:
                     if response.status == 200:
                         await self.track_request()
                         result = await response.json()
                         return {"success": True, "reply_id": result.get("id")}
                     else:
                         error_text = await response.text()
-                        logger.error(f"Instagram comment reply error: {response.status} - {error_text}")
+                        logger.error(
+                            f"Instagram comment reply error: {response.status} - {error_text}"
+                        )
                         return {"success": False, "error": error_text}
 
         except Exception as e:
-            logger.error(f"Instagram comment reply failed: {e}")
+            logger.exception(f"Instagram comment reply failed: {e}")
             return {"success": False, "error": str(e)}
 
     async def get_media_comments(self, media_id: str) -> list[dict[str, Any]]:
@@ -169,14 +171,13 @@ class InstagramClient(RateLimitedClient):
             await asyncio.sleep(wait_time)
 
         url = f"{self.base_url}/{media_id}/comments"
-        params = {
-            "fields": "id,text,username,timestamp,replies",
-            "access_token": self.access_token
-        }
+        params = {"fields": "id,text,username,timestamp,replies", "access_token": self.access_token}
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(url, params=params, timeout=aiohttp.ClientTimeout(total=15)) as response:
+                async with session.get(
+                    url, params=params, timeout=aiohttp.ClientTimeout(total=15)
+                ) as response:
                     if response.status == 200:
                         await self.track_request()
                         result = await response.json()
@@ -186,7 +187,7 @@ class InstagramClient(RateLimitedClient):
                         return []
 
         except Exception as e:
-            logger.error(f"Instagram comments fetch failed: {e}")
+            logger.exception(f"Instagram comments fetch failed: {e}")
             return []
 
 
@@ -197,10 +198,8 @@ class FacebookClient(RateLimitedClient):
         super().__init__(
             platform="facebook",
             rate_limits=RateLimitInfo(
-                requests_per_minute=60,
-                requests_per_hour=200,
-                requests_per_day=200000
-            )
+                requests_per_minute=60, requests_per_hour=200, requests_per_day=200000
+            ),
         )
         self.access_token = access_token
         self.page_id = page_id
@@ -216,12 +215,14 @@ class FacebookClient(RateLimitedClient):
         payload = {
             "recipient": {"id": recipient_id},
             "message": {"text": message},
-            "access_token": self.access_token
+            "access_token": self.access_token,
         }
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.post(url, json=payload, timeout=aiohttp.ClientTimeout(total=15)) as response:
+                async with session.post(
+                    url, json=payload, timeout=aiohttp.ClientTimeout(total=15)
+                ) as response:
                     if response.status == 200:
                         await self.track_request()
                         result = await response.json()
@@ -232,7 +233,7 @@ class FacebookClient(RateLimitedClient):
                         return {"success": False, "error": error_text}
 
         except Exception as e:
-            logger.error(f"Facebook Messenger request failed: {e}")
+            logger.exception(f"Facebook Messenger request failed: {e}")
             return {"success": False, "error": str(e)}
 
     async def reply_to_post_comment(self, comment_id: str, message: str) -> dict[str, Any]:
@@ -242,25 +243,26 @@ class FacebookClient(RateLimitedClient):
             await asyncio.sleep(wait_time)
 
         url = f"{self.base_url}/{comment_id}/comments"
-        payload = {
-            "message": message,
-            "access_token": self.access_token
-        }
+        payload = {"message": message, "access_token": self.access_token}
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.post(url, json=payload, timeout=aiohttp.ClientTimeout(total=15)) as response:
+                async with session.post(
+                    url, json=payload, timeout=aiohttp.ClientTimeout(total=15)
+                ) as response:
                     if response.status == 200:
                         await self.track_request()
                         result = await response.json()
                         return {"success": True, "comment_id": result.get("id")}
                     else:
                         error_text = await response.text()
-                        logger.error(f"Facebook comment reply error: {response.status} - {error_text}")
+                        logger.error(
+                            f"Facebook comment reply error: {response.status} - {error_text}"
+                        )
                         return {"success": False, "error": error_text}
 
         except Exception as e:
-            logger.error(f"Facebook comment reply failed: {e}")
+            logger.exception(f"Facebook comment reply failed: {e}")
             return {"success": False, "error": str(e)}
 
 
@@ -271,10 +273,8 @@ class GoogleBusinessClient(RateLimitedClient):
         super().__init__(
             platform="google",
             rate_limits=RateLimitInfo(
-                requests_per_minute=100,
-                requests_per_hour=1000,
-                requests_per_day=25000
-            )
+                requests_per_minute=100, requests_per_hour=1000, requests_per_day=25000
+            ),
         )
         self.access_token = access_token
         self.location_id = location_id
@@ -287,17 +287,17 @@ class GoogleBusinessClient(RateLimitedClient):
             await asyncio.sleep(wait_time)
 
         url = f"{self.base_url}/{review_name}/reply"
-        payload = {
-            "comment": reply_text
-        }
+        payload = {"comment": reply_text}
         headers = {
             "Authorization": f"Bearer {self.access_token}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.put(url, json=payload, headers=headers, timeout=aiohttp.ClientTimeout(total=15)) as response:
+                async with session.put(
+                    url, json=payload, headers=headers, timeout=aiohttp.ClientTimeout(total=15)
+                ) as response:
                     if response.status == 200:
                         await self.track_request()
                         result = await response.json()
@@ -308,7 +308,7 @@ class GoogleBusinessClient(RateLimitedClient):
                         return {"success": False, "error": error_text}
 
         except Exception as e:
-            logger.error(f"Google review reply failed: {e}")
+            logger.exception(f"Google review reply failed: {e}")
             return {"success": False, "error": str(e)}
 
     async def get_reviews(self) -> list[dict[str, Any]]:
@@ -318,13 +318,13 @@ class GoogleBusinessClient(RateLimitedClient):
             await asyncio.sleep(wait_time)
 
         url = f"{self.base_url}/accounts/*/locations/{self.location_id}/reviews"
-        headers = {
-            "Authorization": f"Bearer {self.access_token}"
-        }
+        headers = {"Authorization": f"Bearer {self.access_token}"}
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=15)) as response:
+                async with session.get(
+                    url, headers=headers, timeout=aiohttp.ClientTimeout(total=15)
+                ) as response:
                     if response.status == 200:
                         await self.track_request()
                         result = await response.json()
@@ -334,7 +334,7 @@ class GoogleBusinessClient(RateLimitedClient):
                         return []
 
         except Exception as e:
-            logger.error(f"Google reviews fetch failed: {e}")
+            logger.exception(f"Google reviews fetch failed: {e}")
             return []
 
 
@@ -345,10 +345,8 @@ class YelpClient(RateLimitedClient):
         super().__init__(
             platform="yelp",
             rate_limits=RateLimitInfo(
-                requests_per_minute=100,
-                requests_per_hour=5000,
-                requests_per_day=25000
-            )
+                requests_per_minute=100, requests_per_hour=5000, requests_per_day=25000
+            ),
         )
         self.api_key = api_key
         self.business_id = business_id
@@ -361,17 +359,14 @@ class YelpClient(RateLimitedClient):
             await asyncio.sleep(wait_time)
 
         url = f"{self.base_url}/businesses/{self.business_id}/reviews"
-        headers = {
-            "Authorization": f"Bearer {self.api_key}"
-        }
-        params = {
-            "offset": offset,
-            "limit": min(limit, 50)  # Yelp max limit
-        }
+        headers = {"Authorization": f"Bearer {self.api_key}"}
+        params = {"offset": offset, "limit": min(limit, 50)}  # Yelp max limit
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(url, headers=headers, params=params, timeout=aiohttp.ClientTimeout(total=15)) as response:
+                async with session.get(
+                    url, headers=headers, params=params, timeout=aiohttp.ClientTimeout(total=15)
+                ) as response:
                     if response.status == 200:
                         await self.track_request()
                         result = await response.json()
@@ -381,23 +376,23 @@ class YelpClient(RateLimitedClient):
                         return []
 
         except Exception as e:
-            logger.error(f"Yelp reviews fetch failed: {e}")
+            logger.exception(f"Yelp reviews fetch failed: {e}")
             return []
 
-    async def get_business_info(self) -> Optional[dict[str, Any]]:
+    async def get_business_info(self) -> dict[str, Any] | None:
         """Get business information."""
         if not await self.can_make_request():
             wait_time = await self.wait_for_rate_limit_reset()
             await asyncio.sleep(wait_time)
 
         url = f"{self.base_url}/businesses/{self.business_id}"
-        headers = {
-            "Authorization": f"Bearer {self.api_key}"
-        }
+        headers = {"Authorization": f"Bearer {self.api_key}"}
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=15)) as response:
+                async with session.get(
+                    url, headers=headers, timeout=aiohttp.ClientTimeout(total=15)
+                ) as response:
                     if response.status == 200:
                         await self.track_request()
                         result = await response.json()
@@ -407,7 +402,7 @@ class YelpClient(RateLimitedClient):
                         return None
 
         except Exception as e:
-            logger.error(f"Yelp business info fetch failed: {e}")
+            logger.exception(f"Yelp business info fetch failed: {e}")
             return None
 
 
@@ -433,7 +428,7 @@ class SocialClientManager:
         """Add Yelp client for account."""
         self.clients[f"yelp_{account_id}"] = YelpClient(api_key, business_id)
 
-    def get_client(self, platform: str, account_id: str) -> Optional[RateLimitedClient]:
+    def get_client(self, platform: str, account_id: str) -> RateLimitedClient | None:
         """Get client for platform and account."""
         return self.clients.get(f"{platform}_{account_id}")
 
@@ -455,9 +450,9 @@ class SocialClientManager:
                 "rate_limits": {
                     "minute": f"{client.rate_limits.current_minute}/{client.rate_limits.requests_per_minute}",
                     "hour": f"{client.rate_limits.current_hour}/{client.rate_limits.requests_per_hour}",
-                    "day": f"{client.rate_limits.current_day}/{client.rate_limits.requests_per_day}"
+                    "day": f"{client.rate_limits.current_day}/{client.rate_limits.requests_per_day}",
                 },
-                "can_make_request": await client.can_make_request()
+                "can_make_request": await client.can_make_request(),
             }
 
         return status

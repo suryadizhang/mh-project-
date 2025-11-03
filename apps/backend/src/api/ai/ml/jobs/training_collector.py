@@ -13,11 +13,11 @@ Author: MyHibachi Development Team
 Created: October 31, 2025
 """
 
-import logging
 from datetime import datetime, timedelta
-from typing import Dict, Any, List
+import logging
+from typing import Any
+
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_, func
 
 # Import services and models
 # from ...endpoints.models import Message, Conversation, TrainingData
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 async def nightly_training_collector(db: AsyncSession):
     """
     Nightly training data collection job
-    
+
     Process:
     1. Fetch conversations from past 24 hours
     2. Filter by quality (feedback, confidence, containment)
@@ -39,13 +39,13 @@ async def nightly_training_collector(db: AsyncSession):
     """
     try:
         logger.info("🔄 Starting nightly training data collection...")
-        
+
         # Get feedback processor
         # feedback_processor = get_feedback_processor()
-        
+
         # Fetch conversations from past 24 hours
-        since = datetime.utcnow() - timedelta(days=1)
-        
+        datetime.utcnow() - timedelta(days=1)
+
         # TODO: Query conversations with positive feedback
         # result = await db.execute(
         #     select(Conversation)
@@ -57,17 +57,17 @@ async def nightly_training_collector(db: AsyncSession):
         #     )
         # )
         # conversations = result.scalars().all()
-        
+
         conversations = []  # Placeholder
-        
+
         if not conversations:
             logger.info("✅ No high-quality conversations to collect")
             return {
                 "success": True,
                 "conversations_collected": 0,
-                "message": "No new training data"
+                "message": "No new training data",
             }
-        
+
         # Promote each conversation to training data
         collected_count = 0
         # for conv in conversations:
@@ -80,7 +80,7 @@ async def nightly_training_collector(db: AsyncSession):
         #         )
         #         if existing.scalar_one_or_none():
         #             continue
-        #         
+        #
         #         # Create training data entry
         #         training_entry = TrainingData(
         #             source_conversation_id=conv.id,
@@ -97,50 +97,44 @@ async def nightly_training_collector(db: AsyncSession):
         #         )
         #         db.add(training_entry)
         #         collected_count += 1
-        #         
+        #
         #     except Exception as e:
         #         logger.error(f"Error collecting conversation {conv.id}: {e}")
-        # 
+        #
         # await db.commit()
-        
+
         # Check if retraining threshold reached
         # total_pending = await db.execute(
         #     select(func.count(TrainingData.id))
         #     .where(TrainingData.status == "pending_review")
         # )
         # pending_count = total_pending.scalar()
-        
+
         pending_count = 0  # Placeholder
         retraining_needed = pending_count >= 1000
-        
+
         logger.info(
             f"✅ Training collection complete: {collected_count} conversations collected, "
             f"{pending_count} total pending, retraining_needed={retraining_needed}"
         )
-        
+
         return {
             "success": True,
             "conversations_collected": collected_count,
             "total_pending": pending_count,
             "retraining_needed": retraining_needed,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
         }
-        
+
     except Exception as e:
-        logger.error(f"❌ Error during training collection: {e}")
-        return {
-            "success": False,
-            "error": str(e),
-            "timestamp": datetime.utcnow().isoformat()
-        }
+        logger.exception(f"❌ Error during training collection: {e}")
+        return {"success": False, "error": str(e), "timestamp": datetime.utcnow().isoformat()}
 
 
-async def get_training_collection_stats(
-    db: AsyncSession
-) -> Dict[str, Any]:
+async def get_training_collection_stats(db: AsyncSession) -> dict[str, Any]:
     """
     Get training data collection statistics
-    
+
     Returns:
         {
             "total_training_examples": int,
@@ -160,33 +154,27 @@ async def get_training_collection_stats(
             "approved": 0,
             "rejected": 0,
             "collected_last_24h": 0,
-            "by_intent": {
-                "pricing": 0,
-                "booking": 0,
-                "complaint": 0,
-                "general_inquiry": 0
-            },
+            "by_intent": {"pricing": 0, "booking": 0, "complaint": 0, "general_inquiry": 0},
             "by_channel": {
                 "email": 0,
                 "sms": 0,
                 "instagram": 0,
                 "facebook": 0,
                 "phone": 0,
-                "live_chat": 0
-            }
+                "live_chat": 0,
+            },
         }
-        
+
         # TODO: Calculate real stats from TrainingData
-        
+
         return stats
-        
+
     except Exception as e:
-        logger.error(f"Error getting training collection stats: {e}")
+        logger.exception(f"Error getting training collection stats: {e}")
         return {"error": str(e)}
 
 
 # APScheduler job registration
-from . import scheduler
 
 # Register job: Daily at 1:00 AM UTC
 # scheduler.add_job(

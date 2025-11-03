@@ -1,19 +1,24 @@
-import json
-import logging
 from datetime import datetime, timedelta
 from decimal import Decimal
+import json
+import logging
 from typing import Any
 
-import stripe
-from sqlalchemy import and_, func, select
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from core.config import get_settings
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+import stripe
 
 settings = get_settings()
 from api.app.models.core import Customer, Payment
-from api.app.models.stripe_models import StripeCustomer, Dispute, Invoice, StripePayment
+from api.app.models.stripe_models import (
+    Dispute,
+    Invoice,
+    StripeCustomer,
+    StripePayment,
+)
 from api.app.schemas.stripe_schemas import PaymentAnalytics
+
 # Temporarily commented out - function not implemented yet
 # from utils.query_optimizer import get_payment_analytics_optimized
 
@@ -32,9 +37,7 @@ class StripeService:
     ) -> StripeCustomer:
         """Get existing StripeCustomer or create new one."""
         # Check if StripeCustomer exists
-        result = await self.db.execute(
-            select(StripeCustomer).where(Customer.user_id == user_id)
-        )
+        result = await self.db.execute(select(StripeCustomer).where(Customer.user_id == user_id))
         StripeCustomer = result.scalar_one_or_none()
 
         if StripeCustomer:
@@ -69,9 +72,7 @@ class StripeService:
 
     async def get_StripeCustomer_by_user_id(self, user_id: str) -> StripeCustomer | None:
         """Get StripeCustomer by user ID."""
-        result = await self.db.execute(
-            select(StripeCustomer).where(Customer.user_id == user_id)
-        )
+        result = await self.db.execute(select(StripeCustomer).where(Customer.user_id == user_id))
         return result.scalar_one_or_none()
 
     async def process_webhook_event(self, event: dict[str, Any]) -> None:
@@ -111,12 +112,10 @@ class StripeService:
                 logger.info(f"Unhandled webhook event: {event_type}")
 
         except Exception as e:
-            logger.error(f"Error processing webhook {event_type}: {e}")
+            logger.exception(f"Error processing webhook {event_type}: {e}")
             raise
 
-    async def _handle_checkout_completed(
-        self, session: dict[str, Any]
-    ) -> None:
+    async def _handle_checkout_completed(self, session: dict[str, Any]) -> None:
         """Handle completed checkout session."""
         metadata = session.get("metadata", {})
         booking_id = metadata.get("booking_id")
@@ -133,44 +132,33 @@ class StripeService:
             payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
             await self._create_payment_record(payment_intent, "checkout")
 
-        logger.info(
-            f"Checkout completed: {session['id']}, booking: {booking_id}"
-        )
+        logger.info(f"Checkout completed: {session['id']}, booking: {booking_id}")
 
-    async def _handle_payment_succeeded(
-        self, payment_intent: dict[str, Any]
-    ) -> None:
+    async def _handle_payment_succeeded(self, payment_intent: dict[str, Any]) -> None:
         """Handle successful payment."""
         await self._create_payment_record(payment_intent, "succeeded")
         await self._update_StripeCustomer_analytics(payment_intent)
 
         logger.info(f"Payment succeeded: {payment_intent['id']}")
 
-    async def _handle_payment_failed(
-        self, payment_intent: dict[str, Any]
-    ) -> None:
+    async def _handle_payment_failed(self, payment_intent: dict[str, Any]) -> None:
         """Handle failed payment."""
         metadata = payment_intent.get("metadata", {})
 
         # Log failed payment
         logger.warning(
-            f"Payment failed: {payment_intent['id']}, "
-            f"booking: {metadata.get('booking_id')}"
+            f"Payment failed: {payment_intent['id']}, " f"booking: {metadata.get('booking_id')}"
         )
 
         # Update payment record if exists
         await self._update_payment_status(payment_intent["id"], "failed")
 
-    async def _handle_payment_canceled(
-        self, payment_intent: dict[str, Any]
-    ) -> None:
+    async def _handle_payment_canceled(self, payment_intent: dict[str, Any]) -> None:
         """Handle canceled payment."""
         logger.info(f"Payment canceled: {payment_intent['id']}")
         await self._update_payment_status(payment_intent["id"], "canceled")
 
-    async def _handle_invoice_payment_succeeded(
-        self, invoice: dict[str, Any]
-    ) -> None:
+    async def _handle_invoice_payment_succeeded(self, invoice: dict[str, Any]) -> None:
         """Handle successful invoice payment."""
         # Update invoice record
         result = await self.db.execute(
@@ -180,17 +168,13 @@ class StripeService:
 
         if invoice_record:
             invoice_record.status = "paid"
-            invoice_record.amount_paid = Decimal(
-                str(invoice["amount_paid"] / 100)
-            )
+            invoice_record.amount_paid = Decimal(str(invoice["amount_paid"] / 100))
             invoice_record.paid_at = datetime.utcnow()
             await self.db.commit()
 
         logger.info(f"Invoice payment succeeded: {invoice['id']}")
 
-    async def _handle_invoice_payment_failed(
-        self, invoice: dict[str, Any]
-    ) -> None:
+    async def _handle_invoice_payment_failed(self, invoice: dict[str, Any]) -> None:
         """Handle failed invoice payment."""
         # Update invoice record
         result = await self.db.execute(
@@ -210,16 +194,12 @@ class StripeService:
         user_id = metadata.get("user_id")
 
         if not user_id:
-            logger.warning(
-                f"StripeCustomer created without user_id: {StripeCustomer['id']}"
-            )
+            logger.warning(f"StripeCustomer created without user_id: {StripeCustomer['id']}")
             return
 
         # Check if we already have this StripeCustomer
         result = await self.db.execute(
-            select(StripeCustomer).where(
-                Customer.stripe_StripeCustomer_id == StripeCustomer["id"]
-            )
+            select(StripeCustomer).where(Customer.stripe_StripeCustomer_id == StripeCustomer["id"])
         )
         existing = result.scalar_one_or_none()
 
@@ -248,32 +228,22 @@ class StripeService:
             currency=dispute["currency"],
             status=dispute["status"],
             reason=dispute["reason"],
-            evidence_due_by=datetime.fromtimestamp(
-                dispute["evidence_details"]["due_by"]
-            ),
+            evidence_due_by=datetime.fromtimestamp(dispute["evidence_details"]["due_by"]),
         )
 
         self.db.add(dispute_record)
         await self.db.commit()
 
-        logger.warning(
-            f"Dispute created: {dispute['id']}, "
-            f"amount: ${dispute['amount']/100}"
-        )
+        logger.warning(f"Dispute created: {dispute['id']}, " f"amount: ${dispute['amount']/100}")
 
     async def _handle_subscription_event(
         self, subscription: dict[str, Any], event_type: str
     ) -> None:
         """Handle subscription events."""
-        logger.info(
-            f"Subscription event: {event_type}, "
-            f"subscription: {subscription['id']}"
-        )
+        logger.info(f"Subscription event: {event_type}, " f"subscription: {subscription['id']}")
         # Implement subscription handling if needed
 
-    async def _create_payment_record(
-        self, payment_intent: dict[str, Any], source: str
-    ) -> None:
+    async def _create_payment_record(self, payment_intent: dict[str, Any], source: str) -> None:
         """Create payment record from payment intent."""
         metadata = payment_intent.get("metadata", {})
 
@@ -310,14 +280,10 @@ class StripeService:
 
         await self.db.commit()
 
-    async def _update_payment_status(
-        self, payment_intent_id: str, status: str
-    ) -> None:
+    async def _update_payment_status(self, payment_intent_id: str, status: str) -> None:
         """Update payment status."""
         result = await self.db.execute(
-            select(Payment).where(
-                Payment.stripe_payment_intent_id == payment_intent_id
-            )
+            select(Payment).where(Payment.stripe_payment_intent_id == payment_intent_id)
         )
         payment = result.scalar_one_or_none()
 
@@ -326,9 +292,7 @@ class StripeService:
             payment.updated_at = datetime.utcnow()
             await self.db.commit()
 
-    async def _update_StripeCustomer_analytics(
-        self, payment_intent: dict[str, Any]
-    ) -> None:
+    async def _update_StripeCustomer_analytics(self, payment_intent: dict[str, Any]) -> None:
         """Update StripeCustomer analytics after successful payment."""
         StripeCustomer_id = payment_intent.get("StripeCustomer")
         if not StripeCustomer_id:
@@ -345,10 +309,7 @@ class StripeService:
             customer_record.total_bookings += 1
 
             # Calculate Zelle savings (8% of Stripe payments)
-            if (
-                payment_intent.get("payment_method_types", ["card"])[0]
-                == "card"
-            ):
+            if payment_intent.get("payment_method_types", ["card"])[0] == "card":
                 customer_record.zelle_savings += amount * Decimal("0.08")
 
             # Update loyalty tier
@@ -370,16 +331,16 @@ class StripeService:
     ) -> PaymentAnalytics:
         """
         Get payment analytics using optimized CTE query.
-        
+
         Performance Improvement: ~20x faster
         - Before: 2 separate queries (~200ms)
         - After: 1 CTE query (~10ms)
-        
+
         Args:
             start_date: Start of date range (default: 30 days ago)
             end_date: End of date range (default: now)
             station_id: Optional station filter for multi-tenancy
-            
+
         Returns:
             PaymentAnalytics object with aggregated data
         """
@@ -422,4 +383,3 @@ class StripeService:
             payment_methods=method_stats,
             monthly_revenue=monthly_revenue,
         )
-

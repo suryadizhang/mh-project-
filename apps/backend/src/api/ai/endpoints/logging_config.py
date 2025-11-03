@@ -4,10 +4,10 @@ Structured logging with performance metrics and monitoring
 """
 
 import logging
+from pathlib import Path
 import sys
 import time
-from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import structlog
 from structlog.typing import FilteringBoundLogger
@@ -15,7 +15,7 @@ from structlog.typing import FilteringBoundLogger
 
 def setup_logging(
     log_level: str = "INFO",
-    log_file: Optional[str] = None,
+    log_file: str | None = None,
     json_logs: bool = False,
 ) -> FilteringBoundLogger:
     """
@@ -115,9 +115,7 @@ def setup_logging(
 class PerformanceLogger:
     """Context manager for timing operations and logging performance metrics"""
 
-    def __init__(
-        self, logger: FilteringBoundLogger, operation: str, **context
-    ):
+    def __init__(self, logger: FilteringBoundLogger, operation: str, **context):
         self.logger = logger
         self.operation = operation
         self.context = context
@@ -125,9 +123,7 @@ class PerformanceLogger:
 
     def __enter__(self):
         self.start_time = time.time()
-        self.logger.debug(
-            "Operation started", operation=self.operation, **self.context
-        )
+        self.logger.debug("Operation started", operation=self.operation, **self.context)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -159,9 +155,7 @@ class RequestLogger:
     def __init__(self, logger: FilteringBoundLogger):
         self.logger = logger
 
-    def log_request(
-        self, method: str, url: str, headers: dict[str, Any] = None, **context
-    ):
+    def log_request(self, method: str, url: str, headers: dict[str, Any] | None = None, **context):
         """Log incoming HTTP request"""
         self.logger.info(
             "HTTP request received",
@@ -197,9 +191,7 @@ class WebSocketLogger:
             conversation_id=conversation_id,
         )
 
-    def log_disconnection(
-        self, client_id: str, conversation_id: str, reason: str = None
-    ):
+    def log_disconnection(self, client_id: str, conversation_id: str, reason: str | None = None):
         """Log WebSocket disconnection"""
         self.logger.info(
             "WebSocket connection closed",
@@ -225,9 +217,7 @@ class AILogger:
     def __init__(self, logger: FilteringBoundLogger):
         self.logger = logger
 
-    def log_model_usage(
-        self, model: str, tokens_used: int, cost: float = None, **context
-    ):
+    def log_model_usage(self, model: str, tokens_used: int, cost: float | None = None, **context):
         """Log AI model usage for cost tracking"""
         self.logger.info(
             "AI model invoked",
@@ -249,9 +239,7 @@ class AILogger:
             **context,
         )
 
-    def log_confidence_score(
-        self, score: float, threshold: float, action: str, **context
-    ):
+    def log_confidence_score(self, score: float, threshold: float, action: str, **context):
         """Log confidence scoring and escalation decisions"""
         self.logger.info(
             "AI confidence evaluation",
@@ -269,9 +257,7 @@ class DatabaseLogger:
     def __init__(self, logger: FilteringBoundLogger):
         self.logger = logger
 
-    def log_query(
-        self, operation: str, table: str, duration: float, **context
-    ):
+    def log_query(self, operation: str, table: str, duration: float, **context):
         """Log database query performance"""
         log_level = "warning" if duration > 1.0 else "debug"
         getattr(self.logger, log_level)(
@@ -300,7 +286,7 @@ class SecurityLogger:
         self.logger = logger
 
     def log_authentication(
-        self, success: bool, user_id: str = None, ip: str = None, **context
+        self, success: bool, user_id: str | None = None, ip: str | None = None, **context
     ):
         """Log authentication attempts"""
         log_level = "info" if success else "warning"
@@ -312,9 +298,7 @@ class SecurityLogger:
             **context,
         )
 
-    def log_rate_limit(
-        self, client_id: str, endpoint: str, limit_reached: bool, **context
-    ):
+    def log_rate_limit(self, client_id: str, endpoint: str, limit_reached: bool, **context):
         """Log rate limiting events"""
         if limit_reached:
             self.logger.warning(
@@ -327,11 +311,11 @@ class SecurityLogger:
 
 # Export main logger setup function and utilities
 __all__ = [
-    "setup_logging",
-    "PerformanceLogger",
-    "RequestLogger",
-    "WebSocketLogger",
     "AILogger",
     "DatabaseLogger",
+    "PerformanceLogger",
+    "RequestLogger",
     "SecurityLogger",
+    "WebSocketLogger",
+    "setup_logging",
 ]

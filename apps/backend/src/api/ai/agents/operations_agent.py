@@ -12,8 +12,8 @@ Author: MH Backend Team
 Created: 2025-10-31 (Phase 1A)
 """
 
-from typing import Dict, List, Any
 import logging
+from typing import Any
 
 from .base_agent import BaseAgent
 
@@ -23,20 +23,20 @@ logger = logging.getLogger(__name__)
 class OperationsAgent(BaseAgent):
     """
     Operations Agent - Handle logistics, scheduling, and practical execution.
-    
+
     Expertise:
     - Calendar management (availability, conflicts, bookings)
     - Equipment logistics (what's needed, where, when)
     - Travel coordination (routes, timing, setup requirements)
     - Status tracking (order updates, chef assignments)
     - Practical problem-solving (can we do X? How do we handle Y?)
-    
+
     Tools:
     - check_availability: Check chef/equipment availability
     - create_booking: Create new booking
     - update_booking: Modify existing booking
     - assign_chef: Assign chef to event
-    
+
     Usage:
         agent = OperationsAgent()
         response = await agent.process(
@@ -44,14 +44,12 @@ class OperationsAgent(BaseAgent):
             context={"conversation_id": "123"}
         )
     """
-    
+
     def __init__(self):
         super().__init__(
-            agent_type="operations",
-            temperature=0.4,  # Very consistent, factual
-            max_tokens=400
+            agent_type="operations", temperature=0.4, max_tokens=400  # Very consistent, factual
         )
-    
+
     def get_system_prompt(self) -> str:
         return """You are the operations coordinator for MyHibachi, responsible for logistics, scheduling, and practical execution.
 
@@ -175,7 +173,7 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
 - Always have a backup plan for logistical challenges
 """
 
-    def get_tools(self) -> List[Dict[str, Any]]:
+    def get_tools(self) -> list[dict[str, Any]]:
         return [
             {
                 "type": "function",
@@ -187,24 +185,21 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
                         "properties": {
                             "event_date": {
                                 "type": "string",
-                                "description": "Event date (YYYY-MM-DD)"
+                                "description": "Event date (YYYY-MM-DD)",
                             },
                             "event_time": {
                                 "type": "string",
-                                "description": "Event start time (HH:MM AM/PM)"
+                                "description": "Event start time (HH:MM AM/PM)",
                             },
-                            "num_guests": {
-                                "type": "integer",
-                                "description": "Number of guests"
-                            },
+                            "num_guests": {"type": "integer", "description": "Number of guests"},
                             "location": {
                                 "type": "string",
-                                "description": "Event location (city or zip code)"
-                            }
+                                "description": "Event location (city or zip code)",
+                            },
                         },
-                        "required": ["event_date"]
-                    }
-                }
+                        "required": ["event_date"],
+                    },
+                },
             },
             {
                 "type": "function",
@@ -216,45 +211,50 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
                         "properties": {
                             "customer_name": {
                                 "type": "string",
-                                "description": "Customer's full name"
+                                "description": "Customer's full name",
                             },
                             "customer_email": {
                                 "type": "string",
-                                "description": "Customer's email address"
+                                "description": "Customer's email address",
                             },
                             "customer_phone": {
                                 "type": "string",
-                                "description": "Customer's phone number"
+                                "description": "Customer's phone number",
                             },
                             "event_date": {
                                 "type": "string",
-                                "description": "Event date (YYYY-MM-DD)"
+                                "description": "Event date (YYYY-MM-DD)",
                             },
                             "event_time": {
                                 "type": "string",
-                                "description": "Event start time (HH:MM AM/PM)"
+                                "description": "Event start time (HH:MM AM/PM)",
                             },
-                            "num_guests": {
-                                "type": "integer",
-                                "description": "Number of guests"
-                            },
+                            "num_guests": {"type": "integer", "description": "Number of guests"},
                             "package": {
                                 "type": "string",
                                 "enum": ["standard", "premium", "deluxe"],
-                                "description": "Selected package"
+                                "description": "Selected package",
                             },
                             "location_address": {
                                 "type": "string",
-                                "description": "Full event address"
+                                "description": "Full event address",
                             },
                             "special_requests": {
                                 "type": "string",
-                                "description": "Any special requests or dietary restrictions"
-                            }
+                                "description": "Any special requests or dietary restrictions",
+                            },
                         },
-                        "required": ["customer_name", "customer_email", "customer_phone", "event_date", "num_guests", "package", "location_address"]
-                    }
-                }
+                        "required": [
+                            "customer_name",
+                            "customer_email",
+                            "customer_phone",
+                            "event_date",
+                            "num_guests",
+                            "package",
+                            "location_address",
+                        ],
+                    },
+                },
             },
             {
                 "type": "function",
@@ -264,10 +264,7 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
                     "parameters": {
                         "type": "object",
                         "properties": {
-                            "order_id": {
-                                "type": "string",
-                                "description": "Booking order ID"
-                            },
+                            "order_id": {"type": "string", "description": "Booking order ID"},
                             "changes": {
                                 "type": "object",
                                 "description": "Fields to update (event_date, event_time, num_guests, etc.)",
@@ -276,17 +273,14 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
                                     "event_time": {"type": "string"},
                                     "num_guests": {"type": "integer"},
                                     "package": {"type": "string"},
-                                    "special_requests": {"type": "string"}
-                                }
+                                    "special_requests": {"type": "string"},
+                                },
                             },
-                            "reason": {
-                                "type": "string",
-                                "description": "Reason for change"
-                            }
+                            "reason": {"type": "string", "description": "Reason for change"},
                         },
-                        "required": ["order_id", "changes"]
-                    }
-                }
+                        "required": ["order_id", "changes"],
+                    },
+                },
             },
             {
                 "type": "function",
@@ -296,93 +290,79 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
                     "parameters": {
                         "type": "object",
                         "properties": {
-                            "order_id": {
-                                "type": "string",
-                                "description": "Booking order ID"
-                            },
+                            "order_id": {"type": "string", "description": "Booking order ID"},
                             "chef_preference": {
                                 "type": "string",
-                                "description": "Preferred chef name or 'auto' for automatic assignment"
+                                "description": "Preferred chef name or 'auto' for automatic assignment",
                             },
                             "requirements": {
                                 "type": "array",
                                 "items": {"type": "string"},
-                                "description": "Special chef requirements (vegetarian_expert, corporate_experience, etc.)"
-                            }
+                                "description": "Special chef requirements (vegetarian_expert, corporate_experience, etc.)",
+                            },
                         },
-                        "required": ["order_id"]
-                    }
-                }
-            }
+                        "required": ["order_id"],
+                    },
+                },
+            },
         ]
-    
+
     async def process_tool_call(
-        self,
-        tool_name: str,
-        arguments: Dict[str, Any],
-        context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, tool_name: str, arguments: dict[str, Any], context: dict[str, Any]
+    ) -> dict[str, Any]:
         """Execute tool functions"""
-        
+
         try:
             if tool_name == "check_availability":
                 return await self._check_availability(arguments)
-            
+
             elif tool_name == "create_booking":
                 return await self._create_booking(arguments, context)
-            
+
             elif tool_name == "update_booking":
                 return await self._update_booking(arguments, context)
-            
+
             elif tool_name == "assign_chef":
                 return await self._assign_chef(arguments)
-            
+
             else:
-                return {
-                    "success": False,
-                    "result": None,
-                    "error": f"Unknown tool: {tool_name}"
-                }
-                
+                return {"success": False, "result": None, "error": f"Unknown tool: {tool_name}"}
+
         except Exception as e:
             logger.error(f"Tool execution error: {tool_name} - {e}", exc_info=True)
-            return {
-                "success": False,
-                "result": None,
-                "error": str(e)
-            }
-    
+            return {"success": False, "result": None, "error": str(e)}
+
     # ===== Tool Implementations =====
-    
-    async def _check_availability(self, args: Dict[str, Any]) -> Dict[str, Any]:
+
+    async def _check_availability(self, args: dict[str, Any]) -> dict[str, Any]:
         """Check availability for date"""
-        
+
         event_date = args["event_date"]
         event_time = args.get("event_time", "6:00 PM")
         num_guests = args.get("num_guests", 50)
         location = args.get("location", "Unknown")
-        
+
         # TODO: Integrate with actual calendar system
         # This is a mock implementation
-        
+
         from datetime import datetime
         import random
-        
+
         # Parse date
         date_obj = datetime.strptime(event_date, "%Y-%m-%d")
         day_of_week = date_obj.strftime("%A")
-        
+
         # Simulate availability (random for demo)
         is_weekend = day_of_week in ["Saturday", "Sunday"]
         is_peak_season = date_obj.month in [5, 6, 7, 8, 9]
-        
+
         # Calculate available resources
         chefs_needed = 1 if num_guests <= 50 else 2
         chefs_available = random.randint(2, 5) if not is_weekend else random.randint(0, 3)
         equipment_sets_available = random.randint(1, 4)
-        
+
         is_available = chefs_available >= chefs_needed and equipment_sets_available >= 1
-        
+
         result = {
             "event_date": event_date,
             "day_of_week": day_of_week,
@@ -395,25 +375,24 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
             "equipment_sets_available": equipment_sets_available,
             "peak_season": is_peak_season,
             "booking_deadline": "ASAP" if is_weekend else "14 days before",
-            "alternative_dates": []
+            "alternative_dates": [],
         }
-        
+
         # Suggest alternatives if not available
         if not is_available:
             result["alternative_dates"] = [
                 {"date": "2024-12-16", "day": "Monday", "availability": "High"},
                 {"date": "2024-12-20", "day": "Friday", "availability": "Medium"},
-                {"date": "2024-12-22", "day": "Sunday", "availability": "Low"}
+                {"date": "2024-12-22", "day": "Sunday", "availability": "Low"},
             ]
-        
-        return {
-            "success": True,
-            "result": result
-        }
-    
-    async def _create_booking(self, args: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+
+        return {"success": True, "result": result}
+
+    async def _create_booking(
+        self, args: dict[str, Any], context: dict[str, Any]
+    ) -> dict[str, Any]:
         """Create new booking"""
-        
+
         # Extract all booking details
         booking = {
             "order_id": f"ORD-2024-{random.randint(1000, 9999)}",
@@ -429,19 +408,19 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
             "status": "Pending Deposit",
             "created_at": "2024-10-31T10:30:00Z",
             "deposit_amount": 0,
-            "total_amount": 0
+            "total_amount": 0,
         }
-        
+
         # Calculate pricing
         base_prices = {"standard": 45, "premium": 65, "deluxe": 85}
         total = base_prices[args["package"]] * args["num_guests"]
         deposit = total * 0.5
-        
+
         booking["total_amount"] = total
         booking["deposit_amount"] = deposit
-        
+
         logger.info(f"Booking created: {booking['order_id']}")
-        
+
         return {
             "success": True,
             "result": {
@@ -451,35 +430,37 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
                     f"Deposit due: ${deposit:,.2f} (50%)",
                     "Payment link included in email",
                     "Booking confirmed upon deposit receipt",
-                    "Final balance due 24 hours before event"
+                    "Final balance due 24 hours before event",
                 ],
-                "confirmation": f"Booking #{booking['order_id']} created successfully!"
-            }
+                "confirmation": f"Booking #{booking['order_id']} created successfully!",
+            },
         }
-    
-    async def _update_booking(self, args: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+
+    async def _update_booking(
+        self, args: dict[str, Any], context: dict[str, Any]
+    ) -> dict[str, Any]:
         """Update existing booking"""
-        
+
         order_id = args["order_id"]
         changes = args["changes"]
         reason = args.get("reason", "Customer request")
-        
+
         # TODO: Integrate with actual database
         # This is a mock implementation
-        
+
         import random
-        
+
         # Calculate if fees apply
         has_fee = False
         fee_amount = 0
-        
+
         if "event_date" in changes:
             # Date changes may incur fees
             has_fee = random.choice([True, False])
             fee_amount = 200 if has_fee else 0
-        
+
         updated_fields = list(changes.keys())
-        
+
         result = {
             "order_id": order_id,
             "updated_fields": updated_fields,
@@ -488,67 +469,63 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
             "fee_applied": has_fee,
             "fee_amount": f"${fee_amount}" if has_fee else "$0",
             "updated_at": "2024-10-31T10:30:00Z",
-            "confirmation": f"Booking #{order_id} updated successfully!"
+            "confirmation": f"Booking #{order_id} updated successfully!",
         }
-        
+
         if has_fee:
             result["note"] = "Change fee applies due to less than 14 days notice"
-        
-        return {
-            "success": True,
-            "result": result
-        }
-    
-    async def _assign_chef(self, args: Dict[str, Any]) -> Dict[str, Any]:
+
+        return {"success": True, "result": result}
+
+    async def _assign_chef(self, args: dict[str, Any]) -> dict[str, Any]:
         """Assign chef to event"""
-        
+
         order_id = args["order_id"]
         chef_preference = args.get("chef_preference", "auto")
         requirements = args.get("requirements", [])
-        
+
         # TODO: Integrate with chef scheduling system
         # This is a mock implementation
-        
+
         # Available chefs (mock data)
         chefs = [
             {
                 "name": "Chef Mike",
                 "specialties": ["corporate_experience", "large_events"],
                 "rating": 4.9,
-                "events_completed": 250
+                "events_completed": 250,
             },
             {
                 "name": "Chef Sarah",
                 "specialties": ["vegetarian_expert", "dietary_accommodations"],
                 "rating": 4.8,
-                "events_completed": 180
+                "events_completed": 180,
             },
             {
                 "name": "Chef Tom",
                 "specialties": ["entertainment_focus", "family_events"],
                 "rating": 4.7,
-                "events_completed": 200
-            }
+                "events_completed": 200,
+            },
         ]
-        
+
         # Auto-assign based on requirements
         if chef_preference == "auto":
             # Match requirements
             best_match = chefs[0]  # Default
-            
+
             for chef in chefs:
                 if any(req in chef["specialties"] for req in requirements):
                     best_match = chef
                     break
-            
+
             assigned_chef = best_match
         else:
             # Find requested chef
             assigned_chef = next(
-                (c for c in chefs if c["name"].lower() == chef_preference.lower()),
-                chefs[0]
+                (c for c in chefs if c["name"].lower() == chef_preference.lower()), chefs[0]
             )
-        
+
         result = {
             "order_id": order_id,
             "chef_assigned": assigned_chef["name"],
@@ -556,13 +533,10 @@ Everything is on track! I'll send you a reminder 3 days before with final detail
             "chef_experience": f"{assigned_chef['events_completed']} events",
             "chef_specialties": assigned_chef["specialties"],
             "assignment_date": "2024-10-31T10:30:00Z",
-            "confirmation": f"{assigned_chef['name']} assigned to booking #{order_id}"
+            "confirmation": f"{assigned_chef['name']} assigned to booking #{order_id}",
         }
-        
-        return {
-            "success": True,
-            "result": result
-        }
+
+        return {"success": True, "result": result}
 
 
 import random  # Add at top of file for mock implementations

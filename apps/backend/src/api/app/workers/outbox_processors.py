@@ -2,21 +2,21 @@
 Outbox processor workers for external service integrations.
 Handles SMS, email, and payment processing with retry logic.
 """
+
 import asyncio
-import json
-import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Any, Optional
+import json
+import logging
+from typing import Any
 
 import aiohttp
-import stripe
-from sqlalchemy import and_, select, update
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from api.app.database import get_db_session, get_db_context
+from api.app.database import get_db_context
 from api.app.models.events import OutboxEntry
 from api.app.utils.encryption import decrypt_field, get_field_encryption
+from sqlalchemy import and_, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+import stripe
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class WorkerConfig:
     """Worker configuration settings."""
+
     max_retries: int = 5
     initial_delay_seconds: int = 1
     max_delay_seconds: int = 300
@@ -50,13 +51,13 @@ class OutboxWorkerBase:
                     await self._process_batch()
                     await asyncio.sleep(self.config.poll_interval_seconds)
                 except Exception as e:
-                    logger.error(f"Worker error in {self.__class__.__name__}: {e}")
+                    logger.exception(f"Worker error in {self.__class__.__name__}: {e}")
                     await asyncio.sleep(self.config.poll_interval_seconds)
         except asyncio.CancelledError:
             logger.info(f"Worker {self.__class__.__name__} was cancelled")
             raise
         except Exception as e:
-            logger.error(f"Fatal error in {self.__class__.__name__}: {e}")
+            logger.exception(f"Fatal error in {self.__class__.__name__}: {e}")
             raise
         finally:
             self.running = False
@@ -80,7 +81,7 @@ class OutboxWorkerBase:
                     await db.commit()
 
                 except Exception as e:
-                    logger.error(f"Error processing event {event.id}: {e}")
+                    logger.exception(f"Error processing event {event.id}: {e}")
                     await self._handle_event_error(event, str(e), db)
                     await db.commit()
 
@@ -91,9 +92,9 @@ class OutboxWorkerBase:
             select(OutboxEntry)
             .where(
                 and_(
-                    OutboxEntry.status == 'pending',
+                    OutboxEntry.status == "pending",
                     OutboxEntry.attempts < self.config.max_retries,
-                    OutboxEntry.next_attempt_at <= datetime.utcnow()
+                    OutboxEntry.next_attempt_at <= datetime.utcnow(),
                 )
             )
             .order_by(OutboxEntry.created_at)
@@ -105,7 +106,7 @@ class OutboxWorkerBase:
 
         # Filter by payload.event_type in Python to support multiple DB backends
         supported = set(self.get_supported_event_types())
-        selected = [e for e in candidates if (e.payload or {}).get('event_type') in supported]
+        selected = [e for e in candidates if (e.payload or {}).get("event_type") in supported]
 
         # Respect batch_size
         return selected[: self.config.batch_size]
@@ -115,10 +116,7 @@ class OutboxWorkerBase:
         await db.execute(
             update(OutboxEntry)
             .where(OutboxEntry.id == event_id)
-            .values(
-                completed_at=datetime.utcnow(),
-                status="completed"
-            )
+            .values(completed_at=datetime.utcnow(), status="completed")
         )
 
     async def _handle_event_error(self, event: OutboxEntry, error_message: str, db: AsyncSession):
@@ -127,8 +125,7 @@ class OutboxWorkerBase:
 
         # Calculate next retry time with exponential backoff
         delay_seconds = min(
-            self.config.initial_delay_seconds * (2 ** retry_count),
-            self.config.max_delay_seconds
+            self.config.initial_delay_seconds * (2**retry_count), self.config.max_delay_seconds
         )
         next_retry_at = datetime.utcnow() + timedelta(seconds=delay_seconds)
 
@@ -141,7 +138,7 @@ class OutboxWorkerBase:
                     status="failed",
                     last_error=error_message,
                     completed_at=datetime.utcnow(),
-                    attempts=retry_count
+                    attempts=retry_count,
                 )
             )
             logger.error(f"Event {event.id} failed after {retry_count} retries: {error_message}")
@@ -151,12 +148,12 @@ class OutboxWorkerBase:
                 update(OutboxEntry)
                 .where(OutboxEntry.id == event.id)
                 .values(
-                    attempts=retry_count,
-                    last_error=error_message,
-                    next_attempt_at=next_retry_at
+                    attempts=retry_count, last_error=error_message, next_attempt_at=next_retry_at
                 )
             )
-            logger.warning(f"Event {event.id} retry {retry_count} scheduled for {next_retry_at}: {error_message}")
+            logger.warning(
+                f"Event {event.id} retry {retry_count} scheduled for {next_retry_at}: {error_message}"
+            )
 
     def get_supported_event_types(self) -> list[str]:
         """Get list of event types this worker handles."""
@@ -170,11 +167,11 @@ class OutboxWorkerBase:
 class SMSWorker(OutboxWorkerBase):
     """Worker for sending SMS messages via RingCentral."""
 
-    def __init__(self, config: WorkerConfig = None, rc_config: dict[str, str] = None):
+    def __init__(self, config: WorkerConfig = None, rc_config: dict[str, str] | None = None):
         super().__init__(config)
         self.rc_config = rc_config or {}
-        self._access_token: Optional[str] = None
-        self._token_expires_at: Optional[datetime] = None
+        self._access_token: str | None = None
+        self._token_expires_at: datetime | None = None
 
     def get_supported_event_types(self) -> list[str]:
         return ["sms_send", "sms_reminder", "sms_confirmation"]
@@ -206,12 +203,12 @@ class SMSWorker(OutboxWorkerBase):
         payload = {
             "from": {"phoneNumber": self.rc_config.get("from_number", "")},
             "to": [{"phoneNumber": phone_number}],
-            "text": message
+            "text": message,
         }
 
         headers = {
             "Authorization": f"Bearer {self._access_token}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
         async with aiohttp.ClientSession() as session:
@@ -226,7 +223,9 @@ class SMSWorker(OutboxWorkerBase):
                     async with session.post(url, json=payload, headers=headers) as retry_response:
                         if retry_response.status != 200:
                             error_text = await retry_response.text()
-                            raise Exception(f"SMS API error after retry: {retry_response.status} - {error_text}")
+                            raise Exception(
+                                f"SMS API error after retry: {retry_response.status} - {error_text}"
+                            )
                         return await retry_response.json()
                 else:
                     error_text = await response.text()
@@ -235,8 +234,8 @@ class SMSWorker(OutboxWorkerBase):
     async def _ensure_access_token(self):
         """Ensure we have a valid access token."""
         if not self._access_token or (
-            self._token_expires_at and
-            datetime.utcnow() >= self._token_expires_at - timedelta(minutes=5)
+            self._token_expires_at
+            and datetime.utcnow() >= self._token_expires_at - timedelta(minutes=5)
         ):
             await self._refresh_access_token()
 
@@ -244,19 +243,22 @@ class SMSWorker(OutboxWorkerBase):
         """Refresh RingCentral access token."""
         url = f"{self.rc_config.get('server_url', '')}/restapi/oauth/token"
 
-        auth_string = f"{self.rc_config.get('client_id', '')}:{self.rc_config.get('client_secret', '')}"
+        auth_string = (
+            f"{self.rc_config.get('client_id', '')}:{self.rc_config.get('client_secret', '')}"
+        )
         import base64
+
         auth_header = base64.b64encode(auth_string.encode()).decode()
 
         headers = {
             "Authorization": f"Basic {auth_header}",
-            "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type": "application/x-www-form-urlencoded",
         }
 
         payload = {
             "grant_type": "password",
             "username": self.rc_config.get("username", ""),
-            "password": self.rc_config.get("password", "")
+            "password": self.rc_config.get("password", ""),
         }
 
         async with aiohttp.ClientSession() as session:
@@ -274,7 +276,7 @@ class SMSWorker(OutboxWorkerBase):
 class EmailWorker(OutboxWorkerBase):
     """Worker for sending emails."""
 
-    def __init__(self, config: WorkerConfig = None, email_config: dict[str, str] = None):
+    def __init__(self, config: WorkerConfig = None, email_config: dict[str, str] | None = None):
         super().__init__(config)
         self.email_config = email_config or {}
 
@@ -301,8 +303,14 @@ class EmailWorker(OutboxWorkerBase):
 
         logger.info(f"Email sent successfully for event {event.id} to {email_address}")
 
-    async def _send_email(self, to_email: str, subject: str, html_body: str,
-                         text_body: str = "", attachments: list[dict] = None):
+    async def _send_email(
+        self,
+        to_email: str,
+        subject: str,
+        html_body: str,
+        text_body: str = "",
+        attachments: list[dict] | None = None,
+    ):
         """Send email via configured email service."""
 
         # Use SendGrid, AWS SES, or SMTP based on configuration
@@ -317,8 +325,14 @@ class EmailWorker(OutboxWorkerBase):
         else:
             raise Exception(f"Unknown email provider: {email_provider}")
 
-    async def _send_via_sendgrid(self, to_email: str, subject: str, html_body: str,
-                                text_body: str = "", attachments: list[dict] = None):
+    async def _send_via_sendgrid(
+        self,
+        to_email: str,
+        subject: str,
+        html_body: str,
+        text_body: str = "",
+        attachments: list[dict] | None = None,
+    ):
         """Send email via SendGrid API."""
         try:
             import sendgrid
@@ -340,7 +354,7 @@ class EmailWorker(OutboxWorkerBase):
             to_emails=to_email,
             subject=subject,
             html_content=html_body,
-            plain_text_content=text_body
+            plain_text_content=text_body,
         )
 
         # Add attachments if any
@@ -350,7 +364,7 @@ class EmailWorker(OutboxWorkerBase):
                     FileContent(attachment_data.get("content", "")),
                     FileName(attachment_data.get("filename", "")),
                     FileType(attachment_data.get("type", "application/octet-stream")),
-                    Disposition("attachment")
+                    Disposition("attachment"),
                 )
                 message.attachment = attachment
 
@@ -359,8 +373,14 @@ class EmailWorker(OutboxWorkerBase):
         if response.status_code not in [200, 201, 202]:
             raise Exception(f"SendGrid error: {response.status_code} - {response.body}")
 
-    async def _send_via_ses(self, to_email: str, subject: str, html_body: str,
-                           text_body: str = "", attachments: list[dict] = None):
+    async def _send_via_ses(
+        self,
+        to_email: str,
+        subject: str,
+        html_body: str,
+        text_body: str = "",
+        attachments: list[dict] | None = None,
+    ):
         """Send email via AWS SES."""
         from email.mime.application import MIMEApplication
         from email.mime.multipart import MIMEMultipart
@@ -372,78 +392,89 @@ class EmailWorker(OutboxWorkerBase):
             raise Exception("boto3 package not installed. Install with: pip install boto3")
 
         ses = boto3.client(
-            'ses',
+            "ses",
             region_name=self.email_config.get("aws_region", "us-east-1"),
             aws_access_key_id=self.email_config.get("aws_access_key_id"),
-            aws_secret_access_key=self.email_config.get("aws_secret_access_key")
+            aws_secret_access_key=self.email_config.get("aws_secret_access_key"),
         )
 
         # Create message
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = subject
-        msg['From'] = self.email_config.get("from_email", "")
-        msg['To'] = to_email
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = self.email_config.get("from_email", "")
+        msg["To"] = to_email
 
         # Add text and HTML parts
         if text_body:
-            msg.attach(MIMEText(text_body, 'plain'))
+            msg.attach(MIMEText(text_body, "plain"))
         if html_body:
-            msg.attach(MIMEText(html_body, 'html'))
+            msg.attach(MIMEText(html_body, "html"))
 
         # Add attachments if any
         if attachments:
             for attachment_data in attachments:
                 part = MIMEApplication(attachment_data.get("content", ""))
-                part.add_header('Content-Disposition', 'attachment',
-                               filename=attachment_data.get("filename", ""))
+                part.add_header(
+                    "Content-Disposition",
+                    "attachment",
+                    filename=attachment_data.get("filename", ""),
+                )
                 msg.attach(part)
 
         # Send email
         response = ses.send_raw_email(
             Source=self.email_config.get("from_email", ""),
             Destinations=[to_email],
-            RawMessage={'Data': msg.as_string()}
+            RawMessage={"Data": msg.as_string()},
         )
 
         logger.info(f"SES MessageId: {response['MessageId']}")
 
-    async def _send_via_smtp(self, to_email: str, subject: str, html_body: str,
-                            text_body: str = "", attachments: list[dict] = None):
+    async def _send_via_smtp(
+        self,
+        to_email: str,
+        subject: str,
+        html_body: str,
+        text_body: str = "",
+        attachments: list[dict] | None = None,
+    ):
         """Send email via SMTP."""
-        import smtplib
         from email.mime.application import MIMEApplication
         from email.mime.multipart import MIMEMultipart
         from email.mime.text import MIMEText
+        import smtplib
 
         # Create message
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = subject
-        msg['From'] = self.email_config.get("from_email", "")
-        msg['To'] = to_email
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = self.email_config.get("from_email", "")
+        msg["To"] = to_email
 
         # Add text and HTML parts
         if text_body:
-            msg.attach(MIMEText(text_body, 'plain'))
+            msg.attach(MIMEText(text_body, "plain"))
         if html_body:
-            msg.attach(MIMEText(html_body, 'html'))
+            msg.attach(MIMEText(html_body, "html"))
 
         # Add attachments if any
         if attachments:
             for attachment_data in attachments:
                 part = MIMEApplication(attachment_data.get("content", ""))
-                part.add_header('Content-Disposition', 'attachment',
-                               filename=attachment_data.get("filename", ""))
+                part.add_header(
+                    "Content-Disposition",
+                    "attachment",
+                    filename=attachment_data.get("filename", ""),
+                )
                 msg.attach(part)
 
         # Send via SMTP
         with smtplib.SMTP(
-            self.email_config.get("smtp_host", ""),
-            self.email_config.get("smtp_port", 587)
+            self.email_config.get("smtp_host", ""), self.email_config.get("smtp_port", 587)
         ) as server:
             server.starttls()
             server.login(
                 self.email_config.get("smtp_username", ""),
-                self.email_config.get("smtp_password", "")
+                self.email_config.get("smtp_password", ""),
             )
             server.send_message(msg)
 
@@ -451,7 +482,7 @@ class EmailWorker(OutboxWorkerBase):
 class StripeWorker(OutboxWorkerBase):
     """Worker for Stripe payment processing."""
 
-    def __init__(self, config: WorkerConfig = None, stripe_config: dict[str, str] = None):
+    def __init__(self, config: WorkerConfig = None, stripe_config: dict[str, str] | None = None):
         super().__init__(config)
         self.stripe_config = stripe_config or {}
 
@@ -495,11 +526,10 @@ class StripeWorker(OutboxWorkerBase):
                 customer = customers.data[0]
             else:
                 customer = stripe.Customer.create(
-                    email=customer_email,
-                    metadata={"booking_id": str(booking_id)}
+                    email=customer_email, metadata={"booking_id": str(booking_id)}
                 )
         except Exception as e:
-            logger.error(f"Error creating/retrieving Stripe customer: {e}")
+            logger.exception(f"Error creating/retrieving Stripe customer: {e}")
             raise
 
         # Create payment intent
@@ -508,11 +538,8 @@ class StripeWorker(OutboxWorkerBase):
                 amount=amount_cents,
                 currency="usd",
                 customer=customer.id,
-                metadata={
-                    "booking_id": str(booking_id),
-                    "customer_email": customer_email
-                },
-                automatic_payment_methods={"enabled": True}
+                metadata={"booking_id": str(booking_id), "customer_email": customer_email},
+                automatic_payment_methods={"enabled": True},
             )
 
             # Store payment intent ID for later reference
@@ -520,7 +547,7 @@ class StripeWorker(OutboxWorkerBase):
             logger.info(f"Created PaymentIntent {payment_intent.id} for booking {booking_id}")
 
         except Exception as e:
-            logger.error(f"Error creating Stripe payment intent: {e}")
+            logger.exception(f"Error creating Stripe payment intent: {e}")
             raise
 
     async def _process_refund(self, event_data: dict[str, Any], db: AsyncSession):
@@ -531,15 +558,13 @@ class StripeWorker(OutboxWorkerBase):
 
         try:
             refund = stripe.Refund.create(
-                payment_intent=payment_intent_id,
-                amount=refund_amount_cents,
-                reason=reason
+                payment_intent=payment_intent_id, amount=refund_amount_cents, reason=reason
             )
 
             logger.info(f"Created refund {refund.id} for PaymentIntent {payment_intent_id}")
 
         except Exception as e:
-            logger.error(f"Error creating Stripe refund: {e}")
+            logger.exception(f"Error creating Stripe refund: {e}")
             raise
 
     async def _process_customer_create(self, event_data: dict[str, Any], db: AsyncSession):
@@ -558,22 +583,20 @@ class StripeWorker(OutboxWorkerBase):
 
         try:
             customer = stripe.Customer.create(
-                email=customer_email,
-                name=customer_name,
-                metadata=event_data.get("metadata", {})
+                email=customer_email, name=customer_name, metadata=event_data.get("metadata", {})
             )
 
             logger.info(f"Created Stripe customer {customer.id} for {customer_email}")
 
         except Exception as e:
-            logger.error(f"Error creating Stripe customer: {e}")
+            logger.exception(f"Error creating Stripe customer: {e}")
             raise
 
 
 class OutboxProcessorManager:
     """Manages all outbox processor workers."""
 
-    def __init__(self, worker_configs: dict[str, Any] = None):
+    def __init__(self, worker_configs: dict[str, Any] | None = None):
         self.worker_configs = worker_configs or {}
         self.workers: list[OutboxWorkerBase] = []
         self.worker_tasks: list[asyncio.Task] = []
@@ -600,7 +623,7 @@ class OutboxProcessorManager:
 
             logger.info(f"Started {len(self.workers)} outbox workers")
         except Exception as e:
-            logger.error(f"Error starting workers: {e}")
+            logger.exception(f"Error starting workers: {e}")
             # Clean up any started tasks
             await self.stop_all()
             raise
@@ -613,7 +636,7 @@ class OutboxProcessorManager:
             logger.info(f"Worker {worker.__class__.__name__} cancelled")
             raise
         except Exception as e:
-            logger.error(f"Worker {worker.__class__.__name__} failed: {e}")
+            logger.exception(f"Worker {worker.__class__.__name__} failed: {e}")
             # Don't re-raise to prevent taking down other workers
 
     async def stop_all(self):
@@ -647,14 +670,21 @@ def create_outbox_processor_manager(app_config: dict[str, Any]) -> OutboxProcess
     if app_config.get("ringcentral", {}).get("enabled", False):
         rc_config = app_config.get("ringcentral", {})
         # Validate RingCentral configuration
-        required_rc_keys = ["server_url", "client_id", "client_secret", "username", "password", "from_number"]
+        required_rc_keys = [
+            "server_url",
+            "client_id",
+            "client_secret",
+            "username",
+            "password",
+            "from_number",
+        ]
         if all(rc_config.get(key) for key in required_rc_keys):
             sms_worker = SMSWorker(
                 config=WorkerConfig(
                     max_retries=app_config.get("sms_worker", {}).get("max_retries", 5),
-                    batch_size=app_config.get("sms_worker", {}).get("batch_size", 10)
+                    batch_size=app_config.get("sms_worker", {}).get("batch_size", 10),
                 ),
-                rc_config=rc_config
+                rc_config=rc_config,
             )
             manager.add_worker(sms_worker)
             logger.info("✅ SMS Worker configured")
@@ -667,21 +697,27 @@ def create_outbox_processor_manager(app_config: dict[str, Any]) -> OutboxProcess
         # Validate email configuration based on provider
         provider = email_config.get("provider", "smtp")
         config_valid = False
-        
+
         if provider == "smtp":
-            config_valid = all(email_config.get(key) for key in ["smtp_host", "smtp_username", "smtp_password", "from_email"])
+            config_valid = all(
+                email_config.get(key)
+                for key in ["smtp_host", "smtp_username", "smtp_password", "from_email"]
+            )
         elif provider == "sendgrid":
             config_valid = all(email_config.get(key) for key in ["sendgrid_api_key", "from_email"])
         elif provider == "ses":
-            config_valid = all(email_config.get(key) for key in ["aws_access_key_id", "aws_secret_access_key", "from_email"])
-            
+            config_valid = all(
+                email_config.get(key)
+                for key in ["aws_access_key_id", "aws_secret_access_key", "from_email"]
+            )
+
         if config_valid:
             email_worker = EmailWorker(
                 config=WorkerConfig(
                     max_retries=app_config.get("email_worker", {}).get("max_retries", 3),
-                    batch_size=app_config.get("email_worker", {}).get("batch_size", 20)
+                    batch_size=app_config.get("email_worker", {}).get("batch_size", 20),
                 ),
-                email_config=email_config
+                email_config=email_config,
             )
             manager.add_worker(email_worker)
             logger.info(f"✅ Email Worker configured (provider: {provider})")
@@ -692,13 +728,15 @@ def create_outbox_processor_manager(app_config: dict[str, Any]) -> OutboxProcess
     if app_config.get("stripe", {}).get("enabled", False):
         stripe_config = app_config.get("stripe", {})
         # Validate Stripe configuration
-        if stripe_config.get("secret_key") and stripe_config["secret_key"].startswith(("sk_test_", "sk_live_")):
+        if stripe_config.get("secret_key") and stripe_config["secret_key"].startswith(
+            ("sk_test_", "sk_live_")
+        ):
             stripe_worker = StripeWorker(
                 config=WorkerConfig(
                     max_retries=app_config.get("stripe_worker", {}).get("max_retries", 3),
-                    batch_size=app_config.get("stripe_worker", {}).get("batch_size", 5)
+                    batch_size=app_config.get("stripe_worker", {}).get("batch_size", 5),
                 ),
-                stripe_config=stripe_config
+                stripe_config=stripe_config,
             )
             manager.add_worker(stripe_worker)
             logger.info("✅ Stripe Worker configured")
@@ -710,6 +748,11 @@ def create_outbox_processor_manager(app_config: dict[str, Any]) -> OutboxProcess
 
 
 __all__ = [
-    "OutboxWorkerBase", "SMSWorker", "EmailWorker", "StripeWorker",
-    "OutboxProcessorManager", "create_outbox_processor_manager", "WorkerConfig"
+    "EmailWorker",
+    "OutboxProcessorManager",
+    "OutboxWorkerBase",
+    "SMSWorker",
+    "StripeWorker",
+    "WorkerConfig",
+    "create_outbox_processor_manager",
 ]

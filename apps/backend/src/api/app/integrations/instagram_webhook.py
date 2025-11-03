@@ -1,17 +1,16 @@
 """Instagram webhook handler for DMs, comments, and mentions."""
 
+from datetime import datetime
 import hashlib
 import hmac
 import json
 import logging
-from datetime import datetime
 from typing import Any
 
+from core.config import get_settings
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from core.config import get_settings
 
 settings = get_settings()
 from api.app.database import get_async_session
@@ -25,38 +24,33 @@ def verify_instagram_signature(payload_body: bytes, signature: str, app_secret: 
     """Verify Instagram webhook signature."""
     try:
         # Instagram sends signature as sha256=<hash>
-        if not signature.startswith('sha256='):
+        if not signature.startswith("sha256="):
             return False
 
         expected_signature = signature[7:]  # Remove 'sha256=' prefix
-        mac = hmac.new(
-            app_secret.encode('utf-8'),
-            payload_body,
-            hashlib.sha256
-        )
+        mac = hmac.new(app_secret.encode("utf-8"), payload_body, hashlib.sha256)
         computed_signature = mac.hexdigest()
 
         return hmac.compare_digest(expected_signature, computed_signature)
     except Exception as e:
-        logger.error(f"Instagram signature verification failed: {e}")
+        logger.exception(f"Instagram signature verification failed: {e}")
         return False
 
 
 @router.get("/webhook")
 async def verify_instagram_webhook(
-    hub_mode: str = None,
-    hub_challenge: str = None,
-    hub_verify_token: str = None
+    hub_mode: str | None = None,
+    hub_challenge: str | None = None,
+    hub_verify_token: str | None = None,
 ):
     """Verify Instagram webhook subscription."""
-    if (
-        hub_mode == "subscribe"
-        and hub_verify_token == settings.instagram_verify_token
-    ):
+    if hub_mode == "subscribe" and hub_verify_token == settings.instagram_verify_token:
         logger.info("Instagram webhook verified successfully")
         return hub_challenge
 
-    logger.warning(f"Instagram webhook verification failed: mode={hub_mode}, token={hub_verify_token}")
+    logger.warning(
+        f"Instagram webhook verification failed: mode={hub_mode}, token={hub_verify_token}"
+    )
     raise HTTPException(status_code=403, detail="Verification failed")
 
 
@@ -73,9 +67,7 @@ async def instagram_webhook_handler(
 
         # Verify signature
         if not verify_instagram_signature(
-            payload_body,
-            x_hub_signature_256 or "",
-            settings.instagram_app_secret
+            payload_body, x_hub_signature_256 or "", settings.instagram_app_secret
         ):
             logger.warning("Instagram webhook signature verification failed")
             raise HTTPException(status_code=403, detail="Invalid signature")
@@ -85,13 +77,13 @@ async def instagram_webhook_handler(
 
         # Create idempotency signature
         signature = hashlib.sha256(
-            f"instagram_{x_hub_signature_256}_{payload_data.get('object', '')}"
-            .encode()
+            f"instagram_{x_hub_signature_256}_{payload_data.get('object', '')}".encode()
         ).hexdigest()
 
         # Check for duplicate processing
         existing = await db.execute(
-            select(1).select_from("integra.social_inbox")
+            select(1)
+            .select_from("integra.social_inbox")
             .where("signature = :sig")
             .params(sig=signature)
         )
@@ -102,13 +94,15 @@ async def instagram_webhook_handler(
 
         # Insert into inbox for idempotency
         await db.execute(
-            insert("integra.social_inbox").values({
-                "signature": signature,
-                "platform": "instagram",
-                "webhook_type": payload_data.get("object", "unknown"),
-                "payload_hash": hashlib.sha256(payload_body).hexdigest(),
-                "received_at": datetime.utcnow()
-            })
+            insert("integra.social_inbox").values(
+                {
+                    "signature": signature,
+                    "platform": "instagram",
+                    "webhook_type": payload_data.get("object", "unknown"),
+                    "payload_hash": hashlib.sha256(payload_body).hexdigest(),
+                    "received_at": datetime.utcnow(),
+                }
+            )
         )
 
         # Process the webhook
@@ -117,8 +111,9 @@ async def instagram_webhook_handler(
 
         # Mark as processed
         await db.execute(
-            "UPDATE integra.social_inbox SET processed = TRUE, processed_at = :now WHERE signature = :sig"
-            .params(now=datetime.utcnow(), sig=signature)
+            "UPDATE integra.social_inbox SET processed = TRUE, processed_at = :now WHERE signature = :sig".params(
+                now=datetime.utcnow(), sig=signature
+            )
         )
 
         await db.commit()
@@ -134,21 +129,18 @@ async def instagram_webhook_handler(
         try:
             await db.execute(
                 "UPDATE integra.social_inbox SET processing_attempts = processing_attempts + 1, "
-                "last_error = :error WHERE signature = :sig"
-                .params(error=str(e), sig=signature)
+                "last_error = :error WHERE signature = :sig".params(error=str(e), sig=signature)
             )
             await db.commit()
         except Exception as db_error:
-            logger.error(f"Failed to update error record in database: {db_error}")
-            pass
+            logger.exception(f"Failed to update error record in database: {db_error}")
 
         raise HTTPException(status_code=500, detail="Webhook processing failed")
 
 
 @router.post("/setup-webhooks")
 async def setup_instagram_webhooks(
-    account_data: dict[str, Any],
-    db: AsyncSession = Depends(get_async_session)
+    account_data: dict[str, Any], db: AsyncSession = Depends(get_async_session)
 ):
     """Set up Instagram webhook subscriptions for an account."""
     try:
@@ -162,14 +154,11 @@ async def setup_instagram_webhooks(
 
     except Exception as e:
         logger.error(f"Instagram webhook setup error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Webhook setup failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Webhook setup failed: {e!s}")
 
 
 @router.delete("/webhooks/{account_id}")
-async def remove_instagram_webhooks(
-    account_id: str,
-    db: AsyncSession = Depends(get_async_session)
-):
+async def remove_instagram_webhooks(account_id: str, db: AsyncSession = Depends(get_async_session)):
     """Remove Instagram webhook subscriptions for an account."""
     try:
         social_service = SocialService(db)
@@ -179,4 +168,4 @@ async def remove_instagram_webhooks(
 
     except Exception as e:
         logger.error(f"Instagram webhook removal error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Webhook removal failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Webhook removal failed: {e!s}")

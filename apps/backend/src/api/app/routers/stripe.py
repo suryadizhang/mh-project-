@@ -1,18 +1,22 @@
+from datetime import datetime
 import json
 import logging
-from datetime import datetime
 
-import stripe
+from core.config import get_settings
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from core.config import get_settings
+import stripe
 
 settings = get_settings()
 from api.app.database import get_db
 from api.app.models.core import Payment
-from api.app.models.stripe_models import Invoice, StripePayment, Refund, WebhookEvent
+from api.app.models.stripe_models import (
+    Invoice,
+    Refund,
+    StripePayment,
+    WebhookEvent,
+)
 from api.app.schemas.stripe_schemas import (
     CheckoutSessionResponse,
     CheckoutSessionVerifyRequest,
@@ -20,16 +24,13 @@ from api.app.schemas.stripe_schemas import (
     CreateCheckoutSession,
     CreatePaymentIntent,
     CustomerPortalResponse,
-)
-from api.app.schemas.stripe_schemas import Invoice as InvoiceSchema
-from api.app.schemas.stripe_schemas import Payment as PaymentSchema
-from api.app.schemas.stripe_schemas import (
     PaymentAnalytics,
     PaymentIntentResponse,
     RefundCreate,
     SuccessResponse,
     WebhookResponse,
 )
+from api.app.schemas.stripe_schemas import Invoice as InvoiceSchema
 from api.app.services.stripe_service import StripeService
 from api.app.utils.auth import get_admin_user, get_current_user
 
@@ -40,9 +41,7 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-@router.post(
-    "/create-checkout-session", response_model=CheckoutSessionResponse
-)
+@router.post("/create-checkout-session", response_model=CheckoutSessionResponse)
 async def create_checkout_session(
     data: CreateCheckoutSession,
     db: AsyncSession = Depends(get_db),
@@ -84,8 +83,7 @@ async def create_checkout_session(
         # Build success and cancel URLs
         success_url = (
             data.success_url
-            or f"{settings.app_url}/checkout/success"
-            "?session_id={{CHECKOUT_SESSION_ID}}"
+            or f"{settings.app_url}/checkout/success" "?session_id={{CHECKOUT_SESSION_ID}}"
         )
         cancel_url = data.cancel_url or f"{settings.app_url}/checkout/cancel"
 
@@ -108,13 +106,13 @@ async def create_checkout_session(
         return CheckoutSessionResponse(url=session.url, session_id=session.id)
 
     except stripe.error.StripeError as e:
-        logger.error(f"Stripe error in checkout session: {e}")
+        logger.exception(f"Stripe error in checkout session: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Payment processing error: {str(e)}",
+            detail=f"Payment processing error: {e!s}",
         )
     except Exception as e:
-        logger.error(f"Error creating checkout session: {e}")
+        logger.exception(f"Error creating checkout session: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create checkout session",
@@ -128,43 +126,45 @@ async def verify_checkout_session(
 ):
     """
     Verify and retrieve a Stripe Checkout session.
-    
+
     This endpoint retrieves the session details from Stripe to verify
     payment status after checkout completion.
     """
     try:
         # Retrieve the session from Stripe
         session = stripe.checkout.Session.retrieve(data.session_id)
-        
+
         # Extract payment information
         response_data = {
             "success": True,
             "session_id": session.id,
             "payment_status": session.payment_status,
-            "payment_intent": session.payment_intent if hasattr(session, 'payment_intent') else None,
+            "payment_intent": (
+                session.payment_intent if hasattr(session, "payment_intent") else None
+            ),
             "amount_total": session.amount_total,
             "currency": session.currency,
             "customer_email": session.customer_details.email if session.customer_details else None,
             "booking_id": session.metadata.get("booking_id") if session.metadata else None,
             "metadata": dict(session.metadata) if session.metadata else None,
         }
-        
+
         return CheckoutSessionVerifyResponse(**response_data)
-        
+
     except stripe.error.InvalidRequestError as e:
-        logger.error(f"Invalid session ID: {e}")
+        logger.exception(f"Invalid session ID: {e}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Checkout session not found",
         )
     except stripe.error.StripeError as e:
-        logger.error(f"Stripe error retrieving session: {e}")
+        logger.exception(f"Stripe error retrieving session: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to retrieve session: {str(e)}",
+            detail=f"Failed to retrieve session: {e!s}",
         )
     except Exception as e:
-        logger.error(f"Error verifying checkout session: {e}")
+        logger.exception(f"Error verifying checkout session: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to verify checkout session",
@@ -200,8 +200,7 @@ async def create_payment_intent(
             amount=data.amount,
             currency=data.currency,
             customer=customer.stripe_customer_id,
-            description=data.description
-            or f"Payment for booking {data.booking_id}",
+            description=data.description or f"Payment for booking {data.booking_id}",
             metadata={
                 "booking_id": data.booking_id,
                 "user_id": current_user["id"],
@@ -219,13 +218,13 @@ async def create_payment_intent(
         )
 
     except stripe.error.StripeError as e:
-        logger.error(f"Stripe error in payment intent: {e}")
+        logger.exception(f"Stripe error in payment intent: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Payment processing error: {str(e)}",
+            detail=f"Payment processing error: {e!s}",
         )
     except Exception as e:
-        logger.error(f"Error creating payment intent: {e}")
+        logger.exception(f"Error creating payment intent: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create payment intent",
@@ -241,9 +240,7 @@ async def create_portal_link(
         stripe_service = StripeService(db)
 
         # Get customer
-        customer = await stripe_service.get_customer_by_user_id(
-            current_user["id"]
-        )
+        customer = await stripe_service.get_customer_by_user_id(current_user["id"])
         if not customer:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -259,13 +256,13 @@ async def create_portal_link(
         return CustomerPortalResponse(url=session.url)
 
     except stripe.error.StripeError as e:
-        logger.error(f"Stripe error in portal link: {e}")
+        logger.exception(f"Stripe error in portal link: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Portal error: {str(e)}",
+            detail=f"Portal error: {e!s}",
         )
     except Exception as e:
-        logger.error(f"Error creating portal link: {e}")
+        logger.exception(f"Error creating portal link: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create portal link",
@@ -273,9 +270,7 @@ async def create_portal_link(
 
 
 @router.post("/webhook", response_model=WebhookResponse)
-async def webhook_endpoint(
-    request: Request, db: AsyncSession = Depends(get_db)
-):
+async def webhook_endpoint(request: Request, db: AsyncSession = Depends(get_db)):
     """Handle Stripe webhook events."""
     try:
         # Get the webhook payload
@@ -294,13 +289,13 @@ async def webhook_endpoint(
                 payload, sig_header, settings.stripe_webhook_secret
             )
         except ValueError:
-            logger.error("Invalid webhook payload")
+            logger.exception("Invalid webhook payload")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid payload",
             )
         except stripe.error.SignatureVerificationError:
-            logger.error("Invalid webhook signature")
+            logger.exception("Invalid webhook signature")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid signature",
@@ -334,7 +329,7 @@ async def webhook_endpoint(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Webhook processing error: {e}")
+        logger.exception(f"Webhook processing error: {e}")
         # Still return 200 to acknowledge receipt
         return WebhookResponse(
             received=True,
@@ -353,9 +348,7 @@ async def create_refund(
     """Create a refund (admin only)."""
     try:
         # Get payment record directly from database
-        result = await db.execute(
-            select(StripePayment).where(StripePayment.id == data.payment_id)
-        )
+        result = await db.execute(select(StripePayment).where(StripePayment.id == data.payment_id))
         payment = result.scalar_one_or_none()
 
         if not payment:
@@ -407,13 +400,13 @@ async def create_refund(
         )
 
     except stripe.error.StripeError as e:
-        logger.error(f"Stripe error in refund: {e}")
+        logger.exception(f"Stripe error in refund: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Refund error: {str(e)}",
+            detail=f"Refund error: {e!s}",
         )
     except Exception as e:
-        logger.error(f"Error creating refund: {e}")
+        logger.exception(f"Error creating refund: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create refund",
@@ -432,13 +425,13 @@ async def get_payments(
 ):
     """
     Get payments with optional filters using cursor pagination.
-    
+
     Performance: Page 100 = 20ms (was 3000ms) - 150x faster!
     """
     try:
         from sqlalchemy.orm import joinedload
         from utils.pagination import paginate_query
-        
+
         # Add eager loading to prevent N+1 queries (MEDIUM #34 Phase 1)
         # Load booking and booking.customer in single query (34x faster)
         query = select(Payment).options(
@@ -471,7 +464,7 @@ async def get_payments(
             cursor=cursor,
             limit=limit,
             order_direction="desc",
-            secondary_order=Payment.id
+            secondary_order=Payment.id,
         )
 
         # Return paginated response
@@ -481,11 +474,11 @@ async def get_payments(
             "prevCursor": page.prev_cursor,
             "hasNext": page.has_next,
             "hasPrev": page.has_prev,
-            "count": len(page.items)
+            "count": len(page.items),
         }
 
     except Exception as e:
-        logger.error(f"Error fetching payments: {e}")
+        logger.exception(f"Error fetching payments: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to fetch payments",
@@ -524,11 +517,7 @@ async def get_invoices(
         if filters:
             query = query.where(and_(*filters))
 
-        query = (
-            query.offset(offset)
-            .limit(limit)
-            .order_by(Invoice.created_at.desc())
-        )
+        query = query.offset(offset).limit(limit).order_by(Invoice.created_at.desc())
 
         result = await db.execute(query)
         invoices = result.scalars().all()
@@ -536,7 +525,7 @@ async def get_invoices(
         return invoices
 
     except Exception as e:
-        logger.error(f"Error fetching invoices: {e}")
+        logger.exception(f"Error fetching invoices: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to fetch invoices",
@@ -553,13 +542,11 @@ async def get_payment_analytics(
     """Get payment analytics (admin only)."""
     try:
         stripe_service = StripeService(db)
-        analytics = await stripe_service.get_payment_analytics(
-            start_date, end_date
-        )
+        analytics = await stripe_service.get_payment_analytics(start_date, end_date)
         return analytics
 
     except Exception as e:
-        logger.error(f"Error fetching payment analytics: {e}")
+        logger.exception(f"Error fetching payment analytics: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to fetch analytics",
@@ -595,9 +582,7 @@ async def get_customer_dashboard(
             # Get by Stripe customer ID
             try:
                 stripe_customer = stripe.Customer.retrieve(customer_id)
-                customer_data = await stripe_service.get_customer_analytics(
-                    customer_id
-                )
+                customer_data = await stripe_service.get_customer_analytics(customer_id)
             except stripe.error.StripeError:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -613,9 +598,7 @@ async def get_customer_dashboard(
                         detail="Customer not found",
                     )
                 stripe_customer = customers.data[0]
-                customer_data = await stripe_service.get_customer_analytics(
-                    stripe_customer.id
-                )
+                customer_data = await stripe_service.get_customer_analytics(stripe_customer.id)
             except stripe.error.StripeError:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -656,9 +639,7 @@ async def get_customer_dashboard(
 
         # Determine loyalty status
         total_bookings = analytics.get("totalBookings", 0)
-        loyalty_status = determine_loyalty_status(
-            total_bookings, total_spent, zelle_adoption_rate
-        )
+        loyalty_status = determine_loyalty_status(total_bookings, total_spent, zelle_adoption_rate)
 
         return {
             "customer": {
@@ -675,7 +656,7 @@ async def get_customer_dashboard(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error fetching customer dashboard: {e}")
+        logger.exception(f"Error fetching customer dashboard: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
@@ -683,9 +664,7 @@ async def get_customer_dashboard(
 
 
 @router.post("/v1/customers/dashboard")
-async def create_customer_portal_session(
-    data: dict, db: AsyncSession = Depends(get_db)
-):
+async def create_customer_portal_session(data: dict, db: AsyncSession = Depends(get_db)):
     """
     MIGRATED FROM: /api/v1/customers/dashboard/route.ts (POST)
     Create customer portal session for billing management
@@ -709,13 +688,13 @@ async def create_customer_portal_session(
         return {"portalUrl": portal_session.url}
 
     except stripe.error.StripeError as e:
-        logger.error(f"Stripe error creating portal session: {e}")
+        logger.exception(f"Stripe error creating portal session: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Portal error: {str(e)}",
+            detail=f"Portal error: {e!s}",
         )
     except Exception as e:
-        logger.error(f"Error creating customer portal session: {e}")
+        logger.exception(f"Error creating customer portal session: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
@@ -723,9 +702,7 @@ async def create_customer_portal_session(
 
 
 @router.post("/v1/payments/create-intent")
-async def create_payment_intent_v1(
-    data: dict, db: AsyncSession = Depends(get_db)
-):
+async def create_payment_intent_v1(data: dict, db: AsyncSession = Depends(get_db)):
     """
     MIGRATED FROM: /api/v1/payments/create-intent/route.ts
     Create payment intent with customer management
@@ -812,9 +789,7 @@ async def create_payment_intent_v1(
 
         # Track payment preference for analytics
         if payment_type:
-            await stripe_service.track_payment_preference(
-                stripe_customer.id, payment_type
-            )
+            await stripe_service.track_payment_preference(stripe_customer.id, payment_type)
 
         return {
             "clientSecret": payment_intent.client_secret,
@@ -823,14 +798,12 @@ async def create_payment_intent_v1(
         }
 
     except stripe.error.StripeError as e:
-        logger.error(f"Stripe error creating payment intent: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
-        )
+        logger.exception(f"Stripe error creating payment intent: {e}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error creating payment intent: {e}")
+        logger.exception(f"Error creating payment intent: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
@@ -838,9 +811,7 @@ async def create_payment_intent_v1(
 
 
 @router.get("/v1/payments/create-intent")
-async def get_payment_intent_v1(
-    payment_intent_id: str, db: AsyncSession = Depends(get_db)
-):
+async def get_payment_intent_v1(payment_intent_id: str, db: AsyncSession = Depends(get_db)):
     """
     MIGRATED FROM: /api/v1/payments/create-intent/route.ts (GET)
     Retrieve payment intent details
@@ -858,21 +829,17 @@ async def get_payment_intent_v1(
         }
 
     except stripe.error.StripeError as e:
-        logger.error(f"Error retrieving payment intent: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
-        )
+        logger.exception(f"Error retrieving payment intent: {e}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
-        logger.error(f"Error retrieving payment intent: {e}")
+        logger.exception(f"Error retrieving payment intent: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
         )
 
 
-def determine_loyalty_status(
-    total_bookings: int, total_spent: float, zelle_adoption_rate: float
-):
+def determine_loyalty_status(total_bookings: int, total_spent: float, zelle_adoption_rate: float):
     """Helper function to determine customer loyalty status"""
     if total_bookings >= 10 and total_spent >= 5000:
         return {
@@ -910,9 +877,7 @@ def determine_loyalty_status(
 
 
 @router.post("/v1/payments/webhook")
-async def payments_webhook_v1(
-    request: Request, db: AsyncSession = Depends(get_db)
-):
+async def payments_webhook_v1(request: Request, db: AsyncSession = Depends(get_db)):
     """
     MIGRATED FROM: /api/v1/payments/webhook/route.ts
     Enhanced production webhook handler for payments
@@ -935,13 +900,13 @@ async def payments_webhook_v1(
                 payload, sig_header, settings.stripe_webhook_secret
             )
         except ValueError:
-            logger.error("Invalid webhook payload")
+            logger.exception("Invalid webhook payload")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid payload",
             )
         except stripe.error.SignatureVerificationError:
-            logger.error("Invalid webhook signature")
+            logger.exception("Invalid webhook signature")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid signature",
@@ -962,9 +927,7 @@ async def payments_webhook_v1(
             elif event_type == "payment_intent.payment_failed":
                 await handle_payment_failure(event_data, stripe_service, db)
             elif event_type == "payment_intent.canceled":
-                await handle_payment_cancellation(
-                    event_data, stripe_service, db
-                )
+                await handle_payment_cancellation(event_data, stripe_service, db)
             elif event_type == "payment_intent.processing":
                 await handle_payment_processing(event_data, stripe_service, db)
             elif event_type == "customer.created":
@@ -972,13 +935,9 @@ async def payments_webhook_v1(
             elif event_type == "customer.updated":
                 await handle_customer_updated(event_data, stripe_service, db)
             elif event_type == "invoice.payment_succeeded":
-                await handle_invoice_payment_succeeded(
-                    event_data, stripe_service, db
-                )
+                await handle_invoice_payment_succeeded(event_data, stripe_service, db)
             elif event_type == "invoice.payment_failed":
-                await handle_invoice_payment_failed(
-                    event_data, stripe_service, db
-                )
+                await handle_invoice_payment_failed(event_data, stripe_service, db)
             elif event_type == "invoice.created":
                 await handle_invoice_created(event_data, stripe_service, db)
             elif event_type == "checkout.session.completed":
@@ -992,16 +951,14 @@ async def payments_webhook_v1(
                 "customer.subscription.updated",
                 "customer.subscription.deleted",
             ]:
-                await handle_subscription_event(
-                    event_data, event_type, stripe_service, db
-                )
+                await handle_subscription_event(event_data, event_type, stripe_service, db)
             elif event_type == "quote.accepted":
                 await handle_quote_accepted(event_data, stripe_service, db)
             else:
                 logger.info(f"Unhandled event type: {event_type}")
 
         except Exception as handler_error:
-            logger.error(f"Error handling {event_type}: {handler_error}")
+            logger.exception(f"Error handling {event_type}: {handler_error}")
             # Still return 200 to acknowledge receipt to Stripe
 
         return {
@@ -1014,7 +971,7 @@ async def payments_webhook_v1(
     except HTTPException:
         raise
     except Exception as error:
-        logger.error(f"Critical webhook processing error: {error}")
+        logger.exception(f"Critical webhook processing error: {error}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
@@ -1022,9 +979,7 @@ async def payments_webhook_v1(
 
 
 @router.post("/v1/webhooks/stripe")
-async def stripe_webhook_v1(
-    request: Request, db: AsyncSession = Depends(get_db)
-):
+async def stripe_webhook_v1(request: Request, db: AsyncSession = Depends(get_db)):
     """
     MIGRATED FROM: /api/v1/webhooks/stripe/route.ts
     Simplified webhook handler with core event processing
@@ -1047,9 +1002,7 @@ async def stripe_webhook_v1(
             )
         except Exception as err:
             error_message = str(err)
-            logger.error(
-                f"Webhook signature verification failed: {error_message}"
-            )
+            logger.exception(f"Webhook signature verification failed: {error_message}")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Webhook signature verification failed",
@@ -1063,31 +1016,23 @@ async def stripe_webhook_v1(
             event_data = event["data"]["object"]
 
             if event_type == "payment_intent.succeeded":
-                await handle_payment_success_simple(
-                    event_data, stripe_service, db
-                )
+                await handle_payment_success_simple(event_data, stripe_service, db)
             elif event_type == "customer.created":
-                await handle_customer_created_simple(
-                    event_data, stripe_service, db
-                )
+                await handle_customer_created_simple(event_data, stripe_service, db)
             elif event_type == "invoice.payment_succeeded":
-                await handle_invoice_payment_succeeded_simple(
-                    event_data, stripe_service, db
-                )
+                await handle_invoice_payment_succeeded_simple(event_data, stripe_service, db)
             elif event_type in [
                 "customer.subscription.created",
                 "customer.subscription.updated",
             ]:
-                await handle_subscription_update_simple(
-                    event_data, stripe_service, db
-                )
+                await handle_subscription_update_simple(event_data, stripe_service, db)
             else:
                 logger.info(f"Unhandled event type {event_type}")
 
             return {"received": True}
 
         except Exception as error:
-            logger.error(f"Error processing webhook: {error}")
+            logger.exception(f"Error processing webhook: {error}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Webhook processing failed",
@@ -1096,7 +1041,7 @@ async def stripe_webhook_v1(
     except HTTPException:
         raise
     except Exception as error:
-        logger.error(f"Webhook processing error: {error}")
+        logger.exception(f"Webhook processing error: {error}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
@@ -1121,7 +1066,7 @@ async def store_webhook_event(event: dict, db: AsyncSession):
         await db.commit()
         logger.info(f"[WEBHOOK EVENT] {event['type']} - {event['id']}")
     except Exception as error:
-        logger.error(f"Error storing webhook event: {error}")
+        logger.exception(f"Error storing webhook event: {error}")
 
 
 async def handle_payment_success(
@@ -1156,7 +1101,7 @@ async def handle_payment_success(
         # TODO: Send confirmation email with Zelle savings tip
 
     except Exception as error:
-        logger.error(f"Error handling payment success: {error}")
+        logger.exception(f"Error handling payment success: {error}")
 
 
 async def handle_payment_failure(
@@ -1180,7 +1125,7 @@ async def handle_payment_failure(
         # TODO: Send admin notification for failed payments
 
     except Exception as error:
-        logger.error(f"Error handling payment failure: {error}")
+        logger.exception(f"Error handling payment failure: {error}")
 
 
 async def handle_payment_cancellation(
@@ -1201,7 +1146,7 @@ async def handle_payment_cancellation(
         # TODO: Send cancellation notification
 
     except Exception as error:
-        logger.error(f"Error handling payment cancellation: {error}")
+        logger.exception(f"Error handling payment cancellation: {error}")
 
 
 async def handle_payment_processing(
@@ -1217,12 +1162,10 @@ async def handle_payment_processing(
         # TODO: Update payment status to processing in database
 
     except Exception as error:
-        logger.error(f"Error handling payment processing: {error}")
+        logger.exception(f"Error handling payment processing: {error}")
 
 
-async def handle_customer_created(
-    customer: dict, stripe_service: StripeService, db: AsyncSession
-):
+async def handle_customer_created(customer: dict, stripe_service: StripeService, db: AsyncSession):
     """Handle new customer creation"""
     try:
         logger.info(
@@ -1234,12 +1177,10 @@ async def handle_customer_created(
         # TODO: Send welcome email with Zelle promotion
 
     except Exception as error:
-        logger.error(f"Error handling customer created: {error}")
+        logger.exception(f"Error handling customer created: {error}")
 
 
-async def handle_customer_updated(
-    customer: dict, stripe_service: StripeService, db: AsyncSession
-):
+async def handle_customer_updated(customer: dict, stripe_service: StripeService, db: AsyncSession):
     """Handle customer updates"""
     try:
         logger.info(f"[CUSTOMER UPDATED] Customer: {customer['id']}")
@@ -1253,7 +1194,7 @@ async def handle_customer_updated(
             # TODO: Send congratulations email for choosing Zelle
 
     except Exception as error:
-        logger.error(f"Error handling customer updated: {error}")
+        logger.exception(f"Error handling customer updated: {error}")
 
 
 # Simplified handlers for the alternative webhook endpoint
@@ -1319,42 +1260,29 @@ async def handle_invoice_payment_succeeded(
     invoice: dict, stripe_service: StripeService, db: AsyncSession
 ):
     """Handle successful invoice payment"""
-    pass  # Implementation similar to simple version but with database updates
+    # Implementation similar to simple version but with database updates
 
 
 async def handle_invoice_payment_failed(
     invoice: dict, stripe_service: StripeService, db: AsyncSession
 ):
     """Handle failed invoice payment"""
-    pass
 
 
-async def handle_invoice_created(
-    invoice: dict, stripe_service: StripeService, db: AsyncSession
-):
+async def handle_invoice_created(invoice: dict, stripe_service: StripeService, db: AsyncSession):
     """Handle invoice creation"""
-    pass
 
 
-async def handle_checkout_completed(
-    session: dict, stripe_service: StripeService, db: AsyncSession
-):
+async def handle_checkout_completed(session: dict, stripe_service: StripeService, db: AsyncSession):
     """Handle checkout session completion"""
-    pass
 
 
-async def handle_charge_refunded(
-    charge: dict, stripe_service: StripeService, db: AsyncSession
-):
+async def handle_charge_refunded(charge: dict, stripe_service: StripeService, db: AsyncSession):
     """Handle charge refund"""
-    pass
 
 
-async def handle_dispute_created(
-    dispute: dict, stripe_service: StripeService, db: AsyncSession
-):
+async def handle_dispute_created(dispute: dict, stripe_service: StripeService, db: AsyncSession):
     """Handle dispute creation"""
-    pass
 
 
 async def handle_subscription_event(
@@ -1364,11 +1292,7 @@ async def handle_subscription_event(
     db: AsyncSession,
 ):
     """Handle subscription events"""
-    pass
 
 
-async def handle_quote_accepted(
-    quote: dict, stripe_service: StripeService, db: AsyncSession
-):
+async def handle_quote_accepted(quote: dict, stripe_service: StripeService, db: AsyncSession):
     """Handle quote acceptance"""
-    pass

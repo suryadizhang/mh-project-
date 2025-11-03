@@ -1,13 +1,10 @@
 """
 CRM API endpoints using CQRS pattern with proper authentication and validation.
 """
-from datetime import date as date_type
-from typing import Any, Optional
-from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel, Field
-from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import date as date_type
+from typing import Any
+from uuid import UUID
 
 from api.app.auth.middleware import (
     AuthenticatedUser,
@@ -18,9 +15,17 @@ from api.app.auth.middleware import (
     require_permission,
 )
 from api.app.auth.models import Permission
-from api.app.cqrs.base import CommandResult, QueryResult, command_bus, query_bus
+from api.app.cqrs.base import (
+    CommandResult,
+    QueryResult,
+    command_bus,
+    query_bus,
+)
 from api.app.cqrs.crm_operations import *
 from api.app.database import get_db_session
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/crm", tags=["CRM Operations"])
 
@@ -28,56 +33,64 @@ router = APIRouter(prefix="/crm", tags=["CRM Operations"])
 # Request/Response Models
 class CreateBookingRequest(BaseModel):
     """Create booking request model."""
-    customer_email: str = Field(..., pattern=r'^[^@]+@[^@]+\.[^@]+$')
+
+    customer_email: str = Field(..., pattern=r"^[^@]+@[^@]+\.[^@]+$")
     customer_name: str = Field(..., min_length=2, max_length=100)
-    customer_phone: str = Field(..., pattern=r'^\+?[\d\s\-\(\)]+$')
+    customer_phone: str = Field(..., pattern=r"^\+?[\d\s\-\(\)]+$")
 
     date: date_type
-    slot: str = Field(..., pattern=r'^(9|10|11):00 (AM|PM)$|^(12|1|2|3|4|5|6|7|8):00 (AM|PM)$')
+    slot: str = Field(..., pattern=r"^(9|10|11):00 (AM|PM)$|^(12|1|2|3|4|5|6|7|8):00 (AM|PM)$")
     total_guests: int = Field(..., ge=1, le=50)
-    special_requests: Optional[str] = Field(None, max_length=500)
+    special_requests: str | None = Field(None, max_length=500)
 
     price_per_person_cents: int = Field(..., ge=0)
     total_due_cents: int = Field(..., ge=0)
     deposit_due_cents: int = Field(..., ge=0)
 
     source: str = Field("website", max_length=50)
-    ai_conversation_id: Optional[str] = Field(None, max_length=100)
+    ai_conversation_id: str | None = Field(None, max_length=100)
 
 
 class UpdateBookingRequest(BaseModel):
     """Update booking request model."""
-    customer_name: Optional[str] = Field(None, min_length=2, max_length=100)
-    customer_phone: Optional[str] = Field(None, pattern=r'^\+?[\d\s\-\(\)]+$')
-    date: Optional[date_type] = None
-    slot: Optional[str] = Field(None, pattern=r'^(9|10|11):00 (AM|PM)$|^(12|1|2|3|4|5|6|7|8):00 (AM|PM)$')
-    total_guests: Optional[int] = Field(None, ge=1, le=50)
-    special_requests: Optional[str] = Field(None, max_length=500)
+
+    customer_name: str | None = Field(None, min_length=2, max_length=100)
+    customer_phone: str | None = Field(None, pattern=r"^\+?[\d\s\-\(\)]+$")
+    date: date_type | None = None
+    slot: str | None = Field(
+        None, pattern=r"^(9|10|11):00 (AM|PM)$|^(12|1|2|3|4|5|6|7|8):00 (AM|PM)$"
+    )
+    total_guests: int | None = Field(None, ge=1, le=50)
+    special_requests: str | None = Field(None, max_length=500)
 
     update_reason: str = Field(..., max_length=200)
 
 
 class RecordPaymentRequest(BaseModel):
     """Record payment request model."""
+
     amount_cents: int = Field(..., gt=0)
-    payment_method: str = Field(..., pattern=r'^(stripe|cash|check|card|other)$')
-    payment_reference: Optional[str] = Field(None, max_length=100)
-    notes: Optional[str] = Field(None, max_length=200)
+    payment_method: str = Field(..., pattern=r"^(stripe|cash|check|card|other)$")
+    payment_reference: str | None = Field(None, max_length=100)
+    notes: str | None = Field(None, max_length=200)
 
 
 class CancelBookingRequest(BaseModel):
     """Cancel booking request model."""
+
     cancellation_reason: str = Field(..., max_length=200)
     refund_amount_cents: int = Field(0, ge=0)
 
 
 class SendMessageRequest(BaseModel):
     """Send message request model."""
+
     content: str = Field(..., min_length=1, max_length=1000)
 
 
 class BookingResponse(BaseModel):
     """Booking response model."""
+
     booking_id: str
     customer: dict[str, Any]
     date: date_type
@@ -87,7 +100,7 @@ class BookingResponse(BaseModel):
     payment_status: str
     total_due_cents: int
     balance_due_cents: int
-    special_requests: Optional[str] = None
+    special_requests: str | None = None
     source: str
     created_at: str
     updated_at: str
@@ -95,28 +108,22 @@ class BookingResponse(BaseModel):
 
 class ApiResponse(BaseModel):
     """Standard API response wrapper."""
+
     success: bool
-    data: Optional[Any] = None
-    error: Optional[str] = None
-    total_count: Optional[int] = None
+    data: Any | None = None
+    error: str | None = None
+    total_count: int | None = None
 
 
 def handle_command_result(result: CommandResult) -> ApiResponse:
     """Convert CommandResult to API response."""
-    return ApiResponse(
-        success=result.success,
-        data=result.data,
-        error=result.error
-    )
+    return ApiResponse(success=result.success, data=result.data, error=result.error)
 
 
 def handle_query_result(result: QueryResult) -> ApiResponse:
     """Convert QueryResult to API response."""
     return ApiResponse(
-        success=result.success,
-        data=result.data,
-        error=result.error,
-        total_count=result.total_count
+        success=result.success, data=result.data, error=result.error, total_count=result.total_count
     )
 
 
@@ -126,7 +133,7 @@ def handle_query_result(result: QueryResult) -> ApiResponse:
 async def create_booking(
     request: CreateBookingRequest,
     current_user: AuthenticatedUser = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_db_session)
+    db: AsyncSession = Depends(get_db_session),
 ):
     """Create a new hibachi booking."""
 
@@ -145,7 +152,7 @@ async def create_booking(
             deposit_due_cents=request.deposit_due_cents,
             source=request.source,
             ai_conversation_id=request.ai_conversation_id,
-            idempotency_key=f"booking_{current_user.id}_{hash(str(request.dict()))}"
+            idempotency_key=f"booking_{current_user.id}_{hash(str(request.dict()))}",
         )
 
         # Execute command
@@ -157,16 +164,16 @@ async def create_booking(
             current_user,
             db,
             resource_type="booking",
-            resource_id=result.data.get('booking_id') if result.success else None,
+            resource_id=result.data.get("booking_id") if result.success else None,
             details={
                 "customer_email": request.customer_email,
                 "date": str(request.date),
                 "slot": request.slot,
                 "total_guests": request.total_guests,
-                "total_due_cents": request.total_due_cents
+                "total_due_cents": request.total_due_cents,
             },
             success=result.success,
-            error_message=result.error
+            error_message=result.error,
         )
 
         return handle_command_result(result)
@@ -178,11 +185,11 @@ async def create_booking(
             db,
             details={"error": "Unexpected error", "exception": str(e)},
             success=False,
-            error_message="Internal server error"
+            error_message="Internal server error",
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while creating the booking"
+            detail="An error occurred while creating the booking",
         )
 
 
@@ -193,7 +200,7 @@ async def get_booking(
     include_payments: bool = Query(True, description="Include payment history"),
     include_messages: bool = Query(True, description="Include message threads"),
     current_user: AuthenticatedUser = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_db_session)
+    db: AsyncSession = Depends(get_db_session),
 ):
     """Get booking details by ID."""
 
@@ -201,7 +208,7 @@ async def get_booking(
         query = GetBookingQuery(
             booking_id=booking_id,
             include_payments=include_payments,
-            include_messages=include_messages
+            include_messages=include_messages,
         )
 
         result = await query_bus.execute(query, db)
@@ -214,7 +221,7 @@ async def get_booking(
             resource_id=str(booking_id),
             details={"include_payments": include_payments, "include_messages": include_messages},
             success=result.success,
-            error_message=result.error
+            error_message=result.error,
         )
 
         return handle_query_result(result)
@@ -222,25 +229,25 @@ async def get_booking(
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while retrieving the booking"
+            detail="An error occurred while retrieving the booking",
         )
 
 
 @router.get("/bookings", response_model=ApiResponse)
 @require_permission(Permission.BOOKING_READ)
 async def get_bookings(
-    customer_email: Optional[str] = Query(None, description="Filter by customer email"),
-    customer_phone: Optional[str] = Query(None, description="Filter by customer phone"),
-    date_from: Optional[date_type] = Query(None, description="Filter bookings from date"),
-    date_to: Optional[date_type] = Query(None, description="Filter bookings to date"),
-    status: Optional[str] = Query(None, pattern=r'^(confirmed|cancelled|completed|pending)$'),
-    source: Optional[str] = Query(None, description="Filter by booking source"),
+    customer_email: str | None = Query(None, description="Filter by customer email"),
+    customer_phone: str | None = Query(None, description="Filter by customer phone"),
+    date_from: date_type | None = Query(None, description="Filter bookings from date"),
+    date_to: date_type | None = Query(None, description="Filter bookings to date"),
+    status: str | None = Query(None, pattern=r"^(confirmed|cancelled|completed|pending)$"),
+    source: str | None = Query(None, description="Filter by booking source"),
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(20, ge=1, le=100, description="Items per page"),
-    sort_by: str = Query("date", pattern=r'^(date|created_at|updated_at|customer_name)$'),
-    sort_order: str = Query("asc", pattern=r'^(asc|desc)$'),
+    sort_by: str = Query("date", pattern=r"^(date|created_at|updated_at|customer_name)$"),
+    sort_order: str = Query("asc", pattern=r"^(asc|desc)$"),
     current_user: AuthenticatedUser = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_db_session)
+    db: AsyncSession = Depends(get_db_session),
 ):
     """Get bookings with filtering and pagination."""
 
@@ -255,7 +262,7 @@ async def get_bookings(
             page=page,
             page_size=page_size,
             sort_by=sort_by,
-            sort_order=sort_order
+            sort_order=sort_order,
         )
 
         result = await query_bus.execute(query, db)
@@ -269,12 +276,12 @@ async def get_bookings(
                     "customer_email": customer_email,
                     "date_from": str(date_from) if date_from else None,
                     "date_to": str(date_to) if date_to else None,
-                    "status": status
+                    "status": status,
                 },
-                "pagination": {"page": page, "page_size": page_size}
+                "pagination": {"page": page, "page_size": page_size},
             },
             success=result.success,
-            error_message=result.error
+            error_message=result.error,
         )
 
         return handle_query_result(result)
@@ -282,7 +289,7 @@ async def get_bookings(
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while retrieving bookings"
+            detail="An error occurred while retrieving bookings",
         )
 
 
@@ -292,7 +299,7 @@ async def update_booking(
     booking_id: UUID,
     request: UpdateBookingRequest,
     current_user: AuthenticatedUser = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_db_session)
+    db: AsyncSession = Depends(get_db_session),
 ):
     """Update an existing booking."""
 
@@ -307,7 +314,7 @@ async def update_booking(
             special_requests=request.special_requests,
             updated_by=str(current_user.id),
             update_reason=request.update_reason,
-            idempotency_key=f"update_booking_{booking_id}_{current_user.id}_{hash(str(request.dict()))}"
+            idempotency_key=f"update_booking_{booking_id}_{current_user.id}_{hash(str(request.dict()))}",
         )
 
         result = await command_bus.execute(command, db)
@@ -320,10 +327,10 @@ async def update_booking(
             resource_id=str(booking_id),
             details={
                 "changes": request.dict(exclude_unset=True),
-                "update_reason": request.update_reason
+                "update_reason": request.update_reason,
             },
             success=result.success,
-            error_message=result.error
+            error_message=result.error,
         )
 
         return handle_command_result(result)
@@ -331,7 +338,7 @@ async def update_booking(
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while updating the booking"
+            detail="An error occurred while updating the booking",
         )
 
 
@@ -341,7 +348,7 @@ async def cancel_booking(
     booking_id: UUID,
     request: CancelBookingRequest,
     current_user: AuthenticatedUser = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_db_session)
+    db: AsyncSession = Depends(get_db_session),
 ):
     """Cancel a booking."""
 
@@ -351,7 +358,7 @@ async def cancel_booking(
             cancellation_reason=request.cancellation_reason,
             cancelled_by=str(current_user.id),
             refund_amount_cents=request.refund_amount_cents,
-            idempotency_key=f"cancel_booking_{booking_id}_{current_user.id}"
+            idempotency_key=f"cancel_booking_{booking_id}_{current_user.id}",
         )
 
         result = await command_bus.execute(command, db)
@@ -364,10 +371,10 @@ async def cancel_booking(
             resource_id=str(booking_id),
             details={
                 "cancellation_reason": request.cancellation_reason,
-                "refund_amount_cents": request.refund_amount_cents
+                "refund_amount_cents": request.refund_amount_cents,
             },
             success=result.success,
-            error_message=result.error
+            error_message=result.error,
         )
 
         return handle_command_result(result)
@@ -375,7 +382,7 @@ async def cancel_booking(
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while cancelling the booking"
+            detail="An error occurred while cancelling the booking",
         )
 
 
@@ -385,7 +392,7 @@ async def record_payment(
     booking_id: UUID,
     request: RecordPaymentRequest,
     current_user: AuthenticatedUser = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_db_session)
+    db: AsyncSession = Depends(get_db_session),
 ):
     """Record a payment for a booking."""
 
@@ -397,7 +404,7 @@ async def record_payment(
             payment_reference=request.payment_reference,
             notes=request.notes,
             processed_by=str(current_user.id),
-            idempotency_key=f"payment_{booking_id}_{current_user.id}_{hash(str(request.dict()))}"
+            idempotency_key=f"payment_{booking_id}_{current_user.id}_{hash(str(request.dict()))}",
         )
 
         result = await command_bus.execute(command, db)
@@ -407,15 +414,15 @@ async def record_payment(
             current_user,
             db,
             resource_type="payment",
-            resource_id=result.data.get('payment_id') if result.success else None,
+            resource_id=result.data.get("payment_id") if result.success else None,
             details={
                 "booking_id": str(booking_id),
                 "amount_cents": request.amount_cents,
                 "payment_method": request.payment_method,
-                "payment_reference": request.payment_reference
+                "payment_reference": request.payment_reference,
             },
             success=result.success,
-            error_message=result.error
+            error_message=result.error,
         )
 
         return handle_command_result(result)
@@ -423,21 +430,21 @@ async def record_payment(
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while recording the payment"
+            detail="An error occurred while recording the payment",
         )
 
 
 @router.get("/customers", response_model=ApiResponse)
 @require_permission(Permission.CUSTOMER_READ)
 async def get_customer_360(
-    customer_id: Optional[UUID] = Query(None, description="Customer ID"),
-    customer_email: Optional[str] = Query(None, description="Customer email"),
-    customer_phone: Optional[str] = Query(None, description="Customer phone"),
+    customer_id: UUID | None = Query(None, description="Customer ID"),
+    customer_email: str | None = Query(None, description="Customer email"),
+    customer_phone: str | None = Query(None, description="Customer phone"),
     include_bookings: bool = Query(True, description="Include booking history"),
     include_payments: bool = Query(True, description="Include payment history"),
     include_messages: bool = Query(True, description="Include message threads"),
     current_user: AuthenticatedUser = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_db_session)
+    db: AsyncSession = Depends(get_db_session),
 ):
     """Get comprehensive customer view."""
 
@@ -448,7 +455,7 @@ async def get_customer_360(
             customer_phone=customer_phone,
             include_bookings=include_bookings,
             include_payments=include_payments,
-            include_messages=include_messages
+            include_messages=include_messages,
         )
 
         result = await query_bus.execute(query, db)
@@ -465,11 +472,11 @@ async def get_customer_360(
                 "includes": {
                     "bookings": include_bookings,
                     "payments": include_payments,
-                    "messages": include_messages
-                }
+                    "messages": include_messages,
+                },
             },
             success=result.success,
-            error_message=result.error
+            error_message=result.error,
         )
 
         return handle_query_result(result)
@@ -477,20 +484,20 @@ async def get_customer_360(
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while retrieving customer information"
+            detail="An error occurred while retrieving customer information",
         )
 
 
 @router.get("/messages/threads", response_model=ApiResponse)
 @require_permission(Permission.MESSAGE_READ)
 async def get_message_threads(
-    customer_id: Optional[UUID] = Query(None, description="Filter by customer ID"),
-    phone_number: Optional[str] = Query(None, description="Filter by phone number"),
-    has_unread: Optional[bool] = Query(None, description="Filter by unread status"),
+    customer_id: UUID | None = Query(None, description="Filter by customer ID"),
+    phone_number: str | None = Query(None, description="Filter by phone number"),
+    has_unread: bool | None = Query(None, description="Filter by unread status"),
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(20, ge=1, le=100, description="Items per page"),
     current_user: AuthenticatedUser = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_db_session)
+    db: AsyncSession = Depends(get_db_session),
 ):
     """Get message threads with filtering."""
 
@@ -500,7 +507,7 @@ async def get_message_threads(
             phone_number=phone_number,
             has_unread=has_unread,
             page=page,
-            page_size=page_size
+            page_size=page_size,
         )
 
         result = await query_bus.execute(query, db)
@@ -513,12 +520,12 @@ async def get_message_threads(
                 "filters": {
                     "customer_id": str(customer_id) if customer_id else None,
                     "phone_number": phone_number,
-                    "has_unread": has_unread
+                    "has_unread": has_unread,
                 },
-                "pagination": {"page": page, "page_size": page_size}
+                "pagination": {"page": page, "page_size": page_size},
             },
             success=result.success,
-            error_message=result.error
+            error_message=result.error,
         )
 
         return handle_query_result(result)
@@ -526,7 +533,7 @@ async def get_message_threads(
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while retrieving message threads"
+            detail="An error occurred while retrieving message threads",
         )
 
 
@@ -538,7 +545,7 @@ async def get_message_thread(
     include_booking_context: bool = Query(True, description="Include booking context"),
     limit: int = Query(50, ge=1, le=200, description="Number of messages to retrieve"),
     current_user: AuthenticatedUser = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_db_session)
+    db: AsyncSession = Depends(get_db_session),
 ):
     """Get message thread with history."""
 
@@ -547,7 +554,7 @@ async def get_message_thread(
             thread_id=thread_id,
             include_customer_details=include_customer_details,
             include_booking_context=include_booking_context,
-            limit=limit
+            limit=limit,
         )
 
         result = await query_bus.execute(query, db)
@@ -561,10 +568,10 @@ async def get_message_thread(
             details={
                 "include_customer_details": include_customer_details,
                 "include_booking_context": include_booking_context,
-                "limit": limit
+                "limit": limit,
             },
             success=result.success,
-            error_message=result.error
+            error_message=result.error,
         )
 
         return handle_query_result(result)
@@ -572,7 +579,7 @@ async def get_message_thread(
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while retrieving the message thread"
+            detail="An error occurred while retrieving the message thread",
         )
 
 
@@ -583,7 +590,7 @@ async def send_message(
     thread_id: UUID,
     request: SendMessageRequest,
     current_user: AuthenticatedUser = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_db_session)
+    db: AsyncSession = Depends(get_db_session),
 ):
     """Send a message in an existing thread."""
 
@@ -592,7 +599,7 @@ async def send_message(
             thread_id=thread_id,
             content=request.content,
             sent_by=str(current_user.id),
-            idempotency_key=f"send_message_{thread_id}_{current_user.id}_{hash(request.content)}"
+            idempotency_key=f"send_message_{thread_id}_{current_user.id}_{hash(request.content)}",
         )
 
         result = await command_bus.execute(command, db)
@@ -602,13 +609,10 @@ async def send_message(
             current_user,
             db,
             resource_type="message",
-            resource_id=result.data.get('message_id') if result.success else None,
-            details={
-                "thread_id": str(thread_id),
-                "content_length": len(request.content)
-            },
+            resource_id=result.data.get("message_id") if result.success else None,
+            details={"thread_id": str(thread_id), "content_length": len(request.content)},
             success=result.success,
-            error_message=result.error
+            error_message=result.error,
         )
 
         return handle_command_result(result)
@@ -616,7 +620,7 @@ async def send_message(
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while sending the message"
+            detail="An error occurred while sending the message",
         )
 
 
@@ -626,15 +630,13 @@ async def get_availability_slots(
     party_size: int = Query(..., ge=1, le=50, description="Number of guests"),
     duration_minutes: int = Query(180, ge=60, le=480, description="Event duration in minutes"),
     current_user: AuthenticatedUser = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_db_session)
+    db: AsyncSession = Depends(get_db_session),
 ):
     """Get available time slots for a date."""
 
     try:
         query = GetAvailabilitySlotsQuery(
-            date=date,
-            party_size=party_size,
-            duration_minutes=duration_minutes
+            date=date, party_size=party_size, duration_minutes=duration_minutes
         )
 
         result = await query_bus.execute(query, db)
@@ -644,20 +646,20 @@ async def get_availability_slots(
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while checking availability"
+            detail="An error occurred while checking availability",
         )
 
 
 @router.get("/dashboard/stats", response_model=ApiResponse)
 @require_any_permission([Permission.REPORTS_VIEW, Permission.BOOKING_READ])
 async def get_dashboard_stats(
-    date_from: Optional[date_type] = Query(None, description="Stats from date"),
-    date_to: Optional[date_type] = Query(None, description="Stats to date"),
+    date_from: date_type | None = Query(None, description="Stats from date"),
+    date_to: date_type | None = Query(None, description="Stats to date"),
     include_bookings: bool = Query(True, description="Include booking statistics"),
     include_revenue: bool = Query(True, description="Include revenue statistics"),
     include_messages: bool = Query(True, description="Include message statistics"),
     current_user: AuthenticatedUser = Depends(get_current_active_user),
-    db: AsyncSession = Depends(get_db_session)
+    db: AsyncSession = Depends(get_db_session),
 ):
     """Get dashboard statistics."""
 
@@ -667,7 +669,7 @@ async def get_dashboard_stats(
             date_to=date_to,
             include_bookings=include_bookings,
             include_revenue=include_revenue,
-            include_messages=include_messages
+            include_messages=include_messages,
         )
 
         result = await query_bus.execute(query, db)
@@ -679,16 +681,16 @@ async def get_dashboard_stats(
             details={
                 "date_range": {
                     "from": str(date_from) if date_from else None,
-                    "to": str(date_to) if date_to else None
+                    "to": str(date_to) if date_to else None,
                 },
                 "includes": {
                     "bookings": include_bookings,
                     "revenue": include_revenue,
-                    "messages": include_messages
-                }
+                    "messages": include_messages,
+                },
             },
             success=result.success,
-            error_message=result.error
+            error_message=result.error,
         )
 
         return handle_query_result(result)
@@ -696,7 +698,7 @@ async def get_dashboard_stats(
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while retrieving dashboard statistics"
+            detail="An error occurred while retrieving dashboard statistics",
         )
 
 

@@ -1,11 +1,8 @@
 """Social media CQRS command handlers."""
 
-import logging
 from datetime import datetime
+import logging
 from typing import Any
-
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.app.cqrs.base import CommandHandler
 from api.app.cqrs.social_commands import (
@@ -26,6 +23,8 @@ from api.app.models.social import (
     SocialThread,
 )
 from api.app.services.social_service import SocialService
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
@@ -33,14 +32,18 @@ logger = logging.getLogger(__name__)
 class CreateLeadFromSocialHandler(CommandHandler[CreateLeadFromSocialCommand]):
     """Handler for creating leads from social media interactions."""
 
-    async def handle(self, command: CreateLeadFromSocialCommand, session: AsyncSession) -> dict[str, Any]:
+    async def handle(
+        self, command: CreateLeadFromSocialCommand, session: AsyncSession
+    ) -> dict[str, Any]:
         try:
             # Check if lead already exists for this handle on this platform
-            existing_stmt = select(Lead).join(
-                SocialIdentity, Lead.id == SocialIdentity.customer_id
-            ).where(
-                SocialIdentity.handle == command.handle,
-                SocialIdentity.platform == command.source
+            existing_stmt = (
+                select(Lead)
+                .join(SocialIdentity, Lead.id == SocialIdentity.customer_id)
+                .where(
+                    SocialIdentity.handle == command.handle,
+                    SocialIdentity.platform == command.source,
+                )
             )
             existing_lead = await session.execute(existing_stmt)
             existing_lead = existing_lead.scalar_one_or_none()
@@ -54,7 +57,11 @@ class CreateLeadFromSocialHandler(CommandHandler[CreateLeadFromSocialCommand]):
                 "source": f"social_{command.source}",
                 "phone": None,  # Will be filled if customer provides
                 "email": None,  # Will be filled if customer provides
-                "first_name": command.handle.replace("@", "").split(".")[0] if "." in command.handle else command.handle.replace("@", ""),
+                "first_name": (
+                    command.handle.replace("@", "").split(".")[0]
+                    if "." in command.handle
+                    else command.handle.replace("@", "")
+                ),
                 "last_name": None,
                 "notes": f"Social media lead from {command.source}. Handle: {command.handle}",
                 "metadata": {
@@ -68,10 +75,10 @@ class CreateLeadFromSocialHandler(CommandHandler[CreateLeadFromSocialCommand]):
                         "consent": {
                             "dm": command.consent_dm,
                             "sms": command.consent_sms,
-                            "email": command.consent_email
-                        }
-                    }
-                }
+                            "email": command.consent_email,
+                        },
+                    },
+                },
             }
 
             lead = Lead(**lead_data)
@@ -89,9 +96,9 @@ class CreateLeadFromSocialHandler(CommandHandler[CreateLeadFromSocialCommand]):
                     "consent_status": {
                         "dm": command.consent_dm,
                         "sms": command.consent_sms,
-                        "email": command.consent_email
-                    }
-                }
+                        "email": command.consent_email,
+                    },
+                },
             }
 
             social_identity = SocialIdentity(**identity_data)
@@ -111,9 +118,9 @@ class CreateLeadFromSocialHandler(CommandHandler[CreateLeadFromSocialCommand]):
                     "consent": {
                         "dm": command.consent_dm,
                         "sms": command.consent_sms,
-                        "email": command.consent_email
-                    }
-                }
+                        "email": command.consent_email,
+                    },
+                },
             }
 
             outbox_event = OutboxEntry(**event_data)
@@ -121,17 +128,19 @@ class CreateLeadFromSocialHandler(CommandHandler[CreateLeadFromSocialCommand]):
 
             await session.commit()
 
-            logger.info(f"Created lead {lead.id} from social {command.source} handle {command.handle}")
+            logger.info(
+                f"Created lead {lead.id} from social {command.source} handle {command.handle}"
+            )
             return {
                 "lead_id": lead.id,
                 "social_identity_id": social_identity.id,
                 "created": True,
                 "handle": command.handle,
-                "platform": command.source
+                "platform": command.source,
             }
 
         except Exception as e:
-            logger.error(f"Error creating lead from social: {e}")
+            logger.exception(f"Error creating lead from social: {e}")
             await session.rollback()
             raise
 
@@ -142,7 +151,9 @@ class SendSocialReplyHandler(CommandHandler[SendSocialReplyCommand]):
     def __init__(self, social_service: SocialService):
         self.social_service = social_service
 
-    async def handle(self, command: SendSocialReplyCommand, session: AsyncSession) -> dict[str, Any]:
+    async def handle(
+        self, command: SendSocialReplyCommand, session: AsyncSession
+    ) -> dict[str, Any]:
         try:
             # Get thread details
             thread_stmt = select(SocialThread).where(SocialThread.id == command.thread_id)
@@ -164,9 +175,11 @@ class SendSocialReplyHandler(CommandHandler[SendSocialReplyCommand]):
                     **(command.metadata or {}),
                     "safety": command.safety,
                     "requires_approval": command.requires_approval,
-                    "scheduled_send_at": command.schedule_send_at.isoformat() if command.schedule_send_at else None
+                    "scheduled_send_at": (
+                        command.schedule_send_at.isoformat() if command.schedule_send_at else None
+                    ),
                 },
-                "sent_at": command.schedule_send_at or datetime.utcnow()
+                "sent_at": command.schedule_send_at or datetime.utcnow(),
             }
 
             message = SocialMessage(**message_data)
@@ -177,17 +190,12 @@ class SendSocialReplyHandler(CommandHandler[SendSocialReplyCommand]):
             if not command.schedule_send_at and not command.requires_approval:
                 # Use social service to send the actual message
                 send_result = await self.social_service.send_reply(
-                    thread=thread,
-                    message=message,
-                    session=session
+                    thread=thread, message=message, session=session
                 )
 
                 # Update message with send result
                 message.platform_message_id = send_result.get("message_id")
-                message.metadata = {
-                    **message.metadata,
-                    "send_result": send_result
-                }
+                message.metadata = {**message.metadata, "send_result": send_result}
 
             # Update thread last activity
             thread.updated_at = datetime.utcnow()
@@ -204,8 +212,8 @@ class SendSocialReplyHandler(CommandHandler[SendSocialReplyCommand]):
                     "reply_kind": command.reply_kind,
                     "body": command.body,
                     "requires_approval": command.requires_approval,
-                    "scheduled": command.schedule_send_at is not None
-                }
+                    "scheduled": command.schedule_send_at is not None,
+                },
             }
 
             outbox_event = OutboxEntry(**event_data)
@@ -213,17 +221,19 @@ class SendSocialReplyHandler(CommandHandler[SendSocialReplyCommand]):
 
             await session.commit()
 
-            logger.info(f"Social reply created for thread {command.thread_id}, message {message.id}")
+            logger.info(
+                f"Social reply created for thread {command.thread_id}, message {message.id}"
+            )
             return {
                 "message_id": message.id,
                 "thread_id": command.thread_id,
                 "sent": not command.requires_approval and not command.schedule_send_at,
                 "scheduled": command.schedule_send_at is not None,
-                "requires_approval": command.requires_approval
+                "requires_approval": command.requires_approval,
             }
 
         except Exception as e:
-            logger.error(f"Error sending social reply: {e}")
+            logger.exception(f"Error sending social reply: {e}")
             await session.rollback()
             raise
 
@@ -231,7 +241,9 @@ class SendSocialReplyHandler(CommandHandler[SendSocialReplyCommand]):
 class LinkSocialIdentityToCustomerHandler(CommandHandler[LinkSocialIdentityToCustomerCommand]):
     """Handler for linking social identities to customers."""
 
-    async def handle(self, command: LinkSocialIdentityToCustomerCommand, session: AsyncSession) -> dict[str, Any]:
+    async def handle(
+        self, command: LinkSocialIdentityToCustomerCommand, session: AsyncSession
+    ) -> dict[str, Any]:
         try:
             # Get social identity
             identity_stmt = select(SocialIdentity).where(
@@ -259,8 +271,8 @@ class LinkSocialIdentityToCustomerHandler(CommandHandler[LinkSocialIdentityToCus
                     "confidence_score": command.confidence_score,
                     "verification_method": command.verification_method,
                     "linked_at": datetime.utcnow().isoformat(),
-                    "notes": command.notes
-                }
+                    "notes": command.notes,
+                },
             }
 
             # Create outbox event for identity linking
@@ -274,8 +286,8 @@ class LinkSocialIdentityToCustomerHandler(CommandHandler[LinkSocialIdentityToCus
                     "platform": identity.platform,
                     "handle": identity.handle,
                     "confidence_score": command.confidence_score,
-                    "verification_method": command.verification_method
-                }
+                    "verification_method": command.verification_method,
+                },
             }
 
             outbox_event = OutboxEntry(**event_data)
@@ -283,17 +295,19 @@ class LinkSocialIdentityToCustomerHandler(CommandHandler[LinkSocialIdentityToCus
 
             await session.commit()
 
-            logger.info(f"Linked social identity {command.social_identity_id} to customer {command.customer_id}")
+            logger.info(
+                f"Linked social identity {command.social_identity_id} to customer {command.customer_id}"
+            )
             return {
                 "social_identity_id": command.social_identity_id,
                 "customer_id": command.customer_id,
                 "platform": identity.platform,
                 "handle": identity.handle,
-                "confidence_score": command.confidence_score
+                "confidence_score": command.confidence_score,
             }
 
         except Exception as e:
-            logger.error(f"Error linking social identity: {e}")
+            logger.exception(f"Error linking social identity: {e}")
             await session.rollback()
             raise
 
@@ -301,7 +315,9 @@ class LinkSocialIdentityToCustomerHandler(CommandHandler[LinkSocialIdentityToCus
 class AcknowledgeReviewHandler(CommandHandler[AcknowledgeReviewCommand]):
     """Handler for acknowledging reviews."""
 
-    async def handle(self, command: AcknowledgeReviewCommand, session: AsyncSession) -> dict[str, Any]:
+    async def handle(
+        self, command: AcknowledgeReviewCommand, session: AsyncSession
+    ) -> dict[str, Any]:
         try:
             # Get review
             review_stmt = select(Review).where(Review.id == command.review_id)
@@ -324,8 +340,8 @@ class AcknowledgeReviewHandler(CommandHandler[AcknowledgeReviewCommand]):
                     "acknowledged_at": datetime.utcnow().isoformat(),
                     "notes": command.notes,
                     "priority_level": command.priority_level,
-                    "assigned_to": command.assigned_to
-                }
+                    "assigned_to": command.assigned_to,
+                },
             }
 
             # Create outbox event
@@ -338,8 +354,8 @@ class AcknowledgeReviewHandler(CommandHandler[AcknowledgeReviewCommand]):
                     "acknowledged_by": command.acknowledged_by,
                     "priority_level": command.priority_level,
                     "assigned_to": command.assigned_to,
-                    "rating": review.rating
-                }
+                    "rating": review.rating,
+                },
             }
 
             outbox_event = OutboxEntry(**event_data)
@@ -352,11 +368,11 @@ class AcknowledgeReviewHandler(CommandHandler[AcknowledgeReviewCommand]):
                 "review_id": command.review_id,
                 "status": "acknowledged",
                 "acknowledged_by": command.acknowledged_by,
-                "priority_level": command.priority_level
+                "priority_level": command.priority_level,
             }
 
         except Exception as e:
-            logger.error(f"Error acknowledging review: {e}")
+            logger.exception(f"Error acknowledging review: {e}")
             await session.rollback()
             raise
 
@@ -364,7 +380,9 @@ class AcknowledgeReviewHandler(CommandHandler[AcknowledgeReviewCommand]):
 class UpdateThreadStatusHandler(CommandHandler[UpdateThreadStatusCommand]):
     """Handler for updating thread status."""
 
-    async def handle(self, command: UpdateThreadStatusCommand, session: AsyncSession) -> dict[str, Any]:
+    async def handle(
+        self, command: UpdateThreadStatusCommand, session: AsyncSession
+    ) -> dict[str, Any]:
         try:
             # Get thread
             thread_stmt = select(SocialThread).where(SocialThread.id == command.thread_id)
@@ -387,14 +405,17 @@ class UpdateThreadStatusHandler(CommandHandler[UpdateThreadStatusCommand]):
 
             thread.metadata = {
                 **existing_metadata,
-                "status_history": existing_history + [{
-                    "from_status": old_status,
-                    "to_status": command.status,
-                    "updated_by": command.updated_by,
-                    "updated_at": datetime.utcnow().isoformat(),
-                    "reason": command.reason
-                }],
-                "tags": command.tags or existing_metadata.get("tags", [])
+                "status_history": [
+                    *existing_history,
+                    {
+                        "from_status": old_status,
+                        "to_status": command.status,
+                        "updated_by": command.updated_by,
+                        "updated_at": datetime.utcnow().isoformat(),
+                        "reason": command.reason,
+                    },
+                ],
+                "tags": command.tags or existing_metadata.get("tags", []),
             }
 
             # Create outbox event
@@ -408,8 +429,8 @@ class UpdateThreadStatusHandler(CommandHandler[UpdateThreadStatusCommand]):
                     "new_status": command.status,
                     "updated_by": command.updated_by,
                     "reason": command.reason,
-                    "assigned_to": command.assigned_to
-                }
+                    "assigned_to": command.assigned_to,
+                },
             }
 
             outbox_event = OutboxEntry(**event_data)
@@ -417,16 +438,18 @@ class UpdateThreadStatusHandler(CommandHandler[UpdateThreadStatusCommand]):
 
             await session.commit()
 
-            logger.info(f"Updated thread {command.thread_id} status from {old_status} to {command.status}")
+            logger.info(
+                f"Updated thread {command.thread_id} status from {old_status} to {command.status}"
+            )
             return {
                 "thread_id": command.thread_id,
                 "old_status": old_status,
                 "new_status": command.status,
-                "assigned_to": command.assigned_to
+                "assigned_to": command.assigned_to,
             }
 
         except Exception as e:
-            logger.error(f"Error updating thread status: {e}")
+            logger.exception(f"Error updating thread status: {e}")
             await session.rollback()
             raise
 
@@ -434,22 +457,25 @@ class UpdateThreadStatusHandler(CommandHandler[UpdateThreadStatusCommand]):
 class CreateSocialAccountHandler(CommandHandler[CreateSocialAccountCommand]):
     """Handler for creating/connecting social media accounts."""
 
-    async def handle(self, command: CreateSocialAccountCommand, session: AsyncSession) -> dict[str, Any]:
+    async def handle(
+        self, command: CreateSocialAccountCommand, session: AsyncSession
+    ) -> dict[str, Any]:
         try:
             # Check if account already exists
             existing_stmt = select(SocialAccount).where(
-                SocialAccount.platform == command.platform,
-                SocialAccount.page_id == command.page_id
+                SocialAccount.platform == command.platform, SocialAccount.page_id == command.page_id
             )
             existing_result = await session.execute(existing_stmt)
             existing_account = existing_result.scalar_one_or_none()
 
             if existing_account:
-                logger.info(f"Social account already exists for {command.platform} page {command.page_id}")
+                logger.info(
+                    f"Social account already exists for {command.platform} page {command.page_id}"
+                )
                 return {
                     "account_id": existing_account.id,
                     "created": False,
-                    "reason": "already_exists"
+                    "reason": "already_exists",
                 }
 
             # Create new social account
@@ -464,7 +490,7 @@ class CreateSocialAccountHandler(CommandHandler[CreateSocialAccountCommand]):
                 "connected_at": datetime.utcnow(),
                 "connected_by": command.connected_by,
                 "token_ref": command.token_ref,
-                "metadata": command.metadata or {}
+                "metadata": command.metadata or {},
             }
 
             account = SocialAccount(**account_data)
@@ -481,8 +507,8 @@ class CreateSocialAccountHandler(CommandHandler[CreateSocialAccountCommand]):
                     "platform": command.platform,
                     "page_id": command.page_id,
                     "page_name": command.page_name,
-                    "connected_by": command.connected_by
-                }
+                    "connected_by": command.connected_by,
+                },
             }
 
             outbox_event = OutboxEntry(**event_data)
@@ -495,10 +521,10 @@ class CreateSocialAccountHandler(CommandHandler[CreateSocialAccountCommand]):
                 "account_id": account.id,
                 "created": True,
                 "platform": command.platform,
-                "page_name": command.page_name
+                "page_name": command.page_name,
             }
 
         except Exception as e:
-            logger.error(f"Error creating social account: {e}")
+            logger.exception(f"Error creating social account: {e}")
             await session.rollback()
             raise

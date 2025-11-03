@@ -12,8 +12,8 @@ Author: MH Backend Team
 Created: 2025-10-31 (Phase 1A)
 """
 
-from typing import Dict, List, Any
 import logging
+from typing import Any
 
 from .base_agent import BaseAgent
 
@@ -23,20 +23,20 @@ logger = logging.getLogger(__name__)
 class CustomerCareAgent(BaseAgent):
     """
     Customer Care Agent - Maximize satisfaction and retain customers.
-    
+
     Expertise:
     - Empathetic communication (active listening, validation)
     - De-escalation (anger management, conflict resolution)
     - Problem-solving (creative solutions, fair compensation)
     - Service recovery (turning negative → positive experiences)
     - Retention strategies (win-back campaigns, loyalty building)
-    
+
     Tools:
     - check_order_status: Look up booking details
     - process_refund: Authorize refunds/credits
     - escalate_to_human: Route to human agent
     - log_complaint: Track issues for analysis
-    
+
     Usage:
         agent = CustomerCareAgent()
         response = await agent.process(
@@ -44,14 +44,14 @@ class CustomerCareAgent(BaseAgent):
             context={"conversation_id": "123", "sentiment": "negative"}
         )
     """
-    
+
     def __init__(self):
         super().__init__(
             agent_type="customer_care",
             temperature=0.6,  # More consistent, less creative
-            max_tokens=500
+            max_tokens=500,
         )
-    
+
     def get_system_prompt(self) -> str:
         return """You are a senior customer care specialist for MyHibachi, dedicated to creating exceptional experiences even in challenging situations.
 
@@ -159,14 +159,14 @@ Your mission: Turn every customer interaction into a positive outcome through em
 - Abusive language toward staff
 - Threats of any kind
 
-**Remember:** 
+**Remember:**
 - A resolved complaint creates more loyalty than if nothing went wrong
 - Service recovery is your superpower - use it generously
 - Every negative experience is a chance to create a brand advocate
 - Your goal: Customer says "They really went above and beyond to make it right"
 """
 
-    def get_tools(self) -> List[Dict[str, Any]]:
+    def get_tools(self) -> list[dict[str, Any]]:
         return [
             {
                 "type": "function",
@@ -178,17 +178,17 @@ Your mission: Turn every customer interaction into a positive outcome through em
                         "properties": {
                             "identifier": {
                                 "type": "string",
-                                "description": "Order ID, confirmation number, email, or phone number"
+                                "description": "Order ID, confirmation number, email, or phone number",
                             },
                             "identifier_type": {
                                 "type": "string",
                                 "enum": ["order_id", "email", "phone", "confirmation_code"],
-                                "description": "Type of identifier provided"
-                            }
+                                "description": "Type of identifier provided",
+                            },
                         },
-                        "required": ["identifier"]
-                    }
-                }
+                        "required": ["identifier"],
+                    },
+                },
             },
             {
                 "type": "function",
@@ -198,31 +198,33 @@ Your mission: Turn every customer interaction into a positive outcome through em
                     "parameters": {
                         "type": "object",
                         "properties": {
-                            "order_id": {
-                                "type": "string",
-                                "description": "Order/booking ID"
-                            },
+                            "order_id": {"type": "string", "description": "Order/booking ID"},
                             "refund_type": {
                                 "type": "string",
-                                "enum": ["full_refund", "partial_refund", "account_credit", "future_discount"],
-                                "description": "Type of compensation"
+                                "enum": [
+                                    "full_refund",
+                                    "partial_refund",
+                                    "account_credit",
+                                    "future_discount",
+                                ],
+                                "description": "Type of compensation",
                             },
                             "amount": {
                                 "type": "number",
-                                "description": "Refund amount in USD (or percentage if partial)"
+                                "description": "Refund amount in USD (or percentage if partial)",
                             },
                             "reason": {
                                 "type": "string",
-                                "description": "Reason for refund (for records)"
+                                "description": "Reason for refund (for records)",
                             },
                             "requires_approval": {
                                 "type": "boolean",
-                                "description": "If true, routes to manager for approval (>$2000)"
-                            }
+                                "description": "If true, routes to manager for approval (>$2000)",
+                            },
                         },
-                        "required": ["order_id", "refund_type", "amount", "reason"]
-                    }
-                }
+                        "required": ["order_id", "refund_type", "amount", "reason"],
+                    },
+                },
             },
             {
                 "type": "function",
@@ -235,25 +237,25 @@ Your mission: Turn every customer interaction into a positive outcome through em
                             "priority": {
                                 "type": "string",
                                 "enum": ["low", "medium", "high", "urgent"],
-                                "description": "Escalation priority"
+                                "description": "Escalation priority",
                             },
                             "reason": {
                                 "type": "string",
-                                "description": "Why escalating (legal threat, extreme anger, complex issue)"
+                                "description": "Why escalating (legal threat, extreme anger, complex issue)",
                             },
                             "summary": {
                                 "type": "string",
-                                "description": "Brief summary of issue for human agent"
+                                "description": "Brief summary of issue for human agent",
                             },
                             "customer_sentiment": {
                                 "type": "string",
                                 "enum": ["calm", "frustrated", "angry", "threatening"],
-                                "description": "Current customer emotional state"
-                            }
+                                "description": "Current customer emotional state",
+                            },
                         },
-                        "required": ["priority", "reason", "summary"]
-                    }
-                }
+                        "required": ["priority", "reason", "summary"],
+                    },
+                },
             },
             {
                 "type": "function",
@@ -265,80 +267,77 @@ Your mission: Turn every customer interaction into a positive outcome through em
                         "properties": {
                             "category": {
                                 "type": "string",
-                                "enum": ["service_quality", "booking_issue", "pricing_dispute", "dietary_issue", "equipment_failure", "staff_behavior", "other"],
-                                "description": "Complaint category"
+                                "enum": [
+                                    "service_quality",
+                                    "booking_issue",
+                                    "pricing_dispute",
+                                    "dietary_issue",
+                                    "equipment_failure",
+                                    "staff_behavior",
+                                    "other",
+                                ],
+                                "description": "Complaint category",
                             },
                             "severity": {
                                 "type": "string",
                                 "enum": ["minor", "moderate", "major", "critical"],
-                                "description": "Issue severity"
+                                "description": "Issue severity",
                             },
                             "description": {
                                 "type": "string",
-                                "description": "Detailed description of issue"
+                                "description": "Detailed description of issue",
                             },
                             "order_id": {
                                 "type": "string",
-                                "description": "Associated order ID (if applicable)"
+                                "description": "Associated order ID (if applicable)",
                             },
                             "resolution": {
                                 "type": "string",
-                                "description": "How issue was resolved"
-                            }
+                                "description": "How issue was resolved",
+                            },
                         },
-                        "required": ["category", "severity", "description"]
-                    }
-                }
-            }
+                        "required": ["category", "severity", "description"],
+                    },
+                },
+            },
         ]
-    
+
     async def process_tool_call(
-        self,
-        tool_name: str,
-        arguments: Dict[str, Any],
-        context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, tool_name: str, arguments: dict[str, Any], context: dict[str, Any]
+    ) -> dict[str, Any]:
         """Execute tool functions"""
-        
+
         try:
             if tool_name == "check_order_status":
                 return await self._check_order_status(arguments)
-            
+
             elif tool_name == "process_refund":
                 return await self._process_refund(arguments, context)
-            
+
             elif tool_name == "escalate_to_human":
                 return await self._escalate_to_human(arguments, context)
-            
+
             elif tool_name == "log_complaint":
                 return await self._log_complaint(arguments, context)
-            
+
             else:
-                return {
-                    "success": False,
-                    "result": None,
-                    "error": f"Unknown tool: {tool_name}"
-                }
-                
+                return {"success": False, "result": None, "error": f"Unknown tool: {tool_name}"}
+
         except Exception as e:
             logger.error(f"Tool execution error: {tool_name} - {e}", exc_info=True)
-            return {
-                "success": False,
-                "result": None,
-                "error": str(e)
-            }
-    
+            return {"success": False, "result": None, "error": str(e)}
+
     # ===== Tool Implementations =====
-    
-    async def _check_order_status(self, args: Dict[str, Any]) -> Dict[str, Any]:
+
+    async def _check_order_status(self, args: dict[str, Any]) -> dict[str, Any]:
         """Look up order details"""
-        
-        identifier = args["identifier"]
-        identifier_type = args.get("identifier_type", "order_id")
-        
+
+        args["identifier"]
+        args.get("identifier_type", "order_id")
+
         # TODO: Integrate with actual database
         # This is a mock implementation
-        
+
         # Simulate database lookup
         order = {
             "order_id": "ORD-2024-1234",
@@ -355,27 +354,29 @@ Your mission: Turn every customer interaction into a positive outcome through em
             "special_requests": "Vegetarian options for 5 guests",
             "addons": ["Sushi Station"],
             "created_at": "2024-10-15",
-            "last_updated": "2024-10-20"
+            "last_updated": "2024-10-20",
         }
-        
+
         return {
             "success": True,
             "result": {
                 "found": True,
                 "order": order,
-                "message": f"Found booking #{order['order_id']} for {order['customer_name']}"
-            }
+                "message": f"Found booking #{order['order_id']} for {order['customer_name']}",
+            },
         }
-    
-    async def _process_refund(self, args: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+
+    async def _process_refund(
+        self, args: dict[str, Any], context: dict[str, Any]
+    ) -> dict[str, Any]:
         """Process refund or compensation"""
-        
+
         order_id = args["order_id"]
         refund_type = args["refund_type"]
         amount = args["amount"]
         reason = args["reason"]
         requires_approval = args.get("requires_approval", False)
-        
+
         # Check if needs manager approval
         if requires_approval or amount > 2000:
             return {
@@ -384,36 +385,36 @@ Your mission: Turn every customer interaction into a positive outcome through em
                     "status": "pending_approval",
                     "message": f"Refund request for ${amount:,.2f} submitted for manager approval. Customer will be contacted within 2 hours.",
                     "reference_number": f"REF-{order_id}-001",
-                    "next_steps": "Manager will review and contact customer directly"
-                }
+                    "next_steps": "Manager will review and contact customer directly",
+                },
             }
-        
+
         # Process refund
         refund_status = {
             "full_refund": {
                 "status": "approved",
                 "processing_time": "2-3 business days",
-                "method": "Original payment method"
+                "method": "Original payment method",
             },
             "partial_refund": {
                 "status": "approved",
                 "processing_time": "2-3 business days",
-                "method": "Original payment method"
+                "method": "Original payment method",
             },
             "account_credit": {
                 "status": "approved",
                 "processing_time": "Immediate",
-                "method": "Account credit (valid 12 months)"
+                "method": "Account credit (valid 12 months)",
             },
             "future_discount": {
                 "status": "approved",
                 "processing_time": "Immediate",
-                "method": "Discount code emailed"
-            }
+                "method": "Discount code emailed",
+            },
         }
-        
+
         result = refund_status.get(refund_type, refund_status["account_credit"])
-        
+
         return {
             "success": True,
             "result": {
@@ -425,44 +426,34 @@ Your mission: Turn every customer interaction into a positive outcome through em
                 "processing_time": result["processing_time"],
                 "method": result["method"],
                 "reference_number": f"REF-{order_id}-{hash(reason) % 1000:03d}",
-                "confirmation": f"Refund of ${amount:,.2f} approved and processing. Customer will receive confirmation email."
-            }
+                "confirmation": f"Refund of ${amount:,.2f} approved and processing. Customer will receive confirmation email.",
+            },
         }
-    
-    async def _escalate_to_human(self, args: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+
+    async def _escalate_to_human(
+        self, args: dict[str, Any], context: dict[str, Any]
+    ) -> dict[str, Any]:
         """Escalate to human agent"""
-        
+
         priority = args["priority"]
         reason = args["reason"]
         summary = args["summary"]
         sentiment = args.get("customer_sentiment", "frustrated")
-        
+
         # Determine routing
         routing = {
             "urgent": {
                 "queue": "Senior Support Manager",
                 "eta": "5-10 minutes",
-                "notify": "SMS + Email"
+                "notify": "SMS + Email",
             },
-            "high": {
-                "queue": "Support Manager",
-                "eta": "15-30 minutes",
-                "notify": "Email"
-            },
-            "medium": {
-                "queue": "Support Team",
-                "eta": "1-2 hours",
-                "notify": "Email"
-            },
-            "low": {
-                "queue": "General Support",
-                "eta": "2-4 hours",
-                "notify": "Email"
-            }
+            "high": {"queue": "Support Manager", "eta": "15-30 minutes", "notify": "Email"},
+            "medium": {"queue": "Support Team", "eta": "1-2 hours", "notify": "Email"},
+            "low": {"queue": "General Support", "eta": "2-4 hours", "notify": "Email"},
         }
-        
+
         route = routing.get(priority, routing["medium"])
-        
+
         # Log escalation
         escalation = {
             "escalation_id": f"ESC-{hash(summary) % 10000:04d}",
@@ -473,32 +464,32 @@ Your mission: Turn every customer interaction into a positive outcome through em
             "conversation_id": context.get("conversation_id"),
             "routed_to": route["queue"],
             "estimated_response": route["eta"],
-            "created_at": "2024-10-31T10:30:00Z"
+            "created_at": "2024-10-31T10:30:00Z",
         }
-        
+
         return {
             "success": True,
             "result": {
                 "escalated": True,
                 "escalation": escalation,
-                "message": f"Your case has been escalated to our {route['queue']}. You can expect a response within {route['eta']}. Reference number: {escalation['escalation_id']}"
-            }
+                "message": f"Your case has been escalated to our {route['queue']}. You can expect a response within {route['eta']}. Reference number: {escalation['escalation_id']}",
+            },
         }
-    
-    async def _log_complaint(self, args: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+
+    async def _log_complaint(self, args: dict[str, Any], context: dict[str, Any]) -> dict[str, Any]:
         """Log complaint for analysis"""
-        
+
         category = args["category"]
         severity = args["severity"]
         description = args["description"]
         order_id = args.get("order_id")
         resolution = args.get("resolution", "In progress")
-        
+
         # TODO: Integrate with actual logging system
         # This would typically write to database for analytics
-        
+
         complaint_id = f"CMP-{hash(description) % 10000:04d}"
-        
+
         complaint = {
             "complaint_id": complaint_id,
             "category": category,
@@ -509,16 +500,16 @@ Your mission: Turn every customer interaction into a positive outcome through em
             "conversation_id": context.get("conversation_id"),
             "channel": context.get("channel"),
             "logged_at": "2024-10-31T10:30:00Z",
-            "status": "logged"
+            "status": "logged",
         }
-        
+
         logger.info(f"Complaint logged: {complaint_id} - {category} ({severity})")
-        
+
         return {
             "success": True,
             "result": {
                 "logged": True,
                 "complaint": complaint,
-                "message": f"Issue logged for analysis. Reference: {complaint_id}. Our team will review this to prevent future occurrences."
-            }
+                "message": f"Issue logged for analysis. Reference: {complaint_id}. Our team will review this to prevent future occurrences.",
+            },
         }

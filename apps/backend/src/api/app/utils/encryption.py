@@ -6,13 +6,13 @@ Uses AES-GCM with envelope encryption pattern:
 - Key Encryption Key (KEK) from environment/KMS
 - Base64 encoding for database storage
 """
+
 import base64
+from functools import lru_cache
 import json
+import logging
 import os
 import secrets
-import logging
-from functools import lru_cache
-from typing import Optional
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -38,7 +38,7 @@ class FieldEncryption:
     KEY_SIZE = 32  # 256 bits
     NONCE_SIZE = 12  # 96 bits for GCM
 
-    def __init__(self, master_key: Optional[str] = None):
+    def __init__(self, master_key: str | None = None):
         """Initialize with master key from environment or parameter."""
         if master_key:
             self.master_key = master_key.encode()
@@ -46,16 +46,17 @@ class FieldEncryption:
             # Get from settings - in production this should come from KMS/Vault
             try:
                 from core.config import get_settings
+
                 settings = get_settings()
                 master_key_b64 = settings.field_encryption_key
             except ImportError:
                 # Fallback to environment variable for standalone usage
-                master_key_b64 = os.environ.get('FIELD_ENCRYPTION_KEY')
-            
+                master_key_b64 = os.environ.get("FIELD_ENCRYPTION_KEY")
+
             if not master_key_b64:
                 raise ValueError(
                     "field_encryption_key setting or FIELD_ENCRYPTION_KEY environment variable required. "
-                    "Generate with: python -c \"import secrets; print(secrets.token_urlsafe(32))\""
+                    'Generate with: python -c "import secrets; print(secrets.token_urlsafe(32))"'
                 )
             try:
                 self.master_key = base64.urlsafe_b64decode(master_key_b64)
@@ -119,20 +120,20 @@ class FieldEncryption:
         # Encrypt the plaintext with DEK
         data_nonce = secrets.token_bytes(self.NONCE_SIZE)
         aesgcm = AESGCM(dek)
-        ciphertext = aesgcm.encrypt(data_nonce, plaintext.encode('utf-8'), None)
+        ciphertext = aesgcm.encrypt(data_nonce, plaintext.encode("utf-8"), None)
 
         # Package everything together
         envelope = {
             "version": self.VERSION,
-            "encrypted_dek": base64.b64encode(encrypted_dek).decode('ascii'),
-            "dek_nonce": base64.b64encode(dek_nonce).decode('ascii'),
-            "data_nonce": base64.b64encode(data_nonce).decode('ascii'),
-            "ciphertext": base64.b64encode(ciphertext).decode('ascii')
+            "encrypted_dek": base64.b64encode(encrypted_dek).decode("ascii"),
+            "dek_nonce": base64.b64encode(dek_nonce).decode("ascii"),
+            "data_nonce": base64.b64encode(data_nonce).decode("ascii"),
+            "ciphertext": base64.b64encode(ciphertext).decode("ascii"),
         }
 
         # Return base64-encoded JSON
-        envelope_json = json.dumps(envelope, separators=(',', ':'))
-        return base64.b64encode(envelope_json.encode('utf-8')).decode('ascii')
+        envelope_json = json.dumps(envelope, separators=(",", ":"))
+        return base64.b64encode(envelope_json.encode("utf-8")).decode("ascii")
 
     def decrypt(self, encrypted_blob: str) -> str:
         """
@@ -149,7 +150,7 @@ class FieldEncryption:
 
         try:
             # Decode and parse envelope
-            envelope_json = base64.b64decode(encrypted_blob.encode('ascii')).decode('utf-8')
+            envelope_json = base64.b64decode(encrypted_blob.encode("ascii")).decode("utf-8")
             envelope = json.loads(envelope_json)
 
             # Version check
@@ -169,7 +170,7 @@ class FieldEncryption:
             aesgcm = AESGCM(dek)
             plaintext_bytes = aesgcm.decrypt(data_nonce, ciphertext, None)
 
-            return plaintext_bytes.decode('utf-8')
+            return plaintext_bytes.decode("utf-8")
 
         except Exception as e:
             raise ValueError(f"Failed to decrypt field: {e}")
@@ -180,7 +181,7 @@ class FieldEncryption:
             return False
 
         try:
-            envelope_json = base64.b64decode(value.encode('ascii')).decode('utf-8')
+            envelope_json = base64.b64decode(value.encode("ascii")).decode("utf-8")
             envelope = json.loads(envelope_json)
             return envelope.get("version") == self.VERSION
         except (ValueError, json.JSONDecodeError, UnicodeDecodeError, KeyError) as e:
@@ -189,7 +190,8 @@ class FieldEncryption:
 
 
 # Global instance - initialized when module is imported
-_field_encryption: Optional[FieldEncryption] = None
+_field_encryption: FieldEncryption | None = None
+
 
 def get_field_encryption() -> FieldEncryption:
     """Get global field encryption instance."""
@@ -198,13 +200,16 @@ def get_field_encryption() -> FieldEncryption:
         _field_encryption = FieldEncryption()
     return _field_encryption
 
+
 def encrypt_field(plaintext: str) -> str:
     """Encrypt a field value."""
     return get_field_encryption().encrypt(plaintext)
 
+
 def decrypt_field(encrypted_value: str) -> str:
     """Decrypt a field value."""
     return get_field_encryption().decrypt(encrypted_value)
+
 
 def is_field_encrypted(value: str) -> bool:
     """Check if a field value is encrypted."""
@@ -217,7 +222,7 @@ class EncryptedColumn:
     Automatically encrypts on write and decrypts on read.
     """
 
-    def __init__(self, field_encryption: Optional[FieldEncryption] = None):
+    def __init__(self, field_encryption: FieldEncryption | None = None):
         self.field_encryption = field_encryption or get_field_encryption()
 
     def process_bind_param(self, value, dialect):
@@ -239,27 +244,31 @@ def normalize_phone(phone: str) -> str:
     import re
 
     # Remove all non-digit characters
-    digits_only = re.sub(r'\D', '', phone)
+    digits_only = re.sub(r"\D", "", phone)
 
     # Add country code if missing
     if len(digits_only) == 10:
-        digits_only = '1' + digits_only
-    elif len(digits_only) == 11 and digits_only.startswith('1'):
+        digits_only = "1" + digits_only
+    elif len(digits_only) == 11 and digits_only.startswith("1"):
         pass  # Already has country code
     else:
         raise ValueError(f"Invalid phone number format: {phone}")
 
-    return '+' + digits_only
+    return "+" + digits_only
+
 
 def normalize_email(email: str) -> str:
     """Normalize email address."""
     return email.lower().strip()
 
+
 def validate_email(email: str) -> bool:
     """Basic email validation."""
     import re
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+
+    pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
     return bool(re.match(pattern, email))
+
 
 def validate_phone(phone: str) -> bool:
     """Validate phone number format."""
@@ -275,12 +284,11 @@ def validate_phone(phone: str) -> bool:
 def generate_master_key() -> str:
     """Generate a new master key for development/testing."""
     key_bytes = secrets.token_bytes(32)
-    return base64.urlsafe_b64encode(key_bytes).decode('ascii')
+    return base64.urlsafe_b64encode(key_bytes).decode("ascii")
+
 
 if __name__ == "__main__":
     # Generate a new master key for development
-    print("New master key (set as FIELD_ENCRYPTION_KEY):")
-    print(generate_master_key())
 
     # Test encryption
     test_key = generate_master_key()
@@ -291,15 +299,9 @@ if __name__ == "__main__":
         "+15551234567",
         "123 Main St, Sacramento, CA 95823",
         "Test User Name",
-        ""
+        "",
     ]
 
-    print("\nTesting encryption/decryption:")
     for data in test_data:
         encrypted = enc.encrypt(data)
         decrypted = enc.decrypt(encrypted)
-        print(f"Original:  '{data}'")
-        print(f"Encrypted: {encrypted[:50]}..." if len(encrypted) > 50 else f"Encrypted: {encrypted}")
-        print(f"Decrypted: '{decrypted}'")
-        print(f"Match:     {data == decrypted}")
-        print()

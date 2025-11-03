@@ -5,10 +5,11 @@ Verifies if PostgreSQL is using the composite index
 """
 
 import asyncio
-import sys
-from pathlib import Path
-from sqlalchemy import text
 from datetime import datetime, timedelta
+from pathlib import Path
+import sys
+
+from sqlalchemy import text
 
 # Add backend to path
 backend_path = Path(__file__).parent.parent.parent.parent
@@ -19,19 +20,15 @@ from core.database import get_db_context
 
 async def check_query_plan():
     """Check if composite index is being used"""
-    
-    print("=" * 80)
-    print("QUERY PLAN ANALYSIS: Duplicate Check")
-    print("=" * 80)
-    print()
-    
+
     async with get_db_context() as db:
         # The actual duplicate check query
         test_date = datetime.utcnow() + timedelta(days=7)
         date_start = test_date
         date_end = test_date + timedelta(days=2)
-        
-        query = text("""
+
+        query = text(
+            """
             EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)
             SELECT * FROM scheduled_followups
             WHERE user_id = 'test_user'
@@ -39,40 +36,31 @@ async def check_query_plan():
               AND status = 'pending'
               AND scheduled_at >= :date_start
               AND scheduled_at <= :date_end
-        """)
-        
-        result = await db.execute(query, {
-            "date_start": date_start,
-            "date_end": date_end
-        })
-        
-        print("EXPLAIN ANALYZE Results:")
-        print("-" * 80)
-        for row in result:
-            print(row[0])
-        print()
-        
+        """
+        )
+
+        result = await db.execute(query, {"date_start": date_start, "date_end": date_end})
+
+        for _row in result:
+            pass
+
         # Check available indexes
-        print("=" * 80)
-        print("AVAILABLE INDEXES ON scheduled_followups")
-        print("=" * 80)
-        print()
-        
-        index_query = text("""
-            SELECT 
+
+        index_query = text(
+            """
+            SELECT
                 indexname,
                 indexdef
             FROM pg_indexes
             WHERE tablename = 'scheduled_followups'
             ORDER BY indexname
-        """)
-        
+        """
+        )
+
         result = await db.execute(index_query)
-        for row in result:
-            print(f"Index: {row[0]}")
-            print(f"  {row[1]}")
-            print()
-        
+        for _row in result:
+            pass
+
         await db.commit()
 
 

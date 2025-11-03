@@ -1,13 +1,9 @@
 """Social media admin API endpoints."""
 
-import logging
 from datetime import datetime
-from typing import Any, Optional
+import logging
+from typing import Any
 from uuid import UUID
-
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi import Query as QueryParam
-from fastapi.responses import JSONResponse
 
 from api.app.cqrs.base import CommandBus, QueryBus
 from api.app.cqrs.social_commands import (
@@ -25,7 +21,11 @@ from api.app.cqrs.social_queries import (
     GetThreadDetailQuery,
     GetUnreadCountsQuery,
 )
-from api.app.dependencies import get_command_bus, get_current_admin_user, get_query_bus
+from api.app.dependencies import (
+    get_command_bus,
+    get_current_admin_user,
+    get_query_bus,
+)
 from api.app.models.social import ReviewStatus, SocialPlatform, ThreadStatus
 from api.app.schemas.social import (
     AcknowledgeReviewRequest,
@@ -42,6 +42,9 @@ from api.app.services.social_ai_generator import (
     SocialResponseContext,
 )
 from api.app.services.social_ai_tools import SocialMediaToolKit
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi import Query as QueryParam
+from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 
@@ -50,19 +53,19 @@ router = APIRouter(prefix="/admin/social", tags=["Social Media Admin"])
 
 @router.get("/inbox", response_model=SocialInboxResponse)
 async def get_social_inbox(
-    platforms: Optional[list[SocialPlatform]] = QueryParam(None),
-    statuses: Optional[list[ThreadStatus]] = QueryParam(None),
-    assigned_to: Optional[UUID] = QueryParam(None),
-    search: Optional[str] = QueryParam(None),
-    has_unread: Optional[bool] = QueryParam(None),
-    date_from: Optional[datetime] = QueryParam(None),
-    date_to: Optional[datetime] = QueryParam(None),
+    platforms: list[SocialPlatform] | None = QueryParam(None),
+    statuses: list[ThreadStatus] | None = QueryParam(None),
+    assigned_to: UUID | None = QueryParam(None),
+    search: str | None = QueryParam(None),
+    has_unread: bool | None = QueryParam(None),
+    date_from: datetime | None = QueryParam(None),
+    date_to: datetime | None = QueryParam(None),
     page: int = QueryParam(1, ge=1),
     page_size: int = QueryParam(25, ge=1, le=100),
     sort_by: str = QueryParam("updated_at"),
     sort_order: str = QueryParam("desc"),
     query_bus: QueryBus = Depends(get_query_bus),
-    current_user = Depends(get_current_admin_user)
+    current_user=Depends(get_current_admin_user),
 ):
     """Get social media inbox messages with filtering."""
     try:
@@ -77,31 +80,31 @@ async def get_social_inbox(
             page=page,
             page_size=page_size,
             sort_by=sort_by,
-            sort_order=sort_order
+            sort_order=sort_order,
         )
 
         result = await query_bus.execute(query)
         return SocialInboxResponse(**result)
 
     except Exception as e:
-        logger.error(f"Error getting social inbox: {e}")
+        logger.exception(f"Error getting social inbox: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve social inbox")
 
 
 @router.get("/reviews", response_model=ReviewsBoardResponse)
 async def get_reviews_board(
-    platforms: Optional[list[SocialPlatform]] = QueryParam(None),
-    statuses: Optional[list[ReviewStatus]] = QueryParam(None),
-    rating_min: Optional[int] = QueryParam(None, ge=1, le=5),
-    rating_max: Optional[int] = QueryParam(None, ge=1, le=5),
-    date_from: Optional[datetime] = QueryParam(None),
-    date_to: Optional[datetime] = QueryParam(None),
-    search: Optional[str] = QueryParam(None),
+    platforms: list[SocialPlatform] | None = QueryParam(None),
+    statuses: list[ReviewStatus] | None = QueryParam(None),
+    rating_min: int | None = QueryParam(None, ge=1, le=5),
+    rating_max: int | None = QueryParam(None, ge=1, le=5),
+    date_from: datetime | None = QueryParam(None),
+    date_to: datetime | None = QueryParam(None),
+    search: str | None = QueryParam(None),
     escalated_only: bool = QueryParam(False),
     page: int = QueryParam(1, ge=1),
     page_size: int = QueryParam(25, ge=1, le=100),
     query_bus: QueryBus = Depends(get_query_bus),
-    current_user = Depends(get_current_admin_user)
+    current_user=Depends(get_current_admin_user),
 ):
     """Get reviews dashboard with filtering."""
     try:
@@ -115,14 +118,14 @@ async def get_reviews_board(
             search=search,
             escalated_only=escalated_only,
             page=page,
-            page_size=page_size
+            page_size=page_size,
         )
 
         result = await query_bus.execute(query)
         return ReviewsBoardResponse(**result)
 
     except Exception as e:
-        logger.error(f"Error getting reviews board: {e}")
+        logger.exception(f"Error getting reviews board: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve reviews board")
 
 
@@ -132,7 +135,7 @@ async def get_thread_detail(
     include_customer_profile: bool = QueryParam(True),
     include_related_threads: bool = QueryParam(False),
     query_bus: QueryBus = Depends(get_query_bus),
-    current_user = Depends(get_current_admin_user)
+    current_user=Depends(get_current_admin_user),
 ):
     """Get detailed thread information."""
     try:
@@ -140,14 +143,14 @@ async def get_thread_detail(
             thread_id=thread_id,
             include_messages=True,
             include_customer_profile=include_customer_profile,
-            include_related_threads=include_related_threads
+            include_related_threads=include_related_threads,
         )
 
         result = await query_bus.execute(query)
         return ThreadDetailResponse(**result)
 
     except Exception as e:
-        logger.error(f"Error getting thread detail: {e}")
+        logger.exception(f"Error getting thread detail: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve thread details")
 
 
@@ -156,7 +159,7 @@ async def send_social_reply(
     thread_id: UUID,
     request: SocialReplyRequest,
     command_bus: CommandBus = Depends(get_command_bus),
-    current_user = Depends(get_current_admin_user)
+    current_user=Depends(get_current_admin_user),
 ):
     """Send a reply to a social media thread."""
     try:
@@ -170,8 +173,8 @@ async def send_social_reply(
             metadata={
                 "sent_by_admin": current_user.id,
                 "admin_name": current_user.name,
-                "client_timestamp": datetime.utcnow().isoformat()
-            }
+                "client_timestamp": datetime.utcnow().isoformat(),
+            },
         )
 
         result = await command_bus.execute(command)
@@ -180,13 +183,15 @@ async def send_social_reply(
             status_code=201,
             content={
                 "success": True,
-                "message": "Reply sent successfully" if result["sent"] else "Reply queued for approval",
-                "data": result
-            }
+                "message": (
+                    "Reply sent successfully" if result["sent"] else "Reply queued for approval"
+                ),
+                "data": result,
+            },
         )
 
     except Exception as e:
-        logger.error(f"Error sending social reply: {e}")
+        logger.exception(f"Error sending social reply: {e}")
         raise HTTPException(status_code=500, detail="Failed to send social reply")
 
 
@@ -195,15 +200,13 @@ async def generate_ai_response(
     thread_id: UUID,
     query_bus: QueryBus = Depends(get_query_bus),
     command_bus: CommandBus = Depends(get_command_bus),
-    current_user = Depends(get_current_admin_user)
+    current_user=Depends(get_current_admin_user),
 ):
     """Generate AI response for a social media thread."""
     try:
         # Get thread details for context
         thread_query = GetThreadDetailQuery(
-            thread_id=thread_id,
-            include_messages=True,
-            include_customer_profile=True
+            thread_id=thread_id, include_messages=True, include_customer_profile=True
         )
 
         thread_detail = await query_bus.execute(thread_query)
@@ -212,14 +215,16 @@ async def generate_ai_response(
         context = SocialResponseContext(
             thread_id=thread_id,
             platform=SocialPlatform(thread_detail["platform"]),
-            customer_handle=thread_detail.get("customer_profile", {}).get("social_identity", {}).get("handle", "unknown"),
+            customer_handle=thread_detail.get("customer_profile", {})
+            .get("social_identity", {})
+            .get("handle", "unknown"),
             customer_name=thread_detail.get("customer_profile", {}).get("name"),
             conversation_history=thread_detail.get("messages", []),
             customer_profile=thread_detail.get("customer_profile"),
             business_context={"admin_requested": True},
             response_tone="professional",
             urgency_level=thread_detail.get("priority", 3),
-            requires_approval=True
+            requires_approval=True,
         )
 
         # Generate AI response
@@ -231,12 +236,12 @@ async def generate_ai_response(
             content={
                 "success": True,
                 "message": "AI response generated successfully",
-                "data": response_data
-            }
+                "data": response_data,
+            },
         )
 
     except Exception as e:
-        logger.error(f"Error generating AI response: {e}")
+        logger.exception(f"Error generating AI response: {e}")
         raise HTTPException(status_code=500, detail="Failed to generate AI response")
 
 
@@ -245,7 +250,7 @@ async def update_thread_status(
     thread_id: UUID,
     request: UpdateThreadStatusRequest,
     command_bus: CommandBus = Depends(get_command_bus),
-    current_user = Depends(get_current_admin_user)
+    current_user=Depends(get_current_admin_user),
 ):
     """Update social media thread status."""
     try:
@@ -255,7 +260,7 @@ async def update_thread_status(
             updated_by=current_user.id,
             reason=request.reason,
             assigned_to=request.assigned_to,
-            tags=request.tags
+            tags=request.tags,
         )
 
         result = await command_bus.execute(command)
@@ -265,12 +270,12 @@ async def update_thread_status(
             content={
                 "success": True,
                 "message": f"Thread status updated to {result['new_status']}",
-                "data": result
-            }
+                "data": result,
+            },
         )
 
     except Exception as e:
-        logger.error(f"Error updating thread status: {e}")
+        logger.exception(f"Error updating thread status: {e}")
         raise HTTPException(status_code=500, detail="Failed to update thread status")
 
 
@@ -278,7 +283,7 @@ async def update_thread_status(
 async def create_lead_from_social(
     request: CreateLeadRequest,
     command_bus: CommandBus = Depends(get_command_bus),
-    current_user = Depends(get_current_admin_user)
+    current_user=Depends(get_current_admin_user),
 ):
     """Create a lead from social media interaction."""
     try:
@@ -292,10 +297,7 @@ async def create_lead_from_social(
             consent_dm=request.consent_dm,
             consent_sms=request.consent_sms,
             consent_email=request.consent_email,
-            metadata={
-                "created_by_admin": current_user.id,
-                "admin_name": current_user.name
-            }
+            metadata={"created_by_admin": current_user.id, "admin_name": current_user.name},
         )
 
         result = await command_bus.execute(command)
@@ -304,13 +306,15 @@ async def create_lead_from_social(
             status_code=201,
             content={
                 "success": True,
-                "message": "Lead created successfully" if result["created"] else "Lead already exists",
-                "data": result
-            }
+                "message": (
+                    "Lead created successfully" if result["created"] else "Lead already exists"
+                ),
+                "data": result,
+            },
         )
 
     except Exception as e:
-        logger.error(f"Error creating lead from social: {e}")
+        logger.exception(f"Error creating lead from social: {e}")
         raise HTTPException(status_code=500, detail="Failed to create lead")
 
 
@@ -319,7 +323,7 @@ async def acknowledge_review(
     review_id: UUID,
     request: AcknowledgeReviewRequest,
     command_bus: CommandBus = Depends(get_command_bus),
-    current_user = Depends(get_current_admin_user)
+    current_user=Depends(get_current_admin_user),
 ):
     """Acknowledge a review."""
     try:
@@ -328,7 +332,7 @@ async def acknowledge_review(
             acknowledged_by=current_user.id,
             notes=request.notes,
             priority_level=request.priority_level,
-            assigned_to=request.assigned_to
+            assigned_to=request.assigned_to,
         )
 
         result = await command_bus.execute(command)
@@ -338,12 +342,12 @@ async def acknowledge_review(
             content={
                 "success": True,
                 "message": "Review acknowledged successfully",
-                "data": result
-            }
+                "data": result,
+            },
         )
 
     except Exception as e:
-        logger.error(f"Error acknowledging review: {e}")
+        logger.exception(f"Error acknowledging review: {e}")
         raise HTTPException(status_code=500, detail="Failed to acknowledge review")
 
 
@@ -352,7 +356,7 @@ async def escalate_review(
     review_id: UUID,
     request: EscalateReviewRequest,
     command_bus: CommandBus = Depends(get_command_bus),
-    current_user = Depends(get_current_admin_user)
+    current_user=Depends(get_current_admin_user),
 ):
     """Escalate a review."""
     try:
@@ -363,34 +367,30 @@ async def escalate_review(
             assigned_to=request.assigned_to,
             urgency_level=request.urgency_level,
             escalation_type=request.escalation_type,
-            deadline=request.deadline
+            deadline=request.deadline,
         )
 
         result = await command_bus.execute(command)
 
         return JSONResponse(
             status_code=200,
-            content={
-                "success": True,
-                "message": "Review escalated successfully",
-                "data": result
-            }
+            content={"success": True, "message": "Review escalated successfully", "data": result},
         )
 
     except Exception as e:
-        logger.error(f"Error escalating review: {e}")
+        logger.exception(f"Error escalating review: {e}")
         raise HTTPException(status_code=500, detail="Failed to escalate review")
 
 
 @router.get("/analytics")
 async def get_social_analytics(
-    platforms: Optional[list[SocialPlatform]] = QueryParam(None),
+    platforms: list[SocialPlatform] | None = QueryParam(None),
     date_from: datetime = QueryParam(...),
     date_to: datetime = QueryParam(...),
     granularity: str = QueryParam("day"),
-    metrics: Optional[list[str]] = QueryParam(None),
+    metrics: list[str] | None = QueryParam(None),
     query_bus: QueryBus = Depends(get_query_bus),
-    current_user = Depends(get_current_admin_user)
+    current_user=Depends(get_current_admin_user),
 ):
     """Get social media analytics."""
     try:
@@ -399,65 +399,51 @@ async def get_social_analytics(
             date_from=date_from,
             date_to=date_to,
             granularity=granularity,
-            metrics=metrics
+            metrics=metrics,
         )
 
         result = await query_bus.execute(query)
 
-        return JSONResponse(
-            status_code=200,
-            content={
-                "success": True,
-                "data": result
-            }
-        )
+        return JSONResponse(status_code=200, content={"success": True, "data": result})
 
     except Exception as e:
-        logger.error(f"Error getting social analytics: {e}")
+        logger.exception(f"Error getting social analytics: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve social analytics")
 
 
 @router.get("/unread-counts")
 async def get_unread_counts(
-    platforms: Optional[list[SocialPlatform]] = QueryParam(None),
-    assigned_to: Optional[UUID] = QueryParam(None),
+    platforms: list[SocialPlatform] | None = QueryParam(None),
+    assigned_to: UUID | None = QueryParam(None),
     group_by: str = QueryParam("platform"),
     query_bus: QueryBus = Depends(get_query_bus),
-    current_user = Depends(get_current_admin_user)
+    current_user=Depends(get_current_admin_user),
 ):
     """Get unread message counts."""
     try:
         query = GetUnreadCountsQuery(
-            platforms=platforms,
-            assigned_to=assigned_to,
-            group_by=group_by
+            platforms=platforms, assigned_to=assigned_to, group_by=group_by
         )
 
         result = await query_bus.execute(query)
 
-        return JSONResponse(
-            status_code=200,
-            content={
-                "success": True,
-                "data": result
-            }
-        )
+        return JSONResponse(status_code=200, content={"success": True, "data": result})
 
     except Exception as e:
-        logger.error(f"Error getting unread counts: {e}")
+        logger.exception(f"Error getting unread counts: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve unread counts")
 
 
 @router.get("/leads")
 async def get_social_leads(
-    platforms: Optional[list[SocialPlatform]] = QueryParam(None),
-    date_from: Optional[datetime] = QueryParam(None),
-    date_to: Optional[datetime] = QueryParam(None),
+    platforms: list[SocialPlatform] | None = QueryParam(None),
+    date_from: datetime | None = QueryParam(None),
+    date_to: datetime | None = QueryParam(None),
     converted_only: bool = QueryParam(False),
     page: int = QueryParam(1, ge=1),
     page_size: int = QueryParam(25, ge=1, le=100),
     query_bus: QueryBus = Depends(get_query_bus),
-    current_user = Depends(get_current_admin_user)
+    current_user=Depends(get_current_admin_user),
 ):
     """Get social media leads."""
     try:
@@ -467,21 +453,15 @@ async def get_social_leads(
             date_to=date_to,
             converted_only=converted_only,
             page=page,
-            page_size=page_size
+            page_size=page_size,
         )
 
         result = await query_bus.execute(query)
 
-        return JSONResponse(
-            status_code=200,
-            content={
-                "success": True,
-                "data": result
-            }
-        )
+        return JSONResponse(status_code=200, content={"success": True, "data": result})
 
     except Exception as e:
-        logger.error(f"Error getting social leads: {e}")
+        logger.exception(f"Error getting social leads: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve social leads")
 
 
@@ -491,7 +471,7 @@ async def execute_social_tool(
     request: dict[str, Any],
     command_bus: CommandBus = Depends(get_command_bus),
     query_bus: QueryBus = Depends(get_query_bus),
-    current_user = Depends(get_current_admin_user)
+    current_user=Depends(get_current_admin_user),
 ):
     """Execute social media AI tools."""
     try:
@@ -505,12 +485,12 @@ async def execute_social_tool(
                 "message": result.message,
                 "data": result.data,
                 "requires_approval": result.requires_approval,
-                "metadata": result.metadata
-            }
+                "metadata": result.metadata,
+            },
         )
 
     except Exception as e:
-        logger.error(f"Error executing social tool {tool_name}: {e}")
+        logger.exception(f"Error executing social tool {tool_name}: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to execute tool: {tool_name}")
 
 
@@ -528,11 +508,11 @@ async def social_health_check():
                     "reviews_board",
                     "ai_responses",
                     "lead_creation",
-                    "analytics"
-                ]
-            }
+                    "analytics",
+                ],
+            },
         )
 
     except Exception as e:
-        logger.error(f"Social health check failed: {e}")
+        logger.exception(f"Social health check failed: {e}")
         raise HTTPException(status_code=500, detail="Social media integration unhealthy")

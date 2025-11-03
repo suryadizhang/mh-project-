@@ -4,7 +4,6 @@ OpenAI service for GPT integration with cost optimization and model selection
 
 import asyncio
 import os
-from typing import Optional
 
 from openai import AsyncOpenAI
 
@@ -16,7 +15,6 @@ class OpenAIService:
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key or api_key == "your_openai_api_key_here":
             self.client = None
-            print("Warning: OpenAI API key not configured. AI features will be limited.")
         else:
             self.client = AsyncOpenAI(api_key=api_key)
 
@@ -77,9 +75,7 @@ class OpenAIService:
     def _load_system_prompts(self) -> dict[str, str]:
         """Load system prompts from files"""
         prompts = {}
-        prompts_dir = os.path.join(
-            os.path.dirname(__file__), "..", "..", "prompts"
-        )
+        prompts_dir = os.path.join(os.path.dirname(__file__), "..", "..", "prompts")
 
         try:
             # Base system prompt
@@ -98,8 +94,7 @@ class OpenAIService:
             else:
                 prompts["wrapper"] = self._get_default_wrapper_prompt()
 
-        except Exception as e:
-            print(f"Error loading prompts: {e}")
+        except Exception:
             prompts["base"] = self._get_default_system_prompt()
             prompts["wrapper"] = self._get_default_wrapper_prompt()
 
@@ -198,9 +193,7 @@ Keep responses under 150 words when possible."""
         ]
 
         message_lower = message.lower()
-        complexity_score = sum(
-            1 for indicator in complex_indicators if indicator in message_lower
-        )
+        complexity_score = sum(1 for indicator in complex_indicators if indicator in message_lower)
 
         # Use GPT-4 for complex queries
         if complexity_score >= 2 or len(message.split()) > 50:
@@ -227,9 +220,9 @@ Keep responses under 150 words when possible."""
                 "none",
                 0,
                 0,
-                0.0
+                0.0,
             )
-            
+
         try:
             # Check for escalation
             should_escalate, escalation_reason = self.should_escalate(message)
@@ -260,12 +253,8 @@ Keep responses under 150 words when possible."""
 
             # Add conversation history if provided
             if conversation_history:
-                for msg in conversation_history[
-                    -6:
-                ]:  # Last 6 messages for context
-                    messages.append(
-                        {"role": msg["role"], "content": msg["content"]}
-                    )
+                for msg in conversation_history[-6:]:  # Last 6 messages for context
+                    messages.append({"role": msg["role"], "content": msg["content"]})
 
             # Add current message
             messages.append({"role": "user", "content": message})
@@ -274,9 +263,7 @@ Keep responses under 150 words when possible."""
             response = await self.client.chat.completions.create(
                 model=model_config["name"],
                 messages=messages,
-                max_tokens=min(
-                    300, model_config["max_tokens"]
-                ),  # Limit for cost control
+                max_tokens=min(300, model_config["max_tokens"]),  # Limit for cost control
                 temperature=0.7,
                 top_p=0.9,
                 frequency_penalty=0.1,
@@ -307,8 +294,7 @@ Keep responses under 150 words when possible."""
                 cost_usd,
             )
 
-        except Exception as e:
-            print(f"OpenAI error: {e}")
+        except Exception:
             return (
                 "I'm having trouble accessing my knowledge right now. Please contact our team directly for immediate assistance with your hibachi catering needs.",
                 0.2,
@@ -333,15 +319,11 @@ Keep responses under 150 words when possible."""
 
         for i in range(0, len(tasks), batch_size):
             batch = tasks[i : i + batch_size]
-            batch_results = await asyncio.gather(
-                *batch, return_exceptions=True
-            )
+            batch_results = await asyncio.gather(*batch, return_exceptions=True)
 
             for result in batch_results:
                 if isinstance(result, Exception):
-                    results.append(
-                        ("Error processing request", 0.1, "error", 0, 0, 0.0)
-                    )
+                    results.append(("Error processing request", 0.1, "error", 0, 0, 0.0))
                 else:
                     results.append(result)
 

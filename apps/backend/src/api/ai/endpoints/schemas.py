@@ -4,10 +4,14 @@ Pydantic models for API requests and responses
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+)
 
 
 class ChannelType(str, Enum):
@@ -36,14 +40,10 @@ class ChatIngestRequest(BaseModel):
     """Request model for /chat/ingest endpoint"""
 
     channel: ChannelType
-    user_id: str = Field(
-        ..., description="External user identifier (phone, FB ID, etc.)"
-    )
-    thread_id: str = Field(
-        ..., description="Channel-specific thread identifier"
-    )
+    user_id: str = Field(..., description="External user identifier (phone, FB ID, etc.)")
+    thread_id: str = Field(..., description="Channel-specific thread identifier")
     text: str = Field(..., min_length=1, max_length=2000)
-    metadata: Optional[dict[str, Any]] = Field(
+    metadata: dict[str, Any] | None = Field(
         default_factory=dict, description="Channel-specific metadata"
     )
 
@@ -66,7 +66,7 @@ class ChatReplyRequest(BaseModel):
 
     conversation_id: UUID
     message: str
-    context: Optional[list[dict[str, Any]]] = Field(default_factory=list)
+    context: list[dict[str, Any]] | None = Field(default_factory=list)
 
 
 class ChatReplyResponse(BaseModel):
@@ -76,8 +76,8 @@ class ChatReplyResponse(BaseModel):
     confidence: float
     source: str
     kb_sources: list[dict[str, Any]] = Field(default_factory=list)
-    tokens_used: Optional[int] = None
-    cost_usd: Optional[float] = None
+    tokens_used: int | None = None
+    cost_usd: float | None = None
 
 
 # Escalation Models
@@ -86,7 +86,7 @@ class EscalationRequest(BaseModel):
 
     conversation_id: UUID
     reason: str
-    priority: Optional[int] = Field(default=1, ge=1, le=5)
+    priority: int | None = Field(default=1, ge=1, le=5)
 
 
 class EscalationResponse(BaseModel):
@@ -100,30 +100,33 @@ class EscalationResponse(BaseModel):
 # WebSocket Models
 class WebSocketMessage(BaseModel):
     """WebSocket message format"""
-    model_config = ConfigDict(json_schema_extra={
-        "example": {
-            "type": "message",
-            "content": "Hello, how can I help?",
-            "role": "assistant",
-            "timestamp": "2024-10-25T10:30:00Z"
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "type": "message",
+                "content": "Hello, how can I help?",
+                "role": "assistant",
+                "timestamp": "2024-10-25T10:30:00Z",
+            }
         }
-    })
+    )
 
     type: str  # "message", "typing", "takeover", "system"
-    conversation_id: Optional[UUID] = None
+    conversation_id: UUID | None = None
     content: str
-    role: Optional[MessageRole] = None
+    role: MessageRole | None = None
     timestamp: datetime = Field(description="Message timestamp")
-    metadata: Optional[dict[str, Any]] = None
+    metadata: dict[str, Any] | None = None
 
     @classmethod
     def create(
         cls,
         type: str,
         content: str,
-        conversation_id: Optional[UUID] = None,
-        role: Optional[MessageRole] = None,
-        metadata: Optional[dict[str, Any]] = None
+        conversation_id: UUID | None = None,
+        role: MessageRole | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> "WebSocketMessage":
         """Factory method to create WebSocketMessage with automatic timestamp."""
         return cls(
@@ -132,7 +135,7 @@ class WebSocketMessage(BaseModel):
             conversation_id=conversation_id,
             role=role,
             timestamp=datetime.utcnow(),
-            metadata=metadata
+            metadata=metadata,
         )
 
 
@@ -143,8 +146,8 @@ class KBChunkCreate(BaseModel):
     title: str = Field(..., max_length=500)
     text: str = Field(..., max_length=5000)
     tags: list[str] = Field(default_factory=list)
-    category: Optional[str] = None
-    source_type: Optional[str] = "manual"
+    category: str | None = None
+    source_type: str | None = "manual"
 
 
 class KBChunkResponse(BaseModel):
@@ -154,7 +157,7 @@ class KBChunkResponse(BaseModel):
     title: str
     text: str
     tags: list[str]
-    category: Optional[str]
+    category: str | None
     usage_count: int
     success_rate: float
     created_at: datetime
@@ -164,9 +167,9 @@ class KBSearchRequest(BaseModel):
     """Request model for KB search"""
 
     query: str = Field(..., min_length=1, max_length=500)
-    limit: Optional[int] = Field(default=5, ge=1, le=20)
-    category: Optional[str] = None
-    min_score: Optional[float] = Field(default=0.5, ge=0.0, le=1.0)
+    limit: int | None = Field(default=5, ge=1, le=20)
+    category: str | None = None
+    min_score: float | None = Field(default=0.5, ge=0.0, le=1.0)
 
 
 class KBSearchResponse(BaseModel):
@@ -185,10 +188,10 @@ class ConversationAnalytics(BaseModel):
     total_messages: int
     ai_messages: int
     human_messages: int
-    avg_confidence: Optional[float]
-    resolution_status: Optional[str]
-    first_response_time_seconds: Optional[int]
-    resolution_time_seconds: Optional[int]
+    avg_confidence: float | None
+    resolution_status: str | None
+    first_response_time_seconds: int | None
+    resolution_time_seconds: int | None
     total_cost_usd: float
 
 
@@ -199,9 +202,9 @@ class TrainingDataCreate(BaseModel):
     question: str = Field(..., max_length=1000)
     answer: str = Field(..., max_length=2000)
     tags: list[str] = Field(default_factory=list)
-    intent: Optional[str] = None
+    intent: str | None = None
     source_type: str = "manual"
-    confidence_score: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+    confidence_score: float | None = Field(default=None, ge=0.0, le=1.0)
 
 
 # Legacy compatibility models (for existing frontend)
@@ -210,8 +213,8 @@ class ChatRequest(BaseModel):
 
     message: str
     page: str
-    consent_to_save: Optional[bool] = False
-    city: Optional[str] = None
+    consent_to_save: bool | None = False
+    city: str | None = None
 
 
 class ChatResponse(BaseModel):
@@ -222,7 +225,7 @@ class ChatResponse(BaseModel):
     route: str
     sources: list[dict[str, Any]] = Field(default_factory=list)
     can_escalate: bool = True
-    log_id: Optional[str] = None
+    log_id: str | None = None
 
 
 class FeedbackRequest(BaseModel):
@@ -230,4 +233,4 @@ class FeedbackRequest(BaseModel):
 
     log_id: str
     feedback: str
-    suggestion: Optional[str] = None
+    suggestion: str | None = None

@@ -8,13 +8,12 @@ import time
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from api.ai.endpoints.models import Message, MessageRole
 from api.ai.endpoints.schemas import ChatReplyResponse
 from api.ai.endpoints.services.knowledge_base_simple import kb_service
 from api.ai.endpoints.services.openai_service import openai_service
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class AIPipeline:
@@ -103,9 +102,7 @@ class AIPipeline:
 
         if intent_scores:
             best_intent = max(intent_scores, key=intent_scores.get)
-            confidence = min(
-                intent_scores[best_intent] * 2, 1.0
-            )  # Scale up confidence
+            confidence = min(intent_scores[best_intent] * 2, 1.0)  # Scale up confidence
             return best_intent, confidence
 
         return "general", 0.3
@@ -178,20 +175,13 @@ class AIPipeline:
             kb_results, _ = await kb_service.search_chunks(db, kb_request)
 
             # Step 3: Determine response strategy
-            kb_confidence = max(
-                [chunk["score"] for chunk in kb_results], default=0.0
-            )
+            kb_confidence = max([chunk["score"] for chunk in kb_results], default=0.0)
             combined_confidence = (intent_confidence + kb_confidence) / 2
 
             # Step 4: Generate response based on confidence
-            if (
-                combined_confidence >= self.confidence_thresholds["high"]
-                and kb_results
-            ):
+            if combined_confidence >= self.confidence_thresholds["high"] and kb_results:
                 # High confidence: Use KB directly
-                response_text = self._format_kb_response(
-                    kb_results[0], message
-                )
+                response_text = self._format_kb_response(kb_results[0], message)
                 source = "our-ai"
                 confidence = combined_confidence
                 tokens_in, tokens_out, cost_usd = 0, 0, 0.0
@@ -247,11 +237,7 @@ class AIPipeline:
 
             ai_message = Message(
                 conversation_id=conversation_id,
-                role=(
-                    MessageRole.AI.value
-                    if "gpt" not in source
-                    else MessageRole.GPT.value
-                ),
+                role=(MessageRole.AI.value if "gpt" not in source else MessageRole.GPT.value),
                 text=response_text,
                 confidence=confidence,
                 model_used=source,
@@ -277,8 +263,7 @@ class AIPipeline:
                 cost_usd=cost_usd,
             )
 
-        except Exception as e:
-            print(f"Error in AI pipeline: {e}")
+        except Exception:
             return ChatReplyResponse(
                 reply="I'm experiencing technical difficulties. Please contact our team directly for immediate assistance.",
                 confidence=0.1,
@@ -288,31 +273,21 @@ class AIPipeline:
                 cost_usd=0.0,
             )
 
-    def _format_kb_response(
-        self, kb_chunk: dict[str, Any], original_message: str
-    ) -> str:
+    def _format_kb_response(self, kb_chunk: dict[str, Any], original_message: str) -> str:
         """Format a knowledge base response to feel natural"""
         # Simple formatting for now - can be enhanced with templates
         base_response = kb_chunk["text"]
 
         # Add natural introduction if the response is very direct
         if not base_response.startswith(("Hi", "Hello", "Thanks", "Great")):
-            if (
-                "price" in original_message.lower()
-                or "cost" in original_message.lower()
-            ):
+            if "price" in original_message.lower() or "cost" in original_message.lower():
                 base_response = f"Great question! {base_response}"
             elif "?" in original_message:
                 base_response = f"Here's what I can tell you: {base_response}"
 
         # Add helpful closing for booking-related queries
-        if any(
-            word in original_message.lower()
-            for word in ["book", "reserve", "schedule"]
-        ):
-            base_response += (
-                "\n\nWould you like me to help you start the booking process?"
-            )
+        if any(word in original_message.lower() for word in ["book", "reserve", "schedule"]):
+            base_response += "\n\nWould you like me to help you start the booking process?"
 
         return base_response
 
@@ -323,13 +298,9 @@ class AIPipeline:
 
         context_parts = []
         for i, chunk in enumerate(kb_results[:3]):
-            context_parts.append(
-                f"{i+1}. {chunk['title']}: {chunk['text'][:200]}..."
-            )
+            context_parts.append(f"{i+1}. {chunk['title']}: {chunk['text'][:200]}...")
 
-        return "Relevant information from our knowledge base:\n" + "\n".join(
-            context_parts
-        )
+        return "Relevant information from our knowledge base:\n" + "\n".join(context_parts)
 
     async def get_conversation_history(
         self, db: AsyncSession, conversation_id: UUID, limit: int = 10
@@ -347,9 +318,7 @@ class AIPipeline:
 
         history = []
         for msg in reversed(messages):  # Reverse to get chronological order
-            role = (
-                "user" if msg.role == MessageRole.USER.value else "assistant"
-            )
+            role = "user" if msg.role == MessageRole.USER.value else "assistant"
             history.append({"role": role, "content": msg.text})
 
         return history
@@ -370,12 +339,8 @@ class AIPipeline:
         messages = result.scalars().all()
 
         # Check for escalation indicators
-        low_confidence_count = sum(
-            1 for msg in messages if msg.confidence and msg.confidence < 0.4
-        )
-        user_messages = [
-            msg for msg in messages if msg.role == MessageRole.USER.value
-        ]
+        low_confidence_count = sum(1 for msg in messages if msg.confidence and msg.confidence < 0.4)
+        user_messages = [msg for msg in messages if msg.role == MessageRole.USER.value]
 
         # Too many low confidence responses
         if low_confidence_count >= 3:
@@ -385,10 +350,7 @@ class AIPipeline:
         if len(user_messages) >= 3:
             recent_texts = [msg.text.lower() for msg in user_messages[:3]]
             if any(
-                text in other
-                for text in recent_texts
-                for other in recent_texts
-                if text != other
+                text in other for text in recent_texts for other in recent_texts if text != other
             ):
                 return (
                     True,

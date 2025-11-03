@@ -1,7 +1,7 @@
-from pydantic import BaseModel, EmailStr
-from enum import Enum
-from typing import Optional
 from datetime import datetime
+from enum import Enum
+
+from pydantic import BaseModel, EmailStr
 
 
 class UserRole(str, Enum):
@@ -19,6 +19,7 @@ class BookingStatus(str, Enum):
 
 class BookingCreate(BaseModel):
     """Request body for creating a new booking."""
+
     name: str
     phone: str
     email: EmailStr
@@ -32,6 +33,7 @@ class BookingCreate(BaseModel):
 
 class WaitlistCreate(BaseModel):
     """Request body for joining the waitlist."""
+
     name: str
     phone: str
     email: EmailStr
@@ -41,22 +43,25 @@ class WaitlistCreate(BaseModel):
 
 class CancelBookingRequest(BaseModel):
     """Request body for cancelling a booking (admin only)."""
+
     reason: str
 
 
 class WaitlistEntry(BaseModel):
     """Waitlist entry model."""
+
     id: int
     name: str
     phone: str
     email: str
     preferred_date: str
     preferred_time: str
-    created_at: Optional[datetime] = None
+    created_at: datetime | None = None
 
 
 class BookingResponse(BaseModel):
     """Response model for booking operations."""
+
     id: int
     name: str
     phone: str
@@ -73,28 +78,32 @@ class BookingResponse(BaseModel):
 
 class AdminCreateRequest(BaseModel):
     """Request body for creating admin user."""
+
     username: str
     password: str
-    full_name: Optional[str] = None
-    email: Optional[EmailStr] = None
+    full_name: str | None = None
+    email: EmailStr | None = None
 
 
 class PasswordChangeRequest(BaseModel):
     """Request body for changing password."""
+
     current_password: str
     new_password: str
 
 
 class NewsletterSendRequest(BaseModel):
     """Request body for sending newsletter."""
+
     subject: str
     message: str
-    city_filter: Optional[str] = None
+    city_filter: str | None = None
     send_type: str = "email"
 
 
 class CustomerAnalytics(BaseModel):
     """Customer analytics response model."""
+
     total_customers: int
     new_customers_this_month: int
     returning_customers: int

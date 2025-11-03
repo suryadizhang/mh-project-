@@ -3,10 +3,6 @@
 import logging
 from typing import Any
 
-from sqlalchemy import and_, asc, desc, func, or_, select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, selectinload
-
 from api.app.cqrs.base import QueryHandler
 from api.app.cqrs.social_queries import (
     GetReviewsBoardQuery,
@@ -15,7 +11,15 @@ from api.app.cqrs.social_queries import (
     GetUnreadCountsQuery,
 )
 from api.app.models.core import Customer
-from api.app.models.social import Review, SocialAccount, SocialMessage, SocialThread
+from api.app.models.social import (
+    Review,
+    SocialAccount,
+    SocialMessage,
+    SocialThread,
+)
+from sqlalchemy import and_, asc, desc, func, or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload, selectinload
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +35,7 @@ class GetSocialInboxHandler(QueryHandler[GetSocialInboxQuery]):
                 joinedload(SocialThread.customer_identity),
                 selectinload(SocialThread.messages).options(
                     joinedload(SocialMessage.sender_identity)
-                )
+                ),
             )
 
             # Apply filters
@@ -57,8 +61,8 @@ class GetSocialInboxHandler(QueryHandler[GetSocialInboxQuery]):
             if query.search:
                 # Search in thread metadata or recent messages
                 search_filter = or_(
-                    SocialThread.metadata['customer_name'].astext.ilike(f"%{query.search}%"),
-                    SocialThread.messages.any(SocialMessage.body.ilike(f"%{query.search}%"))
+                    SocialThread.metadata["customer_name"].astext.ilike(f"%{query.search}%"),
+                    SocialThread.messages.any(SocialMessage.body.ilike(f"%{query.search}%")),
                 )
                 filters.append(search_filter)
 
@@ -73,9 +77,7 @@ class GetSocialInboxHandler(QueryHandler[GetSocialInboxQuery]):
 
             if query.tags:
                 for tag in query.tags:
-                    filters.append(
-                        SocialThread.metadata['tags'].astext.contains(f'"{tag}"')
-                    )
+                    filters.append(SocialThread.metadata["tags"].astext.contains(f'"{tag}"'))
 
             if filters:
                 base_stmt = base_stmt.where(and_(*filters))
@@ -98,9 +100,7 @@ class GetSocialInboxHandler(QueryHandler[GetSocialInboxQuery]):
                 base_stmt = base_stmt.order_by(asc(sort_column))
 
             # Get total count
-            count_stmt = select(func.count()).select_from(
-                base_stmt.subquery()
-            )
+            count_stmt = select(func.count()).select_from(base_stmt.subquery())
             count_result = await session.execute(count_stmt)
             total_count = count_result.scalar()
 
@@ -132,19 +132,28 @@ class GetSocialInboxHandler(QueryHandler[GetSocialInboxQuery]):
                     "last_message_at": thread.last_message_at,
                     "assigned_to": thread.assigned_to,
                     "tags": thread.metadata.get("tags", []),
-                    "latest_message": {
-                        "id": latest_message.id,
-                        "body": latest_message.body[:100] + ("..." if len(latest_message.body) > 100 else ""),
-                        "kind": latest_message.kind,
-                        "direction": latest_message.direction,
-                        "created_at": latest_message.created_at,
-                        "sender_name": latest_message.sender_name
-                    } if latest_message else None,
-                    "customer_profile": {
-                        "id": thread.customer_identity.customer_id,
-                        "name": thread.metadata.get("customer_name"),
-                        "avatar": thread.metadata.get("customer_avatar")
-                    } if thread.customer_identity and thread.customer_identity.customer_id else None
+                    "latest_message": (
+                        {
+                            "id": latest_message.id,
+                            "body": latest_message.body[:100]
+                            + ("..." if len(latest_message.body) > 100 else ""),
+                            "kind": latest_message.kind,
+                            "direction": latest_message.direction,
+                            "created_at": latest_message.created_at,
+                            "sender_name": latest_message.sender_name,
+                        }
+                        if latest_message
+                        else None
+                    ),
+                    "customer_profile": (
+                        {
+                            "id": thread.customer_identity.customer_id,
+                            "name": thread.metadata.get("customer_name"),
+                            "avatar": thread.metadata.get("customer_avatar"),
+                        }
+                        if thread.customer_identity and thread.customer_identity.customer_id
+                        else None
+                    ),
                 }
 
                 thread_data.append(thread_info)
@@ -155,19 +164,23 @@ class GetSocialInboxHandler(QueryHandler[GetSocialInboxQuery]):
                     "page": query.page,
                     "page_size": query.page_size,
                     "total_count": total_count,
-                    "total_pages": (total_count + query.page_size - 1) // query.page_size
+                    "total_pages": (total_count + query.page_size - 1) // query.page_size,
                 },
                 "filters_applied": {
                     "platforms": query.platforms,
                     "statuses": query.statuses,
                     "search": query.search,
                     "has_unread": query.has_unread,
-                    "date_range": [query.date_from, query.date_to] if query.date_from or query.date_to else None
-                }
+                    "date_range": (
+                        [query.date_from, query.date_to]
+                        if query.date_from or query.date_to
+                        else None
+                    ),
+                },
             }
 
         except Exception as e:
-            logger.error(f"Error getting social inbox: {e}")
+            logger.exception(f"Error getting social inbox: {e}")
             raise
 
 
@@ -178,17 +191,14 @@ class GetReviewsBoardHandler(QueryHandler[GetReviewsBoardQuery]):
         try:
             # Build base query for reviews
             base_stmt = select(Review).options(
-                joinedload(Review.account),
-                joinedload(Review.customer_identity)
+                joinedload(Review.account), joinedload(Review.customer_identity)
             )
 
             # Apply filters
             filters = []
 
             if query.platforms:
-                filters.append(
-                    Review.account.has(SocialAccount.platform.in_(query.platforms))
-                )
+                filters.append(Review.account.has(SocialAccount.platform.in_(query.platforms)))
 
             if query.statuses:
                 filters.append(Review.status.in_(query.statuses))
@@ -208,7 +218,7 @@ class GetReviewsBoardHandler(QueryHandler[GetReviewsBoardQuery]):
             if query.search:
                 search_filter = or_(
                     Review.body.ilike(f"%{query.search}%"),
-                    Review.metadata['customer_name'].astext.ilike(f"%{query.search}%")
+                    Review.metadata["customer_name"].astext.ilike(f"%{query.search}%"),
                 )
                 filters.append(search_filter)
 
@@ -242,9 +252,7 @@ class GetReviewsBoardHandler(QueryHandler[GetReviewsBoardQuery]):
                 base_stmt = base_stmt.order_by(asc(sort_column))
 
             # Get total count
-            count_stmt = select(func.count()).select_from(
-                base_stmt.subquery()
-            )
+            count_stmt = select(func.count()).select_from(base_stmt.subquery())
             count_result = await session.execute(count_stmt)
             total_count = count_result.scalar()
 
@@ -266,7 +274,9 @@ class GetReviewsBoardHandler(QueryHandler[GetReviewsBoardQuery]):
                     "priority_level": review.priority_level,
                     "body": review.body,
                     "customer_name": review.metadata.get("customer_name"),
-                    "customer_handle": review.customer_identity.handle if review.customer_identity else None,
+                    "customer_handle": (
+                        review.customer_identity.handle if review.customer_identity else None
+                    ),
                     "created_at": review.created_at,
                     "updated_at": review.updated_at,
                     "acknowledged_at": review.acknowledged_at,
@@ -276,26 +286,30 @@ class GetReviewsBoardHandler(QueryHandler[GetReviewsBoardQuery]):
                     "business_reply": review.metadata.get("business_reply"),
                     "reply_posted_at": review.metadata.get("reply_posted_at"),
                     "sentiment_score": review.metadata.get("sentiment_score"),
-                    "key_topics": review.metadata.get("key_topics", [])
+                    "key_topics": review.metadata.get("key_topics", []),
                 }
 
                 review_data.append(review_info)
 
             # Get summary statistics
-            stats_stmt = select(
-                func.count(Review.id).label("total_reviews"),
-                func.avg(Review.rating).label("avg_rating"),
-                func.count().filter(Review.rating <= 2).label("negative_reviews"),
-                func.count().filter(Review.rating >= 4).label("positive_reviews"),
-                func.count().filter(Review.status == "new").label("new_reviews"),
-                func.count().filter(Review.escalated_at.isnot(None)).label("escalated_reviews")
-            ).where(and_(*filters)) if filters else select(
-                func.count(Review.id).label("total_reviews"),
-                func.avg(Review.rating).label("avg_rating"),
-                func.count().filter(Review.rating <= 2).label("negative_reviews"),
-                func.count().filter(Review.rating >= 4).label("positive_reviews"),
-                func.count().filter(Review.status == "new").label("new_reviews"),
-                func.count().filter(Review.escalated_at.isnot(None)).label("escalated_reviews")
+            stats_stmt = (
+                select(
+                    func.count(Review.id).label("total_reviews"),
+                    func.avg(Review.rating).label("avg_rating"),
+                    func.count().filter(Review.rating <= 2).label("negative_reviews"),
+                    func.count().filter(Review.rating >= 4).label("positive_reviews"),
+                    func.count().filter(Review.status == "new").label("new_reviews"),
+                    func.count().filter(Review.escalated_at.isnot(None)).label("escalated_reviews"),
+                ).where(and_(*filters))
+                if filters
+                else select(
+                    func.count(Review.id).label("total_reviews"),
+                    func.avg(Review.rating).label("avg_rating"),
+                    func.count().filter(Review.rating <= 2).label("negative_reviews"),
+                    func.count().filter(Review.rating >= 4).label("positive_reviews"),
+                    func.count().filter(Review.status == "new").label("new_reviews"),
+                    func.count().filter(Review.escalated_at.isnot(None)).label("escalated_reviews"),
+                )
             )
 
             stats_result = await session.execute(stats_stmt)
@@ -307,7 +321,7 @@ class GetReviewsBoardHandler(QueryHandler[GetReviewsBoardQuery]):
                     "page": query.page,
                     "page_size": query.page_size,
                     "total_count": total_count,
-                    "total_pages": (total_count + query.page_size - 1) // query.page_size
+                    "total_pages": (total_count + query.page_size - 1) // query.page_size,
                 },
                 "summary": {
                     "total_reviews": stats.total_reviews,
@@ -315,19 +329,19 @@ class GetReviewsBoardHandler(QueryHandler[GetReviewsBoardQuery]):
                     "negative_reviews": stats.negative_reviews,
                     "positive_reviews": stats.positive_reviews,
                     "new_reviews": stats.new_reviews,
-                    "escalated_reviews": stats.escalated_reviews
+                    "escalated_reviews": stats.escalated_reviews,
                 },
                 "filters_applied": {
                     "platforms": query.platforms,
                     "statuses": query.statuses,
                     "rating_range": [query.rating_min, query.rating_max],
                     "search": query.search,
-                    "escalated_only": query.escalated_only
-                }
+                    "escalated_only": query.escalated_only,
+                },
             }
 
         except Exception as e:
-            logger.error(f"Error getting reviews board: {e}")
+            logger.exception(f"Error getting reviews board: {e}")
             raise
 
 
@@ -337,13 +351,21 @@ class GetThreadDetailHandler(QueryHandler[GetThreadDetailQuery]):
     async def handle(self, query: GetThreadDetailQuery, session: AsyncSession) -> dict[str, Any]:
         try:
             # Get thread with related data
-            thread_stmt = select(SocialThread).options(
-                joinedload(SocialThread.account),
-                joinedload(SocialThread.customer_identity),
-                selectinload(SocialThread.messages).options(
-                    joinedload(SocialMessage.sender_identity)
-                ) if query.include_messages else lambda: None
-            ).where(SocialThread.id == query.thread_id)
+            thread_stmt = (
+                select(SocialThread)
+                .options(
+                    joinedload(SocialThread.account),
+                    joinedload(SocialThread.customer_identity),
+                    (
+                        selectinload(SocialThread.messages).options(
+                            joinedload(SocialMessage.sender_identity)
+                        )
+                        if query.include_messages
+                        else lambda: None
+                    ),
+                )
+                .where(SocialThread.id == query.thread_id)
+            )
 
             result = await session.execute(thread_stmt)
             thread = result.unique().scalar_one_or_none()
@@ -367,8 +389,8 @@ class GetThreadDetailHandler(QueryHandler[GetThreadDetailQuery]):
                     "id": thread.account.id,
                     "platform": thread.account.platform,
                     "page_name": thread.account.page_name,
-                    "handle": thread.account.handle
-                }
+                    "handle": thread.account.handle,
+                },
             }
 
             # Add messages if requested
@@ -386,11 +408,15 @@ class GetThreadDetailHandler(QueryHandler[GetThreadDetailQuery]):
                         "sent_at": msg.sent_at,
                         "platform_message_id": msg.platform_message_id,
                         "metadata": msg.metadata,
-                        "sender_profile": {
-                            "id": msg.sender_identity.id,
-                            "handle": msg.sender_identity.handle,
-                            "profile_data": msg.sender_identity.profile_data
-                        } if msg.sender_identity else None
+                        "sender_profile": (
+                            {
+                                "id": msg.sender_identity.id,
+                                "handle": msg.sender_identity.handle,
+                                "profile_data": msg.sender_identity.profile_data,
+                            }
+                            if msg.sender_identity
+                            else None
+                        ),
                     }
                     for msg in messages
                 ]
@@ -417,8 +443,8 @@ class GetThreadDetailHandler(QueryHandler[GetThreadDetailQuery]):
                                 "id": thread.customer_identity.id,
                                 "handle": thread.customer_identity.handle,
                                 "platform": thread.customer_identity.platform,
-                                "profile_data": thread.customer_identity.profile_data
-                            }
+                                "profile_data": thread.customer_identity.profile_data,
+                            },
                         }
                 else:
                     # Customer identity not linked to customer yet
@@ -427,21 +453,25 @@ class GetThreadDetailHandler(QueryHandler[GetThreadDetailQuery]):
                             "id": thread.customer_identity.id,
                             "handle": thread.customer_identity.handle,
                             "platform": thread.customer_identity.platform,
-                            "profile_data": thread.customer_identity.profile_data
+                            "profile_data": thread.customer_identity.profile_data,
                         },
-                        "linked": False
+                        "linked": False,
                     }
 
             # Add related threads if requested
             if query.include_related_threads and thread.customer_identity:
-                related_stmt = select(SocialThread).options(
-                    joinedload(SocialThread.account)
-                ).where(
-                    and_(
-                        SocialThread.customer_identity_id == thread.customer_identity.id,
-                        SocialThread.id != thread.id
+                related_stmt = (
+                    select(SocialThread)
+                    .options(joinedload(SocialThread.account))
+                    .where(
+                        and_(
+                            SocialThread.customer_identity_id == thread.customer_identity.id,
+                            SocialThread.id != thread.id,
+                        )
                     )
-                ).order_by(desc(SocialThread.updated_at)).limit(5)
+                    .order_by(desc(SocialThread.updated_at))
+                    .limit(5)
+                )
 
                 related_result = await session.execute(related_stmt)
                 related_threads = related_result.unique().scalars().all()
@@ -453,7 +483,7 @@ class GetThreadDetailHandler(QueryHandler[GetThreadDetailQuery]):
                         "status": rt.status,
                         "priority": rt.priority,
                         "created_at": rt.created_at,
-                        "last_message_at": rt.last_message_at
+                        "last_message_at": rt.last_message_at,
                     }
                     for rt in related_threads
                 ]
@@ -461,7 +491,7 @@ class GetThreadDetailHandler(QueryHandler[GetThreadDetailQuery]):
             return thread_detail
 
         except Exception as e:
-            logger.error(f"Error getting thread detail: {e}")
+            logger.exception(f"Error getting thread detail: {e}")
             raise
 
 
@@ -471,16 +501,16 @@ class GetUnreadCountsHandler(QueryHandler[GetUnreadCountsQuery]):
     async def handle(self, query: GetUnreadCountsQuery, session: AsyncSession) -> dict[str, Any]:
         try:
             # Build base query
-            base_stmt = select(
-                SocialAccount.platform,
-                SocialThread.status,
-                SocialThread.priority,
-                func.count(SocialThread.id).label("thread_count"),
-                func.sum(SocialThread.unread_count).label("unread_count")
-            ).select_from(
-                SocialThread
-            ).join(
-                SocialAccount, SocialThread.account_id == SocialAccount.id
+            base_stmt = (
+                select(
+                    SocialAccount.platform,
+                    SocialThread.status,
+                    SocialThread.priority,
+                    func.count(SocialThread.id).label("thread_count"),
+                    func.sum(SocialThread.unread_count).label("unread_count"),
+                )
+                .select_from(SocialThread)
+                .join(SocialAccount, SocialThread.account_id == SocialAccount.id)
             )
 
             # Apply filters
@@ -507,7 +537,7 @@ class GetUnreadCountsHandler(QueryHandler[GetUnreadCountsQuery]):
                 for row in result:
                     counts[row.platform] = {
                         "thread_count": row.thread_count,
-                        "unread_count": row.unread_count or 0
+                        "unread_count": row.unread_count or 0,
                     }
 
             elif query.group_by == "status":
@@ -518,7 +548,7 @@ class GetUnreadCountsHandler(QueryHandler[GetUnreadCountsQuery]):
                 for row in result:
                     counts[row.status] = {
                         "thread_count": row.thread_count,
-                        "unread_count": row.unread_count or 0
+                        "unread_count": row.unread_count or 0,
                     }
 
             elif query.group_by == "priority":
@@ -529,7 +559,7 @@ class GetUnreadCountsHandler(QueryHandler[GetUnreadCountsQuery]):
                 for row in result:
                     counts[f"priority_{row.priority}"] = {
                         "thread_count": row.thread_count,
-                        "unread_count": row.unread_count or 0
+                        "unread_count": row.unread_count or 0,
                     }
             else:
                 # Default to platform grouping
@@ -540,13 +570,13 @@ class GetUnreadCountsHandler(QueryHandler[GetUnreadCountsQuery]):
                 for row in result:
                     counts[row.platform] = {
                         "thread_count": row.thread_count,
-                        "unread_count": row.unread_count or 0
+                        "unread_count": row.unread_count or 0,
                     }
 
             # Get total counts
             total_stmt = select(
                 func.count(SocialThread.id).label("total_threads"),
-                func.sum(SocialThread.unread_count).label("total_unread")
+                func.sum(SocialThread.unread_count).label("total_unread"),
             ).select_from(SocialThread)
 
             if filters[:-1]:  # Exclude the unread filter for total
@@ -559,15 +589,12 @@ class GetUnreadCountsHandler(QueryHandler[GetUnreadCountsQuery]):
                 "counts": counts,
                 "totals": {
                     "total_threads": totals.total_threads or 0,
-                    "total_unread": totals.total_unread or 0
+                    "total_unread": totals.total_unread or 0,
                 },
                 "group_by": query.group_by,
-                "filters_applied": {
-                    "platforms": query.platforms,
-                    "assigned_to": query.assigned_to
-                }
+                "filters_applied": {"platforms": query.platforms, "assigned_to": query.assigned_to},
             }
 
         except Exception as e:
-            logger.error(f"Error getting unread counts: {e}")
+            logger.exception(f"Error getting unread counts: {e}")
             raise

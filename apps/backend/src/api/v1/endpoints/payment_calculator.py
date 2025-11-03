@@ -6,17 +6,16 @@ Helps customers see the exact cost before selecting a payment method.
 
 Payment Methods & Fees:
 - Zelle: 0% (FREE)
-- Plaid RTP: 0% (FREE) 
+- Plaid RTP: 0% (FREE)
 - Venmo: 3% processing fee
 - Stripe: 3% processing fee
 """
 
 from decimal import Decimal
-from typing import Optional
+import logging
+
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +25,7 @@ router = APIRouter()
 # Request/Response Schemas
 class CalculatePaymentRequest(BaseModel):
     """Request to calculate payment with fees"""
+
     base_amount: Decimal = Field(..., gt=0, description="Base payment amount (before fees)")
     tip_amount: Decimal = Field(0, ge=0, description="Tip amount")
     payment_method: str = Field(..., description="Payment method: zelle, plaid, venmo, or stripe")
@@ -33,6 +33,7 @@ class CalculatePaymentRequest(BaseModel):
 
 class PaymentMethodBreakdown(BaseModel):
     """Payment breakdown for a specific method"""
+
     method: str
     method_display_name: str
     base_amount: float
@@ -49,6 +50,7 @@ class PaymentMethodBreakdown(BaseModel):
 
 class CalculatePaymentResponse(BaseModel):
     """Payment calculation with all fees"""
+
     base_amount: float
     tip_amount: float
     subtotal: float
@@ -59,12 +61,14 @@ class CalculatePaymentResponse(BaseModel):
 
 class CompareAllMethodsRequest(BaseModel):
     """Request to compare all payment methods"""
+
     base_amount: Decimal = Field(..., gt=0)
     tip_amount: Decimal = Field(0, ge=0)
 
 
 class CompareAllMethodsResponse(BaseModel):
     """Comparison of all 4 payment methods"""
+
     base_amount: float
     tip_amount: float
     subtotal: float
@@ -75,13 +79,11 @@ class CompareAllMethodsResponse(BaseModel):
 
 
 def calculate_payment_breakdown(
-    base_amount: Decimal,
-    tip_amount: Decimal,
-    payment_method: str
+    base_amount: Decimal, tip_amount: Decimal, payment_method: str
 ) -> PaymentMethodBreakdown:
     """
     Calculate payment breakdown for a specific method
-    
+
     Fee Structure:
     - Zelle: 0%
     - Plaid RTP: 0%
@@ -93,37 +95,37 @@ def calculate_payment_breakdown(
         "zelle": Decimal("0.00"),
         "plaid": Decimal("0.00"),
         "venmo": Decimal("0.03"),
-        "stripe": Decimal("0.03")
+        "stripe": Decimal("0.03"),
     }
-    
+
     # Display names
     display_names = {
         "zelle": "Zelle",
         "plaid": "Bank Transfer (Plaid RTP)",
         "venmo": "Venmo",
-        "stripe": "Credit Card (Stripe)"
+        "stripe": "Credit Card (Stripe)",
     }
-    
+
     # Method characteristics
     instant_methods = ["plaid", "stripe"]
     confirmation_times = {
         "zelle": "1-2 hours (manual confirmation)",
         "plaid": "Instant (automated)",
         "venmo": "1-2 hours (manual confirmation)",
-        "stripe": "Instant (automated)"
+        "stripe": "Instant (automated)",
     }
-    
+
     method = payment_method.lower()
     fee_rate = fee_rates.get(method, Decimal("0.03"))  # Default to 3%
-    
+
     subtotal = base_amount + tip_amount
     processing_fee = subtotal * fee_rate
     total = subtotal + processing_fee
-    
+
     # Calculate savings vs Stripe (3%)
     stripe_fee = subtotal * Decimal("0.03")
     savings = float(stripe_fee - processing_fee)
-    
+
     return PaymentMethodBreakdown(
         method=method,
         method_display_name=display_names.get(method, method.title()),
@@ -136,7 +138,7 @@ def calculate_payment_breakdown(
         savings_vs_stripe=savings,
         is_free=(fee_rate == 0),
         is_instant=(method in instant_methods),
-        confirmation_time=confirmation_times.get(method, "Varies")
+        confirmation_time=confirmation_times.get(method, "Varies"),
     )
 
 
@@ -144,10 +146,10 @@ def calculate_payment_breakdown(
 async def calculate_payment_with_fees(request: CalculatePaymentRequest):
     """
     Calculate payment total with processing fees
-    
+
     Shows customer the exact amount they'll pay including processing fees
     for their selected payment method.
-    
+
     **Example Request**:
     ```json
     {
@@ -156,7 +158,7 @@ async def calculate_payment_with_fees(request: CalculatePaymentRequest):
       "payment_method": "stripe"
     }
     ```
-    
+
     **Example Response**:
     ```json
     {
@@ -176,11 +178,9 @@ async def calculate_payment_with_fees(request: CalculatePaymentRequest):
     """
     # Calculate for selected method
     selected = calculate_payment_breakdown(
-        request.base_amount,
-        request.tip_amount,
-        request.payment_method
+        request.base_amount, request.tip_amount, request.payment_method
     )
-    
+
     # Calculate for all methods for comparison
     all_methods = [
         calculate_payment_breakdown(request.base_amount, request.tip_amount, "zelle"),
@@ -188,22 +188,26 @@ async def calculate_payment_with_fees(request: CalculatePaymentRequest):
         calculate_payment_breakdown(request.base_amount, request.tip_amount, "venmo"),
         calculate_payment_breakdown(request.base_amount, request.tip_amount, "stripe"),
     ]
-    
+
     # Generate recommendation
     if request.payment_method in ["zelle", "plaid"]:
         recommendation = "✅ Great choice! No processing fees with this payment method."
     elif request.payment_method == "venmo":
-        recommendation = f"💡 Save ${selected.processing_fee:.2f}! Use Zelle or Bank Transfer (FREE)"
+        recommendation = (
+            f"💡 Save ${selected.processing_fee:.2f}! Use Zelle or Bank Transfer (FREE)"
+        )
     else:  # stripe
-        recommendation = f"💡 Save ${selected.processing_fee:.2f}! Use Zelle or Bank Transfer (FREE)"
-    
+        recommendation = (
+            f"💡 Save ${selected.processing_fee:.2f}! Use Zelle or Bank Transfer (FREE)"
+        )
+
     return CalculatePaymentResponse(
         base_amount=float(request.base_amount),
         tip_amount=float(request.tip_amount),
         subtotal=float(request.base_amount + request.tip_amount),
         selected_method=selected,
         all_methods=all_methods,
-        recommendation=recommendation
+        recommendation=recommendation,
     )
 
 
@@ -211,9 +215,9 @@ async def calculate_payment_with_fees(request: CalculatePaymentRequest):
 async def compare_all_payment_methods(request: CompareAllMethodsRequest):
     """
     Compare all 4 payment methods side-by-side
-    
+
     Shows customer all options with fees, helping them make an informed decision.
-    
+
     **Example Request**:
     ```json
     {
@@ -221,7 +225,7 @@ async def compare_all_payment_methods(request: CompareAllMethodsRequest):
       "tip_amount": 50.00
     }
     ```
-    
+
     **Example Response**:
     ```json
     {
@@ -265,11 +269,11 @@ async def compare_all_payment_methods(request: CompareAllMethodsRequest):
         calculate_payment_breakdown(request.base_amount, request.tip_amount, "venmo"),
         calculate_payment_breakdown(request.base_amount, request.tip_amount, "stripe"),
     ]
-    
+
     # Determine best options
     best_value = "Zelle or Bank Transfer (Plaid) - FREE"
     fastest = "Bank Transfer (Plaid) or Credit Card - Instant"
-    
+
     # Smart recommendation based on amount
     subtotal = request.base_amount + request.tip_amount
     if subtotal >= 100:
@@ -282,7 +286,7 @@ async def compare_all_payment_methods(request: CompareAllMethodsRequest):
             "💡 For small amounts, any FREE method works! "
             "Bank Transfer (Plaid) is instant, Zelle requires confirmation."
         )
-    
+
     return CompareAllMethodsResponse(
         base_amount=float(request.base_amount),
         tip_amount=float(request.tip_amount),
@@ -290,7 +294,7 @@ async def compare_all_payment_methods(request: CompareAllMethodsRequest):
         methods=methods,
         best_value=best_value,
         fastest=fastest,
-        recommendation=recommendation
+        recommendation=recommendation,
     )
 
 
@@ -298,10 +302,10 @@ async def compare_all_payment_methods(request: CompareAllMethodsRequest):
 async def get_payment_methods_info():
     """
     Get information about all available payment methods
-    
+
     Returns static information about payment methods, fees, and characteristics.
     Useful for building payment selection UI.
-    
+
     **Response**:
     ```json
     {
@@ -337,7 +341,7 @@ async def get_payment_methods_info():
             "description": "Free bank transfer with manual confirmation",
             "recommended_for": "All orders (FREE!)",
             "email": "myhibachichef@gmail.com",
-            "phone": "+19167408768"
+            "phone": "+19167408768",
         },
         {
             "id": "plaid",
@@ -352,7 +356,7 @@ async def get_payment_methods_info():
             "qr_code_available": False,
             "description": "Free instant bank transfer (automated)",
             "recommended_for": "All orders (FREE + Instant!)",
-            "benefits": ["No fees", "Instant confirmation", "Automated", "Secure"]
+            "benefits": ["No fees", "Instant confirmation", "Automated", "Secure"],
         },
         {
             "id": "venmo",
@@ -366,7 +370,7 @@ async def get_payment_methods_info():
             "qr_code_available": True,
             "description": "Peer-to-peer payment with 3% processing fee",
             "recommended_for": "Small orders if you prefer Venmo",
-            "username": "@myhibachichef"
+            "username": "@myhibachichef",
         },
         {
             "id": "stripe",
@@ -381,13 +385,13 @@ async def get_payment_methods_info():
             "qr_code_available": False,
             "description": "Credit/debit card with 3% processing fee",
             "recommended_for": "If you don't have a bank account linked",
-            "accepted_cards": ["Visa", "Mastercard", "Amex", "Discover"]
-        }
+            "accepted_cards": ["Visa", "Mastercard", "Amex", "Discover"],
+        },
     ]
-    
+
     return {
         "success": True,
         "methods": methods,
         "recommendation": "Bank Transfer (Plaid) offers the best value: FREE + Instant!",
-        "total_methods": 4
+        "total_methods": 4,
     }

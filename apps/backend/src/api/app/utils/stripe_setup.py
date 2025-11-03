@@ -1,9 +1,8 @@
 import logging
 from typing import Any
 
-import stripe
-
 from core.config import get_settings
+import stripe
 
 settings = get_settings()
 
@@ -76,9 +75,7 @@ async def setup_stripe_products() -> None:
             # Create prices for this product
             for price_data in product_data["prices"]:
                 # Check if price already exists
-                existing_prices = stripe.Price.list(
-                    product=product.id, limit=100, active=True
-                )
+                existing_prices = stripe.Price.list(product=product.id, limit=100, active=True)
 
                 price_exists = False
                 for existing_price in existing_prices.data:
@@ -97,25 +94,18 @@ async def setup_stripe_products() -> None:
                         nickname=price_data["nickname"],
                         metadata={"category": product_data["category"]},
                     )
-                    logger.info(
-                        f"Created price: {price.nickname} - "
-                        f"${price.unit_amount/100}"
-                    )
+                    logger.info(f"Created price: {price.nickname} - " f"${price.unit_amount/100}")
                 else:
-                    logger.info(
-                        f"Price '{price_data['nickname']}' already exists"
-                    )
+                    logger.info(f"Price '{price_data['nickname']}' already exists")
 
         # Setup tax settings if enabled
         if settings.enable_automatic_tax:
             await setup_tax_settings()
 
-        logger.info(
-            f"Stripe setup completed. Created {created_count} new products."
-        )
+        logger.info(f"Stripe setup completed. Created {created_count} new products.")
 
     except Exception as e:
-        logger.error(f"Error setting up Stripe products: {e}")
+        logger.exception(f"Error setting up Stripe products: {e}")
         raise
 
 
@@ -133,7 +123,7 @@ async def setup_tax_settings() -> None:
         logger.info("Tax settings configured (placeholder)")
 
     except Exception as e:
-        logger.error(f"Error setting up tax settings: {e}")
+        logger.exception(f"Error setting up tax settings: {e}")
 
 
 def get_default_prices() -> dict[str, str]:
@@ -146,20 +136,16 @@ def get_default_prices() -> dict[str, str]:
         products = stripe.Product.list(limit=100, active=True)
 
         for product in products.data:
-            product_prices = stripe.Price.list(
-                product=product.id, limit=100, active=True
-            )
+            product_prices = stripe.Price.list(product=product.id, limit=100, active=True)
 
             for price in product_prices.data:
-                key = f"{product.name}_{price.nickname}".lower().replace(
-                    " ", "_"
-                )
+                key = f"{product.name}_{price.nickname}".lower().replace(" ", "_")
                 prices[key] = price.id
 
         return prices
 
     except Exception as e:
-        logger.error(f"Error getting default prices: {e}")
+        logger.exception(f"Error getting default prices: {e}")
         return {}
 
 
@@ -202,5 +188,5 @@ def create_test_data() -> dict[str, Any]:
         }
 
     except Exception as e:
-        logger.error(f"Error creating test data: {e}")
+        logger.exception(f"Error creating test data: {e}")
         return {}
