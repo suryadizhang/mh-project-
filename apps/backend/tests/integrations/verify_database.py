@@ -1,7 +1,14 @@
 """Final database state verification"""
+import os
 from sqlalchemy import create_engine, text, inspect
 
-engine = create_engine('postgresql+psycopg2://postgres:DkYokZB945vm3itM@db.yuchqvpctookhjovvdwi.supabase.co:5432/postgres')
+# Get database URL from environment variable
+DATABASE_URL = os.getenv(
+    'DATABASE_URL',
+    'postgresql+psycopg2://postgres:password@localhost:5432/postgres'
+)
+
+engine = create_engine(DATABASE_URL)
 inspector = inspect(engine)
 
 print("=" * 80)

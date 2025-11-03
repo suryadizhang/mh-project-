@@ -1,7 +1,14 @@
 """Manually merge Alembic heads"""
+import os
 from sqlalchemy import create_engine, text
 
-engine = create_engine('postgresql+psycopg2://postgres:DkYokZB945vm3itM@db.yuchqvpctookhjovvdwi.supabase.co:5432/postgres')
+# Get database URL from environment variable
+DATABASE_URL = os.getenv(
+    'DATABASE_URL',
+    'postgresql+psycopg2://postgres:password@localhost:5432/postgres'
+)
+
+engine = create_engine(DATABASE_URL)
 conn = engine.connect()
 
 # Check current versions

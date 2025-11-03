@@ -1,12 +1,19 @@
 """Test Supabase database connection"""
 import asyncio
+import os
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import text
 
 async def test_connection():
     print("Testing Supabase connection...")
+    # Get database URL from environment variable
+    DATABASE_URL = os.getenv(
+        'DATABASE_URL_ASYNC',
+        'postgresql+asyncpg://postgres:password@localhost:5432/postgres'
+    )
+    
     engine = create_async_engine(
-        'postgresql+asyncpg://postgres:DkYokZB945vm3itM@db.yuchqvpctookhjovvdwi.supabase.co:5432/postgres',
+        DATABASE_URL,
         echo=False
     )
     
