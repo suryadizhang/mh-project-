@@ -2,6 +2,7 @@
 API Router - Unified endpoint aggregation
 Combines operational and AI routes under single API
 """
+# ruff: noqa: E501, ERA001 - Long lines for readability, commented TODOs
 from fastapi import APIRouter
 
 # Import endpoint routers
