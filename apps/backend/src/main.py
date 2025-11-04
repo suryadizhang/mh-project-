@@ -251,7 +251,19 @@ async def rate_limiting_middleware(request: Request, call_next):
 
     if hasattr(app.state, "rate_limiter"):
         try:
-            result = await app.state.rate_limiter.check_and_update(request)
+            # Extract user from JWT token if present (for proper rate limiting tiers)
+            user = None
+            auth_header = request.headers.get("authorization")
+            if auth_header and auth_header.startswith("Bearer "):
+                try:
+                    from core.security import extract_user_from_token
+
+                    token = auth_header.split(" ")[1]
+                    user = extract_user_from_token(token)
+                except Exception:
+                    pass  # Invalid token, treat as public user
+
+            result = await app.state.rate_limiter.check_and_update(request, user)
 
             if not result["allowed"]:
                 # Rate limit exceeded

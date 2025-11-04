@@ -76,7 +76,7 @@ async def login(login_data: LoginRequest, db: AsyncSession = Depends(get_db)):
         user_data = {
             "id": "admin-001",
             "email": "admin@myhibachichef.com",
-            "role": UserRole.ADMIN,
+            "role": UserRole.SUPER_ADMIN,  # Changed to SUPER_ADMIN for testing
             "full_name": "Admin User",
         }
     elif login_data.email == "owner@myhibachichef.com" and login_data.password == "owner123":
@@ -94,7 +94,15 @@ async def login(login_data: LoginRequest, db: AsyncSession = Depends(get_db)):
     # Create access token
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user_data["id"], "email": user_data["email"], "role": user_data["role"]},
+        data={
+            "sub": user_data["id"],
+            "email": user_data["email"],
+            "role": (
+                user_data["role"].value
+                if isinstance(user_data["role"], UserRole)
+                else user_data["role"]
+            ),
+        },
         expires_delta=access_token_expires,
     )
 

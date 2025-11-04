@@ -1,6 +1,7 @@
 """
 Backend Server Runner - Fixes Python Path and Starts Server
 """
+
 import sys
 import os
 from pathlib import Path
@@ -13,32 +14,52 @@ if str(src_dir) not in sys.path:
     sys.path.insert(0, str(src_dir))
 
 print(f"[OK] Added {src_dir} to Python path")
-print(f"[START] Starting FastAPI backend server...")
-print(f"[INFO] Server will be available at: http://localhost:8000")
-print(f"[INFO] API documentation: http://localhost:8000/docs")
-print(f"[INFO] Metrics: http://localhost:8000/metrics")
-print(f"[INFO] Health checks:")
-print(f"   - Basic: http://localhost:8000/health")
-print(f"   - Liveness: http://localhost:8000/api/health/live")
-print(f"   - Readiness: http://localhost:8000/api/health/ready")
-print(f"   - Startup: http://localhost:8000/api/health/startup")
+print("[START] Starting FastAPI backend server...")
+print("[INFO] Server will be available at: http://localhost:8000")
+print("[INFO] API documentation: http://localhost:8000/docs")
+print("[INFO] Metrics: http://localhost:8000/metrics")
+print("[INFO] Health checks:")
+print("   - Basic: http://localhost:8000/health")
+print("   - Liveness: http://localhost:8000/api/health/live")
+print("   - Readiness: http://localhost:8000/api/health/ready")
+print("   - Startup: http://localhost:8000/api/health/startup")
 print()
 
 # Set environment variable for the src path
-os.environ['PYTHONPATH'] = str(src_dir)
+os.environ["PYTHONPATH"] = str(src_dir)
 
 if __name__ == "__main__":
     import uvicorn
-    
+    import signal
+
     # Change to src directory
     os.chdir(src_dir)
-    
-    # Run uvicorn with the app
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-        log_level="info",
-        access_log=True
-    )
+
+    # Add graceful shutdown handler
+    def signal_handler(signum, frame):
+        print("\n[SHUTDOWN] Received signal, shutting down gracefully...")
+        sys.exit(0)
+
+    # Register signal handlers for graceful shutdown
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+
+    try:
+        # Run uvicorn with the app
+        uvicorn.run(
+            "main:app",
+            host="0.0.0.0",
+            port=8000,
+            reload=True,
+            log_level="info",
+            access_log=True,
+            # Add timeout settings to prevent zombie processes
+            timeout_keep_alive=5,
+            timeout_graceful_shutdown=30,
+        )
+    except KeyboardInterrupt:
+        print("\n[SHUTDOWN] Keyboard interrupt received, shutting down...")
+    except Exception as e:
+        print(f"\n[ERROR] Server error: {e}")
+    finally:
+        print("[CLEANUP] Server stopped")
