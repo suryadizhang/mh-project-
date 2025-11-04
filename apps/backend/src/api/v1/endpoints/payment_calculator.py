@@ -6,9 +6,8 @@ Helps customers see the exact cost before selecting a payment method.
 
 Payment Methods & Fees:
 - Zelle: 0% (FREE)
-- Plaid RTP: 0% (FREE)
-- Venmo: 3% processing fee
-- Stripe: 3% processing fee
+- Venmo: 0% (standard transfer)
+- Stripe: 2.9% + $0.30 processing fee
 """
 
 from decimal import Decimal
@@ -28,7 +27,7 @@ class CalculatePaymentRequest(BaseModel):
 
     base_amount: Decimal = Field(..., gt=0, description="Base payment amount (before fees)")
     tip_amount: Decimal = Field(0, ge=0, description="Tip amount")
-    payment_method: str = Field(..., description="Payment method: zelle, plaid, venmo, or stripe")
+    payment_method: str = Field(..., description="Payment method: zelle, venmo, or stripe")
 
 
 class PaymentMethodBreakdown(BaseModel):
@@ -86,44 +85,49 @@ def calculate_payment_breakdown(
 
     Fee Structure:
     - Zelle: 0%
-    - Plaid RTP: 0%
-    - Venmo: 3%
-    - Stripe: 3%
+    - Venmo: 0%
+    - Stripe: 2.9% + $0.30
     """
     # Define fee percentages
     fee_rates = {
         "zelle": Decimal("0.00"),
-        "plaid": Decimal("0.00"),
-        "venmo": Decimal("0.03"),
-        "stripe": Decimal("0.03"),
+        "venmo": Decimal("0.00"),
+        "stripe": Decimal("0.029"),
     }
+
+    # Stripe fixed fee
+    stripe_fixed_fee = Decimal("0.30")
 
     # Display names
     display_names = {
         "zelle": "Zelle",
-        "plaid": "Bank Transfer (Plaid RTP)",
         "venmo": "Venmo",
         "stripe": "Credit Card (Stripe)",
     }
 
     # Method characteristics
-    instant_methods = ["plaid", "stripe"]
+    instant_methods = ["stripe"]
     confirmation_times = {
         "zelle": "1-2 hours (manual confirmation)",
-        "plaid": "Instant (automated)",
         "venmo": "1-2 hours (manual confirmation)",
         "stripe": "Instant (automated)",
     }
 
     method = payment_method.lower()
-    fee_rate = fee_rates.get(method, Decimal("0.03"))  # Default to 3%
+    fee_rate = fee_rates.get(method, Decimal("0.029"))  # Default to Stripe rate
 
     subtotal = base_amount + tip_amount
-    processing_fee = subtotal * fee_rate
+
+    # Calculate processing fee (Stripe has fixed + percentage)
+    if method == "stripe":
+        processing_fee = (subtotal * fee_rate) + stripe_fixed_fee
+    else:
+        processing_fee = subtotal * fee_rate
+
     total = subtotal + processing_fee
 
-    # Calculate savings vs Stripe (3%)
-    stripe_fee = subtotal * Decimal("0.03")
+    # Calculate savings vs Stripe (2.9% + $0.30)
+    stripe_fee = (subtotal * Decimal("0.029")) + Decimal("0.30")
     savings = float(stripe_fee - processing_fee)
 
     return PaymentMethodBreakdown(
@@ -133,7 +137,9 @@ def calculate_payment_breakdown(
         tip_amount=float(tip_amount),
         subtotal=float(subtotal),
         processing_fee=float(processing_fee),
-        processing_fee_percentage=f"{float(fee_rate * 100):.2f}%",
+        processing_fee_percentage=(
+            f"{float(fee_rate * 100):.2f}%" if method != "stripe" else "2.9% + $0.30"
+        ),
         total_amount=float(total),
         savings_vs_stripe=savings,
         is_free=(fee_rate == 0),
@@ -184,22 +190,15 @@ async def calculate_payment_with_fees(request: CalculatePaymentRequest):
     # Calculate for all methods for comparison
     all_methods = [
         calculate_payment_breakdown(request.base_amount, request.tip_amount, "zelle"),
-        calculate_payment_breakdown(request.base_amount, request.tip_amount, "plaid"),
         calculate_payment_breakdown(request.base_amount, request.tip_amount, "venmo"),
         calculate_payment_breakdown(request.base_amount, request.tip_amount, "stripe"),
     ]
 
     # Generate recommendation
-    if request.payment_method in ["zelle", "plaid"]:
+    if request.payment_method in ["zelle", "venmo"]:
         recommendation = "✅ Great choice! No processing fees with this payment method."
-    elif request.payment_method == "venmo":
-        recommendation = (
-            f"💡 Save ${selected.processing_fee:.2f}! Use Zelle or Bank Transfer (FREE)"
-        )
     else:  # stripe
-        recommendation = (
-            f"💡 Save ${selected.processing_fee:.2f}! Use Zelle or Bank Transfer (FREE)"
-        )
+        recommendation = f"💡 Save ${selected.processing_fee:.2f}! Use Zelle or Venmo (FREE)"
 
     return CalculatePaymentResponse(
         base_amount=float(request.base_amount),
@@ -235,30 +234,24 @@ async def compare_all_payment_methods(request: CompareAllMethodsRequest):
           "method": "zelle",
           "total_amount": 550.00,
           "processing_fee": 0.00,
-          "savings_vs_stripe": 16.50
-        },
-        {
-          "method": "plaid",
-          "total_amount": 550.00,
-          "processing_fee": 0.00,
-          "savings_vs_stripe": 16.50,
-          "is_instant": true
+          "savings_vs_stripe": 16.25
         },
         {
           "method": "venmo",
-          "total_amount": 566.50,
-          "processing_fee": 16.50
+          "total_amount": 550.00,
+          "processing_fee": 0.00,
+          "savings_vs_stripe": 16.25
         },
         {
           "method": "stripe",
-          "total_amount": 566.50,
-          "processing_fee": 16.50,
+          "total_amount": 566.25,
+          "processing_fee": 16.25,
           "is_instant": true
         }
       ],
-      "best_value": "zelle or plaid (FREE)",
-      "fastest": "plaid or stripe (instant)",
-      "recommendation": "💰 Best: Bank Transfer (Plaid) - FREE + Instant!"
+      "best_value": "zelle or venmo (FREE)",
+      "fastest": "stripe (instant)",
+      "recommendation": "💰 Best: Zelle or Venmo - FREE!"
     }
     ```
     """

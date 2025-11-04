@@ -65,7 +65,7 @@ class LegacyUser(Base):
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
     phone = Column(String(20), nullable=True)
-    role = Column(SQLEnum(UserRole), nullable=False, default=UserRole.CUSTOMER)
+    role = Column(SQLEnum(UserRole), nullable=True)  # Staff roles only - customers book as guests
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

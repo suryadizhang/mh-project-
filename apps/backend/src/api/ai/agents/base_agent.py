@@ -56,14 +56,26 @@ class BaseAgent(ABC):
 
         Args:
             agent_type: Agent identifier (lead_nurturing, customer_care, etc.)
-            provider: Model provider (None = auto-detect from env)
+            provider: Model provider (None = lazy load from container)
             temperature: Response randomness (0.0-1.0)
             max_tokens: Max response length
         """
         self.agent_type = agent_type
-        self.provider = provider or get_provider()
         self.temperature = temperature
         self.max_tokens = max_tokens
+
+        # Phase 2: Dependency Injection support (backward compatible)
+        self.provider = provider
+
+        if self.provider is None:
+            # Backward compatibility: lazy load from container
+            try:
+                from ..container import get_container
+
+                self.provider = get_container().get_model_provider()
+            except ImportError:
+                # Fallback to old way if container not available
+                self.provider = get_provider()
 
         # Tool registry (name -> function)
         self._tool_functions: dict[str, Callable] = {}

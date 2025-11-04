@@ -140,13 +140,15 @@ async def lifespan(app: FastAPI):
         logger.warning(f"⚠️ Payment email scheduler not available: {e}")
 
     # Initialize and start AI Orchestrator with Follow-Up Scheduler (Phase 1B)
+    # Phase 3: Using DI Container pattern
     try:
-        from api.ai.orchestrator import AIOrchestrator
+        from api.ai.container import get_container
 
-        orchestrator = AIOrchestrator()
+        container = get_container()
+        orchestrator = container.get_orchestrator()
         await orchestrator.start()
         app.state.orchestrator = orchestrator
-        logger.info("✅ AI Orchestrator with Follow-Up Scheduler started")
+        logger.info("✅ AI Orchestrator with Follow-Up Scheduler started (via DI Container)")
     except ImportError as e:
         logger.warning(f"⚠️ AI Orchestrator not available (missing dependencies): {e}")
         app.state.orchestrator = None
@@ -390,15 +392,6 @@ try:
 except ImportError as e:
     logger.warning(f"Role Management endpoints not available: {e}")
 
-# Include Plaid RTP Payment endpoints
-try:
-    from api.v1.endpoints.plaid import router as plaid_router
-
-    app.include_router(plaid_router, prefix="/api/v1/plaid", tags=["Plaid RTP Payments"])
-    logger.info("✅ Plaid RTP Payment endpoints included")
-except ImportError as e:
-    logger.warning(f"Plaid RTP endpoints not available: {e}")
-
 # Include Payment Calculator endpoints (for fee calculations)
 try:
     from api.v1.endpoints.payment_calculator import (
@@ -460,6 +453,17 @@ try:
     logger.info("✅ Public lead capture endpoints included")
 except ImportError as e:
     logger.warning(f"Public lead endpoints not available: {e}")
+
+# Include public quote calculation endpoint (no auth required)
+try:
+    from api.v1.endpoints.public_quote import router as public_quote_router
+
+    app.include_router(
+        public_quote_router, prefix="/api/v1/public/quote", tags=["Public Quote Calculator"]
+    )
+    logger.info("✅ Public quote calculation endpoints included (travel fee calculation)")
+except ImportError as e:
+    logger.warning(f"Public quote endpoints not available: {e}")
 
 # AI Chat endpoints from moved AI API
 try:
@@ -546,6 +550,20 @@ try:
     logger.info("✅ Payment Email Notification endpoints included")
 except ImportError as e:
     logger.warning(f"Payment Email Notification endpoints not available: {e}")
+
+# Development Role Switching - SUPER_ADMIN can test as other roles
+if settings.DEV_MODE:
+    try:
+        from api.v1.endpoints.dev_role_switch import router as role_switch_router
+
+        app.include_router(
+            role_switch_router,
+            prefix="/api/v1/dev",
+            tags=["Development - Role Switching"],
+        )
+        logger.info("🔄 Development role switching enabled (DEV_MODE=true)")
+    except ImportError as e:
+        logger.warning(f"Development role switching not available: {e}")
 
 # Multi-Channel AI Communication endpoints - Handle email, SMS, Instagram, Facebook, phone
 try:

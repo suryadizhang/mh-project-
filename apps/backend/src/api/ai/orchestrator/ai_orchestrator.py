@@ -45,26 +45,27 @@ from .tools import (
     TravelFeeTool,
 )
 
+# Initialize logger first
+logger = logging.getLogger(__name__)
+
 # Phase 1A: Import router and provider
 try:
     from ..routers import get_intent_router
 
     ROUTER_ENABLED = True
-except ImportError:
+    logger.info("✅ Intent Router imported successfully - multi-agent system available")
+except ImportError as e:
     ROUTER_ENABLED = False
-    logger = logging.getLogger(__name__)
-    logger.warning("Intent router not available - using legacy mode")
+    logger.warning(f"Intent router not available - using legacy mode: {e}")
 
 try:
     from .providers import get_provider
 
     PROVIDER_ENABLED = True
-except ImportError:
+    logger.info("✅ Model Provider imported successfully")
+except ImportError as e:
     PROVIDER_ENABLED = False
-    logger = logging.getLogger(__name__)
-    logger.warning("Model provider not available - using OpenAI client directly")
-
-logger = logging.getLogger(__name__)
+    logger.warning(f"Model provider not available - using OpenAI client directly: {e}")
 
 
 class AIOrchestrator:
@@ -117,21 +118,41 @@ class AIOrchestrator:
         ```
     """
 
-    def __init__(self, config: OrchestratorConfig | None = None, use_router: bool = True):
+    def __init__(
+        self,
+        config: OrchestratorConfig | None = None,
+        use_router: bool = True,
+        router=None,
+        provider=None,
+    ):
         """
         Initialize the AI orchestrator.
 
         Args:
             config: Optional configuration (uses defaults if not provided)
             use_router: Whether to use Intent Router (default: True)
+            router: Optional IntentRouter instance (for DI, None = lazy load from container)
+            provider: Optional ModelProvider instance (for DI, None = lazy load from container)
         """
         self.config = config or OrchestratorConfig()
         self.logger = logging.getLogger(__name__)
         self.use_router = use_router and ROUTER_ENABLED
 
-        # Initialize router (Phase 1A)
+        # Phase 2: Dependency Injection support (backward compatible)
+        self.router = router
+        self.provider = provider
+
+        # Initialize router (Phase 1A) - with DI fallback
         if self.use_router:
-            self.router = get_intent_router()
+            if self.router is None:
+                # Backward compatibility: lazy load from container
+                try:
+                    from ..container import get_container
+
+                    self.router = get_container().get_intent_router()
+                except ImportError:
+                    # Fallback to old way if container not available
+                    self.router = get_intent_router()
             self.logger.info("Intent router enabled - using multi-agent system")
         else:
             self.router = None
@@ -148,9 +169,17 @@ class AIOrchestrator:
             self.tool_registry = ToolRegistry()
             self._register_tools()
 
-        # Initialize provider (Phase 1A)
+        # Initialize provider (Phase 1A) - with DI fallback
         if PROVIDER_ENABLED:
-            self.provider = get_provider()
+            if self.provider is None:
+                # Backward compatibility: lazy load from container
+                try:
+                    from ..container import get_container
+
+                    self.provider = get_container().get_model_provider()
+                except ImportError:
+                    # Fallback to old way if container not available
+                    self.provider = get_provider()
             self.logger.info(f"Model provider initialized: {self.provider.__class__.__name__}")
         else:
             self.provider = None

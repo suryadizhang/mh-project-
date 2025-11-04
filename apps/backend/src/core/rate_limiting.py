@@ -76,7 +76,7 @@ class RateLimiter:
 
         # Check if user is authenticated
         if user:
-            user_role = getattr(user, "role", UserRole.CUSTOMER)
+            user_role = getattr(user, "role", None)  # No default role - must be authenticated staff
             user_id = getattr(user, "id", "unknown")
             return f"user:{user_id}", user_role
 
@@ -84,9 +84,9 @@ class RateLimiter:
         api_key = request.headers.get("x-api-key")
         if api_key:
             hashed_key = hashlib.sha256(api_key.encode()).hexdigest()[:16]
-            return f"api:{hashed_key}", UserRole.CUSTOMER
+            return f"api:{hashed_key}", None  # API keys are for integrations, not role-based
 
-        # Fall back to IP address for public users
+        # Fall back to IP address for public users (customers don't need login)
         client_ip = request.client.host if request.client else "unknown"
         return f"ip:{client_ip}", None
 

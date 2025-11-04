@@ -53,7 +53,7 @@ class ProductionKnowledgeBaseService:
             {
                 "content": "We offer hibachi chef booking services for private events, parties, and celebrations. "
                 "Bookings can be made online through our website or by calling our business phone. "
-                "We serve parties from small gatherings to large events. Payment accepted via Stripe, Plaid, or alternative methods.",
+                "We serve parties from small gatherings to large events. Payment accepted via Stripe or alternative methods (Zelle/Venmo).",
                 "keywords": [
                     "booking",
                     "reservation",
@@ -69,15 +69,13 @@ class ProductionKnowledgeBaseService:
             },
             # Payment Info - FROM SETTINGS
             {
-                "content": f"Payment Options: Credit/Debit cards via Stripe, Bank transfers via Plaid, "
+                "content": f"Payment Options: Credit/Debit cards via Stripe, "
                 f"Zelle ({settings.ZELLE_EMAIL} or {settings.ZELLE_PHONE}), "
                 f"Venmo ({settings.VENMO_USERNAME}). "
                 f"We offer flexible payment options for your convenience. All payments are processed securely.",
                 "keywords": [
                     "payment",
                     "stripe",
-                    "plaid",
-                    "bank transfer",
                     "zelle",
                     "venmo",
                     "pay",
@@ -93,19 +91,16 @@ class ProductionKnowledgeBaseService:
             },
             # Payment Methods FAQ
             {
-                "content": f"Payment Methods FAQ: We accept four secure payment options. "
+                "content": f"Payment Methods FAQ: We accept three secure payment options. "
                 f"1) Credit/Debit Cards - Processed securely via Stripe portal with instant confirmation. "
-                f"2) Bank Transfer - Direct bank payment via Plaid, secure and convenient. "
-                f"3) Zelle - Send to {settings.ZELLE_EMAIL} or {settings.ZELLE_PHONE} for instant transfer. "
-                f"4) Venmo - Pay {settings.VENMO_USERNAME} for quick and easy payment. "
+                f"2) Zelle - Send to {settings.ZELLE_EMAIL} or {settings.ZELLE_PHONE} for instant transfer. "
+                f"3) Venmo - Pay {settings.VENMO_USERNAME} for quick and easy payment. "
                 f"All payment methods are secure, encrypted, and processed immediately.",
                 "keywords": [
                     "payment",
                     "faq",
                     "methods",
                     "how to pay",
-                    "bank transfer",
-                    "plaid",
                     "options",
                     "ways to pay",
                     "accepted payments",
@@ -250,15 +245,14 @@ class ProductionKnowledgeBaseService:
             },
             # Payment Processing
             {
-                "content": "Payment System: Process payments via Stripe (cards), Plaid (bank transfers), "
-                "or manual (Zelle/Venmo/CashApp). Automatic payment detection from Gmail, "
+                "content": "Payment System: Process payments via Stripe (cards) "
+                "or manual (Zelle/Venmo). Automatic payment detection from Gmail, "
                 "payment matching with bookings using AI, invoice generation, refund processing, "
                 "payment reminder emails, overdue payment tracking, payment history dashboard.",
                 "keywords": [
                     "payment",
                     "processing",
                     "stripe",
-                    "plaid",
                     "invoice",
                     "refund",
                     "overdue",
@@ -396,7 +390,7 @@ class ProductionKnowledgeBaseService:
             },
             # System Settings
             {
-                "content": "System Configuration: Environment variables for API keys (Stripe, Plaid, OpenAI, RingCentral), "
+                "content": "System Configuration: Environment variables for API keys (Stripe, OpenAI, RingCentral), "
                 "email settings (IONOS SMTP, Gmail), payment options, business hours, service areas, "
                 "rate limiting (20/min public, 100/min admin), CORS domains, Redis cache, PostgreSQL database, "
                 "feature flags for enabling/disabling modules.",

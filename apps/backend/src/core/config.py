@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from pydantic import validator
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Load environment variables from .env file (in parent directory)
@@ -24,10 +24,13 @@ class Environment(str, Enum):
 
 
 class UserRole(str, Enum):
-    CUSTOMER = "customer"
-    ADMIN = "admin"
-    MANAGER = "manager"
-    OWNER = "owner"
+    """User roles matching database schema - customers don't need login for frontend"""
+
+    SUPER_ADMIN = "super_admin"  # Highest privilege - full system access
+    ADMIN = "admin"  # Administrative access
+    CUSTOMER_SUPPORT = "customer_support"  # Customer service team
+    STATION_MANAGER = "station_manager"  # Station-specific operations
+    # Note: Regular customers don't have accounts - they book as guests
 
 
 class Settings(BaseSettings):
@@ -45,6 +48,11 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     ENVIRONMENT: Environment = Environment.PRODUCTION
     API_VERSION: str = "1.0.0"
+
+    # Development Mode - Auto Super Admin
+    DEV_MODE: bool = False
+    DEV_SUPER_ADMIN_EMAIL: str | None = None
+    DEV_SUPER_ADMIN_TOKEN: str | None = None
 
     # Server
     HOST: str = "0.0.0.0"
@@ -91,11 +99,6 @@ class Settings(BaseSettings):
     STRIPE_SECRET_KEY: str
     STRIPE_PUBLISHABLE_KEY: str
     STRIPE_WEBHOOK_SECRET: str
-
-    # Plaid - REQUIRED: Must come from .env
-    PLAID_CLIENT_ID: str
-    PLAID_SECRET: str
-    PLAID_ENV: str = "sandbox"
 
     # Meta (Facebook/Instagram) - REQUIRED: Must come from .env
     META_APP_ID: str
@@ -411,7 +414,6 @@ class Settings(BaseSettings):
     ZELLE_EMAIL: str = "myhibachichef@gmail.com"
     ZELLE_PHONE: str = "+19167408768"
     VENMO_USERNAME: str = "@myhibachichef"
-    CASHAPP_USERNAME: str = "$myhibachichef"
 
     # Worker Configuration
     WORKERS_ENABLED: bool = False
@@ -531,7 +533,8 @@ class Settings(BaseSettings):
     # Pydantic Validators for Critical Environment Variables
     # ruff: noqa: N805 - cls is correct for Pydantic validators
 
-    @validator("SECRET_KEY")
+    @field_validator("SECRET_KEY")
+    @classmethod
     def validate_secret_key(cls, v: str) -> str:
         """Ensure SECRET_KEY is at least 32 characters for security"""
         if len(v) < 32:
@@ -540,7 +543,8 @@ class Settings(BaseSettings):
             )
         return v
 
-    @validator("ENCRYPTION_KEY")
+    @field_validator("ENCRYPTION_KEY")
+    @classmethod
     def validate_encryption_key(cls, v: str) -> str:
         """Ensure ENCRYPTION_KEY is at least 32 characters"""
         if len(v) < 32:
@@ -549,7 +553,8 @@ class Settings(BaseSettings):
             )
         return v
 
-    @validator("STRIPE_SECRET_KEY")
+    @field_validator("STRIPE_SECRET_KEY")
+    @classmethod
     def validate_stripe_secret_key(cls, v: str) -> str:
         """Validate Stripe secret key format"""
         if not v.startswith(("sk_test_", "sk_live_")):
@@ -559,7 +564,8 @@ class Settings(BaseSettings):
             )
         return v
 
-    @validator("STRIPE_WEBHOOK_SECRET")
+    @field_validator("STRIPE_WEBHOOK_SECRET")
+    @classmethod
     def validate_stripe_webhook_secret(cls, v: str) -> str:
         """Validate Stripe webhook secret format"""
         # Allow test/dev placeholders for local development
@@ -572,7 +578,8 @@ class Settings(BaseSettings):
             )
         return v
 
-    @validator("DATABASE_URL")
+    @field_validator("DATABASE_URL")
+    @classmethod
     def validate_database_url(cls, v: str) -> str:
         """Validate database URL format (PostgreSQL or SQLite)"""
         if not v.startswith(("postgresql", "sqlite")):
@@ -582,7 +589,8 @@ class Settings(BaseSettings):
             )
         return v
 
-    @validator("REDIS_URL")
+    @field_validator("REDIS_URL")
+    @classmethod
     def validate_redis_url(cls, v: str) -> str:
         """Validate Redis URL format"""
         if not v.startswith("redis://"):
@@ -593,14 +601,14 @@ class Settings(BaseSettings):
 
     def get_rate_limit_for_user(self, user_role: UserRole | None = None) -> dict:
         """Get rate limit configuration based on user role"""
-        if user_role in [UserRole.OWNER, UserRole.MANAGER]:
+        if user_role in [UserRole.SUPER_ADMIN]:
             return {
                 "per_minute": self.RATE_LIMIT_ADMIN_SUPER_PER_MINUTE,
                 "per_hour": self.RATE_LIMIT_ADMIN_SUPER_PER_HOUR,
                 "burst": self.RATE_LIMIT_ADMIN_SUPER_BURST,
                 "tier": "admin_super",
             }
-        elif user_role == UserRole.ADMIN:
+        elif user_role in [UserRole.ADMIN, UserRole.STATION_MANAGER]:
             return {
                 "per_minute": self.RATE_LIMIT_ADMIN_PER_MINUTE,
                 "per_hour": self.RATE_LIMIT_ADMIN_PER_HOUR,

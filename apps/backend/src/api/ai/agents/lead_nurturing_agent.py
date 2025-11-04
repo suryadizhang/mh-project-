@@ -45,9 +45,16 @@ class LeadNurturingAgent(BaseAgent):
         )
     """
 
-    def __init__(self):
+    def __init__(self, provider=None):
+        """
+        Initialize Lead Nurturing Agent.
+
+        Args:
+            provider: Optional ModelProvider instance (for DI, None = lazy load from container)
+        """
         super().__init__(
             agent_type="lead_nurturing",
+            provider=provider,  # Pass to base class
             temperature=0.8,  # More creative for sales
             max_tokens=600,  # Longer responses for explanations
         )

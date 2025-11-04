@@ -7,7 +7,7 @@ from datetime import datetime
 from enum import Enum
 import uuid
 
-from core.database import Base
+from models.base import Base
 from sqlalchemy import (
     Boolean,
     Column,

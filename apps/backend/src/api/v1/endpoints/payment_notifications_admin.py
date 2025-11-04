@@ -12,7 +12,7 @@ from typing import Any
 
 from core.database import get_db
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
-from middleware.auth import require_roles
+from api.app.auth import require_roles
 from models.payment_notification import (
     CateringBooking,
     CateringPayment,
@@ -20,7 +20,7 @@ from models.payment_notification import (
     PaymentNotificationStatus,
     PaymentProvider,
 )
-from models.user import UserRole
+from core.config import UserRole
 from pydantic import BaseModel, Field
 from sqlalchemy import desc, func
 from sqlalchemy.orm import Session

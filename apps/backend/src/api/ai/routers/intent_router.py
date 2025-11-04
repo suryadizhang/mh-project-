@@ -159,9 +159,25 @@ class IntentRouter:
         ],
     }
 
-    def __init__(self):
-        """Initialize the intent router"""
-        self.provider = get_provider()
+    def __init__(self, provider=None):
+        """
+        Initialize the intent router.
+
+        Args:
+            provider: Optional ModelProvider instance (for DI, None = lazy load from container)
+        """
+        # Phase 2: Dependency Injection support (backward compatible)
+        self.provider = provider
+
+        if self.provider is None:
+            # Backward compatibility: lazy load from container
+            try:
+                from ..container import get_container
+
+                self.provider = get_container().get_model_provider()
+            except ImportError:
+                # Fallback to old way if container not available
+                self.provider = get_provider()
 
         # Initialize agents (lazy loading)
         self._agents: dict[AgentType, Any] = {}
