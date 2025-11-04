@@ -45,9 +45,16 @@ class CustomerCareAgent(BaseAgent):
         )
     """
 
-    def __init__(self):
+    def __init__(self, provider=None):
+        """
+        Initialize Customer Care Agent.
+
+        Args:
+            provider: Optional ModelProvider instance (for DI, None = lazy load from container)
+        """
         super().__init__(
             agent_type="customer_care",
+            provider=provider,  # Pass to base class
             temperature=0.6,  # More consistent, less creative
             max_tokens=500,
         )

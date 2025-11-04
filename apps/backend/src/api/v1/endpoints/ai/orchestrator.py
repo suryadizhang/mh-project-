@@ -7,15 +7,17 @@ It integrates with OpenAI function calling and tool execution.
 Author: MyHibachi Development Team
 Created: October 31, 2025
 Version: 1.0.0 (Phase 1)
+Updated: Phase 3 (DI Container integration)
 """
 
 import logging
 
+# Phase 3: Using DI Container pattern
+from api.ai.container import get_container
 from api.ai.orchestrator import (
     AIOrchestrator,
     OrchestratorRequest,
     OrchestratorResponse,
-    get_ai_orchestrator,
 )
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from fastapi.responses import JSONResponse
@@ -26,13 +28,14 @@ router = APIRouter()
 
 def get_orchestrator() -> AIOrchestrator:
     """
-    Dependency to get orchestrator singleton.
+    Dependency to get orchestrator singleton via DI Container.
 
     Returns:
         AIOrchestrator instance
     """
     try:
-        return get_ai_orchestrator()
+        container = get_container()
+        return container.get_orchestrator()
     except Exception as e:
         logger.exception(f"Failed to get orchestrator: {e!s}")
         raise HTTPException(status_code=500, detail="Failed to initialize AI orchestrator")
@@ -251,15 +254,23 @@ async def health_check():
         Health status of orchestrator service
     """
     try:
-        # Check if orchestrator can be initialized
-        orchestrator = get_ai_orchestrator()
+        # Check if orchestrator can be initialized (via DI Container)
+        container = get_container()
+        orchestrator = container.get_orchestrator()
 
         return {
             "status": "healthy",
             "version": "1.0.0",
-            "phase": "Phase 1",
-            "tools_count": len(orchestrator.tool_registry.list_tools()),
-            "openai_configured": bool(orchestrator.client.api_key),
+            "phase": "Phase 3 (DI Container)",
+            "tools_count": (
+                len(orchestrator.tool_registry.list_tools())
+                if hasattr(orchestrator, "tool_registry")
+                else "N/A (multi-agent mode)"
+            ),
+            "openai_configured": (
+                bool(orchestrator.client.api_key) if hasattr(orchestrator, "client") else True
+            ),
+            "using_container": True,
         }
     except Exception as e:
         logger.exception(f"Health check failed: {e!s}")

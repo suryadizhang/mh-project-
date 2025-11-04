@@ -196,6 +196,22 @@ class AuthService:
         credentials: HTTPAuthorizationCredentials | None = Depends(security),
     ) -> UserAuth:
         """Get current user from JWT token"""
+
+        # 🔓 DEVELOPMENT MODE: Auto Super Admin
+        if settings.DEV_MODE and credentials:
+            token = credentials.credentials
+
+            # Check for dev super admin token
+            if token == settings.DEV_SUPER_ADMIN_TOKEN:
+                logger.info("🔓 DEV MODE: Auto super admin access granted")
+                return UserAuth(
+                    id="dev-super-admin",
+                    email=settings.DEV_SUPER_ADMIN_EMAIL or "dev@myhibachichef.com",
+                    hashed_password="",
+                    roles=["super_admin"],
+                    permissions=[],
+                )
+
         if not credentials:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -277,6 +293,11 @@ def require_staff():
 def require_customer():
     """Require customer role"""
     return auth_service.require_roles(["customer"])
+
+
+def require_roles(roles: list[str]):
+    """Generic helper to require specific roles"""
+    return auth_service.require_roles(roles)
 
 
 # Rate limiting for authentication endpoints

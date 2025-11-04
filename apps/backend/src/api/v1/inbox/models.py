@@ -8,7 +8,7 @@ from enum import Enum
 from typing import Any
 from uuid import uuid4
 
-from api.app.database import Base
+from models.base import Base
 from sqlalchemy import (
     JSON,
     Boolean,

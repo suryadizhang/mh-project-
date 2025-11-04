@@ -26,7 +26,7 @@ from api.app.auth.models import (
 from api.app.database import get_db_session
 from api.app.utils.encryption import FieldEncryption
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import and_, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -93,8 +93,8 @@ class ChangePasswordRequest(BaseModel):
     current_password: str
     new_password: str = Field(..., min_length=8, max_length=200)
 
-    @validator("new_password")
-    def passwords_must_differ(self, v, values):
+    @field_validator("new_password")
+    def passwords_must_differ(cls, v, info):
         if "current_password" in values and v == values["current_password"]:
             raise ValueError("New password must be different from current password")
         return v

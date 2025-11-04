@@ -15,7 +15,7 @@ from api.app.database import get_db
 from api.app.models.notification_groups import NotificationEventType
 from api.app.utils.auth import require_super_admin
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from services.notification_group_service import NotificationGroupService
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -35,8 +35,9 @@ class GroupCreateRequest(BaseModel):
     station_id: UUID | None = Field(None, description="Station ID (null = all stations)")
     event_types: list[str] = Field(default=["all"], description="Event types to subscribe to")
 
-    @validator("event_types")
-    def validate_event_types(self, v):
+    @field_validator("event_types")
+    @classmethod
+    def validate_event_types(cls, v):
         valid_events = [e.value for e in NotificationEventType]
         for event in v:
             if event not in valid_events:
@@ -80,8 +81,9 @@ class EventSubscriptionRequest(BaseModel):
     priority_filter: dict | None = None
     custom_filters: dict | None = None
 
-    @validator("event_type")
-    def validate_event_type(self, v):
+    @field_validator("event_type")
+    @classmethod
+    def validate_event_type(cls, v):
         valid_events = [e.value for e in NotificationEventType]
         if v not in valid_events:
             raise ValueError(f"Invalid event type: {v}")

@@ -111,9 +111,7 @@ class Payment(BaseModel):
 
     # Payment details
     amount = Column(Numeric(10, 2), nullable=False)  # Using Decimal for money
-    payment_method = Column(
-        String(50), nullable=False
-    )  # zelle, venmo, cashapp, stripe, cash, check
+    payment_method = Column(String(50), nullable=False)  # zelle, venmo, stripe, cash, check
     payment_reference = Column(String(255))  # Transaction ID, check number, etc.
     status = Column(
         SQLEnum(PaymentStatus), default=PaymentStatus.PENDING, nullable=False, index=True

@@ -9,7 +9,7 @@ import logging
 from api.v1.schemas.user import UserListResponse, UserResponse
 from core.database import get_db
 from core.exceptions import ForbiddenException, ValidationException
-from core.security import get_current_user
+from core.security import require_auth
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from models.user import User, UserStatus
 from services.email_service import email_service
@@ -21,10 +21,45 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-def require_super_admin(current_user: User = Depends(get_current_user)):
+async def get_current_user_model(
+    user_data: dict = Depends(require_auth),
+    db: AsyncSession = Depends(get_db),
+) -> User:
+    """
+    Get current user as User model from database
+    Requires authentication and fetches full User object
+    """
+    try:
+        result = await db.execute(select(User).where(User.id == user_data["id"]))
+        user = result.scalar_one_or_none()
+
+        if not user:
+            logger.error(f"User {user_data['id']} from token not found in database")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        return user
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching user from database: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to authenticate user",
+        )
+
+
+async def require_super_admin(current_user: User = Depends(get_current_user_model)) -> User:
     """Dependency to ensure user is a super admin"""
     if not current_user.is_super_admin:
-        raise ForbiddenException("Only super admins can access this resource")
+        logger.warning(f"User {current_user.id} attempted super admin action without privileges")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only super admins can access this resource",
+        )
     return current_user
 
 

@@ -16,10 +16,9 @@ import re
 from typing import Any
 
 # Import AI Orchestrator (Tool Calling System)
-from api.ai.orchestrator import (
-    OrchestratorRequest,
-    get_ai_orchestrator,
-)
+# Phase 3: Using DI Container pattern
+from api.ai.container import get_container
+from api.ai.orchestrator import OrchestratorRequest
 
 logger = logging.getLogger(__name__)
 
@@ -34,9 +33,11 @@ class MultiChannelAIHandler:
         self.logger = logging.getLogger(self.__class__.__name__)
 
         # Initialize AI Orchestrator (Tool Calling System)
+        # Phase 3: Using DI Container pattern
         try:
-            self.orchestrator = get_ai_orchestrator()
-            self.logger.info("✅ AI Orchestrator initialized successfully")
+            container = get_container()
+            self.orchestrator = container.get_orchestrator()
+            self.logger.info("✅ AI Orchestrator initialized successfully (via DI Container)")
         except Exception as e:
             self.logger.exception(f"❌ Failed to initialize AI Orchestrator: {e!s}")
             self.orchestrator = None

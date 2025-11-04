@@ -4,16 +4,18 @@ Handles role assignment and permission management for users
 """
 
 from uuid import UUID
+import logging
 
 from api.deps import get_current_user
 from core.database import get_db
-from core.exceptions import ForbiddenException
 from fastapi import APIRouter, Depends, HTTPException, status
 from models.role import Permission, Role
 from models.user import User
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/admin/roles", tags=["Role Management"])
 
@@ -72,10 +74,47 @@ class UserRolesResponse(BaseModel):
 # ==================== Helper Functions ====================
 
 
-async def require_super_admin(current_user: User = Depends(get_current_user)) -> User:
+async def get_current_user_model(
+    user_data: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> User:
+    """
+    Get current user as User model from database
+    Requires authentication and fetches full User object
+    """
+    try:
+        result = await db.execute(select(User).where(User.id == user_data["id"]))
+        user = result.scalar_one_or_none()
+
+        if not user:
+            logger.error(f"User {user_data['id']} from token not found in database")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        return user
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching user from database: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to authenticate user",
+        )
+
+
+async def require_super_admin(current_user: User = Depends(get_current_user_model)) -> User:
     """Require super admin access for role management"""
     if not current_user.is_super_admin:
-        raise ForbiddenException(detail="Only super administrators can manage roles")
+        logger.warning(
+            f"User {current_user.id} attempted role management without super admin privileges"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only super administrators can manage roles",
+        )
     return current_user
 
 

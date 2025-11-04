@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 import logging
 import os
 
-from db.models import Customer
+from models.customer import Customer
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 

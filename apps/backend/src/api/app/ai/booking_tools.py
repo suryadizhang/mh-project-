@@ -13,10 +13,10 @@ from api.app.auth.models import User
 from api.app.cqrs.base import command_bus, query_bus
 from api.app.cqrs.crm_operations import *
 from api.app.database import get_db_session
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__, field_validator)
 
 
 class AIBookingToolsConfig:
@@ -80,8 +80,9 @@ class AIBookingRequest(BaseModel):
     ai_conversation_id: str = Field(..., min_length=1, max_length=100)
     source: str = Field(default="ai_chat")
 
-    @validator("customer_phone")
-    def validate_phone(self, v):
+    @field_validator("customer_phone")
+    @classmethod
+    def validate_phone(cls, v):
         # Extract digits and validate US phone format
         digits = re.sub(r"[^\d]", "", v)
         if len(digits) == 10:
@@ -91,16 +92,18 @@ class AIBookingRequest(BaseModel):
         else:
             raise ValueError("Phone number must be valid US format")
 
-    @validator("preferred_slot")
-    def validate_slot(self, v):
+    @field_validator("preferred_slot")
+    @classmethod
+    def validate_slot(cls, v):
         if v not in AIBookingToolsConfig.AVAILABLE_SLOTS:
             raise ValueError(
                 f'Slot must be one of: {", ".join(AIBookingToolsConfig.AVAILABLE_SLOTS)}'
             )
         return v
 
-    @validator("preferred_date")
-    def validate_date(self, v):
+    @field_validator("preferred_date")
+    @classmethod
+    def validate_date(cls, v):
         today = date.today()
         min_date = today + timedelta(hours=AIBookingToolsConfig.MIN_ADVANCE_BOOKING_HOURS / 24)
         max_date = today + timedelta(days=AIBookingToolsConfig.MAX_ADVANCE_BOOKING_DAYS)

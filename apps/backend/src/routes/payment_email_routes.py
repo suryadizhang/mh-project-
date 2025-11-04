@@ -19,8 +19,8 @@ from services.payment_email_monitor import PaymentEmailMonitor
 from sqlalchemy.orm import Session
 
 settings = get_settings()
-from middleware.auth import require_roles
-from models.user import UserRole
+from api.app.auth import require_roles
+from core.config import UserRole
 from services.email_service import EmailService
 from services.notification_service import NotificationService
 from services.payment_matcher_service import PaymentEmailService

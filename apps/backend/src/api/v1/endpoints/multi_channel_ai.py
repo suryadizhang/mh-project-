@@ -8,7 +8,7 @@ import time
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +34,9 @@ class MultiChannelInquiry(BaseModel):
         default=None, description="Additional customer metadata (if available)"
     )
 
-    @validator("channel")
-    def validate_channel(self, v):
+    @field_validator("channel")
+    @classmethod
+    def validate_channel(cls, v):
         allowed_channels = ["email", "sms", "instagram", "facebook", "phone_transcript", "web_chat"]
         if v.lower() not in allowed_channels:
             raise ValueError(f"Channel must be one of: {', '.join(allowed_channels)}")

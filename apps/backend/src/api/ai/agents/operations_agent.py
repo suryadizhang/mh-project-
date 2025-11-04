@@ -45,9 +45,18 @@ class OperationsAgent(BaseAgent):
         )
     """
 
-    def __init__(self):
+    def __init__(self, provider=None):
+        """
+        Initialize Operations Agent.
+
+        Args:
+            provider: Optional ModelProvider instance (for DI, None = lazy load from container)
+        """
         super().__init__(
-            agent_type="operations", temperature=0.4, max_tokens=400  # Very consistent, factual
+            agent_type="operations",
+            provider=provider,  # Pass to base class
+            temperature=0.4,
+            max_tokens=400,  # Very consistent, factual
         )
 
     def get_system_prompt(self) -> str:

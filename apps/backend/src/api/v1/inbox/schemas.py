@@ -11,7 +11,7 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    validator,
+    field_validator,
 )
 
 from .models import MessageChannel, MessageDirection, MessageStatus, TCPAStatus
@@ -59,18 +59,24 @@ class SendMessageRequest(BaseModel):
     # Metadata
     metadata: dict[str, Any] | None = None
 
-    @validator("phone_number", "email_address", "social_handle")
-    def validate_recipient(self, v, values):
+    @field_validator("phone_number", "email_address", "social_handle")
+    @classmethod
+    def validate_recipient(cls, v, info):
         """Ensure at least one recipient identifier is provided"""
+        # In Pydantic v2, we need to check all fields after validation
+        # This validator will run for each field, so we just return the value
+        return v
+
+    def model_post_init(self, __context):
+        """Validate that at least one recipient identifier is provided"""
         identifiers = [
-            values.get("phone_number"),
-            values.get("email_address"),
-            values.get("social_handle"),
-            values.get("contact_id"),
+            self.phone_number,
+            self.email_address,
+            self.social_handle,
+            self.contact_id,
         ]
         if not any(identifiers):
             raise ValueError("At least one recipient identifier must be provided")
-        return v
 
 
 class MessageFilterRequest(BaseModel):

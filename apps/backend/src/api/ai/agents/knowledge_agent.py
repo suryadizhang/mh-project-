@@ -45,9 +45,16 @@ class KnowledgeAgent(BaseAgent):
         )
     """
 
-    def __init__(self):
+    def __init__(self, provider=None):
+        """
+        Initialize Knowledge Agent.
+
+        Args:
+            provider: Optional ModelProvider instance (for DI, None = lazy load from container)
+        """
         super().__init__(
             agent_type="knowledge",
+            provider=provider,  # Pass to base class
             temperature=0.3,  # Very factual, low creativity
             max_tokens=600,  # Longer for detailed explanations
         )

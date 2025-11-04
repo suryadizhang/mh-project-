@@ -202,7 +202,7 @@ def extract_user_from_token(token: str) -> dict[str, Any] | None:
         try:
             role = UserRole(role_str.lower())
         except (ValueError, AttributeError):
-            role = UserRole.CUSTOMER
+            role = None  # No default role - must be valid staff role
 
         return {"id": user_id, "email": email, "role": role}
     return None
@@ -326,22 +326,29 @@ def generate_secure_token(length: int = 32) -> str:
 
 def get_user_rate_limit_tier(user_role: UserRole | None) -> str:
     """Get rate limit tier based on user role"""
-    if user_role in [UserRole.OWNER, UserRole.MANAGER]:
+    if user_role == UserRole.SUPER_ADMIN:
         return "admin_super"
-    elif user_role == UserRole.ADMIN:
+    elif user_role in [UserRole.ADMIN, UserRole.STATION_MANAGER]:
         return "admin"
+    elif user_role == UserRole.CUSTOMER_SUPPORT:
+        return "support"
     else:
         return "public"
 
 
 def is_admin_user(user_role: UserRole | None) -> bool:
     """Check if user has admin privileges"""
-    return user_role in [UserRole.ADMIN, UserRole.MANAGER, UserRole.OWNER]
+    return user_role in [
+        UserRole.SUPER_ADMIN,
+        UserRole.ADMIN,
+        UserRole.STATION_MANAGER,
+        UserRole.CUSTOMER_SUPPORT,
+    ]
 
 
 def is_super_admin(user_role: UserRole | None) -> bool:
     """Check if user has super admin privileges"""
-    return user_role in [UserRole.MANAGER, UserRole.OWNER]
+    return user_role == UserRole.SUPER_ADMIN
 
 
 # =============================================================================
