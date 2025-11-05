@@ -11,7 +11,8 @@ class TestPydanticDefaultSafety:
 
     def test_health_response_no_shared_dict(self):
         """Verify checks dict is not shared between instances"""
-        from api.app.schemas.health import HealthResponse
+        # Phase 2B: TODO - schemas need to be identified in NEW structure
+        from api.app.schemas.health import HealthResponse  # TODO: Update to schemas.*
 
         # Create first instance and modify checks
         health1 = HealthResponse(status="healthy", service="test", environment="dev", version="1.0")
@@ -28,7 +29,7 @@ class TestPydanticDefaultSafety:
 
     def test_command_result_no_shared_list(self):
         """Verify events list is not shared between instances"""
-        from api.app.cqrs.base import CommandResult
+        from cqrs.base import CommandResult  # Phase 2B: Updated from api.app.cqrs.base
 
         # Create first instance and add event
         result1 = CommandResult(success=True)
@@ -46,7 +47,8 @@ class TestPydanticDefaultSafety:
 
     def test_chat_request_no_shared_context(self):
         """Verify context dict is not shared"""
-        from api.ai.endpoints.routers.chat import ChatMessageRequest
+        # Phase 2B: TODO - ai.endpoints needs mapping to NEW structure
+        from api.ai.endpoints.routers.chat import ChatMessageRequest  # TODO: Map ai.* module
 
         # Create first request and modify context
         req1 = ChatMessageRequest(message="test1")
@@ -99,7 +101,9 @@ class TestStationPermissions:
 
     def test_require_station_permission_returns_dependency(self):
         """Verify require_station_permission returns a callable dependency"""
-        from api.app.auth.station_middleware import require_station_permission
+        from core.auth.station_middleware import (
+            require_station_permission,
+        )  # Phase 2B: Updated from api.app.auth.station_middleware
         import inspect
 
         dep = require_station_permission("view_stations")
@@ -111,7 +115,9 @@ class TestStationPermissions:
 
     def test_audit_log_action_signature(self):
         """Verify audit_log_action has correct signature"""
-        from api.app.auth.station_middleware import audit_log_action
+        from core.auth.station_middleware import (
+            audit_log_action,
+        )  # Phase 2B: Updated from api.app.auth.station_middleware
         import inspect
 
         sig = inspect.signature(audit_log_action)
@@ -130,7 +136,7 @@ class TestOutboxWorker:
 
     def test_outbox_entry_model_fields(self):
         """Verify OutboxEntry has correct fields"""
-        from api.app.models.events import OutboxEntry
+        from models.legacy_events import OutboxEntry  # Phase 2B: Updated from api.app.models.events
 
         # Check model has correct fields
         assert hasattr(OutboxEntry, "status")
@@ -143,7 +149,9 @@ class TestOutboxWorker:
 
     def test_worker_uses_context_manager(self):
         """Verify worker uses get_db_context"""
-        from api.app.workers.outbox_processors import OutboxWorkerBase
+        from workers.outbox_processors import (
+            OutboxWorkerBase,
+        )  # Phase 2B: Updated from api.app.workers.outbox_processors
         import inspect
 
         # Read source to verify get_db_context usage
@@ -157,7 +165,7 @@ class TestConfiguration:
 
     def test_workers_disabled_by_default(self):
         """Verify workers are disabled in default config"""
-        from api.app.config import Settings
+        from core.config import Settings  # Phase 2B: Updated from api.app.config
 
         settings = Settings()
         assert settings.workers_enabled == False
@@ -165,7 +173,7 @@ class TestConfiguration:
 
     def test_worker_config_structure(self):
         """Verify get_worker_configs returns correct structure"""
-        from api.app.config import Settings
+        from core.config import Settings  # Phase 2B: Updated from api.app.config
 
         settings = Settings()
         config = settings.get_worker_configs()
