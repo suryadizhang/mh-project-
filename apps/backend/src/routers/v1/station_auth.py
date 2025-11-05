@@ -5,12 +5,12 @@ Provides station-aware authentication endpoints for the admin interface.
 
 from typing import Any
 
-from api.app.auth.middleware import get_current_user, get_db_session
-from api.app.auth.models import AuthenticationService, User
-from api.app.auth.station_auth import (
+from core.auth.middleware import get_current_user, get_db_session
+from core.auth.models import AuthenticationService, User
+from core.auth.station_auth import (
     StationAuthenticationService,
 )
-from api.app.crm.endpoints import ApiResponse
+from cqrs.crm_operations import ApiResponse
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession

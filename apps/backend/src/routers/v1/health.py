@@ -7,8 +7,8 @@ from datetime import datetime
 import time
 from typing import Any
 
-from api.app.database import get_db
-from api.app.schemas.health import HealthResponse, ReadinessResponse
+from core.database import get_db
+from schemas.health import HealthResponse, ReadinessResponse
 from core.config import get_settings
 from fastapi import APIRouter, HTTPException
 

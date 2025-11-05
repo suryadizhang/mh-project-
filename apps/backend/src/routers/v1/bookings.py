@@ -16,8 +16,8 @@ from datetime import datetime
 import logging
 from typing import Any
 
-from api.app.database import get_db
-from api.app.utils.auth import (
+from core.database import get_db
+from utils.auth import (
     can_access_station,
     get_current_user,
     require_customer_support,
@@ -278,7 +278,7 @@ async def get_bookings(
     """
     from uuid import UUID
 
-    from api.app.models.core import Booking
+    from models.legacy_core import Booking
     from sqlalchemy import select
     from sqlalchemy.orm import joinedload
     from utils.pagination import paginate_query
@@ -422,7 +422,7 @@ async def get_booking(
     """
     from uuid import UUID
 
-    from api.app.models.core import Booking
+    from models.legacy_core import Booking
     from sqlalchemy import select
     from sqlalchemy.orm import joinedload, selectinload
 
@@ -965,7 +965,7 @@ async def delete_booking(
     from datetime import timedelta
     from uuid import UUID
 
-    from api.app.models.core import Booking
+    from models.legacy_core import Booking
     from sqlalchemy import select
 
     # Fetch booking
@@ -1176,7 +1176,7 @@ async def get_weekly_bookings(
     from datetime import datetime
     from uuid import UUID
 
-    from api.app.models.core import Booking
+    from models.legacy_core import Booking
     from core.security import decrypt_pii
     from sqlalchemy import and_, select
     from sqlalchemy.orm import joinedload
@@ -1456,7 +1456,7 @@ async def update_booking_datetime(
     import re
     from uuid import UUID
 
-    from api.app.models.core import Booking
+    from models.legacy_core import Booking
     from sqlalchemy import select
 
     # TODO: Add admin role check

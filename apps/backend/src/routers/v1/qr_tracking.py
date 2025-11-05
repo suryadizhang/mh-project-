@@ -5,9 +5,9 @@ Handles QR code redirects and tracking analytics
 
 import secrets
 
-from api.app.database import get_db
-from api.app.models.qr_tracking import QRCodeType
-from api.app.services.qr_tracking_service import QRTrackingService
+from core.database import get_db
+from models.legacy_qr_tracking import QRCodeType
+from services.qr_tracking_service import QRTrackingService
 from fastapi import APIRouter, Depends, Request, Response
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession

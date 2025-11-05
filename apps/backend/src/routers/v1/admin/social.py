@@ -5,15 +5,15 @@ import logging
 from typing import Any
 from uuid import UUID
 
-from api.app.cqrs.base import CommandBus, QueryBus
-from api.app.cqrs.social_commands import (
+from cqrs.base import CommandBus, QueryBus
+from cqrs.social_commands import (
     AcknowledgeReviewCommand,
     CreateLeadFromSocialCommand,
     EscalateReviewCommand,
     SendSocialReplyCommand,
     UpdateThreadStatusCommand,
 )
-from api.app.cqrs.social_queries import (
+from cqrs.social_queries import (
     GetReviewsBoardQuery,
     GetSocialAnalyticsQuery,
     GetSocialInboxQuery,
@@ -21,13 +21,13 @@ from api.app.cqrs.social_queries import (
     GetThreadDetailQuery,
     GetUnreadCountsQuery,
 )
-from api.app.dependencies import (
+from core.dependencies import (
     get_command_bus,
     get_current_admin_user,
     get_query_bus,
 )
-from api.app.models.social import ReviewStatus, SocialPlatform, ThreadStatus
-from api.app.schemas.social import (
+from models.legacy_social import ReviewStatus, SocialPlatform, ThreadStatus
+from schemas.social import (
     AcknowledgeReviewRequest,
     CreateLeadRequest,
     EscalateReviewRequest,
@@ -37,11 +37,11 @@ from api.app.schemas.social import (
     ThreadDetailResponse,
     UpdateThreadStatusRequest,
 )
-from api.app.services.social_ai_generator import (
+from services.social_ai_generator import (
     SocialAIResponseGenerator,
     SocialResponseContext,
 )
-from api.app.services.social_ai_tools import SocialMediaToolKit
+from services.social_ai_tools import SocialMediaToolKit
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi import Query as QueryParam
 from fastapi.responses import JSONResponse

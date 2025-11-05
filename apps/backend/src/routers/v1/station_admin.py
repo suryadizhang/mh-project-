@@ -7,20 +7,20 @@ from datetime import datetime, timedelta
 import logging
 from typing import Any
 
-from api.app.auth.station_middleware import (
+from core.auth.station_middleware import (
     AuthenticatedUser,
     require_station_permission,
 )
-from api.app.auth.station_middleware import (
+from core.auth.station_middleware import (
     audit_log_action as log_station_activity,
 )
-from api.app.auth.station_models import (
+from core.auth.station_models import (
     Station,
     StationAuditLog,
     StationUser,
 )
-from api.app.database import get_db_session
-from api.app.utils.station_code_generator import (
+from core.database import get_db_session
+from utils.station_code_generator import (
     generate_station_code,
 )
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -730,7 +730,7 @@ async def delete_station(
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Station not found")
 
         # Safety check 1: Check for active bookings
-        from api.app.models.booking_models import Booking
+        from models.legacy_booking_models import Booking
 
         active_bookings_result = await db.execute(
             select(func.count(Booking.id)).where(

@@ -9,15 +9,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import stripe
 
 settings = get_settings()
-from api.app.database import get_db
-from api.app.models.core import Payment
-from api.app.models.stripe_models import (
+from core.database import get_db
+from models.legacy_core import Payment
+from models.legacy_stripe_models import (
     Invoice,
     Refund,
     StripePayment,
     WebhookEvent,
 )
-from api.app.schemas.stripe_schemas import (
+from schemas.stripe_schemas import (
     CheckoutSessionResponse,
     CheckoutSessionVerifyRequest,
     CheckoutSessionVerifyResponse,
@@ -30,9 +30,9 @@ from api.app.schemas.stripe_schemas import (
     SuccessResponse,
     WebhookResponse,
 )
-from api.app.schemas.stripe_schemas import Invoice as InvoiceSchema
-from api.app.services.stripe_service import StripeService
-from api.app.utils.auth import get_admin_user, get_current_user
+from schemas.stripe_schemas import Invoice as InvoiceSchema
+from services.stripe_service import StripeService
+from utils.auth import get_admin_user, get_current_user
 
 # Configure Stripe
 stripe.api_key = settings.stripe_secret_key

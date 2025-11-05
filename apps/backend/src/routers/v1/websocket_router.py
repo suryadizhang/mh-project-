@@ -3,7 +3,7 @@ WebSocket router for unified inbox.
 Provides WebSocket endpoints for real-time communication updates.
 """
 
-from api.app.websockets.unified_inbox import (
+from websockets.unified_inbox import (
     get_websocket_stats,
     send_test_message,
     websocket_endpoint,

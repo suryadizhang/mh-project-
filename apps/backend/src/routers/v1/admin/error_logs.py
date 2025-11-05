@@ -20,7 +20,7 @@ import logging
 # Phase 2A: Temporarily commented out - need to fix role-based auth
 # from core.auth.middleware import require_role
 # from core.models import Role
-# OLD: from api.app.auth.dependencies import require_role
+# OLD: from core.auth.dependencies import require_role
 
 
 # Phase 2A: Temporary no-op decorator until role auth is fixed
@@ -33,7 +33,7 @@ def require_role(roles):
     return decorator
 
 
-from api.app.database import get_db
+from core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from middleware.structured_logging import (
     ErrorLog,

@@ -8,7 +8,7 @@ import json
 import logging
 from typing import Any
 
-from api.app.database import get_db
+from core.database import get_db
 from core.config import get_settings
 from fastapi import (
     APIRouter,
@@ -22,15 +22,15 @@ from sqlalchemy.orm import Session
 import stripe
 
 settings = get_settings()
-from api.app.models.core import Event
-from api.app.models.lead_newsletter import (
+from models.legacy_core import Event
+from models.legacy_lead_newsletter import (
     Lead,
     LeadSource,
     LeadStatus,
     SocialThread,
     ThreadStatus,
 )
-from api.app.services.ai_lead_management import get_ai_lead_manager
+from services.ai_lead_management import get_ai_lead_manager
 
 logger = logging.getLogger(__name__)
 

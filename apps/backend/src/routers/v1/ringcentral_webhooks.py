@@ -4,18 +4,18 @@ from datetime import datetime
 import logging
 from uuid import UUID
 
-from api.app.database import get_db
-from api.app.models.lead_newsletter import (
+from core.database import get_db
+from models.legacy_lead_newsletter import (
     ContactChannel,
     Lead,
     LeadContact,
 )
-from api.app.services.ai_lead_management import (
+from services.ai_lead_management import (
     get_ai_lead_manager,
     get_social_media_ai,
 )
-from api.app.services.newsletter_service import NewsletterService
-from api.app.services.ringcentral_sms import SMSMessage, ringcentral_sms
+from services.newsletter_service import NewsletterService
+from services.ringcentral_sms import SMSMessage, ringcentral_sms
 from fastapi import (
     APIRouter,
     BackgroundTasks,

@@ -11,9 +11,9 @@ Super admin endpoints for:
 from typing import Any
 from uuid import UUID
 
-from api.app.database import get_db
-from api.app.models.notification_groups import NotificationEventType
-from api.app.utils.auth import require_super_admin
+from core.database import get_db
+from models.legacy_notification_groups import NotificationEventType
+from utils.auth import require_super_admin
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field, field_validator
 from services.notification_group_service import NotificationGroupService

@@ -12,9 +12,9 @@ Endpoints:
 # from utils.query_optimizer import get_payment_analytics_optimized
 import logging
 
-from api.app.database import get_db
-from api.app.utils.auth import admin_required
-from api.app.utils.timezone_utils import get_date_range_for_station
+from core.database import get_db
+from utils.auth import admin_required
+from utils.timezone_utils import get_date_range_for_station
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -118,13 +118,13 @@ async def get_payment_analytics(
 
         # Add local time formatting if we have payment data
         if first_payment_utc:
-            from api.app.utils.timezone_utils import format_for_display
+            from utils.timezone_utils import format_for_display
 
             date_range_info["first_payment_local"] = format_for_display(
                 first_payment_utc, station_timezone
             )
         if last_payment_utc:
-            from api.app.utils.timezone_utils import format_for_display
+            from utils.timezone_utils import format_for_display
 
             date_range_info["last_payment_local"] = format_for_display(
                 last_payment_utc, station_timezone

@@ -5,8 +5,8 @@ import logging
 from typing import Any
 from uuid import UUID
 
-from api.app.database import get_db
-from api.app.models.lead_newsletter import (
+from core.database import get_db
+from models.legacy_lead_newsletter import (
     ContactChannel,
     Lead,
     LeadContact,
@@ -17,7 +17,7 @@ from api.app.models.lead_newsletter import (
     SocialPlatform,
     SocialThread,
 )
-from api.app.services.ai_lead_management import (
+from services.ai_lead_management import (
     get_ai_lead_manager,
     get_social_media_ai,
 )
@@ -369,7 +369,7 @@ async def get_nurture_sequence(lead_id: UUID, db: Session = Depends(get_db)):
     if not lead:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")
 
-    from api.app.services.ai_lead_management import get_lead_nurture_ai
+    from services.ai_lead_management import get_lead_nurture_ai
 
     nurture_ai = await get_lead_nurture_ai()
     sequence = await nurture_ai.create_nurture_sequence(lead)

@@ -3,9 +3,9 @@
 from datetime import date, datetime, timedelta
 from typing import Any
 
-from api.app.database import get_db
-from api.app.models.core import Booking
-from api.app.models.lead_newsletter import (
+from core.database import get_db
+from models.legacy_core import Booking
+from models.legacy_lead_newsletter import (
     Campaign,
     CampaignEvent,
     CampaignEventType,

@@ -5,8 +5,8 @@ import logging
 from typing import Any
 from uuid import UUID
 
-from api.app.database import get_db
-from api.app.models.lead_newsletter import (
+from core.database import get_db
+from models.legacy_lead_newsletter import (
     Campaign,
     CampaignChannel,
     CampaignEvent,
@@ -14,7 +14,7 @@ from api.app.models.lead_newsletter import (
     CampaignStatus,
     Subscriber,
 )
-from api.app.services.ai_lead_management import get_social_media_ai
+from services.ai_lead_management import get_social_media_ai
 from fastapi import (
     APIRouter,
     BackgroundTasks,

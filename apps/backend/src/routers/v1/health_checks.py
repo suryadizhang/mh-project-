@@ -17,7 +17,7 @@ from datetime import datetime
 import logging
 import time
 
-from api.app.database import get_db
+from core.database import get_db
 from core.config import get_settings
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel

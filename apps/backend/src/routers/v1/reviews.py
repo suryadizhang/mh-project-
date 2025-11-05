@@ -5,8 +5,8 @@ API endpoints for customer reviews and feedback.
 import logging
 from uuid import UUID
 
-from api.app.database import get_db
-from api.app.services.review_service import ReviewService
+from core.database import get_db
+from services.review_service import ReviewService
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field
 from services.unified_notification_service import (

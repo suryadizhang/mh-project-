@@ -6,19 +6,19 @@ from pathlib import Path
 import sys
 from typing import Any
 
-from api.app.database import get_db
-from api.app.schemas.booking_schemas import (
+from core.database import get_db
+from schemas.booking_schemas import (
     BookingCreate,
     CancelBookingRequest,
     WaitlistCreate,
     WaitlistEntry,
 )
-from api.app.utils.auth import (
+from utils.auth import (
     admin_required,
     get_current_user,
     superadmin_required,
 )
-from api.app.utils.timezone_utils import format_for_display
+from utils.timezone_utils import format_for_display
 from fastapi import (
     APIRouter,
     BackgroundTasks,

@@ -10,7 +10,7 @@ import json
 import logging
 from typing import Any
 
-from api.app.database import get_db
+from core.database import get_db
 from core.config import get_settings
 from fastapi import (
     APIRouter,
@@ -23,7 +23,7 @@ from fastapi import (
 from sqlalchemy.orm import Session
 
 settings = get_settings()
-from api.app.services.ringcentral_sms import RingCentralSMSService
+from services.ringcentral_sms import RingCentralSMSService
 
 logger = logging.getLogger(__name__)
 
