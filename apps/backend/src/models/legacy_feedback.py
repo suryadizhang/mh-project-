@@ -7,7 +7,7 @@ import secrets
 import string
 from uuid import uuid4
 
-from api.app.models.declarative_base import Base
+from models.declarative_base import Base  # Phase 2C: Updated from api.app.models.declarative_base
 from sqlalchemy import (
     Boolean,
     CheckConstraint,

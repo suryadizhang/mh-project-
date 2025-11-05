@@ -20,7 +20,7 @@ from datetime import datetime
 import enum
 import uuid
 
-from api.app.models.base import Base
+from models.base import Base  # Phase 2C: Updated from api.app.models.base
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship

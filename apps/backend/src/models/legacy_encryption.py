@@ -1,6 +1,6 @@
 """Encryption utility alias for lead/newsletter models."""
 
-from api.app.utils.encryption import get_field_encryption
+from utils.encryption import get_field_encryption  # Phase 2C: Updated from api.app.utils.encryption
 
 
 class CryptoUtil:

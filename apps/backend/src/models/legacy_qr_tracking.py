@@ -7,7 +7,7 @@ from datetime import datetime
 from enum import Enum as PyEnum
 from uuid import UUID, uuid4
 
-from api.app.models.declarative_base import Base
+from models.declarative_base import Base  # Phase 2C: Updated from api.app.models.declarative_base
 from sqlalchemy import (
     Boolean,
     Column,

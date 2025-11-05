@@ -2,7 +2,7 @@
 
 from enum import Enum
 
-from api.app.database import Base
+from core.database import Base  # Phase 2C: Updated from api.app.database
 from sqlalchemy import (
     ARRAY,
     Boolean,
