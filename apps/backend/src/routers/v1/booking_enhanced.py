@@ -37,10 +37,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 backend_dir = Path(__file__).parent.parent.parent.parent
 if str(backend_dir) not in sys.path:
     sys.path.insert(0, str(backend_dir))
-from utils.query_optimizer import (
-    get_booking_kpis_optimized,
-    get_customer_analytics_optimized,
-)
+
+# Phase 2A: Commented out missing functions - need to be implemented in core/query_optimizer.py
+# from utils.query_optimizer import (
+#     get_booking_kpis_optimized,
+#     get_customer_analytics_optimized,
+# )
+
+
+# Temporary fallback - these functions need proper implementation
+async def get_booking_kpis_optimized(db, *args, **kwargs):
+    """Placeholder - needs implementation in core/query_optimizer.py"""
+    return {}
+
+
+async def get_customer_analytics_optimized(db, *args, **kwargs):
+    """Placeholder - needs implementation in core/query_optimizer.py"""
+    return {}
+
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

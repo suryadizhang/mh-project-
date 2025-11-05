@@ -24,7 +24,15 @@ from pydantic import BaseModel
 from redis import asyncio as aioredis
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
-from twilio.rest import Client as TwilioClient
+
+# Phase 2A: Twilio is optional dependency - handle import gracefully
+try:
+    from twilio.rest import Client as TwilioClient
+
+    TWILIO_AVAILABLE = True
+except ImportError:
+    TWILIO_AVAILABLE = False
+    TwilioClient = None  # type: ignore
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
@@ -152,6 +160,15 @@ async def check_twilio_health() -> ComponentHealth:
     start_time = time.time()
 
     try:
+        # Phase 2A: Check if Twilio is available
+        if not TWILIO_AVAILABLE:
+            return ComponentHealth(
+                name="twilio",
+                status="degraded",
+                message="Twilio library not installed",
+                response_time_ms=0,
+            )
+
         if not settings.twilio_account_sid or not settings.twilio_auth_token:
             return ComponentHealth(
                 name="twilio",
