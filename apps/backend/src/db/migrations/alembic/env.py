@@ -6,7 +6,7 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 # Add src directory to path (go up from alembic/versions to src)
-backend_src = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+backend_src = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 if backend_src not in sys.path:
     sys.path.insert(0, backend_src)
 
@@ -14,11 +14,15 @@ if backend_src not in sys.path:
 from core.config import get_settings  # noqa: E402
 
 settings = get_settings()
-from api.app.database import Base  # noqa: E402
+
+# Import Base without importing async engine
+# Use models.base instead of api.app.database to avoid async engine creation
+from models.base import Base  # noqa: E402
 
 # Import all models for Alembic discovery
 from api.app.models import booking_models, stripe_models, core  # noqa: E402, F401
 from models import review  # noqa: E402, F401
+from models import business  # noqa: E402, F401  # New white-label business model
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -26,7 +30,7 @@ config = context.config
 
 # Override the database URL from settings
 # Use environment variable or settings
-database_url = os.getenv('DATABASE_URL', settings.database_url_sync)
+database_url = os.getenv("DATABASE_URL", settings.database_url_sync)
 config.set_main_option("sqlalchemy.url", database_url)
 
 # Interpret the config file for Python logging.
@@ -82,9 +86,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

@@ -450,12 +450,20 @@ class AIOrchestrator:
         This prompt defines the AI's role, capabilities, and constraints.
         Integrates with existing multi_channel_ai_handler tone/format.
 
+        WHITE-LABEL READY: Uses dynamic brand context from settings.
+
         Args:
             channel: Communication channel (email, sms, instagram, etc.)
 
         Returns:
             System prompt string
         """
+        # Get brand context from settings (white-label ready)
+        from ....core.config import get_settings
+
+        settings = get_settings()
+        brand = settings.get_brand_context()
+
         # Channel-specific tone adjustments
         channel_tones = {
             "email": "professional and detailed",
@@ -468,7 +476,7 @@ class AIOrchestrator:
 
         tone = channel_tones.get(channel, "professional and helpful")
 
-        return f"""You are an AI assistant for My Hibachi Chef, a premier hibachi catering service in Sacramento, CA.
+        return f"""You are an AI assistant for {brand['brand_name']}, a premier {brand['cuisine_type'].lower()} catering service in {brand['city']}, {brand['state']}.
 
 **YOUR ROLE**:
 - Help customers get accurate quotes for hibachi parties
@@ -496,7 +504,7 @@ Available tools:
 1. Use tools for any pricing question (even "roughly" or "ballpark")
 2. Break down costs clearly (base + proteins + travel = total)
 3. Mention gratuity is not included (20-35% suggested)
-4. Include contact info for booking: (916) 740-8768 or email
+4. Include contact info for booking: {brand['phone_formatted']} or {brand['email']}
 5. Be transparent about what's included vs. upgrades
 6. If customer says "filet" they mean "filet mignon"
 7. If customer says "steak" clarify if they mean NY Strip (FREE) or Filet (+$5)

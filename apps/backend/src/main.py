@@ -9,6 +9,13 @@ import logging
 import os
 import time
 
+# Import Sentry for error tracking and performance monitoring
+import sentry_sdk
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+from sentry_sdk.integrations.logging import LoggingIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+
 from core.config import get_settings
 from core.exceptions import (
     AppException,
@@ -32,12 +39,60 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+# Import SlowAPI for secondary rate limiting layer
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
+
+# Import Prometheus for metrics
+from prometheus_client import make_wsgi_app
+from starlette.middleware.wsgi import WSGIMiddleware
+
 # Configure settings
 settings = get_settings()
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Initialize Sentry if DSN is configured (PRODUCTION MONITORING)
+if settings.sentry_dsn:
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        environment=settings.sentry_environment or settings.ENVIRONMENT,
+        integrations=[
+            FastApiIntegration(transaction_style="endpoint"),
+            SqlalchemyIntegration(),
+            RedisIntegration(),
+            LoggingIntegration(
+                level=logging.INFO,  # Capture info and above as breadcrumbs
+                event_level=logging.ERROR,  # Send errors as events
+            ),
+        ],
+        # Performance Monitoring
+        traces_sample_rate=getattr(settings, "sentry_traces_sample_rate", 1.0),
+        profiles_sample_rate=getattr(settings, "sentry_profiles_sample_rate", 1.0),
+        # Additional options
+        send_default_pii=False,  # Don't send personally identifiable information
+        attach_stacktrace=True,
+        enable_tracing=True,
+        # Before send hook to filter sensitive data
+        before_send=lambda event, hint: (
+            None if settings.ENVIRONMENT == "development" and not settings.DEBUG else event
+        ),
+    )
+    logger.info(
+        f"✅ Sentry monitoring initialized (environment: {settings.sentry_environment or settings.ENVIRONMENT})"
+    )
+else:
+    logger.info("⚠️ Sentry DSN not configured - monitoring disabled")
+
+# Set up SlowAPI rate limiter (secondary layer)
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=[f"{getattr(settings, 'RATE_LIMIT_REQUESTS', 100)}/minute"],
+)
+logger.info("✅ SlowAPI rate limiter configured")
 
 
 @asynccontextmanager
@@ -156,11 +211,51 @@ async def lifespan(app: FastAPI):
         logger.warning(f"⚠️ AI Orchestrator initialization failed: {e}")
         app.state.orchestrator = None
 
+    # Initialize outbox processor workers (CQRS + Event Sourcing)
+    if getattr(settings, "WORKERS_ENABLED", False):
+        try:
+            from api.app.workers.outbox_processors import (
+                create_outbox_processor_manager,
+            )
+
+            worker_configs = getattr(settings, "get_worker_configs", lambda: {})()
+            worker_manager = create_outbox_processor_manager(worker_configs)
+            await worker_manager.start_all()
+            app.state.worker_manager = worker_manager
+            logger.info("✅ Outbox processor workers started (CQRS + Event Sourcing)")
+        except ImportError as e:
+            logger.warning(f"⚠️ Outbox processors not available (missing dependencies): {e}")
+            app.state.worker_manager = None
+        except Exception as e:
+            logger.warning(f"⚠️ Worker setup failed: {e}")
+            app.state.worker_manager = None
+    else:
+        app.state.worker_manager = None
+
+    # Initialize Prometheus metrics collection
+    if getattr(settings, "ENABLE_METRICS", False):
+        try:
+            metrics_dir = getattr(
+                settings, "PROMETHEUS_MULTIPROC_DIR", "/tmp/prometheus_multiproc_dir"
+            )
+            os.makedirs(metrics_dir, exist_ok=True)
+            logger.info("✅ Prometheus metrics collection initialized")
+        except Exception as e:
+            logger.warning(f"⚠️ Metrics setup failed: {e}")
+
     logger.info("🚀 Application startup complete - ready to accept requests")
 
     yield
 
     # Shutdown
+    # Stop outbox processor workers
+    if hasattr(app.state, "worker_manager") and app.state.worker_manager:
+        try:
+            await app.state.worker_manager.stop_all()
+            logger.info("✅ Outbox processor workers stopped")
+        except Exception as e:
+            logger.warning(f"Error stopping workers: {e}")
+
     # Stop AI Orchestrator and Follow-Up Scheduler
     if hasattr(app.state, "orchestrator") and app.state.orchestrator:
         try:
@@ -204,23 +299,77 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title=settings.APP_NAME,
-    description="Unified API with enterprise architecture patterns - DI, Repository Pattern, Error Handling",
+    description="Unified API with enterprise architecture patterns - DI, Repository Pattern, Error Handling, CQRS, Event Sourcing",
     version=settings.API_VERSION,
     docs_url="/docs" if settings.DEBUG else None,
     redoc_url="/redoc" if settings.DEBUG else None,
     lifespan=lifespan,
 )
 
+# SlowAPI rate limiting integration (secondary layer)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+logger.info("✅ SlowAPI exception handler registered")
+
+# Prometheus metrics endpoint
+if getattr(settings, "ENABLE_METRICS", False):
+    metrics_app = make_wsgi_app()
+    app.mount("/metrics", WSGIMiddleware(metrics_app))
+    logger.info("✅ Prometheus /metrics endpoint mounted")
+
 # Error Handling - Register our custom exception handlers
 app.add_exception_handler(AppException, app_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)
-app.add_exception_handler(Exception, general_exception_handler)
-logger.info("✅ Custom exception handlers registered")
+
+
+# Enhanced global exception handler with Sentry integration
+@app.exception_handler(Exception)
+async def enhanced_global_exception_handler(request: Request, exc: Exception):
+    """Global exception handler with Sentry integration"""
+    request_id = request.headers.get("X-Request-ID", "unknown")
+    logger.error(
+        f"Unhandled error on {request.method} {request.url}: {exc}",
+        extra={"request_id": request_id},
+    )
+
+    # Capture exception in Sentry with context
+    if settings.sentry_dsn:
+        with sentry_sdk.push_scope() as scope:
+            scope.set_context(
+                "request",
+                {
+                    "url": str(request.url),
+                    "method": request.method,
+                    "headers": dict(request.headers),
+                    "request_id": request_id,
+                },
+            )
+            scope.set_tag("endpoint", request.url.path)
+            sentry_sdk.capture_exception(exc)
+
+    # Call the original handler
+    return await general_exception_handler(request, exc)
+
+
+logger.info("✅ Custom exception handlers registered (with Sentry integration)")
 
 # Request ID Middleware (must be first to trace all requests)
 app.add_middleware(RequestIDMiddleware)
 logger.info("✅ Request ID middleware registered for distributed tracing")
+
+# Add advanced middleware if available
+try:
+    from middleware.structured_logging import StructuredLoggingMiddleware
+
+    app.add_middleware(
+        StructuredLoggingMiddleware,
+        log_request_body=settings.DEBUG,  # Only log request bodies in debug mode
+        log_response_body=False,  # Don't log response bodies (can be large)
+    )
+    logger.info("✅ Structured logging middleware registered")
+except ImportError:
+    logger.warning("⚠️ Structured logging middleware not available")
 
 # Security Headers Middleware (PRODUCTION SECURITY)
 app.add_middleware(SecurityHeadersMiddleware)
@@ -369,6 +518,90 @@ async def health_check(request: Request):
     return health_data
 
 
+@app.get("/ready", tags=["Health"])
+async def readiness_check(request: Request):
+    """Kubernetes readiness probe endpoint"""
+    try:
+        # Check database connectivity
+        from core.database import get_db
+
+        async for db in get_db():
+            await db.execute("SELECT 1")
+            break
+        db_ready = True
+    except Exception:
+        db_ready = False
+
+    # Check worker status if enabled
+    worker_ready = True
+    if getattr(settings, "WORKERS_ENABLED", False):
+        worker_ready = (
+            hasattr(request.app.state, "worker_manager")
+            and request.app.state.worker_manager is not None
+        )
+
+    ready = db_ready and worker_ready
+
+    return {
+        "status": "ready" if ready else "not ready",
+        "checks": {
+            "database": "ready" if db_ready else "not ready",
+            "workers": "ready" if worker_ready else "not ready",
+        },
+    }
+
+
+@app.get("/info", tags=["Health"])
+async def app_info():
+    """Application information endpoint"""
+    return {
+        "name": settings.APP_NAME,
+        "version": settings.API_VERSION,
+        "environment": settings.ENVIRONMENT,
+        "architecture": "CQRS with Event Sourcing + DI + Repository Pattern",
+        "security": {
+            "authentication": "OAuth 2.1 + OIDC",
+            "authorization": "RBAC",
+            "mfa": "TOTP + Backup Codes",
+            "encryption": (
+                "AES-GCM Field-Level"
+                if getattr(settings, "ENABLE_FIELD_ENCRYPTION", False)
+                else "disabled"
+            ),
+            "audit_logging": (
+                "Comprehensive" if getattr(settings, "ENABLE_AUDIT_LOGGING", False) else "disabled"
+            ),
+        },
+        "integrations": {
+            "payment": "Stripe",
+            "sms": "RingCentral" if getattr(settings, "RINGCENTRAL_ENABLED", False) else "disabled",
+            "email": (
+                getattr(settings, "EMAIL_PROVIDER", "disabled")
+                if getattr(settings, "EMAIL_ENABLED", False)
+                else "disabled"
+            ),
+        },
+        "features": {
+            "oauth2.1": True,
+            "oidc": True,
+            "mfa": True,
+            "rbac": True,
+            "cqrs": True,
+            "event_sourcing": True,
+            "outbox_pattern": getattr(settings, "WORKERS_ENABLED", False),
+            "ai_orchestrator": True,
+            "multi_channel_ai": True,
+            "dependency_injection": True,
+        },
+        "worker_stats": {
+            "enabled": getattr(settings, "WORKERS_ENABLED", False),
+            "sms_worker": getattr(settings, "SMS_WORKER_ENABLED", False),
+            "email_worker": getattr(settings, "EMAIL_WORKER_ENABLED", False),
+            "stripe_worker": getattr(settings, "STRIPE_WORKER_ENABLED", False),
+        },
+    }
+
+
 # Include routers from moved working API structure
 from api.app.crm.endpoints import router as crm_router
 from api.app.routers import auth, bookings, health, stripe
@@ -432,6 +665,86 @@ app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
 app.include_router(bookings.router, prefix="/api/bookings", tags=["bookings"])
 app.include_router(stripe.router, prefix="/api/stripe", tags=["payments"])
 app.include_router(crm_router, prefix="/api/crm", tags=["crm"])
+
+# Station Management and Authentication (Multi-tenant RBAC)
+try:
+    from api.app.routers.station_auth import router as station_auth_router
+    from api.app.routers.station_admin import router as station_admin_router
+
+    app.include_router(station_auth_router, prefix="/api/station", tags=["station-auth"])
+    app.include_router(station_admin_router, prefix="/api/admin/stations", tags=["station-admin"])
+    logger.info("✅ Station Management and Auth endpoints included (Multi-tenant RBAC)")
+except ImportError as e:
+    logger.warning(f"Station Management endpoints not available: {e}")
+
+# Enhanced Booking Admin API (includes /admin/kpis and /admin/customer-analytics)
+try:
+    from api.app.routers.booking_enhanced import router as booking_enhanced_router
+
+    app.include_router(booking_enhanced_router, prefix="/api", tags=["booking-enhanced", "admin"])
+    logger.info("✅ Enhanced Booking Admin API included (KPIs, customer analytics)")
+except ImportError as e:
+    logger.warning(f"Enhanced Booking Admin endpoints not available: {e}")
+
+# Payment Analytics (separate router for /api/payments/analytics)
+try:
+    from api.app.routers.payments import router as payments_router
+
+    app.include_router(payments_router, prefix="/api/payments", tags=["payment-analytics"])
+    logger.info("✅ Payment Analytics endpoints included")
+except ImportError as e:
+    logger.warning(f"Payment Analytics endpoints not available: {e}")
+
+# QR Code Tracking System
+try:
+    from api.app.routers.qr_tracking import router as qr_tracking_router
+
+    app.include_router(qr_tracking_router, prefix="/api/qr", tags=["qr-tracking", "marketing"])
+    logger.info("✅ QR Code Tracking System included")
+except ImportError as e:
+    logger.warning(f"QR Tracking endpoints not available: {e}")
+
+# Admin Error Logs (for monitoring and debugging)
+try:
+    from api.app.routers.admin.error_logs import router as error_logs_router
+
+    app.include_router(error_logs_router, prefix="/api", tags=["admin", "error-logs", "monitoring"])
+    logger.info("✅ Admin Error Logs endpoints included")
+except ImportError as e:
+    logger.warning(f"Admin Error Logs endpoints not available: {e}")
+
+# Notification Groups Admin
+try:
+    from api.app.routers.admin.notification_groups import (
+        router as notification_groups_router,
+    )
+
+    app.include_router(
+        notification_groups_router,
+        prefix="/api/admin/notification-groups",
+        tags=["admin", "notifications"],
+    )
+    logger.info("✅ Notification Groups Admin included")
+except ImportError as e:
+    logger.warning(f"Notification Groups endpoints not available: {e}")
+
+# Admin Analytics (comprehensive)
+try:
+    from api.app.routers.admin_analytics import router as admin_analytics_router
+
+    app.include_router(admin_analytics_router, prefix="/api", tags=["admin", "analytics"])
+    logger.info("✅ Admin Analytics endpoints included")
+except ImportError as e:
+    logger.warning(f"Admin Analytics endpoints not available: {e}")
+
+# Customer Review System (from legacy - comprehensive)
+try:
+    from api.app.routers.reviews import router as reviews_router
+
+    app.include_router(reviews_router, prefix="/api/reviews", tags=["reviews", "feedback"])
+    logger.info("✅ Customer Review System included (legacy comprehensive version)")
+except ImportError as e:
+    logger.warning(f"Customer Review System endpoints not available: {e}")
 
 # Try to include additional routers if available
 try:

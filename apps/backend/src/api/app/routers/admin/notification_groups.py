@@ -56,7 +56,7 @@ class GroupUpdateRequest(BaseModel):
 class MemberAddRequest(BaseModel):
     """Request to add a member to a group"""
 
-    phone_number: str = Field(..., regex=r"^\+?[1-9]\d{1,14}$")
+    phone_number: str = Field(..., pattern=r"^\+?[1-9]\d{1,14}$")
     name: str = Field(..., min_length=2, max_length=100)
     email: str | None = None
     user_id: UUID | None = None
