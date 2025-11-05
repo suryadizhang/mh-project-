@@ -5,9 +5,9 @@ Query handlers for CRM read operations using materialized views.
 from datetime import datetime
 from typing import Any
 
-from api.app.cqrs.base import QueryHandler, QueryResult
-from api.app.cqrs.crm_operations import *
-from api.app.utils.encryption import FieldEncryption
+from cqrs.base import QueryHandler, QueryResult  # Phase 2C: Updated from api.app.cqrs.base
+from cqrs.crm_operations import *  # Phase 2C: Updated from api.app.cqrs.crm_operations
+from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 

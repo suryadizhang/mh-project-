@@ -6,22 +6,22 @@ from datetime import datetime
 from typing import Any
 from uuid import uuid4
 
-from api.app.cqrs.base import (
+from cqrs.base import (  # Phase 2C: Updated from api.app.cqrs.base
     CommandHandler,
     CommandResult,
     EventStore,
     OutboxProcessor,
 )
-from api.app.cqrs.crm_operations import *
-from api.app.models.core import (
+from cqrs.crm_operations import *  # Phase 2C: Updated from api.app.cqrs.crm_operations
+from models.legacy_core import (  # Phase 2C: Updated from api.app.models.core
     Booking,
     Customer,
     Message,
     MessageThread,
     Payment,
 )
-from api.app.models.events import IdempotencyKey
-from api.app.utils.encryption import FieldEncryption
+from models.legacy_events import IdempotencyKey  # Phase 2C: Updated from api.app.models.events
+from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 

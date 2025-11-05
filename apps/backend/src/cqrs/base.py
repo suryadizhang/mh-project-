@@ -9,7 +9,10 @@ import json
 from typing import Any
 from uuid import UUID, uuid4
 
-from api.app.models.events import DomainEvent, OutboxEntry
+from models.legacy_events import (
+    DomainEvent,
+    OutboxEntry,
+)  # Phase 2C: Updated from api.app.models.events
 from pydantic import (
     BaseModel,
     ConfigDict,

@@ -7,7 +7,7 @@ from datetime import date as Date
 from typing import Any, Literal
 from uuid import UUID
 
-from api.app.cqrs.base import Command, Event, Query
+from cqrs.base import Command, Event, Query  # Phase 2C: Updated from api.app.cqrs.base
 from pydantic import ConfigDict, Field, field_validator
 
 # ==================== COMMANDS ====================
