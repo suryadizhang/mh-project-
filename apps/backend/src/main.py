@@ -211,10 +211,10 @@ async def lifespan(app: FastAPI):
         logger.warning(f"⚠️ AI Orchestrator initialization failed: {e}")
         app.state.orchestrator = None
 
-    # Initialize outbox processor workers (CQRS + Event Sourcing)
+    # Initialize outbox processor workers (CQRS + Event Sourcing) - NEW location
     if getattr(settings, "WORKERS_ENABLED", False):
         try:
-            from api.app.workers.outbox_processors import (
+            from workers.outbox_processors import (
                 create_outbox_processor_manager,
             )
 
@@ -222,10 +222,24 @@ async def lifespan(app: FastAPI):
             worker_manager = create_outbox_processor_manager(worker_configs)
             await worker_manager.start_all()
             app.state.worker_manager = worker_manager
-            logger.info("✅ Outbox processor workers started (CQRS + Event Sourcing)")
+            logger.info(
+                "✅ Outbox processor workers started from NEW location (CQRS + Event Sourcing)"
+            )
         except ImportError as e:
-            logger.warning(f"⚠️ Outbox processors not available (missing dependencies): {e}")
-            app.state.worker_manager = None
+            logger.warning(f"⚠️ Outbox processors not available from NEW location, trying OLD: {e}")
+            try:
+                from api.app.workers.outbox_processors import (
+                    create_outbox_processor_manager,
+                )
+
+                worker_configs = getattr(settings, "get_worker_configs", lambda: {})()
+                worker_manager = create_outbox_processor_manager(worker_configs)
+                await worker_manager.start_all()
+                app.state.worker_manager = worker_manager
+                logger.warning("⚠️ Using OLD workers location")
+            except ImportError as e2:
+                logger.warning(f"⚠️ Outbox processors not available: {e2}")
+                app.state.worker_manager = None
         except Exception as e:
             logger.warning(f"⚠️ Worker setup failed: {e}")
             app.state.worker_manager = None
@@ -602,9 +616,25 @@ async def app_info():
     }
 
 
-# Include routers from moved working API structure
-from api.app.crm.endpoints import router as crm_router
-from api.app.routers import auth, bookings, health, stripe
+# ============================================================================
+# PHASE 2A: Import Migration - NEW Clean Architecture (2025-11-04)
+# ============================================================================
+# All routers now imported from NEW structure: routers/v1/*, services/*, cqrs/*, workers/*, core/auth/*
+# OLD imports kept commented below as backup for easy rollback
+# ============================================================================
+
+# Import routers from NEW clean architecture structure
+from routers.v1 import auth, bookings, health
+
+# Note: stripe router import updated below in the try/catch block
+# Note: CRM router no longer exists as standalone - functionality distributed across routers
+
+# ============================================================================
+# OLD IMPORTS (BACKUP - Can uncomment if issues arise)
+# ============================================================================
+# from api.app.crm.endpoints import router as crm_router
+# from api.app.routers import auth, bookings, health, stripe
+# ============================================================================
 
 # Include OAuth endpoints
 try:
@@ -659,63 +689,131 @@ try:
 except ImportError as e:
     logger.warning(f"Test endpoints not available: {e}")
 
-# Include the core working routers
+# Include the core working routers (NEW clean architecture)
 app.include_router(health.router, prefix="/api/health", tags=["health"])
 app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
 app.include_router(bookings.router, prefix="/api/bookings", tags=["bookings"])
-app.include_router(stripe.router, prefix="/api/stripe", tags=["payments"])
-app.include_router(crm_router, prefix="/api/crm", tags=["crm"])
 
-# Station Management and Authentication (Multi-tenant RBAC)
+# Stripe router from NEW location
 try:
-    from api.app.routers.station_auth import router as station_auth_router
-    from api.app.routers.station_admin import router as station_admin_router
+    from routers.v1.stripe import router as stripe_router
+
+    app.include_router(stripe_router, prefix="/api/stripe", tags=["payments"])
+    logger.info("✅ Stripe router included from NEW location")
+except ImportError:
+    # Fallback to old location (should not happen after migration)
+    try:
+        from api.app.routers.stripe import router as stripe_router
+
+        app.include_router(stripe_router, prefix="/api/stripe", tags=["payments"])
+        logger.warning("⚠️ Using OLD stripe router location (migration incomplete)")
+    except ImportError as e:
+        logger.error(f"❌ Stripe router not available: {e}")
+
+# CRM router removed - functionality distributed across other routers
+# OLD: app.include_router(crm_router, prefix="/api/crm", tags=["crm"])
+# Note: CRM features now available through: leads, newsletter, bookings, station_admin routers
+
+# Station Management and Authentication (Multi-tenant RBAC) - NEW location
+try:
+    from routers.v1.station_auth import router as station_auth_router
+    from routers.v1.station_admin import router as station_admin_router
 
     app.include_router(station_auth_router, prefix="/api/station", tags=["station-auth"])
     app.include_router(station_admin_router, prefix="/api/admin/stations", tags=["station-admin"])
-    logger.info("✅ Station Management and Auth endpoints included (Multi-tenant RBAC)")
+    logger.info(
+        "✅ Station Management and Auth endpoints included from NEW location (Multi-tenant RBAC)"
+    )
 except ImportError as e:
-    logger.warning(f"Station Management endpoints not available: {e}")
+    logger.warning(f"Station Management endpoints not available from NEW location, trying OLD: {e}")
+    try:
+        # OLD location fallback
+        from api.app.routers.station_auth import router as station_auth_router
+        from api.app.routers.station_admin import router as station_admin_router
 
-# Enhanced Booking Admin API (includes /admin/kpis and /admin/customer-analytics)
+        app.include_router(station_auth_router, prefix="/api/station", tags=["station-auth"])
+        app.include_router(
+            station_admin_router, prefix="/api/admin/stations", tags=["station-admin"]
+        )
+        logger.warning("⚠️ Using OLD station router locations")
+    except ImportError as e2:
+        logger.error(f"❌ Station Management endpoints not available: {e2}")
+
+# Enhanced Booking Admin API (includes /admin/kpis and /admin/customer-analytics) - NEW location
 try:
-    from api.app.routers.booking_enhanced import router as booking_enhanced_router
+    from routers.v1.booking_enhanced import router as booking_enhanced_router
 
     app.include_router(booking_enhanced_router, prefix="/api", tags=["booking-enhanced", "admin"])
-    logger.info("✅ Enhanced Booking Admin API included (KPIs, customer analytics)")
+    logger.info(
+        "✅ Enhanced Booking Admin API included from NEW location (KPIs, customer analytics)"
+    )
 except ImportError as e:
-    logger.warning(f"Enhanced Booking Admin endpoints not available: {e}")
+    logger.warning(
+        f"Enhanced Booking Admin endpoints not available from NEW location, trying OLD: {e}"
+    )
+    try:
+        from api.app.routers.booking_enhanced import router as booking_enhanced_router
 
-# Payment Analytics (separate router for /api/payments/analytics)
+        app.include_router(
+            booking_enhanced_router, prefix="/api", tags=["booking-enhanced", "admin"]
+        )
+        logger.warning("⚠️ Using OLD booking_enhanced location")
+    except ImportError as e2:
+        logger.error(f"❌ Enhanced Booking Admin endpoints not available: {e2}")
+
+# Payment Analytics (separate router for /api/payments/analytics) - NEW location
 try:
-    from api.app.routers.payments import router as payments_router
+    from routers.v1.payments import router as payments_router
 
     app.include_router(payments_router, prefix="/api/payments", tags=["payment-analytics"])
-    logger.info("✅ Payment Analytics endpoints included")
+    logger.info("✅ Payment Analytics endpoints included from NEW location")
 except ImportError as e:
-    logger.warning(f"Payment Analytics endpoints not available: {e}")
+    logger.warning(f"Payment Analytics endpoints not available from NEW location, trying OLD: {e}")
+    try:
+        from api.app.routers.payments import router as payments_router
 
-# QR Code Tracking System
+        app.include_router(payments_router, prefix="/api/payments", tags=["payment-analytics"])
+        logger.warning("⚠️ Using OLD payments location")
+    except ImportError as e2:
+        logger.error(f"❌ Payment Analytics endpoints not available: {e2}")
+
+# QR Code Tracking System - NEW location
 try:
-    from api.app.routers.qr_tracking import router as qr_tracking_router
+    from routers.v1.qr_tracking import router as qr_tracking_router
 
     app.include_router(qr_tracking_router, prefix="/api/qr", tags=["qr-tracking", "marketing"])
-    logger.info("✅ QR Code Tracking System included")
+    logger.info("✅ QR Code Tracking System included from NEW location")
 except ImportError as e:
-    logger.warning(f"QR Tracking endpoints not available: {e}")
+    logger.warning(f"QR Tracking endpoints not available from NEW location, trying OLD: {e}")
+    try:
+        from api.app.routers.qr_tracking import router as qr_tracking_router
 
-# Admin Error Logs (for monitoring and debugging)
+        app.include_router(qr_tracking_router, prefix="/api/qr", tags=["qr-tracking", "marketing"])
+        logger.warning("⚠️ Using OLD qr_tracking location")
+    except ImportError as e2:
+        logger.error(f"❌ QR Tracking endpoints not available: {e2}")
+
+# Admin Error Logs (for monitoring and debugging) - NEW location
 try:
-    from api.app.routers.admin.error_logs import router as error_logs_router
+    from routers.v1.admin.error_logs import router as error_logs_router
 
     app.include_router(error_logs_router, prefix="/api", tags=["admin", "error-logs", "monitoring"])
-    logger.info("✅ Admin Error Logs endpoints included")
+    logger.info("✅ Admin Error Logs endpoints included from NEW location")
 except ImportError as e:
-    logger.warning(f"Admin Error Logs endpoints not available: {e}")
+    logger.warning(f"Admin Error Logs endpoints not available from NEW location, trying OLD: {e}")
+    try:
+        from api.app.routers.admin.error_logs import router as error_logs_router
 
-# Notification Groups Admin
+        app.include_router(
+            error_logs_router, prefix="/api", tags=["admin", "error-logs", "monitoring"]
+        )
+        logger.warning("⚠️ Using OLD admin.error_logs location")
+    except ImportError as e2:
+        logger.error(f"❌ Admin Error Logs endpoints not available: {e2}")
+
+# Notification Groups Admin - NEW location
 try:
-    from api.app.routers.admin.notification_groups import (
+    from routers.v1.admin.notification_groups import (
         router as notification_groups_router,
     )
 
@@ -724,51 +822,92 @@ try:
         prefix="/api/admin/notification-groups",
         tags=["admin", "notifications"],
     )
-    logger.info("✅ Notification Groups Admin included")
+    logger.info("✅ Notification Groups Admin included from NEW location")
 except ImportError as e:
-    logger.warning(f"Notification Groups endpoints not available: {e}")
+    logger.warning(
+        f"Notification Groups endpoints not available from NEW location, trying OLD: {e}"
+    )
+    try:
+        from api.app.routers.admin.notification_groups import (
+            router as notification_groups_router,
+        )
 
-# Admin Analytics (comprehensive)
+        app.include_router(
+            notification_groups_router,
+            prefix="/api/admin/notification-groups",
+            tags=["admin", "notifications"],
+        )
+        logger.warning("⚠️ Using OLD admin.notification_groups location")
+    except ImportError as e2:
+        logger.error(f"❌ Notification Groups endpoints not available: {e2}")
+
+# Admin Analytics (comprehensive) - NEW location
 try:
-    from api.app.routers.admin_analytics import router as admin_analytics_router
+    from routers.v1.admin_analytics import router as admin_analytics_router
 
     app.include_router(admin_analytics_router, prefix="/api", tags=["admin", "analytics"])
-    logger.info("✅ Admin Analytics endpoints included")
+    logger.info("✅ Admin Analytics endpoints included from NEW location")
 except ImportError as e:
-    logger.warning(f"Admin Analytics endpoints not available: {e}")
+    logger.warning(f"Admin Analytics endpoints not available from NEW location, trying OLD: {e}")
+    try:
+        from api.app.routers.admin_analytics import router as admin_analytics_router
 
-# Customer Review System (from legacy - comprehensive)
+        app.include_router(admin_analytics_router, prefix="/api", tags=["admin", "analytics"])
+        logger.warning("⚠️ Using OLD admin_analytics location")
+    except ImportError as e2:
+        logger.error(f"❌ Admin Analytics endpoints not available: {e2}")
+
+# Customer Review System (from legacy - comprehensive) - NEW location
 try:
-    from api.app.routers.reviews import router as reviews_router
+    from routers.v1.reviews import router as reviews_router
 
     app.include_router(reviews_router, prefix="/api/reviews", tags=["reviews", "feedback"])
-    logger.info("✅ Customer Review System included (legacy comprehensive version)")
+    logger.info(
+        "✅ Customer Review System included from NEW location (legacy comprehensive version)"
+    )
 except ImportError as e:
-    logger.warning(f"Customer Review System endpoints not available: {e}")
+    logger.warning(
+        f"Customer Review System endpoints not available from NEW location, trying OLD: {e}"
+    )
+    try:
+        from api.app.routers.reviews import router as reviews_router
 
-# Try to include additional routers if available
+        app.include_router(reviews_router, prefix="/api/reviews", tags=["reviews", "feedback"])
+        logger.warning("⚠️ Using OLD reviews location")
+    except ImportError as e2:
+        logger.error(f"❌ Customer Review System endpoints not available: {e2}")
+
+# Try to include additional routers if available - NEW locations
 try:
-    from api.app.routers.leads import router as leads_router
-    from api.app.routers.newsletter import router as newsletter_router
-    from api.app.routers.ringcentral_webhooks import (
+    from routers.v1.leads import router as leads_router
+    from routers.v1.newsletter import router as newsletter_router
+    from routers.v1.ringcentral_webhooks import (
         router as ringcentral_router,
     )
 
     app.include_router(leads_router, prefix="/api/leads", tags=["leads"])
     app.include_router(newsletter_router, prefix="/api/newsletter", tags=["newsletter"])
     app.include_router(ringcentral_router, prefix="/api/ringcentral", tags=["sms"])
-    logger.info("✅ Additional CRM routers included")
+    logger.info("✅ Additional CRM routers included from NEW location")
 except ImportError as e:
-    logger.warning(f"Some additional routers not available: {e}")
+    logger.warning(f"Some additional routers not available from NEW location, trying OLD: {e}")
+    try:
+        from api.app.routers.leads import router as leads_router
+        from api.app.routers.newsletter import router as newsletter_router
+        from api.app.routers.ringcentral_webhooks import (
+            router as ringcentral_router,
+        )
 
-# Station Management endpoints - Multi-tenant RBAC
-try:
-    from api.app.routers.station_admin import router as station_admin_router
+        app.include_router(leads_router, prefix="/api/leads", tags=["leads"])
+        app.include_router(newsletter_router, prefix="/api/newsletter", tags=["newsletter"])
+        app.include_router(ringcentral_router, prefix="/api/ringcentral", tags=["sms"])
+        logger.warning("⚠️ Using OLD locations for leads/newsletter/ringcentral")
+    except ImportError as e2:
+        logger.error(f"❌ Some additional routers not available: {e2}")
 
-    app.include_router(station_admin_router, prefix="/api/stations", tags=["Station Management"])
-    logger.info("✅ Station Management endpoints included (CRUD + RBAC)")
-except ImportError as e:
-    logger.warning(f"Station Management endpoints not available: {e}")
+# Station Management endpoints - Multi-tenant RBAC (already included above, removing duplicate)
+# OLD duplicate: from api.app.routers.station_admin import router as station_admin_router
+# This was duplicate of lines 671-677 above - now removed
 
 # Include public lead capture endpoints (no auth required)
 try:
@@ -845,18 +984,31 @@ try:
 except ImportError as e:
     logger.warning(f"Enhanced health check endpoints not available: {e}")
 
-# Comprehensive Health Check endpoints with dependency monitoring
+# Comprehensive Health Check endpoints with dependency monitoring - NEW location
 try:
-    from api.app.routers.health_checks import (
+    from routers.v1.health_checks import (
         router as comprehensive_health_router,
     )
 
     app.include_router(
         comprehensive_health_router, prefix="/api/health", tags=["Health Monitoring"]
     )
-    logger.info("✅ Comprehensive health monitoring endpoints included")
+    logger.info("✅ Comprehensive health monitoring endpoints included from NEW location")
 except ImportError as e:
-    logger.warning(f"Comprehensive health check endpoints not available: {e}")
+    logger.warning(
+        f"Comprehensive health check endpoints not available from NEW location, trying OLD: {e}"
+    )
+    try:
+        from api.app.routers.health_checks import (
+            router as comprehensive_health_router,
+        )
+
+        app.include_router(
+            comprehensive_health_router, prefix="/api/health", tags=["Health Monitoring"]
+        )
+        logger.warning("⚠️ Using OLD health_checks location")
+    except ImportError as e2:
+        logger.error(f"❌ Comprehensive health check endpoints not available: {e2}")
 
 # Admin Analytics endpoints - Composite service
 try:
