@@ -5,8 +5,8 @@ import logging
 from typing import Any
 from uuid import UUID
 
-from api.app.cqrs.registry import get_command_bus
-from api.app.models.social import (
+from cqrs.registry import get_command_bus  # Phase 2C: Updated from api.app.cqrs.registry
+from models.legacy_social import (  # Phase 2C: Updated from api.app.models.social
     MessageDirection,
     MessageKind,
     SocialAccount,
@@ -15,10 +15,12 @@ from api.app.models.social import (
     SocialPlatform,
     SocialThread,
 )
-from api.app.schemas.social import SocialMessageCreate
+from schemas.social import SocialMessageCreate  # Phase 2C: Updated from api.app.schemas.social
 
 # Newsletter opt-out service
-from api.app.services.newsletter_service import NewsletterService
+from services.newsletter_service import (
+    NewsletterService,
+)  # Phase 2C: Updated from api.app.services.newsletter_service
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload

@@ -5,18 +5,22 @@ import logging
 from typing import Any
 from uuid import UUID
 
-from api.app.cqrs.base import CommandBus, QueryBus
-from api.app.cqrs.social_commands import (
+from cqrs.base import CommandBus, QueryBus  # Phase 2C: Updated from api.app.cqrs.base
+from cqrs.social_commands import (  # Phase 2C: Updated from api.app.cqrs.social_commands
     CreateLeadFromSocialCommand,
     SendSocialReplyCommand,
     UpdateThreadStatusCommand,
 )
-from api.app.cqrs.social_queries import (
+from cqrs.social_queries import (  # Phase 2C: Updated from api.app.cqrs.social_queries
     GetSocialInboxQuery,
     GetThreadDetailQuery,
     SearchSocialContentQuery,
 )
-from api.app.models.social import MessageKind, SocialPlatform, ThreadStatus
+from models.legacy_social import (
+    MessageKind,
+    SocialPlatform,
+    ThreadStatus,
+)  # Phase 2C: Updated from api.app.models.social
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)

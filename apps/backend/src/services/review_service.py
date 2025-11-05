@@ -7,12 +7,14 @@ import logging
 from typing import Any
 from uuid import UUID
 
-from api.app.models.feedback import (
+from models.legacy_feedback import (  # Phase 2C: Updated from api.app.models.feedback
     CustomerReview,
     DiscountCoupon,
     ReviewEscalation,
 )
-from api.app.services.ringcentral_sms import ringcentral_sms
+from services.ringcentral_sms import (
+    ringcentral_sms,
+)  # Phase 2C: Updated from api.app.services.ringcentral_sms
 from core.config import get_settings
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession

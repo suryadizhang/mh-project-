@@ -8,7 +8,7 @@ Integrates with station CRUD operations to keep notification groups in sync.
 import logging
 from uuid import UUID, uuid4
 
-from api.app.models.notification_groups import (
+from models.legacy_notification_groups import (  # Phase 2C: Updated from api.app.models.notification_groups
     NotificationGroup,
     NotificationGroupEvent,
 )

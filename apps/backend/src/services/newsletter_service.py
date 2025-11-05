@@ -7,7 +7,10 @@ from datetime import datetime
 import logging
 import re
 
-from api.app.models.lead_newsletter import LeadSource, Subscriber
+from models.legacy_lead_newsletter import (
+    LeadSource,
+    Subscriber,
+)  # Phase 2C: Updated from api.app.models.lead_newsletter
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 

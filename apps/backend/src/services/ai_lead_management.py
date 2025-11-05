@@ -6,12 +6,14 @@ import json
 import logging
 from typing import Any
 
-from api.app.models.lead_newsletter import (
+from models.legacy_lead_newsletter import (  # Phase 2C: Updated from api.app.models.lead_newsletter
     Lead,
     LeadQuality,
     LeadSource,
 )
-from api.app.services.openai_service import OpenAIService
+from services.openai_service import (
+    OpenAIService,
+)  # Phase 2C: Updated from api.app.services.openai_service
 
 logger = logging.getLogger(__name__)
 

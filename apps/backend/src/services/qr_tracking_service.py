@@ -7,7 +7,11 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from api.app.models.qr_tracking import QRCode, QRCodeType, QRScan
+from models.legacy_qr_tracking import (
+    QRCode,
+    QRCodeType,
+    QRScan,
+)  # Phase 2C: Updated from api.app.models.qr_tracking
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from user_agents import parse

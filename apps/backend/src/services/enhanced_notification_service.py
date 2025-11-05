@@ -9,7 +9,9 @@ import logging
 from typing import Any
 from uuid import UUID
 
-from api.app.models.notification_groups import NotificationEventType
+from models.legacy_notification_groups import (
+    NotificationEventType,
+)  # Phase 2C: Updated from api.app.models.notification_groups
 from services.notification_group_service import NotificationGroupService
 from services.unified_notification_service import UnifiedNotificationService
 from sqlalchemy.ext.asyncio import AsyncSession

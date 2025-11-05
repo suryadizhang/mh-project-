@@ -8,7 +8,7 @@ import logging
 from typing import Any
 from uuid import UUID, uuid4
 
-from api.app.models.lead_newsletter import (
+from models.legacy_lead_newsletter import (  # Phase 2C: Updated from api.app.models.lead_newsletter
     ContactChannel,
     Lead,
     LeadContact,

@@ -10,14 +10,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import stripe
 
 settings = get_settings()
-from api.app.models.core import Customer, Payment
-from api.app.models.stripe_models import (
+from models.legacy_core import Customer, Payment  # Phase 2C: Updated from api.app.models.core
+from models.legacy_stripe_models import (  # Phase 2C: Updated from api.app.models.stripe_models
     Dispute,
     Invoice,
     StripeCustomer,
     StripePayment,
 )
-from api.app.schemas.stripe_schemas import PaymentAnalytics
+from schemas.stripe_schemas import (
+    PaymentAnalytics,
+)  # Phase 2C: Updated from api.app.schemas.stripe_schemas
 
 # Temporarily commented out - function not implemented yet
 # from utils.query_optimizer import get_payment_analytics_optimized
