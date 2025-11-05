@@ -19,6 +19,6 @@ Import them directly from their modules as needed:
 """
 
 # Only export Base - do NOT import model classes here
-from .declarative_base import Base
+from models.legacy_declarative_base import Base
 
 __all__ = ["Base"]

@@ -5,7 +5,9 @@ Core database models for CRM system.
 from uuid import uuid4
 
 # Use unified Base from models package
-from models.declarative_base import Base  # Phase 2C: Updated from api.app.models.declarative_base
+from models.legacy_declarative_base import (
+    Base,
+)  # Phase 2C: Updated from api.app.models.declarative_base
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
