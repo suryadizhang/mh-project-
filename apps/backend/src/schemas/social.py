@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from api.app.models.social import (
+from models.legacy_social import (  # Phase 2C: Updated from api.app.models.social
     MessageDirection,
     MessageKind,
     ReviewStatus,
