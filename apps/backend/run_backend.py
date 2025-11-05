@@ -30,27 +30,18 @@ os.environ["PYTHONPATH"] = str(src_dir)
 
 if __name__ == "__main__":
     import uvicorn
-    import signal
 
     # Change to src directory
     os.chdir(src_dir)
 
-    # Add graceful shutdown handler
-    def signal_handler(signum, frame):
-        print("\n[SHUTDOWN] Received signal, shutting down gracefully...")
-        sys.exit(0)
-
-    # Register signal handlers for graceful shutdown
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-
     try:
         # Run uvicorn with the app
+        # Uvicorn handles signals gracefully by default, no need for custom handlers
         uvicorn.run(
             "main:app",
             host="0.0.0.0",
             port=8000,
-            reload=True,
+            reload=False,  # Disable reload - appears to have issues with Python 3.13
             log_level="info",
             access_log=True,
             # Add timeout settings to prevent zombie processes

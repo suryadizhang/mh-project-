@@ -126,13 +126,75 @@ class Settings(BaseSettings):
     CLOUDINARY_API_KEY: str
     CLOUDINARY_API_SECRET: str
 
-    # Business Info (PUBLIC SAFE DATA ONLY)
-    BUSINESS_NAME: str = "my Hibachi LLC"
+    # Sentry Error Tracking (Optional)
+    SENTRY_DSN: str | None = None
+    SENTRY_ENVIRONMENT: str | None = None
+    SENTRY_TRACES_SAMPLE_RATE: float = 0.1
+    SENTRY_PROFILES_SAMPLE_RATE: float = 0.1
+
+    # Logging
+    LOG_LEVEL: str = "INFO"
+
+    # Feature Flags
+    WORKERS_ENABLED: bool = False
+    SMS_WORKER_ENABLED: bool = False
+    EMAIL_WORKER_ENABLED: bool = False
+    STRIPE_WORKER_ENABLED: bool = False
+    RATE_LIMIT_ENABLED: bool = True
+    ENABLE_FIELD_ENCRYPTION: bool = False
+    ENABLE_AUDIT_LOGGING: bool = False
+    RINGCENTRAL_ENABLED: bool = False
+    EMAIL_ENABLED: bool = False
+    EMAIL_PROVIDER: str = "smtp"
+    SMTP_USER: str | None = None
+    SENDGRID_API_KEY: str | None = None
+
+    # ========================================
+    # WHITE-LABEL CONFIGURATION
+    # ========================================
+    # These settings allow the platform to be branded for different businesses
+    # For multi-tenant deployment, these come from database per business_id
+    # For single-tenant (current), these come from environment variables
+
+    # Brand Identity
+    BRAND_NAME: str = "My Hibachi Chef"  # Display name for customer-facing content
+    BRAND_NAME_LEGAL: str = "my Hibachi LLC"  # Legal business name for contracts
+    BRAND_TAGLINE: str = "Bringing the Hibachi Experience to Your Home"
+
+    # Contact Information (PUBLIC SAFE DATA ONLY)
     BUSINESS_EMAIL: str = "cs@myhibachichef.com"
     BUSINESS_PHONE: str = "+19167408768"
     BUSINESS_CITY: str = "Fremont"
     BUSINESS_STATE: str = "California"
     SERVICE_AREAS: str = "Sacramento, Bay Area, Central Valley"
+
+    # Service Type (for white-labeling to different catering types)
+    SERVICE_TYPE: str = (
+        "hibachi_catering"  # Options: hibachi_catering, bbq_catering, general_catering, etc.
+    )
+    CUISINE_TYPE: str = "Japanese Hibachi"  # For AI tone and recommendations
+
+    # Branding Assets (URLs to logos, colors, etc.)
+    BRAND_LOGO_URL: str | None = None
+    BRAND_PRIMARY_COLOR: str = "#E31837"  # Hex color for UI theming
+    BRAND_SECONDARY_COLOR: str = "#1A1A1A"
+
+    # Social Media (for review links and integrations)
+    YELP_BUSINESS_URL: str = "https://www.yelp.com/biz/my-hibachi-chef"
+    GOOGLE_BUSINESS_URL: str = "https://g.page/r/YOUR_GOOGLE_PLACE_ID/review"
+    INSTAGRAM_HANDLE: str | None = "@myhibachichef"
+    FACEBOOK_PAGE_URL: str | None = None
+
+    # Business Configuration
+    DEFAULT_CURRENCY: str = "USD"
+    DEFAULT_TIMEZONE_BUSINESS: str = "America/Los_Angeles"
+    TAX_RATE: float = 0.0825  # 8.25% (California default, can be overridden)
+
+    # White-Label Mode (for future multi-tenant deployment)
+    WHITE_LABEL_MODE: str = "single_tenant"  # Options: single_tenant, multi_tenant
+    BUSINESS_ID: str | None = None  # For multi-tenant: UUID of current business
+
+    # ========================================
 
     # Email Configuration (IONOS) - SMTP_PASSWORD REQUIRED from .env
     EMAIL_ENABLED: bool = True
@@ -630,6 +692,242 @@ class Settings(BaseSettings):
             "per_hour": self.RATE_LIMIT_AI_PER_HOUR,
             "burst": self.RATE_LIMIT_AI_BURST,
             "tier": "ai",
+        }
+
+    # ========================================
+    # WHITE-LABEL HELPER METHODS
+    # ========================================
+
+    def get_brand_context(self) -> dict:
+        """
+        Get all brand-specific context for AI prompts, emails, SMS, etc.
+
+        This centralizes brand information so it can be easily:
+        - Injected into AI system prompts
+        - Used in email/SMS templates
+        - Retrieved by frontend for theming
+        - Overridden per business_id in multi-tenant mode
+
+        Returns:
+            Dictionary with all brand context
+        """
+        return {
+            # Identity
+            "brand_name": self.BRAND_NAME,
+            "legal_name": self.BRAND_NAME_LEGAL,
+            "tagline": self.BRAND_TAGLINE,
+            # Contact
+            "email": self.BUSINESS_EMAIL,
+            "phone": self.BUSINESS_PHONE,
+            "phone_formatted": self._format_phone(self.BUSINESS_PHONE),
+            "city": self.BUSINESS_CITY,
+            "state": self.BUSINESS_STATE,
+            "service_areas": self.SERVICE_AREAS,
+            # Service
+            "service_type": self.SERVICE_TYPE,
+            "cuisine_type": self.CUISINE_TYPE,
+            # Branding
+            "logo_url": self.BRAND_LOGO_URL,
+            "primary_color": self.BRAND_PRIMARY_COLOR,
+            "secondary_color": self.BRAND_SECONDARY_COLOR,
+            # Social
+            "yelp_url": self.YELP_BUSINESS_URL,
+            "google_url": self.GOOGLE_BUSINESS_URL,
+            "instagram": self.INSTAGRAM_HANDLE,
+            "facebook": self.FACEBOOK_PAGE_URL,
+            # Business
+            "currency": self.DEFAULT_CURRENCY,
+            "timezone": self.DEFAULT_TIMEZONE_BUSINESS,
+            "tax_rate": self.TAX_RATE,
+            # URLs
+            "website_url": self.FRONTEND_URL,
+            "admin_url": self.ADMIN_URL,
+        }
+
+    def _format_phone(self, phone: str) -> str:
+        """Format phone number for display (e.g., +19167408768 → (916) 740-8768)"""
+        if phone.startswith("+1") and len(phone) == 12:
+            area = phone[2:5]
+            prefix = phone[5:8]
+            line = phone[8:12]
+            return f"({area}) {prefix}-{line}"
+        return phone
+
+    @property
+    def business_name(self) -> str:
+        """Backward compatibility: business name accessor"""
+        return self.BRAND_NAME_LEGAL
+
+    @property
+    def BUSINESS_NAME(self) -> str:
+        """Backward compatibility: uppercase BUSINESS_NAME accessor"""
+        return self.BRAND_NAME
+
+    @property
+    def brand_display_name(self) -> str:
+        """Customer-facing brand name"""
+        return self.BRAND_NAME
+
+    @property
+    def sentry_dsn(self) -> str | None:
+        """Backward compatibility: sentry_dsn accessor"""
+        return self.SENTRY_DSN
+
+    @property
+    def sentry_environment(self) -> str | None:
+        """Backward compatibility: sentry_environment accessor"""
+        return self.SENTRY_ENVIRONMENT
+
+    @property
+    def sentry_traces_sample_rate(self) -> float:
+        """Backward compatibility: sentry_traces_sample_rate accessor"""
+        return self.SENTRY_TRACES_SAMPLE_RATE
+
+    @property
+    def sentry_profiles_sample_rate(self) -> float:
+        """Backward compatibility: sentry_profiles_sample_rate accessor"""
+        return self.SENTRY_PROFILES_SAMPLE_RATE
+
+    @property
+    def log_level(self) -> str:
+        """Backward compatibility: log_level accessor"""
+        return self.LOG_LEVEL
+
+    @property
+    def workers_enabled(self) -> bool:
+        """Backward compatibility: workers_enabled accessor"""
+        return self.WORKERS_ENABLED
+
+    @property
+    def sms_worker_enabled(self) -> bool:
+        """Backward compatibility: sms_worker_enabled accessor"""
+        return self.SMS_WORKER_ENABLED
+
+    @property
+    def email_worker_enabled(self) -> bool:
+        """Backward compatibility: email_worker_enabled accessor"""
+        return self.EMAIL_WORKER_ENABLED
+
+    @property
+    def stripe_worker_enabled(self) -> bool:
+        """Backward compatibility: stripe_worker_enabled accessor"""
+        return self.STRIPE_WORKER_ENABLED
+
+    @property
+    def rate_limit_enabled(self) -> bool:
+        """Backward compatibility: rate_limit_enabled accessor"""
+        return self.RATE_LIMIT_ENABLED
+
+    @property
+    def enable_field_encryption(self) -> bool:
+        """Backward compatibility: enable_field_encryption accessor"""
+        return self.ENABLE_FIELD_ENCRYPTION
+
+    @property
+    def enable_audit_logging(self) -> bool:
+        """Backward compatibility: enable_audit_logging accessor"""
+        return self.ENABLE_AUDIT_LOGGING
+
+    @property
+    def ringcentral_enabled(self) -> bool:
+        """Backward compatibility: ringcentral_enabled accessor"""
+        return self.RINGCENTRAL_ENABLED
+
+    @property
+    def email_enabled(self) -> bool:
+        """Backward compatibility: email_enabled accessor"""
+        return self.EMAIL_ENABLED
+
+    @property
+    def email_provider(self) -> str:
+        """Backward compatibility: email_provider accessor"""
+        return self.EMAIL_PROVIDER
+
+    @property
+    def smtp_user(self) -> str | None:
+        """Backward compatibility: smtp_user accessor"""
+        return self.SMTP_USER
+
+    @property
+    def sendgrid_api_key(self) -> str | None:
+        """Backward compatibility: sendgrid_api_key accessor"""
+        return self.SENDGRID_API_KEY
+
+    @property
+    def cors_origins(self) -> list[str]:
+        """Backward compatibility: cors_origins accessor"""
+        return self.cors_origins_list
+
+    @property
+    def app_name(self) -> str:
+        """Backward compatibility: app_name accessor"""
+        return self.APP_NAME
+
+    @property
+    def environment(self) -> str:
+        """Backward compatibility: environment accessor (returns string, not Enum)"""
+        return (
+            self.ENVIRONMENT.value
+            if isinstance(self.ENVIRONMENT, Environment)
+            else str(self.ENVIRONMENT)
+        )
+
+    @property
+    def redis_url(self) -> str:
+        """Backward compatibility: redis_url accessor"""
+        return self.REDIS_URL
+
+    @property
+    def database_url(self) -> str:
+        """Backward compatibility: database_url accessor"""
+        return self.DATABASE_URL
+
+    @property
+    def stripe_secret_key(self) -> str:
+        """Backward compatibility: stripe_secret_key accessor"""
+        return self.STRIPE_SECRET_KEY
+
+    @property
+    def sentry_dsn(self) -> str | None:
+        """Backward compatibility: sentry_dsn accessor"""
+        return self.SENTRY_DSN
+
+    @property
+    def sentry_environment(self) -> str | None:
+        """Backward compatibility: sentry_environment accessor"""
+        return self.SENTRY_ENVIRONMENT or self.environment
+
+    @property
+    def log_level(self) -> str:
+        """Backward compatibility: log_level accessor"""
+        return self.LOG_LEVEL
+
+    @property
+    def jwt_secret(self) -> str:
+        """Backward compatibility: jwt_secret accessor"""
+        return self.JWT_SECRET or self.SECRET_KEY
+
+    @property
+    def jwt_secret_key(self) -> str:
+        """Backward compatibility: jwt_secret_key accessor"""
+        return self.JWT_SECRET or self.SECRET_KEY
+
+    @property
+    def jwt_algorithm(self) -> str:
+        """Backward compatibility: jwt_algorithm accessor"""
+        return "HS256"
+
+    @property
+    def secret_key(self) -> str:
+        """Backward compatibility: secret_key accessor"""
+        return self.SECRET_KEY
+
+    def get_worker_configs(self) -> dict:
+        """Get worker configuration for background tasks"""
+        return {
+            "sms_worker": {"enabled": self.SMS_WORKER_ENABLED},
+            "email_worker": {"enabled": self.EMAIL_WORKER_ENABLED},
+            "stripe_worker": {"enabled": self.STRIPE_WORKER_ENABLED},
         }
 
 
