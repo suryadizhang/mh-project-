@@ -7,10 +7,10 @@ import asyncio
 from datetime import datetime, timedelta
 import logging
 
-from api.app.database import AsyncSessionLocal
-from api.app.models.core import Booking, Customer
-from api.app.models.feedback import CustomerReview
-from api.app.services.review_service import ReviewService
+from core.database import AsyncSessionLocal
+from models.legacy_core import Booking, Customer
+from models.legacy_feedback import CustomerReview
+from services.review_service import ReviewService
 from core.config import get_settings
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -87,7 +87,7 @@ class ReviewRequestWorker:
                 return False
 
             # Decrypt customer data (assuming you have encryption)
-            from api.app.utils.encryption import (
+            from utils.encryption import (
                 decrypt_field,
                 get_field_encryption,
             )
@@ -183,7 +183,7 @@ class ReviewRequestWorker:
                 return False
 
             # Decrypt customer data
-            from api.app.utils.encryption import (
+            from utils.encryption import (
                 decrypt_field,
                 get_field_encryption,
             )
@@ -194,7 +194,7 @@ class ReviewRequestWorker:
             customer_name = decrypt_field(customer.name_encrypted, field_encryption.key)
 
             # Send reminder SMS
-            from api.app.services.ringcentral_sms import ringcentral_sms
+            from services.ringcentral_sms import ringcentral_sms
 
             message = (
                 f"Hi {customer_name.split()[0]}! 👋\n\n"
@@ -226,7 +226,7 @@ class ReviewRequestWorker:
         """Mark expired coupons as expired. Returns number of coupons updated."""
         async with AsyncSessionLocal() as db:
             try:
-                from api.app.models.feedback import DiscountCoupon
+                from models.legacy_feedback import DiscountCoupon
 
                 # Find active coupons past expiration
                 query = select(DiscountCoupon).where(

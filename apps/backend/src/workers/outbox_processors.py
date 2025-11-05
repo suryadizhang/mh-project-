@@ -11,9 +11,9 @@ import logging
 from typing import Any
 
 import aiohttp
-from api.app.database import get_db_context
-from api.app.models.events import OutboxEntry
-from api.app.utils.encryption import decrypt_field, get_field_encryption
+from core.database import get_db_context
+from models.legacy_events import OutboxEntry
+from utils.encryption import decrypt_field, get_field_encryption
 from sqlalchemy import and_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 import stripe
