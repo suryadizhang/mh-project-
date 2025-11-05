@@ -13,7 +13,7 @@ from core.config import get_settings
 import jwt
 
 settings = get_settings()
-from api.app.services.ringcentral_sms import (
+from services.ringcentral_sms import (  # Phase 2C: Updated from api.app.services.ringcentral_sms
     RingCentralSMSService,
     send_sms_notification,
 )

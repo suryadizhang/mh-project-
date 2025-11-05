@@ -12,8 +12,10 @@ from typing import Any
 from uuid import UUID, uuid4
 
 # Import unified Base (avoid circular import)
-from api.app.models.declarative_base import Base
-from api.app.utils.encryption import FieldEncryption
+from models.legacy_declarative_base import (
+    Base,
+)  # Phase 2C: Updated from api.app.models.declarative_base
+from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
 import bcrypt
 import jwt
 import pyotp

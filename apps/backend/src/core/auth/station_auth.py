@@ -9,14 +9,14 @@ import secrets
 from typing import Any
 from uuid import UUID, uuid4
 
-from api.app.auth.models import (
+from core.auth.models import (  # Phase 2C: Updated from api.app.auth.models
     AuthenticationService as BaseAuthenticationService,
 )
-from api.app.auth.models import (
+from core.auth.models import (  # Phase 2C: Updated from api.app.auth.models
     User,
     UserSession,
 )
-from api.app.auth.station_models import (
+from core.auth.station_models import (  # Phase 2C: Updated from api.app.auth.station_models
     Station,
     StationAccessToken,
     StationAuditLog,
@@ -27,7 +27,7 @@ from api.app.auth.station_models import (
     can_perform_cross_station_action,
     get_station_permissions,
 )
-from api.app.utils.encryption import FieldEncryption
+from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
 import jwt
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession

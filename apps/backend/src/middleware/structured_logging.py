@@ -20,7 +20,7 @@ import time
 import traceback
 import uuid
 
-from api.app.database import Base, get_db
+from core.database import Base, get_db  # Phase 2C: Updated from api.app.database
 from fastapi import Request
 from sqlalchemy import Column, DateTime, Integer, String, Text, select
 from sqlalchemy.ext.asyncio import AsyncSession

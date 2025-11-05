@@ -270,7 +270,8 @@ class LeadService:
                         budget_cents = int((int(numbers[0]) + int(numbers[1])) / 2 * 100)
                     else:
                         budget_cents = int(numbers[0]) * 100
-            except:
+            except (ValueError, IndexError, TypeError):
+                # If budget parsing fails, leave it as None
                 pass
 
         # Phone is required, email is optional

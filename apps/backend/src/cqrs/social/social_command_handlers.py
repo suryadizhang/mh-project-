@@ -4,8 +4,8 @@ from datetime import datetime
 import logging
 from typing import Any
 
-from api.app.cqrs.base import CommandHandler
-from api.app.cqrs.social_commands import (
+from cqrs.base import CommandHandler  # Phase 2C: Updated from api.app.cqrs.base
+from cqrs.social.social_commands import (  # Phase 2C: Updated from api.app.cqrs.social_commands
     AcknowledgeReviewCommand,
     CreateLeadFromSocialCommand,
     CreateSocialAccountCommand,
@@ -13,16 +13,18 @@ from api.app.cqrs.social_commands import (
     SendSocialReplyCommand,
     UpdateThreadStatusCommand,
 )
-from api.app.models.core import Customer, Lead
-from api.app.models.events import OutboxEntry
-from api.app.models.social import (
+from models.legacy_core import Customer, Lead  # Phase 2C: Updated from api.app.models.core
+from models.legacy_events import OutboxEntry  # Phase 2C: Updated from api.app.models.events
+from models.legacy_social import (  # Phase 2C: Updated from api.app.models.social
     Review,
     SocialAccount,
     SocialIdentity,
     SocialMessage,
     SocialThread,
 )
-from api.app.services.social_service import SocialService
+from services.social.social_service import (
+    SocialService,
+)  # Phase 2C: Updated from api.app.services.social_service
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 

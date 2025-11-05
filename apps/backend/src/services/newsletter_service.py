@@ -305,7 +305,9 @@ class SubscriberService:
         """Send SMS message"""
         try:
             # Import here to avoid circular dependencies
-            from api.app.services.ringcentral_sms import RingCentralSMS
+            from services.ringcentral_sms import (
+                RingCentralSMS,
+            )  # Phase 2C: Updated from api.app.services.ringcentral_sms
 
             sms_service = RingCentralSMS()
             await sms_service.send_sms(phone, message)
@@ -318,7 +320,9 @@ class SubscriberService:
         """Send email message"""
         try:
             # Import here to avoid circular dependencies
-            from api.app.services.email_service import EmailService
+            from services.email_service import (
+                EmailService,
+            )  # Phase 2C: Updated from api.app.services.email_service
 
             email_service = EmailService()
             await email_service.send_email(to=email, subject=subject, body=message)

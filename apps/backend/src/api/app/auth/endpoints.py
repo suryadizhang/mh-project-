@@ -95,7 +95,7 @@ class ChangePasswordRequest(BaseModel):
 
     @field_validator("new_password")
     def passwords_must_differ(cls, v, info):
-        if "current_password" in values and v == values["current_password"]:
+        if "current_password" in info.data and v == info.data["current_password"]:
             raise ValueError("New password must be different from current password")
         return v
 

@@ -7,7 +7,9 @@ from datetime import datetime, timedelta
 from enum import Enum
 from uuid import UUID, uuid4
 
-from api.app.models.declarative_base import Base
+from models.legacy_declarative_base import (
+    Base,
+)  # Phase 2C: Updated from api.app.models.declarative_base
 from sqlalchemy import (
     Boolean,
     Column,

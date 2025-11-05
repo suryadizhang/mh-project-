@@ -448,7 +448,9 @@ class PaymentEmailScheduler:
             try:
                 self.idle_connection.send(b"DONE\r\n")
                 self.idle_connection.logout()
-            except:
+            except (OSError, Exception) as e:
+                # If logout fails, connection is likely already closed
+                logger.debug(f"IMAP logout error (expected during shutdown): {e}")
                 pass
 
         # Wait for threads to finish

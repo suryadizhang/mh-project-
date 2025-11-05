@@ -7,14 +7,14 @@ from datetime import datetime
 from typing import Any
 from uuid import uuid4
 
-from api.app.auth.middleware import (
+from core.auth.middleware import (  # Phase 2C: Updated from api.app.auth.middleware
     AuthenticatedUser,
     audit_log_action,
     get_current_active_user,
     rate_limit,
     require_permission,
 )
-from api.app.auth.models import (
+from core.auth.models import (  # Phase 2C: Updated from api.app.auth.models
     AuthenticationService,
     Permission,
     Role,
@@ -23,8 +23,8 @@ from api.app.auth.models import (
     UserSession,
     UserStatus,
 )
-from api.app.database import get_db_session
-from api.app.utils.encryption import FieldEncryption
+from core.database import get_db_session  # Phase 2C: Updated from api.app.database
+from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import and_, or_, select
@@ -95,7 +95,7 @@ class ChangePasswordRequest(BaseModel):
 
     @field_validator("new_password")
     def passwords_must_differ(cls, v, info):
-        if "current_password" in values and v == values["current_password"]:
+        if "current_password" in info.data and v == info.data["current_password"]:
             raise ValueError("New password must be different from current password")
         return v
 

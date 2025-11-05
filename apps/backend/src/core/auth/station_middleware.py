@@ -9,14 +9,17 @@ import logging
 from typing import Any
 from uuid import UUID
 
-from api.app.auth.models import User, UserSession
-from api.app.auth.station_auth import (
+from core.auth.models import User, UserSession  # Phase 2C: Updated from api.app.auth.models
+from core.auth.station_auth import (  # Phase 2C: Updated from api.app.auth.station_auth
     StationAuthenticationService,
     StationContext,
 )
-from api.app.auth.station_models import StationPermission, StationRole
-from api.app.database import get_db_session
-from api.app.utils.encryption import FieldEncryption
+from core.auth.station_models import (
+    StationPermission,
+    StationRole,
+)  # Phase 2C: Updated from api.app.auth.station_models
+from core.database import get_db_session  # Phase 2C: Updated from api.app.database
+from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer
 from sqlalchemy import select, text

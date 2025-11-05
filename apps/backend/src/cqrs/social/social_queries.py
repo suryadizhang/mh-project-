@@ -4,8 +4,8 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from api.app.cqrs.base import Query
-from api.app.models.social import (
+from cqrs.base import Query  # Phase 2C: Updated from api.app.cqrs.base
+from models.legacy_social import (  # Phase 2C: Updated from api.app.models.social
     MessageKind,
     ReviewStatus,
     SocialPlatform,

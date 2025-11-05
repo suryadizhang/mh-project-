@@ -6,7 +6,7 @@ Example: STATION-CA-BAY-001, STATION-TX-AUSTIN-002
 
 import re
 
-from api.app.auth.station_models import Station
+from core.auth.station_models import Station  # Phase 2C: Updated from api.app.auth.station_models
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 

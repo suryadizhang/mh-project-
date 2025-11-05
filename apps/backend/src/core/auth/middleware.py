@@ -8,7 +8,7 @@ from datetime import datetime
 from functools import wraps
 import time
 
-from api.app.auth.models import (
+from core.auth.models import (  # Phase 2C: Updated from api.app.auth.models
     AuditLog,
     AuthenticationService,
     Permission,
@@ -18,8 +18,8 @@ from api.app.auth.models import (
     UserSession,
     UserStatus,
 )
-from api.app.database import get_db_session
-from api.app.utils.encryption import FieldEncryption
+from core.database import get_db_session  # Phase 2C: Updated from api.app.database
+from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.responses import Response
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer

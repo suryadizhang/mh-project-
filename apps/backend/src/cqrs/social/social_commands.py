@@ -4,8 +4,12 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from api.app.cqrs.base import Command
-from api.app.models.social import MessageKind, SocialPlatform, ThreadStatus
+from cqrs.base import Command  # Phase 2C: Updated from api.app.cqrs.base
+from models.legacy_social import (
+    MessageKind,
+    SocialPlatform,
+    ThreadStatus,
+)  # Phase 2C: Updated from api.app.models.social
 from pydantic import ConfigDict, Field
 
 

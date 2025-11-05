@@ -3,15 +3,15 @@
 import logging
 from typing import Any
 
-from api.app.cqrs.base import QueryHandler
-from api.app.cqrs.social_queries import (
+from cqrs.base import QueryHandler  # Phase 2C: Updated from api.app.cqrs.base
+from cqrs.social.social_queries import (  # Phase 2C: Updated from api.app.cqrs.social_queries
     GetReviewsBoardQuery,
     GetSocialInboxQuery,
     GetThreadDetailQuery,
     GetUnreadCountsQuery,
 )
-from api.app.models.core import Customer
-from api.app.models.social import (
+from models.legacy_core import Customer  # Phase 2C: Updated from api.app.models.core
+from models.legacy_social import (  # Phase 2C: Updated from api.app.models.social
     Review,
     SocialAccount,
     SocialMessage,
