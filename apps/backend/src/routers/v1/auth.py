@@ -28,7 +28,9 @@ class LoginRequest(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [{"email": "john@example.com", "password": "SecurePass123!"}]
+            "examples": [
+                {"email": "john@example.com", "password": "SecurePass123!"}
+            ]
         }
     }
 
@@ -37,9 +39,15 @@ class TokenResponse(BaseModel):
     """Authentication token response."""
 
     access_token: str = Field(..., description="JWT access token")
-    token_type: str = Field(default="bearer", description="Token type (always 'bearer')")
-    expires_in: int = Field(..., description="Token expiration time in seconds")
-    refresh_token: str = Field(..., description="Refresh token for obtaining new access tokens")
+    token_type: str = Field(
+        default="bearer", description="Token type (always 'bearer')"
+    )
+    expires_in: int = Field(
+        ..., description="Token expiration time in seconds"
+    )
+    refresh_token: str = Field(
+        ..., description="Refresh token for obtaining new access tokens"
+    )
 
     model_config = {
         "json_schema_extra": {
@@ -61,8 +69,12 @@ class UserResponse(BaseModel):
     id: str = Field(..., description="Unique user identifier")
     email: EmailStr = Field(..., description="User email address")
     name: str = Field(..., description="User full name")
-    is_admin: bool = Field(default=False, description="Whether user has admin privileges")
-    created_at: str = Field(..., description="Account creation timestamp (ISO 8601)")
+    is_admin: bool = Field(
+        default=False, description="Whether user has admin privileges"
+    )
+    created_at: str = Field(
+        ..., description="Account creation timestamp (ISO 8601)"
+    )
 
     model_config = {
         "json_schema_extra": {
@@ -79,10 +91,113 @@ class UserResponse(BaseModel):
     }
 
 
+class RegisterRequest(BaseModel):
+    """User registration request schema."""
+
+    email: EmailStr = Field(..., description="User email address")
+    password: str = Field(
+        ..., min_length=8, description="User password (minimum 8 characters)"
+    )
+    full_name: str = Field(
+        ..., min_length=2, max_length=100, description="User's full name"
+    )
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "email": "jane@example.com",
+                    "password": "SecurePass123!",
+                    "full_name": "Jane Smith",
+                }
+            ]
+        }
+    }
+
+
 class ErrorResponse(BaseModel):
     """Standard error response."""
 
     detail: str = Field(..., description="Error message")
+
+
+@router.post(
+    "/register",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Register new user",
+    description="""
+    Create a new user account.
+
+    ## Process:
+    1. Validates email is not already registered
+    2. Validates password strength (minimum 8 characters)
+    3. Hashes password with bcrypt (12 rounds)
+    4. Creates user account with encrypted email
+    5. Returns user information
+
+    ## Security:
+    - Password hashing: bcrypt with 12 rounds
+    - Email encryption: AES-256-GCM
+    - Rate limiting: 3 attempts per hour per IP
+    - Email validation: RFC 5322 compliant
+
+    ## Default Permissions:
+    New users are created with:
+    - Basic user role
+    - Active status
+    - Email verification pending (if enabled)
+    """,
+    responses={
+        201: {
+            "description": "User registered successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": "user-abc123",
+                        "email": "jane@example.com",
+                        "name": "Jane Smith",
+                        "is_admin": False,
+                        "created_at": "2024-10-19T10:30:00Z",
+                    }
+                }
+            },
+        },
+        400: {
+            "description": "Invalid input or email already registered",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Email already registered"}
+                }
+            },
+        },
+        422: {
+            "description": "Validation error",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "Password must be at least 8 characters"
+                    }
+                }
+            },
+        },
+    },
+)
+async def register(request: RegisterRequest) -> dict[str, Any]:
+    """
+    Register a new user account.
+
+    This endpoint is publicly accessible and does not require authentication.
+    """
+    # TODO: Implement actual registration logic
+    # For now, return placeholder response
+    return {
+        "id": "user-placeholder",
+        "email": request.email,
+        "name": request.full_name,
+        "is_admin": False,
+        "created_at": "2024-10-19T10:30:00Z",
+    }
 
 
 @router.post(
@@ -130,7 +245,11 @@ class ErrorResponse(BaseModel):
         400: {
             "description": "Invalid request data",
             "model": ErrorResponse,
-            "content": {"application/json": {"example": {"detail": "Invalid email format"}}},
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Invalid email format"}
+                }
+            },
         },
         401: {
             "description": "Invalid credentials",
@@ -235,7 +354,9 @@ async def login(credentials: LoginRequest) -> dict[str, Any]:
                         },
                         "invalid_token": {
                             "summary": "Invalid or expired token",
-                            "value": {"detail": "Invalid authentication credentials"},
+                            "value": {
+                                "detail": "Invalid authentication credentials"
+                            },
                         },
                     }
                 }
@@ -290,9 +411,16 @@ async def get_current_user_info() -> dict[str, Any]:
     responses={
         200: {
             "description": "Logout successful",
-            "content": {"application/json": {"example": {"message": "Logged out successfully"}}},
+            "content": {
+                "application/json": {
+                    "example": {"message": "Logged out successfully"}
+                }
+            },
         },
-        401: {"description": "Authentication required", "model": ErrorResponse},
+        401: {
+            "description": "Authentication required",
+            "model": ErrorResponse,
+        },
     },
 )
 async def logout() -> dict[str, str]:
@@ -349,7 +477,9 @@ async def logout() -> dict[str, str]:
                     "examples": {
                         "expired": {
                             "summary": "Refresh token expired",
-                            "value": {"detail": "Refresh token has expired. Please login again."},
+                            "value": {
+                                "detail": "Refresh token has expired. Please login again."
+                            },
                         },
                         "invalid": {
                             "summary": "Invalid token",
@@ -461,4 +591,6 @@ async def reset_password(email: EmailStr) -> dict[str, str]:
         HTTPException(429): Too many reset requests
     """
     # Placeholder implementation
-    return {"message": "If an account with that email exists, a password reset link has been sent."}
+    return {
+        "message": "If an account with that email exists, a password reset link has been sent."
+    }

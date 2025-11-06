@@ -136,19 +136,23 @@ class CampaignEventResponse(BaseModel):
 
 # Subscriber endpoints
 @router.post("/subscribers", response_model=SubscriberResponse)
-async def create_subscriber(subscriber_data: SubscriberCreate, db: AsyncSession = Depends(get_db)):
+async def create_subscriber(
+    subscriber_data: SubscriberCreate, db: AsyncSession = Depends(get_db)
+):
     """Create a new newsletter subscriber."""
 
     # Check if subscriber already exists
     stmt = select(Subscriber).where(
-        Subscriber.email_enc == Subscriber._encrypt_email(subscriber_data.email)
+        Subscriber.email_enc
+        == Subscriber._encrypt_email(subscriber_data.email)
     )
     result = await db.execute(stmt)
     existing = result.scalars().first()
 
     if existing:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Subscriber already exists"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Subscriber already exists",
         )
 
     subscriber = Subscriber(
@@ -194,7 +198,11 @@ async def list_subscribers(
     if engagement_max is not None:
         stmt = stmt.where(Subscriber.engagement_score <= engagement_max)
 
-    stmt = stmt.order_by(desc(Subscriber.engagement_score)).offset(offset).limit(limit)
+    stmt = (
+        stmt.order_by(desc(Subscriber.engagement_score))
+        .offset(offset)
+        .limit(limit)
+    )
     result = await db.execute(stmt)
     subscribers = result.scalars().all()
 
@@ -202,7 +210,9 @@ async def list_subscribers(
 
 
 @router.get("/subscribers/{subscriber_id}", response_model=SubscriberResponse)
-async def get_subscriber(subscriber_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_subscriber(
+    subscriber_id: UUID, db: AsyncSession = Depends(get_db)
+):
     """Get subscriber details."""
 
     stmt = select(Subscriber).where(Subscriber.id == subscriber_id)
@@ -210,24 +220,36 @@ async def get_subscriber(subscriber_id: UUID, db: AsyncSession = Depends(get_db)
     subscriber = result.scalars().first()
 
     if not subscriber:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Subscriber not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Subscriber not found",
+        )
 
     return subscriber
 
 
 @router.put("/subscribers/{subscriber_id}", response_model=SubscriberResponse)
 async def update_subscriber(
-    subscriber_id: UUID, subscriber_update: SubscriberUpdate, db: AsyncSession = Depends(get_db)
+    subscriber_id: UUID,
+    subscriber_update: SubscriberUpdate,
+    db: AsyncSession = Depends(get_db),
 ):
     """Update subscriber information."""
 
     subscriber = (
-        (await db.execute(select(Subscriber).where(Subscriber.id == subscriber_id)))
+        (
+            await db.execute(
+                select(Subscriber).where(Subscriber.id == subscriber_id)
+            )
+        )
         .scalars()
         .first()
     )
     if not subscriber:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Subscriber not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Subscriber not found",
+        )
 
     if subscriber_update.phone is not None:
         subscriber.phone = subscriber_update.phone
@@ -257,16 +279,25 @@ async def update_subscriber(
 
 
 @router.delete("/subscribers/{subscriber_id}")
-async def unsubscribe_subscriber(subscriber_id: UUID, db: AsyncSession = Depends(get_db)):
+async def unsubscribe_subscriber(
+    subscriber_id: UUID, db: AsyncSession = Depends(get_db)
+):
     """Unsubscribe a subscriber."""
 
     subscriber = (
-        (await db.execute(select(Subscriber).where(Subscriber.id == subscriber_id)))
+        (
+            await db.execute(
+                select(Subscriber).where(Subscriber.id == subscriber_id)
+            )
+        )
         .scalars()
         .first()
     )
     if not subscriber:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Subscriber not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Subscriber not found",
+        )
 
     subscriber.subscribed = False
     subscriber.unsubscribed_at = datetime.now()
@@ -319,7 +350,12 @@ async def list_campaigns(
     if channel:
         query = query.where(Campaign.channel == channel)
 
-    campaigns = query.order_by(desc(Campaign.created_at)).offset(offset).limit(limit).all()
+    campaigns = (
+        query.order_by(desc(Campaign.created_at))
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
 
     return campaigns
 
@@ -329,29 +365,40 @@ async def get_campaign(campaign_id: UUID, db: AsyncSession = Depends(get_db)):
     """Get campaign details."""
 
     campaign = (
-        (await db.execute(select(Campaign).where(Campaign.id == campaign_id))).scalars().first()
+        (await db.execute(select(Campaign).where(Campaign.id == campaign_id)))
+        .scalars()
+        .first()
     )
     if not campaign:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found"
+        )
 
     return campaign
 
 
 @router.put("/campaigns/{campaign_id}", response_model=CampaignResponse)
 async def update_campaign(
-    campaign_id: UUID, campaign_update: CampaignUpdate, db: AsyncSession = Depends(get_db)
+    campaign_id: UUID,
+    campaign_update: CampaignUpdate,
+    db: AsyncSession = Depends(get_db),
 ):
     """Update campaign information."""
 
     campaign = (
-        (await db.execute(select(Campaign).where(Campaign.id == campaign_id))).scalars().first()
+        (await db.execute(select(Campaign).where(Campaign.id == campaign_id)))
+        .scalars()
+        .first()
     )
     if not campaign:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found"
+        )
 
     if campaign.status in [CampaignStatus.SENT, CampaignStatus.SENDING]:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot update sent or sending campaign"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot update sent or sending campaign",
         )
 
     for field, value in campaign_update.dict(exclude_unset=True).items():
@@ -364,15 +411,21 @@ async def update_campaign(
 
 @router.post("/campaigns/{campaign_id}/send")
 async def send_campaign(
-    campaign_id: UUID, background_tasks: BackgroundTasks, db: AsyncSession = Depends(get_db)
+    campaign_id: UUID,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
 ):
     """Send campaign to subscribers."""
 
     campaign = (
-        (await db.execute(select(Campaign).where(Campaign.id == campaign_id))).scalars().first()
+        (await db.execute(select(Campaign).where(Campaign.id == campaign_id)))
+        .scalars()
+        .first()
     )
     if not campaign:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found"
+        )
 
     if campaign.status != CampaignStatus.DRAFT:
         raise HTTPException(
@@ -393,15 +446,23 @@ async def send_campaign(
     return {"success": True, "message": "Campaign scheduled for sending"}
 
 
-@router.get("/campaigns/{campaign_id}/stats", response_model=CampaignStatsResponse)
-async def get_campaign_stats(campaign_id: UUID, db: AsyncSession = Depends(get_db)):
+@router.get(
+    "/campaigns/{campaign_id}/stats", response_model=CampaignStatsResponse
+)
+async def get_campaign_stats(
+    campaign_id: UUID, db: AsyncSession = Depends(get_db)
+):
     """Get campaign performance statistics."""
 
     campaign = (
-        (await db.execute(select(Campaign).where(Campaign.id == campaign_id))).scalars().first()
+        (await db.execute(select(Campaign).where(Campaign.id == campaign_id)))
+        .scalars()
+        .first()
     )
     if not campaign:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found"
+        )
 
     # Count events by type
     stmt = (
@@ -433,7 +494,10 @@ async def get_campaign_stats(campaign_id: UUID, db: AsyncSession = Depends(get_d
     )
 
 
-@router.get("/campaigns/{campaign_id}/events", response_model=list[CampaignEventResponse])
+@router.get(
+    "/campaigns/{campaign_id}/events",
+    response_model=list[CampaignEventResponse],
+)
 async def get_campaign_events(
     campaign_id: UUID,
     event_type: CampaignEventType | None = Query(None),
@@ -443,24 +507,35 @@ async def get_campaign_events(
 ):
     """Get campaign events."""
 
-    query = select(CampaignEvent).where(CampaignEvent.campaign_id == campaign_id)
+    query = select(CampaignEvent).where(
+        CampaignEvent.campaign_id == campaign_id
+    )
 
     if event_type:
         query = query.where(CampaignEvent.type == event_type)
 
-    events = query.order_by(desc(CampaignEvent.occurred_at)).offset(offset).limit(limit).all()
+    events = (
+        query.order_by(desc(CampaignEvent.occurred_at))
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
 
     return events
 
 
 @router.post("/campaigns/ai-content")
 async def generate_campaign_content(
-    campaign_type: str, target_audience: str, additional_context: dict[str, Any] | None = None
+    campaign_type: str,
+    target_audience: str,
+    additional_context: dict[str, Any] | None = None,
 ):
     """Generate AI-powered campaign content."""
 
     social_ai = await get_social_media_ai()
-    content = await social_ai.create_promotional_content(campaign_type, target_audience)
+    content = await social_ai.create_promotional_content(
+        campaign_type, target_audience
+    )
 
     return {
         "generated_content": content,
@@ -471,7 +546,9 @@ async def generate_campaign_content(
 
 # Segmentation endpoints
 @router.get("/segments/preview")
-async def preview_segment(filter_criteria: dict[str, Any], db: AsyncSession = Depends(get_db)):
+async def preview_segment(
+    filter_criteria: dict[str, Any], db: AsyncSession = Depends(get_db)
+):
     """Preview subscribers matching segment criteria."""
 
     query = select(Subscriber).where(Subscriber.subscribed)
@@ -481,97 +558,148 @@ async def preview_segment(filter_criteria: dict[str, Any], db: AsyncSession = De
         query = query.where(Subscriber.tags.overlap(filter_criteria["tags"]))
 
     if "engagement_min" in filter_criteria:
-        query = query.where(Subscriber.engagement_score >= filter_criteria["engagement_min"])
+        query = query.where(
+            Subscriber.engagement_score >= filter_criteria["engagement_min"]
+        )
 
     if "engagement_max" in filter_criteria:
-        query = query.where(Subscriber.engagement_score <= filter_criteria["engagement_max"])
+        query = query.where(
+            Subscriber.engagement_score <= filter_criteria["engagement_max"]
+        )
 
     if "last_opened_days" in filter_criteria:
-        cutoff_date = datetime.now() - timedelta(days=filter_criteria["last_opened_days"])
+        cutoff_date = datetime.now() - timedelta(
+            days=filter_criteria["last_opened_days"]
+        )
         query = query.where(Subscriber.last_opened_date >= cutoff_date)
 
-    count = query.count()
-    sample = query.limit(10).all()
+    # Compute total count using COUNT() and fetch a small sample asynchronously
+    # Build where clause for count (re-use query filters)
+    # Note: SQLAlchemy select objects do not expose a public API for extracting the where-clause
+    # so we rebuild a count statement using the same filtering logic.
+    count_stmt = select(func.count()).select_from(Subscriber)
+    # Re-apply filters to count_stmt if present
+    if "tags" in filter_criteria:
+        count_stmt = count_stmt.where(
+            Subscriber.tags.overlap(filter_criteria["tags"])
+        )
+    if "engagement_min" in filter_criteria:
+        count_stmt = count_stmt.where(
+            Subscriber.engagement_score >= filter_criteria["engagement_min"]
+        )
+    if "engagement_max" in filter_criteria:
+        count_stmt = count_stmt.where(
+            Subscriber.engagement_score <= filter_criteria["engagement_max"]
+        )
+    if "last_opened_days" in filter_criteria:
+        cutoff_date = datetime.now() - timedelta(
+            days=filter_criteria["last_opened_days"]
+        )
+        count_stmt = count_stmt.where(
+            Subscriber.last_opened_date >= cutoff_date
+        )
 
-    return {"total_count": count, "sample_subscribers": sample}
+    total_res = await db.execute(count_stmt)
+    total_count = int(total_res.scalar_one())
+
+    sample_stmt = query.limit(10)
+    sample_res = await db.execute(sample_stmt)
+    sample = sample_res.scalars().all()
+
+    return {"total_count": total_count, "sample_subscribers": sample}
 
 
 # Background task functions
 async def _send_campaign_async(campaign_id: UUID):
     """Send campaign in background."""
-    db = next(get_db())
+    from core.database import get_db_context
 
-    try:
-        campaign = (
-            (await db.execute(select(Campaign).where(Campaign.id == campaign_id))).scalars().first()
-        )
-        if not campaign:
-            return
-
-        # Get target subscribers
-        query = select(Subscriber).where(Subscriber.subscribed)
-
-        # Apply segment filters if any
-        if campaign.segment_filter:
-            # Apply segment filtering logic here
-            pass
-
-        # Get appropriate channel subscribers
-        if campaign.channel == CampaignChannel.EMAIL:
-            query = query.where(Subscriber.email_consent)
-        elif campaign.channel == CampaignChannel.SMS:
-            query = query.where(and_(Subscriber.sms_consent, Subscriber.phone_enc.isnot(None)))
-        elif campaign.channel == CampaignChannel.BOTH:
-            query = query.where(
-                or_(
-                    Subscriber.email_consent,
-                    and_(Subscriber.sms_consent, Subscriber.phone_enc.isnot(None)),
+    async with get_db_context() as db:
+        try:
+            campaign = (
+                (
+                    await db.execute(
+                        select(Campaign).where(Campaign.id == campaign_id)
+                    )
                 )
+                .scalars()
+                .first()
             )
+            if not campaign:
+                return
 
-        subscribers = (await db.execute(query)).scalars().all()
+            # Get target subscribers
+            query = select(Subscriber).where(Subscriber.subscribed)
 
-        # Update campaign
-        campaign.status = CampaignStatus.SENDING
-        campaign.total_recipients = len(subscribers)
-        await db.commit()
+            # Apply segment filters if any
+            if campaign.segment_filter:
+                # Apply segment filtering logic here
+                pass
 
-        # Send to each subscriber
-        for subscriber in subscribers:
-            try:
-                # Create sent event
-                event = CampaignEvent(
-                    campaign_id=campaign.id,
-                    subscriber_id=subscriber.id,
-                    type=CampaignEventType.SENT,
+            # Get appropriate channel subscribers
+            if campaign.channel == CampaignChannel.EMAIL:
+                query = query.where(Subscriber.email_consent)
+            elif campaign.channel == CampaignChannel.SMS:
+                query = query.where(
+                    and_(
+                        Subscriber.sms_consent,
+                        Subscriber.phone_enc.isnot(None),
+                    )
                 )
-                db.add(event)
-
-                # Update subscriber stats
-                subscriber.total_emails_sent += 1
-                subscriber.last_email_sent_date = datetime.now()
-
-                # TODO: Integrate with actual email/SMS sending service
-                # For now, just simulate delivery
-                delivery_event = CampaignEvent(
-                    campaign_id=campaign.id,
-                    subscriber_id=subscriber.id,
-                    type=CampaignEventType.DELIVERED,
+            elif campaign.channel == CampaignChannel.BOTH:
+                query = query.where(
+                    or_(
+                        Subscriber.email_consent,
+                        and_(
+                            Subscriber.sms_consent,
+                            Subscriber.phone_enc.isnot(None),
+                        ),
+                    )
                 )
-                db.add(delivery_event)
 
-            except Exception as e:
-                logger.exception(f"Failed to send to subscriber {subscriber.id}: {e}")
+            subscribers = (await db.execute(query)).scalars().all()
 
-        # Mark campaign as sent
-        campaign.status = CampaignStatus.SENT
-        campaign.sent_at = datetime.now()
-        await db.commit()
+            # Update campaign
+            campaign.status = CampaignStatus.SENDING
+            campaign.total_recipients = len(subscribers)
+            await db.commit()
 
-    except Exception as e:
-        logger.exception(f"Campaign sending failed: {e}")
-        # Mark campaign as failed
-        campaign.status = CampaignStatus.CANCELLED
-        await db.commit()
-    finally:
-        db.close()
+            # Send to each subscriber
+            for subscriber in subscribers:
+                try:
+                    # Create sent event
+                    event = CampaignEvent(
+                        campaign_id=campaign.id,
+                        subscriber_id=subscriber.id,
+                        type=CampaignEventType.SENT,
+                    )
+                    db.add(event)
+
+                    # Update subscriber stats
+                    subscriber.total_emails_sent += 1
+                    subscriber.last_email_sent_date = datetime.now()
+
+                    # TODO: Integrate with actual email/SMS sending service
+                    # For now, just simulate delivery
+                    delivery_event = CampaignEvent(
+                        campaign_id=campaign.id,
+                        subscriber_id=subscriber.id,
+                        type=CampaignEventType.DELIVERED,
+                    )
+                    db.add(delivery_event)
+
+                except Exception as e:
+                    logger.exception(
+                        f"Failed to send to subscriber {subscriber.id}: {e}"
+                    )
+
+            # Mark campaign as sent
+            campaign.status = CampaignStatus.SENT
+            campaign.sent_at = datetime.now()
+            await db.commit()
+
+        except Exception as e:
+            logger.exception(f"Campaign sending failed: {e}")
+            # Mark campaign as failed
+            campaign.status = CampaignStatus.CANCELLED
+            await db.commit()

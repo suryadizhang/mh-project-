@@ -84,7 +84,7 @@ alembic upgrade head
 
 # Setup Stripe products (development only)
 python -c "
-from app.utils.stripe_setup import setup_stripe_products
+from utils.stripe_setup import setup_stripe_products
 import asyncio
 asyncio.run(setup_stripe_products())
 "
@@ -93,7 +93,7 @@ asyncio.run(setup_stripe_products())
 ### 4. Start Development Server
 
 ```bash
-uvicorn app.main:app --reload --port 8000
+uvicorn src.main:app --reload --port 8000
 ```
 
 API Documentation: http://localhost:8000/docs
@@ -230,7 +230,7 @@ invoice = stripe.Invoice.create(
 
 ```bash
 # 1. Start servers
-uvicorn app.main:app --reload --port 8000
+uvicorn src.main:app --reload --port 8000
 cd ../myhibachi-frontend && npm run dev
 
 # 2. Start webhook forwarding
@@ -269,7 +269,6 @@ stripe listen --forward-to localhost:8000/api/stripe/webhook
    ```
 
 3. **Complete Payment**
-
    - Visit checkout URL
    - Use card: 4242 4242 4242 4242
    - Complete payment
@@ -318,17 +317,17 @@ alembic upgrade head
 alembic downgrade -1
 
 # Setup Stripe products
-python -c "from app.utils.stripe_setup import setup_stripe_products; import asyncio; asyncio.run(setup_stripe_products())"
+python -c "from utils.stripe_setup import setup_stripe_products; import asyncio; asyncio.run(setup_stripe_products())"
 
 # Create test data
-python -c "from app.utils.stripe_setup import create_test_data; print(create_test_data())"
+python -c "from utils.stripe_setup import create_test_data; print(create_test_data())"
 
 # Code formatting
-black app/
-flake8 app/
+black src/
+flake8 src/
 
 # Type checking
-mypy app/
+mypy src/
 ```
 
 ### Testing

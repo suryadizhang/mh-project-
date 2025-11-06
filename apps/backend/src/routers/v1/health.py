@@ -7,7 +7,8 @@ from datetime import datetime
 import time
 from typing import Any
 
-from core.database import get_db
+from core.database import get_db_context
+from sqlalchemy import text
 from schemas.health import HealthResponse, ReadinessResponse
 from core.config import get_settings
 from fastapi import APIRouter, HTTPException
@@ -28,14 +29,12 @@ async def check_database_connectivity() -> dict[str, Any]:
         start_time = time.time()
 
         # Get database session
-        db = next(get_db())
+        async with get_db_context() as db:
+            # Simple connectivity test
+            await db.execute(text("SELECT 1"))
 
-        # Simple connectivity test
-        db.execute("SELECT 1")
-
-        # Performance test
-        query_time = time.time() - start_time
-        db.close()
+            # Performance test
+            query_time = time.time() - start_time
 
         return {
             "status": "healthy",
@@ -85,7 +84,9 @@ async def health_check():
         # Database connectivity check
         db_check = await check_database_connectivity()
 
-        overall_status = "healthy" if db_check["status"] == "healthy" else "unhealthy"
+        overall_status = (
+            "healthy" if db_check["status"] == "healthy" else "unhealthy"
+        )
 
         return HealthResponse(
             status=overall_status,
@@ -98,14 +99,18 @@ async def health_check():
             database_response_time_ms=db_check.get("response_time_ms"),
             checks={
                 "database": db_check,
-                "stripe_configured": bool(getattr(settings, "stripe_secret_key", None)),
+                "stripe_configured": bool(
+                    getattr(settings, "stripe_secret_key", None)
+                ),
                 "email_configured": bool(getattr(settings, "smtp_user", None)),
                 "environment": getattr(settings, "ENVIRONMENT", "development"),
             },
         )
     except Exception as e:
         logger.exception(f"Health check failed: {e}")
-        raise HTTPException(status_code=503, detail=f"Health check failed: {e!s}")
+        raise HTTPException(
+            status_code=503, detail=f"Health check failed: {e!s}"
+        )
 
 
 @router.get("/ready", response_model=ReadinessResponse)
@@ -144,7 +149,9 @@ async def readiness_check():
         )
     except Exception as e:
         logger.exception(f"Readiness check failed: {e}")
-        raise HTTPException(status_code=503, detail=f"Readiness check failed: {e!s}")
+        raise HTTPException(
+            status_code=503, detail=f"Readiness check failed: {e!s}"
+        )
 
 
 @router.get("/live")
@@ -176,7 +183,9 @@ async def detailed_health_check():
 
         # Configuration checks
         config_status = {
-            "stripe_configured": bool(getattr(settings, "stripe_secret_key", None)),
+            "stripe_configured": bool(
+                getattr(settings, "stripe_secret_key", None)
+            ),
             "email_configured": bool(getattr(settings, "smtp_user", None)),
             "debug_mode": getattr(settings, "debug", False),
             "environment": getattr(settings, "ENVIRONMENT", "development"),
@@ -184,7 +193,9 @@ async def detailed_health_check():
         }
 
         # Overall status
-        overall_status = "healthy" if db_check["status"] == "healthy" else "unhealthy"
+        overall_status = (
+            "healthy" if db_check["status"] == "healthy" else "unhealthy"
+        )
 
         return {
             "status": overall_status,
@@ -204,4 +215,6 @@ async def detailed_health_check():
         }
     except Exception as e:
         logger.exception(f"Detailed health check failed: {e}")
-        raise HTTPException(status_code=503, detail=f"Detailed health check failed: {e!s}")
+        raise HTTPException(
+            status_code=503, detail=f"Detailed health check failed: {e!s}"
+        )

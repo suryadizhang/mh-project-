@@ -20,8 +20,12 @@ import time
 import traceback
 import uuid
 
-from core.database import Base, get_db  # Phase 2C: Updated from api.app.database
+from core.database import (
+    Base,
+    get_db,
+)  # Phase 2C: Updated from api.app.database
 from fastapi import Request
+import asyncio
 from sqlalchemy import Column, DateTime, Integer, String, Text, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -61,7 +65,9 @@ class ErrorLog(Base):
     response_time_ms = Column(Integer, nullable=True)
 
     # Severity level
-    level = Column(String(20), default="ERROR", index=True)  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+    level = Column(
+        String(20), default="ERROR", index=True
+    )  # DEBUG, INFO, WARNING, ERROR, CRITICAL
 
     # Resolution tracking
     resolved = Column(Integer, default=0)  # 0 = unresolved, 1 = resolved
@@ -113,6 +119,13 @@ class StructuredLoggingMiddleware(BaseHTTPMiddleware):
     ):
         """Log error to database for admin dashboard"""
         try:
+            # If the event loop is closed (test teardown), skip DB logging to avoid RuntimeError
+            try:
+                asyncio.get_running_loop()
+            except RuntimeError:
+                logger.warning("Event loop is closed; skipping DB error log")
+                return
+
             # Get database session
             async for db in get_db():
                 # Extract user info from request state
@@ -120,9 +133,15 @@ class StructuredLoggingMiddleware(BaseHTTPMiddleware):
                 user_role = getattr(request.state, "role", None)
 
                 # Get client IP
-                client_ip = request.client.host if request.client else "unknown"
+                client_ip = (
+                    request.client.host if request.client else "unknown"
+                )
                 if "x-forwarded-for" in request.headers:
-                    client_ip = request.headers["x-forwarded-for"].split(",")[0].strip()
+                    client_ip = (
+                        request.headers["x-forwarded-for"]
+                        .split(",")[0]
+                        .strip()
+                    )
 
                 # Create error log entry
                 error_log = ErrorLog(
@@ -136,8 +155,12 @@ class StructuredLoggingMiddleware(BaseHTTPMiddleware):
                     error_message=str(error),
                     error_traceback=traceback.format_exc(),
                     status_code=status_code,
-                    request_body=request_body if self.log_request_body else None,
-                    request_headers=json.dumps(self._sanitize_headers(dict(request.headers))),
+                    request_body=(
+                        request_body if self.log_request_body else None
+                    ),
+                    request_headers=json.dumps(
+                        self._sanitize_headers(dict(request.headers))
+                    ),
                     user_agent=request.headers.get("user-agent"),
                     response_time_ms=response_time_ms,
                     level="ERROR" if status_code >= 500 else "WARNING",
@@ -147,11 +170,16 @@ class StructuredLoggingMiddleware(BaseHTTPMiddleware):
                 db.add(error_log)
                 await db.commit()
 
-                logger.info(f"📝 Error logged to database with correlation ID: {correlation_id}")
+                logger.info(
+                    f"📝 Error logged to database with correlation ID: {correlation_id}"
+                )
                 break  # Exit generator after first iteration
 
         except Exception as e:
-            logger.error(f"❌ Failed to log error to database: {e}", exc_info=True)
+            # If DB logging fails, write to standard logger but do not re-raise
+            logger.error(
+                f"❌ Failed to log error to database: {e}", exc_info=True
+            )
 
     async def dispatch(self, request: Request, call_next):
         """Process request with structured logging"""
@@ -166,11 +194,17 @@ class StructuredLoggingMiddleware(BaseHTTPMiddleware):
         # Get client info
         client_ip = request.client.host if request.client else "unknown"
         if "x-forwarded-for" in request.headers:
-            client_ip = request.headers["x-forwarded-for"].split(",")[0].strip()
+            client_ip = (
+                request.headers["x-forwarded-for"].split(",")[0].strip()
+            )
 
         # Read request body if needed
         request_body = None
-        if self.log_request_body and request.method in ["POST", "PUT", "PATCH"]:
+        if self.log_request_body and request.method in [
+            "POST",
+            "PUT",
+            "PATCH",
+        ]:
             try:
                 body_bytes = await request.body()
                 request_body = body_bytes.decode("utf-8")
@@ -309,7 +343,9 @@ async def log_to_admin_dashboard(
             error_message=message,
             error_traceback=error_traceback,
             status_code=None,
-            request_body=json.dumps(additional_context) if additional_context else None,
+            request_body=(
+                json.dumps(additional_context) if additional_context else None
+            ),
             level=level,
             resolved=0,
         )
@@ -320,7 +356,9 @@ async def log_to_admin_dashboard(
         logger.info(f"📝 Manual log entry created with level {level}")
 
     except Exception as e:
-        logger.error(f"❌ Failed to create manual log entry: {e}", exc_info=True)
+        logger.error(
+            f"❌ Failed to create manual log entry: {e}", exc_info=True
+        )
 
 
 # Helper function to get error logs for admin dashboard
@@ -365,7 +403,10 @@ async def get_error_logs(
 
 # Helper function to resolve error log
 async def resolve_error_log(
-    db: AsyncSession, error_log_id: int, resolved_by: int, resolution_notes: str | None = None
+    db: AsyncSession,
+    error_log_id: int,
+    resolved_by: int,
+    resolution_notes: str | None = None,
 ):
     """
     Mark an error log as resolved
@@ -376,7 +417,9 @@ async def resolve_error_log(
         resolved_by: User ID of the person resolving
         resolution_notes: Optional notes about the resolution
     """
-    result = await db.execute(select(ErrorLog).where(ErrorLog.id == error_log_id))
+    result = await db.execute(
+        select(ErrorLog).where(ErrorLog.id == error_log_id)
+    )
     error_log = result.scalar_one_or_none()
 
     if error_log:
@@ -386,7 +429,9 @@ async def resolve_error_log(
         error_log.resolution_notes = resolution_notes
 
         await db.commit()
-        logger.info(f"✅ Error log {error_log_id} marked as resolved by user {resolved_by}")
+        logger.info(
+            f"✅ Error log {error_log_id} marked as resolved by user {resolved_by}"
+        )
         return True
 
     return False

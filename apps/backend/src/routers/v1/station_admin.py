@@ -35,7 +35,9 @@ router = APIRouter(tags=["station-admin"])
 
 # Add a simple test endpoint without authentication
 @router.get("/test", response_model=dict[str, Any])
-async def test_endpoint(db: AsyncSession = Depends(get_db_session)) -> dict[str, Any]:
+async def test_endpoint(
+    db: AsyncSession = Depends(get_db_session),
+) -> dict[str, Any]:
     """Simple test endpoint to verify router is working."""
     try:
         # Test database connection
@@ -56,37 +58,58 @@ async def test_endpoint(db: AsyncSession = Depends(get_db_session)) -> dict[str,
 class StationCreateRequest(BaseModel):
     """Request model for creating a new station (code is auto-generated)."""
 
-    name: str = Field(..., min_length=1, max_length=100, description="Station name")
-    display_name: str = Field(..., min_length=1, max_length=200, description="Display name for UI")
+    name: str = Field(
+        ..., min_length=1, max_length=100, description="Station name"
+    )
+    display_name: str = Field(
+        ..., min_length=1, max_length=200, description="Display name for UI"
+    )
 
     # Location (required for code generation)
-    city: str = Field(..., min_length=1, max_length=100, description="City name")
-    state: str = Field(
-        ..., min_length=2, max_length=2, description="2-letter state code (e.g., CA, TX)"
+    city: str = Field(
+        ..., min_length=1, max_length=100, description="City name"
     )
-    country: str = Field(default="US", min_length=2, max_length=2, description="Country code")
-    timezone: str = Field(..., description="IANA timezone (e.g., America/Los_Angeles)")
+    state: str = Field(
+        ...,
+        min_length=2,
+        max_length=2,
+        description="2-letter state code (e.g., CA, TX)",
+    )
+    country: str = Field(
+        default="US", min_length=2, max_length=2, description="Country code"
+    )
+    timezone: str = Field(
+        ..., description="IANA timezone (e.g., America/Los_Angeles)"
+    )
 
     # Optional contact & location details
     email: str | None = Field(None, description="Contact email")
     phone: str | None = Field(None, max_length=50, description="Contact phone")
     address: str | None = Field(None, description="Street address")
-    postal_code: str | None = Field(None, max_length=20, description="ZIP/Postal code")
+    postal_code: str | None = Field(
+        None, max_length=20, description="ZIP/Postal code"
+    )
 
     # Business settings
     status: str | None = Field(default="active", description="Station status")
     settings: dict[str, Any] | None = Field(
         default_factory=dict, description="Station settings JSON"
     )
-    business_hours: dict[str, Any] | None = Field(None, description="Operating hours JSON")
-    service_area_radius: int | None = Field(None, ge=0, description="Service radius in miles")
+    business_hours: dict[str, Any] | None = Field(
+        None, description="Operating hours JSON"
+    )
+    service_area_radius: int | None = Field(
+        None, ge=0, description="Service radius in miles"
+    )
     max_concurrent_bookings: int | None = Field(
         default=10, ge=1, description="Max concurrent bookings"
     )
     booking_lead_time_hours: int | None = Field(
         default=24, ge=0, description="Minimum booking lead time"
     )
-    branding_config: dict[str, Any] | None = Field(None, description="Branding configuration JSON")
+    branding_config: dict[str, Any] | None = Field(
+        None, description="Branding configuration JSON"
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -132,7 +155,8 @@ class StationUpdateRequest(BaseModel):
     country: str | None = Field(None, max_length=2)
     timezone: str | None = Field(None)
     status: str | None = Field(
-        None, description="Station status: active, inactive, suspended, maintenance"
+        None,
+        description="Station status: active, inactive, suspended, maintenance",
     )
     settings: dict[str, Any] | None = Field(None)
     business_hours: dict[str, Any] | None = Field(None)
@@ -185,7 +209,9 @@ class UserStationAssignmentRequest(BaseModel):
         description="Role to assign",
         pattern="^(super_admin|admin|station_admin|customer_support)$",
     )
-    permissions: list[str] | None = Field(None, description="Additional permissions")
+    permissions: list[str] | None = Field(
+        None, description="Additional permissions"
+    )
 
     class Config:
         json_schema_extra = {
@@ -245,7 +271,9 @@ class AuditLogResponse(BaseModel):
 
 # NO-AUTH TESTING ENDPOINT (Remove in production)
 @router.get("/list-no-auth")
-async def list_stations_no_auth(db: AsyncSession = Depends(get_db_session)) -> dict[str, Any]:
+async def list_stations_no_auth(
+    db: AsyncSession = Depends(get_db_session),
+) -> dict[str, Any]:
     """List all stations WITHOUT authentication (testing only - REMOVE IN PRODUCTION)."""
     try:
         # Build async query
@@ -281,10 +309,16 @@ async def list_stations_no_auth(db: AsyncSession = Depends(get_db_session)) -> d
 @router.get("/", response_model=list[StationResponse])
 async def list_stations(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+    limit: int = Query(
+        100, ge=1, le=1000, description="Maximum number of records to return"
+    ),
     active_only: bool = Query(True, description="Only return active stations"),
-    include_stats: bool = Query(False, description="Include user and booking statistics"),
-    current_user: AuthenticatedUser = Depends(require_station_permission("view_stations")),
+    include_stats: bool = Query(
+        False, description="Include user and booking statistics"
+    ),
+    current_user: AuthenticatedUser = Depends(
+        require_station_permission("view_stations")
+    ),
     db: AsyncSession = Depends(get_db_session),
 ) -> list[StationResponse]:
     """
@@ -321,7 +355,10 @@ async def list_stations(
                 # Count users (async)
                 user_count_result = await db.execute(
                     select(func.count(StationUser.id)).where(
-                        and_(StationUser.station_id == station.id, StationUser.is_active)
+                        and_(
+                            StationUser.station_id == station.id,
+                            StationUser.is_active,
+                        )
                     )
                 )
                 user_count = user_count_result.scalar_one()
@@ -353,14 +390,19 @@ async def list_stations(
     except Exception as e:
         logger.error(f"Error listing stations: {e}", exc_info=True)
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Unable to retrieve stations"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to retrieve stations",
         )
 
 
-@router.post("/", response_model=StationResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/", response_model=StationResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_station(
     request: StationCreateRequest,
-    current_user: AuthenticatedUser = Depends(require_station_permission("manage_stations")),
+    current_user: AuthenticatedUser = Depends(
+        require_station_permission("manage_stations")
+    ),
     db: AsyncSession = Depends(get_db_session),
 ) -> StationResponse:
     """
@@ -381,10 +423,15 @@ async def create_station(
     try:
         # Auto-generate unique station code
         station_code = await generate_station_code(
-            db=db, city=request.city, state=request.state, country=request.country
+            db=db,
+            city=request.city,
+            state=request.state,
+            country=request.country,
         )
 
-        logger.info(f"Generated station code: {station_code} for {request.city}, {request.state}")
+        logger.info(
+            f"Generated station code: {station_code} for {request.city}, {request.state}"
+        )
 
         # Create station with all fields from new schema
         station = Station(
@@ -431,9 +478,13 @@ async def create_station(
                 is_active=True,
                 created_by=current_user.id,
             )
-            logger.info(f"✅ Auto-created notification group for station: {station.name}")
+            logger.info(
+                f"✅ Auto-created notification group for station: {station.name}"
+            )
         except Exception as e:
-            logger.warning(f"⚠️ Failed to create notification group for station: {e}")
+            logger.warning(
+                f"⚠️ Failed to create notification group for station: {e}"
+            )
             # Don't fail station creation if notification group fails
 
         await log_station_activity(
@@ -466,8 +517,12 @@ async def create_station(
 @router.get("/{station_id}", response_model=StationResponse)
 async def get_station(
     station_id: int,
-    include_stats: bool = Query(False, description="Include detailed statistics"),
-    current_user: AuthenticatedUser = Depends(require_station_permission("view_stations")),
+    include_stats: bool = Query(
+        False, description="Include detailed statistics"
+    ),
+    current_user: AuthenticatedUser = Depends(
+        require_station_permission("view_stations")
+    ),
     db: AsyncSession = Depends(get_db_session),
 ) -> StationResponse:
     """
@@ -478,14 +533,21 @@ async def get_station(
     """
     try:
         # Check station access
-        if not current_user.is_super_admin and station_id != current_user.station_id:
+        if (
+            not current_user.is_super_admin
+            and station_id != current_user.station_id
+        ):
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, detail="Access denied to this station"
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied to this station",
             )
 
         station = db.query(Station).filter(Station.id == station_id).first()
         if not station:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Station not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Station not found",
+            )
 
         response = StationResponse.from_orm(station)
 
@@ -493,7 +555,12 @@ async def get_station(
             # Detailed statistics
             user_count = (
                 db.query(StationUser)
-                .filter(and_(StationUser.station_id == station_id, StationUser.is_active))
+                .filter(
+                    and_(
+                        StationUser.station_id == station_id,
+                        StationUser.is_active,
+                    )
+                )
                 .count()
             )
 
@@ -505,7 +572,9 @@ async def get_station(
             )
 
             response.user_count = user_count
-            response.last_activity = last_activity[0] if last_activity else None
+            response.last_activity = (
+                last_activity[0] if last_activity else None
+            )
 
         await log_station_activity(
             action="view_station",
@@ -522,7 +591,8 @@ async def get_station(
     except Exception as e:
         logger.exception(f"Error getting station {station_id}: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Unable to retrieve station"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to retrieve station",
         )
 
 
@@ -530,7 +600,9 @@ async def get_station(
 async def update_station(
     station_id: str,
     request: StationUpdateRequest,
-    current_user: AuthenticatedUser = Depends(require_station_permission("manage_stations")),
+    current_user: AuthenticatedUser = Depends(
+        require_station_permission("manage_stations")
+    ),
     db: AsyncSession = Depends(get_db_session),
 ) -> StationResponse:
     """
@@ -542,17 +614,25 @@ async def update_station(
     """
     try:
         # Check station access
-        if not current_user.is_super_admin and str(station_id) != str(current_user.station_id):
+        if not current_user.is_super_admin and str(station_id) != str(
+            current_user.station_id
+        ):
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, detail="Access denied to this station"
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied to this station",
             )
 
         # Fetch station
-        result = await db.execute(select(Station).where(Station.id == station_id))
+        result = await db.execute(
+            select(Station).where(Station.id == station_id)
+        )
         station = result.scalar_one_or_none()
 
         if not station:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Station not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Station not found",
+            )
 
         # Track changes for audit
         changes = {}
@@ -563,7 +643,10 @@ async def update_station(
             station.name = request.name
 
         if request.display_name is not None:
-            changes["display_name"] = {"old": station.display_name, "new": request.display_name}
+            changes["display_name"] = {
+                "old": station.display_name,
+                "new": request.display_name,
+            }
             station.display_name = request.display_name
 
         if request.email is not None:
@@ -575,7 +658,10 @@ async def update_station(
             station.phone = request.phone
 
         if request.address is not None:
-            changes["address"] = {"old": station.address, "new": request.address}
+            changes["address"] = {
+                "old": station.address,
+                "new": request.address,
+            }
             station.address = request.address
 
         if request.city is not None:
@@ -587,15 +673,24 @@ async def update_station(
             station.state = request.state
 
         if request.postal_code is not None:
-            changes["postal_code"] = {"old": station.postal_code, "new": request.postal_code}
+            changes["postal_code"] = {
+                "old": station.postal_code,
+                "new": request.postal_code,
+            }
             station.postal_code = request.postal_code
 
         if request.country is not None:
-            changes["country"] = {"old": station.country, "new": request.country}
+            changes["country"] = {
+                "old": station.country,
+                "new": request.country,
+            }
             station.country = request.country
 
         if request.timezone is not None:
-            changes["timezone"] = {"old": station.timezone, "new": request.timezone}
+            changes["timezone"] = {
+                "old": station.timezone,
+                "new": request.timezone,
+            }
             station.timezone = request.timezone
 
         if request.status is not None:
@@ -603,7 +698,10 @@ async def update_station(
             station.status = request.status
 
         if request.settings is not None:
-            changes["settings"] = {"old": station.settings, "new": request.settings}
+            changes["settings"] = {
+                "old": station.settings,
+                "new": request.settings,
+            }
             station.settings = request.settings
 
         if request.business_hours is not None:
@@ -647,7 +745,12 @@ async def update_station(
         await db.refresh(station)
 
         # Sync notification group with updated station info
-        if "name" in changes or "city" in changes or "state" in changes or "status" in changes:
+        if (
+            "name" in changes
+            or "city" in changes
+            or "state" in changes
+            or "status" in changes
+        ):
             try:
                 from services.station_notification_sync import (
                     sync_station_with_notification_group,
@@ -658,7 +761,11 @@ async def update_station(
                     if station.city and station.state
                     else station.name
                 )
-                is_active = station.status == "active" if hasattr(station, "status") else True
+                is_active = (
+                    station.status == "active"
+                    if hasattr(station, "status")
+                    else True
+                )
                 await sync_station_with_notification_group(
                     db=db,
                     station_id=station.id,
@@ -667,7 +774,9 @@ async def update_station(
                     is_active=is_active,
                     created_by=current_user.id,
                 )
-                logger.info(f"✅ Synced notification group for station: {station.name}")
+                logger.info(
+                    f"✅ Synced notification group for station: {station.name}"
+                )
             except Exception as e:
                 logger.warning(f"⚠️ Failed to sync notification group: {e}")
 
@@ -690,7 +799,9 @@ async def update_station(
         raise
     except Exception as e:
         await db.rollback()
-        logger.error(f"Error updating station {station_id}: {e}", exc_info=True)
+        logger.error(
+            f"Error updating station {station_id}: {e}", exc_info=True
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unable to update station: {e!s}",
@@ -701,7 +812,9 @@ async def update_station(
 async def delete_station(
     station_id: str,
     force: bool = Query(False, description="Force delete even with warnings"),
-    current_user: AuthenticatedUser = Depends(require_station_permission("manage_stations")),
+    current_user: AuthenticatedUser = Depends(
+        require_station_permission("manage_stations")
+    ),
     db: AsyncSession = Depends(get_db_session),
 ):
     """
@@ -723,11 +836,16 @@ async def delete_station(
 
     try:
         # Find station
-        result = await db.execute(select(Station).where(Station.id == station_id))
+        result = await db.execute(
+            select(Station).where(Station.id == station_id)
+        )
         station = result.scalar_one_or_none()
 
         if not station:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Station not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Station not found",
+            )
 
         # Safety check 1: Check for active bookings
         from models.legacy_booking_models import Booking
@@ -736,7 +854,9 @@ async def delete_station(
             select(func.count(Booking.id)).where(
                 and_(
                     Booking.station_id == station_id,
-                    Booking.status.in_(["pending", "confirmed", "in_progress"]),
+                    Booking.status.in_(
+                        ["pending", "confirmed", "in_progress"]
+                    ),
                 )
             )
         )
@@ -745,14 +865,18 @@ async def delete_station(
         # Safety check 2: Check for assigned users
         assigned_users_result = await db.execute(
             select(func.count(StationUser.id)).where(
-                and_(StationUser.station_id == station_id, StationUser.is_active)
+                and_(
+                    StationUser.station_id == station_id, StationUser.is_active
+                )
             )
         )
         assigned_users_count = assigned_users_result.scalar_one()
 
         # Safety check 3: Check for total bookings (historical data)
         total_bookings_result = await db.execute(
-            select(func.count(Booking.id)).where(Booking.station_id == station_id)
+            select(func.count(Booking.id)).where(
+                Booking.station_id == station_id
+            )
         )
         total_bookings_count = total_bookings_result.scalar_one()
 
@@ -760,7 +884,9 @@ async def delete_station(
         blocking_issues = []
 
         if active_bookings_count > 0:
-            blocking_issues.append(f"{active_bookings_count} active booking(s)")
+            blocking_issues.append(
+                f"{active_bookings_count} active booking(s)"
+            )
 
         if assigned_users_count > 0:
             blocking_issues.append(f"{assigned_users_count} assigned user(s)")
@@ -813,8 +939,12 @@ async def delete_station(
                 delete_station_notification_group,
             )
 
-            await delete_station_notification_group(db=db, station_id=station.id)
-            logger.info(f"✅ Deleted notification group for station: {station.name}")
+            await delete_station_notification_group(
+                db=db, station_id=station.id
+            )
+            logger.info(
+                f"✅ Deleted notification group for station: {station.name}"
+            )
         except Exception as e:
             logger.warning(f"⚠️ Failed to delete notification group: {e}")
 
@@ -829,7 +959,9 @@ async def delete_station(
         raise
     except Exception as e:
         await db.rollback()
-        logger.error(f"Error deleting station {station_id}: {e}", exc_info=True)
+        logger.error(
+            f"Error deleting station {station_id}: {e}", exc_info=True
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unable to delete station: {e!s}",
@@ -843,9 +975,15 @@ async def list_station_users(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     role: str | None = Query(None, description="Filter by role"),
-    active_only: bool = Query(True, description="Only return active assignments"),
-    include_user_details: bool = Query(False, description="Include user profile information"),
-    current_user: AuthenticatedUser = Depends(require_station_permission("view_station_users")),
+    active_only: bool = Query(
+        True, description="Only return active assignments"
+    ),
+    include_user_details: bool = Query(
+        False, description="Include user profile information"
+    ),
+    current_user: AuthenticatedUser = Depends(
+        require_station_permission("view_station_users")
+    ),
     db: AsyncSession = Depends(get_db_session),
 ) -> list[StationUserResponse]:
     """
@@ -856,12 +994,18 @@ async def list_station_users(
     """
     try:
         # Check station access
-        if not current_user.is_super_admin and station_id != current_user.station_id:
+        if (
+            not current_user.is_super_admin
+            and station_id != current_user.station_id
+        ):
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, detail="Access denied to this station"
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied to this station",
             )
 
-        query = db.query(StationUser).filter(StationUser.station_id == station_id)
+        query = db.query(StationUser).filter(
+            StationUser.station_id == station_id
+        )
 
         # Apply filters
         if role:
@@ -905,12 +1049,16 @@ async def list_station_users(
 
 
 @router.post(
-    "/{station_id}/users", response_model=StationUserResponse, status_code=status.HTTP_201_CREATED
+    "/{station_id}/users",
+    response_model=StationUserResponse,
+    status_code=status.HTTP_201_CREATED,
 )
 async def assign_user_to_station(
     station_id: int,
     request: UserStationAssignmentRequest,
-    current_user: AuthenticatedUser = Depends(require_station_permission("manage_station_users")),
+    current_user: AuthenticatedUser = Depends(
+        require_station_permission("manage_station_users")
+    ),
     db: AsyncSession = Depends(get_db_session),
 ) -> StationUserResponse:
     """
@@ -921,21 +1069,31 @@ async def assign_user_to_station(
     """
     try:
         # Check station access
-        if not current_user.is_super_admin and station_id != current_user.station_id:
+        if (
+            not current_user.is_super_admin
+            and station_id != current_user.station_id
+        ):
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, detail="Access denied to this station"
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied to this station",
             )
 
         # Verify station exists
         station = db.query(Station).filter(Station.id == station_id).first()
         if not station:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Station not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Station not found",
+            )
 
         # Check if assignment already exists
         existing = (
             db.query(StationUser)
             .filter(
-                and_(StationUser.station_id == station_id, StationUser.user_id == request.user_id)
+                and_(
+                    StationUser.station_id == station_id,
+                    StationUser.user_id == request.user_id,
+                )
             )
             .first()
         )
@@ -947,12 +1105,19 @@ async def assign_user_to_station(
             )
 
         # Get default permissions for role
-        from app.auth.station_models import get_role_permissions
+        from core.auth.station_models import (
+            STATION_ROLE_PERMISSIONS,
+            StationRole,
+        )
 
-        default_permissions = get_role_permissions(request.role)
+        default_permissions = list(
+            STATION_ROLE_PERMISSIONS.get(StationRole(request.role), set())
+        )
 
         # Combine with additional permissions
-        all_permissions = list(set(default_permissions + (request.permissions or [])))
+        all_permissions = list(
+            set(default_permissions + (request.permissions or []))
+        )
 
         # Create assignment
         station_user = StationUser(
@@ -1000,10 +1165,16 @@ async def get_station_audit_log(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     action: str | None = Query(None, description="Filter by action"),
-    resource_type: str | None = Query(None, description="Filter by resource type"),
+    resource_type: str | None = Query(
+        None, description="Filter by resource type"
+    ),
     user_id: int | None = Query(None, description="Filter by user ID"),
-    days: int = Query(30, ge=1, le=365, description="Number of days to look back"),
-    current_user: AuthenticatedUser = Depends(require_station_permission("view_audit_logs")),
+    days: int = Query(
+        30, ge=1, le=365, description="Number of days to look back"
+    ),
+    current_user: AuthenticatedUser = Depends(
+        require_station_permission("view_audit_logs")
+    ),
     db: AsyncSession = Depends(get_db_session),
 ) -> list[AuditLogResponse]:
     """
@@ -1014,16 +1185,23 @@ async def get_station_audit_log(
     """
     try:
         # Check station access
-        if not current_user.is_super_admin and station_id != current_user.station_id:
+        if (
+            not current_user.is_super_admin
+            and station_id != current_user.station_id
+        ):
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, detail="Access denied to this station"
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied to this station",
             )
 
         # Calculate date filter
         cutoff_date = datetime.utcnow() - timedelta(days=days)
 
         query = db.query(StationAuditLog).filter(
-            and_(StationAuditLog.station_id == station_id, StationAuditLog.timestamp >= cutoff_date)
+            and_(
+                StationAuditLog.station_id == station_id,
+                StationAuditLog.timestamp >= cutoff_date,
+            )
         )
 
         # Apply filters
@@ -1031,7 +1209,9 @@ async def get_station_audit_log(
             query = query.filter(StationAuditLog.action == action)
 
         if resource_type:
-            query = query.filter(StationAuditLog.resource_type == resource_type)
+            query = query.filter(
+                StationAuditLog.resource_type == resource_type
+            )
 
         if user_id:
             query = query.filter(StationAuditLog.user_id == user_id)

@@ -123,12 +123,23 @@ npm run dev:ai          # AI service only (http://localhost:5000)
 - 👨‍💼 **Admin Dashboard** - Complete booking management and analytics
 - 📱 **Mobile-First Design** - Responsive UI optimized for all devices
 - 🔍 **SEO Optimized** - 85 blog posts and 10 location-specific pages
-- 🤖 **AI Orchestrator** - Multi-brain AI with omnichannel support (chat, email, SMS, voice, social media)
-- 🔒 **Enterprise Security** - PCI compliant with comprehensive data protection
-- 📊 **Self-Learning ML** - Continuous improvement with feedback loops and weekly fine-tuning
-- 🔮 **Future-Proof Architecture** - Built for effortless scaling to local LLMs and graph databases
+- 🤖 **AI Orchestrator** - Multi-brain AI with omnichannel support
+  (chat, email, SMS, voice, social media)
+- 🔒 **Enterprise Security** - PCI compliant with comprehensive data
+  protection
+- 📊 **Self-Learning ML** - Continuous improvement with feedback loops
+  and weekly fine-tuning
+- 🔮 **Future-Proof Architecture** - Built for effortless scaling to
+  local LLMs and graph databases
 
 ## 🏗️ Architecture
+
+> **✅ Nuclear Refactor Complete (Jan 2025)**: Successfully migrated
+> 74 files from `api/app/` to clean layered architecture in
+> `apps/backend/src/`. See
+> [ARCHITECTURE.md](./apps/backend/ARCHITECTURE.md) and
+> [MIGRATION_SUMMARY.md](./apps/backend/MIGRATION_SUMMARY.md) for
+> details.
 
 ### **Current Implementation (Option 1.5 - Production Ready)**
 
@@ -177,54 +188,67 @@ npm run dev:ai          # AI service only (http://localhost:5000)
 ### **🎯 What We Built (Option 1.5)**
 
 **Production Features (Active Now):**
-- ✅ **4 Specialized AI Agents** - Domain experts for sales, support, operations, knowledge
-- ✅ **Omnichannel Support** - Web chat, email, SMS, voice (RingCentral), social media
-- ✅ **RAG Knowledge Base** - Vector embeddings + policy/pricing sources of truth
+
+- ✅ **4 Specialized AI Agents** - Domain experts for sales, support,
+  operations, knowledge
+- ✅ **Omnichannel Support** - Web chat, email, SMS, voice
+  (RingCentral), social media
+- ✅ **RAG Knowledge Base** - Vector embeddings + policy/pricing
+  sources of truth
 - ✅ **Self-Learning ML** - Weekly fine-tuning with feedback (Phase 0)
-- ✅ **Cost Monitoring** - Auto-alert when OpenAI spend hits $500/month
+- ✅ **Cost Monitoring** - Auto-alert when OpenAI spend hits
+  $500/month
 - ✅ **Growth Tracking** - Auto-alert when customers reach 1,000
-- ✅ **Admin Dashboard** - Conversation review, KPIs, analytics, exports
+- ✅ **Admin Dashboard** - Conversation review, KPIs, analytics,
+  exports
 
 **Future-Proof Foundations (Ready, Not Active):**
-- 🔮 **Local LLM Interface** - Llama 3 provider stubbed (75% cost savings when enabled)
-- 🔮 **Graph Database Interface** - Neo4j memory stubbed (10x query speedup when enabled)
-- 🔮 **Teacher-Student Architecture** - Confidence-based routing stubbed
+
+- 🔮 **Local LLM Interface** - Llama 3 provider stubbed (75% cost
+  savings when enabled)
+- 🔮 **Graph Database Interface** - Neo4j memory stubbed (10x query
+  speedup when enabled)
+- 🔮 **Teacher-Student Architecture** - Confidence-based routing
+  stubbed
 - 🔮 **RLHF-Lite Signals** - Reward scoring infrastructure ready
 - 🔮 **Auto-Labeling Pipeline** - GPT-4o batch classifier stubbed
 - 🔮 **Tutor-Pair Logger** - Training data collection ready
 
-> 📖 **See [FUTURE_SCALING_PLAN.md](./FUTURE_SCALING_PLAN.md) for upgrade triggers and timeline**
+> 📖 **See [FUTURE_SCALING_PLAN.md](./FUTURE_SCALING_PLAN.md) for
+> upgrade triggers and timeline**
 
 ## 📊 Project Status
 
-| Component              | Status                | Quality Score |
-| ---------------------- | --------------------- | ------------- |
-| 🎨 Frontend            | ✅ Production Ready   | 98/100        |
-| ⚡ Backend API         | ✅ Production Ready   | 99/100        |
-| 🤖 AI Orchestrator     | ✅ Production Ready   | 97/100        |
-| 🧠 Self-Learning ML    | ✅ Active (Phase 0)   | 95/100        |
-| � Cost Monitoring     | ✅ Active             | 100/100       |
-| �🔒 Security            | ✅ PCI Compliant      | 100/100       |
-| 📦 Build               | ✅ 137 pages compiled | 100%          |
-| 🧪 Tests               | ✅ All passing        | 95% coverage  |
+| Component           | Status                | Quality Score |
+| ------------------- | --------------------- | ------------- |
+| 🎨 Frontend         | ✅ Production Ready   | 98/100        |
+| ⚡ Backend API      | ✅ Production Ready   | 99/100        |
+| 🤖 AI Orchestrator  | ✅ Production Ready   | 97/100        |
+| 🧠 Self-Learning ML | ✅ Active (Phase 0)   | 95/100        |
+| � Cost Monitoring   | ✅ Active             | 100/100       |
+| �🔒 Security        | ✅ PCI Compliant      | 100/100       |
+| 📦 Build            | ✅ 137 pages compiled | 100%          |
+| 🧪 Tests            | ✅ All passing        | 95% coverage  |
 
 **Overall Quality Score: 98.5/100** ⭐
 
 ### 🎯 **AI System Status (Option 1.5)**
 
-| Feature                    | Status           | When to Upgrade                |
-| -------------------------- | ---------------- | ------------------------------ |
-| Multi-Brain Agents         | ✅ Active        | Production ready               |
-| OpenAI GPT-4o-mini         | ✅ Active        | Current model                  |
-| Cost Alerts                | ✅ Active        | Monitors $500/month trigger    |
-| Growth Alerts              | ✅ Active        | Monitors 1,000 customer trigger|
-| Local Llama 3              | 🔮 Ready         | Enable when API costs > $500   |
-| Neo4j Graph Memory         | 🔮 Ready         | Enable when customers > 1,000  |
-| Teacher-Student Routing    | 🔮 Ready         | Enable with Llama 3            |
-| RLHF-Lite Learning         | 🔮 Ready         | Enable with Llama 3            |
-| Auto-Labeling Pipeline     | 🔮 Ready         | Enable for improved training   |
+| Feature                 | Status    | When to Upgrade                 |
+| ----------------------- | --------- | ------------------------------- |
+| Multi-Brain Agents      | ✅ Active | Production ready                |
+| OpenAI GPT-4o-mini      | ✅ Active | Current model                   |
+| Cost Alerts             | ✅ Active | Monitors $500/month trigger     |
+| Growth Alerts           | ✅ Active | Monitors 1,000 customer trigger |
+| Local Llama 3           | 🔮 Ready  | Enable when API costs > $500    |
+| Neo4j Graph Memory      | 🔮 Ready  | Enable when customers > 1,000   |
+| Teacher-Student Routing | 🔮 Ready  | Enable with Llama 3             |
+| RLHF-Lite Learning      | 🔮 Ready  | Enable with Llama 3             |
+| Auto-Labeling Pipeline  | 🔮 Ready  | Enable for improved training    |
 
-> 🚀 **Upgrade Path**: See [FUTURE_SCALING_PLAN.md](./FUTURE_SCALING_PLAN.md) for automatic triggers and migration guides
+> 🚀 **Upgrade Path**: See
+> [FUTURE_SCALING_PLAN.md](./FUTURE_SCALING_PLAN.md) for automatic
+> triggers and migration guides
 
 ## 🛠️ Development
 
@@ -431,29 +455,55 @@ Service files are provided in `systemd/` directory for VPS deployment.
 ## 📚 Documentation
 
 ### **Core Documentation**
-- 📋 [**Comprehensive Docs**](./COMPREHENSIVE_PROJECT_DOCS.md) - Complete project documentation
-- 🚀 [**Deployment Guide**](./DEPLOYMENT_STRATEGY.md) - Production deployment instructions
-- 📊 [**Project Summary**](./PROJECT_SUMMARY.md) - Technical overview and features
+
+- 📋 [**Comprehensive Docs**](./COMPREHENSIVE_PROJECT_DOCS.md) -
+  Complete project documentation
+- 🚀 [**Deployment Guide**](./DEPLOYMENT_STRATEGY.md) - Production
+  deployment instructions
+- 📊 [**Project Summary**](./PROJECT_SUMMARY.md) - Technical overview
+  and features
 
 ### **Setup & Configuration** 🔧
-- 🗂️ [**Environment Files Guide**](./ENVIRONMENT_FILES_GUIDE.md) - Complete environment configuration reference
-- ✅ [**Environment Consolidation**](./ENVIRONMENT_CONSOLIDATION_COMPLETE.md) - File structure cleanup summary
-- 🗺️ [**Google Maps API Setup**](./GOOGLE_MAPS_API_QUICK_START.md) - Maps & Places Autocomplete configuration
+
+- 🗂️ [**Environment Files Guide**](./ENVIRONMENT_FILES_GUIDE.md) -
+  Complete environment configuration reference
+- ✅
+  [**Environment Consolidation**](./ENVIRONMENT_CONSOLIDATION_COMPLETE.md) -
+  File structure cleanup summary
+- 🗺️ [**Google Maps API Setup**](./GOOGLE_MAPS_API_QUICK_START.md) -
+  Maps & Places Autocomplete configuration
 
 ### **AI System Documentation** 🆕
-- 🎯 [**Future Scaling Plan**](./FUTURE_SCALING_PLAN.md) - Upgrade triggers and timeline
-- 📐 [**Option 1.5 Architecture**](./OPTION_1.5_FUTURE_PROOF_ARCHITECTURE.md) - Current architecture + future-proofing
-- 📖 [**Master Implementation Index**](./OPTION_1.5_MASTER_INDEX.md) - Complete implementation guide
-- 🔄 [**Migration Guide: Llama 3**](./docs/migration/MIGRATION_GUIDE_LLAMA3.md) - Add local LLM (12h)
-- 🕸️ [**Migration Guide: Neo4j**](./docs/migration/MIGRATION_GUIDE_NEO4J.md) - Graph database (6h)
+
+- 🎯 [**Future Scaling Plan**](./FUTURE_SCALING_PLAN.md) - Upgrade
+  triggers and timeline
+- 📐
+  [**Option 1.5 Architecture**](./OPTION_1.5_FUTURE_PROOF_ARCHITECTURE.md) -
+  Current architecture + future-proofing
+- 📖 [**Master Implementation Index**](./OPTION_1.5_MASTER_INDEX.md) -
+  Complete implementation guide
+- 🔄
+  [**Migration Guide: Llama 3**](./docs/migration/MIGRATION_GUIDE_LLAMA3.md) -
+  Add local LLM (12h)
+- 🕸️
+  [**Migration Guide: Neo4j**](./docs/migration/MIGRATION_GUIDE_NEO4J.md) -
+  Graph database (6h)
 
 ### **Strategic Planning**
-- 📊 [**Decision Matrix**](./DECISION_MATRIX.md) - Comparison of implementation options
-- 🎓 [**Strategic Recommendation**](./STRATEGIC_RECOMMENDATION_OPTION_1.md) - Why Option 1.5
-- 🏗️ [**Full Option 2 Architecture**](./UNIFIED_ADAPTIVE_APPRENTICE_ARCHITECTURE.md) - Complete apprentice AI spec
+
+- 📊 [**Decision Matrix**](./DECISION_MATRIX.md) - Comparison of
+  implementation options
+- 🎓
+  [**Strategic Recommendation**](./STRATEGIC_RECOMMENDATION_OPTION_1.md) -
+  Why Option 1.5
+- 🏗️
+  [**Full Option 2 Architecture**](./UNIFIED_ADAPTIVE_APPRENTICE_ARCHITECTURE.md) -
+  Complete apprentice AI spec
 
 ### **Historical Archives**
-- 📁 [**Archive Docs**](./archive-docs/) - Historical documentation and reports
+
+- 📁 [**Archive Docs**](./archive-docs/) - Historical documentation
+  and reports
 
 ## 🤝 Contributing
 

@@ -29,8 +29,10 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    select,
 )
 from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -348,6 +350,43 @@ class AuthenticationService:
             return bcrypt.checkpw(salted_password.encode("utf-8"), password_hash.encode("utf-8"))
         except Exception:
             return False
+
+    async def authenticate_user(self, db: AsyncSession, email: str, password: str) -> User | None:
+        """
+        Authenticate user with email and password.
+
+        Args:
+            db: Database session
+            email: User email (will be encrypted for lookup)
+            password: Plain text password
+
+        Returns:
+            User object if authentication successful, None otherwise
+        """
+        try:
+            # Encrypt email for database lookup
+            encrypted_email = self.encryption.encrypt(email)
+
+            # Query user by encrypted email
+            stmt = select(User).where(User.email_encrypted == encrypted_email)
+            result = await db.execute(stmt)
+            user = result.scalar_one_or_none()
+
+            if not user:
+                return None
+
+            # Verify password
+            if not self.verify_password(password, user.password_hash, user.password_salt):
+                return None
+
+            # Check if user is active
+            if user.status != UserStatus.ACTIVE.value:
+                return None
+
+            return user
+
+        except Exception:
+            return None
 
     def generate_mfa_secret(self) -> str:
         """Generate TOTP secret for MFA."""

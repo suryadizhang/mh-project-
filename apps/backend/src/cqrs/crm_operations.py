@@ -7,8 +7,26 @@ from datetime import date as Date
 from typing import Any, Literal
 from uuid import UUID
 
-from cqrs.base import Command, Event, Query  # Phase 2C: Updated from api.app.cqrs.base
-from pydantic import ConfigDict, Field, field_validator
+from cqrs.base import (
+    Command,
+    Event,
+    Query,
+)  # Phase 2C: Updated from api.app.cqrs.base
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+
+# ==================== API RESPONSE MODEL ====================
+
+
+class ApiResponse(BaseModel):
+    """Standard API response wrapper for CQRS operations."""
+
+    success: bool
+    data: Any | None = None
+    message: str | None = None  # Success/info message
+    error: str | None = None  # Error message
+    total_count: int | None = None
+
 
 # ==================== COMMANDS ====================
 
@@ -44,7 +62,9 @@ class CreateBookingCommand(Command):
         """Validate total matches price per person * guests."""
         values = info.data
         if "price_per_person_cents" in values and "total_guests" in values:
-            expected = values["price_per_person_cents"] * values["total_guests"]
+            expected = (
+                values["price_per_person_cents"] * values["total_guests"]
+            )
             if v != expected:
                 raise ValueError(
                     f'Total due ({v}) must equal price per person ({values["price_per_person_cents"]}) × guests ({values["total_guests"]}) = {expected}'
@@ -103,7 +123,9 @@ class RecordPaymentCommand(Command):
     booking_id: UUID
     amount_cents: int = Field(..., gt=0)
     payment_method: str  # stripe, cash, check, etc.
-    payment_reference: str | None = None  # Stripe payment ID, check number, etc.
+    payment_reference: str | None = (
+        None  # Stripe payment ID, check number, etc.
+    )
     notes: str | None = Field(None, max_length=200)
 
     # Who processed
@@ -218,7 +240,9 @@ class GetBookingsQuery(Query):
     page_size: int = Field(20, ge=1, le=100)
 
     # Sorting
-    sort_by: str = Field("date", pattern=r"^(date|created_at|updated_at|customer_name)$")
+    sort_by: str = Field(
+        "date", pattern=r"^(date|created_at|updated_at|customer_name)$"
+    )
     sort_order: str = Field("asc", pattern=r"^(asc|desc)$")
 
 
@@ -239,7 +263,11 @@ class GetCustomer360Query(Query):
     def validate_one_identifier(cls, v, info):
         """Ensure exactly one identifier is provided."""
         values = info.data
-        identifiers = [v, values.get("customer_email"), values.get("customer_phone")]
+        identifiers = [
+            v,
+            values.get("customer_email"),
+            values.get("customer_phone"),
+        ]
         provided = [x for x in identifiers if x is not None]
         if len(provided) != 1:
             raise ValueError(
@@ -414,18 +442,20 @@ class CustomerUpdated(Event):
 
 
 __all__ = [
-    "BookingCancelled",
+    # API Response
+    "ApiResponse",
     # Events
+    "BookingCancelled",
     "BookingCreated",
     "BookingUpdated",
-    "CancelBookingCommand",
     # Commands
+    "CancelBookingCommand",
     "CreateBookingCommand",
     "CreateMessageThreadCommand",
     "CustomerCreated",
     "CustomerUpdated",
-    "GetAvailabilitySlotsQuery",
     # Queries
+    "GetAvailabilitySlotsQuery",
     "GetBookingQuery",
     "GetBookingsQuery",
     "GetCustomer360Query",

@@ -30,11 +30,11 @@ from fastapi import (
     status,
 )
 from pydantic import BaseModel, ConfigDict
-from sqlalchemy import and_, asc, desc
-from sqlalchemy.orm import Session
+from sqlalchemy import and_, asc, desc, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/leads", tags=["leads"])
+router = APIRouter(tags=["leads"])  # No prefix - added in main.py
 
 
 # Pydantic models for API
@@ -123,7 +123,9 @@ class SocialThreadResponse(BaseModel):
 
 @router.post("/", response_model=LeadResponse)
 async def create_lead(
-    lead_data: LeadCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)
+    lead_data: LeadCreate,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
 ):
     """Create a new lead with contacts and context."""
 
@@ -136,7 +138,7 @@ async def create_lead(
             utm_campaign=lead_data.utm_campaign,
         )
         db.add(lead)
-        db.flush()  # Get the lead ID
+        await db.flush()  # Get the lead ID
 
         # Add contacts
         for contact_data in lead_data.contacts:
@@ -181,7 +183,7 @@ async def create_lead(
             },
         )
 
-        db.commit()
+        await db.commit()
 
         # Background tasks
         background_tasks.add_task(_process_new_lead, lead.id)
@@ -189,7 +191,7 @@ async def create_lead(
         return lead
 
     except Exception as e:
-        db.rollback()
+        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create lead: {e!s}",
@@ -207,52 +209,66 @@ async def list_leads(
     follow_up_overdue: bool | None = Query(None),
     limit: int = Query(50, le=100),
     offset: int = Query(0),
-    sort_by: str = Query("score", pattern=r"^(score|created_at|follow_up_date|last_contact_date)$"),
+    sort_by: str = Query(
+        "score",
+        pattern=r"^(score|created_at|follow_up_date|last_contact_date)$",
+    ),
     sort_order: str = Query("desc", pattern=r"^(asc|desc)$"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """List leads with filtering and sorting."""
 
-    query = db.query(Lead)
+    # Build SQLAlchemy 2.0 async query
+    stmt = select(Lead)
 
     # Apply filters
     if status:
-        query = query.filter(Lead.status == status)
+        stmt = stmt.where(Lead.status == status)
     if quality:
-        query = query.filter(Lead.quality == quality)
+        stmt = stmt.where(Lead.quality == quality)
     if source:
-        query = query.filter(Lead.source == source)
+        stmt = stmt.where(Lead.source == source)
     if assigned_to:
-        query = query.filter(Lead.assigned_to == assigned_to)
+        stmt = stmt.where(Lead.assigned_to == assigned_to)
     if score_min is not None:
-        query = query.filter(Lead.score >= score_min)
+        stmt = stmt.where(Lead.score >= score_min)
     if score_max is not None:
-        query = query.filter(Lead.score <= score_max)
+        stmt = stmt.where(Lead.score <= score_max)
     if follow_up_overdue:
-        query = query.filter(
-            and_(Lead.follow_up_date.isnot(None), Lead.follow_up_date < datetime.now())
+        stmt = stmt.where(
+            and_(
+                Lead.follow_up_date.isnot(None),
+                Lead.follow_up_date < datetime.now(),
+            )
         )
 
     # Apply sorting
     sort_column = getattr(Lead, sort_by)
     if sort_order == "desc":
-        query = query.order_by(desc(sort_column))
+        stmt = stmt.order_by(desc(sort_column))
     else:
-        query = query.order_by(asc(sort_column))
+        stmt = stmt.order_by(asc(sort_column))
 
     # Apply pagination
-    leads = query.offset(offset).limit(limit).all()
+    stmt = stmt.offset(offset).limit(limit)
+
+    # Execute query
+    result = await db.execute(stmt)
+    leads = result.scalars().all()
 
     return leads
 
 
 @router.get("/{lead_id}", response_model=LeadDetailResponse)
-async def get_lead(lead_id: UUID, db: Session = Depends(get_db)):
+async def get_lead(lead_id: UUID, db: AsyncSession = Depends(get_db)):
     """Get detailed lead information."""
 
-    lead = db.query(Lead).filter(Lead.id == lead_id).first()
+    result = await db.execute(select(Lead).where(Lead.id == lead_id))
+    lead = result.scalar_one_or_none()
     if not lead:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found"
+        )
 
     # Convert to response model with nested data
     lead_dict = {
@@ -270,19 +286,25 @@ async def update_lead(
     lead_id: UUID,
     lead_update: LeadUpdate,
     background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """Update lead information."""
 
-    lead = db.query(Lead).filter(Lead.id == lead_id).first()
+    result = await db.execute(select(Lead).where(Lead.id == lead_id))
+    lead = result.scalar_one_or_none()
     if not lead:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found"
+        )
 
     # Track changes for events
     changes = {}
 
     if lead_update.status and lead_update.status != lead.status:
-        changes["status"] = {"from": lead.status.value, "to": lead_update.status.value}
+        changes["status"] = {
+            "from": lead.status.value,
+            "to": lead_update.status.value,
+        }
         lead.status = lead_update.status
 
         # Special handling for status changes
@@ -297,11 +319,16 @@ async def update_lead(
         lead.quality = lead_update.quality
 
     if lead_update.assigned_to and lead_update.assigned_to != lead.assigned_to:
-        changes["assigned_to"] = {"from": lead.assigned_to, "to": lead_update.assigned_to}
+        changes["assigned_to"] = {
+            "from": lead.assigned_to,
+            "to": lead_update.assigned_to,
+        }
         lead.assigned_to = lead_update.assigned_to
 
     if lead_update.follow_up_date:
-        changes["follow_up_date"] = {"to": lead_update.follow_up_date.isoformat()}
+        changes["follow_up_date"] = {
+            "to": lead_update.follow_up_date.isoformat()
+        }
         lead.follow_up_date = lead_update.follow_up_date
 
     if lead_update.lost_reason:
@@ -311,7 +338,7 @@ async def update_lead(
     if changes:
         lead.add_event("lead_updated", changes)
 
-    db.commit()
+    await db.commit()
 
     # Background processing
     background_tasks.add_task(_recalculate_lead_score, lead_id)
@@ -324,20 +351,23 @@ async def add_lead_event(
     lead_id: UUID,
     event_type: str,
     payload: dict[str, Any] | None = None,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """Add an event to a lead."""
 
     if payload is None:
         payload = {}
-    lead = db.query(Lead).filter(Lead.id == lead_id).first()
+    result = await db.execute(select(Lead).where(Lead.id == lead_id))
+    lead = result.scalar_one_or_none()
     if not lead:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found"
+        )
 
     lead.add_event(event_type, payload)
     lead.last_contact_date = datetime.now()
 
-    db.commit()
+    await db.commit()
 
     return {"success": True, "message": "Event added successfully"}
 
@@ -347,13 +377,16 @@ async def analyze_lead_with_ai(
     lead_id: UUID,
     conversation_data: list[dict[str, str]],
     background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """Analyze lead using AI and update scoring."""
 
-    lead = db.query(Lead).filter(Lead.id == lead_id).first()
+    result = await db.execute(select(Lead).where(Lead.id == lead_id))
+    lead = result.scalar_one_or_none()
     if not lead:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found"
+        )
 
     # Schedule AI analysis
     background_tasks.add_task(_ai_analyze_lead, lead_id, conversation_data)
@@ -362,12 +395,17 @@ async def analyze_lead_with_ai(
 
 
 @router.get("/{lead_id}/nurture-sequence")
-async def get_nurture_sequence(lead_id: UUID, db: Session = Depends(get_db)):
+async def get_nurture_sequence(
+    lead_id: UUID, db: AsyncSession = Depends(get_db)
+):
     """Get AI-generated nurture sequence for lead."""
 
-    lead = db.query(Lead).filter(Lead.id == lead_id).first()
+    result = await db.execute(select(Lead).where(Lead.id == lead_id))
+    lead = result.scalar_one_or_none()
     if not lead:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found"
+        )
 
     from services.ai_lead_management import get_lead_nurture_ai
 
@@ -379,20 +417,21 @@ async def get_nurture_sequence(lead_id: UUID, db: Session = Depends(get_db)):
 
 # Social Media Thread endpoints
 @router.post("/social-threads", response_model=SocialThreadResponse)
-async def create_social_thread(thread_data: SocialThreadCreate, db: Session = Depends(get_db)):
+async def create_social_thread(
+    thread_data: SocialThreadCreate, db: AsyncSession = Depends(get_db)
+):
     """Create or link a social media thread."""
 
     # Check if thread already exists
-    existing_thread = (
-        db.query(SocialThread)
-        .filter(
+    result = await db.execute(
+        select(SocialThread).where(
             and_(
                 SocialThread.platform == thread_data.platform,
                 SocialThread.thread_ref == thread_data.thread_ref,
             )
         )
-        .first()
     )
+    existing_thread = result.scalar_one_or_none()
 
     if existing_thread:
         return existing_thread
@@ -406,7 +445,7 @@ async def create_social_thread(thread_data: SocialThreadCreate, db: Session = De
     )
 
     db.add(thread)
-    db.commit()
+    await db.commit()
 
     return thread
 
@@ -415,18 +454,20 @@ async def create_social_thread(thread_data: SocialThreadCreate, db: Session = De
 async def list_social_threads(
     platform: SocialPlatform | None = Query(None),
     status: str | None = Query(None),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """List social media threads."""
 
-    query = db.query(SocialThread)
+    stmt = select(SocialThread)
 
     if platform:
-        query = query.filter(SocialThread.platform == platform)
+        stmt = stmt.where(SocialThread.platform == platform)
     if status:
-        query = query.filter(SocialThread.status == status)
+        stmt = stmt.where(SocialThread.status == status)
 
-    threads = query.order_by(desc(SocialThread.last_message_at)).all()
+    stmt = stmt.order_by(desc(SocialThread.last_message_at))
+    result = await db.execute(stmt)
+    threads = result.scalars().all()
     return threads
 
 
@@ -435,15 +476,21 @@ async def respond_to_social_thread(
     thread_id: UUID,
     message_content: str,
     context: dict[str, Any] | None = None,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """Generate AI response for social media thread."""
 
     if context is None:
         context = {}
-    thread = db.query(SocialThread).filter(SocialThread.id == thread_id).first()
+    result = await db.execute(
+        select(SocialThread).where(SocialThread.id == thread_id)
+    )
+    thread = result.scalar_one_or_none()
     if not thread:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Social thread not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Social thread not found",
+        )
 
     social_ai = await get_social_media_ai()
     response = await social_ai.generate_response(message_content, context)
@@ -454,84 +501,90 @@ async def respond_to_social_thread(
 # Background task functions
 async def _process_new_lead(lead_id: UUID):
     """Process new lead in background."""
-    db = next(get_db())
+    from core.database import get_db_context
 
-    try:
-        lead = db.query(Lead).filter(Lead.id == lead_id).first()
-        if lead:
-            # Calculate initial score
-            score = lead.calculate_score()
-            lead.score = score
+    async with get_db_context() as db:
+        try:
+            result = await db.execute(select(Lead).where(Lead.id == lead_id))
+            lead = result.scalar_one_or_none()
+            if lead:
+                # Calculate initial score
+                score = lead.calculate_score()
+                lead.score = score
 
-            # Determine quality
-            if score >= 80:
-                lead.quality = LeadQuality.HOT
-            elif score >= 60:
-                lead.quality = LeadQuality.WARM
-            else:
-                lead.quality = LeadQuality.COLD
+                # Determine quality
+                if score >= 80:
+                    lead.quality = LeadQuality.HOT
+                elif score >= 60:
+                    lead.quality = LeadQuality.WARM
+                else:
+                    lead.quality = LeadQuality.COLD
 
-            db.commit()
+                await db.commit()
 
-    except Exception as e:
-        logger.exception(f"Error processing new lead {lead_id}: {e}")
-    finally:
-        db.close()
+        except Exception as e:
+            logger.exception(f"Error processing new lead {lead_id}: {e}")
 
 
 async def _recalculate_lead_score(lead_id: UUID):
     """Recalculate lead score in background."""
-    db = next(get_db())
+    from core.database import get_db_context
 
-    try:
-        lead = db.query(Lead).filter(Lead.id == lead_id).first()
-        if lead:
-            score = lead.calculate_score()
-            lead.score = score
-            db.commit()
+    async with get_db_context() as db:
+        try:
+            result = await db.execute(select(Lead).where(Lead.id == lead_id))
+            lead = result.scalar_one_or_none()
+            if lead:
+                score = lead.calculate_score()
+                lead.score = score
+                await db.commit()
 
-    except Exception as e:
-        logger.exception(f"Error recalculating lead score {lead_id}: {e}")
-    finally:
-        db.close()
+        except Exception as e:
+            logger.exception(f"Error recalculating lead score {lead_id}: {e}")
 
 
 async def _ai_analyze_lead(lead_id: UUID, conversation_data: list[dict]):
     """Analyze lead with AI in background."""
-    db = next(get_db())
+    from core.database import get_db_context
 
-    try:
-        lead = db.query(Lead).filter(Lead.id == lead_id).first()
-        if lead:
-            ai_manager = await get_ai_lead_manager()
+    async with get_db_context() as db:
+        try:
+            result = await db.execute(select(Lead).where(Lead.id == lead_id))
+            lead = result.scalar_one_or_none()
+            if lead:
+                ai_manager = await get_ai_lead_manager()
 
-            # Get AI insights
-            insights = await ai_manager.analyze_conversation(conversation_data)
+                # Get AI insights
+                insights = await ai_manager.analyze_conversation(
+                    conversation_data
+                )
 
-            # Update lead with AI insights
-            ai_score = await ai_manager.score_lead_with_ai(lead, conversation_data)
-            lead.score = ai_score
+                # Update lead with AI insights
+                ai_score = await ai_manager.score_lead_with_ai(
+                    lead, conversation_data
+                )
+                lead.score = ai_score
 
-            # Update quality based on AI score
-            lead.quality = await ai_manager.determine_lead_quality(lead, ai_score)
+                # Update quality based on AI score
+                lead.quality = await ai_manager.determine_lead_quality(
+                    lead, ai_score
+                )
 
-            # Add AI analysis event
-            lead.add_event(
-                "ai_analysis",
-                {
-                    "insights": {
-                        "intent_score": insights.intent_score,
-                        "urgency_level": insights.urgency_level,
-                        "sentiment": insights.sentiment,
-                        "next_action": insights.next_best_action,
+                # Add AI analysis event
+                lead.add_event(
+                    "ai_analysis",
+                    {
+                        "insights": {
+                            "intent_score": insights.intent_score,
+                            "urgency_level": insights.urgency_level,
+                            "sentiment": insights.sentiment,
+                            "next_action": insights.next_best_action,
+                        },
+                        "ai_score": ai_score,
                     },
-                    "ai_score": ai_score,
-                },
-            )
+                )
 
-            db.commit()
+                await db.commit()
 
-    except Exception as e:
-        logger.exception(f"Error analyzing lead {lead_id} with AI: {e}")
-    finally:
-        db.close()
+        except Exception as e:
+            logger.exception(f"Error analyzing lead {lead_id} with AI: {e}")

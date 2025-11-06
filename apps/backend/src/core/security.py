@@ -1062,3 +1062,22 @@ def get_security_config() -> dict[str, Any]:
         "prometheus_available": PROMETHEUS_AVAILABLE,
         "environment": getattr(settings, "environment", "development"),
     }
+
+
+# =============================================================================
+# PASSWORD HASHING - Re-exported from utils.auth for compatibility
+# =============================================================================
+
+from utils.auth import hash_password, verify_password
+
+__all__ = [
+    # Encryption
+    "FieldEncryption",
+    # Password hashing
+    "hash_password",
+    "verify_password",
+    "hash_password_bcrypt",
+    # Middleware
+    "setup_security_middleware",
+    "get_security_config",
+]

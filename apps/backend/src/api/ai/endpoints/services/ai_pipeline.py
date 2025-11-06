@@ -169,7 +169,7 @@ class AIPipeline:
             intent, intent_confidence = self.classify_intent(message)
 
             # Step 2: Search knowledge base
-            from app.schemas import KBSearchRequest
+            from api.ai.endpoints.schemas import KBSearchRequest
 
             kb_request = KBSearchRequest(query=message, limit=3, min_score=0.3)
             kb_results, _ = await kb_service.search_chunks(db, kb_request)

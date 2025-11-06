@@ -503,16 +503,15 @@ async def readiness_probe(
     start_time = time.time()
 
     try:
-        # Import here to avoid circular dependencies
-        from api.app.database import get_db
+        # Import async session maker to avoid circular dependencies
+        from core.database import get_db_context
 
-        # Get database session
-        db = next(get_db())
-
-        # Run health checks in parallel
-        checks_results = await asyncio.gather(
-            check_database(db), check_redis(request), check_stripe(), return_exceptions=True
-        )
+        # Use an async session for DB checks
+        async with get_db_context() as db:
+            # Run health checks in parallel
+            checks_results = await asyncio.gather(
+                check_database(db), check_redis(request), check_stripe(), return_exceptions=True
+            )
 
         # Parse results
         db_check, redis_check, stripe_check = checks_results
@@ -650,18 +649,16 @@ async def detailed_health_check(request: Request):
     start_time = time.time()
 
     try:
-        from api.app.database import get_db
+        from core.database import get_db_context
         from core.config import get_settings
 
         settings = get_settings()
 
-        # Get database session
-        db = next(get_db())
-
-        # Run all health checks in parallel
-        checks_results = await asyncio.gather(
-            check_database(db), check_redis(request), check_stripe(), return_exceptions=True
-        )
+        # Get database session and run all health checks in parallel
+        async with get_db_context() as db:
+            checks_results = await asyncio.gather(
+                check_database(db), check_redis(request), check_stripe(), return_exceptions=True
+            )
 
         # Parse results
         db_check, redis_check, stripe_check = checks_results

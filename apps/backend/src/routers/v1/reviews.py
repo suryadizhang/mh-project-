@@ -17,16 +17,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/reviews", tags=["reviews"])
+router = APIRouter(tags=["reviews"])  # No prefix - added in main.py
 
 
 # Pydantic models
 class ReviewSubmissionRequest(BaseModel):
     """Request model for submitting a review."""
 
-    rating: str = Field(..., description="Rating: great, good, okay, could_be_better")
-    complaint_text: str | None = Field(None, description="Required for negative reviews")
-    improvement_suggestions: str | None = Field(None, description="How we can improve")
+    rating: str = Field(
+        ..., description="Rating: great, good, okay, could_be_better"
+    )
+    complaint_text: str | None = Field(
+        None, description="Required for negative reviews"
+    )
+    improvement_suggestions: str | None = Field(
+        None, description="How we can improve"
+    )
 
 
 class ExternalReviewTrackingRequest(BaseModel):
@@ -53,27 +59,85 @@ class CouponApplicationRequest(BaseModel):
 class ReviewResolutionRequest(BaseModel):
     """Request model for resolving a review."""
 
-    resolved_by: UUID = Field(..., description="Admin user ID who resolved the issue")
-    resolution_notes: str = Field(..., description="Notes about the resolution")
+    resolved_by: UUID = Field(
+        ..., description="Admin user ID who resolved the issue"
+    )
+    resolution_notes: str = Field(
+        ..., description="Notes about the resolution"
+    )
 
 
 class AIInteractionRequest(BaseModel):
     """Request model for AI to issue coupon after interaction."""
 
     review_id: UUID = Field(..., description="Review ID")
-    ai_interaction_notes: str = Field(..., description="Notes from AI interaction")
-    discount_percentage: int = Field(10, description="Discount percentage (default 10%)")
+    ai_interaction_notes: str = Field(
+        ..., description="Notes from AI interaction"
+    )
+    discount_percentage: int = Field(
+        10, description="Discount percentage (default 10%)"
+    )
 
 
 class AIEscalationRequest(BaseModel):
     """Request model for AI to escalate to human."""
 
     review_id: UUID = Field(..., description="Review ID")
-    ai_notes: str = Field(..., description="AI notes about why escalation needed")
-    priority: str = Field("urgent", description="Escalation priority: low, medium, high, urgent")
+    ai_notes: str = Field(
+        ..., description="AI notes about why escalation needed"
+    )
+    priority: str = Field(
+        "urgent", description="Escalation priority: low, medium, high, urgent"
+    )
+
+
+class ReviewCreateRequest(BaseModel):
+    """Request model for creating a new review."""
+
+    rating: int = Field(..., ge=1, le=5, description="Rating from 1 to 5")
+    comment: str | None = Field(None, description="Review comment/feedback")
+    customer_email: str = Field(..., description="Customer email address")
+    booking_id: UUID | None = Field(
+        None, description="Associated booking ID (if any)"
+    )
 
 
 # Public endpoints (customer-facing)
+@router.get("/")
+async def list_reviews(
+    skip: int = 0,
+    limit: int = 100,
+    db: AsyncSession = Depends(get_db),
+):
+    """List reviews (paginated)."""
+    # TODO: Implement actual review listing logic
+    # For now, return placeholder response
+    return {
+        "reviews": [],
+        "total": 0,
+        "skip": skip,
+        "limit": limit,
+    }
+
+
+@router.post("/", status_code=status.HTTP_201_CREATED)
+async def create_review(
+    data: ReviewCreateRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """Create a new customer review."""
+    # TODO: Implement actual review creation logic
+    # For now, return placeholder response
+    return {
+        "id": "review-placeholder",
+        "rating": data.rating,
+        "comment": data.comment,
+        "customer_email": data.customer_email,
+        "status": "pending",
+        "created_at": "2024-10-19T10:30:00Z",
+    }
+
+
 @router.get("/{review_id}")
 async def get_review(review_id: UUID, db: AsyncSession = Depends(get_db)):
     """Get review details for customer review page."""
@@ -81,7 +145,9 @@ async def get_review(review_id: UUID, db: AsyncSession = Depends(get_db)):
     review = await service.get_review_by_id(review_id)
 
     if not review:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Review not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Review not found"
+        )
 
     # Return limited data for public access
     return {
@@ -89,7 +155,9 @@ async def get_review(review_id: UUID, db: AsyncSession = Depends(get_db)):
         "status": review.status,
         "rating": review.rating if review.status != "pending" else None,
         "submitted": review.status != "pending",
-        "booking_date": review.booking.date.isoformat() if review.booking else None,
+        "booking_date": (
+            review.booking.date.isoformat() if review.booking else None
+        ),
         "customer_name": f"{review.customer.first_name if hasattr(review.customer, 'first_name') else 'Valued Customer'}",
         "coupon_issued": review.coupon_issued,
         "coupon_code": review.coupon.coupon_code if review.coupon else None,
@@ -145,10 +213,14 @@ async def submit_review(
                 customer_phone=customer_phone,
                 booking_id=str(review_data.get("booking_id", "Unknown")),
                 complaint_text=data.complaint_text,
-                priority="high" if data.rating == "could_be_better" else "medium",
+                priority=(
+                    "high" if data.rating == "could_be_better" else "medium"
+                ),
             )
         )
-        logger.info(f"📧 WhatsApp complaint notification queued for review {review_id}")
+        logger.info(
+            f"📧 WhatsApp complaint notification queued for review {review_id}"
+        )
     else:
         # Send positive review notification
         asyncio.create_task(
@@ -158,23 +230,30 @@ async def submit_review(
                 review_text=f"{data.improvement_suggestions[:100] if data.improvement_suggestions else 'No additional feedback'}",
             )
         )
-        logger.info(f"📧 WhatsApp review notification queued for review {review_id}")
+        logger.info(
+            f"📧 WhatsApp review notification queued for review {review_id}"
+        )
 
     return result
 
 
 @router.post("/{review_id}/track-external")
 async def track_external_review(
-    review_id: UUID, data: ExternalReviewTrackingRequest, db: AsyncSession = Depends(get_db)
+    review_id: UUID,
+    data: ExternalReviewTrackingRequest,
+    db: AsyncSession = Depends(get_db),
 ):
     """Track when customer leaves external review (Yelp/Google)."""
     service = ReviewService(db)
 
-    success = await service.track_external_review(review_id=review_id, platform=data.platform)
+    success = await service.track_external_review(
+        review_id=review_id, platform=data.platform
+    )
 
     if not success:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to track external review"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to track external review",
         )
 
     return {"success": True, "message": f"Tracked {data.platform} review"}
@@ -182,7 +261,9 @@ async def track_external_review(
 
 # Coupon endpoints
 @router.post("/coupons/validate")
-async def validate_coupon(data: CouponValidationRequest, db: AsyncSession = Depends(get_db)):
+async def validate_coupon(
+    data: CouponValidationRequest, db: AsyncSession = Depends(get_db)
+):
     """Validate a discount coupon."""
     service = ReviewService(db)
 
@@ -196,15 +277,20 @@ async def validate_coupon(data: CouponValidationRequest, db: AsyncSession = Depe
 
 
 @router.post("/coupons/apply")
-async def apply_coupon(data: CouponApplicationRequest, db: AsyncSession = Depends(get_db)):
+async def apply_coupon(
+    data: CouponApplicationRequest, db: AsyncSession = Depends(get_db)
+):
     """Apply a discount coupon to a booking."""
     service = ReviewService(db)
 
-    success = await service.apply_coupon(coupon_code=data.coupon_code, booking_id=data.booking_id)
+    success = await service.apply_coupon(
+        coupon_code=data.coupon_code, booking_id=data.booking_id
+    )
 
     if not success:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to apply coupon"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to apply coupon",
         )
 
     return {"success": True, "message": "Coupon applied successfully"}
@@ -244,12 +330,16 @@ async def get_customer_coupons(
 
 @router.get("/customers/{customer_id}/reviews")
 async def get_customer_reviews(
-    customer_id: UUID, station_id: UUID | None = None, db: AsyncSession = Depends(get_db)
+    customer_id: UUID,
+    station_id: UUID | None = None,
+    db: AsyncSession = Depends(get_db),
 ):
     """Get customer's review history."""
     service = ReviewService(db)
 
-    reviews = await service.get_customer_reviews(customer_id=customer_id, station_id=station_id)
+    reviews = await service.get_customer_reviews(
+        customer_id=customer_id, station_id=station_id
+    )
 
     return {
         "reviews": [
@@ -258,9 +348,14 @@ async def get_customer_reviews(
                 "booking_id": str(review.booking_id),
                 "rating": review.rating,
                 "status": review.status,
-                "submitted_at": review.submitted_at.isoformat() if review.submitted_at else None,
+                "submitted_at": (
+                    review.submitted_at.isoformat()
+                    if review.submitted_at
+                    else None
+                ),
                 "coupon_issued": review.coupon_issued,
-                "left_external_review": review.left_yelp_review or review.left_google_review,
+                "left_external_review": review.left_yelp_review
+                or review.left_google_review,
             }
             for review in reviews
         ]
@@ -270,12 +365,16 @@ async def get_customer_reviews(
 # Admin endpoints
 @router.get("/admin/escalated")
 async def get_escalated_reviews(
-    station_id: UUID, status: str = "escalated", db: AsyncSession = Depends(get_db)
+    station_id: UUID,
+    status: str = "escalated",
+    db: AsyncSession = Depends(get_db),
 ):
     """Get escalated reviews for admin dashboard."""
     service = ReviewService(db)
 
-    reviews = await service.get_escalated_reviews(station_id=station_id, status=status)
+    reviews = await service.get_escalated_reviews(
+        station_id=station_id, status=status
+    )
 
     return {
         "reviews": [
@@ -287,9 +386,15 @@ async def get_escalated_reviews(
                 "rating": review.rating,
                 "complaint_text": review.complaint_text,
                 "improvement_suggestions": review.improvement_suggestions,
-                "submitted_at": review.submitted_at.isoformat() if review.submitted_at else None,
+                "submitted_at": (
+                    review.submitted_at.isoformat()
+                    if review.submitted_at
+                    else None
+                ),
                 "escalated_at": (
-                    review.admin_notified_at.isoformat() if review.admin_notified_at else None
+                    review.admin_notified_at.isoformat()
+                    if review.admin_notified_at
+                    else None
                 ),
                 "coupon_issued": review.coupon_issued,
                 "escalations": [
@@ -311,18 +416,23 @@ async def get_escalated_reviews(
 
 @router.post("/{review_id}/resolve")
 async def resolve_review(
-    review_id: UUID, data: ReviewResolutionRequest, db: AsyncSession = Depends(get_db)
+    review_id: UUID,
+    data: ReviewResolutionRequest,
+    db: AsyncSession = Depends(get_db),
 ):
     """Resolve an escalated review (admin only)."""
     service = ReviewService(db)
 
     success = await service.resolve_review(
-        review_id=review_id, resolved_by=data.resolved_by, resolution_notes=data.resolution_notes
+        review_id=review_id,
+        resolved_by=data.resolved_by,
+        resolution_notes=data.resolution_notes,
     )
 
     if not success:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to resolve review"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to resolve review",
         )
 
     return {"success": True, "message": "Review resolved successfully"}
@@ -330,7 +440,9 @@ async def resolve_review(
 
 # AI Service endpoints
 @router.post("/ai/issue-coupon")
-async def ai_issue_coupon(data: AIInteractionRequest, db: AsyncSession = Depends(get_db)):
+async def ai_issue_coupon(
+    data: AIInteractionRequest, db: AsyncSession = Depends(get_db)
+):
     """
     AI service calls this to issue coupon after interacting with customer.
     Only for 'could_be_better' reviews after AI determines coupon is warranted.
@@ -345,7 +457,8 @@ async def ai_issue_coupon(data: AIInteractionRequest, db: AsyncSession = Depends
 
     if not coupon:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to issue coupon"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to issue coupon",
         )
 
     return {
@@ -360,7 +473,9 @@ async def ai_issue_coupon(data: AIInteractionRequest, db: AsyncSession = Depends
 
 
 @router.post("/ai/escalate-to-human")
-async def ai_escalate_to_human(data: AIEscalationRequest, db: AsyncSession = Depends(get_db)):
+async def ai_escalate_to_human(
+    data: AIEscalationRequest, db: AsyncSession = Depends(get_db)
+):
     """
     AI service calls this when it cannot resolve the complaint.
     Escalates to human admin with urgency.
@@ -368,19 +483,28 @@ async def ai_escalate_to_human(data: AIEscalationRequest, db: AsyncSession = Dep
     service = ReviewService(db)
 
     success = await service.escalate_to_human(
-        review_id=data.review_id, ai_notes=data.ai_notes, priority=data.priority
+        review_id=data.review_id,
+        ai_notes=data.ai_notes,
+        priority=data.priority,
     )
 
     if not success:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to escalate to human"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to escalate to human",
         )
 
-    return {"success": True, "message": "Escalated to human admin", "priority": data.priority}
+    return {
+        "success": True,
+        "message": "Escalated to human admin",
+        "priority": data.priority,
+    }
 
 
 @router.get("/admin/analytics")
-async def get_review_analytics(station_id: UUID, db: AsyncSession = Depends(get_db)):
+async def get_review_analytics(
+    station_id: UUID, db: AsyncSession = Depends(get_db)
+):
     """Get review analytics for admin dashboard."""
     # This would query the feedback.review_analytics view
     query = """
@@ -414,7 +538,9 @@ async def get_review_analytics(station_id: UUID, db: AsyncSession = Depends(get_
                 "coupons_issued": row.coupons_issued,
                 "escalated": row.escalated_count,
                 "avg_response_hours": (
-                    float(row.avg_response_hours) if row.avg_response_hours else None
+                    float(row.avg_response_hours)
+                    if row.avg_response_hours
+                    else None
                 ),
                 "date": row.review_date.isoformat(),
             }

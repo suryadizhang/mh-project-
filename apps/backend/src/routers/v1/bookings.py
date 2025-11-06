@@ -42,13 +42,21 @@ class BookingCreate(BaseModel):
 
     date: str = Field(..., description="Booking date in YYYY-MM-DD format")
     time: str = Field(..., description="Booking time in HH:MM format")
-    guests: int = Field(..., ge=1, le=50, description="Number of guests (1-50)")
-    location_address: str = Field(..., min_length=10, description="Event location address")
-    customer_name: str = Field(..., min_length=2, description="Customer full name")
+    guests: int = Field(
+        ..., ge=1, le=50, description="Number of guests (1-50)"
+    )
+    location_address: str = Field(
+        ..., min_length=10, description="Event location address"
+    )
+    customer_name: str = Field(
+        ..., min_length=2, description="Customer full name"
+    )
     customer_email: EmailStr = Field(..., description="Customer email address")
     customer_phone: str = Field(..., description="Customer phone number")
     special_requests: str | None = Field(
-        None, max_length=500, description="Special requests or dietary restrictions"
+        None,
+        max_length=500,
+        description="Special requests or dietary restrictions",
     )
 
     model_config = {
@@ -78,10 +86,13 @@ class BookingResponse(BaseModel):
     time: str = Field(..., description="Booking time")
     guests: int = Field(..., description="Number of guests")
     status: str = Field(
-        ..., description="Booking status (pending, confirmed, completed, cancelled)"
+        ...,
+        description="Booking status (pending, confirmed, completed, cancelled)",
     )
     total_amount: float = Field(..., description="Total cost in USD")
-    deposit_paid: bool = Field(..., description="Whether deposit has been paid")
+    deposit_paid: bool = Field(
+        ..., description="Whether deposit has been paid"
+    )
     balance_due: float = Field(..., description="Remaining balance due in USD")
     payment_status: str = Field(..., description="Payment status")
     created_at: str = Field(..., description="Creation timestamp (ISO 8601)")
@@ -112,7 +123,9 @@ class BookingUpdate(BaseModel):
 
     date: str | None = Field(None, description="Updated booking date")
     time: str | None = Field(None, description="Updated booking time")
-    guests: int | None = Field(None, ge=1, le=50, description="Updated guest count")
+    guests: int | None = Field(
+        None, ge=1, le=50, description="Updated guest count"
+    )
     location_address: str | None = Field(None, description="Updated location")
     special_requests: str | None = Field(
         None, max_length=500, description="Updated special requests"
@@ -139,7 +152,11 @@ class DeleteBookingRequest(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [{"reason": "Customer requested cancellation due to weather concerns"}]
+            "examples": [
+                {
+                    "reason": "Customer requested cancellation due to weather concerns"
+                }
+            ]
         }
     }
 
@@ -177,7 +194,9 @@ class ErrorResponse(BaseModel):
 
     detail: str = Field(..., description="Error message")
 
-    model_config = {"json_schema_extra": {"examples": [{"detail": "Booking not found"}]}}
+    model_config = {
+        "json_schema_extra": {"examples": [{"detail": "Booking not found"}]}
+    }
 
 
 @router.get(
@@ -233,24 +252,36 @@ class ErrorResponse(BaseModel):
         401: {
             "description": "Authentication required",
             "model": ErrorResponse,
-            "content": {"application/json": {"example": {"detail": "Not authenticated"}}},
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Not authenticated"}
+                }
+            },
         },
         403: {
             "description": "Insufficient permissions",
             "model": ErrorResponse,
             "content": {
                 "application/json": {
-                    "example": {"detail": "Not authorized to view other users' bookings"}
+                    "example": {
+                        "detail": "Not authorized to view other users' bookings"
+                    }
                 }
             },
         },
     },
 )
 async def get_bookings(
-    user_id: str | None = Query(None, description="Filter by user ID (admin only)"),
+    user_id: str | None = Query(
+        None, description="Filter by user ID (admin only)"
+    ),
     status: str | None = Query(None, description="Filter by booking status"),
-    cursor: str | None = Query(None, description="Cursor for pagination (from nextCursor)"),
-    limit: int = Query(50, ge=1, le=100, description="Maximum results to return"),
+    cursor: str | None = Query(
+        None, description="Cursor for pagination (from nextCursor)"
+    ),
+    limit: int = Query(
+        50, ge=1, le=100, description="Maximum results to return"
+    ),
     db: AsyncSession = Depends(get_db),
     current_user: dict[str, Any] = Depends(get_current_user),
 ) -> dict[str, Any]:
@@ -320,15 +351,27 @@ async def get_bookings(
         {
             "id": str(booking.id),
             "user_id": str(booking.customer_id),
-            "date": booking.date.strftime("%Y-%m-%d") if booking.date else None,
+            "date": (
+                booking.date.strftime("%Y-%m-%d") if booking.date else None
+            ),
             "time": booking.slot,
             "guests": booking.total_guests,
             "status": booking.status,
-            "total_amount": booking.total_due_cents / 100.0 if booking.total_due_cents else 0.0,
+            "total_amount": (
+                booking.total_due_cents / 100.0
+                if booking.total_due_cents
+                else 0.0
+            ),
             "deposit_paid": booking.payment_status in ("deposit_paid", "paid"),
-            "balance_due": booking.balance_due_cents / 100.0 if booking.balance_due_cents else 0.0,
+            "balance_due": (
+                booking.balance_due_cents / 100.0
+                if booking.balance_due_cents
+                else 0.0
+            ),
             "payment_status": booking.payment_status,
-            "created_at": booking.created_at.isoformat() if booking.created_at else None,
+            "created_at": (
+                booking.created_at.isoformat() if booking.created_at else None
+            ),
         }
         for booking in page.items
     ]
@@ -376,10 +419,24 @@ async def get_bookings(
                         "balance_due": 350.00,
                         "payment_status": "deposit_paid",
                         "menu_items": [
-                            {"name": "Adult Menu", "quantity": 6, "price": 45.00},
-                            {"name": "Kids Menu", "quantity": 2, "price": 25.00},
+                            {
+                                "name": "Adult Menu",
+                                "quantity": 6,
+                                "price": 45.00,
+                            },
+                            {
+                                "name": "Kids Menu",
+                                "quantity": 2,
+                                "price": 25.00,
+                            },
                         ],
-                        "addons": [{"name": "Filet Mignon Upgrade", "quantity": 2, "price": 5.00}],
+                        "addons": [
+                            {
+                                "name": "Filet Mignon Upgrade",
+                                "quantity": 2,
+                                "price": 5.00,
+                            }
+                        ],
                         "location": {
                             "address": "123 Main St, San Jose, CA 95123",
                             "travel_distance": 15.5,
@@ -390,12 +447,22 @@ async def get_bookings(
                 }
             },
         },
-        401: {"description": "Authentication required", "model": ErrorResponse},
-        403: {"description": "Insufficient permissions", "model": ErrorResponse},
+        401: {
+            "description": "Authentication required",
+            "model": ErrorResponse,
+        },
+        403: {
+            "description": "Insufficient permissions",
+            "model": ErrorResponse,
+        },
         404: {
             "description": "Booking not found",
             "model": ErrorResponse,
-            "content": {"application/json": {"example": {"detail": "Booking not found"}}},
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Booking not found"}
+                }
+            },
         },
     },
 )
@@ -449,7 +516,9 @@ async def get_booking(
 
     # Check if booking exists
     if not booking:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found"
+        )
 
     # Check authorization (users can only view their own bookings)
     # TODO: Add admin role check to allow admins to view all bookings
@@ -457,12 +526,19 @@ async def get_booking(
     current_user_id = current_user.get("id")
     if customer_id_str != current_user_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to view this booking"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to view this booking",
         )
 
     # Calculate payment totals from eager-loaded payments
-    total_paid = sum(p.amount_cents for p in booking.payments if p.status == "completed")
-    deposit_paid = total_paid >= booking.deposit_due_cents if booking.deposit_due_cents else False
+    total_paid = sum(
+        p.amount_cents for p in booking.payments if p.status == "completed"
+    )
+    deposit_paid = (
+        total_paid >= booking.deposit_due_cents
+        if booking.deposit_due_cents
+        else False
+    )
 
     # Convert to response format
     return {
@@ -472,9 +548,15 @@ async def get_booking(
         "time": booking.slot,
         "guests": booking.total_guests,
         "status": booking.status,
-        "total_amount": booking.total_due_cents / 100.0 if booking.total_due_cents else 0.0,
+        "total_amount": (
+            booking.total_due_cents / 100.0 if booking.total_due_cents else 0.0
+        ),
         "deposit_paid": deposit_paid,
-        "balance_due": booking.balance_due_cents / 100.0 if booking.balance_due_cents else 0.0,
+        "balance_due": (
+            booking.balance_due_cents / 100.0
+            if booking.balance_due_cents
+            else 0.0
+        ),
         "payment_status": booking.payment_status,
         "menu_items": [],  # TODO: Add menu items relationship
         "addons": [],  # TODO: Add addons relationship
@@ -483,7 +565,9 @@ async def get_booking(
             "travel_distance": 0.0,
             "travel_fee": 0.0,
         },
-        "created_at": booking.created_at.isoformat() if booking.created_at else None,
+        "created_at": (
+            booking.created_at.isoformat() if booking.created_at else None
+        ),
     }
 
 
@@ -550,17 +634,24 @@ async def get_booking(
                         },
                         "invalid_guests": {
                             "summary": "Invalid guest count",
-                            "value": {"detail": "Guest count must be between 1 and 50"},
+                            "value": {
+                                "detail": "Guest count must be between 1 and 50"
+                            },
                         },
                         "invalid_time": {
                             "summary": "Invalid time",
-                            "value": {"detail": "Booking time must be between 11:00 and 22:00"},
+                            "value": {
+                                "detail": "Booking time must be between 11:00 and 22:00"
+                            },
                         },
                     }
                 }
             },
         },
-        401: {"description": "Authentication required", "model": ErrorResponse},
+        401: {
+            "description": "Authentication required",
+            "model": ErrorResponse,
+        },
         409: {
             "description": "Time slot not available",
             "model": ErrorResponse,
@@ -740,8 +831,14 @@ async def create_booking(
                 }
             },
         },
-        401: {"description": "Authentication required", "model": ErrorResponse},
-        403: {"description": "Insufficient permissions", "model": ErrorResponse},
+        401: {
+            "description": "Authentication required",
+            "model": ErrorResponse,
+        },
+        403: {
+            "description": "Insufficient permissions",
+            "model": ErrorResponse,
+        },
         404: {"description": "Booking not found", "model": ErrorResponse},
     },
 )
@@ -803,7 +900,9 @@ async def update_booking(
             )
         )
 
-        logger.info(f"📧 WhatsApp edit notification queued for booking {booking_id}")
+        logger.info(
+            f"📧 WhatsApp edit notification queued for booking {booking_id}"
+        )
 
     return response
 
@@ -880,7 +979,9 @@ async def update_booking(
                     "examples": {
                         "reason_too_short": {
                             "summary": "Deletion reason too short",
-                            "value": {"detail": "Deletion reason must be at least 10 characters"},
+                            "value": {
+                                "detail": "Deletion reason must be at least 10 characters"
+                            },
                         },
                         "already_deleted": {
                             "summary": "Booking already deleted",
@@ -890,7 +991,10 @@ async def update_booking(
                 }
             },
         },
-        401: {"description": "Authentication required", "model": ErrorResponse},
+        401: {
+            "description": "Authentication required",
+            "model": ErrorResponse,
+        },
         403: {
             "description": "Insufficient permissions or station access denied",
             "model": ErrorResponse,
@@ -905,7 +1009,9 @@ async def update_booking(
                         },
                         "station_denied": {
                             "summary": "Station access denied",
-                            "value": {"detail": "Cannot delete booking from another station"},
+                            "value": {
+                                "detail": "Cannot delete booking from another station"
+                            },
                         },
                     }
                 }
@@ -914,7 +1020,11 @@ async def update_booking(
         404: {
             "description": "Booking not found",
             "model": ErrorResponse,
-            "content": {"application/json": {"example": {"detail": "Booking not found"}}},
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Booking not found"}
+                }
+            },
         },
     },
 )
@@ -974,12 +1084,15 @@ async def delete_booking(
     booking = result.scalar_one_or_none()
 
     if not booking:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found"
+        )
 
     # Check if already deleted
     if booking.deleted_at is not None:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Booking is already deleted"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Booking is already deleted",
         )
 
     # Multi-tenant check: STATION_MANAGER can only delete from their station
@@ -1032,12 +1145,16 @@ async def delete_booking(
     # Decrypt customer PII for notification
     customer_name = (
         decrypt_pii(booking.customer.name_encrypted)
-        if hasattr(booking, "customer") and booking.customer and booking.customer.name_encrypted
+        if hasattr(booking, "customer")
+        and booking.customer
+        and booking.customer.name_encrypted
         else "Customer"
     )
     customer_phone = (
         decrypt_pii(booking.customer.phone_encrypted)
-        if hasattr(booking, "customer") and booking.customer and booking.customer.phone_encrypted
+        if hasattr(booking, "customer")
+        and booking.customer
+        and booking.customer.phone_encrypted
         else None
     )
 
@@ -1046,7 +1163,11 @@ async def delete_booking(
             customer_name=customer_name,
             customer_phone=customer_phone,
             booking_id=booking_id,
-            event_date=booking.date.strftime("%B %d, %Y") if booking.date else "Unknown Date",
+            event_date=(
+                booking.date.strftime("%B %d, %Y")
+                if booking.date
+                else "Unknown Date"
+            ),
             event_time=booking.slot if booking.slot else "Unknown Time",
             cancellation_reason=delete_request.reason,
             refund_amount=(
@@ -1057,7 +1178,9 @@ async def delete_booking(
         )
     )
 
-    logger.info(f"📧 WhatsApp cancellation notification queued for booking {booking_id}")
+    logger.info(
+        f"📧 WhatsApp cancellation notification queued for booking {booking_id}"
+    )
 
     # Calculate restore deadline (30 days)
     restore_until = now + timedelta(days=30)
@@ -1137,14 +1260,23 @@ async def delete_booking(
             "description": "Invalid date range",
             "model": ErrorResponse,
             "content": {
-                "application/json": {"example": {"detail": "date_from and date_to are required"}}
+                "application/json": {
+                    "example": {"detail": "date_from and date_to are required"}
+                }
             },
         },
-        401: {"description": "Authentication required", "model": ErrorResponse},
+        401: {
+            "description": "Authentication required",
+            "model": ErrorResponse,
+        },
         403: {
             "description": "Admin access required",
             "model": ErrorResponse,
-            "content": {"application/json": {"example": {"detail": "Admin privileges required"}}},
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Admin privileges required"}
+                }
+            },
         },
     },
 )
@@ -1190,7 +1322,8 @@ async def get_weekly_bookings(
         end_date = datetime.fromisoformat(date_to)
     except ValueError:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid date format. Use YYYY-MM-DD"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid date format. Use YYYY-MM-DD",
         )
 
     # Build query with eager loading to prevent N+1 queries
@@ -1224,7 +1357,9 @@ async def get_weekly_bookings(
             else ""
         )
         customer_name = (
-            decrypt_pii(booking.customer.name_encrypted) if booking.customer.name_encrypted else ""
+            decrypt_pii(booking.customer.name_encrypted)
+            if booking.customer.name_encrypted
+            else ""
         )
         customer_phone = (
             decrypt_pii(booking.customer.phone_encrypted)
@@ -1255,12 +1390,24 @@ async def get_weekly_bookings(
                 "balance_due_cents": booking.balance_due_cents,
                 "special_requests": special_requests,
                 "source": booking.source,
-                "created_at": booking.created_at.isoformat() if booking.created_at else None,
-                "updated_at": booking.updated_at.isoformat() if booking.updated_at else None,
+                "created_at": (
+                    booking.created_at.isoformat()
+                    if booking.created_at
+                    else None
+                ),
+                "updated_at": (
+                    booking.updated_at.isoformat()
+                    if booking.updated_at
+                    else None
+                ),
             }
         )
 
-    return {"success": True, "data": bookings_data, "total_count": len(bookings_data)}
+    return {
+        "success": True,
+        "data": bookings_data,
+        "total_count": len(bookings_data),
+    }
 
 
 @router.get(
@@ -1320,7 +1467,10 @@ async def get_weekly_bookings(
             },
         },
         400: {"description": "Invalid date range", "model": ErrorResponse},
-        401: {"description": "Authentication required", "model": ErrorResponse},
+        401: {
+            "description": "Authentication required",
+            "model": ErrorResponse,
+        },
         403: {"description": "Admin access required", "model": ErrorResponse},
     },
 )
@@ -1352,7 +1502,9 @@ async def get_monthly_bookings(
         HTTPException(403): Non-admin user
     """
     # Reuse weekly implementation (same logic, just different date range)
-    return await get_weekly_bookings(date_from, date_to, status, db, current_user)
+    return await get_weekly_bookings(
+        date_from, date_to, status, db, current_user
+    )
 
 
 @router.patch(
@@ -1405,7 +1557,9 @@ async def get_monthly_bookings(
                     "examples": {
                         "past_date": {
                             "summary": "Date in past",
-                            "value": {"detail": "Cannot reschedule to past dates"},
+                            "value": {
+                                "detail": "Cannot reschedule to past dates"
+                            },
                         },
                         "invalid_status": {
                             "summary": "Invalid booking status",
@@ -1423,7 +1577,10 @@ async def get_monthly_bookings(
                 }
             },
         },
-        401: {"description": "Authentication required", "model": ErrorResponse},
+        401: {
+            "description": "Authentication required",
+            "model": ErrorResponse,
+        },
         403: {"description": "Admin access required", "model": ErrorResponse},
         404: {"description": "Booking not found", "model": ErrorResponse},
     },
@@ -1468,7 +1625,8 @@ async def update_booking_datetime(
 
     if not new_date or not new_slot:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Both 'date' and 'slot' are required"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Both 'date' and 'slot' are required",
         )
 
     # Validate date format and parse
@@ -1476,7 +1634,8 @@ async def update_booking_datetime(
         parsed_date = datetime.fromisoformat(new_date)
     except ValueError:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid date format. Use YYYY-MM-DD"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid date format. Use YYYY-MM-DD",
         )
 
     # Validate slot format (HH:MM)
@@ -1489,7 +1648,8 @@ async def update_booking_datetime(
     # Check if date is in the past
     if parsed_date < datetime.now():
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot reschedule to past dates"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot reschedule to past dates",
         )
 
     # Fetch booking
@@ -1504,7 +1664,9 @@ async def update_booking_datetime(
     booking = result.scalars().first()
 
     if not booking:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found"
+        )
 
     # Validate booking status (can't reschedule cancelled or completed)
     if booking.status in ("cancelled", "completed"):
@@ -1532,3 +1694,138 @@ async def update_booking_datetime(
             "message": "Booking rescheduled successfully",
         },
     }
+
+
+@router.get(
+    "/booked-dates",
+    summary="Get all booked dates",
+    description="""
+    Retrieve a list of all dates that have bookings.
+    Useful for calendar displays and availability checking.
+    
+    ## Response:
+    Returns array of dates in YYYY-MM-DD format that have bookings.
+    
+    ## Authentication:
+    Optional - public endpoint for availability checking.
+    """,
+)
+async def get_booked_dates(
+    db: AsyncSession = Depends(get_db),
+    current_user: dict[str, Any] | None = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Get all dates that have bookings."""
+    from models.legacy_booking_models import Booking
+    from sqlalchemy import select, func
+    from uuid import UUID
+
+    try:
+        # Build query to get distinct dates
+        query = select(func.distinct(Booking.date)).where(
+            Booking.status.in_(["pending", "confirmed", "completed"])
+        )
+
+        # Apply station filtering if user is authenticated
+        if current_user and current_user.get("station_id"):
+            query = query.where(
+                Booking.station_id == UUID(current_user["station_id"])
+            )
+
+        result = await db.execute(query)
+        dates = result.scalars().all()
+
+        # Format dates as ISO strings
+        booked_dates = [
+            date.isoformat() if hasattr(date, "isoformat") else str(date)
+            for date in dates
+        ]
+
+        return {
+            "success": True,
+            "data": booked_dates,
+            "count": len(booked_dates),
+        }
+
+    except Exception as e:
+        logger.error(f"Error fetching booked dates: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to fetch booked dates",
+        )
+
+
+@router.get(
+    "/availability",
+    summary="Check availability for a specific date",
+    description="""
+    Check if a specific date is available for bookings.
+    
+    ## Query Parameters:
+    - **date**: Date to check in YYYY-MM-DD format
+    
+    ## Response:
+    Returns availability status and booking count for the date.
+    
+    ## Authentication:
+    Public endpoint - no authentication required.
+    """,
+)
+async def check_availability(
+    date: str = Query(..., description="Date to check (YYYY-MM-DD)"),
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
+    """Check availability for a specific date."""
+    from models.legacy_booking_models import Booking
+    from sqlalchemy import select, func
+    from datetime import datetime
+
+    try:
+        # Parse and validate date
+        try:
+            parsed_date = datetime.fromisoformat(date).date()
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid date format. Use YYYY-MM-DD",
+            )
+
+        # Check if date is in the past
+        if parsed_date < datetime.now().date():
+            return {
+                "success": True,
+                "date": date,
+                "available": False,
+                "reason": "Date is in the past",
+                "bookings_count": 0,
+            }
+
+        # Query bookings for this date
+        query = select(func.count(Booking.id)).where(
+            Booking.date == parsed_date,
+            Booking.status.in_(["pending", "confirmed"]),
+        )
+
+        result = await db.execute(query)
+        booking_count = result.scalar() or 0
+
+        # Simple availability logic: max 2 bookings per day
+        max_bookings_per_day = 2
+        available = booking_count < max_bookings_per_day
+
+        return {
+            "success": True,
+            "date": date,
+            "available": available,
+            "bookings_count": booking_count,
+            "max_bookings": max_bookings_per_day,
+            "slots_remaining": max(0, max_bookings_per_day - booking_count),
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error checking availability for {date}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to check availability",
+        )

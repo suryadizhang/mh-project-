@@ -53,8 +53,9 @@ class AuthenticatedUser:
     def _decrypt_email(self) -> str | None:
         """Decrypt user email for display."""
         try:
-            from app.config import settings
+            from core.config import get_settings
 
+            settings = get_settings()
             encryption = FieldEncryption(settings.field_encryption_key)
             return encryption.decrypt(self.user.email_encrypted)
         except Exception:
@@ -100,8 +101,9 @@ async def get_current_station_user(
         )
 
     try:
-        from app.config import settings
+        from core.config import get_settings
 
+        settings = get_settings()
         # Initialize services
         encryption = FieldEncryption(settings.field_encryption_key)
         auth_service = StationAuthenticationService(
@@ -352,8 +354,9 @@ async def audit_log_action(
 ) -> None:
     """Helper function to log user actions with station context."""
     try:
-        from app.config import settings
+        from core.config import get_settings
 
+        settings = get_settings()
         encryption = FieldEncryption(settings.field_encryption_key)
         auth_service = StationAuthenticationService(
             encryption=encryption, jwt_secret=settings.jwt_secret_key

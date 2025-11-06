@@ -40,22 +40,26 @@ class StationContext:
     def __init__(
         self,
         user_id: UUID,
-        station_assignments: list[dict[str, Any]],
+        station_assignments: list[dict[str, Any]] | None = None,
         primary_station_id: UUID | None = None,
         current_station_id: UUID | None = None,
+        highest_role: str | None = None,
+        # Backward compatibility
+        stations: list[dict[str, Any]] | None = None,
     ):
         self.user_id = user_id
-        self.station_assignments = station_assignments
+        # Support both 'stations' and 'station_assignments' parameter names
+        self.station_assignments = station_assignments or stations or []
         self.primary_station_id = primary_station_id
         self.current_station_id = current_station_id or primary_station_id
 
         # Build quick lookup maps
         self.station_roles = {
-            assignment["station_id"]: assignment["role"] for assignment in station_assignments
+            assignment["station_id"]: assignment["role"] for assignment in self.station_assignments
         }
         self.station_permissions = {
             assignment["station_id"]: set(assignment["permissions"])
-            for assignment in station_assignments
+            for assignment in self.station_assignments
         }
 
         # Determine highest role across all stations
@@ -66,14 +70,20 @@ class StationContext:
             StationRole.CUSTOMER_SUPPORT: 1,
         }
 
-        self.highest_role = StationRole.CUSTOMER_SUPPORT
-        max_level = 0
-        for assignment in station_assignments:
-            role = StationRole(assignment["role"])
-            level = role_hierarchy.get(role, 0)
-            if level > max_level:
-                max_level = level
-                self.highest_role = role
+        # Allow explicit highest_role or calculate from assignments
+        if highest_role:
+            self.highest_role = (
+                StationRole(highest_role) if isinstance(highest_role, str) else highest_role
+            )
+        else:
+            self.highest_role = StationRole.CUSTOMER_SUPPORT
+            max_level = 0
+            for assignment in self.station_assignments:
+                role = StationRole(assignment["role"])
+                level = role_hierarchy.get(role, 0)
+                if level > max_level:
+                    max_level = level
+                    self.highest_role = role
 
     @property
     def is_super_admin(self) -> bool:

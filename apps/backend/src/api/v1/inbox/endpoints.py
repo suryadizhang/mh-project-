@@ -5,9 +5,9 @@ RESTful API for unified messaging system
 
 from datetime import UTC, datetime
 import logging
-from uuid import UUID
+from uuid import UUID, uuid4
 
-from api.app.database import get_db
+from core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import and_, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession

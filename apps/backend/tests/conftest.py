@@ -47,12 +47,11 @@ if str(backend_path) not in sys.path:
 
 # Import from main.py (new unified architecture) not api.app.main (old)
 from main import app
-from api.app.utils.auth import create_access_token
-from api.app.models.booking_models import (
-    LegacyUser,
-    UserRole,
-)  # LegacyUser from booking_models (public.users)
-from api.app.models.core import Booking, Customer, Payment  # Use core models for bookings/payments
+from core.security import create_access_token
+from models.user import User as LegacyUser
+from core.config import UserRole
+from models.booking import Booking, Payment
+from models.customer import Customer
 
 fake = Faker()
 
@@ -115,7 +114,12 @@ def benchmark_results():
             """Add a benchmark result."""
             passed = actual_ms < target_ms
             self.results.append(
-                {"name": name, "actual_ms": actual_ms, "target_ms": target_ms, "passed": passed}
+                {
+                    "name": name,
+                    "actual_ms": actual_ms,
+                    "target_ms": target_ms,
+                    "passed": passed,
+                }
             )
 
         def summary(self):
@@ -141,7 +145,10 @@ async def async_client(test_auth_token) -> AsyncGenerator[AsyncClient, None]:
     transport = ASGITransport(app=app)
     headers = {"Authorization": f"Bearer {test_auth_token}"}
     async with AsyncClient(
-        transport=transport, base_url="http://test", headers=headers, follow_redirects=True
+        transport=transport,
+        base_url="http://test",
+        headers=headers,
+        follow_redirects=True,
     ) as client:
         yield client
 
@@ -149,11 +156,17 @@ async def async_client(test_auth_token) -> AsyncGenerator[AsyncClient, None]:
 @pytest_asyncio.fixture(scope="function")
 async def db_session() -> AsyncGenerator[AsyncSession, None]:
     """Create database session for testing with multi-schema search path."""
-    async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    from core.database import engine
+
+    async_session_maker = async_sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
     async with async_session_maker() as session:
         try:
             # Set search_path to include core (bookings/payments), identity (stations), and public (users)
-            await session.execute(text("SET search_path TO core, identity, public"))
+            await session.execute(
+                text("SET search_path TO core, identity, public")
+            )
             yield session
         finally:
             # Ensure session is properly closed
@@ -177,11 +190,21 @@ async def create_test_bookings(db_session, test_admin_user):
 
     async def _create(count=10):
         try:
-            await db_session.execute(text("DELETE FROM core.payments WHERE TRUE"))
-            await db_session.execute(text("DELETE FROM core.bookings WHERE TRUE"))
-            await db_session.execute(text("DELETE FROM core.customers WHERE TRUE"))
-            await db_session.execute(text("DELETE FROM identity.stations WHERE code LIKE 'TEST-%'"))
-            await db_session.execute(text("DELETE FROM users WHERE id LIKE 'test-user-%'"))
+            await db_session.execute(
+                text("DELETE FROM core.payments WHERE TRUE")
+            )
+            await db_session.execute(
+                text("DELETE FROM core.bookings WHERE TRUE")
+            )
+            await db_session.execute(
+                text("DELETE FROM core.customers WHERE TRUE")
+            )
+            await db_session.execute(
+                text("DELETE FROM identity.stations WHERE code LIKE 'TEST-%'")
+            )
+            await db_session.execute(
+                text("DELETE FROM users WHERE id LIKE 'test-user-%'")
+            )
             await db_session.commit()
         except Exception:
             await db_session.rollback()
@@ -191,7 +214,7 @@ async def create_test_bookings(db_session, test_admin_user):
         timestamp = int(time.time() * 1000)
 
         # Import Station model to use ORM (avoids manual field mapping)
-        from api.app.auth.station_models import Station
+        from core.auth.station_models import Station
 
         # Create test station using ORM
         test_station = Station(
@@ -243,12 +266,18 @@ async def create_test_bookings(db_session, test_admin_user):
                 date=event_datetime,
                 slot=random.choice(slots),
                 total_guests=random.randint(4, 20),
-                price_per_person_cents=random.randint(5000, 10000),  # $50-$100 per person
-                total_due_cents=random.randint(20000, 200000),  # $200-$2000 total
+                price_per_person_cents=random.randint(
+                    5000, 10000
+                ),  # $50-$100 per person
+                total_due_cents=random.randint(
+                    20000, 200000
+                ),  # $200-$2000 total
                 deposit_due_cents=10000,  # $100 deposit
                 balance_due_cents=random.randint(0, 190000),
                 status=random.choice(statuses),
-                payment_status=random.choice(["pending", "deposit_paid", "paid"]),
+                payment_status=random.choice(
+                    ["pending", "deposit_paid", "paid"]
+                ),
                 source="website",
             )
             bookings.append(booking)
