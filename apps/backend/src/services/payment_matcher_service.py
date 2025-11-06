@@ -5,7 +5,7 @@ Automatically matches payment notification emails to pending bookings/payments.
 Updates payment status and sends confirmation notifications.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 import logging
 
@@ -95,7 +95,7 @@ class PaymentMatcher:
 
             # Calculate time window
             if received_at is None:
-                received_at = datetime.utcnow()
+                received_at = datetime.now(timezone.utc)
 
             time_window = (
                 PaymentMatcher.EXTENDED_TIME_WINDOW_HOURS
@@ -195,7 +195,7 @@ class PaymentMatcher:
 
             # Calculate time window (extended for phone matching - 7 days)
             if received_at is None:
-                received_at = datetime.utcnow()
+                received_at = datetime.now(timezone.utc)
 
             time_start = received_at - timedelta(days=7)
             time_end = received_at + timedelta(hours=1)
@@ -467,7 +467,7 @@ class PaymentMatcher:
         try:
             # Update payment status
             payment.status = PaymentStatus.COMPLETED
-            payment.payment_confirmed_at = datetime.utcnow()
+            payment.payment_confirmed_at = datetime.now(timezone.utc)
 
             # Add metadata
             if not payment.metadata:
@@ -477,14 +477,14 @@ class PaymentMatcher:
                 "provider": notification_data.get("provider"),
                 "transaction_id": notification_data.get("transaction_id"),
                 "received_at": notification_data.get("received_at"),
-                "confirmed_at": datetime.utcnow().isoformat(),
+                "confirmed_at": datetime.now(timezone.utc).isoformat(),
             }
 
             # Update booking status
             booking = payment.booking
             if booking:
                 booking.payment_status = "paid"
-                booking.updated_at = datetime.utcnow()
+                booking.updated_at = datetime.now(timezone.utc)
 
             db.commit()
 
@@ -772,7 +772,7 @@ async def check_payment_emails_task(
     )
 
     # Process emails from last 7 days
-    since_date = datetime.utcnow() - timedelta(days=7)
+    since_date = datetime.now(timezone.utc) - timedelta(days=7)
 
     results = service.process_payment_emails(
         since_date=since_date,

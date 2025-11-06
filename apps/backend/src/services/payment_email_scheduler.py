@@ -8,7 +8,7 @@ Cleans up old processed notifications after 2+ days (if read).
 """
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 from threading import Thread
 import time
@@ -92,7 +92,7 @@ class PaymentEmailScheduler:
                 )
 
                 # Update stats
-                self.last_run = datetime.utcnow()
+                self.last_run = datetime.now(timezone.utc)
                 self.run_count += 1
 
                 # Log results
@@ -151,8 +151,10 @@ class PaymentEmailScheduler:
                 )
 
                 # Calculate cutoff dates
-                cutoff_date_read = datetime.utcnow() - timedelta(days=2)  # 2 days for read
-                cutoff_date_unread = datetime.utcnow() - timedelta(days=14)  # 14 days for unread
+                cutoff_date_read = datetime.now(timezone.utc) - timedelta(days=2)  # 2 days for read
+                cutoff_date_unread = datetime.now(timezone.utc) - timedelta(
+                    days=14
+                )  # 14 days for unread
 
                 # Find old READ processed notifications (2+ days old)
                 old_read_notifications = (

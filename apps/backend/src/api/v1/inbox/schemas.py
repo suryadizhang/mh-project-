@@ -321,7 +321,7 @@ class WebSocketStatusUpdate(BaseModel):
 class BulkMessageRequest(BaseModel):
     """Bulk message sending request"""
 
-    messages: list[SendMessageRequest] = Field(..., min_items=1, max_items=100)
+    messages: list[SendMessageRequest] = Field(..., min_length=1, max_length=100)
     batch_metadata: dict[str, Any] | None = None
 
 

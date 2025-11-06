@@ -2,7 +2,7 @@
 
 import asyncio
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 from typing import Any
 
@@ -37,7 +37,7 @@ class RateLimitedClient:
     async def can_make_request(self) -> bool:
         """Check if we can make a request within rate limits."""
         async with self._lock:
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
 
             # Reset minute counter
             if not self.rate_limits.minute_reset_at or now >= self.rate_limits.minute_reset_at:
@@ -70,7 +70,7 @@ class RateLimitedClient:
 
     async def wait_for_rate_limit_reset(self) -> float:
         """Calculate seconds to wait for next available request."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
 
         wait_times = []
 

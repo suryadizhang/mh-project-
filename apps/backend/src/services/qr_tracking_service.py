@@ -3,7 +3,7 @@ QR Code Tracking Service
 Handles QR code scanning, tracking, and analytics
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID
 
@@ -68,7 +68,7 @@ class QRTrackingService:
             browser=device_info.get("browser"),
             referrer=referrer,
             session_id=session_id,
-            scanned_at=datetime.utcnow(),
+            scanned_at=datetime.now(timezone.utc),
         )
 
         # TODO: Add IP geolocation lookup (optional)

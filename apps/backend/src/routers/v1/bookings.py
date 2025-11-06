@@ -12,7 +12,7 @@ All endpoints require authentication via JWT Bearer token.
 Admin endpoints require specific role permissions (RBAC).
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from typing import Any
 
@@ -42,15 +42,9 @@ class BookingCreate(BaseModel):
 
     date: str = Field(..., description="Booking date in YYYY-MM-DD format")
     time: str = Field(..., description="Booking time in HH:MM format")
-    guests: int = Field(
-        ..., ge=1, le=50, description="Number of guests (1-50)"
-    )
-    location_address: str = Field(
-        ..., min_length=10, description="Event location address"
-    )
-    customer_name: str = Field(
-        ..., min_length=2, description="Customer full name"
-    )
+    guests: int = Field(..., ge=1, le=50, description="Number of guests (1-50)")
+    location_address: str = Field(..., min_length=10, description="Event location address")
+    customer_name: str = Field(..., min_length=2, description="Customer full name")
     customer_email: EmailStr = Field(..., description="Customer email address")
     customer_phone: str = Field(..., description="Customer phone number")
     special_requests: str | None = Field(
@@ -90,9 +84,7 @@ class BookingResponse(BaseModel):
         description="Booking status (pending, confirmed, completed, cancelled)",
     )
     total_amount: float = Field(..., description="Total cost in USD")
-    deposit_paid: bool = Field(
-        ..., description="Whether deposit has been paid"
-    )
+    deposit_paid: bool = Field(..., description="Whether deposit has been paid")
     balance_due: float = Field(..., description="Remaining balance due in USD")
     payment_status: str = Field(..., description="Payment status")
     created_at: str = Field(..., description="Creation timestamp (ISO 8601)")
@@ -123,9 +115,7 @@ class BookingUpdate(BaseModel):
 
     date: str | None = Field(None, description="Updated booking date")
     time: str | None = Field(None, description="Updated booking time")
-    guests: int | None = Field(
-        None, ge=1, le=50, description="Updated guest count"
-    )
+    guests: int | None = Field(None, ge=1, le=50, description="Updated guest count")
     location_address: str | None = Field(None, description="Updated location")
     special_requests: str | None = Field(
         None, max_length=500, description="Updated special requests"
@@ -152,11 +142,7 @@ class DeleteBookingRequest(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {
-                    "reason": "Customer requested cancellation due to weather concerns"
-                }
-            ]
+            "examples": [{"reason": "Customer requested cancellation due to weather concerns"}]
         }
     }
 
@@ -194,9 +180,7 @@ class ErrorResponse(BaseModel):
 
     detail: str = Field(..., description="Error message")
 
-    model_config = {
-        "json_schema_extra": {"examples": [{"detail": "Booking not found"}]}
-    }
+    model_config = {"json_schema_extra": {"examples": [{"detail": "Booking not found"}]}}
 
 
 @router.get(
@@ -252,36 +236,24 @@ class ErrorResponse(BaseModel):
         401: {
             "description": "Authentication required",
             "model": ErrorResponse,
-            "content": {
-                "application/json": {
-                    "example": {"detail": "Not authenticated"}
-                }
-            },
+            "content": {"application/json": {"example": {"detail": "Not authenticated"}}},
         },
         403: {
             "description": "Insufficient permissions",
             "model": ErrorResponse,
             "content": {
                 "application/json": {
-                    "example": {
-                        "detail": "Not authorized to view other users' bookings"
-                    }
+                    "example": {"detail": "Not authorized to view other users' bookings"}
                 }
             },
         },
     },
 )
 async def get_bookings(
-    user_id: str | None = Query(
-        None, description="Filter by user ID (admin only)"
-    ),
+    user_id: str | None = Query(None, description="Filter by user ID (admin only)"),
     status: str | None = Query(None, description="Filter by booking status"),
-    cursor: str | None = Query(
-        None, description="Cursor for pagination (from nextCursor)"
-    ),
-    limit: int = Query(
-        50, ge=1, le=100, description="Maximum results to return"
-    ),
+    cursor: str | None = Query(None, description="Cursor for pagination (from nextCursor)"),
+    limit: int = Query(50, ge=1, le=100, description="Maximum results to return"),
     db: AsyncSession = Depends(get_db),
     current_user: dict[str, Any] = Depends(get_current_user),
 ) -> dict[str, Any]:
@@ -351,27 +323,17 @@ async def get_bookings(
         {
             "id": str(booking.id),
             "user_id": str(booking.customer_id),
-            "date": (
-                booking.date.strftime("%Y-%m-%d") if booking.date else None
-            ),
+            "date": (booking.date.strftime("%Y-%m-%d") if booking.date else None),
             "time": booking.slot,
             "guests": booking.total_guests,
             "status": booking.status,
-            "total_amount": (
-                booking.total_due_cents / 100.0
-                if booking.total_due_cents
-                else 0.0
-            ),
+            "total_amount": (booking.total_due_cents / 100.0 if booking.total_due_cents else 0.0),
             "deposit_paid": booking.payment_status in ("deposit_paid", "paid"),
             "balance_due": (
-                booking.balance_due_cents / 100.0
-                if booking.balance_due_cents
-                else 0.0
+                booking.balance_due_cents / 100.0 if booking.balance_due_cents else 0.0
             ),
             "payment_status": booking.payment_status,
-            "created_at": (
-                booking.created_at.isoformat() if booking.created_at else None
-            ),
+            "created_at": (booking.created_at.isoformat() if booking.created_at else None),
         }
         for booking in page.items
     ]
@@ -458,11 +420,7 @@ async def get_bookings(
         404: {
             "description": "Booking not found",
             "model": ErrorResponse,
-            "content": {
-                "application/json": {
-                    "example": {"detail": "Booking not found"}
-                }
-            },
+            "content": {"application/json": {"example": {"detail": "Booking not found"}}},
         },
     },
 )
@@ -516,9 +474,7 @@ async def get_booking(
 
     # Check if booking exists
     if not booking:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
 
     # Check authorization (users can only view their own bookings)
     # TODO: Add admin role check to allow admins to view all bookings
@@ -531,14 +487,8 @@ async def get_booking(
         )
 
     # Calculate payment totals from eager-loaded payments
-    total_paid = sum(
-        p.amount_cents for p in booking.payments if p.status == "completed"
-    )
-    deposit_paid = (
-        total_paid >= booking.deposit_due_cents
-        if booking.deposit_due_cents
-        else False
-    )
+    total_paid = sum(p.amount_cents for p in booking.payments if p.status == "completed")
+    deposit_paid = total_paid >= booking.deposit_due_cents if booking.deposit_due_cents else False
 
     # Convert to response format
     return {
@@ -548,15 +498,9 @@ async def get_booking(
         "time": booking.slot,
         "guests": booking.total_guests,
         "status": booking.status,
-        "total_amount": (
-            booking.total_due_cents / 100.0 if booking.total_due_cents else 0.0
-        ),
+        "total_amount": (booking.total_due_cents / 100.0 if booking.total_due_cents else 0.0),
         "deposit_paid": deposit_paid,
-        "balance_due": (
-            booking.balance_due_cents / 100.0
-            if booking.balance_due_cents
-            else 0.0
-        ),
+        "balance_due": (booking.balance_due_cents / 100.0 if booking.balance_due_cents else 0.0),
         "payment_status": booking.payment_status,
         "menu_items": [],  # TODO: Add menu items relationship
         "addons": [],  # TODO: Add addons relationship
@@ -565,9 +509,7 @@ async def get_booking(
             "travel_distance": 0.0,
             "travel_fee": 0.0,
         },
-        "created_at": (
-            booking.created_at.isoformat() if booking.created_at else None
-        ),
+        "created_at": (booking.created_at.isoformat() if booking.created_at else None),
     }
 
 
@@ -634,15 +576,11 @@ async def get_booking(
                         },
                         "invalid_guests": {
                             "summary": "Invalid guest count",
-                            "value": {
-                                "detail": "Guest count must be between 1 and 50"
-                            },
+                            "value": {"detail": "Guest count must be between 1 and 50"},
                         },
                         "invalid_time": {
                             "summary": "Invalid time",
-                            "value": {
-                                "detail": "Booking time must be between 11:00 and 22:00"
-                            },
+                            "value": {"detail": "Booking time must be between 11:00 and 22:00"},
                         },
                     }
                 }
@@ -900,9 +838,7 @@ async def update_booking(
             )
         )
 
-        logger.info(
-            f"📧 WhatsApp edit notification queued for booking {booking_id}"
-        )
+        logger.info(f"📧 WhatsApp edit notification queued for booking {booking_id}")
 
     return response
 
@@ -979,9 +915,7 @@ async def update_booking(
                     "examples": {
                         "reason_too_short": {
                             "summary": "Deletion reason too short",
-                            "value": {
-                                "detail": "Deletion reason must be at least 10 characters"
-                            },
+                            "value": {"detail": "Deletion reason must be at least 10 characters"},
                         },
                         "already_deleted": {
                             "summary": "Booking already deleted",
@@ -1009,9 +943,7 @@ async def update_booking(
                         },
                         "station_denied": {
                             "summary": "Station access denied",
-                            "value": {
-                                "detail": "Cannot delete booking from another station"
-                            },
+                            "value": {"detail": "Cannot delete booking from another station"},
                         },
                     }
                 }
@@ -1020,11 +952,7 @@ async def update_booking(
         404: {
             "description": "Booking not found",
             "model": ErrorResponse,
-            "content": {
-                "application/json": {
-                    "example": {"detail": "Booking not found"}
-                }
-            },
+            "content": {"application/json": {"example": {"detail": "Booking not found"}}},
         },
     },
 )
@@ -1084,9 +1012,7 @@ async def delete_booking(
     booking = result.scalar_one_or_none()
 
     if not booking:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
 
     # Check if already deleted
     if booking.deleted_at is not None:
@@ -1117,7 +1043,7 @@ async def delete_booking(
     }
 
     # Perform soft delete
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     booking.deleted_at = now
     booking.deleted_by = UUID(current_user["id"])
     booking.delete_reason = delete_request.reason
@@ -1145,16 +1071,12 @@ async def delete_booking(
     # Decrypt customer PII for notification
     customer_name = (
         decrypt_pii(booking.customer.name_encrypted)
-        if hasattr(booking, "customer")
-        and booking.customer
-        and booking.customer.name_encrypted
+        if hasattr(booking, "customer") and booking.customer and booking.customer.name_encrypted
         else "Customer"
     )
     customer_phone = (
         decrypt_pii(booking.customer.phone_encrypted)
-        if hasattr(booking, "customer")
-        and booking.customer
-        and booking.customer.phone_encrypted
+        if hasattr(booking, "customer") and booking.customer and booking.customer.phone_encrypted
         else None
     )
 
@@ -1163,11 +1085,7 @@ async def delete_booking(
             customer_name=customer_name,
             customer_phone=customer_phone,
             booking_id=booking_id,
-            event_date=(
-                booking.date.strftime("%B %d, %Y")
-                if booking.date
-                else "Unknown Date"
-            ),
+            event_date=(booking.date.strftime("%B %d, %Y") if booking.date else "Unknown Date"),
             event_time=booking.slot if booking.slot else "Unknown Time",
             cancellation_reason=delete_request.reason,
             refund_amount=(
@@ -1178,9 +1096,7 @@ async def delete_booking(
         )
     )
 
-    logger.info(
-        f"📧 WhatsApp cancellation notification queued for booking {booking_id}"
-    )
+    logger.info(f"📧 WhatsApp cancellation notification queued for booking {booking_id}")
 
     # Calculate restore deadline (30 days)
     restore_until = now + timedelta(days=30)
@@ -1260,9 +1176,7 @@ async def delete_booking(
             "description": "Invalid date range",
             "model": ErrorResponse,
             "content": {
-                "application/json": {
-                    "example": {"detail": "date_from and date_to are required"}
-                }
+                "application/json": {"example": {"detail": "date_from and date_to are required"}}
             },
         },
         401: {
@@ -1272,11 +1186,7 @@ async def delete_booking(
         403: {
             "description": "Admin access required",
             "model": ErrorResponse,
-            "content": {
-                "application/json": {
-                    "example": {"detail": "Admin privileges required"}
-                }
-            },
+            "content": {"application/json": {"example": {"detail": "Admin privileges required"}}},
         },
     },
 )
@@ -1357,9 +1267,7 @@ async def get_weekly_bookings(
             else ""
         )
         customer_name = (
-            decrypt_pii(booking.customer.name_encrypted)
-            if booking.customer.name_encrypted
-            else ""
+            decrypt_pii(booking.customer.name_encrypted) if booking.customer.name_encrypted else ""
         )
         customer_phone = (
             decrypt_pii(booking.customer.phone_encrypted)
@@ -1390,16 +1298,8 @@ async def get_weekly_bookings(
                 "balance_due_cents": booking.balance_due_cents,
                 "special_requests": special_requests,
                 "source": booking.source,
-                "created_at": (
-                    booking.created_at.isoformat()
-                    if booking.created_at
-                    else None
-                ),
-                "updated_at": (
-                    booking.updated_at.isoformat()
-                    if booking.updated_at
-                    else None
-                ),
+                "created_at": (booking.created_at.isoformat() if booking.created_at else None),
+                "updated_at": (booking.updated_at.isoformat() if booking.updated_at else None),
             }
         )
 
@@ -1502,9 +1402,7 @@ async def get_monthly_bookings(
         HTTPException(403): Non-admin user
     """
     # Reuse weekly implementation (same logic, just different date range)
-    return await get_weekly_bookings(
-        date_from, date_to, status, db, current_user
-    )
+    return await get_weekly_bookings(date_from, date_to, status, db, current_user)
 
 
 @router.patch(
@@ -1557,9 +1455,7 @@ async def get_monthly_bookings(
                     "examples": {
                         "past_date": {
                             "summary": "Date in past",
-                            "value": {
-                                "detail": "Cannot reschedule to past dates"
-                            },
+                            "value": {"detail": "Cannot reschedule to past dates"},
                         },
                         "invalid_status": {
                             "summary": "Invalid booking status",
@@ -1664,9 +1560,7 @@ async def update_booking_datetime(
     booking = result.scalars().first()
 
     if not booking:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found")
 
     # Validate booking status (can't reschedule cancelled or completed)
     if booking.status in ("cancelled", "completed"):
@@ -1727,17 +1621,14 @@ async def get_booked_dates(
 
         # Apply station filtering if user is authenticated
         if current_user and current_user.get("station_id"):
-            query = query.where(
-                Booking.station_id == UUID(current_user["station_id"])
-            )
+            query = query.where(Booking.station_id == UUID(current_user["station_id"]))
 
         result = await db.execute(query)
         dates = result.scalars().all()
 
         # Format dates as ISO strings
         booked_dates = [
-            date.isoformat() if hasattr(date, "isoformat") else str(date)
-            for date in dates
+            date.isoformat() if hasattr(date, "isoformat") else str(date) for date in dates
         ]
 
         return {

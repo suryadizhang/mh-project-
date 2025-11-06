@@ -251,7 +251,7 @@ class ScheduleSocialFollowUpCommand(Command):
 class BulkUpdateThreadsCommand(Command):
     """Command to bulk update multiple social threads."""
 
-    thread_ids: list[UUID] = Field(..., min_items=1, max_items=100)
+    thread_ids: list[UUID] = Field(..., min_length=1, max_length=100)
     updates: dict[str, Any] = Field(..., description="Fields to update")
     updated_by: UUID
     reason: str | None = None

@@ -1,6 +1,6 @@
 """Social media integration service."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from typing import Any
 from uuid import UUID
@@ -492,7 +492,7 @@ class SocialService:
             await self.db.execute(
                 update(SocialIdentity)
                 .where(SocialIdentity.id == identity.id)
-                .values(last_active_at=datetime.utcnow())
+                .values(last_active_at=datetime.now(timezone.utc))
             )
             return identity
 
@@ -502,7 +502,7 @@ class SocialService:
             "handle": handle,
             "display_name": profile_data.get("name") if profile_data else None,
             "avatar_url": profile_data.get("profile_pic") if profile_data else None,
-            "last_active_at": datetime.utcnow(),
+            "last_active_at": datetime.now(timezone.utc),
         }
 
         result = await self.db.execute(
@@ -533,7 +533,7 @@ class SocialService:
             await self.db.execute(
                 update(SocialThread)
                 .where(SocialThread.id == thread.id)
-                .values(last_message_at=datetime.utcnow())
+                .values(last_message_at=datetime.now(timezone.utc))
             )
             return thread
 
@@ -544,7 +544,7 @@ class SocialService:
             "account_id": account.id,
             "social_identity_id": social_identity.id,
             "context_url": context_url,
-            "last_message_at": datetime.utcnow(),
+            "last_message_at": datetime.now(timezone.utc),
         }
 
         result = await self.db.execute(
@@ -571,7 +571,7 @@ class SocialService:
                 message_count=SocialThread.message_count + 1,
                 unread_count=SocialThread.unread_count
                 + (1 if message_create.direction == MessageDirection.IN else 0),
-                last_message_at=datetime.utcnow(),
+                last_message_at=datetime.now(timezone.utc),
             )
         )
 

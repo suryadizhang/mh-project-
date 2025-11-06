@@ -341,7 +341,7 @@ class BookingService:
 
         # Update status
         booking.status = BookingStatus.CONFIRMED
-        booking.confirmed_at = datetime.utcnow()
+        booking.confirmed_at = datetime.now(timezone.utc)
 
         updated_booking = self.repository.update(booking)
 
@@ -386,7 +386,7 @@ class BookingService:
 
         # Update status
         booking.status = BookingStatus.CANCELLED
-        booking.cancelled_at = datetime.utcnow()
+        booking.cancelled_at = datetime.now(timezone.utc)
         booking.cancellation_reason = reason
 
         updated_booking = self.repository.update(booking)

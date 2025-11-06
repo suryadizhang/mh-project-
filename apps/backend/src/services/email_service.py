@@ -4,7 +4,7 @@ Sends emails for user approval, rejection, and other events
 Supports SMTP for IONOS and other providers
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import logging
@@ -278,13 +278,13 @@ class EmailService:
                 full_name=full_name,
                 email=email,
                 frontend_url=self.frontend_url,
-                approval_date=datetime.utcnow().strftime("%B %d, %Y"),
+                approval_date=datetime.now(timezone.utc).strftime("%B %d, %Y"),
             )
             text_body = template["text"].format(
                 full_name=full_name,
                 email=email,
                 frontend_url=self.frontend_url,
-                approval_date=datetime.utcnow().strftime("%B %d, %Y"),
+                approval_date=datetime.now(timezone.utc).strftime("%B %d, %Y"),
             )
 
             return self._send_email(

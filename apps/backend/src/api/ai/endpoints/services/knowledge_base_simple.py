@@ -4,7 +4,7 @@ Integrated with actual database and real business data
 Supports AI chat with context from bookings, menu, reviews, and FAQs
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import re
 from typing import Any
@@ -418,7 +418,7 @@ class ProductionKnowledgeBaseService:
                     "priority": knowledge.get("priority", 5),
                     "source": "business_config",
                 },
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
             }
 
             # Build keyword index
@@ -449,7 +449,7 @@ class ProductionKnowledgeBaseService:
                 # Get recent bookings count
                 result = await db.execute(
                     select(func.count(Booking.id)).where(
-                        Booking.created_at >= datetime.utcnow().replace(day=1)
+                        Booking.created_at >= datetime.now(timezone.utc).replace(day=1)
                     )
                 )
                 booking_count = result.scalar() or 0
@@ -577,7 +577,7 @@ class ProductionKnowledgeBaseService:
         self.chunks_cache[chunk_id] = {
             "content": content,
             "metadata": metadata,
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
         }
 
         # Update keyword index
@@ -666,7 +666,7 @@ class ProductionKnowledgeBaseService:
             if metadata is not None:
                 self.chunks_cache[chunk_id]["metadata"].update(metadata)
 
-            self.chunks_cache[chunk_id]["updated_at"] = datetime.utcnow().isoformat()
+            self.chunks_cache[chunk_id]["updated_at"] = datetime.now(timezone.utc).isoformat()
 
     async def delete_knowledge_chunk(self, chunk_id: str):
         """Delete a knowledge chunk"""

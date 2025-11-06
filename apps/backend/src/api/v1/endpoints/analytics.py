@@ -261,7 +261,7 @@ async def get_overview(
         raise HTTPException(status_code=500, detail=f"Failed to get overview: {e!s}")
 
 
-@router.get("/leads", response_model=LeadAnalytics)
+@router.get("/leads", response_model=LeadAnalytics, operation_id="get_lead_analytics_v2")
 async def get_lead_analytics(
     period: str = Query("30d", description="Time period: 7d, 30d, 90d, 1y"),
     db: AsyncSession = Depends(get_db),
@@ -392,7 +392,9 @@ async def get_lead_analytics(
         raise HTTPException(status_code=500, detail=f"Failed to get lead analytics: {e!s}")
 
 
-@router.get("/newsletter", response_model=NewsletterAnalytics)
+@router.get(
+    "/newsletter", response_model=NewsletterAnalytics, operation_id="get_newsletter_analytics_v2"
+)
 async def get_newsletter_analytics(
     db: AsyncSession = Depends(get_db), current_user: dict = Depends(get_current_user)
 ):
@@ -492,7 +494,7 @@ async def get_newsletter_analytics(
         raise HTTPException(status_code=500, detail=f"Failed to get newsletter analytics: {e!s}")
 
 
-@router.get("/funnel", response_model=ConversionFunnel)
+@router.get("/funnel", response_model=ConversionFunnel, operation_id="get_conversion_funnel_v2")
 async def get_conversion_funnel(
     period: str = Query("30d", description="Time period"),
     db: AsyncSession = Depends(get_db),
@@ -707,7 +709,9 @@ async def get_lead_scoring(
         raise HTTPException(status_code=500, detail=f"Failed to get lead scoring: {e!s}")
 
 
-@router.get("/engagement-trends", response_model=EngagementTrends)
+@router.get(
+    "/engagement-trends", response_model=EngagementTrends, operation_id="get_engagement_trends_v2"
+)
 async def get_engagement_trends(
     period: str = Query("30d", description="Time period"),
     db: AsyncSession = Depends(get_db),

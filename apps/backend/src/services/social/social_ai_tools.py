@@ -1,6 +1,6 @@
 """Social media function calling tools for AI API."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 from typing import Any
 from uuid import UUID
@@ -278,7 +278,7 @@ class SendSocialReplyTool:
                     "safety_score": safety_score,
                     "profanity_check": safety_context.get("profanity_checked", False),
                     "policy_compliant": safety_context.get("policy_compliant", True),
-                    "generated_at": datetime.utcnow().isoformat(),
+                    "generated_at": datetime.now(timezone.utc).isoformat(),
                 },
             )
 
@@ -400,7 +400,7 @@ class CreateLeadFromSocialTool:
                 metadata={
                     "interest_signals": interest_signals,
                     "ai_created": True,
-                    "created_at": datetime.utcnow().isoformat(),
+                    "created_at": datetime.now(timezone.utc).isoformat(),
                 },
             )
 
@@ -495,7 +495,7 @@ class SearchSocialContentTool:
             content_types = kwargs.get("content_types")
             days_back = kwargs.get("days_back", 7)
 
-            date_from = datetime.utcnow() - timedelta(days=days_back)
+            date_from = datetime.now(timezone.utc) - timedelta(days=days_back)
 
             query = SearchSocialContentQuery(
                 search_term=search_term,
