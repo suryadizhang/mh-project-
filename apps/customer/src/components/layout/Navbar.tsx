@@ -1,5 +1,16 @@
 'use client';
 
+import {
+  BookOpen,
+  Calculator,
+  Calendar,
+  HelpCircle,
+  Home,
+  Menu,
+  MessageCircle,
+  UtensilsCrossed,
+  X,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -17,10 +28,21 @@ export default function Navbar() {
     setIsOpen(false); // Close mobile menu when link is clicked
   };
 
+  const navLinks = [
+    { href: '/', label: 'Home', icon: Home },
+    { href: '/menu', label: 'Menu', icon: UtensilsCrossed },
+    { href: '/quote', label: 'Get Quote', icon: Calculator },
+    { href: '/BookUs', label: 'Book Us', icon: Calendar },
+    { href: '/faqs', label: 'FAQs', icon: HelpCircle },
+    { href: '/contact', label: 'Contact', icon: MessageCircle },
+    { href: '/blog', label: 'Blog', icon: BookOpen },
+  ];
+
   return (
-    <nav className={cn('navbar navbar-expand-lg', styles.navbar)}>
-      <div className={cn('container', styles.container)}>
-        <Link href="/" className={cn('navbar-brand', styles.brand)}>
+    <nav className={styles.navbar}>
+      <div className={styles.container}>
+        {/* Brand Logo */}
+        <Link href="/" className={styles.brand}>
           <Image
             src="/My Hibachi logo.png"
             alt="MyHibachi Private Hibachi Chef Bay Area Sacramento San Jose Catering Logo"
@@ -31,89 +53,36 @@ export default function Navbar() {
           <span className={styles.brandText}>My Hibachi Chef</span>
         </Link>
 
+        {/* Mobile Menu Toggle */}
         <button
-          className={cn('navbar-toggler d-lg-none', styles.toggler)}
+          className={styles.toggler}
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           aria-controls="navbarNav"
           aria-expanded={isOpen}
+          aria-label="Toggle navigation"
         >
-          <span className={cn('navbar-toggler-icon', styles.togglerIcon)}></span>
+          {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
 
-        <div className={cn('navbar-collapse', styles.navCollapse, isOpen && 'show')} id="navbarNav">
-          <ul className={cn('navbar-nav ms-auto', styles.navList)}>
-            {/* Changed to ms-auto for Bootstrap 5 */}
-            <li className="nav-item">
-              <Link
-                href="/"
-                className={cn('nav-link', styles.navLink, pathname === '/' && 'active')}
-                onClick={handleLinkClick}
-              >
-                <i className={cn('bi bi-house-fill', styles.navIcon)}></i>
-                <span className={styles.navText}>Home</span>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link
-                href="/menu"
-                className={cn('nav-link', styles.navLink, pathname === '/menu' && 'active')}
-                onClick={handleLinkClick}
-              >
-                <i className={cn('bi bi-card-list', styles.navIcon)}></i>
-                <span className={styles.navText}>Menu</span>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link
-                href="/quote"
-                className={cn('nav-link', styles.navLink, pathname === '/quote' && 'active')}
-                onClick={handleLinkClick}
-              >
-                <i className={cn('bi bi-calculator', styles.navIcon)}></i>
-                <span className={styles.navText}>Get Quote</span>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link
-                href="/BookUs"
-                className={cn('nav-link', styles.navLink, pathname === '/BookUs' && 'active')}
-                onClick={handleLinkClick}
-              >
-                <i className={cn('bi bi-calendar-check', styles.navIcon)}></i>
-                <span className={styles.navText}>Book Us</span>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link
-                href="/faqs"
-                className={cn('nav-link', styles.navLink, pathname === '/faqs' && 'active')}
-                onClick={handleLinkClick}
-              >
-                <i className={cn('bi bi-question-circle', styles.navIcon)}></i>
-                <span className={styles.navText}>FAQs</span>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link
-                href="/contact"
-                className={cn('nav-link', styles.navLink, pathname === '/contact' && 'active')}
-                onClick={handleLinkClick}
-              >
-                <i className={cn('bi bi-chat-dots-fill', styles.navIcon)}></i>
-                <span className={styles.navText}>Contact</span>
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link
-                href="/blog"
-                className={cn('nav-link', styles.navLink, pathname === '/blog' && 'active')}
-                onClick={handleLinkClick}
-              >
-                <i className={cn('bi bi-journal-text', styles.navIcon)}></i>
-                <span className={styles.navText}>Blog</span>
-              </Link>
-            </li>
+        {/* Navigation Links */}
+        <div className={cn(styles.navCollapse, isOpen && styles.show)} id="navbarNav">
+          <ul className={styles.navList}>
+            {navLinks.map((link) => {
+              const Icon = link.icon;
+              return (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className={cn(styles.navLink, pathname === link.href && styles.active)}
+                    onClick={handleLinkClick}
+                  >
+                    <Icon size={18} className={styles.navIcon} />
+                    <span className={styles.navText}>{link.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </div>

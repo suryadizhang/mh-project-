@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef,useState } from 'react';
 
-import { logger } from '@/lib/logger';
 import { submitQuoteLead } from '@/lib/leadService';
+import { logger } from '@/lib/logger';
+
 
 // Google Maps Autocomplete types
 declare global {
   interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     google: any;
     initAutocomplete?: () => void;
   }
@@ -66,10 +68,10 @@ export function QuoteCalculator() {
   const [quoteResult, setQuoteResult] = useState<QuoteResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [calculationError, setCalculationError] = useState('');
-  const [isCalculatingTravelFee, setIsCalculatingTravelFee] = useState(false);
 
   // Google Places Autocomplete refs
   const venueAddressInputRef = useRef<HTMLInputElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const autocompleteRef = useRef<any>(null);
 
   const handleInputChange = (field: keyof QuoteData, value: number | string) => {
@@ -121,6 +123,7 @@ export function QuoteCalculator() {
             let city = '';
             let zipCode = '';
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             place.address_components.forEach((component: any) => {
               if (component.types.includes('locality')) {
                 city = component.long_name;

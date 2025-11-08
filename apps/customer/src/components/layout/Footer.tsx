@@ -1,3 +1,15 @@
+import {
+  ChevronRight,
+  ExternalLink,
+  Facebook,
+  FileText,
+  Instagram,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Shield,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -27,7 +39,7 @@ export default function Footer() {
               rel="noopener noreferrer"
               className={styles.socialIcon}
             >
-              <i className="bi bi-instagram"></i>
+              <Instagram size={24} />
             </a>
             <a
               href="https://www.facebook.com/people/My-hibachi/61577483702847/"
@@ -35,7 +47,7 @@ export default function Footer() {
               rel="noopener noreferrer"
               className={styles.socialIcon}
             >
-              <i className="bi bi-facebook"></i>
+              <Facebook size={24} />
             </a>
             <a
               href="https://www.yelp.com/biz/my-hibachi-fremont"
@@ -43,7 +55,7 @@ export default function Footer() {
               rel="noopener noreferrer"
               className={styles.socialIcon}
             >
-              <i className="bi bi-yelp"></i>
+              <ExternalLink size={24} />
             </a>
           </div>
         </div>
@@ -53,27 +65,27 @@ export default function Footer() {
           <ul className={styles.links}>
             <li>
               <Link href="/">
-                <i className={`bi bi-chevron-right ${styles.linkIcon}`}></i> Home
+                <ChevronRight size={16} className={styles.linkIcon} /> Home
               </Link>
             </li>
             <li>
               <Link href="/menu">
-                <i className={`bi bi-chevron-right ${styles.linkIcon}`}></i> Menu
+                <ChevronRight size={16} className={styles.linkIcon} /> Menu
               </Link>
             </li>
             <li>
               <Link href="/BookUs">
-                <i className={`bi bi-chevron-right ${styles.linkIcon}`}></i> Book Us
+                <ChevronRight size={16} className={styles.linkIcon} /> Book Us
               </Link>
             </li>
             <li>
               <Link href="/quote">
-                <i className={`bi bi-chevron-right ${styles.linkIcon}`}></i> Get Quote
+                <ChevronRight size={16} className={styles.linkIcon} /> Get Quote
               </Link>
             </li>
             <li>
               <Link href="/contact">
-                <i className={`bi bi-chevron-right ${styles.linkIcon}`}></i> Contact
+                <ChevronRight size={16} className={styles.linkIcon} /> Contact
               </Link>
             </li>
           </ul>
@@ -84,12 +96,12 @@ export default function Footer() {
           <ul className={styles.links}>
             <li>
               <Link href="/privacy">
-                <i className={`bi bi-shield-check ${styles.linkIcon}`}></i> Privacy Policy
+                <Shield size={16} className={styles.linkIcon} /> Privacy Policy
               </Link>
             </li>
             <li>
               <Link href="/terms">
-                <i className={`bi bi-file-text ${styles.linkIcon}`}></i> Terms & Conditions
+                <FileText size={16} className={styles.linkIcon} /> Terms & Conditions
               </Link>
             </li>
           </ul>
@@ -99,25 +111,25 @@ export default function Footer() {
           <h3>Contact Us</h3>
           <ul className={styles.contactInfo}>
             <li>
-              <i className={`bi bi-geo-alt ${styles.contactIcon}`}></i>
+              <MapPin size={18} className={styles.contactIcon} />
               <span>Serving the Bay Area & Sacramento Region</span>
             </li>
             <li>
-              <i className={`bi bi-telephone ${styles.contactIcon}`}></i>
+              <Phone size={18} className={styles.contactIcon} />
               <a href="tel:+19167408768">(916) 740-8768</a>
             </li>
             <li>
-              <i className={`bi bi-envelope ${styles.contactIcon}`}></i>
+              <Mail size={18} className={styles.contactIcon} />
               <Link href="/contact#business-inquiries">Business Inquiries Form</Link>
             </li>
             <li>
-              <i className={`bi bi-messenger ${styles.contactIcon}`}></i>
+              <MessageCircle size={18} className={styles.contactIcon} />
               <a href="https://m.me/61577483702847" target="_blank" rel="noopener noreferrer">
                 Facebook Messenger
               </a>
             </li>
             <li>
-              <i className={`bi bi-instagram ${styles.contactIcon}`}></i>
+              <Instagram size={18} className={styles.contactIcon} />
               <a href="https://ig.me/m/my_hibachi_chef" target="_blank" rel="noopener noreferrer">
                 Instagram DM
               </a>

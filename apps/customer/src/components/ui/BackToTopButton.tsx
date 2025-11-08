@@ -1,5 +1,6 @@
 'use client';
 
+import { ArrowUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import styles from './BackToTopButton.module.css';
@@ -39,7 +40,7 @@ export default function BackToTopButton() {
           aria-label="Back to top"
           type="button"
         >
-          <i className="bi bi-arrow-up"></i>
+          <ArrowUp size={20} />
         </button>
       )}
     </>

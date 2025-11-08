@@ -1,5 +1,6 @@
 'use client';
 
+import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -53,7 +54,7 @@ export default function Breadcrumb({
                     {item.label}
                   </Link>
                   <span className={styles.separator} aria-hidden="true">
-                    <i className="bi bi-chevron-right"></i>
+                    <ChevronRight size={14} />
                   </span>
                 </>
               )}
