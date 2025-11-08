@@ -10,7 +10,7 @@ Monitors myhibachichef@gmail.com for incoming payment confirmations from:
 Automatically parses and updates payment/booking status in the database.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 import email
 from email.header import decode_header
@@ -81,7 +81,7 @@ class PaymentEmailParser:
                 "amount": PaymentEmailParser.clean_amount(amount_match.group(1)),
                 "transaction_id": tx_match.group(1) if tx_match else None,
                 "status": "confirmed",
-                "parsed_at": datetime.utcnow().isoformat(),
+                "parsed_at": datetime.now(timezone.utc).isoformat(),
             }
         except Exception as e:
             logger.exception(f"Error parsing Stripe email: {e}")
@@ -156,7 +156,7 @@ class PaymentEmailParser:
                     phone_match.group(1) if phone_match else None
                 ),  # Customer's phone from note
                 "status": "pending",  # Venmo requires manual confirmation
-                "parsed_at": datetime.utcnow().isoformat(),
+                "parsed_at": datetime.now(timezone.utc).isoformat(),
             }
 
             logger.info(
@@ -233,7 +233,7 @@ class PaymentEmailParser:
                     phone_match.group(1) if phone_match else None
                 ),  # Customer's phone from memo
                 "status": "pending",  # Zelle requires manual confirmation
-                "parsed_at": datetime.utcnow().isoformat(),
+                "parsed_at": datetime.now(timezone.utc).isoformat(),
             }
 
             logger.info(
@@ -269,7 +269,7 @@ class PaymentEmailParser:
                 "amount": PaymentEmailParser.clean_amount(amount_match.group(1)),
                 "payment_type": type_match.group(1) if type_match else "Unknown",
                 "status": "confirmed",
-                "parsed_at": datetime.utcnow().isoformat(),
+                "parsed_at": datetime.now(timezone.utc).isoformat(),
             }
         except Exception as e:
             logger.exception(f"Error parsing Bank of America email: {e}")
@@ -381,7 +381,7 @@ class PaymentEmailMonitor:
 
             # Build search criteria
             if since_date is None:
-                since_date = datetime.utcnow() - timedelta(days=7)
+                since_date = datetime.now(timezone.utc) - timedelta(days=7)
 
             date_str = since_date.strftime("%d-%b-%Y")
 

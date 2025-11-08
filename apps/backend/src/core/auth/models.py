@@ -3,7 +3,7 @@ OAuth 2.1 + OIDC + MFA Identity System with RBAC.
 Implements modern authentication with proper security controls.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from enum import Enum
 import hashlib
 from io import BytesIO
@@ -429,7 +429,11 @@ class AuthenticationService:
         for code in codes:
             code_hash = hashlib.sha256(code.encode()).hexdigest()
             hashed_codes.append(
-                {"hash": code_hash, "used": False, "created_at": datetime.utcnow().isoformat()}
+                {
+                    "hash": code_hash,
+                    "used": False,
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                }
             )
         return hashed_codes
 
@@ -443,14 +447,14 @@ class AuthenticationService:
             if code_data["hash"] == provided_hash and not code_data["used"]:
                 # Mark as used
                 hashed_codes[i]["used"] = True
-                hashed_codes[i]["used_at"] = datetime.utcnow().isoformat()
+                hashed_codes[i]["used_at"] = datetime.now(timezone.utc).isoformat()
                 return True, hashed_codes
 
         return False, hashed_codes
 
     def create_jwt_tokens(self, user: User, session_id: UUID) -> tuple[str, str]:
         """Create access and refresh JWT tokens."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
 
         # Access token (short-lived)
         access_jti = str(uuid4())

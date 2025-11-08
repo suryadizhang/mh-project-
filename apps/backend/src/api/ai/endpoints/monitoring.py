@@ -5,7 +5,7 @@ Real-time metrics, health checks, and system resource monitoring
 
 from collections import defaultdict, deque
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import time
 from typing import Any
 
@@ -88,7 +88,7 @@ class PerformanceMetrics:
     def __post_init__(self):
         """Set timestamp after initialization."""
         if self.last_updated is None:
-            self.last_updated = datetime.utcnow()
+            self.last_updated = datetime.now(timezone.utc)
 
 
 class PerformanceMonitor:
@@ -284,7 +284,7 @@ class PerformanceMonitor:
 
         return {
             "status": status,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "uptime_seconds": metrics.uptime_seconds,
             "uptime_human": str(timedelta(seconds=int(metrics.uptime_seconds))),
             "metrics": {

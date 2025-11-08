@@ -4,7 +4,7 @@ Learns from user interactions to improve responses over time
 """
 
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 from typing import Any
 
@@ -83,7 +83,7 @@ class SelfLearningAI:
                     "intent_detected": interaction_data.get("intent_detected"),
                     "user_feedback": interaction_data.get("user_feedback"),
                     "learning_enabled": True,
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 },
             )
 
@@ -128,7 +128,7 @@ class SelfLearningAI:
             # Update message with feedback
             current_metadata = message.metadata or {}
             current_metadata["user_feedback"] = feedback
-            current_metadata["feedback_timestamp"] = datetime.utcnow().isoformat()
+            current_metadata["feedback_timestamp"] = datetime.now(timezone.utc).isoformat()
             message.metadata = current_metadata
 
             await db.commit()
@@ -207,7 +207,7 @@ class SelfLearningAI:
             from api.ai.endpoints.models import Message, MessageRole
 
             # Get recent user messages
-            since_date = datetime.utcnow() - timedelta(days=days)
+            since_date = datetime.now(timezone.utc) - timedelta(days=days)
 
             query = select(Message).where(
                 and_(Message.role == MessageRole.USER.value, Message.created_at >= since_date)
@@ -319,7 +319,7 @@ class SelfLearningAI:
                             "confidence": msg.confidence,
                             "user_rating": user_feedback.get("rating"),
                             "source": "learned_from_interaction",
-                            "created_at": datetime.utcnow().isoformat(),
+                            "created_at": datetime.now(timezone.utc).isoformat(),
                         }
                     )
 
@@ -371,7 +371,7 @@ class SelfLearningAI:
                 changes = {
                     "enhancements_added": len(enhancements),
                     "top_topics": top_topics,
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
 
                 self.learning_stats["auto_improvements"] += 1
@@ -419,7 +419,7 @@ class SelfLearningAI:
                     ),
                 },
                 "learning_health": self._calculate_learning_health(),
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
 
         except Exception as e:

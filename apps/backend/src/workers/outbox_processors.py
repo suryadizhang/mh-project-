@@ -5,7 +5,7 @@ Handles SMS, email, and payment processing with retry logic.
 
 import asyncio
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import json
 import logging
 from typing import Any
@@ -94,7 +94,7 @@ class OutboxWorkerBase:
                 and_(
                     OutboxEntry.status == "pending",
                     OutboxEntry.attempts < self.config.max_retries,
-                    OutboxEntry.next_attempt_at <= datetime.utcnow(),
+                    OutboxEntry.next_attempt_at <= datetime.now(timezone.utc),
                 )
             )
             .order_by(OutboxEntry.created_at)
@@ -116,7 +116,7 @@ class OutboxWorkerBase:
         await db.execute(
             update(OutboxEntry)
             .where(OutboxEntry.id == event_id)
-            .values(completed_at=datetime.utcnow(), status="completed")
+            .values(completed_at=datetime.now(timezone.utc), status="completed")
         )
 
     async def _handle_event_error(self, event: OutboxEntry, error_message: str, db: AsyncSession):
@@ -127,7 +127,7 @@ class OutboxWorkerBase:
         delay_seconds = min(
             self.config.initial_delay_seconds * (2**retry_count), self.config.max_delay_seconds
         )
-        next_retry_at = datetime.utcnow() + timedelta(seconds=delay_seconds)
+        next_retry_at = datetime.now(timezone.utc) + timedelta(seconds=delay_seconds)
 
         if retry_count >= self.config.max_retries:
             # Mark as failed after max retries
@@ -137,7 +137,7 @@ class OutboxWorkerBase:
                 .values(
                     status="failed",
                     last_error=error_message,
-                    completed_at=datetime.utcnow(),
+                    completed_at=datetime.now(timezone.utc),
                     attempts=retry_count,
                 )
             )
@@ -235,7 +235,7 @@ class SMSWorker(OutboxWorkerBase):
         """Ensure we have a valid access token."""
         if not self._access_token or (
             self._token_expires_at
-            and datetime.utcnow() >= self._token_expires_at - timedelta(minutes=5)
+            and datetime.now(timezone.utc) >= self._token_expires_at - timedelta(minutes=5)
         ):
             await self._refresh_access_token()
 
@@ -270,7 +270,7 @@ class SMSWorker(OutboxWorkerBase):
                 token_data = await response.json()
                 self._access_token = token_data["access_token"]
                 expires_in = token_data.get("expires_in", 3600)
-                self._token_expires_at = datetime.utcnow() + timedelta(seconds=expires_in)
+                self._token_expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
 
 
 class EmailWorker(OutboxWorkerBase):

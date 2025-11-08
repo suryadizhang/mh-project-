@@ -4,7 +4,7 @@ Implements confidence-based model selection and escalation routing.
 Provides intelligent routing: retrieval → GPT-5 nano → GPT-4.1 mini → human escalation.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 import logging
 from typing import Any
@@ -518,8 +518,8 @@ class ModelLadderService:
                 "total_agents": total_agents,
                 "available_tiers": [tier.value for tier in ModelTier],
                 "test_selection": test_selection,
-                "last_check": datetime.utcnow(),
+                "last_check": datetime.now(timezone.utc),
             }
 
         except Exception as e:
-            return {"healthy": False, "error": str(e), "last_check": datetime.utcnow()}
+            return {"healthy": False, "error": str(e), "last_check": datetime.now(timezone.utc)}

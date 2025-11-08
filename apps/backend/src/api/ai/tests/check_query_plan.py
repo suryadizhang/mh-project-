@@ -5,7 +5,7 @@ Verifies if PostgreSQL is using the composite index
 """
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 import sys
 
@@ -23,7 +23,7 @@ async def check_query_plan():
 
     async with get_db_context() as db:
         # The actual duplicate check query
-        test_date = datetime.utcnow() + timedelta(days=7)
+        test_date = datetime.now(timezone.utc) + timedelta(days=7)
         date_start = test_date
         date_end = test_date + timedelta(days=2)
 

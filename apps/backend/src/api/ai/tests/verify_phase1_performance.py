@@ -13,7 +13,7 @@ import time
 backend_path = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(backend_path))
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 
 from api.ai.memory import get_memory_backend
 from api.ai.memory.memory_backend import ConversationChannel, MessageRole
@@ -36,7 +36,7 @@ async def quick_verify():
     # Create test data
     user_id = f"verify_{time.time()}"
     conversation_id = f"verify_{time.time()}"
-    event_date = datetime.utcnow() + timedelta(days=7)
+    event_date = datetime.now(timezone.utc) + timedelta(days=7)
 
     # Store message with emotion
     t0 = time.time()

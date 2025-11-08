@@ -250,7 +250,7 @@ async def public_health_check():
     return {
         "status": "healthy",
         "service": "public-lead-capture",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
 

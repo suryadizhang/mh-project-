@@ -3,7 +3,7 @@ Local LLM Service - Ollama Integration
 Manages local Llama-3 model for Shadow Learning
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from typing import Any
 
@@ -51,7 +51,7 @@ class LocalLLMService:
                     "ollama_url": self.base_url,
                     "models_available": model_names,
                     "llama3_installed": any("llama3" in name for name in model_names),
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
 
         except httpx.ConnectError:
@@ -111,7 +111,7 @@ class LocalLLMService:
         Returns:
             dict: Response with text, tokens, and timing info
         """
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
 
         try:
             # Build the full prompt with context
@@ -140,7 +140,7 @@ class LocalLLMService:
                 response.raise_for_status()
                 result = response.json()
 
-            end_time = datetime.utcnow()
+            end_time = datetime.now(timezone.utc)
             response_time_ms = int((end_time - start_time).total_seconds() * 1000)
 
             return {
@@ -172,7 +172,7 @@ class LocalLLMService:
             }
         except Exception as e:
             logger.exception(f"Failed to generate response: {e}")
-            end_time = datetime.utcnow()
+            end_time = datetime.now(timezone.utc)
             response_time_ms = int((end_time - start_time).total_seconds() * 1000)
             return {
                 "success": False,
@@ -212,7 +212,7 @@ class LocalLLMService:
 
         # Add metadata for shadow learning
         result["shadow_learning"] = True
-        result["timestamp"] = datetime.utcnow().isoformat()
+        result["timestamp"] = datetime.now(timezone.utc).isoformat()
 
         return result
 

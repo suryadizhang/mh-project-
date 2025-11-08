@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 import json
 import logging
@@ -171,7 +171,7 @@ class StripeService:
         if invoice_record:
             invoice_record.status = "paid"
             invoice_record.amount_paid = Decimal(str(invoice["amount_paid"] / 100))
-            invoice_record.paid_at = datetime.utcnow()
+            invoice_record.paid_at = datetime.now(timezone.utc)
             await self.db.commit()
 
         logger.info(f"Invoice payment succeeded: {invoice['id']}")
@@ -260,7 +260,7 @@ class StripeService:
         if existing:
             # Update existing record
             existing.status = payment_intent["status"]
-            existing.updated_at = datetime.utcnow()
+            existing.updated_at = datetime.now(timezone.utc)
         else:
             # Create new payment record
             payment = StripePayment(
@@ -291,7 +291,7 @@ class StripeService:
 
         if payment:
             payment.status = status
-            payment.updated_at = datetime.utcnow()
+            payment.updated_at = datetime.now(timezone.utc)
             await self.db.commit()
 
     async def _update_StripeCustomer_analytics(self, payment_intent: dict[str, Any]) -> None:
@@ -322,7 +322,7 @@ class StripeService:
             elif customer_record.total_spent >= 500:
                 customer_record.loyalty_tier = "silver"
 
-            customer_record.updated_at = datetime.utcnow()
+            customer_record.updated_at = datetime.now(timezone.utc)
             await self.db.commit()
 
     async def get_payment_analytics(
@@ -347,9 +347,9 @@ class StripeService:
             PaymentAnalytics object with aggregated data
         """
         if not start_date:
-            start_date = datetime.utcnow() - timedelta(days=30)
+            start_date = datetime.now(timezone.utc) - timedelta(days=30)
         if not end_date:
-            end_date = datetime.utcnow()
+            end_date = datetime.now(timezone.utc)
 
         # Use optimized CTE query (Phase 3 optimization)
         # Single query replaces 2+ separate queries

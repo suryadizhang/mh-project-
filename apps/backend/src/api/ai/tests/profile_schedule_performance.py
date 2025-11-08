@@ -4,7 +4,7 @@ Measures each operation in schedule_follow_up to identify bottlenecks
 """
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 import sys
 import time
@@ -37,7 +37,7 @@ async def profile_schedule_followup():
     # Create test data
     user_id = f"profile_user_{time.time()}"
     conversation_id = f"profile_conv_{time.time()}"
-    event_date = datetime.utcnow() + timedelta(days=7)
+    event_date = datetime.now(timezone.utc) + timedelta(days=7)
 
     # Step 1: Store message with emotion
     t0 = time.time()

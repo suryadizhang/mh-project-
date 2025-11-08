@@ -4,7 +4,7 @@ Implements proper agent isolation to prevent prompt bleed while allowing general
 Manages context namespacing, conversation separation, and agent-specific response filtering.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from typing import Any
 
@@ -17,7 +17,7 @@ class ConversationContext:
     def __init__(self, conversation_id: str, agent: str):
         self.conversation_id = conversation_id
         self.agent = agent
-        self.created_at = datetime.utcnow()
+        self.created_at = datetime.now(timezone.utc)
         self.messages = []
         self.agent_capabilities = set()
         self.escalation_history = []
@@ -32,7 +32,7 @@ class ConversationContext:
             "message_id": message_id,
             "role": role,
             "content": content,
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(timezone.utc),
             "agent": self.agent,
             "metadata": metadata or {},
         }
@@ -569,8 +569,8 @@ class AgentNamespaceService:
                 "isolation_enabled": not self.namespace_rules["conversation_isolation"][
                     "cross_agent_context"
                 ],
-                "last_check": datetime.utcnow(),
+                "last_check": datetime.now(timezone.utc),
             }
 
         except Exception as e:
-            return {"healthy": False, "error": str(e), "last_check": datetime.utcnow()}
+            return {"healthy": False, "error": str(e), "last_check": datetime.now(timezone.utc)}

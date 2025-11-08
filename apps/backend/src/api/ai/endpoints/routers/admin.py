@@ -3,7 +3,7 @@ Admin AI API endpoints for administration and management.
 Provides admin-specific endpoints for AI system management, analytics, and configuration.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 from uuid import uuid4
 
@@ -51,7 +51,7 @@ async def test_admin_chat(
     Provides a testing interface for administrators to test AI responses
     with debug information and performance metrics.
     """
-    start_time = datetime.utcnow()
+    start_time = datetime.now(timezone.utc)
 
     try:
         # Get chat service instance
@@ -67,14 +67,14 @@ async def test_admin_chat(
             "channel": request.channel,
             "user_id": "admin_test",
             "context": {**request.context, "admin_test": True, "test_mode": request.test_mode},
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
         # Process the chat through AI service
         response_data = await chat_service.ingest_chat(chat_data)
 
         # Calculate processing time
-        processing_time = (datetime.utcnow() - start_time).total_seconds() * 1000
+        processing_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
 
         # Prepare debug information
         debug_info = (
@@ -93,7 +93,7 @@ async def test_admin_chat(
             message_id=str(uuid4()),
             conversation_id=conversation_id,
             content=response_data.get("ai_response", "Test response unavailable"),
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             debug_info=debug_info,
             processing_time_ms=processing_time,
         )
@@ -118,9 +118,9 @@ async def get_chat_analytics(
     """
     try:
         # Calculate date range
-        end_date = datetime.utcnow()
+        end_date = datetime.now(timezone.utc)
         end_date - timedelta(days=days)
-        today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
 
         # Total conversations and messages
         total_conversations = db.query(func.count(Conversation.id)).scalar() or 0

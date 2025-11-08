@@ -13,7 +13,7 @@ Author: MyHibachi Development Team
 Created: October 31, 2025
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 from typing import Any
 
@@ -44,7 +44,7 @@ async def nightly_training_collector(db: AsyncSession):
         # feedback_processor = get_feedback_processor()
 
         # Fetch conversations from past 24 hours
-        datetime.utcnow() - timedelta(days=1)
+        datetime.now(timezone.utc) - timedelta(days=1)
 
         # TODO: Query conversations with positive feedback
         # result = await db.execute(
@@ -90,7 +90,7 @@ async def nightly_training_collector(db: AsyncSession):
         #             intent=conv.metadata.get("intent"),
         #             metadata={
         #                 "channel": conv.channel,
-        #                 "collected_at": datetime.utcnow().isoformat(),
+        #                 "collected_at": datetime.now(timezone.utc).isoformat(),
         #                 "feedback": conv.metadata.get("feedback")
         #             },
         #             status="pending_review"
@@ -123,12 +123,16 @@ async def nightly_training_collector(db: AsyncSession):
             "conversations_collected": collected_count,
             "total_pending": pending_count,
             "retraining_needed": retraining_needed,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
     except Exception as e:
         logger.exception(f"❌ Error during training collection: {e}")
-        return {"success": False, "error": str(e), "timestamp": datetime.utcnow().isoformat()}
+        return {
+            "success": False,
+            "error": str(e),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
 
 
 async def get_training_collection_stats(db: AsyncSession) -> dict[str, Any]:

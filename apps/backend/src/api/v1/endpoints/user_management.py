@@ -3,7 +3,7 @@ Admin User Management Endpoints
 Handles user approval, rejection, and management for super admins
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 
 from api.v1.schemas.user import UserListResponse, UserResponse
@@ -154,7 +154,7 @@ async def approve_user(
 
         # Update user status
         user.status = UserStatus.ACTIVE
-        user.updated_at = datetime.utcnow()
+        user.updated_at = datetime.now(timezone.utc)
 
         await db.commit()
         await db.refresh(user)
@@ -213,7 +213,7 @@ async def reject_user(
 
         # Update user status
         user.status = UserStatus.DEACTIVATED
-        user.updated_at = datetime.utcnow()
+        user.updated_at = datetime.now(timezone.utc)
 
         await db.commit()
         await db.refresh(user)
@@ -269,7 +269,7 @@ async def suspend_user(
 
         # Update user status
         user.status = UserStatus.SUSPENDED
-        user.updated_at = datetime.utcnow()
+        user.updated_at = datetime.now(timezone.utc)
 
         await db.commit()
         await db.refresh(user)

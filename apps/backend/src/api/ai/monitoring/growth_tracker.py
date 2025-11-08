@@ -5,7 +5,7 @@ Monitors customer growth and triggers alerts when milestones are reached.
 This enables proactive scaling decisions (e.g., migrating to Neo4j).
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 import os
 
@@ -41,7 +41,7 @@ class GrowthTracker:
         customer_count = result.scalar() or 0
 
         # Get growth rate (last 30 days)
-        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+        thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
         result = await db.execute(
             select(func.count(Customer.id)).where(Customer.created_at >= thirty_days_ago)
         )
@@ -128,7 +128,7 @@ Migrate to Neo4j graph database (6-hour upgrade) for 10x query speedup.
         total_customers = result.scalar() or 0
 
         # Growth over different periods
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         periods = {
             "7d": now - timedelta(days=7),
             "30d": now - timedelta(days=30),

@@ -1,38 +1,42 @@
-'use client'
+'use client';
 
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation';
+
+import { cn } from '@/lib/utils';
+
+import styles from './FreeQuoteButton.module.css';
 
 interface FreeQuoteButtonProps {
-  variant?: 'primary' | 'secondary' | 'floating'
-  text?: string
-  className?: string
+  variant?: 'primary' | 'secondary' | 'floating';
+  text?: string;
+  className?: string;
 }
 
 export function FreeQuoteButton({
   variant = 'primary',
   text = 'Get Free Quote',
-  className = ''
+  className = '',
 }: FreeQuoteButtonProps) {
-  const router = useRouter()
+  const router = useRouter();
 
-  const buttonClasses = {
-    primary: 'free-quote-btn free-quote-primary',
-    secondary: 'free-quote-btn free-quote-secondary',
-    floating: 'free-quote-btn free-quote-floating'
-  }
+  const variantStyles = {
+    primary: styles.primary,
+    secondary: styles.secondary,
+    floating: styles.floating,
+  };
 
   const handleClick = () => {
-    router.push('/quote')
-  }
+    router.push('/quote');
+  };
 
   return (
     <button
       onClick={handleClick}
-      className={`${buttonClasses[variant]} ${className}`}
+      className={cn(styles.btn, variantStyles[variant], className)}
       aria-label="Go to quote calculator page"
     >
-      <span className="quote-icon">💰</span>
+      <span className={styles.icon}>💰</span>
       {text}
     </button>
-  )
+  );
 }

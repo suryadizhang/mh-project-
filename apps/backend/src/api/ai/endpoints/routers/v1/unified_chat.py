@@ -4,7 +4,7 @@ Single endpoint with X-Agent header routing for all AI interactions.
 Implements proper agent scoping, tool permissions, and prompt isolation.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from typing import Any
 from uuid import uuid4
@@ -205,7 +205,7 @@ async def unified_chat(
     - Multi-tenant data isolation enforced through station context
     - Permissions validated against station-specific RBAC rules
     """
-    start_time = datetime.utcnow()
+    start_time = datetime.now(timezone.utc)
     message_id = str(uuid4())
     conversation_id = request.conversation_id or str(uuid4())
 
@@ -262,7 +262,7 @@ async def unified_chat(
             conversation_id=conversation_id,
             agent=agent,
             content=response_data["content"],
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             confidence=response_data["confidence"],
             model_used=response_data["model_used"],
             intent=response_data.get("intent"),
@@ -277,7 +277,7 @@ async def unified_chat(
         )
 
         # Log response
-        processing_time = (datetime.utcnow() - start_time).total_seconds()
+        processing_time = (datetime.now(timezone.utc) - start_time).total_seconds()
         await monitoring.log_response(
             message_id=message_id, agent=agent, response=response, processing_time=processing_time
         )
@@ -387,7 +387,7 @@ async def list_agents():
         gateway = StationAwareAgentGatewayService()
         agents = await gateway.list_agents()
 
-        return {"agents": agents, "total": len(agents), "timestamp": datetime.utcnow()}
+        return {"agents": agents, "total": len(agents), "timestamp": datetime.now(timezone.utc)}
 
     except Exception as e:
         logger.exception(f"Error listing agents: {e}")
@@ -440,7 +440,7 @@ async def unified_api_health():
 
         health_status = {
             "status": "healthy",
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(timezone.utc),
             "components": {
                 "agent_gateway": await gateway.health_check(),
                 "prompt_registry": await prompt_registry.health_check(),
@@ -458,7 +458,7 @@ async def unified_api_health():
 
     except Exception as e:
         logger.exception(f"Health check error: {e}")
-        return {"status": "unhealthy", "timestamp": datetime.utcnow(), "error": str(e)}
+        return {"status": "unhealthy", "timestamp": datetime.now(timezone.utc), "error": str(e)}
 
 
 # Export router

@@ -153,7 +153,7 @@ class BookingRepository(BaseRepository[Booking]):
         Returns:
             List of pending bookings with eager loading, limited for performance
         """
-        cutoff_time = datetime.utcnow() - timedelta(hours=hours_old)
+        cutoff_time = datetime.now(timezone.utc) - timedelta(hours=hours_old)
 
         return (
             self.session.query(self.model)
@@ -180,7 +180,7 @@ class BookingRepository(BaseRepository[Booking]):
         Returns:
             List of upcoming bookings with eager loading, limited for performance
         """
-        start_date = datetime.utcnow()
+        start_date = datetime.now(timezone.utc)
         end_date = start_date + timedelta(days=days_ahead)
 
         query = (
@@ -294,7 +294,7 @@ class BookingRepository(BaseRepository[Booking]):
     ) -> Booking:
         """Create a new booking with validation"""
         # Validate booking time (must be in future)
-        if booking_datetime <= datetime.utcnow():
+        if booking_datetime <= datetime.now(timezone.utc):
             raise_business_error(
                 "Booking time must be in the future",
                 ErrorCode.BOOKING_NOT_AVAILABLE,
@@ -332,8 +332,8 @@ class BookingRepository(BaseRepository[Booking]):
             "special_requests": special_requests,
             "contact_phone": contact_phone,
             "contact_email": contact_email,
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow(),
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
         }
 
         return self.create(booking_data)
@@ -367,8 +367,8 @@ class BookingRepository(BaseRepository[Booking]):
 
         update_data = {
             "status": BookingStatus.CONFIRMED,
-            "confirmed_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow(),
+            "confirmed_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
         }
 
         return self.update(booking.id, update_data)
@@ -396,7 +396,7 @@ class BookingRepository(BaseRepository[Booking]):
             )
 
         # Check cancellation policy (e.g., cannot cancel within 2 hours)
-        time_until_booking = booking.booking_datetime - datetime.utcnow()
+        time_until_booking = booking.booking_datetime - datetime.now(timezone.utc)
         if time_until_booking < timedelta(hours=2):
             raise_business_error(
                 "Booking cannot be cancelled within 2 hours of the scheduled time",
@@ -410,9 +410,9 @@ class BookingRepository(BaseRepository[Booking]):
 
         update_data = {
             "status": BookingStatus.CANCELLED,
-            "cancelled_at": datetime.utcnow(),
+            "cancelled_at": datetime.now(timezone.utc),
             "cancellation_reason": cancellation_reason,
-            "updated_at": datetime.utcnow(),
+            "updated_at": datetime.now(timezone.utc),
         }
 
         return self.update(booking.id, update_data)
@@ -432,8 +432,8 @@ class BookingRepository(BaseRepository[Booking]):
 
         update_data = {
             "status": BookingStatus.SEATED,
-            "seated_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow(),
+            "seated_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
         }
 
         return self.update(booking.id, update_data)
@@ -453,8 +453,8 @@ class BookingRepository(BaseRepository[Booking]):
 
         update_data = {
             "status": BookingStatus.COMPLETED,
-            "completed_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow(),
+            "completed_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
         }
 
         return self.update(booking.id, update_data)

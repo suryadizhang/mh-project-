@@ -26,7 +26,7 @@ Usage:
     )
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from typing import Any
 from uuid import UUID
@@ -126,7 +126,7 @@ class AuditLogger:
             metadata = {}
 
         # Add timestamp to metadata
-        metadata["logged_at"] = datetime.utcnow().isoformat()
+        metadata["logged_at"] = datetime.now(timezone.utc).isoformat()
 
         # Insert audit log
         query = text(

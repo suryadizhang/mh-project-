@@ -3,7 +3,7 @@ Role-Based AI Service for MyHibachi
 Implements scope separation between customer and admin AI functionality
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 import logging
 from typing import Any
@@ -268,7 +268,7 @@ You cannot access financial information or system configuration.
     def log_ai_interaction(self, role: UserRole, request: dict[str, Any], response: str):
         """Log AI interactions for security auditing"""
         log_data = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "role": role.value,
             "request_message": request.get("message", "")[:100],  # Truncate for privacy
             "response_length": len(response),

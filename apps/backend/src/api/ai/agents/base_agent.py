@@ -10,7 +10,7 @@ Created: 2025-10-31 (Phase 1A)
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from typing import Any
 
@@ -181,7 +181,7 @@ class BaseAgent(ABC):
         context = context or {}
         conversation_history = conversation_history or []
 
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
 
         try:
             # Build messages
@@ -229,7 +229,7 @@ class BaseAgent(ABC):
                     "model": response["model"],
                     "latency_ms": response.get("latency_ms", 0),
                     "processing_time_ms": int(
-                        (datetime.utcnow() - start_time).total_seconds() * 1000
+                        (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
                     ),
                 },
             }

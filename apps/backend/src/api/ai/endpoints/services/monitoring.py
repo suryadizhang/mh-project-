@@ -4,7 +4,7 @@ Provides comprehensive observability for agent-aware AI system.
 Handles logging, metrics, PII masking, audit trails, and performance monitoring.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 import re
 from typing import Any
@@ -76,7 +76,7 @@ class MonitoringService:
 
             # Create audit log entry
             log_entry = {
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "event_type": "request",
                 "message_id": message_id,
                 "agent": agent,
@@ -127,7 +127,7 @@ class MonitoringService:
 
             # Create audit log entry
             log_entry = {
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "event_type": "response",
                 "message_id": message_id,
                 "agent": agent,
@@ -174,7 +174,7 @@ class MonitoringService:
         try:
             # Create audit log entry
             log_entry = {
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "event_type": "error",
                 "message_id": message_id,
                 "agent": agent,
@@ -257,7 +257,7 @@ class MonitoringService:
         self.metrics["requests"]["by_agent"][agent] += 1
 
         # By hour
-        current_hour = datetime.utcnow().strftime("%Y-%m-%d %H:00")
+        current_hour = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:00")
         if current_hour not in self.metrics["requests"]["by_hour"]:
             self.metrics["requests"]["by_hour"][current_hour] = 0
         self.metrics["requests"]["by_hour"][current_hour] += 1
@@ -320,11 +320,11 @@ class MonitoringService:
             cutoff_time = None
             if time_range:
                 if time_range == "1h":
-                    cutoff_time = datetime.utcnow() - timedelta(hours=1)
+                    cutoff_time = datetime.now(timezone.utc) - timedelta(hours=1)
                 elif time_range == "24h":
-                    cutoff_time = datetime.utcnow() - timedelta(hours=24)
+                    cutoff_time = datetime.now(timezone.utc) - timedelta(hours=24)
                 elif time_range == "7d":
-                    cutoff_time = datetime.utcnow() - timedelta(days=7)
+                    cutoff_time = datetime.now(timezone.utc) - timedelta(days=7)
 
             # Filter audit log if time range specified
             filtered_logs = self.audit_log
@@ -357,12 +357,12 @@ class MonitoringService:
                 "by_model": filtered_metrics.get("by_model", {}),
                 "system_status": system_status,
                 "time_range": time_range or "all",
-                "generated_at": datetime.utcnow().isoformat(),
+                "generated_at": datetime.now(timezone.utc).isoformat(),
             }
 
         except Exception as e:
             logger.exception(f"Error generating metrics summary: {e}")
-            return {"error": str(e), "generated_at": datetime.utcnow().isoformat()}
+            return {"error": str(e), "generated_at": datetime.now(timezone.utc).isoformat()}
 
     def _calculate_filtered_metrics(self, logs: list[dict[str, Any]]) -> dict[str, Any]:
         """Calculate metrics from filtered logs."""
@@ -513,8 +513,8 @@ class MonitoringService:
                 "audit_log_size": len(self.audit_log),
                 "total_requests": self.metrics["requests"]["total"],
                 "total_errors": self.metrics["requests"]["errors"],
-                "last_check": datetime.utcnow(),
+                "last_check": datetime.now(timezone.utc),
             }
 
         except Exception as e:
-            return {"healthy": False, "error": str(e), "last_check": datetime.utcnow()}
+            return {"healthy": False, "error": str(e), "last_check": datetime.now(timezone.utc)}

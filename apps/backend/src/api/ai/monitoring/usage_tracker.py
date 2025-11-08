@@ -8,7 +8,7 @@ Tracks token usage across all OpenAI API calls to enable:
 4. Budget forecasting
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 
 from api.ai.endpoints.models import AIUsage
@@ -67,7 +67,7 @@ class UsageTracker:
             customer_id=customer_id,
             channel=channel,
             agent_type=agent_type,
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc),
         )
 
         db.add(usage)
@@ -95,7 +95,7 @@ class UsageTracker:
             Dict with usage stats (total_cost, total_tokens, breakdown by model)
         """
         if date is None:
-            date = datetime.utcnow()
+            date = datetime.now(timezone.utc)
 
         start_of_day = date.replace(hour=0, minute=0, second=0, microsecond=0)
         end_of_day = start_of_day + timedelta(days=1)
@@ -163,7 +163,7 @@ class UsageTracker:
         Returns:
             Dict with monthly usage stats
         """
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         if year is None:
             year = now.year
         if month is None:
@@ -253,7 +253,7 @@ class UsageTracker:
             Dict with usage by agent type
         """
         if end_date is None:
-            end_date = datetime.utcnow()
+            end_date = datetime.now(timezone.utc)
         if start_date is None:
             start_date = end_date - timedelta(days=30)
 

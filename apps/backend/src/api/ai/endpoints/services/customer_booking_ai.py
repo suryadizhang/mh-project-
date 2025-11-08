@@ -3,7 +3,7 @@ Customer Booking AI Functions
 Handles all customer booking-related AI interactions with proper scope restrictions
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 import time
 from typing import Any
@@ -218,7 +218,7 @@ Keep responses concise but friendly. Use emojis sparingly."""
                         # Note: Actual recording happens in the router after full context
                         response_data["learning_metadata"] = {
                             "user_message": message,
-                            "timestamp": datetime.utcnow().isoformat(),
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
                             "conversation_id": context.get("conversation_id"),
                         }
 

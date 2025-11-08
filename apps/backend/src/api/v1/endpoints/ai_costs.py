@@ -2,9 +2,10 @@
 AI Cost Monitoring API Endpoints
 Provides cost analysis, trends, and budget management for OpenAI API usage
 """
+
 # ruff: noqa: B008 - FastAPI Depends() in function defaults is standard pattern
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from typing import Any
 
 from api.ai.endpoints.models import AIUsage
@@ -23,9 +24,7 @@ HOURLY_CRITICAL_THRESHOLD = 2.00
 
 
 @router.get("/summary")
-async def get_cost_summary(
-    db: AsyncSession = Depends(get_db)
-) -> dict[str, Any]:
+async def get_cost_summary(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     """
     Get comprehensive cost summary including:
     - Current month spending vs threshold
@@ -35,10 +34,8 @@ async def get_cost_summary(
     """
 
     # Get current month dates
-    now = datetime.utcnow()
-    month_start = now.replace(
-        day=1, hour=0, minute=0, second=0, microsecond=0
-    )
+    now = datetime.now(timezone.utc)
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     next_month = month_start.replace(month=month_start.month % 12 + 1, day=1)
     days_in_month = (next_month - timedelta(days=1)).day
     days_elapsed = (now - month_start).days + 1
@@ -48,10 +45,8 @@ async def get_cost_summary(
     month_query = select(
         func.sum(AIUsage.cost_usd).label("total_cost"),
         func.count(AIUsage.id).label("total_calls"),
-        func.sum(AIUsage.total_tokens).label("total_tokens")
-    ).where(
-        AIUsage.created_at >= month_start
-    )
+        func.sum(AIUsage.total_tokens).label("total_tokens"),
+    ).where(AIUsage.created_at >= month_start)
 
     month_result = await db.execute(month_query)
     month_data = month_result.first()
@@ -69,26 +64,25 @@ async def get_cost_summary(
     today_query = select(
         func.sum(AIUsage.cost_usd).label("total_cost"),
         func.count(AIUsage.id).label("total_calls"),
-        func.sum(AIUsage.total_tokens).label("total_tokens")
-    ).where(
-        AIUsage.created_at >= today_start
-    )
-
+        func.sum(AIUsage.total_tokens).label("total_tokens"),
+    ).where(AIUsage.created_at >= today_start)
 
     today_result = await db.execute(today_query)
     today_data = today_result.first()
 
     # Model breakdown
-    breakdown_query = select(
-        AIUsage.model_used,
-        func.sum(AIUsage.input_tokens).label("input_tokens"),
-        func.sum(AIUsage.output_tokens).label("output_tokens"),
-        func.sum(AIUsage.total_tokens).label("total_tokens"),
-        func.sum(AIUsage.cost_usd).label("cost_usd"),
-        func.count(AIUsage.id).label("call_count")
-    ).where(
-        AIUsage.created_at >= month_start
-    ).group_by(AIUsage.model_used)
+    breakdown_query = (
+        select(
+            AIUsage.model_used,
+            func.sum(AIUsage.input_tokens).label("input_tokens"),
+            func.sum(AIUsage.output_tokens).label("output_tokens"),
+            func.sum(AIUsage.total_tokens).label("total_tokens"),
+            func.sum(AIUsage.cost_usd).label("cost_usd"),
+            func.count(AIUsage.id).label("call_count"),
+        )
+        .where(AIUsage.created_at >= month_start)
+        .group_by(AIUsage.model_used)
+    )
 
     breakdown_result = await db.execute(breakdown_query)
     breakdown_data = breakdown_result.all()
@@ -100,7 +94,7 @@ async def get_cost_summary(
             "output_tokens": int(row.output_tokens or 0),
             "total_tokens": int(row.total_tokens or 0),
             "cost_usd": float(row.cost_usd or 0),
-            "call_count": int(row.call_count or 0)
+            "call_count": int(row.call_count or 0),
         }
 
     # Llama3 upgrade recommendation
@@ -111,9 +105,7 @@ async def get_cost_summary(
 
     if current_month_spend > 50:
         gpt4_cost = sum(
-            data["cost_usd"]
-            for model, data in breakdown_dict.items()
-            if "gpt-4" in model.lower()
+            data["cost_usd"] for model, data in breakdown_dict.items() if "gpt-4" in model.lower()
         )
         if gpt4_cost > current_month_spend * 0.5:  # >50% is GPT-4
             recommend_llama3 = True
@@ -128,53 +120,49 @@ async def get_cost_summary(
             "spend": current_month_spend,
             "projected": projected_spend,
             "threshold": MONTHLY_BUDGET_USD,
-            "threshold_percent": (
-                (current_month_spend / MONTHLY_BUDGET_USD) * 100
-            ),
+            "threshold_percent": ((current_month_spend / MONTHLY_BUDGET_USD) * 100),
             "days_elapsed": days_elapsed,
             "days_remaining": days_remaining,
-            "daily_average": daily_average
+            "daily_average": daily_average,
         },
         "today": {
             "spend": float(today_data.total_cost or 0),
             "calls": int(today_data.total_calls or 0),
-            "tokens": int(today_data.total_tokens or 0)
+            "tokens": int(today_data.total_tokens or 0),
         },
         "breakdown": breakdown_dict,
         "recommendations": {
             "llama3_upgrade": {
                 "recommended": recommend_llama3,
                 "potential_savings": potential_savings,
-                "reason": reason
+                "reason": reason,
             }
-        }
+        },
     }
 
 
 @router.get("/trend")
 async def get_cost_trend(
-    days: int = Query(default=30, ge=1, le=90),
-    db: AsyncSession = Depends(get_db)
+    days: int = Query(default=30, ge=1, le=90), db: AsyncSession = Depends(get_db)
 ) -> dict[str, Any]:
     """
     Get daily cost trend for the specified number of days
     """
 
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     start_date = now - timedelta(days=days)
 
     # Query daily aggregates
-    daily_query = select(
-        func.date(AIUsage.created_at).label("date"),
-        func.sum(AIUsage.cost_usd).label("total_cost"),
-        func.count(AIUsage.id).label("total_calls"),
-        func.sum(AIUsage.total_tokens).label("total_tokens")
-    ).where(
-        AIUsage.created_at >= start_date
-    ).group_by(
-        func.date(AIUsage.created_at)
-    ).order_by(
-        func.date(AIUsage.created_at)
+    daily_query = (
+        select(
+            func.date(AIUsage.created_at).label("date"),
+            func.sum(AIUsage.cost_usd).label("total_cost"),
+            func.count(AIUsage.id).label("total_calls"),
+            func.sum(AIUsage.total_tokens).label("total_tokens"),
+        )
+        .where(AIUsage.created_at >= start_date)
+        .group_by(func.date(AIUsage.created_at))
+        .order_by(func.date(AIUsage.created_at))
     )
 
     result = await db.execute(daily_query)
@@ -201,17 +189,16 @@ async def get_cost_trend(
         "dates": dates,
         "costs": costs,
         "calls": calls,
-        "average_cost_per_call": avg_cost_per_call
+        "average_cost_per_call": avg_cost_per_call,
     }
 
 
 @router.get("/hourly")
 async def get_hourly_costs(
     date: str | None = Query(
-        default=None,
-        description="Date in YYYY-MM-DD format (defaults to today)"
+        default=None, description="Date in YYYY-MM-DD format (defaults to today)"
     ),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> list[dict[str, Any]]:
     """
     Get hourly cost breakdown for a specific date
@@ -222,30 +209,23 @@ async def get_hourly_costs(
             target_date = datetime.strptime(date, "%Y-%m-%d")
         except ValueError:
             raise HTTPException(
-                status_code=400,
-                detail="Invalid date format. Use YYYY-MM-DD"
+                status_code=400, detail="Invalid date format. Use YYYY-MM-DD"
             ) from None
     else:
-        target_date = datetime.utcnow().replace(
-            hour=0, minute=0, second=0, microsecond=0
-        )
+        target_date = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
 
     next_day = target_date + timedelta(days=1)
 
     # Query hourly aggregates
-    hourly_query = select(
-        func.extract('hour', AIUsage.created_at).label("hour"),
-        func.sum(AIUsage.cost_usd).label("total_cost"),
-        func.count(AIUsage.id).label("total_calls")
-    ).where(
-        and_(
-            AIUsage.created_at >= target_date,
-            AIUsage.created_at < next_day
+    hourly_query = (
+        select(
+            func.extract("hour", AIUsage.created_at).label("hour"),
+            func.sum(AIUsage.cost_usd).label("total_cost"),
+            func.count(AIUsage.id).label("total_calls"),
         )
-    ).group_by(
-        func.extract('hour', AIUsage.created_at)
-    ).order_by(
-        func.extract('hour', AIUsage.created_at)
+        .where(and_(AIUsage.created_at >= target_date, AIUsage.created_at < next_day))
+        .group_by(func.extract("hour", AIUsage.created_at))
+        .order_by(func.extract("hour", AIUsage.created_at))
     )
 
     result = await db.execute(hourly_query)
@@ -253,33 +233,31 @@ async def get_hourly_costs(
 
     hourly_breakdown = []
     for row in hourly_data:
-        hourly_breakdown.append({
-            "hour": f"{int(row.hour):02d}:00",
-            "cost": float(row.total_cost or 0),
-            "calls": int(row.total_calls or 0)
-        })
+        hourly_breakdown.append(
+            {
+                "hour": f"{int(row.hour):02d}:00",
+                "cost": float(row.total_cost or 0),
+                "calls": int(row.total_calls or 0),
+            }
+        )
 
     return hourly_breakdown
 
 
 @router.get("/alerts")
-async def check_cost_alerts(
-    db: AsyncSession = Depends(get_db)
-) -> dict[str, Any]:
+async def check_cost_alerts(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     """
     Check if any cost thresholds have been exceeded
     Returns alerts that should trigger notifications
     """
 
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     alerts = []
 
     # Check hourly costs
     hour_ago = now - timedelta(hours=1)
 
-    hourly_query = select(
-        func.sum(AIUsage.cost_usd).label("total_cost")
-    ).where(
+    hourly_query = select(func.sum(AIUsage.cost_usd).label("total_cost")).where(
         AIUsage.created_at >= hour_ago
     )
 
@@ -291,20 +269,20 @@ async def check_cost_alerts(
             f"Hourly cost of ${hourly_cost:.2f} exceeds "
             f"critical threshold of ${HOURLY_CRITICAL_THRESHOLD}"
         )
-        alerts.append({
-            "severity": "critical",
-            "type": "hourly_threshold",
-            "message": msg,
-            "cost": hourly_cost,
-            "threshold": HOURLY_CRITICAL_THRESHOLD
-        })
+        alerts.append(
+            {
+                "severity": "critical",
+                "type": "hourly_threshold",
+                "message": msg,
+                "cost": hourly_cost,
+                "threshold": HOURLY_CRITICAL_THRESHOLD,
+            }
+        )
 
     # Check daily costs
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
-    daily_query = select(
-        func.sum(AIUsage.cost_usd).label("total_cost")
-    ).where(
+    daily_query = select(func.sum(AIUsage.cost_usd).label("total_cost")).where(
         AIUsage.created_at >= today_start
     )
 
@@ -316,20 +294,20 @@ async def check_cost_alerts(
             f"Daily cost of ${daily_cost:.2f} exceeds "
             f"warning threshold of ${DAILY_WARNING_THRESHOLD}"
         )
-        alerts.append({
-            "severity": "warning",
-            "type": "daily_threshold",
-            "message": msg,
-            "cost": daily_cost,
-            "threshold": DAILY_WARNING_THRESHOLD
-        })
+        alerts.append(
+            {
+                "severity": "warning",
+                "type": "daily_threshold",
+                "message": msg,
+                "cost": daily_cost,
+                "threshold": DAILY_WARNING_THRESHOLD,
+            }
+        )
 
     # Check monthly budget
     month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
-    monthly_query = select(
-        func.sum(AIUsage.cost_usd).label("total_cost")
-    ).where(
+    monthly_query = select(func.sum(AIUsage.cost_usd).label("total_cost")).where(
         AIUsage.created_at >= month_start
     )
 
@@ -337,42 +315,42 @@ async def check_cost_alerts(
     monthly_cost = float(monthly_result.scalar() or 0)
 
     if monthly_cost > MONTHLY_BUDGET_USD:
-        msg = (
-            f"Monthly cost of ${monthly_cost:.2f} exceeds "
-            f"budget of ${MONTHLY_BUDGET_USD}"
+        msg = f"Monthly cost of ${monthly_cost:.2f} exceeds " f"budget of ${MONTHLY_BUDGET_USD}"
+        alerts.append(
+            {
+                "severity": "critical",
+                "type": "monthly_budget",
+                "message": msg,
+                "cost": monthly_cost,
+                "threshold": MONTHLY_BUDGET_USD,
+            }
         )
-        alerts.append({
-            "severity": "critical",
-            "type": "monthly_budget",
-            "message": msg,
-            "cost": monthly_cost,
-            "threshold": MONTHLY_BUDGET_USD
-        })
     elif monthly_cost > MONTHLY_BUDGET_USD * 0.8:
         msg = (
             f"Monthly cost of ${monthly_cost:.2f} is approaching "
             f"budget of ${MONTHLY_BUDGET_USD}"
         )
-        alerts.append({
-            "severity": "warning",
-            "type": "monthly_budget",
-            "message": msg,
-            "cost": monthly_cost,
-            "threshold": MONTHLY_BUDGET_USD
-        })
+        alerts.append(
+            {
+                "severity": "warning",
+                "type": "monthly_budget",
+                "message": msg,
+                "cost": monthly_cost,
+                "threshold": MONTHLY_BUDGET_USD,
+            }
+        )
 
     return {
         "has_alerts": len(alerts) > 0,
         "alert_count": len(alerts),
         "alerts": alerts,
-        "checked_at": now.isoformat()
+        "checked_at": now.isoformat(),
     }
 
 
 @router.get("/top-expensive")
 async def get_top_expensive_queries(
-    limit: int = Query(default=10, ge=1, le=100),
-    db: AsyncSession = Depends(get_db)
+    limit: int = Query(default=10, ge=1, le=100), db: AsyncSession = Depends(get_db)
 ) -> list[dict[str, Any]]:
     """
     Get the most expensive API calls
@@ -393,7 +371,7 @@ async def get_top_expensive_queries(
             "total_tokens": int(usage.total_tokens or 0),
             "input_tokens": int(usage.input_tokens or 0),
             "output_tokens": int(usage.output_tokens or 0),
-            "response_time_ms": int(usage.response_time_ms or 0)
+            "response_time_ms": int(usage.response_time_ms or 0),
         }
         for usage in expensive_queries
     ]
@@ -401,11 +379,7 @@ async def get_top_expensive_queries(
 
 @router.post("/set-budget")
 async def set_monthly_budget(
-    budget_usd: float = Query(
-        ...,
-        gt=0,
-        description="Monthly budget in USD"
-    ),
+    budget_usd: float = Query(..., gt=0, description="Monthly budget in USD"),
 ) -> dict[str, Any]:
     """
     Update the monthly budget threshold
@@ -417,5 +391,5 @@ async def set_monthly_budget(
     return {
         "success": True,
         "new_budget": budget_usd,
-        "message": f"Monthly budget updated to ${budget_usd}"
+        "message": f"Monthly budget updated to ${budget_usd}",
     }

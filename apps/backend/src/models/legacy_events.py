@@ -2,7 +2,7 @@
 Database models for CQRS event sourcing and outbox patterns.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
 
@@ -62,7 +62,7 @@ class DomainEvent(Base):
         self.event_type = event_type
         self.version = version
         self.payload = payload or {}
-        self.occurred_at = occurred_at or datetime.utcnow()
+        self.occurred_at = occurred_at or datetime.now(timezone.utc)
         self.hash_previous = hash_previous
         self.hash_current = hash_current
 
@@ -122,7 +122,7 @@ class OutboxEntry(Base):
         self.status = status
         self.attempts = attempts
         self.max_attempts = max_attempts
-        self.next_attempt_at = next_attempt_at or datetime.utcnow()
+        self.next_attempt_at = next_attempt_at or datetime.now(timezone.utc)
 
 
 class Snapshot(Base):
@@ -204,7 +204,7 @@ class IdempotencyKey(Base):
     ):
         self.key = key
         self.command_type = command_type
-        self.expires_at = expires_at or datetime.utcnow()
+        self.expires_at = expires_at or datetime.now(timezone.utc)
 
 
 __all__ = ["DomainEvent", "IdempotencyKey", "OutboxEntry", "ProjectionPosition", "Snapshot"]

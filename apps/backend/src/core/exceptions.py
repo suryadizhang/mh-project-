@@ -3,7 +3,7 @@ Centralized Exception Handling
 Custom exceptions and error handling middleware for consistent error responses
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 import logging
 import traceback
@@ -81,7 +81,7 @@ class AppException(Exception):
         self.status_code = status_code
         self.details = details or {}
         self.context = context or {}
-        self.timestamp = datetime.utcnow()
+        self.timestamp = datetime.now(timezone.utc)
 
         super().__init__(self.message)
 
@@ -334,7 +334,7 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException) 
 
 async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle unexpected exceptions"""
-    error_id = f"error_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+    error_id = f"error_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
 
     logger.error(
         f"Unhandled exception [{error_id}]: {exc!s}",
@@ -430,7 +430,7 @@ def create_error_response(
             "code": error_code.value,
             "message": message,
             "details": details or {},
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         },
     }
 

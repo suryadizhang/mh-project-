@@ -27,7 +27,7 @@ from api.deps import (
     get_pagination_params,
 )
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
@@ -110,8 +110,7 @@ class BookingResponse(BookingBase):
     updated_at: datetime
     admin_notes: str | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class BookingList(BaseModel):
@@ -140,8 +139,8 @@ mock_bookings = [
         "quote_amount": 800.00,
         "deposit_amount": 200.00,
         "final_amount": 850.00,
-        "created_at": datetime.utcnow(),
-        "updated_at": datetime.utcnow(),
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
         "admin_notes": "VIP customer, previous booking went well",
     }
 ]
@@ -176,8 +175,8 @@ async def create_booking(
         "quote_amount": None,
         "deposit_amount": None,
         "final_amount": None,
-        "created_at": datetime.utcnow(),
-        "updated_at": datetime.utcnow(),
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
         "admin_notes": None,
         **booking_data.model_dump(),
     }
@@ -278,7 +277,7 @@ async def update_booking(
     # Update fields
     update_data = booking_update.model_dump(exclude_unset=True)
     booking.update(update_data)
-    booking["updated_at"] = datetime.utcnow()
+    booking["updated_at"] = datetime.now(timezone.utc)
 
     logger.info(f"Admin {current_user['email']} updated booking {booking_id}")
 
@@ -304,7 +303,7 @@ async def delete_booking(
 
     # In practice, we'd change status to cancelled rather than delete
     booking["status"] = BookingStatus.CANCELLED
-    booking["updated_at"] = datetime.utcnow()
+    booking["updated_at"] = datetime.now(timezone.utc)
 
     logger.info(f"Admin {current_user['email']} cancelled booking {booking_id}")
 

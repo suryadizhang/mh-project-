@@ -3,7 +3,7 @@ Tutor Logger Service - Shadow Learning
 Records teacher-student response pairs for training
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from typing import Any
 
@@ -84,7 +84,7 @@ async def log_tutor_pair(
         quality_score=None,  # To be set by human review or automated eval
         used_in_production=False,  # Always false in shadow mode
         customer_feedback=None,
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(timezone.utc),
     )
 
     db.add(tutor_pair)
@@ -150,7 +150,7 @@ async def get_tutor_pair_stats(db: AsyncSession, days: int = 7) -> dict[str, Any
 
     from sqlalchemy import func
 
-    cutoff_date = datetime.utcnow() - timedelta(days=days)
+    cutoff_date = datetime.now(timezone.utc) - timedelta(days=days)
 
     # Total pairs
     total_query = select(func.count(AITutorPair.id))

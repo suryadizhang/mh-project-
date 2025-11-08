@@ -3,7 +3,7 @@ Subscriber Service
 Handles Subscriber subscriptions, unsubscriptions, and STOP command processing
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import re
 
@@ -11,8 +11,9 @@ from models.legacy_lead_newsletter import (
     LeadSource,
     Subscriber,
 )  # Phase 2C: Updated from api.app.models.lead_newsletter
-from sqlalchemy import or_
-from sqlalchemy.orm import Session
+from sqlalchemy import or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from utils.validators import validate_email, validate_phone, ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 class SubscriberService:
     """Service for managing Subscriber subscriptions"""
 
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
 
     async def subscribe(
@@ -48,6 +49,17 @@ class SubscriberService:
         if not phone and not email:
             raise ValueError("Either phone or email is required for Subscriber subscription")
 
+        # Validate and normalize inputs
+        try:
+            if phone:
+                phone = validate_phone(phone)  # Validates E.164 format
+            if email:
+                email = validate_email(email)  # Normalizes to lowercase
+        except ValidationError as e:
+            # Re-raise with more context
+            logger.error(f"Validation error in subscribe: {e}", extra={"phone": phone, "email": email})
+            raise
+
         # Check if already subscribed
         existing = await self.find_by_contact(phone=phone, email=email)
 
@@ -56,7 +68,8 @@ class SubscriberService:
             if existing.unsubscribed_at:
                 existing.unsubscribed_at = None
                 existing.subscribed = True
-                self.db.commit()
+                await self.db.commit()
+                await self.db.refresh(existing)
 
                 logger.info(
                     "Reactivated Subscriber subscription",
@@ -81,12 +94,12 @@ class SubscriberService:
             subscribed=True,
             email_consent=bool(email),
             sms_consent=bool(phone),
-            consent_updated_at=datetime.utcnow(),
+            consent_updated_at=datetime.now(timezone.utc),
         )
 
         self.db.add(subscription)
-        self.db.commit()
-        self.db.refresh(subscription)
+        await self.db.commit()
+        await self.db.refresh(subscription)
 
         logger.info(
             "Created Subscriber subscription",
@@ -105,19 +118,31 @@ class SubscriberService:
         return subscription
 
     async def unsubscribe(
-        self, phone: str | None = None, email: str | None = None, reason: str = "user_requested"
+        self, phone: str | None = None, email: str | None = None
     ) -> bool:
         """
         Unsubscribe user from Subscriber
 
         Args:
-            phone: User's phone number
+            phone: User's phone number in E.164 format
             email: User's email address
-            reason: Reason for unsubscribe
 
         Returns:
             True if unsubscribed, False if not found
+            
+        Raises:
+            ValidationError: If phone or email format is invalid
         """
+
+        # Validate inputs if provided
+        try:
+            if phone:
+                phone = validate_phone(phone)
+            if email:
+                email = validate_email(email)
+        except ValidationError as e:
+            logger.error(f"Validation error in unsubscribe: {e}", extra={"phone": phone, "email": email})
+            raise
 
         subscription = await self.find_by_contact(phone=phone, email=email)
 
@@ -135,9 +160,9 @@ class SubscriberService:
             return True
 
         # Mark as unsubscribed
-        subscription.unsubscribed_at = datetime.utcnow()
-        subscription.unsubscribe_reason = reason
-        self.db.commit()
+        subscription.unsubscribed_at = datetime.now(timezone.utc)
+        await self.db.commit()
+        await self.db.refresh(subscription)
 
         logger.info(
             "Unsubscribed from Subscriber",
@@ -145,7 +170,6 @@ class SubscriberService:
                 "subscription_id": str(subscription.id),
                 "phone": phone,
                 "email": email,
-                "reason": reason,
             },
         )
 
@@ -159,16 +183,24 @@ class SubscriberService:
         Process STOP/UNSUBSCRIBE command
 
         Args:
-            phone: User's phone number
+            phone: User's phone number in E.164 format (+15551234567)
             channel: Communication channel (sms, facebook, instagram)
 
         Returns:
             Tuple of (success, message)
+            
+        Raises:
+            ValidationError: If phone format is invalid
         """
 
-        phone = self._clean_phone(phone)
+        # Validate phone format
+        try:
+            phone = validate_phone(phone)
+        except ValidationError as e:
+            logger.error(f"Validation error in process_stop_command: {e}", extra={"phone": phone})
+            raise
 
-        # Find subscription
+        # Find subscription (phone already in E.164 format)
         subscription = await self.find_by_contact(phone=phone)
 
         if not subscription:
@@ -178,7 +210,7 @@ class SubscriberService:
             return True, "You're already unsubscribed from our Subscriber."
 
         # Unsubscribe
-        await self.unsubscribe(phone=phone, reason=f"stop_command_{channel}")
+        await self.unsubscribe(phone=phone)
 
         return (
             True,
@@ -192,17 +224,25 @@ class SubscriberService:
         Process START/SUBSCRIBE command
 
         Args:
-            phone: User's phone number
+            phone: User's phone number in E.164 format (+15551234567)
             name: User's name (if available)
             channel: Communication channel
 
         Returns:
             Tuple of (success, message)
+            
+        Raises:
+            ValidationError: If phone format is invalid
         """
 
-        phone = self._clean_phone(phone)
+        # Validate phone format
+        try:
+            phone = validate_phone(phone)
+        except ValidationError as e:
+            logger.error(f"Validation error in process_start_command: {e}", extra={"phone": phone})
+            raise
 
-        # Check if already subscribed
+        # Check if already subscribed (phone already in E.164 format)
         subscription = await self.find_by_contact(phone=phone)
 
         if subscription and not subscription.unsubscribed_at:
@@ -230,47 +270,98 @@ class SubscriberService:
     async def find_by_contact(
         self, phone: str | None = None, email: str | None = None
     ) -> Subscriber | None:
-        """Find Subscriber subscription by phone or email"""
+        """
+        Find Subscriber subscription by phone or email.
+        
+        NOTE: Since phone and email are encrypted, we need to fetch all subscribers
+        and decrypt them in Python to compare. This is a performance trade-off for PII security.
+        """
 
         if not phone and not email:
             return None
 
-        query = self.db.query(Subscriber)
+        # Normalize inputs for comparison
+        # Phone: Keep as-is in E.164 format (+15551234567)
+        # Email: Lowercase and trim
+        normalized_phone = phone if phone else None
+        normalized_email = email.lower().strip() if email else None
 
-        conditions = []
-        if phone:
-            conditions.append(Subscriber.phone == self._clean_phone(phone))
-        if email:
-            conditions.append(Subscriber.email == email.lower().strip())
+        logger.debug(
+            f"Finding subscriber: phone={normalized_phone}, email={normalized_email}"
+        )
 
-        return query.filter(or_(*conditions)).first()
+        # Expire all cached objects to ensure we get fresh data from DB
+        self.db.expire_all()
+
+        # Fetch ALL subscribers (we need to decrypt to compare)
+        # TODO: Add pagination if subscriber count grows large (>10k)
+        result = await self.db.execute(
+            select(Subscriber)
+        )
+        all_subscribers = list(result.scalars().all())
+        
+        logger.debug(f"Total subscribers to check: {len(all_subscribers)}")
+
+        # Decrypt and compare in Python
+        for subscriber in all_subscribers:
+            try:
+                # Decrypt phone and email for this subscriber
+                sub_phone = subscriber.phone  # Property decrypts
+                sub_email = subscriber.email  # Property decrypts
+                
+                logger.debug(
+                    f"Checking subscriber {subscriber.id}: phone={sub_phone}, email={sub_email}"
+                )
+                
+                # Check phone match
+                if normalized_phone and sub_phone:
+                    if sub_phone == normalized_phone:
+                        logger.debug(f"Found match by phone: {subscriber.id}")
+                        return subscriber
+                
+                # Check email match
+                if normalized_email and sub_email:
+                    if sub_email == normalized_email:
+                        logger.debug(f"Found match by email: {subscriber.id}")
+                        return subscriber
+            except Exception as e:
+                # If decryption fails for this subscriber, skip it
+                # (could be old data with different encryption key)
+                logger.warning(
+                    f"Failed to decrypt subscriber {subscriber.id}: {str(e)}",
+                    extra={"subscriber_id": str(subscriber.id)}
+                )
+                continue
+
+        logger.debug("No matching subscriber found")
+        return None
 
     async def get_active_subscriptions(
         self, limit: int = 1000, offset: int = 0
     ) -> list[Subscriber]:
         """Get all active Subscriber subscriptions"""
 
-        return (
-            self.db.query(Subscriber)
+        result = await self.db.execute(
+            select(Subscriber)
             .filter(Subscriber.unsubscribed_at.is_(None))
             .limit(limit)
             .offset(offset)
-            .all()
         )
+        return list(result.scalars().all())
 
-    async def _send_welcome_message(self, subscription: Subscriber, resubscribe: bool = False):
+    async def _send_welcome_message(self, subscription: Subscriber, name: str | None = None, resubscribe: bool = False):
         """Send welcome message with STOP instructions"""
 
         if resubscribe:
             message = (
-                f"Welcome back, {subscription.name or 'friend'}! 🎉\n\n"
+                f"Welcome back, {name or 'friend'}! 🎉\n\n"
                 "You're now resubscribed to MyHibachi Subscriber. "
                 "Get ready for exclusive hibachi deals, cooking tips, and event updates!\n\n"
                 "Reply STOP anytime to unsubscribe."
             )
         else:
             message = (
-                f"Thanks for connecting with MyHibachi, {subscription.name or 'friend'}! 🎉\n\n"
+                f"Thanks for connecting with MyHibachi, {name or 'friend'}! 🎉\n\n"
                 "You've been added to our Subscriber for exclusive deals and updates. "
                 "We promise to only send you the good stuff!\n\n"
                 "Reply STOP anytime to unsubscribe."
@@ -306,10 +397,10 @@ class SubscriberService:
         try:
             # Import here to avoid circular dependencies
             from services.ringcentral_sms import (
-                RingCentralSMS,
+                RingCentralSMSService,
             )  # Phase 2C: Updated from api.app.services.ringcentral_sms
 
-            sms_service = RingCentralSMS()
+            sms_service = RingCentralSMSService()
             await sms_service.send_sms(phone, message)
 
             logger.info("Sent Subscriber SMS", extra={"phone": phone})

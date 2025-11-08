@@ -10,7 +10,7 @@ This module:
 - Integrates with the FollowUpScheduler
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 
 from api.ai.memory.postgresql_memory import AIConversation
@@ -34,7 +34,7 @@ async def detect_inactive_users(
         List of dictionaries containing user_id and last_activity_at
     """
     try:
-        threshold_date = datetime.utcnow() - timedelta(days=inactive_threshold_days)
+        threshold_date = datetime.now(timezone.utc) - timedelta(days=inactive_threshold_days)
 
         async with get_db_context() as db:
             # Find users whose last message was before threshold

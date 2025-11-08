@@ -29,7 +29,7 @@ Message Flow:
 Payment Detected → Try WhatsApp → If fail, send SMS → Log result
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 import logging
 import os
@@ -130,7 +130,7 @@ class WhatsAppNotificationService:
             "channel": NotificationChannel.FAILED,
             "message_sid": None,
             "error": None,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
         try:

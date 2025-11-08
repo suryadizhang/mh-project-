@@ -3,7 +3,7 @@ Rate Limit Monitoring and Metrics
 Provides visibility into rate limiting behavior and usage patterns
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import time
 from typing import Any
 
@@ -54,7 +54,7 @@ async def get_rate_limit_status():
                     "burst": settings.RATE_LIMIT_WEBHOOK_BURST,
                 },
             },
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     except Exception as e:
         raise HTTPException(
@@ -79,7 +79,7 @@ async def get_rate_limit_metrics():
         return {
             "metrics": metrics,
             "backend": "redis" if rate_limiter.redis_available else "memory",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     except Exception as e:
         raise HTTPException(
@@ -103,7 +103,7 @@ async def test_rate_limits():
             "admin": "Use 'Authorization: Bearer admin_token'",
             "admin_super": "Use 'Authorization: Bearer super_admin_token'",
         },
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
 
@@ -232,5 +232,5 @@ async def get_admin_rate_limit_stats():
             "Monitor AI endpoint usage for cost optimization",
             "Redis performance is optimal",
         ],
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }

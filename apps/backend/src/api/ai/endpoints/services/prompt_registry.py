@@ -4,7 +4,7 @@ Manages agent-specific prompts with inheritance and proper isolation.
 Prevents prompt bleed while allowing general reasoning capabilities.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import os
 from typing import Any
@@ -290,7 +290,7 @@ You can discuss any topic naturally while bringing your analytical perspective t
 
 ---
 *Agent: {agent}*
-*Created: {datetime.utcnow().isoformat()}*
+*Created: {datetime.now(timezone.utc).isoformat()}*
 *Purpose: {config['description']}*
 """
 
@@ -457,7 +457,7 @@ You can discuss any topic naturally while bringing your analytical perspective t
 
 ---
 *Agent: {agent}*
-*Updated: {datetime.utcnow().isoformat()}*
+*Updated: {datetime.now(timezone.utc).isoformat()}*
 *Purpose: {description or f'{agent} agent prompt'}*
 """
 
@@ -558,4 +558,4 @@ You can discuss any topic naturally while bringing your analytical perspective t
             }
 
         except Exception as e:
-            return {"healthy": False, "error": str(e), "last_check": datetime.utcnow()}
+            return {"healthy": False, "error": str(e), "last_check": datetime.now(timezone.utc)}

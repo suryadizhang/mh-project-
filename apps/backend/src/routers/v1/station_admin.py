@@ -3,7 +3,7 @@ Station Administration API
 Comprehensive endpoints for managing stations, users, roles, and permissions.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 from typing import Any
 
@@ -58,58 +58,40 @@ async def test_endpoint(
 class StationCreateRequest(BaseModel):
     """Request model for creating a new station (code is auto-generated)."""
 
-    name: str = Field(
-        ..., min_length=1, max_length=100, description="Station name"
-    )
-    display_name: str = Field(
-        ..., min_length=1, max_length=200, description="Display name for UI"
-    )
+    name: str = Field(..., min_length=1, max_length=100, description="Station name")
+    display_name: str = Field(..., min_length=1, max_length=200, description="Display name for UI")
 
     # Location (required for code generation)
-    city: str = Field(
-        ..., min_length=1, max_length=100, description="City name"
-    )
+    city: str = Field(..., min_length=1, max_length=100, description="City name")
     state: str = Field(
         ...,
         min_length=2,
         max_length=2,
         description="2-letter state code (e.g., CA, TX)",
     )
-    country: str = Field(
-        default="US", min_length=2, max_length=2, description="Country code"
-    )
-    timezone: str = Field(
-        ..., description="IANA timezone (e.g., America/Los_Angeles)"
-    )
+    country: str = Field(default="US", min_length=2, max_length=2, description="Country code")
+    timezone: str = Field(..., description="IANA timezone (e.g., America/Los_Angeles)")
 
     # Optional contact & location details
     email: str | None = Field(None, description="Contact email")
     phone: str | None = Field(None, max_length=50, description="Contact phone")
     address: str | None = Field(None, description="Street address")
-    postal_code: str | None = Field(
-        None, max_length=20, description="ZIP/Postal code"
-    )
+    postal_code: str | None = Field(None, max_length=20, description="ZIP/Postal code")
 
     # Business settings
     status: str | None = Field(default="active", description="Station status")
     settings: dict[str, Any] | None = Field(
         default_factory=dict, description="Station settings JSON"
     )
-    business_hours: dict[str, Any] | None = Field(
-        None, description="Operating hours JSON"
-    )
-    service_area_radius: int | None = Field(
-        None, ge=0, description="Service radius in miles"
-    )
+    business_hours: dict[str, Any] | None = Field(None, description="Operating hours JSON")
+    service_area_radius: int | None = Field(None, ge=0, description="Service radius in miles")
     max_concurrent_bookings: int | None = Field(
         default=10, ge=1, description="Max concurrent bookings"
     )
     booking_lead_time_hours: int | None = Field(
         default=24, ge=0, description="Minimum booking lead time"
     )
-    branding_config: dict[str, Any] | None = Field(
-        None, description="Branding configuration JSON"
-    )
+    branding_config: dict[str, Any] | None = Field(None, description="Branding configuration JSON")
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -209,18 +191,17 @@ class UserStationAssignmentRequest(BaseModel):
         description="Role to assign",
         pattern="^(super_admin|admin|station_admin|customer_support)$",
     )
-    permissions: list[str] | None = Field(
-        None, description="Additional permissions"
-    )
+    permissions: list[str] | None = Field(None, description="Additional permissions")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "user_id": 123,
                 "role": "station_admin",
                 "permissions": ["manage_bookings", "view_analytics"],
             }
         }
+    )
 
 
 class StationUserResponse(BaseModel):
@@ -240,8 +221,7 @@ class StationUserResponse(BaseModel):
     user_name: str | None = None
     last_login: datetime | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AuditLogResponse(BaseModel):
@@ -262,8 +242,7 @@ class AuditLogResponse(BaseModel):
     user_email: str | None = None
     user_role: str | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Station management endpoints
@@ -309,16 +288,10 @@ async def list_stations_no_auth(
 @router.get("/", response_model=list[StationResponse])
 async def list_stations(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(
-        100, ge=1, le=1000, description="Maximum number of records to return"
-    ),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
     active_only: bool = Query(True, description="Only return active stations"),
-    include_stats: bool = Query(
-        False, description="Include user and booking statistics"
-    ),
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("view_stations")
-    ),
+    include_stats: bool = Query(False, description="Include user and booking statistics"),
+    current_user: AuthenticatedUser = Depends(require_station_permission("view_stations")),
     db: AsyncSession = Depends(get_db_session),
 ) -> list[StationResponse]:
     """
@@ -395,14 +368,10 @@ async def list_stations(
         )
 
 
-@router.post(
-    "/", response_model=StationResponse, status_code=status.HTTP_201_CREATED
-)
+@router.post("/", response_model=StationResponse, status_code=status.HTTP_201_CREATED)
 async def create_station(
     request: StationCreateRequest,
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("manage_stations")
-    ),
+    current_user: AuthenticatedUser = Depends(require_station_permission("manage_stations")),
     db: AsyncSession = Depends(get_db_session),
 ) -> StationResponse:
     """
@@ -429,9 +398,7 @@ async def create_station(
             country=request.country,
         )
 
-        logger.info(
-            f"Generated station code: {station_code} for {request.city}, {request.state}"
-        )
+        logger.info(f"Generated station code: {station_code} for {request.city}, {request.state}")
 
         # Create station with all fields from new schema
         station = Station(
@@ -478,13 +445,9 @@ async def create_station(
                 is_active=True,
                 created_by=current_user.id,
             )
-            logger.info(
-                f"✅ Auto-created notification group for station: {station.name}"
-            )
+            logger.info(f"✅ Auto-created notification group for station: {station.name}")
         except Exception as e:
-            logger.warning(
-                f"⚠️ Failed to create notification group for station: {e}"
-            )
+            logger.warning(f"⚠️ Failed to create notification group for station: {e}")
             # Don't fail station creation if notification group fails
 
         await log_station_activity(
@@ -517,12 +480,8 @@ async def create_station(
 @router.get("/{station_id}", response_model=StationResponse)
 async def get_station(
     station_id: int,
-    include_stats: bool = Query(
-        False, description="Include detailed statistics"
-    ),
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("view_stations")
-    ),
+    include_stats: bool = Query(False, description="Include detailed statistics"),
+    current_user: AuthenticatedUser = Depends(require_station_permission("view_stations")),
     db: AsyncSession = Depends(get_db_session),
 ) -> StationResponse:
     """
@@ -533,10 +492,7 @@ async def get_station(
     """
     try:
         # Check station access
-        if (
-            not current_user.is_super_admin
-            and station_id != current_user.station_id
-        ):
+        if not current_user.is_super_admin and station_id != current_user.station_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Access denied to this station",
@@ -572,9 +528,7 @@ async def get_station(
             )
 
             response.user_count = user_count
-            response.last_activity = (
-                last_activity[0] if last_activity else None
-            )
+            response.last_activity = last_activity[0] if last_activity else None
 
         await log_station_activity(
             action="view_station",
@@ -600,9 +554,7 @@ async def get_station(
 async def update_station(
     station_id: str,
     request: StationUpdateRequest,
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("manage_stations")
-    ),
+    current_user: AuthenticatedUser = Depends(require_station_permission("manage_stations")),
     db: AsyncSession = Depends(get_db_session),
 ) -> StationResponse:
     """
@@ -614,18 +566,14 @@ async def update_station(
     """
     try:
         # Check station access
-        if not current_user.is_super_admin and str(station_id) != str(
-            current_user.station_id
-        ):
+        if not current_user.is_super_admin and str(station_id) != str(current_user.station_id):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Access denied to this station",
             )
 
         # Fetch station
-        result = await db.execute(
-            select(Station).where(Station.id == station_id)
-        )
+        result = await db.execute(select(Station).where(Station.id == station_id))
         station = result.scalar_one_or_none()
 
         if not station:
@@ -739,18 +687,13 @@ async def update_station(
             }
             station.branding_config = request.branding_config
 
-        station.updated_at = datetime.utcnow()
+        station.updated_at = datetime.now(timezone.utc)
 
         await db.commit()
         await db.refresh(station)
 
         # Sync notification group with updated station info
-        if (
-            "name" in changes
-            or "city" in changes
-            or "state" in changes
-            or "status" in changes
-        ):
+        if "name" in changes or "city" in changes or "state" in changes or "status" in changes:
             try:
                 from services.station_notification_sync import (
                     sync_station_with_notification_group,
@@ -761,11 +704,7 @@ async def update_station(
                     if station.city and station.state
                     else station.name
                 )
-                is_active = (
-                    station.status == "active"
-                    if hasattr(station, "status")
-                    else True
-                )
+                is_active = station.status == "active" if hasattr(station, "status") else True
                 await sync_station_with_notification_group(
                     db=db,
                     station_id=station.id,
@@ -774,9 +713,7 @@ async def update_station(
                     is_active=is_active,
                     created_by=current_user.id,
                 )
-                logger.info(
-                    f"✅ Synced notification group for station: {station.name}"
-                )
+                logger.info(f"✅ Synced notification group for station: {station.name}")
             except Exception as e:
                 logger.warning(f"⚠️ Failed to sync notification group: {e}")
 
@@ -799,9 +736,7 @@ async def update_station(
         raise
     except Exception as e:
         await db.rollback()
-        logger.error(
-            f"Error updating station {station_id}: {e}", exc_info=True
-        )
+        logger.error(f"Error updating station {station_id}: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unable to update station: {e!s}",
@@ -812,9 +747,7 @@ async def update_station(
 async def delete_station(
     station_id: str,
     force: bool = Query(False, description="Force delete even with warnings"),
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("manage_stations")
-    ),
+    current_user: AuthenticatedUser = Depends(require_station_permission("manage_stations")),
     db: AsyncSession = Depends(get_db_session),
 ):
     """
@@ -836,9 +769,7 @@ async def delete_station(
 
     try:
         # Find station
-        result = await db.execute(
-            select(Station).where(Station.id == station_id)
-        )
+        result = await db.execute(select(Station).where(Station.id == station_id))
         station = result.scalar_one_or_none()
 
         if not station:
@@ -854,9 +785,7 @@ async def delete_station(
             select(func.count(Booking.id)).where(
                 and_(
                     Booking.station_id == station_id,
-                    Booking.status.in_(
-                        ["pending", "confirmed", "in_progress"]
-                    ),
+                    Booking.status.in_(["pending", "confirmed", "in_progress"]),
                 )
             )
         )
@@ -865,18 +794,14 @@ async def delete_station(
         # Safety check 2: Check for assigned users
         assigned_users_result = await db.execute(
             select(func.count(StationUser.id)).where(
-                and_(
-                    StationUser.station_id == station_id, StationUser.is_active
-                )
+                and_(StationUser.station_id == station_id, StationUser.is_active)
             )
         )
         assigned_users_count = assigned_users_result.scalar_one()
 
         # Safety check 3: Check for total bookings (historical data)
         total_bookings_result = await db.execute(
-            select(func.count(Booking.id)).where(
-                Booking.station_id == station_id
-            )
+            select(func.count(Booking.id)).where(Booking.station_id == station_id)
         )
         total_bookings_count = total_bookings_result.scalar_one()
 
@@ -884,9 +809,7 @@ async def delete_station(
         blocking_issues = []
 
         if active_bookings_count > 0:
-            blocking_issues.append(
-                f"{active_bookings_count} active booking(s)"
-            )
+            blocking_issues.append(f"{active_bookings_count} active booking(s)")
 
         if assigned_users_count > 0:
             blocking_issues.append(f"{assigned_users_count} assigned user(s)")
@@ -939,12 +862,8 @@ async def delete_station(
                 delete_station_notification_group,
             )
 
-            await delete_station_notification_group(
-                db=db, station_id=station.id
-            )
-            logger.info(
-                f"✅ Deleted notification group for station: {station.name}"
-            )
+            await delete_station_notification_group(db=db, station_id=station.id)
+            logger.info(f"✅ Deleted notification group for station: {station.name}")
         except Exception as e:
             logger.warning(f"⚠️ Failed to delete notification group: {e}")
 
@@ -959,9 +878,7 @@ async def delete_station(
         raise
     except Exception as e:
         await db.rollback()
-        logger.error(
-            f"Error deleting station {station_id}: {e}", exc_info=True
-        )
+        logger.error(f"Error deleting station {station_id}: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unable to delete station: {e!s}",
@@ -975,15 +892,9 @@ async def list_station_users(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     role: str | None = Query(None, description="Filter by role"),
-    active_only: bool = Query(
-        True, description="Only return active assignments"
-    ),
-    include_user_details: bool = Query(
-        False, description="Include user profile information"
-    ),
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("view_station_users")
-    ),
+    active_only: bool = Query(True, description="Only return active assignments"),
+    include_user_details: bool = Query(False, description="Include user profile information"),
+    current_user: AuthenticatedUser = Depends(require_station_permission("view_station_users")),
     db: AsyncSession = Depends(get_db_session),
 ) -> list[StationUserResponse]:
     """
@@ -994,18 +905,13 @@ async def list_station_users(
     """
     try:
         # Check station access
-        if (
-            not current_user.is_super_admin
-            and station_id != current_user.station_id
-        ):
+        if not current_user.is_super_admin and station_id != current_user.station_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Access denied to this station",
             )
 
-        query = db.query(StationUser).filter(
-            StationUser.station_id == station_id
-        )
+        query = db.query(StationUser).filter(StationUser.station_id == station_id)
 
         # Apply filters
         if role:
@@ -1056,9 +962,7 @@ async def list_station_users(
 async def assign_user_to_station(
     station_id: int,
     request: UserStationAssignmentRequest,
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("manage_station_users")
-    ),
+    current_user: AuthenticatedUser = Depends(require_station_permission("manage_station_users")),
     db: AsyncSession = Depends(get_db_session),
 ) -> StationUserResponse:
     """
@@ -1069,10 +973,7 @@ async def assign_user_to_station(
     """
     try:
         # Check station access
-        if (
-            not current_user.is_super_admin
-            and station_id != current_user.station_id
-        ):
+        if not current_user.is_super_admin and station_id != current_user.station_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Access denied to this station",
@@ -1110,14 +1011,10 @@ async def assign_user_to_station(
             StationRole,
         )
 
-        default_permissions = list(
-            STATION_ROLE_PERMISSIONS.get(StationRole(request.role), set())
-        )
+        default_permissions = list(STATION_ROLE_PERMISSIONS.get(StationRole(request.role), set()))
 
         # Combine with additional permissions
-        all_permissions = list(
-            set(default_permissions + (request.permissions or []))
-        )
+        all_permissions = list(set(default_permissions + (request.permissions or [])))
 
         # Create assignment
         station_user = StationUser(
@@ -1165,16 +1062,10 @@ async def get_station_audit_log(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
     action: str | None = Query(None, description="Filter by action"),
-    resource_type: str | None = Query(
-        None, description="Filter by resource type"
-    ),
+    resource_type: str | None = Query(None, description="Filter by resource type"),
     user_id: int | None = Query(None, description="Filter by user ID"),
-    days: int = Query(
-        30, ge=1, le=365, description="Number of days to look back"
-    ),
-    current_user: AuthenticatedUser = Depends(
-        require_station_permission("view_audit_logs")
-    ),
+    days: int = Query(30, ge=1, le=365, description="Number of days to look back"),
+    current_user: AuthenticatedUser = Depends(require_station_permission("view_audit_logs")),
     db: AsyncSession = Depends(get_db_session),
 ) -> list[AuditLogResponse]:
     """
@@ -1185,17 +1076,14 @@ async def get_station_audit_log(
     """
     try:
         # Check station access
-        if (
-            not current_user.is_super_admin
-            and station_id != current_user.station_id
-        ):
+        if not current_user.is_super_admin and station_id != current_user.station_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Access denied to this station",
             )
 
         # Calculate date filter
-        cutoff_date = datetime.utcnow() - timedelta(days=days)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=days)
 
         query = db.query(StationAuditLog).filter(
             and_(
@@ -1209,9 +1097,7 @@ async def get_station_audit_log(
             query = query.filter(StationAuditLog.action == action)
 
         if resource_type:
-            query = query.filter(
-                StationAuditLog.resource_type == resource_type
-            )
+            query = query.filter(StationAuditLog.resource_type == resource_type)
 
         if user_id:
             query = query.filter(StationAuditLog.user_id == user_id)

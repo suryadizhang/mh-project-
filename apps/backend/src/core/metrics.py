@@ -4,7 +4,7 @@ Track request metrics, cache performance, query times, and business KPIs
 """
 
 from collections.abc import Callable
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import time
 
@@ -378,7 +378,7 @@ class HealthCheckMetrics:
 
         return {
             "status": "healthy",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "metrics": {
                 "total_requests": (
                     request_count._value.get() if hasattr(request_count, "_value") else 0

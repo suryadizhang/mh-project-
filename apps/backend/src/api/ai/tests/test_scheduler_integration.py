@@ -11,7 +11,7 @@ Tests the complete integration including:
 """
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 import os
 import sys
@@ -160,7 +160,7 @@ class TestSchedulerIntegration(unittest.TestCase):
             )
 
             # Simulate booking confirmation
-            event_date = datetime.utcnow() + timedelta(days=7)
+            event_date = datetime.now(timezone.utc) + timedelta(days=7)
             job_id = await self.orchestrator.schedule_post_event_followup(
                 conversation_id=conv_id,
                 user_id=user_id,
@@ -211,7 +211,7 @@ class TestSchedulerIntegration(unittest.TestCase):
                 emotion_label="positive",
             )
 
-            event_date = datetime.utcnow() + timedelta(days=3)
+            event_date = datetime.now(timezone.utc) + timedelta(days=3)
             await self.orchestrator.schedule_post_event_followup(
                 conversation_id=conv_high, user_id=user_high, event_date=event_date
             )
@@ -273,7 +273,7 @@ class TestSchedulerIntegration(unittest.TestCase):
             from api.ai.memory.postgresql_memory import AIConversation
             from core.database import get_db_context
 
-            inactive_date = datetime.utcnow() - timedelta(days=31)
+            inactive_date = datetime.now(timezone.utc) - timedelta(days=31)
 
             async with get_db_context() as db:
                 conversation = AIConversation(
@@ -352,11 +352,11 @@ class TestSchedulerIntegration(unittest.TestCase):
                 user_id=user_id,
                 trigger_type="post_event",
                 trigger_data={"test": True},
-                scheduled_at=datetime.utcnow(),  # Execute now
+                scheduled_at=datetime.now(timezone.utc),  # Execute now
                 status=FollowUpStatus.PENDING.value,
                 template_id="post_event_neutral_emotion",
                 message_content="Test follow-up message",
-                created_at=datetime.utcnow(),
+                created_at=datetime.now(timezone.utc),
                 retry_count=0,
             )
 

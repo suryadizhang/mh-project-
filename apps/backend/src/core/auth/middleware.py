@@ -4,7 +4,7 @@ Implements JWT validation, role-based access control, and security headers.
 """
 
 from collections.abc import Callable
-from datetime import datetime
+from datetime import datetime, timezone
 from functools import wraps
 import time
 
@@ -185,7 +185,7 @@ async def get_current_user(
                 UserSession.id == session_id,
                 User.status == UserStatus.ACTIVE.value,
                 UserSession.status == SessionStatus.ACTIVE.value,
-                UserSession.expires_at > datetime.utcnow(),
+                UserSession.expires_at > datetime.now(timezone.utc),
             )
         )
     )
@@ -201,8 +201,8 @@ async def get_current_user(
     user, session = row
 
     # Update last active time
-    session.last_used_at = datetime.utcnow()
-    user.last_active_at = datetime.utcnow()
+    session.last_used_at = datetime.now(timezone.utc)
+    user.last_active_at = datetime.now(timezone.utc)
     await db.commit()
 
     # Get permissions from JWT (cached for performance)

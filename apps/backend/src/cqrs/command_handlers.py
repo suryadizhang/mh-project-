@@ -2,7 +2,7 @@
 Command handlers for CRM operations.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
 
@@ -81,7 +81,7 @@ class CreateBookingCommandHandler(CommandHandler):
                 ai_conversation_id=command.ai_conversation_id,
                 status="confirmed",
                 balance_due_cents=command.total_due_cents - command.deposit_due_cents,
-                created_at=datetime.utcnow(),
+                created_at=datetime.now(timezone.utc),
             )
 
             self.session.add(booking)
@@ -177,7 +177,7 @@ class CreateBookingCommandHandler(CommandHandler):
                 needs_update = True
 
             if needs_update:
-                customer.updated_at = datetime.utcnow()
+                customer.updated_at = datetime.now(timezone.utc)
 
             return customer
 
@@ -189,7 +189,7 @@ class CreateBookingCommandHandler(CommandHandler):
             name_encrypted=self.encryption.encrypt(name),
             phone_encrypted=self.encryption.encrypt(phone),
             source="booking",
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc),
         )
 
         self.session.add(customer)
@@ -222,8 +222,8 @@ class CreateBookingCommandHandler(CommandHandler):
             command_type=command_type,
             result=result_data,
             status="completed",
-            completed_at=datetime.utcnow(),
-            expires_at=datetime.utcnow() + timedelta(days=7),  # Keep for a week
+            completed_at=datetime.now(timezone.utc),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=7),  # Keep for a week
         )
 
         self.session.add(idem)
@@ -284,7 +284,7 @@ class RecordPaymentCommandHandler(CommandHandler):
                 payment_reference=command.payment_reference,
                 notes=command.notes,
                 processed_by=command.processed_by,
-                processed_at=datetime.utcnow(),
+                processed_at=datetime.now(timezone.utc),
             )
 
             self.session.add(payment)
@@ -292,7 +292,7 @@ class RecordPaymentCommandHandler(CommandHandler):
             # Update booking balance
             new_balance = booking.balance_due_cents - command.amount_cents
             booking.balance_due_cents = new_balance
-            booking.updated_at = datetime.utcnow()
+            booking.updated_at = datetime.now(timezone.utc)
 
             # Mark as paid if balance is zero
             if new_balance == 0:
@@ -366,8 +366,8 @@ class RecordPaymentCommandHandler(CommandHandler):
             command_type=command_type,
             result=result_data,
             status="completed",
-            completed_at=datetime.utcnow(),
-            expires_at=datetime.utcnow() + timedelta(days=7),
+            completed_at=datetime.now(timezone.utc),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=7),
         )
 
         self.session.add(idem)
@@ -424,7 +424,7 @@ class ReceiveMessageCommandHandler(CommandHandler):
                     phone_number_encrypted=self.encryption.encrypt(command.phone_number),
                     customer_id=None,  # Will be linked later if customer found
                     status="active",
-                    created_at=datetime.utcnow(),
+                    created_at=datetime.now(timezone.utc),
                 )
                 self.session.add(thread)
                 await self.session.flush()
@@ -439,7 +439,7 @@ class ReceiveMessageCommandHandler(CommandHandler):
                 external_message_id=command.external_message_id,
                 source=command.source,
                 sent_at=command.received_at,
-                created_at=datetime.utcnow(),
+                created_at=datetime.now(timezone.utc),
             )
 
             self.session.add(message)
@@ -447,7 +447,7 @@ class ReceiveMessageCommandHandler(CommandHandler):
             # Update thread
             thread.last_message_at = command.received_at
             thread.has_unread = True
-            thread.updated_at = datetime.utcnow()
+            thread.updated_at = datetime.now(timezone.utc)
 
             # Create domain event
             event = MessageReceived(
@@ -517,8 +517,8 @@ class ReceiveMessageCommandHandler(CommandHandler):
             command_type=command_type,
             result=result_data,
             status="completed",
-            completed_at=datetime.utcnow(),
-            expires_at=datetime.utcnow() + timedelta(days=7),
+            completed_at=datetime.now(timezone.utc),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=7),
         )
 
         self.session.add(idem)

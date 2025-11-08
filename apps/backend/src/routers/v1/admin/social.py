@@ -1,6 +1,6 @@
 """Social media admin API endpoints."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from typing import Any
 from uuid import UUID
@@ -173,7 +173,7 @@ async def send_social_reply(
             metadata={
                 "sent_by_admin": current_user.id,
                 "admin_name": current_user.name,
-                "client_timestamp": datetime.utcnow().isoformat(),
+                "client_timestamp": datetime.now(timezone.utc).isoformat(),
             },
         )
 
@@ -502,7 +502,7 @@ async def social_health_check():
             status_code=200,
             content={
                 "status": "healthy",
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "features": [
                     "social_inbox",
                     "reviews_board",

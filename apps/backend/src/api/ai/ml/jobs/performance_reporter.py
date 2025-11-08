@@ -13,7 +13,7 @@ Author: MyHibachi Development Team
 Created: October 31, 2025
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 from typing import Any
 
@@ -45,7 +45,7 @@ async def weekly_performance_reporter(db: AsyncSession):
         logger.info("📊 Generating weekly AI performance report...")
 
         # Date ranges
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         current_week_start = now - timedelta(days=7)
         previous_week_start = now - timedelta(days=14)
 
@@ -78,7 +78,11 @@ async def weekly_performance_reporter(db: AsyncSession):
 
     except Exception as e:
         logger.exception(f"❌ Error generating performance report: {e}")
-        return {"success": False, "error": str(e), "timestamp": datetime.utcnow().isoformat()}
+        return {
+            "success": False,
+            "error": str(e),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
 
 
 async def _calculate_weekly_metrics(

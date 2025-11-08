@@ -3,7 +3,7 @@ Station-Aware Authentication Service
 Extends the existing authentication system with multi-tenant station context.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import hashlib
 import secrets
 from typing import Any
@@ -200,7 +200,7 @@ class StationAuthenticationService(BaseAuthenticationService):
         target_station_id: UUID | None = None,
     ) -> tuple[str, str, str, str]:
         """Create JWT tokens with station context embedded."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
 
         # Determine which station to include in token
         current_station_id = target_station_id or station_context.current_station_id
@@ -291,7 +291,7 @@ class StationAuthenticationService(BaseAuthenticationService):
                 jwt_id=jwt_id,
                 role=role.value,
                 permissions=list(permissions),
-                expires_at=datetime.utcnow() + self.station_token_lifetime,
+                expires_at=datetime.now(timezone.utc) + self.station_token_lifetime,
             )
 
             db.add(station_token)
@@ -316,7 +316,7 @@ class StationAuthenticationService(BaseAuthenticationService):
                     StationAccessToken.token_hash == token_hash,
                     StationAccessToken.station_id == station_id,
                     not StationAccessToken.is_revoked,
-                    StationAccessToken.expires_at > datetime.utcnow(),
+                    StationAccessToken.expires_at > datetime.now(timezone.utc),
                 )
             )
 
@@ -343,7 +343,7 @@ class StationAuthenticationService(BaseAuthenticationService):
             stmt = (
                 update(StationAccessToken)
                 .where(and_(*conditions))
-                .values(is_revoked=True, revoked_at=datetime.utcnow())
+                .values(is_revoked=True, revoked_at=datetime.now(timezone.utc))
             )
 
             await db.execute(stmt)

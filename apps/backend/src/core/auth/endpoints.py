@@ -3,7 +3,7 @@ Authentication endpoints for login, logout, MFA, and user management.
 """
 
 import base64
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
 
@@ -155,7 +155,7 @@ async def login(
             )
 
         # Check if account is locked
-        if user.lockout_until and user.lockout_until > datetime.utcnow():
+        if user.lockout_until and user.lockout_until > datetime.now(timezone.utc):
             await audit_log_action(
                 "LOGIN_FAILED",
                 None,
@@ -175,11 +175,11 @@ async def login(
         ):
             # Increment failed attempts
             user.failed_login_attempts += 1
-            user.last_failed_login = datetime.utcnow()
+            user.last_failed_login = datetime.now(timezone.utc)
 
             # Lock account if too many attempts
             if user.failed_login_attempts >= auth_service.max_failed_attempts:
-                user.lockout_until = datetime.utcnow() + auth_service.lockout_duration
+                user.lockout_until = datetime.now(timezone.utc) + auth_service.lockout_duration
 
             await db.commit()
 
@@ -260,8 +260,8 @@ async def login(
         user.failed_login_attempts = 0
         user.last_failed_login = None
         user.lockout_until = None
-        user.last_login_at = datetime.utcnow()
-        user.last_active_at = datetime.utcnow()
+        user.last_login_at = datetime.now(timezone.utc)
+        user.last_active_at = datetime.now(timezone.utc)
 
         # Create session
         session_id = uuid4()
@@ -286,8 +286,8 @@ async def login(
             user_agent=request.headers.get("user-agent"),
             ip_address=request.client.host,
             mfa_verified=mfa_verified,
-            mfa_verified_at=datetime.utcnow() if mfa_verified else None,
-            expires_at=datetime.utcnow()
+            mfa_verified_at=datetime.now(timezone.utc) if mfa_verified else None,
+            expires_at=datetime.now(timezone.utc)
             + (
                 auth_service.refresh_lifetime
                 if login_data.remember_me
@@ -376,7 +376,7 @@ async def refresh_token(
                     UserSession.id == session_id,
                     UserSession.refresh_token_jti == refresh_jti,
                     UserSession.status == SessionStatus.ACTIVE.value,
-                    UserSession.expires_at > datetime.utcnow(),
+                    UserSession.expires_at > datetime.now(timezone.utc),
                 )
             )
         )
@@ -405,9 +405,9 @@ async def refresh_token(
         session.access_token_jti = new_access_jti
         session.refresh_token_jti = new_refresh_jti
         session.refresh_token_hash = auth_service.hash_refresh_token(new_refresh_token)
-        session.last_used_at = datetime.utcnow()
+        session.last_used_at = datetime.now(timezone.utc)
 
-        user.last_active_at = datetime.utcnow()
+        user.last_active_at = datetime.now(timezone.utc)
 
         await db.commit()
 
@@ -448,7 +448,7 @@ async def logout(
     try:
         # Revoke current session
         current_user.session.status = SessionStatus.LOGGED_OUT
-        current_user.session.updated_at = datetime.utcnow()
+        current_user.session.updated_at = datetime.now(timezone.utc)
 
         await db.commit()
 

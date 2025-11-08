@@ -1,78 +1,90 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+import { cn } from '@/lib/utils';
+
+import styles from './Breadcrumb.module.css';
 
 interface BreadcrumbItem {
-  label: string
-  href: string
+  label: string;
+  href: string;
 }
 
 interface BreadcrumbProps {
-  items?: BreadcrumbItem[]
-  className?: string
+  items?: BreadcrumbItem[];
+  className?: string;
+  lightBackground?: boolean;
 }
 
-export default function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
-  const pathname = usePathname()
+export default function Breadcrumb({
+  items,
+  className = '',
+  lightBackground = false,
+}: BreadcrumbProps) {
+  const pathname = usePathname();
 
   // Auto-generate breadcrumbs if not provided
-  const breadcrumbItems = items || generateBreadcrumbs(pathname || '/')
+  const breadcrumbItems = items || generateBreadcrumbs(pathname || '/');
 
   if (breadcrumbItems.length <= 1) {
-    return null // Don't show breadcrumbs for home page or single level
+    return null; // Don't show breadcrumbs for home page or single level
   }
 
   return (
-    <nav aria-label="Breadcrumb" className={`breadcrumb-nav ${className}`}>
-      <ol className="breadcrumb-list">
+    <nav
+      aria-label="Breadcrumb"
+      className={cn(styles.nav, lightBackground && styles.lightBackground, className)}
+    >
+      <ol className={styles.list}>
         {breadcrumbItems.map((item, index) => {
-          const isLast = index === breadcrumbItems.length - 1
+          const isLast = index === breadcrumbItems.length - 1;
 
           return (
-            <li key={item.href} className="breadcrumb-item">
+            <li key={item.href} className={styles.item}>
               {isLast ? (
-                <span className="breadcrumb-current" aria-current="page">
+                <span className={styles.current} aria-current="page">
                   {item.label}
                 </span>
               ) : (
                 <>
-                  <Link href={item.href} className="breadcrumb-link">
+                  <Link href={item.href} className={styles.link}>
                     {item.label}
                   </Link>
-                  <span className="breadcrumb-separator" aria-hidden="true">
+                  <span className={styles.separator} aria-hidden="true">
                     <i className="bi bi-chevron-right"></i>
                   </span>
                 </>
               )}
             </li>
-          )
+          );
         })}
       </ol>
     </nav>
-  )
+  );
 }
 
 // Auto-generate breadcrumbs from pathname
 function generateBreadcrumbs(pathname: string): BreadcrumbItem[] {
-  const segments = pathname.split('/').filter(Boolean)
-  const breadcrumbs: BreadcrumbItem[] = [{ label: 'Home', href: '/' }]
+  const segments = pathname.split('/').filter(Boolean);
+  const breadcrumbs: BreadcrumbItem[] = [{ label: 'Home', href: '/' }];
 
-  let currentPath = ''
+  let currentPath = '';
 
-  segments.forEach(segment => {
-    currentPath += `/${segment}`
+  segments.forEach((segment) => {
+    currentPath += `/${segment}`;
 
     // Convert segment to readable label
-    const label = formatSegmentLabel(segment)
+    const label = formatSegmentLabel(segment);
 
     breadcrumbs.push({
       label,
-      href: currentPath
-    })
-  })
+      href: currentPath,
+    });
+  });
 
-  return breadcrumbs
+  return breadcrumbs;
 }
 
 // Format URL segment to readable label
@@ -95,21 +107,21 @@ function formatSegmentLabel(segment: string): string {
     sacramento: 'Sacramento',
     oakland: 'Oakland',
     fremont: 'Fremont',
-    sunnyvale: 'Sunnyvale'
-  }
+    sunnyvale: 'Sunnyvale',
+  };
 
   if (specialCases[segment]) {
-    return specialCases[segment]
+    return specialCases[segment];
   }
 
   // Default formatting: replace hyphens with spaces and capitalize
-  return segment.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+  return segment.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 }
 
 // Export function for generating structured data
 export function generateBreadcrumbStructuredData(
   items: BreadcrumbItem[],
-  baseUrl: string = 'https://myhibachichef.com'
+  baseUrl: string = 'https://myhibachichef.com',
 ) {
   return {
     '@context': 'https://schema.org',
@@ -118,7 +130,7 @@ export function generateBreadcrumbStructuredData(
       '@type': 'ListItem',
       position: index + 1,
       name: item.label,
-      item: `${baseUrl}${item.href}`
-    }))
-  }
+      item: `${baseUrl}${item.href}`,
+    })),
+  };
 }

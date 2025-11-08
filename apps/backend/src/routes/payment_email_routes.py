@@ -8,13 +8,13 @@ Endpoints for managing automatic payment notification email processing:
 - View unmatched notifications
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 
 from core.config import get_settings
 from core.database import get_db
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from services.payment_email_monitor import PaymentEmailMonitor
 from sqlalchemy.orm import Session
 
@@ -49,8 +49,8 @@ class EmailNotificationResponse(BaseModel):
     payment_type: str | None = None
     parsed_at: str
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True
+)
 
 
 class ProcessEmailsRequest(BaseModel):
@@ -150,7 +150,7 @@ async def process_payment_emails(
     - List of any errors encountered
     """
     try:
-        since_date = datetime.utcnow() - timedelta(hours=request.since_hours)
+        since_date = datetime.now(timezone.utc) - timedelta(hours=request.since_hours)
 
         results = service.process_payment_emails(
             since_date=since_date,
@@ -165,7 +165,7 @@ async def process_payment_emails(
             payments_matched=results["payments_matched"],
             payments_confirmed=results["payments_confirmed"],
             errors=results["errors"],
-            processed_at=datetime.utcnow().isoformat(),
+            processed_at=datetime.now(timezone.utc).isoformat(),
         )
 
     except Exception as e:
@@ -199,7 +199,7 @@ async def get_recent_notifications(
     - Email metadata (subject, from, received date)
     """
     try:
-        since_date = datetime.utcnow() - timedelta(hours=min(since_hours, 168))
+        since_date = datetime.now(timezone.utc) - timedelta(hours=min(since_hours, 168))
 
         notifications = email_monitor.get_unread_payment_emails(
             since_date=since_date,
@@ -238,7 +238,7 @@ async def get_unmatched_notifications(
     List of unmatched payment notifications that need manual processing
     """
     try:
-        since_date = datetime.utcnow() - timedelta(hours=min(since_hours, 168))
+        since_date = datetime.now(timezone.utc) - timedelta(hours=min(since_hours, 168))
 
         unmatched = service.get_unmatched_notifications(since_date=since_date)
 
@@ -360,7 +360,7 @@ async def get_email_monitoring_status(
             "email_address": email_monitor.email_address,
             "imap_server": email_monitor.imap_server,
             "configured": bool(email_monitor.app_password),
-            "last_checked": datetime.utcnow().isoformat(),
+            "last_checked": datetime.now(timezone.utc).isoformat(),
         }
 
     except Exception as e:
@@ -369,7 +369,7 @@ async def get_email_monitoring_status(
             "status": "error",
             "email_address": email_monitor.email_address,
             "error": str(e),
-            "last_checked": datetime.utcnow().isoformat(),
+            "last_checked": datetime.now(timezone.utc).isoformat(),
         }
 
 

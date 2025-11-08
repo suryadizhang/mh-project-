@@ -15,7 +15,7 @@ Architecture:
 """
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import os
 import time
@@ -95,7 +95,7 @@ class ServiceHealthCheck(BaseModel):
             details=details,
             response_time_ms=response_time_ms,
             error=error,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
         )
 
 
@@ -129,7 +129,11 @@ class ReadinessResponse(BaseModel):
     ) -> "ReadinessResponse":
         """Factory method to create ReadinessResponse with automatic timestamp."""
         return cls(
-            status=status, checks=checks, ready=ready, details=details, timestamp=datetime.utcnow()
+            status=status,
+            checks=checks,
+            ready=ready,
+            details=details,
+            timestamp=datetime.now(timezone.utc),
         )
 
 
@@ -156,7 +160,10 @@ class LivenessResponse(BaseModel):
     def create(cls, uptime_seconds: float, pid: int, status: str = "alive") -> "LivenessResponse":
         """Factory method to create LivenessResponse with automatic timestamp."""
         return cls(
-            status=status, uptime_seconds=uptime_seconds, pid=pid, timestamp=datetime.utcnow()
+            status=status,
+            uptime_seconds=uptime_seconds,
+            pid=pid,
+            timestamp=datetime.now(timezone.utc),
         )
 
 
@@ -207,7 +214,7 @@ class DetailedHealthResponse(BaseModel):
             services=services,
             system=system,
             configuration=configuration,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
         )
 
 
@@ -731,7 +738,7 @@ async def basic_health_check():
     """
     return {
         "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "uptime_seconds": round(time.time() - STARTUP_TIME, 2),
         "service": "myhibachi-backend",
     }

@@ -13,7 +13,7 @@ Author: MyHibachi Development Team
 Created: October 31, 2025
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from typing import Any
 
@@ -67,7 +67,7 @@ async def weekly_kb_refresh(db: AsyncSession):
         #             "metadata": {
         #                 "source": "training_data",
         #                 "quality_score": qa["quality_score"],
-        #                 "added_at": datetime.utcnow().isoformat()
+        #                 "added_at": datetime.now(timezone.utc).isoformat()
         #             }
         #         })
         #         added_count += 1
@@ -82,12 +82,16 @@ async def weekly_kb_refresh(db: AsyncSession):
         return {
             "success": True,
             "pairs_added": added_count,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
     except Exception as e:
         logger.exception(f"❌ Error during KB refresh: {e}")
-        return {"success": False, "error": str(e), "timestamp": datetime.utcnow().isoformat()}
+        return {
+            "success": False,
+            "error": str(e),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
 
 
 async def get_kb_refresh_stats(db: AsyncSession) -> dict[str, Any]:

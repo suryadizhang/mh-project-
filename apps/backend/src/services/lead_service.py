@@ -3,7 +3,7 @@ Lead Service Layer
 Handles lead generation, tracking, and scoring
 """
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 import logging
 from typing import Any
 from uuid import UUID, uuid4
@@ -26,6 +26,7 @@ from core.exceptions import (
 )
 from sqlalchemy import String, and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from utils.validators import validate_email, validate_phone, ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -70,8 +71,33 @@ class LeadService:
 
         Returns:
             Created Lead object
+            
+        Raises:
+            BusinessLogicException: If validation fails or creation fails
+            ValidationError: If contact information is invalid
         """
         try:
+            # Validate contact information before creating lead
+            if contact_info.get("email"):
+                try:
+                    contact_info["email"] = validate_email(contact_info["email"])
+                except ValidationError as e:
+                    logger.error(f"Invalid email in create_lead: {e}", extra={"email": contact_info.get("email")})
+                    raise BusinessLogicException(
+                        message=f"Invalid email address: {e}",
+                        error_code=ErrorCode.VALIDATION_ERROR,
+                    )
+            
+            if contact_info.get("phone"):
+                try:
+                    contact_info["phone"] = validate_phone(contact_info["phone"])
+                except ValidationError as e:
+                    logger.error(f"Invalid phone in create_lead: {e}", extra={"phone": contact_info.get("phone")})
+                    raise BusinessLogicException(
+                        message=f"Invalid phone number: {e}",
+                        error_code=ErrorCode.VALIDATION_ERROR,
+                    )
+            
             # Create lead
             lead = Lead(
                 id=uuid4(),
@@ -249,6 +275,10 @@ class LeadService:
 
         Returns:
             Created Lead object
+            
+        Raises:
+            BusinessLogicException: If validation fails
+            ValidationError: If phone or email format is invalid
         """
         # Validate required fields
         if not phone:
@@ -256,6 +286,27 @@ class LeadService:
                 message="Phone number is required for lead generation",
                 error_code=ErrorCode.VALIDATION_ERROR,
             )
+        
+        # Validate phone and email formats
+        try:
+            phone = validate_phone(phone)
+        except ValidationError as e:
+            logger.error(f"Invalid phone in capture_quote_request: {e}", extra={"phone": phone})
+            raise BusinessLogicException(
+                message=f"Invalid phone number: {e}",
+                error_code=ErrorCode.VALIDATION_ERROR,
+            )
+        
+        if email:
+            try:
+                email = validate_email(email)
+            except ValidationError as e:
+                logger.error(f"Invalid email in capture_quote_request: {e}", extra={"email": email})
+                raise BusinessLogicException(
+                    message=f"Invalid email address: {e}",
+                    error_code=ErrorCode.VALIDATION_ERROR,
+                )
+        
         # Parse budget to cents
         budget_cents = None
         if budget:
@@ -408,10 +459,10 @@ class LeadService:
 
         old_status = lead.status
         lead.status = status
-        lead.updated_at = datetime.utcnow()
+        lead.updated_at = datetime.now(timezone.utc)
 
         if status == LeadStatus.CONVERTED:
-            lead.conversion_date = datetime.utcnow()
+            lead.conversion_date = datetime.now(timezone.utc)
 
         # Log status change event
         event = LeadEvent(
@@ -442,7 +493,7 @@ class LeadService:
         old_score = lead.score
 
         lead.score = new_score
-        lead.updated_at = datetime.utcnow()
+        lead.updated_at = datetime.now(timezone.utc)
 
         # Update quality based on new score
         if new_score >= 70:

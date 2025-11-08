@@ -5,7 +5,7 @@ Protects external service calls (Stripe, RingCentral, etc.) from cascade failure
 
 import asyncio
 from collections.abc import Callable
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from functools import wraps
 import logging
@@ -74,7 +74,7 @@ class CircuitBreaker:
         self.failure_count = 0
         self.success_count = 0
         self.last_failure_time: datetime | None = None
-        self.last_state_change: datetime = datetime.utcnow()
+        self.last_state_change: datetime = datetime.now(timezone.utc)
 
     async def call(self, func: Callable, *args, **kwargs) -> Any:
         """
@@ -125,7 +125,7 @@ class CircuitBreaker:
         if not self.last_failure_time:
             return True
 
-        time_since_failure = (datetime.utcnow() - self.last_failure_time).total_seconds()
+        time_since_failure = (datetime.now(timezone.utc) - self.last_failure_time).total_seconds()
         return time_since_failure >= self.recovery_timeout
 
     def _transition_to_half_open(self):
@@ -133,7 +133,7 @@ class CircuitBreaker:
         logger.info("Circuit breaker transitioning to HALF_OPEN")
         self.state = CircuitState.HALF_OPEN
         self.success_count = 0
-        self.last_state_change = datetime.utcnow()
+        self.last_state_change = datetime.now(timezone.utc)
 
     def _on_success(self):
         """Handle successful call"""
@@ -154,7 +154,7 @@ class CircuitBreaker:
     def _on_failure(self):
         """Handle failed call"""
         self.failure_count += 1
-        self.last_failure_time = datetime.utcnow()
+        self.last_failure_time = datetime.now(timezone.utc)
 
         logger.warning(
             f"Circuit breaker failure count: {self.failure_count}/{self.failure_threshold}"
@@ -173,7 +173,7 @@ class CircuitBreaker:
         """Open the circuit"""
         logger.error(f"Circuit breaker OPENING after {self.failure_count} failures")
         self.state = CircuitState.OPEN
-        self.last_state_change = datetime.utcnow()
+        self.last_state_change = datetime.now(timezone.utc)
 
     def _close_circuit(self):
         """Close the circuit"""
@@ -181,7 +181,7 @@ class CircuitBreaker:
         self.state = CircuitState.CLOSED
         self.failure_count = 0
         self.success_count = 0
-        self.last_state_change = datetime.utcnow()
+        self.last_state_change = datetime.now(timezone.utc)
 
     def get_state(self) -> dict:
         """Get current circuit breaker state"""

@@ -1,39 +1,41 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
+
+import styles from './BackToTopButton.module.css';
 
 export default function BackToTopButton() {
-  const [isVisible, setIsVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(false);
 
   // Show button when page is scrolled down
   useEffect(() => {
     const toggleVisibility = () => {
       if (window.pageYOffset > 300) {
-        setIsVisible(true)
+        setIsVisible(true);
       } else {
-        setIsVisible(false)
+        setIsVisible(false);
       }
-    }
+    };
 
-    window.addEventListener('scroll', toggleVisibility)
+    window.addEventListener('scroll', toggleVisibility);
 
-    return () => window.removeEventListener('scroll', toggleVisibility)
-  }, [])
+    return () => window.removeEventListener('scroll', toggleVisibility);
+  }, []);
 
   // Scroll to top smoothly
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
-    })
-  }
+      behavior: 'smooth',
+    });
+  };
 
   return (
     <>
       {isVisible && (
         <button
           onClick={scrollToTop}
-          className="back-to-top-button"
+          className={styles.button}
           aria-label="Back to top"
           type="button"
         >
@@ -41,5 +43,5 @@ export default function BackToTopButton() {
         </button>
       )}
     </>
-  )
+  );
 }

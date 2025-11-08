@@ -5,7 +5,7 @@ Generic repository with CRUD operations and query builders
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from typing import Any, Generic, TypeVar
 from uuid import UUID
@@ -195,9 +195,9 @@ class BaseRepository(IRepository[TModel]):
         """Create new entity"""
         # Set audit fields if available
         if hasattr(entity, "created_at") and not entity.created_at:
-            entity.created_at = datetime.utcnow()
+            entity.created_at = datetime.now(timezone.utc)
         if hasattr(entity, "updated_at"):
-            entity.updated_at = datetime.utcnow()
+            entity.updated_at = datetime.now(timezone.utc)
 
         self.db.add(entity)
         await self.db.flush()  # Flush to get ID
@@ -208,7 +208,7 @@ class BaseRepository(IRepository[TModel]):
         """Update existing entity"""
         # Set audit fields if available
         if hasattr(entity, "updated_at"):
-            entity.updated_at = datetime.utcnow()
+            entity.updated_at = datetime.now(timezone.utc)
 
         await self.db.flush()
         await self.db.refresh(entity)
@@ -222,7 +222,7 @@ class BaseRepository(IRepository[TModel]):
 
         if self.soft_delete and hasattr(entity, "deleted_at"):
             # Soft delete
-            entity.deleted_at = datetime.utcnow()
+            entity.deleted_at = datetime.now(timezone.utc)
             await self.db.flush()
         else:
             # Hard delete
@@ -291,9 +291,9 @@ class BaseRepository(IRepository[TModel]):
         """Bulk create entities"""
         for entity in entities:
             if hasattr(entity, "created_at") and not entity.created_at:
-                entity.created_at = datetime.utcnow()
+                entity.created_at = datetime.now(timezone.utc)
             if hasattr(entity, "updated_at"):
-                entity.updated_at = datetime.utcnow()
+                entity.updated_at = datetime.now(timezone.utc)
 
         self.db.add_all(entities)
         await self.db.flush()
@@ -307,7 +307,7 @@ class BaseRepository(IRepository[TModel]):
     async def bulk_update(self, filters: list[FilterCriteria], update_data: dict[str, Any]) -> int:
         """Bulk update entities matching filters"""
         if hasattr(self.model, "updated_at"):
-            update_data["updated_at"] = datetime.utcnow()
+            update_data["updated_at"] = datetime.now(timezone.utc)
 
         query = update(self.model)
 

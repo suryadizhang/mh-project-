@@ -19,7 +19,7 @@ Author: MyHibachi Development Team
 Created: October 31, 2025
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import re
 from typing import Any
@@ -163,7 +163,7 @@ class PIIScrubber:
             "metadata": {
                 "original_length": len(text),
                 "cleaned_length": len(cleaned),
-                "scrubbed_at": datetime.utcnow().isoformat(),
+                "scrubbed_at": datetime.now(timezone.utc).isoformat(),
                 "total_pii_instances": sum(pii_count.values()),
             },
         }

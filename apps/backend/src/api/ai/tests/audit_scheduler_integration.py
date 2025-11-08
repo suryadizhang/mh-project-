@@ -13,7 +13,7 @@ This audit script validates:
 """
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 import os
 import sys
@@ -540,7 +540,7 @@ class SchedulerIntegrationAudit:
             job_id = await orchestrator.schedule_post_event_followup(
                 conversation_id=conv_id,
                 user_id=user_id,
-                event_date=datetime.utcnow() + timedelta(days=7),
+                event_date=datetime.now(timezone.utc) + timedelta(days=7),
             )
             duration_ms = (time.time() - start) * 1000
 
@@ -599,7 +599,7 @@ class SchedulerIntegrationAudit:
             await orchestrator.schedule_post_event_followup(
                 conversation_id="invalid",
                 user_id="",  # Empty user_id
-                event_date=datetime.utcnow() + timedelta(days=1),
+                event_date=datetime.now(timezone.utc) + timedelta(days=1),
             )
             # Should handle gracefully (may return None or raise)
             result.passed = True
@@ -618,7 +618,7 @@ class SchedulerIntegrationAudit:
             await orchestrator.schedule_post_event_followup(
                 conversation_id="past_test",
                 user_id="past_user",
-                event_date=datetime.utcnow() - timedelta(days=1),  # Past date
+                event_date=datetime.now(timezone.utc) - timedelta(days=1),  # Past date
             )
             # Should handle gracefully
             result.passed = True
@@ -635,7 +635,7 @@ class SchedulerIntegrationAudit:
         try:
             conv_id = f"dup_test_{time.time()}"
             user_id = f"dup_user_{time.time()}"
-            event_date = datetime.utcnow() + timedelta(days=5)
+            event_date = datetime.now(timezone.utc) + timedelta(days=5)
 
             # First schedule
             job_id_1 = await orchestrator.schedule_post_event_followup(

@@ -3,7 +3,7 @@ Quality Monitor - Detect degradation and trigger auto-rollback
 Monitors student model performance and prevents quality issues
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 from typing import Any
 
@@ -35,7 +35,7 @@ class QualityAlert:
         self.current_value = current_value
         self.expected_value = expected_value
         self.message = message
-        self.timestamp = datetime.utcnow()
+        self.timestamp = datetime.now(timezone.utc)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -104,7 +104,7 @@ class QualityMonitor:
         """Check if similarity scores are degrading"""
 
         # Get baseline (last 30 days)
-        baseline_date = datetime.utcnow() - timedelta(days=30)
+        baseline_date = datetime.now(timezone.utc) - timedelta(days=30)
         baseline_query = select(func.avg(AITutorPair.similarity_score)).where(
             and_(
                 AITutorPair.agent_type == intent,
@@ -116,7 +116,7 @@ class QualityMonitor:
         baseline_sim = result.scalar() or 0.0
 
         # Get recent (last 24 hours)
-        recent_date = datetime.utcnow() - timedelta(hours=24)
+        recent_date = datetime.now(timezone.utc) - timedelta(hours=24)
         recent_query = select(func.avg(AITutorPair.similarity_score)).where(
             and_(
                 AITutorPair.agent_type == intent,
@@ -154,7 +154,7 @@ class QualityMonitor:
         """Check if student response time is increasing"""
 
         # Get baseline (last 30 days)
-        baseline_date = datetime.utcnow() - timedelta(days=30)
+        baseline_date = datetime.now(timezone.utc) - timedelta(days=30)
         baseline_query = select(func.avg(AITutorPair.student_response_time_ms)).where(
             and_(
                 AITutorPair.agent_type == intent,
@@ -166,7 +166,7 @@ class QualityMonitor:
         baseline_time = result.scalar() or 0
 
         # Get recent (last 24 hours)
-        recent_date = datetime.utcnow() - timedelta(hours=24)
+        recent_date = datetime.now(timezone.utc) - timedelta(hours=24)
         recent_query = select(func.avg(AITutorPair.student_response_time_ms)).where(
             and_(
                 AITutorPair.agent_type == intent,
@@ -213,7 +213,7 @@ class QualityMonitor:
             {
                 "intent": intent,
                 "reason": reason,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
         )
 
@@ -248,7 +248,7 @@ class QualityMonitor:
 
         Returns detailed metrics for analysis
         """
-        cutoff_date = datetime.utcnow() - timedelta(days=days)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=days)
 
         # Build query
         query = select(AITutorPair).where(AITutorPair.created_at >= cutoff_date)

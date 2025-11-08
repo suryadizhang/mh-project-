@@ -1,120 +1,122 @@
-'use client'
+'use client';
 
-import '@/styles/navbar.css'
+import Image from 'next/image';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 
-import Image from 'next/image'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { cn } from '@/lib/utils';
+
+import styles from './Navbar.module.css';
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false)
-  const pathname = usePathname()
+  const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
   const handleLinkClick = () => {
-    setIsOpen(false) // Close mobile menu when link is clicked
-  }
+    setIsOpen(false); // Close mobile menu when link is clicked
+  };
 
   return (
-    <nav className="navbar navbar-expand-lg custom-navbar">
-      <div className="container navbar-container">
-        <Link href="/" className="navbar-brand navbar-brand-custom">
+    <nav className={cn('navbar navbar-expand-lg', styles.navbar)}>
+      <div className={cn('container', styles.container)}>
+        <Link href="/" className={cn('navbar-brand', styles.brand)}>
           <Image
             src="/My Hibachi logo.png"
             alt="MyHibachi Private Hibachi Chef Bay Area Sacramento San Jose Catering Logo"
             width={238}
             height={238}
-            className="navbar-logo"
+            className={styles.logo}
           />
-          <span className="brand-text">My Hibachi Chef</span>
+          <span className={styles.brandText}>My Hibachi Chef</span>
         </Link>
 
         <button
-          className="navbar-toggler navbar-toggler-custom d-lg-none"
+          className={cn('navbar-toggler d-lg-none', styles.toggler)}
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           aria-controls="navbarNav"
           aria-expanded={isOpen}
         >
-          <span className="navbar-toggler-icon"></span>
+          <span className={cn('navbar-toggler-icon', styles.togglerIcon)}></span>
         </button>
 
-        <div className={`navbar-collapse ${isOpen ? 'show' : ''}`} id="navbarNav">
-          <ul className="navbar-nav navbar-nav-custom ms-auto">
+        <div className={cn('navbar-collapse', styles.navCollapse, isOpen && 'show')} id="navbarNav">
+          <ul className={cn('navbar-nav ms-auto', styles.navList)}>
             {/* Changed to ms-auto for Bootstrap 5 */}
             <li className="nav-item">
               <Link
                 href="/"
-                className={`nav-link nav-link-custom ${pathname === '/' ? 'active' : ''}`}
+                className={cn('nav-link', styles.navLink, pathname === '/' && 'active')}
                 onClick={handleLinkClick}
               >
-                <i className="bi bi-house-fill nav-icon"></i>
-                <span className="nav-text">Home</span>
+                <i className={cn('bi bi-house-fill', styles.navIcon)}></i>
+                <span className={styles.navText}>Home</span>
               </Link>
             </li>
             <li className="nav-item">
               <Link
                 href="/menu"
-                className={`nav-link nav-link-custom ${pathname === '/menu' ? 'active' : ''}`}
+                className={cn('nav-link', styles.navLink, pathname === '/menu' && 'active')}
                 onClick={handleLinkClick}
               >
-                <i className="bi bi-card-list nav-icon"></i>
-                <span className="nav-text">Menu</span>
+                <i className={cn('bi bi-card-list', styles.navIcon)}></i>
+                <span className={styles.navText}>Menu</span>
               </Link>
             </li>
             <li className="nav-item">
               <Link
                 href="/quote"
-                className={`nav-link nav-link-custom ${pathname === '/quote' ? 'active' : ''}`}
+                className={cn('nav-link', styles.navLink, pathname === '/quote' && 'active')}
                 onClick={handleLinkClick}
               >
-                <i className="bi bi-calculator nav-icon"></i>
-                <span className="nav-text">Get Quote</span>
+                <i className={cn('bi bi-calculator', styles.navIcon)}></i>
+                <span className={styles.navText}>Get Quote</span>
               </Link>
             </li>
             <li className="nav-item">
               <Link
                 href="/BookUs"
-                className={`nav-link nav-link-custom ${pathname === '/BookUs' ? 'active' : ''}`}
+                className={cn('nav-link', styles.navLink, pathname === '/BookUs' && 'active')}
                 onClick={handleLinkClick}
               >
-                <i className="bi bi-calendar-check nav-icon"></i>
-                <span className="nav-text">Book Us</span>
+                <i className={cn('bi bi-calendar-check', styles.navIcon)}></i>
+                <span className={styles.navText}>Book Us</span>
               </Link>
             </li>
             <li className="nav-item">
               <Link
                 href="/faqs"
-                className={`nav-link nav-link-custom ${pathname === '/faqs' ? 'active' : ''}`}
+                className={cn('nav-link', styles.navLink, pathname === '/faqs' && 'active')}
                 onClick={handleLinkClick}
               >
-                <i className="bi bi-question-circle nav-icon"></i>
-                <span className="nav-text">FAQs</span>
+                <i className={cn('bi bi-question-circle', styles.navIcon)}></i>
+                <span className={styles.navText}>FAQs</span>
               </Link>
             </li>
             <li className="nav-item">
               <Link
                 href="/contact"
-                className={`nav-link nav-link-custom ${pathname === '/contact' ? 'active' : ''}`}
+                className={cn('nav-link', styles.navLink, pathname === '/contact' && 'active')}
                 onClick={handleLinkClick}
               >
-                <i className="bi bi-chat-dots-fill nav-icon"></i>
-                <span className="nav-text">Contact</span>
+                <i className={cn('bi bi-chat-dots-fill', styles.navIcon)}></i>
+                <span className={styles.navText}>Contact</span>
               </Link>
             </li>
             <li className="nav-item">
               <Link
                 href="/blog"
-                className={`nav-link nav-link-custom ${pathname === '/blog' ? 'active' : ''}`}
+                className={cn('nav-link', styles.navLink, pathname === '/blog' && 'active')}
                 onClick={handleLinkClick}
               >
-                <i className="bi bi-journal-text nav-icon"></i>
-                <span className="nav-text">Blog</span>
+                <i className={cn('bi bi-journal-text', styles.navIcon)}></i>
+                <span className={styles.navText}>Blog</span>
               </Link>
             </li>
           </ul>
         </div>
       </div>
     </nav>
-  )
+  );
 }

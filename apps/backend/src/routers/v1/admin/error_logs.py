@@ -13,7 +13,7 @@ Author: My Hibachi Chef Development Team
 """
 
 import csv
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import io
 import logging
 
@@ -39,7 +39,7 @@ from middleware.structured_logging import (
     ErrorLog,
     resolve_error_log,
 )
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -69,8 +69,7 @@ class ErrorLogResponse(BaseModel):
     resolved_by: int | None
     resolution_notes: str | None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ErrorLogDetailResponse(ErrorLogResponse):
@@ -271,7 +270,7 @@ async def resolve_error(
             "success": True,
             "message": f"Error log {error_log_id} marked as resolved",
             "resolved_by": current_user_id,
-            "resolved_at": datetime.utcnow().isoformat(),
+            "resolved_at": datetime.now(timezone.utc).isoformat(),
         }
 
     except HTTPException:
@@ -296,7 +295,7 @@ async def get_error_statistics(
     Provides insights into error patterns and trends
     """
     try:
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         time_window = now - timedelta(hours=hours)
         one_hour_ago = now - timedelta(hours=1)
 
@@ -470,7 +469,7 @@ async def export_error_logs_csv(
             content=output.getvalue(),
             media_type="text/csv",
             headers={
-                "Content-Disposition": f"attachment; filename=error_logs_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+                "Content-Disposition": f"attachment; filename=error_logs_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.csv"
             },
         )
 

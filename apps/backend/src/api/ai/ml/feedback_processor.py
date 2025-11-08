@@ -12,7 +12,7 @@ Author: MyHibachi Development Team
 Created: October 31, 2025
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 from typing import Any
 
@@ -73,7 +73,7 @@ class FeedbackProcessor:
                 "helpful": feedback.get("helpful"),
                 "accurate": feedback.get("accurate"),
                 "quality_score": quality_score,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
 
             # TODO: Update message.metadata with feedback
@@ -93,7 +93,7 @@ class FeedbackProcessor:
 
             return {
                 "success": True,
-                "feedback_id": f"fb_{message_id}_{int(datetime.utcnow().timestamp())}",
+                "feedback_id": f"fb_{message_id}_{int(datetime.now(timezone.utc).timestamp())}",
                 "promoted_to_training": promoted,
                 "quality_score": quality_score,
             }
@@ -181,7 +181,7 @@ class FeedbackProcessor:
             #     user_message=conversation.user_message,
             #     ai_response=conversation.ai_response,
             #     metadata={
-            #         "promoted_at": datetime.utcnow().isoformat(),
+            #         "promoted_at": datetime.now(timezone.utc).isoformat(),
             #         "quality_score": quality_score,
             #         "channel": conversation.channel
             #     },
@@ -218,7 +218,7 @@ class FeedbackProcessor:
             }
         """
         try:
-            datetime.utcnow() - timedelta(days=days)
+            datetime.now(timezone.utc) - timedelta(days=days)
 
             # TODO: Query messages with feedback
             # result = await db.execute(
@@ -281,7 +281,7 @@ class FeedbackProcessor:
             }
         """
         try:
-            datetime.utcnow() - timedelta(days=days)
+            datetime.now(timezone.utc) - timedelta(days=days)
 
             # TODO: Query training data
             # result = await db.execute(

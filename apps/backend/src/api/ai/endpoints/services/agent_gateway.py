@@ -5,7 +5,7 @@ Handles agent validation, request routing, and response coordination with statio
 """
 
 from collections.abc import AsyncGenerator
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 import logging
 from typing import Any
@@ -928,11 +928,11 @@ class StationAwareAgentGatewayService:
                 "available_agents": [a.value for a in AgentType],
                 "station_aware": True,
                 "rbac_enabled": True,
-                "last_check": datetime.utcnow(),
+                "last_check": datetime.now(timezone.utc),
             }
 
         except Exception as e:
-            return {"healthy": False, "error": str(e), "last_check": datetime.utcnow()}
+            return {"healthy": False, "error": str(e), "last_check": datetime.now(timezone.utc)}
 
     # Legacy compatibility methods (for backward compatibility)
     async def validate_agent(self, agent: str) -> dict[str, Any]:

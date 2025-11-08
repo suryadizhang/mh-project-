@@ -22,7 +22,7 @@ Future Implementation:
 - Graph analytics
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from typing import Any
 
@@ -113,7 +113,7 @@ class Neo4jMemory(MemoryBackend):
             conversation_id=conversation_id,
             role=role,
             content=content,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             metadata=metadata or {},
             channel=channel,
             emotion_score=emotion_score,

@@ -3,7 +3,7 @@ Customer Repository Implementation
 Handles customer-specific data access patterns and business logic
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from enum import Enum
 from typing import Any
 
@@ -139,7 +139,7 @@ class CustomerRepository(BaseRepository[Customer]):
         Returns:
             List of inactive customers, limited for performance
         """
-        cutoff_date = datetime.utcnow() - timedelta(days=days_inactive)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=days_inactive)
 
         return (
             self.session.query(self.model)
@@ -168,7 +168,7 @@ class CustomerRepository(BaseRepository[Customer]):
         Returns:
             List of new customers, limited for performance
         """
-        cutoff_date = datetime.utcnow() - timedelta(days=days_ago)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=days_ago)
 
         return (
             self.session.query(self.model)
@@ -290,8 +290,8 @@ class CustomerRepository(BaseRepository[Customer]):
             "loyalty_points": 0,
             "total_visits": 0,
             "total_spent": 0,
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow(),
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
         }
 
         customer = self.create(customer_data)
@@ -338,7 +338,7 @@ class CustomerRepository(BaseRepository[Customer]):
                 customer.set_dietary_preferences(dietary_prefs)
 
         # Update other fields
-        update_data["updated_at"] = datetime.utcnow()
+        update_data["updated_at"] = datetime.now(timezone.utc)
 
         return self.update(customer_id, update_data)
 
@@ -359,7 +359,7 @@ class CustomerRepository(BaseRepository[Customer]):
             )
 
         customer.add_loyalty_points(points)
-        customer.updated_at = datetime.utcnow()
+        customer.updated_at = datetime.now(timezone.utc)
 
         self.session.commit()
 
@@ -379,12 +379,12 @@ class CustomerRepository(BaseRepository[Customer]):
         if not customer:
             raise_not_found("Customer", str(customer_id))
 
-        visit_datetime = visit_date or datetime.utcnow()
+        visit_datetime = visit_date or datetime.now(timezone.utc)
 
         update_data = {
             "last_visit_date": visit_datetime,
             "total_visits": (customer.total_visits or 0) + 1,
-            "updated_at": datetime.utcnow(),
+            "updated_at": datetime.now(timezone.utc),
         }
 
         if amount_spent_cents:
@@ -408,7 +408,7 @@ class CustomerRepository(BaseRepository[Customer]):
                 "Customer is already VIP", field_errors={"status": ["Already VIP status"]}
             )
 
-        update_data = {"status": CustomerStatus.VIP, "updated_at": datetime.utcnow()}
+        update_data = {"status": CustomerStatus.VIP, "updated_at": datetime.now(timezone.utc)}
 
         return self.update(customer_id, update_data)
 
@@ -421,7 +421,7 @@ class CustomerRepository(BaseRepository[Customer]):
         update_data = {
             "status": CustomerStatus.SUSPENDED,
             "special_notes": f"Suspended: {reason}" if reason else "Account suspended",
-            "updated_at": datetime.utcnow(),
+            "updated_at": datetime.now(timezone.utc),
         }
 
         return self.update(customer_id, update_data)
@@ -432,7 +432,7 @@ class CustomerRepository(BaseRepository[Customer]):
         if not customer:
             raise_not_found("Customer", str(customer_id))
 
-        update_data = {"status": CustomerStatus.ACTIVE, "updated_at": datetime.utcnow()}
+        update_data = {"status": CustomerStatus.ACTIVE, "updated_at": datetime.now(timezone.utc)}
 
         return self.update(customer_id, update_data)
 
@@ -449,7 +449,9 @@ class CustomerRepository(BaseRepository[Customer]):
         )
 
         # New customers this month
-        start_of_month = datetime.utcnow().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        start_of_month = datetime.now(timezone.utc).replace(
+            day=1, hour=0, minute=0, second=0, microsecond=0
+        )
         new_this_month = (
             self.session.query(func.count(self.model.id))
             .filter(and_(self.model.created_at >= start_of_month, not self.model.is_deleted))
@@ -515,7 +517,7 @@ class CustomerRepository(BaseRepository[Customer]):
         )
 
         # Inactive customers (no visit in 90 days)
-        cutoff_date = datetime.utcnow() - timedelta(days=90)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=90)
         inactive_count = (
             self.session.query(func.count(self.model.id))
             .filter(

@@ -13,7 +13,7 @@ Expected Results:
 """
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 import sys
 import time
@@ -44,7 +44,7 @@ async def test_background_scheduling_doesnt_block():
     # Test data
     conversation_id = f"test_conv_{int(time.time())}"
     user_id = f"test_user_{int(time.time())}"
-    event_date = datetime.utcnow() + timedelta(days=7)
+    event_date = datetime.now(timezone.utc) + timedelta(days=7)
     booking_id = f"test_booking_{int(time.time())}"
 
     # Measure time to queue background task
@@ -97,7 +97,7 @@ async def test_simulated_booking_flow():
     # Test data
     user_id = f"booking_test_{int(time.time())}"
     conversation_id = f"conv_{int(time.time())}"
-    event_date = datetime.utcnow() + timedelta(days=14)
+    event_date = datetime.now(timezone.utc) + timedelta(days=14)
     booking_id = f"booking_{int(time.time())}"
 
     # Simulate booking creation flow
@@ -184,7 +184,7 @@ async def test_error_handling():
             scheduler=None,  # Invalid!
             conversation_id="test",
             user_id="test",
-            event_date=datetime.utcnow() + timedelta(days=1),
+            event_date=datetime.now(timezone.utc) + timedelta(days=1),
             booking_id="test",
         )
 

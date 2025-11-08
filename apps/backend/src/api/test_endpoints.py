@@ -453,6 +453,6 @@ async def health_check(
             "error": {
                 "code": "HEALTH_CHECK_FAILED",
                 "message": f"Health check failed: {e!s}",
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             },
         }

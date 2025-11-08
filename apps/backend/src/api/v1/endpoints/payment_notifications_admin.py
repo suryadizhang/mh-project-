@@ -5,7 +5,7 @@ Complete REST API for managing payment notifications and automated matching.
 Includes endpoints for admin UI dashboard, manual review, and testing.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 import logging
 from typing import Any
@@ -21,7 +21,7 @@ from models.payment_notification import (
     PaymentProvider,
 )
 from core.config import UserRole
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy import desc, func
 from sqlalchemy.orm import Session
 
@@ -59,8 +59,7 @@ class NotificationListItem(BaseModel):
     customer_phone: str | None = None
     event_date: datetime | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class NotificationDetail(BaseModel):
@@ -110,8 +109,7 @@ class NotificationDetail(BaseModel):
     booking: dict | None = None
     payment: dict | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class CreateTestBookingRequest(BaseModel):
@@ -125,14 +123,16 @@ class CreateTestBookingRequest(BaseModel):
     alternative_payer_phone: str | None = None
     alternative_payer_venmo: str | None = None
 
-    event_date: datetime = Field(default_factory=lambda: datetime.utcnow() + timedelta(days=7))
+    event_date: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc) + timedelta(days=7)
+    )
     event_location: str = Field(default="123 Test St, San Jose, CA 95123")
     guest_count: int = Field(default=8, ge=1, le=50)
 
     total_amount: float = Field(..., gt=0)
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "customer_name": "Suryadi Zhang",
                 "customer_email": "test@example.com",
@@ -142,6 +142,7 @@ class CreateTestBookingRequest(BaseModel):
                 "guest_count": 8,
             }
         }
+    )
 
 
 class ManualMatchRequest(BaseModel):
@@ -204,7 +205,7 @@ async def get_notification_stats(
     - Recent activity (24h, 7 days)
     - Matching performance metrics
     """
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     day_ago = now - timedelta(days=1)
     week_ago = now - timedelta(days=7)
 
@@ -322,7 +323,7 @@ async def list_notifications(
     - Paginated list of notifications with basic info
     - Includes matched booking info if available
     """
-    since_date = datetime.utcnow() - timedelta(hours=since_hours)
+    since_date = datetime.now(timezone.utc) - timedelta(hours=since_hours)
 
     query = db.query(PaymentNotification).filter(PaymentNotification.received_at >= since_date)
 
@@ -611,7 +612,7 @@ async def manual_match_notification(
             sender_name=notif.sender_name,
             sender_phone=notif.sender_phone,
             sender_username=notif.sender_username,
-            confirmed_at=datetime.utcnow() if request.confirm_payment else None,
+            confirmed_at=datetime.now(timezone.utc) if request.confirm_payment else None,
             admin_note=request.admin_notes,
         )
         db.add(payment)
@@ -625,8 +626,8 @@ async def manual_match_notification(
             if request.confirm_payment
             else PaymentNotificationStatus.MATCHED
         )
-        notif.matched_at = datetime.utcnow()
-        notif.confirmed_at = datetime.utcnow() if request.confirm_payment else None
+        notif.matched_at = datetime.now(timezone.utc)
+        notif.confirmed_at = datetime.now(timezone.utc) if request.confirm_payment else None
         notif.is_processed = True
         notif.admin_notes = request.admin_notes
         notif.reviewed_by = current_user.get("id")

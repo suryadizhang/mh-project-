@@ -3,7 +3,7 @@ WebSocket routes for real-time AI chat
 Provides WebSocket endpoints for live chat functionality with role-based AI routing
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import logging
 
@@ -46,7 +46,7 @@ async def websocket_chat_endpoint(
 
     # Generate conversation ID if not provided
     if not conversation_id:
-        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         conversation_id = f"{channel}_{user_id}_{timestamp}"
 
     # Parse user role
@@ -61,7 +61,7 @@ async def websocket_chat_endpoint(
         "user_id": user_id,
         "channel": channel,
         "user_role": parsed_user_role.value,
-        "connected_at": datetime.utcnow().isoformat(),
+        "connected_at": datetime.now(timezone.utc).isoformat(),
     }
 
     # Connect to WebSocket manager
@@ -151,7 +151,7 @@ async def websocket_chat_endpoint(
                         type=MessageType.SYSTEM,
                         conversation_id=conversation_id,
                         content="pong",
-                        timestamp=datetime.utcnow(),
+                        timestamp=datetime.now(timezone.utc),
                     )
                     await websocket_manager.send_to_websocket(websocket, pong_message)
 
@@ -221,7 +221,7 @@ async def handle_chat_message_with_role(
         await websocket_manager.send_ai_response(
             conversation_id=conversation_id,
             content=response_content,
-            message_id=f"ws_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+            message_id=f"ws_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}",
             metadata={
                 "user_role": user_role.value,
                 "intent": intent,
@@ -271,7 +271,7 @@ async def broadcast_message(conversation_id: str, message: dict):
             type=MessageType.SYSTEM,
             conversation_id=conversation_id,
             content=message.get("content", ""),
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             metadata=message.get("metadata"),
         )
 

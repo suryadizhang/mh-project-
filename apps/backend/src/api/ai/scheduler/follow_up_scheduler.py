@@ -17,7 +17,7 @@ Architecture:
 
 import asyncio
 from collections.abc import Callable
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from enum import Enum
 import logging
 from typing import Any
@@ -329,7 +329,7 @@ class FollowUpScheduler:
                 # Get all pending jobs
                 stmt = select(ScheduledFollowUp).where(
                     ScheduledFollowUp.status == FollowUpStatus.PENDING.value,
-                    ScheduledFollowUp.scheduled_at > datetime.utcnow(),
+                    ScheduledFollowUp.scheduled_at > datetime.now(timezone.utc),
                 )
                 result = await db.execute(stmt)
                 pending_jobs = result.scalars().all()
@@ -564,7 +564,7 @@ class FollowUpScheduler:
                     return False
 
                 followup.status = FollowUpStatus.CANCELLED.value
-                followup.cancelled_at = datetime.utcnow()
+                followup.cancelled_at = datetime.now(timezone.utc)
                 await db.commit()
 
             logger.info(f"Cancelled follow-up: {job_id}")
@@ -662,7 +662,7 @@ class FollowUpScheduler:
                                 "trigger_type": followup.trigger_type,
                                 "template_id": followup.template_id,
                                 "scheduled_at": followup.scheduled_at.isoformat(),
-                                "executed_at": datetime.utcnow().isoformat(),
+                                "executed_at": datetime.now(timezone.utc).isoformat(),
                             },
                         )
                         logger.info(f"Message sent for follow-up: {job_id}")
@@ -677,7 +677,7 @@ class FollowUpScheduler:
 
                 # Update status
                 followup.status = FollowUpStatus.EXECUTED.value
-                followup.executed_at = datetime.utcnow()
+                followup.executed_at = datetime.now(timezone.utc)
                 await db.commit()
 
                 logger.info(f"Successfully executed follow-up: {job_id}")
@@ -792,7 +792,7 @@ class FollowUpScheduler:
         """
         # Return cached result if still valid
         if self._health_cache and self._health_cache_time:
-            cache_age = (datetime.utcnow() - self._health_cache_time).total_seconds()
+            cache_age = (datetime.now(timezone.utc) - self._health_cache_time).total_seconds()
             if cache_age < self._health_cache_ttl:
                 logger.debug(f"Returning cached health check (age: {cache_age:.1f}s)")
                 return self._health_cache
@@ -810,7 +810,9 @@ class FollowUpScheduler:
                 pending_count = result.scalar()
 
                 # Count executed today
-                today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+                today = datetime.now(timezone.utc).replace(
+                    hour=0, minute=0, second=0, microsecond=0
+                )
                 stmt = select(func.count(ScheduledFollowUp.id)).where(
                     ScheduledFollowUp.status == FollowUpStatus.EXECUTED.value,
                     ScheduledFollowUp.executed_at >= today,
@@ -827,7 +829,7 @@ class FollowUpScheduler:
                     "timezone": str(self.timezone),
                     "background_tasks_active": len(_scheduling_background_tasks),
                 }
-                self._health_cache_time = datetime.utcnow()
+                self._health_cache_time = datetime.now(timezone.utc)
 
                 return self._health_cache
 

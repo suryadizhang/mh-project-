@@ -3,7 +3,7 @@ ML Confidence Predictor - Predict student model quality per message
 Uses historical performance to estimate confidence before generation
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 from typing import Any
 
@@ -136,7 +136,7 @@ class ConfidencePredictor:
         logger.info("Training ML confidence predictor...")
 
         # Get training data (recent pairs with similarity scores)
-        cutoff_date = datetime.utcnow() - timedelta(days=30)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=30)
         query = (
             select(AITutorPair)
             .where(
@@ -198,7 +198,7 @@ class ConfidencePredictor:
                 self.intent_baselines[intent] = avg_sim
 
         self.trained = True
-        self.last_training = datetime.utcnow()
+        self.last_training = datetime.now(timezone.utc)
         logger.info(
             f"ML predictor trained on {len(pairs)} pairs. "
             f"Intent baselines: {self.intent_baselines}"
@@ -212,7 +212,9 @@ class ConfidencePredictor:
         if self.last_training is None:
             return True
 
-        hours_since_training = (datetime.utcnow() - self.last_training).total_seconds() / 3600
+        hours_since_training = (
+            datetime.now(timezone.utc) - self.last_training
+        ).total_seconds() / 3600
 
         return hours_since_training >= settings.ML_PREDICTOR_RETRAIN_INTERVAL_HOURS
 
@@ -225,7 +227,7 @@ class ConfidencePredictor:
         Uses simple text similarity (message length + shared words)
         """
         # Get recent pairs with same intent
-        cutoff_date = datetime.utcnow() - timedelta(days=7)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=7)
         query = (
             select(AITutorPair)
             .where(

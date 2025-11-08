@@ -3,7 +3,7 @@ RingCentral utility functions for setup, management, and testing.
 Enhanced to work with existing RingCentralSMSService architecture.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 import os
 from typing import Any
@@ -41,7 +41,7 @@ def generate_jwt_token(
     Returns:
         JWT token string
     """
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     payload = {
         "iss": issuer or app_key,
         "aud": audience or "https://platform.ringcentral.com",

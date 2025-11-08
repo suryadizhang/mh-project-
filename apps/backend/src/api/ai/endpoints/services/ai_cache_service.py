@@ -3,7 +3,7 @@ AI Response Caching Service
 Redis-backed cache for common AI queries to reduce OpenAI API costs and improve response times
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import hashlib
 import json
 import logging
@@ -149,7 +149,7 @@ class AIResponseCache:
                 cached_item = self.memory_cache[cache_key]
 
                 # Check if expired
-                if datetime.fromisoformat(cached_item["expires_at"]) > datetime.utcnow():
+                if datetime.fromisoformat(cached_item["expires_at"]) > datetime.now(timezone.utc):
                     response_data = cached_item["data"]
                     response_data["cached"] = True
                     response_data["cache_timestamp"] = cached_item["timestamp"]
@@ -181,7 +181,7 @@ class AIResponseCache:
             # Add metadata
             cache_data = {
                 **response,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "cache_category": category,
                 "original_message": message,
             }
@@ -194,8 +194,8 @@ class AIResponseCache:
             # Store in memory cache as backup
             self.memory_cache[cache_key] = {
                 "data": cache_data,
-                "timestamp": datetime.utcnow().isoformat(),
-                "expires_at": (datetime.utcnow() + timedelta(seconds=ttl)).isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "expires_at": (datetime.now(timezone.utc) + timedelta(seconds=ttl)).isoformat(),
             }
 
             # Limit memory cache size

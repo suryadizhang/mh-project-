@@ -21,7 +21,7 @@ Run with:
 """
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 import os
 import sys
@@ -173,7 +173,7 @@ class TestFollowUpScheduler(unittest.TestCase):
             )
 
             # Schedule follow-up for 2 days from now
-            event_date = datetime.utcnow() + timedelta(days=2)
+            event_date = datetime.now(timezone.utc) + timedelta(days=2)
             job_id = await self.scheduler.schedule_post_event_followup(
                 conversation_id=self.test_conv_id,
                 user_id=self.test_user_id,
@@ -214,7 +214,7 @@ class TestFollowUpScheduler(unittest.TestCase):
             )
             logger.info(f"Stored high emotion message: {msg_high.id if msg_high else 'FAILED'}")
 
-            event_date = datetime.utcnow() + timedelta(days=1)
+            event_date = datetime.now(timezone.utc) + timedelta(days=1)
             job_id_high = await self.scheduler.schedule_post_event_followup(
                 conversation_id=conv_id_high,
                 user_id=f"{self.test_user_id}_high",
@@ -267,7 +267,7 @@ class TestFollowUpScheduler(unittest.TestCase):
 
         async def run_test():
             # Schedule re-engagement for user inactive for 30 days
-            last_activity = datetime.utcnow() - timedelta(days=25)
+            last_activity = datetime.now(timezone.utc) - timedelta(days=25)
             job_id = await self.scheduler.schedule_reengagement(
                 user_id=f"{self.test_user_id}_reeng",
                 last_activity=last_activity,
@@ -294,7 +294,7 @@ class TestFollowUpScheduler(unittest.TestCase):
         logger.info("\nTEST 5: Duplicate Follow-Up Prevention")
 
         async def run_test():
-            event_date = datetime.utcnow() + timedelta(days=3)
+            event_date = datetime.now(timezone.utc) + timedelta(days=3)
             user_id = f"{self.test_user_id}_dup"
 
             # Schedule first follow-up
@@ -325,7 +325,7 @@ class TestFollowUpScheduler(unittest.TestCase):
 
         async def run_test():
             # Schedule follow-up
-            event_date = datetime.utcnow() + timedelta(days=4)
+            event_date = datetime.now(timezone.utc) + timedelta(days=4)
             user_id = f"{self.test_user_id}_cancel"
 
             job_id = await self.scheduler.schedule_post_event_followup(
@@ -357,8 +357,8 @@ class TestFollowUpScheduler(unittest.TestCase):
             user_id = f"{self.test_user_id}_list"
 
             # Schedule multiple follow-ups with well-separated dates
-            event_date_1 = datetime.utcnow() + timedelta(days=5)
-            event_date_2 = datetime.utcnow() + timedelta(
+            event_date_1 = datetime.now(timezone.utc) + timedelta(days=5)
+            event_date_2 = datetime.now(timezone.utc) + timedelta(
                 days=10
             )  # Changed from 6 to 10 to avoid duplicate detection
 
@@ -407,7 +407,7 @@ class TestFollowUpScheduler(unittest.TestCase):
 
             try:
                 # Schedule follow-up
-                event_date = datetime.utcnow() + timedelta(days=7)
+                event_date = datetime.now(timezone.utc) + timedelta(days=7)
                 user_id = f"{self.test_user_id}_tz"
 
                 job_id = await scheduler_pst.schedule_post_event_followup(

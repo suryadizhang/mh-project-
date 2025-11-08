@@ -5,7 +5,7 @@ ONLY ENABLED IN DEVELOPMENT MODE
 """
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 
 from api.deps import get_current_user
 from core.config import UserRole, get_settings
@@ -87,7 +87,7 @@ async def switch_role(
         )
 
     # Store original role and set expiration
-    expires_at = datetime.utcnow() + timedelta(minutes=request.duration_minutes)
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=request.duration_minutes)
 
     _role_switches[str(current_user.get("id"))] = {
         "original_role": current_user.get("role"),
@@ -170,7 +170,7 @@ async def get_current_role(
     if user_id in _role_switches:
         switch_info = _role_switches[user_id]
         expires_at = switch_info["expires_at"]
-        time_remaining = int((expires_at - datetime.utcnow()).total_seconds() / 60)
+        time_remaining = int((expires_at - datetime.now(timezone.utc)).total_seconds() / 60)
 
         return {
             "current_role": switch_info["target_role"],  # Show switched role

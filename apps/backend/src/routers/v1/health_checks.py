@@ -13,7 +13,7 @@ Author: My Hibachi Chef Development Team
 """
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import time
 
@@ -297,7 +297,7 @@ async def liveness_probe():
     """
     return {
         "status": "alive",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "message": "Application is running",
     }
 
@@ -364,7 +364,7 @@ async def readiness_probe(db: AsyncSession = Depends(get_db)):
 
     response = HealthResponse(
         status=overall_status,
-        timestamp=datetime.utcnow().isoformat(),
+        timestamp=datetime.now(timezone.utc).isoformat(),
         version=getattr(settings, "API_VERSION", "1.0.0"),
         environment=getattr(settings, "ENVIRONMENT", "development"),
         uptime_seconds=uptime_seconds,
@@ -406,7 +406,7 @@ async def startup_probe(db: AsyncSession = Depends(get_db)):
 
         return {
             "status": "ready",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "message": "Application is fully initialized and ready to serve traffic",
             "uptime_seconds": int(time.time() - APP_START_TIME),
         }
@@ -418,6 +418,6 @@ async def startup_probe(db: AsyncSession = Depends(get_db)):
             detail={
                 "status": "not_ready",
                 "message": f"Application is still initializing: {e!s}",
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             },
         )

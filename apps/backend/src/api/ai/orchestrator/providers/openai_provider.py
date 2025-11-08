@@ -10,7 +10,7 @@ Created: 2025-10-31 (Phase 1A)
 
 import asyncio
 from collections.abc import AsyncIterator
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import time
 from typing import Any
@@ -147,7 +147,7 @@ class OpenAIProvider:
                     "total_tokens": response.usage.total_tokens,
                 },
                 "model": response.model,
-                "created_at": datetime.utcnow(),
+                "created_at": datetime.now(timezone.utc),
                 "latency_ms": int((time.time() - start_time) * 1000),
             }
 

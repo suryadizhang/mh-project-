@@ -3,7 +3,7 @@ Common Data Transfer Objects (DTOs)
 Standardized response schemas for API consistency
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -49,7 +49,7 @@ class ApiResponse(BaseModel, Generic[T]):
             success=success,
             data=data,
             message=message,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             request_id=request_id,
         )
 
@@ -94,7 +94,7 @@ class ErrorResponse(BaseModel):
     @classmethod
     def create(cls, error: ErrorDetail, request_id: str | None = None) -> "ErrorResponse":
         """Factory method to create ErrorResponse with automatic timestamp."""
-        return cls(error=error, timestamp=datetime.utcnow(), request_id=request_id)
+        return cls(error=error, timestamp=datetime.now(timezone.utc), request_id=request_id)
 
 
 class PaginationMetadata(BaseModel):
@@ -168,7 +168,7 @@ class PaginatedResponse(BaseModel, Generic[T]):
             data=data,
             pagination=pagination,
             message=message,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             request_id=request_id,
         )
 
@@ -195,7 +195,9 @@ class HealthCheckResponse(BaseModel):
     @classmethod
     def create(cls, status: str, version: str, checks: dict[str, bool]) -> "HealthCheckResponse":
         """Factory method to create HealthCheckResponse with automatic timestamp."""
-        return cls(status=status, version=version, timestamp=datetime.utcnow(), checks=checks)
+        return cls(
+            status=status, version=version, timestamp=datetime.now(timezone.utc), checks=checks
+        )
 
 
 # Helper functions for creating responses
@@ -219,7 +221,7 @@ def create_success_response(
         "success": True,
         "data": data,
         "message": message,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "request_id": request_id,
     }
 
@@ -247,7 +249,7 @@ def create_error_response(
     return {
         "success": False,
         "error": {"code": code, "message": message, "field": field, "details": details or {}},
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "request_id": request_id,
     }
 
@@ -283,6 +285,6 @@ def create_paginated_response(
         "data": items,
         "pagination": pagination_meta.dict(),
         "message": message,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "request_id": request_id,
     }

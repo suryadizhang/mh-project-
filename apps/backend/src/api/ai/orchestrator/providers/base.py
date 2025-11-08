@@ -92,7 +92,7 @@ class ModelProvider(Protocol):
                     "total_tokens": 579
                 },
                 "model": "gpt-4o-mini",
-                "created_at": datetime.utcnow()
+                "created_at": datetime.now(timezone.utc)
             }
         """
         ...

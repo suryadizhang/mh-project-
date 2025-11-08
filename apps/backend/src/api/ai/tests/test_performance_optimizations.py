@@ -9,7 +9,7 @@ Tests the performance improvements from:
 """
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import sys
 import time
 
@@ -44,7 +44,9 @@ async def test_performance():
     # Measure scheduling time
     start = time.time()
     job_id = await orchestrator.schedule_post_event_followup(
-        conversation_id=conv_id, user_id=user_id, event_date=datetime.utcnow() + timedelta(days=7)
+        conversation_id=conv_id,
+        user_id=user_id,
+        event_date=datetime.now(timezone.utc) + timedelta(days=7),
     )
     duration_ms = (time.time() - start) * 1000
 

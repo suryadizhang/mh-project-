@@ -25,7 +25,7 @@ Performance:
 """
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 import time
 from typing import Any
@@ -283,7 +283,7 @@ class PostgreSQLMemory(MemoryBackend):
                 from sqlalchemy.dialects.postgresql import insert
 
                 message_id = str(uuid4())
-                message_timestamp = datetime.utcnow()
+                message_timestamp = datetime.now(timezone.utc)
                 message_metadata = metadata or {}
 
                 # OPTIMIZATION: Use UPSERT to create/update conversation in one query
@@ -453,7 +453,7 @@ class PostgreSQLMemory(MemoryBackend):
                 msg_query = select(AIMessage).where(AIMessage.conversation_id.in_(conversation_ids))
 
                 if days:
-                    cutoff = datetime.utcnow() - timedelta(days=days)
+                    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
                     msg_query = msg_query.where(AIMessage.timestamp >= cutoff)
 
                 msg_query = msg_query.order_by(AIMessage.timestamp.desc()).limit(limit)
@@ -537,7 +537,7 @@ class PostgreSQLMemory(MemoryBackend):
 
                 if escalated is not None and escalated and not conversation.escalated:
                     conversation.escalated = True
-                    conversation.escalated_at = datetime.utcnow()
+                    conversation.escalated_at = datetime.now(timezone.utc)
                     logger.warning(f"Conversation {conversation_id} escalated to human agent")
 
                 await db.commit()
@@ -559,7 +559,7 @@ class PostgreSQLMemory(MemoryBackend):
                     raise MemoryNotFoundError(f"Conversation {conversation_id} not found")
 
                 conversation.is_active = False
-                conversation.closed_at = datetime.utcnow()
+                conversation.closed_at = datetime.now(timezone.utc)
                 conversation.closed_reason = reason
 
                 await db.commit()
@@ -632,7 +632,7 @@ class PostgreSQLMemory(MemoryBackend):
 
         try:
             async with get_db_context() as db:
-                cutoff = datetime.utcnow() - timedelta(hours=hours)
+                cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
 
                 query = select(AIConversation).where(
                     and_(AIConversation.escalated, AIConversation.escalated_at >= cutoff)
@@ -707,7 +707,7 @@ class PostgreSQLMemory(MemoryBackend):
 
         try:
             async with get_db_context() as db:
-                cutoff = datetime.utcnow() - timedelta(days=days)
+                cutoff = datetime.now(timezone.utc) - timedelta(days=days)
 
                 # Base query filters
                 conv_filter = AIConversation.started_at >= cutoff

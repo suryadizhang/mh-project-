@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import logging
 
@@ -316,7 +316,7 @@ async def webhook_endpoint(request: Request, db: AsyncSession = Depends(get_db))
 
         # Mark as processed
         webhook_event.processed = True
-        webhook_event.processed_at = datetime.utcnow()
+        webhook_event.processed_at = datetime.now(timezone.utc)
         await db.commit()
 
         return WebhookResponse(

@@ -3,7 +3,7 @@ WebSocket Manager for Real-time AI Chat
 Handles WebSocket connections, message broadcasting, and real-time chat functionality
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 import logging
 
@@ -70,7 +70,7 @@ class ConnectionManager:
                     type=MessageType.CONNECTION_STATUS,
                     conversation_id=conversation_id,
                     content="Connected to AI chat",
-                    timestamp=datetime.utcnow(),
+                    timestamp=datetime.now(timezone.utc),
                 ),
             )
 
@@ -137,7 +137,7 @@ class ConnectionManager:
             type=MessageType.AI_RESPONSE,
             conversation_id=conversation_id,
             content=content,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             message_id=message_id,
             metadata=metadata,
         )
@@ -149,7 +149,7 @@ class ConnectionManager:
             type=MessageType.TYPING,
             conversation_id=conversation_id,
             content="AI is typing..." if is_typing else "",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             metadata={"is_typing": is_typing},
         )
         await self.broadcast_to_conversation(conversation_id, message)
@@ -160,7 +160,7 @@ class ConnectionManager:
             type=MessageType.SYSTEM,
             conversation_id=conversation_id,
             content=content,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
         )
         await self.broadcast_to_conversation(conversation_id, message)
 
@@ -170,7 +170,7 @@ class ConnectionManager:
             type=MessageType.ERROR,
             conversation_id=conversation_id,
             content=f"Error: {error}",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
         )
         await self.broadcast_to_conversation(conversation_id, message)
 

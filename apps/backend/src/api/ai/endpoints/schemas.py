@@ -2,7 +2,7 @@
 Pydantic models for API requests and responses
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 from uuid import UUID
@@ -134,7 +134,7 @@ class WebSocketMessage(BaseModel):
             content=content,
             conversation_id=conversation_id,
             role=role,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             metadata=metadata,
         )
 

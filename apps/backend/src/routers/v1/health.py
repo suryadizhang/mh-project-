@@ -3,7 +3,7 @@ Comprehensive health check endpoints for MyHibachi Backend.
 Provides detailed system status, database connectivity, and external service checks.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import time
 from typing import Any
 
@@ -84,33 +84,27 @@ async def health_check():
         # Database connectivity check
         db_check = await check_database_connectivity()
 
-        overall_status = (
-            "healthy" if db_check["status"] == "healthy" else "unhealthy"
-        )
+        overall_status = "healthy" if db_check["status"] == "healthy" else "unhealthy"
 
         return HealthResponse(
             status=overall_status,
             service="myhibachi-backend-fastapi",
             environment=getattr(settings, "ENVIRONMENT", "development"),
             version="1.2.0",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             uptime_seconds=round(time.time() - startup_time, 2),
             database_status=db_check["status"],
             database_response_time_ms=db_check.get("response_time_ms"),
             checks={
                 "database": db_check,
-                "stripe_configured": bool(
-                    getattr(settings, "stripe_secret_key", None)
-                ),
+                "stripe_configured": bool(getattr(settings, "stripe_secret_key", None)),
                 "email_configured": bool(getattr(settings, "smtp_user", None)),
                 "environment": getattr(settings, "ENVIRONMENT", "development"),
             },
         )
     except Exception as e:
         logger.exception(f"Health check failed: {e}")
-        raise HTTPException(
-            status_code=503, detail=f"Health check failed: {e!s}"
-        )
+        raise HTTPException(status_code=503, detail=f"Health check failed: {e!s}")
 
 
 @router.get("/ready", response_model=ReadinessResponse)
@@ -144,14 +138,12 @@ async def readiness_check():
             database_connected=checks["database"],
             stripe_configured=checks["stripe"],
             email_configured=checks["email"],
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             ready=is_ready,
         )
     except Exception as e:
         logger.exception(f"Readiness check failed: {e}")
-        raise HTTPException(
-            status_code=503, detail=f"Readiness check failed: {e!s}"
-        )
+        raise HTTPException(status_code=503, detail=f"Readiness check failed: {e!s}")
 
 
 @router.get("/live")
@@ -162,7 +154,7 @@ async def liveness_check():
     """
     return {
         "status": "alive",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "service": "myhibachi-backend-fastapi",
         "uptime_seconds": round(time.time() - startup_time, 2),
     }
@@ -183,9 +175,7 @@ async def detailed_health_check():
 
         # Configuration checks
         config_status = {
-            "stripe_configured": bool(
-                getattr(settings, "stripe_secret_key", None)
-            ),
+            "stripe_configured": bool(getattr(settings, "stripe_secret_key", None)),
             "email_configured": bool(getattr(settings, "smtp_user", None)),
             "debug_mode": getattr(settings, "debug", False),
             "environment": getattr(settings, "ENVIRONMENT", "development"),
@@ -193,15 +183,13 @@ async def detailed_health_check():
         }
 
         # Overall status
-        overall_status = (
-            "healthy" if db_check["status"] == "healthy" else "unhealthy"
-        )
+        overall_status = "healthy" if db_check["status"] == "healthy" else "unhealthy"
 
         return {
             "status": overall_status,
             "service": "myhibachi-backend-fastapi",
             "version": "1.2.0",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "uptime_seconds": round(time.time() - startup_time, 2),
             "environment": getattr(settings, "ENVIRONMENT", "development"),
             "database": db_check,
@@ -215,6 +203,4 @@ async def detailed_health_check():
         }
     except Exception as e:
         logger.exception(f"Detailed health check failed: {e}")
-        raise HTTPException(
-            status_code=503, detail=f"Detailed health check failed: {e!s}"
-        )
+        raise HTTPException(status_code=503, detail=f"Detailed health check failed: {e!s}")

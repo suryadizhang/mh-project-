@@ -4,7 +4,7 @@ Provides REST endpoints for chat functionality, conversation management, and kno
 Integrates role-based AI services for customer booking and admin management.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from uuid import uuid4
 
@@ -178,7 +178,7 @@ async def send_chat_message(
             message_id=message_id,
             conversation_id=conversation_id,
             content=response_content,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             channel=request.channel,
             user_role=user_role.value,
             intent=intent,
@@ -353,7 +353,7 @@ async def chat_health_check():
         return {
             "status": "healthy",
             "service": "ai-chat-api",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "version": "1.0.0",
         }
 

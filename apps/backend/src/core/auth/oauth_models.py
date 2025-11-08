@@ -3,7 +3,7 @@ Google OAuth Authentication Models
 Supports any Google account with super admin approval/invitation system.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from enum import Enum
 from uuid import UUID, uuid4
 
@@ -222,7 +222,7 @@ def create_admin_invitation(
         role=role,
         station_id=station_id,
         invited_by=invited_by_id,
-        expires_at=datetime.utcnow() + timedelta(days=expiry_days),
+        expires_at=datetime.now(timezone.utc) + timedelta(days=expiry_days),
         notes=notes,
     )
     return invitation

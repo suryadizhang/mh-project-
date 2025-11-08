@@ -3,7 +3,7 @@ Model Router - Smart AI Model Selection
 Routes requests between OpenAI (teacher) and Ollama (student)
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import random
 from typing import Any, Literal
@@ -25,7 +25,7 @@ class TrafficSplitConfig:
     def __init__(self):
         # Intent -> Percentage of traffic to send to local model
         self.splits: dict[str, int] = {"faq": 0, "quote": 0, "booking": 0}
-        self.last_updated = datetime.utcnow()
+        self.last_updated = datetime.now(timezone.utc)
 
     def get_split(self, intent: str) -> int:
         """Get traffic split percentage for intent"""
@@ -36,7 +36,7 @@ class TrafficSplitConfig:
         if not 0 <= percentage <= 100:
             raise ValueError("Percentage must be between 0 and 100")
         self.splits[intent] = percentage
-        self.last_updated = datetime.utcnow()
+        self.last_updated = datetime.now(timezone.utc)
         logger.info(f"Traffic split updated: {intent} = {percentage}%")
 
     def to_dict(self) -> dict[str, Any]:

@@ -16,7 +16,7 @@ Features:
 - Automatic email verification (Google verifies emails)
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 
 from core.config import get_settings
@@ -139,7 +139,7 @@ async def google_callback(
                 user.avatar_url = avatar_url or user.avatar_url
                 user.is_email_verified = email_verified
                 user.email_verified_at = (
-                    datetime.utcnow() if email_verified else user.email_verified_at
+                    datetime.now(timezone.utc) if email_verified else user.email_verified_at
                 )
             else:
                 # Create new user with PENDING status (awaiting approval)
@@ -151,15 +151,15 @@ async def google_callback(
                     google_id=google_id,
                     status=UserStatus.PENDING,  # Requires super admin approval
                     is_email_verified=email_verified,
-                    email_verified_at=datetime.utcnow() if email_verified else None,
+                    email_verified_at=datetime.now(timezone.utc) if email_verified else None,
                 )
                 db.add(user)
                 is_new_user = True
 
         # Update last login
-        user.last_login_at = datetime.utcnow()
+        user.last_login_at = datetime.now(timezone.utc)
         user.last_login_ip = request.client.host if request.client else None
-        user.last_activity_at = datetime.utcnow()
+        user.last_activity_at = datetime.now(timezone.utc)
 
         await db.commit()
         await db.refresh(user)

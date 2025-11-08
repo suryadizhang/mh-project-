@@ -4,7 +4,7 @@ Manages agent-specific tool permissions and validation.
 Ensures agents can only access tools appropriate for their role.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 import logging
 from typing import Any
@@ -642,8 +642,8 @@ class ToolRegistryService:
                 "total_agents": total_agents,
                 "orphaned_permissions": orphaned_tools,
                 "uncovered_tools": list(uncovered_tools),
-                "last_check": datetime.utcnow(),
+                "last_check": datetime.now(timezone.utc),
             }
 
         except Exception as e:
-            return {"healthy": False, "error": str(e), "last_check": datetime.utcnow()}
+            return {"healthy": False, "error": str(e), "last_check": datetime.now(timezone.utc)}

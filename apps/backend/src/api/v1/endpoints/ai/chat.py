@@ -18,7 +18,7 @@ These mock endpoints serve as:
 TODO comments have been documented with implementation requirements.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from typing import Any
 
@@ -151,17 +151,19 @@ async def get_chat_thread(
     return ChatThread(
         thread_id=thread_id,
         channel="web",
-        created_at=datetime.utcnow(),
-        last_message_at=datetime.utcnow(),
+        created_at=datetime.now(timezone.utc),
+        last_message_at=datetime.now(timezone.utc),
         message_count=2,
         messages=[
             ChatMessage(
-                role="user", content="I want to book a hibachi chef", timestamp=datetime.utcnow()
+                role="user",
+                content="I want to book a hibachi chef",
+                timestamp=datetime.now(timezone.utc),
             ),
             ChatMessage(
                 role="assistant",
                 content="I'd be happy to help you book a hibachi chef! Let me gather some details...",
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
             ),
         ],
     )

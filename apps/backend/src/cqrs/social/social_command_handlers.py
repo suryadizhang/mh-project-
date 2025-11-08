@@ -1,6 +1,6 @@
 """Social media CQRS command handlers."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from typing import Any
 
@@ -181,7 +181,7 @@ class SendSocialReplyHandler(CommandHandler[SendSocialReplyCommand]):
                         command.schedule_send_at.isoformat() if command.schedule_send_at else None
                     ),
                 },
-                "sent_at": command.schedule_send_at or datetime.utcnow(),
+                "sent_at": command.schedule_send_at or datetime.now(timezone.utc),
             }
 
             message = SocialMessage(**message_data)
@@ -200,8 +200,8 @@ class SendSocialReplyHandler(CommandHandler[SendSocialReplyCommand]):
                 message.metadata = {**message.metadata, "send_result": send_result}
 
             # Update thread last activity
-            thread.updated_at = datetime.utcnow()
-            thread.last_message_at = datetime.utcnow()
+            thread.updated_at = datetime.now(timezone.utc)
+            thread.last_message_at = datetime.now(timezone.utc)
 
             # Create outbox event for reply sent
             event_data = {
@@ -272,7 +272,7 @@ class LinkSocialIdentityToCustomerHandler(CommandHandler[LinkSocialIdentityToCus
                 "customer_link": {
                     "confidence_score": command.confidence_score,
                     "verification_method": command.verification_method,
-                    "linked_at": datetime.utcnow().isoformat(),
+                    "linked_at": datetime.now(timezone.utc).isoformat(),
                     "notes": command.notes,
                 },
             }
@@ -331,7 +331,7 @@ class AcknowledgeReviewHandler(CommandHandler[AcknowledgeReviewCommand]):
 
             # Update review status
             review.status = "acknowledged"
-            review.acknowledged_at = datetime.utcnow()
+            review.acknowledged_at = datetime.now(timezone.utc)
             review.acknowledged_by = command.acknowledged_by
             review.assigned_to = command.assigned_to
             review.priority_level = command.priority_level
@@ -339,7 +339,7 @@ class AcknowledgeReviewHandler(CommandHandler[AcknowledgeReviewCommand]):
                 **(review.metadata or {}),
                 "acknowledgment": {
                     "acknowledged_by": command.acknowledged_by,
-                    "acknowledged_at": datetime.utcnow().isoformat(),
+                    "acknowledged_at": datetime.now(timezone.utc).isoformat(),
                     "notes": command.notes,
                     "priority_level": command.priority_level,
                     "assigned_to": command.assigned_to,
@@ -399,7 +399,7 @@ class UpdateThreadStatusHandler(CommandHandler[UpdateThreadStatusCommand]):
             # Update thread
             thread.status = command.status
             thread.assigned_to = command.assigned_to
-            thread.updated_at = datetime.utcnow()
+            thread.updated_at = datetime.now(timezone.utc)
 
             # Update metadata with status change info
             existing_metadata = thread.metadata or {}
@@ -413,7 +413,7 @@ class UpdateThreadStatusHandler(CommandHandler[UpdateThreadStatusCommand]):
                         "from_status": old_status,
                         "to_status": command.status,
                         "updated_by": command.updated_by,
-                        "updated_at": datetime.utcnow().isoformat(),
+                        "updated_at": datetime.now(timezone.utc).isoformat(),
                         "reason": command.reason,
                     },
                 ],
@@ -489,7 +489,7 @@ class CreateSocialAccountHandler(CommandHandler[CreateSocialAccountCommand]):
                 "profile_url": command.profile_url,
                 "avatar_url": command.avatar_url,
                 "is_active": True,
-                "connected_at": datetime.utcnow(),
+                "connected_at": datetime.now(timezone.utc),
                 "connected_by": command.connected_by,
                 "token_ref": command.token_ref,
                 "metadata": command.metadata or {},

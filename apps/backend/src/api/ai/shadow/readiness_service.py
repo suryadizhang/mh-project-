@@ -3,7 +3,7 @@ AI Readiness Service - Shadow Learning Assessment
 Determines when Ollama is ready for production use
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 from typing import Any
 
@@ -218,7 +218,7 @@ class AIReadinessService:
             },
             "quality_metrics": recent_stats,
             "recommendations": self._generate_recommendations(intent_readiness),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
     async def get_intent_readiness(self, db: AsyncSession, intent: str) -> IntentReadiness:
@@ -266,7 +266,7 @@ class AIReadinessService:
     async def _get_recent_performance(self, db: AsyncSession, days: int = 7) -> dict[str, Any]:
         """Get performance metrics for recent period"""
 
-        cutoff_date = datetime.utcnow() - timedelta(days=days)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=days)
 
         # Recent pairs
         recent_query = select(func.count(AITutorPair.id)).where(

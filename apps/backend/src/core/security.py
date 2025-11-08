@@ -13,7 +13,7 @@ Consolidated from:
 import base64
 from collections import defaultdict
 from collections.abc import Callable
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from functools import wraps
 import hashlib
 import hmac
@@ -168,11 +168,13 @@ def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = 
     to_encode = data.copy()
 
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        )
 
-    to_encode.update({"exp": expire, "iat": datetime.utcnow()})
+    to_encode.update({"exp": expire, "iat": datetime.now(timezone.utc)})
 
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256")
     return encoded_jwt
@@ -817,7 +819,7 @@ class AuditLogger:
                 "success": success,
                 "ip_address": ip,
                 "details": details or {},
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             },
         )
 
@@ -831,7 +833,7 @@ class AuditLogger:
                 "action": action,
                 "resource": resource,
                 "success": success,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             },
         )
 
@@ -844,7 +846,7 @@ class AuditLogger:
                 "user_id": user_id,
                 "resource": resource,
                 "operation": operation,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             },
         )
 
@@ -856,7 +858,7 @@ class AuditLogger:
                 "event_type": "security",
                 "security_event": event_type,
                 "details": details,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             },
         )
 

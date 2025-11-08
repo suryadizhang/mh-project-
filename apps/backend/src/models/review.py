@@ -2,7 +2,7 @@
 Customer Review Blog Post models
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 
 from sqlalchemy import (
@@ -127,7 +127,7 @@ class CustomerReviewBlogPost(BaseModel):
         """Approve the review"""
         self.status = "approved"
         self.approved_by = admin_id
-        self.approved_at = datetime.utcnow()
+        self.approved_at = datetime.now(timezone.utc)
         self.rejection_reason = None
 
     def reject(self, admin_id: int, reason: str):

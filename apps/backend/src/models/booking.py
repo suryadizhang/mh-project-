@@ -2,7 +2,7 @@
 Booking model and related enums
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 
 from sqlalchemy import (
@@ -74,6 +74,7 @@ class Booking(BaseModel):
     # Relationships
     customer = relationship("Customer", back_populates="bookings", lazy="select")
     payments = relationship("Payment", back_populates="booking", lazy="select")
+    message_threads = relationship("Thread", back_populates="booking", lazy="select", foreign_keys="[Thread.booking_id]")
 
     def __repr__(self):
         return f"<Booking(id={self.id}, customer_id={self.customer_id}, datetime={self.booking_datetime}, status={self.status})>"
@@ -95,10 +96,10 @@ class Booking(BaseModel):
 
     def get_time_until_booking(self) -> int | None:
         """Get hours until booking (None if past)"""
-        if self.booking_datetime <= datetime.utcnow():
+        if self.booking_datetime <= datetime.now(timezone.utc):
             return None
 
-        time_diff = self.booking_datetime - datetime.utcnow()
+        time_diff = self.booking_datetime - datetime.now(timezone.utc)
         return int(time_diff.total_seconds() / 3600)
 
 
