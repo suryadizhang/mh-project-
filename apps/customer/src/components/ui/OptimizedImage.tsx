@@ -1,20 +1,21 @@
-'use client'
+'use client';
 
-import Image from 'next/image'
-import { useState } from 'react'
+import { ImageIcon } from 'lucide-react';
+import Image from 'next/image';
+import { useState } from 'react';
 
 interface OptimizedImageProps {
-  src: string
-  alt: string
-  width?: number
-  height?: number
-  className?: string
-  priority?: boolean
-  fill?: boolean
-  sizes?: string
-  quality?: number
-  placeholder?: 'blur' | 'empty'
-  blurDataURL?: string
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  className?: string;
+  priority?: boolean;
+  fill?: boolean;
+  sizes?: string;
+  quality?: number;
+  placeholder?: 'blur' | 'empty';
+  blurDataURL?: string;
 }
 
 export default function OptimizedImage({
@@ -28,37 +29,37 @@ export default function OptimizedImage({
   sizes,
   quality = 85,
   placeholder = 'empty',
-  blurDataURL
+  blurDataURL,
 }: OptimizedImageProps) {
-  const [isLoading, setIsLoading] = useState(true)
-  const [hasError, setHasError] = useState(false)
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   // Generate blur placeholder if not provided
   const generateBlurDataURL = (w: number = 10, h: number = 10) => {
     return `data:image/svg+xml;base64,${Buffer.from(
       `<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
         <rect width="100%" height="100%" fill="#f0f0f0"/>
-      </svg>`
-    ).toString('base64')}`
-  }
+      </svg>`,
+    ).toString('base64')}`;
+  };
 
   const handleLoad = () => {
-    setIsLoading(false)
-  }
+    setIsLoading(false);
+  };
 
   const handleError = () => {
-    setIsLoading(false)
-    setHasError(true)
-  }
+    setIsLoading(false);
+    setHasError(true);
+  };
 
   // Fallback image for errors
   if (hasError) {
     return (
       <div className={`image-error-fallback ${className}`}>
-        <i className="bi bi-image" style={{ fontSize: '2rem', color: '#ccc' }}></i>
+        <ImageIcon size={32} className="text-gray-400" />
         <span className="sr-only">{alt}</span>
       </div>
-    )
+    );
   }
 
   const imageProps = {
@@ -71,17 +72,17 @@ export default function OptimizedImage({
     priority,
     ...(placeholder === 'blur' && { placeholder: 'blur' as const }),
     ...(placeholder === 'blur' && {
-      blurDataURL: blurDataURL || generateBlurDataURL(width, height)
+      blurDataURL: blurDataURL || generateBlurDataURL(width, height),
     }),
-    ...(sizes && { sizes })
-  }
+    ...(sizes && { sizes }),
+  };
 
   if (fill) {
-    return <Image {...imageProps} alt={alt} fill />
+    return <Image {...imageProps} alt={alt} fill />;
   }
 
   if (width && height) {
-    return <Image {...imageProps} alt={alt} width={width} height={height} />
+    return <Image {...imageProps} alt={alt} width={width} height={height} />;
   }
 
   // Default responsive image
@@ -93,18 +94,18 @@ export default function OptimizedImage({
       height={600}
       style={{ width: '100%', height: 'auto' }}
     />
-  )
+  );
 }
 
 // Hero image component with optimization
 export function HeroImage({
   src,
   alt,
-  className = ''
+  className = '',
 }: {
-  src: string
-  alt: string
-  className?: string
+  src: string;
+  alt: string;
+  className?: string;
 }) {
   return (
     <OptimizedImage
@@ -118,18 +119,18 @@ export function HeroImage({
       placeholder="blur"
       sizes="100vw"
     />
-  )
+  );
 }
 
 // Card image component
 export function CardImage({
   src,
   alt,
-  className = ''
+  className = '',
 }: {
-  src: string
-  alt: string
-  className?: string
+  src: string;
+  alt: string;
+  className?: string;
 }) {
   return (
     <OptimizedImage
@@ -142,7 +143,7 @@ export function CardImage({
       placeholder="blur"
       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
     />
-  )
+  );
 }
 
 // Avatar/profile image component
@@ -150,12 +151,12 @@ export function AvatarImage({
   src,
   alt,
   size = 100,
-  className = ''
+  className = '',
 }: {
-  src: string
-  alt: string
-  size?: number
-  className?: string
+  src: string;
+  alt: string;
+  size?: number;
+  className?: string;
 }) {
   return (
     <OptimizedImage
@@ -167,18 +168,18 @@ export function AvatarImage({
       className={`avatar-image ${className}`}
       placeholder="blur"
     />
-  )
+  );
 }
 
 // Gallery image component
 export function GalleryImage({
   src,
   alt,
-  className = ''
+  className = '',
 }: {
-  src: string
-  alt: string
-  className?: string
+  src: string;
+  alt: string;
+  className?: string;
 }) {
   return (
     <OptimizedImage
@@ -191,5 +192,5 @@ export function GalleryImage({
       placeholder="blur"
       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
     />
-  )
+  );
 }

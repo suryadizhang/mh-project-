@@ -1,18 +1,19 @@
-import './styles/ContactInfoSection.module.css'
+import './styles/ContactInfoSection.module.css';
 
-import React from 'react'
+import { User } from 'lucide-react';
+import React from 'react';
 
-import { FormSectionProps } from './types'
+import { FormSectionProps } from './types';
 
 const ContactInfoSection: React.FC<FormSectionProps & { className?: string }> = ({
   register,
   errors,
-  className = ''
+  className = '',
 }) => {
   return (
     <div className={`form-section ${className}`}>
       <h3 className="section-title">
-        <i className="bi bi-person-fill me-2"></i>
+        <User className="mr-2 inline-block" size={20} />
         Contact Information
       </h3>
 
@@ -46,8 +47,8 @@ const ContactInfoSection: React.FC<FormSectionProps & { className?: string }> = 
                 required: 'Email is required',
                 pattern: {
                   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: 'Invalid email address'
-                }
+                  message: 'Invalid email address',
+                },
               })}
               placeholder="your.email@example.com"
             />
@@ -87,7 +88,7 @@ const ContactInfoSection: React.FC<FormSectionProps & { className?: string }> = 
               {...register('guestCount', {
                 required: 'Guest count is required',
                 min: { value: 1, message: 'At least 1 guest required' },
-                max: { value: 50, message: 'Maximum 50 guests allowed' }
+                max: { value: 50, message: 'Maximum 50 guests allowed' },
               })}
               placeholder="e.g., 8"
             />
@@ -98,7 +99,7 @@ const ContactInfoSection: React.FC<FormSectionProps & { className?: string }> = 
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ContactInfoSection
+export default ContactInfoSection;

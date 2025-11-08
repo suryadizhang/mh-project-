@@ -1,18 +1,19 @@
-import './styles/VenueAddressSection.module.css'
+import './styles/VenueAddressSection.module.css';
 
-import React from 'react'
+import { MapPin } from 'lucide-react';
+import React from 'react';
 
-import { VenueAddressSectionProps } from './types'
+import { VenueAddressSectionProps } from './types';
 
 const VenueAddressSection: React.FC<VenueAddressSectionProps & { className?: string }> = ({
   register,
   errors,
-  className = ''
+  className = '',
 }) => {
   return (
     <div className={`form-section ${className}`}>
       <h3 className="section-title">
-        <i className="bi bi-geo-alt me-2"></i>
+        <MapPin className="mr-2 inline-block" size={20} />
         Event Venue Address
       </h3>
       <p className="section-description">
@@ -97,7 +98,7 @@ const VenueAddressSection: React.FC<VenueAddressSectionProps & { className?: str
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default VenueAddressSection
+export default VenueAddressSection;

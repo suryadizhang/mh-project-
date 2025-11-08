@@ -1,4 +1,7 @@
-﻿"use client";
+﻿'use client';
+
+import { Phone } from 'lucide-react';
+
 import { initiateCall } from '@/lib/ringcentral';
 
 interface LiveChatButtonProps {
@@ -10,7 +13,7 @@ interface LiveChatButtonProps {
 export default function LiveChatButton({
   className = '',
   variant = 'primary',
-  size = 'md'
+  size = 'md',
 }: LiveChatButtonProps) {
   const handleCallClick = () => {
     initiateCall(); // Opens phone dialer with MyHibachi business number
@@ -22,13 +25,13 @@ export default function LiveChatButton({
     const variantClasses = {
       primary: 'btn-primary',
       outline: 'btn-outline-primary',
-      secondary: 'btn-secondary'
+      secondary: 'btn-secondary',
     };
 
     const sizeClasses = {
       sm: 'btn-sm',
       md: '',
-      lg: 'btn-lg'
+      lg: 'btn-lg',
     };
 
     return `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;
@@ -40,7 +43,7 @@ export default function LiveChatButton({
       className={getButtonClasses()}
       title="Call MyHibachi - Click to dial (916) 740-8768"
     >
-      <i className="bi bi-telephone-fill"></i>
+      <Phone size={18} className="inline-block" />
       <span>Call Us</span>
     </button>
   );

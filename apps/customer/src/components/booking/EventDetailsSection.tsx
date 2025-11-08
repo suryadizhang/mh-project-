@@ -1,13 +1,14 @@
-import 'react-datepicker/dist/react-datepicker.css'
-import '../../../app/BookUs/datepicker.css'
-import './styles/EventDetailsSection.module.css'
+import 'react-datepicker/dist/react-datepicker.css';
+import '../../../app/BookUs/datepicker.css';
+import './styles/EventDetailsSection.module.css';
 
-import { addDays } from 'date-fns'
-import React from 'react'
-import DatePicker from 'react-datepicker'
-import { Controller } from 'react-hook-form'
+import { addDays } from 'date-fns';
+import { CalendarDays } from 'lucide-react';
+import React from 'react';
+import DatePicker from 'react-datepicker';
+import { Controller } from 'react-hook-form';
 
-import { EventDetailsSectionProps } from './types'
+import { EventDetailsSectionProps } from './types';
 
 const EventDetailsSection: React.FC<EventDetailsSectionProps & { className?: string }> = ({
   register,
@@ -18,12 +19,12 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps & { className?: str
   availableTimeSlots,
   loadingTimeSlots,
   isDateDisabled,
-  className = ''
+  className = '',
 }) => {
   return (
     <div className={`form-section ${className}`}>
       <h3 className="section-title">
-        <i className="bi bi-calendar-event me-2"></i>
+        <CalendarDays className="mr-2 inline-block" size={20} />
         Event Details
       </h3>
 
@@ -40,8 +41,8 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps & { className?: str
               render={({ field }) => (
                 <DatePicker
                   selected={field.value}
-                  onChange={date => field.onChange(date)}
-                  filterDate={date => !isDateDisabled(date)}
+                  onChange={(date) => field.onChange(date)}
+                  filterDate={(date) => !isDateDisabled(date)}
                   minDate={new Date()}
                   maxDate={addDays(new Date(), 90)}
                   className={`form-control ${errors.eventDate ? 'is-invalid' : ''}`}
@@ -73,7 +74,7 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps & { className?: str
                 {...register('eventTime', { required: 'Event time is required' })}
               >
                 <option value="">Select a time</option>
-                {availableTimeSlots.map(slot => (
+                {availableTimeSlots.map((slot) => (
                   <option key={slot.time} value={slot.time} disabled={!slot.isAvailable}>
                     {slot.label}{' '}
                     {slot.isAvailable ? `(${slot.available} available)` : '(Fully Booked)'}
@@ -86,7 +87,7 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps & { className?: str
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default EventDetailsSection
+export default EventDetailsSection;

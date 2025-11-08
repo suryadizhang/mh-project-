@@ -1,19 +1,20 @@
-import './styles/CustomerAddressSection.module.css'
+import './styles/CustomerAddressSection.module.css';
 
-import React from 'react'
+import { Home } from 'lucide-react';
+import React from 'react';
 
-import { CustomerAddressSectionProps } from './types'
+import { CustomerAddressSectionProps } from './types';
 
 const CustomerAddressSection: React.FC<CustomerAddressSectionProps & { className?: string }> = ({
   register,
   errors,
   sameAsVenue,
-  className = ''
+  className = '',
 }) => {
   return (
     <div className={`form-section ${className}`}>
       <h3 className="section-title">
-        <i className="bi bi-house me-2"></i>
+        <Home className="mr-2 inline-block" size={20} />
         Your Contact Address
       </h3>
       <p className="section-description">
@@ -116,7 +117,7 @@ const CustomerAddressSection: React.FC<CustomerAddressSectionProps & { className
         </>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default CustomerAddressSection
+export default CustomerAddressSection;

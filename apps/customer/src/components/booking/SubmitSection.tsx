@@ -1,21 +1,26 @@
-import './styles/SubmitSection.module.css'
+import './styles/SubmitSection.module.css';
 
-import React from 'react'
+import { CalendarCheck, Hourglass, Shield } from 'lucide-react';
+import React from 'react';
 
 interface SubmitSectionProps {
-  isSubmitting: boolean
-  className?: string
+  isSubmitting: boolean;
+  className?: string;
 }
 
 const SubmitSection: React.FC<SubmitSectionProps> = ({ isSubmitting, className = '' }) => {
   return (
     <div className={`form-section text-center ${className}`}>
       {/* Newsletter Auto-Subscribe Notice */}
-      <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+      <div className="mb-4 rounded-lg border border-orange-200 bg-orange-50 p-3">
         <p className="text-xs text-gray-700">
-          📧 <strong>You&apos;ll automatically receive our newsletter</strong> with exclusive offers and hibachi tips.
+          📧 <strong>You&apos;ll automatically receive our newsletter</strong> with exclusive offers
+          and hibachi tips.
           <br />
-          <span className="text-gray-600">Don&apos;t want updates? Simply reply <strong>&quot;STOP&quot;</strong> anytime to unsubscribe.</span>
+          <span className="text-gray-600">
+            Don&apos;t want updates? Simply reply <strong>&quot;STOP&quot;</strong> anytime to
+            unsubscribe.
+          </span>
         </p>
       </div>
 
@@ -26,24 +31,24 @@ const SubmitSection: React.FC<SubmitSectionProps> = ({ isSubmitting, className =
       >
         {isSubmitting ? (
           <>
-            <i className="bi bi-hourglass-split me-2"></i>
+            <Hourglass className="mr-2 inline-block" size={20} />
             Processing Booking...
           </>
         ) : (
           <>
-            <i className="bi bi-calendar-check me-2"></i>
+            <CalendarCheck className="mr-2 inline-block" size={20} />
             Submit Booking Request
           </>
         )}
       </button>
-      <p className="mt-3 text-muted">
+      <p className="text-muted mt-3">
         <small>
-          <i className="bi bi-shield-check me-1"></i>
+          <Shield className="mr-1 inline-block" size={16} />
           Your information is secure and will only be used to process your booking.
         </small>
       </p>
     </div>
-  )
-}
+  );
+};
 
-export default SubmitSection
+export default SubmitSection;

@@ -1,8 +1,9 @@
-import './styles/BookingModals.module.css'
+import './styles/BookingModals.module.css';
 
-import React from 'react'
+import { AlertTriangle, ArrowRight, Check, FileText, X } from 'lucide-react';
+import React from 'react';
 
-import { BookingModalProps } from './types'
+import { BookingModalProps } from './types';
 
 const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
   showValidationModal,
@@ -12,20 +13,20 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
   missingFields,
   isSubmitting,
   onAgreementConfirm,
-  onAgreementCancel
+  onAgreementCancel,
   // className = '' // Commented out as it's not used in this component
 }) => {
   const handleCloseValidation = () => {
-    setShowValidationModal(false)
-  }
+    setShowValidationModal(false);
+  };
 
   const handleConfirmAgreement = () => {
-    onAgreementConfirm()
-  }
+    onAgreementConfirm();
+  };
 
   const handleCancelAgreement = () => {
-    onAgreementCancel()
-  }
+    onAgreementCancel();
+  };
 
   return (
     <>
@@ -36,7 +37,7 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">
-                  <i className="bi bi-exclamation-triangle text-warning me-2"></i>
+                  <AlertTriangle className="text-warning mr-2 inline-block" size={20} />
                   Missing Information
                 </h5>
               </div>
@@ -45,7 +46,7 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
                 <ul className="list-unstyled">
                   {missingFields.map((field, index) => (
                     <li key={index} className="mb-1">
-                      <i className="bi bi-arrow-right text-primary me-2"></i>
+                      <ArrowRight className="text-primary mr-2 inline-block" size={16} />
                       {field}
                     </li>
                   ))}
@@ -53,7 +54,7 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-primary" onClick={handleCloseValidation}>
-                  <i className="bi bi-check-lg me-2"></i>
+                  <Check className="mr-2 inline-block" size={18} />
                   Got It
                 </button>
               </div>
@@ -69,7 +70,7 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">
-                  <i className="bi bi-file-text text-primary me-2"></i>
+                  <FileText className="text-primary mr-2 inline-block" size={20} />
                   Booking Agreement & Terms
                 </h5>
               </div>
@@ -87,7 +88,10 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
                   <ul>
                     <li>Final pricing will be confirmed based on guest count and menu selection</li>
                     <li>$100 refundable deposit required to secure booking</li>
-                    <li>Deposit is refundable if canceled 7+ days before event, non-refundable within 7 days</li>
+                    <li>
+                      Deposit is refundable if canceled 7+ days before event, non-refundable within
+                      7 days
+                    </li>
                     <li>Remaining balance due on event day</li>
                     <li>Travel fees may apply for locations outside our standard service area</li>
                   </ul>
@@ -96,7 +100,10 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
                   <ul>
                     <li>Full refund if cancelled 7+ days before event</li>
                     <li>No refund if cancelled within 7 days of event</li>
-                    <li>One free reschedule within 48 hours of booking; additional reschedules cost $100</li>
+                    <li>
+                      One free reschedule within 48 hours of booking; additional reschedules cost
+                      $100
+                    </li>
                   </ul>
 
                   <h6 className="mt-3">Client Responsibilities:</h6>
@@ -119,7 +126,7 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
                   className="btn btn-outline-secondary me-2"
                   onClick={handleCancelAgreement}
                 >
-                  <i className="bi bi-x-lg me-2"></i>
+                  <X className="mr-2 inline-block" size={18} />
                   Cancel
                 </button>
                 <button
@@ -128,7 +135,7 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
                   onClick={handleConfirmAgreement}
                   disabled={isSubmitting}
                 >
-                  <i className="bi bi-check-lg me-2"></i>I Agree - Submit Booking
+                  <Check className="mr-2 inline-block" size={18} />I Agree - Submit Booking
                 </button>
               </div>
             </div>
@@ -136,7 +143,7 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
         </div>
       )}
     </>
-  )
-}
+  );
+};
 
-export default BookingModals
+export default BookingModals;

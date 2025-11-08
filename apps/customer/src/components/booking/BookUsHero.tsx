@@ -1,9 +1,10 @@
-import './styles/BookUsHero.module.css'
+import './styles/BookUsHero.module.css';
 
-import React from 'react'
+import { CalendarCheck, Clock, MapPin, Shield } from 'lucide-react';
+import React from 'react';
 
 interface BookUsHeroProps {
-  className?: string
+  className?: string;
 }
 
 const BookUsHero: React.FC<BookUsHeroProps> = ({ className = '' }) => {
@@ -12,7 +13,7 @@ const BookUsHero: React.FC<BookUsHeroProps> = ({ className = '' }) => {
       <div className="container">
         <div className="hero-content text-center">
           <h1 className="hero-title">
-            <i className="bi bi-calendar-check-fill me-3"></i>
+            <CalendarCheck className="mr-3 inline-block" size={36} />
             Book Your Hibachi Experience
           </h1>
           <p className="hero-subtitle">
@@ -21,22 +22,22 @@ const BookUsHero: React.FC<BookUsHeroProps> = ({ className = '' }) => {
           </p>
           <div className="hero-features">
             <div className="feature-item">
-              <i className="bi bi-shield-check feature-icon"></i>
+              <Shield className="feature-icon" size={24} />
               <span>100% Satisfaction Guaranteed</span>
             </div>
             <div className="feature-item">
-              <i className="bi bi-clock feature-icon"></i>
+              <Clock className="feature-icon" size={24} />
               <span>Flexible Scheduling</span>
             </div>
             <div className="feature-item">
-              <i className="bi bi-geo-alt feature-icon"></i>
+              <MapPin className="feature-icon" size={24} />
               <span>We Come To You</span>
             </div>
           </div>
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default BookUsHero
+export default BookUsHero;
