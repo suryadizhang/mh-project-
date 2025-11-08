@@ -1,4 +1,4 @@
-import contact from '@/data/contact.json' assert { type: 'json' }
+import contact from '@/data/contact.json' assert { type: 'json' };
 
 export function getContactData() {
   return {
@@ -12,25 +12,25 @@ export function getContactData() {
     email: contact.email || '',
     greetings: contact.greetings || {
       loggedIn: 'Hi! How can we help with your hibachi booking?',
-      loggedOut: 'Hi! How can we help with your hibachi booking?'
-    }
-  }
+      loggedOut: 'Hi! How can we help with your hibachi booking?',
+    },
+  };
 }
 
 export function openIG(igUser: string, igDmUrl: string) {
-  const app = `instagram://user?username=${igUser}`
+  const app = `instagram://user?username=${igUser}`;
   if (/Android|iPhone/i.test(navigator.userAgent)) {
-    window.location.href = app
-    setTimeout(() => window.open(igDmUrl || `https://ig.me/m/${igUser}`, '_blank'), 400)
+    window.location.href = app;
+    setTimeout(() => window.open(igDmUrl || `https://ig.me/m/${igUser}`, '_blank'), 400);
   } else {
-    window.open(igDmUrl || `https://ig.me/m/${igUser}`, '_blank')
+    window.open(igDmUrl || `https://ig.me/m/${igUser}`, '_blank');
   }
 
   // GTM tracking
   if (typeof window !== 'undefined' && (window as unknown as { dataLayer?: unknown[] }).dataLayer) {
-    ;(window as unknown as { dataLayer: unknown[] }).dataLayer.push({
+    (window as unknown as { dataLayer: unknown[] }).dataLayer.push({
       event: 'chat_open',
-      channel: 'instagram'
-    })
+      channel: 'instagram',
+    });
   }
 }

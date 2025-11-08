@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 
 import type { FaqItem } from '@/data/faqsData';
+import { HibachiButton } from '@/components/ui/button';
 
 import { FaqItemComponent } from './FaqItem';
 
@@ -12,14 +13,17 @@ interface FaqListProps {
 
 // Helper function to group FAQs by category only
 function groupFAQsByCategory(faqs: FaqItem[]) {
-  const grouped = faqs.reduce((acc, faq) => {
-    const category = faq.category;
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(faq);
-    return acc;
-  }, {} as Record<string, FaqItem[]>);
+  const grouped = faqs.reduce(
+    (acc, faq) => {
+      const category = faq.category;
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(faq);
+      return acc;
+    },
+    {} as Record<string, FaqItem[]>,
+  );
 
   return grouped;
 }
@@ -69,9 +73,9 @@ export function FaqList({ items }: FaqListProps) {
           <h3>No FAQs found</h3>
           <p>If you can&apos;t find what you&apos;re looking for, we&apos;re here to help!</p>
           <div className="no-results-actions">
-            <a href="/contact" className="contact-cta-btn">
+            <HibachiButton href="/contact" variant="primary" size="md">
               Contact us directly
-            </a>
+            </HibachiButton>
           </div>
         </div>
       </div>
