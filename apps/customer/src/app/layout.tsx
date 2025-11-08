@@ -1,84 +1,72 @@
-import './globals.css'
+import './globals.css';
 // Import global styles
-import '@/styles/base.css'
-import '@/styles/utilities.css'
-import '@/styles/accessibility.css'
-import '@/styles/menu.css'
-import '@/styles/menu/menu-features.css'
-import '@/styles/menu/menu-pricing.css'
-import '@/styles/menu/menu-base.css'
-import '@/styles/menu/base.css'
-import '@/styles/pages/menu.page.css'
-import '@/styles/footer.css'
-import '@/styles/free-quote-button.css'
-import '@/styles/quote-calculator.css'
-import '@/styles/back-to-top.css'
-import '@/styles/breadcrumb.css'
-import '@/styles/optimized-image.css'
+import '@/styles/base.css';
+import '@/styles/utilities.css';
+import '@/styles/accessibility.css';
+import '@/styles/menu.css';
+import '@/styles/menu/menu-features.css';
+import '@/styles/menu/menu-pricing.css';
+import '@/styles/menu/menu-base.css';
+import '@/styles/menu/base.css';
+import '@/styles/pages/menu.page.css';
+import '@/styles/footer.css';
+import '@/styles/free-quote-button.css';
+import '@/styles/quote-calculator.css';
+import '@/styles/back-to-top.css';
+import '@/styles/breadcrumb.css';
+import '@/styles/optimized-image.css';
 // PHASE 5 FIX: Cross-browser button standardization - MUST LOAD LAST
-import '@/styles/components/buttons-cross-browser.css'
+import '@/styles/components/buttons-cross-browser.css';
 
-import type { Metadata } from 'next'
-import { Inter, JetBrains_Mono, Poppins } from 'next/font/google'
+import type { Metadata } from 'next';
+import { Inter, JetBrains_Mono, Poppins } from 'next/font/google';
 
-import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
-import ClientLayout from '@/components/layout/ClientLayout'
-import Footer from '@/components/layout/Footer'
-import Navbar from '@/components/layout/Navbar'
-import { QueryProvider } from '@/components/providers/QueryProvider'
-import { PerformanceMonitoring } from '@/components/seo/TechnicalSEO'
-import BackToTopButton from '@/components/ui/BackToTopButton'
-import RateLimitBanner from '@/components/RateLimitBanner'
+import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
+import ClientLayout from '@/components/layout/ClientLayout';
+import Footer from '@/components/layout/Footer';
+import Navbar from '@/components/layout/Navbar';
+import { QueryProvider } from '@/components/providers/QueryProvider';
+import RateLimitBanner from '@/components/RateLimitBanner';
+import { PerformanceMonitoring } from '@/components/seo/TechnicalSEO';
+import BackToTopButton from '@/components/ui/BackToTopButton';
 import {
   generateLocalBusinessSchema,
   generateOrganizationSchema,
   generatePageMetadata,
-  SITE_CONFIG
-} from '@/lib/seo-config'
+  SITE_CONFIG,
+} from '@/lib/seo-config';
 
 const inter = Inter({
   variable: '--font-inter',
-  subsets: ['latin']
-})
+  subsets: ['latin'],
+});
 
 const jetbrainsMono = JetBrains_Mono({
   variable: '--font-jetbrains-mono',
-  subsets: ['latin']
-})
+  subsets: ['latin'],
+});
 
 const poppins = Poppins({
   variable: '--font-poppins',
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700'],
-  display: 'swap'
-})
+  display: 'swap',
+});
 
 export const metadata: Metadata = generatePageMetadata({
   title: SITE_CONFIG.title,
   description: SITE_CONFIG.description,
-  path: '/'
-})
+  path: '/',
+});
 
 export default function RootLayout({
-  children
+  children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Bootstrap CSS */}
-        <link
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-          rel="stylesheet"
-        />
-
-        {/* Bootstrap Icons */}
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
-        />
-
         {/* Performance optimization hints */}
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="preconnect" href="//fonts.gstatic.com" crossOrigin="anonymous" />
@@ -93,24 +81,21 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(generateOrganizationSchema())
+            __html: JSON.stringify(generateOrganizationSchema()),
           }}
         />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(generateLocalBusinessSchema())
+            __html: JSON.stringify(generateLocalBusinessSchema()),
           }}
         />
 
-        {/* Bootstrap JavaScript Bundle */}
-        <script
-          src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-          async
-        ></script>
+        {/* Google Search Console Verification - Add your verification code here when you get it */}
+        {/* <meta name="google-site-verification" content="YOUR_VERIFICATION_CODE_HERE" /> */}
       </head>
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable} ${poppins.variable} antialiased min-h-screen flex flex-col company-background`}
+        className={`${inter.variable} ${jetbrainsMono.variable} ${poppins.variable} company-background flex min-h-screen flex-col antialiased`}
       >
         <QueryProvider>
           {/* Google Analytics 4 */}
@@ -131,5 +116,5 @@ export default function RootLayout({
         </QueryProvider>
       </body>
     </html>
-  )
+  );
 }
