@@ -228,7 +228,7 @@ async def get_escalation_stats(
         )
 
 
-@router.post("/{escalation_id}/send-sms", response_model=SMSResponse)
+@router.post("/{escalation_id}/sms", response_model=SMSResponse)
 async def send_sms_to_customer(
     escalation_id: str,
     request: SendSMSRequest,
@@ -272,4 +272,87 @@ async def send_sms_to_customer(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to send SMS",
+        )
+
+
+@router.post("/{escalation_id}/call", status_code=status.HTTP_202_ACCEPTED)
+async def initiate_call(
+    escalation_id: str,
+    db: Session = Depends(get_database_session),
+    _: None = Depends(require_permission("phone:call")),
+):
+    """
+    Initiate call to customer via RingCentral
+
+    **Permissions:** phone:call
+    """
+    try:
+        service = EscalationService(db)
+        escalation = await service.get_escalation(escalation_id)
+
+        if not escalation:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Escalation {escalation_id} not found",
+            )
+
+        # TODO: Enqueue job to initiate call via RingCentral
+        # from workers.escalation_tasks import initiate_outbound_call
+        # job = initiate_outbound_call.delay(str(escalation.id))
+
+        logger.info(f"Call queued for escalation {escalation_id} to {escalation.customer_phone}")
+
+        return {
+            "escalation_id": escalation_id,
+            "status": "queued",
+            "message": "Call will be initiated via RingCentral",
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to initiate call: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to initiate call",
+        )
+
+
+@router.get("/{escalation_id}/recordings")
+async def get_call_recordings(
+    escalation_id: str,
+    db: Session = Depends(get_database_session),
+    _: None = Depends(require_permission("escalation:read")),
+):
+    """
+    Get call recordings for an escalation
+
+    **Permissions:** escalation:read
+    """
+    try:
+        service = EscalationService(db)
+        escalation = await service.get_escalation(escalation_id)
+
+        if not escalation:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Escalation {escalation_id} not found",
+            )
+
+        # TODO: Implement fetching call recordings from database
+        # For now return empty list
+        recordings = []
+
+        return {
+            "escalation_id": escalation_id,
+            "recordings": recordings,
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get recordings: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to get recordings",
         )
