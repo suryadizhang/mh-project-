@@ -62,6 +62,7 @@ export default function EscalationsPage() {
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
   // Fetch escalations
   const fetchEscalations = async () => {
@@ -76,6 +77,7 @@ export default function EscalationsPage() {
 
       const data: EscalationListResponse = await response.json();
       setEscalations(data.escalations);
+      setLastUpdated(new Date());
       setError(null);
     } catch (err) {
       setError(
@@ -92,17 +94,40 @@ export default function EscalationsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, priorityFilter, searchQuery]);
 
-  // Auto-refresh every 30 seconds
+  // Smart auto-refresh: Only when page is visible and has active escalations
   useEffect(() => {
     if (!autoRefresh) return;
 
-    const interval = setInterval(() => {
-      fetchEscalations();
-    }, 30000); // 30 seconds
+    // Skip if no pending/in-progress escalations (nothing to monitor)
+    const hasActiveEscalations = escalations.some(
+      e =>
+        e.status === 'pending' ||
+        e.status === 'assigned' ||
+        e.status === 'in_progress'
+    );
+    if (!hasActiveEscalations && escalations.length > 0) return;
 
-    return () => clearInterval(interval);
+    // Check if page is visible (stop refreshing when tab is inactive)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchEscalations(); // Refresh immediately when tab becomes visible
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Refresh every 60 seconds (reduced from 30s for efficiency)
+    const interval = setInterval(() => {
+      if (!document.hidden) {
+        fetchEscalations();
+      }
+    }, 60000); // 60 seconds
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoRefresh]);
+  }, [autoRefresh, escalations.length]);
 
   // Priority badge styling
   const getPriorityStyle = (priority: Escalation['priority']) => {
@@ -185,6 +210,17 @@ export default function EscalationsPage() {
     return `${Math.floor(seconds / 86400)}d ago`;
   };
 
+  // Format last updated time
+  const getLastUpdatedText = () => {
+    const seconds = Math.floor(
+      (new Date().getTime() - lastUpdated.getTime()) / 1000
+    );
+    if (seconds < 10) return 'Just now';
+    if (seconds < 60) return `${seconds}s ago`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    return lastUpdated.toLocaleTimeString();
+  };
+
   // Get contact method icon
   const getMethodIcon = (method: Escalation['method']) => {
     switch (method) {
@@ -232,6 +268,11 @@ export default function EscalationsPage() {
             </p>
           </div>
           <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <Clock size={14} />
+              <span>Updated: {getLastUpdatedText()}</span>
+            </div>
+            <div className="h-6 w-px bg-gray-300"></div>
             <label className="flex items-center space-x-2 text-sm">
               <input
                 type="checkbox"
@@ -239,13 +280,21 @@ export default function EscalationsPage() {
                 onChange={e => setAutoRefresh(e.target.checked)}
                 className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
               />
-              <span className="text-gray-700">Auto-refresh (30s)</span>
+              <span className="text-gray-700">Smart refresh (60s)</span>
             </label>
             <button
               onClick={() => fetchEscalations()}
-              className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+              disabled={loading}
+              className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
             >
-              Refresh Now
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Refreshing...</span>
+                </>
+              ) : (
+                <span>Refresh Now</span>
+              )}
             </button>
           </div>
         </div>
