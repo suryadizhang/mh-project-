@@ -182,10 +182,10 @@ async def handle_sms_received(payload: dict):
             escalation.last_customer_response_at = datetime.utcnow()
 
             # Add to metadata
-            if "sms_messages" not in escalation.metadata:
-                escalation.metadata["sms_messages"] = []
+            if "sms_messages" not in escalation.escalation_metadata:
+                escalation.escalation_metadata["sms_messages"] = []
 
-            escalation.metadata["sms_messages"].append(
+            escalation.escalation_metadata["sms_messages"].append(
                 {
                     "message_id": message_id,
                     "from": from_number,
@@ -252,10 +252,10 @@ async def handle_call_started(payload: dict):
             escalation.escalated_at = datetime.utcnow()
 
             # Record call details in metadata
-            if "calls" not in escalation.metadata:
-                escalation.metadata["calls"] = []
+            if "calls" not in escalation.escalation_metadata:
+                escalation.escalation_metadata["calls"] = []
 
-            escalation.metadata["calls"].append(
+            escalation.escalation_metadata["calls"].append(
                 {
                     "rc_call_id": rc_call_id,
                     "from": from_number,
@@ -299,7 +299,7 @@ async def handle_call_ended(payload: dict):
         escalations = db.query(Escalation).all()
 
         for escalation in escalations:
-            calls = escalation.metadata.get("calls", [])
+            calls = escalation.escalation_metadata.get("calls", [])
 
             for call in calls:
                 if call.get("rc_call_id") == rc_call_id:

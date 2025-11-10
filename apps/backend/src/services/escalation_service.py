@@ -131,7 +131,7 @@ class EscalationService:
         escalation.status = EscalationStatus.ASSIGNED
 
         if notes:
-            escalation.metadata["assignment_notes"] = notes
+            escalation.escalation_metadata["assignment_notes"] = notes
 
         self.db.commit()
         self.db.refresh(escalation)
@@ -152,9 +152,9 @@ class EscalationService:
         escalation.updated_at = datetime.utcnow()
 
         if notes:
-            if "status_history" not in escalation.metadata:
-                escalation.metadata["status_history"] = []
-            escalation.metadata["status_history"].append(
+            if "status_history" not in escalation.escalation_metadata:
+                escalation.escalation_metadata["status_history"] = []
+            escalation.escalation_metadata["status_history"].append(
                 {
                     "from": old_status,
                     "to": status,
@@ -195,7 +195,7 @@ class EscalationService:
 
         # TODO: Resume conversation (update conversation.paused = False) if resume_ai is True
         if resume_ai:
-            escalation.metadata["ai_resumed"] = True
+            escalation.escalation_metadata["ai_resumed"] = True
             logger.info(f"AI conversation resumed for escalation {escalation_id}")
 
         self.db.commit()

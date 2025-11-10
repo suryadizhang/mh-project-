@@ -224,11 +224,11 @@ def process_recording_metadata(recording_id: str):
         logger.info(f"Processing metadata for recording {recording_id}")
 
         # Add processing metadata
-        if "processing" not in recording.metadata:
-            recording.metadata["processing"] = {}
+        if "processing" not in recording.recording_metadata:
+            recording.recording_metadata["processing"] = {}
 
-        recording.metadata["processing"]["processed_at"] = datetime.utcnow().isoformat()
-        recording.metadata["processing"]["status"] = "pending"
+        recording.recording_metadata["processing"]["processed_at"] = datetime.utcnow().isoformat()
+        recording.recording_metadata["processing"]["status"] = "pending"
 
         db.commit()
 

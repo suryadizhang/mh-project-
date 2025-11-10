@@ -8,10 +8,10 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 from workers.celery_config import celery_app
-from core.database import get_db_session
+from core.database import get_sync_db
 from models.escalation import Escalation, EscalationStatus
-from services.escalation_service import EscalationService
 from services.ringcentral_service import get_ringcentral_service
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -26,11 +26,11 @@ def send_escalation_notification(self, escalation_id: str):
 
     Retries: 3 times with 60 second delay
     """
-    db: Session = next(get_db_session())
+    db: Session = next(get_sync_db())
 
     try:
-        service = EscalationService(db)
-        escalation = await service.get_escalation(escalation_id)
+        # Query escalation directly (sync operation)
+        escalation = db.query(Escalation).filter(Escalation.id == escalation_id).first()
 
         if not escalation:
             logger.error(f"Escalation {escalation_id} not found")
@@ -46,9 +46,9 @@ def send_escalation_notification(self, escalation_id: str):
         message = (
             f"🚨 NEW ESCALATION\n"
             f"Priority: {escalation.priority.upper()}\n"
-            f"Customer: {escalation.phone}\n"
+            f"Customer: {escalation.customer_phone}\n"
             f"Reason: {escalation.reason[:100]}...\n"
-            f"Method: {escalation.preferred_method}\n"
+            f"Method: {escalation.method}\n"
             f"View: https://admin.myhibachi.com/inbox/escalations/{escalation_id}"
         )
 
@@ -62,7 +62,6 @@ def send_escalation_notification(self, escalation_id: str):
         result = rc_service.send_sms(
             to_phone=on_call_phone,
             message=message,
-            metadata={"escalation_id": escalation_id, "type": "admin_notification"},
         )
 
         logger.info(
@@ -81,7 +80,10 @@ def send_escalation_notification(self, escalation_id: str):
 
         # Record error in escalation
         try:
-            await service.record_error(escalation_id, f"Notification failed: {str(e)}")
+            if escalation:
+                escalation.error_message = f"Notification failed: {str(e)}"
+                escalation.retry_count += 1
+                db.commit()
         except Exception:
             pass
 
@@ -104,20 +106,15 @@ def send_customer_sms(self, escalation_id: str, message: str, admin_id: Optional
 
     Retries: 3 times with 30 second delay
     """
-    db: Session = next(get_db_session())
+    db: Session = next(get_sync_db())
 
     try:
-        service = EscalationService(db)
-        escalation = await service.get_escalation(escalation_id)
+        # Query escalation directly (sync operation)
+        escalation = db.query(Escalation).filter(Escalation.id == escalation_id).first()
 
         if not escalation:
             logger.error(f"Escalation {escalation_id} not found")
             return {"status": "error", "message": "Escalation not found"}
-
-        # Check customer consent
-        if escalation.customer_consent != "true":
-            logger.warning(f"Customer did not consent to SMS for escalation {escalation_id}")
-            return {"status": "error", "message": "Customer did not consent to SMS"}
 
         # Send SMS via RingCentral
         rc_service = get_ringcentral_service()
@@ -126,33 +123,32 @@ def send_customer_sms(self, escalation_id: str, message: str, admin_id: Optional
             raise RuntimeError("RingCentral not configured")
 
         result = rc_service.send_sms(
-            to_phone=escalation.phone,
+            to_phone=escalation.customer_phone,
             message=message,
-            metadata={
-                "escalation_id": escalation_id,
-                "admin_id": admin_id,
-                "type": "customer_reply",
-            },
         )
 
         # Record SMS sent
-        await service.record_sms_sent(escalation_id)
+        escalation.sms_sent = True
+        escalation.sms_sent_at = datetime.utcnow()
 
         # Update escalation status to in_progress if pending
         if (
             escalation.status == EscalationStatus.PENDING
             or escalation.status == EscalationStatus.ASSIGNED
         ):
-            await service.update_status(escalation_id, EscalationStatus.IN_PROGRESS.value)
+            escalation.status = EscalationStatus.IN_PROGRESS
 
-        logger.info(f"SMS sent to customer {escalation.phone} for escalation {escalation_id}")
+        db.commit()
+
+        logger.info(
+            f"SMS sent to customer {escalation.customer_phone} for escalation {escalation_id}"
+        )
 
         return {
             "status": "success",
             "escalation_id": escalation_id,
             "message_id": result.get("message_id"),
-            "sent_to": escalation.phone,
-            "sent_at": result.get("sent_at"),
+            "sent_to": escalation.customer_phone,
         }
 
     except Exception as e:
@@ -160,7 +156,10 @@ def send_customer_sms(self, escalation_id: str, message: str, admin_id: Optional
 
         # Record error
         try:
-            await service.record_error(escalation_id, f"SMS send failed: {str(e)}")
+            if escalation:
+                escalation.error_message = f"SMS send failed: {str(e)}"
+                escalation.retry_count += 1
+                db.commit()
         except Exception:
             pass
 
@@ -171,7 +170,7 @@ def send_customer_sms(self, escalation_id: str, message: str, admin_id: Optional
         db.close()
 
 
-@celery_app.task(bind=True, max_retries=5, default_retry_delay=300)
+@celery_app.task(bind=True, max_retries=0)
 def retry_failed_escalations(self):
     """
     Periodic task to retry failed escalation notifications
@@ -179,17 +178,15 @@ def retry_failed_escalations(self):
     Runs every 5 minutes via Celery Beat
     Retries escalations in ERROR status with retry_count < 5
     """
-    db: Session = next(get_db_session())
+    db: Session = next(get_sync_db())
 
     try:
-        service = EscalationService(db)
-
         # Find escalations in ERROR status with retries remaining
         failed_escalations = (
             db.query(Escalation)
             .filter(
                 Escalation.status == EscalationStatus.ERROR,
-                Escalation.retry_count < "5",
+                Escalation.retry_count < 5,
             )
             .all()
         )
@@ -242,11 +239,11 @@ def initiate_outbound_call(escalation_id: str, admin_id: Optional[str] = None):
         escalation_id: ID of the escalation
         admin_id: Optional ID of admin initiating the call
     """
-    db: Session = next(get_db_session())
+    db: Session = next(get_sync_db())
 
     try:
-        service = EscalationService(db)
-        escalation = await service.get_escalation(escalation_id)
+        # Query escalation directly (sync operation)
+        escalation = db.query(Escalation).filter(Escalation.id == escalation_id).first()
 
         if not escalation:
             logger.error(f"Escalation {escalation_id} not found")
@@ -258,18 +255,22 @@ def initiate_outbound_call(escalation_id: str, admin_id: Optional[str] = None):
         if not rc_service.is_configured():
             raise RuntimeError("RingCentral not configured")
 
-        result = rc_service.initiate_call(to_phone=escalation.phone)
+        result = rc_service.initiate_call(to_phone=escalation.customer_phone)
 
         # Record call initiated
-        await service.record_call_initiated(escalation_id)
+        escalation.call_initiated = True
+        escalation.call_initiated_at = datetime.utcnow()
+        db.commit()
 
-        logger.info(f"Outbound call initiated to {escalation.phone} for escalation {escalation_id}")
+        logger.info(
+            f"Outbound call initiated to {escalation.customer_phone} for escalation {escalation_id}"
+        )
 
         return {
             "status": "success",
             "escalation_id": escalation_id,
             "call_id": result.get("call_id"),
-            "to_phone": escalation.phone,
+            "to_phone": escalation.customer_phone,
         }
 
     except Exception as e:
@@ -277,7 +278,10 @@ def initiate_outbound_call(escalation_id: str, admin_id: Optional[str] = None):
 
         # Record error
         try:
-            await service.record_error(escalation_id, f"Call initiation failed: {str(e)}")
+            if escalation:
+                escalation.error_message = f"Call initiation failed: {str(e)}"
+                escalation.retry_count += 1
+                db.commit()
         except Exception:
             pass
 

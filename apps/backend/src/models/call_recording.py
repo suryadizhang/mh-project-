@@ -111,8 +111,8 @@ class CallRecording(Base):
     file_size_bytes = Column(Integer, nullable=True)  # File size
     content_type = Column(String(100), nullable=True)  # audio/mpeg, audio/wav, etc.
 
-    # Metadata
-    metadata = Column(JSONB, default={}, nullable=False)  # Additional context
+    # Additional data (renamed from 'metadata' to avoid SQLAlchemy reserved name)
+    recording_metadata = Column(JSONB, default={}, nullable=False)  # Additional context
     tags = Column(JSONB, default=[], nullable=False)  # Categorization
 
     # Retention policy
@@ -181,7 +181,7 @@ class CallRecording(Base):
             "last_accessed_at": (
                 self.last_accessed_at.isoformat() if self.last_accessed_at else None
             ),
-            "metadata": self.metadata,
+            "recording_metadata": self.recording_metadata,
             "tags": self.tags,
             "call_started_at": self.call_started_at.isoformat() if self.call_started_at else None,
             "call_ended_at": self.call_ended_at.isoformat() if self.call_ended_at else None,

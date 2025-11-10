@@ -54,7 +54,7 @@ async def create_escalation(
             preferred_method=request.preferred_method,
             priority=request.priority,
             customer_consent=request.customer_consent,
-            metadata=request.metadata,
+            escalation_metadata=request.metadata,
         )
 
         # TODO: Enqueue job to send SMS notification to on-call admin

@@ -126,8 +126,8 @@ class Escalation(Base):
     error_message = Column(Text, nullable=True)  # If notification failed
     retry_count = Column(String(10), default="0", nullable=False)  # SMS/call retry attempts
 
-    # Metadata
-    metadata = Column(JSONB, default={}, nullable=False)  # Additional context
+    # Additional data (renamed from 'metadata' to avoid SQLAlchemy reserved name)
+    escalation_metadata = Column(JSONB, default={}, nullable=False)  # Additional context
     tags = Column(JSONB, default=[], nullable=False)  # Categorization tags
 
     # Timestamps
@@ -171,7 +171,7 @@ class Escalation(Base):
             "resolved_by": self.resolved_by.full_name if self.resolved_by else None,
             "resolution_notes": self.resolution_notes,
             "error_message": self.error_message,
-            "metadata": self.metadata,
+            "escalation_metadata": self.escalation_metadata,
             "tags": self.tags,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,

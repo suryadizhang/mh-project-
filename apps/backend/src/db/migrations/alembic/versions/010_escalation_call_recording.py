@@ -151,7 +151,7 @@ def upgrade() -> None:
         sa.Column("call_initiated_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("error_message", sa.Text, nullable=True),
         sa.Column("retry_count", sa.Integer, nullable=False, server_default="0"),
-        sa.Column("metadata", postgresql.JSONB, nullable=False, server_default="{}"),
+        sa.Column("escalation_metadata", postgresql.JSONB, nullable=False, server_default="{}"),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -217,7 +217,7 @@ def upgrade() -> None:
         sa.Column("accessed_count", sa.Integer, nullable=False, server_default="0"),
         sa.Column("last_accessed_by_id", postgresql.UUID(as_uuid=True), nullable=True),
         sa.Column("last_accessed_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("metadata", postgresql.JSONB, nullable=False, server_default="{}"),
+        sa.Column("recording_metadata", postgresql.JSONB, nullable=False, server_default="{}"),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
