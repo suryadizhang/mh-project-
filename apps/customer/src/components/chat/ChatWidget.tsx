@@ -2,10 +2,12 @@
 
 import { ExternalLink, Send, X } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useCallback,useEffect, useRef, useState } from 'react';
 
-import { logger, logWebSocket } from '@/lib/logger';
 import { ApiErrorBoundary } from '@/components/ErrorBoundary';
+import { logger, logWebSocket } from '@/lib/logger';
+
+import EscalationForm from './EscalationForm';
 
 interface Citation {
   href: string;
@@ -27,10 +29,10 @@ interface ChatWidgetProps {
 
 const WELCOME_SUGGESTIONS: Record<string, string[]> = {
   '/BookUs': [
-    "Book a table for tonight",
+    'Book a table for tonight',
     "What's included in the menu?",
     'How much is the deposit?',
-    "Modify my reservation",
+    'Modify my reservation',
   ],
   '/menu': [
     'Book hibachi for this weekend',
@@ -50,12 +52,7 @@ const WELCOME_SUGGESTIONS: Record<string, string[]> = {
     'Make a reservation',
     'Check availability',
   ],
-  '/blog': [
-    'Book hibachi catering',
-    'Make a reservation',
-    'Schedule an event',
-    'How do I book?',
-  ],
+  '/blog': ['Book hibachi catering', 'Make a reservation', 'Schedule an event', 'How do I book?'],
   default: [
     'Book a table for tonight',
     'Make a reservation',
@@ -70,6 +67,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showHandoff, setShowHandoff] = useState(false);
+  const [showEscalationForm, setShowEscalationForm] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -89,13 +87,13 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
 
   // User contact information state
   const [userName, setUserName] = useState<string | null>(
-    typeof window !== 'undefined' ? localStorage.getItem('mh_user_name') : null
+    typeof window !== 'undefined' ? localStorage.getItem('mh_user_name') : null,
   );
   const [userPhone, setUserPhone] = useState<string | null>(
-    typeof window !== 'undefined' ? localStorage.getItem('mh_user_phone') : null
+    typeof window !== 'undefined' ? localStorage.getItem('mh_user_phone') : null,
   );
   const [userEmail, setUserEmail] = useState<string | null>(
-    typeof window !== 'undefined' ? localStorage.getItem('mh_user_email') : null
+    typeof window !== 'undefined' ? localStorage.getItem('mh_user_email') : null,
   );
   const [showContactPrompt, setShowContactPrompt] = useState(false);
   const [tempName, setTempName] = useState('');
@@ -161,7 +159,12 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
               type: 'assistant',
               content: data.content,
               timestamp: new Date(data.timestamp || Date.now()),
-              confidence: data.metadata?.confidence > 0.7 ? 'high' : data.metadata?.confidence > 0.4 ? 'medium' : 'low',
+              confidence:
+                data.metadata?.confidence > 0.7
+                  ? 'high'
+                  : data.metadata?.confidence > 0.4
+                    ? 'medium'
+                    : 'low',
             };
             setMessages((prev) => [...prev, assistantMessage]);
             setIsLoading(false);
@@ -171,7 +174,8 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
           } else if (data.type === 'connection_status') {
             logWebSocket('status', { content: data.content });
           } else if (data.type === 'system') {
-            if (data.content !== 'pong') { // Filter out ping/pong messages
+            if (data.content !== 'pong') {
+              // Filter out ping/pong messages
               logger.debug('AI API system message', { content: data.content });
             }
           } else if (data.type === 'error') {
@@ -332,7 +336,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
   // Phone formatting helper
   const formatPhoneForDisplay = (value: string): string => {
     const digits = value.replace(/\D/g, '');
-    
+
     if (digits.length <= 3) {
       return digits;
     } else if (digits.length <= 6) {
@@ -346,18 +350,18 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
   const saveContactAndContinue = () => {
     const trimmedName = tempName.trim();
     const cleanedPhone = tempPhone.replace(/\D/g, '');
-    
+
     // Validation
     if (trimmedName.length < 2) {
       setContactError('Please enter your full name (at least 2 characters)');
       return;
     }
-    
+
     if (cleanedPhone.length < 10) {
       setContactError('Please enter a valid phone number (at least 10 digits)');
       return;
     }
-    
+
     // Validate email if provided (optional but recommended for newsletter)
     if (tempEmail.trim()) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -366,7 +370,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
         return;
       }
     }
-    
+
     // Save to state (will trigger localStorage save via useEffect)
     setUserName(trimmedName);
     setUserPhone(cleanedPhone);
@@ -378,15 +382,15 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
     setTempName('');
     setTempPhone('');
     setTempEmail('');
-    
+
     // Log for debugging
     logger.info('User contact info collected', {
       name: trimmedName,
       phoneLength: cleanedPhone.length,
       email: tempEmail.trim() || 'not provided',
-      autoSubscribe: true
+      autoSubscribe: true,
     });
-    
+
     // Send the original message after contact info is saved
     setTimeout(() => {
       sendMessage(inputValue);
@@ -421,8 +425,8 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
           channel: 'website',
           context: {
             page: page || '/',
-            customer_chat: true
-          }
+            customer_chat: true,
+          },
         }),
       });
 
@@ -644,7 +648,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
                       />
                       {message.confidence === 'low' && (
                         <button
-                          onClick={() => setShowHandoff(true)}
+                          onClick={() => setShowEscalationForm(true)}
                           className="text-xs font-medium text-blue-600 underline hover:text-blue-800"
                         >
                           Need more help? Talk to a human →
@@ -720,7 +724,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
 
         <div className="mt-2 flex items-center justify-between">
           <button
-            onClick={() => setShowHandoff(true)}
+            onClick={() => setShowEscalationForm(true)}
             className="flex items-center space-x-1 text-xs font-medium text-orange-600 underline hover:text-orange-800"
           >
             <span>💬</span>
@@ -732,29 +736,28 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
 
       {/* Contact Information Collection Modal */}
       {showContactPrompt && (
-        <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/50 p-4 z-50">
+        <div className="absolute inset-0 z-50 flex items-center justify-center rounded-2xl bg-black/50 p-4">
           <div className="relative w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl">
             {/* Welcome Header */}
-            <div className="text-center mb-4">
-              <div className="text-4xl mb-2">👋</div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-1">
-                Welcome to MyHibachi!
-              </h3>
+            <div className="mb-4 text-center">
+              <div className="mb-2 text-4xl">👋</div>
+              <h3 className="mb-1 text-lg font-semibold text-gray-800">Welcome to MyHibachi!</h3>
               <p className="text-sm text-gray-600">
-                Please provide your contact information so we can serve you better and create a personalized experience.
+                Please provide your contact information so we can serve you better and create a
+                personalized experience.
               </p>
             </div>
-            
+
             {/* Error Message */}
             {contactError && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3">
                 <p className="text-sm text-red-800">{contactError}</p>
               </div>
             )}
-            
+
             {/* Name Input */}
             <div className="mb-4">
-              <label htmlFor="chat-name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="chat-name" className="mb-1 block text-sm font-medium text-gray-700">
                 Full Name *
               </label>
               <input
@@ -770,7 +773,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
                 minLength={2}
                 maxLength={100}
                 autoFocus
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent focus:outline-none text-base"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-transparent focus:ring-2 focus:ring-orange-500 focus:outline-none"
                 onKeyPress={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -782,10 +785,10 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
                 }}
               />
             </div>
-            
+
             {/* Phone Input */}
             <div className="mb-4">
-              <label htmlFor="chat-phone" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="chat-phone" className="mb-1 block text-sm font-medium text-gray-700">
                 Phone Number *
               </label>
               <input
@@ -800,20 +803,26 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
                 }}
                 required
                 maxLength={14}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent focus:outline-none text-base"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-transparent focus:ring-2 focus:ring-orange-500 focus:outline-none"
                 onKeyPress={(e) => {
-                  if (e.key === 'Enter' && tempName.trim().length >= 2 && tempPhone.replace(/\D/g, '').length >= 10) {
+                  if (
+                    e.key === 'Enter' &&
+                    tempName.trim().length >= 2 &&
+                    tempPhone.replace(/\D/g, '').length >= 10
+                  ) {
                     e.preventDefault();
                     saveContactAndContinue();
                   }
                 }}
               />
-              <p className="text-xs text-gray-500 mt-1">Required - So we can follow up on your inquiries</p>
+              <p className="mt-1 text-xs text-gray-500">
+                Required - So we can follow up on your inquiries
+              </p>
             </div>
 
             {/* Email Input (optional) */}
             <div className="mb-4">
-              <label htmlFor="chat-email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="chat-email" className="mb-1 block text-sm font-medium text-gray-700">
                 Email Address (Optional)
               </label>
               <input
@@ -825,38 +834,49 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
                   setTempEmail(e.target.value);
                   setContactError('');
                 }}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent focus:outline-none text-base"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-transparent focus:ring-2 focus:ring-orange-500 focus:outline-none"
                 onKeyPress={(e) => {
-                  if (e.key === 'Enter' && tempName.trim().length >= 2 && tempPhone.replace(/\D/g, '').length >= 10) {
+                  if (
+                    e.key === 'Enter' &&
+                    tempName.trim().length >= 2 &&
+                    tempPhone.replace(/\D/g, '').length >= 10
+                  ) {
                     e.preventDefault();
                     saveContactAndContinue();
                   }
                 }}
               />
-              <p className="text-xs text-gray-500 mt-1">Recommended - For exclusive hibachi deals and updates</p>
+              <p className="mt-1 text-xs text-gray-500">
+                Recommended - For exclusive hibachi deals and updates
+              </p>
             </div>
 
             {/* Newsletter Auto-Subscribe Notice */}
-            <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+            <div className="mb-4 rounded-lg border border-orange-200 bg-orange-50 p-3">
               <p className="text-xs text-gray-700">
-                📧 <strong>You&apos;ll automatically receive our newsletter</strong> with exclusive offers and hibachi tips.
+                📧 <strong>You&apos;ll automatically receive our newsletter</strong> with exclusive
+                offers and hibachi tips.
                 <br />
-                <span className="text-gray-600">Don&apos;t want updates? Simply reply <strong>&quot;STOP&quot;</strong> anytime to unsubscribe.</span>
+                <span className="text-gray-600">
+                  Don&apos;t want updates? Simply reply <strong>&quot;STOP&quot;</strong> anytime to
+                  unsubscribe.
+                </span>
               </p>
             </div>
-            
+
             {/* Continue Button */}
             <button
               onClick={saveContactAndContinue}
               disabled={tempName.trim().length < 2 || tempPhone.replace(/\D/g, '').length < 10}
-              className="w-full rounded-lg bg-gradient-to-r from-[#ffb800] to-[#db2b28] p-3 text-white font-medium transition-all hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:from-gray-400 disabled:to-gray-400"
+              className="w-full rounded-lg bg-gradient-to-r from-[#ffb800] to-[#db2b28] p-3 font-medium text-white transition-all hover:shadow-md disabled:cursor-not-allowed disabled:from-gray-400 disabled:to-gray-400 disabled:opacity-50"
             >
               Start Chatting 💬
             </button>
-            
+
             {/* Privacy Note */}
-            <p className="mt-3 text-xs text-gray-500 text-center">
-              🔒 Your information is safe and only used to provide you with the best service and follow up on your booking inquiries.
+            <p className="mt-3 text-center text-xs text-gray-500">
+              🔒 Your information is safe and only used to provide you with the best service and
+              follow up on your booking inquiries.
             </p>
           </div>
         </div>
@@ -937,6 +957,29 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
           </div>
         </div>
       )}
+
+      {/* Escalation Form Modal */}
+      {showEscalationForm && (
+        <EscalationForm
+          conversationId={threadIdRef.current}
+          userName={userName}
+          userPhone={userPhone}
+          userEmail={userEmail}
+          onClose={() => setShowEscalationForm(false)}
+          onSuccess={() => {
+            // Optionally show a message in chat
+            const confirmMessage: Message = {
+              id: Math.random().toString(36).substring(7),
+              type: 'assistant',
+              content:
+                "Thank you! We've received your request. Our team will contact you shortly. 📞",
+              timestamp: new Date(),
+              confidence: 'high',
+            };
+            setMessages((prev) => [...prev, confirmMessage]);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -947,5 +990,5 @@ export default function ChatWidget(props: ChatWidgetProps) {
     <ApiErrorBoundary apiEndpoint="/api/chat">
       <ChatWidgetComponent {...props} />
     </ApiErrorBoundary>
-  )
+  );
 }

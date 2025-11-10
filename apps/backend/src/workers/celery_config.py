@@ -61,6 +61,14 @@ celery_app.conf.update(
     # Monitoring
     worker_send_task_events=True,
     task_send_sent_event=True,
+    # Flower monitoring configuration
+    flower_basic_auth=[
+        os.getenv("FLOWER_ADMIN_USERNAME", "admin")
+        + ":"
+        + os.getenv("FLOWER_ADMIN_PASSWORD", "admin123")
+    ],
+    flower_port=int(os.getenv("FLOWER_PORT", "5555")),
+    flower_url_prefix=os.getenv("FLOWER_URL_PREFIX", ""),
 )
 
 # Beat schedule for periodic tasks
