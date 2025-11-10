@@ -1,32 +1,35 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { logger } from '@/lib/logger';
+import {
+  Building,
+  Edit,
+  Eye,
+  Mail,
+  MapPin,
+  Phone,
+  Plus,
+  Shield,
+  Trash2,
+  User,
+  UserPlus,
+  Users,
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Building, 
-  Users, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  MapPin, 
-  Phone, 
-  Mail,
-  User,
-  Shield,
-  Eye,
-  UserPlus
-} from 'lucide-react';
-import { stationService } from '@/services/api';
-import type { Station, StationUser, AuditLog } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/lib/logger';
+import type { AuditLog, Station, StationUser } from '@/services/api';
+import { stationService } from '@/services/api';
 
 interface StationManagerProps {
   className?: string;
 }
 
-export const StationManager: React.FC<StationManagerProps> = ({ className }) => {
+export const StationManager: React.FC<StationManagerProps> = ({
+  className,
+}) => {
   const { hasPermission, isSuperAdmin } = useAuth();
   const [stations, setStations] = useState<Station[]>([]);
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
@@ -34,12 +37,15 @@ export const StationManager: React.FC<StationManagerProps> = ({ className }) => 
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'audit'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'audit'>(
+    'overview'
+  );
 
   // Check permissions
   const canManageStations = isSuperAdmin() || hasPermission('manage_stations');
   const canViewStations = canManageStations || hasPermission('view_stations');
-  const canManageUsers = isSuperAdmin() || hasPermission('manage_station_users');
+  const canManageUsers =
+    isSuperAdmin() || hasPermission('manage_station_users');
 
   useEffect(() => {
     if (canViewStations) {
@@ -71,18 +77,26 @@ export const StationManager: React.FC<StationManagerProps> = ({ className }) => 
         setStationUsers(response.data);
       }
     } catch (err: any) {
-      logger.error(err as Error, { context: 'load_station_users', station_id: stationId });
+      logger.error(err as Error, {
+        context: 'load_station_users',
+        station_id: stationId,
+      });
     }
   };
 
   const loadAuditLogs = async (stationId: number) => {
     try {
-      const response = await stationService.getStationAuditLogs(stationId, { limit: 50 });
+      const response = await stationService.getStationAuditLogs(stationId, {
+        limit: 50,
+      });
       if (response.data) {
         setAuditLogs(response.data);
       }
     } catch (err: any) {
-      logger.error(err as Error, { context: 'load_audit_logs', station_id: stationId });
+      logger.error(err as Error, {
+        context: 'load_audit_logs',
+        station_id: stationId,
+      });
     }
   };
 
@@ -101,7 +115,9 @@ export const StationManager: React.FC<StationManagerProps> = ({ className }) => 
       <div className={`${className} flex items-center justify-center p-8`}>
         <div className="text-center">
           <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600">You don't have permission to view stations.</p>
+          <p className="text-gray-600">
+            You don&apos;t have permission to view stations.
+          </p>
         </div>
       </div>
     );
@@ -130,7 +146,9 @@ export const StationManager: React.FC<StationManagerProps> = ({ className }) => 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Station Details</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Station Details
+            </CardTitle>
             <Building className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -162,20 +180,26 @@ export const StationManager: React.FC<StationManagerProps> = ({ className }) => 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Status</CardTitle>
-            <div className={`h-3 w-3 rounded-full ${selectedStation?.is_active ? 'bg-green-500' : 'bg-red-500'}`} />
+            <div
+              className={`h-3 w-3 rounded-full ${selectedStation?.is_active ? 'bg-green-500' : 'bg-red-500'}`}
+            />
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div>
                 <p className="text-sm font-medium text-gray-600">Status</p>
-                <p className={`text-lg font-semibold ${selectedStation?.is_active ? 'text-green-600' : 'text-red-600'}`}>
+                <p
+                  className={`text-lg font-semibold ${selectedStation?.is_active ? 'text-green-600' : 'text-red-600'}`}
+                >
                   {selectedStation?.is_active ? 'Active' : 'Inactive'}
                 </p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Created</p>
                 <p className="text-sm">
-                  {selectedStation?.created_at ? new Date(selectedStation.created_at).toLocaleDateString() : 'N/A'}
+                  {selectedStation?.created_at
+                    ? new Date(selectedStation.created_at).toLocaleDateString()
+                    : 'N/A'}
                 </p>
               </div>
             </div>
@@ -189,7 +213,10 @@ export const StationManager: React.FC<StationManagerProps> = ({ className }) => 
             <Edit className="h-4 w-4 mr-2" />
             Edit Station
           </Button>
-          <Button variant="outline" className="flex items-center text-red-600 hover:text-red-700">
+          <Button
+            variant="outline"
+            className="flex items-center text-red-600 hover:text-red-700"
+          >
             <Trash2 className="h-4 w-4 mr-2" />
             Delete Station
           </Button>
@@ -211,7 +238,7 @@ export const StationManager: React.FC<StationManagerProps> = ({ className }) => 
       )}
 
       <div className="space-y-3">
-        {stationUsers.map((user) => (
+        {stationUsers.map(user => (
           <Card key={user.id}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -220,14 +247,20 @@ export const StationManager: React.FC<StationManagerProps> = ({ className }) => 
                     <User className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="font-medium">{user.user_email || `User ${user.user_id}`}</p>
+                    <p className="font-medium">
+                      {user.user_email || `User ${user.user_id}`}
+                    </p>
                     <p className="text-sm text-gray-600">{user.role}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}>
+                  <span
+                    className={`px-2 py-1 text-xs rounded-full ${
+                      user.is_active
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}
+                  >
                     {user.is_active ? 'Active' : 'Inactive'}
                   </span>
                   {canManageUsers && (
@@ -247,15 +280,17 @@ export const StationManager: React.FC<StationManagerProps> = ({ className }) => 
   const renderAuditLogs = () => (
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Audit Trail</h3>
-      
+
       <div className="space-y-3">
-        {auditLogs.map((log) => (
+        {auditLogs.map(log => (
           <Card key={log.id}>
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
                   <p className="font-medium">{log.action}</p>
-                  <p className="text-sm text-gray-600">{JSON.stringify(log.details)}</p>
+                  <p className="text-sm text-gray-600">
+                    {JSON.stringify(log.details)}
+                  </p>
                   <p className="text-xs text-gray-500">
                     {new Date(log.timestamp).toLocaleString()}
                   </p>
@@ -286,13 +321,15 @@ export const StationManager: React.FC<StationManagerProps> = ({ className }) => 
               </Button>
             )}
           </div>
-          
+
           <div className="space-y-2">
-            {stations.map((station) => (
-              <Card 
+            {stations.map(station => (
+              <Card
                 key={station.id}
                 className={`cursor-pointer transition-colors ${
-                  selectedStation?.id === station.id ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'
+                  selectedStation?.id === station.id
+                    ? 'bg-blue-50 border-blue-200'
+                    : 'hover:bg-gray-50'
                 }`}
                 onClick={() => setSelectedStation(station)}
               >
@@ -300,9 +337,13 @@ export const StationManager: React.FC<StationManagerProps> = ({ className }) => 
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">{station.name}</p>
-                      <p className="text-sm text-gray-600">{station.location}</p>
+                      <p className="text-sm text-gray-600">
+                        {station.location}
+                      </p>
                     </div>
-                    <div className={`h-2 w-2 rounded-full ${station.is_active ? 'bg-green-500' : 'bg-red-500'}`} />
+                    <div
+                      className={`h-2 w-2 rounded-full ${station.is_active ? 'bg-green-500' : 'bg-red-500'}`}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -354,7 +395,9 @@ export const StationManager: React.FC<StationManagerProps> = ({ className }) => 
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">Select a station to view details</p>
+                <p className="text-gray-600">
+                  Select a station to view details
+                </p>
               </div>
             </div>
           )}

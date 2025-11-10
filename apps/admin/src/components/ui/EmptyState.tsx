@@ -1,19 +1,18 @@
 'use client';
 
-import React from 'react';
 import {
-  FileText,
-  Users,
+  AlertCircle,
   Calendar,
+  LucideIcon,
   Mail,
   MessageSquare,
-  Star,
-  TrendingUp,
   Package,
   Search,
-  AlertCircle,
-  LucideIcon,
+  Star,
+  TrendingUp,
+  Users,
 } from 'lucide-react';
+import React from 'react';
 
 export type EmptyStateVariant =
   | 'no-data'
@@ -84,7 +83,8 @@ const variantConfig: Record<
   customers: {
     icon: Users,
     title: 'No customers yet',
-    description: 'Your customer list will appear here once you start getting bookings.',
+    description:
+      'Your customer list will appear here once you start getting bookings.',
     iconColor: 'text-blue-400',
     iconBg: 'bg-blue-100',
   },
@@ -105,7 +105,8 @@ const variantConfig: Record<
   newsletter: {
     icon: Mail,
     title: 'No subscribers yet',
-    description: 'Start building your email list to send newsletters and campaigns.',
+    description:
+      'Start building your email list to send newsletters and campaigns.',
     iconColor: 'text-indigo-400',
     iconBg: 'bg-indigo-100',
   },
@@ -119,7 +120,8 @@ const variantConfig: Record<
   analytics: {
     icon: TrendingUp,
     title: 'No analytics data',
-    description: 'Analytics and insights will be available once you have activity.',
+    description:
+      'Analytics and insights will be available once you have activity.',
     iconColor: 'text-green-400',
     iconBg: 'bg-green-100',
   },
@@ -139,13 +141,19 @@ export function EmptyState({
   const displayDescription = description || config.description;
 
   return (
-    <div className={`flex flex-col items-center justify-center py-12 px-4 text-center ${className}`}>
+    <div
+      className={`flex flex-col items-center justify-center py-12 px-4 text-center ${className}`}
+    >
       <div className={`rounded-full ${config.iconBg} p-6 mb-4`}>
         <Icon className={`h-12 w-12 ${config.iconColor}`} />
       </div>
 
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">{displayTitle}</h3>
-      <p className="text-sm text-gray-500 max-w-md mb-6">{displayDescription}</p>
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        {displayTitle}
+      </h3>
+      <p className="text-sm text-gray-500 max-w-md mb-6">
+        {displayDescription}
+      </p>
 
       {actions.length > 0 && (
         <div className="flex flex-wrap gap-3 justify-center">

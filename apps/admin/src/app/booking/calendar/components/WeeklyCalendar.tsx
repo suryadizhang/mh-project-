@@ -6,13 +6,19 @@
 
 'use client';
 
-import React, { useState, useCallback } from 'react';
 import { format } from 'date-fns';
-import { Clock, AlertCircle } from 'lucide-react';
+import { AlertCircle, Clock } from 'lucide-react';
+import React, { useCallback, useState } from 'react';
+
 import { useToast } from '@/components/ui/Toast';
-import type { WeekView, CalendarBooking, BookingMoveResult } from '../types/calendar.types';
-import { BookingCard } from './BookingCard';
+
 import { updateBookingDateTime } from '../hooks/useDragDrop';
+import type {
+  BookingMoveResult,
+  CalendarBooking,
+  WeekView,
+} from '../types/calendar.types';
+import { BookingCard } from './BookingCard';
 
 interface WeeklyCalendarProps {
   weekView: WeekView;
@@ -20,10 +26,19 @@ interface WeeklyCalendarProps {
   onRefresh?: () => void;
 }
 
-export function WeeklyCalendar({ weekView, onBookingClick, onRefresh }: WeeklyCalendarProps) {
+export function WeeklyCalendar({
+  weekView,
+  onBookingClick,
+  onRefresh,
+}: WeeklyCalendarProps) {
   const toast = useToast();
-  const [draggedBooking, setDraggedBooking] = useState<CalendarBooking | null>(null);
-  const [dropTarget, setDropTarget] = useState<{ date: string; slot: string } | null>(null);
+  const [draggedBooking, setDraggedBooking] = useState<CalendarBooking | null>(
+    null
+  );
+  const [dropTarget, setDropTarget] = useState<{
+    date: string;
+    slot: string;
+  } | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleDragStart = useCallback((booking: CalendarBooking) => {
@@ -39,7 +54,7 @@ export function WeeklyCalendar({ weekView, onBookingClick, onRefresh }: WeeklyCa
     (e: React.DragEvent, date: string, slot: string) => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
-      
+
       if (draggedBooking) {
         setDropTarget({ date, slot });
       }
@@ -54,7 +69,7 @@ export function WeeklyCalendar({ weekView, onBookingClick, onRefresh }: WeeklyCa
   const handleDrop = useCallback(
     async (e: React.DragEvent, targetDate: string, targetSlot: string) => {
       e.preventDefault();
-      
+
       if (!draggedBooking) return;
 
       const originalDate = format(draggedBooking.startTime, 'yyyy-MM-dd');
@@ -76,15 +91,24 @@ export function WeeklyCalendar({ weekView, onBookingClick, onRefresh }: WeeklyCa
         );
 
         if (result.success) {
-          toast.success('Booking rescheduled', `Event moved to ${format(new Date(targetDate), 'MMM d')} at ${targetSlot}`);
+          toast.success(
+            'Booking rescheduled',
+            `Event moved to ${format(new Date(targetDate), 'MMM d')} at ${targetSlot}`
+          );
           // Refresh calendar data
           onRefresh?.();
         } else {
-          toast.error('Reschedule failed', result.error || 'Unable to move booking');
+          toast.error(
+            'Reschedule failed',
+            result.error || 'Unable to move booking'
+          );
         }
       } catch (error) {
         console.error('Error moving booking:', error);
-        toast.error('Move failed', 'An error occurred while moving the booking');
+        toast.error(
+          'Move failed',
+          'An error occurred while moving the booking'
+        );
       } finally {
         setIsUpdating(false);
         handleDragEnd();
@@ -97,7 +121,10 @@ export function WeeklyCalendar({ weekView, onBookingClick, onRefresh }: WeeklyCa
     return dropTarget?.date === date && dropTarget?.slot === slot;
   };
 
-  const getBookingsForSlot = (date: string, slot: string): CalendarBooking[] => {
+  const getBookingsForSlot = (
+    date: string,
+    slot: string
+  ): CalendarBooking[] => {
     const day = weekView.days.find(d => d.dateString === date);
     if (!day) return [];
 
@@ -132,7 +159,7 @@ export function WeeklyCalendar({ weekView, onBookingClick, onRefresh }: WeeklyCa
         </div>
 
         {/* Day headers */}
-        {weekView.days.map((day) => (
+        {weekView.days.map(day => (
           <div
             key={day.dateString}
             className={`p-3 text-center border-r border-gray-200 last:border-r-0 ${
@@ -152,7 +179,8 @@ export function WeeklyCalendar({ weekView, onBookingClick, onRefresh }: WeeklyCa
               {day.dayNumber}
             </div>
             <div className="text-xs text-gray-500 mt-1">
-              {day.bookingCount} {day.bookingCount === 1 ? 'booking' : 'bookings'}
+              {day.bookingCount}{' '}
+              {day.bookingCount === 1 ? 'booking' : 'bookings'}
             </div>
           </div>
         ))}
@@ -162,7 +190,7 @@ export function WeeklyCalendar({ weekView, onBookingClick, onRefresh }: WeeklyCa
       <div className="overflow-auto max-h-[calc(100vh-300px)]">
         <div className="grid grid-cols-8">
           {/* Time slots */}
-          {timeSlots.map((timeSlot) => (
+          {timeSlots.map(timeSlot => (
             <React.Fragment key={timeSlot.time}>
               {/* Time label */}
               <div className="p-2 text-xs font-medium text-gray-500 border-r border-b border-gray-200 bg-gray-50 sticky left-0 z-10">
@@ -170,10 +198,14 @@ export function WeeklyCalendar({ weekView, onBookingClick, onRefresh }: WeeklyCa
               </div>
 
               {/* Day cells */}
-              {weekView.days.map((day) => {
-                const bookings = getBookingsForSlot(day.dateString, timeSlot.time);
+              {weekView.days.map(day => {
+                const bookings = getBookingsForSlot(
+                  day.dateString,
+                  timeSlot.time
+                );
                 const isTarget = isDropTarget(day.dateString, timeSlot.time);
-                const isPast = new Date(`${day.dateString}T${timeSlot.time}`) < new Date();
+                const isPast =
+                  new Date(`${day.dateString}T${timeSlot.time}`) < new Date();
 
                 return (
                   <div
@@ -186,18 +218,25 @@ export function WeeklyCalendar({ weekView, onBookingClick, onRefresh }: WeeklyCa
                       ${!isPast && !draggedBooking ? 'hover:bg-gray-50' : ''}
                       transition-colors duration-150
                     `}
-                    onDragOver={(e) => !isPast && handleDragOver(e, day.dateString, timeSlot.time)}
+                    onDragOver={e =>
+                      !isPast &&
+                      handleDragOver(e, day.dateString, timeSlot.time)
+                    }
                     onDragLeave={handleDragLeave}
-                    onDrop={(e) => !isPast && handleDrop(e, day.dateString, timeSlot.time)}
+                    onDrop={e =>
+                      !isPast && handleDrop(e, day.dateString, timeSlot.time)
+                    }
                   >
                     {bookings.length > 0 ? (
                       <div className="space-y-1">
-                        {bookings.map((booking) => (
+                        {bookings.map(booking => (
                           <BookingCard
                             key={booking.booking_id}
                             booking={booking}
                             compact
-                            isDragging={draggedBooking?.booking_id === booking.booking_id}
+                            isDragging={
+                              draggedBooking?.booking_id === booking.booking_id
+                            }
                             onDragStart={() => handleDragStart(booking)}
                             onDragEnd={handleDragEnd}
                             onClick={() => onBookingClick?.(booking)}
@@ -210,7 +249,9 @@ export function WeeklyCalendar({ weekView, onBookingClick, onRefresh }: WeeklyCa
                       </div>
                     ) : isTarget ? (
                       <div className="h-full flex items-center justify-center">
-                        <span className="text-xs text-blue-600 font-medium">Drop here</span>
+                        <span className="text-xs text-blue-600 font-medium">
+                          Drop here
+                        </span>
                       </div>
                     ) : null}
                   </div>

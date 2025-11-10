@@ -1,8 +1,14 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { Search, X } from 'lucide-react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { createPortal } from 'react-dom';
-import { Command, Search, X } from 'lucide-react';
 
 export interface KeyboardShortcut {
   key: string;
@@ -21,12 +27,15 @@ interface KeyboardShortcutsContextValue {
   toggleCommandPalette: () => void;
 }
 
-const KeyboardShortcutsContext = createContext<KeyboardShortcutsContextValue | null>(null);
+const KeyboardShortcutsContext =
+  createContext<KeyboardShortcutsContextValue | null>(null);
 
 export function useKeyboardShortcuts() {
   const context = useContext(KeyboardShortcutsContext);
   if (!context) {
-    throw new Error('useKeyboardShortcuts must be used within KeyboardShortcutsProvider');
+    throw new Error(
+      'useKeyboardShortcuts must be used within KeyboardShortcutsProvider'
+    );
   }
   return context;
 }
@@ -35,8 +44,14 @@ export function useKeyboardShortcuts() {
  * Keyboard Shortcuts Provider
  * Manages global keyboard shortcuts and command palette
  */
-export function KeyboardShortcutsProvider({ children }: { children: React.ReactNode }) {
-  const [shortcuts, setShortcuts] = useState<Map<string, KeyboardShortcut>>(new Map());
+export function KeyboardShortcutsProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [shortcuts, setShortcuts] = useState<Map<string, KeyboardShortcut>>(
+    new Map()
+  );
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -44,16 +59,19 @@ export function KeyboardShortcutsProvider({ children }: { children: React.ReactN
     setMounted(true);
   }, []);
 
-  const registerShortcut = useCallback((id: string, shortcut: KeyboardShortcut) => {
-    setShortcuts((prev) => {
-      const next = new Map(prev);
-      next.set(id, shortcut);
-      return next;
-    });
-  }, []);
+  const registerShortcut = useCallback(
+    (id: string, shortcut: KeyboardShortcut) => {
+      setShortcuts(prev => {
+        const next = new Map(prev);
+        next.set(id, shortcut);
+        return next;
+      });
+    },
+    []
+  );
 
   const unregisterShortcut = useCallback((id: string) => {
-    setShortcuts((prev) => {
+    setShortcuts(prev => {
       const next = new Map(prev);
       next.delete(id);
       return next;
@@ -61,7 +79,7 @@ export function KeyboardShortcutsProvider({ children }: { children: React.ReactN
   }, []);
 
   const toggleCommandPalette = useCallback(() => {
-    setShowCommandPalette((prev) => !prev);
+    setShowCommandPalette(prev => !prev);
   }, []);
 
   // Global keyboard event handler
@@ -148,25 +166,31 @@ function CommandPalette({
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   // Group shortcuts by category
-  const groupedShortcuts = shortcuts.reduce((acc, shortcut) => {
-    const category = shortcut.category || 'General';
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(shortcut);
-    return acc;
-  }, {} as Record<string, KeyboardShortcut[]>);
+  const groupedShortcuts = shortcuts.reduce(
+    (acc, shortcut) => {
+      const category = shortcut.category || 'General';
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(shortcut);
+      return acc;
+    },
+    {} as Record<string, KeyboardShortcut[]>
+  );
 
   // Filter shortcuts based on search
-  const filteredShortcuts = Object.entries(groupedShortcuts).reduce((acc, [category, items]) => {
-    const filtered = items.filter((shortcut) =>
-      shortcut.description.toLowerCase().includes(search.toLowerCase())
-    );
-    if (filtered.length > 0) {
-      acc[category] = filtered;
-    }
-    return acc;
-  }, {} as Record<string, KeyboardShortcut[]>);
+  const filteredShortcuts = Object.entries(groupedShortcuts).reduce(
+    (acc, [category, items]) => {
+      const filtered = items.filter(shortcut =>
+        shortcut.description.toLowerCase().includes(search.toLowerCase())
+      );
+      if (filtered.length > 0) {
+        acc[category] = filtered;
+      }
+      return acc;
+    },
+    {} as Record<string, KeyboardShortcut[]>
+  );
 
   const allFilteredShortcuts = Object.values(filteredShortcuts).flat();
 
@@ -175,12 +199,12 @@ function CommandPalette({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setSelectedIndex((prev) =>
+        setSelectedIndex(prev =>
           prev < allFilteredShortcuts.length - 1 ? prev + 1 : prev
         );
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : 0));
+        setSelectedIndex(prev => (prev > 0 ? prev - 1 : 0));
       } else if (e.key === 'Enter') {
         e.preventDefault();
         const selected = allFilteredShortcuts[selectedIndex];
@@ -202,7 +226,7 @@ function CommandPalette({
     >
       <div
         className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[600px] flex flex-col animate-in zoom-in-95 duration-200"
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       >
         {/* Search Input */}
         <div className="flex items-center gap-3 p-4 border-b border-gray-200">
@@ -211,7 +235,7 @@ function CommandPalette({
             type="text"
             placeholder="Type a command or search..."
             value={search}
-            onChange={(e) => {
+            onChange={e => {
               setSearch(e.target.value);
               setSelectedIndex(0);
             }}
@@ -310,7 +334,11 @@ function Kbd({ children }: { children: React.ReactNode }) {
  * Keyboard Shortcut Hint Component
  * Shows shortcut hint inline in UI
  */
-export function ShortcutHint({ shortcut }: { shortcut: Omit<KeyboardShortcut, 'action'> }) {
+export function ShortcutHint({
+  shortcut,
+}: {
+  shortcut: Omit<KeyboardShortcut, 'action'>;
+}) {
   return (
     <div className="flex items-center gap-1 text-xs text-gray-500">
       {shortcut.meta && <Kbd>⌘</Kbd>}

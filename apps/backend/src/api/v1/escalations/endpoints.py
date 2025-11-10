@@ -81,7 +81,7 @@ async def create_escalation(
 async def get_escalation(
     escalation_id: str,
     db: Session = Depends(get_database_session),
-    _: None = Depends(require_permission("escalation:read")),
+    _: None = require_permission("escalation:read"),
 ):
     """
     Get escalation by ID
@@ -105,7 +105,7 @@ async def assign_escalation(
     escalation_id: str,
     request: EscalationAssignRequest,
     db: Session = Depends(get_database_session),
-    _: None = Depends(require_permission("inbox:assign")),
+    _: None = require_permission("inbox:assign"),
 ):
     """
     Assign escalation to an admin
@@ -137,7 +137,7 @@ async def resolve_escalation(
     escalation_id: str,
     request: EscalationResolveRequest,
     db: Session = Depends(get_database_session),
-    current_user=Depends(require_permission("escalation:resolve")),
+    current_user=require_permission("escalation:resolve"),
 ):
     """
     Resolve an escalation
@@ -169,7 +169,7 @@ async def resolve_escalation(
 async def list_escalations(
     request: EscalationListRequest,
     db: Session = Depends(get_database_session),
-    _: None = Depends(require_permission("escalation:read")),
+    _: None = require_permission("escalation:read"),
 ):
     """
     List escalations with filters
@@ -207,7 +207,7 @@ async def list_escalations(
 @router.get("/stats", response_model=EscalationStatsResponse)
 async def get_escalation_stats(
     db: Session = Depends(get_database_session),
-    _: None = Depends(require_permission("analytics:view")),
+    _: None = require_permission("analytics:view"),
 ):
     """
     Get escalation statistics
@@ -233,7 +233,7 @@ async def send_sms_to_customer(
     escalation_id: str,
     request: SendSMSRequest,
     db: Session = Depends(get_database_session),
-    _: None = Depends(require_permission("sms:send")),
+    _: None = require_permission("sms:send"),
 ):
     """
     Send SMS to customer via escalation
@@ -279,7 +279,7 @@ async def send_sms_to_customer(
 async def initiate_call(
     escalation_id: str,
     db: Session = Depends(get_database_session),
-    _: None = Depends(require_permission("phone:call")),
+    _: None = require_permission("phone:call"),
 ):
     """
     Initiate call to customer via RingCentral
@@ -322,7 +322,7 @@ async def initiate_call(
 async def get_call_recordings(
     escalation_id: str,
     db: Session = Depends(get_database_session),
-    _: None = Depends(require_permission("escalation:read")),
+    _: None = require_permission("escalation:read"),
 ):
     """
     Get call recordings for an escalation

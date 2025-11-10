@@ -3,12 +3,20 @@
  * Handles drag state, drop logic, and API updates
  */
 
-import { useCallback, useState } from 'react';
 import { format } from 'date-fns';
-import type { CalendarBooking, BookingMoveResult } from '../types/calendar.types';
+import { useCallback, useState } from 'react';
+
+import type {
+  BookingMoveResult,
+  CalendarBooking,
+} from '../types/calendar.types';
 
 interface UseDragDropProps {
-  onBookingMoved: (booking: CalendarBooking, newDate: string, newSlot: string) => Promise<BookingMoveResult>;
+  onBookingMoved: (
+    booking: CalendarBooking,
+    newDate: string,
+    newSlot: string
+  ) => Promise<BookingMoveResult>;
 }
 
 interface UseDragDropReturn {
@@ -20,9 +28,13 @@ interface UseDragDropReturn {
   isDroppable: (targetDate: string, targetSlot: string) => boolean;
 }
 
-export function useDragDrop({ onBookingMoved }: UseDragDropProps): UseDragDropReturn {
+export function useDragDrop({
+  onBookingMoved,
+}: UseDragDropProps): UseDragDropReturn {
   const [isDragging, setIsDragging] = useState(false);
-  const [draggedBooking, setDraggedBooking] = useState<CalendarBooking | null>(null);
+  const [draggedBooking, setDraggedBooking] = useState<CalendarBooking | null>(
+    null
+  );
 
   const handleDragStart = useCallback((booking: CalendarBooking) => {
     // Only allow dragging of confirmed or pending bookings
@@ -39,46 +51,56 @@ export function useDragDrop({ onBookingMoved }: UseDragDropProps): UseDragDropRe
     setDraggedBooking(null);
   }, []);
 
-  const handleDrop = useCallback(async (targetDate: string, targetSlot: string) => {
-    if (!draggedBooking) return;
+  const handleDrop = useCallback(
+    async (targetDate: string, targetSlot: string) => {
+      if (!draggedBooking) return;
 
-    // Don't do anything if dropped on the same slot
-    const originalDate = format(draggedBooking.startTime, 'yyyy-MM-dd');
-    const originalSlot = draggedBooking.slot;
+      // Don't do anything if dropped on the same slot
+      const originalDate = format(draggedBooking.startTime, 'yyyy-MM-dd');
+      const originalSlot = draggedBooking.slot;
 
-    if (originalDate === targetDate && originalSlot === targetSlot) {
-      handleDragEnd();
-      return;
-    }
-
-    try {
-      const result = await onBookingMoved(draggedBooking, targetDate, targetSlot);
-      
-      if (!result.success) {
-        console.error('Failed to move booking:', result.error);
-        // Could show toast notification here
+      if (originalDate === targetDate && originalSlot === targetSlot) {
+        handleDragEnd();
+        return;
       }
-    } catch (error) {
-      console.error('Error moving booking:', error);
-    } finally {
-      handleDragEnd();
-    }
-  }, [draggedBooking, onBookingMoved, handleDragEnd]);
 
-  const isDroppable = useCallback((targetDate: string, targetSlot: string): boolean => {
-    if (!draggedBooking) return false;
+      try {
+        const result = await onBookingMoved(
+          draggedBooking,
+          targetDate,
+          targetSlot
+        );
 
-    // Can't drop on cancelled or completed bookings' slots
-    // Can't drop in the past
-    const targetDateTime = new Date(`${targetDate}T${targetSlot}`);
-    const now = new Date();
+        if (!result.success) {
+          console.error('Failed to move booking:', result.error);
+          // Could show toast notification here
+        }
+      } catch (error) {
+        console.error('Error moving booking:', error);
+      } finally {
+        handleDragEnd();
+      }
+    },
+    [draggedBooking, onBookingMoved, handleDragEnd]
+  );
 
-    if (targetDateTime < now) {
-      return false;
-    }
+  const isDroppable = useCallback(
+    (targetDate: string, targetSlot: string): boolean => {
+      if (!draggedBooking) return false;
 
-    return true;
-  }, [draggedBooking]);
+      // Can't drop on cancelled or completed bookings' slots
+      // Can't drop in the past
+      const targetDateTime = new Date(`${targetDate}T${targetSlot}`);
+      const now = new Date();
+
+      if (targetDateTime < now) {
+        return false;
+      }
+
+      return true;
+    },
+    [draggedBooking]
+  );
 
   return {
     isDragging,

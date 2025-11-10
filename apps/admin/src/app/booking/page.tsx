@@ -1,35 +1,45 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { 
-  Filter, 
-  Plus, 
-  Search, 
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
   Calendar,
-  Users,
-  DollarSign,
-  Clock,
   ChevronLeft,
   ChevronRight,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
+  Clock,
+  DollarSign,
+  Filter,
+  Plus,
+  Search,
+  Users,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { useBookings, usePagination, useFilters, useSearch, useSort } from '@/hooks/useApi';
+import {
+  useBookings,
+  useFilters,
+  usePagination,
+  useSearch,
+  useSort,
+} from '@/hooks/useApi';
 import type { BookingFilters } from '@/types';
 
 export default function BookingPage() {
   const router = useRouter();
-  
+
   // Pagination state
   const { page, limit, setPage, nextPage, prevPage } = usePagination(1, 20);
-  
+
   // Search state
-  const { query: searchQuery, debouncedQuery, setQuery: setSearchQuery } = useSearch();
-  
+  const {
+    query: searchQuery,
+    debouncedQuery,
+    setQuery: setSearchQuery,
+  } = useSearch();
+
   // Filter state
   const { filters, updateFilter, resetFilters } = useFilters<BookingFilters>({
     status: '',
@@ -37,27 +47,37 @@ export default function BookingPage() {
     date_from: '',
     date_to: '',
   });
-  
+
   // Sort state - default to upcoming events first
-  const { sortBy, sortOrder, toggleSort } = useSort<'date' | 'booking_id' | 'total_guests' | 'created_at'>('date', 'asc');
-  
+  const { sortBy, sortOrder, toggleSort } = useSort<
+    'date' | 'booking_id' | 'total_guests' | 'created_at'
+  >('date', 'asc');
+
   // Combine all filters for API call
-  const apiFilters = useMemo(() => ({
-    ...filters,
-    customer_search: debouncedQuery,
-    page,
-    limit,
-    sort_by: sortBy,
-    sort_order: sortOrder,
-  }), [filters, debouncedQuery, page, limit, sortBy, sortOrder]);
-  
+  const apiFilters = useMemo(
+    () => ({
+      ...filters,
+      customer_search: debouncedQuery,
+      page,
+      limit,
+      sort_by: sortBy,
+      sort_order: sortOrder,
+    }),
+    [filters, debouncedQuery, page, limit, sortBy, sortOrder]
+  );
+
   // Fetch bookings data
-  const { data: bookingsResponse, loading, error, refetch } = useBookings(apiFilters);
-  
+  const {
+    data: bookingsResponse,
+    loading,
+    error,
+    refetch,
+  } = useBookings(apiFilters);
+
   const bookings = bookingsResponse?.data || [];
   const totalCount = bookingsResponse?.total_count || 0;
   const totalPages = Math.ceil(totalCount / limit);
-  
+
   // Format currency
   const formatCurrency = useCallback((cents: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -65,7 +85,7 @@ export default function BookingPage() {
       currency: 'USD',
     }).format(cents / 100);
   }, []);
-  
+
   // Format date
   const formatDate = useCallback((dateString: string) => {
     const date = new Date(dateString);
@@ -75,7 +95,7 @@ export default function BookingPage() {
       year: 'numeric',
     });
   }, []);
-  
+
   // Get status color
   const getStatusColor = useCallback((status: string) => {
     switch (status.toLowerCase()) {
@@ -91,7 +111,7 @@ export default function BookingPage() {
         return 'bg-gray-100 text-gray-800';
     }
   }, []);
-  
+
   // Get payment status color
   const getPaymentStatusColor = useCallback((status: string) => {
     switch (status.toLowerCase()) {
@@ -107,7 +127,7 @@ export default function BookingPage() {
         return 'bg-gray-100 text-gray-800';
     }
   }, []);
-  
+
   // Check if booking is upcoming
   const isUpcoming = useCallback((dateString: string) => {
     const bookingDate = new Date(dateString);
@@ -115,38 +135,38 @@ export default function BookingPage() {
     today.setHours(0, 0, 0, 0);
     return bookingDate >= today;
   }, []);
-  
+
   // Handle status filter change
   const handleStatusFilter = (status: string) => {
     updateFilter('status', status === 'all' ? '' : status);
     setPage(1); // Reset to first page when filtering
   };
-  
+
   // Handle payment status filter change
   const handlePaymentStatusFilter = (status: string) => {
     updateFilter('payment_status', status === 'all' ? '' : status);
     setPage(1);
   };
-  
+
   // Handle search
   const handleSearch = (value: string) => {
     setSearchQuery(value);
     setPage(1); // Reset to first page when searching
   };
-  
+
   // Handle sort
   const handleSort = (field: string) => {
     toggleSort(field as any);
     setPage(1); // Reset to first page when sorting
   };
-  
+
   // Clear all filters
   const handleClearFilters = () => {
     resetFilters();
     setSearchQuery('');
     setPage(1);
   };
-  
+
   if (error) {
     return (
       <div className="space-y-6">
@@ -222,26 +242,30 @@ export default function BookingPage() {
               <Calendar className="w-6 h-6" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Bookings</p>
+              <p className="text-sm font-medium text-gray-600">
+                Total Bookings
+              </p>
               <p className="text-2xl font-bold text-gray-900">{totalCount}</p>
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
           <div className="flex items-center">
             <div className="p-3 rounded-full bg-green-100 text-green-600">
               <Users className="w-6 h-6" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Upcoming Events</p>
+              <p className="text-sm font-medium text-gray-600">
+                Upcoming Events
+              </p>
               <p className="text-2xl font-bold text-gray-900">
                 {bookings.filter((b: any) => isUpcoming(b.date)).length}
               </p>
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
           <div className="flex items-center">
             <div className="p-3 rounded-full bg-yellow-100 text-yellow-600">
@@ -255,7 +279,7 @@ export default function BookingPage() {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
           <div className="flex items-center">
             <div className="p-3 rounded-full bg-purple-100 text-purple-600">
@@ -264,7 +288,12 @@ export default function BookingPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
               <p className="text-2xl font-bold text-gray-900">
-                {formatCurrency(bookings.reduce((sum: number, b: any) => sum + b.total_due_cents, 0))}
+                {formatCurrency(
+                  bookings.reduce(
+                    (sum: number, b: any) => sum + b.total_due_cents,
+                    0
+                  )
+                )}
               </p>
             </div>
           </div>
@@ -281,16 +310,16 @@ export default function BookingPage() {
                 type="text"
                 placeholder="Search bookings..."
                 value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
+                onChange={e => handleSearch(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
-          
+
           <div className="flex flex-wrap gap-2">
-            <select 
+            <select
               value={filters.status || 'all'}
-              onChange={(e) => handleStatusFilter(e.target.value)}
+              onChange={e => handleStatusFilter(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">All Status</option>
@@ -299,10 +328,10 @@ export default function BookingPage() {
               <option value="completed">Completed</option>
               <option value="cancelled">Cancelled</option>
             </select>
-            
-            <select 
+
+            <select
               value={filters.payment_status || 'all'}
-              onChange={(e) => handlePaymentStatusFilter(e.target.value)}
+              onChange={e => handlePaymentStatusFilter(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">All Payments</option>
@@ -311,7 +340,7 @@ export default function BookingPage() {
               <option value="paid">Paid</option>
               <option value="refunded">Refunded</option>
             </select>
-            
+
             <Button variant="outline" onClick={handleClearFilters}>
               <Filter className="w-4 h-4 mr-2" />
               Clear Filters
@@ -335,11 +364,13 @@ export default function BookingPage() {
         <div className="bg-white rounded-lg shadow border border-gray-200 p-8">
           <div className="text-center">
             <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No bookings found</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              No bookings found
+            </h3>
             <p className="text-gray-600 mb-4">
               {Object.values(filters).some(Boolean) || debouncedQuery
-                ? "Try adjusting your filters or search query"
-                : "Get started by creating your first booking"}
+                ? 'Try adjusting your filters or search query'
+                : 'Get started by creating your first booking'}
             </p>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
@@ -363,7 +394,11 @@ export default function BookingPage() {
                     >
                       <span>Booking ID</span>
                       {sortBy === 'booking_id' ? (
-                        sortOrder === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                        sortOrder === 'asc' ? (
+                          <ArrowUp className="w-3 h-3" />
+                        ) : (
+                          <ArrowDown className="w-3 h-3" />
+                        )
                       ) : (
                         <ArrowUpDown className="w-3 h-3" />
                       )}
@@ -382,7 +417,11 @@ export default function BookingPage() {
                     >
                       <span>Event Date</span>
                       {sortBy === 'date' ? (
-                        sortOrder === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                        sortOrder === 'asc' ? (
+                          <ArrowUp className="w-3 h-3" />
+                        ) : (
+                          <ArrowDown className="w-3 h-3" />
+                        )
                       ) : (
                         <ArrowUpDown className="w-3 h-3" />
                       )}
@@ -395,7 +434,11 @@ export default function BookingPage() {
                     >
                       <span>Guests</span>
                       {sortBy === 'total_guests' ? (
-                        sortOrder === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                        sortOrder === 'asc' ? (
+                          <ArrowUp className="w-3 h-3" />
+                        ) : (
+                          <ArrowDown className="w-3 h-3" />
+                        )
                       ) : (
                         <ArrowUpDown className="w-3 h-3" />
                       )}
@@ -417,8 +460,8 @@ export default function BookingPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {bookings.map((booking: any) => (
-                  <tr 
-                    key={booking.booking_id} 
+                  <tr
+                    key={booking.booking_id}
                     className={`hover:bg-gray-50 ${isUpcoming(booking.date) ? 'bg-blue-50' : ''}`}
                   >
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -440,7 +483,9 @@ export default function BookingPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <div>
-                        <div className="font-medium">{formatDate(booking.date)}</div>
+                        <div className="font-medium">
+                          {formatDate(booking.date)}
+                        </div>
                         <div>{booking.slot}</div>
                       </div>
                     </td>
@@ -464,14 +509,16 @@ export default function BookingPage() {
                       <span
                         className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(booking.status)}`}
                       >
-                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                        {booking.status.charAt(0).toUpperCase() +
+                          booking.status.slice(1)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPaymentStatusColor(booking.payment_status)}`}
                       >
-                        {booking.payment_status.charAt(0).toUpperCase() + booking.payment_status.slice(1)}
+                        {booking.payment_status.charAt(0).toUpperCase() +
+                          booking.payment_status.slice(1)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -494,15 +541,11 @@ export default function BookingPage() {
               </tbody>
             </table>
           </div>
-          
+
           {/* Pagination */}
           <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
             <div className="flex-1 flex justify-between sm:hidden">
-              <Button
-                variant="outline"
-                onClick={prevPage}
-                disabled={page <= 1}
-              >
+              <Button variant="outline" onClick={prevPage} disabled={page <= 1}>
                 Previous
               </Button>
               <Button
@@ -517,18 +560,19 @@ export default function BookingPage() {
               <div>
                 <p className="text-sm text-gray-700">
                   Showing{' '}
-                  <span className="font-medium">{((page - 1) * limit) + 1}</span>
-                  {' '}to{' '}
+                  <span className="font-medium">{(page - 1) * limit + 1}</span>{' '}
+                  to{' '}
                   <span className="font-medium">
                     {Math.min(page * limit, totalCount)}
-                  </span>
-                  {' '}of{' '}
-                  <span className="font-medium">{totalCount}</span>
-                  {' '}results
+                  </span>{' '}
+                  of <span className="font-medium">{totalCount}</span> results
                 </p>
               </div>
               <div>
-                <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <nav
+                  className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                  aria-label="Pagination"
+                >
                   <button
                     onClick={prevPage}
                     disabled={page <= 1}
@@ -536,11 +580,11 @@ export default function BookingPage() {
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </button>
-                  
+
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                     const pageNum = Math.max(1, page - 2) + i;
                     if (pageNum > totalPages) return null;
-                    
+
                     return (
                       <button
                         key={pageNum}
@@ -555,7 +599,7 @@ export default function BookingPage() {
                       </button>
                     );
                   })}
-                  
+
                   <button
                     onClick={nextPage}
                     disabled={page >= totalPages}

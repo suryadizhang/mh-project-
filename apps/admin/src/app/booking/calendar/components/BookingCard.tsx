@@ -5,10 +5,11 @@
 
 'use client';
 
-import React from 'react';
-import { Users, Clock, DollarSign, Phone, Mail } from 'lucide-react';
-import type { CalendarBooking } from '../types/calendar.types';
 import { format } from 'date-fns';
+import { Clock, DollarSign, Phone, Users } from 'lucide-react';
+import React from 'react';
+
+import type { CalendarBooking } from '../types/calendar.types';
 
 interface BookingCardProps {
   booking: CalendarBooking;
@@ -27,7 +28,8 @@ export function BookingCard({
   onClick,
   compact = false,
 }: BookingCardProps) {
-  const isDraggable = booking.status === 'confirmed' || booking.status === 'pending';
+  const isDraggable =
+    booking.status === 'confirmed' || booking.status === 'pending';
 
   const handleDragStart = (e: React.DragEvent) => {
     if (!isDraggable) {
@@ -51,7 +53,8 @@ export function BookingCard({
     completed: 'bg-blue-50 border-blue-200 text-blue-800',
   };
 
-  const statusStyle = statusStyles[booking.status] || 'bg-gray-50 border-gray-200 text-gray-800';
+  const statusStyle =
+    statusStyles[booking.status] || 'bg-gray-50 border-gray-200 text-gray-800';
 
   const formatCurrency = (cents: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -105,16 +108,22 @@ export function BookingCard({
       {/* Header */}
       <div className="flex items-start justify-between mb-2">
         <div className="flex-1 min-w-0">
-          <h4 className="font-semibold text-sm truncate">{booking.customer.name}</h4>
-          <p className="text-xs opacity-80 truncate">{booking.customer.email}</p>
+          <h4 className="font-semibold text-sm truncate">
+            {booking.customer.name}
+          </h4>
+          <p className="text-xs opacity-80 truncate">
+            {booking.customer.email}
+          </p>
         </div>
-        <span className={`
+        <span
+          className={`
           px-2 py-1 rounded text-[10px] font-semibold uppercase tracking-wide
           ${booking.status === 'confirmed' ? 'bg-green-100' : ''}
           ${booking.status === 'pending' ? 'bg-yellow-100' : ''}
           ${booking.status === 'cancelled' ? 'bg-red-100' : ''}
           ${booking.status === 'completed' ? 'bg-blue-100' : ''}
-        `}>
+        `}
+        >
           {booking.status}
         </span>
       </div>
@@ -123,7 +132,10 @@ export function BookingCard({
       <div className="space-y-1 text-xs">
         <div className="flex items-center gap-2">
           <Clock className="w-3 h-3 opacity-60" />
-          <span>{format(booking.startTime, 'h:mm a')} - {format(booking.endTime, 'h:mm a')}</span>
+          <span>
+            {format(booking.startTime, 'h:mm a')} -{' '}
+            {format(booking.endTime, 'h:mm a')}
+          </span>
         </div>
 
         <div className="flex items-center gap-2">

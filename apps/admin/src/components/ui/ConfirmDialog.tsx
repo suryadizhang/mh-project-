@@ -1,8 +1,8 @@
 'use client';
 
+import { AlertTriangle, CheckCircle, Info, Loader2 } from 'lucide-react';
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { AlertTriangle, Info, CheckCircle, Loader2 } from 'lucide-react';
 
 /**
  * Confirmation Dialog Types
@@ -24,11 +24,11 @@ export interface ConfirmDialogProps {
 
 /**
  * Reusable Confirmation Dialog Component
- * 
+ *
  * @example
  * ```tsx
  * const [showDialog, setShowDialog] = useState(false);
- * 
+ *
  * <ConfirmDialog
  *   isOpen={showDialog}
  *   onClose={() => setShowDialog(false)}
@@ -160,10 +160,16 @@ export function ConfirmDialog({
           <div
             className={`mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full ${config.iconBgColor} sm:mx-0 sm:h-10 sm:w-10`}
           >
-            <Icon className={`h-6 w-6 ${config.iconColor}`} aria-hidden="true" />
+            <Icon
+              className={`h-6 w-6 ${config.iconColor}`}
+              aria-hidden="true"
+            />
           </div>
           <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left flex-1">
-            <h3 id="dialog-title" className="text-lg font-semibold leading-6 text-gray-900">
+            <h3
+              id="dialog-title"
+              className="text-lg font-semibold leading-6 text-gray-900"
+            >
               {title}
             </h3>
             <div className="mt-2">
@@ -209,23 +215,23 @@ export function ConfirmDialog({
 
 /**
  * Hook for managing confirmation dialogs
- * 
+ *
  * @example
  * ```tsx
  * const { confirm, ConfirmDialogComponent } = useConfirmDialog();
- * 
+ *
  * const handleDelete = async () => {
  *   const confirmed = await confirm({
  *     title: 'Delete Item',
  *     message: 'Are you sure?',
  *     variant: 'danger',
  *   });
- *   
+ *
  *   if (confirmed) {
  *     await deleteItem();
  *   }
  * };
- * 
+ *
  * return (
  *   <>
  *     <button onClick={handleDelete}>Delete</button>
@@ -258,7 +264,7 @@ export function useConfirmDialog() {
       confirmText?: string;
       cancelText?: string;
     }): Promise<boolean> => {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         setDialogState({
           isOpen: true,
           ...options,
@@ -272,12 +278,12 @@ export function useConfirmDialog() {
 
   const handleClose = React.useCallback(() => {
     dialogState.resolve?.(false);
-    setDialogState((prev) => ({ ...prev, isOpen: false }));
+    setDialogState(prev => ({ ...prev, isOpen: false }));
   }, [dialogState.resolve]);
 
   const handleConfirm = React.useCallback(() => {
     dialogState.resolve?.(true);
-    setDialogState((prev) => ({ ...prev, isOpen: false }));
+    setDialogState(prev => ({ ...prev, isOpen: false }));
   }, [dialogState.resolve]);
 
   const ConfirmDialogComponent = React.useCallback(

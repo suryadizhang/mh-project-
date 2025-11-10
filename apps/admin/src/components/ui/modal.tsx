@@ -5,6 +5,7 @@
 
 import { X } from 'lucide-react';
 import { useEffect } from 'react';
+
 import { Button } from './button';
 
 interface ModalProps {
@@ -72,7 +73,7 @@ export function Modal({
       <div className="flex min-h-full items-center justify-center p-4">
         <div
           className={`relative bg-white rounded-lg shadow-xl ${sizeClasses[size]} w-full`}
-          onClick={(e) => e.stopPropagation()}
+          onClick={e => e.stopPropagation()}
         >
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200">

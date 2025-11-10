@@ -1,35 +1,35 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
 import {
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Users,
+  BarChart3,
   Calendar,
-  Target,
-  Star,
+  DollarSign,
+  Download,
+  Mail,
   MessageSquare,
   QrCode,
-  Mail,
   ShoppingCart,
-  BarChart3,
-  Download,
+  Star,
+  Target,
+  TrendingDown,
+  TrendingUp,
+  Users,
 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { StatsCard } from '@/components/ui/stats-card';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { EmptyState } from '@/components/ui/empty-state';
-import { mockDataService } from '@/services/mockDataService';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { StatsCard } from '@/components/ui/stats-card';
 import { logger } from '@/lib/logger';
+import { mockDataService } from '@/services/mockDataService';
 
 // Date range options
 const DATE_RANGES = {
   '7d': { label: 'Last 7 Days', days: 7 },
   '30d': { label: 'Last 30 Days', days: 30 },
   '90d': { label: 'Last 90 Days', days: 90 },
-  'custom': { label: 'Custom Range', days: null },
+  custom: { label: 'Custom Range', days: null },
 } as const;
 
 type DateRangeKey = keyof typeof DATE_RANGES;
@@ -166,9 +166,21 @@ export default function AnalyticsPage() {
 
     return [
       { stage: 'Visitors', count: visitors, dropoff: 0 },
-      { stage: 'Leads', count: leads, dropoff: ((visitors - leads) / visitors) * 100 },
-      { stage: 'Qualified', count: qualified, dropoff: ((leads - qualified) / leads) * 100 },
-      { stage: 'Converted', count: converted, dropoff: ((qualified - converted) / qualified) * 100 },
+      {
+        stage: 'Leads',
+        count: leads,
+        dropoff: ((visitors - leads) / visitors) * 100,
+      },
+      {
+        stage: 'Qualified',
+        count: qualified,
+        dropoff: ((leads - qualified) / leads) * 100,
+      },
+      {
+        stage: 'Converted',
+        count: converted,
+        dropoff: ((qualified - converted) / qualified) * 100,
+      },
     ];
   }, [analyticsData]);
 
@@ -223,13 +235,25 @@ export default function AnalyticsPage() {
       ['Metric', 'Value', 'Change'],
       ['Revenue', overview.revenue, formatPercent(overview.revenueChange)],
       ['Bookings', overview.bookings, formatPercent(overview.bookingsChange)],
-      ['Customers', overview.customers, formatPercent(overview.customersChange)],
-      ['Avg Order Value', overview.avgOrderValue, formatPercent(overview.avgOrderValueChange)],
+      [
+        'Customers',
+        overview.customers,
+        formatPercent(overview.customersChange),
+      ],
+      [
+        'Avg Order Value',
+        overview.avgOrderValue,
+        formatPercent(overview.avgOrderValueChange),
+      ],
       ['Leads', overview.leads, formatPercent(overview.leadsChange)],
-      ['Conversion Rate', `${overview.conversionRate}%`, formatPercent(overview.conversionRateChange)],
+      [
+        'Conversion Rate',
+        `${overview.conversionRate}%`,
+        formatPercent(overview.conversionRateChange),
+      ],
     ];
 
-    const csv = csvData.map((row) => row.join(',')).join('\n');
+    const csv = csvData.map(row => row.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -258,7 +282,9 @@ export default function AnalyticsPage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Business Analytics</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Business Analytics
+          </h1>
           <p className="text-gray-600">Track performance and growth metrics</p>
         </div>
         <div className="flex gap-3">
@@ -293,14 +319,14 @@ export default function AnalyticsPage() {
               <input
                 type="date"
                 value={customStartDate}
-                onChange={(e) => setCustomStartDate(e.target.value)}
+                onChange={e => setCustomStartDate(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-md text-sm"
               />
               <span className="text-gray-500">to</span>
               <input
                 type="date"
                 value={customEndDate}
-                onChange={(e) => setCustomEndDate(e.target.value)}
+                onChange={e => setCustomEndDate(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-md text-sm"
               />
             </div>
@@ -404,8 +430,12 @@ export default function AnalyticsPage() {
                   <DollarSign className="w-6 h-6 text-green-600" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Revenue Trend</h2>
-                  <p className="text-sm text-gray-600">Last 6 months performance</p>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Revenue Trend
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    Last 6 months performance
+                  </p>
                 </div>
               </div>
               <div className="text-right">
@@ -419,27 +449,34 @@ export default function AnalyticsPage() {
             {/* Simple bar chart */}
             {analyticsData?.revenueByMonth && (
               <div className="space-y-4">
-                {analyticsData.revenueByMonth.map((month: any, index: number) => {
-                  const maxRevenue = Math.max(...analyticsData.revenueByMonth.map((m: any) => m.revenue));
-                  const width = maxRevenue > 0 ? (month.revenue / maxRevenue) * 100 : 0;
-                  
-                  return (
-                    <div key={index}>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700 w-24">{month.month}</span>
-                        <span className="text-sm text-gray-900 font-semibold">
-                          {formatCurrency(month.revenue)}
-                        </span>
+                {analyticsData.revenueByMonth.map(
+                  (month: any, index: number) => {
+                    const maxRevenue = Math.max(
+                      ...analyticsData.revenueByMonth.map((m: any) => m.revenue)
+                    );
+                    const width =
+                      maxRevenue > 0 ? (month.revenue / maxRevenue) * 100 : 0;
+
+                    return (
+                      <div key={index}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-700 w-24">
+                            {month.month}
+                          </span>
+                          <span className="text-sm text-gray-900 font-semibold">
+                            {formatCurrency(month.revenue)}
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-6">
+                          <div
+                            className="bg-gradient-to-r from-green-600 to-green-400 h-6 rounded-full transition-all duration-500"
+                            style={{ width: `${width}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-6">
-                        <div
-                          className="bg-gradient-to-r from-green-600 to-green-400 h-6 rounded-full transition-all duration-500"
-                          style={{ width: `${width}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  }
+                )}
               </div>
             )}
           </div>
@@ -452,48 +489,76 @@ export default function AnalyticsPage() {
                   <Target className="w-6 h-6 text-red-600" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Lead Performance</h2>
-                  <p className="text-sm text-gray-600">Track lead quality and sources</p>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Lead Performance
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    Track lead quality and sources
+                  </p>
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                <div className="text-sm font-medium text-yellow-800 mb-1">Qualified Leads</div>
-                <div className="text-2xl font-bold text-yellow-900">{leadAnalytics.qualified}</div>
+                <div className="text-sm font-medium text-yellow-800 mb-1">
+                  Qualified Leads
+                </div>
+                <div className="text-2xl font-bold text-yellow-900">
+                  {leadAnalytics.qualified}
+                </div>
               </div>
 
               <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                <div className="text-sm font-medium text-green-800 mb-1">Converted</div>
-                <div className="text-2xl font-bold text-green-900">{leadAnalytics.converted}</div>
+                <div className="text-sm font-medium text-green-800 mb-1">
+                  Converted
+                </div>
+                <div className="text-2xl font-bold text-green-900">
+                  {leadAnalytics.converted}
+                </div>
               </div>
 
               <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-                <div className="text-sm font-medium text-red-800 mb-1">Lost</div>
-                <div className="text-2xl font-bold text-red-900">{leadAnalytics.lost}</div>
+                <div className="text-sm font-medium text-red-800 mb-1">
+                  Lost
+                </div>
+                <div className="text-2xl font-bold text-red-900">
+                  {leadAnalytics.lost}
+                </div>
               </div>
 
               <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="text-sm font-medium text-blue-800 mb-1">Avg AI Score</div>
-                <div className="text-2xl font-bold text-blue-900">{leadAnalytics.avgScore.toFixed(0)}</div>
+                <div className="text-sm font-medium text-blue-800 mb-1">
+                  Avg AI Score
+                </div>
+                <div className="text-2xl font-bold text-blue-900">
+                  {leadAnalytics.avgScore.toFixed(0)}
+                </div>
               </div>
             </div>
 
             {/* Top Lead Sources */}
             {leadAnalytics.topSources.length > 0 && (
               <div className="mt-6">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Top Lead Sources</h3>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                  Top Lead Sources
+                </h3>
                 <div className="space-y-2">
-                  {leadAnalytics.topSources.map((source: any, index: number) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                    >
-                      <span className="text-sm font-medium text-gray-700">{source.source || 'Unknown'}</span>
-                      <span className="text-sm text-gray-900 font-semibold">{source.count} leads</span>
-                    </div>
-                  ))}
+                  {leadAnalytics.topSources.map(
+                    (source: any, index: number) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                      >
+                        <span className="text-sm font-medium text-gray-700">
+                          {source.source || 'Unknown'}
+                        </span>
+                        <span className="text-sm text-gray-900 font-semibold">
+                          {source.count} leads
+                        </span>
+                      </div>
+                    )
+                  )}
                 </div>
               </div>
             )}
@@ -506,29 +571,60 @@ export default function AnalyticsPage() {
                 <Calendar className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Bookings by Status</h2>
-                <p className="text-sm text-gray-600">Distribution across all statuses</p>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Bookings by Status
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Distribution across all statuses
+                </p>
               </div>
             </div>
 
             {analyticsData?.bookingsByStatus && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {analyticsData.bookingsByStatus.map((status: any, index: number) => {
-                  const colors = [
-                    { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-900' },
-                    { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-900' },
-                    { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-900' },
-                    { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-900' },
-                  ];
-                  const color = colors[index % colors.length];
-                  
-                  return (
-                    <div key={index} className={`p-4 ${color.bg} rounded-lg border ${color.border}`}>
-                      <div className={`text-sm font-medium ${color.text} mb-1`}>{status.status}</div>
-                      <div className={`text-2xl font-bold ${color.text}`}>{status.count}</div>
-                    </div>
-                  );
-                })}
+                {analyticsData.bookingsByStatus.map(
+                  (status: any, index: number) => {
+                    const colors = [
+                      {
+                        bg: 'bg-green-50',
+                        border: 'border-green-200',
+                        text: 'text-green-900',
+                      },
+                      {
+                        bg: 'bg-yellow-50',
+                        border: 'border-yellow-200',
+                        text: 'text-yellow-900',
+                      },
+                      {
+                        bg: 'bg-blue-50',
+                        border: 'border-blue-200',
+                        text: 'text-blue-900',
+                      },
+                      {
+                        bg: 'bg-red-50',
+                        border: 'border-red-200',
+                        text: 'text-red-900',
+                      },
+                    ];
+                    const color = colors[index % colors.length];
+
+                    return (
+                      <div
+                        key={index}
+                        className={`p-4 ${color.bg} rounded-lg border ${color.border}`}
+                      >
+                        <div
+                          className={`text-sm font-medium ${color.text} mb-1`}
+                        >
+                          {status.status}
+                        </div>
+                        <div className={`text-2xl font-bold ${color.text}`}>
+                          {status.count}
+                        </div>
+                      </div>
+                    );
+                  }
+                )}
               </div>
             )}
           </div>
@@ -540,8 +636,12 @@ export default function AnalyticsPage() {
                 <TrendingDown className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Conversion Funnel</h2>
-                <p className="text-sm text-gray-600">Track visitor journey to booking</p>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Conversion Funnel
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Track visitor journey to booking
+                </p>
               </div>
             </div>
 
@@ -553,7 +653,9 @@ export default function AnalyticsPage() {
                 return (
                   <div key={stage.stage}>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700">{stage.stage}</span>
+                      <span className="text-sm font-medium text-gray-700">
+                        {stage.stage}
+                      </span>
                       <span className="text-sm text-gray-900 font-semibold">
                         {stage.count.toLocaleString()}
                         {index > 0 && stage.dropoff > 0 && (
@@ -589,8 +691,12 @@ export default function AnalyticsPage() {
                   <Star className="w-6 h-6 text-yellow-600" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Customer Reviews</h2>
-                  <p className="text-sm text-gray-600">Monitor satisfaction and feedback</p>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Customer Reviews
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    Monitor satisfaction and feedback
+                  </p>
                 </div>
               </div>
             </div>
@@ -623,7 +729,9 @@ export default function AnalyticsPage() {
               </div>
 
               <div className="p-6 bg-gray-50 rounded-lg">
-                <div className="text-3xl font-bold text-red-600 mb-2">{reviews.escalated}</div>
+                <div className="text-3xl font-bold text-red-600 mb-2">
+                  {reviews.escalated}
+                </div>
                 <div className="text-sm text-gray-600">Escalated Issues</div>
               </div>
             </div>
@@ -635,7 +743,9 @@ export default function AnalyticsPage() {
                   <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                   <span className="text-sm text-gray-700">Positive</span>
                 </div>
-                <span className="text-sm font-semibold text-gray-900">{reviews.positive}</span>
+                <span className="text-sm font-semibold text-gray-900">
+                  {reviews.positive}
+                </span>
               </div>
 
               <div className="flex items-center justify-between">
@@ -643,7 +753,9 @@ export default function AnalyticsPage() {
                   <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
                   <span className="text-sm text-gray-700">Neutral</span>
                 </div>
-                <span className="text-sm font-semibold text-gray-900">{reviews.neutral}</span>
+                <span className="text-sm font-semibold text-gray-900">
+                  {reviews.neutral}
+                </span>
               </div>
 
               <div className="flex items-center justify-between">
@@ -651,52 +763,67 @@ export default function AnalyticsPage() {
                   <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                   <span className="text-sm text-gray-700">Negative</span>
                 </div>
-                <span className="text-sm font-semibold text-gray-900">{reviews.negative}</span>
+                <span className="text-sm font-semibold text-gray-900">
+                  {reviews.negative}
+                </span>
               </div>
             </div>
           </div>
 
           {/* Top Customers */}
-          {analyticsData?.topRevenueCustomers && analyticsData.topRevenueCustomers.length > 0 && (
-            <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-purple-50 rounded-lg">
-                  <Users className="w-6 h-6 text-purple-600" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Top Customers</h2>
-                  <p className="text-sm text-gray-600">Highest revenue contributors</p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {analyticsData.topRevenueCustomers.map((customer: any, index: number) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                        <span className="text-lg font-bold text-purple-700">
-                          {index + 1}
-                        </span>
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-gray-900">{customer.name}</div>
-                        <div className="text-xs text-gray-500">{customer.email}</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-lg font-bold text-gray-900">
-                        {formatCurrency(customer.totalSpent)}
-                      </div>
-                      <div className="text-xs text-gray-500">Total Spent</div>
-                    </div>
+          {analyticsData?.topRevenueCustomers &&
+            analyticsData.topRevenueCustomers.length > 0 && (
+              <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-purple-50 rounded-lg">
+                    <Users className="w-6 h-6 text-purple-600" />
                   </div>
-                ))}
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900">
+                      Top Customers
+                    </h2>
+                    <p className="text-sm text-gray-600">
+                      Highest revenue contributors
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {analyticsData.topRevenueCustomers.map(
+                    (customer: any, index: number) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                            <span className="text-lg font-bold text-purple-700">
+                              {index + 1}
+                            </span>
+                          </div>
+                          <div>
+                            <div className="text-sm font-semibold text-gray-900">
+                              {customer.name}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {customer.email}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-lg font-bold text-gray-900">
+                            {formatCurrency(customer.totalSpent)}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Total Spent
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Additional Metrics Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -706,7 +833,9 @@ export default function AnalyticsPage() {
                 <div className="p-2 bg-purple-50 rounded-lg">
                   <Mail className="w-5 h-5 text-purple-600" />
                 </div>
-                <h3 className="text-sm font-semibold text-gray-900">Newsletter</h3>
+                <h3 className="text-sm font-semibold text-gray-900">
+                  Newsletter
+                </h3>
               </div>
               <div className="space-y-2">
                 <div className="text-2xl font-bold text-gray-900">-</div>
@@ -720,7 +849,9 @@ export default function AnalyticsPage() {
                 <div className="p-2 bg-blue-50 rounded-lg">
                   <QrCode className="w-5 h-5 text-blue-600" />
                 </div>
-                <h3 className="text-sm font-semibold text-gray-900">QR Scans</h3>
+                <h3 className="text-sm font-semibold text-gray-900">
+                  QR Scans
+                </h3>
               </div>
               <div className="space-y-2">
                 <div className="text-2xl font-bold text-gray-900">-</div>
@@ -734,7 +865,9 @@ export default function AnalyticsPage() {
                 <div className="p-2 bg-pink-50 rounded-lg">
                   <MessageSquare className="w-5 h-5 text-pink-600" />
                 </div>
-                <h3 className="text-sm font-semibold text-gray-900">Social Engagement</h3>
+                <h3 className="text-sm font-semibold text-gray-900">
+                  Social Engagement
+                </h3>
               </div>
               <div className="space-y-2">
                 <div className="text-2xl font-bold text-gray-900">-</div>

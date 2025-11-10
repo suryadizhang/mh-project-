@@ -1,29 +1,30 @@
 /**
  * AI Readiness API Service
- * 
+ *
  * Client service for all Shadow Learning, AI Readiness, and ML Confidence endpoints
  * Handles communication with the backend API for AI monitoring and control.
  */
 
 import type {
-  ReadinessDashboard,
+  ActivationRequest,
+  Alert,
+  ConfidencePrediction,
+  ConfidenceTestRequest,
+  DisableRequest,
   IntentReadiness,
   IntentType,
-  TrafficSplitUpdateRequest,
-  ActivationRequest,
-  DisableRequest,
-  Alert,
-  RollbackEvent,
   MLPredictorStatus,
-  ConfidenceTestRequest,
-  ConfidencePrediction,
-  SystemConfig,
+  ReadinessDashboard,
+  RollbackEvent,
   RoutingStats,
   ShadowLearningStats,
+  SystemConfig,
+  TrafficSplitUpdateRequest,
   TrainingDataExport,
 } from '@/types/aiReadiness';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 const AI_READINESS_BASE = `${API_BASE_URL}/api/v1/ai/readiness`;
 const SHADOW_LEARNING_BASE = `${API_BASE_URL}/api/v1/ai/shadow`;
 
@@ -41,7 +42,9 @@ async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ detail: response.statusText }));
+      const errorData = await response
+        .json()
+        .catch(() => ({ detail: response.statusText }));
       throw new Error(errorData.detail || `API Error: ${response.status}`);
     }
 
@@ -70,14 +73,20 @@ export class AIReadinessService {
   /**
    * Get intent-specific readiness
    */
-  static async getIntentReadiness(intent: IntentType): Promise<IntentReadiness> {
+  static async getIntentReadiness(
+    intent: IntentType
+  ): Promise<IntentReadiness> {
     return apiFetch<IntentReadiness>(`${AI_READINESS_BASE}/intent/${intent}`);
   }
 
   /**
    * Get quick overall status
    */
-  static async getOverallStatus(): Promise<{ ready: boolean; score: number; message: string }> {
+  static async getOverallStatus(): Promise<{
+    ready: boolean;
+    score: number;
+    message: string;
+  }> {
     return apiFetch(`${AI_READINESS_BASE}/overall`);
   }
 
@@ -101,7 +110,7 @@ export class AIReadinessService {
     reason?: string
   ): Promise<{ success: boolean; message: string }> {
     const request: TrafficSplitUpdateRequest = { intent, percentage, reason };
-    
+
     return apiFetch(`${AI_READINESS_BASE}/routing/update-split`, {
       method: 'POST',
       body: JSON.stringify(request),
@@ -115,8 +124,8 @@ export class AIReadinessService {
   /**
    * ONE-CLICK ACTIVATION: Enable local AI
    */
-  static async enableLocalAI(request: ActivationRequest): Promise<{ 
-    success: boolean; 
+  static async enableLocalAI(request: ActivationRequest): Promise<{
+    success: boolean;
     message: string;
     intents_enabled: IntentType[];
     traffic_percentages: Record<IntentType, number>;
@@ -130,8 +139,8 @@ export class AIReadinessService {
   /**
    * Disable local AI (emergency stop)
    */
-  static async disableLocalAI(request: DisableRequest): Promise<{ 
-    success: boolean; 
+  static async disableLocalAI(request: DisableRequest): Promise<{
+    success: boolean;
     message: string;
   }> {
     return apiFetch(`${AI_READINESS_BASE}/activation/disable`, {
@@ -187,11 +196,13 @@ export class AIReadinessService {
   /**
    * Get rollback history
    */
-  static async getRollbackHistory(intent?: IntentType): Promise<RollbackEvent[]> {
-    const url = intent 
+  static async getRollbackHistory(
+    intent?: IntentType
+  ): Promise<RollbackEvent[]> {
+    const url = intent
       ? `${AI_READINESS_BASE}/quality/rollback-history?intent=${intent}`
       : `${AI_READINESS_BASE}/quality/rollback-history`;
-    
+
     return apiFetch<RollbackEvent[]>(url);
   }
 
@@ -203,17 +214,24 @@ export class AIReadinessService {
    * Get ML predictor statistics
    */
   static async getMLPredictorStats(): Promise<MLPredictorStatus> {
-    return apiFetch<MLPredictorStatus>(`${AI_READINESS_BASE}/ml/predictor-stats`);
+    return apiFetch<MLPredictorStatus>(
+      `${AI_READINESS_BASE}/ml/predictor-stats`
+    );
   }
 
   /**
    * Test confidence prediction for a message
    */
-  static async testConfidence(request: ConfidenceTestRequest): Promise<ConfidencePrediction> {
-    return apiFetch<ConfidencePrediction>(`${AI_READINESS_BASE}/ml/test-confidence`, {
-      method: 'POST',
-      body: JSON.stringify(request),
-    });
+  static async testConfidence(
+    request: ConfidenceTestRequest
+  ): Promise<ConfidencePrediction> {
+    return apiFetch<ConfidencePrediction>(
+      `${AI_READINESS_BASE}/ml/test-confidence`,
+      {
+        method: 'POST',
+        body: JSON.stringify(request),
+      }
+    );
   }
 
   /**
@@ -314,7 +332,7 @@ export class AIReadinessService {
       min_similarity: minSimilarity.toString(),
       limit: limit.toString(),
     });
-    
+
     if (intent) params.append('intent', intent);
 
     return apiFetch<TrainingDataExport>(

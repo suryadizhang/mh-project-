@@ -14,8 +14,9 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import React, { useEffect, useState } from 'react';
+
 import { useToast } from '@/components/ui/Toast';
 
 // ============================================================================
@@ -57,7 +58,7 @@ interface PendingReview {
 export default function PendingReviewsList() {
   // Toast notifications
   const toast = useToast();
-  
+
   // Data state
   const [reviews, setReviews] = useState<PendingReview[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,13 +67,16 @@ export default function PendingReviewsList() {
   const [totalCount, setTotalCount] = useState(0);
 
   // UI state
-  const [selectedReviews, setSelectedReviews] = useState<Set<number>>(new Set());
+  const [selectedReviews, setSelectedReviews] = useState<Set<number>>(
+    new Set()
+  );
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReviewId, setRejectReviewId] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [processingIds, setProcessingIds] = useState<Set<number>>(new Set());
   const [expandedReviewId, setExpandedReviewId] = useState<number | null>(null);
-  const [selectedMediaPreview, setSelectedMediaPreview] = useState<MediaItem | null>(null);
+  const [selectedMediaPreview, setSelectedMediaPreview] =
+    useState<MediaItem | null>(null);
 
   // Mock admin ID (in real app, get from auth context)
   const adminId = 1;
@@ -96,7 +100,10 @@ export default function PendingReviewsList() {
       }
     } catch (error) {
       console.error('Error fetching reviews:', error);
-      toast.error('Failed to load reviews', 'Please refresh the page to try again');
+      toast.error(
+        'Failed to load reviews',
+        'Please refresh the page to try again'
+      );
     } finally {
       setLoading(false);
     }
@@ -148,7 +155,10 @@ export default function PendingReviewsList() {
 
   const handleReject = async () => {
     if (!rejectReviewId || !rejectReason.trim()) {
-      toast.warning('Rejection reason required', 'Please provide a reason for rejection');
+      toast.warning(
+        'Rejection reason required',
+        'Please provide a reason for rejection'
+      );
       return;
     }
 
@@ -198,12 +208,19 @@ export default function PendingReviewsList() {
     if (action === 'reject') {
       reason = prompt('Enter rejection reason for all selected reviews:') || '';
       if (!reason.trim()) {
-        toast.warning('Rejection reason required', 'Cannot reject without a reason');
+        toast.warning(
+          'Rejection reason required',
+          'Cannot reject without a reason'
+        );
         return;
       }
     }
 
-    if (!confirm(`${action === 'approve' ? 'Approve' : 'Reject'} ${selectedReviews.size} reviews?`)) {
+    if (
+      !confirm(
+        `${action === 'approve' ? 'Approve' : 'Reject'} ${selectedReviews.size} reviews?`
+      )
+    ) {
       return;
     }
 
@@ -259,7 +276,7 @@ export default function PendingReviewsList() {
     if (selectedReviews.size === reviews.length) {
       setSelectedReviews(new Set());
     } else {
-      setSelectedReviews(new Set(reviews.map((r) => r.id)));
+      setSelectedReviews(new Set(reviews.map(r => r.id)));
     }
   };
 
@@ -288,7 +305,8 @@ export default function PendingReviewsList() {
           <div>
             <h1 className="text-3xl font-bold">Pending Reviews</h1>
             <p className="text-gray-600 mt-1">
-              {totalCount} review{totalCount !== 1 ? 's' : ''} waiting for approval
+              {totalCount} review{totalCount !== 1 ? 's' : ''} waiting for
+              approval
             </p>
           </div>
 
@@ -320,7 +338,10 @@ export default function PendingReviewsList() {
               onChange={toggleSelectAll}
               className="w-4 h-4 cursor-pointer"
             />
-            <label className="text-sm text-gray-600 cursor-pointer" onClick={toggleSelectAll}>
+            <label
+              className="text-sm text-gray-600 cursor-pointer"
+              onClick={toggleSelectAll}
+            >
               Select all on this page
             </label>
           </div>
@@ -336,7 +357,7 @@ export default function PendingReviewsList() {
         </div>
       ) : (
         <div className="space-y-6">
-          {reviews.map((review) => {
+          {reviews.map(review => {
             const isProcessing = processingIds.has(review.id);
             const isExpanded = expandedReviewId === review.id;
 
@@ -344,7 +365,9 @@ export default function PendingReviewsList() {
               <div
                 key={review.id}
                 className={`bg-white rounded-lg shadow-md border-2 transition ${
-                  selectedReviews.has(review.id) ? 'border-blue-500' : 'border-gray-200'
+                  selectedReviews.has(review.id)
+                    ? 'border-blue-500'
+                    : 'border-gray-200'
                 } ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}
               >
                 <div className="p-6">
@@ -364,11 +387,13 @@ export default function PendingReviewsList() {
                     <div className="flex-1">
                       {/* Rating Stars */}
                       <div className="flex items-center gap-2 mb-2">
-                        {[1, 2, 3, 4, 5].map((star) => (
+                        {[1, 2, 3, 4, 5].map(star => (
                           <span
                             key={star}
                             className={`text-2xl ${
-                              star <= review.rating ? 'text-yellow-400' : 'text-gray-300'
+                              star <= review.rating
+                                ? 'text-yellow-400'
+                                : 'text-gray-300'
                             }`}
                           >
                             ★
@@ -410,7 +435,8 @@ export default function PendingReviewsList() {
                               Media ({review.media_count}):
                             </span>
                             <span className="text-xs text-gray-600">
-                              {review.image_count} image{review.image_count !== 1 ? 's' : ''}
+                              {review.image_count} image
+                              {review.image_count !== 1 ? 's' : ''}
                               {review.video_count > 0 &&
                                 `, ${review.video_count} video${review.video_count !== 1 ? 's' : ''}`}
                             </span>
@@ -438,7 +464,9 @@ export default function PendingReviewsList() {
                                       className="object-cover"
                                     />
                                     <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                                      <span className="text-white text-2xl">▶</span>
+                                      <span className="text-white text-2xl">
+                                        ▶
+                                      </span>
                                     </div>
                                   </div>
                                 )}
@@ -458,14 +486,17 @@ export default function PendingReviewsList() {
                         </h4>
                         <div className="space-y-1 text-sm">
                           <p>
-                            <span className="font-semibold">Name:</span> {review.customer_name}
+                            <span className="font-semibold">Name:</span>{' '}
+                            {review.customer_name}
                           </p>
                           <p>
-                            <span className="font-semibold">Email:</span> {review.customer_email}
+                            <span className="font-semibold">Email:</span>{' '}
+                            {review.customer_email}
                           </p>
                           {review.customer_phone && (
                             <p>
-                              <span className="font-semibold">Phone:</span> {review.customer_phone}
+                              <span className="font-semibold">Phone:</span>{' '}
+                              {review.customer_phone}
                             </p>
                           )}
                         </div>
@@ -560,11 +591,12 @@ export default function PendingReviewsList() {
           <div className="bg-white rounded-lg p-8 max-w-md w-full">
             <h2 className="text-2xl font-bold mb-4">Reject Review</h2>
             <p className="text-gray-600 mb-4">
-              Please provide a reason for rejecting this review. This will be sent to the customer.
+              Please provide a reason for rejecting this review. This will be
+              sent to the customer.
             </p>
             <textarea
               value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
+              onChange={e => setRejectReason(e.target.value)}
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 outline-none h-32 resize-none mb-4"
               placeholder="Reason for rejection..."
             />

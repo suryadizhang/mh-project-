@@ -1,51 +1,68 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
-import { 
-  Filter, 
-  Search, 
-  UserPlus, 
-  Users,
-  Star,
+import {
   Calendar,
-  DollarSign,
   ChevronLeft,
   ChevronRight,
+  DollarSign,
+  Filter,
+  Search,
+  Star,
+  UserPlus,
+  Users,
 } from 'lucide-react';
+import { useCallback, useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { useCustomers, usePagination, useFilters, useSearch } from '@/hooks/useApi';
+import {
+  useCustomers,
+  useFilters,
+  usePagination,
+  useSearch,
+} from '@/hooks/useApi';
 import type { CustomerFilters } from '@/types';
 
 export default function CustomersPage() {
   // Pagination state
   const { page, limit, setPage, nextPage, prevPage } = usePagination(1, 20);
-  
+
   // Search state
-  const { query: searchQuery, debouncedQuery, setQuery: setSearchQuery } = useSearch();
-  
+  const {
+    query: searchQuery,
+    debouncedQuery,
+    setQuery: setSearchQuery,
+  } = useSearch();
+
   // Filter state
   const { filters, updateFilter, resetFilters } = useFilters<CustomerFilters>({
     status: '',
   });
-  
+
   // Combine all filters for API call
-  const apiFilters = useMemo(() => ({
-    ...filters,
-    search: debouncedQuery,
-    page,
-    limit,
-    sort_by: 'created_at',
-    sort_order: 'desc' as const,
-  }), [filters, debouncedQuery, page, limit]);
-  
+  const apiFilters = useMemo(
+    () => ({
+      ...filters,
+      search: debouncedQuery,
+      page,
+      limit,
+      sort_by: 'created_at',
+      sort_order: 'desc' as const,
+    }),
+    [filters, debouncedQuery, page, limit]
+  );
+
   // Fetch customers data
-  const { data: customersResponse, loading, error, refetch } = useCustomers(apiFilters);
-  
+  const {
+    data: customersResponse,
+    loading,
+    error,
+    refetch,
+  } = useCustomers(apiFilters);
+
   const customers = customersResponse?.data || [];
   const totalCount = customersResponse?.total_count || 0;
   const totalPages = Math.ceil(totalCount / limit);
-  
+
   // Format currency
   const formatCurrency = useCallback((cents: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -53,7 +70,7 @@ export default function CustomersPage() {
       currency: 'USD',
     }).format(cents / 100);
   }, []);
-  
+
   // Format date
   const formatDate = useCallback((dateString: string) => {
     if (!dateString) return 'Never';
@@ -64,7 +81,7 @@ export default function CustomersPage() {
       year: 'numeric',
     });
   }, []);
-  
+
   // Get status color
   const getStatusColor = useCallback((status: string) => {
     switch (status?.toLowerCase()) {
@@ -78,38 +95,48 @@ export default function CustomersPage() {
         return 'bg-blue-100 text-blue-800';
     }
   }, []);
-  
+
   // Handle status filter change
   const handleStatusFilter = (status: string) => {
     updateFilter('status', status === 'all' ? '' : status);
     setPage(1); // Reset to first page when filtering
   };
-  
+
   // Handle search
   const handleSearch = (value: string) => {
     setSearchQuery(value);
     setPage(1); // Reset to first page when searching
   };
-  
+
   // Clear all filters
   const handleClearFilters = () => {
     resetFilters();
     setSearchQuery('');
     setPage(1);
   };
-  
+
   // Calculate stats
   const stats = useMemo(() => {
     return {
       total: totalCount,
-      active: customers.filter((c: any) => (c.status || 'active').toLowerCase() === 'active').length,
-      vip: customers.filter((c: any) => (c.status || '').toLowerCase() === 'vip').length,
-      avgBookings: customers.length > 0 
-        ? (customers.reduce((sum: number, c: any) => sum + (c.total_bookings || 0), 0) / customers.length).toFixed(1)
-        : '0',
+      active: customers.filter(
+        (c: any) => (c.status || 'active').toLowerCase() === 'active'
+      ).length,
+      vip: customers.filter(
+        (c: any) => (c.status || '').toLowerCase() === 'vip'
+      ).length,
+      avgBookings:
+        customers.length > 0
+          ? (
+              customers.reduce(
+                (sum: number, c: any) => sum + (c.total_bookings || 0),
+                0
+              ) / customers.length
+            ).toFixed(1)
+          : '0',
     };
   }, [customers, totalCount]);
-  
+
   if (error) {
     return (
       <div className="space-y-6">
@@ -218,7 +245,9 @@ export default function CustomersPage() {
         </div>
         <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
           <div className="text-center">
-            <p className="text-3xl font-bold text-blue-600">{stats.avgBookings}</p>
+            <p className="text-3xl font-bold text-blue-600">
+              {stats.avgBookings}
+            </p>
             <p className="text-sm text-gray-600">Avg. Bookings</p>
           </div>
         </div>
@@ -234,15 +263,15 @@ export default function CustomersPage() {
                 type="text"
                 placeholder="Search customers..."
                 value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
+                onChange={e => handleSearch(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
           <div className="flex gap-2">
-            <select 
+            <select
               value={filters.status || 'all'}
-              onChange={(e) => handleStatusFilter(e.target.value)}
+              onChange={e => handleStatusFilter(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">All Status</option>
@@ -273,11 +302,13 @@ export default function CustomersPage() {
         <div className="bg-white rounded-lg shadow border border-gray-200 p-8">
           <div className="text-center">
             <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No customers found</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              No customers found
+            </h3>
             <p className="text-gray-600 mb-4">
               {Object.values(filters).some(Boolean) || debouncedQuery
-                ? "Try adjusting your filters or search query"
-                : "Get started by adding your first customer"}
+                ? 'Try adjusting your filters or search query'
+                : 'Get started by adding your first customer'}
             </p>
             <Button>
               <UserPlus className="w-4 h-4 mr-2" />
@@ -352,7 +383,9 @@ export default function CustomersPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       <div className="flex items-center">
                         <DollarSign className="w-4 h-4 mr-1 text-gray-400" />
-                        {customer.total_spent_cents ? formatCurrency(customer.total_spent_cents) : '$0.00'}
+                        {customer.total_spent_cents
+                          ? formatCurrency(customer.total_spent_cents)
+                          : '$0.00'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -362,8 +395,11 @@ export default function CustomersPage() {
                       <span
                         className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(customer.status || 'active')}`}
                       >
-                        {customer.status === 'vip' && <Star className="w-3 h-3 mr-1" />}
-                        {(customer.status || 'Active').charAt(0).toUpperCase() + (customer.status || 'Active').slice(1)}
+                        {customer.status === 'vip' && (
+                          <Star className="w-3 h-3 mr-1" />
+                        )}
+                        {(customer.status || 'Active').charAt(0).toUpperCase() +
+                          (customer.status || 'Active').slice(1)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -381,15 +417,11 @@ export default function CustomersPage() {
               </tbody>
             </table>
           </div>
-          
+
           {/* Pagination */}
           <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
             <div className="flex-1 flex justify-between sm:hidden">
-              <Button
-                variant="outline"
-                onClick={prevPage}
-                disabled={page <= 1}
-              >
+              <Button variant="outline" onClick={prevPage} disabled={page <= 1}>
                 Previous
               </Button>
               <Button
@@ -404,18 +436,19 @@ export default function CustomersPage() {
               <div>
                 <p className="text-sm text-gray-700">
                   Showing{' '}
-                  <span className="font-medium">{((page - 1) * limit) + 1}</span>
-                  {' '}to{' '}
+                  <span className="font-medium">{(page - 1) * limit + 1}</span>{' '}
+                  to{' '}
                   <span className="font-medium">
                     {Math.min(page * limit, totalCount)}
-                  </span>
-                  {' '}of{' '}
-                  <span className="font-medium">{totalCount}</span>
-                  {' '}results
+                  </span>{' '}
+                  of <span className="font-medium">{totalCount}</span> results
                 </p>
               </div>
               <div>
-                <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <nav
+                  className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                  aria-label="Pagination"
+                >
                   <button
                     onClick={prevPage}
                     disabled={page <= 1}
@@ -423,11 +456,11 @@ export default function CustomersPage() {
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </button>
-                  
+
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                     const pageNum = Math.max(1, page - 2) + i;
                     if (pageNum > totalPages) return null;
-                    
+
                     return (
                       <button
                         key={pageNum}
@@ -442,7 +475,7 @@ export default function CustomersPage() {
                       </button>
                     );
                   })}
-                  
+
                   <button
                     onClick={nextPage}
                     disabled={page >= totalPages}

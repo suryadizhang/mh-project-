@@ -1,14 +1,14 @@
 // Content Marketing & Social Media Helper Functions
 // ================================================
 
-import { blogPosts, type BlogPost } from '@/data/blogPosts'
+import { type BlogPost, blogPosts } from '@/data/blogPosts';
 
 // Generate social media post content from blog posts
 export const generateSocialMediaContent = (postId: number) => {
-  const post = blogPosts.find((p: BlogPost) => p.id === postId)
-  if (!post) return null
+  const post = blogPosts.find((p: BlogPost) => p.id === postId);
+  if (!post) return null;
 
-  const baseUrl = 'https://myhibachi.com'
+  const baseUrl = 'https://myhibachi.com';
 
   return {
     twitter: {
@@ -20,14 +20,14 @@ export const generateSocialMediaContent = (postId: number) => {
         'hibachi',
         'catering',
         post.serviceArea.replace(' ', ''),
-        post.eventType.replace(' ', '')
-      ]
+        post.eventType.replace(' ', ''),
+      ],
     },
     facebook: {
       text: `🍤 ${post.title}\n\n${post.excerpt}\n\nRead the complete guide: ${baseUrl}/blog/${
         post.slug
       }\n\n#HibachiCatering #${post.serviceArea.replace(' ', '')}Events #InteractiveDining`,
-      image: `${baseUrl}/images/hibachi-social.jpg` // You'll need to add this image
+      image: `${baseUrl}/images/hibachi-social.jpg`, // You'll need to add this image
     },
     instagram: {
       caption: `🔥 ${post.title}\n\n${post.excerpt.slice(0, 150)}...\n\n📍 Serving ${
@@ -46,8 +46,8 @@ export const generateSocialMediaContent = (postId: number) => {
         post.eventType.replace(' ', '').toLowerCase(),
         'mobilechef',
         'interactivedining',
-        'partycatering'
-      ]
+        'partycatering',
+      ],
     },
     linkedin: {
       text: `${post.title}\n\n${
@@ -56,17 +56,26 @@ export const generateSocialMediaContent = (postId: number) => {
         post.serviceArea
       }.\n\nRead the complete guide: ${baseUrl}/blog/${
         post.slug
-      }\n\n#ProfessionalCatering #CorporateEvents #TeamBuilding #HibachCatering`
-    }
-  }
-}
+      }\n\n#ProfessionalCatering #CorporateEvents #TeamBuilding #HibachCatering`,
+    },
+  };
+};
 
 // Generate email newsletter content
-export const generateNewsletterContent = (featured: number[] = [], seasonal: number[] = []) => {
-  const featuredPosts = featured.map((id: number) => blogPosts.find((p: BlogPost) => p.id === id)).filter(Boolean)
-  const seasonalPosts = seasonal.map((id: number) => blogPosts.find((p: BlogPost) => p.id === id)).filter(Boolean)
+export const generateNewsletterContent = (
+  featured: number[] = [],
+  seasonal: number[] = []
+) => {
+  const featuredPosts = featured
+    .map((id: number) => blogPosts.find((p: BlogPost) => p.id === id))
+    .filter(Boolean);
+  const seasonalPosts = seasonal
+    .map((id: number) => blogPosts.find((p: BlogPost) => p.id === id))
+    .filter(Boolean);
 
-  const currentMonth = new Date().toLocaleDateString('en-US', { month: 'long' })
+  const currentMonth = new Date().toLocaleDateString('en-US', {
+    month: 'long',
+  });
 
   return {
     subject: `${currentMonth} Hibachi Event Ideas & Seasonal Menu Updates`,
@@ -74,9 +83,9 @@ export const generateNewsletterContent = (featured: number[] = [], seasonal: num
     featured: featuredPosts,
     seasonal: seasonalPosts,
     ctaText: 'Book Your Hibachi Event',
-    ctaUrl: 'https://myhibachi.com/booking'
-  }
-}
+    ctaUrl: 'https://myhibachi.com/booking',
+  };
+};
 
 // Generate local business directory listings
 export const generateBusinessListings = () => {
@@ -92,7 +101,7 @@ export const generateBusinessListings = () => {
       'Holiday Party Hibachi',
       'Graduation Celebration Catering',
       'Family Reunion Hibachi',
-      'Backyard Party Catering'
+      'Backyard Party Catering',
     ],
     serviceAreas: [
       'San Francisco Bay Area',
@@ -102,33 +111,38 @@ export const generateBusinessListings = () => {
       'Fremont',
       'Stockton',
       'Napa Valley',
-      'Peninsula'
+      'Peninsula',
     ],
     keywords:
       'hibachi catering, mobile hibachi chef, Japanese catering, interactive dining, live cooking show, party catering, corporate catering, wedding catering',
     website: 'https://myhibachi.com',
-    blog: 'https://myhibachi.com/blog'
-  }
+    blog: 'https://myhibachi.com/blog',
+  };
 
   return {
     google: {
       ...businessInfo,
       category: 'Catering Service',
-      attributes: ['Offers takeout', 'Offers delivery', 'Good for groups', 'Accepts credit cards']
+      attributes: [
+        'Offers takeout',
+        'Offers delivery',
+        'Good for groups',
+        'Accepts credit cards',
+      ],
     },
     yelp: {
       ...businessInfo,
       categories: ['Caterers', 'Japanese', 'Event Planning & Services'],
       specialties:
-        'Interactive hibachi cooking shows, premium ingredients, professional mobile setup'
+        'Interactive hibachi cooking shows, premium ingredients, professional mobile setup',
     },
     nextdoor: {
       ...businessInfo,
       type: 'Professional Service',
-      serviceType: 'Catering & Event Services'
-    }
-  }
-}
+      serviceType: 'Catering & Event Services',
+    },
+  };
+};
 
 // Generate content calendar suggestions
 export const generateContentCalendar = () => {
@@ -144,23 +158,43 @@ export const generateContentCalendar = () => {
     'September',
     'October',
     'November',
-    'December'
-  ]
+    'December',
+  ];
 
   const seasonalEvents = {
-    January: ['New Year parties', 'winter corporate events', 'indoor celebrations'],
-    February: ["Valentine's Day", 'winter sports parties', 'indoor romantic dinners'],
+    January: [
+      'New Year parties',
+      'winter corporate events',
+      'indoor celebrations',
+    ],
+    February: [
+      "Valentine's Day",
+      'winter sports parties',
+      'indoor romantic dinners',
+    ],
     March: ['spring celebrations', "St. Patrick's Day", 'school fundraisers'],
-    April: ['Easter celebrations', 'spring outdoor events', 'graduation planning'],
+    April: [
+      'Easter celebrations',
+      'spring outdoor events',
+      'graduation planning',
+    ],
     May: ["Mother's Day", 'graduation parties', 'outdoor season start'],
     June: ["Father's Day", 'wedding season', 'graduation celebrations'],
     July: ['summer pool parties', 'Fourth of July', 'vacation gatherings'],
     August: ['back-to-school parties', 'late summer events', 'family reunions'],
-    September: ['fall season start', 'harvest celebrations', 'corporate retreats'],
+    September: [
+      'fall season start',
+      'harvest celebrations',
+      'corporate retreats',
+    ],
     October: ['Halloween parties', 'fall festivals', 'holiday planning'],
-    November: ['Thanksgiving alternatives', 'holiday corporate events', 'family gatherings'],
-    December: ['holiday parties', 'New Year planning', 'winter celebrations']
-  }
+    November: [
+      'Thanksgiving alternatives',
+      'holiday corporate events',
+      'family gatherings',
+    ],
+    December: ['holiday parties', 'New Year planning', 'winter celebrations'],
+  };
 
   return months.map(month => ({
     month,
@@ -169,11 +203,16 @@ export const generateContentCalendar = () => {
       `${month} Hibachi Menu Highlights`,
       `Perfect ${month} Events for Hibachi Catering`,
       `${month} Party Planning with Hibachi`,
-      `Seasonal Ingredients in ${month}`
+      `Seasonal Ingredients in ${month}`,
     ],
-    socialMediaThemes: [`#${month}Hibachi`, `#${month}Events`, `#SeasonalMenu`, `#PartyPlanning`]
-  }))
-}
+    socialMediaThemes: [
+      `#${month}Hibachi`,
+      `#${month}Events`,
+      `#SeasonalMenu`,
+      `#PartyPlanning`,
+    ],
+  }));
+};
 
 // Generate blog post performance tracking
 export const generateContentMetrics = () => {
@@ -189,73 +228,76 @@ export const generateContentMetrics = () => {
     seasonal: post.seasonal || false,
     estimatedSEOValue: calculateSEOValue(post),
     socialMediaPotential: calculateSocialPotential(post),
-    conversionPotential: calculateConversionPotential(post)
-  }))
-}
+    conversionPotential: calculateConversionPotential(post),
+  }));
+};
 
 // Helper function to calculate SEO value
 function calculateSEOValue(post: BlogPost): number {
-  let score = 0
+  let score = 0;
 
   // Keyword density and variety
-  score += post.keywords.length * 2
+  score += post.keywords.length * 2;
 
   // Location-specific content
-  if (post.serviceArea !== 'All Areas') score += 10
+  if (post.serviceArea !== 'All Areas') score += 10;
 
   // Event-specific content
-  if (post.eventType !== 'General') score += 10
+  if (post.eventType !== 'General') score += 10;
 
   // Featured status
-  if (post.featured) score += 15
+  if (post.featured) score += 15;
 
   // Recent content
-  const postDate = new Date(post.date)
-  const isRecent = Date.now() - postDate.getTime() < 90 * 24 * 60 * 60 * 1000 // 90 days
-  if (isRecent) score += 10
+  const postDate = new Date(post.date);
+  const isRecent = Date.now() - postDate.getTime() < 90 * 24 * 60 * 60 * 1000; // 90 days
+  if (isRecent) score += 10;
 
-  return Math.min(score, 100) // Cap at 100
+  return Math.min(score, 100); // Cap at 100
 }
 
 // Helper function to calculate social media potential
 function calculateSocialPotential(post: BlogPost): number {
-  let score = 0
+  let score = 0;
 
   // Visual content potential
-  if (post.eventType.includes('Party') || post.eventType.includes('Wedding')) score += 20
+  if (post.eventType.includes('Party') || post.eventType.includes('Wedding'))
+    score += 20;
 
   // Seasonal relevance
-  if (post.seasonal) score += 15
+  if (post.seasonal) score += 15;
 
   // Local interest
-  if (post.serviceArea !== 'All Areas') score += 10
+  if (post.serviceArea !== 'All Areas') score += 10;
 
   // Trending events
-  const trendingEvents = ['Birthday', 'Wedding', 'Corporate', 'Pool Party']
-  if (trendingEvents.some((event: string) => post.eventType.includes(event))) score += 15
+  const trendingEvents = ['Birthday', 'Wedding', 'Corporate', 'Pool Party'];
+  if (trendingEvents.some((event: string) => post.eventType.includes(event)))
+    score += 15;
 
-  return Math.min(score, 100)
+  return Math.min(score, 100);
 }
 
 // Helper function to calculate conversion potential
 function calculateConversionPotential(post: BlogPost): number {
-  let score = 0
+  let score = 0;
 
   // High-intent event types
-  const highIntentEvents = ['Wedding', 'Corporate', 'Birthday', 'Graduation']
-  if (highIntentEvents.some((event: string) => post.eventType.includes(event))) score += 25
+  const highIntentEvents = ['Wedding', 'Corporate', 'Birthday', 'Graduation'];
+  if (highIntentEvents.some((event: string) => post.eventType.includes(event)))
+    score += 25;
 
   // Specific service areas (local intent)
-  if (post.serviceArea !== 'All Areas') score += 20
+  if (post.serviceArea !== 'All Areas') score += 20;
 
   // Featured content
-  if (post.featured) score += 15
+  if (post.featured) score += 15;
 
   // Comprehensive guides (longer read time)
-  const wordCount = post.excerpt.length * 10 // Estimate based on excerpt
-  if (wordCount > 500) score += 10
+  const wordCount = post.excerpt.length * 10; // Estimate based on excerpt
+  if (wordCount > 500) score += 10;
 
-  return Math.min(score, 100)
+  return Math.min(score, 100);
 }
 
 const contentMarketingHelpers = {
@@ -263,7 +305,7 @@ const contentMarketingHelpers = {
   generateNewsletterContent,
   generateBusinessListings,
   generateContentCalendar,
-  generateContentMetrics
-}
+  generateContentMetrics,
+};
 
-export default contentMarketingHelpers
+export default contentMarketingHelpers;

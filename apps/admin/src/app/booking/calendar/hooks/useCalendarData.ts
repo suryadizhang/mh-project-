@@ -3,10 +3,24 @@
  * Handles API calls for weekly and monthly views
  */
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, addWeeks, addMonths } from 'date-fns';
-import type { CalendarBooking, CalendarView, WeekView, MonthView, DayColumn } from '../types/calendar.types';
+import {
+  endOfMonth,
+  endOfWeek,
+  format,
+  startOfMonth,
+  startOfWeek,
+} from 'date-fns';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
 import type { Booking } from '@/types';
+
+import type {
+  CalendarBooking,
+  CalendarView,
+  DayColumn,
+  MonthView,
+  WeekView,
+} from '../types/calendar.types';
 
 interface UseCalendarDataProps {
   view: CalendarView;
@@ -25,7 +39,10 @@ interface UseCalendarDataReturn {
   moveToToday: () => void;
 }
 
-export function useCalendarData({ view, currentDate }: UseCalendarDataProps): UseCalendarDataReturn {
+export function useCalendarData({
+  view,
+  currentDate,
+}: UseCalendarDataProps): UseCalendarDataReturn {
   const [bookings, setBookings] = useState<CalendarBooking[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,9 +73,10 @@ export function useCalendarData({ view, currentDate }: UseCalendarDataProps): Us
         date_to: format(dateRange.end, 'yyyy-MM-dd'),
       });
 
-      const endpoint = view === 'week' 
-        ? `/api/bookings/admin/weekly?${params}`
-        : `/api/bookings/admin/monthly?${params}`;
+      const endpoint =
+        view === 'week'
+          ? `/api/bookings/admin/weekly?${params}`
+          : `/api/bookings/admin/monthly?${params}`;
 
       const response = await fetch(endpoint, {
         credentials: 'include',
@@ -69,31 +87,34 @@ export function useCalendarData({ view, currentDate }: UseCalendarDataProps): Us
       }
 
       const data = await response.json();
-      
-      // Transform bookings to calendar bookings with time data
-      const calendarBookings: CalendarBooking[] = (data.data || []).map((booking: Booking) => {
-        const bookingDate = new Date(booking.date);
-        const [hours, minutes] = booking.slot.split(':').map(Number);
-        
-        const startTime = new Date(bookingDate);
-        startTime.setHours(hours, minutes, 0);
-        
-        // Assume 2-hour duration for hibachi events
-        const endTime = new Date(startTime);
-        endTime.setHours(hours + 2, minutes, 0);
 
-        return {
-          ...booking,
-          startTime,
-          endTime,
-          duration: 120, // 2 hours in minutes
-          color: getStatusColor(booking.status),
-        };
-      });
+      // Transform bookings to calendar bookings with time data
+      const calendarBookings: CalendarBooking[] = (data.data || []).map(
+        (booking: Booking) => {
+          const bookingDate = new Date(booking.date);
+          const [hours, minutes] = booking.slot.split(':').map(Number);
+
+          const startTime = new Date(bookingDate);
+          startTime.setHours(hours, minutes, 0);
+
+          // Assume 2-hour duration for hibachi events
+          const endTime = new Date(startTime);
+          endTime.setHours(hours + 2, minutes, 0);
+
+          return {
+            ...booking,
+            startTime,
+            endTime,
+            duration: 120, // 2 hours in minutes
+            color: getStatusColor(booking.status),
+          };
+        }
+      );
 
       setBookings(calendarBookings);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch bookings';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to fetch bookings';
       setError(errorMessage);
       console.error('Error fetching calendar bookings:', err);
     } finally {
@@ -117,14 +138,17 @@ export function useCalendarData({ view, currentDate }: UseCalendarDataProps): Us
 
     for (let i = 0; i < 7; i++) {
       const dateString = format(currentDay, 'yyyy-MM-dd');
-      const dayBookings = bookings.filter(b => format(b.startTime, 'yyyy-MM-dd') === dateString);
+      const dayBookings = bookings.filter(
+        b => format(b.startTime, 'yyyy-MM-dd') === dateString
+      );
 
       days.push({
         date: new Date(currentDay),
         dateString,
         dayName: format(currentDay, 'EEE'),
         dayNumber: currentDay.getDate(),
-        isToday: format(currentDay, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd'),
+        isToday:
+          format(currentDay, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd'),
         isWeekend: currentDay.getDay() === 0 || currentDay.getDay() === 6,
         bookings: dayBookings,
         bookingCount: dayBookings.length,
@@ -158,27 +182,30 @@ export function useCalendarData({ view, currentDate }: UseCalendarDataProps): Us
     const weeks: DayColumn[][] = [];
     const firstDay = startOfMonth(currentDate);
     const lastDay = endOfMonth(currentDate);
-    
+
     // Start from the first Sunday of the week containing the first day
-    let currentDay = startOfWeek(firstDay, { weekStartsOn: 0 });
+    const currentDay = startOfWeek(firstDay, { weekStartsOn: 0 });
     const endDay = endOfWeek(lastDay, { weekStartsOn: 0 });
-    
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     while (currentDay <= endDay) {
       const week: DayColumn[] = [];
-      
+
       for (let i = 0; i < 7; i++) {
         const dateString = format(currentDay, 'yyyy-MM-dd');
-        const dayBookings = bookings.filter(b => format(b.startTime, 'yyyy-MM-dd') === dateString);
+        const dayBookings = bookings.filter(
+          b => format(b.startTime, 'yyyy-MM-dd') === dateString
+        );
 
         week.push({
           date: new Date(currentDay),
           dateString,
           dayName: format(currentDay, 'EEE'),
           dayNumber: currentDay.getDate(),
-          isToday: format(currentDay, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd'),
+          isToday:
+            format(currentDay, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd'),
           isWeekend: currentDay.getDay() === 0 || currentDay.getDay() === 6,
           bookings: dayBookings,
           bookingCount: dayBookings.length,
@@ -186,7 +213,7 @@ export function useCalendarData({ view, currentDate }: UseCalendarDataProps): Us
 
         currentDay.setDate(currentDay.getDate() + 1);
       }
-      
+
       weeks.push(week);
     }
 

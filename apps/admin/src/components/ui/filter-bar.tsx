@@ -3,7 +3,8 @@
  * Reusable filter bar with search and filter dropdowns
  */
 
-import { Search, Filter, X } from 'lucide-react';
+import { Filter, Search, X } from 'lucide-react';
+
 import { Button } from './button';
 
 export interface FilterOption {
@@ -41,10 +42,12 @@ export function FilterBar({
 }: FilterBarProps) {
   const hasActiveFilters =
     searchQuery ||
-    filters.some((f) => f.value && f.value !== 'all' && f.value !== '');
+    filters.some(f => f.value && f.value !== 'all' && f.value !== '');
 
   return (
-    <div className={`bg-white p-4 rounded-lg shadow border border-gray-200 ${className}`}>
+    <div
+      className={`bg-white p-4 rounded-lg shadow border border-gray-200 ${className}`}
+    >
       <div className="flex flex-col sm:flex-row gap-4">
         {/* Search Input */}
         {onSearchChange && (
@@ -55,7 +58,7 @@ export function FilterBar({
                 type="text"
                 placeholder={searchPlaceholder}
                 value={searchQuery}
-                onChange={(e) => onSearchChange(e.target.value)}
+                onChange={e => onSearchChange(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               {searchQuery && (
@@ -73,22 +76,22 @@ export function FilterBar({
         {/* Filter Dropdowns */}
         {filters.length > 0 && (
           <div className="flex gap-2 flex-wrap">
-            {filters.map((filter) => (
+            {filters.map(filter => (
               <select
                 key={filter.key}
                 value={filter.value || 'all'}
-                onChange={(e) => onFilterChange?.(filter.key, e.target.value)}
+                onChange={e => onFilterChange?.(filter.key, e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >
                 <option value="all">{filter.label}</option>
-                {filter.options.map((option) => (
+                {filter.options.map(option => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
                 ))}
               </select>
             ))}
-            
+
             {/* Clear Filters Button */}
             {(showClearButton || hasActiveFilters) && onClearFilters && (
               <Button

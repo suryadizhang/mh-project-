@@ -1,34 +1,33 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
 import {
-  MessageSquare,
-  Send,
+  Circle,
+  Clock,
   Facebook,
   Instagram,
-  MessageCircle,
   Mail,
-  Target,
-  Clock,
-  CheckCircle,
-  Circle,
-  Sparkles,
+  MessageCircle,
+  MessageSquare,
   Phone,
+  Send,
+  Sparkles,
+  Target,
   UserPlus,
 } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { StatsCard } from '@/components/ui/stats-card';
-import { FilterBar } from '@/components/ui/filter-bar';
 import { EmptyState } from '@/components/ui/empty-state';
+import { FilterBar } from '@/components/ui/filter-bar';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Modal } from '@/components/ui/modal';
+import { StatsCard } from '@/components/ui/stats-card';
 import { useToast } from '@/components/ui/Toast';
 import {
-  useSocialThreads,
-  usePagination,
   useFilters,
+  usePagination,
   useSearch,
+  useSocialThreads,
 } from '@/hooks/useApi';
 import { smsService } from '@/services/api';
 
@@ -41,7 +40,7 @@ const CHANNELS = {
   EMAIL: 'email', // Future
 } as const;
 
-type ChannelType = typeof CHANNELS[keyof typeof CHANNELS];
+type ChannelType = (typeof CHANNELS)[keyof typeof CHANNELS];
 
 // Channel configuration with colors, icons, and labels
 const CHANNEL_CONFIG = {
@@ -122,7 +121,7 @@ const QUICK_REPLIES = {
 export default function UnifiedInboxPage() {
   // Toast notifications
   const toast = useToast();
-  
+
   // State
   const [activeChannel, setActiveChannel] = useState<ChannelType>(CHANNELS.ALL);
   const [selectedThread, setSelectedThread] = useState<any>(null);
@@ -133,7 +132,11 @@ export default function UnifiedInboxPage() {
 
   // Pagination and filters
   const { page, limit } = usePagination(1, 50);
-  const { query: searchQuery, debouncedQuery, setQuery: setSearchQuery } = useSearch();
+  const {
+    query: searchQuery,
+    debouncedQuery,
+    setQuery: setSearchQuery,
+  } = useSearch();
   const { filters, updateFilter, resetFilters } = useFilters({
     status: '',
   });
@@ -142,7 +145,10 @@ export default function UnifiedInboxPage() {
   const apiFilters = useMemo(
     () => ({
       ...filters,
-      platform: activeChannel !== CHANNELS.ALL && activeChannel !== CHANNELS.SMS ? activeChannel : undefined,
+      platform:
+        activeChannel !== CHANNELS.ALL && activeChannel !== CHANNELS.SMS
+          ? activeChannel
+          : undefined,
       search: debouncedQuery,
       page,
       limit,
@@ -153,15 +159,19 @@ export default function UnifiedInboxPage() {
   );
 
   // Fetch social media threads (FB/IG)
-  const { data: socialResponse, loading: loadingSocial, error, refetch: refetchSocial } = useSocialThreads(
-    activeChannel !== CHANNELS.SMS ? apiFilters : null
-  );
+  const {
+    data: socialResponse,
+    loading: loadingSocial,
+    error,
+    refetch: refetchSocial,
+  } = useSocialThreads(activeChannel !== CHANNELS.SMS ? apiFilters : null);
 
   const socialThreads = socialResponse?.data || [];
 
   // Load SMS threads when channel is active
   const loadSmsThreads = useCallback(async () => {
-    if (activeChannel !== CHANNELS.SMS && activeChannel !== CHANNELS.ALL) return;
+    if (activeChannel !== CHANNELS.SMS && activeChannel !== CHANNELS.ALL)
+      return;
 
     setLoadingSms(true);
     try {
@@ -218,8 +228,12 @@ export default function UnifiedInboxPage() {
     ];
 
     const unreadCount = allCombined.filter((t: any) => !t.is_read).length;
-    const fbCount = allCombined.filter((t: any) => t.channel === CHANNELS.FACEBOOK).length;
-    const igCount = allCombined.filter((t: any) => t.channel === CHANNELS.INSTAGRAM).length;
+    const fbCount = allCombined.filter(
+      (t: any) => t.channel === CHANNELS.FACEBOOK
+    ).length;
+    const igCount = allCombined.filter(
+      (t: any) => t.channel === CHANNELS.INSTAGRAM
+    ).length;
     const smsCount = smsThreads.length;
 
     return {
@@ -239,7 +253,7 @@ export default function UnifiedInboxPage() {
 
   const handleThreadClick = async (thread: any) => {
     setSelectedThread(thread);
-    
+
     // Mark as read if unread
     if (thread.status === 'unread') {
       try {
@@ -247,11 +261,11 @@ export default function UnifiedInboxPage() {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+            Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
           },
-          body: JSON.stringify({ status: 'read' })
+          body: JSON.stringify({ status: 'read' }),
         });
-        
+
         // Refresh threads to show updated status
         if (thread.channel === CHANNELS.SMS) {
           await loadSmsThreads();
@@ -276,18 +290,21 @@ export default function UnifiedInboxPage() {
         });
       } else {
         // Send social media message via inbox API
-        await fetch(`/api/v1/inbox/threads/${selectedThread.thread_id}/messages`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-          },
-          body: JSON.stringify({
-            content: messageText,
-            direction: 'outbound',
-            message_type: 'text'
-          })
-        });
+        await fetch(
+          `/api/v1/inbox/threads/${selectedThread.thread_id}/messages`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+            },
+            body: JSON.stringify({
+              content: messageText,
+              direction: 'outbound',
+              message_type: 'text',
+            }),
+          }
+        );
       }
 
       setMessageText('');
@@ -301,7 +318,10 @@ export default function UnifiedInboxPage() {
       }
     } catch (err) {
       console.error('Failed to send message:', err);
-      toast.error('Failed to send message', 'Please check your connection and try again');
+      toast.error(
+        'Failed to send message',
+        'Please check your connection and try again'
+      );
     }
   };
 
@@ -317,7 +337,7 @@ export default function UnifiedInboxPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
         },
         body: JSON.stringify({
           thread_id: threadId,
@@ -326,11 +346,14 @@ export default function UnifiedInboxPage() {
           phone: thread.phone_number || '',
           source: thread.channel || 'social',
           notes: `Converted from ${thread.channel} thread`,
-        })
+        }),
       });
-      
+
       if (response.ok) {
-        toast.success('Converted to lead!', 'Thread has been added to leads pipeline');
+        toast.success(
+          'Converted to lead!',
+          'Thread has been added to leads pipeline'
+        );
         // Optionally refresh threads
         if (thread.channel === CHANNELS.SMS) {
           await loadSmsThreads();
@@ -342,27 +365,33 @@ export default function UnifiedInboxPage() {
       }
     } catch (err) {
       console.error('Failed to convert to lead:', err);
-      toast.error('Conversion failed', 'Unable to create lead from this thread');
+      toast.error(
+        'Conversion failed',
+        'Unable to create lead from this thread'
+      );
     }
   };
 
   // AI Auto-Reply
   const [aiGenerating, setAiGenerating] = useState(false);
-  
+
   const handleAIAutoReply = async () => {
     if (!selectedThread) return;
 
     try {
       setAiGenerating(true);
       const threadId = selectedThread.thread_id || selectedThread.id;
-      
-      const response = await fetch(`/api/v1/inbox/threads/${threadId}/ai-reply`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-        },
-      });
+
+      const response = await fetch(
+        `/api/v1/inbox/threads/${threadId}/ai-reply`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+          },
+        }
+      );
 
       if (!response.ok) throw new Error('Failed to generate AI reply');
 
@@ -379,22 +408,22 @@ export default function UnifiedInboxPage() {
   // Thread Assignment
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [assigneeId, setAssigneeId] = useState('');
-  
+
   const handleAssignThread = async () => {
     if (!selectedThread || !assigneeId) return;
 
     try {
       const threadId = selectedThread.thread_id || selectedThread.id;
-      
+
       const response = await fetch(`/api/v1/inbox/threads/${threadId}/assign`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
         },
         body: JSON.stringify({
-          assignee_id: parseInt(assigneeId)
-        })
+          assignee_id: parseInt(assigneeId),
+        }),
       });
 
       if (!response.ok) throw new Error('Failed to assign thread');
@@ -475,8 +504,12 @@ export default function UnifiedInboxPage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Communication Inbox</h1>
-          <p className="text-gray-600">Unified inbox for all customer communications</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Communication Inbox
+          </h1>
+          <p className="text-gray-600">
+            Unified inbox for all customer communications
+          </p>
         </div>
         <Button onClick={handleRefresh}>
           <MessageSquare className="w-4 h-4 mr-2" />
@@ -613,7 +646,9 @@ export default function UnifiedInboxPage() {
                 value: filters.status,
               },
             ]}
-            onFilterChange={(key, value) => updateFilter(key as 'status', value)}
+            onFilterChange={(key, value) =>
+              updateFilter(key as 'status', value)
+            }
             onClearFilters={handleClearFilters}
             showClearButton
           />
@@ -654,9 +689,13 @@ export default function UnifiedInboxPage() {
 
               <div className="divide-y divide-gray-200">
                 {allThreads.map((thread: any, index) => {
-                  const channel = CHANNEL_CONFIG[thread.channel as keyof typeof CHANNEL_CONFIG] || CHANNEL_CONFIG[CHANNELS.FACEBOOK];
+                  const channel =
+                    CHANNEL_CONFIG[
+                      thread.channel as keyof typeof CHANNEL_CONFIG
+                    ] || CHANNEL_CONFIG[CHANNELS.FACEBOOK];
                   const ChannelIcon = channel.icon;
-                  const threadId = thread.thread_id || thread.id || `thread-${index}`;
+                  const threadId =
+                    thread.thread_id || thread.id || `thread-${index}`;
 
                   return (
                     <div
@@ -667,18 +706,23 @@ export default function UnifiedInboxPage() {
                         selectedThread?.id === thread.id
                           ? `bg-${channel.text.split('-')[1]}-50 border-l-4 ${channel.borderColor}`
                           : !thread.is_read
-                          ? 'bg-blue-50 bg-opacity-30'
-                          : ''
+                            ? 'bg-blue-50 bg-opacity-30'
+                            : ''
                       }`}
                     >
                       {/* Thread Header */}
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <div className={`p-1 rounded ${channel.bg}`}>
-                            <ChannelIcon className={`w-4 h-4 ${channel.text}`} />
+                            <ChannelIcon
+                              className={`w-4 h-4 ${channel.text}`}
+                            />
                           </div>
                           <span className="font-medium text-gray-900">
-                            {thread.customer_name || thread.from_name || thread.phone_number || 'Unknown'}
+                            {thread.customer_name ||
+                              thread.from_name ||
+                              thread.phone_number ||
+                              'Unknown'}
                           </span>
                         </div>
                         {!thread.is_read && (
@@ -688,7 +732,9 @@ export default function UnifiedInboxPage() {
 
                       {/* Last Message Preview */}
                       <p className="text-sm text-gray-600 mb-1 line-clamp-2">
-                        {thread.last_message || thread.message || 'No messages yet'}
+                        {thread.last_message ||
+                          thread.message ||
+                          'No messages yet'}
                       </p>
 
                       {/* Time and Channel */}
@@ -715,21 +761,34 @@ export default function UnifiedInboxPage() {
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
                           <span className="text-sm font-medium text-gray-700">
-                            {(selectedThread.customer_name || selectedThread.from_name || selectedThread.phone_number || 'U')[0].toUpperCase()}
+                            {(selectedThread.customer_name ||
+                              selectedThread.from_name ||
+                              selectedThread.phone_number ||
+                              'U')[0].toUpperCase()}
                           </span>
                         </div>
                         <div>
                           <h3 className="font-semibold text-gray-900 text-sm sm:text-base">
-                            {selectedThread.customer_name || selectedThread.from_name || selectedThread.phone_number || 'Unknown'}
+                            {selectedThread.customer_name ||
+                              selectedThread.from_name ||
+                              selectedThread.phone_number ||
+                              'Unknown'}
                           </h3>
                           <p className="text-xs text-gray-500 flex flex-wrap items-center gap-2">
-                            <span>{CHANNEL_CONFIG[selectedThread.channel as keyof typeof CHANNEL_CONFIG]?.label || 'Unknown'}</span>
-                            {selectedThread.channel === CHANNELS.SMS && selectedThread.phone_number && (
-                              <span className="flex items-center">
-                                <Phone className="w-3 h-3 mr-1" />
-                                <span className="text-xs">{selectedThread.phone_number}</span>
-                              </span>
-                            )}
+                            <span>
+                              {CHANNEL_CONFIG[
+                                selectedThread.channel as keyof typeof CHANNEL_CONFIG
+                              ]?.label || 'Unknown'}
+                            </span>
+                            {selectedThread.channel === CHANNELS.SMS &&
+                              selectedThread.phone_number && (
+                                <span className="flex items-center">
+                                  <Phone className="w-3 h-3 mr-1" />
+                                  <span className="text-xs">
+                                    {selectedThread.phone_number}
+                                  </span>
+                                </span>
+                              )}
                           </p>
                         </div>
                       </div>
@@ -739,7 +798,9 @@ export default function UnifiedInboxPage() {
                         className="w-full sm:w-auto"
                       >
                         <Target className="w-4 h-4 mr-1" />
-                        <span className="text-xs sm:text-sm">Convert to Lead</span>
+                        <span className="text-xs sm:text-sm">
+                          Convert to Lead
+                        </span>
                       </Button>
                     </div>
                   </div>
@@ -747,36 +808,47 @@ export default function UnifiedInboxPage() {
                   {/* Messages */}
                   <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
                     <div className="space-y-4">
-                      {selectedThread.messages?.map((message: any, index: number) => {
-                        const isFromCustomer = message.direction === 'inbound' || message.direction === 'in';
+                      {selectedThread.messages?.map(
+                        (message: any, index: number) => {
+                          const isFromCustomer =
+                            message.direction === 'inbound' ||
+                            message.direction === 'in';
 
-                        return (
-                          <div
-                            key={index}
-                            className={`flex ${isFromCustomer ? 'justify-start' : 'justify-end'}`}
-                          >
+                          return (
                             <div
-                              className={`max-w-[70%] p-3 rounded-lg ${
-                                isFromCustomer
-                                  ? 'bg-white text-gray-900'
-                                  : 'bg-blue-600 text-white'
-                              }`}
+                              key={index}
+                              className={`flex ${isFromCustomer ? 'justify-start' : 'justify-end'}`}
                             >
-                              <p className="text-sm">{message.text || message.message}</p>
-                              <p
-                                className={`text-xs mt-1 ${
-                                  isFromCustomer ? 'text-gray-500' : 'text-blue-100'
+                              <div
+                                className={`max-w-[70%] p-3 rounded-lg ${
+                                  isFromCustomer
+                                    ? 'bg-white text-gray-900'
+                                    : 'bg-blue-600 text-white'
                                 }`}
                               >
-                                {formatTime(message.timestamp || message.created_at)}
-                              </p>
+                                <p className="text-sm">
+                                  {message.text || message.message}
+                                </p>
+                                <p
+                                  className={`text-xs mt-1 ${
+                                    isFromCustomer
+                                      ? 'text-gray-500'
+                                      : 'text-blue-100'
+                                  }`}
+                                >
+                                  {formatTime(
+                                    message.timestamp || message.created_at
+                                  )}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        }
+                      )}
 
                       {/* Placeholder if no messages */}
-                      {(!selectedThread.messages || selectedThread.messages.length === 0) && (
+                      {(!selectedThread.messages ||
+                        selectedThread.messages.length === 0) && (
                         <div className="text-center text-gray-500 py-8">
                           <MessageSquare className="w-12 h-12 mx-auto mb-2 text-gray-400" />
                           <p>No messages in this conversation yet</p>
@@ -797,8 +869,12 @@ export default function UnifiedInboxPage() {
                           disabled={aiGenerating}
                           className="flex-1 sm:flex-none text-purple-600 border-purple-300 hover:bg-purple-50 min-w-0"
                         >
-                          <Sparkles className={`w-4 h-4 mr-1 flex-shrink-0 ${aiGenerating ? 'animate-spin' : ''}`} />
-                          <span className="truncate">{aiGenerating ? 'Generating...' : 'AI Reply'}</span>
+                          <Sparkles
+                            className={`w-4 h-4 mr-1 flex-shrink-0 ${aiGenerating ? 'animate-spin' : ''}`}
+                          />
+                          <span className="truncate">
+                            {aiGenerating ? 'Generating...' : 'AI Reply'}
+                          </span>
                         </Button>
                         <Button
                           size="sm"
@@ -810,13 +886,15 @@ export default function UnifiedInboxPage() {
                           <span className="truncate">Assign</span>
                         </Button>
                       </div>
-                      <span className="text-xs text-gray-500 text-center sm:text-right">AI-powered features</span>
+                      <span className="text-xs text-gray-500 text-center sm:text-right">
+                        AI-powered features
+                      </span>
                     </div>
 
                     {/* Quick Replies */}
                     {showQuickReplies && (
                       <div className="mb-3 flex flex-wrap gap-2">
-                        {getQuickReplies().map((reply) => (
+                        {getQuickReplies().map(reply => (
                           <button
                             key={reply.label}
                             onClick={() => handleQuickReply(reply.text)}
@@ -838,7 +916,7 @@ export default function UnifiedInboxPage() {
                       </button>
                       <textarea
                         value={messageText}
-                        onChange={(e) => setMessageText(e.target.value)}
+                        onChange={e => setMessageText(e.target.value)}
                         placeholder={
                           selectedThread.channel === CHANNELS.SMS
                             ? 'Type SMS message...'
@@ -846,14 +924,17 @@ export default function UnifiedInboxPage() {
                         }
                         className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                         rows={2}
-                        onKeyDown={(e) => {
+                        onKeyDown={e => {
                           if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
                             handleSendMessage();
                           }
                         }}
                       />
-                      <Button onClick={handleSendMessage} disabled={!messageText.trim()}>
+                      <Button
+                        onClick={handleSendMessage}
+                        disabled={!messageText.trim()}
+                      >
                         <Send className="w-4 h-4" />
                       </Button>
                     </div>
@@ -868,7 +949,9 @@ export default function UnifiedInboxPage() {
                 <div className="flex-1 flex items-center justify-center text-gray-500">
                   <div className="text-center">
                     <MessageSquare className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                    <p className="text-lg">Select a conversation to view messages</p>
+                    <p className="text-lg">
+                      Select a conversation to view messages
+                    </p>
                     <p className="text-sm text-gray-400 mt-2">
                       {activeChannel === CHANNELS.ALL
                         ? 'Showing all channels'
@@ -899,7 +982,7 @@ export default function UnifiedInboxPage() {
               </label>
               <select
                 value={assigneeId}
-                onChange={(e) => setAssigneeId(e.target.value)}
+                onChange={e => setAssigneeId(e.target.value)}
                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
               >
                 <option value="">Select a team member</option>
@@ -917,10 +1000,15 @@ export default function UnifiedInboxPage() {
               <div className="bg-gray-50 rounded-lg p-3">
                 <p className="text-sm text-gray-700">
                   <span className="font-medium">Thread:</span>{' '}
-                  {selectedThread.customer_name || selectedThread.from_name || selectedThread.phone_number}
+                  {selectedThread.customer_name ||
+                    selectedThread.from_name ||
+                    selectedThread.phone_number}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  Channel: {CHANNEL_CONFIG[selectedThread.channel as keyof typeof CHANNEL_CONFIG]?.label || 'Unknown'}
+                  Channel:{' '}
+                  {CHANNEL_CONFIG[
+                    selectedThread.channel as keyof typeof CHANNEL_CONFIG
+                  ]?.label || 'Unknown'}
                 </p>
               </div>
             )}

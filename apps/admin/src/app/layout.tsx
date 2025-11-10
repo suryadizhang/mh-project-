@@ -1,8 +1,11 @@
-import type { Metadata } from 'next';
 import './globals.css';
-import AdminLayoutComponent from './AdminLayoutComponent';
-import { AuthProvider } from '@/contexts/AuthContext';
+
+import type { Metadata } from 'next';
+
 import { ToastProvider } from '@/components/ui/Toast';
+import { AuthProvider } from '@/contexts/AuthContext';
+
+import AdminLayoutComponent from './AdminLayoutComponent';
 
 export const metadata: Metadata = {
   title: 'MyHibachi Admin Dashboard',

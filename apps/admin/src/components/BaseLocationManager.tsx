@@ -9,9 +9,9 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-import { logger } from '@/lib/logger';
 import { Button } from '@/components/ui/button';
 import { apiFetch } from '@/lib/api';
+import { logger } from '@/lib/logger';
 
 interface CompanySettings {
   baseFeeStructure: {

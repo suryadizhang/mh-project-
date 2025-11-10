@@ -1,9 +1,10 @@
 'use client';
 
+import { usePathname, useRouter } from 'next/navigation';
 import { createContext, useContext, useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { tokenManager } from '@/services/api';
+
 import type { StationContext } from '@/services/api';
+import { tokenManager } from '@/services/api';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -34,7 +35,9 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [token, setToken] = useState<string | null>(null);
-  const [stationContext, setStationContext] = useState<StationContext | null>(null);
+  const [stationContext, setStationContext] = useState<StationContext | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
@@ -43,7 +46,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Check for token and station context in localStorage on component mount
     const storedToken = tokenManager.getToken();
     const storedStationContext = tokenManager.getStationContext();
-    
+
     if (storedToken) {
       setToken(storedToken);
       setStationContext(storedStationContext);
@@ -52,7 +55,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Redirect to login if no token and not already on login page
       router.push('/login');
     }
-    
+
     setLoading(false);
   }, [pathname, router]);
 
@@ -60,7 +63,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     tokenManager.setToken(newToken);
     setToken(newToken);
     setIsAuthenticated(true);
-    
+
     if (newStationContext) {
       tokenManager.setStationContext(newStationContext);
       setStationContext(newStationContext);
@@ -78,10 +81,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const hasPermission = (permission: string): boolean => {
     if (!stationContext) return false;
-    
+
     // Super admin has all permissions
     if (stationContext.is_super_admin) return true;
-    
+
     return stationContext.permissions.includes(permission);
   };
 
@@ -106,17 +109,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Allow access to login page without authentication
   if (pathname === '/login') {
     return (
-      <AuthContext.Provider value={{ 
-        isAuthenticated, 
-        token, 
-        stationContext, 
-        login, 
-        logout, 
-        loading,
-        hasPermission,
-        hasRole,
-        isSuperAdmin
-      }}>
+      <AuthContext.Provider
+        value={{
+          isAuthenticated,
+          token,
+          stationContext,
+          login,
+          logout,
+          loading,
+          hasPermission,
+          hasRole,
+          isSuperAdmin,
+        }}
+      >
         {children}
       </AuthContext.Provider>
     );
@@ -132,17 +137,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ 
-      isAuthenticated, 
-      token, 
-      stationContext, 
-      login, 
-      logout, 
-      loading,
-      hasPermission,
-      hasRole,
-      isSuperAdmin
-    }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        token,
+        stationContext,
+        login,
+        logout,
+        loading,
+        hasPermission,
+        hasRole,
+        isSuperAdmin,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

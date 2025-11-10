@@ -5,33 +5,34 @@
 
 'use client';
 
+import { AlertCircle, CalendarIcon } from 'lucide-react';
 import React, { useState } from 'react';
-import { CalendarIcon, AlertCircle } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
+
 import { CalendarHeader } from './components/CalendarHeader';
-import { WeeklyCalendar } from './components/WeeklyCalendar';
 import { MonthlyCalendar } from './components/MonthlyCalendar';
+import { WeeklyCalendar } from './components/WeeklyCalendar';
 import { useCalendarData } from './hooks/useCalendarData';
-import type { CalendarView, CalendarBooking, DayColumn } from './types/calendar.types';
+import type {
+  CalendarBooking,
+  CalendarView,
+  DayColumn,
+} from './types/calendar.types';
 
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<CalendarView>('week');
-  const [selectedBooking, setSelectedBooking] = useState<CalendarBooking | null>(null);
+  const [selectedBooking, setSelectedBooking] =
+    useState<CalendarBooking | null>(null);
   const [selectedDay, setSelectedDay] = useState<DayColumn | null>(null);
 
   // Fetch calendar data
-  const {
-    bookings,
-    weekView,
-    monthView,
-    loading,
-    error,
-    refetch,
-  } = useCalendarData({
-    view,
-    currentDate,
-  });
+  const { bookings, weekView, monthView, loading, error, refetch } =
+    useCalendarData({
+      view,
+      currentDate,
+    });
 
   // Handle booking click - could open modal/sidebar
   const handleBookingClick = (booking: CalendarBooking) => {
@@ -98,14 +99,17 @@ export default function CalendarPage() {
               Booking Calendar
             </h1>
             <p className="text-xs sm:text-sm text-gray-600 mt-1">
-              Manage and reschedule bookings {view === 'week' ? 'with drag-and-drop' : ''}
+              Manage and reschedule bookings{' '}
+              {view === 'week' ? 'with drag-and-drop' : ''}
             </p>
           </div>
 
           {/* Quick Stats */}
           <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto justify-between sm:justify-end">
             <div className="text-center">
-              <div className="text-xl sm:text-2xl font-bold text-gray-900">{bookings.length}</div>
+              <div className="text-xl sm:text-2xl font-bold text-gray-900">
+                {bookings.length}
+              </div>
               <div className="text-xs text-gray-600">Total</div>
             </div>
             <div className="text-center">

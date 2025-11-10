@@ -5,10 +5,17 @@
 
 'use client';
 
+import { addMonths, addWeeks, format, subMonths, subWeeks } from 'date-fns';
+import {
+  Calendar as CalendarIcon,
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
+} from 'lucide-react';
 import React from 'react';
-import { format, addWeeks, addMonths, subWeeks, subMonths } from 'date-fns';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, RefreshCw } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
+
 import type { CalendarView } from '../types/calendar.types';
 
 interface CalendarHeaderProps {
@@ -57,7 +64,7 @@ export function CalendarHeader({
       weekEnd.setDate(weekStart.getDate() + 6);
 
       const sameMonth = weekStart.getMonth() === weekEnd.getMonth();
-      
+
       if (sameMonth) {
         return `${format(weekStart, 'MMM d')} - ${format(weekEnd, 'd, yyyy')}`;
       } else {
@@ -120,7 +127,9 @@ export function CalendarHeader({
               className="px-3"
               title="Refresh"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`}
+              />
             </Button>
           )}
         </div>
@@ -133,9 +142,10 @@ export function CalendarHeader({
               onClick={() => onViewChange('week')}
               className={`
                 px-4 py-2 text-sm font-medium transition-colors
-                ${view === 'week'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
+                ${
+                  view === 'week'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
                 }
               `}
             >
@@ -145,9 +155,10 @@ export function CalendarHeader({
               onClick={() => onViewChange('month')}
               className={`
                 px-4 py-2 text-sm font-medium border-l border-gray-200 transition-colors
-                ${view === 'month'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
+                ${
+                  view === 'month'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
                 }
               `}
             >

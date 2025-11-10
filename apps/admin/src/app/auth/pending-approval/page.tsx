@@ -1,8 +1,9 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
-import { Clock, Mail, ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Clock, Mail } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+
 import { Button } from '@/components/ui/button';
 
 export default function PendingApprovalPage() {
@@ -36,9 +37,7 @@ export default function PendingApprovalPage() {
                 <p className="text-sm font-medium text-gray-900 truncate">
                   {email}
                 </p>
-                <p className="text-xs text-gray-500">
-                  Registered email
-                </p>
+                <p className="text-xs text-gray-500">Registered email</p>
               </div>
             </div>
           </div>
@@ -55,7 +54,9 @@ export default function PendingApprovalPage() {
               </li>
               <li className="flex items-start">
                 <span className="mr-2">•</span>
-                <span>You'll receive an email notification once approved</span>
+                <span>
+                  You&apos;ll receive an email notification once approved
+                </span>
               </li>
               <li className="flex items-start">
                 <span className="mr-2">•</span>
@@ -72,14 +73,20 @@ export default function PendingApprovalPage() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => window.location.href = 'mailto:support@myhibachi.com?subject=Account Approval Request'}
+              onClick={() =>
+                (window.location.href =
+                  'mailto:support@myhibachi.com?subject=Account Approval Request')
+              }
             >
               Contact Support
             </Button>
           </div>
 
           {/* Back to Login */}
-          <Link href="/login" className="flex items-center text-sm text-blue-600 hover:text-blue-700">
+          <Link
+            href="/login"
+            className="flex items-center text-sm text-blue-600 hover:text-blue-700"
+          >
             <ArrowLeft className="h-4 w-4 mr-1" />
             Back to login
           </Link>

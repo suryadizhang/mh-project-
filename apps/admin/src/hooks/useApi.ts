@@ -3,32 +3,31 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+
+import { requestDeduplicator } from '@/lib/cache/RequestDeduplicator';
 import {
+  analyticsService,
   bookingService,
   customerService,
   dashboardService,
-  paymentService,
   invoiceService,
   leadService,
-  socialService,
-  reviewService,
-  analyticsService,
+  paymentService,
   qrService,
-  smsService,
-  couponService,
-  stationService,
+  reviewService,
+  socialService,
   type Station,
+  stationService,
   type StationUser,
 } from '@/services/api';
-import { requestDeduplicator } from '@/lib/cache/RequestDeduplicator';
 import type {
   Booking,
   BookingFilters,
   Customer,
   CustomerFilters,
   DashboardStats,
-  Payment,
   Invoice,
+  Payment,
 } from '@/types';
 
 interface UseDataState<T> {
@@ -58,7 +57,10 @@ function useApiData<T>(
       const cacheKey = JSON.stringify({ fn: fetchFunction.toString(), deps });
 
       // Use request deduplicator to prevent duplicate simultaneous calls
-      const response = await requestDeduplicator.dedupe(cacheKey, fetchFunction);
+      const response = await requestDeduplicator.dedupe(
+        cacheKey,
+        fetchFunction
+      );
 
       if (response.success) {
         setData(response.data || response);
@@ -101,7 +103,10 @@ export function useBookings(filters: BookingFilters = {}) {
  */
 export function useBooking(bookingId: string | null) {
   return useApiData<Booking>(
-    () => bookingId ? bookingService.getBooking(bookingId) : Promise.resolve({ data: null, success: true }),
+    () =>
+      bookingId
+        ? bookingService.getBooking(bookingId)
+        : Promise.resolve({ data: null, success: true }),
     [bookingId]
   );
 }
@@ -121,7 +126,10 @@ export function useCustomers(filters: CustomerFilters = {}) {
  */
 export function useCustomer(customerId: string | null) {
   return useApiData<Customer>(
-    () => customerId ? customerService.getCustomer(customerId) : Promise.resolve({ data: null, success: true }),
+    () =>
+      customerId
+        ? customerService.getCustomer(customerId)
+        : Promise.resolve({ data: null, success: true }),
     [customerId]
   );
 }
@@ -130,10 +138,7 @@ export function useCustomer(customerId: string | null) {
  * Hook for fetching dashboard stats
  */
 export function useDashboardStats() {
-  return useApiData<DashboardStats>(
-    () => dashboardService.getStats(),
-    []
-  );
+  return useApiData<DashboardStats>(() => dashboardService.getStats(), []);
 }
 
 /**
@@ -165,7 +170,10 @@ export function usePagination(initialPage = 1, initialLimit = 20) {
 
   const nextPage = useCallback(() => setPage(p => p + 1), []);
   const prevPage = useCallback(() => setPage(p => Math.max(1, p - 1)), []);
-  const goToPage = useCallback((newPage: number) => setPage(Math.max(1, newPage)), []);
+  const goToPage = useCallback(
+    (newPage: number) => setPage(Math.max(1, newPage)),
+    []
+  );
   const resetPagination = useCallback(() => setPage(1), []);
 
   return {
@@ -230,18 +238,24 @@ export function useSearch(initialQuery = '', debounceMs = 500) {
 /**
  * Hook for sorting functionality
  */
-export function useSort<T extends string>(initialSortBy?: T, initialSortOrder: 'asc' | 'desc' = 'asc') {
+export function useSort<T extends string>(
+  initialSortBy?: T,
+  initialSortOrder: 'asc' | 'desc' = 'asc'
+) {
   const [sortBy, setSortBy] = useState<T | undefined>(initialSortBy);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(initialSortOrder);
 
-  const toggleSort = useCallback((field: T) => {
-    if (sortBy === field) {
-      setSortOrder(order => order === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(field);
-      setSortOrder('asc');
-    }
-  }, [sortBy]);
+  const toggleSort = useCallback(
+    (field: T) => {
+      if (sortBy === field) {
+        setSortOrder(order => (order === 'asc' ? 'desc' : 'asc'));
+      } else {
+        setSortBy(field);
+        setSortOrder('asc');
+      }
+    },
+    [sortBy]
+  );
 
   return {
     sortBy,
@@ -267,7 +281,10 @@ export function useLeads(filters: any = {}) {
  */
 export function useLead(leadId: string | null) {
   return useApiData<any>(
-    () => leadId ? leadService.getLead(leadId) : Promise.resolve({ data: null, success: true }),
+    () =>
+      leadId
+        ? leadService.getLead(leadId)
+        : Promise.resolve({ data: null, success: true }),
     [leadId]
   );
 }
@@ -287,7 +304,10 @@ export function useSocialThreads(filters: any = {}) {
  */
 export function useSocialThread(threadId: string | null) {
   return useApiData<any>(
-    () => threadId ? socialService.getSocialThread(threadId) : Promise.resolve({ data: null, success: true }),
+    () =>
+      threadId
+        ? socialService.getSocialThread(threadId)
+        : Promise.resolve({ data: null, success: true }),
     [threadId]
   );
 }
@@ -316,10 +336,7 @@ export function useEscalatedReviews() {
  * Hook for fetching review analytics
  */
 export function useReviewAnalytics() {
-  return useApiData<any>(
-    () => reviewService.getReviewAnalytics(),
-    []
-  );
+  return useApiData<any>(() => reviewService.getReviewAnalytics(), []);
 }
 
 /**
@@ -346,10 +363,7 @@ export function useLeadAnalytics(filters: any = {}) {
  * Hook for fetching conversion funnel
  */
 export function useConversionFunnel() {
-  return useApiData<any>(
-    () => analyticsService.getConversionFunnel(),
-    []
-  );
+  return useApiData<any>(() => analyticsService.getConversionFunnel(), []);
 }
 
 /**
@@ -367,7 +381,10 @@ export function useQRCodes(filters: any = {}) {
  */
 export function useQRAnalytics(code: string | null) {
   return useApiData<any>(
-    () => code ? qrService.getQRAnalytics(code) : Promise.resolve({ data: null, success: true }),
+    () =>
+      code
+        ? qrService.getQRAnalytics(code)
+        : Promise.resolve({ data: null, success: true }),
     [code]
   );
 }
@@ -385,9 +402,15 @@ export function useStations(includeStats: boolean = false) {
 /**
  * Hook for fetching a single station
  */
-export function useStation(stationId: number | null, includeStats: boolean = false) {
+export function useStation(
+  stationId: number | null,
+  includeStats: boolean = false
+) {
   return useApiData<Station>(
-    () => stationId ? stationService.getStation(stationId, includeStats) : Promise.resolve({ data: null, success: true }),
+    () =>
+      stationId
+        ? stationService.getStation(stationId, includeStats)
+        : Promise.resolve({ data: null, success: true }),
     [stationId, includeStats]
   );
 }
@@ -395,9 +418,15 @@ export function useStation(stationId: number | null, includeStats: boolean = fal
 /**
  * Hook for fetching station users
  */
-export function useStationUsers(stationId: number | null, includeUserDetails: boolean = false) {
+export function useStationUsers(
+  stationId: number | null,
+  includeUserDetails: boolean = false
+) {
   return useApiData<StationUser[]>(
-    () => stationId ? stationService.getStationUsers(stationId, includeUserDetails) : Promise.resolve({ data: [], success: true }),
+    () =>
+      stationId
+        ? stationService.getStationUsers(stationId, includeUserDetails)
+        : Promise.resolve({ data: [], success: true }),
     [stationId, includeUserDetails]
   );
 }

@@ -39,7 +39,7 @@ from middleware.structured_logging import (
     ErrorLog,
     resolve_error_log,
 )
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 

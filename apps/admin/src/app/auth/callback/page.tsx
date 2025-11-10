@@ -1,14 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
 import { logger } from '@/lib/logger';
 
 export default function OAuthCallbackPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
+  const [status, setStatus] = useState<'processing' | 'success' | 'error'>(
+    'processing'
+  );
   const [message, setMessage] = useState('Processing your login...');
 
   useEffect(() => {
@@ -22,32 +25,39 @@ export default function OAuthCallbackPage() {
         if (error) {
           setStatus('error');
           setMessage(decodeURIComponent(error));
-          logger.error(new Error(`OAuth error: ${error}`), { context: 'oauth_callback' });
+          logger.error(new Error(`OAuth error: ${error}`), {
+            context: 'oauth_callback',
+          });
           return;
         }
 
         if (!token) {
           setStatus('error');
           setMessage('No authentication token received. Please try again.');
-          logger.error(new Error('No token in OAuth callback'), { context: 'oauth_callback' });
+          logger.error(new Error('No token in OAuth callback'), {
+            context: 'oauth_callback',
+          });
           return;
         }
 
         // Store token in localStorage
         localStorage.setItem('access_token', token);
-        
+
         // Verify token is valid by making a test request
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/me`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (response.ok) {
           const userData = await response.json();
           setStatus('success');
           setMessage(`Welcome back, ${userData.data?.full_name || 'User'}!`);
-          
+
           // Redirect to dashboard after 1 second
           setTimeout(() => {
             router.push('/');
@@ -59,7 +69,7 @@ export default function OAuthCallbackPage() {
         logger.error(err as Error, { context: 'oauth_callback' });
         setStatus('error');
         setMessage('Authentication failed. Please try again.');
-        
+
         // Redirect to login after 3 seconds
         setTimeout(() => {
           router.push('/login');
@@ -80,21 +90,15 @@ export default function OAuthCallbackPage() {
               <h2 className="text-xl font-semibold text-gray-900">
                 Completing sign in...
               </h2>
-              <p className="text-sm text-gray-600 text-center">
-                {message}
-              </p>
+              <p className="text-sm text-gray-600 text-center">{message}</p>
             </>
           )}
 
           {status === 'success' && (
             <>
               <CheckCircle className="h-12 w-12 text-green-600" />
-              <h2 className="text-xl font-semibold text-gray-900">
-                Success!
-              </h2>
-              <p className="text-sm text-gray-600 text-center">
-                {message}
-              </p>
+              <h2 className="text-xl font-semibold text-gray-900">Success!</h2>
+              <p className="text-sm text-gray-600 text-center">{message}</p>
               <p className="text-xs text-gray-500">
                 Redirecting to dashboard...
               </p>
@@ -107,12 +111,8 @@ export default function OAuthCallbackPage() {
               <h2 className="text-xl font-semibold text-gray-900">
                 Authentication Failed
               </h2>
-              <p className="text-sm text-gray-600 text-center">
-                {message}
-              </p>
-              <p className="text-xs text-gray-500">
-                Redirecting to login...
-              </p>
+              <p className="text-sm text-gray-600 text-center">{message}</p>
+              <p className="text-xs text-gray-500">Redirecting to login...</p>
             </>
           )}
         </div>

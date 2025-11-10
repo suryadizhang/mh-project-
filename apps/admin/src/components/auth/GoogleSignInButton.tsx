@@ -1,9 +1,10 @@
 'use client';
 
 import { useGoogleLogin } from '@react-oauth/google';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import { useState } from 'react';
+
+import { Button } from '@/components/ui/button';
 import { logger } from '@/lib/logger';
 
 export default function GoogleSignInButton() {
@@ -14,9 +15,9 @@ export default function GoogleSignInButton() {
     flow: 'auth-code',
     ux_mode: 'redirect',
     redirect_uri: `${process.env.NEXT_PUBLIC_API_URL}/auth/google/callback`,
-    onError: (error) => {
-      logger.error(new Error(`Google OAuth error: ${JSON.stringify(error)}`), { 
-        context: 'google_oauth_login' 
+    onError: error => {
+      logger.error(new Error(`Google OAuth error: ${JSON.stringify(error)}`), {
+        context: 'google_oauth_login',
       });
       setError('Failed to sign in with Google. Please try again.');
       setLoading(false);
@@ -73,9 +74,7 @@ export default function GoogleSignInButton() {
           </>
         )}
       </Button>
-      {error && (
-        <p className="text-sm text-red-600 text-center">{error}</p>
-      )}
+      {error && <p className="text-sm text-red-600 text-center">{error}</p>}
     </div>
   );
 }

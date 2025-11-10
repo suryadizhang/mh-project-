@@ -1,6 +1,6 @@
 /**
  * Production-ready logging utility for Admin Dashboard
- * 
+ *
  * Features:
  * - Environment-aware logging (silent in production)
  * - Multiple log levels (debug, info, warn, error)
@@ -8,17 +8,17 @@
  * - Sentry integration for production error tracking
  * - WebSocket-specific logging utilities
  * - Structured logging for better analysis
- * 
+ *
  * Usage:
  * ```typescript
  * import { logger } from '@/lib/logger';
- * 
+ *
  * // Basic logging
  * logger.debug('User clicked button');
  * logger.info('Payment processed', { amount: 1000, customer_id: 123 });
  * logger.warn('Deprecated API used', { endpoint: '/old-api' });
  * logger.error(new Error('Failed to fetch data'), { endpoint: '/api/bookings' });
- * 
+ *
  * // WebSocket logging
  * logger.websocket('connect', { url: 'ws://localhost:8000/ws' });
  * logger.websocket('message', { type: 'booking_update', booking_id: 456 });
@@ -58,7 +58,7 @@ class Logger {
 
   constructor(config: Partial<LoggerConfig> = {}) {
     const environment = (process.env.NODE_ENV || 'development') as Environment;
-    
+
     this.config = {
       environment,
       enableConsole: environment !== 'production',
@@ -78,7 +78,11 @@ class Logger {
   /**
    * Format log message with timestamp and context
    */
-  private formatMessage(level: LogLevel, message: string, context?: LogContext): string {
+  private formatMessage(
+    level: LogLevel,
+    message: string,
+    context?: LogContext
+  ): string {
     const timestamp = new Date().toISOString();
     const contextStr = context ? ` ${JSON.stringify(context)}` : '';
     return `[${timestamp}] [${level.toUpperCase()}] ${message}${contextStr}`;
@@ -94,7 +98,7 @@ class Logger {
     // In production, this should be initialized in _app.tsx
     if (typeof window !== 'undefined' && (window as any).Sentry) {
       const Sentry = (window as any).Sentry;
-      
+
       if (error instanceof Error) {
         Sentry.captureException(error, {
           extra: context,
@@ -192,9 +196,10 @@ class Logger {
         break;
       case 'error':
         // Handle error data properly - could be string, Error, or object
-        const errorMessage = typeof data?.error === 'string' 
-          ? data.error 
-          : data?.error?.message || 'WebSocket error';
+        const errorMessage =
+          typeof data?.error === 'string'
+            ? data.error
+            : data?.error?.message || 'WebSocket error';
         this.error(errorMessage, context);
         break;
       default:
@@ -214,7 +219,12 @@ class Logger {
    * API error logging utility
    * Logs API errors with status code and response
    */
-  apiError(method: string, endpoint: string, error: any, context?: LogContext): void {
+  apiError(
+    method: string,
+    endpoint: string,
+    error: any,
+    context?: LogContext
+  ): void {
     const errorContext = {
       method,
       endpoint,
@@ -228,7 +238,10 @@ class Logger {
       this.warn(`API ${method} ${endpoint} - Auth error`, errorContext);
     } else {
       // Other errors - send to Sentry in production
-      this.error(error instanceof Error ? error : new Error(`API error: ${error}`), errorContext);
+      this.error(
+        error instanceof Error ? error : new Error(`API error: ${error}`),
+        errorContext
+      );
     }
   }
 
@@ -290,7 +303,7 @@ class Logger {
 export const logger = new Logger();
 
 // Export types for TypeScript
-export type { LogLevel, LogContext, WebSocketEvent };
+export type { LogContext, LogLevel, WebSocketEvent };
 
 // Export class for testing or custom configurations
 export { Logger };

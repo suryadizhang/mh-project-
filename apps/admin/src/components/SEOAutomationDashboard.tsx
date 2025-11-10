@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { logger } from '@/lib/logger';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,6 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { AutomationManager } from '@/lib/advancedAutomation';
+import { logger } from '@/lib/logger';
 
 interface DashboardStats {
   gmbPosts: number;

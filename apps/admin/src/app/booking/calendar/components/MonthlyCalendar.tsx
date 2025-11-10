@@ -6,13 +6,20 @@
 
 'use client';
 
-import React, { useState, useCallback } from 'react';
 import { format, isSameMonth } from 'date-fns';
-import { ChevronRight, AlertCircle } from 'lucide-react';
+import { AlertCircle, ChevronRight } from 'lucide-react';
+import React, { useCallback, useState } from 'react';
+
 import { useToast } from '@/components/ui/Toast';
-import type { MonthView, CalendarBooking, DayColumn, BookingMoveResult } from '../types/calendar.types';
-import { BookingCard } from './BookingCard';
+
 import { updateBookingDateTime } from '../hooks/useDragDrop';
+import type {
+  BookingMoveResult,
+  CalendarBooking,
+  DayColumn,
+  MonthView,
+} from '../types/calendar.types';
+import { BookingCard } from './BookingCard';
 
 interface MonthlyCalendarProps {
   monthView: MonthView;
@@ -21,9 +28,16 @@ interface MonthlyCalendarProps {
   onRefresh?: () => void;
 }
 
-export function MonthlyCalendar({ monthView, onBookingClick, onDayClick, onRefresh }: MonthlyCalendarProps) {
+export function MonthlyCalendar({
+  monthView,
+  onBookingClick,
+  onDayClick,
+  onRefresh,
+}: MonthlyCalendarProps) {
   const toast = useToast();
-  const [draggedBooking, setDraggedBooking] = useState<CalendarBooking | null>(null);
+  const [draggedBooking, setDraggedBooking] = useState<CalendarBooking | null>(
+    null
+  );
   const [dropTarget, setDropTarget] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -40,7 +54,7 @@ export function MonthlyCalendar({ monthView, onBookingClick, onDayClick, onRefre
     (e: React.DragEvent, date: string) => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
-      
+
       if (draggedBooking) {
         setDropTarget(date);
       }
@@ -55,7 +69,7 @@ export function MonthlyCalendar({ monthView, onBookingClick, onDayClick, onRefre
   const handleDrop = useCallback(
     async (e: React.DragEvent, targetDate: string) => {
       e.preventDefault();
-      
+
       if (!draggedBooking) return;
 
       const originalDate = format(draggedBooking.startTime, 'yyyy-MM-dd');
@@ -77,15 +91,24 @@ export function MonthlyCalendar({ monthView, onBookingClick, onDayClick, onRefre
         );
 
         if (result.success) {
-          toast.success('Booking moved', `Event rescheduled to ${format(new Date(targetDate), 'MMM d')}`);
+          toast.success(
+            'Booking moved',
+            `Event rescheduled to ${format(new Date(targetDate), 'MMM d')}`
+          );
           // Refresh calendar data
           onRefresh?.();
         } else {
-          toast.error('Failed to move booking', result.error || 'Unable to reschedule event');
+          toast.error(
+            'Failed to move booking',
+            result.error || 'Unable to reschedule event'
+          );
         }
       } catch (error) {
         console.error('Error moving booking:', error);
-        toast.error('Move failed', 'An error occurred while moving the booking');
+        toast.error(
+          'Move failed',
+          'An error occurred while moving the booking'
+        );
       } finally {
         setIsUpdating(false);
         handleDragEnd();
@@ -129,7 +152,15 @@ export function MonthlyCalendar({ monthView, onBookingClick, onDayClick, onRefre
 
       {/* Day of Week Headers */}
       <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50">
-        {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day) => (
+        {[
+          'Sunday',
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday',
+          'Saturday',
+        ].map(day => (
           <div
             key={day}
             className="p-3 text-center text-xs font-semibold text-gray-600 uppercase border-r border-gray-200 last:border-r-0"
@@ -143,10 +174,14 @@ export function MonthlyCalendar({ monthView, onBookingClick, onDayClick, onRefre
       <div className="grid grid-cols-7">
         {monthView.weeks.map((week, weekIndex) => (
           <React.Fragment key={weekIndex}>
-            {week.map((day) => {
+            {week.map(day => {
               const isTarget = isDropTarget(day.dateString);
-              const isPast = day.date < new Date(new Date().setHours(0, 0, 0, 0));
-              const isCurrentMonth = isSameMonth(day.date, monthView.monthStart);
+              const isPast =
+                day.date < new Date(new Date().setHours(0, 0, 0, 0));
+              const isCurrentMonth = isSameMonth(
+                day.date,
+                monthView.monthStart
+              );
               const stats = getDayStats(day);
 
               return (
@@ -160,9 +195,9 @@ export function MonthlyCalendar({ monthView, onBookingClick, onDayClick, onRefre
                     ${isPast ? 'opacity-60' : ''}
                     transition-colors duration-150
                   `}
-                  onDragOver={(e) => !isPast && handleDragOver(e, day.dateString)}
+                  onDragOver={e => !isPast && handleDragOver(e, day.dateString)}
                   onDragLeave={handleDragLeave}
-                  onDrop={(e) => !isPast && handleDrop(e, day.dateString)}
+                  onDrop={e => !isPast && handleDrop(e, day.dateString)}
                 >
                   {/* Day Header */}
                   <div
@@ -195,12 +230,14 @@ export function MonthlyCalendar({ monthView, onBookingClick, onDayClick, onRefre
 
                   {/* Bookings List */}
                   <div className="p-2 space-y-1 overflow-y-auto max-h-[100px]">
-                    {day.bookings.slice(0, 3).map((booking) => (
+                    {day.bookings.slice(0, 3).map(booking => (
                       <BookingCard
                         key={booking.booking_id}
                         booking={booking}
                         compact
-                        isDragging={draggedBooking?.booking_id === booking.booking_id}
+                        isDragging={
+                          draggedBooking?.booking_id === booking.booking_id
+                        }
                         onDragStart={() => handleDragStart(booking)}
                         onDragEnd={handleDragEnd}
                         onClick={() => onBookingClick?.(booking)}
@@ -226,11 +263,14 @@ export function MonthlyCalendar({ monthView, onBookingClick, onDayClick, onRefre
                     )}
 
                     {/* Empty state */}
-                    {day.bookingCount === 0 && !isTarget && isCurrentMonth && !isPast && (
-                      <div className="flex items-center justify-center h-16 text-xs text-gray-400">
-                        No bookings
-                      </div>
-                    )}
+                    {day.bookingCount === 0 &&
+                      !isTarget &&
+                      isCurrentMonth &&
+                      !isPast && (
+                        <div className="flex items-center justify-center h-16 text-xs text-gray-400">
+                          No bookings
+                        </div>
+                      )}
                   </div>
 
                   {/* Day Stats */}
@@ -239,18 +279,24 @@ export function MonthlyCalendar({ monthView, onBookingClick, onDayClick, onRefre
                       {stats.confirmed > 0 && (
                         <div className="flex items-center justify-between">
                           <span>Confirmed:</span>
-                          <span className="font-medium text-green-600">{stats.confirmed}</span>
+                          <span className="font-medium text-green-600">
+                            {stats.confirmed}
+                          </span>
                         </div>
                       )}
                       {stats.pending > 0 && (
                         <div className="flex items-center justify-between">
                           <span>Pending:</span>
-                          <span className="font-medium text-yellow-600">{stats.pending}</span>
+                          <span className="font-medium text-yellow-600">
+                            {stats.pending}
+                          </span>
                         </div>
                       )}
                       <div className="flex items-center justify-between pt-0.5 border-t border-gray-200">
                         <span>Revenue:</span>
-                        <span className="font-semibold text-gray-900">{formatCurrency(stats.revenue)}</span>
+                        <span className="font-semibold text-gray-900">
+                          {formatCurrency(stats.revenue)}
+                        </span>
                       </div>
                     </div>
                   )}
@@ -298,16 +344,25 @@ export function MonthlyCalendar({ monthView, onBookingClick, onDayClick, onRefre
           </span>
           <div className="flex items-center gap-4">
             <span className="text-gray-600">
-              Total Bookings: <span className="font-semibold text-gray-900">{monthView.totalBookings}</span>
+              Total Bookings:{' '}
+              <span className="font-semibold text-gray-900">
+                {monthView.totalBookings}
+              </span>
             </span>
             <span className="text-gray-600">
-              Total Revenue: <span className="font-semibold text-gray-900">
+              Total Revenue:{' '}
+              <span className="font-semibold text-gray-900">
                 {formatCurrency(
-                  monthView.weeks.flat().reduce((sum, day) => 
-                    sum + day.bookings
-                      .filter(b => b.status !== 'cancelled')
-                      .reduce((daySum, b) => daySum + b.total_due_cents, 0)
-                  , 0)
+                  monthView.weeks
+                    .flat()
+                    .reduce(
+                      (sum, day) =>
+                        sum +
+                        day.bookings
+                          .filter(b => b.status !== 'cancelled')
+                          .reduce((daySum, b) => daySum + b.total_due_cents, 0),
+                      0
+                    )
                 )}
               </span>
             </span>

@@ -1,8 +1,8 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import { AlertCircle, AlertTriangle, CheckCircle, Info, X } from 'lucide-react';
+import React, { createContext, useCallback, useContext, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -47,7 +47,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const hideToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    setToasts(prev => prev.filter(toast => toast.id !== id));
   }, []);
 
   const showToast = useCallback(
@@ -55,7 +55,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       const id = Math.random().toString(36).substr(2, 9);
       const duration = toast.duration ?? 5000;
 
-      setToasts((prev) => [...prev, { ...toast, id }]);
+      setToasts(prev => [...prev, { ...toast, id }]);
 
       if (duration > 0) {
         setTimeout(() => {
@@ -125,7 +125,7 @@ function ToastContainer({
       aria-live="polite"
       aria-atomic="true"
     >
-      {toasts.map((toast) => (
+      {toasts.map(toast => (
         <ToastItem key={toast.id} toast={toast} onClose={onClose} />
       ))}
     </div>
@@ -183,9 +183,13 @@ function ToastItem({
       <div className="flex gap-3">
         <Icon className={`h-5 w-5 ${style.iconColor} flex-shrink-0`} />
         <div className="flex-1 min-w-0">
-          <p className={`text-sm font-semibold ${style.textColor}`}>{toast.title}</p>
+          <p className={`text-sm font-semibold ${style.textColor}`}>
+            {toast.title}
+          </p>
           {toast.message && (
-            <p className={`text-sm mt-1 ${style.textColor} opacity-90`}>{toast.message}</p>
+            <p className={`text-sm mt-1 ${style.textColor} opacity-90`}>
+              {toast.message}
+            </p>
           )}
           {toast.action && (
             <button

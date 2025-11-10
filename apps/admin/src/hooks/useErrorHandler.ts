@@ -1,21 +1,22 @@
+import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
+
 import { useToast } from '@/components/ui/Toast';
 import {
-  parseError,
   getErrorMessage,
   getShortErrorMessage,
-  requiresReauth,
   isTemporaryError,
+  parseError,
+  requiresReauth,
 } from '@/lib/errors';
-import { useRouter } from 'next/navigation';
 
 /**
  * Hook for handling errors with user-friendly messages
- * 
+ *
  * @example
  * ```tsx
  * const { handleError } = useErrorHandler();
- * 
+ *
  * try {
  *   await deleteBooking(id);
  * } catch (error) {
@@ -28,12 +29,19 @@ export function useErrorHandler() {
   const router = useRouter();
 
   const handleError = useCallback(
-    (error: unknown, options?: {
-      showToast?: boolean;
-      onRetry?: () => void;
-      silent?: boolean;
-    }) => {
-      const { showToast: shouldShowToast = true, onRetry, silent = false } = options || {};
+    (
+      error: unknown,
+      options?: {
+        showToast?: boolean;
+        onRetry?: () => void;
+        silent?: boolean;
+      }
+    ) => {
+      const {
+        showToast: shouldShowToast = true,
+        onRetry,
+        silent = false,
+      } = options || {};
 
       if (silent) return;
 
@@ -101,11 +109,11 @@ export function useErrorHandler() {
 
 /**
  * Higher-order function to wrap async functions with error handling
- * 
+ *
  * @example
  * ```tsx
  * const { withErrorHandling } = useErrorHandler();
- * 
+ *
  * const handleDelete = withErrorHandling(async () => {
  *   await deleteBooking(id);
  *   toast.success('Booking deleted successfully');

@@ -1,19 +1,24 @@
 /**
  * ActivationButton Component
- * 
+ *
  * ONE-CLICK ACTIVATION BUTTON
  * Enables/disables local AI with confirmation modal and reason input
  */
 
 'use client';
 
+import { AlertTriangle, CheckCircle, Loader2, Power } from 'lucide-react';
 import React, { useState } from 'react';
-import { Power, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react';
+
 import type { OverallReadiness } from '@/types/aiReadiness';
 
 interface ActivationButtonProps {
   overallReadiness: OverallReadiness;
-  onActivate: (reason: string, intents?: string[], startPercentage?: number) => Promise<void>;
+  onActivate: (
+    reason: string,
+    intents?: string[],
+    startPercentage?: number
+  ) => Promise<void>;
   onDisable: (reason: string, emergency?: boolean) => Promise<void>;
   isActivating: boolean;
   currentMode: 'shadow' | 'active' | 'disabled';
@@ -24,13 +29,15 @@ export function ActivationButton({
   onActivate,
   onDisable,
   isActivating,
-  currentMode
+  currentMode,
 }: ActivationButtonProps) {
   const [showModal, setShowModal] = useState(false);
   const [reason, setReason] = useState('');
   const [startPercentage, setStartPercentage] = useState(10);
   const [error, setError] = useState('');
-  const [actionType, setActionType] = useState<'activate' | 'disable'>('activate');
+  const [actionType, setActionType] = useState<'activate' | 'disable'>(
+    'activate'
+  );
 
   const isActive = currentMode === 'active';
   const canActivate = overallReadiness.can_activate && !isActive;
@@ -50,7 +57,11 @@ export function ActivationButton({
 
     try {
       if (actionType === 'activate') {
-        await onActivate(reason, overallReadiness.ready_intents, startPercentage);
+        await onActivate(
+          reason,
+          overallReadiness.ready_intents,
+          startPercentage
+        );
       } else {
         await onDisable(reason, false);
       }
@@ -61,7 +72,11 @@ export function ActivationButton({
   };
 
   const handleEmergencyDisable = async () => {
-    if (!confirm('⚠️ EMERGENCY DISABLE: This will immediately stop all local AI processing. Are you sure?')) {
+    if (
+      !confirm(
+        '⚠️ EMERGENCY DISABLE: This will immediately stop all local AI processing. Are you sure?'
+      )
+    ) {
       return;
     }
 
@@ -82,28 +97,40 @@ export function ActivationButton({
               AI Activation Control
             </h3>
             <p className="text-sm text-gray-600">
-              {isActive 
+              {isActive
                 ? 'Local AI is currently active and handling requests'
                 : currentMode === 'shadow'
-                ? 'Shadow mode: Collecting training data without customer impact'
-                : 'Local AI is disabled'}
+                  ? 'Shadow mode: Collecting training data without customer impact'
+                  : 'Local AI is disabled'}
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             {/* Status Indicator */}
-            <div className={`px-3 py-1.5 rounded-lg border flex items-center gap-2 ${
-              isActive 
-                ? 'bg-green-50 border-green-200 text-green-700'
-                : currentMode === 'shadow'
-                ? 'bg-blue-50 border-blue-200 text-blue-700'
-                : 'bg-gray-50 border-gray-200 text-gray-700'
-            }`}>
-              <div className={`w-2 h-2 rounded-full ${
-                isActive ? 'bg-green-500 animate-pulse' : currentMode === 'shadow' ? 'bg-blue-500' : 'bg-gray-400'
-              }`} />
+            <div
+              className={`px-3 py-1.5 rounded-lg border flex items-center gap-2 ${
+                isActive
+                  ? 'bg-green-50 border-green-200 text-green-700'
+                  : currentMode === 'shadow'
+                    ? 'bg-blue-50 border-blue-200 text-blue-700'
+                    : 'bg-gray-50 border-gray-200 text-gray-700'
+              }`}
+            >
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  isActive
+                    ? 'bg-green-500 animate-pulse'
+                    : currentMode === 'shadow'
+                      ? 'bg-blue-500'
+                      : 'bg-gray-400'
+                }`}
+              />
               <span className="font-medium text-sm">
-                {isActive ? 'ACTIVE' : currentMode === 'shadow' ? 'SHADOW MODE' : 'DISABLED'}
+                {isActive
+                  ? 'ACTIVE'
+                  : currentMode === 'shadow'
+                    ? 'SHADOW MODE'
+                    : 'DISABLED'}
               </span>
             </div>
 
@@ -117,7 +144,11 @@ export function ActivationButton({
                     ? 'bg-green-600 text-white hover:bg-green-700 hover:shadow-lg'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
-                title={!canActivate ? overallReadiness.blocking_reasons.join(', ') : ''}
+                title={
+                  !canActivate
+                    ? overallReadiness.blocking_reasons.join(', ')
+                    : ''
+                }
               >
                 {isActivating ? (
                   <>
@@ -176,9 +207,13 @@ export function ActivationButton({
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className={`p-6 border-b ${
-              actionType === 'activate' ? 'border-green-200' : 'border-red-200'
-            }`}>
+            <div
+              className={`p-6 border-b ${
+                actionType === 'activate'
+                  ? 'border-green-200'
+                  : 'border-red-200'
+              }`}
+            >
               <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                 {actionType === 'activate' ? (
                   <>
@@ -198,8 +233,11 @@ export function ActivationButton({
               {actionType === 'activate' ? (
                 <>
                   <p className="text-gray-700">
-                    You're about to activate local AI for{' '}
-                    <strong>{overallReadiness.ready_intents.length} intent(s)</strong>.
+                    You&apos;re about to activate local AI for{' '}
+                    <strong>
+                      {overallReadiness.ready_intents.length} intent(s)
+                    </strong>
+                    .
                   </p>
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
                     <strong>Ready Intents:</strong>{' '}
@@ -214,7 +252,7 @@ export function ActivationButton({
                       min="5"
                       max="50"
                       value={startPercentage}
-                      onChange={(e) => setStartPercentage(Number(e.target.value))}
+                      onChange={e => setStartPercentage(Number(e.target.value))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
                     <p className="text-xs text-gray-600 mt-1">
@@ -224,7 +262,8 @@ export function ActivationButton({
                 </>
               ) : (
                 <p className="text-gray-700">
-                  This will disable local AI and route all requests back to the teacher AI (OpenAI).
+                  This will disable local AI and route all requests back to the
+                  teacher AI (OpenAI).
                 </p>
               )}
 
@@ -234,7 +273,7 @@ export function ActivationButton({
                 </label>
                 <textarea
                   value={reason}
-                  onChange={(e) => setReason(e.target.value)}
+                  onChange={e => setReason(e.target.value)}
                   placeholder="e.g., Initial production deployment, Quality metrics stable"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   rows={3}
