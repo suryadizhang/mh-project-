@@ -171,6 +171,12 @@ wheels/
 *.sqlite
 *.sqlite3
 
+# Celery
+celerybeat-schedule
+celerybeat-schedule.db
+celerybeat-schedule-shm
+celerybeat-schedule-wal
+
 # Test files
 test-results/
 playwright-report/
