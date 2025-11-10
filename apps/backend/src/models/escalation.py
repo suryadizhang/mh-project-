@@ -118,6 +118,11 @@ class Escalation(Base):
     resolution_notes = Column(Text, nullable=True)
 
     # Communication tracking
+    admin_notified_at = Column(DateTime(timezone=True), nullable=True)  # When admin was notified
+    admin_notification_sid = Column(String(100), nullable=True)  # Twilio message SID
+    admin_notification_status = Column(String(20), nullable=True)  # delivered, read, failed
+    admin_notification_channel = Column(String(20), nullable=True)  # whatsapp, sms, email
+
     sms_sent = Column(DateTime(timezone=True), nullable=True)  # When SMS was sent to customer
     call_initiated = Column(DateTime(timezone=True), nullable=True)  # When call was made
     last_contact_at = Column(DateTime(timezone=True), nullable=True)  # Last interaction time

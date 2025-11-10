@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 @celery_app.task(bind=True, max_retries=3, default_retry_delay=60)
 def send_escalation_notification(self, escalation_id: str):
     """
-    Send SMS notification to on-call admin when escalation is created
+    Send WhatsApp/SMS notification to on-call admin when escalation is created
 
     Args:
         escalation_id: ID of the escalation
@@ -36,44 +36,47 @@ def send_escalation_notification(self, escalation_id: str):
             logger.error(f"Escalation {escalation_id} not found")
             return {"status": "error", "message": "Escalation not found"}
 
-        # Get on-call admin phone (TODO: implement on-call rotation)
-        # For now, use a configured phone number
-        import os
+        # Send WhatsApp notification using async service
+        import asyncio
+        from services.whatsapp_notification_service import get_whatsapp_service
 
-        on_call_phone = os.getenv("ON_CALL_ADMIN_PHONE", "+15555551234")
+        whatsapp_service = get_whatsapp_service()
 
-        # Compose notification message
-        message = (
-            f"🚨 NEW ESCALATION\n"
-            f"Priority: {escalation.priority.upper()}\n"
-            f"Customer: {escalation.customer_phone}\n"
-            f"Reason: {escalation.reason[:100]}...\n"
-            f"Method: {escalation.method}\n"
-            f"View: https://admin.myhibachi.com/inbox/escalations/{escalation_id}"
+        # Run async function in sync context
+        result = asyncio.run(
+            whatsapp_service.send_escalation_alert(
+                escalation_id=str(escalation.id),
+                priority=escalation.priority,
+                customer_phone=escalation.customer_phone,
+                reason=escalation.reason,
+                method=escalation.method,
+                conversation_id=(
+                    str(escalation.conversation_id) if escalation.conversation_id else None
+                ),
+            )
         )
 
-        # Send SMS via RingCentral
-        rc_service = get_ringcentral_service()
+        if result.get("success"):
+            # Update escalation with notification details
+            escalation.admin_notified_at = datetime.utcnow()
+            escalation.admin_notification_sid = result.get("message_sid")
+            escalation.admin_notification_channel = result.get("channel")
+            escalation.admin_notification_status = "sent"
+            db.commit()
 
-        if not rc_service.is_configured():
-            logger.warning("RingCentral not configured, skipping notification")
-            return {"status": "skipped", "reason": "RingCentral not configured"}
+            logger.info(
+                f"Escalation notification sent for {escalation_id} via {result.get('channel')}"
+            )
 
-        result = rc_service.send_sms(
-            to_phone=on_call_phone,
-            message=message,
-        )
-
-        logger.info(
-            f"Escalation notification sent to {on_call_phone} for escalation {escalation_id}"
-        )
-
-        return {
-            "status": "success",
-            "escalation_id": escalation_id,
-            "message_id": result.get("message_id"),
-            "sent_to": on_call_phone,
-        }
+            return {
+                "status": "success",
+                "escalation_id": escalation_id,
+                "message_id": result.get("message_sid"),
+                "channel": result.get("channel"),
+            }
+        else:
+            logger.error(f"Escalation notification failed: {result.get('error')}")
+            raise RuntimeError(f"Notification failed: {result.get('error')}")
 
     except Exception as e:
         logger.error(f"Failed to send escalation notification: {str(e)}")

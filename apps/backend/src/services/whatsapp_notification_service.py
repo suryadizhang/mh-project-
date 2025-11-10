@@ -386,6 +386,76 @@ class WhatsAppNotificationService:
             logger.exception(f"Manual review alert failed: {e}")
             return {"success": False, "error": str(e)}
 
+    async def send_escalation_alert(
+        self,
+        escalation_id: str,
+        priority: str,
+        customer_phone: str,
+        reason: str,
+        method: str,
+        conversation_id: str | None = None,
+    ) -> dict[str, Any]:
+        """
+        Send WhatsApp alert to on-call admin when escalation is created.
+
+        Args:
+            escalation_id: UUID of the escalation
+            priority: Priority level (low, medium, high, urgent)
+            customer_phone: Customer's phone number
+            reason: Escalation reason
+            method: Preferred contact method (sms, call, email)
+            conversation_id: Optional conversation ID
+
+        Returns:
+            Dict with delivery status and details
+        """
+        # Determine emoji based on priority
+        priority_emoji = {
+            "low": "📋",
+            "medium": "⚠️",
+            "high": "🔴",
+            "urgent": "🚨",
+        }.get(priority.lower(), "🔔")
+
+        # Build message
+        message = (
+            f"{priority_emoji} NEW ESCALATION\n"
+            f"\n"
+            f"Priority: {priority.upper()}\n"
+            f"Customer: {customer_phone}\n"
+            f"Method: {method.upper()}\n"
+            f"\n"
+            f"Reason:\n{reason[:200]}{'...' if len(reason) > 200 else ''}\n"
+            f"\n"
+            f"🔗 View Details:\n"
+            f"https://admin.myhibachichef.com/inbox/escalations/{escalation_id}"
+        )
+
+        # Get on-call admin phone
+        on_call_phone = os.getenv("ON_CALL_ADMIN_PHONE") or os.getenv(
+            "BUSINESS_PHONE", "+19167408768"
+        )
+
+        try:
+            # Try WhatsApp first
+            result = await self._send_whatsapp(on_call_phone, message)
+
+            if not result["success"]:
+                # Fallback to SMS
+                logger.warning("WhatsApp failed for escalation alert, falling back to SMS")
+                result = await self._send_sms(on_call_phone, message)
+
+            logger.info(
+                f"Escalation alert sent for {escalation_id} to {on_call_phone} "
+                f"via {result.get('channel', 'unknown')}"
+            )
+
+            return result
+
+        except Exception as e:
+            logger.exception(f"Escalation alert failed: {e}")
+            return {"success": False, "error": str(e), "channel": NotificationChannel.FAILED}
+
 
 # Module-level instance
 _whatsapp_service: WhatsAppNotificationService | None = None

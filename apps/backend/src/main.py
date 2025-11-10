@@ -942,6 +942,19 @@ try:
 except ImportError as e:
     logger.warning(f"RingCentral webhook endpoints not available: {e}")
 
+# Twilio Webhooks - WhatsApp and SMS Status Callbacks
+try:
+    from api.v1.webhooks.twilio import router as twilio_webhook_router
+
+    app.include_router(
+        twilio_webhook_router,
+        prefix="/api/v1",  # Already has /webhooks/twilio in router definition
+        tags=["webhooks"],
+    )
+    logger.info("✅ Twilio webhook receiver included (WhatsApp/SMS status)")
+except ImportError as e:
+    logger.warning(f"Twilio webhook endpoints not available: {e}")
+
 
 # Unified Inbox endpoints - Week 2 Feature
 try:
