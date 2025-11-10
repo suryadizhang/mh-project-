@@ -1,12 +1,13 @@
 'use client';
 
+import { LogOut } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ReactNode, useState } from 'react';
-import { LogOut } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+
 import ChatBot from '@/components/ChatBot';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -26,6 +27,7 @@ export default function AdminLayoutComponent({ children }: AdminLayoutProps) {
     { name: 'Dashboard', href: '/', icon: '🏠' },
     { name: 'Bookings', href: '/booking', icon: '📅' },
     { name: 'Leads', href: '/leads', icon: '🎯' },
+    { name: 'Escalations', href: '/escalations', icon: '🆘' },
     { name: 'Inbox', href: '/inbox', icon: '💬' },
     { name: 'Reviews', href: '/reviews', icon: '⭐' },
     { name: 'Customers', href: '/customers', icon: '👥' },
@@ -160,11 +162,7 @@ export default function AdminLayoutComponent({ children }: AdminLayoutProps) {
       </div>
 
       {/* AI ChatBot Widget */}
-      <ChatBot 
-        defaultMinimized={true}
-        showDebugInfo={true}
-        className="z-50"
-      />
+      <ChatBot defaultMinimized={true} showDebugInfo={true} className="z-50" />
     </div>
   );
 }
