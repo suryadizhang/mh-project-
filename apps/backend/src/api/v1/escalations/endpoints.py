@@ -57,9 +57,10 @@ async def create_escalation(
             escalation_metadata=request.metadata,
         )
 
-        # TODO: Enqueue job to send SMS notification to on-call admin
-        # from workers.escalation_tasks import send_escalation_notification
-        # send_escalation_notification.delay(str(escalation.id))
+        # Enqueue job to send SMS notification to on-call admin
+        from workers.escalation_tasks import send_escalation_notification
+
+        send_escalation_notification.delay(str(escalation.id))
 
         logger.info(
             f"Created escalation {escalation.id} for conversation {request.conversation_id}"
@@ -250,9 +251,10 @@ async def send_sms_to_customer(
                 detail=f"Escalation {escalation_id} not found",
             )
 
-        # TODO: Enqueue job to send SMS via RingCentral
-        # from workers.sms_tasks import send_sms
-        # job = send_sms.delay(escalation.phone, request.message, request.metadata)
+        # Enqueue job to send SMS via RingCentral
+        from workers.escalation_tasks import send_customer_sms
+
+        send_customer_sms.delay(str(escalation.id), request.message, request.metadata or {})
 
         # Record SMS sent
         await service.record_sms_sent(escalation_id)
@@ -296,9 +298,10 @@ async def initiate_call(
                 detail=f"Escalation {escalation_id} not found",
             )
 
-        # TODO: Enqueue job to initiate call via RingCentral
-        # from workers.escalation_tasks import initiate_outbound_call
-        # job = initiate_outbound_call.delay(str(escalation.id))
+        # Enqueue job to initiate call via RingCentral
+        from workers.escalation_tasks import initiate_outbound_call
+
+        initiate_outbound_call.delay(str(escalation.id))
 
         logger.info(f"Call queued for escalation {escalation_id} to {escalation.customer_phone}")
 

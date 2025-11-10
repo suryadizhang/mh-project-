@@ -19,9 +19,9 @@ celery_app = Celery(
     backend=CELERY_RESULT_BACKEND,
     include=[
         "workers.escalation_tasks",
-        "workers.sms_tasks",
         "workers.recording_tasks",
-        "workers.notification_tasks",
+        "workers.review_worker",
+        "workers.outbox_processors",
     ],
 )
 
@@ -30,16 +30,16 @@ celery_app.conf.update(
     # Task routing
     task_routes={
         "workers.escalation_tasks.*": {"queue": "escalations"},
-        "workers.sms_tasks.*": {"queue": "sms"},
         "workers.recording_tasks.*": {"queue": "recordings"},
-        "workers.notification_tasks.*": {"queue": "notifications"},
+        "workers.review_worker.*": {"queue": "reviews"},
+        "workers.outbox_processors.*": {"queue": "outbox"},
     },
     # Task queues
     task_queues=(
         Queue("escalations", routing_key="escalations"),
-        Queue("sms", routing_key="sms"),
         Queue("recordings", routing_key="recordings"),
-        Queue("notifications", routing_key="notifications"),
+        Queue("reviews", routing_key="reviews"),
+        Queue("outbox", routing_key="outbox"),
         Queue("default", routing_key="default"),
     ),
     # Task settings
@@ -82,11 +82,6 @@ celery_app.conf.beat_schedule = {
     "retry-failed-escalations": {
         "task": "workers.escalation_tasks.retry_failed_escalations",
         "schedule": 300.0,  # Every 5 minutes
-    },
-    # Send escalation metrics
-    "send-escalation-metrics": {
-        "task": "workers.notification_tasks.send_escalation_metrics",
-        "schedule": 86400.0,  # Daily
     },
 }
 
