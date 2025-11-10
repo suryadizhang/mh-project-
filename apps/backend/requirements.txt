@@ -20,6 +20,13 @@ slowapi==0.1.9  # Rate limiting for FastAPI
 schedule==1.2.0  # Background job scheduling for payment email monitoring
 apscheduler==3.10.4  # Advanced Python Scheduler for follow-ups
 
+# Celery for async task queue (escalation notifications, recording downloads)
+celery==5.3.4
+kombu==5.3.4  # Celery messaging library
+celery[redis]==5.3.4  # Celery with Redis broker support
+flower==2.0.1  # Celery monitoring web UI (optional)
+billiard==4.2.0  # Celery process pool implementation
+
 # Authentication and security
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
