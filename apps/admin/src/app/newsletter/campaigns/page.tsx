@@ -1,25 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import {
+  Calendar,
+  Copy,
+  Edit,
+  Eye,
   Mail,
   Plus,
   Send,
-  Calendar,
-  Users,
-  Eye,
-  Edit,
-  Trash2,
-  Copy,
   Sparkles,
+  Trash2,
+  Users,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect,useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { StatsCard } from '@/components/ui/stats-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Modal } from '@/components/ui/modal';
+import { StatsCard } from '@/components/ui/stats-card';
 
 interface Campaign {
   id: number;
@@ -47,8 +47,12 @@ interface CampaignFormData {
 export default function NewsletterCampaignsPage() {
   // State
   const [showModal, setShowModal] = useState(false);
-  const [modalMode, setModalMode] = useState<'create' | 'edit' | 'ai'>('create');
-  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  const [modalMode, setModalMode] = useState<'create' | 'edit' | 'ai'>(
+    'create'
+  );
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(
+    null
+  );
   const [formData, setFormData] = useState<CampaignFormData>({
     name: '',
     subject: '',
@@ -67,7 +71,7 @@ export default function NewsletterCampaignsPage() {
       setIsLoading(true);
       const response = await fetch('/api/newsletter/campaigns', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
         },
       });
 
@@ -87,12 +91,20 @@ export default function NewsletterCampaignsPage() {
   }, []);
 
   // Stats calculations
-  const stats = campaigns ? {
-    total: campaigns.campaigns?.length || 0,
-    sent: campaigns.campaigns?.filter((c: Campaign) => c.status === 'sent').length || 0,
-    scheduled: campaigns.campaigns?.filter((c: Campaign) => c.status === 'scheduled').length || 0,
-    drafts: campaigns.campaigns?.filter((c: Campaign) => c.status === 'draft').length || 0,
-  } : { total: 0, sent: 0, scheduled: 0, drafts: 0 };
+  const stats = campaigns
+    ? {
+        total: campaigns.campaigns?.length || 0,
+        sent:
+          campaigns.campaigns?.filter((c: Campaign) => c.status === 'sent')
+            .length || 0,
+        scheduled:
+          campaigns.campaigns?.filter((c: Campaign) => c.status === 'scheduled')
+            .length || 0,
+        drafts:
+          campaigns.campaigns?.filter((c: Campaign) => c.status === 'draft')
+            .length || 0,
+      }
+    : { total: 0, sent: 0, scheduled: 0, drafts: 0 };
 
   // Handlers
   const handleCreate = () => {
@@ -133,7 +145,7 @@ export default function NewsletterCampaignsPage() {
       const response = await fetch('/api/newsletter/campaigns/ai-content', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ prompt: aiPrompt }),
@@ -162,14 +174,15 @@ export default function NewsletterCampaignsPage() {
     e.preventDefault();
 
     try {
-      const url = modalMode === 'edit' && selectedCampaign
-        ? `/api/newsletter/campaigns/${selectedCampaign.id}`
-        : '/api/newsletter/campaigns';
+      const url =
+        modalMode === 'edit' && selectedCampaign
+          ? `/api/newsletter/campaigns/${selectedCampaign.id}`
+          : '/api/newsletter/campaigns';
 
       const response = await fetch(url, {
         method: modalMode === 'edit' ? 'PUT' : 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
@@ -192,7 +205,7 @@ export default function NewsletterCampaignsPage() {
       const response = await fetch(`/api/newsletter/campaigns/${campaignId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
         },
       });
 
@@ -206,15 +219,23 @@ export default function NewsletterCampaignsPage() {
   };
 
   const handleSend = async (campaignId: number) => {
-    if (!confirm('Are you sure you want to send this campaign to all subscribers?')) return;
+    if (
+      !confirm(
+        'Are you sure you want to send this campaign to all subscribers?'
+      )
+    )
+      return;
 
     try {
-      const response = await fetch(`/api/newsletter/campaigns/${campaignId}/send`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-        },
-      });
+      const response = await fetch(
+        `/api/newsletter/campaigns/${campaignId}/send`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+          },
+        }
+      );
 
       if (!response.ok) throw new Error('Failed to send');
 
@@ -231,7 +252,7 @@ export default function NewsletterCampaignsPage() {
       const response = await fetch('/api/newsletter/campaigns', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -294,7 +315,9 @@ export default function NewsletterCampaignsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Newsletter Campaigns</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Newsletter Campaigns
+          </h1>
           <p className="mt-1 text-sm text-gray-600">
             Create and manage email campaigns
           </p>
@@ -313,26 +336,10 @@ export default function NewsletterCampaignsPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
-          title="Total Campaigns"
-          value={stats.total}
-          icon={Mail}
-        />
-        <StatsCard
-          title="Sent"
-          value={stats.sent}
-          icon={Send}
-        />
-        <StatsCard
-          title="Scheduled"
-          value={stats.scheduled}
-          icon={Calendar}
-        />
-        <StatsCard
-          title="Drafts"
-          value={stats.drafts}
-          icon={Edit}
-        />
+        <StatsCard title="Total Campaigns" value={stats.total} icon={Mail} />
+        <StatsCard title="Sent" value={stats.sent} icon={Send} />
+        <StatsCard title="Scheduled" value={stats.scheduled} icon={Calendar} />
+        <StatsCard title="Drafts" value={stats.drafts} icon={Edit} />
       </div>
 
       {/* Content */}
@@ -391,7 +398,9 @@ export default function NewsletterCampaignsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(campaign.status)}`}>
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(campaign.status)}`}
+                      >
                         {campaign.status}
                       </span>
                     </td>
@@ -405,14 +414,24 @@ export default function NewsletterCampaignsPage() {
                             <span className="text-gray-600">
                               <Eye className="w-4 h-4 inline mr-1" />
                               {campaign.total_recipients > 0
-                                ? ((campaign.opened / campaign.total_recipients) * 100).toFixed(1)
-                                : 0}%
+                                ? (
+                                    (campaign.opened /
+                                      campaign.total_recipients) *
+                                    100
+                                  ).toFixed(1)
+                                : 0}
+                              %
                             </span>
                             <span className="text-gray-600">
                               <Users className="w-4 h-4 inline mr-1" />
                               {campaign.total_recipients > 0
-                                ? ((campaign.clicked / campaign.total_recipients) * 100).toFixed(1)
-                                : 0}%
+                                ? (
+                                    (campaign.clicked /
+                                      campaign.total_recipients) *
+                                    100
+                                  ).toFixed(1)
+                                : 0}
+                              %
                             </span>
                           </div>
                         </div>
@@ -422,8 +441,8 @@ export default function NewsletterCampaignsPage() {
                       {campaign.sent_at
                         ? formatDate(campaign.sent_at)
                         : campaign.scheduled_at
-                        ? formatDate(campaign.scheduled_at)
-                        : formatDate(campaign.created_at)}
+                          ? formatDate(campaign.scheduled_at)
+                          : formatDate(campaign.created_at)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end gap-2">
@@ -486,7 +505,9 @@ export default function NewsletterCampaignsPage() {
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 required
               />
@@ -499,7 +520,9 @@ export default function NewsletterCampaignsPage() {
               <input
                 type="text"
                 value={formData.subject}
-                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, subject: e.target.value })
+                }
                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 required
               />
@@ -511,7 +534,9 @@ export default function NewsletterCampaignsPage() {
               </label>
               <textarea
                 value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, content: e.target.value })
+                }
                 rows={10}
                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm font-mono"
                 placeholder="Enter HTML content or plain text..."
@@ -526,13 +551,19 @@ export default function NewsletterCampaignsPage() {
               <input
                 type="datetime-local"
                 value={formData.scheduled_at}
-                onChange={(e) => setFormData({ ...formData, scheduled_at: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, scheduled_at: e.target.value })
+                }
                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
               />
             </div>
 
             <div className="flex justify-end gap-3 mt-6">
-              <Button type="button" variant="outline" onClick={() => setShowModal(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowModal(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit">
@@ -557,7 +588,7 @@ export default function NewsletterCampaignsPage() {
               </label>
               <textarea
                 value={aiPrompt}
-                onChange={(e) => setAiPrompt(e.target.value)}
+                onChange={e => setAiPrompt(e.target.value)}
                 rows={6}
                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 placeholder="e.g., Create a summer promotion email for our hibachi catering service with a 15% discount..."

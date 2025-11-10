@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production builds
+build/
+dist/
+.next/
+out/
+
+# Generated files - packages
+packages/*/dist/
+packages/*/build/
+packages/*/.turbo/
+
+# Compiled output
+*.js.map
+*.d.ts
+*.d.ts.map
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Environment variables
+.env*
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+
+# Turbo
+.turbo/
+
+# Specific generated files
+apps/*/dist/
+apps/*/.next/
+apps/*/out/
+
+# Backup files
+*.backup.*
+*-old-backup.*
+*.bak
+
+# Database
+*.db
+*.sqlite
+
+# Other
+public/build/
+.cache/
+temp/
+tmp/

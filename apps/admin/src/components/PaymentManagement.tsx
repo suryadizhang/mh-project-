@@ -18,8 +18,8 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
-import { logger } from '@/lib/logger';
 import { useToast } from '@/components/ui/Toast';
+import { logger } from '@/lib/logger';
 
 interface Payment {
   id: string;
@@ -139,16 +139,26 @@ export default function PaymentManagement() {
 
       if (response.ok) {
         const result = await response.json();
-        toast.success('Refund successful', result.message || 'Payment has been refunded');
+        toast.success(
+          'Refund successful',
+          result.message || 'Payment has been refunded'
+        );
         setShowRefundModal(false);
         setSelectedPayment(null);
         fetchPayments(); // Refresh payments list
       } else {
         const error = await response.json();
-        toast.error('Refund failed', error.detail || 'Unable to process refund');
+        toast.error(
+          'Refund failed',
+          error.detail || 'Unable to process refund'
+        );
       }
     } catch (error) {
-      logger.error(error as Error, { context: 'process_refund', payment_id: selectedPayment?.stripe_payment_intent_id || selectedPayment?.id });
+      logger.error(error as Error, {
+        context: 'process_refund',
+        payment_id:
+          selectedPayment?.stripe_payment_intent_id || selectedPayment?.id,
+      });
       toast.error('Refund failed', 'Please try again or contact support');
     } finally {
       setRefundLoading(false);

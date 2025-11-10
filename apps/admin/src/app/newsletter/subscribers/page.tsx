@@ -1,24 +1,17 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import {
-  Mail,
-  Plus,
-  Download,
-  Upload,
-  UserCheck,
-  UserX,
-} from 'lucide-react';
+import { Download, Mail, Plus, Upload, UserCheck, UserX } from 'lucide-react';
+import { useEffect, useMemo,useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { StatsCard } from '@/components/ui/stats-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Modal } from '@/components/ui/modal';
+import { StatsCard } from '@/components/ui/stats-card';
 
 // Newsletter subscriber statuses
 const STATUSES = ['active', 'unsubscribed', 'bounced', 'complained'] as const;
-type SubscriberStatus = typeof STATUSES[number];
+type SubscriberStatus = (typeof STATUSES)[number];
 
 // Subscriber form data
 interface SubscriberFormData {
@@ -32,7 +25,9 @@ interface SubscriberFormData {
 export default function NewsletterSubscribersPage() {
   // State
   const [showModal, setShowModal] = useState(false);
-  const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('create');
+  const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>(
+    'create'
+  );
   const [selectedSubscriber, setSelectedSubscriber] = useState<any>(null);
   const [formData, setFormData] = useState<SubscriberFormData>({
     email: '',
@@ -59,11 +54,14 @@ export default function NewsletterSubscribersPage() {
       params.append('skip', ((page - 1) * limit).toString());
       params.append('limit', limit.toString());
 
-      const response = await fetch(`/api/newsletter/subscribers?${params.toString()}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-        },
-      });
+      const response = await fetch(
+        `/api/newsletter/subscribers?${params.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+          },
+        }
+      );
 
       if (!response.ok) throw new Error('Failed to fetch');
 
@@ -82,17 +80,24 @@ export default function NewsletterSubscribersPage() {
 
   // Stats calculation
   const stats = useMemo(() => {
-    if (!subscribers?.data) return {
-      total: 0,
-      active: 0,
-      unsubscribed: 0,
-      bounced: 0,
-    };
+    if (!subscribers?.data)
+      return {
+        total: 0,
+        active: 0,
+        unsubscribed: 0,
+        bounced: 0,
+      };
 
     const total = subscribers.total_count || subscribers.data.length;
-    const active = subscribers.data.filter((s: any) => s.status === 'active').length;
-    const unsubscribed = subscribers.data.filter((s: any) => s.status === 'unsubscribed').length;
-    const bounced = subscribers.data.filter((s: any) => s.status === 'bounced').length;
+    const active = subscribers.data.filter(
+      (s: any) => s.status === 'active'
+    ).length;
+    const unsubscribed = subscribers.data.filter(
+      (s: any) => s.status === 'unsubscribed'
+    ).length;
+    const bounced = subscribers.data.filter(
+      (s: any) => s.status === 'bounced'
+    ).length;
 
     return { total, active, unsubscribed, bounced };
   }, [subscribers]);
@@ -130,17 +135,18 @@ export default function NewsletterSubscribersPage() {
 
   const handleSubmit = async () => {
     try {
-      const endpoint = modalMode === 'create'
-        ? '/api/newsletter/subscribers'
-        : `/api/newsletter/subscribers/${selectedSubscriber.id}`;
-      
+      const endpoint =
+        modalMode === 'create'
+          ? '/api/newsletter/subscribers'
+          : `/api/newsletter/subscribers/${selectedSubscriber.id}`;
+
       const method = modalMode === 'create' ? 'POST' : 'PUT';
 
       const response = await fetch(endpoint, {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
         },
         body: JSON.stringify(formData),
       });
@@ -159,12 +165,15 @@ export default function NewsletterSubscribersPage() {
     if (!confirm('Are you sure you want to delete this subscriber?')) return;
 
     try {
-      const response = await fetch(`/api/newsletter/subscribers/${subscriberId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-        },
-      });
+      const response = await fetch(
+        `/api/newsletter/subscribers/${subscriberId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+          },
+        }
+      );
 
       if (!response.ok) throw new Error('Failed to delete');
 
@@ -177,14 +186,17 @@ export default function NewsletterSubscribersPage() {
 
   const handleUnsubscribe = async (subscriberId: number) => {
     try {
-      const response = await fetch(`/api/newsletter/subscribers/${subscriberId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-        },
-        body: JSON.stringify({ status: 'unsubscribed' }),
-      });
+      const response = await fetch(
+        `/api/newsletter/subscribers/${subscriberId}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+          },
+          body: JSON.stringify({ status: 'unsubscribed' }),
+        }
+      );
 
       if (!response.ok) throw new Error('Failed to unsubscribe');
 
@@ -199,7 +211,7 @@ export default function NewsletterSubscribersPage() {
     try {
       const response = await fetch('/api/newsletter/subscribers?export=csv', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
         },
       });
 
@@ -233,7 +245,7 @@ export default function NewsletterSubscribersPage() {
       const response = await fetch('/api/newsletter/subscribers/import', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
         },
         body: formData,
       });
@@ -279,7 +291,9 @@ export default function NewsletterSubscribersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Newsletter Subscribers</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Newsletter Subscribers
+          </h1>
           <p className="mt-1 text-sm text-gray-500">
             Manage your email subscribers and mailing lists
           </p>
@@ -330,11 +344,7 @@ export default function NewsletterSubscribersPage() {
           value={stats.unsubscribed}
           icon={UserX}
         />
-        <StatsCard
-          title="Bounced"
-          value={stats.bounced}
-          icon={Mail}
-        />
+        <StatsCard title="Bounced" value={stats.bounced} icon={Mail} />
       </div>
 
       {/* Search & Filter */}
@@ -345,13 +355,13 @@ export default function NewsletterSubscribersPage() {
               type="text"
               placeholder="Search by email or name..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             />
           </div>
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={e => setStatusFilter(e.target.value)}
             className="block rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           >
             <option value="">All Statuses</option>
@@ -373,7 +383,9 @@ export default function NewsletterSubscribersPage() {
         {isLoading ? (
           <LoadingSpinner />
         ) : error ? (
-          <div className="p-4 text-red-600">Error loading subscribers: {error.message}</div>
+          <div className="p-4 text-red-600">
+            Error loading subscribers: {error.message}
+          </div>
         ) : !subscribers?.data || subscribers.data.length === 0 ? (
           <EmptyState
             icon={Mail}
@@ -421,7 +433,9 @@ export default function NewsletterSubscribersPage() {
                             <div className="text-sm font-medium text-gray-900">
                               {subscriber.name || 'No Name'}
                             </div>
-                            <div className="text-sm text-gray-500">{subscriber.email}</div>
+                            <div className="text-sm text-gray-500">
+                              {subscriber.email}
+                            </div>
                           </div>
                         </div>
                       </td>
@@ -434,14 +448,16 @@ export default function NewsletterSubscribersPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-wrap gap-1">
-                          {subscriber.tags?.slice(0, 3).map((tag: string, idx: number) => (
-                            <span
-                              key={idx}
-                              className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded"
-                            >
-                              {tag}
-                            </span>
-                          ))}
+                          {subscriber.tags
+                            ?.slice(0, 3)
+                            .map((tag: string, idx: number) => (
+                              <span
+                                key={idx}
+                                className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded"
+                              >
+                                {tag}
+                              </span>
+                            ))}
                           {subscriber.tags?.length > 3 && (
                             <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
                               +{subscriber.tags.length - 3} more
@@ -453,7 +469,10 @@ export default function NewsletterSubscribersPage() {
                         {new Date(subscriber.created_at).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                        <div
+                          className="flex justify-end gap-2"
+                          onClick={e => e.stopPropagation()}
+                        >
                           <Button
                             size="sm"
                             variant="outline"
@@ -498,7 +517,9 @@ export default function NewsletterSubscribersPage() {
                 </Button>
                 <Button
                   onClick={() => setPage(page + 1)}
-                  disabled={!subscribers?.data || subscribers.data.length < limit}
+                  disabled={
+                    !subscribers?.data || subscribers.data.length < limit
+                  }
                   variant="outline"
                 >
                   Next
@@ -507,11 +528,16 @@ export default function NewsletterSubscribersPage() {
               <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm text-gray-700">
-                    Showing <span className="font-medium">{((page - 1) * limit) + 1}</span> to{' '}
+                    Showing{' '}
+                    <span className="font-medium">
+                      {(page - 1) * limit + 1}
+                    </span>{' '}
+                    to{' '}
                     <span className="font-medium">
                       {Math.min(page * limit, stats.total)}
                     </span>{' '}
-                    of <span className="font-medium">{stats.total}</span> results
+                    of <span className="font-medium">{stats.total}</span>{' '}
+                    results
                   </p>
                 </div>
                 <div>
@@ -526,7 +552,9 @@ export default function NewsletterSubscribersPage() {
                     </Button>
                     <Button
                       onClick={() => setPage(page + 1)}
-                      disabled={!subscribers?.data || subscribers.data.length < limit}
+                      disabled={
+                        !subscribers?.data || subscribers.data.length < limit
+                      }
                       variant="outline"
                       className="rounded-l-none"
                     >
@@ -549,24 +577,32 @@ export default function NewsletterSubscribersPage() {
             modalMode === 'view'
               ? 'Subscriber Details'
               : modalMode === 'edit'
-              ? 'Edit Subscriber'
-              : 'Add Subscriber'
+                ? 'Edit Subscriber'
+                : 'Add Subscriber'
           }
         >
           {modalMode === 'view' && selectedSubscriber ? (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Email</label>
-                <p className="mt-1 text-sm text-gray-900">{selectedSubscriber.email}</p>
+                <label className="block text-sm font-medium text-gray-700">
+                  Email
+                </label>
+                <p className="mt-1 text-sm text-gray-900">
+                  {selectedSubscriber.email}
+                </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Name
+                </label>
                 <p className="mt-1 text-sm text-gray-900">
                   {selectedSubscriber.name || 'Not provided'}
                 </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Status</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Status
+                </label>
                 <span
                   className={`mt-1 px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(selectedSubscriber.status)}`}
                 >
@@ -574,7 +610,9 @@ export default function NewsletterSubscribersPage() {
                 </span>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Tags</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Tags
+                </label>
                 <div className="mt-1 flex flex-wrap gap-1">
                   {selectedSubscriber.tags?.map((tag: string, idx: number) => (
                     <span
@@ -587,7 +625,9 @@ export default function NewsletterSubscribersPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Subscribed</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Subscribed
+                </label>
                 <p className="mt-1 text-sm text-gray-900">
                   {new Date(selectedSubscriber.created_at).toLocaleString()}
                 </p>
@@ -595,7 +635,7 @@ export default function NewsletterSubscribersPage() {
             </div>
           ) : (
             <form
-              onSubmit={(e) => {
+              onSubmit={e => {
                 e.preventDefault();
                 handleSubmit();
               }}
@@ -609,32 +649,43 @@ export default function NewsletterSubscribersPage() {
                   type="email"
                   required
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={e =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   disabled={modalMode === 'edit'}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Name
+                </label>
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={e =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Status</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Status
+                </label>
                 <select
                   value={formData.status}
-                  onChange={(e) =>
-                    setFormData({ ...formData, status: e.target.value as SubscriberStatus })
+                  onChange={e =>
+                    setFormData({
+                      ...formData,
+                      status: e.target.value as SubscriberStatus,
+                    })
                   }
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 >
-                  {STATUSES.map((status) => (
+                  {STATUSES.map(status => (
                     <option key={status} value={status}>
                       {status.charAt(0).toUpperCase() + status.slice(1)}
                     </option>
@@ -649,10 +700,13 @@ export default function NewsletterSubscribersPage() {
                 <input
                   type="text"
                   value={formData.tags?.join(', ') || ''}
-                  onChange={(e) =>
+                  onChange={e =>
                     setFormData({
                       ...formData,
-                      tags: e.target.value.split(',').map((t) => t.trim()).filter(Boolean),
+                      tags: e.target.value
+                        .split(',')
+                        .map(t => t.trim())
+                        .filter(Boolean),
                     })
                   }
                   placeholder="e.g., vip, customer, promotion"
@@ -661,7 +715,11 @@ export default function NewsletterSubscribersPage() {
               </div>
 
               <div className="flex justify-end gap-3 pt-4">
-                <Button type="button" variant="outline" onClick={() => setShowModal(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowModal(false)}
+                >
                   Cancel
                 </Button>
                 <Button type="submit">

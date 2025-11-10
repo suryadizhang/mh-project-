@@ -1,10 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import {
+  Calendar,
+  Clock,
+  Mail,
+  Search,
+  Shield,
+  UserCheck,
+  Users,
+  UserX,
+} from 'lucide-react';
+import { useEffect,useState } from 'react';
+
 import { Badge } from '@/components/ui/badge';
-import { Users, UserCheck, UserX, Clock, Mail, Calendar, Shield, Search, Filter } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { logger } from '@/lib/logger';
 
 interface User {
@@ -24,7 +39,9 @@ interface User {
 export default function UserManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'active' | 'suspended'>('all');
+  const [filter, setFilter] = useState<
+    'all' | 'pending' | 'active' | 'suspended'
+  >('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
@@ -36,13 +53,14 @@ export default function UserManagementPage() {
     setLoading(true);
     try {
       const token = localStorage.getItem('access_token');
-      const endpoint = filter === 'pending' 
-        ? `${process.env.NEXT_PUBLIC_API_URL}/admin/users/pending`
-        : `${process.env.NEXT_PUBLIC_API_URL}/admin/users?status=${filter !== 'all' ? filter : ''}`;
-      
+      const endpoint =
+        filter === 'pending'
+          ? `${process.env.NEXT_PUBLIC_API_URL}/admin/users/pending`
+          : `${process.env.NEXT_PUBLIC_API_URL}/admin/users?status=${filter !== 'all' ? filter : ''}`;
+
       const response = await fetch(endpoint, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -63,12 +81,15 @@ export default function UserManagementPage() {
     setActionLoading(userId);
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/users/${userId}/approve`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/users/${userId}/approve`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         await fetchUsers(); // Refresh list
@@ -84,19 +105,26 @@ export default function UserManagementPage() {
   };
 
   const handleReject = async (userId: string) => {
-    if (!confirm('Are you sure you want to reject this user? This action cannot be undone.')) {
+    if (
+      !confirm(
+        'Are you sure you want to reject this user? This action cannot be undone.'
+      )
+    ) {
       return;
     }
 
     setActionLoading(userId);
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/users/${userId}/reject`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/users/${userId}/reject`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         await fetchUsers(); // Refresh list
@@ -119,12 +147,15 @@ export default function UserManagementPage() {
     setActionLoading(userId);
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/users/${userId}/suspend`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/users/${userId}/suspend`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         await fetchUsers(); // Refresh list
@@ -141,20 +172,28 @@ export default function UserManagementPage() {
 
   const filteredUsers = users.filter(user => {
     if (searchQuery) {
-      return user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-             user.full_name.toLowerCase().includes(searchQuery.toLowerCase());
+      return (
+        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.full_name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
     }
     return true;
   });
 
   const getStatusBadge = (status: User['status']) => {
-    const variants: Record<User['status'], { variant: 'default' | 'secondary' | 'destructive' | 'outline', label: string }> = {
+    const variants: Record<
+      User['status'],
+      {
+        variant: 'default' | 'secondary' | 'destructive' | 'outline';
+        label: string;
+      }
+    > = {
       pending: { variant: 'outline', label: 'Pending' },
       active: { variant: 'default', label: 'Active' },
       suspended: { variant: 'destructive', label: 'Suspended' },
       deactivated: { variant: 'secondary', label: 'Deactivated' },
     };
-    
+
     const config = variants[status];
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
@@ -175,7 +214,9 @@ export default function UserManagementPage() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">User Management</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          User Management
+        </h1>
         <p className="text-gray-600">Manage user accounts and permissions</p>
       </div>
 
@@ -183,7 +224,9 @@ export default function UserManagementPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Total Users</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Total Users
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{users.length}</div>
@@ -191,7 +234,9 @@ export default function UserManagementPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Pending Approval</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Pending Approval
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">
@@ -201,7 +246,9 @@ export default function UserManagementPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Active Users</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Active Users
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
@@ -211,7 +258,9 @@ export default function UserManagementPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Super Admins</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Super Admins
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">
@@ -233,7 +282,7 @@ export default function UserManagementPage() {
                   type="text"
                   placeholder="Search by email or name..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -284,16 +333,20 @@ export default function UserManagementPage() {
           <CardContent className="py-12">
             <div className="text-center">
               <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No users found</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No users found
+              </h3>
               <p className="text-gray-600">
-                {searchQuery ? 'Try adjusting your search query.' : 'No users match the selected filter.'}
+                {searchQuery
+                  ? 'Try adjusting your search query.'
+                  : 'No users match the selected filter.'}
               </p>
             </div>
           </CardContent>
         </Card>
       ) : (
         <div className="grid grid-cols-1 gap-4">
-          {filteredUsers.map((user) => (
+          {filteredUsers.map(user => (
             <Card key={user.id}>
               <CardContent className="pt-6">
                 <div className="flex items-start justify-between">
@@ -301,7 +354,11 @@ export default function UserManagementPage() {
                     {/* Avatar */}
                     <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                       {user.avatar_url ? (
-                        <img src={user.avatar_url} alt={user.full_name} className="h-12 w-12 rounded-full" />
+                        <img
+                          src={user.avatar_url}
+                          alt={user.full_name}
+                          className="h-12 w-12 rounded-full"
+                        />
                       ) : (
                         <span className="text-blue-600 font-semibold text-lg">
                           {user.full_name.charAt(0).toUpperCase()}
@@ -312,7 +369,9 @@ export default function UserManagementPage() {
                     {/* User Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2 mb-1">
-                        <h3 className="text-lg font-semibold text-gray-900">{user.full_name}</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {user.full_name}
+                        </h3>
                         {user.is_super_admin && (
                           <Badge variant="default" className="bg-purple-600">
                             <Shield className="h-3 w-3 mr-1" />
@@ -321,32 +380,40 @@ export default function UserManagementPage() {
                         )}
                         {getStatusBadge(user.status)}
                       </div>
-                      
+
                       <div className="flex items-center space-x-4 text-sm text-gray-600">
                         <div className="flex items-center">
                           <Mail className="h-4 w-4 mr-1" />
                           {user.email}
                         </div>
                         <div className="flex items-center">
-                          <span className="mr-1">{getProviderIcon(user.auth_provider)}</span>
-                          {user.auth_provider.charAt(0).toUpperCase() + user.auth_provider.slice(1)}
+                          <span className="mr-1">
+                            {getProviderIcon(user.auth_provider)}
+                          </span>
+                          {user.auth_provider.charAt(0).toUpperCase() +
+                            user.auth_provider.slice(1)}
                         </div>
                         {user.is_email_verified && (
-                          <Badge variant="outline" className="text-green-600 border-green-600">
+                          <Badge
+                            variant="outline"
+                            className="text-green-600 border-green-600"
+                          >
                             ✓ Verified
                           </Badge>
                         )}
                       </div>
-                      
+
                       <div className="flex items-center space-x-4 text-xs text-gray-500 mt-2">
                         <div className="flex items-center">
                           <Calendar className="h-3 w-3 mr-1" />
-                          Joined {new Date(user.created_at).toLocaleDateString()}
+                          Joined{' '}
+                          {new Date(user.created_at).toLocaleDateString()}
                         </div>
                         {user.last_login_at && (
                           <div className="flex items-center">
                             <Clock className="h-3 w-3 mr-1" />
-                            Last login {new Date(user.last_login_at).toLocaleDateString()}
+                            Last login{' '}
+                            {new Date(user.last_login_at).toLocaleDateString()}
                           </div>
                         )}
                       </div>

@@ -1,16 +1,16 @@
-'use client'
+'use client';
 
-import '@/styles/home.css'
-import '@/styles/pages/home.page.css'
+import '@/styles/home.css';
+import '@/styles/pages/home.page.css';
 
-import Link from 'next/link'
+import Link from 'next/link';
 
-import Assistant from '@/components/chat/Assistant'
-import TestimonialsSection from '@/components/sections/TestimonialsSection'
-import { useScrollAnimation } from '@/hooks/useScrollAnimation'
+import Assistant from '@/components/chat/Assistant';
+import TestimonialsSection from '@/components/sections/TestimonialsSection';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 export default function Home() {
-  useScrollAnimation()
+  useScrollAnimation();
   return (
     <main data-page="home">
       {/* Hero Video Section */}
@@ -241,7 +241,7 @@ export default function Home() {
               location—we&apos;ll make it work with{' '}
               <span className="highlight-text">transparent travel options</span>.
             </p>
-            <div className="text-center mt-3 mb-4">
+            <div className="mt-3 mb-4 text-center">
               <a href="/BookUs" className="btn btn-primary me-3">
                 📅 Check Your Date & Time
               </a>
@@ -287,7 +287,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="service-radius-info text-center mt-4">
+            <div className="service-radius-info mt-4 text-center">
               <div className="radius-card">
                 <span className="radius-icon"> 🚗</span>
                 <h4 className="radius-title">We Come to You!</h4>
@@ -466,5 +466,5 @@ export default function Home() {
 
       <Assistant page="/" />
     </main>
-  )
+  );
 }

@@ -1,29 +1,27 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
 import {
-  MessageSquare,
-  Send,
+  Circle,
+  Clock,
   Facebook,
   Instagram,
-  Target,
-  Clock,
-  CheckCircle,
-  Circle,
+  MessageSquare,
+  Send,
   Sparkles,
+  Target,
 } from 'lucide-react';
+import { useMemo,useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { StatsCard } from '@/components/ui/stats-card';
-import { FilterBar } from '@/components/ui/filter-bar';
 import { EmptyState } from '@/components/ui/empty-state';
+import { FilterBar } from '@/components/ui/filter-bar';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { Modal } from '@/components/ui/modal';
+import { StatsCard } from '@/components/ui/stats-card';
 import {
-  useSocialThreads,
-  usePagination,
   useFilters,
+  usePagination,
   useSearch,
+  useSocialThreads,
 } from '@/hooks/useApi';
 
 const PLATFORMS = {
@@ -77,7 +75,11 @@ export default function SocialInboxPage() {
 
   // Pagination and filters
   const { page, limit } = usePagination(1, 50);
-  const { query: searchQuery, debouncedQuery, setQuery: setSearchQuery } = useSearch();
+  const {
+    query: searchQuery,
+    debouncedQuery,
+    setQuery: setSearchQuery,
+  } = useSearch();
   const { filters, updateFilter, resetFilters } = useFilters({
     platform: '',
     status: '',
@@ -97,7 +99,12 @@ export default function SocialInboxPage() {
   );
 
   // Fetch threads data
-  const { data: threadsResponse, loading, error, refetch } = useSocialThreads(apiFilters);
+  const {
+    data: threadsResponse,
+    loading,
+    error,
+    refetch,
+  } = useSocialThreads(apiFilters);
 
   const threads = threadsResponse?.data || [];
   const totalCount = threadsResponse?.total_count || 0;
@@ -105,19 +112,26 @@ export default function SocialInboxPage() {
   // Calculate stats
   const stats = useMemo(() => {
     const unreadCount = threads.filter((t: any) => !t.is_read).length;
-    const fbCount = threads.filter((t: any) => t.platform === PLATFORMS.FACEBOOK).length;
-    const igCount = threads.filter((t: any) => t.platform === PLATFORMS.INSTAGRAM).length;
+    const fbCount = threads.filter(
+      (t: any) => t.platform === PLATFORMS.FACEBOOK
+    ).length;
+    const igCount = threads.filter(
+      (t: any) => t.platform === PLATFORMS.INSTAGRAM
+    ).length;
 
     // Average response time (in hours)
-    const avgResponseTime = threads.length > 0
-      ? threads.reduce((sum: number, t: any) => {
-          if (t.first_response_time) {
-            const hours = new Date(t.first_response_time).getTime() - new Date(t.created_at).getTime();
-            return sum + (hours / (1000 * 60 * 60));
-          }
-          return sum;
-        }, 0) / threads.length
-      : 0;
+    const avgResponseTime =
+      threads.length > 0
+        ? threads.reduce((sum: number, t: any) => {
+            if (t.first_response_time) {
+              const hours =
+                new Date(t.first_response_time).getTime() -
+                new Date(t.created_at).getTime();
+              return sum + hours / (1000 * 60 * 60);
+            }
+            return sum;
+          }, 0) / threads.length
+        : 0;
 
     return {
       total: totalCount,
@@ -138,7 +152,12 @@ export default function SocialInboxPage() {
     if (!messageText.trim() || !selectedThread) return;
 
     // TODO: Call send message API
-    console.log('Sending message:', messageText, 'to thread:', selectedThread.thread_id);
+    console.log(
+      'Sending message:',
+      messageText,
+      'to thread:',
+      selectedThread.thread_id
+    );
     setMessageText('');
     setShowQuickReplies(false);
   };
@@ -196,8 +215,12 @@ export default function SocialInboxPage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Social Media Inbox</h1>
-          <p className="text-gray-600">Manage Facebook and Instagram messages</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Social Media Inbox
+          </h1>
+          <p className="text-gray-600">
+            Manage Facebook and Instagram messages
+          </p>
         </div>
         <Button onClick={refetch}>
           <MessageSquare className="w-4 h-4 mr-2" />
@@ -259,7 +282,9 @@ export default function SocialInboxPage() {
             value: filters.status,
           },
         ]}
-        onFilterChange={(key, value) => updateFilter(key as 'platform' | 'status', value)}
+        onFilterChange={(key, value) =>
+          updateFilter(key as 'platform' | 'status', value)
+        }
         onClearFilters={handleClearFilters}
         showClearButton
       />
@@ -287,12 +312,17 @@ export default function SocialInboxPage() {
             {/* Thread List Sidebar */}
             <div className="w-1/3 border-r border-gray-200 overflow-y-auto">
               <div className="p-4 border-b border-gray-200 bg-gray-50">
-                <h3 className="font-semibold text-gray-900">Messages ({threads.length})</h3>
+                <h3 className="font-semibold text-gray-900">
+                  Messages ({threads.length})
+                </h3>
               </div>
 
               <div className="divide-y divide-gray-200">
                 {threads.map((thread: any) => {
-                  const platform = PLATFORM_COLORS[thread.platform as keyof typeof PLATFORM_COLORS] || PLATFORM_COLORS[PLATFORMS.FACEBOOK];
+                  const platform =
+                    PLATFORM_COLORS[
+                      thread.platform as keyof typeof PLATFORM_COLORS
+                    ] || PLATFORM_COLORS[PLATFORMS.FACEBOOK];
                   const PlatformIcon = platform.icon;
 
                   return (
@@ -303,15 +333,17 @@ export default function SocialInboxPage() {
                         selectedThread?.thread_id === thread.thread_id
                           ? 'bg-blue-50 border-l-4 border-blue-600'
                           : !thread.is_read
-                          ? 'bg-blue-50 bg-opacity-30'
-                          : ''
+                            ? 'bg-blue-50 bg-opacity-30'
+                            : ''
                       }`}
                     >
                       {/* Thread Header */}
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <div className={`p-1 rounded ${platform.bg}`}>
-                            <PlatformIcon className={`w-4 h-4 ${platform.text}`} />
+                            <PlatformIcon
+                              className={`w-4 h-4 ${platform.text}`}
+                            />
                           </div>
                           <span className="font-medium text-gray-900">
                             {thread.customer_name || 'Unknown User'}
@@ -351,7 +383,8 @@ export default function SocialInboxPage() {
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                           <span className="text-sm font-medium text-gray-700">
-                            {(selectedThread.customer_name || 'U')[0].toUpperCase()}
+                            {(selectedThread.customer_name ||
+                              'U')[0].toUpperCase()}
                           </span>
                         </div>
                         <div>
@@ -359,7 +392,9 @@ export default function SocialInboxPage() {
                             {selectedThread.customer_name || 'Unknown User'}
                           </h3>
                           <p className="text-xs text-gray-500">
-                            {PLATFORM_COLORS[selectedThread.platform as keyof typeof PLATFORM_COLORS]?.label || 'Unknown'}
+                            {PLATFORM_COLORS[
+                              selectedThread.platform as keyof typeof PLATFORM_COLORS
+                            ]?.label || 'Unknown'}
                           </p>
                         </div>
                       </div>
@@ -376,36 +411,42 @@ export default function SocialInboxPage() {
                   {/* Messages */}
                   <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
                     <div className="space-y-4">
-                      {selectedThread.messages?.map((message: any, index: number) => {
-                        const isFromCustomer = message.direction === 'inbound';
+                      {selectedThread.messages?.map(
+                        (message: any, index: number) => {
+                          const isFromCustomer =
+                            message.direction === 'inbound';
 
-                        return (
-                          <div
-                            key={index}
-                            className={`flex ${isFromCustomer ? 'justify-start' : 'justify-end'}`}
-                          >
+                          return (
                             <div
-                              className={`max-w-[70%] p-3 rounded-lg ${
-                                isFromCustomer
-                                  ? 'bg-white text-gray-900'
-                                  : 'bg-blue-600 text-white'
-                              }`}
+                              key={index}
+                              className={`flex ${isFromCustomer ? 'justify-start' : 'justify-end'}`}
                             >
-                              <p className="text-sm">{message.text}</p>
-                              <p
-                                className={`text-xs mt-1 ${
-                                  isFromCustomer ? 'text-gray-500' : 'text-blue-100'
+                              <div
+                                className={`max-w-[70%] p-3 rounded-lg ${
+                                  isFromCustomer
+                                    ? 'bg-white text-gray-900'
+                                    : 'bg-blue-600 text-white'
                                 }`}
                               >
-                                {formatTime(message.timestamp)}
-                              </p>
+                                <p className="text-sm">{message.text}</p>
+                                <p
+                                  className={`text-xs mt-1 ${
+                                    isFromCustomer
+                                      ? 'text-gray-500'
+                                      : 'text-blue-100'
+                                  }`}
+                                >
+                                  {formatTime(message.timestamp)}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        }
+                      )}
 
                       {/* Placeholder if no messages */}
-                      {(!selectedThread.messages || selectedThread.messages.length === 0) && (
+                      {(!selectedThread.messages ||
+                        selectedThread.messages.length === 0) && (
                         <div className="text-center text-gray-500 py-8">
                           <MessageSquare className="w-12 h-12 mx-auto mb-2 text-gray-400" />
                           <p>No messages in this thread yet</p>
@@ -419,7 +460,7 @@ export default function SocialInboxPage() {
                     {/* Quick Replies */}
                     {showQuickReplies && (
                       <div className="mb-3 flex flex-wrap gap-2">
-                        {QUICK_REPLIES.map((reply) => (
+                        {QUICK_REPLIES.map(reply => (
                           <button
                             key={reply.label}
                             onClick={() => handleQuickReply(reply.text)}
@@ -441,18 +482,21 @@ export default function SocialInboxPage() {
                       </button>
                       <textarea
                         value={messageText}
-                        onChange={(e) => setMessageText(e.target.value)}
+                        onChange={e => setMessageText(e.target.value)}
                         placeholder="Type your message..."
                         className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                         rows={2}
-                        onKeyDown={(e) => {
+                        onKeyDown={e => {
                           if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
                             handleSendMessage();
                           }
                         }}
                       />
-                      <Button onClick={handleSendMessage} disabled={!messageText.trim()}>
+                      <Button
+                        onClick={handleSendMessage}
+                        disabled={!messageText.trim()}
+                      >
                         <Send className="w-4 h-4" />
                       </Button>
                     </div>
@@ -462,7 +506,9 @@ export default function SocialInboxPage() {
                 <div className="flex-1 flex items-center justify-center text-gray-500">
                   <div className="text-center">
                     <MessageSquare className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                    <p className="text-lg">Select a conversation to view messages</p>
+                    <p className="text-lg">
+                      Select a conversation to view messages
+                    </p>
                   </div>
                 </div>
               )}

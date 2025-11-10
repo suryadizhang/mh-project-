@@ -1,12 +1,12 @@
-﻿'use client'
+﻿'use client';
 
-import '@/styles/menu.css'
-import '@/styles/pages/menu.page.css'
+import '@/styles/menu.css';
+import '@/styles/pages/menu.page.css';
 
-import { Calculator, Calendar, MessageCircle } from 'lucide-react'
-import Link from 'next/link'
+import { Calculator, Calendar, MessageCircle } from 'lucide-react';
+import Link from 'next/link';
 
-import Assistant from '@/components/chat/Assistant'
+import Assistant from '@/components/chat/Assistant';
 
 export default function MenuPage() {
   return (
@@ -15,7 +15,7 @@ export default function MenuPage() {
       <div className="menu-container">
         <div className="container-fluid px-lg-5">
           {/* Enhanced Hero Section with Better Flow */}
-          <div className="hero-section page-hero-background text-center mb-5">
+          <div className="hero-section page-hero-background mb-5 text-center">
             <div className="hero-content">
               <div className="hero-icon-wrapper mb-4">
                 <div className="floating-icons">
@@ -98,9 +98,9 @@ export default function MenuPage() {
           </div>
 
           {/* Modernized Pricing Section */}
-          <div className="card menu-card p-0 border-0 overflow-hidden mb-5">
-            <div className="pricing-section p-5 mb-0">
-              <div className="text-center mb-5">
+          <div className="card menu-card mb-5 overflow-hidden border-0 p-0">
+            <div className="pricing-section mb-0 p-5">
+              <div className="mb-5 text-center">
                 <div className="section-header animated-section">
                   <div className="section-icon-wrapper mb-3">
                     <span className="section-icon emoji-visible">💰</span>
@@ -250,9 +250,9 @@ export default function MenuPage() {
           </div>
 
           {/* What's Included Section */}
-          <div className="card menu-card p-0 border-0 overflow-hidden mb-5">
+          <div className="card menu-card mb-5 overflow-hidden border-0 p-0">
             <div className="included-section p-5">
-              <div className="text-center mb-5">
+              <div className="mb-5 text-center">
                 <div className="section-header animated-section">
                   <div className="section-icon-wrapper mb-3">
                     <span className="section-icon emoji-visible">🍽️</span>
@@ -360,9 +360,9 @@ export default function MenuPage() {
           </div>
 
           {/* Enhanced Protein Options and Premium Upgrades */}
-          <div className="card menu-card p-0 border-0 overflow-hidden mb-5">
+          <div className="card menu-card mb-5 overflow-hidden border-0 p-0">
             <div className="proteins-section p-5">
-              <div className="text-center mb-5">
+              <div className="mb-5 text-center">
                 <div className="section-header animated-section">
                   <div className="section-icon-wrapper mb-3">
                     <span className="section-icon emoji-visible">🥩</span>
@@ -631,9 +631,9 @@ export default function MenuPage() {
           </div>
 
           {/* Modern Additional Options */}
-          <div className="card menu-card p-0 border-0 overflow-hidden mb-5">
+          <div className="card menu-card mb-5 overflow-hidden border-0 p-0">
             <div className="additional-section p-5">
-              <div className="text-center mb-5">
+              <div className="mb-5 text-center">
                 <div className="section-header animated-section">
                   <div className="section-icon-wrapper mb-3">
                     <span className="section-icon emoji-visible">🍜</span>
@@ -743,9 +743,9 @@ export default function MenuPage() {
 
       {/* Service Areas */}
       <div className="container-fluid px-lg-5 mb-5">
-        <div className="card menu-card p-0 border-0 overflow-hidden">
+        <div className="card menu-card overflow-hidden border-0 p-0">
           <div className="service-areas p-5">
-            <div className="text-center mb-5">
+            <div className="mb-5 text-center">
               <div className="section-header animated-section">
                 <div className="section-icon-wrapper mb-3">
                   <span className="section-icon emoji-visible">🏠</span>
@@ -762,17 +762,17 @@ export default function MenuPage() {
               San Jose & surrounding regions. Not sure we cover you? Reach out—we&apos;ll do our
               best!
             </p>
-            <div className="text-center mt-3 mb-4">
+            <div className="mt-3 mb-4 text-center">
               <a href="/BookUs" className="btn btn-primary me-3">
-                <Calendar className="w-4 h-4 me-2 inline" />
+                <Calendar className="me-2 inline h-4 w-4" />
                 Ready to Plan Your Date?
               </a>
               <a href="/quote" className="btn btn-outline-primary me-3">
-                <Calculator className="w-4 h-4 me-2 inline" />
+                <Calculator className="me-2 inline h-4 w-4" />
                 Get Your Quote
               </a>
               <a href="/contact" className="btn btn-outline-secondary">
-                <MessageCircle className="w-4 h-4 me-2 inline" />
+                <MessageCircle className="me-2 inline h-4 w-4" />
                 Questions? Contact Us
               </a>
             </div>
@@ -813,7 +813,7 @@ export default function MenuPage() {
               </div>
             </div>
 
-            <div className="service-radius-info text-center mt-4">
+            <div className="service-radius-info mt-4 text-center">
               <div className="radius-card">
                 <span className="radius-icon"> 🚗 </span>
                 <h4 className="radius-title">We Come to You!</h4>
@@ -843,8 +843,8 @@ export default function MenuPage() {
 
       {/* Enhanced Call to Action */}
       <div className="container-fluid px-lg-5 mb-5">
-        <div className="card menu-card p-0 border-0 overflow-hidden">
-          <div className="cta-section text-center p-5">
+        <div className="card menu-card overflow-hidden border-0 p-0">
+          <div className="cta-section p-5 text-center">
             <div className="cta-content-wrapper">
               <div className="cta-background-pattern"></div>
 
@@ -939,5 +939,5 @@ export default function MenuPage() {
       </div>
       <Assistant page="/menu" />
     </main>
-  )
+  );
 }

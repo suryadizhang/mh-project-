@@ -7,6 +7,12 @@ node_modules/
 build/
 dist/
 .next/
+out/
+
+# Generated files - packages
+packages/*/dist/
+packages/*/build/
+packages/*/.turbo/
 
 # Environment variables
 .env
@@ -21,6 +27,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+*.log
 
 # OS generated files
 .DS_Store
@@ -47,6 +54,7 @@ __pycache__/
 env/
 .venv/
 .ENV/
+venv/
 
 # Package files
 package-lock.json
@@ -57,6 +65,20 @@ pnpm-lock.yaml
 *.min.js
 *.min.css
 *.map
+*.d.ts.map
+
+# Test coverage
+coverage/
+.nyc_output/
+*.lcov
+
+# Turbo
+.turbo/
 
 # Documentation
 CHANGELOG.md
+
+# Backup files
+*.backup.tsx
+*-old-backup.tsx
+*.bak

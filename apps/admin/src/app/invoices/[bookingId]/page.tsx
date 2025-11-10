@@ -13,7 +13,6 @@ import {
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { logger } from '@/lib/logger';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,6 +25,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { logger } from '@/lib/logger';
 
 interface BookingData {
   bookingId: string;
@@ -157,7 +157,10 @@ export default function AdminInvoicePage() {
 
         setBooking(mockBooking);
       } catch (error) {
-        logger.error(error as Error, { context: 'fetch_booking', booking_id: bookingId });
+        logger.error(error as Error, {
+          context: 'fetch_booking',
+          booking_id: bookingId,
+        });
       } finally {
         setLoading(false);
       }
@@ -260,7 +263,10 @@ export default function AdminInvoicePage() {
         window.open(url, '_blank');
       }
     } catch (error) {
-      logger.error(error as Error, { context: 'generate_invoice', booking_id: bookingId });
+      logger.error(error as Error, {
+        context: 'generate_invoice',
+        booking_id: bookingId,
+      });
       alert('Error generating invoice. Please try again.');
     } finally {
       setGenerating(false);
@@ -532,7 +538,7 @@ export default function AdminInvoicePage() {
                       value === ''
                         ? 0
                         : parseFloat(value.replace(/^0+/, '') || '0');
-                    setInvoiceSettings((prev) => ({
+                    setInvoiceSettings(prev => ({
                       ...prev,
                       travelMiles: isNaN(numValue) ? 0 : Math.max(0, numValue),
                     }));
@@ -560,7 +566,7 @@ export default function AdminInvoicePage() {
                         value === ''
                           ? 0
                           : parseFloat(value.replace(/^0+/, '') || '0');
-                      setInvoiceSettings((prev) => ({
+                      setInvoiceSettings(prev => ({
                         ...prev,
                         discountAmount: isNaN(numValue)
                           ? 0
@@ -573,7 +579,7 @@ export default function AdminInvoicePage() {
                     id="discountDescription"
                     value={invoiceSettings.discountDescription}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setInvoiceSettings((prev) => ({
+                      setInvoiceSettings(prev => ({
                         ...prev,
                         discountDescription: e.target.value,
                       }))
@@ -593,7 +599,7 @@ export default function AdminInvoicePage() {
                   id="paymentTerms"
                   value={invoiceSettings.paymentTerms}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setInvoiceSettings((prev) => ({
+                    setInvoiceSettings(prev => ({
                       ...prev,
                       paymentTerms: e.target.value,
                     }))
@@ -609,7 +615,7 @@ export default function AdminInvoicePage() {
                   id="additionalNotes"
                   value={invoiceSettings.additionalNotes}
                   onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                    setInvoiceSettings((prev) => ({
+                    setInvoiceSettings(prev => ({
                       ...prev,
                       additionalNotes: e.target.value,
                     }))

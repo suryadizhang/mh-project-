@@ -1,17 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import {
-  Mail,
-  Users,
-  TrendingUp,
   Eye,
+  Mail,
   MousePointerClick,
-  UserX,
+  TrendingUp,
+  Users,
 } from 'lucide-react';
+import { useEffect,useState } from 'react';
 
-import { StatsCard } from '@/components/ui/stats-card';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { StatsCard } from '@/components/ui/stats-card';
 
 interface AnalyticsData {
   overview: {
@@ -53,11 +52,14 @@ export default function NewsletterAnalyticsPage() {
   const fetchAnalytics = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/newsletter/analytics?period=${timeRange}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-        },
-      });
+      const response = await fetch(
+        `/api/newsletter/analytics?period=${timeRange}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+          },
+        }
+      );
 
       if (!response.ok) throw new Error('Failed to fetch');
 
@@ -86,7 +88,9 @@ export default function NewsletterAnalyticsPage() {
     return (
       <div className="p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">Failed to load analytics. Please try again.</p>
+          <p className="text-red-800">
+            Failed to load analytics. Please try again.
+          </p>
         </div>
       </div>
     );
@@ -97,14 +101,16 @@ export default function NewsletterAnalyticsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Newsletter Analytics</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Newsletter Analytics
+          </h1>
           <p className="mt-1 text-sm text-gray-600">
             Track your email campaign performance
           </p>
         </div>
         <select
           value={timeRange}
-          onChange={(e) => setTimeRange(e.target.value)}
+          onChange={e => setTimeRange(e.target.value)}
           className="block rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
         >
           <option value="7d">Last 7 days</option>
@@ -155,7 +161,9 @@ export default function NewsletterAnalyticsPage() {
       {/* Subscriber Growth Chart */}
       <div className="bg-white shadow sm:rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Subscriber Growth</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">
+            Subscriber Growth
+          </h2>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -195,8 +203,13 @@ export default function NewsletterAnalyticsPage() {
                         -{row.unsubscribed}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <span className={netGrowth >= 0 ? 'text-green-600' : 'text-red-600'}>
-                          {netGrowth >= 0 ? '+' : ''}{netGrowth}
+                        <span
+                          className={
+                            netGrowth >= 0 ? 'text-green-600' : 'text-red-600'
+                          }
+                        >
+                          {netGrowth >= 0 ? '+' : ''}
+                          {netGrowth}
                         </span>
                       </td>
                     </tr>
@@ -211,7 +224,9 @@ export default function NewsletterAnalyticsPage() {
       {/* Campaign Performance */}
       <div className="bg-white shadow sm:rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Recent Campaign Performance</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">
+            Recent Campaign Performance
+          </h2>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -234,7 +249,7 @@ export default function NewsletterAnalyticsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {analytics.campaign_performance.map((campaign) => (
+                {analytics.campaign_performance.map(campaign => (
                   <tr key={campaign.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 text-sm font-medium text-gray-900">
                       {campaign.name}
@@ -253,7 +268,9 @@ export default function NewsletterAnalyticsPage() {
                         <div className="w-16 bg-gray-200 rounded-full h-2">
                           <div
                             className="bg-blue-600 h-2 rounded-full"
-                            style={{ width: `${Math.min(campaign.open_rate, 100)}%` }}
+                            style={{
+                              width: `${Math.min(campaign.open_rate, 100)}%`,
+                            }}
                           />
                         </div>
                       </div>
@@ -266,7 +283,9 @@ export default function NewsletterAnalyticsPage() {
                         <div className="w-16 bg-gray-200 rounded-full h-2">
                           <div
                             className="bg-green-600 h-2 rounded-full"
-                            style={{ width: `${Math.min(campaign.click_rate, 100)}%` }}
+                            style={{
+                              width: `${Math.min(campaign.click_rate, 100)}%`,
+                            }}
                           />
                         </div>
                       </div>
@@ -282,17 +301,24 @@ export default function NewsletterAnalyticsPage() {
       {/* Engagement Trends */}
       <div className="bg-white shadow sm:rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Engagement Trends</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">
+            Engagement Trends
+          </h2>
           <div className="space-y-6">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700">Email Opens</span>
+                <span className="text-sm font-medium text-gray-700">
+                  Email Opens
+                </span>
                 <Eye className="w-5 h-5 text-blue-600" />
               </div>
               <div className="grid grid-cols-7 gap-2">
                 {analytics.engagement_trends.opens.map((value, index) => {
-                  const maxValue = Math.max(...analytics.engagement_trends.opens);
-                  const heightPercent = maxValue > 0 ? (value / maxValue) * 100 : 0;
+                  const maxValue = Math.max(
+                    ...analytics.engagement_trends.opens
+                  );
+                  const heightPercent =
+                    maxValue > 0 ? (value / maxValue) * 100 : 0;
                   return (
                     <div key={index} className="flex flex-col items-center">
                       <div className="w-full bg-gray-200 rounded-t h-32 flex items-end">
@@ -303,7 +329,9 @@ export default function NewsletterAnalyticsPage() {
                         />
                       </div>
                       <span className="text-xs text-gray-500 mt-1">
-                        {new Date(analytics.engagement_trends.dates[index]).toLocaleDateString('en-US', { weekday: 'short' })}
+                        {new Date(
+                          analytics.engagement_trends.dates[index]
+                        ).toLocaleDateString('en-US', { weekday: 'short' })}
                       </span>
                     </div>
                   );
@@ -313,13 +341,18 @@ export default function NewsletterAnalyticsPage() {
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700">Link Clicks</span>
+                <span className="text-sm font-medium text-gray-700">
+                  Link Clicks
+                </span>
                 <MousePointerClick className="w-5 h-5 text-green-600" />
               </div>
               <div className="grid grid-cols-7 gap-2">
                 {analytics.engagement_trends.clicks.map((value, index) => {
-                  const maxValue = Math.max(...analytics.engagement_trends.clicks);
-                  const heightPercent = maxValue > 0 ? (value / maxValue) * 100 : 0;
+                  const maxValue = Math.max(
+                    ...analytics.engagement_trends.clicks
+                  );
+                  const heightPercent =
+                    maxValue > 0 ? (value / maxValue) * 100 : 0;
                   return (
                     <div key={index} className="flex flex-col items-center">
                       <div className="w-full bg-gray-200 rounded-t h-32 flex items-end">
@@ -330,7 +363,9 @@ export default function NewsletterAnalyticsPage() {
                         />
                       </div>
                       <span className="text-xs text-gray-500 mt-1">
-                        {new Date(analytics.engagement_trends.dates[index]).toLocaleDateString('en-US', { weekday: 'short' })}
+                        {new Date(
+                          analytics.engagement_trends.dates[index]
+                        ).toLocaleDateString('en-US', { weekday: 'short' })}
                       </span>
                     </div>
                   );

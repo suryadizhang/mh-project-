@@ -1,33 +1,32 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
 import {
-  Star,
   AlertCircle,
-  CheckCircle,
-  Gift,
-  ExternalLink,
   Calendar,
-  User,
-  MessageSquare,
-  TrendingUp,
-  ThumbsUp,
-  ThumbsDown,
+  CheckCircle,
+  ExternalLink,
+  Gift,
   Meh,
+  MessageSquare,
+  Star,
+  ThumbsDown,
+  ThumbsUp,
+  User,
 } from 'lucide-react';
+import { useMemo,useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { StatsCard } from '@/components/ui/stats-card';
-import { FilterBar, FilterDefinition } from '@/components/ui/filter-bar';
 import { EmptyState } from '@/components/ui/empty-state';
+import { FilterBar, FilterDefinition } from '@/components/ui/filter-bar';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { Modal, ConfirmModal } from '@/components/ui/modal';
+import { ConfirmModal,Modal } from '@/components/ui/modal';
+import { StatsCard } from '@/components/ui/stats-card';
 import {
-  useReviews,
   useEscalatedReviews,
-  useReviewAnalytics,
-  usePagination,
   useFilters,
+  usePagination,
+  useReviewAnalytics,
+  useReviews,
   useSearch,
 } from '@/hooks/useApi';
 
@@ -40,11 +39,16 @@ export default function ReviewsPage() {
   const [selectedReview, setSelectedReview] = useState<any>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isIssueCouponOpen, setIsIssueCouponOpen] = useState(false);
-  const [selectedReviewForCoupon, setSelectedReviewForCoupon] = useState<any>(null);
+  const [selectedReviewForCoupon, setSelectedReviewForCoupon] =
+    useState<any>(null);
 
   // Pagination and filters
   const { page, limit, setPage, nextPage, prevPage } = usePagination(1, 20);
-  const { query: searchQuery, debouncedQuery, setQuery: setSearchQuery } = useSearch();
+  const {
+    query: searchQuery,
+    debouncedQuery,
+    setQuery: setSearchQuery,
+  } = useSearch();
   const { filters, updateFilter, resetFilters } = useFilters({
     rating: '',
     sentiment: '',
@@ -64,8 +68,14 @@ export default function ReviewsPage() {
   );
 
   // Fetch data
-  const { data: reviewsResponse, loading, error, refetch } = useReviews(apiFilters);
-  const { data: escalatedResponse, loading: escalatedLoading } = useEscalatedReviews();
+  const {
+    data: reviewsResponse,
+    loading,
+    error,
+    refetch,
+  } = useReviews(apiFilters);
+  const { data: escalatedResponse, loading: escalatedLoading } =
+    useEscalatedReviews();
   const { data: analyticsData } = useReviewAnalytics();
 
   const reviews = reviewsResponse?.data || [];
@@ -86,7 +96,8 @@ export default function ReviewsPage() {
     const avgRating =
       reviews.length > 0
         ? (
-            reviews.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / reviews.length
+            reviews.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) /
+            reviews.length
           ).toFixed(1)
         : '0.0';
 
@@ -157,7 +168,10 @@ export default function ReviewsPage() {
 
   const handleConfirmCoupon = () => {
     // TODO: Call AI coupon generation API
-    console.log('Issuing coupon for review:', selectedReviewForCoupon?.review_id);
+    console.log(
+      'Issuing coupon for review:',
+      selectedReviewForCoupon?.review_id
+    );
   };
 
   const handleResolve = (review: any) => {
@@ -209,11 +223,13 @@ export default function ReviewsPage() {
 
     return (
       <div className="flex items-center gap-1">
-        {[1, 2, 3, 4, 5].map((star) => (
+        {[1, 2, 3, 4, 5].map(star => (
           <Star
             key={star}
             className={`${sizeClasses[size]} ${
-              star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+              star <= rating
+                ? 'fill-yellow-400 text-yellow-400'
+                : 'text-gray-300'
             }`}
           />
         ))}
@@ -263,8 +279,12 @@ export default function ReviewsPage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Reviews & Feedback</h1>
-          <p className="text-gray-600">Manage customer reviews and resolve issues</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Reviews & Feedback
+          </h1>
+          <p className="text-gray-600">
+            Manage customer reviews and resolve issues
+          </p>
         </div>
         <Button variant="outline">
           <ExternalLink className="w-4 h-4 mr-2" />
@@ -309,7 +329,7 @@ export default function ReviewsPage() {
           Rating Distribution
         </h3>
         <div className="space-y-2">
-          {ratingDistribution.reverse().map((dist) => (
+          {ratingDistribution.reverse().map(dist => (
             <div key={dist.stars} className="flex items-center gap-4">
               <div className="flex items-center gap-1 w-20">
                 {renderStars(dist.stars, 'sm')}
@@ -376,7 +396,9 @@ export default function ReviewsPage() {
             onSearchChange={setSearchQuery}
             searchPlaceholder="Search reviews by customer name or booking..."
             filters={filterDefinitions}
-            onFilterChange={(key, value) => updateFilter(key as 'rating' | 'sentiment', value)}
+            onFilterChange={(key, value) =>
+              updateFilter(key as 'rating' | 'sentiment', value)
+            }
             onClearFilters={handleClearFilters}
             showClearButton
           />
@@ -394,8 +416,8 @@ export default function ReviewsPage() {
             activeTab === 'escalated'
               ? 'No escalated issues'
               : activeTab === 'resolved'
-              ? 'No resolved reviews'
-              : 'No reviews found'
+                ? 'No resolved reviews'
+                : 'No reviews found'
           }
           description={
             Object.values(filters).some(Boolean) || debouncedQuery
@@ -432,7 +454,9 @@ export default function ReviewsPage() {
                           ESCALATED
                         </span>
                       )}
-                      <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold ${sentiment.bg} ${sentiment.color}`}>
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold ${sentiment.bg} ${sentiment.color}`}
+                      >
                         <SentimentIcon className="w-3 h-3 mr-1" />
                         {sentiment.label}
                       </span>
@@ -466,14 +490,20 @@ export default function ReviewsPage() {
                         <h4 className="text-sm font-semibold text-red-900 mb-1">
                           Issue Reported:
                         </h4>
-                        <p className="text-sm text-red-800">{review.issue_description}</p>
+                        <p className="text-sm text-red-800">
+                          {review.issue_description}
+                        </p>
                       </div>
                     )}
                   </div>
 
                   {/* Actions */}
                   <div className="flex flex-col gap-2 ml-4">
-                    <Button size="sm" variant="outline" onClick={() => handleReviewClick(review)}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleReviewClick(review)}
+                    >
                       View Full
                     </Button>
                     {review.is_escalated && (
@@ -486,10 +516,7 @@ export default function ReviewsPage() {
                           <Gift className="w-4 h-4 mr-1" />
                           Issue Coupon
                         </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => handleResolve(review)}
-                        >
+                        <Button size="sm" onClick={() => handleResolve(review)}>
                           <CheckCircle className="w-4 h-4 mr-1" />
                           Resolve
                         </Button>
@@ -512,7 +539,10 @@ export default function ReviewsPage() {
           size="lg"
           footer={
             <>
-              <Button variant="outline" onClick={() => setIsReviewModalOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsReviewModalOpen(false)}
+              >
                 Close
               </Button>
               {selectedReview.is_escalated && (
@@ -545,7 +575,9 @@ export default function ReviewsPage() {
             </div>
 
             <div>
-              <h4 className="text-sm font-semibold text-gray-700 mb-1">Customer</h4>
+              <h4 className="text-sm font-semibold text-gray-700 mb-1">
+                Customer
+              </h4>
               <p className="text-gray-900">
                 {selectedReview.customer_name || 'Anonymous'}
               </p>
@@ -558,23 +590,30 @@ export default function ReviewsPage() {
 
             {selectedReview.review_text && (
               <div>
-                <h4 className="text-sm font-semibold text-gray-700 mb-1">Review</h4>
+                <h4 className="text-sm font-semibold text-gray-700 mb-1">
+                  Review
+                </h4>
                 <p className="text-gray-900">{selectedReview.review_text}</p>
               </div>
             )}
 
-            {selectedReview.is_escalated && selectedReview.issue_description && (
-              <div className="p-4 bg-red-50 rounded border border-red-200">
-                <h4 className="text-sm font-semibold text-red-900 mb-1">
-                  Issue Description
-                </h4>
-                <p className="text-red-800">{selectedReview.issue_description}</p>
-              </div>
-            )}
+            {selectedReview.is_escalated &&
+              selectedReview.issue_description && (
+                <div className="p-4 bg-red-50 rounded border border-red-200">
+                  <h4 className="text-sm font-semibold text-red-900 mb-1">
+                    Issue Description
+                  </h4>
+                  <p className="text-red-800">
+                    {selectedReview.issue_description}
+                  </p>
+                </div>
+              )}
 
             {selectedReview.photos && selectedReview.photos.length > 0 && (
               <div>
-                <h4 className="text-sm font-semibold text-gray-700 mb-2">Photos</h4>
+                <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                  Photos
+                </h4>
                 <div className="grid grid-cols-3 gap-2">
                   {selectedReview.photos.map((photo: string, index: number) => (
                     <img

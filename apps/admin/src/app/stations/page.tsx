@@ -1,32 +1,29 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import { 
-  Building2, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Users, 
-  Activity,
-  MapPin,
-  Phone,
-  Mail,
-  Shield,
-  AlertTriangle,
+import {
+  Building2,
   CheckCircle,
-  XCircle,
-  Search,
+  Edit,
   Filter,
-  Calendar,
+  Mail,
+  MapPin,
   MoreVertical,
+  Phone,
+  Plus,
+  Search,
+  Shield,
+  Trash2,
   UserPlus,
+  Users,
+  XCircle,
 } from 'lucide-react';
+import { useCallback, useEffect,useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Modal, ConfirmModal } from '@/components/ui/modal';
 import { Input } from '@/components/ui/input';
-import { stationService, type Station, type StationUser } from '@/services/api';
+import { ConfirmModal,Modal } from '@/components/ui/modal';
 import { useAuth } from '@/contexts/AuthContext';
+import { type Station, stationService, type StationUser } from '@/services/api';
 
 export default function StationsPage() {
   const { stationContext } = useAuth();
@@ -34,8 +31,10 @@ export default function StationsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
-  
+  const [filterStatus, setFilterStatus] = useState<
+    'all' | 'active' | 'inactive'
+  >('all');
+
   // Modal states
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -70,16 +69,16 @@ export default function StationsPage() {
 
   // Filter stations
   const filteredStations = stations.filter(station => {
-    const matchesSearch = 
+    const matchesSearch =
       station.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       station.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       station.email?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus = 
-      filterStatus === 'all' || 
+
+    const matchesStatus =
+      filterStatus === 'all' ||
       (filterStatus === 'active' && station.is_active) ||
       (filterStatus === 'inactive' && !station.is_active);
-    
+
     return matchesSearch && matchesStatus;
   });
 
@@ -111,7 +110,7 @@ export default function StationsPage() {
 
   const handleDeleteConfirm = async () => {
     if (!selectedStation) return;
-    
+
     try {
       // Station deletion logic would go here
       // For now, just close modal and reload
@@ -129,8 +128,12 @@ export default function StationsPage() {
         <div className="flex items-center space-x-3">
           <Building2 className="w-8 h-8 text-blue-600" />
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Station Management</h1>
-            <p className="text-gray-600">Manage locations, staff, and permissions</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Station Management
+            </h1>
+            <p className="text-gray-600">
+              Manage locations, staff, and permissions
+            </p>
           </div>
         </div>
         {isSuperAdmin && (
@@ -147,9 +150,12 @@ export default function StationsPage() {
           <div className="flex items-center">
             <Shield className="w-5 h-5 text-yellow-600 mr-3" />
             <div>
-              <h3 className="text-sm font-medium text-yellow-800">Limited Access</h3>
+              <h3 className="text-sm font-medium text-yellow-800">
+                Limited Access
+              </h3>
               <p className="text-sm text-yellow-700">
-                You can only view stations. Contact a super administrator to create or modify stations.
+                You can only view stations. Contact a super administrator to
+                create or modify stations.
               </p>
             </div>
           </div>
@@ -167,7 +173,7 @@ export default function StationsPage() {
                 type="text"
                 placeholder="Search by name, location, or email..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
             </div>
@@ -178,7 +184,7 @@ export default function StationsPage() {
             <Filter className="w-4 h-4 text-gray-400" />
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as any)}
+              onChange={e => setFilterStatus(e.target.value as any)}
               className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="all">All Stations</option>
@@ -215,7 +221,7 @@ export default function StationsPage() {
       {/* Stations Grid */}
       {!loading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredStations.map((station) => (
+          {filteredStations.map(station => (
             <div
               key={station.id}
               className="bg-white rounded-lg shadow border border-gray-200 hover:shadow-lg transition-shadow"
@@ -293,7 +299,9 @@ export default function StationsPage() {
                 <div className="text-center">
                   <div className="text-xs text-gray-600">Last Active</div>
                   <div className="text-xs font-medium text-gray-900">
-                    {station.last_activity ? formatDate(station.last_activity) : 'Never'}
+                    {station.last_activity
+                      ? formatDate(station.last_activity)
+                      : 'Never'}
                   </div>
                 </div>
               </div>
@@ -363,7 +371,7 @@ export default function StationsPage() {
         onClose={() => setCreateModalOpen(false)}
         onSuccess={loadStations}
       />
-      
+
       <EditStationModal
         isOpen={editModalOpen}
         onClose={() => setEditModalOpen(false)}
@@ -400,7 +408,11 @@ interface CreateStationModalProps {
   onSuccess: () => void;
 }
 
-function CreateStationModal({ isOpen, onClose, onSuccess }: CreateStationModalProps) {
+function CreateStationModal({
+  isOpen,
+  onClose,
+  onSuccess,
+}: CreateStationModalProps) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -415,13 +427,13 @@ function CreateStationModal({ isOpen, onClose, onSuccess }: CreateStationModalPr
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       setLoading(true);
       setError(null);
 
       const response = await stationService.createStation(formData);
-      
+
       if (response.success) {
         onSuccess();
         onClose();
@@ -476,7 +488,7 @@ function CreateStationModal({ isOpen, onClose, onSuccess }: CreateStationModalPr
           <Input
             type="text"
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            onChange={e => setFormData({ ...formData, name: e.target.value })}
             placeholder="Bay Area Station"
             required
           />
@@ -488,7 +500,9 @@ function CreateStationModal({ isOpen, onClose, onSuccess }: CreateStationModalPr
           </label>
           <textarea
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            onChange={e =>
+              setFormData({ ...formData, description: e.target.value })
+            }
             placeholder="Main station serving the Bay Area region"
             rows={3}
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -503,7 +517,9 @@ function CreateStationModal({ isOpen, onClose, onSuccess }: CreateStationModalPr
             <Input
               type="text"
               value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              onChange={e =>
+                setFormData({ ...formData, location: e.target.value })
+              }
               placeholder="San Francisco, CA"
               required
             />
@@ -516,7 +532,9 @@ function CreateStationModal({ isOpen, onClose, onSuccess }: CreateStationModalPr
             <Input
               type="tel"
               value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onChange={e =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
               placeholder="(555) 123-4567"
             />
           </div>
@@ -530,7 +548,9 @@ function CreateStationModal({ isOpen, onClose, onSuccess }: CreateStationModalPr
             <Input
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              onChange={e =>
+                setFormData({ ...formData, email: e.target.value })
+              }
               placeholder="bayarea@myhibachi.com"
             />
           </div>
@@ -542,7 +562,9 @@ function CreateStationModal({ isOpen, onClose, onSuccess }: CreateStationModalPr
             <Input
               type="text"
               value={formData.manager_name}
-              onChange={(e) => setFormData({ ...formData, manager_name: e.target.value })}
+              onChange={e =>
+                setFormData({ ...formData, manager_name: e.target.value })
+              }
               placeholder="John Doe"
             />
           </div>
@@ -553,7 +575,9 @@ function CreateStationModal({ isOpen, onClose, onSuccess }: CreateStationModalPr
             type="checkbox"
             id="is_active"
             checked={formData.is_active}
-            onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+            onChange={e =>
+              setFormData({ ...formData, is_active: e.target.checked })
+            }
             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
           />
           <label htmlFor="is_active" className="ml-2 text-sm text-gray-700">
@@ -575,7 +599,12 @@ interface EditStationModalProps {
   onSuccess: () => void;
 }
 
-function EditStationModal({ isOpen, onClose, station, onSuccess }: EditStationModalProps) {
+function EditStationModal({
+  isOpen,
+  onClose,
+  station,
+  onSuccess,
+}: EditStationModalProps) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -606,13 +635,13 @@ function EditStationModal({ isOpen, onClose, station, onSuccess }: EditStationMo
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!station) return;
-    
+
     try {
       setLoading(true);
       setError(null);
 
       const response = await stationService.updateStation(station.id, formData);
-      
+
       if (response.success) {
         onSuccess();
         onClose();
@@ -657,7 +686,7 @@ function EditStationModal({ isOpen, onClose, station, onSuccess }: EditStationMo
           <Input
             type="text"
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            onChange={e => setFormData({ ...formData, name: e.target.value })}
             required
           />
         </div>
@@ -668,7 +697,9 @@ function EditStationModal({ isOpen, onClose, station, onSuccess }: EditStationMo
           </label>
           <textarea
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            onChange={e =>
+              setFormData({ ...formData, description: e.target.value })
+            }
             rows={3}
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
@@ -682,7 +713,9 @@ function EditStationModal({ isOpen, onClose, station, onSuccess }: EditStationMo
             <Input
               type="text"
               value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              onChange={e =>
+                setFormData({ ...formData, location: e.target.value })
+              }
               required
             />
           </div>
@@ -694,7 +727,9 @@ function EditStationModal({ isOpen, onClose, station, onSuccess }: EditStationMo
             <Input
               type="tel"
               value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onChange={e =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
             />
           </div>
         </div>
@@ -707,7 +742,9 @@ function EditStationModal({ isOpen, onClose, station, onSuccess }: EditStationMo
             <Input
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              onChange={e =>
+                setFormData({ ...formData, email: e.target.value })
+              }
             />
           </div>
 
@@ -718,7 +755,9 @@ function EditStationModal({ isOpen, onClose, station, onSuccess }: EditStationMo
             <Input
               type="text"
               value={formData.manager_name}
-              onChange={(e) => setFormData({ ...formData, manager_name: e.target.value })}
+              onChange={e =>
+                setFormData({ ...formData, manager_name: e.target.value })
+              }
             />
           </div>
         </div>
@@ -728,10 +767,15 @@ function EditStationModal({ isOpen, onClose, station, onSuccess }: EditStationMo
             type="checkbox"
             id="edit_is_active"
             checked={formData.is_active}
-            onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+            onChange={e =>
+              setFormData({ ...formData, is_active: e.target.checked })
+            }
             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
           />
-          <label htmlFor="edit_is_active" className="ml-2 text-sm text-gray-700">
+          <label
+            htmlFor="edit_is_active"
+            className="ml-2 text-sm text-gray-700"
+          >
             Station is active
           </label>
         </div>
@@ -750,7 +794,12 @@ interface StationManagerModalProps {
   onSuccess: () => void;
 }
 
-function StationManagerModal({ isOpen, onClose, station, onSuccess }: StationManagerModalProps) {
+function StationManagerModal({
+  isOpen,
+  onClose,
+  station,
+  onSuccess,
+}: StationManagerModalProps) {
   const [users, setUsers] = useState<StationUser[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -762,7 +811,7 @@ function StationManagerModal({ isOpen, onClose, station, onSuccess }: StationMan
 
   const loadUsers = async () => {
     if (!station) return;
-    
+
     try {
       setLoading(true);
       const response = await stationService.getStationUsers(station.id, true);
@@ -836,7 +885,7 @@ function StationManagerModal({ isOpen, onClose, station, onSuccess }: StationMan
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {users.map((user) => (
+                {users.map(user => (
                   <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3">
                       <div>
@@ -844,7 +893,9 @@ function StationManagerModal({ isOpen, onClose, station, onSuccess }: StationMan
                           {user.user_name || user.user_email}
                         </div>
                         {user.user_name && (
-                          <div className="text-sm text-gray-500">{user.user_email}</div>
+                          <div className="text-sm text-gray-500">
+                            {user.user_email}
+                          </div>
                         )}
                       </div>
                     </td>
@@ -867,7 +918,9 @@ function StationManagerModal({ isOpen, onClose, station, onSuccess }: StationMan
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">
-                      {user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}
+                      {user.last_login
+                        ? new Date(user.last_login).toLocaleDateString()
+                        : 'Never'}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <Button variant="outline" size="sm">

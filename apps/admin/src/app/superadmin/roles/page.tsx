@@ -1,19 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
-  Shield,
-  Users,
-  Key,
-  Plus,
-  Trash2,
-  AlertCircle,
   CheckCircle,
-  Lock
+  Key,
+  Lock,
+  Plus,
+  Shield,
+  Trash2,
+  Users,
 } from 'lucide-react';
+import { useEffect,useState } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent,CardHeader, CardTitle } from '@/components/ui/card';
 import { logger } from '@/lib/logger';
 
 interface Permission {
@@ -78,28 +78,32 @@ export default function RoleManagementPage() {
       setLoading(true);
       const token = localStorage.getItem('access_token');
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      
+
       // Load roles, permissions, and users in parallel
       const [rolesRes, permsRes, usersRes] = await Promise.all([
         fetch(`${apiUrl}/admin/roles`, {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         }),
         fetch(`${apiUrl}/admin/roles/permissions/all`, {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         }),
         fetch(`${apiUrl}/admin/users`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ]);
 
       if (rolesRes.ok && permsRes.ok && usersRes.ok) {
         const rolesData = await rolesRes.json();
         const permsData = await permsRes.json();
         const usersData = await usersRes.json();
-        
+
         setRoles(rolesData);
         setPermissions(permsData);
-        setUsers((usersData.data || usersData).filter((u: User) => u.status === 'ACTIVE'));
+        setUsers(
+          (usersData.data || usersData).filter(
+            (u: User) => u.status === 'ACTIVE'
+          )
+        );
       }
     } catch (error: any) {
       logger.error(error, { context: 'load_role_data' });
@@ -114,10 +118,10 @@ export default function RoleManagementPage() {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/admin/roles/users/${userId}/permissions`,
         {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
-      
+
       if (response.ok) {
         const data = await response.json();
         setUserRoles(data);
@@ -143,21 +147,28 @@ export default function RoleManagementPage() {
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ role_id: roleId })
+          body: JSON.stringify({ role_id: roleId }),
         }
       );
 
       if (response.ok) {
-        logger.info('Role assigned successfully', { userId: selectedUser.id, roleId });
+        logger.info('Role assigned successfully', {
+          userId: selectedUser.id,
+          roleId,
+        });
         await loadUserRoles(selectedUser.id);
       } else {
         throw new Error('Failed to assign role');
       }
     } catch (error: any) {
-      logger.error(error, { context: 'assign_role', userId: selectedUser.id, roleId });
+      logger.error(error, {
+        context: 'assign_role',
+        userId: selectedUser.id,
+        roleId,
+      });
     } finally {
       setAssigningRole(false);
     }
@@ -172,29 +183,39 @@ export default function RoleManagementPage() {
         `${process.env.NEXT_PUBLIC_API_URL}/admin/roles/users/${selectedUser.id}/roles/${roleId}`,
         {
           method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
       if (response.ok) {
-        logger.info('Role removed successfully', { userId: selectedUser.id, roleId });
+        logger.info('Role removed successfully', {
+          userId: selectedUser.id,
+          roleId,
+        });
         await loadUserRoles(selectedUser.id);
       } else {
         throw new Error('Failed to remove role');
       }
     } catch (error: any) {
-      logger.error(error, { context: 'remove_role', userId: selectedUser.id, roleId });
+      logger.error(error, {
+        context: 'remove_role',
+        userId: selectedUser.id,
+        roleId,
+      });
     }
   };
 
   // Group permissions by resource
-  const groupedPermissions = permissions.reduce((acc, perm) => {
-    if (!acc[perm.resource]) {
-      acc[perm.resource] = [];
-    }
-    acc[perm.resource].push(perm);
-    return acc;
-  }, {} as Record<string, Permission[]>);
+  const groupedPermissions = permissions.reduce(
+    (acc, perm) => {
+      if (!acc[perm.resource]) {
+        acc[perm.resource] = [];
+      }
+      acc[perm.resource].push(perm);
+      return acc;
+    },
+    {} as Record<string, Permission[]>
+  );
 
   if (!isSuperAdmin) {
     return (
@@ -250,7 +271,7 @@ export default function RoleManagementPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {roles.map((role) => (
+            {roles.map(role => (
               <div
                 key={role.id}
                 className="p-4 border rounded-lg hover:bg-gray-50 transition-colors"
@@ -309,13 +330,13 @@ export default function RoleManagementPage() {
               <select
                 className="w-full border rounded-lg px-3 py-2"
                 value={selectedUser?.id || ''}
-                onChange={(e) => {
-                  const user = users.find((u) => u.id === e.target.value);
+                onChange={e => {
+                  const user = users.find(u => u.id === e.target.value);
                   if (user) handleSelectUser(user);
                 }}
               >
                 <option value="">-- Select a user --</option>
-                {users.map((user) => (
+                {users.map(user => (
                   <option key={user.id} value={user.id}>
                     {user.full_name || user.email} ({user.email})
                   </option>
@@ -335,7 +356,7 @@ export default function RoleManagementPage() {
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      {userRoles.roles.map((role) => (
+                      {userRoles.roles.map(role => (
                         <div
                           key={role.id}
                           className="flex items-center justify-between p-3 border rounded-lg"
@@ -366,10 +387,9 @@ export default function RoleManagementPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {roles
                       .filter(
-                        (role) =>
-                          !userRoles.roles.find((ur) => ur.id === role.id)
+                        role => !userRoles.roles.find(ur => ur.id === role.id)
                       )
-                      .map((role) => (
+                      .map(role => (
                         <Button
                           key={role.id}
                           variant="outline"
@@ -392,7 +412,11 @@ export default function RoleManagementPage() {
                   <div className="border rounded-lg p-3 max-h-64 overflow-y-auto">
                     <div className="flex flex-wrap gap-1">
                       {userRoles.all_permissions.map((perm, idx) => (
-                        <Badge key={idx} variant="secondary" className="text-xs">
+                        <Badge
+                          key={idx}
+                          variant="secondary"
+                          className="text-xs"
+                        >
                           {perm}
                         </Badge>
                       ))}
@@ -421,7 +445,7 @@ export default function RoleManagementPage() {
                   {resource} Permissions
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {perms.map((perm) => (
+                  {perms.map(perm => (
                     <div
                       key={perm.id}
                       className="p-3 border rounded-lg hover:bg-gray-50"

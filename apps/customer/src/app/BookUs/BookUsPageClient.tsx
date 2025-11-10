@@ -40,7 +40,9 @@ export default function BookUsPageClient() {
   const [bookedDates, setBookedDates] = useState<Date[]>([]);
   const [loadingDates, setLoadingDates] = useState(false);
   const [dateError, setDateError] = useState<string | null>(null);
-  const [availableTimeSlots, setAvailableTimeSlots] = useState<Array<{ time: string; label: string; available: number; isAvailable: boolean }>>([]);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<
+    Array<{ time: string; label: string; available: number; isAvailable: boolean }>
+  >([]);
   const [loadingTimeSlots, setLoadingTimeSlots] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -194,7 +196,7 @@ export default function BookUsPageClient() {
     setShowAgreementModal(true);
   };
 
-    const handleAgreementConfirm = async () => {
+  const handleAgreementConfirm = async () => {
     if (!formData) return;
 
     setIsSubmitting(true);
@@ -698,11 +700,22 @@ export default function BookUsPageClient() {
 
                 {/* Newsletter Auto-Subscribe Notice */}
                 <div className="form-section">
-                  <div className="mb-4 p-3" style={{ backgroundColor: '#fff7ed', border: '1px solid #fed7aa', borderRadius: '0.5rem' }}>
+                  <div
+                    className="mb-4 p-3"
+                    style={{
+                      backgroundColor: '#fff7ed',
+                      border: '1px solid #fed7aa',
+                      borderRadius: '0.5rem',
+                    }}
+                  >
                     <p className="text-xs" style={{ color: '#374151', margin: 0 }}>
-                      📧 <strong>You&apos;ll automatically receive our newsletter</strong> with exclusive offers and hibachi tips.
+                      📧 <strong>You&apos;ll automatically receive our newsletter</strong> with
+                      exclusive offers and hibachi tips.
                       <br />
-                      <span style={{ color: '#6b7280' }}>Don&apos;t want updates? Simply reply <strong>&quot;STOP&quot;</strong> anytime to unsubscribe.</span>
+                      <span style={{ color: '#6b7280' }}>
+                        Don&apos;t want updates? Simply reply <strong>&quot;STOP&quot;</strong>{' '}
+                        anytime to unsubscribe.
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -801,7 +814,10 @@ export default function BookUsPageClient() {
                   <ul>
                     <li>Final pricing will be confirmed based on guest count and menu selection</li>
                     <li>$100 refundable deposit required to secure booking</li>
-                    <li>Deposit is refundable if canceled 7+ days before event, non-refundable within 7 days</li>
+                    <li>
+                      Deposit is refundable if canceled 7+ days before event, non-refundable within
+                      7 days
+                    </li>
                     <li>Remaining balance due on event day</li>
                     <li>Travel fees may apply for locations outside our standard service area</li>
                   </ul>
@@ -810,7 +826,10 @@ export default function BookUsPageClient() {
                   <ul>
                     <li>Full refund if cancelled 7+ days before event</li>
                     <li>No refund if cancelled within 7 days of event</li>
-                    <li>One free reschedule within 48 hours of booking; additional reschedules cost $100</li>
+                    <li>
+                      One free reschedule within 48 hours of booking; additional reschedules cost
+                      $100
+                    </li>
                   </ul>
 
                   <h6 className="mt-3">Client Responsibilities:</h6>

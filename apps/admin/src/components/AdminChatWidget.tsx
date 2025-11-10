@@ -1,10 +1,11 @@
 'use client';
 
-import { Send, X, MessageSquare, Bot, User as UserIcon } from 'lucide-react';
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Bot, MessageSquare, Send, User as UserIcon,X } from 'lucide-react';
+import { useCallback,useEffect, useRef, useState } from 'react';
+
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 
 interface Message {
@@ -22,9 +23,9 @@ interface AdminChatWidgetProps {
   defaultOpen?: boolean;
 }
 
-export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({ 
-  className, 
-  defaultOpen = false 
+export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
+  className,
+  defaultOpen = false,
 }) => {
   const { token, stationContext, hasPermission } = useAuth();
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -40,26 +41,48 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Chat access control
-  const canUseChat = hasPermission('use_ai_chat') || hasPermission('manage_ai_chat');
+  const canUseChat =
+    hasPermission('use_ai_chat') || hasPermission('manage_ai_chat');
 
   const availableAgents = [
-    { id: 'general', name: 'General Assistant', description: 'General admin tasks and questions' },
-    { id: 'analytics', name: 'Analytics Agent', description: 'Data analysis and reporting' },
-    { id: 'customer_service', name: 'Customer Service', description: 'Customer support and CRM' },
-    { id: 'operations', name: 'Operations', description: 'Operational tasks and management' },
-    { id: 'technical', name: 'Technical Support', description: 'System and technical issues' },
+    {
+      id: 'general',
+      name: 'General Assistant',
+      description: 'General admin tasks and questions',
+    },
+    {
+      id: 'analytics',
+      name: 'Analytics Agent',
+      description: 'Data analysis and reporting',
+    },
+    {
+      id: 'customer_service',
+      name: 'Customer Service',
+      description: 'Customer support and CRM',
+    },
+    {
+      id: 'operations',
+      name: 'Operations',
+      description: 'Operational tasks and management',
+    },
+    {
+      id: 'technical',
+      name: 'Technical Support',
+      description: 'System and technical issues',
+    },
   ];
 
   // WebSocket connection management with station context
   const connectWebSocket = useCallback(() => {
     if (!canUseChat || !token || !stationContext) return;
-    
+
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       return; // Already connected
     }
 
     // Use the new unified chat WebSocket endpoint with station context
-    const wsUrl = `ws://localhost:8002/ws/chat?` +
+    const wsUrl =
+      `ws://localhost:8002/ws/chat?` +
       `station_id=${stationContext.station_id}&` +
       `role=${stationContext.role}&` +
       `channel=admin_panel`;
@@ -68,17 +91,22 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
       const ws = new WebSocket(wsUrl);
       ws.addEventListener('open', () => {
         // Send authentication after connection
-        ws.send(JSON.stringify({
-          type: 'auth',
-          token: token,
-          station_context: stationContext
-        }));
+        ws.send(
+          JSON.stringify({
+            type: 'auth',
+            token: token,
+            station_context: stationContext,
+          })
+        );
       });
 
       wsRef.current = ws;
 
       ws.onopen = () => {
-        logger.websocket('connect', { status: 'connected', channel: 'admin_chat' });
+        logger.websocket('connect', {
+          status: 'connected',
+          channel: 'admin_chat',
+        });
         setIsConnected(true);
         if (reconnectTimeoutRef.current) {
           clearTimeout(reconnectTimeoutRef.current);
@@ -86,7 +114,7 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
         }
       };
 
-      ws.onmessage = (event) => {
+      ws.onmessage = event => {
         try {
           const data = JSON.parse(event.data);
 
@@ -98,9 +126,9 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
               timestamp: new Date(data.timestamp || Date.now()),
               agent_type: data.agent_type,
               confidence: data.confidence,
-              metadata: data.metadata
+              metadata: data.metadata,
             };
-            setMessages((prev) => [...prev, assistantMessage]);
+            setMessages(prev => [...prev, assistantMessage]);
             setIsLoading(false);
             setIsTyping(false);
           } else if (data.type === 'typing') {
@@ -113,22 +141,27 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
                 content: data.content,
                 timestamp: new Date(),
               };
-              setMessages((prev) => [...prev, systemMessage]);
+              setMessages(prev => [...prev, systemMessage]);
             }
           } else if (data.type === 'error') {
             const errorMessage: Message = {
               id: (Date.now() + 1).toString(),
               type: 'assistant',
-              content: data.content || "I'm experiencing technical difficulties. Please try again.",
+              content:
+                data.content ||
+                "I'm experiencing technical difficulties. Please try again.",
               timestamp: new Date(),
               confidence: 0,
             };
-            setMessages((prev) => [...prev, errorMessage]);
+            setMessages(prev => [...prev, errorMessage]);
             setIsLoading(false);
             setIsTyping(false);
           }
         } catch (error) {
-          logger.error(error as Error, { context: 'websocket_message_parse', channel: 'admin_chat' });
+          logger.error(error as Error, {
+            context: 'websocket_message_parse',
+            channel: 'admin_chat',
+          });
         }
       };
 
@@ -146,14 +179,17 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
         }
       };
 
-      ws.onerror = (error) => {
+      ws.onerror = error => {
         logger.websocket('error', { error, channel: 'admin_chat' });
         setIsConnected(false);
         setIsLoading(false);
         setIsTyping(false);
       };
     } catch (error) {
-      logger.error(error as Error, { context: 'websocket_create', channel: 'admin_chat' });
+      logger.error(error as Error, {
+        context: 'websocket_create',
+        channel: 'admin_chat',
+      });
       setIsConnected(false);
     }
   }, [canUseChat, token, stationContext]);
@@ -191,27 +227,32 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setIsLoading(true);
 
     // Try WebSocket first, fallback to HTTP
     if (isConnected && wsRef.current) {
       try {
-        wsRef.current.send(JSON.stringify({
-          type: 'message',
-          content: content,
-          agent_type: selectedAgent || 'general',
-          context: {
-            station_id: stationContext?.station_id,
-            user_role: stationContext?.role,
-            permissions: stationContext?.permissions,
-            channel: 'admin_panel'
-          },
-          timestamp: new Date().toISOString(),
-        }));
+        wsRef.current.send(
+          JSON.stringify({
+            type: 'message',
+            content: content,
+            agent_type: selectedAgent || 'general',
+            context: {
+              station_id: stationContext?.station_id,
+              user_role: stationContext?.role,
+              permissions: stationContext?.permissions,
+              channel: 'admin_panel',
+            },
+            timestamp: new Date().toISOString(),
+          })
+        );
       } catch (error) {
-        logger.error(error as Error, { context: 'websocket_send', channel: 'admin_chat' });
+        logger.error(error as Error, {
+          context: 'websocket_send',
+          channel: 'admin_chat',
+        });
         setIsLoading(false);
         await sendMessageHTTP(content);
       }
@@ -227,9 +268,9 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
     try {
       const response = await fetch('http://localhost:8002/api/v1/chat', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           message: content,
@@ -238,8 +279,8 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
             station_id: stationContext.station_id,
             user_role: stationContext.role,
             permissions: stationContext.permissions,
-            channel: 'admin_panel'
-          }
+            channel: 'admin_panel',
+          },
         }),
       });
 
@@ -254,20 +295,24 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
         timestamp: new Date(data.timestamp || Date.now()),
         agent_type: data.agent_type,
         confidence: data.confidence,
-        metadata: data.metadata
+        metadata: data.metadata,
       };
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      logger.error(error as Error, { context: 'http_chat', channel: 'admin_chat' });
+      logger.error(error as Error, {
+        context: 'http_chat',
+        channel: 'admin_chat',
+      });
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: "I'm experiencing technical difficulties. Please try again or contact support.",
+        content:
+          "I'm experiencing technical difficulties. Please try again or contact support.",
         timestamp: new Date(),
         confidence: 0,
       };
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -282,11 +327,16 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
 
   const getAgentIcon = (agentType?: string) => {
     switch (agentType) {
-      case 'analytics': return '📊';
-      case 'customer_service': return '🎧';
-      case 'operations': return '⚙️';
-      case 'technical': return '🔧';
-      default: return '🤖';
+      case 'analytics':
+        return '📊';
+      case 'customer_service':
+        return '🎧';
+      case 'operations':
+        return '⚙️';
+      case 'technical':
+        return '🔧';
+      default:
+        return '🤖';
     }
   };
 
@@ -302,7 +352,9 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
       <Card className={className}>
         <CardContent className="p-6 text-center">
           <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600">AI Chat access not available with your current permissions.</p>
+          <p className="text-gray-600">
+            AI Chat access not available with your current permissions.
+          </p>
         </CardContent>
       </Card>
     );
@@ -330,26 +382,24 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
           <CardTitle className="flex items-center space-x-2">
             <Bot className="h-5 w-5 text-blue-600" />
             <span>AI Assistant</span>
-            <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+            <div
+              className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}
+            />
           </CardTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsOpen(false)}
-          >
+          <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>
             <X className="h-4 w-4" />
           </Button>
         </div>
-        
+
         {/* Agent Selection */}
         <div className="mt-2">
           <select
             value={selectedAgent}
-            onChange={(e) => setSelectedAgent(e.target.value)}
+            onChange={e => setSelectedAgent(e.target.value)}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select an agent...</option>
-            {availableAgents.map((agent) => (
+            {availableAgents.map(agent => (
               <option key={agent.id} value={agent.id}>
                 {agent.name} - {agent.description}
               </option>
@@ -366,14 +416,17 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
               <Bot className="h-12 w-12 mx-auto mb-4 text-gray-400" />
               <p className="mb-2">Welcome to your AI Assistant!</p>
               <p className="text-sm">
-                Station: <strong>{stationContext?.station_name}</strong><br />
+                Station: <strong>{stationContext?.station_name}</strong>
+                <br />
                 Role: <strong>{stationContext?.role}</strong>
               </p>
-              <p className="text-xs mt-2">Select an agent above and start chatting.</p>
+              <p className="text-xs mt-2">
+                Select an agent above and start chatting.
+              </p>
             </div>
           )}
 
-          {messages.map((message) => (
+          {messages.map(message => (
             <div
               key={message.id}
               className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -383,8 +436,8 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
                   message.type === 'user'
                     ? 'bg-blue-600 text-white'
                     : message.type === 'system'
-                    ? 'bg-yellow-50 border border-yellow-200 text-yellow-800'
-                    : 'bg-gray-100 text-gray-800'
+                      ? 'bg-yellow-50 border border-yellow-200 text-yellow-800'
+                      : 'bg-gray-100 text-gray-800'
                 }`}
               >
                 <div className="flex items-start space-x-2">
@@ -397,19 +450,25 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
                     <UserIcon className="h-4 w-4 flex-shrink-0 mt-0.5" />
                   )}
                   <div className="flex-1">
-                    <p className="whitespace-pre-wrap text-sm">{message.content}</p>
-                    
+                    <p className="whitespace-pre-wrap text-sm">
+                      {message.content}
+                    </p>
+
                     {message.type === 'assistant' && (
                       <div className="mt-2 flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           {message.agent_type && (
                             <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                              {availableAgents.find(a => a.id === message.agent_type)?.name || message.agent_type}
+                              {availableAgents.find(
+                                a => a.id === message.agent_type
+                              )?.name || message.agent_type}
                             </span>
                           )}
                           {message.confidence !== undefined && (
                             <div className="flex items-center space-x-1">
-                              <div className={`h-2 w-2 rounded-full ${getConfidenceColor(message.confidence)}`} />
+                              <div
+                                className={`h-2 w-2 rounded-full ${getConfidenceColor(message.confidence)}`}
+                              />
                               <span className="text-xs text-gray-500">
                                 {Math.round(message.confidence * 100)}%
                               </span>
@@ -444,7 +503,9 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
                     />
                   </div>
                   {isTyping && (
-                    <span className="text-xs text-gray-500">AI is thinking...</span>
+                    <span className="text-xs text-gray-500">
+                      AI is thinking...
+                    </span>
                   )}
                 </div>
               </div>
@@ -461,12 +522,12 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
               ref={inputRef}
               type="text"
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              onChange={e => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder={
-                selectedAgent 
+                selectedAgent
                   ? `Ask the ${availableAgents.find(a => a.id === selectedAgent)?.name}...`
-                  : "Select an agent to start chatting..."
+                  : 'Select an agent to start chatting...'
               }
               className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={isLoading || !selectedAgent}
@@ -480,7 +541,8 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
             </Button>
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            Connected to station: {stationContext?.station_name} | Role: {stationContext?.role}
+            Connected to station: {stationContext?.station_name} | Role:{' '}
+            {stationContext?.role}
           </p>
         </div>
       </CardContent>

@@ -1,15 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { Building,Eye, EyeOff, LogIn } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import {useState } from 'react';
+
+import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 import { Button } from '@/components/ui/button';
-import { Eye, EyeOff, LogIn, Building } from 'lucide-react';
-import { authService, stationService } from '@/services/api';
-import type { Station } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
-import { GoogleOAuthProvider } from '@react-oauth/google';
-import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
+import type { Station } from '@/services/api';
+import { authService } from '@/services/api';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -32,25 +33,38 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const response = await authService.login(formData.email, formData.password);
-      
+      const response = await authService.login(
+        formData.email,
+        formData.password
+      );
+
       if (response.data?.access_token) {
         setTempToken(response.data.access_token);
-        
+
         // Get user's stations
-        const stationsResponse = await authService.getUserStations(response.data.access_token);
-        
+        const stationsResponse = await authService.getUserStations(
+          response.data.access_token
+        );
+
         if (stationsResponse.data && stationsResponse.data.length > 1) {
           // Multiple stations - show station selection
           setUserStations(stationsResponse.data);
           setStep('station');
-        } else if (stationsResponse.data && stationsResponse.data.length === 1) {
+        } else if (
+          stationsResponse.data &&
+          stationsResponse.data.length === 1
+        ) {
           // Single station - auto-select and continue
           const station = stationsResponse.data[0];
-          await completeStationLogin(response.data.access_token, station.id.toString());
+          await completeStationLogin(
+            response.data.access_token,
+            station.id.toString()
+          );
         } else {
           // No stations assigned
-          setError('No stations assigned to your account. Please contact an administrator.');
+          setError(
+            'No stations assigned to your account. Please contact an administrator.'
+          );
         }
       } else {
         setError('Login failed. Please try again.');
@@ -68,14 +82,14 @@ export default function LoginPage() {
     setError('');
 
     try {
-      // For now, since we already have the token and station info, 
+      // For now, since we already have the token and station info,
       // we'll call the station login with the original credentials
       const response = await authService.stationLogin(
-        formData.email, 
-        formData.password, 
+        formData.email,
+        formData.password,
         parseInt(stationId)
       );
-      
+
       if (response.data?.access_token && response.data?.station_context) {
         login(response.data.access_token, response.data.station_context);
         router.push('/');
@@ -83,7 +97,11 @@ export default function LoginPage() {
         setError('Station login failed. Please try again.');
       }
     } catch (err: any) {
-      logger.error(err as Error, { context: 'station_login', email: formData.email, station_id: stationId });
+      logger.error(err as Error, {
+        context: 'station_login',
+        email: formData.email,
+        station_id: stationId,
+      });
       setError(err.message || 'Station login failed. Please try again.');
     } finally {
       setLoading(false);
@@ -185,19 +203,21 @@ export default function LoginPage() {
           <div className="w-full border-t border-gray-300"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-gray-50 text-gray-500">Or continue with</span>
+          <span className="px-2 bg-gray-50 text-gray-500">
+            Or continue with
+          </span>
         </div>
       </div>
 
       {/* Google OAuth Button */}
-      <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''}>
+      <GoogleOAuthProvider
+        clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''}
+      >
         <GoogleSignInButton />
       </GoogleOAuthProvider>
 
       <div className="text-center">
-        <p className="text-sm text-gray-600">
-          Demo credentials:
-        </p>
+        <p className="text-sm text-gray-600">Demo credentials:</p>
         <p className="text-xs text-gray-500 mt-1">
           Email: admin@myhibachi.com | Password: admin123
         </p>
@@ -208,18 +228,21 @@ export default function LoginPage() {
   const renderStationSelection = () => (
     <form className="mt-8 space-y-6" onSubmit={handleStationSubmit}>
       <div>
-        <label htmlFor="station" className="block text-sm font-medium text-gray-700 mb-2">
+        <label
+          htmlFor="station"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
           Select Station
         </label>
         <select
           id="station"
           value={selectedStation}
-          onChange={(e) => setSelectedStation(e.target.value)}
+          onChange={e => setSelectedStation(e.target.value)}
           className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
           required
         >
           <option value="">Choose a station...</option>
-          {userStations.map((station) => (
+          {userStations.map(station => (
             <option key={station.id} value={station.id}>
               {station.name} - {station.location}
             </option>
@@ -278,13 +301,12 @@ export default function LoginPage() {
             MyHibachi Admin
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            {step === 'login' 
+            {step === 'login'
               ? 'Sign in to your admin account'
-              : 'Select your station to continue'
-            }
+              : 'Select your station to continue'}
           </p>
         </div>
-        
+
         {step === 'login' ? renderLoginForm() : renderStationSelection()}
       </div>
     </div>

@@ -5,27 +5,29 @@
 
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { 
-  MessageCircle, 
-  Send, 
-  Bot, 
-  User, 
-  Minimize2, 
-  Maximize2, 
-  X,
-  Settings,
+import {
   Activity,
-  Clock,
-  CheckCircle,
   AlertCircle,
+  Bot,
+  CheckCircle,
+  Clock,
   Loader2,
+  MessageCircle,
+  Minimize2,
+  Send,
+  Settings,
+  User,
   Wifi,
-  WifiOff
+  WifiOff,
 } from 'lucide-react';
+import React, { useEffect,useRef, useState } from 'react';
+
+import { useWebSocket } from '@/hooks/useWebSocket';
 import { logger } from '@/lib/logger';
-import { aiApiService, type AdminChatResponse, type ChatMessage } from '@/services/ai-api';
-import { useWebSocket, type WebSocketMessage } from '@/hooks/useWebSocket';
+import {
+  type AdminChatResponse,
+  aiApiService,
+} from '@/services/ai-api';
 
 interface Message {
   id: string;
@@ -44,18 +46,19 @@ interface ChatBotProps {
   enableWebSocket?: boolean;
 }
 
-export default function ChatBot({ 
+export default function ChatBot({
   className = '',
   defaultMinimized = false,
   showDebugInfo = true,
-  enableWebSocket = true
+  enableWebSocket = true,
 }: ChatBotProps) {
   const [isMinimized, setIsMinimized] = useState(defaultMinimized);
   const [isConnected, setIsConnected] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: 'Hello! I\'m your AI management assistant. I can help you with:\n• User & Staff Management\n• Booking Operations\n• Analytics & Reports\n• System Configuration\n• Operations Support\n\nHow can I assist you with managing MyHibachi today?',
+      content:
+        "Hello! I'm your AI management assistant. I can help you with:\n• User & Staff Management\n• Booking Operations\n• Analytics & Reports\n• System Configuration\n• Operations Support\n\nHow can I assist you with managing MyHibachi today?",
       isBot: true,
       timestamp: new Date(),
     },
@@ -72,7 +75,7 @@ export default function ChatBot({
     userId: 'admin',
     channel: 'admin',
     userRole: 'admin',
-    autoReconnect: true
+    autoReconnect: true,
   };
 
   const {
@@ -81,15 +84,17 @@ export default function ChatBot({
     lastMessage: wsLastMessage,
     connectionError: wsError,
     sendMessage: wsSendMessage,
-    reconnect: wsReconnect
-  } = useWebSocket(enableWebSocket ? wsConfig : { url: '', autoReconnect: false });
+    reconnect: wsReconnect,
+  } = useWebSocket(
+    enableWebSocket ? wsConfig : { url: '', autoReconnect: false }
+  );
 
   // Handle WebSocket messages
   useEffect(() => {
     if (!wsLastMessage || !enableWebSocket) return;
 
     const message = wsLastMessage;
-    
+
     // Handle different message types
     switch (message.type) {
       case 'ai_response':
@@ -101,7 +106,7 @@ export default function ChatBot({
           timestamp: new Date(message.timestamp),
           confidence: message.metadata?.confidence,
           processingTime: message.metadata?.processing_time_ms,
-          debugInfo: message.metadata
+          debugInfo: message.metadata,
         };
         setMessages(prev => [...prev, aiMessage]);
         break;
@@ -116,16 +121,19 @@ export default function ChatBot({
         break;
 
       case 'connection_status':
-        logger.debug('WebSocket connection status', { status: message.content });
+        logger.debug('WebSocket connection status', {
+          status: message.content,
+        });
         break;
 
       case 'system':
-        if (message.content !== 'pong') { // Filter out ping/pong messages
+        if (message.content !== 'pong') {
+          // Filter out ping/pong messages
           const systemMessage: Message = {
             id: Date.now().toString(),
             content: `System: ${message.content}`,
             isBot: true,
-            timestamp: new Date(message.timestamp)
+            timestamp: new Date(message.timestamp),
           };
           setMessages(prev => [...prev, systemMessage]);
         }
@@ -137,7 +145,7 @@ export default function ChatBot({
           id: Date.now().toString(),
           content: message.content,
           isBot: true,
-          timestamp: new Date(message.timestamp)
+          timestamp: new Date(message.timestamp),
         };
         setMessages(prev => [...prev, errorMessage]);
         break;
@@ -194,10 +202,10 @@ export default function ChatBot({
     } else {
       // Fallback to REST API
       setIsLoading(true);
-      
+
       try {
         let response: AdminChatResponse;
-        
+
         if (showDebugInfo) {
           // Use admin test endpoint for debug info
           response = await aiApiService.testAdminChat({
@@ -241,17 +249,19 @@ export default function ChatBot({
         };
 
         setMessages(prev => [...prev, botMessage]);
-        
       } catch (error) {
-        logger.error(error as Error, { context: 'send_message', conversation_id: conversationId });
-        
+        logger.error(error as Error, {
+          context: 'send_message',
+          conversation_id: conversationId,
+        });
+
         const errorMessage: Message = {
           id: Date.now().toString(),
           content: `Sorry, I'm having trouble connecting to the AI service. Please try again later. ${error instanceof Error ? error.message : ''}`,
           isBot: true,
           timestamp: new Date(),
         };
-        
+
         setMessages(prev => [...prev, errorMessage]);
       } finally {
         setIsLoading(false);
@@ -270,7 +280,8 @@ export default function ChatBot({
     setMessages([
       {
         id: '1',
-        content: 'Hello! I\'m your AI management assistant. How can I help you manage MyHibachi today?',
+        content:
+          "Hello! I'm your AI management assistant. How can I help you manage MyHibachi today?",
         isBot: true,
         timestamp: new Date(),
       },
@@ -312,7 +323,10 @@ export default function ChatBot({
                     </>
                   ) : wsConnecting ? (
                     <>
-                      <Loader2 size={12} className="text-yellow-300 animate-spin" />
+                      <Loader2
+                        size={12}
+                        className="text-yellow-300 animate-spin"
+                      />
                       <span>Connecting...</span>
                     </>
                   ) : (
@@ -321,18 +335,16 @@ export default function ChatBot({
                       <span>Offline</span>
                     </>
                   )
+                ) : isConnected ? (
+                  <>
+                    <CheckCircle size={12} className="text-green-300" />
+                    <span>Connected</span>
+                  </>
                 ) : (
-                  isConnected ? (
-                    <>
-                      <CheckCircle size={12} className="text-green-300" />
-                      <span>Connected</span>
-                    </>
-                  ) : (
-                    <>
-                      <AlertCircle size={12} className="text-red-300" />
-                      <span>Disconnected</span>
-                    </>
-                  )
+                  <>
+                    <AlertCircle size={12} className="text-red-300" />
+                    <span>Disconnected</span>
+                  </>
                 )}
               </div>
             </div>
@@ -370,7 +382,7 @@ export default function ChatBot({
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((message) => (
+          {messages.map(message => (
             <div
               key={message.id}
               className={`flex items-start gap-2 ${
@@ -384,7 +396,9 @@ export default function ChatBot({
               >
                 {message.isBot ? <Bot size={16} /> : <User size={16} />}
               </div>
-              <div className={`flex-1 ${message.isBot ? 'text-left' : 'text-right'}`}>
+              <div
+                className={`flex-1 ${message.isBot ? 'text-left' : 'text-right'}`}
+              >
                 <div
                   className={`inline-block p-3 rounded-lg max-w-xs ${
                     message.isBot
@@ -393,29 +407,34 @@ export default function ChatBot({
                   }`}
                 >
                   <p className="text-sm">{message.content}</p>
-                  
+
                   {/* Debug info for admin */}
                   {showDebugInfo && message.isBot && message.debugInfo && (
                     <div className="mt-2 pt-2 border-t border-gray-300 text-xs">
                       <div className="grid grid-cols-2 gap-1">
                         {message.confidence && (
                           <div>
-                            <span className="font-semibold">Confidence:</span> {(message.confidence * 100).toFixed(1)}%
+                            <span className="font-semibold">Confidence:</span>{' '}
+                            {(message.confidence * 100).toFixed(1)}%
                           </div>
                         )}
                         {message.processingTime && (
                           <div>
-                            <span className="font-semibold">Time:</span> {message.processingTime.toFixed(0)}ms
+                            <span className="font-semibold">Time:</span>{' '}
+                            {message.processingTime.toFixed(0)}ms
                           </div>
                         )}
                         {message.debugInfo.knowledge_base_hits && (
                           <div>
-                            <span className="font-semibold">KB Hits:</span> {message.debugInfo.knowledge_base_hits}
+                            <span className="font-semibold">KB Hits:</span>{' '}
+                            {message.debugInfo.knowledge_base_hits}
                           </div>
                         )}
                         {message.debugInfo.fallback_used && (
                           <div className="col-span-2 text-orange-600">
-                            <span className="font-semibold">⚠️ Fallback Used</span>
+                            <span className="font-semibold">
+                              ⚠️ Fallback Used
+                            </span>
                           </div>
                         )}
                       </div>
@@ -429,7 +448,7 @@ export default function ChatBot({
               </div>
             </div>
           ))}
-          
+
           {isLoading && (
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
@@ -443,7 +462,7 @@ export default function ChatBot({
               </div>
             </div>
           )}
-          
+
           <div ref={messagesEndRef} />
         </div>
 
@@ -452,49 +471,59 @@ export default function ChatBot({
           <div className="flex gap-2">
             <textarea
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              onChange={e => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder={
-                enableWebSocket 
-                  ? (wsConnected ? "Ask me anything..." : "Connecting to real-time chat...")
-                  : (isConnected ? "Ask me anything..." : "AI service disconnected")
+                enableWebSocket
+                  ? wsConnected
+                    ? 'Ask me anything...'
+                    : 'Connecting to real-time chat...'
+                  : isConnected
+                    ? 'Ask me anything...'
+                    : 'AI service disconnected'
               }
-              disabled={enableWebSocket ? (!wsConnected || isLoading) : (!isConnected || isLoading)}
+              disabled={
+                enableWebSocket
+                  ? !wsConnected || isLoading
+                  : !isConnected || isLoading
+              }
               className="flex-1 resize-none border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               rows={2}
             />
             <button
               onClick={handleSendMessage}
               disabled={
-                !inputValue.trim() || 
-                (enableWebSocket ? (!wsConnected || isLoading) : (!isConnected || isLoading))
+                !inputValue.trim() ||
+                (enableWebSocket
+                  ? !wsConnected || isLoading
+                  : !isConnected || isLoading)
               }
               className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg px-4 py-2 transition-colors disabled:cursor-not-allowed"
             >
               <Send size={16} />
             </button>
           </div>
-          
-          {enableWebSocket ? (
-            !wsConnected && (
-              <div className="mt-2 text-xs text-red-600 flex items-center gap-1">
-                <AlertCircle size={12} />
-                <span>
-                  {wsConnecting 
-                    ? "Connecting to real-time chat..." 
-                    : (wsError || "Real-time chat is not available. Messages will use REST API.")
-                  }
-                </span>
-              </div>
-            )
-          ) : (
-            !isConnected && (
-              <div className="mt-2 text-xs text-red-600 flex items-center gap-1">
-                <AlertCircle size={12} />
-                <span>AI service is not available. Check the connection.</span>
-              </div>
-            )
-          )}
+
+          {enableWebSocket
+            ? !wsConnected && (
+                <div className="mt-2 text-xs text-red-600 flex items-center gap-1">
+                  <AlertCircle size={12} />
+                  <span>
+                    {wsConnecting
+                      ? 'Connecting to real-time chat...'
+                      : wsError ||
+                        'Real-time chat is not available. Messages will use REST API.'}
+                  </span>
+                </div>
+              )
+            : !isConnected && (
+                <div className="mt-2 text-xs text-red-600 flex items-center gap-1">
+                  <AlertCircle size={12} />
+                  <span>
+                    AI service is not available. Check the connection.
+                  </span>
+                </div>
+              )}
         </div>
       </div>
     </div>

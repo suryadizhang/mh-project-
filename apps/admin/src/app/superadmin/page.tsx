@@ -1,4 +1,11 @@
-import { AlertTriangle, Database, Settings, Shield, Users, Key } from 'lucide-react';
+import {
+  AlertTriangle,
+  Database,
+  Key,
+  Settings,
+  Shield,
+  Users,
+} from 'lucide-react';
 import Link from 'next/link';
 
 import { BaseLocationManager } from '@/components/BaseLocationManager';

@@ -1,21 +1,27 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  AlertCircle,
+  Calendar,
+  CheckCircle,
+  Clock,
+  Mail,
+  RefreshCw,
+  User,
+  XCircle,
+} from 'lucide-react';
+import { useEffect,useState } from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
-  Mail, 
-  DollarSign, 
-  User, 
-  Calendar,
-  RefreshCw,
-  AlertCircle
-} from 'lucide-react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 interface PaymentNotification {
   email_id: string;
@@ -46,8 +52,12 @@ interface UnmatchedNotification extends PaymentNotification {
 }
 
 export default function PaymentEmailMonitoringDashboard() {
-  const [recentNotifications, setRecentNotifications] = useState<PaymentNotification[]>([]);
-  const [unmatchedNotifications, setUnmatchedNotifications] = useState<UnmatchedNotification[]>([]);
+  const [recentNotifications, setRecentNotifications] = useState<
+    PaymentNotification[]
+  >([]);
+  const [unmatchedNotifications, setUnmatchedNotifications] = useState<
+    UnmatchedNotification[]
+  >([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastChecked, setLastChecked] = useState<Date | null>(null);
@@ -59,19 +69,27 @@ export default function PaymentEmailMonitoringDashboard() {
 
     try {
       // Fetch recent notifications
-      const recentRes = await fetch('/api/v1/payments/email-notifications/recent?since_hours=48&limit=20');
-      if (!recentRes.ok) throw new Error('Failed to fetch recent notifications');
+      const recentRes = await fetch(
+        '/api/v1/payments/email-notifications/recent?since_hours=48&limit=20'
+      );
+      if (!recentRes.ok)
+        throw new Error('Failed to fetch recent notifications');
       const recentData = await recentRes.json();
       setRecentNotifications(recentData);
 
       // Fetch unmatched notifications
-      const unmatchedRes = await fetch('/api/v1/payments/email-notifications/unmatched?since_hours=48');
-      if (!unmatchedRes.ok) throw new Error('Failed to fetch unmatched notifications');
+      const unmatchedRes = await fetch(
+        '/api/v1/payments/email-notifications/unmatched?since_hours=48'
+      );
+      if (!unmatchedRes.ok)
+        throw new Error('Failed to fetch unmatched notifications');
       const unmatchedData = await unmatchedRes.json();
       setUnmatchedNotifications(unmatchedData);
 
       // Fetch monitor status
-      const statusRes = await fetch('/api/v1/payments/email-notifications/status');
+      const statusRes = await fetch(
+        '/api/v1/payments/email-notifications/status'
+      );
       if (!statusRes.ok) throw new Error('Failed to fetch monitor status');
       const statusData = await statusRes.json();
       setMonitorStatus(statusData);
@@ -95,21 +113,21 @@ export default function PaymentEmailMonitoringDashboard() {
         body: JSON.stringify({
           since_hours: 24,
           auto_confirm: true,
-          mark_as_read: true
-        })
+          mark_as_read: true,
+        }),
       });
 
       if (!res.ok) throw new Error('Failed to process emails');
-      
+
       const result = await res.json();
-      
+
       // Show result message
       alert(
         `✅ Processing complete!\n\n` +
-        `Emails found: ${result.emails_found}\n` +
-        `Payments matched: ${result.payments_matched}\n` +
-        `Payments confirmed: ${result.payments_confirmed}\n` +
-        `Errors: ${result.errors.length}`
+          `Emails found: ${result.emails_found}\n` +
+          `Payments matched: ${result.payments_matched}\n` +
+          `Payments confirmed: ${result.payments_confirmed}\n` +
+          `Errors: ${result.errors.length}`
       );
 
       // Refresh data
@@ -128,18 +146,21 @@ export default function PaymentEmailMonitoringDashboard() {
     setError(null);
 
     try {
-      const res = await fetch('/api/v1/payments/email-notifications/manual-match', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email_id: emailId,
-          payment_id: paymentId,
-          confirm_payment: true
-        })
-      });
+      const res = await fetch(
+        '/api/v1/payments/email-notifications/manual-match',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email_id: emailId,
+            payment_id: paymentId,
+            confirm_payment: true,
+          }),
+        }
+      );
 
       if (!res.ok) throw new Error('Failed to match payment');
-      
+
       const result = await res.json();
       alert(`✅ ${result.message}`);
 
@@ -164,18 +185,21 @@ export default function PaymentEmailMonitoringDashboard() {
       stripe: 'bg-purple-100 text-purple-800',
       venmo: 'bg-blue-100 text-blue-800',
       zelle: 'bg-green-100 text-green-800',
-      bank_of_america: 'bg-red-100 text-red-800'
+      bank_of_america: 'bg-red-100 text-red-800',
     };
-    return colors[provider as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+    return (
+      colors[provider as keyof typeof colors] || 'bg-gray-100 text-gray-800'
+    );
   };
 
   const getStatusBadge = (status: string) => {
     const config = {
       confirmed: { icon: CheckCircle, color: 'bg-green-100 text-green-800' },
       pending: { icon: Clock, color: 'bg-yellow-100 text-yellow-800' },
-      failed: { icon: XCircle, color: 'bg-red-100 text-red-800' }
+      failed: { icon: XCircle, color: 'bg-red-100 text-red-800' },
     };
-    const { icon: Icon, color } = config[status as keyof typeof config] || config.pending;
+    const { icon: Icon, color } =
+      config[status as keyof typeof config] || config.pending;
     return (
       <Badge className={color}>
         <Icon className="w-3 h-3 mr-1" />
@@ -195,7 +219,9 @@ export default function PaymentEmailMonitoringDashboard() {
           </p>
         </div>
         <Button onClick={fetchData} disabled={isLoading}>
-          <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+          <RefreshCw
+            className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`}
+          />
           Refresh
         </Button>
       </div>
@@ -221,20 +247,34 @@ export default function PaymentEmailMonitoringDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <p className="text-sm text-gray-600">Status</p>
-                <Badge className={monitorStatus.status === 'connected' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+                <Badge
+                  className={
+                    monitorStatus.status === 'connected'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                  }
+                >
                   {monitorStatus.status}
                 </Badge>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Email</p>
-                <p className="font-mono text-sm">{monitorStatus.email_address}</p>
+                <p className="font-mono text-sm">
+                  {monitorStatus.email_address}
+                </p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Last Checked</p>
-                <p className="text-sm">{lastChecked ? lastChecked.toLocaleTimeString() : 'Never'}</p>
+                <p className="text-sm">
+                  {lastChecked ? lastChecked.toLocaleTimeString() : 'Never'}
+                </p>
               </div>
               <div>
-                <Button onClick={handleManualProcess} disabled={isLoading} className="w-full">
+                <Button
+                  onClick={handleManualProcess}
+                  disabled={isLoading}
+                  className="w-full"
+                >
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Process Now
                 </Button>
@@ -257,21 +297,30 @@ export default function PaymentEmailMonitoringDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {unmatchedNotifications.map((notification) => (
-              <div key={notification.email_id} className="p-4 border border-orange-200 rounded-lg bg-orange-50">
+            {unmatchedNotifications.map(notification => (
+              <div
+                key={notification.email_id}
+                className="p-4 border border-orange-200 rounded-lg bg-orange-50"
+              >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <Badge className={getProviderBadge(notification.provider)}>
+                      <Badge
+                        className={getProviderBadge(notification.provider)}
+                      >
                         {notification.provider.toUpperCase()}
                       </Badge>
                       <span className="text-2xl font-bold text-green-600">
                         ${notification.amount.toFixed(2)}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600">{notification.subject}</p>
+                    <p className="text-sm text-gray-600">
+                      {notification.subject}
+                    </p>
                     {notification.sender_name && (
-                      <p className="text-sm font-medium mt-1">From: {notification.sender_name}</p>
+                      <p className="text-sm font-medium mt-1">
+                        From: {notification.sender_name}
+                      </p>
                     )}
                     <p className="text-xs text-gray-500 mt-1">
                       {new Date(notification.received_at).toLocaleString()}
@@ -279,31 +328,42 @@ export default function PaymentEmailMonitoringDashboard() {
                   </div>
                 </div>
 
-                {notification.possible_matches && notification.possible_matches.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium">Possible Matches:</p>
-                    {notification.possible_matches.map((match) => (
-                      <div key={match.payment_id} className="flex items-center justify-between p-3 bg-white rounded border">
-                        <div>
-                          <p className="font-medium">{match.customer_name}</p>
-                          <p className="text-sm text-gray-600">
-                            ${match.amount.toFixed(2)} • Booking #{match.booking_id}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            Created: {new Date(match.created_at).toLocaleString()}
-                          </p>
-                        </div>
-                        <Button 
-                          size="sm" 
-                          onClick={() => handleManualMatch(notification.email_id, match.payment_id)}
-                          disabled={isLoading}
+                {notification.possible_matches &&
+                  notification.possible_matches.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">Possible Matches:</p>
+                      {notification.possible_matches.map(match => (
+                        <div
+                          key={match.payment_id}
+                          className="flex items-center justify-between p-3 bg-white rounded border"
                         >
-                          Match This
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                          <div>
+                            <p className="font-medium">{match.customer_name}</p>
+                            <p className="text-sm text-gray-600">
+                              ${match.amount.toFixed(2)} • Booking #
+                              {match.booking_id}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Created:{' '}
+                              {new Date(match.created_at).toLocaleString()}
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              handleManualMatch(
+                                notification.email_id,
+                                match.payment_id
+                              )
+                            }
+                            disabled={isLoading}
+                          >
+                            Match This
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
               </div>
             ))}
           </CardContent>
@@ -318,7 +378,8 @@ export default function PaymentEmailMonitoringDashboard() {
             Recent Payment Notifications (Last 48 Hours)
           </CardTitle>
           <CardDescription>
-            All payment emails detected from Stripe, Venmo, Zelle, and Bank of America
+            All payment emails detected from Stripe, Venmo, Zelle, and Bank of
+            America
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -328,12 +389,17 @@ export default function PaymentEmailMonitoringDashboard() {
             </p>
           ) : (
             <div className="space-y-4">
-              {recentNotifications.map((notification) => (
-                <div key={notification.email_id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+              {recentNotifications.map(notification => (
+                <div
+                  key={notification.email_id}
+                  className="p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <Badge className={getProviderBadge(notification.provider)}>
+                        <Badge
+                          className={getProviderBadge(notification.provider)}
+                        >
                           {notification.provider.toUpperCase()}
                         </Badge>
                         {getStatusBadge(notification.status)}
@@ -341,9 +407,11 @@ export default function PaymentEmailMonitoringDashboard() {
                           ${notification.amount.toFixed(2)}
                         </span>
                       </div>
-                      
-                      <p className="text-sm text-gray-600 mb-1">{notification.subject}</p>
-                      
+
+                      <p className="text-sm text-gray-600 mb-1">
+                        {notification.subject}
+                      </p>
+
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         {notification.sender_name && (
                           <div className="flex items-center gap-1">
@@ -354,12 +422,18 @@ export default function PaymentEmailMonitoringDashboard() {
                         {notification.sender_username && (
                           <div className="flex items-center gap-1">
                             <User className="w-4 h-4 text-gray-400" />
-                            <span className="font-mono">{notification.sender_username}</span>
+                            <span className="font-mono">
+                              {notification.sender_username}
+                            </span>
                           </div>
                         )}
                         <div className="flex items-center gap-1">
                           <Calendar className="w-4 h-4 text-gray-400" />
-                          <span>{new Date(notification.received_at).toLocaleString()}</span>
+                          <span>
+                            {new Date(
+                              notification.received_at
+                            ).toLocaleString()}
+                          </span>
                         </div>
                       </div>
 
@@ -372,7 +446,8 @@ export default function PaymentEmailMonitoringDashboard() {
                       {notification.matched_booking_id && (
                         <div className="mt-2">
                           <Badge variant="outline" className="bg-green-50">
-                            ✅ Matched to Booking #{notification.matched_booking_id}
+                            ✅ Matched to Booking #
+                            {notification.matched_booking_id}
                           </Badge>
                         </div>
                       )}

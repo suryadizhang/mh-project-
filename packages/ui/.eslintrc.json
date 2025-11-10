@@ -1,0 +1,8 @@
+{
+  "extends": ["@myhibachi/eslint-config/react-internal"],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "warn",
+    "react-hooks/exhaustive-deps": "warn",
+    "no-console": "warn"
+  }
+}

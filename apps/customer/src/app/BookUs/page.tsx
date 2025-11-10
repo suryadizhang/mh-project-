@@ -3,17 +3,17 @@
 import 'react-datepicker/dist/react-datepicker.css';
 import './datepicker.css';
 
+import {
+  AvailabilityResponseSchema,
+  BookedDatesResponseSchema,
+  BookingSubmitResponseSchema,
+} from '@myhibachi/types/schemas';
 import { addDays, format } from 'date-fns';
 import Link from 'next/link';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef,useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { Controller, useForm } from 'react-hook-form';
 import type { z } from 'zod';
-import {
-  BookedDatesResponseSchema,
-  AvailabilityResponseSchema,
-  BookingSubmitResponseSchema,
-} from '@myhibachi/types/schemas';
 
 import Assistant from '@/components/chat/Assistant';
 import { apiFetch } from '@/lib/api';
@@ -31,7 +31,7 @@ declare global {
               types?: string[];
               componentRestrictions?: { country: string };
               fields?: string[];
-            }
+            },
           ) => {
             addListener: (event: string, handler: () => void) => void;
             getPlace: () => {
@@ -92,11 +92,13 @@ export default function BookingPage() {
   const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
   const [loadingTimeSlots, setLoadingTimeSlots] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Google Places Autocomplete refs
   const venueAddressInputRef = useRef<HTMLInputElement>(null);
-  const autocompleteRef = useRef<ReturnType<typeof window.google.maps.places.Autocomplete> | null>(null);
-  
+  const autocompleteRef = useRef<ReturnType<typeof window.google.maps.places.Autocomplete> | null>(
+    null,
+  );
+
   const {
     register,
     handleSubmit,
@@ -151,7 +153,7 @@ export default function BookingPage() {
   useEffect(() => {
     fetchBookedDates();
   }, []);
-  
+
   // Initialize Google Places Autocomplete for venue address
   useEffect(() => {
     const initializeAutocomplete = () => {
@@ -165,7 +167,7 @@ export default function BookingPage() {
             types: ['address'],
             componentRestrictions: { country: 'us' },
             fields: ['formatted_address', 'address_components', 'geometry'],
-          }
+          },
         );
 
         // Listen for place selection
@@ -219,7 +221,7 @@ export default function BookingPage() {
       initializeAutocomplete();
     }
   }, [setValue]);
-  
+
   // Fetch availability for selected date
   const fetchAvailability = async (date: Date) => {
     setLoadingTimeSlots(true);
@@ -1011,10 +1013,12 @@ export default function BookingPage() {
                 </div>
                 {/* SMS Consent Section */}
                 <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
-                  <h3 className="mb-3 text-lg font-semibold text-blue-900">📱 SMS Communication Consent</h3>
+                  <h3 className="mb-3 text-lg font-semibold text-blue-900">
+                    📱 SMS Communication Consent
+                  </h3>
                   <div className="mb-4 space-y-3">
                     <div className="rounded-md border border-blue-300 bg-white p-3">
-                      <label className="flex items-start space-x-3 cursor-pointer">
+                      <label className="flex cursor-pointer items-start space-x-3">
                         <Controller
                           name="smsConsent"
                           control={control}
@@ -1033,7 +1037,8 @@ export default function BookingPage() {
                           </div>
                           <div className="mt-1 text-gray-600">
                             <p className="mb-2">
-                              <strong>By checking this box, I agree to receive SMS messages</strong> including:
+                              <strong>By checking this box, I agree to receive SMS messages</strong>{' '}
+                              including:
                             </p>
                             <ul className="ml-4 list-disc space-y-1 text-xs">
                               <li>Booking confirmations and order details</li>
@@ -1047,11 +1052,38 @@ export default function BookingPage() {
                         </div>
                       </label>
                     </div>
-                    <div className="text-xs text-gray-600 space-y-1">
-                      <p><strong>Important:</strong> Message frequency varies. Message and data rates may apply. Consent is not required for purchase.</p>
-                      <p><strong>Opt-out:</strong> Reply STOP to opt-out anytime. Reply START to re-subscribe. Reply HELP for support.</p>
-                      <p><strong>Contact:</strong> <a href="tel:+19167408768" className="text-blue-600 hover:underline">(916) 740-8768</a> | <a href="mailto:cs@myhibachichef.com" className="text-blue-600 hover:underline">cs@myhibachichef.com</a></p>
-                      <p><strong>Policies:</strong> <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link> | <Link href="/terms" className="text-blue-600 hover:underline">Terms & Conditions</Link></p>
+                    <div className="space-y-1 text-xs text-gray-600">
+                      <p>
+                        <strong>Important:</strong> Message frequency varies. Message and data rates
+                        may apply. Consent is not required for purchase.
+                      </p>
+                      <p>
+                        <strong>Opt-out:</strong> Reply STOP to opt-out anytime. Reply START to
+                        re-subscribe. Reply HELP for support.
+                      </p>
+                      <p>
+                        <strong>Contact:</strong>{' '}
+                        <a href="tel:+19167408768" className="text-blue-600 hover:underline">
+                          (916) 740-8768
+                        </a>{' '}
+                        |{' '}
+                        <a
+                          href="mailto:cs@myhibachichef.com"
+                          className="text-blue-600 hover:underline"
+                        >
+                          cs@myhibachichef.com
+                        </a>
+                      </p>
+                      <p>
+                        <strong>Policies:</strong>{' '}
+                        <Link href="/privacy" className="text-blue-600 hover:underline">
+                          Privacy Policy
+                        </Link>{' '}
+                        |{' '}
+                        <Link href="/terms" className="text-blue-600 hover:underline">
+                          Terms & Conditions
+                        </Link>
+                      </p>
                     </div>
                   </div>
                 </div>

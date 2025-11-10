@@ -1,27 +1,26 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
 import {
-  Target,
-  Plus,
-  Phone,
-  Mail,
   Calendar,
+  CheckCircle,
   DollarSign,
+  Mail,
+  Phone,
+  Plus,
+  Sparkles,
+  Target,
   TrendingUp,
   Users,
-  CheckCircle,
-  XCircle,
-  Sparkles,
 } from 'lucide-react';
+import { useMemo,useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { StatsCard } from '@/components/ui/stats-card';
-import { FilterBar, FilterDefinition } from '@/components/ui/filter-bar';
 import { EmptyState } from '@/components/ui/empty-state';
+import { FilterBar, FilterDefinition } from '@/components/ui/filter-bar';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Modal } from '@/components/ui/modal';
-import { useLeads, usePagination, useFilters, useSearch } from '@/hooks/useApi';
+import { StatsCard } from '@/components/ui/stats-card';
+import { useFilters, useLeads, usePagination, useSearch } from '@/hooks/useApi';
 
 // Lead status enum
 const LEAD_STATUSES = {
@@ -53,7 +52,11 @@ export default function LeadsPage() {
 
   // Pagination and filters
   const { page, limit, setPage, nextPage, prevPage } = usePagination(1, 100);
-  const { query: searchQuery, debouncedQuery, setQuery: setSearchQuery } = useSearch();
+  const {
+    query: searchQuery,
+    debouncedQuery,
+    setQuery: setSearchQuery,
+  } = useSearch();
   const { filters, updateFilter, resetFilters } = useFilters({
     status: '',
     quality: '',
@@ -81,10 +84,13 @@ export default function LeadsPage() {
 
   // Group leads by status
   const leadsByStatus = useMemo(() => {
-    return Object.values(LEAD_STATUSES).reduce((acc, status) => {
-      acc[status] = leads.filter((lead: any) => lead.status === status);
-      return acc;
-    }, {} as Record<string, any[]>);
+    return Object.values(LEAD_STATUSES).reduce(
+      (acc, status) => {
+        acc[status] = leads.filter((lead: any) => lead.status === status);
+        return acc;
+      },
+      {} as Record<string, any[]>
+    );
   }, [leads]);
 
   // Calculate stats
@@ -97,13 +103,19 @@ export default function LeadsPage() {
     const avgScore =
       leads.length > 0
         ? (
-            leads.reduce((sum: number, lead: any) => sum + (lead.ai_score || 0), 0) / leads.length
+            leads.reduce(
+              (sum: number, lead: any) => sum + (lead.ai_score || 0),
+              0
+            ) / leads.length
           ).toFixed(0)
         : 0;
 
     const conversionRate =
       newCount + qualifiedCount + convertedCount > 0
-        ? ((convertedCount / (newCount + qualifiedCount + convertedCount)) * 100).toFixed(1)
+        ? (
+            (convertedCount / (newCount + qualifiedCount + convertedCount)) *
+            100
+          ).toFixed(1)
         : 0;
 
     return {
@@ -261,7 +273,9 @@ export default function LeadsPage() {
         onSearchChange={setSearchQuery}
         searchPlaceholder="Search leads by name, email, phone..."
         filters={filterDefinitions}
-        onFilterChange={(key, value) => updateFilter(key as 'status' | 'quality' | 'source', value)}
+        onFilterChange={(key, value) =>
+          updateFilter(key as 'status' | 'quality' | 'source', value)
+        }
         onClearFilters={handleClearFilters}
         showClearButton
       />
@@ -299,7 +313,9 @@ export default function LeadsPage() {
                 >
                   <h3 className="font-semibold text-gray-900 flex items-center justify-between">
                     <span>{STATUS_LABELS[status]}</span>
-                    <span className="text-sm bg-white px-2 py-1 rounded">{count}</span>
+                    <span className="text-sm bg-white px-2 py-1 rounded">
+                      {count}
+                    </span>
                   </h3>
                 </div>
 
@@ -342,7 +358,9 @@ export default function LeadsPage() {
                         {lead.contact?.email && (
                           <div className="flex items-center">
                             <Mail className="w-3 h-3 mr-2" />
-                            <span className="truncate">{lead.contact.email}</span>
+                            <span className="truncate">
+                              {lead.contact.email}
+                            </span>
                           </div>
                         )}
                         {lead.contact?.phone && (
@@ -396,7 +414,10 @@ export default function LeadsPage() {
           size="lg"
           footer={
             <>
-              <Button variant="outline" onClick={() => setIsLeadModalOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsLeadModalOpen(false)}
+              >
                 Close
               </Button>
               <Button>
@@ -418,7 +439,9 @@ export default function LeadsPage() {
             {/* AI Score */}
             {selectedLead.ai_score && (
               <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">AI Score</h3>
+                <h3 className="text-sm font-semibold text-gray-700 mb-2">
+                  AI Score
+                </h3>
                 <div className="flex items-center">
                   <div className="flex-1 bg-gray-200 rounded-full h-4">
                     <div
@@ -426,8 +449,8 @@ export default function LeadsPage() {
                         selectedLead.ai_score >= 80
                           ? 'bg-green-500'
                           : selectedLead.ai_score >= 60
-                          ? 'bg-yellow-500'
-                          : 'bg-red-500'
+                            ? 'bg-yellow-500'
+                            : 'bg-red-500'
                       }`}
                       style={{ width: `${selectedLead.ai_score}%` }}
                     />
@@ -490,7 +513,9 @@ export default function LeadsPage() {
                   {selectedLead.context.location && (
                     <div>
                       <span className="text-gray-600">Location:</span>{' '}
-                      <span className="font-medium">{selectedLead.context.location}</span>
+                      <span className="font-medium">
+                        {selectedLead.context.location}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -499,7 +524,9 @@ export default function LeadsPage() {
 
             {/* Source Information */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-700 mb-2">Source</h3>
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">
+                Source
+              </h3>
               <div className="text-sm">
                 <span className="inline-block px-3 py-1 bg-gray-100 rounded">
                   {selectedLead.source_type || 'Unknown'}
@@ -509,7 +536,9 @@ export default function LeadsPage() {
 
             {/* Timeline */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-700 mb-2">Timeline</h3>
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">
+                Timeline
+              </h3>
               <div className="space-y-2 text-sm text-gray-600">
                 <div>
                   <span className="font-medium">Created:</span>{' '}
@@ -541,7 +570,10 @@ export default function LeadsPage() {
         size="lg"
         footer={
           <>
-            <Button variant="outline" onClick={() => setIsNewLeadModalOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsNewLeadModalOpen(false)}
+            >
               Cancel
             </Button>
             <Button>Create Lead</Button>
@@ -550,8 +582,8 @@ export default function LeadsPage() {
       >
         <div className="space-y-4">
           <p className="text-gray-600">
-            Lead creation form coming soon. This will include fields for contact info,
-            event details, and source tracking.
+            Lead creation form coming soon. This will include fields for contact
+            info, event details, and source tracking.
           </p>
         </div>
       </Modal>

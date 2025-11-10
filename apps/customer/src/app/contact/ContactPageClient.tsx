@@ -1,19 +1,19 @@
-'use client'
+'use client';
 
-import { logger } from '@/lib/logger'
+import { logger } from '@/lib/logger';
 
 // Type definitions
 declare global {
   interface Window {
     FB?: {
-      init: (config: { xfbml: boolean; version: string }) => void
+      init: (config: { xfbml: boolean; version: string }) => void;
       CustomerChat: {
-        show: () => void
-        hide: () => void
-      }
-    }
-    dataLayer?: unknown[]
-    opera?: string
+        show: () => void;
+        hide: () => void;
+      };
+    };
+    dataLayer?: unknown[];
+    opera?: string;
   }
 }
 
@@ -23,29 +23,29 @@ function InlineMessengerButton() {
     try {
       // GTM tracking
       if (typeof window !== 'undefined' && window.dataLayer) {
-        window.dataLayer.push({ event: 'chat_open', channel: 'messenger' })
+        window.dataLayer.push({ event: 'chat_open', channel: 'messenger' });
       }
 
       // Try to show Facebook Customer Chat if available
       if (typeof window !== 'undefined' && window.FB?.CustomerChat?.show) {
-        window.FB.CustomerChat.show()
-        logger.debug('Facebook Customer Chat opened')
+        window.FB.CustomerChat.show();
+        logger.debug('Facebook Customer Chat opened');
       } else {
         // Fallback: Open Messenger directly
-        const pageId = '61577483702847' // My-hibachi page ID
-        const messengerUrl = `https://m.me/${pageId}`
+        const pageId = '61577483702847'; // My-hibachi page ID
+        const messengerUrl = `https://m.me/${pageId}`;
 
-        logger.debug('Opening Messenger directly', { url: messengerUrl })
-        window.open(messengerUrl, '_blank', 'noopener,noreferrer')
+        logger.debug('Opening Messenger directly', { url: messengerUrl });
+        window.open(messengerUrl, '_blank', 'noopener,noreferrer');
       }
     } catch (error) {
-      logger.warn('Error opening Messenger', { error })
+      logger.warn('Error opening Messenger', { error });
       // Final fallback: Open Messenger directly
-      const pageId = '61577483702847'
-      const messengerUrl = `https://m.me/${pageId}`
-      window.open(messengerUrl, '_blank', 'noopener,noreferrer')
+      const pageId = '61577483702847';
+      const messengerUrl = `https://m.me/${pageId}`;
+      window.open(messengerUrl, '_blank', 'noopener,noreferrer');
     }
-  }
+  };
 
   return (
     <button
@@ -59,7 +59,7 @@ function InlineMessengerButton() {
         <small>Instant messaging with our team</small>
       </div>
     </button>
-  )
+  );
 }
 
 function InlineInstagramButton() {
@@ -67,43 +67,43 @@ function InlineInstagramButton() {
     try {
       // GTM tracking
       if (typeof window !== 'undefined' && window.dataLayer) {
-        window.dataLayer.push({ event: 'chat_open', channel: 'instagram' })
+        window.dataLayer.push({ event: 'chat_open', channel: 'instagram' });
       }
 
       // Mobile app detection and opening
-      const userAgent = navigator.userAgent || navigator.vendor || window.opera || ''
+      const userAgent = navigator.userAgent || navigator.vendor || window.opera || '';
       const isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
-        userAgent.toLowerCase()
-      )
+        userAgent.toLowerCase(),
+      );
 
       if (isMobile) {
         // Try to open Instagram app first with the ig.me URL (works best on mobile)
-        const igMeUrl = 'https://ig.me/m/my_hibachi_chef'
-        logger.debug('Opening Instagram DM (mobile)', { url: igMeUrl })
+        const igMeUrl = 'https://ig.me/m/my_hibachi_chef';
+        logger.debug('Opening Instagram DM (mobile)', { url: igMeUrl });
 
         // Try Instagram app deep link first
-        const iframe = document.createElement('iframe')
-        iframe.style.display = 'none'
-        iframe.src = 'instagram://user?username=my_hibachi_chef'
-        document.body.appendChild(iframe)
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = 'instagram://user?username=my_hibachi_chef';
+        document.body.appendChild(iframe);
 
         setTimeout(() => {
-          document.body.removeChild(iframe)
+          document.body.removeChild(iframe);
           // Fallback to ig.me which works on both app and web
-          window.open(igMeUrl, '_blank', 'noopener,noreferrer')
-        }, 1000)
+          window.open(igMeUrl, '_blank', 'noopener,noreferrer');
+        }, 1000);
       } else {
         // Desktop - use ig.me URL which redirects properly
-        const igMeUrl = 'https://ig.me/m/my_hibachi_chef'
-        logger.debug('Opening Instagram DM (desktop)', { url: igMeUrl })
-        window.open(igMeUrl, '_blank', 'noopener,noreferrer')
+        const igMeUrl = 'https://ig.me/m/my_hibachi_chef';
+        logger.debug('Opening Instagram DM (desktop)', { url: igMeUrl });
+        window.open(igMeUrl, '_blank', 'noopener,noreferrer');
       }
     } catch (error) {
-      logger.warn('Error opening Instagram', { error })
+      logger.warn('Error opening Instagram', { error });
       // Ultimate fallback to profile page
-      window.open('https://www.instagram.com/my_hibachi_chef/', '_blank', 'noopener,noreferrer')
+      window.open('https://www.instagram.com/my_hibachi_chef/', '_blank', 'noopener,noreferrer');
     }
-  }
+  };
 
   return (
     <button
@@ -117,7 +117,7 @@ function InlineInstagramButton() {
         <small>Message @my_hibachi_chef directly</small>
       </div>
     </button>
-  )
+  );
 }
 
 export default function ContactPageClient() {
@@ -160,7 +160,7 @@ export default function ContactPageClient() {
         </div>
       </div>
 
-      <div className="container contact-container">
+      <div className="contact-container container">
         {/* Main Contact Section */}
         <div className="row contact-main-section" id="contact-details">
           {/* Contact Information Card */}
@@ -358,7 +358,7 @@ export default function ContactPageClient() {
 
         {/* Testimonials Section */}
         <div className="testimonials-section">
-          <h3 className="text-center mb-5">
+          <h3 className="mb-5 text-center">
             <i className="bi bi-quote me-2"></i>
             What Our Clients Say
           </h3>
@@ -415,13 +415,13 @@ export default function ContactPageClient() {
       </div>
 
       {/* Service Areas */}
-      <section className="py-5 service-areas-section">
+      <section className="service-areas-section py-5">
         <div className="container">
-          <h2 className="text-center mb-5">Our Service Areas</h2>
+          <h2 className="mb-5 text-center">Our Service Areas</h2>
 
           {/* Primary Bay Area Locations */}
-          <h4 className="text-center mb-4">🏙️ Primary Bay Area Locations</h4>
-          <p className="text-center mb-4">No additional travel fees within these areas!</p>
+          <h4 className="mb-4 text-center">🏙️ Primary Bay Area Locations</h4>
+          <p className="mb-4 text-center">No additional travel fees within these areas!</p>
           <div className="row mb-4">
             <div className="col-md-3 mb-3">
               <div className="d-flex align-items-center">
@@ -474,8 +474,8 @@ export default function ContactPageClient() {
           </div>
 
           {/* Sacramento & Extended Regions */}
-          <h4 className="text-center mb-4">🏞️ Sacramento & Extended Regions</h4>
-          <p className="text-center mb-4">Minimal travel fees for these beautiful locations!</p>
+          <h4 className="mb-4 text-center">🏞️ Sacramento & Extended Regions</h4>
+          <p className="mb-4 text-center">Minimal travel fees for these beautiful locations!</p>
           <div className="row">
             <div className="col-md-3 mb-3">
               <div className="d-flex align-items-center">
@@ -527,7 +527,7 @@ export default function ContactPageClient() {
             </div>
           </div>
 
-          <div className="text-center mt-4">
+          <div className="mt-4 text-center">
             <div className="alert alert-info d-inline-block">
               <i className="bi bi-info-circle-fill me-2"></i>
               We bring hibachi to your home or venue across Northern California—
@@ -538,5 +538,5 @@ export default function ContactPageClient() {
         </div>
       </section>
     </div>
-  )
+  );
 }

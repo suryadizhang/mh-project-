@@ -1,33 +1,38 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
 import {
-  QrCode,
-  Download,
-  Plus,
   BarChart3,
-  Eye,
-  Copy,
   CheckCircle,
+  Copy,
+  Download,
   ExternalLink,
-  Smartphone,
+  Eye,
   Monitor,
+  Plus,
+  QrCode,
+  Smartphone,
   Tablet,
 } from 'lucide-react';
+import {useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { StatsCard } from '@/components/ui/stats-card';
-import { FilterBar } from '@/components/ui/filter-bar';
 import { EmptyState } from '@/components/ui/empty-state';
+import { FilterBar } from '@/components/ui/filter-bar';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Modal } from '@/components/ui/modal';
+import { StatsCard } from '@/components/ui/stats-card';
 import { useToast } from '@/components/ui/Toast';
-import { useQRCodes, useQRAnalytics, useFilters, useSearch } from '@/hooks/useApi';
+import {
+  useFilters,
+  useQRAnalytics,
+  useQRCodes,
+  useSearch,
+} from '@/hooks/useApi';
 import { qrService } from '@/services/api';
 
 export default function QRCodeManagementPage() {
   const toast = useToast();
-  
+
   // State
   const [selectedCode, setSelectedCode] = useState<any>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -43,7 +48,11 @@ export default function QRCodeManagementPage() {
   });
 
   // Filters
-  const { query: searchQuery, debouncedQuery, setQuery: setSearchQuery } = useSearch();
+  const {
+    query: searchQuery,
+    debouncedQuery,
+    setQuery: setSearchQuery,
+  } = useSearch();
   const { filters, updateFilter, resetFilters } = useFilters({
     campaign: '',
     active: '',
@@ -69,14 +78,19 @@ export default function QRCodeManagementPage() {
 
   // Calculate stats
   const stats = useMemo(() => {
-    const totalScans = qrCodes.reduce((sum: number, qr: any) => sum + (qr.scan_count || 0), 0);
+    const totalScans = qrCodes.reduce(
+      (sum: number, qr: any) => sum + (qr.scan_count || 0),
+      0
+    );
     const activeCount = qrCodes.filter((qr: any) => qr.is_active).length;
     const totalConversions = qrCodes.reduce(
       (sum: number, qr: any) => sum + (qr.conversion_count || 0),
       0
     );
     const conversionRate =
-      totalScans > 0 ? ((totalConversions / totalScans) * 100).toFixed(1) : '0.0';
+      totalScans > 0
+        ? ((totalConversions / totalScans) * 100).toFixed(1)
+        : '0.0';
 
     return {
       total: qrCodes.length,
@@ -90,7 +104,10 @@ export default function QRCodeManagementPage() {
   // Handlers
   const handleCreateQR = async () => {
     if (!newQRForm.name || !newQRForm.url) {
-      toast.warning('Missing information', 'Please fill in Name and URL fields');
+      toast.warning(
+        'Missing information',
+        'Please fill in Name and URL fields'
+      );
       return;
     }
 
@@ -108,14 +125,17 @@ export default function QRCodeManagementPage() {
       refetch();
     } catch (err) {
       console.error('Failed to create QR code:', err);
-      toast.error('Creation failed', 'Unable to create QR code. Please try again');
+      toast.error(
+        'Creation failed',
+        'Unable to create QR code. Please try again'
+      );
     }
   };
 
   const handleDownloadQR = (qrCode: any, format: 'png' | 'svg' = 'png') => {
     // Generate download URL (assuming backend provides this)
     const downloadUrl = `/api/qr/download/${qrCode.code}?format=${format}`;
-    
+
     // Create temporary link and trigger download
     const a = document.createElement('a');
     a.href = downloadUrl;
@@ -174,7 +194,11 @@ export default function QRCodeManagementPage() {
       uniqueScans: data.unique_scans || 0,
       conversions: data.conversions || 0,
       conversionRate: data.conversion_rate || 0,
-      deviceBreakdown: data.device_breakdown || { mobile: 0, desktop: 0, tablet: 0 },
+      deviceBreakdown: data.device_breakdown || {
+        mobile: 0,
+        desktop: 0,
+        tablet: 0,
+      },
       scansByDate: data.scans_by_date || [],
     };
   }, [analyticsData]);
@@ -198,8 +222,12 @@ export default function QRCodeManagementPage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">QR Code Management</h1>
-          <p className="text-gray-600">Create, track, and analyze QR code campaigns</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            QR Code Management
+          </h1>
+          <p className="text-gray-600">
+            Create, track, and analyze QR code campaigns
+          </p>
         </div>
         <Button onClick={() => setShowCreateModal(true)}>
           <Plus className="w-4 h-4 mr-2" />
@@ -265,7 +293,9 @@ export default function QRCodeManagementPage() {
             value: filters.active,
           },
         ]}
-        onFilterChange={(key, value) => updateFilter(key as 'campaign' | 'active', value)}
+        onFilterChange={(key, value) =>
+          updateFilter(key as 'campaign' | 'active', value)
+        }
         onClearFilters={handleClearFilters}
         showClearButton
       />
@@ -433,7 +463,9 @@ export default function QRCodeManagementPage() {
             <input
               type="text"
               value={newQRForm.name}
-              onChange={(e) => setNewQRForm({ ...newQRForm, name: e.target.value })}
+              onChange={e =>
+                setNewQRForm({ ...newQRForm, name: e.target.value })
+              }
               placeholder="e.g., Menu QR Code"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
@@ -446,7 +478,9 @@ export default function QRCodeManagementPage() {
             <input
               type="url"
               value={newQRForm.url}
-              onChange={(e) => setNewQRForm({ ...newQRForm, url: e.target.value })}
+              onChange={e =>
+                setNewQRForm({ ...newQRForm, url: e.target.value })
+              }
               placeholder="https://myhibachi.com/menu"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
@@ -458,7 +492,9 @@ export default function QRCodeManagementPage() {
             </label>
             <select
               value={newQRForm.campaign}
-              onChange={(e) => setNewQRForm({ ...newQRForm, campaign: e.target.value })}
+              onChange={e =>
+                setNewQRForm({ ...newQRForm, campaign: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">Default</option>
@@ -474,7 +510,7 @@ export default function QRCodeManagementPage() {
             </label>
             <textarea
               value={newQRForm.description}
-              onChange={(e) =>
+              onChange={e =>
                 setNewQRForm({ ...newQRForm, description: e.target.value })
               }
               placeholder="Optional description for internal use"
@@ -489,7 +525,12 @@ export default function QRCodeManagementPage() {
               className="flex-1"
               onClick={() => {
                 setShowCreateModal(false);
-                setNewQRForm({ name: '', url: '', campaign: '', description: '' });
+                setNewQRForm({
+                  name: '',
+                  url: '',
+                  campaign: '',
+                  description: '',
+                });
               }}
             >
               Cancel

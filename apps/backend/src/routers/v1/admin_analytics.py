@@ -332,6 +332,569 @@ async def get_engagement_trends(days: int = Query(30, le=365), db: Session = Dep
     }
 
 
+# ============================================================================
+# NEW ENDPOINTS: Missing Analytics Features
+# ============================================================================
+
+
+@router.get("/revenue-trends")
+async def get_revenue_trends(
+    days: int = Query(30, le=365),
+    interval: str = Query("day", regex="^(day|week|month)$"),
+    db: Session = Depends(get_db),
+):
+    """
+    Get revenue trends over time with customizable intervals.
+
+    Returns:
+        - Daily/Weekly/Monthly revenue
+        - Booking counts
+        - Average order value
+        - Growth rates
+    """
+    start_date = datetime.now() - timedelta(days=days)
+
+    # Determine date truncation based on interval
+    if interval == "day":
+        date_trunc = func.date(Booking.created_at)
+    elif interval == "week":
+        date_trunc = func.date_trunc("week", Booking.created_at)
+    else:  # month
+        date_trunc = func.date_trunc("month", Booking.created_at)
+
+    # Get revenue trends
+    trends = (
+        db.query(
+            date_trunc.label("period"),
+            func.sum(Booking.total_due_cents).label("revenue_cents"),
+            func.count(Booking.id).label("booking_count"),
+            func.avg(Booking.total_due_cents).label("avg_order_value_cents"),
+        )
+        .filter(Booking.created_at >= start_date, Booking.status != "cancelled")
+        .group_by("period")
+        .order_by("period")
+        .all()
+    )
+
+    # Calculate growth rates
+    result = []
+    prev_revenue = 0
+    for period, revenue_cents, booking_count, avg_order_value_cents in trends:
+        revenue = float(revenue_cents or 0) / 100
+        growth_rate = 0.0
+        if prev_revenue > 0:
+            growth_rate = ((revenue - prev_revenue) / prev_revenue) * 100
+
+        result.append(
+            {
+                "period": period.isoformat() if hasattr(period, "isoformat") else str(period),
+                "revenue": revenue,
+                "booking_count": booking_count,
+                "avg_order_value": float(avg_order_value_cents or 0) / 100,
+                "growth_rate": growth_rate,
+            }
+        )
+        prev_revenue = revenue
+
+    # Calculate totals and summary
+    total_revenue = sum(item["revenue"] for item in result)
+    total_bookings = sum(item["booking_count"] for item in result)
+    overall_avg_order_value = total_revenue / total_bookings if total_bookings > 0 else 0
+
+    return {
+        "trends": result,
+        "summary": {
+            "total_revenue": total_revenue,
+            "total_bookings": total_bookings,
+            "average_order_value": overall_avg_order_value,
+            "period_count": len(result),
+        },
+    }
+
+
+@router.get("/customer-lifetime-value")
+async def get_customer_lifetime_value(
+    top_n: int = Query(100, le=500), db: Session = Depends(get_db)
+):
+    """
+    Calculate Customer Lifetime Value (CLV) metrics.
+
+    Returns:
+        - Average CLV
+        - CLV distribution
+        - Top customers by value
+        - Repeat customer rates
+    """
+    from models.legacy_core import Customer
+
+    # Calculate CLV for each customer
+    customer_values = (
+        db.query(
+            Customer.id,
+            func.count(Booking.id).label("booking_count"),
+            func.sum(Booking.total_due_cents).label("total_spent_cents"),
+            func.min(Booking.created_at).label("first_booking"),
+            func.max(Booking.created_at).label("last_booking"),
+        )
+        .join(Booking, Customer.id == Booking.customer_id)
+        .filter(Booking.status != "cancelled")
+        .group_by(Customer.id)
+        .all()
+    )
+
+    # Calculate metrics
+    total_customers = len(customer_values)
+    if total_customers == 0:
+        return {
+            "average_clv": 0,
+            "median_clv": 0,
+            "top_customers": [],
+            "clv_distribution": [],
+            "repeat_customer_rate": 0,
+            "total_customers_analyzed": 0,
+        }
+
+    clv_list = [float(val.total_spent_cents or 0) / 100 for val in customer_values]
+    clv_list.sort(reverse=True)
+
+    avg_clv = sum(clv_list) / len(clv_list)
+    median_clv = clv_list[len(clv_list) // 2]
+
+    # Repeat customer rate (2+ bookings)
+    repeat_customers = sum(1 for val in customer_values if val.booking_count >= 2)
+    repeat_rate = (repeat_customers / total_customers) * 100
+
+    # CLV distribution buckets
+    distribution_buckets = [
+        ("$0-100", 0, 10000),
+        ("$100-250", 10000, 25000),
+        ("$250-500", 25000, 50000),
+        ("$500-1000", 50000, 100000),
+        ("$1000+", 100000, float("inf")),
+    ]
+
+    distribution = []
+    for label, min_cents, max_cents in distribution_buckets:
+        count = sum(
+            1 for val in customer_values if min_cents <= (val.total_spent_cents or 0) < max_cents
+        )
+        distribution.append(
+            {"range": label, "count": count, "percentage": (count / total_customers) * 100}
+        )
+
+    # Top customers
+    top_customers = []
+    for val in customer_values[:top_n]:
+        customer_tenure_days = 0
+        if val.first_booking and val.last_booking:
+            customer_tenure_days = (val.last_booking - val.first_booking).days
+
+        top_customers.append(
+            {
+                "customer_id": str(val.id),
+                "total_spent": float(val.total_spent_cents or 0) / 100,
+                "booking_count": val.booking_count,
+                "customer_tenure_days": customer_tenure_days,
+                "avg_order_value": float(val.total_spent_cents or 0) / 100 / val.booking_count,
+            }
+        )
+
+    top_customers.sort(key=lambda x: x["total_spent"], reverse=True)
+
+    return {
+        "average_clv": avg_clv,
+        "median_clv": median_clv,
+        "top_customers": top_customers[:top_n],
+        "clv_distribution": distribution,
+        "repeat_customer_rate": repeat_rate,
+        "total_customers_analyzed": total_customers,
+    }
+
+
+@router.get("/booking-conversion-funnel")
+async def get_booking_conversion_funnel(
+    date_from: date | None = Query(None),
+    date_to: date | None = Query(None),
+    db: Session = Depends(get_db),
+):
+    """
+    Get detailed booking conversion funnel analytics.
+
+    Tracks the journey from lead → quote → booking → payment
+    """
+    if not date_from:
+        date_from = datetime.now().date() - timedelta(days=30)
+    if not date_to:
+        date_to = datetime.now().date()
+
+    # Stage 1: Website Visits (proxy via leads created)
+    total_leads = (
+        db.query(Lead).filter(Lead.created_at >= date_from, Lead.created_at <= date_to).count()
+    )
+
+    # Stage 2: Quote Requests (leads with contact info)
+    quote_requests = (
+        db.query(Lead)
+        .filter(
+            Lead.created_at >= date_from,
+            Lead.created_at <= date_to,
+            Lead.contact_name.isnot(None),
+        )
+        .count()
+    )
+
+    # Stage 3: Qualified Leads
+    qualified = (
+        db.query(Lead)
+        .filter(
+            Lead.created_at >= date_from,
+            Lead.created_at <= date_to,
+            Lead.status.in_([LeadStatus.QUALIFIED, LeadStatus.CONVERTED]),
+        )
+        .count()
+    )
+
+    # Stage 4: Bookings Created
+    bookings_created = (
+        db.query(Booking)
+        .filter(Booking.created_at >= date_from, Booking.created_at <= date_to)
+        .count()
+    )
+
+    # Stage 5: Deposits Paid
+    deposits_paid = (
+        db.query(Booking)
+        .filter(
+            Booking.created_at >= date_from,
+            Booking.created_at <= date_to,
+            Booking.payment_status.in_(["deposit_paid", "paid"]),
+        )
+        .count()
+    )
+
+    # Stage 6: Fully Paid
+    fully_paid = (
+        db.query(Booking)
+        .filter(
+            Booking.created_at >= date_from,
+            Booking.created_at <= date_to,
+            Booking.payment_status == "paid",
+        )
+        .count()
+    )
+
+    # Stage 7: Completed Events
+    completed = (
+        db.query(Booking)
+        .filter(
+            Booking.created_at >= date_from,
+            Booking.created_at <= date_to,
+            Booking.status == "completed",
+        )
+        .count()
+    )
+
+    # Calculate conversion rates
+    stages = [
+        {"stage": "Total Leads", "count": total_leads, "conversion_rate": 100.0},
+        {
+            "stage": "Quote Requests",
+            "count": quote_requests,
+            "conversion_rate": (quote_requests / total_leads * 100) if total_leads > 0 else 0,
+        },
+        {
+            "stage": "Qualified",
+            "count": qualified,
+            "conversion_rate": (qualified / total_leads * 100) if total_leads > 0 else 0,
+        },
+        {
+            "stage": "Bookings Created",
+            "count": bookings_created,
+            "conversion_rate": (bookings_created / total_leads * 100) if total_leads > 0 else 0,
+        },
+        {
+            "stage": "Deposits Paid",
+            "count": deposits_paid,
+            "conversion_rate": (deposits_paid / total_leads * 100) if total_leads > 0 else 0,
+        },
+        {
+            "stage": "Fully Paid",
+            "count": fully_paid,
+            "conversion_rate": (fully_paid / total_leads * 100) if total_leads > 0 else 0,
+        },
+        {
+            "stage": "Completed",
+            "count": completed,
+            "conversion_rate": (completed / total_leads * 100) if total_leads > 0 else 0,
+        },
+    ]
+
+    # Calculate drop-off rates between stages
+    drop_offs = []
+    for i in range(len(stages) - 1):
+        current_count = stages[i]["count"]
+        next_count = stages[i + 1]["count"]
+        drop_off_count = current_count - next_count
+        drop_off_rate = (drop_off_count / current_count * 100) if current_count > 0 else 0
+
+        drop_offs.append(
+            {
+                "from_stage": stages[i]["stage"],
+                "to_stage": stages[i + 1]["stage"],
+                "drop_off_count": drop_off_count,
+                "drop_off_rate": drop_off_rate,
+            }
+        )
+
+    return {
+        "funnel_stages": stages,
+        "drop_offs": drop_offs,
+        "overall_conversion_rate": (completed / total_leads * 100) if total_leads > 0 else 0,
+        "date_range": {"from": date_from.isoformat(), "to": date_to.isoformat()},
+    }
+
+
+@router.get("/menu-item-popularity")
+async def get_menu_item_popularity(
+    date_from: date | None = Query(None),
+    date_to: date | None = Query(None),
+    db: Session = Depends(get_db),
+):
+    """
+    Analyze menu item popularity and preferences.
+
+    Note: This is a placeholder implementation. Requires menu_items table
+    or extracting from booking special_requests/notes.
+    """
+    if not date_from:
+        date_from = datetime.now().date() - timedelta(days=30)
+    if not date_to:
+        date_to = datetime.now().date()
+
+    # For now, analyze guest count preferences as a proxy for menu tiers
+    guest_count_distribution = (
+        db.query(
+            func.case(
+                [
+                    (Booking.total_guests <= 10, "Small (1-10)"),
+                    (Booking.total_guests <= 25, "Medium (11-25)"),
+                    (Booking.total_guests <= 50, "Large (26-50)"),
+                ],
+                else_="Extra Large (50+)",
+            ).label("party_size"),
+            func.count(Booking.id).label("booking_count"),
+            func.sum(Booking.total_due_cents).label("revenue_cents"),
+        )
+        .filter(
+            Booking.created_at >= date_from,
+            Booking.created_at <= date_to,
+            Booking.status != "cancelled",
+        )
+        .group_by("party_size")
+        .all()
+    )
+
+    popularity_data = []
+    total_bookings = sum(item.booking_count for item in guest_count_distribution)
+
+    for party_size, booking_count, revenue_cents in guest_count_distribution:
+        popularity_data.append(
+            {
+                "category": party_size,
+                "booking_count": booking_count,
+                "revenue": float(revenue_cents or 0) / 100,
+                "popularity_percentage": (
+                    (booking_count / total_bookings * 100) if total_bookings > 0 else 0
+                ),
+                "avg_order_value": (
+                    float(revenue_cents or 0) / 100 / booking_count if booking_count > 0 else 0
+                ),
+            }
+        )
+
+    # Sort by popularity
+    popularity_data.sort(key=lambda x: x["booking_count"], reverse=True)
+
+    return {
+        "items": popularity_data,
+        "total_bookings_analyzed": total_bookings,
+        "date_range": {"from": date_from.isoformat(), "to": date_to.isoformat()},
+        "note": "This endpoint analyzes party size distribution as a proxy for menu preferences. Full menu item tracking requires additional data model.",
+    }
+
+
+@router.get("/geographic-distribution")
+async def get_geographic_distribution(db: Session = Depends(get_db)):
+    """
+    Analyze customer and booking geographic distribution.
+
+    Returns distribution by station/location.
+    """
+    from models.legacy_identity import Station
+
+    # Get bookings by station
+    station_distribution = (
+        db.query(
+            Station.id,
+            Station.name,
+            Station.address,
+            func.count(Booking.id).label("booking_count"),
+            func.sum(Booking.total_due_cents).label("revenue_cents"),
+            func.count(func.distinct(Booking.customer_id)).label("unique_customers"),
+        )
+        .join(Booking, Station.id == Booking.station_id)
+        .filter(Booking.status != "cancelled")
+        .group_by(Station.id, Station.name, Station.address)
+        .all()
+    )
+
+    total_bookings = sum(item.booking_count for item in station_distribution)
+    total_revenue = sum(item.revenue_cents or 0 for item in station_distribution) / 100
+
+    distribution_data = []
+    for item in station_distribution:
+        distribution_data.append(
+            {
+                "station_id": str(item.id),
+                "station_name": item.name,
+                "location": item.address,
+                "booking_count": item.booking_count,
+                "revenue": float(item.revenue_cents or 0) / 100,
+                "unique_customers": item.unique_customers,
+                "market_share_bookings": (
+                    (item.booking_count / total_bookings * 100) if total_bookings > 0 else 0
+                ),
+                "market_share_revenue": (
+                    (float(item.revenue_cents or 0) / 100 / total_revenue * 100)
+                    if total_revenue > 0
+                    else 0
+                ),
+            }
+        )
+
+    # Sort by revenue
+    distribution_data.sort(key=lambda x: x["revenue"], reverse=True)
+
+    return {
+        "stations": distribution_data,
+        "summary": {
+            "total_stations": len(distribution_data),
+            "total_bookings": total_bookings,
+            "total_revenue": total_revenue,
+            "avg_bookings_per_station": (
+                total_bookings / len(distribution_data) if distribution_data else 0
+            ),
+        },
+    }
+
+
+@router.get("/seasonal-trends")
+async def get_seasonal_trends(years: int = Query(1, ge=1, le=5), db: Session = Depends(get_db)):
+    """
+    Analyze seasonal booking trends and patterns.
+
+    Returns:
+        - Monthly booking patterns
+        - Day of week analysis
+        - Seasonal revenue trends
+        - Peak/off-peak identification
+    """
+    start_date = datetime.now() - timedelta(days=365 * years)
+
+    # Monthly trends
+    monthly_trends = (
+        db.query(
+            func.extract("month", Booking.created_at).label("month"),
+            func.count(Booking.id).label("booking_count"),
+            func.sum(Booking.total_due_cents).label("revenue_cents"),
+            func.avg(Booking.total_guests).label("avg_party_size"),
+        )
+        .filter(Booking.created_at >= start_date, Booking.status != "cancelled")
+        .group_by("month")
+        .order_by("month")
+        .all()
+    )
+
+    month_names = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ]
+
+    monthly_data = []
+    for month, booking_count, revenue_cents, avg_party_size in monthly_trends:
+        monthly_data.append(
+            {
+                "month": month_names[int(month) - 1],
+                "month_number": int(month),
+                "booking_count": booking_count,
+                "revenue": float(revenue_cents or 0) / 100,
+                "avg_party_size": float(avg_party_size or 0),
+            }
+        )
+
+    # Day of week trends
+    day_of_week_trends = (
+        db.query(
+            func.extract("dow", Booking.date).label("day_of_week"),
+            func.count(Booking.id).label("booking_count"),
+            func.sum(Booking.total_due_cents).label("revenue_cents"),
+        )
+        .filter(Booking.created_at >= start_date, Booking.status != "cancelled")
+        .group_by("day_of_week")
+        .order_by("day_of_week")
+        .all()
+    )
+
+    day_names = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+
+    day_of_week_data = []
+    for day_num, booking_count, revenue_cents in day_of_week_trends:
+        day_of_week_data.append(
+            {
+                "day": day_names[int(day_num)],
+                "day_number": int(day_num),
+                "booking_count": booking_count,
+                "revenue": float(revenue_cents or 0) / 100,
+            }
+        )
+
+    # Identify peak months
+    if monthly_data:
+        peak_month = max(monthly_data, key=lambda x: x["booking_count"])
+        off_peak_month = min(monthly_data, key=lambda x: x["booking_count"])
+    else:
+        peak_month = off_peak_month = None
+
+    # Identify peak days
+    if day_of_week_data:
+        peak_day = max(day_of_week_data, key=lambda x: x["booking_count"])
+        slowest_day = min(day_of_week_data, key=lambda x: x["booking_count"])
+    else:
+        peak_day = slowest_day = None
+
+    return {
+        "monthly_trends": monthly_data,
+        "day_of_week_trends": day_of_week_data,
+        "peak_periods": {
+            "peak_month": peak_month,
+            "off_peak_month": off_peak_month,
+            "peak_day": peak_day,
+            "slowest_day": slowest_day,
+        },
+        "analysis_period_years": years,
+    }
+
+
 # Helper functions
 async def _get_lead_analytics(date_from: date, date_to: date, db: Session) -> LeadAnalytics:
     """Get lead analytics for date range."""

@@ -1,26 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
 import {
-  Mail,
-  ArrowLeft,
-  Calendar,
-  Users,
-  Eye,
-  MousePointerClick,
-  UserX,
   AlertCircle,
-  Send,
+  ArrowLeft,
   Edit,
+  Eye,
+  Mail,
+  MousePointerClick,
+  Send,
   Trash2,
+  Users,
+  UserX,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect,useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { StatsCard } from '@/components/ui/stats-card';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { EmptyState } from '@/components/ui/empty-state';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { StatsCard } from '@/components/ui/stats-card';
 
 interface Campaign {
   id: number;
@@ -54,7 +53,7 @@ export default function CampaignDetailsPage() {
       setIsLoading(true);
       const response = await fetch(`/api/newsletter/campaigns/${campaignId}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
         },
       });
 
@@ -74,15 +73,23 @@ export default function CampaignDetailsPage() {
   }, [campaignId]);
 
   const handleSend = async () => {
-    if (!confirm('Are you sure you want to send this campaign to all subscribers?')) return;
+    if (
+      !confirm(
+        'Are you sure you want to send this campaign to all subscribers?'
+      )
+    )
+      return;
 
     try {
-      const response = await fetch(`/api/newsletter/campaigns/${campaignId}/send`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
-        },
-      });
+      const response = await fetch(
+        `/api/newsletter/campaigns/${campaignId}/send`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+          },
+        }
+      );
 
       if (!response.ok) throw new Error('Failed to send');
 
@@ -101,7 +108,7 @@ export default function CampaignDetailsPage() {
       const response = await fetch(`/api/newsletter/campaigns/${campaignId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
         },
       });
 
@@ -161,18 +168,22 @@ export default function CampaignDetailsPage() {
     );
   }
 
-  const openRate = campaign.total_recipients > 0
-    ? ((campaign.opened / campaign.total_recipients) * 100).toFixed(1)
-    : '0.0';
-  const clickRate = campaign.total_recipients > 0
-    ? ((campaign.clicked / campaign.total_recipients) * 100).toFixed(1)
-    : '0.0';
-  const bounceRate = campaign.total_recipients > 0
-    ? ((campaign.bounced / campaign.total_recipients) * 100).toFixed(1)
-    : '0.0';
-  const unsubscribeRate = campaign.total_recipients > 0
-    ? ((campaign.unsubscribed / campaign.total_recipients) * 100).toFixed(1)
-    : '0.0';
+  const openRate =
+    campaign.total_recipients > 0
+      ? ((campaign.opened / campaign.total_recipients) * 100).toFixed(1)
+      : '0.0';
+  const clickRate =
+    campaign.total_recipients > 0
+      ? ((campaign.clicked / campaign.total_recipients) * 100).toFixed(1)
+      : '0.0';
+  const bounceRate =
+    campaign.total_recipients > 0
+      ? ((campaign.bounced / campaign.total_recipients) * 100).toFixed(1)
+      : '0.0';
+  const unsubscribeRate =
+    campaign.total_recipients > 0
+      ? ((campaign.unsubscribed / campaign.total_recipients) * 100).toFixed(1)
+      : '0.0';
 
   return (
     <div className="space-y-6">
@@ -187,8 +198,12 @@ export default function CampaignDetailsPage() {
           </Link>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-900">{campaign.name}</h1>
-              <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(campaign.status)}`}>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {campaign.name}
+              </h1>
+              <span
+                className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(campaign.status)}`}
+              >
                 {campaign.status}
               </span>
             </div>
@@ -197,8 +212,8 @@ export default function CampaignDetailsPage() {
               {campaign.sent_at
                 ? `Sent on ${formatDate(campaign.sent_at)}`
                 : campaign.scheduled_at
-                ? `Scheduled for ${formatDate(campaign.scheduled_at)}`
-                : `Created on ${formatDate(campaign.created_at)}`}
+                  ? `Scheduled for ${formatDate(campaign.scheduled_at)}`
+                  : `Created on ${formatDate(campaign.created_at)}`}
             </p>
           </div>
         </div>
@@ -208,7 +223,9 @@ export default function CampaignDetailsPage() {
             <>
               <Button
                 variant="outline"
-                onClick={() => router.push(`/newsletter/campaigns/${campaignId}/edit`)}
+                onClick={() =>
+                  router.push(`/newsletter/campaigns/${campaignId}/edit`)
+                }
               >
                 <Edit className="w-4 h-4 mr-2" />
                 Edit
@@ -219,7 +236,11 @@ export default function CampaignDetailsPage() {
               </Button>
             </>
           )}
-          <Button variant="outline" onClick={handleDelete} className="text-red-600 hover:text-red-700">
+          <Button
+            variant="outline"
+            onClick={handleDelete}
+            className="text-red-600 hover:text-red-700"
+          >
             <Trash2 className="w-4 h-4 mr-2" />
             Delete
           </Button>
@@ -235,11 +256,7 @@ export default function CampaignDetailsPage() {
               value={campaign.total_recipients}
               icon={Users}
             />
-            <StatsCard
-              title="Open Rate"
-              value={`${openRate}%`}
-              icon={Eye}
-            />
+            <StatsCard title="Open Rate" value={`${openRate}%`} icon={Eye} />
             <StatsCard
               title="Click Rate"
               value={`${clickRate}%`}
@@ -257,7 +274,9 @@ export default function CampaignDetailsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Opens</p>
-                  <p className="mt-2 text-3xl font-semibold text-gray-900">{campaign.opened.toLocaleString()}</p>
+                  <p className="mt-2 text-3xl font-semibold text-gray-900">
+                    {campaign.opened.toLocaleString()}
+                  </p>
                 </div>
                 <Eye className="w-8 h-8 text-blue-600" />
               </div>
@@ -267,7 +286,9 @@ export default function CampaignDetailsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Clicks</p>
-                  <p className="mt-2 text-3xl font-semibold text-gray-900">{campaign.clicked.toLocaleString()}</p>
+                  <p className="mt-2 text-3xl font-semibold text-gray-900">
+                    {campaign.clicked.toLocaleString()}
+                  </p>
                 </div>
                 <MousePointerClick className="w-8 h-8 text-green-600" />
               </div>
@@ -276,8 +297,12 @@ export default function CampaignDetailsPage() {
             <div className="bg-white shadow sm:rounded-lg p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Unsubscribed</p>
-                  <p className="mt-2 text-3xl font-semibold text-gray-900">{campaign.unsubscribed.toLocaleString()}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Unsubscribed
+                  </p>
+                  <p className="mt-2 text-3xl font-semibold text-gray-900">
+                    {campaign.unsubscribed.toLocaleString()}
+                  </p>
                 </div>
                 <UserX className="w-8 h-8 text-red-600" />
               </div>
@@ -315,7 +340,9 @@ export default function CampaignDetailsPage() {
       {/* Campaign Details */}
       <div className="bg-white shadow sm:rounded-lg">
         <div className="px-4 py-5 sm:p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Campaign Details</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">
+            Campaign Details
+          </h2>
           <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
             <div>
               <dt className="text-sm font-medium text-gray-500">Campaign ID</dt>
@@ -324,33 +351,49 @@ export default function CampaignDetailsPage() {
             <div>
               <dt className="text-sm font-medium text-gray-500">Status</dt>
               <dd className="mt-1">
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(campaign.status)}`}>
+                <span
+                  className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(campaign.status)}`}
+                >
                   {campaign.status}
                 </span>
               </dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">Subject Line</dt>
+              <dt className="text-sm font-medium text-gray-500">
+                Subject Line
+              </dt>
               <dd className="mt-1 text-sm text-gray-900">{campaign.subject}</dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">Total Recipients</dt>
-              <dd className="mt-1 text-sm text-gray-900">{campaign.total_recipients.toLocaleString()}</dd>
+              <dt className="text-sm font-medium text-gray-500">
+                Total Recipients
+              </dt>
+              <dd className="mt-1 text-sm text-gray-900">
+                {campaign.total_recipients.toLocaleString()}
+              </dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-500">Created At</dt>
-              <dd className="mt-1 text-sm text-gray-900">{formatDate(campaign.created_at)}</dd>
+              <dd className="mt-1 text-sm text-gray-900">
+                {formatDate(campaign.created_at)}
+              </dd>
             </div>
             {campaign.scheduled_at && (
               <div>
-                <dt className="text-sm font-medium text-gray-500">Scheduled For</dt>
-                <dd className="mt-1 text-sm text-gray-900">{formatDate(campaign.scheduled_at)}</dd>
+                <dt className="text-sm font-medium text-gray-500">
+                  Scheduled For
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900">
+                  {formatDate(campaign.scheduled_at)}
+                </dd>
               </div>
             )}
             {campaign.sent_at && (
               <div>
                 <dt className="text-sm font-medium text-gray-500">Sent At</dt>
-                <dd className="mt-1 text-sm text-gray-900">{formatDate(campaign.sent_at)}</dd>
+                <dd className="mt-1 text-sm text-gray-900">
+                  {formatDate(campaign.sent_at)}
+                </dd>
               </div>
             )}
           </dl>
