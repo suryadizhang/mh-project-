@@ -9,6 +9,7 @@
 ## ✅ Pre-Deployment Status
 
 ### API Integrations: 8/8 PASSING ✅
+
 - ✅ Google Maps API - Travel fee calculator working
 - ✅ RingCentral API - SMS/Voice with JWT authentication
 - ✅ OpenAI API - AI chatbot ready
@@ -19,6 +20,7 @@
 - ✅ Environment Variables - All configured
 
 ### Backend Server
+
 - ✅ FastAPI application tested
 - ✅ All dependencies installed
 - ✅ Database schema ready
@@ -29,10 +31,11 @@
 ## 🔧 Deployment Steps
 
 ### 1. Deploy Backend
+
 ```bash
 # Choose your deployment platform:
 # - Railway.app
-# - Render.com  
+# - Render.com
 # - DigitalOcean
 # - AWS/GCP/Azure
 # - Vercel (with Python runtime)
@@ -42,6 +45,7 @@
 ```
 
 ### 2. Deploy Frontend
+
 ```bash
 cd apps/customer
 npm run build
@@ -49,14 +53,17 @@ npm run build
 ```
 
 ### 3. Configure Webhooks (AFTER deployment)
+
 See: `WEBHOOK_CONFIGURATION_PRODUCTION.md`
 
 **Required webhooks:**
+
 - [ ] Stripe payment webhooks
-- [ ] Meta (Facebook/Instagram) message webhooks  
+- [ ] Meta (Facebook/Instagram) message webhooks
 - [ ] RingCentral SMS webhooks (optional)
 
 **Get your production URLs first:**
+
 - Backend: `https://api.yourdomain.com`
 - Frontend: `https://yourdomain.com`
 
@@ -67,6 +74,7 @@ See: `WEBHOOK_CONFIGURATION_PRODUCTION.md`
 Copy these to your production environment:
 
 ### Critical (Required)
+
 ```bash
 # Database
 DATABASE_URL=postgresql://<username>:<password>@<host>:5432/<database>
@@ -91,42 +99,43 @@ SMTP_PASSWORD=your-app-password
 ```
 
 ### API Integrations (Copy from .env)
+
 ```bash
 # Google Maps
-GOOGLE_MAPS_API_KEY=AIzaSyCx...Ivhs
-GOOGLE_CLOUD_PROJECT=my-hibachi-crm
-GOOGLE_CLIENT_ID=28565005233-...
-GOOGLE_CLIENT_SECRET=GOCSPX-...bayC
+GOOGLE_MAPS_API_KEY=YOUR_GOOGLE_MAPS_API_KEY
+GOOGLE_CLOUD_PROJECT=YOUR_PROJECT_ID
+GOOGLE_CLIENT_ID=YOUR_CLIENT_ID
+GOOGLE_CLIENT_SECRET=YOUR_CLIENT_SECRET
 
 # RingCentral
-RC_CLIENT_ID=3ADYc6Nv8qxeddtHygnfIK
-RC_CLIENT_SECRET=V665HVqP...54Cy
-RC_JWT_TOKEN=your-jwt-token
-RC_USERNAME=suryadizhang.chef@gmail.com
-RC_EXTENSION=101
-RC_SMS_FROM=+19167408768
+RC_CLIENT_ID=YOUR_RC_CLIENT_ID
+RC_CLIENT_SECRET=YOUR_RC_CLIENT_SECRET
+RC_JWT_TOKEN=YOUR_JWT_TOKEN
+RC_USERNAME=YOUR_RC_USERNAME
+RC_EXTENSION=YOUR_EXTENSION
+RC_SMS_FROM=YOUR_RC_PHONE_NUMBER
 
 # OpenAI
-OPENAI_API_KEY=sk-svcac...eCoA
+OPENAI_API_KEY=YOUR_OPENAI_API_KEY
 OPENAI_MODEL=gpt-4
 
 # Plaid
-PLAID_CLIENT_ID=68ffbe986a1a5500222404db
-PLAID_SECRET=5216f623...e24c
+PLAID_CLIENT_ID=YOUR_PLAID_CLIENT_ID
+PLAID_SECRET=YOUR_PLAID_SECRET
 PLAID_ENV=production  # Change from 'sandbox'!
 
 # Meta (Facebook/Instagram)
-META_APP_ID=1839409339973429
-META_APP_SECRET=f128b977...acc3
-META_PAGE_ACCESS_TOKEN=EAAaI7tx...s8ZD
-META_VERIFY_TOKEN=myhibachi-meta-webhook-verify-token-2025
-META_PAGE_ID=664861203383602
-META_INSTAGRAM_ID=17841475429729945
+META_APP_ID=YOUR_META_APP_ID
+META_APP_SECRET=YOUR_META_APP_SECRET
+META_PAGE_ACCESS_TOKEN=YOUR_META_PAGE_ACCESS_TOKEN
+META_VERIFY_TOKEN=YOUR_VERIFY_TOKEN
+META_PAGE_ID=YOUR_PAGE_ID
+META_INSTAGRAM_ID=YOUR_INSTAGRAM_ID
 
 # Cloudinary
-CLOUDINARY_CLOUD_NAME=dlubugier
-CLOUDINARY_API_KEY=65291356...7941
-CLOUDINARY_API_SECRET=XWmGc5BZ...oKRg
+CLOUDINARY_CLOUD_NAME=YOUR_CLOUD_NAME
+CLOUDINARY_API_KEY=YOUR_API_KEY
+CLOUDINARY_API_SECRET=YOUR_API_SECRET
 
 # Business Info
 BUSINESS_ADDRESS=47481 Towhee Street, Fremont, CA 94539
@@ -141,17 +150,20 @@ TRAVEL_FEE_PER_MILE_CENTS=200
 ## ⚠️ Important Changes for Production
 
 ### 1. Use Production API Keys
+
 - [ ] Stripe: Switch from `sk_test_...` to `sk_live_...`
 - [ ] Plaid: Change `PLAID_ENV` from `sandbox` to `production`
 - [ ] All other APIs: Already using production keys ✅
 
 ### 2. Security
+
 - [ ] Generate new `JWT_SECRET` (don't use dev secret!)
 - [ ] Enable CORS only for your domain
 - [ ] Set `DEBUG=False` in production
 - [ ] Use HTTPS only (no HTTP)
 
 ### 3. Database
+
 - [ ] Run migrations: `alembic upgrade head`
 - [ ] Backup database regularly
 - [ ] Set up connection pooling
@@ -161,6 +173,7 @@ TRAVEL_FEE_PER_MILE_CENTS=200
 ## 🧪 Post-Deployment Testing
 
 ### Test Checklist
+
 - [ ] Homepage loads correctly
 - [ ] Booking form submits successfully
 - [ ] Payment processing works (test with small amount)
@@ -171,6 +184,7 @@ TRAVEL_FEE_PER_MILE_CENTS=200
 - [ ] Image uploads work (Cloudinary)
 
 ### Monitoring
+
 - [ ] Set up error tracking (Sentry.io)
 - [ ] Configure uptime monitoring (UptimeRobot)
 - [ ] Set up log aggregation
@@ -181,13 +195,16 @@ TRAVEL_FEE_PER_MILE_CENTS=200
 ## 📞 Support & Resources
 
 ### Documentation
+
 - API Integration Tests: `apps/backend/test_all_integrations.py`
 - Webhook Configuration: `WEBHOOK_CONFIGURATION_PRODUCTION.md`
 - Environment Setup: `ENV_SETUP_CHECKLIST.md`
 
 ### Quick Links
+
 - Stripe Dashboard: https://dashboard.stripe.com
-- Meta Developer Console: https://developers.facebook.com/apps/1839409339973429
+- Meta Developer Console:
+  https://developers.facebook.com/apps/1839409339973429
 - RingCentral Console: https://developers.ringcentral.com
 - Cloudinary Dashboard: https://cloudinary.com/console
 
