@@ -1,0 +1,204 @@
+/* Service Areas Section Styles */
+
+.serviceAreas {
+  padding: var(--menu-spacing-xl) var(--menu-spacing-lg);
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: var(--menu-border-radius-lg);
+  margin-bottom: var(--menu-spacing-xl);
+}
+
+.sectionTitle {
+  text-align: center;
+  font-size: var(--menu-font-size-4xl);
+  font-weight: 700;
+  margin-bottom: var(--menu-spacing-md);
+  color: var(--menu-text-primary);
+  line-height: 1.2;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.serviceIntro {
+  max-width: 800px;
+  margin: 0 auto var(--menu-spacing-xl);
+  font-size: var(--menu-font-size-lg);
+  color: var(--menu-text-secondary);
+  text-align: center;
+  line-height: 1.6;
+}
+
+.ctaButtons {
+  text-align: center;
+  margin-bottom: var(--menu-spacing-xl);
+  display: flex;
+  justify-content: center;
+  gap: var(--menu-spacing-md);
+  flex-wrap: wrap;
+}
+
+.primaryBtn,
+.secondaryBtn {
+  padding: var(--menu-spacing-md) var(--menu-spacing-lg);
+  border-radius: var(--menu-border-radius-md);
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--menu-transition-normal);
+  font-size: var(--menu-font-size-md);
+  display: inline-block;
+}
+
+.primaryBtn {
+  background: linear-gradient(135deg, var(--menu-primary), #ff6b6b);
+  color: white;
+  border: 2px solid transparent;
+}
+
+.primaryBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--menu-shadow-lg);
+  color: white;
+  text-decoration: none;
+}
+
+.secondaryBtn {
+  background: transparent;
+  color: var(--menu-primary);
+  border: 2px solid var(--menu-primary);
+}
+
+.secondaryBtn:hover {
+  background: var(--menu-primary);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--menu-shadow-lg);
+  text-decoration: none;
+}
+
+.areasGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: var(--menu-spacing-lg);
+  margin-bottom: var(--menu-spacing-xl);
+}
+
+.serviceAreaCard {
+  background: white;
+  border-radius: var(--menu-border-radius-lg);
+  padding: var(--menu-spacing-lg);
+  box-shadow: var(--menu-shadow-md);
+  border: 2px solid transparent;
+  transition: var(--menu-transition-normal);
+}
+
+.serviceAreaCard:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--menu-shadow-xl);
+  border-color: var(--menu-primary);
+}
+
+.areaTitle {
+  color: var(--menu-text-primary);
+  font-size: var(--menu-font-size-xl);
+  font-weight: 700;
+  margin-bottom: var(--menu-spacing-sm);
+  text-align: center;
+}
+
+.areaSubtitle {
+  color: var(--menu-success);
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: var(--menu-spacing-md);
+  font-size: var(--menu-font-size-md);
+}
+
+.areaList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.areaList li {
+  padding: var(--menu-spacing-xs) 0;
+  color: var(--menu-text-secondary);
+  border-bottom: 1px solid #f0f0f0;
+  transition: var(--menu-transition-fast);
+  font-size: var(--menu-font-size-sm);
+  line-height: 1.5;
+}
+
+.areaList li:last-child {
+  border-bottom: none;
+}
+
+.areaList li:hover {
+  color: var(--menu-primary);
+  padding-left: var(--menu-spacing-sm);
+  background: #f8f9fa;
+}
+
+.travelNote {
+  background: white;
+  border-radius: var(--menu-border-radius-md);
+  padding: var(--menu-spacing-md);
+  text-align: center;
+  border-left: 4px solid var(--menu-info);
+  box-shadow: var(--menu-shadow-sm);
+}
+
+.travelNote p {
+  margin: 0;
+  color: var(--menu-text-secondary);
+  font-size: var(--menu-font-size-sm);
+  line-height: 1.5;
+}
+
+.travelNote strong {
+  color: var(--menu-text-primary);
+}
+
+/* Responsive Design */
+@media (width <= 768px) {
+  .sectionTitle {
+    font-size: var(--menu-font-size-3xl);
+    line-height: 1.3;
+  }
+
+  .serviceIntro {
+    font-size: var(--menu-font-size-md);
+  }
+
+  .ctaButtons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .primaryBtn,
+  .secondaryBtn {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .areasGrid {
+    grid-template-columns: 1fr;
+    gap: var(--menu-spacing-md);
+  }
+}
+
+@media (width <= 576px) {
+  .serviceAreas {
+    padding: var(--menu-spacing-lg) var(--menu-spacing-md);
+  }
+
+  .sectionTitle {
+    font-size: var(--menu-font-size-2xl);
+    line-height: 1.4;
+  }
+
+  .serviceAreaCard {
+    padding: var(--menu-spacing-md);
+  }
+}

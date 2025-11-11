@@ -1,0 +1,156 @@
+/* Home Page CSS Variables and Global Tokens */
+
+:root {
+  /* Home-specific color palette */
+  --home-primary: #dc3545;
+  --home-primary-dark: #c82333;
+  --home-secondary: #6c757d;
+  --home-accent: #ff6b6b;
+
+  /* Background gradients */
+  --home-gradient-primary: linear-gradient(
+    135deg,
+    var(--home-primary) 0%,
+    var(--home-accent) 100%
+  );
+  --home-gradient-hero: linear-gradient(
+    135deg,
+    rgb(220 53 69 / 90%) 0%,
+    rgb(255 107 107 / 90%) 100%
+  );
+  --home-gradient-card: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+
+  /* Hero video styles */
+  --home-hero-height: 533px;
+  --home-hero-overlay: rgb(0 0 0 / 50%);
+
+  /* Animation durations */
+  --home-animation-slow: 0.8s;
+  --home-animation-normal: 0.6s;
+  --home-animation-fast: 0.3s;
+
+  /* Component spacing */
+  --home-section-padding: 3rem 0;
+  --home-container-padding: 0 1rem;
+  --home-card-padding: 2rem;
+
+  /* Typography scales */
+  --home-title-size: 3.5rem;
+  --home-subtitle-size: 1.25rem;
+  --home-section-title-size: 2.5rem;
+  --home-card-title-size: 1.5rem;
+
+  /* Shadows and effects */
+  --home-card-shadow: 0 10px 30px rgb(0 0 0 / 10%);
+  --home-card-shadow-hover: 0 20px 40px rgb(0 0 0 / 15%);
+  --home-text-shadow: 0 2px 4px rgb(0 0 0 / 30%);
+}
+
+/* Global home page container */
+.home-container {
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Loading placeholder styles */
+.loading-placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 0;
+  font-size: 1.1rem;
+  color: var(--home-secondary);
+  background: rgb(248 249 250 / 50%);
+  margin: 1rem 0;
+  border-radius: 10px;
+  font-style: italic;
+}
+
+/* Hero Video Section Base */
+.about-section {
+  position: relative;
+  padding-top: 0;
+  overflow: hidden;
+}
+
+.hero-media-container {
+  position: relative;
+  width: 100%;
+  height: var(--home-hero-height);
+  overflow: hidden;
+  margin-bottom: 3rem;
+}
+
+.hero-media-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--home-hero-overlay);
+  z-index: 1;
+}
+
+.hero-media {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+/* Scroll Animation Base Classes */
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all var(--home-animation-normal) ease-in-out;
+}
+
+.animate-on-scroll.animate-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Shared component styles */
+.section-title {
+  font-size: var(--home-section-title-size);
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--menu-text-primary);
+  line-height: 1.2;
+}
+
+.section-subtitle {
+  font-size: var(--home-subtitle-size);
+  text-align: center;
+  color: var(--menu-text-secondary);
+  margin-bottom: 3rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+/* Responsive adjustments */
+@media (width <= 768px) {
+  :root {
+    --home-title-size: 2.5rem;
+    --home-section-title-size: 2rem;
+    --home-hero-height: 400px;
+    --home-section-padding: 2rem 0;
+    --home-card-padding: 1.5rem;
+  }
+}
+
+@media (width <= 576px) {
+  :root {
+    --home-title-size: 2rem;
+    --home-section-title-size: 1.75rem;
+    --home-hero-height: 300px;
+    --home-container-padding: 0 0.5rem;
+    --home-card-padding: 1rem;
+  }
+}

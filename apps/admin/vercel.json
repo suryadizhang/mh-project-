@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control", 
+          "value": "public, max-age=3600"
+        }
+      ]
+    }
+  ]
+}

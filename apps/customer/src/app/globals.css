@@ -1,0 +1,353 @@
+/* ==========================================================================
+   MY HIBACHI - CSS ARCHITECTURE V2 (SCOPED, PHASED, AND SAFE)
+   ========================================================================== */
+
+@import url('tailwindcss');
+@import url('tw-animate-css');
+@import '../styles/responsive-images.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* ===== Brand Colors (My Hibachi Design System) ===== */
+  --color-primary: #dc2626;
+  --color-primary-hover: #b91c1c;
+  --color-primary-dark: #991b1b;
+  --color-primary-light: #fef2f2;
+  --color-primary-border: #fecaca;
+  --color-primary-foreground: #ffffff;
+
+  --color-secondary: #f97316;
+  --color-secondary-hover: #ea580c;
+  --color-secondary-dark: #c2410c;
+  --color-secondary-foreground: #ffffff;
+
+  /* ===== Neutral Colors ===== */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-neutral-100: #f9e8d0;
+
+  /* ===== Gray Scale ===== */
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+
+  /* ===== Semantic Colors ===== */
+  --color-success: #10b981;
+  --color-success-light: #d1fae5;
+  --color-error: #ef4444;
+  --color-error-light: #fee2e2;
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-info: #3b82f6;
+  --color-info-light: #dbeafe;
+  --color-destructive: #ef4444;
+
+  /* ===== Additional Semantic Colors ===== */
+  --color-background: #ffffff;
+  --color-foreground: #111827;
+  --color-muted: #f3f4f6;
+  --color-muted-foreground: #6b7280;
+  --color-accent: #f3f4f6;
+  --color-accent-foreground: #111827;
+  --color-card: #ffffff;
+  --color-card-foreground: #111827;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #111827;
+  --color-border: #e5e7eb;
+  --color-input: #e5e7eb;
+  --color-ring: #dc2626;
+
+  /* ===== Sidebar Colors ===== */
+  --color-sidebar: #ffffff;
+  --color-sidebar-foreground: #111827;
+  --color-sidebar-primary: #dc2626;
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: #f3f4f6;
+  --color-sidebar-accent-foreground: #111827;
+  --color-sidebar-border: #e5e7eb;
+  --color-sidebar-ring: #dc2626;
+
+  /* ===== Chart Colors ===== */
+  --color-chart-1: #dc2626;
+  --color-chart-2: #f97316;
+  --color-chart-3: #f59e0b;
+  --color-chart-4: #10b981;
+  --color-chart-5: #3b82f6;
+
+  /* ===== Typography ===== */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-secondary: 'Poppins', 'Inter', sans-serif;
+  --font-heading: 'Poppins', 'Inter', sans-serif;
+
+  /* ===== Font Sizes ===== */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
+
+  /* ===== Spacing Scale ===== */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+  --spacing-4xl: 6rem;
+
+  /* ===== Border Radius ===== */
+  --radius: 0.5rem;
+  --radius-none: 0;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* ===== Z-Index Layers ===== */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
+
+:root {
+  /* ==========================================================================
+     MY HIBACHI DESIGN TOKENS - Brand & UI System
+     ========================================================================== */
+
+  /* Brand Colors */
+  --color-primary: #db2b28;
+  --color-primary-hover: #c41e1a;
+  --color-primary-dark: #a01d1a;
+  --color-primary-contrast: #fff;
+  --color-secondary: #ff6b35;
+  --color-gold: #d4af37;
+  --color-tan: #f5e6d3;
+
+  /* Neutral Colors */
+  --color-dark: #1a1a1a;
+  --color-brown: #4a2d13;
+  --color-text: #1f2937;
+  --color-text-strong: #111827;
+  --text-strong: #111;
+  --text-default: #222;
+  --text-secondary: #333;
+  --text-light: #666;
+  --text-muted: #666;
+  --color-text-muted: #4b5563;
+  --text-on-dark: #fff;
+
+  /* Background Colors */
+  --color-background: #fff;
+  --color-background-light: #fafafa;
+  --color-background-accent: #f8f8f8;
+  --color-border-custom: #e5e5e5;
+
+  /* Status Colors */
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  /* Typography */
+  --font-primary: 'Poppins', system-ui, -apple-system, sans-serif;
+  --font-secondary: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
+  /* Border Radius */
+  --radius-sm-custom: 6px;
+  --radius-md-custom: 12px;
+  --radius-lg-custom: 16px;
+  --radius-xl-custom: 20px;
+  --radius-full: 50px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgb(0 0 0 / 10%);
+  --shadow-md: 0 4px 20px rgb(0 0 0 / 10%);
+  --shadow-lg: 0 8px 32px rgb(0 0 0 / 12%);
+  --shadow-xl: 0 12px 48px rgb(0 0 0 / 15%);
+
+  /* Transitions */
+  --transition-fast: all 0.2s ease;
+  --transition-normal: all 0.3s ease;
+  --transition-slow: all 0.5s ease;
+
+  /* ==========================================================================
+     TAILWIND DESIGN TOKENS (Preserved)
+     ========================================================================== */
+  --radius: 0.625rem;
+  --background: oklch(100% 0 0deg);
+  --foreground: oklch(12.9% 0.042 264.695deg);
+  --card: oklch(100% 0 0deg);
+  --card-foreground: oklch(12.9% 0.042 264.695deg);
+  --popover: oklch(100% 0 0deg);
+  --popover-foreground: oklch(12.9% 0.042 264.695deg);
+  --primary: oklch(20.8% 0.042 265.755deg);
+  --primary-foreground: oklch(98.4% 0.003 247.858deg);
+  --secondary: oklch(96.8% 0.007 247.896deg);
+  --secondary-foreground: oklch(20.8% 0.042 265.755deg);
+  --muted: oklch(96.8% 0.007 247.896deg);
+  --muted-foreground: oklch(55.4% 0.046 257.417deg);
+  --accent: oklch(96.8% 0.007 247.896deg);
+  --accent-foreground: oklch(20.8% 0.042 265.755deg);
+  --destructive: oklch(57.7% 0.245 27.325deg);
+  --border: oklch(92.9% 0.013 255.508deg);
+  --input: oklch(92.9% 0.013 255.508deg);
+  --ring: oklch(70.4% 0.04 256.788deg);
+  --chart-1: oklch(64.6% 0.222 41.116deg);
+  --chart-2: oklch(60% 0.118 184.704deg);
+  --chart-3: oklch(39.8% 0.07 227.392deg);
+  --chart-4: oklch(82.8% 0.189 84.429deg);
+  --chart-5: oklch(76.9% 0.188 70.08deg);
+  --sidebar: oklch(98.4% 0.003 247.858deg);
+  --sidebar-foreground: oklch(12.9% 0.042 264.695deg);
+  --sidebar-primary: oklch(20.8% 0.042 265.755deg);
+  --sidebar-primary-foreground: oklch(98.4% 0.003 247.858deg);
+  --sidebar-accent: oklch(96.8% 0.007 247.896deg);
+  --sidebar-accent-foreground: oklch(20.8% 0.042 265.755deg);
+  --sidebar-border: oklch(92.9% 0.013 255.508deg);
+  --sidebar-ring: oklch(70.4% 0.04 256.788deg);
+}
+
+.dark {
+  --background: oklch(12.9% 0.042 264.695deg);
+  --foreground: oklch(98.4% 0.003 247.858deg);
+  --card: oklch(20.8% 0.042 265.755deg);
+  --card-foreground: oklch(98.4% 0.003 247.858deg);
+  --popover: oklch(20.8% 0.042 265.755deg);
+  --popover-foreground: oklch(98.4% 0.003 247.858deg);
+  --primary: oklch(92.9% 0.013 255.508deg);
+  --primary-foreground: oklch(20.8% 0.042 265.755deg);
+  --secondary: oklch(27.9% 0.041 260.031deg);
+  --secondary-foreground: oklch(98.4% 0.003 247.858deg);
+  --muted: oklch(27.9% 0.041 260.031deg);
+  --muted-foreground: oklch(70.4% 0.04 256.788deg);
+  --accent: oklch(27.9% 0.041 260.031deg);
+  --accent-foreground: oklch(98.4% 0.003 247.858deg);
+  --destructive: oklch(70.4% 0.191 22.216deg);
+  --border: oklch(100% 0 0deg / 10%);
+  --input: oklch(100% 0 0deg / 15%);
+  --ring: oklch(55.1% 0.027 264.364deg);
+  --chart-1: oklch(48.8% 0.243 264.376deg);
+  --chart-2: oklch(69.6% 0.17 162.48deg);
+  --chart-3: oklch(76.9% 0.188 70.08deg);
+  --chart-4: oklch(62.7% 0.265 303.9deg);
+  --chart-5: oklch(64.5% 0.246 16.439deg);
+  --sidebar: oklch(20.8% 0.042 265.755deg);
+  --sidebar-foreground: oklch(98.4% 0.003 247.858deg);
+  --sidebar-primary: oklch(48.8% 0.243 264.376deg);
+  --sidebar-primary-foreground: oklch(98.4% 0.003 247.858deg);
+  --sidebar-accent: oklch(27.9% 0.041 260.031deg);
+  --sidebar-accent-foreground: oklch(98.4% 0.003 247.858deg);
+  --sidebar-border: oklch(100% 0 0deg / 10%);
+  --sidebar-ring: oklch(55.1% 0.027 264.364deg);
+}
+
+@layer base {
+  /* ==========================================================================
+     NORMALIZE & BOX MODEL
+     ========================================================================== */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+  }
+
+  body {
+    font-family: var(--font-secondary);
+    color: var(--text-default);
+    background: var(--color-background);
+  }
+
+  /* Tailwind Base Styles */
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  /* ==========================================================================
+     UTILITY CLASSES - Defensive CSS for Cross-Browser Consistency
+     ========================================================================== */
+
+  /* Text Color Utilities */
+  .u-text-on-dark {
+    color: var(--text-on-dark);
+    text-shadow: 0 1px 2px rgb(0 0 0 / 25%);
+  }
+
+  .u-text-strong {
+    color: var(--text-strong);
+  }
+  .u-text-default {
+    color: var(--text-default);
+  }
+  .u-text-light {
+    color: var(--text-light);
+  }
+  .u-text-muted {
+    color: var(--text-muted);
+  }
+
+  /* Safe Component Patterns */
+  .component-on-primary {
+    /* hard fallback */
+    color: var(--color-primary-contrast);
+  }
+}
+
+/* ==========================================================================
+   SCOPED PAGE CSS - DATA ATTRIBUTE ARCHITECTURE
+   ========================================================================== */
+
+/* Component styles */
+@import url('../styles/utilities.css');
+
+/* Page-specific CSS loaded via data attributes */
+@import url('../styles/pages/menu.page.css');
+@import url('../styles/pages/contact.page.css');
+@import url('../styles/pages/quote.page.css');
+
+/* ==========================================================================
+   LEGACY CSS - LOADED LAST (SCHEDULED FOR DELETION)
+   ========================================================================== */
+
+/* TEMP: Do not add new styles here. These will be migrated to components. */
+@import url('../styles/legacy.css');

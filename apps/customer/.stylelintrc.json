@@ -1,0 +1,30 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "rules": {
+    "no-descending-specificity": null,
+    "selector-max-specificity": null,
+    "declaration-block-no-duplicate-properties": true,
+    "no-duplicate-selectors": true,
+    "block-no-empty": null,
+    "comment-no-empty": null,
+    "selector-class-pattern": null,
+    "keyframes-name-pattern": null,
+    "property-no-vendor-prefix": null,
+    "no-empty-source": null,
+    "at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": [
+          "tailwind",
+          "apply",
+          "variants",
+          "responsive",
+          "screen",
+          "layer",
+          "import"
+        ]
+      }
+    ]
+  },
+  "ignoreFiles": ["**/*.min.css", "**/vendor/**/*.css", "**/node_modules/**/*.css"]
+}

@@ -1,0 +1,236 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-debug.log*
+
+# Build outputs
+/.next/
+/out/
+/build
+/dist
+*.tsbuildinfo
+
+# Environment variables and secrets
+.env*
+!.env.example
+!.env.template
+!.env.*.template
+.secrets
+.secrets.*
+*.pem
+*.key
+config/environments/secrets/
+
+# Prevent documentation bloat
+**/FINAL_*.md
+**/COMPLETE_*.md
+**/IMPLEMENTATION_*.md
+**/COMPREHENSIVE_*.md
+**/AUDIT_*.md
+**/*_COMPLETE.md
+**/*_FINAL.md
+**/*_IMPLEMENTATION.md
+error_check_report*.json
+phase*-report.md
+step*-report.md
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+lib-cov
+coverage/
+.nyc_output
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/
+
+# Backup files
+*.backup
+*.bak
+*.tmp
+*.old
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+__pycache__
+.Python
+build/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+# Python lib directories only (not TypeScript/JavaScript source lib/)
+**/python/lib/
+**/venv/lib/
+**/.venv/lib/
+**/env/lib/
+**/ENV/lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Vercel
+.vercel
+
+# Local development
+.local
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Celery
+celerybeat-schedule
+celerybeat-schedule.db
+celerybeat-schedule-shm
+celerybeat-schedule-wal
+
+# Test files
+test-results/
+playwright-report/
+test-results.xml
+
+# Cache directories
+.cache/
+.npm/
+.eslintcache
+.stylelintcache
+
+# TypeScript
+*.tsbuildinfo
+
+# Optional packages
+.pnp.*
+
+# Test data files (keeping production data)
+*-test.ts
+*-test.js
+*-test.tsx
+*-test.jsx
+
+# Documentation and reports (keep only active ones)
+archive-docs/
+*.backup
+*.old
+*-COMPLETED.md
+*-FINAL.md
+*-SUCCESS.md
+*-REPORT.md
+PHASE_*.md
+CLEANUP_*.md
+COMPREHENSIVE_*.md
+FINAL_*.md
+MIGRATION_*.md
+PRODUCTION_*.md
+PROTOTYPE_*.md
+RELIABLE_*.md
+REFACTOR_*.md
+QUALITY_*.md
+SEO_IMPLEMENTATION_*.md
+STRIPE_INTEGRATION_*.md
+STRIPE_IMPLEMENTATION_*.md
+WEBHOOK_*.md
+*_FIXES.md
+*_COMPLETE.md
+*_SUCCESS.md
+verification/*.md
+verification/step-*.md
+verification/phase*.md
+
+# Keep only essential docs
+!PROJECT_SUMMARY.md
+!DEPLOYMENT_STRATEGY.md
+!README.md
+!docs/

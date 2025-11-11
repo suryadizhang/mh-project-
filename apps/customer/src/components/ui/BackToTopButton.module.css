@@ -1,0 +1,70 @@
+/* BackToTopButton CSS Module */
+
+.button {
+  position: fixed;
+  bottom: var(--spacing-2xl);
+  left: var(--spacing-2xl);
+  z-index: var(--z-index-dropdown);
+
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+
+  background: linear-gradient(135deg, var(--color-secondary) 0%, #f7931e 100%);
+  color: var(--color-white);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 4px 12px rgba(var(--color-secondary-rgb), 0.3);
+  cursor: pointer;
+
+  transition: var(--transition-normal);
+
+  font-size: var(--font-size-xl);
+  pointer-events: auto;
+}
+
+.button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(var(--color-secondary-rgb), 0.4);
+  background: linear-gradient(135deg, #f7931e 0%, var(--color-secondary) 100%);
+}
+
+.button:active {
+  transform: translateY(-1px);
+}
+
+.button:focus {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+/* Animation for appearance */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.button {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .button {
+    bottom: var(--spacing-xl);
+    left: var(--spacing-xl);
+    width: 45px;
+    height: 45px;
+    font-size: var(--font-size-lg);
+  }
+}

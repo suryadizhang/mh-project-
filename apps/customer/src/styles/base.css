@@ -1,0 +1,346 @@
+/* Base CSS - Global resets and animations */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* CSS Custom Properties (Variables) */
+:root {
+  /* Colors */
+  --color-primary: #db2b28;
+  --color-secondary: #ff7b00;
+  --color-gold: #ffb800;
+  --color-success: #28a745;
+  --color-background: #ffffff;
+  --color-background-light: #f8f9fa;
+  --color-background-accent: #f9f4eb;
+  --color-border-custom: rgba(0, 0, 0, 0.1);
+  --text-default: #333333;
+  --text-strong: #111111;
+  --text-light: #666666;
+  --text-on-dark: #ffffff;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-md-custom: 15px;
+  --radius-lg-custom: 20px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+
+  /* Transitions */
+  --transition-fast: all 0.15s ease;
+  --transition-normal: all 0.3s ease;
+  --transition-slow: all 0.5s ease;
+}
+
+/* CSS Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family:
+    Poppins,
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    sans-serif;
+  line-height: 1.6;
+  color: #333;
+  overflow-x: hidden;
+}
+
+/* Improved text contrast for accessibility */
+.text-muted,
+.muted-text {
+  color: #555 !important; /* Better contrast than #666 */
+}
+
+/* Enhanced focus indicators for all interactive elements */
+button:focus,
+input:focus,
+textarea:focus,
+select:focus,
+a:focus {
+  outline: 2px solid #db2b28;
+  outline-offset: 2px;
+}
+
+/* Canonical emoji rule – single source of truth */
+.emoji-visible {
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  background: none;
+  background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: initial;
+  color: inherit;
+  text-shadow: none;
+  filter: none;
+  opacity: 1;
+  visibility: visible;
+  display: inline;
+}
+
+/* Global Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes floatAround {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(50px, 30px) rotate(90deg);
+  }
+
+  50% {
+    transform: translate(0, 60px) rotate(180deg);
+  }
+
+  75% {
+    transform: translate(-50px, 30px) rotate(270deg);
+  }
+
+  100% {
+    transform: translate(0, 0) rotate(360deg);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Utility Classes */
+.fade-in {
+  animation: fadeIn 0.8s ease-out;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.8s ease-out;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.8s ease-out;
+}
+
+.zoom-in {
+  animation: zoomIn 0.8s ease-out;
+}
+
+/* Animation classes */
+.animate-on-scroll {
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s ease;
+}
+
+.animate-hidden {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.animate-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Image loading animations */
+.img-loading {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.img-loaded {
+  opacity: 1;
+}
+
+/* Enhanced hover effects */
+.hover-lift {
+  transition: transform 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+}
+
+/* Common utility classes */
+.gradient-text {
+  background: linear-gradient(135deg, #ff7b00, #ffb800, #db2b28);
+  background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.highlight-text {
+  font-weight: 600;
+  color: #ffb800;
+  position: relative;
+}
+
+.pulse-animation {
+  display: inline-block;
+  animation: pulse 1.5s infinite;
+}
+
+/* Universal Company Background Branding */
+.company-background {
+  position: relative;
+}
+
+.company-background::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/images/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  opacity: 0.03;
+  z-index: -2;
+  pointer-events: none;
+}
+
+/* Page-specific background overlay (for hero sections) */
+.page-hero-background {
+  position: relative;
+  background-image: url('/images/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.page-hero-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgb(0 0 0 / 60%);
+  z-index: 1;
+}
+
+.page-hero-background > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Subtle background pattern for content sections */
+.section-background {
+  position: relative;
+}
+
+.section-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/images/background.jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.05;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.section-background > * {
+  position: relative;
+  z-index: 1;
+}
