@@ -1,0 +1,287 @@
+/* ==========================================================================
+   CROSS-BROWSER BUTTON STANDARDIZATION
+   Fixes visual inconsistencies between Chrome and VS Code Simple Browser
+   Phase 5: Visual Parity - Button Color Rendering Fix
+   ========================================================================== */
+
+/* ==========================================================================
+   PRIMARY BUTTON - SINGLE SOURCE OF TRUTH
+   ========================================================================== */
+.btn-primary {
+  /* Solid fallback for browsers that don't support gradients */
+  background-color: var(--color-primary, #db2b28) !important;
+
+  /* Cross-browser gradient with vendor prefixes */
+  background: -webkit-linear-gradient(
+    135deg,
+    var(--color-primary, #db2b28) 0%,
+    #c41e1a 100%
+  ) !important;
+  background: -moz-linear-gradient(
+    135deg,
+    var(--color-primary, #db2b28) 0%,
+    #c41e1a 100%
+  ) !important;
+  background: -o-linear-gradient(
+    135deg,
+    var(--color-primary, #db2b28) 0%,
+    #c41e1a 100%
+  ) !important;
+  background: -ms-linear-gradient(
+    135deg,
+    var(--color-primary, #db2b28) 0%,
+    #c41e1a 100%
+  ) !important;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary, #db2b28) 0%,
+    #c41e1a 100%
+  ) !important;
+
+  /* Consistent text color across all browsers */
+  color: #ffffff !important;
+
+  /* Border standardization */
+  border: 2px solid transparent !important;
+
+  /* Prevent text decoration inheritance */
+  text-decoration: none !important;
+
+  /* Standard typography */
+  font-weight: 600 !important;
+
+  /* Hover state with explicit gradient */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  /* Solid fallback for hover */
+  background-color: #c41e1a !important;
+
+  /* Cross-browser hover gradient */
+  background: -webkit-linear-gradient(
+    135deg,
+    #c41e1a 0%,
+    #b01e1a 100%
+  ) !important;
+  background: -moz-linear-gradient(135deg, #c41e1a 0%, #b01e1a 100%) !important;
+  background: -o-linear-gradient(135deg, #c41e1a 0%, #b01e1a 100%) !important;
+  background: -ms-linear-gradient(135deg, #c41e1a 0%, #b01e1a 100%) !important;
+  background: linear-gradient(135deg, #c41e1a 0%, #b01e1a 100%) !important;
+
+  /* Consistent hover effects */
+  color: #ffffff !important;
+  text-decoration: none !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(219, 43, 40, 0.3) !important;
+}
+
+.btn-primary:active {
+  /* Active state - pressed down */
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 8px rgba(219, 43, 40, 0.4) !important;
+}
+
+/* ==========================================================================
+   OUTLINE PRIMARY BUTTON - SINGLE SOURCE OF TRUTH
+   ========================================================================== */
+.btn-outline-primary {
+  /* Transparent background with solid fallback */
+  background-color: transparent !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+
+  /* Consistent border */
+  border: 2px solid var(--color-primary, #db2b28) !important;
+
+  /* Text color standardization */
+  color: var(--color-primary, #db2b28) !important;
+
+  /* Typography consistency */
+  font-weight: 600 !important;
+  text-decoration: none !important;
+
+  /* Smooth transitions */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+  /* Hover background - solid fallback */
+  background-color: var(--color-primary, #db2b28) !important;
+
+  /* Cross-browser hover gradient */
+  background: -webkit-linear-gradient(
+    135deg,
+    var(--color-primary, #db2b28) 0%,
+    #c41e1a 100%
+  ) !important;
+  background: -moz-linear-gradient(
+    135deg,
+    var(--color-primary, #db2b28) 0%,
+    #c41e1a 100%
+  ) !important;
+  background: -o-linear-gradient(
+    135deg,
+    var(--color-primary, #db2b28) 0%,
+    #c41e1a 100%
+  ) !important;
+  background: -ms-linear-gradient(
+    135deg,
+    var(--color-primary, #db2b28) 0%,
+    #c41e1a 100%
+  ) !important;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary, #db2b28) 0%,
+    #c41e1a 100%
+  ) !important;
+
+  /* Text and border color on hover */
+  color: #ffffff !important;
+  border-color: var(--color-primary, #db2b28) !important;
+
+  /* Hover effects */
+  text-decoration: none !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(219, 43, 40, 0.25) !important;
+}
+
+.btn-outline-primary:active {
+  /* Active state */
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 8px rgba(219, 43, 40, 0.3) !important;
+}
+
+/* ==========================================================================
+   LARGE BUTTON SIZING
+   ========================================================================== */
+.btn-lg {
+  padding: 1rem 2rem !important;
+  font-size: 1.125rem !important;
+  border-radius: 30px !important;
+}
+
+/* ==========================================================================
+   CTA SECTION SPECIFIC OVERRIDES
+   Special styling for CTA sections with white backgrounds
+   ========================================================================== */
+.booking-cta-card .btn-primary,
+.cta-section .btn-primary {
+  /* White background variant */
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+
+  /* Text color for white background */
+  color: var(--color-primary, #db2b28) !important;
+
+  /* Border for definition */
+  border: 2px solid rgba(255, 255, 255, 0.8) !important;
+
+  /* Enhanced backdrop for glass effect */
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
+}
+
+.booking-cta-card .btn-primary:hover,
+.cta-section .btn-primary:hover {
+  /* Hover state for CTA sections */
+  background-color: rgba(255, 255, 255, 1) !important;
+  background: rgba(255, 255, 255, 1) !important;
+  color: var(--color-primary, #db2b28) !important;
+  border-color: rgba(255, 255, 255, 1) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
+}
+
+.booking-cta-card .btn-outline-primary,
+.cta-section .btn-outline-primary {
+  /* Outline variant for CTA sections */
+  background: transparent !important;
+  color: #ffffff !important;
+  border: 2px solid rgba(255, 255, 255, 0.8) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+.booking-cta-card .btn-outline-primary:hover,
+.cta-section .btn-outline-primary:hover {
+  /* Hover state for outline CTA buttons */
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: var(--color-primary, #db2b28) !important;
+  border-color: rgba(255, 255, 255, 1) !important;
+  text-shadow: none !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
+}
+
+/* ==========================================================================
+   ACCESSIBILITY AND FOCUS STATES
+   ========================================================================== */
+.btn-primary:focus-visible,
+.btn-outline-primary:focus-visible {
+  outline: 3px solid rgba(219, 43, 40, 0.5) !important;
+  outline-offset: 2px !important;
+}
+
+/* ==========================================================================
+   DISABLED STATE STANDARDIZATION
+   ========================================================================== */
+.btn-primary:disabled,
+.btn-outline-primary:disabled {
+  background: #cccccc !important;
+  color: #666666 !important;
+  border-color: #cccccc !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ==========================================================================
+   PRINT OPTIMIZATION
+   ========================================================================== */
+@media print {
+  .btn-primary,
+  .btn-outline-primary {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 2px solid #000000 !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+}
+
+/* ==========================================================================
+   HIGH CONTRAST MODE SUPPORT
+   ========================================================================== */
+@media (prefers-contrast: high) {
+  .btn-primary {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border: 3px solid #ffffff !important;
+  }
+
+  .btn-outline-primary {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 3px solid #000000 !important;
+  }
+}
+
+/* ==========================================================================
+   REDUCED MOTION SUPPORT
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary,
+  .btn-outline-primary {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .btn-primary:hover,
+  .btn-outline-primary:hover {
+    transform: none !important;
+  }
+}

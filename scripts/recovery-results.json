@@ -1,0 +1,113 @@
+{
+  "timestamp": "2025-10-26T20:46:11.042Z",
+  "total": 15,
+  "successful": 15,
+  "failed": 0,
+  "results": [
+    {
+      "number": 1,
+      "topic": "Backyard Party Hibachi",
+      "status": "SUCCESS",
+      "file": "bay-area-backyard-party-hibachi-catering.mdx",
+      "contentLength": 4491
+    },
+    {
+      "number": 2,
+      "topic": "Pool Party Hibachi",
+      "status": "SUCCESS",
+      "file": "pool-party-hibachi-summer-entertainment-experience.mdx",
+      "contentLength": 4937
+    },
+    {
+      "number": 3,
+      "topic": "School Party Hibachi",
+      "status": "SUCCESS",
+      "file": "school-party-hibachi-educational-fun-dining.mdx",
+      "contentLength": 5957
+    },
+    {
+      "number": 4,
+      "topic": "Corporate Hibachi Events",
+      "status": "SUCCESS",
+      "file": "corporate-hibachi-events-san-jose-team-building.mdx",
+      "contentLength": 6284
+    },
+    {
+      "number": 5,
+      "topic": "Vineyard Hibachi Events",
+      "status": "SUCCESS",
+      "file": "vineyard-hibachi-events-wine-country-japanese-culinary.mdx",
+      "contentLength": 6195
+    },
+    {
+      "number": 6,
+      "topic": "Holiday Party Hibachi",
+      "status": "SUCCESS",
+      "file": "holiday-party-hibachi-seasonal-celebrations-entertainment.mdx",
+      "contentLength": 5927
+    },
+    {
+      "number": 7,
+      "topic": "Birthday Hibachi Celebrations",
+      "status": "SUCCESS",
+      "file": "sacramento-birthday-hibachi-age-celebration-entertainment.mdx",
+      "contentLength": 5830
+    },
+    {
+      "number": 8,
+      "topic": "Graduation Party Hibachi",
+      "status": "SUCCESS",
+      "file": "bay-area-graduation-hibachi-academic-success-style.mdx",
+      "contentLength": 6237
+    },
+    {
+      "number": 9,
+      "topic": "Wedding & Engagement Hibachi",
+      "status": "SUCCESS",
+      "file": "unique-bay-area-wedding-hibachi-reception-dining.mdx",
+      "contentLength": 6353
+    },
+    {
+      "number": 10,
+      "topic": "Sports Viewing Party Hibachi",
+      "status": "SUCCESS",
+      "file": "game-day-hibachi-catering-bay-area-sports-party.mdx",
+      "contentLength": 5774
+    },
+    {
+      "number": 11,
+      "topic": "Neighborhood Block Party Hibachi",
+      "status": "SUCCESS",
+      "file": "neighborhood-block-party-hibachi-communities-sacramento.mdx",
+      "contentLength": 6377
+    },
+    {
+      "number": 12,
+      "topic": "Family Reunion Hibachi",
+      "status": "SUCCESS",
+      "file": "stockton-family-reunion-hibachi-multi-generational-dining.mdx",
+      "contentLength": 6575
+    },
+    {
+      "number": 13,
+      "topic": "Summer BBQ Alternative Hibachi",
+      "status": "SUCCESS",
+      "file": "sacramento-summer-hibachi-ultimate-bbq-alternative.mdx",
+      "contentLength": 6034
+    },
+    {
+      "number": 14,
+      "topic": "New Year's Eve Hibachi",
+      "status": "SUCCESS",
+      "file": "bay-area-new-years-eve-hibachi-celebrations-2026.mdx",
+      "contentLength": 6186
+    },
+    {
+      "number": 15,
+      "topic": "Seasonal Festival Hibachi",
+      "status": "SUCCESS",
+      "file": "california-seasonal-festival-hibachi-mobile-catering.mdx",
+      "contentLength": 6928
+    }
+  ]
+}

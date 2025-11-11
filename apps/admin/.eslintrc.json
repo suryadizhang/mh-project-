@@ -1,0 +1,14 @@
+{
+  "extends": ["next/core-web-vitals", "next/typescript"],
+  "plugins": ["simple-import-sort", "unused-imports"],
+  "rules": {
+    "no-var": "off",
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error",
+    "unused-imports/no-unused-imports": "error",
+    "no-console": "off",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-unused-vars": "warn",
+    "react-hooks/exhaustive-deps": "warn"
+  }
+}

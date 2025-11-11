@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["ES2017", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+    "incremental": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/utils/*": ["./src/utils/*"],
+      "@/styles/*": ["./src/styles/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx", ".next/types/**/*.ts"]
+}

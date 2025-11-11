@@ -1,0 +1,35 @@
+line-length = 79
+target-version = "py311"
+
+[lint]
+# Ignore specific rules that are unavoidable in our codebase
+ignore = [
+    "B008",    # FastAPI Depends() in function defaults is standard pattern
+    "PLW0603", # Global statement for singletons is acceptable
+    "TRY300",  # Return in try block without else is acceptable
+    "TRY400",  # Use logging.error instead of logging.exception (contextual choice)
+    "TRY401",  # Redundant exception in logging.exception (we want the variable)
+    "PLC0415", # Import should be top-level (sometimes we need conditional imports)
+    "B904",    # raise ... from err (not always needed)
+    "ARG001",  # Unused function argument (sometimes required by interface)
+    "ARG002",  # Unused method argument (sometimes required by interface)
+    "N806",    # Variable in function should be lowercase (math notation like X, y)
+    "ERA001",  # Commented-out code (sometimes useful for reference)
+    "SIM103",  # Return negated condition (sometimes more readable as is)
+    "SIM105",  # Use contextlib.suppress (prefer explicit try-except)
+    "SIM210",  # Use bool(...) instead of True if ... else False
+    "RUF012",  # Mutable class attributes without ClassVar (FastAPI patterns)
+    "F403",    # Star imports in __init__.py are acceptable
+    "PTH100",  # Use Path.resolve() - os.path is fine
+    "PTH120",  # Use Path.parent - os.path is fine
+    "PLR0912", # Too many branches - acceptable for complex logic
+    "RUF022",  # __all__ sorting - manual order is intentional
+]
+
+[lint.per-file-ignores]
+"__init__.py" = ["F401"]  # Unused imports in __init__ are for re-export
+"test_*.py" = ["S101"]    # Assert statements allowed in tests
+"**/migrations/**" = ["ALL"]  # Ignore all linting in migrations
+"**/api/app/**" = ["E402"]  # Module level import not at top - legacy code
+"**/api/ai/endpoints/**" = ["E402"]  # Module level import not at top - legacy code
+"stripe_service.py" = ["F823", "F821"]  # Legacy code issues

@@ -1,0 +1,32 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Increase Node memory limit for large commits
+export NODE_OPTIONS="--max-old-space-size=8192"
+
+# Run lint-staged with sequential processing (no concurrency to save memory)
+npx lint-staged --concurrent false
+
+# Check for .env files (CRITICAL SECURITY CHECK)
+if git diff --cached --name-only | grep -E '\.env$|\.env\.local$|\.env\.production$'; then
+  echo "❌ ERROR: You're trying to commit a .env file!"
+  echo "   .env files contain secrets and should NEVER be committed."
+  echo "   Please unstage the .env file and add it to .gitignore"
+  echo ""
+  echo "   To unstage: git restore --staged <file>"
+  exit 1
+fi
+
+# Check for potential secrets in code
+if git diff --cached --name-only | xargs grep -E 'sk-[a-zA-Z0-9]{48}|AIza[0-9A-Za-z_-]{35}|AKIA[0-9A-Z]{16}' 2>/dev/null; then
+  echo "⚠️  WARNING: Possible API key or secret detected in staged files!"
+  echo "   Please review the files above carefully."
+  echo "   If this is a false positive, you can proceed."
+  read -p "   Do you want to proceed anyway? (y/N): " -n 1 -r
+  echo
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    exit 1
+  fi
+fi
+
+echo "✅ Pre-commit checks passed!"

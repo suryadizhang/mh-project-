@@ -1,0 +1,589 @@
+/* ==========================================================================
+   MENU PAGE - SCOPED STYLES (DATA-PAGE="menu")
+   Safe migration from global styles to page-scoped architecture
+   ========================================================================== */
+
+[data-page='menu'] {
+  /* Page-level variables */
+  --menu-hero-bg: url('/images/background.jpg');
+  --menu-overlay: rgb(0 0 0 / 50%);
+  --menu-card-shadow: 0 8px 32px rgb(0 0 0 / 12%);
+  --menu-card-hover-shadow: 0 16px 48px rgb(0 0 0 / 20%);
+}
+
+/* ==========================================================================
+   HERO SECTION
+   ========================================================================== */
+[data-page='menu'] .hero-section {
+  background: linear-gradient(var(--menu-overlay), var(--menu-overlay)), var(--menu-hero-bg);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-page='menu'] .hero-title {
+  color: var(--text-on-dark);
+  font-size: clamp(2.5rem, 5vw, 5rem);
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+  text-shadow: 2px 2px 4px rgb(0 0 0 / 50%);
+}
+
+[data-page='menu'] .hero-subtitle {
+  color: var(--text-on-dark);
+  font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+  text-align: center;
+  opacity: 0.9;
+  text-shadow: 1px 1px 2px rgb(0 0 0 / 50%);
+}
+
+/* ==========================================================================
+   PRICING CARDS
+   ========================================================================== */
+[data-page='menu'] .pricing-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--spacing-xl);
+  padding: var(--spacing-2xl) 0;
+}
+
+[data-page='menu'] .pricing-card {
+  background: var(--color-background);
+  border-radius: var(--radius-lg-custom);
+  padding: var(--spacing-xl);
+  box-shadow: var(--menu-card-shadow);
+  transition: var(--transition-normal);
+  border: 2px solid var(--color-border-custom);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-page='menu'] .pricing-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary),
+    var(--color-secondary),
+    var(--color-gold)
+  );
+}
+
+[data-page='menu'] .pricing-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--menu-card-hover-shadow);
+  border-color: var(--color-primary);
+}
+
+[data-page='menu'] .pricing-card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-strong);
+  margin-bottom: var(--spacing-md);
+  text-align: center;
+}
+
+[data-page='menu'] .pricing-card-price {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+[data-page='menu'] .pricing-card-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--spacing-xl) 0;
+}
+
+[data-page='menu'] .pricing-card-features li {
+  padding: var(--spacing-sm) 0;
+  color: var(--text-default);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+[data-page='menu'] .pricing-card-features li::before {
+  content: '✓';
+  color: var(--color-success);
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+/* ==========================================================================
+   INCLUDED ITEMS GRID
+   ========================================================================== */
+[data-page='menu'] .included-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
+  margin: var(--spacing-xl) 0;
+}
+
+[data-page='menu'] .included-item {
+  background: var(--color-background-light);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-md-custom);
+  text-align: center;
+  transition: var(--transition-fast);
+  border: 1px solid var(--color-border-custom);
+}
+
+[data-page='menu'] .included-item:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary);
+}
+
+[data-page='menu'] .included-item-icon {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-primary);
+}
+
+[data-page='menu'] .included-item-title {
+  font-weight: 600;
+  color: var(--text-strong);
+  margin-bottom: var(--spacing-sm);
+}
+
+[data-page='menu'] .included-item-description {
+  color: var(--text-light);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   PROTEIN SECTIONS
+   ========================================================================== */
+[data-page='menu'] .protein-section {
+  background: var(--color-background-accent);
+  padding: var(--spacing-2xl) 0;
+  margin: var(--spacing-xl) 0;
+  border-radius: var(--radius-lg-custom);
+}
+
+[data-page='menu'] .protein-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-xl);
+}
+
+[data-page='menu'] .protein-card {
+  background: var(--color-background);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-md-custom);
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-fast);
+  border: 1px solid var(--color-border-custom);
+}
+
+[data-page='menu'] .protein-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-secondary);
+}
+
+[data-page='menu'] .protein-emoji {
+  font-size: 2.5rem;
+  margin-bottom: var(--spacing-md);
+  display: block;
+}
+
+[data-page='menu'] .protein-name {
+  font-weight: 600;
+  color: var(--text-strong);
+  font-size: 1.125rem;
+}
+
+/* ==========================================================================
+   FLOATING ICONS ANIMATIONS - ORIGINAL ORBITAL DESIGN
+   Override conflicting animations to restore original orbital motion
+   ========================================================================== */
+[data-page='menu'] .floating-icons {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-page='menu'] .hero-main-icon {
+  font-size: 4rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  filter: drop-shadow(0 4px 8px rgb(0 0 0 / 10%));
+  animation: mainIconPulse 4s infinite ease-in-out;
+}
+
+@keyframes mainIconPulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+[data-page='menu'] .floating-icon {
+  font-size: 1.8rem !important;
+  position: absolute !important;
+  opacity: 0.8;
+  z-index: 5;
+  filter: drop-shadow(0 2px 4px rgb(0 0 0 / 10%));
+
+  /* Position at center of container */
+  top: 50% !important;
+  left: 50% !important;
+
+  /* Set up for orbital animation */
+  width: 2em;
+  height: 2em;
+  margin-left: -1em !important;
+  margin-top: -1em !important;
+
+  /* Apply orbital animation */
+  animation: orbitAnimation 10s infinite linear !important;
+  transform-origin: 50px 0px !important;
+}
+
+[data-page='menu'] .floating-icon:nth-child(2) {
+  animation-delay: 0s !important;
+}
+
+[data-page='menu'] .floating-icon:nth-child(3) {
+  animation-delay: 2.5s !important;
+}
+
+[data-page='menu'] .floating-icon:nth-child(4) {
+  animation-delay: 5s !important;
+}
+
+[data-page='menu'] .floating-icon:nth-child(5) {
+  animation-delay: 7.5s !important;
+}
+
+/* ==========================================================================
+   SERVICE AREAS SECTION EMOJI ANIMATIONS
+   Apply orbital motion to all emoji icons in service areas
+   ========================================================================== */
+
+/* Section header icons (📍 in service areas header) */
+[data-page='menu'] .section-icon {
+  display: inline-block !important;
+  position: relative !important;
+  /* Remove animation for house emoji - should be static */
+  /* animation: orbitAnimation 8s infinite linear !important; */
+  transform-origin: center !important;
+  backface-visibility: hidden !important;
+}
+
+/* Radius card icons (📍 in "We Come to You!" section) */
+[data-page='menu'] .radius-icon {
+  display: inline-block !important;
+  position: relative !important;
+  animation: carDriveAnimation 3s infinite ease-in-out !important;
+  transform-origin: center !important;
+  backface-visibility: hidden !important;
+}
+
+/* Promise icons (🎯 in service promise section) */
+[data-page='menu'] .promise-icon {
+  display: inline-block !important;
+  position: relative !important;
+  animation: orbitAnimation 9s infinite linear !important;
+  transform-origin: center !important;
+  backface-visibility: hidden !important;
+}
+
+/* Add staggered delays for variety */
+[data-page='menu'] .section-icon:nth-child(1) {
+  animation-delay: 0s !important;
+}
+
+[data-page='menu'] .radius-icon:nth-child(1) {
+  animation-delay: 1s !important;
+}
+
+[data-page='menu'] .promise-icon:nth-child(1) {
+  animation-delay: 2s !important;
+}
+
+/* Additional items icons (🍜) - keep static */
+[data-page='menu'] .additional-icon {
+  display: inline-block !important;
+  position: relative !important;
+  /* Remove animation for ramen emoji - should be static */
+  /* animation: orbitAnimation 8s infinite linear !important; */
+  transform-origin: center !important;
+  backface-visibility: hidden !important;
+}
+
+/* Override animations for specific static emojis */
+/* House emoji in service areas - should be static */
+[data-page='menu'] .section-icon.emoji-visible {
+  animation: none !important;
+}
+
+/* Ramen emoji in additional items - should be static */
+[data-page='menu'] .additional-icon.emoji-visible {
+  animation: none !important;
+}
+
+/* Area title emojis (🌉, 🏞️) */
+[data-page='menu'] .area-title {
+  position: relative !important;
+}
+
+[data-page='menu'] .area-title::first-letter {
+  display: inline-block !important;
+  animation: orbitAnimation 12s infinite linear !important;
+  transform-origin: center !important;
+  backface-visibility: hidden !important;
+}
+
+/* Working orbital animation */
+@keyframes orbitAnimation {
+  0% {
+    transform: rotate(0deg);
+    opacity: 0.7;
+  }
+  25% {
+    opacity: 0.9;
+  }
+  50% {
+    transform: rotate(180deg);
+    opacity: 1;
+  }
+  75% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 0.7;
+  }
+}
+
+/* Car driving animation - back and forward movement */
+@keyframes carDriveAnimation {
+  0% {
+    transform: translateX(-15px);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateX(15px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-15px);
+    opacity: 0.8;
+  }
+}
+
+/* Simple working animation */
+@keyframes simpleFloat {
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(-15px) scale(1.1);
+    opacity: 1;
+  }
+}
+
+/* CRITICAL: Original orbital animation keyframes */
+@keyframes orbitMenuPage {
+  0% {
+    transform: rotate(0deg) translateX(50px) rotate(0deg);
+    opacity: 0.7;
+  }
+  25% {
+    transform: rotate(90deg) translateX(50px) rotate(-90deg);
+    opacity: 0.9;
+  }
+  50% {
+    transform: rotate(180deg) translateX(50px) rotate(-180deg);
+    opacity: 1;
+  }
+  75% {
+    transform: rotate(270deg) translateX(50px) rotate(-270deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: rotate(360deg) translateX(50px) rotate(-360deg);
+    opacity: 0.7;
+  }
+}
+
+/* Mobile responsive adjustments for orbital animation */
+@media (width <= 768px) {
+  [data-page='menu'] .floating-icons {
+    width: 100px;
+    height: 100px;
+  }
+
+  [data-page='menu'] .hero-main-icon {
+    font-size: 3rem;
+  }
+
+  [data-page='menu'] .floating-icon {
+    font-size: 1.4rem !important;
+  }
+
+  @keyframes orbitMenuPage {
+    0% {
+      transform: rotate(0deg) translateX(40px) rotate(0deg);
+      opacity: 0.7;
+    }
+    25% {
+      transform: rotate(90deg) translateX(40px) rotate(-90deg);
+      opacity: 0.9;
+    }
+    50% {
+      transform: rotate(180deg) translateX(40px) rotate(-180deg);
+      opacity: 1;
+    }
+    75% {
+      transform: rotate(270deg) translateX(40px) rotate(-270deg);
+      opacity: 0.9;
+    }
+    100% {
+      transform: rotate(360deg) translateX(40px) rotate(-360deg);
+      opacity: 0.7;
+    }
+  }
+}
+
+@media (width <= 576px) {
+  [data-page='menu'] .floating-icons {
+    width: 80px;
+    height: 80px;
+  }
+
+  [data-page='menu'] .hero-main-icon {
+    font-size: 2.5rem;
+  }
+
+  [data-page='menu'] .floating-icon {
+    font-size: 1.2rem !important;
+  }
+
+  @keyframes orbitMenuPage {
+    0% {
+      transform: rotate(0deg) translateX(30px) rotate(0deg);
+      opacity: 0.7;
+    }
+    25% {
+      transform: rotate(90deg) translateX(30px) rotate(-90deg);
+      opacity: 0.9;
+    }
+    50% {
+      transform: rotate(180deg) translateX(30px) rotate(-180deg);
+      opacity: 1;
+    }
+    75% {
+      transform: rotate(270deg) translateX(30px) rotate(-270deg);
+      opacity: 0.9;
+    }
+    100% {
+      transform: rotate(360deg) translateX(30px) rotate(-360deg);
+      opacity: 0.7;
+    }
+  }
+}
+
+/* ==========================================================================
+   ADDITIONAL ITEMS PRICING FIX - RESTORE ORIGINAL DESIGN
+   Fix contrast issue with price tags - use original design
+   ========================================================================== */
+[data-page='menu'] .add-price-circle {
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #db2b28, #b71c1c) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: white !important;
+  font-weight: 700 !important;
+  box-shadow: 0 3px 10px rgb(219 43 40 / 30%) !important;
+  border: none !important;
+  min-width: 60px !important;
+  min-height: 60px !important;
+}
+
+[data-page='menu'] .add-price-tag {
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  color: white !important;
+  position: relative;
+  z-index: 2;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+@media (width <= 768px) {
+  [data-page='menu'] .hero-section {
+    background-attachment: scroll;
+    min-height: 50vh;
+    padding: var(--spacing-xl);
+  }
+
+  [data-page='menu'] .pricing-cards {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+
+  [data-page='menu'] .included-items-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  [data-page='menu'] .protein-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+  }
+
+  [data-page='menu'] .floating-icon {
+    display: none; /* Hide floating icons on mobile for performance */
+  }
+}
+
+@media (width <= 480px) {
+  [data-page='menu'] .pricing-card {
+    padding: var(--spacing-lg);
+  }
+
+  [data-page='menu'] .pricing-card-price {
+    font-size: 2rem;
+  }
+
+  [data-page='menu'] .hero-title {
+    font-size: 2.5rem;
+  }
+}

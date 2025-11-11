@@ -1,0 +1,94 @@
+[
+  {
+    "title": "Booking & Cancellation Policy",
+    "content": "📋 Booking requires 48 hours advance notice. 50% deposit required to secure your date. Cancellations more than 24 hours in advance receive full deposit refund. Cancellations within 24 hours forfeit deposit due to ingredient purchasing and chef scheduling.",
+    "category": "policies",
+    "href": "/faqs",
+    "keywords": ["booking", "cancellation", "deposit", "refund", "advance notice", "policy"]
+  },
+  {
+    "title": "Payment Terms",
+    "content": "💳 50% deposit due at booking to secure date. Remaining 50% due day of service. We accept cash, credit cards, Venmo, Zelle, and PayPal. No hidden fees - our quoted price is your final price!",
+    "category": "policies",
+    "href": "/faqs",
+    "keywords": ["payment", "deposit", "cash", "credit card", "venmo", "zelle", "paypal", "fees"]
+  },
+  {
+    "title": "Service Requirements",
+    "content": "🏠 Client provides: adequate space for cooking setup, access to water source, electrical outlet (if cooking indoors), and parking for chef vehicle. We handle all equipment, ingredients, and cooking.",
+    "category": "policies",
+    "href": "/faqs",
+    "keywords": ["requirements", "space", "water", "electrical", "parking", "client provides"]
+  },
+  {
+    "title": "Travel & Distance Policy",
+    "content": "🚚 First 30 miles from our location are FREE. Additional mileage charged at $2/mile each way. Flexible service area with transparent travel options. Popular service areas include Bay Area and Sacramento region.",
+    "category": "policies",
+    "href": "/faqs",
+    "keywords": ["travel", "distance", "mileage", "free", "service area", "bay area", "sacramento"]
+  },
+  {
+    "title": "Weather & Indoor Cooking",
+    "content": "🌧️ We cook indoors or outdoors based on your preference and weather conditions. Indoor cooking requires adequate ventilation and space. Outdoor cooking requires covered area in case of rain. We adapt to your venue!",
+    "category": "policies",
+    "href": "/faqs",
+    "keywords": ["weather", "indoor", "outdoor", "ventilation", "covered", "rain", "adapt"]
+  },
+  {
+    "title": "Group Size & Pricing",
+    "content": "👥 Minimum group size: 6 people. Adult portions: $60+ per person. Children (under 12): $35+ per person. Final pricing based on menu selection and group size. Larger groups may receive volume discounts.",
+    "category": "policies",
+    "href": "/BookUs",
+    "keywords": ["group size", "minimum", "adults", "children", "pricing", "volume discount"]
+  },
+  {
+    "title": "Dietary Accommodations",
+    "content": "🥗 We accommodate most dietary restrictions including vegetarian, gluten-free, and common allergies. Please inform us of any restrictions at booking so we can prepare appropriate ingredients and avoid cross-contamination.",
+    "category": "policies",
+    "href": "/menu",
+    "keywords": ["dietary", "restrictions", "vegetarian", "gluten-free", "allergies", "cross-contamination"]
+  },
+  {
+    "title": "Equipment & Setup",
+    "content": "🔧 We provide all professional hibachi equipment, cooking utensils, serving dishes, and ingredients. Setup takes 15-20 minutes. You'll need to handle basic cleanup after our service. No stress cooking for you!",
+    "category": "policies",
+    "href": "/faqs",
+    "keywords": ["equipment", "setup", "professional", "utensils", "ingredients", "hibachi equipment"]
+  },
+  {
+    "title": "Event Timing & Duration",
+    "content": "⏰ Typical hibachi experience lasts 1.5-2 hours including setup, cooking show, and dining. Flexible timing available. Popular slots: 12PM lunch, 3PM afternoon, 6PM dinner, 9PM late dinner.",
+    "category": "policies",
+    "href": "/BookUs",
+    "keywords": ["timing", "duration", "1.5 hours", "2 hours", "flexible", "lunch", "dinner", "slots"]
+  },
+  {
+    "title": "Liability & Insurance",
+    "content": "🛡️ My Hibachi is fully insured and licensed. We follow all food safety protocols and health department guidelines. Professional chef with years of experience ensures safe, entertaining cooking experience for all guests.",
+    "category": "policies",
+    "href": "/faqs",
+    "keywords": [
+      "liability",
+      "insurance",
+      "licensed",
+      "food safety",
+      "health department",
+      "professional",
+      "experienced"
+    ]
+  },
+  {
+    "title": "Gratuity Guidelines",
+    "content": "💝 Gratuity is appreciated but not required. Standard service gratuity is 15-20% for exceptional service. Your chef works hard to create a memorable experience - tips are always appreciated but never expected!",
+    "category": "policies",
+    "href": "/faqs",
+    "keywords": ["gratuity", "tip", "appreciated", "15-20%", "exceptional", "memorable", "not required"]
+  },
+  {
+    "title": "Contact & Support",
+    "content": "📞 Questions? Call (916) 740-8768 or use our website contact form. We typically respond within 4 hours during business hours. Emergency day-of-event contact available for urgent matters only.",
+    "category": "policies",
+    "href": "/contact",
+    "keywords": ["contact", "support", "phone", "website", "response time", "emergency", "business hours"]
+  }
+]

@@ -1,0 +1,182 @@
+/* Booking Modals Styles */
+
+/* Modal Base Styles */
+.modal {
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
+}
+
+.modal-header {
+  border-bottom: 1px solid #e5e7eb;
+  border-radius: 12px 12px 0 0;
+  background: linear-gradient(135deg, #f8fafc 0%, #fff 100%);
+}
+
+.modal-title {
+  font-weight: 600;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+}
+
+.modal-body {
+  padding: 2rem;
+  line-height: 1.6;
+}
+
+.modal-footer {
+  border-top: 1px solid #e5e7eb;
+  padding: 1.5rem 2rem;
+  background: #f8fafc;
+  border-radius: 0 0 12px 12px;
+}
+
+/* Validation Modal Specific */
+.list-unstyled {
+  margin: 0;
+  padding: 0;
+}
+
+.list-unstyled li {
+  padding: 0.5rem 0;
+  color: #374151;
+  font-weight: 500;
+}
+
+/* Agreement Modal Specific */
+.agreement-content {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 1rem;
+}
+
+.agreement-content h6 {
+  color: #1f2937;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.agreement-content ul {
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
+}
+
+.agreement-content li {
+  margin-bottom: 0.5rem;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+/* Custom scrollbar for agreement content */
+.agreement-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.agreement-content::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.agreement-content::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.agreement-content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Button Styles */
+.btn {
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgb(59 130 246 / 30%);
+}
+
+.btn-outline-secondary {
+  background: transparent;
+  border: 2px solid #6b7280;
+  color: #6b7280;
+}
+
+.btn-outline-secondary:hover {
+  background: #6b7280;
+  color: white;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Icon Styles */
+.bi {
+  font-size: 1.1em;
+}
+
+.text-warning {
+  color: #f59e0b !important;
+}
+
+.text-primary {
+  color: #3b82f6 !important;
+}
+
+/* Modal Animation */
+.modal.show {
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive Design */
+@media (width <= 768px) {
+  .modal-dialog {
+    margin: 1rem;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .modal-footer {
+    padding: 1rem 1.5rem;
+  }
+
+  .agreement-content {
+    max-height: 300px;
+  }
+
+  .btn {
+    padding: 0.75rem 1.25rem;
+  }
+}

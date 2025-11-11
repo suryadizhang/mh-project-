@@ -1,0 +1,108 @@
+/* ==========================================================================
+   QUOTE PAGE SCOPED STYLES - Phase 1 Migration
+   ========================================================================== */
+
+/* Page Scope: All styles within [data-page="quote"] */
+[data-page='quote'] {
+  /* Ensure base text color is safe */
+  color: var(--text-default);
+}
+
+/* Quote Page Button Styles - Scoped and Safe */
+[data-page='quote'] .btn-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  color: var(--color-primary-contrast);
+  border: 0;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md-custom);
+  font-weight: 600;
+  font-size: 1rem;
+  transition: var(--transition-fast);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 280px;
+  min-height: 2.5rem;
+}
+
+[data-page='quote'] .btn-primary:where(:hover, :focus-visible):not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgb(219 43 40 / 30%);
+  background: var(--color-primary-hover);
+}
+
+[data-page='quote'] .btn-secondary {
+  background: white;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md-custom);
+  font-weight: 600;
+  font-size: 1rem;
+  transition: var(--transition-fast);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 280px;
+  min-height: 2.5rem;
+}
+
+[data-page='quote'] .btn-secondary:where(:hover, :focus-visible):not(:disabled) {
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgb(219 43 40 / 20%);
+}
+
+/* White Text Safety - Only apply white text when on confirmed dark backgrounds */
+[data-page='quote'] .calc-result {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+}
+
+[data-page='quote'] .calc-result .result-amount,
+[data-page='quote'] .calc-result .result-breakdown {
+  color: var(--color-primary-contrast);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 25%);
+}
+
+/* Safe fallbacks for any remaining white text */
+[data-page='quote'] .u-text-on-dark {
+  color: var(--color-primary-contrast);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 25%);
+}
+
+/* Form elements using design tokens */
+[data-page='quote'] .calc-input,
+[data-page='quote'] .calc-select {
+  border-color: var(--color-border-custom);
+  border-radius: var(--radius-sm-custom);
+  transition: var(--transition-fast);
+}
+
+[data-page='quote'] .calc-input:focus,
+[data-page='quote'] .calc-select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgb(219 43 40 / 10%);
+}
+
+/* Card elements using design tokens */
+[data-page='quote'] .calc-field {
+  border-radius: var(--radius-lg-custom);
+  transition: var(--transition-normal);
+}
+
+[data-page='quote'] .calc-field:hover {
+  border-color: var(--color-secondary);
+  box-shadow: var(--shadow-md);
+}
+
+[data-page='quote'] .calc-field.focused {
+  border-color: var(--color-primary);
+  background: var(--color-background);
+}
