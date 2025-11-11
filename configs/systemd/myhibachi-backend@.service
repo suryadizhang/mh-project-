@@ -1,0 +1,70 @@
+# MyHibachi Backend Service Template (Systemd)
+# Location: /etc/systemd/system/myhibachi-backend@.service
+# 
+# This is a systemd service template for running multiple backend instances.
+# The '@' allows you to create multiple instances:
+#   - myhibachi-backend@1.service (port 8001)
+#   - myhibachi-backend@2.service (port 8002)
+#   - myhibachi-backend@3.service (port 8003)
+# 
+# Usage:
+#   systemctl enable myhibachi-backend@1.service
+#   systemctl start myhibachi-backend@1.service
+#   systemctl status myhibachi-backend@1.service
+
+[Unit]
+Description=MyHibachi Backend API (Instance %i)
+After=network.target postgresql.service redis.service
+Requires=postgresql.service
+
+# If PostgreSQL is on same server, wait for it
+# If external database, remove postgresql.service from After/Requires
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/vhosts/myhibachi.com/backend
+
+# Environment variables
+# Port is dynamically set based on instance number: 8001, 8002, 8003
+Environment="PORT=800%i"
+Environment="WORKERS=2"
+
+# Load additional environment from .env file
+EnvironmentFile=/var/www/vhosts/myhibachi.com/backend/.env
+
+# Start command
+# %i is replaced with instance number (1, 2, or 3)
+ExecStart=/var/www/vhosts/myhibachi.com/backend/.venv/bin/uvicorn \
+    api.app.main:app \
+    --host 127.0.0.1 \
+    --port 800%i \
+    --workers 2 \
+    --log-level info \
+    --access-log \
+    --use-colors
+
+# Restart policy
+Restart=always
+RestartSec=10s
+
+# Graceful shutdown (send SIGTERM, wait 30s, then SIGKILL)
+TimeoutStopSec=30s
+KillMode=mixed
+KillSignal=SIGTERM
+
+# Resource limits (adjust based on your VPS resources)
+LimitNOFILE=65536  # Max open files
+MemoryLimit=1G  # Max 1GB RAM per instance
+CPUQuota=50%  # Max 50% CPU per instance (of 1 core)
+
+# Security hardening (optional but recommended)
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Working directory must exist and be owned by www-data
+# Logs go to systemd journal: journalctl -u myhibachi-backend@1.service -f
+
+[Install]
+WantedBy=multi-user.target

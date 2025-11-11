@@ -1,0 +1,518 @@
+/* ==========================================================================
+   UTILITY CLASSES - Defensive CSS for Cross-Browser Consistency
+   ========================================================================== */
+
+/* ==========================================================================
+   TEXT COLOR UTILITIES
+   ========================================================================== */
+.u-text-on-dark {
+  color: var(--text-on-dark);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 25%); /* subtle legibility aid */
+}
+
+.u-text-strong {
+  color: var(--text-strong);
+}
+
+.u-text-default {
+  color: var(--text-default);
+}
+
+.u-text-secondary {
+  color: var(--text-secondary);
+}
+
+.u-text-light {
+  color: var(--text-light);
+}
+
+.u-text-muted {
+  color: var(--text-muted);
+}
+
+.u-text-primary {
+  color: var(--color-primary);
+}
+
+.u-text-secondary-color {
+  color: var(--color-secondary);
+}
+
+.u-text-gold {
+  color: var(--color-gold);
+}
+
+/* ==========================================================================
+   SAFE COMPONENT PATTERNS
+   ========================================================================== */
+.component-on-primary {
+  /* hard fallback */
+  color: var(--color-primary-contrast);
+}
+
+.component-on-dark {
+  /* hard fallback */
+  color: var(--text-on-dark);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 25%);
+}
+
+.component-on-light {
+  /* hard fallback */
+  color: var(--text-default);
+}
+
+/* ==========================================================================
+   BACKGROUND UTILITIES
+   ========================================================================== */
+.u-bg-primary {
+  background-color: var(--color-primary);
+}
+
+.u-bg-secondary {
+  background-color: var(--color-secondary);
+}
+
+.u-bg-light {
+  background-color: var(--color-background-light);
+}
+
+.u-bg-accent {
+  background-color: var(--color-background-accent);
+}
+
+.u-bg-gradient-primary {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-hover) 100%
+  );
+}
+
+.u-bg-gradient-secondary {
+  background: linear-gradient(135deg, var(--color-secondary) 0%, #ff7849 100%);
+}
+
+.u-bg-gradient-brand {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-secondary) 50%,
+    var(--color-gold) 100%
+  );
+}
+
+/* ==========================================================================
+   SPACING UTILITIES
+   ========================================================================== */
+.u-mt-xs {
+  margin-top: var(--spacing-xs);
+}
+.u-mt-sm {
+  margin-top: var(--spacing-sm);
+}
+.u-mt-md {
+  margin-top: var(--spacing-md);
+}
+.u-mt-lg {
+  margin-top: var(--spacing-lg);
+}
+.u-mt-xl {
+  margin-top: var(--spacing-xl);
+}
+.u-mt-2xl {
+  margin-top: var(--spacing-2xl);
+}
+
+.u-mb-xs {
+  margin-bottom: var(--spacing-xs);
+}
+.u-mb-sm {
+  margin-bottom: var(--spacing-sm);
+}
+.u-mb-md {
+  margin-bottom: var(--spacing-md);
+}
+.u-mb-lg {
+  margin-bottom: var(--spacing-lg);
+}
+.u-mb-xl {
+  margin-bottom: var(--spacing-xl);
+}
+.u-mb-2xl {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.u-p-xs {
+  padding: var(--spacing-xs);
+}
+.u-p-sm {
+  padding: var(--spacing-sm);
+}
+.u-p-md {
+  padding: var(--spacing-md);
+}
+.u-p-lg {
+  padding: var(--spacing-lg);
+}
+.u-p-xl {
+  padding: var(--spacing-xl);
+}
+.u-p-2xl {
+  padding: var(--spacing-2xl);
+}
+
+/* ==========================================================================
+   TYPOGRAPHY UTILITIES
+   ========================================================================== */
+.u-font-primary {
+  font-family: var(--font-primary);
+}
+
+.u-font-secondary {
+  font-family: var(--font-secondary);
+}
+
+.u-fw-normal {
+  font-weight: 400;
+}
+.u-fw-medium {
+  font-weight: 500;
+}
+.u-fw-semibold {
+  font-weight: 600;
+}
+.u-fw-bold {
+  font-weight: 700;
+}
+.u-fw-black {
+  font-weight: 800;
+}
+
+.u-text-xs {
+  font-size: 0.75rem;
+}
+.u-text-sm {
+  font-size: 0.875rem;
+}
+.u-text-base {
+  font-size: 1rem;
+}
+.u-text-lg {
+  font-size: 1.125rem;
+}
+.u-text-xl {
+  font-size: 1.25rem;
+}
+.u-text-2xl {
+  font-size: 1.5rem;
+}
+.u-text-3xl {
+  font-size: 2rem;
+}
+.u-text-4xl {
+  font-size: 2.5rem;
+}
+
+.u-text-center {
+  text-align: center;
+}
+.u-text-left {
+  text-align: left;
+}
+.u-text-right {
+  text-align: right;
+}
+
+.u-line-height-tight {
+  line-height: 1.2;
+}
+.u-line-height-normal {
+  line-height: 1.5;
+}
+.u-line-height-relaxed {
+  line-height: 1.6;
+}
+.u-line-height-loose {
+  line-height: 1.8;
+}
+
+/* ==========================================================================
+   LAYOUT UTILITIES
+   ========================================================================== */
+.u-flex {
+  display: flex;
+}
+.u-flex-column {
+  flex-direction: column;
+}
+.u-flex-row {
+  flex-direction: row;
+}
+.u-items-center {
+  align-items: center;
+}
+.u-items-start {
+  align-items: flex-start;
+}
+.u-items-end {
+  align-items: flex-end;
+}
+.u-justify-center {
+  justify-content: center;
+}
+.u-justify-between {
+  justify-content: space-between;
+}
+.u-justify-start {
+  justify-content: flex-start;
+}
+.u-justify-end {
+  justify-content: flex-end;
+}
+
+.u-grid {
+  display: grid;
+}
+.u-grid-1 {
+  grid-template-columns: 1fr;
+}
+.u-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.u-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.u-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+.u-grid-auto {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.u-gap-xs {
+  gap: var(--spacing-xs);
+}
+.u-gap-sm {
+  gap: var(--spacing-sm);
+}
+.u-gap-md {
+  gap: var(--spacing-md);
+}
+.u-gap-lg {
+  gap: var(--spacing-lg);
+}
+.u-gap-xl {
+  gap: var(--spacing-xl);
+}
+
+/* ==========================================================================
+   BORDER UTILITIES
+   ========================================================================== */
+.u-border {
+  border: 1px solid var(--color-border-custom);
+}
+.u-border-primary {
+  border: 1px solid var(--color-primary);
+}
+.u-border-secondary {
+  border: 1px solid var(--color-secondary);
+}
+
+.u-rounded-sm {
+  border-radius: var(--radius-sm-custom);
+}
+.u-rounded-md {
+  border-radius: var(--radius-md-custom);
+}
+.u-rounded-lg {
+  border-radius: var(--radius-lg-custom);
+}
+.u-rounded-xl {
+  border-radius: var(--radius-xl-custom);
+}
+.u-rounded-full {
+  border-radius: var(--radius-full);
+}
+
+/* ==========================================================================
+   SHADOW UTILITIES
+   ========================================================================== */
+.u-shadow-sm {
+  box-shadow: var(--shadow-sm);
+}
+.u-shadow-md {
+  box-shadow: var(--shadow-md);
+}
+.u-shadow-lg {
+  box-shadow: var(--shadow-lg);
+}
+.u-shadow-xl {
+  box-shadow: var(--shadow-xl);
+}
+.u-shadow-none {
+  box-shadow: none;
+}
+
+/* ==========================================================================
+   TRANSITION UTILITIES
+   ========================================================================== */
+.u-transition-fast {
+  transition: var(--transition-fast);
+}
+.u-transition-normal {
+  transition: var(--transition-normal);
+}
+.u-transition-slow {
+  transition: var(--transition-slow);
+}
+
+/* ==========================================================================
+   VISIBILITY UTILITIES
+   ========================================================================== */
+.u-hidden {
+  display: none;
+}
+.u-visible {
+  display: block;
+}
+.u-invisible {
+  visibility: hidden;
+}
+
+.u-opacity-0 {
+  opacity: 0;
+}
+.u-opacity-25 {
+  opacity: 0.25;
+}
+.u-opacity-50 {
+  opacity: 0.5;
+}
+.u-opacity-75 {
+  opacity: 0.75;
+}
+.u-opacity-100 {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   POSITION UTILITIES
+   ========================================================================== */
+.u-relative {
+  position: relative;
+}
+.u-absolute {
+  position: absolute;
+}
+.u-fixed {
+  position: fixed;
+}
+.u-sticky {
+  position: sticky;
+}
+
+.u-z-0 {
+  z-index: 0;
+}
+.u-z-10 {
+  z-index: 10;
+}
+.u-z-20 {
+  z-index: 20;
+}
+.u-z-30 {
+  z-index: 30;
+}
+.u-z-40 {
+  z-index: 40;
+}
+.u-z-50 {
+  z-index: 50;
+}
+
+/* ==========================================================================
+   HOVER UTILITIES
+   ========================================================================== */
+.u-hover-lift {
+  transition: var(--transition-fast);
+}
+
+.u-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.u-hover-scale {
+  transition: var(--transition-fast);
+}
+
+.u-hover-scale:hover {
+  transform: scale(1.02);
+}
+
+.u-hover-brightness {
+  transition: var(--transition-fast);
+}
+
+.u-hover-brightness:hover {
+  filter: brightness(1.05);
+}
+
+/* ==========================================================================
+   FOCUS UTILITIES (Accessibility)
+   ========================================================================== */
+.u-focus-ring:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.u-focus-shadow:focus-visible {
+  box-shadow: 0 0 0 3px rgb(219 43 40 / 10%);
+}
+
+/* ==========================================================================
+   RESPONSIVE UTILITIES
+   ========================================================================== */
+@media (width <= 768px) {
+  .u-hidden-mobile {
+    display: none;
+  }
+  .u-visible-mobile {
+    display: block;
+  }
+
+  .u-grid-mobile-1 {
+    grid-template-columns: 1fr;
+  }
+  .u-grid-mobile-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .u-text-mobile-center {
+    text-align: center;
+  }
+  .u-text-mobile-left {
+    text-align: left;
+  }
+}
+
+@media (width >= 769px) {
+  .u-hidden-desktop {
+    display: none;
+  }
+  .u-visible-desktop {
+    display: block;
+  }
+}
+
+/* ==========================================================================
+   PRINT UTILITIES
+   ========================================================================== */
+@media print {
+  .u-print-hidden {
+    display: none !important;
+  }
+  .u-print-visible {
+    display: block !important;
+  }
+}

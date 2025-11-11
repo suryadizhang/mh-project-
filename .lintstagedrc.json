@@ -1,0 +1,9 @@
+{
+  "*.{js,jsx,ts,tsx}": [
+    "prettier --write --ignore-unknown",
+    "eslint --cache --cache-location .eslintcache --fix --max-warnings=0"
+  ],
+  "*.{json,md,yml,yaml}": ["prettier --write --ignore-unknown"],
+  "*.py": ["ruff check --fix --exit-zero", "black --quiet"],
+  "*.{css,scss}": ["prettier --write --ignore-unknown"]
+}

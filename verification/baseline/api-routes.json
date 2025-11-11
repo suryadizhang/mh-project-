@@ -1,0 +1,30 @@
+{
+  "apiRoutes": [
+    "/api/assistant",
+    "/api/contact",
+    "/api/support/contact",
+    "/api/v1/admin/base-location",
+    "/api/v1/admin/company-settings",
+    "/api/v1/admin/learning-queue",
+    "/api/v1/admin/learning-queue/[id]/approve",
+    "/api/v1/bookings/availability",
+    "/api/v1/bookings/booked-dates",
+    "/api/v1/bookings/cache-audit",
+    "/api/v1/bookings/cache-status",
+    "/api/v1/bookings/check",
+    "/api/v1/bookings/emails",
+    "/api/v1/bookings/rate-limit",
+    "/api/v1/bookings",
+    "/api/v1/bookings/[bookingId]/invoice",
+    "/api/v1/bookings/[bookingId]",
+    "/api/v1/chat",
+    "/api/v1/customers/dashboard",
+    "/api/v1/feedback",
+    "/api/v1/invoices/send",
+    "/api/v1/payments/alternative-payment",
+    "/api/v1/payments/create-intent",
+    "/api/v1/payments/webhook",
+    "/api/v1/webhooks/stripe"
+  ],
+  "timestamp": "2025-09-02T05:35:01.171Z"
+}

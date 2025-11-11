@@ -1,0 +1,158 @@
+/* Home Page Service Areas Section - Location Coverage */
+
+/* Service Areas */
+.service-areas {
+  max-width: 1200px;
+  margin: 5rem auto;
+  padding: 0 2rem;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #333;
+  line-height: 1.2;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Responsive font sizes for section-title */
+@media (width <= 768px) {
+  .section-title {
+    font-size: 2rem;
+    line-height: 1.3;
+  }
+}
+
+@media (width <= 576px) {
+  .section-title {
+    font-size: 1.75rem;
+    line-height: 1.4;
+  }
+}
+
+.service-intro {
+  max-width: 800px;
+  margin: 0 auto 3rem;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.service-area-card {
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 5%);
+  height: 100%;
+}
+
+.area-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.area-subtitle {
+  color: #db2b28;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+}
+
+.area-list {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.area-list li {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgb(0 0 0 / 5%);
+  position: relative;
+  padding-left: 2rem;
+}
+
+.area-list li::before {
+  content: '•';
+  color: #db2b28;
+  position: absolute;
+  left: 0.5rem;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.area-list li:last-child {
+  border-bottom: none;
+}
+
+.service-radius-info {
+  margin-top: 4rem;
+}
+
+/* Home page specific radius card styling */
+.service-areas .radius-card {
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 5%);
+  display: inline-block;
+}
+
+.service-areas .radius-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.service-areas .radius-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.service-areas .radius-description {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.service-areas .travel-fee-info {
+  background: #f9f4ec;
+  padding: 1.25rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  color: #333;
+  border: 1px solid #e6ddd1;
+}
+
+.travel-highlight {
+  color: #db2b28;
+  font-weight: 600;
+}
+
+[data-page='home'] .service-promise {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: rgb(219 43 40 / 10%);
+  padding: 1rem;
+  border-radius: 10px;
+}
+
+[data-page='home'] .promise-icon {
+  font-size: 1.5rem;
+}
+
+[data-page='home'] .promise-text {
+  font-size: 1rem;
+  color: #333;
+}

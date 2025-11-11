@@ -1,0 +1,31 @@
+.guest-details-section {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+}
+
+.guest-details-section h3 {
+  @apply text-gray-900 font-semibold mb-4;
+}
+
+.guest-details-section .space-y-4 > div {
+  @apply mb-4;
+}
+
+.guest-details-section label {
+  @apply block text-sm font-medium text-gray-700 mb-2;
+}
+
+.guest-details-section input,
+.guest-details-section select {
+  @apply w-full px-4 py-3 border border-gray-300 rounded-lg;
+  @apply focus:ring-2 focus:ring-red-500 focus:border-red-500;
+  @apply transition-colors duration-200;
+}
+
+.guest-details-section input:hover,
+.guest-details-section select:hover {
+  @apply border-gray-400;
+}
+
+.guest-details-section .error-message {
+  @apply text-red-500 text-sm mt-1;
+}

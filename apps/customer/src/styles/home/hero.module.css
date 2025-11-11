@@ -1,0 +1,145 @@
+/* Hero Section Styles */
+
+.aboutSection {
+  position: relative;
+  padding-top: 0;
+  overflow: hidden;
+  background: var(--home-gradient-hero);
+}
+
+.heroMediaContainer {
+  position: relative;
+  width: 100%;
+  height: var(--home-hero-height);
+  overflow: hidden;
+  margin-bottom: 3rem;
+}
+
+.heroContent {
+  padding: var(--home-section-padding);
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all var(--home-animation-normal) ease-in-out;
+}
+
+.heroContent.animateIn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.qualityBadge {
+  background: var(--home-gradient-card);
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--home-primary);
+  box-shadow: var(--home-card-shadow);
+  margin-bottom: 2rem;
+  display: inline-block;
+  border: 2px solid var(--home-primary);
+}
+
+.logoSection {
+  margin-top: 3rem;
+}
+
+.logoContainer {
+  background: rgb(255 255 255 / 95%);
+  backdrop-filter: blur(10px);
+  padding: var(--home-card-padding);
+  border-radius: 20px;
+  box-shadow: var(--home-card-shadow);
+  transition: all var(--home-animation-fast) ease-in-out;
+}
+
+.logoContainer:hover {
+  box-shadow: var(--home-card-shadow-hover);
+  transform: translateY(-5px);
+}
+
+.logoImage {
+  filter: drop-shadow(0 4px 8px rgb(0 0 0 / 10%));
+  transition: transform var(--home-animation-fast) ease-in-out;
+}
+
+.logoImage:hover {
+  transform: scale(1.05);
+}
+
+.logoText {
+  font-size: var(--home-card-title-size);
+  font-weight: 700;
+  color: var(--home-primary);
+  margin: 1rem 0 0.5rem;
+  text-shadow: var(--home-text-shadow);
+}
+
+.logoDescription {
+  font-size: var(--home-subtitle-size);
+  color: var(--home-secondary);
+  margin: 0;
+  font-style: italic;
+}
+
+.aboutContent {
+  background: rgb(255 255 255 / 95%);
+  backdrop-filter: blur(10px);
+  padding: var(--home-card-padding);
+  border-radius: 20px;
+  box-shadow: var(--home-card-shadow);
+  margin-top: 3rem;
+}
+
+.aboutParagraph {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--menu-text-primary);
+  margin-bottom: 1.5rem;
+  text-align: justify;
+}
+
+.aboutParagraph:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive Design */
+@media (width <= 768px) {
+  .heroContent {
+    padding: 1.5rem 0;
+  }
+
+  .qualityBadge {
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+  }
+
+  .logoContainer {
+    padding: 1.5rem;
+  }
+
+  .aboutContent {
+    padding: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .aboutParagraph {
+    font-size: 1rem;
+    text-align: left;
+  }
+}
+
+@media (width <= 576px) {
+  .qualityBadge {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .logoContainer {
+    padding: 1rem;
+  }
+
+  .aboutContent {
+    padding: 1rem;
+  }
+}

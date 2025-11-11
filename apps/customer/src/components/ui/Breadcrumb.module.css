@@ -1,0 +1,103 @@
+/* Breadcrumb Navigation - CSS Module */
+
+.nav {
+  padding: var(--spacing-md) 0;
+  margin-bottom: var(--spacing-md);
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  animation: slideInDown 0.3s ease-out;
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.link {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: var(--transition-normal);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+}
+
+.link:hover {
+  color: var(--color-secondary);
+  background: rgba(var(--color-secondary-rgb), 0.1);
+}
+
+.link:focus {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+.current {
+  color: var(--color-secondary);
+  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.separator {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: var(--font-size-xs);
+  margin: 0 var(--spacing-xs);
+}
+
+/* Light theme variant */
+.lightBackground .nav {
+  background: rgba(0, 0, 0, 0.03);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.lightBackground .link {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.lightBackground .link:hover {
+  color: var(--color-secondary);
+  background: rgba(var(--color-secondary-rgb), 0.1);
+}
+
+.lightBackground .separator {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .nav {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .item {
+    font-size: var(--font-size-xs);
+  }
+
+  .link,
+  .current {
+    padding: var(--spacing-2xs) var(--spacing-xs);
+  }
+}
+
+/* Animation */
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

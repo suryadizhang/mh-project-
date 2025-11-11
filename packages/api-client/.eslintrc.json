@@ -1,0 +1,7 @@
+{
+  "extends": ["@myhibachi/eslint-config/library"],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "warn",
+    "no-console": "warn"
+  }
+}
