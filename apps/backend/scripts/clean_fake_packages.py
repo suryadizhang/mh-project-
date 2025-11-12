@@ -2,12 +2,12 @@
 """Remove fake package data from database"""
 import asyncio
 import asyncpg
+import os
 
 
 async def clean_fake_data():
-    conn = await asyncpg.connect(
-        "postgresql://postgres:DkYokZB945vm3itM@db.yuchqvpctookhjovvdwi.supabase.co:5432/postgres"
-    )
+    db_url = os.getenv("SUPABASE_DB_URL", "postgresql://postgres@localhost:5432/postgres")
+    conn = await asyncpg.connect(db_url)
 
     print("\n🔍 Checking for fake packages in database...\n")
 
