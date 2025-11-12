@@ -467,7 +467,9 @@ class Settings(BaseSettings):
     # Customer Review System
     CUSTOMER_APP_URL: str = "http://localhost:3000"
     YELP_REVIEW_URL: str = "https://www.yelp.com/biz/my-hibachi-chef"
-    GOOGLE_REVIEW_URL: str = "https://g.page/r/YOUR_GOOGLE_PLACE_ID/review"
+    GOOGLE_REVIEW_URL: str = (
+        "https://g.page/r/CUWxn9u-KUjLEBM/review"  # Google Maps write review link
+    )
     REVIEW_COUPON_DISCOUNT_PERCENTAGE: int = 10
     REVIEW_COUPON_VALIDITY_DAYS: int = 90
     REVIEW_COUPON_MINIMUM_ORDER_CENTS: int = 5000
