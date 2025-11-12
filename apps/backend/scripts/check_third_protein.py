@@ -1,11 +1,11 @@
 import asyncio
 import asyncpg
+import os
 
 
 async def check():
-    conn = await asyncpg.connect(
-        "postgresql://postgres:DkYokZB945vm3itM@db.yuchqvpctookhjovvdwi.supabase.co:5432/postgres"
-    )
+    db_url = os.getenv("SUPABASE_DB_URL", "postgresql://postgres@localhost:5432/postgres")
+    conn = await asyncpg.connect(db_url)
     row = await conn.fetchrow(
         "SELECT upsell_item, pitch_template FROM upsell_rules WHERE upsell_item LIKE '%Third%Protein%' LIMIT 1"
     )
