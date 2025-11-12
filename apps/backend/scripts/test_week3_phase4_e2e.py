@@ -6,6 +6,7 @@ Test complete booking conversation across all agents with tone consistency
 import asyncio
 import asyncpg
 import json
+import os
 
 
 class E2EFlowTester:
@@ -15,9 +16,8 @@ class E2EFlowTester:
 
     async def connect_db(self):
         """Connect to database"""
-        self.conn = await asyncpg.connect(
-            "postgresql://postgres:DkYokZB945vm3itM@db.yuchqvpctookhjovvdwi.supabase.co:5432/postgres"
-        )
+        db_url = os.getenv("SUPABASE_DB_URL", "postgresql://postgres@localhost:5432/postgres")
+        self.conn = await asyncpg.connect(db_url)
 
     async def close_db(self):
         await self.conn.close()

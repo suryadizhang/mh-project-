@@ -5,15 +5,15 @@ This is a mock/development table that will be replaced with real data in product
 """
 import asyncio
 import asyncpg
+import os
 from datetime import date, time
 
 
 async def create_bookings_table():
     """Create bookings table for AI availability checks"""
 
-    conn = await asyncpg.connect(
-        "postgresql://postgres:DkYokZB945vm3itM@db.yuchqvpctookhjovvdwi.supabase.co:5432/postgres"
-    )
+    db_url = os.getenv("SUPABASE_DB_URL", "postgresql://postgres@localhost:5432/postgres")
+    conn = await asyncpg.connect(db_url)
 
     try:
         print("\n📅 Creating bookings table for availability checks...")
