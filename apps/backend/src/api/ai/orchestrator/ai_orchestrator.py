@@ -49,6 +49,17 @@ from .tools import (
 # Initialize logger first
 logger = logging.getLogger(__name__)
 
+# Week 1: AI Hospitality Training System
+try:
+    from ..services.tone_analyzer import ToneAnalyzer
+    from ..services.knowledge_service import KnowledgeService
+
+    TONE_ANALYZER_ENABLED = True
+    logger.info("✅ ToneAnalyzer and KnowledgeService imported successfully")
+except ImportError as e:
+    TONE_ANALYZER_ENABLED = False
+    logger.warning(f"Tone analyzer and knowledge service not available: {e}")
+
 # Phase 1A: Import router and provider
 try:
     from ..routers import get_intent_router
@@ -80,8 +91,11 @@ try:
         EscalationReason,
         EscalationContext,
     )
+
     REASONING_ENABLED = True
-    logger.info("✅ Adaptive Reasoning imported successfully - Layers 3-5 (ReAct + Multi-Agent + Human Escalation) available")
+    logger.info(
+        "✅ Adaptive Reasoning imported successfully - Layers 3-5 (ReAct + Multi-Agent + Human Escalation) available"
+    )
 except ImportError as e:
     REASONING_ENABLED = False
     logger.warning(f"Adaptive reasoning not available - using direct routing: {e}")
@@ -233,6 +247,21 @@ class AIOrchestrator:
         self.rag_service = get_rag_service(enable_rag=self.config.enable_rag)
         self.voice_service = get_voice_service(enable_voice=self.config.enable_voice)
         self.identity_resolver = get_identity_resolver(enable_identity=self.config.enable_identity)
+
+        # Week 1: Initialize AI Hospitality Training System services
+        if TONE_ANALYZER_ENABLED:
+            try:
+                self.tone_analyzer = ToneAnalyzer()
+                # KnowledgeService will be initialized lazily (needs database session)
+                self.knowledge_service = None
+                self.logger.info("✅ ToneAnalyzer initialized successfully")
+            except Exception as e:
+                self.logger.warning(f"⚠️ Failed to initialize tone analyzer: {e}")
+                self.tone_analyzer = None
+                self.knowledge_service = None
+        else:
+            self.tone_analyzer = None
+            self.knowledge_service = None
 
         # Phase 1B: Initialize memory backend and emotion service (deferred to start())
         self.memory_backend = None
@@ -585,7 +614,52 @@ Generate accurate, helpful responses that make customers excited to book!"""
         start_time = datetime.now()
 
         try:
-            # Step 1: Resolve customer identity (Phase 3 - currently no-op)
+            # Step 1: Detect customer tone (Week 1: AI Hospitality Training)
+            customer_tone = "casual"  # Default fallback
+            tone_confidence = 0.5
+            tone_guidelines = None
+            business_charter = None
+
+            if self.tone_analyzer:
+                try:
+                    tone_result = self.tone_analyzer.detect_tone(request.message)
+                    customer_tone = tone_result.detected_tone.value
+                    tone_confidence = tone_result.confidence
+
+                    # Get response guidelines for this tone
+                    tone_guidelines = await self.tone_analyzer.get_response_guidelines(
+                        tone_result.detected_tone
+                    )
+
+                    self.logger.info(
+                        f"Tone detected: {customer_tone} (confidence: {tone_confidence:.2f})",
+                        extra={
+                            "query": request.message[:100],
+                            "detected_tone": customer_tone,
+                            "confidence": tone_confidence,
+                            "reasoning": tone_result.reasoning,
+                        },
+                    )
+                except Exception as e:
+                    self.logger.warning(f"Tone detection failed, using default: {e}")
+
+            # Step 1B: Get dynamic business knowledge (Week 1: Knowledge Service)
+            if self.knowledge_service:
+                try:
+                    business_charter = await self.knowledge_service.get_business_charter()
+
+                    self.logger.debug(
+                        "Business knowledge loaded",
+                        extra={
+                            "last_updated": business_charter.get("last_updated"),
+                            "has_pricing": "pricing" in business_charter,
+                            "has_policies": "policies" in business_charter,
+                        },
+                    )
+                except Exception as e:
+                    self.logger.warning(f"Failed to load business knowledge: {e}")
+
+            # Step 2: Resolve customer identity (Phase 3 - currently no-op)
             customer_id = (
                 await self.identity_resolver.resolve_identity(
                     email=request.customer_context.get("email"),
@@ -595,14 +669,18 @@ Generate accurate, helpful responses that make customers excited to book!"""
                 or request.customer_id
             )
 
-            # Step 2: Create/retrieve conversation
+            # Step 3: Create/retrieve conversation
             if not request.conversation_id:
                 request.conversation_id = await self.conversation_service.create_conversation(
                     customer_id=customer_id, channel=request.channel, message=request.message
                 )
 
-            # Step 3: Get conversation history
+            # Step 4: Get conversation history
             conversation_history = self._conversation_history.get(request.conversation_id, [])
+
+            # Week 1: Add tone to request context for agents
+            request.customer_context["detected_tone"] = customer_tone
+            request.customer_context["tone_confidence"] = tone_confidence
 
             # Phase 3: Adaptive complexity routing (if enabled)
             complexity_level = None
@@ -614,7 +692,11 @@ Generate accurate, helpful responses that make customers excited to book!"""
                         "customer_id": customer_id,
                         "channel": request.channel,
                         "escalation_count": len(
-                            [m for m in conversation_history if "escalate" in m.get("content", "").lower()]
+                            [
+                                m
+                                for m in conversation_history
+                                if "escalate" in m.get("content", "").lower()
+                            ]
                         ),
                         "avg_complexity": 1.0,  # TODO: Track historical complexity
                         **request.customer_context,
@@ -648,14 +730,22 @@ Generate accurate, helpful responses that make customers excited to book!"""
                         )
                     elif complexity_level == ComplexityLevel.HUMAN:
                         # Route to human escalation (Layer 5)
-                        self.logger.warning("Routing to human escalation with AI context preparation")
+                        self.logger.warning(
+                            "Routing to human escalation with AI context preparation"
+                        )
                         response = await self._process_with_human_escalation(
                             request, customer_id, conversation_history, start_time, routing_context
                         )
                     else:  # ComplexityLevel.CACHE or fallback
                         # Use standard routing for simple queries
                         response = await self._process_with_router_or_legacy(
-                            request, customer_id, conversation_history, start_time
+                            request,
+                            customer_id,
+                            conversation_history,
+                            start_time,
+                            customer_tone,
+                            tone_guidelines,
+                            business_charter,  # Week 1
                         )
 
                 except Exception as e:
@@ -664,12 +754,24 @@ Generate accurate, helpful responses that make customers excited to book!"""
                         exc_info=True,
                     )
                     response = await self._process_with_router_or_legacy(
-                        request, customer_id, conversation_history, start_time
+                        request,
+                        customer_id,
+                        conversation_history,
+                        start_time,
+                        customer_tone,
+                        tone_guidelines,
+                        business_charter,  # Week 1
                     )
             else:
                 # Standard routing (no adaptive reasoning)
                 response = await self._process_with_router_or_legacy(
-                    request, customer_id, conversation_history, start_time
+                    request,
+                    customer_id,
+                    conversation_history,
+                    start_time,
+                    customer_tone,
+                    tone_guidelines,
+                    business_charter,  # Week 1
                 )
 
             # Add complexity metadata if available
@@ -720,19 +822,30 @@ Generate accurate, helpful responses that make customers excited to book!"""
         customer_id: str,
         conversation_history: list[dict[str, str]],
         start_time: datetime,
+        customer_tone=None,  # Week 1
+        tone_guidelines=None,  # Week 1
+        business_charter=None,  # Week 1
     ) -> OrchestratorResponse:
         """
         Process inquiry using Intent Router and specialized agents.
 
         This is the Phase 1A multi-agent flow.
         """
-        # Build context for router
+        # Build context for router (Week 1: Include tone + knowledge)
         context = {
             "conversation_id": request.conversation_id,
             "customer_id": customer_id,
             "channel": request.channel,
             **request.customer_context,
         }
+
+        # Week 1: Add tone and knowledge if available
+        if customer_tone:
+            context["customer_tone"] = customer_tone.value
+        if tone_guidelines:
+            context["tone_guidelines"] = tone_guidelines
+        if business_charter:
+            context["business_charter"] = business_charter
 
         # Route to appropriate agent
         agent_response = await self.router.route(
@@ -811,6 +924,9 @@ Generate accurate, helpful responses that make customers excited to book!"""
         customer_id: str,
         conversation_history: list[dict[str, str]],
         start_time: datetime,
+        customer_tone=None,  # Week 1
+        tone_guidelines=None,  # Week 1
+        business_charter=None,  # Week 1
     ) -> OrchestratorResponse:
         """
         Route to either Intent Router (Phase 1A) or Legacy mode based on configuration.
@@ -819,7 +935,13 @@ Generate accurate, helpful responses that make customers excited to book!"""
         """
         if self.use_router:
             return await self._process_with_router(
-                request, customer_id, conversation_history, start_time
+                request,
+                customer_id,
+                conversation_history,
+                start_time,
+                customer_tone,
+                tone_guidelines,
+                business_charter,  # Week 1
             )
         else:
             return await self._process_with_legacy(
@@ -1053,7 +1175,7 @@ Generate accurate, helpful responses that make customers excited to book!"""
         Process inquiry requiring human intervention with AI context preparation (Layer 5).
 
         This is the highest complexity level - prepares comprehensive context for human agents.
-        
+
         Steps:
         1. Lazy initialize HumanEscalationService
         2. Determine escalation reason from routing context
@@ -1062,14 +1184,14 @@ Generate accurate, helpful responses that make customers excited to book!"""
         5. Create escalation record in database
         6. Build response directing customer to human
         7. Add rich metadata for admin dashboard
-        
+
         Args:
             request: Orchestrator request
             customer_id: Customer identifier
             conversation_history: Full conversation history
             start_time: Processing start time
             routing_context: Context from complexity classification
-            
+
         Returns:
             OrchestratorResponse with escalation details
         """
@@ -1085,7 +1207,7 @@ Generate accurate, helpful responses that make customers excited to book!"""
 
             # Determine escalation reason from routing context
             escalation_reason = self._determine_escalation_reason(routing_context)
-            
+
             self.logger.info(
                 "Preparing human escalation context",
                 extra={
@@ -1139,17 +1261,17 @@ Generate accurate, helpful responses that make customers excited to book!"""
                 )
 
             escalation_context = escalation_result.context
-            
+
             # Create escalation record in database
             escalation_id = None
             if request.customer_context.get("phone"):
                 try:
                     from services.escalation_service import EscalationService
                     from database import get_db
-                    
+
                     db = next(get_db())
                     escalation_svc = EscalationService(db)
-                    
+
                     # Map urgency to priority
                     priority_map = {
                         "LOW": "low",
@@ -1157,15 +1279,13 @@ Generate accurate, helpful responses that make customers excited to book!"""
                         "HIGH": "high",
                         "CRITICAL": "urgent",
                     }
-                    
+
                     escalation_record = await escalation_svc.create_escalation(
                         conversation_id=request.conversation_id or str(uuid4()),
                         phone=request.customer_context.get("phone"),
                         reason=escalation_context.why_ai_failed,
                         preferred_method="sms",
-                        priority=priority_map.get(
-                            escalation_context.urgency_level.name, "medium"
-                        ),
+                        priority=priority_map.get(escalation_context.urgency_level.name, "medium"),
                         email=request.customer_context.get("email"),
                         customer_id=customer_id,
                         customer_consent=True,
@@ -1178,10 +1298,10 @@ Generate accurate, helpful responses that make customers excited to book!"""
                             "priority_flags": escalation_context.priority_flags,
                         },
                     )
-                    
+
                     escalation_id = str(escalation_record.id)
                     self.logger.info(f"✅ Escalation record created: {escalation_id}")
-                    
+
                 except Exception as e:
                     self.logger.warning(f"Failed to create escalation record: {e}")
                     # Continue without database record
@@ -1233,73 +1353,71 @@ Generate accurate, helpful responses that make customers excited to book!"""
     def _determine_escalation_reason(self, routing_context: dict) -> EscalationReason:
         """
         Determine escalation reason from routing context.
-        
+
         Maps routing signals to EscalationReason enum.
         """
         # Check for explicit signals in routing context
         if routing_context.get("explicit_human_request"):
             return EscalationReason.EXPLICIT_REQUEST
-        
+
         if routing_context.get("contains_crisis_keywords"):
             return EscalationReason.CRISIS
-        
+
         if routing_context.get("contains_sensitive_topics"):
             return EscalationReason.SENSITIVE
-        
+
         if routing_context.get("high_value_query"):
             return EscalationReason.HIGH_VALUE
-        
+
         confidence = routing_context.get("confidence", 1.0)
         if confidence < 0.85:
             return EscalationReason.LOW_CONFIDENCE
-        
+
         # Default to complex unsolved
         return EscalationReason.COMPLEX_UNSOLVED
 
     def _build_escalation_response_message(self, escalation_context: EscalationContext) -> str:
         """
         Build customer-facing response message for human escalation.
-        
+
         Message is empathetic and explains what will happen next.
         """
         # Get customer name if available
         customer_name = escalation_context.customer_context.name
         greeting = f"Hi {customer_name}! " if customer_name != "Unknown" else "Hi! "
-        
+
         # Base message
         message = (
             f"{greeting}I understand you need assistance with this. "
             f"I'm connecting you with one of our team members who can help. "
         )
-        
+
         # Add urgency-specific messaging
         if escalation_context.urgency_level.name == "CRITICAL":
-            message += (
-                "Your request is marked as urgent and we'll respond as soon as possible. "
-            )
+            message += "Your request is marked as urgent and we'll respond as soon as possible. "
         elif escalation_context.urgency_level.name == "HIGH":
             message += "We'll get back to you shortly. "
         else:
             message += "We'll respond within our normal business hours. "
-        
+
         # Add sentiment-specific messaging
         if escalation_context.current_sentiment.value <= -1:
             message += (
                 "I apologize for any frustration. "
                 "Our team will make sure you get the help you need. "
             )
-        
+
         # Add VIP messaging
         if escalation_context.customer_context.vip_status:
             message += "As a valued VIP customer, you're a priority for us. "
-        
+
         # Add contact method
         if escalation_context.customer_context.phone:
             message += f"We'll contact you at {escalation_context.customer_context.phone}. "
-        
+
         # Closing
         message += f"Reference ID: {escalation_context.escalation_id}"
-        
+
         return message
 
     async def _process_with_legacy(

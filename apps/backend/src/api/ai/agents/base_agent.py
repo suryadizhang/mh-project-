@@ -184,8 +184,8 @@ class BaseAgent(ABC):
         start_time = datetime.now(timezone.utc)
 
         try:
-            # Build messages
-            messages = self._build_messages(message, conversation_history)
+            # Build messages (Week 1: Pass context for tone adaptation)
+            messages = self._build_messages(message, conversation_history, context)
 
             # Get tools (if enabled)
             tools = self.get_tools() if enable_tools else None
@@ -250,11 +250,29 @@ class BaseAgent(ABC):
     # ===== Helper Methods =====
 
     def _build_messages(
-        self, message: str, conversation_history: list[dict[str, str]]
+        self,
+        message: str,
+        conversation_history: list[dict[str, str]],
+        context: dict[str, Any] = None,
     ) -> list[dict[str, str]]:
-        """Build message list with system prompt + history + current message"""
+        """
+        Build message list with system prompt + history + current message.
 
-        messages = [{"role": "system", "content": self.get_system_prompt()}]
+        Week 1: Pass context to get_system_prompt() for tone adaptation.
+        """
+        # Week 1: Check if get_system_prompt accepts context parameter
+        import inspect
+
+        sig = inspect.signature(self.get_system_prompt)
+
+        if "context" in sig.parameters:
+            # New signature (Week 1): get_system_prompt(context)
+            system_content = self.get_system_prompt(context or {})
+        else:
+            # Old signature (backward compatible): get_system_prompt()
+            system_content = self.get_system_prompt()
+
+        messages = [{"role": "system", "content": system_content}]
 
         # Add conversation history
         messages.extend(conversation_history)
