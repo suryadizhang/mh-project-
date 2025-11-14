@@ -3,10 +3,13 @@ Booking Service Layer
 Encapsulates booking business logic and orchestrates repository operations
 """
 
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 import logging
-from typing import Any
+from typing import Any, Optional, TYPE_CHECKING
 from uuid import UUID
+
+if TYPE_CHECKING:
+    from services.lead_service import LeadService
 
 from core.cache import CacheService, cached, invalidate_cache
 from core.exceptions import (
@@ -18,31 +21,39 @@ from core.exceptions import (
 from models.booking import Booking, BookingStatus
 from repositories.booking_repository import BookingRepository
 from schemas.booking import BookingCreate
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
 
 class BookingService:
     """
-    Service layer for booking operations
+    Service layer for booking operations with dependency injection.
 
     Responsibilities:
     - Business rule enforcement
     - Cross-cutting concerns (caching, logging)
     - Transaction coordination
-    - Integration with external services
+    - Integration with external services (LeadService)
     """
 
-    def __init__(self, repository: BookingRepository, cache: CacheService | None = None):
+    def __init__(
+        self, 
+        repository: BookingRepository, 
+        cache: CacheService | None = None,
+        lead_service: Optional['LeadService'] = None,  # Forward reference to avoid circular import
+    ):
         """
-        Initialize booking service
+        Initialize booking service with injected dependencies.
 
         Args:
             repository: Booking repository instance
             cache: Optional cache service for performance
+            lead_service: Optional lead service for failed booking capture
         """
         self.repository = repository
         self.cache = cache
+        self.lead_service = lead_service
 
     # Query Operations (with caching)
 
@@ -235,28 +246,25 @@ class BookingService:
 
         if not is_available:
             # Capture failed booking as lead for follow-up
-            try:
-                from services.lead_service import LeadService
-
-                lead_service = LeadService(db=self.repository.db)
-
-                await lead_service.capture_failed_booking(
-                    contact_info={
-                        "email": booking_data.contact_email,
-                        "phone": booking_data.contact_phone,
-                    },
-                    booking_data={
-                        "event_date": booking_data.event_date,
-                        "party_size": booking_data.party_size,
-                        "event_time": booking_data.event_time,
-                        "special_requests": booking_data.special_requests,
-                    },
-                    failure_reason=f"Time slot {booking_data.event_time} already booked",
-                )
-                logger.info(f"Captured failed booking as lead for {booking_data.contact_email}")
-            except Exception as e:
-                # Don't fail the booking flow if lead capture fails
-                logger.warning(f"Failed to capture lead from failed booking: {e}")
+            if self.lead_service:
+                try:
+                    await self.lead_service.capture_failed_booking(
+                        contact_info={
+                            "email": booking_data.contact_email,
+                            "phone": booking_data.contact_phone,
+                        },
+                        booking_data={
+                            "event_date": booking_data.event_date,
+                            "party_size": booking_data.party_size,
+                            "event_time": booking_data.event_time,
+                            "special_requests": booking_data.special_requests,
+                        },
+                        failure_reason=f"Time slot {booking_data.event_time} already booked",
+                    )
+                    logger.info(f"Captured failed booking as lead for {booking_data.contact_email}")
+                except Exception as e:
+                    # Don't fail the booking flow if lead capture fails
+                    logger.warning(f"Failed to capture lead from failed booking: {e}")
 
             raise ConflictException(
                 message=f"Time slot {booking_data.event_time} on {booking_data.event_date} is not available",
