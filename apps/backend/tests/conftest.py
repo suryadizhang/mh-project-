@@ -58,6 +58,14 @@ from src.models.user import User as LegacyUser
 from src.core.config import UserRole
 from src.models.booking import Booking, Payment
 from src.models.customer import Customer
+from src.models.legacy_lead_newsletter import Lead, Subscriber
+from unittest.mock import AsyncMock, MagicMock
+from src.services.event_service import EventService
+from src.services.lead_service import LeadService
+from src.services.newsletter_service import SubscriberService
+from src.services.referral_service import ReferralService
+from src.services.nurture_campaign_service import NurtureCampaignService
+from src.core.compliance import ComplianceValidator
 
 fake = Faker()
 
@@ -322,3 +330,117 @@ async def create_test_payments(db_session):
         return payments
 
     return _create
+
+
+# ============================================================================
+# DEPENDENCY INJECTION MOCKS - Phase 4 Test Suite
+# ============================================================================
+
+
+@pytest.fixture
+def mock_compliance_validator():
+    """Mock ComplianceValidator for testing."""
+    mock = MagicMock(spec=ComplianceValidator)
+    mock.validate_consent.return_value = {"valid": True, "warnings": []}
+    mock.validate_email.return_value = True
+    mock.validate_phone.return_value = True
+    return mock
+
+
+@pytest_asyncio.fixture
+async def mock_event_service(db_session):
+    """Mock EventService with database session."""
+    service = EventService(db_session)
+    # Wrap methods with AsyncMock to track calls
+    service.log_event = AsyncMock(wraps=service.log_event)
+    service.log_lead_event = AsyncMock(wraps=service.log_lead_event)
+    service.log_booking_event = AsyncMock(wraps=service.log_booking_event)
+    return service
+
+
+@pytest_asyncio.fixture
+async def mock_lead_service(db_session, mock_compliance_validator, mock_event_service):
+    """Create real LeadService with mocked dependencies for testing."""
+    service = LeadService(
+        db=db_session,
+        compliance_validator=mock_compliance_validator,
+        event_service=mock_event_service,
+    )
+    return service
+
+
+@pytest_asyncio.fixture
+async def mock_newsletter_service(db_session, mock_compliance_validator, mock_event_service):
+    """Create real SubscriberService with mocked dependencies for testing."""
+    service = SubscriberService(
+        db=db_session,
+        compliance_validator=mock_compliance_validator,
+        event_service=mock_event_service,
+    )
+    return service
+
+
+@pytest_asyncio.fixture
+async def mock_referral_service(db_session, mock_event_service):
+    """Create real ReferralService with mocked dependencies for testing."""
+    # Mock notification service
+    mock_notification = AsyncMock()
+    
+    service = ReferralService(
+        db=db_session,
+        event_service=mock_event_service,
+        notification_service=mock_notification,
+    )
+    service.notification_service = mock_notification
+    return service
+
+
+@pytest_asyncio.fixture
+async def mock_campaign_service(db_session, mock_event_service):
+    """Create real NurtureCampaignService with mocked dependencies for testing."""
+    # Mock notification service
+    mock_notification = AsyncMock()
+    
+    service = NurtureCampaignService(
+        db=db_session,
+        event_service=mock_event_service,
+        notification_service=mock_notification,
+    )
+    service.notification_service = mock_notification
+    return service
+
+
+@pytest_asyncio.fixture
+async def test_lead(db_session):
+    """Create a test lead in the database."""
+    lead = Lead(
+        name="Test Lead",
+        email=f"testlead{int(time.time())}@example.com",
+        phone="+15551234567",
+        source="test",
+        notes="Test lead for automated tests",
+        consent_email=True,
+        consent_sms=True,
+        consent_phone=True,
+    )
+    db_session.add(lead)
+    await db_session.commit()
+    await db_session.refresh(lead)
+    return lead
+
+
+@pytest_asyncio.fixture
+async def test_subscriber(db_session):
+    """Create a test subscriber in the database."""
+    subscriber = Subscriber(
+        email=f"testsub{int(time.time())}@example.com",
+        name="Test Subscriber",
+        status="active",
+        consent_email=True,
+        subscribed_at=datetime.utcnow(),
+    )
+    db_session.add(subscriber)
+    await db_session.commit()
+    await db_session.refresh(subscriber)
+    return subscriber
+

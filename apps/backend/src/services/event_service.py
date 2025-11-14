@@ -73,7 +73,7 @@ class EventService(BaseService):
                 entity_type=entity_type,
                 entity_id=entity_id,
                 user_id=user_id,
-                metadata=metadata or {},
+                event_data=metadata or {},  # Changed from metadata to event_data
                 severity=severity,
                 timestamp=datetime.utcnow(),
             )
