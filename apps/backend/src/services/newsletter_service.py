@@ -11,7 +11,9 @@ from models.legacy_lead_newsletter import (
     LeadSource,
     Subscriber,
 )  # Phase 2C: Updated from api.app.models.lead_newsletter
+from core.base_service import BaseService, EventTrackingMixin
 from core.compliance import ComplianceValidator
+from services.event_service import EventService
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from utils.validators import validate_email, validate_phone, ValidationError
@@ -19,12 +21,41 @@ from utils.validators import validate_email, validate_phone, ValidationError
 logger = logging.getLogger(__name__)
 
 
-class SubscriberService:
-    """Service for managing Subscriber subscriptions"""
+class SubscriberService(BaseService, EventTrackingMixin):
+    """
+    Service for managing Subscriber subscriptions with dependency injection.
+    
+    Handles:
+    - Newsletter subscriptions and unsubscriptions
+    - STOP/START/HELP SMS commands
+    - CAN-SPAM compliance
+    - Subscriber tracking
+    
+    Dependencies (injected):
+    - db: Database session
+    - compliance_validator: CAN-SPAM validator
+    - event_service: Centralized event tracking
+    """
 
-    def __init__(self, db: AsyncSession):
-        self.db = db
-        self.compliance = ComplianceValidator()  # Add compliance validator
+    def __init__(
+        self,
+        db: AsyncSession,
+        compliance_validator: ComplianceValidator,
+        event_service: EventService,
+        logger: logging.Logger | None = None,
+    ):
+        """
+        Initialize subscriber service with injected dependencies.
+        
+        Args:
+            db: Database session
+            compliance_validator: Validator for CAN-SPAM compliance
+            event_service: Service for event tracking
+            logger: Optional logger (created automatically if not provided)
+        """
+        super().__init__(db, logger)
+        self.compliance = compliance_validator
+        self.event_service = event_service
 
     async def subscribe(
         self,
@@ -116,6 +147,19 @@ class SubscriberService:
             },
         )
 
+        # Track subscription event
+        await self.track_event(
+            action="subscriber_created",
+            entity_type="subscriber",
+            entity_id=subscription.id,
+            metadata={
+                "source": source,
+                "auto_subscribed": auto_subscribed,
+                "has_email": bool(email),
+                "has_phone": bool(phone),
+            },
+        )
+
         # Send welcome message with STOP instructions
         await self._send_welcome_message(subscription, name=name)
 
@@ -172,6 +216,17 @@ class SubscriberService:
             "Unsubscribed from Subscriber",
             extra={
                 "subscription_id": str(subscription.id),
+                "phone": phone,
+                "email": email,
+            },
+        )
+
+        # Track unsubscribe event
+        await self.track_event(
+            action="subscriber_unsubscribed",
+            entity_type="subscriber",
+            entity_id=subscription.id,
+            metadata={
                 "phone": phone,
                 "email": email,
             },
