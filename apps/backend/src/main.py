@@ -937,13 +937,17 @@ try:
         router as ringcentral_router,
     )
     from routers.v1.conversations import router as conversations_router
+    from routers.v1.referrals import router as referrals_router
+    from routers.v1.campaigns import router as campaigns_router
 
     app.include_router(leads_router, prefix="/api/leads", tags=["leads"])
     app.include_router(leads_router, prefix="/api/v1/public/leads", tags=["leads-public"])  # Public endpoint
     app.include_router(newsletter_router, prefix="/api/newsletter", tags=["newsletter"])
     app.include_router(ringcentral_router, prefix="/api/ringcentral", tags=["sms"])
     app.include_router(conversations_router, prefix="/api/v1", tags=["conversations"])
-    logger.info("✅ Additional CRM routers included from NEW location")
+    app.include_router(referrals_router, prefix="/api/v1", tags=["referrals"])
+    app.include_router(campaigns_router, prefix="/api/v1", tags=["campaigns"])
+    logger.info("✅ Additional CRM routers included from NEW location (leads, newsletter, SMS, conversations, referrals, campaigns)")
 except ImportError as e:
     logger.error(f"❌ Some additional routers not available: {e}")
 
