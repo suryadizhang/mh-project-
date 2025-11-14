@@ -25,9 +25,12 @@ from fastapi import Depends
 
 from db.session import AsyncSessionLocal
 from services.lead_service import LeadService
-from services.newsletter_service import NewsletterService
+from services.newsletter_service import SubscriberService
 from services.event_service import EventService
+from services.booking_service import BookingService
+from repositories.booking_repository import BookingRepository
 from core.compliance import ComplianceValidator
+from core.cache import CacheService
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -121,9 +124,9 @@ async def get_newsletter_service(
     db: AsyncSession = Depends(get_db),
     compliance_validator: ComplianceValidator = Depends(get_compliance_validator),
     event_service: EventService = Depends(get_event_service),
-) -> NewsletterService:
+) -> SubscriberService:
     """
-    Provide NewsletterService with all dependencies injected.
+    Provide SubscriberService (NewsletterService) with all dependencies injected.
     
     Automatically injects:
     - Database session for data access
@@ -136,20 +139,49 @@ async def get_newsletter_service(
         event_service: Event tracking service
     
     Returns:
-        NewsletterService: Fully configured newsletter service
+        SubscriberService: Fully configured newsletter service
     
     Example:
         @router.post("/api/v1/newsletter/subscribe")
         async def subscribe(
             data: SubscribeRequest,
-            service: NewsletterService = Depends(get_newsletter_service)
+            service: SubscriberService = Depends(get_newsletter_service)
         ):
             return await service.subscribe(data)
     """
-    return NewsletterService(
+    return SubscriberService(
         db=db,
         compliance_validator=compliance_validator,
         event_service=event_service,
+    )
+
+
+async def get_booking_service(
+    db: AsyncSession = Depends(get_db),
+    lead_service: LeadService = Depends(get_lead_service),
+    cache: Optional[CacheService] = None,
+) -> BookingService:
+    """
+    Provide BookingService with all dependencies injected.
+    
+    Automatically injects:
+    - Database session via BookingRepository
+    - LeadService for failed booking capture
+    - CacheService for performance optimization (optional)
+    
+    Args:
+        db: Database session
+        lead_service: Lead service for capturing failed bookings
+        cache: Optional cache service
+    
+    Returns:
+        BookingService: Fully configured booking service
+    """
+    repository = BookingRepository(db)
+    return BookingService(
+        repository=repository,
+        lead_service=lead_service,
+        cache=cache,
     )
 
 
