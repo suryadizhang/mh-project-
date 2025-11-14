@@ -11,10 +11,10 @@ import logging
 import os
 from typing import Any
 
-from api.app.auth.station_models import Station
+from core.auth.station_models import Station
 
 # Import models
-from api.app.models.booking_models import AddonItem, MenuItem
+from models.legacy_booking_models import AddonItem, MenuItem
 import requests
 from sqlalchemy import select
 from sqlalchemy.orm import Session

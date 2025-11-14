@@ -190,9 +190,20 @@ class RingCentralVoiceService:
                 call_recording.state = CallState.RECORDED
                 await db.commit()
 
-                # TODO: Trigger download and transcription
-                # Can be done via Celery task
-                logger.info(f"Recording URI saved: {recording_uri}")
+                # Queue transcript fetch from RingCentral AI + entity linking
+                # Using delay=30s to allow RC AI to process the recording
+                # Then automatically link to customer/booking
+                from celery import chain
+                from workers.recording_tasks import fetch_recording_transcript, link_recording_entities
+                
+                chain(
+                    fetch_recording_transcript.si(str(call_recording.id), call_id),
+                    link_recording_entities.si(str(call_recording.id))
+                ).apply_async(countdown=30)  # Wait 30 seconds for RC AI to process
+                
+                logger.info(
+                    f"Recording URI saved, transcript fetch + entity linking queued: {recording_uri}"
+                )
 
             return {"success": True, "call_id": call_id, "recording_uri": recording_uri}
 

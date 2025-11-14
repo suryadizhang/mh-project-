@@ -56,7 +56,7 @@ class Escalation(Base):
     """
 
     __tablename__ = "escalations"
-    __table_args__ = {"schema": "support"}
+    __table_args__ = {"schema": "support", "extend_existing": True}
 
     # Primary key
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)

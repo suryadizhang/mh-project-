@@ -67,6 +67,7 @@ class Customer(BaseModel):
 
     # Relationships
     bookings = relationship("Booking", back_populates="customer", lazy="select")
+    tone_preferences = relationship("CustomerTonePreference", back_populates="customer", lazy="select")
 
     def __repr__(self):
         return f"<Customer(id={self.id}, email={self.email}, name={self.full_name})>"

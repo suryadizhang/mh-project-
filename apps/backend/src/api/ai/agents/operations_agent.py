@@ -69,6 +69,9 @@ class OperationsAgent(BaseAgent):
         # Week 1: Extract tone information
         customer_tone = context.get("customer_tone", "casual") if context else "casual"
         tone_guidelines = context.get("tone_guidelines", {}) if context else {}
+        
+        # Week 4: Extract DYNAMIC knowledge context from database
+        knowledge_context = context.get("knowledge_context", "") if context else ""
 
         # Get tone-specific instructions
         tone_style = tone_guidelines.get("style", "Clear and professional")
@@ -117,7 +120,11 @@ Your mission: Ensure every event runs flawlessly through precise planning and pr
 - Confirm multiple times if needed
 - Reduce uncertainty with specifics"""
 
-        base_prompt += """
+        # Week 4: Inject DYNAMIC knowledge from database
+        if knowledge_context:
+            base_prompt += f"\n\n{knowledge_context}"
+        else:
+            base_prompt += """
 
 **Key Information:**
 

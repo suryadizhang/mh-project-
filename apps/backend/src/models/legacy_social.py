@@ -72,7 +72,7 @@ class SocialAccount(Base):
     """Connected social media business accounts."""
 
     __tablename__ = "social_accounts"
-    __table_args__ = {"schema": "core"}
+    __table_args__ = {"schema": "core", "extend_existing": True}
 
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
     platform = Column(ENUM(SocialPlatform), nullable=False)
@@ -107,7 +107,7 @@ class SocialIdentity(Base):
     """Social media identities mapped to customers."""
 
     __tablename__ = "social_identities"
-    __table_args__ = {"schema": "core"}
+    __table_args__ = {"schema": "core", "extend_existing": True}
 
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
     platform = Column(ENUM(SocialPlatform), nullable=False)
@@ -136,7 +136,7 @@ class SocialThread(Base):
     """Social media conversation threads."""
 
     __tablename__ = "social_threads"
-    __table_args__ = {"schema": "core"}
+    __table_args__ = {"schema": "core", "extend_existing": True}
 
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
     platform = Column(ENUM(SocialPlatform), nullable=False)
@@ -182,7 +182,7 @@ class SocialMessage(Base):
     """Individual messages within social media threads."""
 
     __tablename__ = "social_messages"
-    __table_args__ = {"schema": "core"}
+    __table_args__ = {"schema": "core", "extend_existing": True}
 
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
     thread_id = Column(
@@ -227,7 +227,7 @@ class Review(Base):
     """Social media reviews and ratings."""
 
     __tablename__ = "reviews"
-    __table_args__ = {"schema": "core"}
+    __table_args__ = {"schema": "core", "extend_existing": True}
 
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
     platform = Column(ENUM(SocialPlatform), nullable=False)
@@ -270,7 +270,7 @@ class SocialInbox(Base):
     """Webhook idempotency tracking."""
 
     __tablename__ = "social_inbox"
-    __table_args__ = {"schema": "integra"}
+    __table_args__ = {"schema": "integra", "extend_existing": True}
 
     signature = Column(String(255), primary_key=True, comment="Webhook signature for idempotency")
     platform = Column(ENUM(SocialPlatform), nullable=False)

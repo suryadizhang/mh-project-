@@ -10,7 +10,6 @@ import logging
 from core.database import AsyncSessionLocal
 from models.legacy_core import Booking, Customer
 from models.legacy_feedback import CustomerReview
-from services.review_service import ReviewService
 from core.config import get_settings
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,6 +24,18 @@ class ReviewRequestWorker:
 
     def __init__(self):
         self.base_url = settings.customer_app_url or "https://myhibachi.com"
+        
+        # Lazy-loaded services
+        self._review_service = None
+    
+    @property
+    def review_service(self):
+        """Lazy load review service (Google APIs)"""
+        if self._review_service is None:
+            logger.info("Loading review service...")
+            from services.review_service import ReviewService
+            self._review_service = ReviewService()
+        return self._review_service
 
     async def process_completed_bookings(self) -> int:
         """
@@ -101,7 +112,8 @@ class ReviewRequestWorker:
                 logger.exception(f"Error decrypting customer data: {e}")
                 return False
 
-            # Create review service
+            # Create review service (lazy loaded)
+            from services.review_service import ReviewService
             review_service = ReviewService(db)
 
             # Create review record

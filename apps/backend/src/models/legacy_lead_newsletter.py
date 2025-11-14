@@ -144,7 +144,7 @@ class Lead(BaseModel):
     __tablename__ = "leads"
     __table_args__ = (
         CheckConstraint("score >= 0 AND score <= 100", name="check_lead_score_range"),
-        {"schema": "lead"},
+        {"schema": "lead", "extend_existing": True},
     )
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -240,7 +240,7 @@ class LeadContact(BaseModel):
     """Lead contact information across channels."""
 
     __tablename__ = "lead_contacts"
-    __table_args__ = {"schema": "lead"}
+    __table_args__ = {"schema": "lead", "extend_existing": True}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     lead_id = Column(
@@ -258,7 +258,7 @@ class LeadContext(BaseModel):
     """Event context and preferences for leads."""
 
     __tablename__ = "lead_context"
-    __table_args__ = {"schema": "lead"}
+    __table_args__ = {"schema": "lead", "extend_existing": True}
 
     lead_id = Column(
         UUID(as_uuid=True), ForeignKey("lead.leads.id", ondelete="CASCADE"), primary_key=True
@@ -291,7 +291,7 @@ class LeadEvent(BaseModel):
     """Lead activity tracking."""
 
     __tablename__ = "lead_events"
-    __table_args__ = {"schema": "lead"}
+    __table_args__ = {"schema": "lead", "extend_existing": True}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     lead_id = Column(
@@ -311,7 +311,7 @@ class SocialThread(BaseModel):
     __tablename__ = "social_threads"
     __table_args__ = (
         Index("ix_social_threads_platform", "platform", "thread_external_id", unique=True),
-        {"schema": "lead"},
+        {"schema": "lead", "extend_existing": True},
     )
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -348,7 +348,7 @@ class Subscriber(BaseModel):
         CheckConstraint(
             "engagement_score >= 0 AND engagement_score <= 100", name="check_engagement_score_range"
         ),
-        {"schema": "newsletter"},
+        {"schema": "newsletter", "extend_existing": True},
     )
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -443,7 +443,7 @@ class Campaign(BaseModel):
     """Marketing campaign management."""
 
     __tablename__ = "campaigns"
-    __table_args__ = {"schema": "newsletter"}
+    __table_args__ = {"schema": "newsletter", "extend_existing": True}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String(200), nullable=False)
@@ -483,7 +483,7 @@ class CampaignEvent(BaseModel):
     """Campaign interaction tracking."""
 
     __tablename__ = "campaign_events"
-    __table_args__ = {"schema": "newsletter"}
+    __table_args__ = {"schema": "newsletter", "extend_existing": True}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     campaign_id = Column(

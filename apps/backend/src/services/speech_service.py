@@ -15,14 +15,19 @@ import aiohttp
 
 logger = logging.getLogger(__name__)
 
+# Try importing Deepgram SDK v5.x
+DEEPGRAM_AVAILABLE = False
+DeepgramClient = None
+
 try:
     from deepgram import DeepgramClient
-    from deepgram.options.live import LiveOptions, LiveTranscriptionEvents
-    from deepgram.options.prerecorded import PrerecordedOptions
     DEEPGRAM_AVAILABLE = True
-except ImportError:
-    DEEPGRAM_AVAILABLE = False
-    logger.warning("Deepgram SDK not installed. Voice AI features will be disabled.")
+    logger.info("✅ Deepgram SDK v5.x loaded successfully")
+except ImportError as e:
+    logger.warning(f"Deepgram SDK not available: {e}. Voice AI features will be disabled.")
+
+# Note: In Deepgram v5.x, options and events are not imported separately
+# They are accessed via the client methods directly
 
 
 class SpeechProvider(str, Enum):
@@ -108,6 +113,10 @@ class SpeechService:
     ) -> dict[str, Any]:
         """
         Real-time speech-to-text streaming.
+        
+        NOTE: Deepgram v5.x has a different WebSocket API structure.
+        This method is a placeholder for future implementation.
+        For production phone calls, use transcribe_audio_file() for now.
 
         Args:
             audio_stream: Async generator yielding audio chunks
@@ -117,105 +126,16 @@ class SpeechService:
         Returns:
             Dict with transcription metadata and statistics
         """
-        if not self.deepgram_enabled:
-            raise RuntimeError("Deepgram not configured. Set DEEPGRAM_API_KEY")
-
-        try:
-            # Configure live transcription
-            options = LiveOptions(
-                model=self.transcription_model,
-                language=language,
-                punctuate=True,
-                interim_results=True,
-                utterance_end_ms=1000,  # 1 second pause = end of utterance
-                vad_events=True,  # Voice activity detection
-                smart_format=True,  # Automatic formatting
-            )
-
-            # Create connection
-            connection = self.deepgram_client.listen.live.v("1")
-
-            # Track statistics
-            stats = {
-                "start_time": datetime.now(timezone.utc),
-                "segments": 0,
-                "characters": 0,
-                "words": 0,
-                "confidence_scores": [],
-            }
-
-            # Event handlers
-            def on_message(self, result, **kwargs):
-                """Handle transcription results"""
-                sentence = result.channel.alternatives[0].transcript
-
-                if len(sentence) == 0:
-                    return
-
-                # Update statistics
-                stats["segments"] += 1
-                stats["characters"] += len(sentence)
-                stats["words"] += len(sentence.split())
-                stats["confidence_scores"].append(result.channel.alternatives[0].confidence)
-
-                # Call user callback
-                is_final = result.is_final
-                callback(
-                    {
-                        "text": sentence,
-                        "is_final": is_final,
-                        "confidence": result.channel.alternatives[0].confidence,
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
-                    }
-                )
-
-            def on_error(self, error, **kwargs):
-                """Handle errors"""
-                logger.error(f"Deepgram error: {error}")
-
-            # Register event handlers
-            connection.on(LiveTranscriptionEvents.Transcript, on_message)
-            connection.on(LiveTranscriptionEvents.Error, on_error)
-
-            # Start connection
-            if connection.start(options) is False:
-                raise RuntimeError("Failed to start Deepgram connection")
-
-            # Stream audio
-            async for audio_chunk in audio_stream:
-                connection.send(audio_chunk)
-
-            # Finish
-            connection.finish()
-
-            # Calculate statistics
-            stats["end_time"] = datetime.now(timezone.utc)
-            duration = (stats["end_time"] - stats["start_time"]).total_seconds()
-            stats["duration_seconds"] = duration
-            stats["duration_minutes"] = duration / 60
-            stats["cost_usd"] = stats["duration_minutes"] * self.transcription_cost_per_minute
-            stats["avg_confidence"] = (
-                sum(stats["confidence_scores"]) / len(stats["confidence_scores"])
-                if stats["confidence_scores"]
-                else 0
-            )
-
-            logger.info(
-                f"Transcription complete: {stats['duration_minutes']:.2f} min, "
-                f"{stats['words']} words, ${stats['cost_usd']:.4f}"
-            )
-
-            return stats
-
-        except Exception as e:
-            logger.exception(f"Transcription error: {e}")
-            raise
+        raise NotImplementedError(
+            "Live streaming transcription requires Deepgram v5.x WebSocket implementation. "
+            "Use transcribe_audio_file() for batch transcription instead."
+        )
 
     async def transcribe_audio_file(
         self, audio_data: bytes, language: str = "en"
     ) -> dict[str, Any]:
         """
-        Transcribe pre-recorded audio file.
+        Transcribe pre-recorded audio file using Deepgram v5.x REST API.
 
         Args:
             audio_data: Audio file bytes (WAV, MP3, etc.)
@@ -228,18 +148,16 @@ class SpeechService:
             raise RuntimeError("Deepgram not configured. Set DEEPGRAM_API_KEY")
 
         try:
-            options = PrerecordedOptions(
+            # Deepgram v5.x uses client.listen.v1.transcribe_file()
+            # Options are passed as keyword arguments
+            response = await self.deepgram_client.listen.v1.transcribe_file(
+                {"buffer": audio_data},
                 model=self.transcription_model,
                 language=language,
                 punctuate=True,
                 smart_format=True,
                 utterances=True,
                 diarize=True,  # Speaker detection
-            )
-
-            # Send request
-            response = await self.deepgram_client.listen.asyncrest.v("1").transcribe_file(
-                {"buffer": audio_data}, options
             )
 
             # Extract transcription
@@ -301,13 +219,15 @@ class SpeechService:
 
             logger.info(f"Synthesizing speech (streaming): {char_count} chars, ${cost:.4f}")
 
-            # Stream audio chunks using Deepgram Aura
-            audio_stream = self.deepgram_client.speak.v1.audio.generate(
+            # Stream audio chunks using Deepgram v5 API
+            # client.speak.v1.audio.generate() returns Iterator[bytes]
+            audio_iterator = self.deepgram_client.speak.v1.audio.generate(
                 text=text,
-                model=voice_model
+                model=voice_model,
             )
-
-            for chunk in audio_stream:
+            
+            # Stream chunks
+            for chunk in audio_iterator:
                 yield chunk
 
         except Exception as e:
@@ -341,17 +261,17 @@ class SpeechService:
 
             logger.info(f"Synthesizing speech (full): {char_count} chars, ${cost:.4f}")
 
-            # Generate full audio using Deepgram Aura
-            audio_stream = self.deepgram_client.speak.v1.audio.generate(
+            # Generate full audio using Deepgram v5 API
+            # client.speak.v1.audio.generate() returns Iterator[bytes]
+            audio_iterator = self.deepgram_client.speak.v1.audio.generate(
                 text=text,
-                model=voice_model
+                model=voice_model,
             )
-
-            # Collect all chunks
-            audio_bytes = b""
-            for chunk in audio_stream:
-                audio_bytes += chunk
-
+            
+            # Collect all chunks into bytes
+            audio_bytes = b"".join(chunk for chunk in audio_iterator)
+            
+            # Return audio bytes
             return audio_bytes
 
         except Exception as e:

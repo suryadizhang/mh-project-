@@ -7,7 +7,7 @@ must use to avoid cross-Base relationship issues and mapper initialization error
 
 Architecture:
 - Single Base for all models across all schemas (core, identity, public, lead, newsletter)
-- Schema isolation via __table_args__ = {"schema": "schema_name"}
+- Schema isolation via __table_args__ = {"schema": "schema_name", "extend_existing": True}
 - Proper ForeignKey references using fully qualified names (schema.table.column)
 
 IMPORTANT: Models are NOT automatically imported here to avoid circular imports.

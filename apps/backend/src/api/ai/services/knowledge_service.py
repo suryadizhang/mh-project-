@@ -20,7 +20,7 @@ from cachetools import TTLCache
 import logging
 import time
 
-from apps.backend.src.db.models.ai_hospitality import (
+from models.knowledge_base import (
     BusinessRule,
     FAQItem,
     TrainingData,

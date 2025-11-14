@@ -43,7 +43,7 @@ class QRCode(Base):
     """
 
     __tablename__ = "qr_codes"
-    __table_args__ = {"schema": "marketing"}
+    __table_args__ = {"schema": "marketing", "extend_existing": True}
 
     id: UUID = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
     code: str = Column(String(50), unique=True, nullable=False, index=True)
@@ -104,7 +104,7 @@ class QRScan(Base):
     """
 
     __tablename__ = "qr_scans"
-    __table_args__ = {"schema": "marketing"}
+    __table_args__ = {"schema": "marketing", "extend_existing": True}
 
     id: UUID = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
     qr_code_id: UUID = Column(

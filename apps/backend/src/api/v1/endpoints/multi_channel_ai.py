@@ -42,8 +42,8 @@ class MultiChannelInquiry(BaseModel):
             raise ValueError(f"Channel must be one of: {', '.join(allowed_channels)}")
         return v.lower()
 
-    class Config:
-        schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "message": "I'm looking into booking a hibachi experience for 9 people in August of 2026, likely in the Sonoma area. Do you have a quote I could take a look at? Looking forward to hearing from you. Malia -- Malia Nakamura (206)-661-8822",
                 "channel": "email",
@@ -53,6 +53,7 @@ class MultiChannelInquiry(BaseModel):
                 },
             }
         }
+    }
 
 
 class ChannelResponse(BaseModel):
@@ -174,8 +175,7 @@ class ChannelTestRequest(BaseModel):
 
     message: str = Field(..., description="Customer inquiry to test")
 
-    class Config:
-        schema_extra = {"example": {"message": "What payment methods do you accept?"}}
+    model_config = {"json_schema_extra": {"example": {"message": "What payment methods do you accept?"}}}
 
 
 @router.post("/inquiries/test-all-channels", status_code=status.HTTP_200_OK)

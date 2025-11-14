@@ -20,51 +20,93 @@ from prometheus_client import (
 import psutil
 import structlog
 
+# Import shared registry from core.metrics
+from core.metrics import (
+    registry,
+    request_count as REQUEST_COUNT,
+    request_duration as REQUEST_DURATION,
+)
+
 logger = structlog.get_logger(__name__)
 
 
-# Prometheus metrics
-REQUEST_COUNT = Counter(
-    "http_requests_total",
-    "Total HTTP requests",
-    ["method", "endpoint", "status"],
-)
-
-REQUEST_DURATION = Histogram(
-    "http_request_duration_seconds",
-    "HTTP request duration",
-    ["method", "endpoint"],
-)
-
+# AI-specific Prometheus metrics (using shared registry)
 AI_MODEL_REQUESTS = Counter(
-    "ai_model_requests_total", "Total AI model requests", ["model", "success"]
+    "ai_model_requests_total",
+    "Total AI model requests",
+    ["model", "success"],
+    registry=registry,
 )
 
-AI_MODEL_TOKENS = Counter("ai_model_tokens_total", "Total AI model tokens used", ["model"])
+AI_MODEL_TOKENS = Counter(
+    "ai_model_tokens_total",
+    "Total AI model tokens used",
+    ["model"],
+    registry=registry,
+)
 
-AI_RESPONSE_TIME = Histogram("ai_response_duration_seconds", "AI model response time", ["model"])
+AI_RESPONSE_TIME = Histogram(
+    "ai_response_duration_seconds",
+    "AI model response time",
+    ["model"],
+    registry=registry,
+)
 
-WEBSOCKET_CONNECTIONS = Gauge("websocket_connections_active", "Active WebSocket connections")
+WEBSOCKET_CONNECTIONS = Gauge(
+    "websocket_connections_active",
+    "Active WebSocket connections",
+    [],
+    registry=registry,
+)
 
 DATABASE_QUERY_DURATION = Histogram(
     "database_query_duration_seconds",
     "Database query duration",
     ["operation", "table"],
+    registry=registry,
 )
 
 KNOWLEDGE_BASE_SEARCHES = Counter(
     "knowledge_base_searches_total",
     "Total knowledge base searches",
     ["success"],
+    registry=registry,
 )
 
-SYSTEM_INFO = Info("myhibachi_ai_system_info", "System information")
+SYSTEM_INFO = Info(
+    "myhibachi_ai_system_info",
+    "System information",
+    registry=registry,
+)
 
-# System resource metrics
-CPU_USAGE = Gauge("system_cpu_usage_percent", "CPU usage percentage")
-MEMORY_USAGE = Gauge("system_memory_usage_bytes", "Memory usage in bytes")
-MEMORY_USAGE_PERCENT = Gauge("system_memory_usage_percent", "Memory usage percentage")
-DISK_USAGE = Gauge("system_disk_usage_percent", "Disk usage percentage")
+# System resource metrics (using shared registry)
+CPU_USAGE = Gauge(
+    "system_cpu_usage_percent",
+    "CPU usage percentage",
+    [],
+    registry=registry,
+)
+
+MEMORY_USAGE = Gauge(
+    "system_memory_usage_bytes",
+    "Memory usage in bytes",
+    [],
+    registry=registry,
+)
+
+MEMORY_USAGE_PERCENT = Gauge(
+    "system_memory_usage_percent",
+    "Memory usage percentage",
+    [],
+    registry=registry,
+)
+
+DISK_USAGE = Gauge(
+    "system_disk_usage_percent",
+    "Disk usage percentage",
+    [],
+    registry=registry,
+)
 
 
 @dataclass

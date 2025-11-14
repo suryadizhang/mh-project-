@@ -11,18 +11,30 @@ import {
   UserPlus,
   Users,
 } from 'lucide-react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { Modal } from '@/components/ui/modal';
+import { useToast } from '@/components/ui/Toast';
 import {
   useCustomers,
   useFilters,
   usePagination,
   useSearch,
 } from '@/hooks/useApi';
+import { api } from '@/lib/api';
 import type { CustomerFilters } from '@/types';
 
 export default function CustomersPage() {
+  // Hooks
+  const toast = useToast();
+
+  // Modal state
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [customerDetail, setCustomerDetail] = useState<any>(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+
   // Pagination state
   const { page, limit, setPage, nextPage, prevPage } = usePagination(1, 20);
 
@@ -113,6 +125,40 @@ export default function CustomersPage() {
     resetFilters();
     setSearchQuery('');
     setPage(1);
+  };
+
+  // View customer detail
+  const handleViewCustomer = async (customer: any) => {
+    setSelectedCustomer(customer);
+    setIsDetailModalOpen(true);
+    setLoadingDetail(true);
+    
+    try {
+      const response = await api.get(`/api/v1/bookings/admin/customer/${customer.email}`);
+      if (response.success) {
+        setCustomerDetail(response.data);
+        toast.success('Customer Details Loaded', `Showing details for ${customer.name}`);
+      } else {
+        throw new Error(response.error || 'Failed to load customer details');
+      }
+    } catch (error) {
+      console.error('Error loading customer detail:', error);
+      toast.error(
+        'Failed to Load Customer',
+        error instanceof Error ? error.message : 'Please try again'
+      );
+      // Close modal on error
+      setIsDetailModalOpen(false);
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
+
+  // Close detail modal
+  const handleCloseDetail = () => {
+    setIsDetailModalOpen(false);
+    setSelectedCustomer(null);
+    setCustomerDetail(null);
   };
 
   // Calculate stats
@@ -404,10 +450,16 @@ export default function CustomersPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
-                        <button className="text-blue-600 hover:text-blue-900">
+                        <button 
+                          onClick={() => handleViewCustomer(customer)}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
                           View
                         </button>
-                        <button className="text-gray-600 hover:text-gray-900">
+                        <button 
+                          onClick={() => toast.info('Coming Soon', 'Edit customer functionality will be available in the next update')}
+                          className="text-gray-600 hover:text-gray-900"
+                        >
                           Edit
                         </button>
                       </div>
@@ -489,6 +541,70 @@ export default function CustomersPage() {
           </div>
         </div>
       )}
+
+      {/* Customer Detail Modal */}
+      <Modal
+        isOpen={isDetailModalOpen}
+        onClose={handleCloseDetail}
+        title={selectedCustomer ? `Customer: ${selectedCustomer.name}` : 'Customer Detail'}
+      >
+        {loadingDetail ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading customer details...</p>
+          </div>
+        ) : customerDetail ? (
+          <div className="space-y-6">
+            {/* Contact Information */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Contact Information</h3>
+              <dl className="grid grid-cols-2 gap-4">
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Email</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{customerDetail.email}</dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Phone</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{customerDetail.phone || 'N/A'}</dd>
+                </div>
+              </dl>
+            </div>
+
+            {/* Booking Statistics */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Booking Statistics</h3>
+              <dl className="grid grid-cols-2 gap-4">
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Total Bookings</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{customerDetail.total_bookings || 0}</dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Total Spent</dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {customerDetail.total_spent_cents ? formatCurrency(customerDetail.total_spent_cents) : '$0.00'}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Last Booking</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{formatDate(customerDetail.last_booking_date)}</dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Status</dt>
+                  <dd className="mt-1">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(customerDetail.status || 'active')}`}>
+                      {(customerDetail.status || 'Active').charAt(0).toUpperCase() + (customerDetail.status || 'Active').slice(1)}
+                    </span>
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            No details available
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

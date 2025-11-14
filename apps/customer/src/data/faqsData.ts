@@ -16,7 +16,7 @@ export const faqs: FaqItem[] = [
     id: 'base-pricing',
     question: 'How much does My Hibachi Chef cost?',
     answer:
-      '$55 per adult (13+), $30 per child (6-12), free for ages 5 & under. $550 party minimum (≈10 adults). This includes your choice of 2 proteins (Chicken, NY Strip Steak, Shrimp, Scallops, Salmon, or Tofu), hibachi fried rice, fresh vegetables, side salad, signature sauces, and plenty of sake for adults 21+.',
+      '$55 per adult (13+), $30 per child (6-12), free for ages 5 & under. $550 party minimum (≈10 adults). This includes your choice of 2 proteins (Chicken, NY Strip Steak, Shrimp, Calamari, or Tofu), hibachi fried rice, fresh vegetables, side salad, signature sauces, and plenty of sake for adults 21+.',
     category: 'Pricing & Minimums',
     subcategory: 'Per‑person Rates',
     tags: ['pricing', '$55 adult', '$30 child', '$550 minimum'],
@@ -62,10 +62,10 @@ export const faqs: FaqItem[] = [
     id: 'menu-options',
     question: "What's included in the hibachi menu?",
     answer:
-      'Each guest chooses 2 proteins: Chicken, NY Strip Steak, Shrimp, Scallops, Salmon, or Tofu. Plus fried rice, vegetables, salad, sauces, and sake for adults 21+.',
+      'Each guest chooses 2 proteins: Chicken, NY Strip Steak, Shrimp, Calamari, or Tofu. Plus fried rice, vegetables, salad, sauces, and sake for adults 21+.',
     category: 'Menu & Upgrades',
     subcategory: 'Included Items',
-    tags: ['2 proteins', 'chicken', 'steak', 'shrimp', 'rice', 'vegetables', 'sake'],
+    tags: ['2 proteins', 'chicken', 'steak', 'shrimp', 'calamari', 'tofu', 'rice', 'vegetables', 'sake'],
     confidence: 'high',
     source_urls: ['/menu']
   },

@@ -1,171 +1,181 @@
-import { Mail, Send, Users } from 'lucide-react';
+'use client';
+
+import { Mail, Plus, Send, TrendingUp, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+import CampaignList from './components/CampaignList';
+
+interface NewsletterStats {
+  totalSubscribers: number;
+  activeSubscribers: number;
+  campaignsSent: number;
+  averageOpenRate: number;
+  averageClickRate: number;
+}
 
 export default function NewsletterPage() {
-  const subscribers = [
-    {
-      id: 1,
-      email: 'john@example.com',
-      name: 'John Smith',
-      subscribed: '2025-01-15',
-      status: 'Active',
-    },
-    {
-      id: 2,
-      email: 'sarah@example.com',
-      name: 'Sarah Johnson',
-      subscribed: '2025-01-20',
-      status: 'Active',
-    },
-    {
-      id: 3,
-      email: 'mike@example.com',
-      name: 'Mike Chen',
-      subscribed: '2025-01-25',
-      status: 'Active',
-    },
-  ];
+  const [stats, setStats] = useState<NewsletterStats>({
+    totalSubscribers: 0,
+    activeSubscribers: 0,
+    campaignsSent: 0,
+    averageOpenRate: 0,
+    averageClickRate: 0,
+  });
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      // TODO: Connect to /api/newsletter/newsletter/stats endpoint
+      setStats({
+        totalSubscribers: 892,
+        activeSubscribers: 856,
+        campaignsSent: 24,
+        averageOpenRate: 68.5,
+        averageClickRate: 24.3,
+      });
+    } catch (error) {
+      console.error('Failed to fetch newsletter stats:', error);
+    }
+  };
+
+  const handleCreateCampaign = () => {
+    // TODO: Open campaign creation dialog
+    console.log('Create new campaign');
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Newsletter</h1>
-          <p className="text-gray-600">Manage newsletters and subscribers</p>
+          <h1 className="text-3xl font-bold text-gray-900">Newsletter Management</h1>
+          <p className="mt-1 text-gray-600">
+            Manage email campaigns, subscribers, and analytics
+          </p>
         </div>
-        <Button>
-          <Send className="w-4 h-4 mr-2" />
+        <Button onClick={handleCreateCampaign}>
+          <Plus className="mr-2 h-4 w-4" />
           Create Campaign
         </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
-          <div className="flex items-center">
-            <Users className="w-8 h-8 text-blue-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">
-                Total Subscribers
-              </p>
-              <p className="text-3xl font-bold text-gray-900">892</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
-          <div className="flex items-center">
-            <Mail className="w-8 h-8 text-green-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">
-                Campaigns Sent
-              </p>
-              <p className="text-3xl font-bold text-gray-900">24</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
-          <div className="flex items-center">
-            <Send className="w-8 h-8 text-purple-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Open Rate</p>
-              <p className="text-3xl font-bold text-gray-900">68%</p>
-            </div>
-          </div>
-        </div>
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Subscribers</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalSubscribers.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.activeSubscribers.toLocaleString()} active
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Campaigns Sent</CardTitle>
+            <Send className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.campaignsSent}</div>
+            <p className="text-xs text-muted-foreground">This month</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Avg. Open Rate</CardTitle>
+            <Mail className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.averageOpenRate.toFixed(1)}%</div>
+            <p className="text-xs text-muted-foreground">Industry avg: 21.3%</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Avg. Click Rate</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.averageClickRate.toFixed(1)}%</div>
+            <p className="text-xs text-muted-foreground">Industry avg: 2.6%</p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Newsletter Composer */}
-      <div className="bg-white rounded-lg shadow border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">
-            Create Newsletter
-          </h2>
-        </div>
-        <div className="p-6">
-          <form className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Subject Line
-              </label>
-              <input
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter newsletter subject..."
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Content
-              </label>
-              <textarea
-                rows={8}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Write your newsletter content..."
-              ></textarea>
-            </div>
-            <div className="flex justify-end space-x-3">
-              <Button variant="outline">Save Draft</Button>
-              <Button>Send Newsletter</Button>
-            </div>
-          </form>
-        </div>
-      </div>
+      {/* Main Content - Tabs */}
+      <Tabs defaultValue="campaigns" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+          <TabsTrigger value="subscribers">Subscribers</TabsTrigger>
+          <TabsTrigger value="segments">Segments</TabsTrigger>
+          <TabsTrigger value="templates">Templates</TabsTrigger>
+        </TabsList>
 
-      {/* Subscribers List */}
-      <div className="bg-white rounded-lg shadow border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Subscribers</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Subscribed
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {subscribers.map(subscriber => (
-                <tr key={subscriber.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {subscriber.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {subscriber.email}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {subscriber.subscribed}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                      {subscriber.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-red-600 hover:text-red-900">
-                      Remove
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <TabsContent value="campaigns" className="space-y-4">
+          <CampaignList onCreateNew={handleCreateCampaign} />
+        </TabsContent>
+
+        <TabsContent value="subscribers" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Subscriber List</CardTitle>
+              <CardDescription>
+                Manage your newsletter subscribers and their preferences
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Subscriber management coming soon...
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="segments" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Audience Segments</CardTitle>
+              <CardDescription>
+                Create targeted segments based on subscriber behavior and preferences
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Segment management coming soon...
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="templates" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Email Templates</CardTitle>
+              <CardDescription>
+                Create and manage reusable email templates for your campaigns
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Template editor coming soon...
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

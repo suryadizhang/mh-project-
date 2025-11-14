@@ -174,7 +174,7 @@ class Role(Base):
     """Role model for RBAC"""
 
     __tablename__ = "roles"
-    __table_args__ = {"schema": "identity"}
+    __table_args__ = {"schema": "identity", "extend_existing": True}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(
@@ -228,7 +228,7 @@ class Permission(Base):
     """Permission model for granular access control"""
 
     __tablename__ = "permissions"
-    __table_args__ = {"schema": "identity"}
+    __table_args__ = {"schema": "identity", "extend_existing": True}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(

@@ -1,0 +1,9 @@
+[sqlfluff]
+# Disable all linting for PostgreSQL files
+# VS Code's MSSQL extension incorrectly parses PostgreSQL syntax
+noqa = True
+dialect = postgres
+
+[sqlfluff:rules]
+# Disable all rules
+max_line_length = 999999

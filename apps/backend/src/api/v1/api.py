@@ -10,13 +10,14 @@ from fastapi import APIRouter
 from .endpoints import (
     ai_costs,
     ai_readiness,
+    analytics_holidays,
     auth,
     bookings,
+    campaigns,
     customers,
     inbox,
     leads,
-    public_leads,
-    public_quote,
+    newsletters,
     rate_limit_metrics,
     shadow_learning,
 )
@@ -25,8 +26,8 @@ from .endpoints.ai import chat, orchestrator
 api_router = APIRouter()
 
 # Public endpoints (no authentication required)
-api_router.include_router(public_leads.router, prefix="/public", tags=["Public"])
-api_router.include_router(public_quote.router, prefix="/public/quote", tags=["Public", "Quotes"])
+# api_router.include_router(public_leads.router, prefix="/public", tags=["Public"])
+# api_router.include_router(public_quote.router, prefix="/public/quote", tags=["Public", "Quotes"])
 
 # Operational endpoints (CRM functions)
 api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
@@ -50,6 +51,11 @@ api_router.include_router(ai_readiness.router, tags=["AI Readiness"])
 
 # Rate limiting monitoring endpoints
 api_router.include_router(rate_limit_metrics.router, prefix="/monitoring", tags=["Monitoring"])
+
+# AI-Powered Marketing endpoints (NEW)
+api_router.include_router(newsletters.router, prefix="/marketing", tags=["AI Marketing", "Newsletters"])
+api_router.include_router(campaigns.router, prefix="/marketing", tags=["AI Marketing", "Campaigns"])
+api_router.include_router(analytics_holidays.router, prefix="/marketing", tags=["AI Marketing", "Analytics"])
 
 # TODO: Add remaining AI endpoints
 # api_router.include_router(voice.router, prefix="/ai/voice", tags=["AI Voice"])
@@ -129,6 +135,27 @@ async def list_endpoints():
             "embeddings": {
                 "create": "POST /v1/ai/embeddings",
                 "search": "POST /v1/ai/embeddings/search",
+            },
+            "marketing": {
+                "newsletters": {
+                    "generate": "GET /v1/marketing/newsletters/generate?days_ahead=60",
+                    "generate_content": "POST /v1/marketing/newsletters/generate-content",
+                    "send": "POST /v1/marketing/newsletters/send",
+                    "preview": "GET /v1/marketing/newsletters/preview/{holiday_key}",
+                },
+                "campaigns": {
+                    "annual": "GET /v1/marketing/campaigns/annual?days_ahead=365",
+                    "generate_content": "POST /v1/marketing/campaigns/generate-content",
+                    "launch": "POST /v1/marketing/campaigns/launch",
+                    "budget_recommendations": "GET /v1/marketing/campaigns/budget-recommendations",
+                },
+                "analytics": {
+                    "trends": "GET /v1/marketing/analytics/holidays/trends?year=2025",
+                    "summary": "GET /v1/marketing/analytics/holidays/summary?year=2025",
+                    "peaks": "GET /v1/marketing/analytics/holidays/peaks?year=2025",
+                    "forecast": "GET /v1/marketing/analytics/holidays/forecast/{holiday_key}",
+                    "comparison": "GET /v1/marketing/analytics/holidays/comparison",
+                },
             },
         },
         "rate_limits": {

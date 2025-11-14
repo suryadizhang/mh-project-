@@ -49,7 +49,7 @@ class User(Base):
     """
 
     __tablename__ = "users"
-    __table_args__ = {"schema": "identity"}
+    __table_args__ = {"schema": "identity", "extend_existing": True}
 
     # Primary key
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
