@@ -16,8 +16,6 @@ from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
-from api.ai.endpoints.logging_config import setup_logger
-
 
 class BaseService:
     """
@@ -44,7 +42,7 @@ class BaseService:
             logger: Optional logger instance. If not provided, creates one based on class name
         """
         self.db = db
-        self.logger = logger or setup_logger(self.__class__.__name__)
+        self.logger = logger or logging.getLogger(self.__class__.__name__)
     
     async def _log_action(self, action: str, entity_type: str, entity_id: Optional[int] = None, 
                          metadata: Optional[Dict[str, Any]] = None) -> None:
