@@ -69,14 +69,13 @@ class CustomerCareAgent(BaseAgent):
         # Week 1: Extract tone information
         customer_tone = context.get("customer_tone", "casual") if context else "casual"
         tone_guidelines = context.get("tone_guidelines", {}) if context else {}
-        business_charter = context.get("business_charter", {}) if context else {}
+        
+        # Week 4: Extract DYNAMIC knowledge context from database
+        knowledge_context = context.get("knowledge_context", "") if context else ""
 
         # Get tone-specific instructions
         tone_style = tone_guidelines.get("style", "Empathetic and supportive")
         tone_greeting = tone_guidelines.get("greeting", "Warm greeting")
-
-        # Get dynamic policies if available
-        policies = business_charter.get("policies", [])
 
         base_prompt = f"""You are a senior customer care specialist for MyHibachi, dedicated to creating exceptional experiences even in challenging situations.
 
@@ -209,15 +208,12 @@ Your mission: Turn every customer interaction into a positive outcome through em
 **4. Communication Failures (no response, missed calls)**
 - Immediate: Own it - "That's on us, and I'm sorry"
 - Solution: Immediate response now + preferred contact method noted
-- Follow-up: Personal follow-up to ensure satisfaction"""
+- Follow-up: Personal follow-up to ensure satisfaction
+"""
 
-        # Add dynamic policies if available
-        if policies:
-            base_prompt += "\n\n**Current Company Policies** (from live database):"
-            for policy in policies[:3]:  # Show top 3 most relevant
-                policy_type = policy.get("type", "")
-                content = policy.get("content", "")
-                base_prompt += f"\n- **{policy_type.replace('_', ' ').title()}**: {content}"
+        # Week 4: Inject DYNAMIC knowledge from database
+        if knowledge_context:
+            base_prompt += f"\n\n{knowledge_context}"
         else:
             base_prompt += """
 

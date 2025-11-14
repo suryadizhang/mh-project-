@@ -1,6 +1,9 @@
 """
 API Monitoring & Metrics - Prometheus Integration
 Track request metrics, cache performance, query times, and business KPIs
+
+IMPORTANT: This is the SINGLE SOURCE OF TRUTH for the metrics registry.
+All other modules MUST import metrics from here, never create their own.
 """
 
 from collections.abc import Callable
@@ -22,8 +25,32 @@ from starlette.responses import Response as StarletteResponse
 
 logger = logging.getLogger(__name__)
 
-# Create metrics registry
+# ============================================================================
+# SINGLE METRICS REGISTRY - All metrics MUST use this registry
+# ============================================================================
 registry = CollectorRegistry()
+
+# Guard to prevent double registration during test imports
+_METRICS_REGISTERED = False
+
+def _register_metrics():
+    """
+    Register all metrics exactly once.
+    This prevents duplicate registration errors during test imports.
+    """
+    global _METRICS_REGISTERED
+    
+    if _METRICS_REGISTERED:
+        logger.debug("Metrics already registered, skipping")
+        return
+    
+    logger.info("Registering Prometheus metrics...")
+    _METRICS_REGISTERED = True
+
+
+# ============================================================================
+# CORE METRICS - Registered at module import
+# ============================================================================
 
 # Request metrics
 request_count = Counter(
@@ -114,6 +141,13 @@ messages_sent = Counter(
 # System metrics
 active_connections = Gauge(
     "active_connections", "Number of active connections", [], registry=registry
+)
+
+security_violations = Counter(
+    "security_violations_total",
+    "Security violations detected",
+    ["violation_type"],
+    registry=registry,
 )
 
 rate_limit_exceeded = Counter(
@@ -395,3 +429,48 @@ class HealthCheckMetrics:
                 ),
             },
         }
+
+
+# ============================================================================
+# PUBLIC API - Import these from other modules
+# ============================================================================
+__all__ = [
+    # Registry (REQUIRED for all custom metrics)
+    "registry",
+    
+    # Core HTTP metrics
+    "request_count",
+    "request_duration",
+    "request_size",
+    "response_size",
+    
+    # Cache metrics
+    "cache_hits",
+    "cache_misses",
+    "cache_errors",
+    "cache_operation_duration",
+    
+    # Database metrics
+    "db_query_duration",
+    "db_query_count",
+    "db_connection_errors",
+    
+    # Business metrics
+    "bookings_created",
+    "payments_processed",
+    "payment_amount",
+    "messages_sent",
+    
+    # System metrics
+    "active_connections",
+    "security_violations",
+    "rate_limit_exceeded",
+    "idempotency_replays",
+    
+    # Middleware & utilities
+    "MetricsMiddleware",
+    "MetricsCollector",
+    "HealthCheckMetrics",
+    "metrics_endpoint",
+    "track_cache_operation",
+]

@@ -9,10 +9,12 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from workers.celery_config import celery_app
-from core.database import get_db_session
+from core.database import get_db_session, get_async_session
 from models.call_recording import CallRecording, RecordingStatus
 from services.ringcentral_service import get_ringcentral_service
+from services.recording_linking_service import RecordingLinkingService
 
 logger = logging.getLogger(__name__)
 
@@ -121,6 +123,163 @@ def fetch_call_recording(self, recording_id: str):
 
     finally:
         db.close()
+
+
+@celery_app.task(bind=True, max_retries=3, default_retry_delay=180)
+def fetch_recording_transcript(self, recording_id: str, call_session_id: str):
+    """
+    Fetch AI transcript from RingCentral for a call recording.
+    
+    Uses RingCentral AI Insights API to get:
+    - Full transcript with timestamps
+    - Speaker separation
+    - Confidence scores
+    - AI insights (sentiment, topics, action items)
+    
+    Args:
+        recording_id: CallRecording model ID (UUID)
+        call_session_id: RingCentral call session ID for transcript API
+        
+    Retries: 3 times with 3 minute delay (transcription may take time)
+    """
+    db: Session = next(get_db_session())
+    
+    try:
+        # Get recording record
+        recording = db.query(CallRecording).filter(CallRecording.id == recording_id).first()
+        
+        if not recording:
+            logger.error(f"Recording {recording_id} not found")
+            return {"status": "error", "message": "Recording not found"}
+        
+        # Get RingCentral service
+        rc_service = get_ringcentral_service()
+        
+        if not rc_service.is_configured():
+            raise RuntimeError("RingCentral not configured")
+        
+        logger.info(f"Fetching transcript for call {call_session_id}")
+        
+        # Fetch transcript from RingCentral AI
+        transcript_data = rc_service.get_call_transcript(call_session_id)
+        
+        # Check if transcript is available
+        if not transcript_data.get("full_text"):
+            # Transcript not ready yet, retry
+            if "error" in transcript_data:
+                logger.warning(
+                    f"Transcript not ready for {call_session_id}: {transcript_data['error']}"
+                )
+                raise RuntimeError("Transcript not ready, will retry")
+            else:
+                logger.info(f"No transcript available for {call_session_id}")
+        
+        # Save transcript to database
+        recording.rc_transcript = transcript_data.get("full_text", "")
+        recording.rc_transcript_confidence = transcript_data.get("confidence", 0)
+        recording.rc_transcript_fetched_at = datetime.utcnow()
+        recording.rc_ai_insights = transcript_data.get("insights", {})
+        
+        db.commit()
+        
+        logger.info(
+            f"Transcript saved for recording {recording_id}: "
+            f"{len(recording.rc_transcript)} chars, "
+            f"{recording.rc_transcript_confidence}% confidence"
+        )
+        
+        return {
+            "status": "success",
+            "recording_id": recording_id,
+            "transcript_length": len(recording.rc_transcript),
+            "confidence": recording.rc_transcript_confidence,
+            "has_insights": bool(recording.rc_ai_insights),
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to fetch transcript for {recording_id}: {str(e)}")
+        
+        # Retry if not last attempt
+        if self.request.retries < self.max_retries:
+            logger.info(f"Retrying transcript fetch (attempt {self.request.retries + 1})")
+            raise self.retry(exc=e, countdown=180 * (2 ** self.request.retries))
+        else:
+            logger.error(f"All transcript fetch retries exhausted for {recording_id}")
+            return {
+                "status": "error",
+                "recording_id": recording_id,
+                "message": str(e),
+            }
+    
+    finally:
+        db.close()
+
+
+@celery_app.task(bind=True, max_retries=2)
+def link_recording_entities(self, recording_id: str):
+    """
+    Link call recording to customer and booking entities.
+    
+    Automatically runs after transcript fetch completes.
+    Links recording to:
+    1. Customer - by matching phone numbers (from_phone/to_phone)
+    2. Booking - by correlating call timing with booking dates
+    
+    Args:
+        recording_id: CallRecording model ID (UUID)
+        
+    Retries: 2 times with exponential backoff
+    
+    Returns:
+        dict with linking results
+    """
+    import asyncio
+    from uuid import UUID
+    
+    async def async_link():
+        """Async wrapper for linking service"""
+        async for db in get_async_session():
+            try:
+                linking_service = RecordingLinkingService(db)
+                result = await linking_service.link_recording(UUID(recording_id))
+                return result
+            finally:
+                await db.close()
+    
+    try:
+        logger.info(f"Starting entity linking for recording {recording_id}")
+        
+        # Run async linking in event loop
+        result = asyncio.run(async_link())
+        
+        if result.get("error"):
+            logger.error(f"Entity linking failed for {recording_id}: {result['error']}")
+            
+            # Retry on error
+            if self.request.retries < self.max_retries:
+                raise self.retry(exc=Exception(result["error"]), countdown=60 * (2 ** self.request.retries))
+        else:
+            logger.info(
+                f"Entity linking complete for {recording_id}: "
+                f"customer={'linked' if result['customer_linked'] else 'not found'}, "
+                f"booking={'linked' if result['booking_linked'] else 'not found'}"
+            )
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"Failed to link recording entities for {recording_id}: {str(e)}", exc_info=True)
+        
+        # Retry if not last attempt
+        if self.request.retries < self.max_retries:
+            raise self.retry(exc=e, countdown=60 * (2 ** self.request.retries))
+        else:
+            return {
+                "recording_id": recording_id,
+                "customer_linked": False,
+                "booking_linked": False,
+                "error": str(e),
+            }
 
 
 @celery_app.task

@@ -69,7 +69,9 @@ class KnowledgeAgent(BaseAgent):
         # Week 1: Extract tone information
         customer_tone = context.get("customer_tone", "casual") if context else "casual"
         tone_guidelines = context.get("tone_guidelines", {}) if context else {}
-        business_charter = context.get("business_charter", {}) if context else {}
+        
+        # Week 4: Extract DYNAMIC knowledge context from database
+        knowledge_context = context.get("knowledge_context", "") if context else ""
 
         # Get tone-specific instructions
         tone_style = tone_guidelines.get("style", "Clear and informative")
@@ -120,7 +122,16 @@ Your mission: Provide precise, well-sourced answers to customer questions about 
 - Use `search_faq` for common questions  
 - Use `get_pricing_details` for accurate pricing
 
-**Remember**: ALWAYS match customer's tone while staying accurate."""
+**Remember**: ALWAYS match customer's tone while staying accurate.
+"""
+
+        # Week 4: Inject DYNAMIC knowledge from database
+        if knowledge_context:
+            base_prompt += f"\n\n{knowledge_context}"
+        else:
+            base_prompt += """
+
+⚠️ IMPORTANT: If asked about current pricing, menu items, or policies, use your tools to fetch the LATEST information from the database. Do not rely on outdated hardcoded data."""
 
         return base_prompt
 

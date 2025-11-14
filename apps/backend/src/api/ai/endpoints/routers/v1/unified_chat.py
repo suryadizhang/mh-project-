@@ -16,13 +16,6 @@ from api.ai.endpoints.auth import (
     has_agent_access,
 )
 from api.ai.endpoints.database import get_db
-from api.ai.endpoints.services.agent_gateway import (
-    StationAwareAgentGatewayService,
-)
-from api.ai.endpoints.services.model_ladder import ModelLadderService
-from api.ai.endpoints.services.monitoring import MonitoringService
-from api.ai.endpoints.services.prompt_registry import PromptRegistryService
-from api.ai.endpoints.services.tool_registry import ToolRegistryService
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
@@ -30,6 +23,37 @@ from sqlalchemy.orm import Session
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/v1", tags=["v1-unified-chat"])
+
+
+# Lazy-loaded service dependencies (AI services: 3-5s load, 500MB)
+def get_agent_gateway():
+    """Lazy load agent gateway service (AI models)"""
+    from api.ai.endpoints.services.agent_gateway import StationAwareAgentGatewayService
+    return StationAwareAgentGatewayService()
+
+
+def get_monitoring_service():
+    """Lazy load monitoring service"""
+    from api.ai.endpoints.services.monitoring import MonitoringService
+    return MonitoringService()
+
+
+def get_prompt_registry():
+    """Lazy load prompt registry service"""
+    from api.ai.endpoints.services.prompt_registry import PromptRegistryService
+    return PromptRegistryService()
+
+
+def get_tool_registry():
+    """Lazy load tool registry service"""
+    from api.ai.endpoints.services.tool_registry import ToolRegistryService
+    return ToolRegistryService()
+
+
+def get_model_ladder():
+    """Lazy load model ladder service"""
+    from api.ai.endpoints.services.model_ladder import ModelLadderService
+    return ModelLadderService()
 
 
 # Pydantic models for unified chat API
@@ -184,6 +208,8 @@ async def unified_chat(
     agent: str = Depends(detect_agent_from_request),
     station_context: StationContext | None = Depends(get_station_context_optional),
     db: Session = Depends(get_db),
+    gateway = Depends(get_agent_gateway),
+    monitoring = Depends(get_monitoring_service),
 ) -> UnifiedChatResponse:
     """
     Unified chat endpoint with agent-aware routing and station-scoped permissions.
@@ -210,10 +236,8 @@ async def unified_chat(
     conversation_id = request.conversation_id or str(uuid4())
 
     try:
-        # Initialize services
-        gateway = StationAwareAgentGatewayService()
-        monitoring = MonitoringService()
-
+        # Services injected via dependencies (lazy loaded on first call)
+        
         # Log request
         await monitoring.log_request(
             message_id=message_id,
@@ -303,6 +327,7 @@ async def unified_chat_stream(
     agent: str = Depends(detect_agent_from_request),
     station_context: StationContext | None = Depends(get_station_context_optional),
     db: Session = Depends(get_db),
+    gateway = Depends(get_agent_gateway),
 ):
     """
     Streaming version of unified chat endpoint.
@@ -317,7 +342,7 @@ async def unified_chat_stream(
         conversation_id = request.conversation_id or str(uuid4())
 
         try:
-            gateway = StationAwareAgentGatewayService()
+            # Gateway injected via dependency (lazy loaded)
 
             # Validate agent
             agent_info = await gateway.validate_agent(agent)
@@ -376,7 +401,7 @@ async def unified_chat_stream(
 
 
 @router.get("/agents")
-async def list_agents():
+async def list_agents(gateway = Depends(get_agent_gateway)):
     """
     List available agents and their capabilities.
 
@@ -384,7 +409,7 @@ async def list_agents():
     and current status.
     """
     try:
-        gateway = StationAwareAgentGatewayService()
+        # Gateway injected via dependency (lazy loaded)
         agents = await gateway.list_agents()
 
         return {"agents": agents, "total": len(agents), "timestamp": datetime.now(timezone.utc)}
@@ -398,14 +423,14 @@ async def list_agents():
 
 
 @router.get("/agents/{agent_name}")
-async def get_agent_info(agent_name: str):
+async def get_agent_info(agent_name: str, gateway = Depends(get_agent_gateway)):
     """
     Get detailed information about a specific agent.
 
     Returns capabilities, tools, permissions, and current status.
     """
     try:
-        gateway = StationAwareAgentGatewayService()
+        # Gateway injected via dependency (lazy loaded)
         agent_info = await gateway.get_agent_details(agent_name)
 
         if not agent_info:
@@ -426,17 +451,19 @@ async def get_agent_info(agent_name: str):
 
 
 @router.get("/health")
-async def unified_api_health():
+async def unified_api_health(
+    gateway = Depends(get_agent_gateway),
+    prompt_registry = Depends(get_prompt_registry),
+    tool_registry = Depends(get_tool_registry),
+    model_ladder = Depends(get_model_ladder)
+):
     """
     Health check for unified API system.
 
     Returns status of all agent-aware components.
     """
     try:
-        gateway = StationAwareAgentGatewayService()
-        prompt_registry = PromptRegistryService()
-        tool_registry = ToolRegistryService()
-        model_ladder = ModelLadderService()
+        # All services injected via dependencies (lazy loaded)
 
         health_status = {
             "status": "healthy",

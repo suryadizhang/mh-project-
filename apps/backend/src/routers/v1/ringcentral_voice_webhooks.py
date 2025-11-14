@@ -41,6 +41,8 @@ async def handle_inbound_call_webhook(
     - Call needs to be answered/routed
 
     Returns instructions for RingCentral on how to handle the call.
+    
+    NEW: Initiates real-time WebSocket connection for bidirectional audio streaming.
     """
     try:
         payload = await request.json()
@@ -48,11 +50,45 @@ async def handle_inbound_call_webhook(
 
         voice_service = RingCentralVoiceService(db)
 
-        # Process call in background
+        # Process call
         call_data = payload.get("body", {})
+        call_id = call_data.get("id")
+        from_number = call_data.get("from", {}).get("phoneNumber", "unknown")
+        to_number = call_data.get("to", {}).get("phoneNumber", "unknown")
+
+        # Handle in service (creates DB record)
         response = await voice_service.handle_inbound_call(call_data)
 
-        return response
+        # Build WebSocket URL for RingCentral media gateway
+        # RingCentral will connect to this URL to stream audio
+        ws_url = (
+            f"ws://{request.headers.get('host', 'localhost:8000')}"
+            f"/api/voice/realtime/ws/call"
+            f"?call_id={call_id}"
+            f"&from_number={from_number}"
+            f"&to_number={to_number}"
+        )
+        
+        logger.info(f"🎧 WebSocket URL for call {call_id}: {ws_url}")
+        
+        # Return instructions to RingCentral
+        # Tell it to:
+        # 1. Answer the call
+        # 2. Connect media stream to our WebSocket
+        return {
+            "action": "answer",
+            "media": {
+                "type": "websocket",
+                "url": ws_url,
+                "format": {
+                    "encoding": "pcm",  # or "mulaw"
+                    "sampleRate": 8000,
+                    "channels": 1,
+                },
+            },
+            "success": True,
+            "call_id": call_id,
+        }
 
     except Exception as e:
         logger.exception(f"Error handling inbound call webhook: {e}")

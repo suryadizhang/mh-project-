@@ -386,16 +386,16 @@ class PaymentEmailMonitor:
             date_str = since_date.strftime("%d-%b-%Y")
 
             # Search for unread emails from payment providers
+            # IMAP search format: each criterion must be properly formatted
             search_criteria = [
-                "(UNSEEN)",  # Unread emails
-                f'(SINCE "{date_str}")',  # Since date
-                "(OR",  # From any of these
-                '(FROM "stripe")',
-                '(FROM "venmo")',
-                '(FROM "zelle")',
-                '(FROM "alerts@")',
-                '(FROM "bankofamerica")',
-                ")",
+                "UNSEEN",  # Unread emails
+                f'SINCE {date_str}',  # Since date
+                "OR", "OR", "OR", "OR",  # Chain OR for multiple FROM
+                'FROM "stripe"',
+                'FROM "venmo"',
+                'FROM "zelle"',
+                'FROM "alerts@"',
+                'FROM "bankofamerica"'
             ]
 
             _, message_numbers = self.mail.search(None, " ".join(search_criteria))

@@ -98,7 +98,7 @@ class LegacyBooking(Base):
     """Legacy booking model from public schema (linking all booking information)."""
 
     __tablename__ = "bookings_legacy"  # Changed from "bookings" to avoid conflict with core.Booking
-    __table_args__ = {"schema": "public"}  # Use public schema for legacy model
+    __table_args__ = {"schema": "public", "extend_existing": True}  # Use public schema for legacy model
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     booking_reference = Column(

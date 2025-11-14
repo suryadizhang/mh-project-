@@ -28,7 +28,7 @@ class DomainEvent(Base):
     """Domain events for event sourcing."""
 
     __tablename__ = "domain_events"
-    __table_args__ = {"schema": "events"}
+    __table_args__ = {"schema": "events", "extend_existing": True}
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
     aggregate_id = Column(PostgresUUID(as_uuid=True), nullable=False, index=True)
@@ -100,7 +100,7 @@ class OutboxEntry(Base):
         ),
         CheckConstraint("attempts >= 0", name="outbox_attempts_positive"),
         CheckConstraint("max_attempts > 0", name="outbox_max_attempts_positive"),
-        {"schema": "events"},
+        {"schema": "events", "extend_existing": True},
     )
 
     def __init__(
@@ -129,7 +129,7 @@ class Snapshot(Base):
     """Aggregate snapshots for performance optimization."""
 
     __tablename__ = "snapshots"
-    __table_args__ = {"schema": "events"}
+    __table_args__ = {"schema": "events", "extend_existing": True}
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
     aggregate_id = Column(PostgresUUID(as_uuid=True), nullable=False, unique=True)
@@ -156,7 +156,7 @@ class ProjectionPosition(Base):
     """Track projection positions for event replay."""
 
     __tablename__ = "projection_positions"
-    __table_args__ = {"schema": "events"}
+    __table_args__ = {"schema": "events", "extend_existing": True}
 
     projection_name = Column(String(100), primary_key=True)
     last_event_id = Column(PostgresUUID(as_uuid=True), nullable=True)
@@ -192,7 +192,7 @@ class IdempotencyKey(Base):
         CheckConstraint(
             "status IN ('processing', 'completed', 'failed')", name="idempotency_status_check"
         ),
-        {"schema": "events"},
+        {"schema": "events", "extend_existing": True},
     )
 
     def __init__(

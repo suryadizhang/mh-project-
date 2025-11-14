@@ -25,6 +25,26 @@ class RecordingStatus(str, enum.Enum):
     ERROR = "error"  # Failed to download or process
 
 
+class CallStatus(str, enum.Enum):
+    """Call status for real-time tracking"""
+
+    RINGING = "ringing"  # Call is ringing
+    IN_PROGRESS = "in_progress"  # Call is ongoing
+    COMPLETED = "completed"  # Call ended normally
+    TRANSFERRED = "transferred"  # Call transferred to another agent
+    VOICEMAIL = "voicemail"  # Call went to voicemail
+    MISSED = "missed"  # Call not answered
+    ERROR = "error"  # Call failed
+
+
+class CallDirection(str, enum.Enum):
+    """Call direction"""
+
+    INBOUND = "inbound"  # Customer calling business
+    OUTBOUND = "outbound"  # Business calling customer
+    INTERNAL = "internal"  # Internal calls between staff
+
+
 class RecordingType(str, enum.Enum):
     """Type of call recording"""
 
@@ -47,7 +67,7 @@ class CallRecording(Base):
     """
 
     __tablename__ = "call_recordings"
-    __table_args__ = {"schema": "communications"}
+    __table_args__ = {"schema": "communications", "extend_existing": True}
 
     # Primary key
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
@@ -110,6 +130,15 @@ class CallRecording(Base):
     s3_uri = Column(Text, nullable=True)  # Full S3 URI for access
     file_size_bytes = Column(Integer, nullable=True)  # File size
     content_type = Column(String(100), nullable=True)  # audio/mpeg, audio/wav, etc.
+
+    # RingCentral AI Transcript (native RC transcription)
+    rc_transcript = Column(Text, nullable=True)  # Full transcript from RC AI
+    rc_transcript_confidence = Column(Integer, nullable=True)  # Confidence score (0-100)
+    rc_transcript_fetched_at = Column(DateTime(timezone=True), nullable=True)  # When fetched
+    
+    # RingCentral AI Insights (sentiment, topics, action items, etc.)
+    rc_ai_insights = Column(JSONB, default={}, nullable=False)  # AI-generated insights
+    # Structure: {sentiment, topics, action_items, intent, speakers, keywords}
 
     # Additional data (renamed from 'metadata' to avoid SQLAlchemy reserved name)
     recording_metadata = Column(JSONB, default={}, nullable=False)  # Additional context

@@ -244,6 +244,74 @@ async def check_stripe_health() -> ComponentHealth:
         )
 
 
+async def check_openai_health() -> ComponentHealth:
+    """Check OpenAI API key health"""
+    start_time = time.time()
+
+    try:
+        if not settings.openai_api_key:
+            return ComponentHealth(
+                name="openai",
+                status="degraded",
+                message="OpenAI API key not configured",
+                response_time_ms=0,
+            )
+
+        from openai import OpenAI
+
+        client = OpenAI(api_key=settings.openai_api_key)
+
+        # Determine key type
+        key_prefix = settings.openai_api_key[:20] + "..."
+        if settings.openai_api_key.startswith("sk-proj-"):
+            key_type = "project"
+        elif settings.openai_api_key.startswith("sk-svcacct-"):
+            key_type = "service_account"
+        else:
+            key_type = "unknown"
+
+        # Test API with a simple call
+        models = client.models.list()
+        models_count = len(models.data)
+
+        response_time_ms = int((time.time() - start_time) * 1000)
+
+        # Warn if using service account key
+        warning = None
+        if key_type == "service_account":
+            warning = "Using SERVICE ACCOUNT key - consider switching to PROJECT key for stability"
+
+        return ComponentHealth(
+            name="openai",
+            status="healthy",
+            message="OpenAI API key is valid",
+            response_time_ms=response_time_ms,
+            details={
+                "key_prefix": key_prefix,
+                "key_type": key_type,
+                "models_available": models_count,
+                "warning": warning,
+            },
+        )
+
+    except Exception as e:
+        logger.exception(f"❌ OpenAI health check failed: {e}")
+        error_msg = str(e)
+
+        # Provide helpful error message
+        if "401" in error_msg or "Incorrect API key" in error_msg:
+            message = "OpenAI API key is INVALID or EXPIRED! Update .env file immediately."
+        else:
+            message = f"OpenAI API connection failed: {error_msg}"
+
+        return ComponentHealth(
+            name="openai",
+            status="unhealthy",
+            message=message,
+            response_time_ms=int((time.time() - start_time) * 1000),
+        )
+
+
 async def check_email_health() -> ComponentHealth:
     """Check email service health (Gmail IMAP)"""
     start_time = time.time()
@@ -321,6 +389,7 @@ async def readiness_probe(db: AsyncSession = Depends(get_db)):
     results = await asyncio.gather(
         check_database_health(db),
         check_redis_health(),
+        check_openai_health(),
         check_twilio_health(),
         check_stripe_health(),
         check_email_health(),

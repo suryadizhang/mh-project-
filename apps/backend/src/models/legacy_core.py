@@ -29,7 +29,7 @@ class Customer(Base):
     """Customer records with encrypted PII and station scoping."""
 
     __tablename__ = "customers"
-    __table_args__ = {"schema": "core"}
+    __table_args__ = {"schema": "core", "extend_existing": True}
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
 
@@ -126,7 +126,7 @@ class Booking(Base):
         ),
         Index("idx_booking_station_date", "station_id", "date", "slot"),
         Index("idx_booking_station_customer", "station_id", "customer_id"),
-        {"schema": "core"},
+        {"schema": "core", "extend_existing": True},
     )
 
 
@@ -169,7 +169,7 @@ class Payment(Base):
         CheckConstraint(
             "status IN ('completed', 'pending', 'failed', 'refunded')", name="payment_status_valid"
         ),
-        {"schema": "core"},
+        {"schema": "core", "extend_existing": True},
     )
 
 
@@ -215,7 +215,7 @@ class MessageThread(Base):
         CheckConstraint("status IN ('active', 'closed', 'archived')", name="thread_status_valid"),
         Index("idx_thread_station_phone", "station_id", "phone_number_encrypted"),
         Index("idx_thread_station_customer", "station_id", "customer_id"),
-        {"schema": "core"},
+        {"schema": "core", "extend_existing": True},
     )
 
 
@@ -265,7 +265,7 @@ class Message(Base):
             "status IN ('delivered', 'failed', 'pending')", name="message_status_valid"
         ),
         Index("idx_message_thread_sent", "thread_id", "sent_at"),
-        {"schema": "core"},
+        {"schema": "core", "extend_existing": True},
     )
 
 
@@ -273,7 +273,7 @@ class Event(Base):
     """Event logging for system activities."""
 
     __tablename__ = "events"
-    __table_args__ = {"schema": "core"}
+    __table_args__ = {"schema": "core", "extend_existing": True}
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
 

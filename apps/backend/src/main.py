@@ -85,7 +85,7 @@ if settings.sentry_dsn:
         f"✅ Sentry monitoring initialized (environment: {settings.sentry_environment or settings.ENVIRONMENT})"
     )
 else:
-    logger.info("⚠️ Sentry DSN not configured - monitoring disabled")
+    logger.debug("Sentry DSN not configured - monitoring disabled (OK for development)")
 
 # Set up SlowAPI rate limiter (secondary layer)
 limiter = Limiter(
@@ -252,6 +252,62 @@ async def lifespan(app: FastAPI):
     yield
 
     # Shutdown
+    logger.info("🛑 Starting graceful shutdown...")
+    
+    # Stop real-time voice call sessions
+    try:
+        from services.realtime_voice.call_session import call_session_manager
+        
+        active_sessions = list(call_session_manager.active_sessions.values())
+        if active_sessions:
+            logger.info(f"📞 Gracefully closing {len(active_sessions)} active voice calls...")
+            
+            for session in active_sessions:
+                try:
+                    # Stop STT bridge
+                    if session.stt_bridge and session.stt_bridge.is_running:
+                        session.stt_bridge.stop()
+                        logger.info(f"✅ Stopped STT bridge for call {session.call_id}")
+                    
+                    # Close WebSocket
+                    if session.websocket:
+                        try:
+                            await session.websocket.close(code=1001, reason="Server shutdown")
+                            logger.info(f"✅ Closed WebSocket for call {session.call_id}")
+                        except Exception as ws_error:
+                            logger.debug(f"WebSocket already closed: {ws_error}")
+                    
+                    # Mark session ended and save logs
+                    session.mark_ended()
+                    logger.info(
+                        f"✅ Call {session.call_id} ended gracefully | "
+                        f"duration={session.get_duration():.1f}s | "
+                        f"transcripts={session.transcripts_count} | "
+                        f"turns={session.turn_count}"
+                    )
+                    
+                except Exception as session_error:
+                    logger.error(f"Error closing session {session.call_id}: {session_error}")
+            
+            # Final cleanup
+            await call_session_manager.cleanup_all_sessions()
+            
+            stats = call_session_manager.get_stats()
+            logger.info(
+                f"📊 Voice AI final stats | "
+                f"total_calls={stats['total_calls']} | "
+                f"completed={stats['completed_calls']} | "
+                f"failed={stats['failed_calls']} | "
+                f"success_rate={stats['success_rate']:.2%}"
+            )
+        else:
+            logger.info("✅ No active voice calls to close")
+            
+    except ImportError:
+        logger.debug("Real-time voice module not imported")
+    except Exception as e:
+        logger.error(f"Error during voice call shutdown: {e}")
+    
     # Stop outbox processor workers
     if hasattr(app.state, "worker_manager") and app.state.worker_manager:
         try:
@@ -699,6 +755,15 @@ app.include_router(bookings.router, prefix="/api/bookings", tags=["bookings"])
 # Also register with /api/v1 prefix for frontend compatibility
 app.include_router(bookings.router, prefix="/api/v1/bookings", tags=["bookings-v1"])
 
+# Include Knowledge Sync endpoints (Admin/Superadmin)
+try:
+    from routers.v1.knowledge_sync import router as knowledge_sync_router
+    
+    app.include_router(knowledge_sync_router, tags=["Knowledge Sync"])
+    logger.info("✅ Knowledge Sync endpoints included")
+except ImportError as e:
+    logger.warning(f"Knowledge Sync endpoints not available: {e}")
+
 # Stripe router from NEW location
 try:
     from routers.v1.stripe import router as stripe_router
@@ -777,6 +842,15 @@ try:
 except ImportError as e:
     logger.error(f"❌ Payment Analytics endpoints not available: {e}")
 
+# Real-time Voice WebSocket endpoints - NEW location
+try:
+    from routers.v1.realtime_voice import router as realtime_voice_router
+
+    app.include_router(realtime_voice_router, tags=["Voice - Real-time"])
+    logger.info("✅ Real-time Voice WebSocket endpoints included")
+except ImportError as e:
+    logger.error(f"❌ Real-time Voice endpoints not available: {e}")
+
 # QR Code Tracking System - NEW location
 try:
     from routers.v1.qr_tracking import router as qr_tracking_router
@@ -838,14 +912,22 @@ try:
 except ImportError as e:
     logger.error(f"❌ Customer Review System endpoints not available: {e}")
 
-# Monitoring Alert Rules API (Admin only - dynamic rule management)
-try:
-    from routers.v1.monitoring_rules import router as monitoring_rules_router
+# Monitoring Alert Rules API (Admin only - dynamic rule management) - DISABLED (broken import)
+# try:
+#     from routers.v1.monitoring_rules import router as monitoring_rules_router
+#     app.include_router(monitoring_rules_router, prefix="/api/v1", tags=["monitoring"])
+#     logger.info("✅ Monitoring Alert Rules API included (admin rule management)")
+# except ImportError as e:
+#     logger.error(f"❌ Monitoring Alert Rules API not available: {e}")
 
-    app.include_router(monitoring_rules_router, prefix="/api/v1", tags=["monitoring"])
-    logger.info("✅ Monitoring Alert Rules API included (admin rule management)")
+# Knowledge Sync API (Superadmin only - dynamic menu/FAQ/terms sync)
+try:
+    from api.v1.knowledge_sync.router import router as knowledge_sync_router
+
+    app.include_router(knowledge_sync_router, prefix="/api/v1/knowledge", tags=["knowledge-sync"])
+    logger.info("✅ Knowledge Sync API included (menu/FAQ/terms auto-sync)")
 except ImportError as e:
-    logger.error(f"❌ Monitoring Alert Rules API not available: {e}")
+    logger.error(f"❌ Knowledge Sync API not available: {e}")
 
 # Try to include additional routers if available - NEW locations
 try:
@@ -854,10 +936,13 @@ try:
     from routers.v1.ringcentral_webhooks import (
         router as ringcentral_router,
     )
+    from routers.v1.conversations import router as conversations_router
 
     app.include_router(leads_router, prefix="/api/leads", tags=["leads"])
+    app.include_router(leads_router, prefix="/api/v1/public/leads", tags=["leads-public"])  # Public endpoint
     app.include_router(newsletter_router, prefix="/api/newsletter", tags=["newsletter"])
     app.include_router(ringcentral_router, prefix="/api/ringcentral", tags=["sms"])
+    app.include_router(conversations_router, prefix="/api/v1", tags=["conversations"])
     logger.info("✅ Additional CRM routers included from NEW location")
 except ImportError as e:
     logger.error(f"❌ Some additional routers not available: {e}")
@@ -865,32 +950,6 @@ except ImportError as e:
 # Station Management endpoints - Multi-tenant RBAC (already included above, removing duplicate)
 # OLD duplicate: from api.app.routers.station_admin import router as station_admin_router
 # This was duplicate of lines 671-677 above - now removed
-
-# Include public lead capture endpoints (no auth required)
-try:
-    from api.v1.endpoints.public_leads import router as public_leads_router
-
-    app.include_router(
-        public_leads_router,
-        prefix="/api/v1/public",
-        tags=["Public Lead Capture"],
-    )
-    logger.info("✅ Public lead capture endpoints included")
-except ImportError as e:
-    logger.warning(f"Public lead endpoints not available: {e}")
-
-# Include public quote calculation endpoint (no auth required)
-try:
-    from api.v1.endpoints.public_quote import router as public_quote_router
-
-    app.include_router(
-        public_quote_router,
-        prefix="/api/v1/public/quote",
-        tags=["Public Quote Calculator"],
-    )
-    logger.info("✅ Public quote calculation endpoints included (travel fee calculation)")
-except ImportError as e:
-    logger.warning(f"Public quote endpoints not available: {e}")
 
 # AI Chat endpoints from moved AI API
 try:
@@ -901,24 +960,6 @@ try:
 except ImportError as e:
     logger.warning(f"AI Chat endpoints not available: {e}")
 
-# Customer Review Blog System (Production-grade with video support)
-try:
-    from api.v1.customer_reviews import router as customer_reviews_router
-
-    app.include_router(customer_reviews_router, tags=["customer-reviews"])
-    logger.info("✅ Customer Review Blog endpoints included (image + video support)")
-except ImportError as e:
-    logger.warning(f"Customer Review Blog endpoints not available: {e}")
-
-# Admin Review Moderation System (Approval workflow)
-try:
-    from api.admin.review_moderation import router as admin_moderation_router
-
-    app.include_router(admin_moderation_router, tags=["admin-review-moderation"])
-    logger.info("✅ Admin Review Moderation endpoints included (approve/reject/bulk)")
-except ImportError as e:
-    logger.warning(f"Admin Review Moderation endpoints not available: {e}")
-
     # Add a placeholder AI endpoint
     @app.post("/api/v1/ai/chat", tags=["ai-chat"])
     async def ai_chat_placeholder():
@@ -927,6 +968,15 @@ except ImportError as e:
             "message": "AI chat endpoint - moved from apps/ai-api",
             "note": "Full implementation pending import path fixes",
         }
+
+# NLP Monitoring endpoints
+try:
+    from api.ai.endpoints.routers.nlp_monitoring import router as nlp_monitoring_router
+
+    app.include_router(nlp_monitoring_router, prefix="/api/v1/ai", tags=["nlp-monitoring"])
+    logger.info("✅ NLP Monitoring endpoints included")
+except ImportError as e:
+    logger.warning(f"NLP Monitoring endpoints not available: {e}")
 
 
 # Escalation System - Customer Support Handoff
@@ -963,6 +1013,19 @@ try:
     logger.info("✅ RingCentral Voice AI webhooks included (Deepgram STT + TTS)")
 except ImportError as e:
     logger.warning(f"Voice AI endpoints not available: {e}")
+
+# Call Recordings API - Access recordings and AI transcripts
+try:
+    from routers.v1.recordings import router as recordings_router
+
+    app.include_router(
+        recordings_router,
+        prefix="/api/v1",  # Already has /recordings prefix in router
+        tags=["recordings", "voice-ai"],
+    )
+    logger.info("✅ Call recordings API included (RingCentral AI transcripts)")
+except ImportError as e:
+    logger.warning(f"Recordings API not available: {e}")
 
 # Twilio Webhooks - WhatsApp and SMS Status Callbacks
 try:

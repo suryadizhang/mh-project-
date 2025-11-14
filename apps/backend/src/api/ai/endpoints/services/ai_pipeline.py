@@ -15,6 +15,15 @@ from api.ai.endpoints.services.openai_service import openai_service
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# Import enhanced NLP service
+try:
+    from services.enhanced_nlp_service import get_nlp_service
+    ENHANCED_NLP_AVAILABLE = True
+except ImportError:
+    ENHANCED_NLP_AVAILABLE = False
+    import logging
+    logging.getLogger(__name__).warning("Enhanced NLP service not available, using fallback")
+
 
 class AIPipeline:
     """Main AI pipeline for processing customer messages"""
@@ -25,6 +34,12 @@ class AIPipeline:
             "medium": 0.50,  # Use GPT with KB context
             "low": 0.30,  # Use GPT-4 or escalate
         }
+        
+        # Initialize enhanced NLP service if available
+        if ENHANCED_NLP_AVAILABLE:
+            self.nlp_service = get_nlp_service()
+        else:
+            self.nlp_service = None
 
         # Intent classification keywords
         self.intent_keywords = {
@@ -108,7 +123,33 @@ class AIPipeline:
         return "general", 0.3
 
     def extract_entities(self, message: str) -> dict[str, Any]:
-        """Extract entities like dates, locations, numbers from message"""
+        """
+        Extract entities like dates, locations, numbers from message
+        Uses Enhanced NLP if available, otherwise falls back to regex
+        """
+        # Try enhanced NLP first (more accurate)
+        if self.nlp_service:
+            try:
+                nlp_entities = self.nlp_service.extract_entities(message)
+                
+                # Convert to expected format
+                entities = {}
+                
+                if 'DATE' in nlp_entities:
+                    entities['dates'] = nlp_entities['DATE']
+                
+                if 'GPE' in nlp_entities or 'LOC' in nlp_entities:
+                    entities['locations'] = nlp_entities.get('GPE', []) + nlp_entities.get('LOC', [])
+                
+                if 'CARDINAL' in nlp_entities:
+                    entities['numbers'] = [int(n) for n in nlp_entities['CARDINAL'] if n.isdigit() and int(n) < 1000]
+                
+                return entities
+                
+            except Exception:
+                pass  # Fall back to regex
+        
+        # Fallback: regex-based extraction
         entities = {}
 
         # Extract potential dates
