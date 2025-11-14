@@ -5,6 +5,7 @@ Checks for fake/imaginary data that doesn't exist on actual website
 """
 import asyncio
 import asyncpg
+import os
 import re
 from pathlib import Path
 
@@ -24,9 +25,13 @@ class DataAudit:
 
     async def connect_db(self):
         """Connect to production database"""
-        self.conn = await asyncpg.connect(
-            "postgresql://postgres:DkYokZB945vm3itM@db.yuchqvpctookhjovvdwi.supabase.co:5432/postgres"
-        )
+        database_url = os.getenv("DATABASE_URL")
+        if not database_url:
+            raise ValueError("DATABASE_URL environment variable not set")
+        # Convert SQLAlchemy format to asyncpg format if needed
+        if database_url.startswith("postgresql+asyncpg://"):
+            database_url = database_url.replace("postgresql+asyncpg://", "postgresql://", 1)
+        self.conn = await asyncpg.connect(database_url)
 
     async def close_db(self):
         await self.conn.close()

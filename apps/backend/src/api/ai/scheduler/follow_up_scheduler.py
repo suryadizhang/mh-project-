@@ -326,10 +326,13 @@ class FollowUpScheduler:
             async with get_db_context() as db:
                 from sqlalchemy import select
 
+                # Use timezone-naive datetime since scheduled_at column is TIMESTAMP WITHOUT TIME ZONE
+                now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
+                
                 # Get all pending jobs
                 stmt = select(ScheduledFollowUp).where(
                     ScheduledFollowUp.status == FollowUpStatus.PENDING.value,
-                    ScheduledFollowUp.scheduled_at > datetime.now(timezone.utc),
+                    ScheduledFollowUp.scheduled_at > now_utc,
                 )
                 result = await db.execute(stmt)
                 pending_jobs = result.scalars().all()

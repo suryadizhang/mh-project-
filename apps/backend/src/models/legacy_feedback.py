@@ -126,7 +126,7 @@ class CustomerReview(Base):
         Index("ix_feedback_reviews_rating", "rating"),
         Index("ix_feedback_reviews_status", "status"),
         Index("ix_feedback_reviews_created", "created_at"),
-        {"schema": "feedback"},
+        {"schema": "feedback", "extend_existing": True},
     )
 
     @property
@@ -233,7 +233,7 @@ class DiscountCoupon(Base):
         Index("ix_feedback_coupons_status", "status"),
         Index("ix_feedback_coupons_valid_until", "valid_until"),
         Index("ix_feedback_coupons_review", "review_id"),
-        {"schema": "feedback"},
+        {"schema": "feedback", "extend_existing": True},
     )
 
     @classmethod
@@ -319,7 +319,7 @@ class ReviewEscalation(Base):
         Index("ix_feedback_escalations_review", "review_id"),
         Index("ix_feedback_escalations_status", "status"),
         Index("ix_feedback_escalations_priority", "priority"),
-        {"schema": "feedback"},
+        {"schema": "feedback", "extend_existing": True},
     )
 
     @property

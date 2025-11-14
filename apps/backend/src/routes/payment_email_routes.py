@@ -15,15 +15,11 @@ from core.config import get_settings
 from core.database import get_db
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field, ConfigDict
-from services.payment_email_monitor import PaymentEmailMonitor
 from sqlalchemy.orm import Session
 
 settings = get_settings()
 from core.auth import require_roles  # Phase 2C: Updated from api.app.auth
 from core.config import UserRole
-from services.email_service import EmailService
-from services.notification_service import NotificationService
-from services.payment_matcher_service import PaymentEmailService
 
 logger = logging.getLogger(__name__)
 
@@ -92,10 +88,11 @@ class ManualMatchResponse(BaseModel):
     message: str
 
 
-# Dependency: Get email monitor
-def get_email_monitor() -> PaymentEmailMonitor:
+# Dependency: Get email monitor (lazy loaded)
+def get_email_monitor():
     """Get configured email monitor instance"""
     try:
+        from services.payment_email_monitor import PaymentEmailMonitor
         monitor = PaymentEmailMonitor(
             email_address=settings.GMAIL_USER,
             app_password=settings.GMAIL_APP_PASSWORD,
@@ -106,12 +103,16 @@ def get_email_monitor() -> PaymentEmailMonitor:
         raise HTTPException(status_code=500, detail="Email monitoring not configured")
 
 
-# Dependency: Get payment email service
+# Dependency: Get payment email service (lazy loaded)
 def get_payment_email_service(
     db: Session = Depends(get_db),
-    email_monitor: PaymentEmailMonitor = Depends(get_email_monitor),
-) -> PaymentEmailService:
+    email_monitor = Depends(get_email_monitor),
+):
     """Get payment email service instance"""
+    from services.email_service import EmailService
+    from services.notification_service import NotificationService
+    from services.payment_matcher_service import PaymentEmailService
+    
     email_service = EmailService()
     notify_service = NotificationService()
 
@@ -127,7 +128,7 @@ def get_payment_email_service(
 async def process_payment_emails(
     request: ProcessEmailsRequest,
     background_tasks: BackgroundTasks,
-    service: PaymentEmailService = Depends(get_payment_email_service),
+    service = Depends(get_payment_email_service),
     current_user=Depends(require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])),
 ):
     """
@@ -177,7 +178,7 @@ async def process_payment_emails(
 async def get_recent_notifications(
     since_hours: int = 24,
     limit: int = 50,
-    email_monitor: PaymentEmailMonitor = Depends(get_email_monitor),
+    email_monitor = Depends(get_email_monitor),
     current_user=Depends(require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])),
 ):
     """
@@ -216,7 +217,7 @@ async def get_recent_notifications(
 @router.get("/unmatched", response_model=list[EmailNotificationResponse])
 async def get_unmatched_notifications(
     since_hours: int = 48,
-    service: PaymentEmailService = Depends(get_payment_email_service),
+    service = Depends(get_payment_email_service),
     current_user=Depends(require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])),
 ):
     """
@@ -252,7 +253,7 @@ async def get_unmatched_notifications(
 @router.post("/manual-match", response_model=ManualMatchResponse)
 async def manual_match_payment(
     request: ManualMatchRequest,
-    service: PaymentEmailService = Depends(get_payment_email_service),
+    service = Depends(get_payment_email_service),
     current_user=Depends(require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])),
 ):
     """
@@ -333,7 +334,7 @@ async def manual_match_payment(
 
 @router.get("/status")
 async def get_email_monitoring_status(
-    email_monitor: PaymentEmailMonitor = Depends(get_email_monitor),
+    email_monitor = Depends(get_email_monitor),
     current_user=Depends(require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])),
 ):
     """

@@ -116,7 +116,10 @@ export function useEscalationWebSocket(): UseEscalationWebSocketResult {
   // Connect to WebSocket
   const connect = useCallback(() => {
     if (!isAuthenticated || !token) {
-      logger.warn('Cannot connect to escalation WebSocket: Not authenticated');
+      // Silent return - this is expected before authentication completes
+      // Not an error, just waiting for auth
+      logger.debug('WebSocket connection pending authentication');
+      setConnectionError(null); // Clear any previous errors
       return;
     }
 
@@ -243,14 +246,21 @@ export function useEscalationWebSocket(): UseEscalationWebSocketResult {
       };
 
       ws.current.onerror = event => {
-        const errorMessage =
-          event instanceof ErrorEvent
-            ? event.message || 'WebSocket connection error'
-            : 'WebSocket connection error';
-        logger.error(new Error(errorMessage), {
-          context: 'escalation_websocket',
-        });
-        setConnectionError(errorMessage);
+        // Only log as error if we were authenticated and connection failed
+        // Pre-auth connection attempts are normal and expected
+        if (isAuthenticated && token) {
+          const errorMessage =
+            event instanceof ErrorEvent
+              ? event.message || 'WebSocket connection error'
+              : 'WebSocket connection error';
+          logger.error(new Error(errorMessage), {
+            context: 'escalation_websocket',
+          });
+          setConnectionError(errorMessage);
+        } else {
+          // Silent fail for pre-auth - this is expected
+          logger.debug('WebSocket connection not established (awaiting authentication)');
+        }
         setIsConnecting(false);
       };
     } catch (error) {

@@ -40,19 +40,14 @@ from starlette.types import ASGIApp
 
 try:
     import prometheus_client
+    from core.metrics import registry, request_count, request_duration, security_violations
 
     PROMETHEUS_AVAILABLE = True
 
-    # Metrics for monitoring
-    REQUEST_COUNT = prometheus_client.Counter(
-        "http_requests_total", "Total HTTP requests", ["method", "endpoint", "status_code"]
-    )
-    REQUEST_DURATION = prometheus_client.Histogram(
-        "http_request_duration_seconds", "HTTP request duration", ["method", "endpoint"]
-    )
-    SECURITY_VIOLATIONS = prometheus_client.Counter(
-        "security_violations_total", "Security violations detected", ["violation_type"]
-    )
+    # Use existing metrics from core.metrics
+    REQUEST_COUNT = request_count
+    REQUEST_DURATION = request_duration
+    SECURITY_VIOLATIONS = security_violations
 except ImportError:
     PROMETHEUS_AVAILABLE = False
     REQUEST_COUNT = None
@@ -730,8 +725,9 @@ class MetricsMiddleware(BaseHTTPMiddleware):
         # Record Prometheus metrics if available
         if PROMETHEUS_AVAILABLE:
             if REQUEST_COUNT:
+                # Note: core.metrics uses 'status' label, not 'status_code'
                 REQUEST_COUNT.labels(
-                    method=request.method, endpoint=endpoint, status_code=status_code
+                    method=request.method, endpoint=endpoint, status=str(status_code)
                 ).inc()
 
             if REQUEST_DURATION:

@@ -52,8 +52,8 @@ class EscalationCreateRequest(BaseModel):
             raise ValueError(f"Priority must be one of: {', '.join(valid_priorities)}")
         return v.lower()
 
-    class Config:
-        schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "conversation_id": "550e8400-e29b-41d4-a716-446655440000",
                 "phone": "+1-555-0100",
@@ -65,6 +65,7 @@ class EscalationCreateRequest(BaseModel):
                 "metadata": {"booking_id": "booking-123", "issue_type": "booking_modification"},
             }
         }
+    }
 
 
 class EscalationResponse(BaseModel):

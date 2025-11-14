@@ -51,7 +51,7 @@ class StripePayment(Base):
     """Legacy Stripe payment records for public.stripe_payments table."""
 
     __tablename__ = "stripe_payments"  # Changed from "payments" to avoid conflict with core.Payment
-    __table_args__ = {"schema": "public"}  # Use public schema for legacy Stripe model
+    __table_args__ = {"schema": "public", "extend_existing": True}  # Use public schema for legacy Stripe model
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String, nullable=False, index=True)

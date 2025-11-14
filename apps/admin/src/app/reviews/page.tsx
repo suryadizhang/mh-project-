@@ -21,6 +21,7 @@ import { FilterBar, FilterDefinition } from '@/components/ui/filter-bar';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { ConfirmModal,Modal } from '@/components/ui/modal';
 import { StatsCard } from '@/components/ui/stats-card';
+import { useToast } from '@/components/ui/Toast';
 import {
   useEscalatedReviews,
   useFilters,
@@ -29,11 +30,15 @@ import {
   useReviews,
   useSearch,
 } from '@/hooks/useApi';
+import { api } from '@/lib/api';
 
 // Tab types
 type ReviewTab = 'all' | 'escalated' | 'resolved';
 
 export default function ReviewsPage() {
+  // Hooks
+  const toast = useToast();
+
   // State
   const [activeTab, setActiveTab] = useState<ReviewTab>('all');
   const [selectedReview, setSelectedReview] = useState<any>(null);
@@ -41,6 +46,8 @@ export default function ReviewsPage() {
   const [isIssueCouponOpen, setIsIssueCouponOpen] = useState(false);
   const [selectedReviewForCoupon, setSelectedReviewForCoupon] =
     useState<any>(null);
+  const [isIssuingCoupon, setIsIssuingCoupon] = useState(false);
+  const [isResolvingReview, setIsResolvingReview] = useState(false);
 
   // Pagination and filters
   const { page, limit, setPage, nextPage, prevPage } = usePagination(1, 20);
@@ -166,18 +173,66 @@ export default function ReviewsPage() {
     setIsIssueCouponOpen(true);
   };
 
-  const handleConfirmCoupon = () => {
-    // TODO: Call AI coupon generation API
-    console.log(
-      'Issuing coupon for review:',
-      selectedReviewForCoupon?.review_id
-    );
+  const handleConfirmCoupon = async () => {
+    if (!selectedReviewForCoupon || isIssuingCoupon) return;
+    
+    setIsIssuingCoupon(true);
+    try {
+      const response = await api.post('/api/v1/reviews/ai/issue-coupon', {
+        review_id: selectedReviewForCoupon.review_id,
+        ai_interaction_notes: 'Admin manually issued coupon for negative experience',
+        discount_percentage: 10,
+      });
+
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to issue coupon');
+      }
+
+      toast.success('Coupon Issued', 'Discount coupon has been created successfully');
+      
+      // Close modal and refresh
+      setIsIssueCouponOpen(false);
+      setSelectedReviewForCoupon(null);
+      refetch();
+    } catch (error) {
+      console.error('Error issuing coupon:', error);
+      toast.error(
+        'Failed to Issue Coupon',
+        error instanceof Error ? error.message : 'Please try again'
+      );
+    } finally {
+      setIsIssuingCoupon(false);
+    }
   };
 
-  const handleResolve = (review: any) => {
-    // TODO: Call resolve API
-    console.log('Resolving review:', review.review_id);
-    refetch();
+  const handleResolve = async (review: any) => {
+    if (!review?.review_id || isResolvingReview) return;
+    
+    setIsResolvingReview(true);
+    try {
+      const response = await api.post(`/api/v1/reviews/${review.review_id}/resolve`, {
+        resolved_by: '00000000-0000-0000-0000-000000000000', // TODO: Get from auth context
+        resolution_notes: 'Resolved by admin',
+      });
+
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to resolve review');
+      }
+
+      toast.success('Review Resolved', 'The review has been marked as resolved');
+      
+      // Close modal if open and refresh
+      setIsReviewModalOpen(false);
+      refetch();
+    } catch (error) {
+      console.error('Error resolving review:', error);
+      toast.error(
+        'Failed to Resolve Review',
+        error instanceof Error ? error.message : 'Please try again'
+      );
+    } finally {
+      setIsResolvingReview(false);
+    }
   };
 
   const handleClearFilters = () => {
@@ -633,12 +688,13 @@ export default function ReviewsPage() {
       {/* Issue Coupon Confirmation */}
       <ConfirmModal
         isOpen={isIssueCouponOpen}
-        onClose={() => setIsIssueCouponOpen(false)}
+        onClose={() => !isIssuingCoupon && setIsIssueCouponOpen(false)}
         onConfirm={handleConfirmCoupon}
         title="Issue Apology Coupon"
         message={`Are you sure you want to issue an AI-generated apology coupon for this review? The system will automatically determine the appropriate discount amount.`}
-        confirmLabel="Issue Coupon"
+        confirmLabel={isIssuingCoupon ? 'Issuing...' : 'Issue Coupon'}
         variant="info"
+        loading={isIssuingCoupon}
       />
     </div>
   );

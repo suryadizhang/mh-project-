@@ -419,13 +419,13 @@ export default function MenuPage() {
                       <div className="protein-item modern-protein-item enhanced-protein-item">
                         <div className="protein-content">
                           <div className="protein-header">
-                            <h5 className="protein-name">Premium Angus Sirloin Steak</h5>
+                            <h5 className="protein-name">NY Strip Steak</h5>
                             <div className="protein-sparkle">
                               <span className="emoji-visible">✨</span>
                             </div>
                           </div>
                           <p className="protein-desc">
-                            Premium Angus Sirloin steak cooked to your preferred temperature
+                            Premium NY strip steak cooked to your preferred temperature
                           </p>
                           <div className="protein-features">
                             <span className="feature-tag">Fresh Daily</span>

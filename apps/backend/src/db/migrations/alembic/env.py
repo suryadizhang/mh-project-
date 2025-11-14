@@ -32,6 +32,7 @@ from models import (  # noqa: E402, F401
     lead,
     call_recording,
     payment_notification,
+    knowledge_base,
 )
 
 # this is the Alembic Config object, which provides

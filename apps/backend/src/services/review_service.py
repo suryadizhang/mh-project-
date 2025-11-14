@@ -16,7 +16,7 @@ from services.ringcentral_sms import (
     ringcentral_sms,
 )  # Phase 2C: Updated from api.app.services.ringcentral_sms
 from core.config import get_settings
-from sqlalchemy import and_, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -248,6 +248,12 @@ class ReviewService:
         """
         Issue coupon after AI has interacted with customer.
         Called by AI service after conversation determines coupon is warranted.
+        
+        Restrictions:
+        - Max 1 active (unused) coupon per customer
+        - Max 1 coupon per booking
+        - Discount: 10% or $100, whichever is LESS
+        - Maximum discount cap: $100
         """
         try:
             review = await self.db.get(CustomerReview, review_id)
@@ -255,7 +261,42 @@ class ReviewService:
                 logger.error(f"Review {review_id} not found")
                 return None
 
-            # Issue coupon
+            # 🔒 RESTRICTION 1: Check if customer already has active coupon
+            existing_active = await self._check_existing_active_coupon(review.customer_id)
+            if existing_active:
+                logger.warning(
+                    f"Customer {review.customer_id} already has active coupon {existing_active.coupon_code}. "
+                    f"Coupon issuance denied."
+                )
+                # Store denial reason for admin review
+                if not review.metadata:
+                    review.metadata = {}
+                review.metadata["coupon_denial_reason"] = "Customer has active unused coupon"
+                review.metadata["coupon_denial_at"] = datetime.now().isoformat()
+                review.metadata["existing_coupon_code"] = existing_active.coupon_code
+                await self.db.commit()
+                return None
+
+            # 🔒 RESTRICTION 2: Check if booking already has coupon
+            if review.booking_id:
+                booking_has_coupon = await self._check_coupon_for_booking(
+                    review.customer_id, 
+                    review.booking_id
+                )
+                if booking_has_coupon:
+                    logger.warning(
+                        f"Booking {review.booking_id} already issued coupon to customer {review.customer_id}. "
+                        f"Coupon issuance denied."
+                    )
+                    # Store denial reason
+                    if not review.metadata:
+                        review.metadata = {}
+                    review.metadata["coupon_denial_reason"] = "Booking already issued coupon"
+                    review.metadata["coupon_denial_at"] = datetime.now().isoformat()
+                    await self.db.commit()
+                    return None
+
+            # ✅ All restrictions passed - Issue coupon
             coupon = await self._issue_coupon(
                 customer_id=review.customer_id,
                 station_id=review.station_id,
@@ -273,9 +314,22 @@ class ReviewService:
                     review.metadata = {}
                 review.metadata["ai_interaction_notes"] = ai_interaction_notes
                 review.metadata["coupon_issued_at"] = datetime.now().isoformat()
+                review.metadata["coupon_restrictions_passed"] = [
+                    "no_active_coupon",
+                    "no_booking_coupon"
+                ]
 
                 await self.db.commit()
-                logger.info(f"AI issued coupon {coupon.coupon_code} for review {review_id}")
+                
+                # 📱 Send welcome SMS via RingCentral (Day 0 reminder)
+                # TODO: Get customer phone from Customer model
+                # For now, store in coupon metadata for reminder system
+                # await self._send_coupon_welcome_sms(coupon, customer_phone, customer_name)
+                
+                logger.info(
+                    f"AI issued coupon {coupon.coupon_code} for review {review_id}. "
+                    f"Discount: {discount_percentage}%, Max: $100, Valid: 6 months"
+                )
                 return coupon
 
             return None
@@ -337,34 +391,67 @@ class ReviewService:
         review_id: UUID,
         reason: str,
         discount_percentage: int = 10,
-        validity_days: int = 90,
+        validity_days: int = 180,  # 6 months - aligns with event planning cycle
     ) -> DiscountCoupon | None:
-        """Issue discount coupon for customer."""
+        """
+        Issue discount coupon for customer.
+        
+        Discount Logic:
+        - Type: Percentage (10%)
+        - Maximum Cap: $100 (10,000 cents)
+        - Applied: 10% OR $100, whichever is LESS
+        - Validity: 6 months (180 days) - allows time for next event
+        - Example: $550 order → 10% = $55 discount ✅
+        - Example: $2000 order → 10% = $200, capped at $100 ✅
+        """
         try:
             # Generate unique coupon code
             coupon_code = DiscountCoupon.generate_coupon_code()
 
-            # Create coupon
+            # 💰 DISCOUNT CAP: Maximum $100 discount
+            MAX_DISCOUNT_CENTS = 10000  # $100
+            
+            # TODO: Get customer contact info for SMS reminders
+            # For now, this will be populated when we integrate with Customer model
+            # customer = await self.db.get(Customer, customer_id)
+            # customer_phone = customer.phone
+            # customer_name = customer.name
+            
+            # Create coupon with percentage discount
+            # The cap will be enforced when coupon is validated during checkout
             coupon = DiscountCoupon(
                 station_id=station_id,
                 customer_id=customer_id,
                 review_id=review_id,
                 coupon_code=coupon_code,
                 discount_type="percentage",
-                discount_value=discount_percentage,
-                description=f"Thank you for your feedback! {discount_percentage}% off your next booking.",
-                minimum_order_cents=5000,  # $50 minimum
+                discount_value=discount_percentage,  # 10%
+                description=f"Thank you for your feedback! {discount_percentage}% off your next booking (max $100 discount).",
+                minimum_order_cents=55000,  # $550 minimum order (business requirement)
                 max_uses=1,
                 issue_reason=reason,
                 valid_from=datetime.now(),
                 valid_until=datetime.now() + timedelta(days=validity_days),
                 status="active",
+                # Store max discount cap + customer contact info for SMS reminders
+                extra_metadata={
+                    "max_discount_cents": MAX_DISCOUNT_CENTS,
+                    "max_discount_display": "$100",
+                    "discount_rule": "10% or $100, whichever is less",
+                    # TODO: Populate from Customer model
+                    # "customer_phone": customer_phone,
+                    # "customer_name": customer_name,
+                    "reminders_sent": [],  # Track which reminders have been sent
+                }
             )
 
             self.db.add(coupon)
             await self.db.flush()
 
-            logger.info(f"Issued coupon {coupon_code} for customer {customer_id}")
+            logger.info(
+                f"Issued coupon {coupon_code} for customer {customer_id}: "
+                f"{discount_percentage}% discount (capped at $100), valid 6 months"
+            )
             return coupon
 
         except Exception as e:
@@ -486,7 +573,11 @@ class ReviewService:
     async def validate_coupon(
         self, coupon_code: str, customer_id: UUID, order_total_cents: int
     ) -> dict[str, Any]:
-        """Validate if coupon can be used."""
+        """
+        Validate if coupon can be used.
+        
+        Enforces discount cap: 10% OR $100, whichever is LESS
+        """
         result = await self.db.execute(
             select(DiscountCoupon).where(DiscountCoupon.coupon_code == coupon_code)
         )
@@ -505,11 +596,27 @@ class ReviewService:
             min_order = coupon.minimum_order_cents / 100
             return {"valid": False, "error": f"Minimum order ${min_order:.2f} required"}
 
-        # Calculate discount
+        # 💰 Calculate discount with $100 cap
+        MAX_DISCOUNT_CENTS = 10000  # $100 maximum
+        
         if coupon.discount_type == "percentage":
+            # Calculate percentage discount
             discount_cents = int(order_total_cents * coupon.discount_value / 100)
+            
+            # 🔒 ENFORCE CAP: Take minimum of calculated discount or $100
+            discount_cents = min(discount_cents, MAX_DISCOUNT_CENTS)
+            
+            # Calculate what percentage was actually applied (for display)
+            actual_percentage = (discount_cents / order_total_cents * 100) if order_total_cents > 0 else 0
+            
+            logger.info(
+                f"Coupon {coupon_code} validation: Order ${order_total_cents/100:.2f}, "
+                f"Calculated {coupon.discount_value}% = ${discount_cents/100:.2f} "
+                f"(capped at $100)"
+            )
         else:  # fixed_amount
-            discount_cents = coupon.discount_value
+            discount_cents = min(coupon.discount_value, MAX_DISCOUNT_CENTS)
+            actual_percentage = None
 
         return {
             "valid": True,
@@ -520,10 +627,55 @@ class ReviewService:
                 "discount_value": coupon.discount_value,
                 "discount_display": coupon.discount_display,
                 "discount_cents": discount_cents,
+                "max_discount_cents": MAX_DISCOUNT_CENTS,
+                "max_discount_display": "$100",
+                "actual_percentage_applied": f"{actual_percentage:.1f}%" if actual_percentage else None,
                 "description": coupon.description,
                 "valid_until": coupon.valid_until.isoformat(),
             },
         }
+
+    async def _check_existing_active_coupon(
+        self, customer_id: UUID
+    ) -> DiscountCoupon | None:
+        """
+        Check if customer has any active (unused) coupons.
+        
+        Restriction: Customer can only have 1 active coupon at a time.
+        Returns the active coupon if found, None otherwise.
+        """
+        result = await self.db.execute(
+            select(DiscountCoupon)
+            .where(
+                DiscountCoupon.customer_id == customer_id,
+                DiscountCoupon.status == "active",
+                DiscountCoupon.times_used == 0,  # Unused
+                DiscountCoupon.valid_until >= datetime.now()  # Not expired
+            )
+            .order_by(DiscountCoupon.created_at.desc())
+            .limit(1)
+        )
+        return result.scalar_one_or_none()
+
+    async def _check_coupon_for_booking(
+        self, customer_id: UUID, booking_id: UUID
+    ) -> bool:
+        """
+        Check if this booking already generated a coupon.
+        
+        Restriction: Each booking can only issue 1 coupon.
+        Returns True if booking already has coupon, False otherwise.
+        """
+        result = await self.db.execute(
+            select(func.count(DiscountCoupon.id))
+            .join(CustomerReview, CustomerReview.id == DiscountCoupon.review_id)
+            .where(
+                DiscountCoupon.customer_id == customer_id,
+                CustomerReview.booking_id == booking_id
+            )
+        )
+        count = result.scalar()
+        return count > 0
 
     async def apply_coupon(self, coupon_code: str, booking_id: UUID) -> bool:
         """Apply coupon to booking."""

@@ -28,6 +28,8 @@ from ..agents import (
     OperationsAgent,
 )
 from ..orchestrator.providers import get_provider
+from services.knowledge.knowledge_service import KnowledgeService
+from core.database import get_db
 
 logger = logging.getLogger(__name__)
 
@@ -370,6 +372,26 @@ class IntentRouter:
         # Get agent
         agent = self._get_agent(agent_type)
 
+        # Load dynamic knowledge context from database
+        try:
+            async for db in get_db():
+                knowledge_service = KnowledgeService(db, station_id=context.get("station_id"))
+                
+                knowledge_context = await knowledge_service.get_full_ai_context(
+                    include_menu=True,
+                    include_charter=True,
+                    include_faqs=True,
+                    guest_count=context.get("guest_count"),
+                    event_type=context.get("event_type")
+                )
+                
+                context["knowledge_context"] = knowledge_context
+                logger.debug(f"Loaded knowledge context ({len(knowledge_context)} chars) for {agent_type.value}")
+                break  # Only need one iteration
+        except Exception as e:
+            logger.warning(f"Failed to load knowledge context for {agent_type.value}: {e}")
+            context["knowledge_context"] = ""  # Agent will show warning and use tools
+
         # Process message with agent
         agent_start_time = datetime.now()
         agent_response = await agent.process(
@@ -477,10 +499,37 @@ class IntentRouter:
         # Get agent
         agent = self._get_agent(agent_type)
 
+        # Load dynamic knowledge context from database
+        try:
+            async for db in get_db():
+                knowledge_service = KnowledgeService(db, station_id=context.get("station_id"))
+                
+                knowledge_context = await knowledge_service.get_full_ai_context(
+                    include_menu=True,
+                    include_charter=True,
+                    include_faqs=True,
+                    guest_count=context.get("guest_count"),
+                    event_type=context.get("event_type")
+                )
+                
+                context["knowledge_context"] = knowledge_context
+                logger.debug(f"Loaded knowledge context ({len(knowledge_context)} chars) for {agent_type.value}")
+                break  # Only need one iteration
+        except Exception as e:
+            logger.warning(f"Failed to load knowledge context for {agent_type.value}: {e}")
+            context["knowledge_context"] = ""  # Agent will show warning and use tools
+
         # Process message
         agent_response = await agent.process(
             message=message, context=context, conversation_history=conversation_history
         )
+
+        # Add routing metadata (same as route() method)
+        if "routing" not in agent_response:
+            agent_response["routing"] = {}
+        
+        agent_response["routing"]["agent_type"] = agent_type.value
+        agent_response["routing"]["confidence"] = round(confidence, 3)
 
         # Add fallback metadata
         if is_fallback:

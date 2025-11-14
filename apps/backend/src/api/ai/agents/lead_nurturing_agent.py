@@ -69,16 +69,14 @@ class LeadNurturingAgent(BaseAgent):
         # Week 1: Extract tone information
         customer_tone = context.get("customer_tone", "casual") if context else "casual"
         tone_guidelines = context.get("tone_guidelines", {}) if context else {}
-        business_charter = context.get("business_charter", {}) if context else {}
+        
+        # Week 4: Extract DYNAMIC knowledge context from database
+        knowledge_context = context.get("knowledge_context", "") if context else ""
 
         # Get tone-specific instructions
         tone_style = tone_guidelines.get("style", "Friendly and professional")
         tone_greeting = tone_guidelines.get("greeting", "Use natural greeting")
         tone_structure = tone_guidelines.get("structure", "Natural flow")
-
-        # Get dynamic pricing if available
-        pricing_info = business_charter.get("pricing", {})
-        upgrades_info = business_charter.get("upgrades", [])
 
         base_prompt = f"""You are an expert sales consultant for MyHibachi, a premium hibachi catering company.
 
@@ -152,40 +150,25 @@ Your mission: Convert inquiries into bookings while maximizing revenue through s
 
 **Product Knowledge:**"""
 
-        # Use dynamic pricing if available
-        if pricing_info and "adult_base" in pricing_info:
-            adult_price = pricing_info["adult_base"]
-            child_price = pricing_info.get("child_base", 35)
-            party_min = pricing_info.get("party_minimum", 550)
-            base_prompt += f"""
-- **Standard Package**: ${adult_price}/adult, ${child_price}/child - Hibachi chicken or steak, fried rice, vegetables, show
-- **Party Minimum**: ${party_min}
-"""
+        # Week 4: Inject DYNAMIC knowledge from database (menu, pricing, upsells)
+        if knowledge_context:
+            base_prompt += f"\n\n{knowledge_context}"
         else:
-            # Fallback to static pricing
+            # Fallback to static information with warning
             base_prompt += """
+
+⚠️ CRITICAL: Use your tools to fetch CURRENT pricing and menu from database. Our offerings change regularly.
+
+**Standard Packages** (Use tools for current pricing):
 - **Standard Package**: $45/person - Hibachi chicken or steak, fried rice, vegetables, show
+- **Premium Package**: $65/person - Filet mignon + lobster tail, premium sides, chef's signature dishes
+- **Deluxe Package**: $85/person - Full premium menu, multiple chefs, extended performance
 - **Party Minimum**: $550
+- **Add-ons**: Extra protein (+$15), sushi station (+$20/person), sake bar (+$300)
+- **Minimum**: 20 guests for standard, 30 for premium events
 """
-
-        base_prompt += """- **Premium Package**: $65/person - Filet mignon + lobster tail, premium sides, chef's signature dishes
-- **Deluxe Package**: $85/person - Full premium menu, multiple chefs, extended performance"""
-
-        # Add dynamic upgrades if available
-        if upgrades_info:
-            base_prompt += "\n\n**Available Upgrades** (updated from live menu):"
-            for upgrade in upgrades_info[:5]:  # Show top 5
-                name = upgrade.get("name", "")
-                price = upgrade.get("price", 0)
-                desc = upgrade.get("description", "")
-                base_prompt += f"\n- **{name}**: +${price} - {desc}"
-        else:
-            base_prompt += """
-
-**Add-ons**: Extra protein (+$15), sushi station (+$20/person), sake bar (+$300)"""
 
         base_prompt += """
-- **Minimum**: 20 guests for standard, 30 for premium events
 
 **Upselling Strategy:**
 1. Start with needs assessment (occasion, guests, budget, preferences)

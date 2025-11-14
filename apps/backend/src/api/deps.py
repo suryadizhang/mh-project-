@@ -5,6 +5,7 @@ API Dependencies for authentication, rate limiting, and permissions
 import logging
 from typing import Any
 
+from core.database import get_db  # Re-export for convenience
 from core.security import (
     extract_user_from_token,
     is_admin_user,
@@ -16,6 +17,10 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
+
+
+# Re-export get_db for backward compatibility
+__all__ = ["get_db"]
 
 
 # Pydantic models for type hints

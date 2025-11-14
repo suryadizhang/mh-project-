@@ -10,6 +10,7 @@ import time
 import random
 from datetime import datetime, timedelta
 from typing import AsyncGenerator
+import os
 
 import pytest
 import pytest_asyncio
@@ -17,6 +18,11 @@ from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy import text
 from faker import Faker
+from dotenv import load_dotenv
+
+# Force load real .env file (not .env.test)
+env_path = Path(__file__).parent.parent / ".env"
+load_dotenv(dotenv_path=env_path, override=True)
 
 # Fix for Windows event loop issues with pytest-asyncio
 if sys.platform == "win32":
@@ -45,13 +51,13 @@ backend_path = Path(__file__).parent.parent
 if str(backend_path) not in sys.path:
     sys.path.insert(0, str(backend_path))
 
-# Import from main.py (new unified architecture) not api.app.main (old)
-from main import app
-from core.security import create_access_token
-from models.user import User as LegacyUser
-from core.config import UserRole
-from models.booking import Booking, Payment
-from models.customer import Customer
+# Import from src package (unified architecture)
+from src.main import app
+from src.core.security import create_access_token
+from src.models.user import User as LegacyUser
+from src.core.config import UserRole
+from src.models.booking import Booking, Payment
+from src.models.customer import Customer
 
 fake = Faker()
 
@@ -156,7 +162,7 @@ async def async_client(test_auth_token) -> AsyncGenerator[AsyncClient, None]:
 @pytest_asyncio.fixture(scope="function")
 async def db_session() -> AsyncGenerator[AsyncSession, None]:
     """Create database session for testing with multi-schema search path."""
-    from core.database import engine
+    from src.core.database import engine
 
     async_session_maker = async_sessionmaker(
         engine, class_=AsyncSession, expire_on_commit=False
@@ -214,7 +220,7 @@ async def create_test_bookings(db_session, test_admin_user):
         timestamp = int(time.time() * 1000)
 
         # Import Station model to use ORM (avoids manual field mapping)
-        from core.auth.station_models import Station
+        from src.core.auth.station_models import Station
 
         # Create test station using ORM
         test_station = Station(
