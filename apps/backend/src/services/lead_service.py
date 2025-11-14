@@ -18,6 +18,7 @@ from models.legacy_lead_newsletter import (  # Phase 2C: Updated from api.app.mo
     LeadSource,
     LeadStatus,
 )
+from core.base_service import BaseService, EventTrackingMixin
 from core.cache import CacheService
 from core.compliance import ComplianceValidator, ConsentRecord
 from core.exceptions import (
@@ -25,6 +26,7 @@ from core.exceptions import (
     ErrorCode,
     NotFoundException,
 )
+from services.event_service import EventService
 from sqlalchemy import String, and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from utils.validators import validate_email, validate_phone, ValidationError
@@ -32,28 +34,46 @@ from utils.validators import validate_email, validate_phone, ValidationError
 logger = logging.getLogger(__name__)
 
 
-class LeadService:
+class LeadService(BaseService, EventTrackingMixin):
     """
-    Service layer for lead management
+    Service layer for lead management with dependency injection.
 
     Handles:
     - Lead creation from multiple sources
     - Lead scoring and qualification
     - Contact management
     - Event tracking
+    - TCPA/CAN-SPAM compliance
+    
+    Dependencies (injected):
+    - db: Database session
+    - compliance_validator: TCPA/CAN-SPAM validator
+    - event_service: Centralized event tracking
+    - cache: Optional Redis cache
     """
 
-    def __init__(self, db: AsyncSession, cache: CacheService | None = None):
+    def __init__(
+        self, 
+        db: AsyncSession, 
+        compliance_validator: ComplianceValidator,
+        event_service: EventService,
+        cache: CacheService | None = None,
+        logger: logging.Logger | None = None,
+    ):
         """
-        Initialize lead service
+        Initialize lead service with injected dependencies.
 
         Args:
             db: Database session
+            compliance_validator: Validator for TCPA/CAN-SPAM compliance
+            event_service: Service for event tracking
             cache: Optional cache service
+            logger: Optional logger (created automatically if not provided)
         """
-        self.db = db
+        super().__init__(db, logger)
         self.cache = cache
-        self.compliance = ComplianceValidator()  # Add compliance validator
+        self.compliance = compliance_validator
+        self.event_service = event_service
 
     async def create_lead(
         self,
@@ -304,9 +324,34 @@ class LeadService:
                     },
                 )
 
+                # Track event using EventTrackingMixin
+                await self.track_event(
+                    action="consent_recorded",
+                    entity_type="lead",
+                    entity_id=lead.id,
+                    metadata={
+                        "sms_consent": consent_data.get("sms_consent", False),
+                        "email_consent": consent_data.get("email_consent", False),
+                        "consent_method": consent_data.get("consent_method"),
+                        "source": source.value,
+                    },
+                )
+
                 # Auto-subscribe to newsletter if consented
                 if consent_data.get("sms_consent") or consent_data.get("email_consent"):
                     await self._subscribe_to_newsletter(lead, consent_data, contact_info)
+
+            # Track lead creation event
+            await self.track_event(
+                action="lead_created",
+                entity_type="lead",
+                entity_id=lead.id,
+                metadata={
+                    "source": source.value,
+                    "has_consent": consent_record is not None,
+                    "utm_params": utm_params or {},
+                },
+            )
 
             return lead, consent_record
 
