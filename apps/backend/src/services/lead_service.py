@@ -19,6 +19,7 @@ from models.legacy_lead_newsletter import (  # Phase 2C: Updated from api.app.mo
     LeadStatus,
 )
 from core.cache import CacheService
+from core.compliance import ComplianceValidator, ConsentRecord
 from core.exceptions import (
     BusinessLogicException,
     ErrorCode,
@@ -52,6 +53,7 @@ class LeadService:
         """
         self.db = db
         self.cache = cache
+        self.compliance = ComplianceValidator()  # Add compliance validator
 
     async def create_lead(
         self,
@@ -71,7 +73,7 @@ class LeadService:
 
         Returns:
             Created Lead object
-            
+
         Raises:
             BusinessLogicException: If validation fails or creation fails
             ValidationError: If contact information is invalid
@@ -82,22 +84,28 @@ class LeadService:
                 try:
                     contact_info["email"] = validate_email(contact_info["email"])
                 except ValidationError as e:
-                    logger.error(f"Invalid email in create_lead: {e}", extra={"email": contact_info.get("email")})
+                    logger.error(
+                        f"Invalid email in create_lead: {e}",
+                        extra={"email": contact_info.get("email")},
+                    )
                     raise BusinessLogicException(
                         message=f"Invalid email address: {e}",
                         error_code=ErrorCode.VALIDATION_ERROR,
                     )
-            
+
             if contact_info.get("phone"):
                 try:
                     contact_info["phone"] = validate_phone(contact_info["phone"])
                 except ValidationError as e:
-                    logger.error(f"Invalid phone in create_lead: {e}", extra={"phone": contact_info.get("phone")})
+                    logger.error(
+                        f"Invalid phone in create_lead: {e}",
+                        extra={"phone": contact_info.get("phone")},
+                    )
                     raise BusinessLogicException(
                         message=f"Invalid phone number: {e}",
                         error_code=ErrorCode.VALIDATION_ERROR,
                     )
-            
+
             # Create lead
             lead = Lead(
                 id=uuid4(),
@@ -207,6 +215,151 @@ class LeadService:
                 message="Failed to create lead", error_code=ErrorCode.BUSINESS_RULE_VIOLATION
             )
 
+    async def create_lead_with_consent(
+        self,
+        source: LeadSource,
+        contact_info: dict[str, Any],
+        context: dict[str, Any] | None = None,
+        consent_data: dict[str, Any] | None = None,
+        utm_params: dict[str, str] | None = None,
+    ) -> tuple[Lead, ConsentRecord | None]:
+        """
+        Create a new lead with full TCPA/CAN-SPAM compliance tracking
+
+        This method creates a lead AND tracks consent with full audit trail including:
+        - IP address and user agent for consent verification
+        - Exact consent text shown to user
+        - Consent timestamp and source
+        - Automatic consent validation
+
+        Args:
+            source: Lead acquisition source
+            contact_info: Dict with email, phone, instagram_handle, etc.
+            context: Optional event context (party size, budget, dates, notes)
+            consent_data: Consent tracking data with keys:
+                - sms_consent (bool): SMS marketing consent
+                - email_consent (bool): Email marketing consent
+                - ip_address (str): IP address where consent was given
+                - user_agent (str): Browser user agent
+                - consent_text (str): Exact text shown to user
+                - consent_method (str): Method of consent (checkbox, auto_subscribe, etc.)
+            utm_params: Optional UTM tracking parameters
+
+        Returns:
+            tuple[Lead, ConsentRecord | None]: Created lead and consent record (if consent provided)
+
+        Raises:
+            BusinessLogicException: If validation fails
+        """
+        try:
+            # Create lead using existing method
+            lead = await self.create_lead(source, contact_info, context, utm_params)
+
+            consent_record = None
+
+            # Process consent if provided
+            if consent_data and (
+                consent_data.get("sms_consent") or consent_data.get("email_consent")
+            ):
+                # Validate SMS consent if provided
+                if consent_data.get("sms_consent") and contact_info.get("phone"):
+                    is_valid, reason = self.compliance.validate_sms_consent(
+                        phone=contact_info["phone"],
+                        consent_text=consent_data.get("consent_text", ""),
+                        consent_method=consent_data.get("consent_method", "checkbox"),
+                        ip_address=consent_data.get("ip_address"),
+                        user_agent=consent_data.get("user_agent"),
+                    )
+
+                    if not is_valid:
+                        logger.warning(
+                            f"SMS consent validation failed for lead {lead.id}: {reason}",
+                            extra={"lead_id": str(lead.id), "reason": reason},
+                        )
+
+                # Create consent record for audit trail
+                consent_record = self.compliance.create_consent_record(
+                    consent_type="marketing",
+                    consent_given=True,
+                    consent_source=source.value,
+                    consent_text=consent_data.get("consent_text", ""),
+                    consent_method=consent_data.get("consent_method", "checkbox"),
+                    phone=contact_info.get("phone") if consent_data.get("sms_consent") else None,
+                    email=contact_info.get("email") if consent_data.get("email_consent") else None,
+                    ip_address=consent_data.get("ip_address"),
+                    user_agent=consent_data.get("user_agent"),
+                    lead_source=source.value,
+                    lead_id=str(lead.id),
+                    sms_consent=consent_data.get("sms_consent", False),
+                    email_consent=consent_data.get("email_consent", False),
+                )
+
+                logger.info(
+                    f"Created consent record for lead {lead.id}",
+                    extra={
+                        "lead_id": str(lead.id),
+                        "sms_consent": consent_data.get("sms_consent"),
+                        "email_consent": consent_data.get("email_consent"),
+                        "consent_method": consent_data.get("consent_method"),
+                    },
+                )
+
+                # Auto-subscribe to newsletter if consented
+                if consent_data.get("sms_consent") or consent_data.get("email_consent"):
+                    await self._subscribe_to_newsletter(lead, consent_data, contact_info)
+
+            return lead, consent_record
+
+        except Exception as e:
+            await self.db.rollback()
+            logger.exception(f"Error creating lead with consent: {e}")
+            raise BusinessLogicException(
+                message="Failed to create lead with consent tracking",
+                error_code=ErrorCode.BUSINESS_RULE_VIOLATION,
+            )
+
+    async def _subscribe_to_newsletter(
+        self, lead: Lead, consent_data: dict[str, Any], contact_info: dict[str, Any]
+    ) -> None:
+        """
+        Auto-subscribe lead to newsletter if explicit consent was given
+
+        This is called automatically when lead provides SMS or email consent.
+        Sets auto_subscribed=False since this is explicit opt-in via checkbox.
+
+        Args:
+            lead: The created lead
+            consent_data: Consent information
+            contact_info: Contact information from lead
+        """
+        try:
+            from services.newsletter_service import SubscriberService
+
+            subscriber_service = SubscriberService(self.db)
+            await subscriber_service.subscribe(
+                phone=contact_info.get("phone") if consent_data.get("sms_consent") else None,
+                email=contact_info.get("email") if consent_data.get("email_consent") else None,
+                name=contact_info.get("name"),
+                source=f"lead_consent_{lead.source.value}",
+                auto_subscribed=False,  # Explicit consent, not auto-subscribe
+            )
+
+            logger.info(
+                f"Auto-subscribed lead {lead.id} to newsletter",
+                extra={
+                    "lead_id": str(lead.id),
+                    "has_phone": bool(contact_info.get("phone")),
+                    "has_email": bool(contact_info.get("email")),
+                },
+            )
+
+        except Exception as e:
+            # Don't fail lead creation if newsletter subscription fails
+            logger.error(
+                f"Failed to auto-subscribe lead {lead.id} to newsletter: {e}",
+                extra={"lead_id": str(lead.id)},
+            )
+
     async def capture_failed_booking(
         self, contact_info: dict[str, Any], booking_data: dict[str, Any], failure_reason: str
     ) -> Lead:
@@ -275,7 +428,7 @@ class LeadService:
 
         Returns:
             Created Lead object
-            
+
         Raises:
             BusinessLogicException: If validation fails
             ValidationError: If phone or email format is invalid
@@ -286,7 +439,7 @@ class LeadService:
                 message="Phone number is required for lead generation",
                 error_code=ErrorCode.VALIDATION_ERROR,
             )
-        
+
         # Validate phone and email formats
         try:
             phone = validate_phone(phone)
@@ -296,7 +449,7 @@ class LeadService:
                 message=f"Invalid phone number: {e}",
                 error_code=ErrorCode.VALIDATION_ERROR,
             )
-        
+
         if email:
             try:
                 email = validate_email(email)
@@ -306,7 +459,7 @@ class LeadService:
                     message=f"Invalid email address: {e}",
                     error_code=ErrorCode.VALIDATION_ERROR,
                 )
-        
+
         # Parse budget to cents
         budget_cents = None
         if budget:

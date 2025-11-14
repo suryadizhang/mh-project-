@@ -1,24 +1,26 @@
-'use client'
+'use client';
 
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 
-import { apiFetch } from '@/lib/api'
-import { logger } from '@/lib/logger'
+import { apiFetch } from '@/lib/api';
+import { logger } from '@/lib/logger';
 
 interface QuoteFormData {
-  name: string
-  email: string
-  phone: string
-  eventDate: string
-  guestCount: number
-  budget: string
-  location: string
-  message: string
+  name: string;
+  email: string;
+  phone: string;
+  eventDate: string;
+  guestCount: number;
+  budget: string;
+  location: string;
+  message: string;
+  smsConsent: boolean;
+  emailConsent: boolean;
 }
 
 interface QuoteRequestFormProps {
-  className?: string
-  onSuccess?: () => void
+  className?: string;
+  onSuccess?: () => void;
 }
 
 const budgetOptions = [
@@ -27,8 +29,8 @@ const budgetOptions = [
   '$1,000 - $2,000',
   '$2,000 - $5,000',
   'Over $5,000',
-  'Not sure / Need help'
-]
+  'Not sure / Need help',
+];
 
 export function QuoteRequestForm({ className = '', onSuccess }: QuoteRequestFormProps) {
   const [formData, setFormData] = useState<QuoteFormData>({
@@ -39,60 +41,62 @@ export function QuoteRequestForm({ className = '', onSuccess }: QuoteRequestForm
     guestCount: 1,
     budget: '',
     location: '',
-    message: ''
-  })
+    message: '',
+    smsConsent: false,
+    emailConsent: false,
+  });
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
-    const { name, value, type } = e.target
-    
-    setFormData(prev => ({
+    const { name, value, type } = e.target;
+
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-    }))
-  }
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+    }));
+  };
 
   // Format phone number as user types
   const formatPhoneForDisplay = (value: string): string => {
     // Remove all non-digit characters
-    const digits = value.replace(/\D/g, '')
-    
+    const digits = value.replace(/\D/g, '');
+
     // Format as (XXX) XXX-XXXX
     if (digits.length <= 3) {
-      return digits
+      return digits;
     } else if (digits.length <= 6) {
-      return `(${digits.slice(0, 3)}) ${digits.slice(3)}`
+      return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
     } else {
-      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`
+      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
     }
-  }
+  };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatPhoneForDisplay(e.target.value)
-    setFormData(prev => ({ ...prev, phone: formatted }))
-  }
+    const formatted = formatPhoneForDisplay(e.target.value);
+    setFormData((prev) => ({ ...prev, phone: formatted }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setError(null)
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
 
     // Validate required fields
     if (!formData.name || formData.name.trim().length < 2) {
-      setError('Please enter your full name')
-      setIsSubmitting(false)
-      return
+      setError('Please enter your full name');
+      setIsSubmitting(false);
+      return;
     }
 
     if (!formData.phone || formData.phone.replace(/\D/g, '').length < 10) {
-      setError('Please enter a valid phone number with at least 10 digits')
-      setIsSubmitting(false)
-      return
+      setError('Please enter a valid phone number with at least 10 digits');
+      setIsSubmitting(false);
+      return;
     }
 
     try {
@@ -101,24 +105,29 @@ export function QuoteRequestForm({ className = '', onSuccess }: QuoteRequestForm
         method: 'POST',
         body: JSON.stringify({
           name: formData.name,
-          phone: formData.phone,  // Now required
+          phone: formData.phone, // Now required
           email: formData.email || undefined,
           event_date: formData.eventDate || undefined,
           guest_count: formData.guestCount || undefined,
           budget: formData.budget || undefined,
           location: formData.location || undefined,
           message: formData.message || undefined,
-          source: 'quote'
-        })
-      })
+          source: 'quote',
+          sms_consent: formData.smsConsent,
+          email_consent: formData.emailConsent,
+          consent_text: formData.smsConsent
+            ? 'By providing your phone number and checking this box, you consent to receive SMS messages from my Hibachi LLC. Message frequency varies based on your bookings. Message and data rates may apply. Reply STOP to opt out, HELP for assistance.'
+            : undefined,
+        }),
+      });
 
       if (response.success) {
-        logger.info('Quote request submitted successfully')
-        
-        setSubmitted(true)
-        
+        logger.info('Quote request submitted successfully');
+
+        setSubmitted(true);
+
         if (onSuccess) {
-          onSuccess()
+          onSuccess();
         }
 
         // Reset form after 3 seconds
@@ -131,58 +140,61 @@ export function QuoteRequestForm({ className = '', onSuccess }: QuoteRequestForm
             guestCount: 1,
             budget: '',
             location: '',
-            message: ''
-          })
-          setSubmitted(false)
-        }, 3000)
+            message: '',
+            smsConsent: false,
+            emailConsent: false,
+          });
+          setSubmitted(false);
+        }, 3000);
       } else {
-        throw new Error(response.message || 'Failed to submit quote request')
+        throw new Error(response.message || 'Failed to submit quote request');
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to submit quote request'
-      setError(errorMessage)
-      logger.error('Quote request submission failed')
+      const errorMessage = err instanceof Error ? err.message : 'Failed to submit quote request';
+      setError(errorMessage);
+      logger.error('Quote request submission failed');
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   if (submitted) {
     return (
-      <div className={`bg-green-50 border border-green-200 rounded-lg p-8 text-center ${className}`}>
-        <div className="text-green-600 mb-4">
-          <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div
+        className={`rounded-lg border border-green-200 bg-green-50 p-8 text-center ${className}`}
+      >
+        <div className="mb-4 text-green-600">
+          <svg className="mx-auto h-16 w-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">Thank You!</h3>
+        <h3 className="mb-2 text-2xl font-bold text-gray-900">Thank You!</h3>
         <p className="text-gray-600">
-          We&apos;ve received your quote request and will contact you shortly with a personalized quote.
+          We&apos;ve received your quote request and will contact you shortly with a personalized
+          quote.
         </p>
-        <p className="text-sm text-gray-500 mt-4">
-          Expected response time: Within 24 hours
-        </p>
+        <p className="mt-4 text-sm text-gray-500">Expected response time: Within 24 hours</p>
       </div>
-    )
+    );
   }
 
   return (
     <form onSubmit={handleSubmit} className={`space-y-6 ${className}`}>
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Get Your Free Quote</h2>
-        
+      <div className="rounded-lg bg-white p-6 shadow-md">
+        <h2 className="mb-6 text-2xl font-bold text-gray-900">Get Your Free Quote</h2>
+
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
             <p className="text-red-600">{error}</p>
           </div>
         )}
 
         {/* Contact Information */}
-        <div className="space-y-4 mb-6">
+        <div className="mb-6 space-y-4">
           <h3 className="text-lg font-semibold text-gray-700">Contact Information</h3>
-          
+
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="name" className="mb-1 block text-sm font-medium text-gray-700">
               Full Name *
             </label>
             <input
@@ -194,13 +206,13 @@ export function QuoteRequestForm({ className = '', onSuccess }: QuoteRequestForm
               required
               minLength={2}
               maxLength={100}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-red-500"
               placeholder="John Doe"
             />
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">
               Email Address
             </label>
             <input
@@ -209,14 +221,16 @@ export function QuoteRequestForm({ className = '', onSuccess }: QuoteRequestForm
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-red-500"
               placeholder="john@example.com"
             />
-            <p className="text-sm text-gray-500 mt-1">Optional, but recommended for confirmations</p>
+            <p className="mt-1 text-sm text-gray-500">
+              Optional, but recommended for confirmations
+            </p>
           </div>
 
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="phone" className="mb-1 block text-sm font-medium text-gray-700">
               Phone Number *
             </label>
             <input
@@ -226,20 +240,22 @@ export function QuoteRequestForm({ className = '', onSuccess }: QuoteRequestForm
               value={formData.phone}
               onChange={handlePhoneChange}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-red-500"
               placeholder="(555) 123-4567"
               maxLength={14}
             />
-            <p className="text-sm text-gray-500 mt-1">Required - We&apos;ll call to confirm your quote</p>
+            <p className="mt-1 text-sm text-gray-500">
+              Required - We&apos;ll call to confirm your quote
+            </p>
           </div>
         </div>
 
         {/* Event Details */}
-        <div className="space-y-4 mb-6">
+        <div className="mb-6 space-y-4">
           <h3 className="text-lg font-semibold text-gray-700">Event Details</h3>
-          
+
           <div>
-            <label htmlFor="eventDate" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="eventDate" className="mb-1 block text-sm font-medium text-gray-700">
               Preferred Event Date
             </label>
             <input
@@ -249,12 +265,12 @@ export function QuoteRequestForm({ className = '', onSuccess }: QuoteRequestForm
               value={formData.eventDate}
               onChange={handleChange}
               min={new Date().toISOString().split('T')[0]}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-red-500"
             />
           </div>
 
           <div>
-            <label htmlFor="guestCount" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="guestCount" className="mb-1 block text-sm font-medium text-gray-700">
               Number of Guests *
             </label>
             <input
@@ -266,12 +282,12 @@ export function QuoteRequestForm({ className = '', onSuccess }: QuoteRequestForm
               required
               min={1}
               max={500}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-red-500"
             />
           </div>
 
           <div>
-            <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="budget" className="mb-1 block text-sm font-medium text-gray-700">
               Budget Range
             </label>
             <select
@@ -279,17 +295,19 @@ export function QuoteRequestForm({ className = '', onSuccess }: QuoteRequestForm
               name="budget"
               value={formData.budget}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-red-500"
             >
               <option value="">Select budget range...</option>
-              {budgetOptions.map(option => (
-                <option key={option} value={option}>{option}</option>
+              {budgetOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="location" className="mb-1 block text-sm font-medium text-gray-700">
               Event Location / Zip Code
             </label>
             <input
@@ -299,13 +317,13 @@ export function QuoteRequestForm({ className = '', onSuccess }: QuoteRequestForm
               value={formData.location}
               onChange={handleChange}
               maxLength={200}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-red-500"
               placeholder="City or Zip Code"
             />
           </div>
 
           <div>
-            <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="message" className="mb-1 block text-sm font-medium text-gray-700">
               Additional Details or Questions
             </label>
             <textarea
@@ -315,40 +333,97 @@ export function QuoteRequestForm({ className = '', onSuccess }: QuoteRequestForm
               onChange={handleChange}
               rows={4}
               maxLength={2000}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+              className="w-full resize-none rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-red-500"
               placeholder="Tell us about your event, dietary restrictions, special requests, etc."
             />
           </div>
         </div>
 
-        {/* Newsletter Auto-Subscribe Notice */}
-        <div className="mb-6 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-          <p className="text-xs text-gray-700">
-            📧 <strong>You&apos;ll automatically receive our newsletter</strong> with exclusive offers and hibachi tips.
-            <br />
-            <span className="text-gray-600">Don&apos;t want updates? Simply reply <strong>&quot;STOP&quot;</strong> anytime to unsubscribe.</span>
-          </p>
+        {/* TCPA Consent Checkboxes */}
+        <div className="mb-6 space-y-4">
+          <h3 className="text-lg font-semibold text-gray-700">Communication Preferences</h3>
+
+          {/* SMS Consent */}
+          <div className="flex items-start">
+            <input
+              type="checkbox"
+              id="smsConsent"
+              name="smsConsent"
+              checked={formData.smsConsent}
+              onChange={handleChange}
+              className="mt-1 h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+            />
+            <label htmlFor="smsConsent" className="ml-3 text-sm text-gray-700">
+              <strong>Yes, send me SMS updates</strong> about my booking, event reminders, and
+              exclusive offers.
+              <span className="mt-1 block text-xs text-gray-600">
+                By checking this box, you consent to receive SMS messages from my Hibachi LLC.
+                Message frequency varies. Message and data rates may apply. Reply{' '}
+                <strong>STOP</strong> to opt out, <strong>HELP</strong> for assistance.
+              </span>
+            </label>
+          </div>
+
+          {/* Email Consent */}
+          <div className="flex items-start">
+            <input
+              type="checkbox"
+              id="emailConsent"
+              name="emailConsent"
+              checked={formData.emailConsent}
+              onChange={handleChange}
+              className="mt-1 h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+            />
+            <label htmlFor="emailConsent" className="ml-3 text-sm text-gray-700">
+              <strong>Yes, send me email updates</strong> about hibachi tips, recipes, and special
+              promotions.
+              <span className="mt-1 block text-xs text-gray-600">
+                You can unsubscribe anytime by clicking the unsubscribe link in any email.
+              </span>
+            </label>
+          </div>
+
+          {/* Privacy Notice */}
+          <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+            <p className="text-xs text-gray-700">
+              🔒 Your privacy matters. We never sell your information.{' '}
+              <a
+                href="/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline hover:text-blue-800"
+              >
+                Privacy Policy
+              </a>
+              {' | '}
+              <a
+                href="/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline hover:text-blue-800"
+              >
+                Terms & Conditions
+              </a>
+            </p>
+          </div>
         </div>
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className={`
-            w-full py-3 px-6 rounded-lg font-semibold text-white
-            transition-all duration-200
-            ${isSubmitting
-              ? 'bg-gray-400 cursor-not-allowed'
+          className={`w-full rounded-lg px-6 py-3 font-semibold text-white transition-all duration-200 ${
+            isSubmitting
+              ? 'cursor-not-allowed bg-gray-400'
               : 'bg-red-600 hover:bg-red-700 active:bg-red-800'
-            }
-          `}
+          } `}
         >
           {isSubmitting ? 'Submitting...' : 'Get Your Free Quote'}
         </button>
 
-        <p className="text-xs text-gray-500 text-center mt-4">
+        <p className="mt-4 text-center text-xs text-gray-500">
           * Required fields. We typically respond within 24 hours.
         </p>
       </div>
     </form>
-  )
+  );
 }

@@ -11,7 +11,8 @@ from models.legacy_lead_newsletter import (
     LeadSource,
     Subscriber,
 )  # Phase 2C: Updated from api.app.models.lead_newsletter
-from sqlalchemy import or_, select
+from core.compliance import ComplianceValidator
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from utils.validators import validate_email, validate_phone, ValidationError
 
@@ -23,6 +24,7 @@ class SubscriberService:
 
     def __init__(self, db: AsyncSession):
         self.db = db
+        self.compliance = ComplianceValidator()  # Add compliance validator
 
     async def subscribe(
         self,
@@ -57,7 +59,9 @@ class SubscriberService:
                 email = validate_email(email)  # Normalizes to lowercase
         except ValidationError as e:
             # Re-raise with more context
-            logger.error(f"Validation error in subscribe: {e}", extra={"phone": phone, "email": email})
+            logger.error(
+                f"Validation error in subscribe: {e}", extra={"phone": phone, "email": email}
+            )
             raise
 
         # Check if already subscribed
@@ -117,9 +121,7 @@ class SubscriberService:
 
         return subscription
 
-    async def unsubscribe(
-        self, phone: str | None = None, email: str | None = None
-    ) -> bool:
+    async def unsubscribe(self, phone: str | None = None, email: str | None = None) -> bool:
         """
         Unsubscribe user from Subscriber
 
@@ -129,7 +131,7 @@ class SubscriberService:
 
         Returns:
             True if unsubscribed, False if not found
-            
+
         Raises:
             ValidationError: If phone or email format is invalid
         """
@@ -141,7 +143,9 @@ class SubscriberService:
             if email:
                 email = validate_email(email)
         except ValidationError as e:
-            logger.error(f"Validation error in unsubscribe: {e}", extra={"phone": phone, "email": email})
+            logger.error(
+                f"Validation error in unsubscribe: {e}", extra={"phone": phone, "email": email}
+            )
             raise
 
         subscription = await self.find_by_contact(phone=phone, email=email)
@@ -188,7 +192,7 @@ class SubscriberService:
 
         Returns:
             Tuple of (success, message)
-            
+
         Raises:
             ValidationError: If phone format is invalid
         """
@@ -230,7 +234,7 @@ class SubscriberService:
 
         Returns:
             Tuple of (success, message)
-            
+
         Raises:
             ValidationError: If phone format is invalid
         """
@@ -267,12 +271,40 @@ class SubscriberService:
             "Welcome back! 🎉 You're now subscribed to our Subscriber for exclusive hibachi deals and updates. Reply STOP anytime to unsubscribe.",
         )
 
+    async def process_help_command(self, phone: str) -> tuple[bool, str]:
+        """
+        Process HELP command with TCPA-compliant information
+
+        Args:
+            phone: User's phone number in E.164 format (+15551234567)
+
+        Returns:
+            Tuple of (success, help_message)
+
+        Raises:
+            ValidationError: If phone format is invalid
+        """
+
+        # Validate phone format
+        try:
+            phone = validate_phone(phone)
+        except ValidationError as e:
+            logger.error(f"Validation error in process_help_command: {e}", extra={"phone": phone})
+            raise
+
+        # Get TCPA-compliant help message from compliance module
+        help_message = self.compliance.get_sms_help_message()
+
+        logger.info("Sent HELP message", extra={"phone": phone})
+
+        return True, help_message
+
     async def find_by_contact(
         self, phone: str | None = None, email: str | None = None
     ) -> Subscriber | None:
         """
         Find Subscriber subscription by phone or email.
-        
+
         NOTE: Since phone and email are encrypted, we need to fetch all subscribers
         and decrypt them in Python to compare. This is a performance trade-off for PII security.
         """
@@ -286,20 +318,16 @@ class SubscriberService:
         normalized_phone = phone if phone else None
         normalized_email = email.lower().strip() if email else None
 
-        logger.debug(
-            f"Finding subscriber: phone={normalized_phone}, email={normalized_email}"
-        )
+        logger.debug(f"Finding subscriber: phone={normalized_phone}, email={normalized_email}")
 
         # Expire all cached objects to ensure we get fresh data from DB
         self.db.expire_all()
 
         # Fetch ALL subscribers (we need to decrypt to compare)
         # TODO: Add pagination if subscriber count grows large (>10k)
-        result = await self.db.execute(
-            select(Subscriber)
-        )
+        result = await self.db.execute(select(Subscriber))
         all_subscribers = list(result.scalars().all())
-        
+
         logger.debug(f"Total subscribers to check: {len(all_subscribers)}")
 
         # Decrypt and compare in Python
@@ -308,17 +336,17 @@ class SubscriberService:
                 # Decrypt phone and email for this subscriber
                 sub_phone = subscriber.phone  # Property decrypts
                 sub_email = subscriber.email  # Property decrypts
-                
+
                 logger.debug(
                     f"Checking subscriber {subscriber.id}: phone={sub_phone}, email={sub_email}"
                 )
-                
+
                 # Check phone match
                 if normalized_phone and sub_phone:
                     if sub_phone == normalized_phone:
                         logger.debug(f"Found match by phone: {subscriber.id}")
                         return subscriber
-                
+
                 # Check email match
                 if normalized_email and sub_email:
                     if sub_email == normalized_email:
@@ -329,7 +357,7 @@ class SubscriberService:
                 # (could be old data with different encryption key)
                 logger.warning(
                     f"Failed to decrypt subscriber {subscriber.id}: {str(e)}",
-                    extra={"subscriber_id": str(subscriber.id)}
+                    extra={"subscriber_id": str(subscriber.id)},
                 )
                 continue
 
@@ -349,48 +377,38 @@ class SubscriberService:
         )
         return list(result.scalars().all())
 
-    async def _send_welcome_message(self, subscription: Subscriber, name: str | None = None, resubscribe: bool = False):
-        """Send welcome message with STOP instructions"""
+    async def _send_welcome_message(
+        self, subscription: Subscriber, name: str | None = None, resubscribe: bool = False
+    ):
+        """Send TCPA-compliant welcome message with STOP instructions"""
 
-        if resubscribe:
-            message = (
-                f"Welcome back, {name or 'friend'}! 🎉\n\n"
-                "You're now resubscribed to MyHibachi Subscriber. "
-                "Get ready for exclusive hibachi deals, cooking tips, and event updates!\n\n"
-                "Reply STOP anytime to unsubscribe."
-            )
-        else:
-            message = (
-                f"Thanks for connecting with MyHibachi, {name or 'friend'}! 🎉\n\n"
-                "You've been added to our Subscriber for exclusive deals and updates. "
-                "We promise to only send you the good stuff!\n\n"
-                "Reply STOP anytime to unsubscribe."
-            )
+        # Use compliance module for TCPA-compliant messaging
+        message = self.compliance.get_sms_welcome_message(name)
 
         # Send via appropriate channel
         if subscription.phone:
             await self._send_sms(subscription.phone, message)
 
         if subscription.email:
-            await self._send_email(
-                subscription.email, "Welcome to MyHibachi Subscriber! 🎉", message
+            email_subject = (
+                "Welcome to My Hibachi Chef! 🎉"
+                if not resubscribe
+                else "Welcome Back to My Hibachi Chef! 🎉"
             )
+            await self._send_email(subscription.email, email_subject, message)
 
     async def _send_unsubscribe_confirmation(self, subscription: Subscriber):
-        """Send unsubscribe confirmation"""
+        """Send TCPA-compliant unsubscribe confirmation"""
 
-        message = (
-            "You've been removed from MyHibachi Subscriber. "
-            "We're sorry to see you go! 😢\n\n"
-            "Reply START anytime to resubscribe and get exclusive hibachi deals."
-        )
+        # Use compliance module for TCPA-compliant messaging
+        message = self.compliance.get_sms_opt_out_confirmation()
 
         # Send via appropriate channel
         if subscription.phone:
             await self._send_sms(subscription.phone, message)
 
         if subscription.email:
-            await self._send_email(subscription.email, "Subscriber Unsubscribed", message)
+            await self._send_email(subscription.email, "Unsubscribed from My Hibachi Chef", message)
 
     async def _send_sms(self, phone: str, message: str):
         """Send SMS message"""
