@@ -28,6 +28,7 @@ from services.lead_service import LeadService
 from services.newsletter_service import SubscriberService
 from services.event_service import EventService
 from services.booking_service import BookingService
+from services.webhook_service import MetaWebhookHandler
 from repositories.booking_repository import BookingRepository
 from core.compliance import ComplianceValidator
 from core.cache import CacheService
@@ -182,6 +183,41 @@ async def get_booking_service(
         repository=repository,
         lead_service=lead_service,
         cache=cache,
+    )
+
+
+async def get_meta_webhook_handler(
+    db: AsyncSession = Depends(get_db),
+    lead_service: LeadService = Depends(get_lead_service),
+    event_service: EventService = Depends(get_event_service),
+) -> MetaWebhookHandler:
+    """
+    Provide MetaWebhookHandler with all dependencies injected.
+    
+    Automatically injects:
+    - Database session
+    - LeadService for lead capture from social messages
+    - EventService for webhook event tracking
+    
+    Args:
+        db: Database session
+        lead_service: Service for lead management
+        event_service: Event tracking service
+    
+    Returns:
+        MetaWebhookHandler: Fully configured Meta webhook handler
+    
+    Example:
+        @router.post("/webhooks/meta")
+        async def process_webhook(
+            handler: MetaWebhookHandler = Depends(get_meta_webhook_handler)
+        ):
+            return await handler.handle_webhook(...)
+    """
+    return MetaWebhookHandler(
+        db=db,
+        lead_service=lead_service,
+        event_service=event_service,
     )
 
 
