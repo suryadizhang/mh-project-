@@ -46,8 +46,8 @@ class SystemEvent(Base):
     # User reference (who performed the action)
     user_id = Column(Integer, nullable=True, index=True, comment="User who triggered the event")
     
-    # Event data
-    metadata = Column(JSON, nullable=False, default=dict, comment="Additional JSON data about the event")
+    # Event data (renamed from 'metadata' to avoid SQLAlchemy reserved name conflict)
+    event_data = Column(JSON, nullable=False, default=dict, comment="Additional JSON data about the event")
     
     # Event severity
     severity = Column(
@@ -95,7 +95,7 @@ class SystemEvent(Base):
             "entity_type": self.entity_type,
             "entity_id": self.entity_id,
             "user_id": self.user_id,
-            "metadata": self.metadata,
+            "metadata": self.event_data,  # Keep 'metadata' key for API compatibility
             "severity": self.severity,
             "timestamp": self.timestamp.isoformat() if self.timestamp else None,
         }
