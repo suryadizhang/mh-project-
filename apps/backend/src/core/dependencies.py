@@ -19,7 +19,7 @@ Usage in tests:
     app.dependency_overrides[get_lead_service] = lambda: MockLeadService()
 """
 
-from typing import AsyncGenerator, Optional
+from typing import AsyncGenerator, Optional, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 
@@ -221,22 +221,75 @@ async def get_meta_webhook_handler(
     )
 
 
-# Additional dependency providers can be added here as services are refactored:
-#
-# async def get_booking_service(
-#     db: AsyncSession = Depends(get_db),
-#     event_service: EventService = Depends(get_event_service),
-# ) -> BookingService:
-#     return BookingService(db=db, event_service=event_service)
-#
-# async def get_webhook_service(
-#     db: AsyncSession = Depends(get_db),
-#     lead_service: LeadService = Depends(get_lead_service),
-# ) -> WebhookService:
-#     return WebhookService(db=db, lead_service=lead_service)
-#
-# async def get_referral_service(
-#     db: AsyncSession = Depends(get_db),
-#     event_service: EventService = Depends(get_event_service),
-# ) -> ReferralService:
-#     return ReferralService(db=db, event_service=event_service)
+async def get_referral_service(
+    db: AsyncSession = Depends(get_db),
+    event_service: EventService = Depends(get_event_service),
+    notification_service: Optional[Any] = None,
+) -> "ReferralService":
+    """
+    Provide ReferralService with all dependencies injected.
+    
+    Automatically injects:
+    - Database session for data access
+    - EventService for referral tracking
+    - NotificationService for sending referral emails (optional)
+    
+    Args:
+        db: Database session
+        event_service: Event tracking service
+        notification_service: Optional notification service
+    
+    Returns:
+        ReferralService: Fully configured referral service
+    
+    Example:
+        @router.post("/api/v1/referrals")
+        async def create_referral(
+            data: CreateReferralRequest,
+            service: ReferralService = Depends(get_referral_service)
+        ):
+            return await service.create_referral(...)
+    """
+    from services.referral_service import ReferralService
+    return ReferralService(
+        db=db,
+        event_service=event_service,
+        notification_service=notification_service,
+    )
+
+
+async def get_nurture_campaign_service(
+    db: AsyncSession = Depends(get_db),
+    event_service: EventService = Depends(get_event_service),
+    notification_service: Optional[Any] = None,
+) -> "NurtureCampaignService":
+    """
+    Provide NurtureCampaignService with all dependencies injected.
+    
+    Automatically injects:
+    - Database session for data access
+    - EventService for campaign tracking
+    - NotificationService for sending campaign messages (optional)
+    
+    Args:
+        db: Database session
+        event_service: Event tracking service
+        notification_service: Optional notification service
+    
+    Returns:
+        NurtureCampaignService: Fully configured nurture campaign service
+    
+    Example:
+        @router.post("/api/v1/campaigns/enroll")
+        async def enroll_lead(
+            data: EnrollLeadRequest,
+            service: NurtureCampaignService = Depends(get_nurture_campaign_service)
+        ):
+            return await service.enroll_lead(...)
+    """
+    from services.nurture_campaign_service import NurtureCampaignService
+    return NurtureCampaignService(
+        db=db,
+        event_service=event_service,
+        notification_service=notification_service,
+    )
