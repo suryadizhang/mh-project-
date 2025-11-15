@@ -179,7 +179,10 @@ class AINewsletterGenerator:
         }.get(segment, "Target: General. Tone: Friendly. Focus: Great experiences.")
         
         return f"""
-Write email newsletter for hibachi catering company.
+Write SMS newsletter content for hibachi catering company.
+
+IMPORTANT: This will be sent via SMS (RingCentral), NOT email!
+Keep it concise and mobile-friendly.
 
 HOLIDAY: {context['name']}
 Days Until: {context['days_until']}
@@ -195,10 +198,12 @@ STRUCTURE:
 4. Urgency ({context['days_until']} days left)
 5. Strong CTA
 
-LENGTH: 250-350 words
+LENGTH: 250-350 words (will be sent as SMS)
 Include: live cooking, interactive experience
 Mention: $550 minimum (position as value)
 Use: MH Hibachi Catering
+
+Note: STOP instructions will be added automatically by SMS service.
 """
     
     async def _generate_subject_line(
@@ -207,19 +212,20 @@ Use: MH Hibachi Catering
         """Generate AI subject line."""
         try:
             prompt = f"""
-Generate 1 email subject line for hibachi catering newsletter.
+Generate 1 SMS preview text for hibachi catering newsletter.
+(This is for SMS, NOT email - newsletters are sent via RingCentral SMS)
 
 Holiday: {context['name']}
 Days: {context['days_until']}
 Target: {segment.value}
 
 Requirements:
-- 50 chars max
+- 50 chars max (SMS preview)
 - Create urgency
 - Include 1-2 emoji
 - Personalized
 
-Just the subject line:
+Just the preview text:
 """
             response = await openai.ChatCompletion.acreate(
                 model="gpt-4",

@@ -266,7 +266,8 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
     if (!content || !token || !stationContext) return;
 
     try {
-      const response = await fetch('http://localhost:8002/api/v1/chat', {
+      const apiUrl = process.env.NEXT_PUBLIC_CHAT_API_URL || 'http://localhost:8002';
+      const response = await fetch(`${apiUrl}/api/v1/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

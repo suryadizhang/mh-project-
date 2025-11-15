@@ -1,11 +1,13 @@
-"""
-US Compliance Configuration for Lead Generation & Newsletter System
+"""US Compliance Configuration for Lead Generation & Newsletter System
 TCPA, CAN-SPAM, and Privacy Compliance
 
 This module centralizes all compliance-related configuration and utilities
 to ensure adherence to US regulations for SMS and email marketing.
 """
 
+import hmac
+import hashlib
+from urllib.parse import urlencode
 from datetime import datetime, timezone
 from typing import Dict, Any
 from pydantic import BaseModel, Field
@@ -17,7 +19,8 @@ class ComplianceConfig(BaseModel):
     # Business Information (ACTUAL DATA from Terms & Privacy pages)
     business_name: str = "my Hibachi LLC"
     business_display_name: str = "My Hibachi Chef"
-    business_phone: str = "+19167408768"  # (916) 740-8768
+    business_phone: str = "+19167408768"  # E.164 format for APIs
+    business_phone_formatted: str = "(916) 740-8768"  # Human-readable format
     business_email_support: str = "cs@myhibachichef.com"
     business_email_privacy: str = "privacy@myhibachichef.com"
     business_website: str = "https://myhibachichef.com"
@@ -194,39 +197,39 @@ class ComplianceValidator:
     def get_sms_welcome_message(self, name: str | None = None) -> str:
         """Get TCPA-compliant welcome message"""
         
-        greeting = f"👋 Hi {name}! " if name else "👋 Welcome! "
+        greeting = f"Hi {name}! " if name else "Welcome! "
         
         return f"""{greeting}Thanks for subscribing to {self.config.business_display_name} updates.
 
-You'll receive:
-✅ Booking updates
-✅ Event reminders  
-✅ Exclusive offers
+You will receive:
+- Booking updates
+- Event reminders  
+- Exclusive offers
 
 Reply STOP to opt out anytime.
 Reply HELP for assistance.
 
-{self.config.business_phone}"""
+{self.config.business_phone_formatted}"""
     
     def get_sms_opt_out_confirmation(self) -> str:
         """Get TCPA-compliant opt-out confirmation"""
         
-        return f"""You've been unsubscribed from {self.config.business_display_name} SMS messages.
+        return f"""You have been unsubscribed from {self.config.business_display_name} SMS messages.
 
-You won't receive further texts.
+You will not receive further texts.
 
 Reply START to resubscribe.
 
-Questions? Call {self.config.business_phone}"""
+Questions? Call {self.config.business_phone_formatted}"""
     
     def get_sms_help_message(self) -> str:
         """Get TCPA-compliant help message"""
         
         return f"""{self.config.business_display_name}
 
-📞 Call: {self.config.business_phone}
-📧 Email: {self.config.business_email_support}
-🌐 Web: {self.config.business_website}
+Call: {self.config.business_phone_formatted}
+Email: {self.config.business_email_support}
+Web: {self.config.business_website}
 
 Reply STOP to unsubscribe.
 
@@ -248,11 +251,11 @@ Reply STOP to unsubscribe.
     </p>
     
     <p style="margin-top: 10px;">
-        You're receiving this because you subscribed to {self.config.business_display_name} updates.
+        You are receiving this because you subscribed to {self.config.business_display_name} updates.
     </p>
     
     <p style="margin-top: 5px; font-size: 11px;">
-        © {datetime.now().year} {self.config.business_name}. All rights reserved.
+        Copyright {datetime.now().year} {self.config.business_name}. All rights reserved.
     </p>
 </div>
 """
@@ -317,6 +320,48 @@ Reply STOP to unsubscribe.
             return False, f"Exceeded {max_allowed} {channel} messages per {period}"
         
         return True, f"Within frequency limit ({messages_sent_period}/{max_allowed} per {period})"
+    
+    def generate_unsubscribe_url(self, email: str, secret_key: str) -> str:
+        """
+        Generate secure unsubscribe URL with HMAC token for CAN-SPAM compliance.
+        
+        Args:
+            email: Subscriber email address
+            secret_key: Application secret key for HMAC generation
+        
+        Returns:
+            Full unsubscribe URL with secure token
+        
+        Example:
+            https://myhibachichef.com/api/v1/newsletter/unsubscribe?email=user@example.com&token=abc123def456
+        """
+        # Generate HMAC token to prevent unsubscribe link abuse
+        secret = secret_key.encode()
+        message = f"{email}|unsubscribe".encode()
+        token = hmac.new(secret, message, hashlib.sha256).hexdigest()[:16]
+        
+        # Build URL with query parameters
+        params = urlencode({"email": email, "token": token})
+        return f"{self.config.business_website}/api/v1/newsletter/unsubscribe?{params}"
+    
+    def verify_unsubscribe_token(self, email: str, token: str, secret_key: str) -> bool:
+        """
+        Verify unsubscribe token is valid and has not been tampered with.
+        
+        Args:
+            email: Subscriber email address from URL
+            token: HMAC token from URL
+            secret_key: Application secret key
+        
+        Returns:
+            True if token is valid, False otherwise
+        """
+        secret = secret_key.encode()
+        message = f"{email}|unsubscribe".encode()
+        expected_token = hmac.new(secret, message, hashlib.sha256).hexdigest()[:16]
+        
+        # Constant-time comparison to prevent timing attacks
+        return hmac.compare_digest(token, expected_token)
 
 
 # Global compliance instance
@@ -332,3 +377,4 @@ def get_compliance_config() -> ComplianceConfig:
 def get_compliance_validator() -> ComplianceValidator:
     """Get the global compliance validator"""
     return compliance_validator
+

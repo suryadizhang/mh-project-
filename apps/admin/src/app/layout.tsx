@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 import { ToastProvider } from '@/components/ui/Toast';
 import { AuthProvider } from '@/contexts/AuthContext';
 
-import AdminLayoutComponent from './AdminLayoutComponent';
+import AdminLayoutNew from './AdminLayoutNew';
 
 export const metadata: Metadata = {
   title: 'MyHibachi Admin Dashboard',
@@ -22,7 +22,7 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <AuthProvider>
           <ToastProvider>
-            <AdminLayoutComponent>{children}</AdminLayoutComponent>
+            <AdminLayoutNew>{children}</AdminLayoutNew>
           </ToastProvider>
         </AuthProvider>
       </body>

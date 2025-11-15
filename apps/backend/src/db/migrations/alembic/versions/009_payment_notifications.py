@@ -2,7 +2,7 @@
 Add payment notification system tables
 
 Revision ID: 009_payment_notifications
-Revises: 008_add_user_roles
+Revises: 06fc7e9891b1 (merge_all_heads which includes 008_add_user_roles)
 Create Date: 2025-10-30 00:00:00.000000
 
 Tables:
@@ -23,7 +23,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = '009_payment_notifications'
-down_revision = '008_add_user_roles'
+down_revision = '06fc7e9891b1'  # merge_all_heads
 branch_labels = None
 depends_on = None
 
