@@ -1,7 +1,7 @@
 'use client';
 
-import { Bot, MessageSquare, Send, User as UserIcon,X } from 'lucide-react';
-import { useCallback,useEffect, useRef, useState } from 'react';
+import { Bot, MessageSquare, Send, User as UserIcon, X } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +15,7 @@ interface Message {
   timestamp: Date;
   agent_type?: string;
   confidence?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 interface AdminChatWidgetProps {
@@ -266,7 +266,8 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
     if (!content || !token || !stationContext) return;
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_CHAT_API_URL || 'http://localhost:8002';
+      const apiUrl =
+        process.env.NEXT_PUBLIC_CHAT_API_URL || 'http://localhost:8002';
       const response = await fetch(`${apiUrl}/api/v1/chat`, {
         method: 'POST',
         headers: {
