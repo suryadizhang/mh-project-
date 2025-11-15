@@ -186,8 +186,9 @@ export default function PrivacyPage() {
             </ul>
             <h3>5.2 Communication Preferences</h3>
             <ul>
-              <li><strong>Email Opt-Out:</strong> Unsubscribe from promotional emails at any time</li>
+              <li><strong>Email Opt-Out:</strong> Unsubscribe from promotional emails at any time by clicking the "Unsubscribe" link in any marketing email, or contact us at cs@myhibachichef.com</li>
               <li><strong>SMS Opt-Out:</strong> Text <code>STOP</code> to discontinue SMS messages</li>
+              <li><strong>One-Click Unsubscribe:</strong> All marketing emails include a direct unsubscribe link for instant removal from our mailing list (CAN-SPAM compliant)</li>
               <li><strong>Marketing Controls:</strong> Choose which types of promotional content you receive</li>
               <li><strong>Frequency Management:</strong> Adjust how often you hear from us</li>
             </ul>

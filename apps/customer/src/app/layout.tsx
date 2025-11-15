@@ -29,6 +29,7 @@ import { QueryProvider } from '@/components/providers/QueryProvider';
 import RateLimitBanner from '@/components/RateLimitBanner';
 import { PerformanceMonitoring } from '@/components/seo/TechnicalSEO';
 import BackToTopButton from '@/components/ui/BackToTopButton';
+import StickyBookNowButton from '@/components/ui/StickyBookNowButton';
 import {
   generateLocalBusinessSchema,
   generateOrganizationSchema,
@@ -112,6 +113,7 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
             <Footer />
             <BackToTopButton />
+            <StickyBookNowButton />
           </ClientLayout>
         </QueryProvider>
       </body>

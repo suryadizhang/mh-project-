@@ -1,6 +1,6 @@
 """create_system_events_table
 
-Revision ID: a1b2c3d4e5f6
+Revision ID: 7ca3dac9d866
 Revises: f069ddb440f7
 Create Date: 2025-11-13 12:00:00.000000
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import JSON
 
 # revision identifiers, used by Alembic.
-revision = 'a1b2c3d4e5f6'
+revision = '7ca3dac9d866'
 down_revision = 'f069ddb440f7'
 branch_labels = None
 depends_on = None

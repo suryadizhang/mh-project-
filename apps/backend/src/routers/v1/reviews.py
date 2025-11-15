@@ -445,7 +445,15 @@ async def ai_issue_coupon(
 ):
     """
     AI service calls this to issue coupon after interacting with customer.
-    Only for 'could_be_better' reviews after AI determines coupon is warranted.
+    
+    ⚠️ CRITICAL: Only for EXISTING CUSTOMERS with completed bookings (complaint compensation).
+    NOT for promotional discounts (admin-only).
+    
+    Requirements:
+    - Must have booking_id (existing customer)
+    - Must be 'could_be_better' review (complaint)
+    - After AI determines compensation is warranted
+    - Max 10% or $100 cap (whichever is less)
     """
     service = ReviewService(db)
 

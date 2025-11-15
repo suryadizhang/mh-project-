@@ -88,8 +88,9 @@ export default function PendingReviewsList() {
   const fetchReviews = async () => {
     setLoading(true);
     try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       const response = await fetch(
-        `http://localhost:8000/api/admin/review-moderation/pending-reviews?page=${page}&limit=20`
+        `${apiUrl}/api/admin/review-moderation/pending-reviews?page=${page}&limit=20`
       );
       const data = await response.json();
 
@@ -123,8 +124,9 @@ export default function PendingReviewsList() {
     setProcessingIds(new Set([...processingIds, reviewId]));
 
     try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       const response = await fetch(
-        `http://localhost:8000/api/admin/review-moderation/approve-review/${reviewId}`,
+        `${apiUrl}/api/admin/review-moderation/approve-review/${reviewId}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -165,8 +167,9 @@ export default function PendingReviewsList() {
     setProcessingIds(new Set([...processingIds, rejectReviewId]));
 
     try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       const response = await fetch(
-        `http://localhost:8000/api/admin/review-moderation/reject-review/${rejectReviewId}`,
+        `${apiUrl}/api/admin/review-moderation/reject-review/${rejectReviewId}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -225,8 +228,9 @@ export default function PendingReviewsList() {
     }
 
     try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       const response = await fetch(
-        'http://localhost:8000/api/admin/review-moderation/bulk-action',
+        `${apiUrl}/api/admin/review-moderation/bulk-action`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

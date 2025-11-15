@@ -13,8 +13,11 @@ from workers.recording_tasks import (
 )
 from models.call_recording import CallRecording, RecordingStatus, RecordingType
 from models.escalation import Escalation, EscalationStatus
+from models.sms_delivery_event import SMSDeliveryEvent, SMSDeliveryStatus
+from models.subscriber import Subscriber
 from core.database import get_db_session
 from datetime import datetime
+from sqlalchemy import select
 
 router = APIRouter(prefix="/webhooks/ringcentral", tags=["webhooks"])
 logger = logging.getLogger(__name__)
@@ -81,6 +84,9 @@ async def ringcentral_webhook_handler(
             await handle_call_started(payload)
         elif event_type == "call.ended":
             await handle_call_ended(payload)
+        elif event_type in ["message-store", "sms.delivery_status"]:
+            # RingCentral sends SMS delivery status updates as message-store events
+            await handle_sms_delivery_status(payload)
         else:
             logger.warning(f"Unhandled webhook event type: {event_type}")
 
@@ -321,6 +327,150 @@ async def handle_call_ended(payload: dict):
 
     except Exception as e:
         logger.error(f"Failed to handle call.ended event: {str(e)}")
+        db.rollback()
+        raise
+
+    finally:
+        db.close()
+
+
+async def handle_sms_delivery_status(payload: dict):
+    """
+    Handle SMS delivery status events from RingCentral
+
+    Updates SMSDeliveryEvent and Subscriber metrics when:
+    - SMS is delivered successfully
+    - SMS delivery fails
+    - SMS bounces
+
+    RingCentral sends delivery updates as message-store events with:
+    - messageStatus: "Delivered", "SendingFailed", "DeliveryFailed"
+    - messageId: unique message identifier
+    """
+    message_id = payload.get("messageId") or payload.get("message_id")
+    message_status = payload.get("messageStatus") or payload.get("status")
+
+    if not message_id:
+        logger.error("Missing messageId in SMS delivery status webhook")
+        return
+
+    if not message_status:
+        logger.warning(f"Missing messageStatus for message {message_id}")
+        return
+
+    logger.info(f"Processing SMS delivery status: {message_id} -> {message_status}")
+
+    db = next(get_db_session())
+
+    try:
+        # Find the delivery event record
+        delivery_event = (
+            db.query(SMSDeliveryEvent)
+            .filter(SMSDeliveryEvent.ringcentral_message_id == message_id)
+            .first()
+        )
+
+        if not delivery_event:
+            logger.warning(
+                f"No SMSDeliveryEvent found for RingCentral message_id: {message_id}. "
+                f"This may be an SMS not sent through our campaign system."
+            )
+            return
+
+        # Get the associated subscriber
+        from models.campaign_event import CampaignEvent
+
+        campaign_event = (
+            db.query(CampaignEvent)
+            .filter(CampaignEvent.id == delivery_event.campaign_event_id)
+            .first()
+        )
+
+        if not campaign_event:
+            logger.error(f"CampaignEvent {delivery_event.campaign_event_id} not found")
+            return
+
+        subscriber = (
+            db.query(Subscriber)
+            .filter(Subscriber.id == campaign_event.subscriber_id)
+            .first()
+        )
+
+        if not subscriber:
+            logger.error(f"Subscriber {campaign_event.subscriber_id} not found")
+            return
+
+        # Map RingCentral status to our enum
+        old_status = delivery_event.status
+        new_status = old_status
+
+        if message_status in ["Delivered", "delivered"]:
+            new_status = SMSDeliveryStatus.DELIVERED
+        elif message_status in ["SendingFailed", "DeliveryFailed", "failed"]:
+            new_status = SMSDeliveryStatus.FAILED
+        elif message_status in ["Queued", "queued"]:
+            new_status = SMSDeliveryStatus.QUEUED
+        else:
+            logger.warning(f"Unknown message status: {message_status}")
+            return
+
+        # Only process if status changed
+        if new_status == old_status:
+            logger.info(f"Status unchanged for message {message_id}: {old_status}")
+            return
+
+        # Update delivery event
+        delivery_event.status = new_status
+        delivery_event.delivery_timestamp = datetime.utcnow()
+
+        # Extract failure information if failed
+        if new_status == SMSDeliveryStatus.FAILED:
+            delivery_event.failure_reason = payload.get("failureReason") or payload.get(
+                "error_message", "Delivery failed"
+            )
+            delivery_event.carrier_error_code = payload.get("carrierErrorCode") or payload.get(
+                "error_code"
+            )
+
+        # Update RingCentral metadata with full payload
+        delivery_event.ringcentral_metadata = delivery_event.ringcentral_metadata or {}
+        delivery_event.ringcentral_metadata["delivery_update"] = {
+            "status": message_status,
+            "timestamp": datetime.utcnow().isoformat(),
+            "payload": payload,
+        }
+
+        # Update subscriber metrics based on new status
+        if new_status == SMSDeliveryStatus.DELIVERED and old_status != SMSDeliveryStatus.DELIVERED:
+            # Increment delivered counter
+            subscriber.total_sms_delivered = (subscriber.total_sms_delivered or 0) + 1
+            subscriber.last_sms_delivered_date = datetime.utcnow()
+
+            logger.info(
+                f"Updated subscriber {subscriber.id}: delivered count = {subscriber.total_sms_delivered}"
+            )
+
+        elif new_status == SMSDeliveryStatus.FAILED and old_status == SMSDeliveryStatus.SENT:
+            # Increment failed counter (only if transitioning from SENT to FAILED)
+            # Note: failed counter was already incremented during send if immediate failure occurred
+            subscriber.total_sms_failed = (subscriber.total_sms_failed or 0) + 1
+
+            logger.info(
+                f"Updated subscriber {subscriber.id}: failed count = {subscriber.total_sms_failed}"
+            )
+
+        # Recalculate engagement score
+        subscriber.recalculate_engagement_score()
+
+        db.commit()
+
+        logger.info(
+            f"Successfully updated SMS delivery status for message {message_id}: "
+            f"{old_status} -> {new_status}"
+        )
+
+    except Exception as e:
+        logger.error(f"Failed to handle SMS delivery status event: {str(e)}")
         db.rollback()
         raise
 

@@ -1,9 +1,11 @@
 'use client';
 
 import {
-  Eye,
+  DollarSign,
   Mail,
-  MousePointerClick,
+  MessageSquare,
+  Send,
+  ShieldCheck,
   TrendingUp,
   Users,
 } from 'lucide-react';
@@ -16,36 +18,54 @@ interface AnalyticsData {
   overview: {
     total_subscribers: number;
     active_subscribers: number;
+    sms_consented: number;
     total_campaigns: number;
     campaigns_sent: number;
-    avg_open_rate: number;
-    avg_click_rate: number;
+    total_sms_sent: number;
+    total_sms_delivered: number;
+    total_sms_failed: number;
+    avg_delivery_rate: number;
+    total_cost_dollars: number;
+    avg_cost_per_campaign: number;
+    tcpa_compliance_rate: number;
   };
   subscriber_growth: Array<{
     date: string;
     total: number;
     new: number;
     unsubscribed: number;
+    sms_consented: number;
   }>;
   campaign_performance: Array<{
     id: number;
     name: string;
     sent_at: string;
     recipients: number;
-    open_rate: number;
-    click_rate: number;
+    delivery_rate: number;
+    failed_count: number;
+    cost_dollars: number;
+    channel: string;
   }>;
-  engagement_trends: {
+  delivery_trends: {
     dates: string[];
-    opens: number[];
-    clicks: number[];
+    sent: number[];
+    delivered: number[];
+    failed: number[];
+  };
+  cost_analysis: {
+    daily_costs: Array<{
+      date: string;
+      cost: number;
+      sms_count: number;
+    }>;
+    total_monthly_cost: number;
   };
 }
 
 export default function NewsletterAnalyticsPage() {
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+    const [analytics, setAnalytics] = useState<Record<string, unknown> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState('30d');
 
   // Fetch analytics
@@ -65,8 +85,8 @@ export default function NewsletterAnalyticsPage() {
 
       const data = await response.json();
       setAnalytics(data);
-    } catch (err: any) {
-      setError(err);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -74,6 +94,7 @@ export default function NewsletterAnalyticsPage() {
 
   useEffect(() => {
     fetchAnalytics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeRange]);
 
   if (isLoading) {
@@ -102,10 +123,10 @@ export default function NewsletterAnalyticsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            Newsletter Analytics
+            SMS Campaign Analytics
           </h1>
           <p className="mt-1 text-sm text-gray-600">
-            Track your email campaign performance
+            Track your SMS campaign performance, delivery rates, and TCPA compliance
           </p>
         </div>
         <select
@@ -121,7 +142,7 @@ export default function NewsletterAnalyticsPage() {
       </div>
 
       {/* Overview Stats */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Total Subscribers"
           value={analytics.overview.total_subscribers}
@@ -132,29 +153,47 @@ export default function NewsletterAnalyticsPage() {
           }}
         />
         <StatsCard
-          title="Active Subscribers"
-          value={analytics.overview.active_subscribers}
-          icon={Mail}
+          title="SMS Consented"
+          value={analytics.overview.sms_consented}
+          icon={MessageSquare}
+          subtitle={`${((analytics.overview.sms_consented / analytics.overview.total_subscribers) * 100).toFixed(1)}% consent rate`}
+        />
+        <StatsCard
+          title="SMS Delivered"
+          value={analytics.overview.total_sms_delivered}
+          icon={Send}
+          subtitle={`${analytics.overview.avg_delivery_rate.toFixed(1)}% delivery rate`}
+        />
+        <StatsCard
+          title="Total Cost"
+          value={`$${analytics.overview.total_cost_dollars.toFixed(2)}`}
+          icon={DollarSign}
+          subtitle={`$${analytics.overview.avg_cost_per_campaign.toFixed(2)}/campaign avg`}
         />
         <StatsCard
           title="Campaigns Sent"
           value={analytics.overview.campaigns_sent}
-          icon={TrendingUp}
-        />
-        <StatsCard
-          title="Avg Open Rate"
-          value={`${analytics.overview.avg_open_rate.toFixed(1)}%`}
-          icon={Eye}
-        />
-        <StatsCard
-          title="Avg Click Rate"
-          value={`${analytics.overview.avg_click_rate.toFixed(1)}%`}
-          icon={MousePointerClick}
-        />
-        <StatsCard
-          title="Total Campaigns"
-          value={analytics.overview.total_campaigns}
           icon={Mail}
+        />
+        <StatsCard
+          title="SMS Sent"
+          value={analytics.overview.total_sms_sent}
+          icon={MessageSquare}
+        />
+        <StatsCard
+          title="SMS Failed"
+          value={analytics.overview.total_sms_failed}
+          icon={TrendingUp}
+          subtitle={`${((analytics.overview.total_sms_failed / analytics.overview.total_sms_sent) * 100).toFixed(1)}% failure rate`}
+        />
+        <StatsCard
+          title="TCPA Compliance"
+          value={`${analytics.overview.tcpa_compliance_rate.toFixed(1)}%`}
+          icon={ShieldCheck}
+          trend={{
+            value: analytics.overview.tcpa_compliance_rate,
+            isPositive: analytics.overview.tcpa_compliance_rate >= 99,
+          }}
         />
       </div>
 
@@ -162,7 +201,7 @@ export default function NewsletterAnalyticsPage() {
       <div className="bg-white shadow sm:rounded-lg">
         <div className="px-4 py-5 sm:p-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">
-            Subscriber Growth
+            Subscriber Growth & SMS Consent
           </h2>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -179,6 +218,9 @@ export default function NewsletterAnalyticsPage() {
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Unsubscribed
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    SMS Consented
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Net Growth
@@ -201,6 +243,9 @@ export default function NewsletterAnalyticsPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600">
                         -{row.unsubscribed}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
+                        {row.sms_consented.toLocaleString()} ({((row.sms_consented / row.total) * 100).toFixed(1)}%)
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <span
@@ -235,16 +280,22 @@ export default function NewsletterAnalyticsPage() {
                     Campaign
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Channel
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Sent Date
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Recipients
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Open Rate
+                    Delivery Rate
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Click Rate
+                    Failed
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Cost
                   </th>
                 </tr>
               </thead>
@@ -253,6 +304,13 @@ export default function NewsletterAnalyticsPage() {
                   <tr key={campaign.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 text-sm font-medium text-gray-900">
                       {campaign.name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        campaign.channel === 'SMS' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {campaign.channel}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(campaign.sent_at).toLocaleDateString()}
@@ -263,32 +321,26 @@ export default function NewsletterAnalyticsPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <span className="text-sm text-gray-900 mr-2">
-                          {campaign.open_rate.toFixed(1)}%
+                          {campaign.delivery_rate.toFixed(1)}%
                         </span>
                         <div className="w-16 bg-gray-200 rounded-full h-2">
                           <div
-                            className="bg-blue-600 h-2 rounded-full"
+                            className={`h-2 rounded-full ${
+                              campaign.delivery_rate >= 95 ? 'bg-green-600' : 
+                              campaign.delivery_rate >= 90 ? 'bg-yellow-600' : 'bg-red-600'
+                            }`}
                             style={{
-                              width: `${Math.min(campaign.open_rate, 100)}%`,
+                              width: `${Math.min(campaign.delivery_rate, 100)}%`,
                             }}
                           />
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <span className="text-sm text-gray-900 mr-2">
-                          {campaign.click_rate.toFixed(1)}%
-                        </span>
-                        <div className="w-16 bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-green-600 h-2 rounded-full"
-                            style={{
-                              width: `${Math.min(campaign.click_rate, 100)}%`,
-                            }}
-                          />
-                        </div>
-                      </div>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600">
+                      {campaign.failed_count}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      ${campaign.cost_dollars.toFixed(2)}
                     </td>
                   </tr>
                 ))}
@@ -298,24 +350,24 @@ export default function NewsletterAnalyticsPage() {
         </div>
       </div>
 
-      {/* Engagement Trends */}
+      {/* Delivery Trends */}
       <div className="bg-white shadow sm:rounded-lg">
         <div className="px-4 py-5 sm:p-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">
-            Engagement Trends
+            SMS Delivery Trends
           </h2>
           <div className="space-y-6">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">
-                  Email Opens
+                  SMS Sent
                 </span>
-                <Eye className="w-5 h-5 text-blue-600" />
+                <Send className="w-5 h-5 text-blue-600" />
               </div>
               <div className="grid grid-cols-7 gap-2">
-                {analytics.engagement_trends.opens.map((value, index) => {
+                {analytics.delivery_trends.sent.map((value, index) => {
                   const maxValue = Math.max(
-                    ...analytics.engagement_trends.opens
+                    ...analytics.delivery_trends.sent
                   );
                   const heightPercent =
                     maxValue > 0 ? (value / maxValue) * 100 : 0;
@@ -325,12 +377,12 @@ export default function NewsletterAnalyticsPage() {
                         <div
                           className="w-full bg-blue-600 rounded-t"
                           style={{ height: `${heightPercent}%` }}
-                          title={`${value} opens`}
+                          title={`${value} sent`}
                         />
                       </div>
                       <span className="text-xs text-gray-500 mt-1">
                         {new Date(
-                          analytics.engagement_trends.dates[index]
+                          analytics.delivery_trends.dates[index]
                         ).toLocaleDateString('en-US', { weekday: 'short' })}
                       </span>
                     </div>
@@ -342,14 +394,14 @@ export default function NewsletterAnalyticsPage() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">
-                  Link Clicks
+                  SMS Delivered
                 </span>
-                <MousePointerClick className="w-5 h-5 text-green-600" />
+                <MessageSquare className="w-5 h-5 text-green-600" />
               </div>
               <div className="grid grid-cols-7 gap-2">
-                {analytics.engagement_trends.clicks.map((value, index) => {
+                {analytics.delivery_trends.delivered.map((value, index) => {
                   const maxValue = Math.max(
-                    ...analytics.engagement_trends.clicks
+                    ...analytics.delivery_trends.delivered
                   );
                   const heightPercent =
                     maxValue > 0 ? (value / maxValue) * 100 : 0;
@@ -359,12 +411,12 @@ export default function NewsletterAnalyticsPage() {
                         <div
                           className="w-full bg-green-600 rounded-t"
                           style={{ height: `${heightPercent}%` }}
-                          title={`${value} clicks`}
+                          title={`${value} delivered`}
                         />
                       </div>
                       <span className="text-xs text-gray-500 mt-1">
                         {new Date(
-                          analytics.engagement_trends.dates[index]
+                          analytics.delivery_trends.dates[index]
                         ).toLocaleDateString('en-US', { weekday: 'short' })}
                       </span>
                     </div>
@@ -372,6 +424,97 @@ export default function NewsletterAnalyticsPage() {
                 })}
               </div>
             </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">
+                  SMS Failed
+                </span>
+                <TrendingUp className="w-5 h-5 text-red-600" />
+              </div>
+              <div className="grid grid-cols-7 gap-2">
+                {analytics.delivery_trends.failed.map((value, index) => {
+                  const maxValue = Math.max(
+                    ...analytics.delivery_trends.failed
+                  );
+                  const heightPercent =
+                    maxValue > 0 ? (value / maxValue) * 100 : 0;
+                  return (
+                    <div key={index} className="flex flex-col items-center">
+                      <div className="w-full bg-gray-200 rounded-t h-32 flex items-end">
+                        <div
+                          className="w-full bg-red-600 rounded-t"
+                          style={{ height: `${heightPercent}%` }}
+                          title={`${value} failed`}
+                        />
+                      </div>
+                      <span className="text-xs text-gray-500 mt-1">
+                        {new Date(
+                          analytics.delivery_trends.dates[index]
+                        ).toLocaleDateString('en-US', { weekday: 'short' })}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Cost Analysis */}
+      <div className="bg-white shadow sm:rounded-lg">
+        <div className="px-4 py-5 sm:p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">
+            Cost Analysis
+          </h2>
+          <div className="mb-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-700">
+                Total Monthly Cost
+              </span>
+              <span className="text-2xl font-bold text-gray-900">
+                ${analytics.cost_analysis.total_monthly_cost.toFixed(2)}
+              </span>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    SMS Count
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Daily Cost
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Avg Cost/SMS
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {analytics.cost_analysis.daily_costs.map((row, index) => (
+                  <tr key={index}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {new Date(row.date).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {row.sms_count.toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      ${row.cost.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      ${(row.cost / row.sms_count).toFixed(4)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

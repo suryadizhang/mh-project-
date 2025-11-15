@@ -1,6 +1,9 @@
 """
 AI Newsletter Endpoints - GPT-4 Powered Content Generation
 Automated holiday newsletter generation with customer segmentation
+
+IMPORTANT: Newsletters are sent via SMS (RingCentral), NOT email!
+Email is only used for admin/transactional purposes (invoices, bookings, etc.)
 """
 
 import logging
