@@ -9,7 +9,7 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react';
-import { useEffect,useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { StatsCard } from '@/components/ui/stats-card';
@@ -63,13 +63,13 @@ interface AnalyticsData {
 }
 
 export default function NewsletterAnalyticsPage() {
-    const [analytics, setAnalytics] = useState<Record<string, unknown> | null>(null);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState('30d');
 
   // Fetch analytics
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await fetch(
@@ -90,12 +90,11 @@ export default function NewsletterAnalyticsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [timeRange]);
 
   useEffect(() => {
     fetchAnalytics();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeRange]);
+  }, [fetchAnalytics]);
 
   if (isLoading) {
     return (
@@ -126,7 +125,8 @@ export default function NewsletterAnalyticsPage() {
             SMS Campaign Analytics
           </h1>
           <p className="mt-1 text-sm text-gray-600">
-            Track your SMS campaign performance, delivery rates, and TCPA compliance
+            Track your SMS campaign performance, delivery rates, and TCPA
+            compliance
           </p>
         </div>
         <select
@@ -245,7 +245,8 @@ export default function NewsletterAnalyticsPage() {
                         -{row.unsubscribed}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
-                        {row.sms_consented.toLocaleString()} ({((row.sms_consented / row.total) * 100).toFixed(1)}%)
+                        {row.sms_consented.toLocaleString()} (
+                        {((row.sms_consented / row.total) * 100).toFixed(1)}%)
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <span
@@ -306,9 +307,13 @@ export default function NewsletterAnalyticsPage() {
                       {campaign.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        campaign.channel === 'SMS' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          campaign.channel === 'SMS'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
                         {campaign.channel}
                       </span>
                     </td>
@@ -326,8 +331,11 @@ export default function NewsletterAnalyticsPage() {
                         <div className="w-16 bg-gray-200 rounded-full h-2">
                           <div
                             className={`h-2 rounded-full ${
-                              campaign.delivery_rate >= 95 ? 'bg-green-600' : 
-                              campaign.delivery_rate >= 90 ? 'bg-yellow-600' : 'bg-red-600'
+                              campaign.delivery_rate >= 95
+                                ? 'bg-green-600'
+                                : campaign.delivery_rate >= 90
+                                  ? 'bg-yellow-600'
+                                  : 'bg-red-600'
                             }`}
                             style={{
                               width: `${Math.min(campaign.delivery_rate, 100)}%`,
@@ -366,9 +374,7 @@ export default function NewsletterAnalyticsPage() {
               </div>
               <div className="grid grid-cols-7 gap-2">
                 {analytics.delivery_trends.sent.map((value, index) => {
-                  const maxValue = Math.max(
-                    ...analytics.delivery_trends.sent
-                  );
+                  const maxValue = Math.max(...analytics.delivery_trends.sent);
                   const heightPercent =
                     maxValue > 0 ? (value / maxValue) * 100 : 0;
                   return (
