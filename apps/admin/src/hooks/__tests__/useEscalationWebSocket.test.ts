@@ -44,7 +44,10 @@ class MockWebSocket {
   }
 
   close(code = 1000, reason = '') {
-    if (this.readyState === MockWebSocket.OPEN || this.readyState === MockWebSocket.CONNECTING) {
+    if (
+      this.readyState === MockWebSocket.OPEN ||
+      this.readyState === MockWebSocket.CONNECTING
+    ) {
       this.readyState = MockWebSocket.CLOSED;
       const closeEvent = new CloseEvent('close', { code, reason });
       queueMicrotask(() => {
@@ -107,10 +110,13 @@ describe('useEscalationWebSocket', () => {
     vi.useRealTimers();
     // Clean up all WebSocket instances
     MockWebSocket.instances.forEach(ws => {
-      if (ws.readyState === MockWebSocket.OPEN || ws.readyState === MockWebSocket.CONNECTING) {
+      if (
+        ws.readyState === MockWebSocket.OPEN ||
+        ws.readyState === MockWebSocket.CONNECTING
+      ) {
         try {
           ws.close(1000, 'Test cleanup');
-        } catch (e) {
+        } catch {
           // Ignore cleanup errors
         }
       }
@@ -122,9 +128,12 @@ describe('useEscalationWebSocket', () => {
     it('should establish WebSocket connection on mount', async () => {
       const { result } = renderHook(() => useEscalationWebSocket());
 
-      await waitFor(() => {
-        expect(result.current.isConnected).toBe(true);
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          expect(result.current.isConnected).toBe(true);
+        },
+        { timeout: 3000 }
+      );
 
       expect(result.current.isConnecting).toBe(false);
     });
@@ -261,8 +270,6 @@ describe('useEscalationWebSocket', () => {
         { timeout: 2000 }
       );
 
-      const initialLastEvent = result.current.lastEvent;
-
       const wsInstance = MockWebSocket.instances[0];
 
       await act(async () => {
@@ -338,7 +345,9 @@ describe('useEscalationWebSocket', () => {
       await waitFor(
         () => {
           // A new WebSocket instance should be created
-          expect(MockWebSocket.instances.length).toBeGreaterThan(initialInstanceCount);
+          expect(MockWebSocket.instances.length).toBeGreaterThan(
+            initialInstanceCount
+          );
         },
         { timeout: 5000 }
       );
@@ -373,7 +382,7 @@ describe('useEscalationWebSocket', () => {
 
       // Verify the reconnect method exists
       expect(typeof result.current.reconnect).toBe('function');
-      
+
       // Call manual reconnect
       act(() => {
         result.current.reconnect();
@@ -385,7 +394,9 @@ describe('useEscalationWebSocket', () => {
       // Verify a new connection attempt was made
       await waitFor(
         () => {
-          expect(MockWebSocket.instances.length).toBeGreaterThan(initialInstanceCount);
+          expect(MockWebSocket.instances.length).toBeGreaterThan(
+            initialInstanceCount
+          );
         },
         { timeout: 2000 }
       );
@@ -449,7 +460,7 @@ describe('useEscalationWebSocket', () => {
 
       // Just check the method exists and is callable
       expect(typeof result.current.sendPing).toBe('function');
-      
+
       // Wait for connection
       await waitFor(
         () => {
@@ -468,7 +479,7 @@ describe('useEscalationWebSocket', () => {
       const { result } = renderHook(() => useEscalationWebSocket());
 
       expect(typeof result.current.subscribe).toBe('function');
-      
+
       await waitFor(
         () => {
           expect(result.current.isConnected).toBe(true);
@@ -485,7 +496,7 @@ describe('useEscalationWebSocket', () => {
       const { result } = renderHook(() => useEscalationWebSocket());
 
       expect(typeof result.current.unsubscribe).toBe('function');
-      
+
       await waitFor(
         () => {
           expect(result.current.isConnected).toBe(true);
@@ -565,7 +576,7 @@ describe('useEscalationWebSocket', () => {
     it('should not create multiple WebSocket connections on re-render', async () => {
       const connectSpy = vi.fn();
       const OriginalWebSocket = global.WebSocket;
-      
+
       // Wrap WebSocket to count instantiations
       global.WebSocket = new Proxy(OriginalWebSocket, {
         construct(target, args) {
@@ -598,4 +609,3 @@ describe('useEscalationWebSocket', () => {
     });
   });
 });
-

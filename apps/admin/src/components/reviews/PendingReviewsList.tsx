@@ -15,7 +15,7 @@
 'use client';
 
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { useToast } from '@/components/ui/Toast';
 
@@ -85,7 +85,7 @@ export default function PendingReviewsList() {
   // Data Fetching
   // ============================================================================
 
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     setLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -108,11 +108,11 @@ export default function PendingReviewsList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, toast]);
 
   useEffect(() => {
     fetchReviews();
-  }, [page]);
+  }, [fetchReviews]);
 
   // ============================================================================
   // Action Handlers
