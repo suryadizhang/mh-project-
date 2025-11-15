@@ -939,15 +939,17 @@ try:
     from routers.v1.conversations import router as conversations_router
     from routers.v1.referrals import router as referrals_router
     from routers.v1.campaigns import router as campaigns_router
+    from routers.v1.newsletter import analytics_router as newsletter_analytics_router
 
     app.include_router(leads_router, prefix="/api/leads", tags=["leads"])
     app.include_router(leads_router, prefix="/api/v1/public/leads", tags=["leads-public"])  # Public endpoint
     app.include_router(newsletter_router, prefix="/api/newsletter", tags=["newsletter"])
+    app.include_router(newsletter_analytics_router, prefix="/api", tags=["newsletter-analytics"])
     app.include_router(ringcentral_router, prefix="/api/ringcentral", tags=["sms"])
     app.include_router(conversations_router, prefix="/api/v1", tags=["conversations"])
     app.include_router(referrals_router, prefix="/api/v1", tags=["referrals"])
     app.include_router(campaigns_router, prefix="/api/v1", tags=["campaigns"])
-    logger.info("✅ Additional CRM routers included from NEW location (leads, newsletter, SMS, conversations, referrals, campaigns)")
+    logger.info("✅ Additional CRM routers included from NEW location (leads, newsletter, newsletter analytics, SMS, conversations, referrals, campaigns)")
 except ImportError as e:
     logger.error(f"❌ Some additional routers not available: {e}")
 
@@ -1056,6 +1058,19 @@ try:
     logger.info("✅ Escalation WebSocket included (real-time updates)")
 except ImportError as e:
     logger.warning(f"Escalation WebSocket not available: {e}")
+
+
+# Compliance WebSocket - Real-time Updates
+try:
+    from api.v1.websockets.compliance import router as compliance_ws_router
+
+    app.include_router(
+        compliance_ws_router,
+        tags=["websocket"],
+    )
+    logger.info("✅ Compliance WebSocket included (real-time updates)")
+except ImportError as e:
+    logger.warning(f"Compliance WebSocket not available: {e}")
 
 
 # Unified Inbox endpoints - Week 2 Feature

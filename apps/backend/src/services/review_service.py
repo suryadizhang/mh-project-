@@ -249,6 +249,12 @@ class ReviewService:
         Issue coupon after AI has interacted with customer.
         Called by AI service after conversation determines coupon is warranted.
         
+        ⚠️ CRITICAL BUSINESS RULES:
+        - ONLY for existing customers with completed bookings (compensation for complaints)
+        - NOT for promotional/marketing discounts (those are admin-only)
+        - Must have booking_id (proves they're actual customer)
+        - Must be complaint/negative review (rating = 'could_be_better')
+        
         Restrictions:
         - Max 1 active (unused) coupon per customer
         - Max 1 coupon per booking
@@ -259,6 +265,32 @@ class ReviewService:
             review = await self.db.get(CustomerReview, review_id)
             if not review:
                 logger.error(f"Review {review_id} not found")
+                return None
+
+            # 🔒 BUSINESS RULE 1: Must be existing customer with completed booking
+            if not review.booking_id:
+                logger.warning(
+                    f"Review {review_id} has no booking_id. AI coupons only for existing customers with completed bookings. "
+                    f"Coupon issuance denied."
+                )
+                if not review.metadata:
+                    review.metadata = {}
+                review.metadata["coupon_denial_reason"] = "Not an existing customer - no booking_id (AI coupons only for complaint compensation)"
+                review.metadata["coupon_denial_at"] = datetime.now().isoformat()
+                await self.db.commit()
+                return None
+
+            # 🔒 BUSINESS RULE 2: Must be complaint/negative review
+            if review.rating != "could_be_better":
+                logger.warning(
+                    f"Review {review_id} rating is '{review.rating}', not 'could_be_better'. "
+                    f"AI coupons only for complaints. Coupon issuance denied."
+                )
+                if not review.metadata:
+                    review.metadata = {}
+                review.metadata["coupon_denial_reason"] = f"Not a complaint - rating is '{review.rating}' (AI coupons only for 'could_be_better')"
+                review.metadata["coupon_denial_at"] = datetime.now().isoformat()
+                await self.db.commit()
                 return None
 
             # 🔒 RESTRICTION 1: Check if customer already has active coupon
@@ -314,7 +346,10 @@ class ReviewService:
                     review.metadata = {}
                 review.metadata["ai_interaction_notes"] = ai_interaction_notes
                 review.metadata["coupon_issued_at"] = datetime.now().isoformat()
+                review.metadata["coupon_type"] = "complaint_compensation"
                 review.metadata["coupon_restrictions_passed"] = [
+                    "existing_customer_with_booking",
+                    "complaint_review_only",
                     "no_active_coupon",
                     "no_booking_coupon"
                 ]

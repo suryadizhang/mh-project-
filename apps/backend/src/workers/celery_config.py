@@ -23,6 +23,7 @@ celery_app = Celery(
         "workers.review_worker",
         "workers.outbox_processors",
         "workers.monitoring_tasks",  # Added monitoring tasks
+        "workers.campaign_metrics_tasks",  # Added campaign metrics tasks
     ],
 )
 
@@ -35,6 +36,7 @@ celery_app.conf.update(
         "workers.review_worker.*": {"queue": "reviews"},
         "workers.outbox_processors.*": {"queue": "outbox"},
         "monitoring.*": {"queue": "monitoring"},  # Added monitoring queue
+        "workers.campaign_metrics_tasks.*": {"queue": "campaigns"},  # Added campaign metrics queue
     },
     # Task queues
     task_queues=(
@@ -43,6 +45,7 @@ celery_app.conf.update(
         Queue("reviews", routing_key="reviews"),
         Queue("outbox", routing_key="outbox"),
         Queue("monitoring", routing_key="monitoring"),  # Added monitoring queue
+        Queue("campaigns", routing_key="campaigns"),  # Added campaigns queue
         Queue("default", routing_key="default"),
     ),
     # Task settings
@@ -105,6 +108,15 @@ celery_app.conf.beat_schedule = {
     },
     "aggregate-monitoring-stats": {
         "task": "monitoring.aggregate_statistics",
+        "schedule": 3600.0,  # Every hour
+    },
+    # Campaign metrics updates
+    "update-active-campaign-metrics": {
+        "task": "workers.campaign_metrics_tasks.update_active_campaign_metrics",
+        "schedule": 300.0,  # Every 5 minutes
+    },
+    "cleanup-completed-campaign-metrics": {
+        "task": "workers.campaign_metrics_tasks.cleanup_completed_campaign_metrics",
         "schedule": 3600.0,  # Every hour
     },
 }

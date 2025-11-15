@@ -8,7 +8,7 @@ Used by EventService for centralized event tracking.
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, JSON, Index, Text
 from sqlalchemy.dialects.postgresql import UUID
-from models.base import Base
+from models.base import Base  # Use same Base as majority of models (User, Booking, Payment, etc.)
 import uuid
 
 

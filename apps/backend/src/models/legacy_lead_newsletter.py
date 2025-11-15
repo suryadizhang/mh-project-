@@ -138,6 +138,17 @@ class CampaignEventType(str, enum.Enum):
     COMPLAINED = "complained"
 
 
+class SMSDeliveryStatus(str, enum.Enum):
+    """SMS delivery status tracking (RingCentral)."""
+    
+    QUEUED = "queued"          # Message queued for sending
+    SENDING = "sending"        # Message being sent
+    SENT = "sent"              # Message sent to carrier
+    DELIVERED = "delivered"    # Delivered to recipient (carrier confirmation)
+    FAILED = "failed"          # Delivery failed
+    UNDELIVERED = "undelivered"  # Could not be delivered
+
+
 class Lead(BaseModel):
     """Lead management with comprehensive tracking."""
 
@@ -148,9 +159,9 @@ class Lead(BaseModel):
     )
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    source = Column(Enum(LeadSource), nullable=False)
-    status = Column(Enum(LeadStatus), nullable=False, default=LeadStatus.NEW)
-    quality = Column(Enum(LeadQuality), nullable=True)
+    source = Column(Enum(LeadSource, name='lead_source', create_type=False), nullable=False)
+    status = Column(Enum(LeadStatus, name='lead_status', create_type=False), nullable=False, default=LeadStatus.NEW)
+    quality = Column(Enum(LeadQuality, name='lead_quality', create_type=False), nullable=True)
     customer_id = Column(
         UUID(as_uuid=True),
         nullable=True,
@@ -246,7 +257,7 @@ class LeadContact(BaseModel):
     lead_id = Column(
         UUID(as_uuid=True), ForeignKey("lead.leads.id", ondelete="CASCADE"), nullable=False
     )
-    channel = Column(Enum(ContactChannel), nullable=False)
+    channel = Column(Enum(ContactChannel, name='contact_channel', create_type=False), nullable=False)
     handle_or_address = Column(Text, nullable=False)
     verified = Column(Boolean, nullable=False, default=False)
 
@@ -315,7 +326,7 @@ class SocialThread(BaseModel):
     )
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    platform = Column(Enum(SocialPlatform), nullable=False)
+    platform = Column(Enum(SocialPlatform, name='social_platform', create_type=False), nullable=False)
     thread_external_id = Column(String(255), nullable=False)  # External platform thread ID
     lead_id = Column(
         UUID(as_uuid=True), ForeignKey("lead.leads.id", ondelete="SET NULL"), nullable=True
@@ -325,7 +336,7 @@ class SocialThread(BaseModel):
     )  # FK removed - Customer model not in this module
 
     # Thread management
-    status = Column(Enum(ThreadStatus), nullable=False, default=ThreadStatus.OPEN)
+    status = Column(Enum(ThreadStatus, name='thread_status', create_type=False), nullable=False, default=ThreadStatus.OPEN)
     customer_handle = Column(String(255), nullable=True)  # Customer's display name/handle
     unread_count = Column(Integer, nullable=False, default=0)
     last_message_at = Column(DateTime(timezone=True), nullable=True)
@@ -341,7 +352,27 @@ class SocialThread(BaseModel):
 
 # Newsletter models
 class Subscriber(BaseModel):
-    """Newsletter subscriber with engagement tracking."""
+    """
+    Newsletter subscriber with engagement tracking.
+    
+    IMPORTANT FIELD USAGE CLARIFICATION:
+    =====================================
+    Marketing Channels:
+    - SMS: Primary newsletter channel (RingCentral) - controlled by sms_consent
+    - Email: Admin/transactional ONLY (invoices, bookings) - controlled by email_consent
+    
+    Field Purpose:
+    - email_enc: Encrypted email for identification and admin communications
+    - phone_enc: Encrypted phone for SMS newsletters (primary marketing channel)
+    - sms_consent: Permission for SMS newsletters (TCPA compliance)
+    - email_consent: Permission for admin emails (CAN-SPAM compliance)
+    - total_emails_sent: Tracks ADMIN emails, NOT marketing newsletters
+    - total_sms_sent: Tracks SMS newsletters (primary marketing channel)
+    - last_email_sent_date: Last ADMIN email, NOT newsletter
+    
+    Do NOT use email for marketing newsletters - use SMS via RingCentral!
+    =====================================
+    """
 
     __tablename__ = "subscribers"
     __table_args__ = (
@@ -355,21 +386,31 @@ class Subscriber(BaseModel):
     customer_id = Column(
         UUID(as_uuid=True), nullable=True
     )  # FK removed - Customer model not in this module
-    email_enc = Column(LargeBinary, nullable=False)
-    phone_enc = Column(LargeBinary, nullable=True)
+    email_enc = Column(LargeBinary, nullable=False)  # For identification & admin emails ONLY
+    phone_enc = Column(LargeBinary, nullable=True)  # For SMS newsletters (primary marketing channel)
     subscribed = Column(Boolean, nullable=False, default=True)
     source = Column(String(50), nullable=True)
-    sms_consent = Column(Boolean, nullable=False, default=False)
-    email_consent = Column(Boolean, nullable=False, default=True)
+    sms_consent = Column(Boolean, nullable=False, default=False)  # SMS newsletters (RingCentral)
+    email_consent = Column(Boolean, nullable=False, default=True)  # Admin emails only
     consent_updated_at = Column(DateTime(timezone=True), nullable=True)
     consent_ip_address = Column(String(45), nullable=True)
     tags = Column(ARRAY(String(50)), nullable=True)
     engagement_score = Column(Integer, nullable=False, default=0)
-    total_emails_sent = Column(Integer, nullable=False, default=0)
-    total_emails_opened = Column(Integer, nullable=False, default=0)
+    
+    # Admin email tracking (NOT for newsletters)
+    total_emails_sent = Column(Integer, nullable=False, default=0)  # ADMIN emails, NOT newsletters!
+    total_emails_opened = Column(Integer, nullable=False, default=0)  # Admin email tracking
     total_clicks = Column(Integer, nullable=False, default=0)
-    last_email_sent_date = Column(DateTime(timezone=True), nullable=True)
+    last_email_sent_date = Column(DateTime(timezone=True), nullable=True)  # Admin emails only
     last_opened_date = Column(DateTime(timezone=True), nullable=True)
+    
+    # SMS newsletter tracking (PRIMARY marketing channel via RingCentral)
+    total_sms_sent = Column(Integer, nullable=False, default=0)  # SMS newsletters sent
+    total_sms_delivered = Column(Integer, nullable=False, default=0)  # SMS delivery confirmations
+    total_sms_failed = Column(Integer, nullable=False, default=0)  # Failed SMS deliveries
+    last_sms_sent_date = Column(DateTime(timezone=True), nullable=True)  # Last SMS newsletter
+    last_sms_delivered_date = Column(DateTime(timezone=True), nullable=True)  # Last successful delivery
+    
     unsubscribed_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships
@@ -412,29 +453,61 @@ class Subscriber(BaseModel):
         """Calculate click-through rate."""
         return (self.total_clicks / self.total_emails_sent) if self.total_emails_sent > 0 else 0.0
 
+    @property
+    def sms_delivery_rate(self) -> float:
+        """Calculate SMS delivery rate (TCPA compliance metric)."""
+        return (
+            (self.total_sms_delivered / self.total_sms_sent)
+            if self.total_sms_sent > 0
+            else 0.0
+        )
+
+    @property
+    def sms_failure_rate(self) -> float:
+        """Calculate SMS failure rate."""
+        return (
+            (self.total_sms_failed / self.total_sms_sent)
+            if self.total_sms_sent > 0
+            else 0.0
+        )
+
     def update_engagement_score(self):
-        """Update engagement score based on recent activity."""
+        """Update engagement score based on recent activity (email and SMS)."""
         score = 0
 
-        # Base score from open rate
-        score += self.open_rate * 40
+        # Admin email metrics (lower weight - not primary channel)
+        score += self.open_rate * 20
+        score += self.click_rate * 15
 
-        # Click rate bonus
-        score += self.click_rate * 30
-
-        # Recency bonus
-        if self.last_opened_date:
+        # SMS newsletter metrics (higher weight - PRIMARY channel)
+        score += self.sms_delivery_rate * 30  # Successful SMS delivery
+        
+        # Recency bonus - prioritize SMS activity
+        if self.last_sms_sent_date:
+            days_since_sms = (
+                datetime.now(self.last_sms_sent_date.tzinfo) - self.last_sms_sent_date
+            ).days
+            if days_since_sms <= 7:
+                score += 20  # Very recent SMS engagement
+            elif days_since_sms <= 30:
+                score += 10  # Recent SMS engagement
+                
+        elif self.last_opened_date:
+            # Fallback to email activity if no SMS
             days_since_open = (
                 datetime.now(self.last_opened_date.tzinfo) - self.last_opened_date
             ).days
             if days_since_open <= 7:
-                score += 20
-            elif days_since_open <= 30:
                 score += 10
+            elif days_since_open <= 30:
+                score += 5
 
-        # Consent and subscription status
-        if self.subscribed and self.email_consent:
-            score += 10
+        # Consent and subscription status (TCPA/CAN-SPAM compliance)
+        if self.subscribed:
+            if self.sms_consent:
+                score += 10  # SMS consent (primary channel)
+            if self.email_consent:
+                score += 5   # Email consent (admin only)
 
         self.engagement_score = int(min(score, 100))
 
@@ -447,15 +520,31 @@ class Campaign(BaseModel):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String(200), nullable=False)
-    channel = Column(Enum(CampaignChannel), nullable=False)
+    channel = Column(Enum(CampaignChannel, name='campaign_channel', create_type=False), nullable=False)
     subject = Column(Text, nullable=True)
     content = Column(JSONB, nullable=False)
     segment_filter = Column(JSONB, nullable=True)
     scheduled_at = Column(DateTime(timezone=True), nullable=True)
     sent_at = Column(DateTime(timezone=True), nullable=True)
-    status = Column(Enum(CampaignStatus), nullable=False, default=CampaignStatus.DRAFT)
+    status = Column(Enum(CampaignStatus, name='campaign_status', create_type=False), nullable=False, default=CampaignStatus.DRAFT)
     total_recipients = Column(Integer, nullable=False, default=0)
     created_by = Column(String(100), nullable=False)
+    
+    # Denormalized performance metrics (updated via triggers or scheduled jobs)
+    # These provide fast dashboard queries without expensive joins
+    total_sent = Column(Integer, nullable=False, default=0)
+    total_delivered = Column(Integer, nullable=False, default=0)
+    total_opened = Column(Integer, nullable=False, default=0)
+    total_clicked = Column(Integer, nullable=False, default=0)
+    total_unsubscribed = Column(Integer, nullable=False, default=0)
+    total_failed = Column(Integer, nullable=False, default=0)
+    
+    # Cached rate metrics (calculated periodically for dashboard performance)
+    delivery_rate_cached = Column(Numeric(5, 2), nullable=True)  # Percentage 0.00-100.00
+    open_rate_cached = Column(Numeric(5, 2), nullable=True)      # Percentage 0.00-100.00
+    click_rate_cached = Column(Numeric(5, 2), nullable=True)     # Percentage 0.00-100.00
+    unsubscribe_rate_cached = Column(Numeric(5, 2), nullable=True)  # Percentage 0.00-100.00
+    last_metrics_updated = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     events = relationship("CampaignEvent", back_populates="campaign", cascade="all, delete-orphan")
@@ -478,6 +567,47 @@ class Campaign(BaseModel):
         clicked = len([e for e in self.events if e.type == CampaignEventType.CLICKED])
         return (clicked / self.total_recipients) if self.total_recipients > 0 else 0.0
 
+    def update_cached_metrics(self):
+        """
+        Update cached performance metrics from campaign events.
+        
+        This method should be called:
+        - After campaign completion
+        - Periodically via scheduled job (e.g., every 5-15 minutes during active sends)
+        - On-demand when detailed metrics are needed
+        
+        Improves dashboard performance by avoiding expensive joins.
+        """
+        from collections import Counter
+        
+        # Count events by type
+        event_counts = Counter(e.type for e in self.events)
+        
+        # Update denormalized counts
+        self.total_sent = event_counts.get(CampaignEventType.SENT, 0)
+        self.total_delivered = event_counts.get(CampaignEventType.DELIVERED, 0)
+        self.total_opened = event_counts.get(CampaignEventType.OPENED, 0)
+        self.total_clicked = event_counts.get(CampaignEventType.CLICKED, 0)
+        self.total_unsubscribed = event_counts.get(CampaignEventType.UNSUBSCRIBED, 0)
+        self.total_failed = event_counts.get(CampaignEventType.BOUNCED, 0)
+        
+        # Calculate cached rates
+        if self.total_recipients > 0:
+            self.delivery_rate_cached = round(
+                (self.total_delivered / self.total_recipients) * 100, 2
+            )
+            self.open_rate_cached = round(
+                (self.total_opened / self.total_recipients) * 100, 2
+            )
+            self.click_rate_cached = round(
+                (self.total_clicked / self.total_recipients) * 100, 2
+            )
+            self.unsubscribe_rate_cached = round(
+                (self.total_unsubscribed / self.total_recipients) * 100, 2
+            )
+        
+        self.last_metrics_updated = datetime.now(datetime.now().astimezone().tzinfo)
+
 
 class CampaignEvent(BaseModel):
     """Campaign interaction tracking."""
@@ -496,10 +626,91 @@ class CampaignEvent(BaseModel):
         ForeignKey("newsletter.subscribers.id", ondelete="CASCADE"),
         nullable=False,
     )
-    type = Column(Enum(CampaignEventType), nullable=False)
+    type = Column(Enum(CampaignEventType, name='campaign_event_type', create_type=False), nullable=False)
     payload = Column(JSONB, nullable=True)
     occurred_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
 
     # Relationships
     campaign = relationship("Campaign", back_populates="events")
     subscriber = relationship("Subscriber", back_populates="campaign_events")
+
+
+class SMSDeliveryEvent(BaseModel):
+    """
+    Track detailed SMS delivery status from RingCentral.
+    
+    TCPA Compliance & Cost Tracking:
+    - Tracks delivery confirmations for compliance reporting
+    - Monitors message segments for cost analysis
+    - Records failure reasons for quality improvement
+    - Links to campaign events for full audit trail
+    
+    US Compliance Notes:
+    - Delivery confirmations help prove TCPA compliance
+    - Failed delivery tracking prevents repeated attempts to invalid numbers
+    - Cost tracking ensures budget compliance
+    - Segment tracking validates pricing accuracy
+    """
+
+    __tablename__ = "sms_delivery_events"
+    __table_args__ = (
+        Index("ix_sms_delivery_ringcentral_msg_id", "ringcentral_message_id", unique=True),
+        Index("ix_sms_delivery_campaign_event", "campaign_event_id"),
+        Index("ix_sms_delivery_status", "status"),
+        Index("ix_sms_delivery_timestamp", "delivery_timestamp"),
+        {"schema": "newsletter", "extend_existing": True},
+    )
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    campaign_event_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("newsletter.campaign_events.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    ringcentral_message_id = Column(String(255), nullable=False)  # RingCentral's message ID
+    
+    # Delivery tracking
+    status = Column(
+        Enum(SMSDeliveryStatus, name='sms_delivery_status', create_type=False),
+        nullable=False,
+        default=SMSDeliveryStatus.QUEUED
+    )
+    delivery_timestamp = Column(DateTime(timezone=True), nullable=True)
+    
+    # Error handling
+    failure_reason = Column(Text, nullable=True)
+    carrier_error_code = Column(String(50), nullable=True)  # Carrier-specific error code
+    
+    # Cost & segment tracking
+    segments_used = Column(Integer, nullable=False, default=1)  # SMS segments (160 chars each)
+    cost_cents = Column(Integer, nullable=True)  # Cost in cents for accounting
+    
+    # RingCentral metadata
+    ringcentral_metadata = Column(JSONB, nullable=True)  # Additional RingCentral data
+    
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    campaign_event = relationship("CampaignEvent", backref="sms_delivery")
+
+    @property
+    def cost_dollars(self) -> float | None:
+        """Convert cents to dollars."""
+        return self.cost_cents / 100 if self.cost_cents else None
+
+    @cost_dollars.setter
+    def cost_dollars(self, value: float | None):
+        """Convert dollars to cents."""
+        self.cost_cents = int(value * 100) if value else None
+
+    @property
+    def is_delivered(self) -> bool:
+        """Check if SMS was successfully delivered."""
+        return self.status == SMSDeliveryStatus.DELIVERED
+
+    @property
+    def is_failed(self) -> bool:
+        """Check if SMS delivery failed."""
+        return self.status in (SMSDeliveryStatus.FAILED, SMSDeliveryStatus.UNDELIVERED)
+
