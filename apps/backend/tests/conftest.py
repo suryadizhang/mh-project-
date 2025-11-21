@@ -11,7 +11,6 @@ import random
 import uuid
 from datetime import datetime, timedelta
 from typing import AsyncGenerator
-import os
 
 import pytest
 import pytest_asyncio
@@ -59,6 +58,7 @@ from src.models.user import User as LegacyUser
 from src.core.config import UserRole
 from src.models.booking import Booking, Payment
 from src.models.customer import Customer
+
 # NOTE: Lead and Subscriber not imported to avoid multiple declarative_base conflicts
 # from src.models.legacy_lead_newsletter import Lead, Subscriber
 from unittest.mock import AsyncMock, MagicMock
@@ -174,15 +174,11 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
     """Create database session for testing with multi-schema search path."""
     from src.core.database import engine
 
-    async_session_maker = async_sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
+    async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with async_session_maker() as session:
         try:
             # Set search_path to include core (bookings/payments), identity (stations), and public (users)
-            await session.execute(
-                text("SET search_path TO core, identity, public")
-            )
+            await session.execute(text("SET search_path TO core, identity, public"))
             yield session
         finally:
             # Ensure session is properly closed
@@ -206,21 +202,11 @@ async def create_test_bookings(db_session, test_admin_user):
 
     async def _create(count=10):
         try:
-            await db_session.execute(
-                text("DELETE FROM core.payments WHERE TRUE")
-            )
-            await db_session.execute(
-                text("DELETE FROM core.bookings WHERE TRUE")
-            )
-            await db_session.execute(
-                text("DELETE FROM core.customers WHERE TRUE")
-            )
-            await db_session.execute(
-                text("DELETE FROM identity.stations WHERE code LIKE 'TEST-%'")
-            )
-            await db_session.execute(
-                text("DELETE FROM users WHERE id LIKE 'test-user-%'")
-            )
+            await db_session.execute(text("DELETE FROM core.payments WHERE TRUE"))
+            await db_session.execute(text("DELETE FROM core.bookings WHERE TRUE"))
+            await db_session.execute(text("DELETE FROM core.customers WHERE TRUE"))
+            await db_session.execute(text("DELETE FROM identity.stations WHERE code LIKE 'TEST-%'"))
+            await db_session.execute(text("DELETE FROM users WHERE id LIKE 'test-user-%'"))
             await db_session.commit()
         except Exception:
             await db_session.rollback()
@@ -262,9 +248,9 @@ async def create_test_bookings(db_session, test_admin_user):
         # Create test customer in core.customers
         test_customer = Customer(
             station_id=test_station_id,
-            email_encrypted=f"testuser{timestamp}@example.com",  # Plaintext for testing
-            name_encrypted="Test User",  # Plaintext for testing
-            phone_encrypted="+1234567890",  # Plaintext for testing
+            email_encrypted=f"testuser{timestamp}@example.com",
+            name_encrypted="Test User",
+            phone_encrypted="+1234567890",
             source="website",
         )
         db_session.add(test_customer)
@@ -282,18 +268,12 @@ async def create_test_bookings(db_session, test_admin_user):
                 date=event_datetime,
                 slot=random.choice(slots),
                 total_guests=random.randint(4, 20),
-                price_per_person_cents=random.randint(
-                    5000, 10000
-                ),  # $50-$100 per person
-                total_due_cents=random.randint(
-                    20000, 200000
-                ),  # $200-$2000 total
+                price_per_person_cents=random.randint(5000, 10000),  # $50-$100 per person
+                total_due_cents=random.randint(20000, 200000),  # $200-$2000 total
                 deposit_due_cents=10000,  # $100 deposit
                 balance_due_cents=random.randint(0, 190000),
                 status=random.choice(statuses),
-                payment_status=random.choice(
-                    ["pending", "deposit_paid", "paid"]
-                ),
+                payment_status=random.choice(["pending", "deposit_paid", "paid"]),
                 source="website",
             )
             bookings.append(booking)
@@ -332,6 +312,23 @@ async def create_test_payments(db_session):
         return payments
 
     return _create
+
+
+# ============================================================================
+# FIXTURE ALIASES FOR COMPREHENSIVE ENDPOINT TESTS
+# ============================================================================
+
+
+@pytest_asyncio.fixture
+async def client(async_client) -> AsyncGenerator[AsyncClient, None]:
+    """Alias for async_client - used by comprehensive endpoint tests."""
+    yield async_client
+
+
+@pytest_asyncio.fixture
+async def db(db_session) -> AsyncGenerator[AsyncSession, None]:
+    """Alias for db_session - used by comprehensive endpoint tests."""
+    yield db_session
 
 
 # ============================================================================
@@ -387,22 +384,22 @@ async def mock_referral_service(db_session, mock_event_service, test_lead):
     """Create real ReferralService with mocked dependencies for testing."""
     # Mock notification service
     mock_notification = AsyncMock()
-    
+
     service = ReferralService(
         db=db_session,
         event_service=mock_event_service,
         notification_service=mock_notification,
     )
     service.notification_service = mock_notification
-    
+
     # Mock _get_lead to bypass database enum issues and return test_lead
     async def mock_get_lead(lead_id):
         if str(lead_id) == str(test_lead.id):
             return test_lead
         return None
-    
+
     service._get_lead = AsyncMock(side_effect=mock_get_lead)
-    
+
     return service
 
 
@@ -411,7 +408,7 @@ async def mock_campaign_service(db_session, mock_event_service):
     """Create real NurtureCampaignService with mocked dependencies for testing."""
     # Mock notification service
     mock_notification = AsyncMock()
-    
+
     service = NurtureCampaignService(
         db=db_session,
         event_service=mock_event_service,
@@ -424,21 +421,23 @@ async def mock_campaign_service(db_session, mock_event_service):
 @pytest_asyncio.fixture
 async def test_lead(db_session):
     """Create a test lead in the database using raw SQL to avoid declarative_base conflicts.
-    
+
     Note: Lead model uses legacy_declarative_base which conflicts with models.base.Base.
     Using raw SQL insertion to bypass SQLAlchemy model conflicts.
     """
     lead_id = uuid.uuid4()
-    
+
     # Insert minimal test lead using raw SQL (only required columns)
     await db_session.execute(
-        text("""
+        text(
+            """
             INSERT INTO lead.leads (
                 id, source, status, score, created_at, updated_at
             ) VALUES (
                 :id, :source, :status, :score, :created_at, :updated_at
             )
-        """),
+        """
+        ),
         {
             "id": lead_id,
             "source": "web_quote",  # Use actual enum VALUE (web_quote) not name (WEB_QUOTE)
@@ -446,36 +445,38 @@ async def test_lead(db_session):
             "score": 0,
             "created_at": datetime.utcnow(),
             "updated_at": datetime.utcnow(),
-        }
+        },
     )
     await db_session.commit()
-    
+
     # Return a simple object with just the ID (that's all tests need)
     class MockLead:
         def __init__(self):
             self.id = lead_id
-    
+
     return MockLead()
 
 
 @pytest_asyncio.fixture
 async def test_subscriber(db_session):
     """Create a test subscriber in the database using raw SQL to avoid declarative_base conflicts.
-    
+
     Note: Subscriber model uses legacy_declarative_base which conflicts with models.base.Base.
     Using raw SQL insertion to bypass SQLAlchemy model conflicts.
     Subscriber email/phone are encrypted, so we need to handle that properly.
     """
     subscriber_id = uuid.uuid4()
     subscriber_email = f"testsub{int(time.time())}@example.com"
-    
+
     # Import CryptoUtil to encrypt email (required field)
     from src.models.legacy_encryption import CryptoUtil
+
     email_encrypted = CryptoUtil.encrypt_text(subscriber_email)
-    
+
     # Insert test subscriber using raw SQL
     await db_session.execute(
-        text("""
+        text(
+            """
             INSERT INTO newsletter.subscribers (
                 id, email_enc, subscribed, sms_consent, email_consent,
                 engagement_score, total_emails_sent, total_emails_opened, total_clicks,
@@ -485,7 +486,8 @@ async def test_subscriber(db_session):
                 :engagement_score, :total_emails_sent, :total_emails_opened, :total_clicks,
                 :created_at, :updated_at
             )
-        """),
+        """
+        ),
         {
             "id": subscriber_id,
             "email_enc": email_encrypted,
@@ -498,15 +500,14 @@ async def test_subscriber(db_session):
             "total_clicks": 0,
             "created_at": datetime.utcnow(),
             "updated_at": datetime.utcnow(),
-        }
+        },
     )
     await db_session.commit()
-    
+
     # Return a simple object with ID
     class MockSubscriber:
         def __init__(self):
             self.id = subscriber_id
             self.email = subscriber_email
-    
-    return MockSubscriber()
 
+    return MockSubscriber()
