@@ -40,6 +40,13 @@ coverage/
 __pycache__/
 *.pyc
 
+# Backend Python/TypeScript mixed directories (Python backend, skip TS linting)
+apps/backend/src/config/
+apps/backend/src/**/*.ts
+
+# GSM Client library (separate build process)
+libs/gsm-client/
+
 # Turbo
 .turbo/
 

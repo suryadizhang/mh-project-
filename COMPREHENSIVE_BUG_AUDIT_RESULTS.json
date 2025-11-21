@@ -1,0 +1,2658 @@
+{
+  "timestamp": "2025-11-19T19:37:22.308509",
+  "files_scanned": 528,
+  "lines_scanned": 959,
+  "total_issues": 529,
+  "findings": {
+    "critical": [],
+    "high": [],
+    "medium": [],
+    "low": [
+      {
+        "file": "apps\\backend\\src\\comprehensive_health_check.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\drop_scheduler_table.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\main.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\start_server.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\start_with_gsm.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\test_enterprise_architecture.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\validate_phase1.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\deps.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\deps_enhanced.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\test_endpoints.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\config\\ai_booking_config.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\config\\ai_booking_config_v2.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\config\\ai_response_validator.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\config\\gsm_config.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\audit_logger.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\base_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\cache.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\circuit_breaker.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\compliance.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\config.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\container.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\database.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\dependencies.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\dtos.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\exceptions.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\idempotency.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\metrics.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\middleware.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\openai_monitor.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\query_optimizer.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\rate_limiting.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\repository.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\security.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\security_middleware.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\service_registry.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\cqrs\\base.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\cqrs\\booking_commands.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\cqrs\\booking_queries.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\cqrs\\command_handlers.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\cqrs\\crm_operations.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\cqrs\\lead_commands.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\cqrs\\query_handlers.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\cqrs\\registry.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\middleware\\rate_limit.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\middleware\\structured_logging.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\audit.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\base.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\booking.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\business.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\call_recording.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\customer.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\escalation.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\knowledge_base.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\lead.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\legacy_base.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\legacy_booking_models.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\legacy_core.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\legacy_declarative_base.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\legacy_encryption.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\legacy_events.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\legacy_feedback.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\legacy_lead_newsletter.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\legacy_models_init.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\legacy_notification_groups.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\legacy_qr_tracking.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\legacy_social.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\legacy_stripe_models.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\payment_notification.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\review.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\role.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\station.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\system_event.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\terms_acknowledgment.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\user.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\models\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\monitoring\\activity_classifier.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\monitoring\\ai_alert_analyzer.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\monitoring\\ALERT_EXAMPLES.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\monitoring\\alert_feedback_loop.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\monitoring\\alert_rule_model.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\monitoring\\alert_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\monitoring\\cli.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\monitoring\\metric_collector.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\monitoring\\metric_subscriber.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\monitoring\\middleware.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\monitoring\\models.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\monitoring\\monitoring_state.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\monitoring\\predictive_monitor.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\monitoring\\rule_evaluator.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\monitoring\\startup.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\monitoring\\threshold_monitor.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\monitoring\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\repositories\\booking_repository.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\repositories\\customer_repository.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\repositories\\newsletter_analytics.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\repositories\\optimized_queries.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\repositories\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routes\\payment_email_routes.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\schemas\\booking.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\schemas\\booking_schemas.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\schemas\\health.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\schemas\\social.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\schemas\\stripe_schemas.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\schemas\\terms_acknowledgment.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\schemas\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\scripts\\verify_terms_proof.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\ai_booking_assistant_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\ai_lead_management.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\ai_marketing_automation.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\ai_newsletter_generator.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\audit_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\booking_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\conversation_history_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\coupon_reminder_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\email_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\encryption_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\enhanced_nlp_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\enhanced_notification_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\escalation_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\event_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\faq_health_check.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\google_oauth.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\holiday_analytics_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\holiday_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\image_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\ip_verification_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\knowledge_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\knowledge_sync_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\lead_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\newsletter_analytics_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\newsletter_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\notification_group_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\notification_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\nurture_campaign_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\openai_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\payment_email_monitor.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\payment_email_scheduler.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\payment_instructions_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\payment_matcher_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\qr_tracking_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\recording_linking_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\referral_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\review_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\ringcentral_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\ringcentral_sms.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\ringcentral_voice.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\ringcentral_voice_ai.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\ringcentral_voice_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\speech_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\station_notification_sync.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\stripe_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\tone_analyzer.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\totp_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\unified_notification_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\webhook_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\whatsapp_notification_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\tasks\\cancel_expired_bookings.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\tasks\\coupon_reminder_scheduler.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\tests\\test_knowledge_integration.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\tests\\test_realtime_voice.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\utils\\auth.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\utils\\encryption.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\utils\\guard.py",
+        "line": 1,
+        "message": "Unfinished work: #!/usr/bin/env python3\n\"\"\"\nRepository Guard Script - Comprehensive Security & Quality Enforcement\n\nThis script enforces repository hygiene, separation rules, and security\npolicies. Fails build on violations. Designed for CI/CD integration.\n\nAuthor: Release Management Team\nDate: September 1, 2025\n\"\"\"\n\nimport argparse\nfrom dataclasses import dataclass\nimport json\nfrom pathlib import Path\nimport re\nimport sys\n\nfrom colorama import init\n\n# Initialize colorama for cross-platform colored output\ninit()\n\n\n@dataclass\nclass Violation:\n    \"\"\"Represents a single policy violation\"\"\"\n\n    file_path: str\n    violation_type: str\n    description: str\n    line_number: int = 0\n    content: str = \"\"\n\n\nclass RepositoryGuard:\n    \"\"\"Main guard class for repository policy enforcement\"\"\"\n\n    def __init__(self, repo_root: Path):\n        self.repo_root = repo_root\n        self.violations: list[Violation] = []\n        self.stats = {\n            \"files_scanned\": 0,\n            \"empty_files\": 0,\n            \"placeholder_violations\": 0,\n            \"security_violations\": 0,\n            \"separation_violations\": 0,\n            \"cross_import_violations\": 0,\n        }\n\n        # Define folder structure and rules\n        self.folders = {\n            \"myhibachi-frontend\": {\n                \"type\": \"Next.js Frontend\",\n                \"allowed_env_pattern\": r\"NEXT_PUBLIC_\",\n                \"forbidden_imports\": [\n                    r\"\\.\\.\\/myhibachi-.*backend\",\n                    r\"stripe.*server\",\n                    r\"process\\.env\\.(?!NEXT_PUBLIC_)\",\n                ],\n                \"dev_port\": 3000,\n            },\n            \"myhibachi-backend-fastapi\": {\n                \"type\": \"FastAPI Backend\",\n                \"allowed_stripe\": True,\n                \"dev_port\": 8000,\n            },\n            \"myhibachi-backend\": {\n                \"type\": \"Legacy Backend (DEPRECATED)\",\n                \"deprecated\": True,\n                \"forbidden_routes\": [r\"/api/stripe/\"],\n                \"dev_port\": 8001,\n            },\n            \"myhibachi-ai-backend\": {\n                \"type\": \"AI Backend\",\n                \"forbidden_env\": [\n                    \"STRIPE_SECRET_KEY\",\n                    \"STRIPE_WEBHOOK_SECRET\",\n                ],\n                \"dev_port\": 8002,\n            },\n        }\n\n        # Security patterns\n        self.secret_patterns = [\n            (r\"sk_live_[a-zA-Z0-9]{99,}\", \"Live Stripe Secret Key\"),\n            (r\"sk_test_[a-zA-Z0-9]{99,}\", \"Test Stripe Secret Key\"),\n            (r\"whsec_[a-zA-Z0-9]{32,}\", \"Stripe Webhook Secret\"),\n            (\n                r\"pk_live_[a-zA-Z0-9]{99,}\",\n                \"Live Stripe Publishable Key (should be in env)\",\n            ),\n            (r\"rk_live_[a-zA-Z0-9]{99,}\", \"Live Stripe Restricted Key\"),\n        ]\n\n        # Placeholder patterns\n        self.placeholder_patterns = [\n            (r\"\\bTODO\\b(?!\\s*:?\\s*\\w)\", \"TODO placeholder\"),\n            (r\"\\bFIXME\\b(?!\\s*:?\\s*\\w)\", \"FIXME placeholder\"),\n            (r\"\\blorem\\s+ipsum\\b\", \"Lorem ipsum placeholder\"),\n            (r\"\\bREPLACEME\\b\", \"REPLACEME placeholder\"),\n            (r\"\\byour[_-]?key[_-]?here\\b\", \"Your key here placeholder\"),\n            (r\"\\bplaceholder[_-]?text\\b\", \"Placeholder text\"),\n        ]\n\n        # File patterns to skip\n        self.skip_patterns = [\n            r\"\\.git/\",\n            r\"node_modules/\",\n            r\"__pycache__/\",\n            r\"\\.next/\",\n            r\"\\.venv/\",\n            r\"\\.env\\.local$\",\n            r\"\\.env$\",\n            r\"BUILD_ID$\",\n            r\"\\.(lock|log|pyc|jpg|png|ico|svg|woff|woff2|ttf|eot)$\",\n            r\"package-lock\\.json$\",\n            r\"yarn\\.lock$\",\n            r\"\\.git\",\n            r\"CHANGELOG\",\n            r\"LICENSE\",\n        ]\n\n    def should_skip_file(self, file_path: Path) -> bool:\n        \"\"\"Check if file should be skipped based on patterns\"\"\"\n        relative_path = str(file_path.relative_to(self.repo_root))\n        for pattern in self.skip_patterns:\n            if re.search(pattern, relative_path, re.IGNORECASE):\n                return True\n        return False\n\n    def scan_file_for_violations(self, file_path: Path) -> None:\n        \"\"\"Scan a single file for all types of violations\"\"\"\n        if self.should_skip_file(file_path):\n            return\n\n        relative_path = str(file_path.relative_to(self.repo_root))\n        self.stats[\"files_scanned\"] += 1\n\n        try:\n            # Check for empty files\n            if file_path.stat().st_size == 0:\n                if file_path.name != \".gitkeep\":\n                    self.violations.append(\n                        Violation(\n                            relative_path,\n                            \"EMPTY_FILE\",\n                            \"Zero-byte file detected\",\n                        )\n                    )\n                    self.stats[\"empty_files\"] += 1\n                return\n\n            # Read file content\n            try:\n                content = file_path.read_text(encoding=\"utf-8\", errors=\"ignore\")\n            except Exception:\n                return  # Skip binary files\n\n            # Check for whitespace-only files\n            if content.strip() == \"\":\n                self.violations.append(\n                    Violation(\n                        relative_path,\n                        \"WHITESPACE_ONLY\",\n                        \"File contains only whitespace\",\n                    )\n                )\n                self.stats[\"empty_files\"] += 1\n                return\n\n            lines = content.split(\""
+      },
+      {
+        "file": "apps\\backend\\src\\utils\\guard.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\utils\\pagination.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\utils\\query_optimizer.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\utils\\station_code_generator.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\utils\\stripe_setup.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\utils\\timezone_utils.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\utils\\validators.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\utils\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\workers\\campaign_metrics_tasks.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\workers\\celery_config.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\workers\\escalation_tasks.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\workers\\monitoring_tasks.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\workers\\outbox_processors.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\workers\\recording_tasks.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\workers\\review_worker.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\utils\\ringcentral\\ringcentral_seed_data.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\utils\\ringcentral\\ringcentral_utils.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\email\\base.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\email\\newsletter_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\email\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\knowledge\\availability.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\knowledge\\business_rules.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\knowledge\\faq_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\knowledge\\formatters.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\knowledge\\knowledge_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\knowledge\\menu_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\knowledge\\training_data.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\knowledge\\upsell_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\knowledge\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\newsletter\\sms_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\realtime_voice\\audio_processor.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\realtime_voice\\call_session.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\realtime_voice\\deepgram_stt_bridge.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\realtime_voice\\metrics.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\realtime_voice\\websocket_handler.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\realtime_voice\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\social\\social_ai_generator.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\social\\social_ai_tools.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\social\\social_clients.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\social\\social_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\email\\providers\\ionos.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\services\\email\\providers\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\admin.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\admin_analytics.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\auth.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\auth_audit.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\bookings.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\booking_enhanced.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\campaigns.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\conversations.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\faq_settings.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\health.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\health_checks.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\knowledge_sync.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\leads.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\monitoring_dashboard.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\monitoring_rules.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\newsletter.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\payments.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\qr_tracking.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\realtime_voice.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\recordings.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\referrals.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\reviews.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\ringcentral_ai_webhooks.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\ringcentral_voice_webhooks.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\ringcentral_webhooks.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\security.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\sms_campaigns.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\station_admin.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\station_auth.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\stripe.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\voice_webhooks.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\websocket_router.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\admin\\error_logs.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\admin\\notification_groups.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\admin\\social.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\admin\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\webhooks\\google_business_webhook.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\webhooks\\meta_webhook.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\webhooks\\meta_webhook_refactored.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\webhooks\\ringcentral_webhook.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\webhooks\\stripe_webhook.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\routers\\v1\\webhooks\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\models\\ai_hospitality.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\models\\ai_hospitality_training.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\ai\\env.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\env.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\000_create_base_users_table.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\001_create_crm_schemas.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\001_initial_stripe_tables.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\002_create_read_projections.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\003_add_lead_newsletter_schemas.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\003_add_social_media_integration.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\004_add_customer_review_system.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\004_add_station_multi_tenant_rbac.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\005_add_qr_code_tracking.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\005_add_users_table.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\006_add_roles_permissions.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\006_create_audit_logs_system.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\007_add_soft_delete_support.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\007_fix_lead_enum_values.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\008_add_user_roles.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\009_payment_notifications.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\010_add_ai_hospitality_training_system.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\010_escalation_call_recording.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\011_add_audit_logging.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\012_add_2fa_ip_verification.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\013_add_deposit_deadline.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\014_add_sms_consent.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\015_add_terms_acknowledgment.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\06fc7e9891b1_merge_all_heads.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\198b329960a9_add_customer_review_blog_posts_and_.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\25dc17ff6a26_add_message_log_table.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\3907a0a8e118_add_error_logs_table.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\4a931353b079_add_pgvector_for_ai_semantic_search.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\4ec9e57ea53e_add_escalation_performance_indexes.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\5034d1bfa5f0_add_conversation_linking_indexes.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\53bf4e839c3c_merge_terms_system_with_main.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\573ac0543ebb_create_alert_rules_table.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\5f6cb2dfed84_add_monitoring_alert_tables.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\6e2245429ea8_add_ringcentral_ai_transcript_fields.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\73b5896f4fd5_merge_escalation_and_business_migrations.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\7ca3dac9d866_create_system_events_table.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\8ecb9a7d48f7_add_menu_items_table.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\8f571102b6b2_add_performance_indexes_for_ai_and_.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\90164363b9b9_add_referral_tables.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\987eae60d297_add_ai_training_quality_index.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\9c41683cf436_merge_ai_training_and_alerts.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\9fd62e8ed3b4_merge_migrations.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\a1b2c3d4e5f6_create_notification_groups_tables.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\ba857522523f_add_consent_records_table.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\bd8856cf6aa0_create_knowledge_base_tables.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\cd22216ae9d3_merge_roles_migrations.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\e1814ce1d0e9_final_master_merge_all_12_heads.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\e636a2d56d82_add_businesses_table_for_white_label.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\e8e33e1e5658_add_business_table_for_white_label.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\ea9069521d16_update_indexes_and_constraints.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\f069ddb440f7_merge_payment_notifications.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\alembic\\versions\\f5a8b9c2d3e4_add_sms_tracking_and_delivery_events.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\ai\\versions\\56d701cf2472_initial_ai_router_schema_with_.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\db\\migrations\\ai\\versions\\cdf67096c06d_update_chat_system_with_new_models.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\cqrs\\social\\social_commands.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\cqrs\\social\\social_command_handlers.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\cqrs\\social\\social_queries.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\cqrs\\social\\social_query_handlers.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\auth\\endpoints.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\auth\\middleware.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\auth\\models.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\auth\\oauth_models.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\auth\\station_auth.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\auth\\station_middleware.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\auth\\station_models.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\auth\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\logging\\pii_masking.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\core\\logging\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\admin\\email_review.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\admin\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\container.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\CONTAINER_MIGRATION_EXAMPLE.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\voice_assistant.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\health\\config_health.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\superadmin\\variables.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\tests\\test_customer_quotes.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\api.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\example_refactor.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\webhooks\\sms_terms_webhook.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\websockets\\compliance_manager.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\websockets\\escalation_manager.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\ai_costs.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\ai_readiness.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\analytics.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\analytics_holidays.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\auth.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\bookings.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\campaigns.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\customers.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\dev_role_switch.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\google_oauth.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\health.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\inbox.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\leads.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\multi_channel_ai.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\newsletters.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\payment_calculator.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\payment_notifications_admin.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\rate_limit_metrics.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\role_management.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\shadow_learning.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\test_ai_simple.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\user_management.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\escalations\\endpoints.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\escalations\\schemas.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\escalations\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\inbox\\endpoints.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\inbox\\models.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\inbox\\router.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\inbox\\schemas.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\inbox\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\knowledge_sync\\router.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\knowledge_sync\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\schemas\\user.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\webhooks\\ringcentral.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\webhooks\\twilio.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\webhooks\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\websockets\\compliance.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\websockets\\escalations.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\ai\\chat.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\ai\\orchestrator.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\v1\\endpoints\\ai\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\agents\\base_agent.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\agents\\customer_care_agent.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\agents\\knowledge_agent.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\agents\\lead_nurturing_agent.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\agents\\operations_agent.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\agents\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\cache\\examples.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\cache\\semantic_cache.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\cache\\test_semantic_cache.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\cache\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\auth.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\config.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\database.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\logging_config.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\main.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\models.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\monitoring.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\schemas.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\websocket_manager.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\examples\\router_examples.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\memory\\analyze_tables.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\memory\\create_tables.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\memory\\memory_backend.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\memory\\memory_factory.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\memory\\neo4j_memory.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\memory\\postgresql_memory.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\memory\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\ml\\feedback_processor.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\ml\\model_deployment.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\ml\\model_fine_tuner.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\ml\\pii_scrubber.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\ml\\training_dataset_builder.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\ml\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\monitoring\\alerts.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\monitoring\\cost_monitor.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\monitoring\\growth_tracker.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\monitoring\\pricing.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\monitoring\\usage_tracker.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\monitoring\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\ai_orchestrator.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\test_human_escalation_integration.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\test_orchestrator_reasoning.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\reasoning\\complexity_router.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\reasoning\\human_escalation.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\reasoning\\multi_agent.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\reasoning\\react_agent.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\reasoning\\test_human_escalation.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\reasoning\\test_multi_agent.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\reasoning\\test_orchestrator_integration.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\reasoning\\test_reasoning.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\reasoning\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\routers\\intent_router.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\routers\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\scheduler\\follow_up_scheduler.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\scheduler\\inactive_user_detection.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\scheduler\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\services\\emotion_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\services\\knowledge_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\services\\tone_analyzer.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\services\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\shadow\\chat_integration.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\shadow\\confidence_predictor.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\shadow\\local_model.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\shadow\\models.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\shadow\\model_router.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\shadow\\quality_monitor.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\shadow\\readiness_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\shadow\\similarity_evaluator.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\shadow\\tutor_logger.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\shadow\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\tests\\apply_phase1_optimizations.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\tests\\audit_scheduler_integration.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\tests\\check_query_plan.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\tests\\comprehensive_audit.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\tests\\detailed_profiling.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\tests\\profile_schedule_performance.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\tests\\test_detailed.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\tests\\test_emotion_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\tests\\test_follow_up_scheduler.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\tests\\test_integration.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\tests\\test_memory.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\tests\\test_performance_optimizations.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\tests\\test_phase2a_improvements.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\tests\\test_phase2c_booking_performance.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\tests\\test_quick.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\tests\\test_scheduler_integration.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\tests\\verify_phase1_performance.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\tests\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\providers\\base.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\providers\\examples.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\providers\\factory.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\providers\\hybrid_provider.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\providers\\llama_provider.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\providers\\openai_provider.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\providers\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\schemas\\orchestrator_schemas.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\schemas\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\services\\conversation_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\services\\phase3_services.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\services\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\tools\\base_tool.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\tools\\pricing_tool.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\tools\\protein_tool.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\tools\\travel_fee_tool.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\orchestrator\\tools\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\ml\\jobs\\kb_refresh.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\ml\\jobs\\performance_reporter.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\ml\\jobs\\training_collector.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\ml\\jobs\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\routers\\admin.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\routers\\chat.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\routers\\nlp_monitoring.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\routers\\webhooks.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\routers\\websocket.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\routers\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\admin_alert_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\admin_management_ai.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\agent_gateway.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\agent_namespace.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\ai_cache_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\ai_pipeline.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\channel_manager.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\chat_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\chef_availability_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\customer_booking_ai.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\intelligent_model_router.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\knowledge_base.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\knowledge_base_simple.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\model_ladder.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\monitoring.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\multi_channel_ai_handler.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\openai_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\pricing_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\prompt_registry.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\protein_calculator_service.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\role_based_ai.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\self_learning_ai.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\tool_registry.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\websocket_manager.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\services\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\utils\\content_classifier.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\utils\\prompts.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\utils\\sentiment_analyzer.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\utils\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\routers\\v1\\unified_chat.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\api\\ai\\endpoints\\routers\\v1\\__init__.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      },
+      {
+        "file": "apps\\backend\\src\\alembic\\versions\\add_escalation_call_recording.py",
+        "line": 0,
+        "message": "Could not fully scan file: missing ), unterminated subpattern at position 10"
+      }
+    ]
+  }
+}
