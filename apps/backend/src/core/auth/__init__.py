@@ -13,7 +13,7 @@ from core.auth.middleware import (
     require_permission,
     setup_auth_middleware,
 )
-from core.auth.models import Permission, User, UserSession
+from core.auth.models import Permission, StationUser, UserSession
 from core.config import UserRole  # UserRole is in core.config, not core.auth.models
 from fastapi import Depends, HTTPException, status
 

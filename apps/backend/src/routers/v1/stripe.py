@@ -14,14 +14,13 @@ if TYPE_CHECKING:
 
 settings = get_settings()
 from core.database import get_db
-from models import Payment
-# TODO: Legacy stripe models not migrated - needs refactor
-# from models.legacy_stripe_models import (
-#     Invoice,
-#     Refund,
-#     StripePayment,
-#     WebhookEvent,
-# )
+from models.legacy_core import CorePayment
+from models.legacy_stripe_models import (
+    Invoice,
+    Refund,
+    StripePayment,
+    WebhookEvent,
+)
 from schemas.stripe_schemas import (
     CheckoutSessionResponse,
     CheckoutSessionVerifyRequest,

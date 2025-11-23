@@ -2,10 +2,11 @@
 Booking model and related enums
 """
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from enum import Enum
 
 from sqlalchemy import (
+    Boolean,
     Column,
     DateTime,
     ForeignKey,
@@ -42,25 +43,28 @@ class PaymentStatus(str, Enum):
 
 
 class Booking(BaseModel):
-    """
-    Booking model - ALIGNED WITH PRODUCTION
-    
-    Critical: customer_id is String (VARCHAR) to match customers.id
-    """
+    """Booking model"""
 
     __tablename__ = "bookings"
 
-    # Foreign key - MUST be String to match public.customers.id (VARCHAR in production)
-    customer_id = Column(String, ForeignKey("customers.id"), nullable=True, index=True)  # String, not Integer!
+    customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False, index=True)
     booking_datetime = Column(DateTime, nullable=False, index=True)
     party_size = Column(Integer, nullable=False)
     status = Column(
         SQLEnum(BookingStatus), default=BookingStatus.PENDING, nullable=False, index=True
     )
 
+    # Optimistic locking: Prevents race conditions on concurrent updates
+    # Increment on each update, UPDATE ... WHERE version = old_version
+    version = Column(Integer, default=1, nullable=False)
+
     # Contact information (may be different from customer profile)
     contact_phone = Column(String(20))
     contact_email = Column(String(255))
+
+    # TCPA Compliance - SMS Consent
+    sms_consent = Column(Boolean, default=False, nullable=False)
+    sms_consent_timestamp = Column(DateTime)  # When consent was given
 
     # Special requests and notes
     special_requests = Column(Text)
@@ -73,16 +77,31 @@ class Booking(BaseModel):
     cancelled_at = Column(DateTime)
     cancellation_reason = Column(Text)
 
+    # Dual deadline system: Tell customer 2h (urgency), give them 24h (grace)
+    customer_deposit_deadline = Column(DateTime, index=True)  # 2 hours - shown to customer
+    internal_deadline = Column(DateTime, index=True)  # 24 hours - actual enforcement
+    deposit_deadline = Column(DateTime)  # DEPRECATED - kept for backward compatibility
+
+    # Manual deposit confirmation by admin
+    deposit_confirmed_at = Column(DateTime)  # When admin clicked "Deposit Received"
+    deposit_confirmed_by = Column(String(255))  # Admin email who confirmed
+
+    # Admin hold system to prevent auto-cancellation
+    hold_on_request = Column(Boolean, default=False)  # Admin/CS can hold booking
+    held_by = Column(String(255))  # Staff member who placed the hold
+    held_at = Column(DateTime)  # When the hold was placed
+    hold_reason = Column(Text)  # Reason for holding (e.g., "Customer requested extension", "VIP client")
+
     # Table assignment
     table_number = Column(String(10))
 
     # Relationships
-    customer = relationship("Customer", back_populates="bookings", lazy="select")
-    payments = relationship("Payment", back_populates="booking", lazy="select")
-    # TODO: Fix circular import - Thread model not found in registry
-    # message_threads = relationship("Thread", back_populates="booking", lazy="select", foreign_keys="[Thread.booking_id]")
-    # TODO: Fix circular import - add back after resolving SQLAlchemy mapper issue
-    # reminders = relationship("BookingReminder", back_populates="booking", lazy="select", cascade="all, delete-orphan")
+    # Use fully-qualified module path to avoid "Multiple classes found for path 'Customer'" error
+    # This explicitly references models.customer.Customer, not legacy_core.Customer or api.ai.endpoints.models.Customer
+    customer = relationship("models.customer.Customer", back_populates="bookings", lazy="select")
+    payments = relationship("models.booking.Payment", back_populates="booking", lazy="select")
+    message_threads = relationship("Thread", back_populates="booking", lazy="select", foreign_keys="[Thread.booking_id]")
+    terms_acknowledgments = relationship("TermsAcknowledgment", back_populates="booking", lazy="select")
 
     def __repr__(self):
         return f"<Booking(id={self.id}, customer_id={self.customer_id}, datetime={self.booking_datetime}, status={self.status})>"
@@ -101,6 +120,24 @@ class Booking(BaseModel):
     def can_be_confirmed(self) -> bool:
         """Check if booking can be confirmed"""
         return self.status == BookingStatus.PENDING
+
+    @property
+    def event_time(self) -> str:
+        """Get event time in HH:MM format extracted from booking_datetime"""
+        if self.booking_datetime:
+            return self.booking_datetime.strftime("%H:%M")
+        return "00:00"
+
+    @property
+    def event_date(self) -> "date":
+        """Get event date extracted from booking_datetime
+
+        Raises:
+            ValueError: If booking_datetime is None
+        """
+        if not self.booking_datetime:
+            raise ValueError(f"Booking {self.id} has no booking_datetime set")
+        return self.booking_datetime.date()
 
     def get_time_until_booking(self) -> int | None:
         """Get hours until booking (None if past)"""
@@ -145,7 +182,8 @@ class Payment(BaseModel):
     internal_notes = Column(Text)
 
     # Relationships
-    booking = relationship("Booking", back_populates="payments", lazy="select")
+    # Use fully-qualified module path to avoid "Multiple classes found for path 'Booking'" error
+    booking = relationship("models.booking.Booking", back_populates="payments", lazy="select")
 
     def __repr__(self):
         return f"<Payment(id={self.id}, booking_id={self.booking_id}, amount={self.amount}, method={self.payment_method}, status={self.status})>"

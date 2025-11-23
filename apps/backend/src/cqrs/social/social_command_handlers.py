@@ -13,9 +13,16 @@ from cqrs.social.social_commands import (  # Phase 2C: Updated from api.app.cqrs
     SendSocialReplyCommand,
     UpdateThreadStatusCommand,
 )
-from models import Customer, DomainEvent, Lead, OutboxEntry  # Phase 2C: Updated from api.app.models.core
-from models import Review, SocialMessage, SocialThread
-from models.enums import MessageDirection, ReviewStatus, ThreadStatus
+from models.legacy_core import CoreCustomer  # Phase 2C: Updated from api.app.models.core
+from models.legacy_lead_newsletter import Lead
+from models.legacy_events import OutboxEntry  # Phase 2C: Updated from api.app.models.events
+from models.legacy_social import (  # Phase 2C: Updated from api.app.models.social
+    Review,
+    SocialAccount,
+    SocialIdentity,
+    SocialMessage,
+    SocialThread,
+)
 from services.social.social_service import (
     SocialService,
 )  # Phase 2C: Updated from api.app.services.social_service
@@ -252,7 +259,7 @@ class LinkSocialIdentityToCustomerHandler(CommandHandler[LinkSocialIdentityToCus
                 raise ValueError(f"Social identity {command.social_identity_id} not found")
 
             # Get customer
-            customer_stmt = select(Customer).where(Customer.id == command.customer_id)
+            customer_stmt = select(CoreCustomer).where(CoreCustomer.id == command.customer_id)
             customer_result = await session.execute(customer_stmt)
             customer = customer_result.scalar_one_or_none()
 

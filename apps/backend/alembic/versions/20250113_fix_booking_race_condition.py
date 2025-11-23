@@ -53,7 +53,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = "20250113_fix_race"
+revision = '20250113_fix_race'
 down_revision = None  # UPDATE THIS with actual previous revision
 branch_labels = None
 depends_on = None
@@ -65,22 +65,27 @@ def upgrade():
     """
     # 1. Add version column for optimistic locking
     op.add_column(
-        "bookings", sa.Column("version", sa.Integer(), nullable=False, server_default="1")
+        'bookings',
+        sa.Column('version', sa.Integer(), nullable=False, server_default='1')
     )
 
     # 2. Create unique partial index to prevent double bookings
     # This ensures no two active bookings can exist at the same datetime
     # Partial index only covers active statuses (pending, confirmed, seated)
     op.create_index(
-        "idx_booking_datetime_active",
-        "bookings",
-        ["booking_datetime", "status"],
+        'idx_booking_datetime_active',
+        'bookings',
+        ['booking_datetime', 'status'],
         unique=True,
-        postgresql_where=sa.text("status IN ('pending', 'confirmed', 'seated')"),
+        postgresql_where=sa.text("status IN ('pending', 'confirmed', 'seated')")
     )
 
     # 3. Add index on version column for optimistic locking queries
-    op.create_index("idx_bookings_version", "bookings", ["version"])
+    op.create_index(
+        'idx_bookings_version',
+        'bookings',
+        ['version']
+    )
 
     # Note: Existing data already has version=1 from server_default
     # No backfill needed
@@ -91,8 +96,8 @@ def downgrade():
     Rollback database changes
     """
     # Remove indexes
-    op.drop_index("idx_bookings_version", table_name="bookings")
-    op.drop_index("idx_booking_datetime_active", table_name="bookings")
+    op.drop_index('idx_bookings_version', table_name='bookings')
+    op.drop_index('idx_booking_datetime_active', table_name='bookings')
 
     # Remove version column
-    op.drop_column("bookings", "version")
+    op.drop_column('bookings', 'version')

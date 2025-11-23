@@ -205,11 +205,33 @@ class BookingRepository(BaseRepository[Booking]):
     def check_availability(
         self, booking_datetime: datetime, party_size: int, exclude_booking_id: int | None = None
     ) -> bool:
-        """Check if a time slot is available for the given party size"""
+        """
+        Check if a time slot is available for the given party size
+
+        Uses SELECT FOR UPDATE to prevent race conditions:
+        - Locks rows until transaction commits
+        - Concurrent requests queue instead of racing
+        - Prevents TOCTOU (Time-Of-Check, Time-Of-Use) bugs
+
+        Args:
+            booking_datetime: Desired booking datetime
+            party_size: Number of guests
+            exclude_booking_id: Optional booking ID to exclude (for updates)
+
+        Returns:
+            True if time slot available, False otherwise
+
+        Security:
+            ✅ SELECT FOR UPDATE prevents race conditions
+            ✅ Unique constraint at DB level (idx_booking_datetime_active)
+            ✅ Optimistic locking with version column
+        """
         # Get bookings in the same time window (±2 hours)
         time_window_start = booking_datetime - timedelta(hours=2)
         time_window_end = booking_datetime + timedelta(hours=2)
 
+        # SELECT FOR UPDATE: Lock rows to prevent concurrent modifications
+        # This creates a transaction-level lock that queues concurrent requests
         query = self.session.query(self.model).filter(
             and_(
                 self.model.booking_datetime >= time_window_start,
@@ -218,7 +240,7 @@ class BookingRepository(BaseRepository[Booking]):
                     [BookingStatus.CONFIRMED, BookingStatus.PENDING, BookingStatus.SEATED]
                 ),
             )
-        )
+        ).with_for_update()  # ← RACE CONDITION FIX: Row-level locking
 
         if exclude_booking_id:
             query = query.filter(self.model.id != exclude_booking_id)

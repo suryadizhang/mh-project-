@@ -34,9 +34,9 @@ export default function ContactHtmlRedirect() {
     // Track the scan
     trackQRScan();
 
-    // Redirect to new contact page after brief delay
+    // Redirect to booking page after brief delay
     const timer = setTimeout(() => {
-      router.push("/contact");
+      router.push("/booking");
     }, 500);
 
     return () => clearTimeout(timer);

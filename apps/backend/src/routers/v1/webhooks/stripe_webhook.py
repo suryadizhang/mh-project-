@@ -22,14 +22,14 @@ from sqlalchemy.orm import Session
 import stripe
 
 settings = get_settings()
-from models.legacy_core import Event
-# TODO: Legacy lead/newsletter models not migrated yet - needs refactor
-    # Lead,
-    # LeadSource,
-    # LeadStatus,
-    # SocialThread,
-    # ThreadStatus,
-# )
+from models.legacy_core import CoreEvent
+from models.legacy_lead_newsletter import (
+    Lead,
+    LeadSource,
+    LeadStatus,
+    SocialThread,
+    ThreadStatus,
+)
 from services.ai_lead_management import get_ai_lead_manager
 
 logger = logging.getLogger(__name__)
@@ -113,7 +113,7 @@ async def process_payment_event(stripe_event: dict[str, Any], db: Session) -> di
             db.flush()
 
             # Log lead creation
-            lead_event = Event(
+            lead_event = CoreEvent(
                 event_type="lead_created",
                 entity_type="lead",
                 entity_id=str(existing_lead.id),
@@ -158,7 +158,7 @@ async def process_payment_event(stripe_event: dict[str, Any], db: Session) -> di
         message_content = generate_payment_message(event_type, event_data)
 
         # Create payment event
-        payment_event = Event(
+        payment_event = CoreEvent(
             event_type="payment_notification",
             entity_type="thread",
             entity_id=str(thread.id),
@@ -269,7 +269,7 @@ async def process_dispute_event(stripe_event: dict[str, Any], db: Session) -> di
         db.flush()
 
         # Create dispute event
-        dispute_event = Event(
+        dispute_event = CoreEvent(
             event_type="payment_dispute",
             entity_type="thread",
             entity_id=str(thread.id),
