@@ -1,14 +1,15 @@
 """
 Base model classes and common types
+CRITICAL: Uses unified Base from legacy_declarative_base to avoid registry conflicts
 """
 
 from datetime import datetime, timezone
 from typing import Any
 
 from sqlalchemy import Boolean, Column, DateTime, Integer
-from sqlalchemy.orm import declarative_base
 
-Base = declarative_base()
+# MUST import Base from single source to avoid "Multiple classes found" errors
+from .legacy_declarative_base import Base
 
 
 class BaseModel(Base):

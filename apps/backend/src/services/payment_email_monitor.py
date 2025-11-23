@@ -30,6 +30,7 @@ class PaymentEmailParser:
             "subject": r"payment.*(?:received|succeeded|confirmed)",
             "amount": r"\$?(\d+(?:,\d{3})*(?:\.\d{2})?)",
             "transaction_id": r"(?:payment[_ ]intent|transaction[_ ]id)[:\s]+([a-zA-Z0-9_-]+)",
+            "email": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",
         },
         "venmo": {
             "subject": r"you.*received.*\$",
@@ -37,6 +38,7 @@ class PaymentEmailParser:
             "amount": r"received\s+\$(\d+(?:\.\d{2})?)",
             "username": r"from\s+(@[\w-]+)",
             "phone": r"\b(\d{10})\b",  # Match 10-digit phone number
+            "email": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",
         },
         "zelle": {
             "subject": r"you.*received.*via.*zelle",
@@ -44,6 +46,7 @@ class PaymentEmailParser:
             "amount": r"received\s+\$(\d+(?:,\d{3})*(?:\.\d{2})?)",
             "sender": r"from\s+([\w\s]+?)(?:\s|$)",
             "phone": r"\b(\d{10})\b",  # Match 10-digit phone number
+            "email": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",
         },
         "bank_of_america": {
             "subject": r"payment.*received|deposit.*made",
@@ -76,10 +79,17 @@ class PaymentEmailParser:
                 PaymentEmailParser.PATTERNS["stripe"]["transaction_id"], body, re.IGNORECASE
             )
 
+            # Extract customer email from body
+            email_match = re.search(
+                PaymentEmailParser.PATTERNS["stripe"]["email"], body, re.IGNORECASE
+            )
+
             return {
                 "provider": "stripe",
                 "amount": PaymentEmailParser.clean_amount(amount_match.group(1)),
                 "transaction_id": tx_match.group(1) if tx_match else None,
+                "customer_email": email_match.group(0) if email_match else None,
+                "customer_phone": None,  # Stripe doesn't include phone in emails
                 "status": "confirmed",
                 "parsed_at": datetime.now(timezone.utc).isoformat(),
             }
@@ -147,6 +157,11 @@ class PaymentEmailParser:
                 # Fallback: any 10-digit number in the body
                 phone_match = re.search(r"\b(\d{10})\b", body_text)
 
+            # Extract customer email from body/note
+            email_match = re.search(
+                PaymentEmailParser.PATTERNS["venmo"]["email"], body_text, re.IGNORECASE
+            )
+
             result = {
                 "provider": "venmo",
                 "amount": PaymentEmailParser.clean_amount(amount_match.group(1)),
@@ -155,12 +170,13 @@ class PaymentEmailParser:
                 "customer_phone": (
                     phone_match.group(1) if phone_match else None
                 ),  # Customer's phone from note
+                "customer_email": email_match.group(0) if email_match else None,
                 "status": "pending",  # Venmo requires manual confirmation
                 "parsed_at": datetime.now(timezone.utc).isoformat(),
             }
 
             logger.info(
-                f"Parsed Venmo email: amount=${result['amount']}, sender={result['sender_name']}, username={result.get('sender_username', 'N/A')}, phone={result.get('customer_phone', 'N/A')}"
+                f"Parsed Venmo email: amount=${result['amount']}, sender={result['sender_name']}, username={result.get('sender_username', 'N/A')}, phone={result.get('customer_phone', 'N/A')}, email={result.get('customer_email', 'N/A')}"
             )
             return result
 
@@ -213,7 +229,9 @@ class PaymentEmailParser:
                     sender_name = sender_body.group(1).strip()
 
             # Extract sender email (if available)
-            email_match = re.search(r"[\w\.-]+@[\w\.-]+\.\w+", body_text)
+            email_match = re.search(
+                PaymentEmailParser.PATTERNS["zelle"]["email"], body_text, re.IGNORECASE
+            )
 
             # Extract customer phone number (10 digits) from payment memo/note
             # Look for patterns like: "Memo: 2103884155" or "Note: 2103884155 ady"
@@ -232,12 +250,13 @@ class PaymentEmailParser:
                 "customer_phone": (
                     phone_match.group(1) if phone_match else None
                 ),  # Customer's phone from memo
+                "customer_email": email_match.group(0) if email_match else None,  # Use sender email as customer email
                 "status": "pending",  # Zelle requires manual confirmation
                 "parsed_at": datetime.now(timezone.utc).isoformat(),
             }
 
             logger.info(
-                f"Parsed Zelle email: amount=${result['amount']}, sender={result['sender_name']}, phone={result.get('customer_phone', 'N/A')}"
+                f"Parsed Zelle email: amount=${result['amount']}, sender={result['sender_name']}, phone={result.get('customer_phone', 'N/A')}, email={result.get('customer_email', 'N/A')}"
             )
             return result
 
@@ -324,7 +343,9 @@ class PaymentEmailParser:
 class PaymentEmailMonitor:
     """Monitor Gmail inbox for payment notification emails"""
 
-    def __init__(self, email_address: str, app_password: str):
+    MINIMUM_DEPOSIT = Decimal("100.00")  # $100 minimum deposit to lock booking date
+
+    def __init__(self, email_address: str, app_password: str, db_session=None):
         """
         Initialize email monitor
 
@@ -337,6 +358,7 @@ class PaymentEmailMonitor:
         self.imap_server = "imap.gmail.com"
         self.imap_port = 993
         self.mail = None
+        self.db_session = db_session
 
     def connect(self) -> bool:
         """Connect to Gmail IMAP server"""
@@ -358,6 +380,153 @@ class PaymentEmailMonitor:
                 logger.info("✅ Disconnected from Gmail IMAP")
             except Exception as e:
                 logger.exception(f"Error disconnecting: {e}")
+
+    def find_booking_by_contact_info(self, phone: str | None, email: str | None) -> dict | None:
+        """
+        Look up booking by customer phone or email.
+
+        Args:
+            phone: Customer phone number (10 digits)
+            email: Customer email address
+
+        Returns:
+            Dict with booking info including: id, total_amount, amount_paid, amount_remaining, is_deposit_met
+            None if no booking found
+        """
+        if not self.db_session:
+            logger.error("Database session not available for booking lookup")
+            return None
+
+        if not phone and not email:
+            logger.warning("No phone or email provided for booking lookup")
+            return None
+
+        try:
+            from models.booking import Booking, BookingStatus
+            from sqlalchemy import or_, func
+
+            # Build query to search by phone or email
+            query = self.db_session.query(Booking).filter(
+                Booking.status.in_([BookingStatus.PENDING, BookingStatus.CONFIRMED])
+            )
+
+            conditions = []
+            if phone:
+                # Normalize phone: remove non-digits, ensure 10 digits
+                clean_phone = ''.join(filter(str.isdigit, phone))
+                # Remove country code if present (11 digits starting with 1)
+                if len(clean_phone) == 11 and clean_phone[0] == '1':
+                    clean_phone = clean_phone[1:]
+                # Match exact 10 digits (booking phones are stored as 10 digits)
+                if len(clean_phone) == 10:
+                    conditions.append(Booking.contact_phone == clean_phone)
+
+            if email:
+                conditions.append(func.lower(Booking.contact_email) == email.lower())
+
+            if conditions:
+                query = query.filter(or_(*conditions))
+
+            # Get most recent booking
+            booking = query.order_by(Booking.created_at.desc()).first()
+
+            if not booking:
+                logger.info(f"No active booking found for phone={phone}, email={email}")
+                return None
+
+            # Calculate payment totals
+            from models.legacy_core import CorePayment
+            payments = self.db_session.query(Payment).filter(
+                Payment.booking_id == booking.id,
+                Payment.status == "completed"
+            ).all()
+
+            amount_paid = sum(p.amount for p in payments)
+
+            # Calculate total amount (assuming $55/adult pricing logic exists in booking)
+            # For now, use a placeholder - should integrate with booking_service pricing
+            total_amount = Decimal("550.00")  # Minimum booking amount
+            if hasattr(booking, 'total_amount') and booking.total_amount:
+                total_amount = booking.total_amount
+
+            amount_remaining = total_amount - amount_paid
+            is_deposit_met = amount_paid >= self.MINIMUM_DEPOSIT
+
+            return {
+                "booking_id": booking.id,
+                "customer_id": booking.customer_id,
+                "booking_datetime": booking.booking_datetime,
+                "party_size": booking.party_size,
+                "status": booking.status.value,
+                "total_amount": total_amount,
+                "amount_paid": amount_paid,
+                "amount_remaining": amount_remaining,
+                "is_deposit_met": is_deposit_met,
+                "deposit_required": self.MINIMUM_DEPOSIT,
+                "contact_phone": booking.contact_phone,
+                "contact_email": booking.contact_email,
+            }
+
+        except Exception as e:
+            logger.exception(f"Error looking up booking: {e}")
+            return None
+
+    def validate_payment_amount(self, payment_data: dict, booking_info: dict) -> dict:
+        """
+        Validate payment amount against booking requirements.
+
+        Args:
+            payment_data: Parsed payment data with 'amount'
+            booking_info: Booking data from find_booking_by_contact_info()
+
+        Returns:
+            Dict with validation results:
+            - is_valid: Whether payment is acceptable
+            - meets_deposit: Whether $100 minimum deposit is met with this payment
+            - new_amount_paid: Total after this payment
+            - amount_remaining: Remaining balance after payment
+            - message: Human-readable status message
+        """
+        payment_amount = payment_data.get("amount", Decimal("0"))
+        current_paid = booking_info.get("amount_paid", Decimal("0"))
+        total_required = booking_info.get("total_amount", Decimal("550.00"))
+
+        new_amount_paid = current_paid + payment_amount
+        amount_remaining = total_required - new_amount_paid
+
+        # Check if this payment meets the minimum deposit
+        was_deposit_met = booking_info.get("is_deposit_met", False)
+        meets_deposit_now = new_amount_paid >= self.MINIMUM_DEPOSIT
+
+        # Determine validity
+        is_valid = True
+        if payment_amount <= 0:
+            is_valid = False
+            message = "Invalid payment amount"
+        elif new_amount_paid > total_required:
+            is_valid = False
+            message = f"Overpayment: ${payment_amount} exceeds remaining ${booking_info['amount_remaining']}"
+        elif not was_deposit_met and meets_deposit_now:
+            message = f"✅ Deposit met! ${new_amount_paid} paid, ${amount_remaining} remaining. Booking date is LOCKED."
+        elif not meets_deposit_now:
+            shortage = self.MINIMUM_DEPOSIT - new_amount_paid
+            message = f"⚠️ Partial payment received: ${payment_amount}. Need ${shortage} more to meet $100 deposit and lock booking date."
+        elif amount_remaining <= 0:
+            message = f"✅ Booking fully paid! ${new_amount_paid} total."
+        else:
+            message = f"✅ Payment received: ${payment_amount}. ${amount_remaining} remaining balance."
+
+        return {
+            "is_valid": is_valid,
+            "meets_deposit": meets_deposit_now,
+            "deposit_was_met": was_deposit_met,
+            "deposit_met_by_this_payment": meets_deposit_now and not was_deposit_met,
+            "payment_amount": payment_amount,
+            "new_amount_paid": new_amount_paid,
+            "amount_remaining": max(Decimal("0"), amount_remaining),
+            "total_required": total_required,
+            "message": message,
+        }
 
     def get_unread_payment_emails(
         self, since_date: datetime | None = None, limit: int = 50

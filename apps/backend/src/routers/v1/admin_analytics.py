@@ -4,12 +4,16 @@ from datetime import date, datetime, timedelta
 from typing import Any
 
 from core.database import get_db
-from models import Booking, Campaign, CampaignEvent, Lead, Subscriber
-from models.enums import (
+from models.legacy_core import CoreBooking
+from models.legacy_lead_newsletter import (
+    Campaign,
+    CampaignEvent,
     CampaignEventType,
     CampaignStatus,
+    Lead,
     LeadQuality,
     LeadStatus,
+    Subscriber,
 )
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
@@ -421,7 +425,7 @@ async def get_customer_lifetime_value(
         - Top customers by value
         - Repeat customer rates
     """
-    from models import Customer
+    from models.legacy_core import CoreCustomer
 
     # Calculate CLV for each customer
     customer_values = (
@@ -726,7 +730,7 @@ async def get_geographic_distribution(db: Session = Depends(get_db)):
 
     Returns distribution by station/location.
     """
-    from core.auth.station_models import Station
+    from models.legacy_identity import Station
 
     # Get bookings by station
     station_distribution = (

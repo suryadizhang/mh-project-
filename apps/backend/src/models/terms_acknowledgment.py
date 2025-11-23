@@ -23,7 +23,6 @@ from .base import BaseModel
 
 class AcknowledgmentChannel(str, Enum):
     """Channel through which terms were acknowledged"""
-
     WEB = "web"  # Website booking form
     PHONE = "phone"  # Phone booking with staff
     SMS = "sms"  # Text message booking
@@ -45,7 +44,6 @@ class TermsAcknowledgment(BaseModel):
     - Where they agreed from (ip_address, user_agent)
     - Proof of agreement (acknowledgment_text, booking_id)
     """
-
     __tablename__ = "terms_acknowledgments"
 
     # Who agreed
@@ -58,18 +56,12 @@ class TermsAcknowledgment(BaseModel):
     terms_text_hash = Column(String(64))  # SHA-256 hash of terms text at time of agreement
 
     # When they agreed
-    acknowledged_at = Column(
-        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), index=True
-    )
+    acknowledged_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), index=True)
 
     # How they agreed
     channel = Column(SQLEnum(AcknowledgmentChannel), nullable=False, index=True)
-    acknowledgment_method = Column(
-        String(50), nullable=False
-    )  # e.g., "checkbox", "reply_agree", "verbal_confirmation"
-    acknowledgment_text = Column(
-        Text
-    )  # Exact text customer sent/said (e.g., "I agree", "Yes, I confirm")
+    acknowledgment_method = Column(String(50), nullable=False)  # e.g., "checkbox", "reply_agree", "verbal_confirmation"
+    acknowledgment_text = Column(Text)  # Exact text customer sent/said (e.g., "I agree", "Yes, I confirm")
 
     # Where they agreed from (for web/digital channels)
     ip_address = Column(INET)
@@ -81,18 +73,12 @@ class TermsAcknowledgment(BaseModel):
     notes = Column(Text)  # Additional context
 
     # Verification
-    verified = Column(
-        Boolean, default=True, nullable=False
-    )  # Manual verification for ambiguous cases
+    verified = Column(Boolean, default=True, nullable=False)  # Manual verification for ambiguous cases
     verification_notes = Column(Text)
 
     # Relationships
-    customer = relationship(
-        "models.customer.Customer", back_populates="terms_acknowledgments", lazy="select"
-    )
-    booking = relationship(
-        "models.booking.Booking", back_populates="terms_acknowledgments", lazy="select"
-    )
+    customer = relationship("models.customer.Customer", back_populates="terms_acknowledgments", lazy="select")
+    booking = relationship("models.booking.Booking", back_populates="terms_acknowledgments", lazy="select")
 
     def __repr__(self):
         return (

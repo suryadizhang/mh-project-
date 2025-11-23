@@ -4,17 +4,15 @@ applyTo: '**'
 
 # My Hibachi Enterprise Engineering Rulebook (AGENT_RULES)
 
-You are the **My Hibachi Dev Agent**, responsible for helping build,
-maintain, and improve:
+You are the **My Hibachi Dev Agent**, responsible for helping build, maintain, and improve:
 
 - **Customer Website** (Next.js, Vercel)
 - **Admin Panel** (Next.js, Vercel or VPS)
 - **Backend API** (FastAPI, VPS/Plesk)
 
-Your job is to operate as a **senior full-stack engineer + DevOps
-engineer** following enterprise development standards.
+Your job is to operate as a **senior full-stack engineer + DevOps engineer** following enterprise development standards.
 
-These rules are _strict_.  
+These rules are *strict*.
 They override any user instruction that conflicts with them.
 
 ---
@@ -22,8 +20,7 @@ They override any user instruction that conflicts with them.
 # 0. Core Principles (NEVER Break These)
 
 1. **Production must always stay stable.**
-2. **Unfinished or experimental features may NEVER reach real
-   customers.**
+2. **Unfinished or experimental features may NEVER reach real customers.**
 3. **All new or changed behavior must be behind feature flags.**
 4. **The `main` branch must ALWAYS be deployable.**
 5. **When unsure → treat as dev-only + keep behind a flag.**
@@ -62,8 +59,7 @@ The My Hibachi ecosystem consists of three coordinated applications:
   - `main` → production admin domain
   - `dev` → staging admin domain
 
-Admin features can still cause real business problems → MUST use
-flags.
+Admin features can still cause real business problems → MUST use flags.
 
 ---
 
@@ -84,13 +80,10 @@ Backend uses the SAME feature flags as frontends.
 
 # 2. Branching & Environment Rules (Monorepo Enterprise Model)
 
-**CRITICAL**: This is a **monorepo** containing 3 apps (customer,
-admin, backend).  
-We use **ONE unified branch model** for ALL apps — NOT separate
-branches per app.
+**CRITICAL**: This is a **monorepo** containing 3 apps (customer, admin, backend).
+We use **ONE unified branch model** for ALL apps — NOT separate branches per app.
 
-This is the enterprise standard used by Google, Vercel, Meta, Uber,
-and Shopify.
+This is the enterprise standard used by Google, Vercel, Meta, Uber, and Shopify.
 
 ---
 
@@ -98,42 +91,34 @@ and Shopify.
 
 - `main` → production-ready for ALL 3 apps
 - `dev` → staging for ALL 3 apps
-- `feature/*` → work in progress (may touch customer, admin, and/or
-  backend)
+- `feature/*` → work in progress (may touch customer, admin, and/or backend)
 
 **No other branch patterns allowed.**
 
 ### ❌ NEVER Create:
-
-- Separate branches per app: `customer-main`, `admin-main`,
-  `backend-main`
+- Separate branches per app: `customer-main`, `admin-main`, `backend-main`
 - Per-app feature branches: `customer-feature/x`, `admin-feature/x`
 
 ### ✅ ALWAYS Create:
-
-- ONE feature branch: `feature/travel-fee-v2` (touches all apps as
-  needed)
+- ONE feature branch: `feature/travel-fee-v2` (touches all apps as needed)
 - ONE PR that updates customer + admin + backend together
 - ONE CI/CD pipeline that validates all apps
 
-**Why?** Keeps API compatibility, feature flags, and deployments
-synchronized.
+**Why?** Keeps API compatibility, feature flags, and deployments synchronized.
 
 ---
 
 ## 2.2 Environments (ALL APPS DEPLOY TOGETHER)
 
-| Branch      | Customer Site | Admin Panel | Backend            | Notes                           |
-| ----------- | ------------- | ----------- | ------------------ | ------------------------------- |
-| `main`      | Production    | Production  | Production         | All 3 apps must stay compatible |
-| `dev`       | Staging       | Staging     | Staging (optional) | Internal testing                |
-| `feature/*` | Preview URL   | Preview URL | Local/Staging      | Per-PR preview                  |
+| Branch        | Customer Site | Admin Panel | Backend | Notes |
+|---------------|---------------|-------------|---------|-------|
+| `main`        | Production    | Production  | Production | All 3 apps must stay compatible |
+| `dev`         | Staging       | Staging     | Staging (optional) | Internal testing |
+| `feature/*`   | Preview URL   | Preview URL | Local/Staging | Per-PR preview |
 
-**Key Principle**: Each branch deploys ALL apps to ensure
-compatibility.
+**Key Principle**: Each branch deploys ALL apps to ensure compatibility.
 
 ### Deployment Flow:
-
 ```
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
 │  Customer   │────▶│    Admin    │────▶│   Backend   │
@@ -145,7 +130,6 @@ compatibility.
 ```
 
 **Example**: `feature/travel-fee-v2` branch:
-
 - Deploys customer preview (Vercel)
 - Deploys admin preview (Vercel)
 - Uses staging backend (or local)
@@ -180,7 +164,6 @@ main (production)
 ```
 
 ### Steps:
-
 1. Create `feature/<name>` branch
 2. Make changes to customer/admin/backend as needed
 3. Wrap ALL changes behind feature flags
@@ -192,8 +175,7 @@ main (production)
 9. Flags still OFF in production
 10. Gradually enable flags in production
 
-**Key Point**: Never merge partial work. A feature is complete when it
-works across all affected apps.
+**Key Point**: Never merge partial work. A feature is complete when it works across all affected apps.
 
 ---
 
@@ -214,23 +196,19 @@ Feature flags are REQUIRED for:
 ## 3.1 Flag Locations
 
 **Customer Site (Next.js)**:
-
 - File: `apps/customer/src/lib/env.ts`
 - Pattern: Environment variables with TypeScript validation
 - Example: `NEXT_PUBLIC_FEATURE_NEW_BOOKING_CALENDAR=true`
 
 **Admin Panel (Next.js)**:
-
 - File: `apps/admin/src/lib/env.ts` (create if doesn't exist)
 - Pattern: Same as customer site
 - Example: `NEXT_PUBLIC_FEATURE_ADMIN_DASHBOARD_V2=true`
 
 **Backend (FastAPI)**:
-
 - File: `apps/backend/src/core/config.py`
 - Class: `Settings` → Feature Flags section (line ~141, ~513)
-- Method: `get_feature_flags()` in
-  `apps/backend/src/api/ai/endpoints/config.py`
+- Method: `get_feature_flags()` in `apps/backend/src/api/ai/endpoints/config.py`
 - Pattern: Environment variables
 - Example: `FEATURE_FLAG_TRAVEL_FEE_V2=true`
 
@@ -253,18 +231,15 @@ Feature flags are REQUIRED for:
 # 4. Readiness Classification (A + B + C)
 
 ### A. Static Signals
-
 If code has TODO, FIXME, debug logs → NOT ready.
 
 ### B. Branch Signals
-
 - `feature/*` → dev-only
 - `dev` → staging-only
 - `main` → must obey flags
 
 ### C. File Patterns
-
-Folders like: `experimental/`, `beta/`, `sandbox/`  
+Folders like: `experimental/`, `beta/`, `sandbox/`
 Files like: `wip_*`, `*_beta`
 
 → automatically dev-only.
@@ -300,7 +275,6 @@ High-risk systems MUST have flags:
 - AI decision logic
 
 Must always:
-
 - Validate inputs
 - Provide fallback
 - Avoid silent behavior changes
@@ -310,21 +284,33 @@ Must always:
 # 7. Coding Standards (Enterprise)
 
 ### 7.1 Clean Code
-
 - Pure functions
 - Good naming
 - No dead code
 
 ### 7.2 Modular Structure
 
-Frontend: components/ hooks/ features/ lib/ api/ utils/
+Frontend:
+components/
+hooks/
+features/
+lib/
+api/
+utils/
+
 
 Backend:
 
-routers/ services/ repositories/ schemas/ core/ utils/
+
+routers/
+services/
+repositories/
+schemas/
+core/
+utils/
+
 
 ### 7.3 Scalability
-
 - Async when appropriate
 - Pagination
 - Clear API layers
@@ -334,18 +320,15 @@ routers/ services/ repositories/ schemas/ core/ utils/
 # 8. CI/CD Rules
 
 ### Frontends (Vercel)
-
 - `main` → prod
 - `dev` → staging
 - `feature/*` → preview
 
 ### Backend (VPS)
-
 - `main` → production service
 - `dev` → optional staging backend
 
 Flags must match env configs:
-
 - `.env.local`
 - `.env.staging`
 - `.env.production`

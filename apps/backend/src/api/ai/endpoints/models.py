@@ -262,8 +262,45 @@ class ConversationAnalytics(Base):
     )
 
 
-# REMOVED: Duplicate TrainingData model - use models.knowledge_base.TrainingData instead
-# from models.knowledge_base import TrainingData
+class TrainingData(Base):
+    """High-quality Q&A pairs for model fine-tuning and knowledge base updates"""
+
+    __tablename__ = "training_data"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+
+    # Training pair
+    question = Column(Text, nullable=False)
+    answer = Column(Text, nullable=False)
+
+    # Context and metadata
+    tags = Column(JSON, default=list)
+    intent = Column(String(100), nullable=True)
+    confidence_score = Column(Float, nullable=True)
+
+    # Source tracking
+    source_type = Column(String(50), nullable=False)  # gpt_answer, human_answer, imported
+    source_conversation_id = Column(String(36), nullable=True)
+    source_message_id = Column(String(36), nullable=True)
+
+    # Quality flags
+    human_verified = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
+    quality_score = Column(Float, nullable=True)  # Based on usage and feedback
+
+    # Lifecycle
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_used_at = Column(DateTime, nullable=True)
+
+    # Indexes
+    __table_args__ = (
+        Index("idx_training_intent", "intent"),
+        Index("idx_training_source", "source_type"),
+        Index("idx_training_verified", "human_verified"),
+        Index("idx_training_active", "is_active"),
+        Index("idx_training_quality", "quality_score"),
+    )
 
 
 class AIUsage(Base):
@@ -314,8 +351,27 @@ class AIUsage(Base):
     )
 
 
-# REMOVED: Duplicate Customer model - use models.customer.Customer instead
-# from models.customer import Customer
+class Customer(Base):
+    """
+    Customer model for growth tracking.
 
-# NOTE: If you need this relationship, add it to models.customer.Customer:
-# conversations = relationship("Conversation", back_populates="customer")
+    Used by growth_tracker to monitor customer count and trigger
+    Neo4j migration alert at 1,000 customers.
+    """
+
+    __tablename__ = "customers"
+    __table_args__ = {"extend_existing": True}
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+
+    # Customer info
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    name = Column(String(255), nullable=True)
+    phone = Column(String(50), nullable=True)
+
+    # Lifecycle
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    conversations = relationship("Conversation", back_populates="customer")

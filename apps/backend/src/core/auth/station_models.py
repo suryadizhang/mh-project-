@@ -7,7 +7,9 @@ from enum import Enum
 from uuid import UUID, uuid4
 
 # Import unified Base (avoid circular import)
-from models.base import BaseModel as Base
+from models.legacy_declarative_base import (
+    Base,
+)  # Phase 2C: Updated from api.app.models.declarative_base
 from sqlalchemy import (
     JSON,
     Boolean,
@@ -249,16 +251,16 @@ class Station(Base):
     )
 
     # Relationships
-    station_users = relationship("StationUser", back_populates="station")
+    station_users = relationship("UserStationAssignment", back_populates="station")
     # Note: Booking and Customer relationships are defined in their respective models
     # to avoid circular import issues. They will use back_populates="station"
 
 
-class StationUser(Base):
+class UserStationAssignment(Base):
     """Junction table for user-station assignments with role-based permissions."""
 
-    __tablename__ = "station_users"
-    __table_args__ = {"schema": "identity"}
+    __tablename__ = "user_station_assignments"
+    __table_args__ = {"schema": "identity", "extend_existing": True}
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
 
@@ -439,7 +441,7 @@ __all__ = [
     "StationPermission",
     "StationRole",
     "StationStatus",
-    "StationUser",
+    "UserStationAssignment",
     "can_access_station",
     "can_perform_cross_station_action",
     "get_station_permissions",

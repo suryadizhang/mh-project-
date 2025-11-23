@@ -206,7 +206,11 @@ class Role(Base):
     permissions = relationship(
         "Permission", secondary=role_permissions, back_populates="roles", lazy="selectin"
     )
-    users = relationship("User", secondary=user_roles, back_populates="roles", lazy="selectin")
+    users = relationship(
+        "User",  # String reference to User class (will be resolved by SQLAlchemy)
+        secondary=user_roles,
+        lazy="selectin"
+    )
 
     def __repr__(self):
         return f"<Role {self.name}: {self.display_name}>"

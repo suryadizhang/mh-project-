@@ -1,8 +1,7 @@
 # GitHub Branch Protection Rules (Enterprise Standard)
 
-**Project**: My Hibachi Monorepo  
-**Applies To**: All 3 apps (Customer, Admin, Backend)  
-**Last Updated**: November 17, 2025
+**Project**: My Hibachi Monorepo **Applies To**: All 3 apps (Customer,
+Admin, Backend) **Last Updated**: November 17, 2025
 
 ---
 
@@ -368,6 +367,5 @@ this.
 
 ---
 
-**Maintained by**: @suryadizhang  
-**Last Review**: November 17, 2025  
+**Maintained by**: @suryadizhang **Last Review**: November 17, 2025
 **Next Review**: December 17, 2025

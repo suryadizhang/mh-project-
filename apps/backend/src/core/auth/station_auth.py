@@ -11,9 +11,7 @@ from uuid import UUID, uuid4
 
 from core.auth.models import (  # Phase 2C: Updated from api.app.auth.models
     AuthenticationService as BaseAuthenticationService,
-)
-from core.auth.models import (  # Phase 2C: Updated from api.app.auth.models
-    User,
+    StationUser,
     UserSession,
 )
 from core.auth.station_models import (  # Phase 2C: Updated from api.app.auth.station_models
@@ -22,7 +20,7 @@ from core.auth.station_models import (  # Phase 2C: Updated from api.app.auth.st
     StationAuditLog,
     StationPermission,
     StationRole,
-    StationUser,
+    UserStationAssignment,
     can_access_station,
     can_perform_cross_station_action,
     get_station_permissions,
@@ -137,15 +135,15 @@ class StationAuthenticationService(BaseAuthenticationService):
         # Station-specific token settings
         self.station_token_lifetime = timedelta(hours=4)  # Shorter for station tokens
 
-    async def get_user_station_context(self, db: AsyncSession, user: User) -> StationContext | None:
+    async def get_user_station_context(self, db: AsyncSession, user: StationUser) -> StationContext | None:
         """Get station context for a user including all assignments and permissions."""
         try:
             # Get user's station assignments with station details
             stmt = (
-                select(StationUser, Station)
-                .join(Station, StationUser.station_id == Station.id)
-                .where(and_(StationUser.user_id == user.id, StationUser.is_active))
-                .options(selectinload(StationUser.station))
+                select(UserStationAssignment, Station)
+                .join(Station, UserStationAssignment.station_id == Station.id)
+                .where(and_(UserStationAssignment.user_id == user.id, UserStationAssignment.is_active))
+                .options(selectinload(UserStationAssignment.station))
             )
 
             result = await db.execute(stmt)
@@ -194,7 +192,7 @@ class StationAuthenticationService(BaseAuthenticationService):
 
     def create_station_aware_jwt_tokens(
         self,
-        user: User,
+        user: StationUser,
         session_id: UUID,
         station_context: StationContext,
         target_station_id: UUID | None = None,
@@ -259,7 +257,7 @@ class StationAuthenticationService(BaseAuthenticationService):
     async def create_station_access_token(
         self,
         db: AsyncSession,
-        user: User,
+        user: StationUser,
         session: UserSession,
         station_id: UUID,
         station_context: StationContext,
@@ -454,7 +452,7 @@ class StationAuthenticationService(BaseAuthenticationService):
     async def switch_station_context(
         self,
         db: AsyncSession,
-        user: User,
+        user: StationUser,
         current_station_context: StationContext,
         target_station_id: UUID,
         session_id: UUID,

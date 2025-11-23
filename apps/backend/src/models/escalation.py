@@ -148,7 +148,7 @@ class Escalation(Base):
 
     # Relationships
     conversation = relationship("Conversation", back_populates="escalations", lazy="selectin")
-    customer = relationship("Customer", back_populates="escalations", lazy="selectin")
+    customer = relationship("models.customer.Customer", back_populates="escalations", lazy="selectin")
     assigned_to = relationship(
         "User", foreign_keys=[assigned_to_id], backref="assigned_escalations", lazy="selectin"
     )

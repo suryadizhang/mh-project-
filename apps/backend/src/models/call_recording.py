@@ -135,7 +135,7 @@ class CallRecording(Base):
     rc_transcript = Column(Text, nullable=True)  # Full transcript from RC AI
     rc_transcript_confidence = Column(Integer, nullable=True)  # Confidence score (0-100)
     rc_transcript_fetched_at = Column(DateTime(timezone=True), nullable=True)  # When fetched
-    
+
     # RingCentral AI Insights (sentiment, topics, action items, etc.)
     rc_ai_insights = Column(JSONB, default={}, nullable=False)  # AI-generated insights
     # Structure: {sentiment, topics, action_items, intent, speakers, keywords}
@@ -173,8 +173,8 @@ class CallRecording(Base):
     deleted_at = Column(DateTime(timezone=True), nullable=True)  # Soft delete timestamp
 
     # Relationships
-    booking = relationship("Booking", back_populates="call_recordings", lazy="selectin")
-    customer = relationship("Customer", back_populates="call_recordings", lazy="selectin")
+    booking = relationship("models.booking.Booking", back_populates="call_recordings", lazy="selectin")
+    customer = relationship("models.customer.Customer", back_populates="call_recordings", lazy="selectin")
     escalation = relationship("Escalation", backref="call_recordings", lazy="selectin")
     agent = relationship(
         "User", foreign_keys=[agent_id], backref="call_recordings", lazy="selectin"

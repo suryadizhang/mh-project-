@@ -1,8 +1,7 @@
 # My Hibachi Feature Flag Standard (Unified)
 
-**Version**: 1.0  
-**Last Updated**: November 17, 2025  
-**Applies To**: Customer Site, Admin Panel, Backend API
+**Version**: 1.0 **Last Updated**: November 17, 2025 **Applies To**:
+Customer Site, Admin Panel, Backend API
 
 ---
 

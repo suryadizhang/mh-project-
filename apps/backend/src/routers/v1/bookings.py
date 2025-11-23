@@ -281,15 +281,15 @@ async def get_bookings(
     """
     from uuid import UUID
 
-    from models import Booking
+    from models.legacy_core import CoreBooking
     from sqlalchemy import select
     from sqlalchemy.orm import joinedload
     from utils.pagination import paginate_query
 
     # Build query with eager loading to prevent N+1 queries (MEDIUM #34 Phase 1)
     # Using joinedload for customer since we always need it (51 queries → 1 query)
-    query = select(Booking).options(
-        joinedload(Booking.customer)  # Eager load customer in single query
+    query = select(CoreBooking).options(
+        joinedload(CoreBooking.customer)  # Eager load customer in single query
     )
 
     # Apply station filtering (multi-tenant isolation)
@@ -447,7 +447,7 @@ async def get_booking(
     """
     from uuid import UUID
 
-    from models import Booking
+    from models.legacy_core import CoreBooking
     from sqlalchemy import select
     from sqlalchemy.orm import joinedload, selectinload
 
@@ -455,12 +455,12 @@ async def get_booking(
     # Using joinedload for customer (one-to-one) and selectinload for payments (one-to-many)
     # This reduces 34 queries to 1 query (34x faster)
     query = (
-        select(Booking)
+        select(CoreBooking)
         .options(
-            joinedload(Booking.customer),  # Eager load customer (1-to-1)
-            selectinload(Booking.payments),  # Eager load payments (1-to-many)
+            joinedload(CoreBooking.customer),  # Eager load customer (1-to-1)
+            selectinload(CoreBooking.payments),  # Eager load payments (1-to-many)
         )
-        .where(Booking.id == UUID(booking_id))
+        .where(CoreBooking.id == UUID(booking_id))
     )
 
     # Apply station filtering (multi-tenant isolation)
@@ -1003,11 +1003,11 @@ async def delete_booking(
     from datetime import timedelta
     from uuid import UUID
 
-    from models import Booking
+    from models.legacy_core import CoreBooking
     from sqlalchemy import select
 
     # Fetch booking
-    query = select(Booking).where(Booking.id == UUID(booking_id))
+    query = select(CoreBooking).where(CoreBooking.id == UUID(booking_id))
     result = await db.execute(query)
     booking = result.scalar_one_or_none()
 
@@ -1218,7 +1218,7 @@ async def get_weekly_bookings(
     from datetime import datetime
     from uuid import UUID
 
-    from models import Booking
+    from models.legacy_core import CoreBooking
     from core.security import decrypt_pii
     from sqlalchemy import and_, select
     from sqlalchemy.orm import joinedload
@@ -1238,9 +1238,9 @@ async def get_weekly_bookings(
 
     # Build query with eager loading to prevent N+1 queries
     query = (
-        select(Booking)
-        .options(joinedload(Booking.customer))  # Eager load customer
-        .where(and_(Booking.date >= start_date, Booking.date <= end_date))
+        select(CoreBooking)
+        .options(joinedload(CoreBooking.customer))  # Eager load customer
+        .where(and_(CoreBooking.date >= start_date, CoreBooking.date <= end_date))
         .order_by(Booking.date, Booking.slot)
     )
 
@@ -1509,7 +1509,7 @@ async def update_booking_datetime(
     import re
     from uuid import UUID
 
-    from models import Booking
+    from models.legacy_core import CoreBooking
     from sqlalchemy import select
 
     # TODO: Add admin role check
@@ -1549,12 +1549,12 @@ async def update_booking_datetime(
         )
 
     # Fetch booking
-    query = select(Booking).where(Booking.id == UUID(booking_id))
+    query = select(CoreBooking).where(CoreBooking.id == UUID(booking_id))
 
     # Apply station filtering (multi-tenant isolation)
     station_id = current_user.get("station_id")
     if station_id:
-        query = query.where(Booking.station_id == UUID(station_id))
+        query = query.where(CoreBooking.station_id == UUID(station_id))
 
     result = await db.execute(query)
     booking = result.scalars().first()
@@ -1596,10 +1596,10 @@ async def update_booking_datetime(
     description="""
     Retrieve a list of all dates that have bookings.
     Useful for calendar displays and availability checking.
-    
+
     ## Response:
     Returns array of dates in YYYY-MM-DD format that have bookings.
-    
+
     ## Authentication:
     Optional - public endpoint for availability checking.
     """,
@@ -1609,7 +1609,7 @@ async def get_booked_dates(
     current_user: dict[str, Any] | None = Depends(get_current_user),
 ) -> dict[str, Any]:
     """Get all dates that have bookings."""
-    from models import Booking
+    from models.legacy_booking_models import Booking
     from sqlalchemy import select, func
     from uuid import UUID
 
@@ -1650,13 +1650,13 @@ async def get_booked_dates(
     summary="Check availability for a specific date",
     description="""
     Check if a specific date is available for bookings.
-    
+
     ## Query Parameters:
     - **date**: Date to check in YYYY-MM-DD format
-    
+
     ## Response:
     Returns availability status and booking count for the date.
-    
+
     ## Authentication:
     Public endpoint - no authentication required.
     """,
@@ -1666,7 +1666,7 @@ async def check_availability(
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Check availability for a specific date."""
-    from models import Booking
+    from models.legacy_booking_models import Booking
     from sqlalchemy import select, func
     from datetime import datetime
 

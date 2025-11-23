@@ -10,9 +10,13 @@ from cqrs.social.social_queries import (  # Phase 2C: Updated from api.app.cqrs.
     GetThreadDetailQuery,
     GetUnreadCountsQuery,
 )
-from models import Customer  # Phase 2C: Updated from api.app.models.core
-from models import Review, SocialMessage, SocialThread
-from models.enums import MessageDirection, ReviewStatus, ThreadStatus
+from models.legacy_core import CoreCustomer  # Phase 2C: Updated from api.app.models.core
+from models.legacy_social import (  # Phase 2C: Updated from api.app.models.social
+    Review,
+    SocialAccount,
+    SocialMessage,
+    SocialThread,
+)
 from sqlalchemy import and_, asc, desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
@@ -420,7 +424,7 @@ class GetThreadDetailHandler(QueryHandler[GetThreadDetailQuery]):
             # Add customer profile if requested
             if query.include_customer_profile and thread.customer_identity:
                 if thread.customer_identity.customer_id:
-                    customer_stmt = select(Customer).where(
+                    customer_stmt = select(CoreCustomer).where(
                         Customer.id == thread.customer_identity.customer_id
                     )
                     customer_result = await session.execute(customer_stmt)

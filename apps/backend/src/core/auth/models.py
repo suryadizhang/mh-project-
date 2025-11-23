@@ -12,7 +12,9 @@ from typing import Any
 from uuid import UUID, uuid4
 
 # Import unified Base (avoid circular import)
-from models.base import BaseModel as Base
+from models.legacy_declarative_base import (
+    Base,
+)  # Phase 2C: Updated from api.app.models.declarative_base
 from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
 import bcrypt
 import jwt
@@ -35,23 +37,12 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 
-class AuthProvider(str, Enum):
-    """Authentication provider types"""
-    
-    GOOGLE = "google"
-    EMAIL = "email"
-    MICROSOFT = "microsoft"
-    APPLE = "apple"
-
-
 class UserStatus(str, Enum):
     """User account status."""
 
-    PENDING = "pending"  # Awaiting super admin approval
     ACTIVE = "active"
     INACTIVE = "inactive"
     SUSPENDED = "suspended"
-    DEACTIVATED = "deactivated"  # Permanently disabled
     LOCKED = "locked"
     PENDING_VERIFICATION = "pending_verification"
 
@@ -166,11 +157,16 @@ ROLE_PERMISSIONS: dict[Role, set[Permission]] = {
 }
 
 
-class User(Base):
-    """User accounts with encrypted PII."""
+class StationUser(Base):
+    """
+    Station user accounts with encrypted PII for high-security environments.
 
-    __tablename__ = "users"
-    __table_args__ = {"schema": "identity"}
+    NOTE: This is separate from models.user.User (OAuth/general users).
+    Station users require encrypted PII storage for compliance.
+    """
+
+    __tablename__ = "station_users"  # Renamed from "users" to avoid conflict
+    __table_args__ = {"schema": "identity", "extend_existing": True}
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
 
@@ -224,11 +220,11 @@ class UserSession(Base):
     """User sessions with JWT token management."""
 
     __tablename__ = "user_sessions"
-    __table_args__ = {"schema": "identity"}
+    __table_args__ = {"schema": "identity", "extend_existing": True}
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
     user_id = Column(
-        PostgresUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=False, index=True
+        PostgresUUID(as_uuid=True), ForeignKey("identity.station_users.id"), nullable=False, index=True
     )
 
     # Session identification
@@ -261,20 +257,20 @@ class UserSession(Base):
     )
 
     # Relationships
-    user = relationship("User", back_populates="sessions")
+    user = relationship("StationUser", back_populates="sessions")
 
 
 class AuditLog(Base):
     """Comprehensive audit logging for security and compliance."""
 
     __tablename__ = "audit_logs"
-    __table_args__ = {"schema": "identity"}
+    __table_args__ = {"schema": "identity", "extend_existing": True}
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Who
     user_id = Column(
-        PostgresUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=True, index=True
+        PostgresUUID(as_uuid=True), ForeignKey("identity.station_users.id"), nullable=True, index=True
     )
     session_id = Column(
         PostgresUUID(as_uuid=True), ForeignKey("identity.user_sessions.id"), nullable=True
@@ -298,7 +294,7 @@ class AuditLog(Base):
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
 
     # Relationships
-    user = relationship("User", back_populates="audit_logs")
+    user = relationship("StationUser", back_populates="audit_logs")
 
 
 class PasswordResetToken(Base):
@@ -309,7 +305,7 @@ class PasswordResetToken(Base):
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
     user_id = Column(
-        PostgresUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=False, index=True
+        PostgresUUID(as_uuid=True), ForeignKey("identity.station_users.id"), nullable=False, index=True
     )
 
     token_hash = Column(String(100), nullable=False, unique=True)
@@ -360,7 +356,7 @@ class AuthenticationService:
         except Exception:
             return False
 
-    async def authenticate_user(self, db: AsyncSession, email: str, password: str) -> User | None:
+    async def authenticate_user(self, db: AsyncSession, email: str, password: str) -> StationUser | None:
         """
         Authenticate user with email and password.
 
@@ -377,7 +373,7 @@ class AuthenticationService:
             encrypted_email = self.encryption.encrypt(email)
 
             # Query user by encrypted email
-            stmt = select(User).where(User.email_encrypted == encrypted_email)
+            stmt = select(StationUser).where(StationUser.email_encrypted == encrypted_email)
             result = await db.execute(stmt)
             user = result.scalar_one_or_none()
 
@@ -461,7 +457,7 @@ class AuthenticationService:
 
         return False, hashed_codes
 
-    def create_jwt_tokens(self, user: User, session_id: UUID) -> tuple[str, str]:
+    def create_jwt_tokens(self, user: StationUser, session_id: UUID) -> tuple[str, str]:
         """Create access and refresh JWT tokens."""
         now = datetime.now(timezone.utc)
 
@@ -516,7 +512,7 @@ class AuthenticationService:
         except jwt.InvalidTokenError:
             return None
 
-    def get_user_permissions(self, user: User) -> set[str]:
+    def get_user_permissions(self, user: StationUser) -> set[str]:
         """Get all permissions for a user based on role and additional permissions."""
         role = Role(user.role)
         permissions = ROLE_PERMISSIONS.get(role, set())

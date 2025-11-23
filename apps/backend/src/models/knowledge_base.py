@@ -125,7 +125,7 @@ class PricingTierLevel(str, Enum):
 class BusinessRule(Base):
     """
     Business rules, policies, and guidelines
-    
+
     Examples:
     - Cancellation policy
     - Travel fee structure
@@ -142,7 +142,7 @@ class BusinessRule(Base):
         Index('idx_business_rules_lookup', 'category', 'is_active', 'station_id'),
         {'schema': 'public', 'extend_existing': True}
     )
-    
+
     id = Column(String(36), primary_key=True)
     category = Column(
         PgEnum(RuleCategory, name='rule_category', create_type=False),
@@ -160,7 +160,7 @@ class BusinessRule(Base):
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     version = Column(Integer, default=1)
-    
+
     def to_dict(self) -> Dict:
         """Convert to dictionary for API responses"""
         return {
@@ -184,7 +184,7 @@ class BusinessRule(Base):
 class FAQItem(Base):
     """
     Frequently Asked Questions
-    
+
     Dynamic FAQ system with search, tagging, and popularity tracking
     """
     __tablename__ = "faq_items"
@@ -198,7 +198,7 @@ class FAQItem(Base):
         Index('idx_faq_lookup', 'category', 'is_active', 'priority'),
         {'schema': 'public', 'extend_existing': True}
     )
-    
+
     id = Column(String(36), primary_key=True)
     question = Column(Text, nullable=False)
     answer = Column(Text, nullable=False)
@@ -214,7 +214,7 @@ class FAQItem(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
-    
+
     def to_dict(self) -> Dict:
         """Convert to dictionary for API responses"""
         return {
@@ -239,7 +239,7 @@ class FAQItem(Base):
 class TrainingData(Base):
     """
     AI training examples for hospitality scenarios
-    
+
     Stores example conversations with different tones and contexts
     """
     __tablename__ = "training_data"
@@ -252,7 +252,7 @@ class TrainingData(Base):
         Index('idx_training_lookup', 'tone', 'example_type', 'is_active'),
         {'schema': 'public', 'extend_existing': True}
     )
-    
+
     id = Column(String(36), primary_key=True)
     example_type = Column(String(100), nullable=False)
     tone = Column(
@@ -269,7 +269,7 @@ class TrainingData(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
-    
+
     def to_dict(self) -> Dict:
         """Convert to dictionary for API responses"""
         return {
@@ -292,7 +292,7 @@ class TrainingData(Base):
 class UpsellRule(Base):
     """
     Contextual upselling rules
-    
+
     Defines when and how to suggest premium items/services
     """
     __tablename__ = "upsell_rules"
@@ -303,7 +303,7 @@ class UpsellRule(Base):
         Index('idx_upsell_priority', 'priority'),
         {'schema': 'public', 'extend_existing': True}
     )
-    
+
     id = Column(String(36), primary_key=True)
     rule_name = Column(String(200), nullable=False)
     trigger_type = Column(
@@ -320,7 +320,7 @@ class UpsellRule(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
-    
+
     def to_dict(self) -> Dict:
         """Convert to dictionary for API responses"""
         return {
@@ -343,7 +343,7 @@ class UpsellRule(Base):
 class SeasonalOffer(Base):
     """
     Time-limited promotions and special offers
-    
+
     Examples:
     - Holiday discounts
     - Graduation season specials
@@ -356,7 +356,7 @@ class SeasonalOffer(Base):
         Index('idx_offers_station', 'station_id'),
         {'schema': 'public', 'extend_existing': True}
     )
-    
+
     id = Column(String(36), primary_key=True)
     offer_name = Column(String(200), nullable=False)
     offer_description = Column(Text, nullable=False)
@@ -374,7 +374,7 @@ class SeasonalOffer(Base):
     station_id = Column(String(36), nullable=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
-    
+
     def to_dict(self) -> Dict:
         """Convert to dictionary for API responses"""
         return {
@@ -398,7 +398,7 @@ class SeasonalOffer(Base):
 class AvailabilityCalendar(Base):
     """
     Real-time booking availability tracking
-    
+
     Tracks capacity for each date/time slot
     """
     __tablename__ = "availability_calendar"
@@ -409,7 +409,7 @@ class AvailabilityCalendar(Base):
         Index('idx_calendar_station', 'station_id'),
         {'schema': 'public', 'extend_existing': True}
     )
-    
+
     id = Column(String(36), primary_key=True)
     date = Column(Date, nullable=False)
     time_slot = Column(Time, nullable=False)
@@ -420,7 +420,7 @@ class AvailabilityCalendar(Base):
     station_id = Column(String(36), nullable=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
-    
+
     def to_dict(self) -> Dict:
         """Convert to dictionary for API responses"""
         return {
@@ -441,7 +441,7 @@ class AvailabilityCalendar(Base):
 class CustomerTonePreference(Base):
     """
     Customer tone history and preferences
-    
+
     Learns customer communication style over time
     """
     __tablename__ = "customer_tone_preferences"
@@ -453,7 +453,7 @@ class CustomerTonePreference(Base):
         Index('idx_tone_history', 'customer_id', 'interaction_date'),
         {'schema': 'public', 'extend_existing': True}
     )
-    
+
     id = Column(String(36), primary_key=True)
     customer_id = Column(String(36), ForeignKey('public.customers.id', ondelete='CASCADE'), nullable=False)
     detected_tone = Column(
@@ -465,11 +465,10 @@ class CustomerTonePreference(Base):
     message_sample = Column(Text, nullable=True)
     interaction_date = Column(DateTime(timezone=True), nullable=False)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
-    
-    # TODO: Fix circular import - add back after resolving SQLAlchemy mapper issue
-    # Relationship
+
+    # Relationship removed due to cross-registry incompatibility with Customer model
     # customer = relationship("Customer", back_populates="tone_preferences")
-    
+
     def to_dict(self) -> Dict:
         """Convert to dictionary for API responses"""
         return {
@@ -487,7 +486,7 @@ class CustomerTonePreference(Base):
 class MenuItem(Base):
     """
     Menu items (proteins, sides, appetizers, etc.)
-    
+
     Allows dynamic menu management without code deployment
     """
     __tablename__ = "menu_items"
@@ -499,7 +498,7 @@ class MenuItem(Base):
         Index('idx_menu_items_lookup', 'category', 'is_available', 'display_order'),
         {'schema': 'public', 'extend_existing': True}
     )
-    
+
     id = Column(String(36), primary_key=True)
     name = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
@@ -516,7 +515,7 @@ class MenuItem(Base):
     station_id = Column(String(36), nullable=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
-    
+
     def to_dict(self) -> Dict:
         """Convert to dictionary for API responses"""
         return {
@@ -539,7 +538,7 @@ class MenuItem(Base):
 class PricingTier(Base):
     """
     Pricing tiers/packages
-    
+
     Examples: Essential Hibachi, Signature Experience, Ultimate Hibachi
     """
     __tablename__ = "pricing_tiers"
@@ -550,7 +549,7 @@ class PricingTier(Base):
         Index('idx_pricing_tiers_lookup', 'tier_level', 'is_active', 'display_order'),
         {'schema': 'public', 'extend_existing': True}
     )
-    
+
     id = Column(String(36), primary_key=True)
     tier_level = Column(
         PgEnum(PricingTierLevel, name='pricing_tier_level', create_type=False),
@@ -571,7 +570,7 @@ class PricingTier(Base):
     station_id = Column(String(36), nullable=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
-    
+
     def to_dict(self) -> Dict:
         """Convert to dictionary for API responses"""
         return {
@@ -612,27 +611,27 @@ class SyncHistory(Base):
         Index('idx_sync_history_created', 'created_at'),
         {'schema': 'public', 'extend_existing': True}
     )
-    
+
     id = Column(Integer, primary_key=True, autoincrement=True)
-    
+
     # Source identification
     source_type = Column(
         PgEnum(SyncSourceType, name='sync_source_type', create_type=True),
         nullable=False
     )
     source_file_path = Column(Text, nullable=False)
-    
+
     # Sync tracking
     file_hash = Column(String(64), nullable=False)
     last_sync_time = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
-    
+
     # Change statistics
     changes_applied = Column(Integer, default=0)
     items_added = Column(Integer, default=0)
     items_modified = Column(Integer, default=0)
     items_deleted = Column(Integer, default=0)
     conflicts_detected = Column(Integer, default=0)
-    
+
     # Sync metadata
     synced_by = Column(String(100), nullable=True)
     sync_type = Column(
@@ -643,14 +642,14 @@ class SyncHistory(Base):
         PgEnum(SyncStatus, name='sync_status', create_type=True),
         default=SyncStatus.SUCCESS
     )
-    
+
     # Error tracking
     error_message = Column(Text, nullable=True)
-    
+
     # Audit trail
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
-    
+
     def to_dict(self) -> Dict:
         """Convert to dictionary for API responses"""
         return {

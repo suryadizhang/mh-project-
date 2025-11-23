@@ -14,7 +14,7 @@ from core.auth.models import (  # Phase 2C: Updated from api.app.auth.models
     Permission,
     Role,
     SessionStatus,
-    User,
+    StationUser,
     UserSession,
     UserStatus,
 )
@@ -111,7 +111,7 @@ jwt_bearer = JWTBearer()
 class AuthenticatedUser:
     """Represents an authenticated user with permissions."""
 
-    def __init__(self, user: User, session: UserSession, permissions: set[str]):
+    def __init__(self, user: StationUser, session: UserSession, permissions: set[str]):
         self.user = user
         self.session = session
         self.permissions = permissions
