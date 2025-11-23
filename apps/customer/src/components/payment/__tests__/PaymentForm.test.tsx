@@ -220,7 +220,7 @@ describe('PaymentForm', () => {
   describe('Success State', () => {
     // Note: Testing success state would require mocking Stripe's confirmPayment
     // which is complex. These tests ensure the component structure is correct.
-    
+
     it('should render without crashing', () => {
       const { container } = renderWithStripe()
       expect(container).toBeInTheDocument()
@@ -271,14 +271,14 @@ describe('PaymentForm', () => {
     it('should have accessible labels for required fields when no booking data', () => {
       const props = { ...defaultProps, bookingData: null }
       renderWithStripe(props)
-      
+
       const nameInput = screen.getByLabelText(/Full Name/i)
       expect(nameInput).toHaveAttribute('required')
-      
+
       const emailInput = screen.getByLabelText(/Email Address/i)
       expect(emailInput).toHaveAttribute('required')
       expect(emailInput).toHaveAttribute('type', 'email')
-      
+
       const phoneInput = screen.getByLabelText(/Phone Number/i)
       expect(phoneInput).toHaveAttribute('required')
       expect(phoneInput).toHaveAttribute('type', 'tel')

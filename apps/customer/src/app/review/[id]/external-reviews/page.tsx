@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
 
 export default function ExternalReviewsPage() {
@@ -59,7 +60,7 @@ export default function ExternalReviewsPage() {
             Thank You for Your Positive Feedback!
           </h1>
           <p className="text-xl text-gray-600">
-            We're thrilled you enjoyed your hibachi experience! 🍱✨
+            {"We're thrilled you enjoyed your hibachi experience! 🍱✨"}
           </p>
         </motion.div>
 
@@ -158,12 +159,12 @@ export default function ExternalReviewsPage() {
 
         {/* Skip Option */}
         <div className="text-center mt-8">
-          <a
+          <Link
             href="/"
             className="text-gray-500 hover:text-gray-700 underline text-sm"
           >
             Skip for now
-          </a>
+          </Link>
         </div>
       </div>
     </div>

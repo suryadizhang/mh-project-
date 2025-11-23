@@ -8,8 +8,7 @@ from datetime import datetime, timedelta
 import logging
 
 from core.database import AsyncSessionLocal
-from models.legacy_core import Booking, Customer
-from models.legacy_feedback import CustomerReview
+from models import Booking, Customer, CustomerReview
 from core.config import get_settings
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -238,8 +237,8 @@ class ReviewRequestWorker:
         """Mark expired coupons as expired. Returns number of coupons updated."""
         async with AsyncSessionLocal() as db:
             try:
-                from models.legacy_feedback import DiscountCoupon
-
+                from models import DiscountCoupon
+                
                 # Find active coupons past expiration
                 query = select(DiscountCoupon).where(
                     and_(

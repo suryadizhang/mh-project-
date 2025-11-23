@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   }
 
   const authorName = typeof post.author === 'string' ? post.author : post.author?.name || 'My Hibachi Team';
-  
+
   return {
     title: `${post.title} | My Hibachi Blog`,
     description: post.metaDescription,

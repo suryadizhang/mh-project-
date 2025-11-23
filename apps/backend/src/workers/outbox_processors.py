@@ -12,7 +12,7 @@ from typing import Any
 
 import aiohttp
 from core.database import get_db_context
-from models.legacy_events import OutboxEntry
+from models import DomainEvent, OutboxEntry
 from utils.encryption import decrypt_field, get_field_encryption
 from sqlalchemy import and_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession

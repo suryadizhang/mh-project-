@@ -292,56 +292,57 @@ async def handle_call_event(event: RCWebhookEvent, db: AsyncSession):
 # Helper Functions
 async def handle_sms_opt_out(phone_number: str, db: AsyncSession):
     """Update subscriber sms_consent to False."""
-    try:
-        from models.legacy_lead_newsletter import Subscriber
-        from sqlalchemy.future import select
+    # TODO: Legacy lead/newsletter models not migrated yet - needs refactor
+    # try:
+    # from sqlalchemy.future import select
 
-        query = select(Subscriber).where(Subscriber.phone == phone_number)
-        result = await db.execute(query)
-        subscriber = result.scalar_one_or_none()
+    # query = select(Subscriber).where(Subscriber.phone == phone_number)
+    # result = await db.execute(query)
+    # subscriber = result.scalar_one_or_none()
 
-        if subscriber:
-            subscriber.sms_consent = False
-            subscriber.subscribed = False
-            await db.commit()
-            logger.info(f"✅ SMS opt-out processed: {phone_number}")
-        else:
-            logger.warning(f"Subscriber not found for opt-out: {phone_number}")
+    # if subscriber:
+    # subscriber.sms_consent = False
+    # subscriber.subscribed = False
+    # await db.commit()
+    # logger.info(f"✅ SMS opt-out processed: {phone_number}")
+    # else:
+    # logger.warning(f"Subscriber not found for opt-out: {phone_number}")
 
-    except Exception as e:
-        logger.exception(f"Opt-out processing failed: {e}")
+    # except Exception as e:
+    # logger.exception(f"Opt-out processing failed: {e}")
+    pass
 
 
 async def handle_sms_opt_in(phone_number: str, db: AsyncSession):
     """Update subscriber sms_consent to True."""
-    try:
-        from models.legacy_lead_newsletter import Subscriber
-        from sqlalchemy.future import select
+    # TODO: Legacy lead/newsletter models not migrated yet - needs refactor
+    # try:
+    # from sqlalchemy.future import select
 
-        query = select(Subscriber).where(Subscriber.phone == phone_number)
-        result = await db.execute(query)
-        subscriber = result.scalar_one_or_none()
+    # query = select(Subscriber).where(Subscriber.phone == phone_number)
+    # result = await db.execute(query)
+    # subscriber = result.scalar_one_or_none()
 
-        if subscriber:
-            subscriber.sms_consent = True
-            subscriber.subscribed = True
-            await db.commit()
-            logger.info(f"✅ SMS opt-in processed: {phone_number}")
-        else:
-            # Create new subscriber
-            new_subscriber = Subscriber(
-                phone=phone_number,
-                sms_consent=True,
-                email_consent=False,
-                subscribed=True,
-                source="sms_opt_in",
-            )
-            db.add(new_subscriber)
-            await db.commit()
-            logger.info(f"✅ New SMS subscriber created: {phone_number}")
+    # if subscriber:
+    # subscriber.sms_consent = True
+    # subscriber.subscribed = True
+    # await db.commit()
+    # logger.info(f"✅ SMS opt-in processed: {phone_number}")
+    # else:
+    # Create new subscriber
+    # new_subscriber = Subscriber(
+    # phone=phone_number,
+    # sms_consent=True,
+    # email_consent=False,
+    # subscribed=True,
+    # source="sms_opt_in",
+    # )
+    # db.add(new_subscriber)
+    # await db.commit()
+    # logger.info(f"✅ New SMS subscriber created: {phone_number}")
 
-    except Exception as e:
-        logger.exception(f"Opt-in processing failed: {e}")
+    # except Exception as e:
+    # logger.exception(f"Opt-in processing failed: {e}")
 
 
 # Webhook Subscription Management

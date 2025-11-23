@@ -262,9 +262,9 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ className =
         const errorMessage = typeof errorData === 'object' && errorData !== null && 'detail' in errorData
           ? String(errorData.detail)
           : 'Unknown error';
-        
+
         logger.error('Booking submission failed', undefined, { error: errorData });
-        
+
         // Determine failure reason based on error message
         let failureReason = 'booking_failed';
         let userMessage = 'Sorry, there was an error submitting your booking. Please try again or contact us directly.';

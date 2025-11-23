@@ -4,8 +4,7 @@ import { format } from 'date-fns';
 import { Download, ExternalLink, Gift, MessageSquare, Star } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import React, { Suspense } from 'react';
-import { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 
 import Assistant from '@/components/chat/Assistant';
 import { Badge } from '@/components/ui/badge';

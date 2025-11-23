@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
+
 import { getContactData } from '@/lib/contactData'
 
 declare global {

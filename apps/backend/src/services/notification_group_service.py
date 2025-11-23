@@ -9,7 +9,7 @@ import logging
 from typing import Any
 from uuid import UUID, uuid4
 
-from models.legacy_notification_groups import (  # Phase 2C: Updated from api.app.models.notification_groups
+from models.notification import (
     DEFAULT_GROUPS,
     NotificationEventType,
     NotificationGroup,

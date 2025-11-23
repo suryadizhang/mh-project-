@@ -139,7 +139,7 @@ export async function pollLiveChatMessages(
     }
 
     const data = await response.json();
-    
+
     interface MessageData {
       id: string;
       session_id: string;
@@ -148,7 +148,7 @@ export async function pollLiveChatMessages(
       timestamp: string;
       agent_name?: string;
     }
-    
+
     return {
       success: true,
       messages: data.messages.map((msg: MessageData) => ({

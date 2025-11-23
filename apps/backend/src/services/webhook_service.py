@@ -24,7 +24,7 @@ from fastapi import HTTPException
 from core.base_service import BaseService, EventTrackingMixin
 from services.lead_service import LeadService
 from services.event_service import EventService
-from models.legacy_lead_newsletter import Lead, LeadSource, LeadStatus, SocialThread, ThreadStatus
+# TODO: Legacy lead/newsletter models not migrated yet - needs refactor
 
 
 class BaseWebhookHandler(ABC, BaseService, EventTrackingMixin):

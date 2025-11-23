@@ -49,7 +49,7 @@ export default function ContactHtmlRedirect() {
         <div className="mb-6">
           <div className="inline-block w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
         </div>
-        
+
         <h1 className="text-2xl font-bold text-gray-800 mb-2">
           Welcome to My Hibachi Chef!
         </h1>

@@ -147,7 +147,7 @@ class TrainingDatasetBuilder:
 
         try:
             # Import here to avoid circular dependency
-            from api.ai.endpoints.models import TrainingData
+            from models.knowledge_base import TrainingData
 
             # Build query
             query = select(TrainingData).where(
@@ -353,7 +353,7 @@ class TrainingDatasetBuilder:
         self.logger.info(f"Exporting {sample_size} examples for evaluation")
 
         try:
-            from api.ai.endpoints.models import TrainingData
+            from models.knowledge_base import TrainingData
 
             # Get random sample of high-quality examples
             query = (

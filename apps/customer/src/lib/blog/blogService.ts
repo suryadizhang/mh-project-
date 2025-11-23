@@ -197,7 +197,7 @@ export class BlogService implements IBlogService {
     // Calculate pagination metadata
     const page = filters.page || 1;
     const limit = filters.limit || 20;
-    
+
     // Get total count without pagination
     const allResults = await getBlogPosts({
       ...filters,

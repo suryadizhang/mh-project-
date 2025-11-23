@@ -3,7 +3,6 @@
 import { BookOpen, Calendar, ChevronRight, Tag, Users } from 'lucide-react';
 import Link from 'next/link';
 import React, { useState } from 'react';
-
 import type { BlogPost } from '@my-hibachi/blog-types';
 
 import BlogCardImage from './BlogCardImage';

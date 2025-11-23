@@ -14,15 +14,15 @@ interface RateLimitInfo {
 
 /**
  * RateLimitBanner Component
- * 
+ *
  * Displays a warning banner when rate limits are exceeded.
  * Shows countdown timer and allows manual dismissal.
  * Listens for custom events from the API client.
- * 
+ *
  * Events:
  * - rate-limit-exceeded: Client-side rate limit (before request)
  * - server-rate-limit-exceeded: Server-side 429 response
- * 
+ *
  * Features:
  * - Animated progress bar showing remaining time
  * - Color-coded countdown (red <10s, yellow 10-30s, green >30s)
@@ -212,7 +212,7 @@ export default function RateLimitBanner() {
             </h3>
 
             <p className="text-sm mb-3">
-              You've reached the limit for <strong>{getEndpointDisplay()}</strong>.
+              {"You've reached the limit for"} <strong>{getEndpointDisplay()}</strong>.
               Please wait before trying again.
             </p>
 

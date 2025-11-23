@@ -72,26 +72,18 @@ def upgrade() -> None:
     """)).scalar()
     
     if not permissions_exists:
-        # Create permissions table
-        op.create_table(
-            'permissions',
-            sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4),
-            sa.Column('name', sa.Enum('user:create', 'user:read', 'user:update', 'user:delete', 'user:approve',
-                                       'station:create', 'station:read', 'station:update', 'station:delete',
-                                       'booking:create', 'booking:read', 'booking:update', 'booking:delete', 'booking:cancel',
-                                       'customer:create', 'customer:read', 'customer:update', 'customer:delete',
-                                       'payment:create', 'payment:read', 'payment:refund',
-                                       'review:read', 'review:moderate', 'review:respond',
-                                       'analytics:view', 'analytics:export',
-                                       'settings:read', 'settings:update',
-                                       name='permissiontype'), unique=True, nullable=False),
-            sa.Column('display_name', sa.String(100), nullable=False),
-            sa.Column('description', sa.Text, nullable=True),
-            sa.Column('resource', sa.String(50), nullable=False),
-            sa.Column('action', sa.String(50), nullable=False),
-            sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-            schema='identity'
-        )
+        # Create permissions table using raw SQL to avoid SQLAlchemy's automatic ENUM creation
+        conn.execute(sa.text("""
+            CREATE TABLE identity.permissions (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                name permissiontype UNIQUE NOT NULL,
+                display_name VARCHAR(100) NOT NULL,
+                description TEXT,
+                resource VARCHAR(50) NOT NULL,
+                action VARCHAR(50) NOT NULL,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            )
+        """))
         print("✅ Created permissions table")
     else:
         print("[SKIP] permissions table already exists")
@@ -106,22 +98,21 @@ def upgrade() -> None:
     """)).scalar()
     
     if not roles_exists:
-        # Create roles table
-        op.create_table(
-            'roles',
-            sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4),
-            sa.Column('name', sa.Enum('super_admin', 'admin', 'manager', 'staff', 'viewer', name='roletype'), 
-                      unique=True, nullable=False),
-            sa.Column('display_name', sa.String(100), nullable=False),
-            sa.Column('description', sa.Text, nullable=True),
-            sa.Column('is_system_role', sa.Boolean, default=False, nullable=False),
-            sa.Column('is_active', sa.Boolean, default=True, nullable=False),
-            sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-            sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.func.now(), onupdate=sa.func.now(), nullable=False),
-            sa.Column('created_by', postgresql.UUID(as_uuid=True), sa.ForeignKey('identity.users.id', ondelete='SET NULL'), nullable=True),
-            sa.Column('settings', postgresql.JSONB, default={}, nullable=False),
-            schema='identity'
-        )
+        # Create roles table using raw SQL to avoid SQLAlchemy's automatic ENUM creation
+        conn.execute(sa.text("""
+            CREATE TABLE identity.roles (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                name roletype UNIQUE NOT NULL,
+                display_name VARCHAR(100) NOT NULL,
+                description TEXT,
+                is_system_role BOOLEAN NOT NULL DEFAULT FALSE,
+                is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                created_by UUID REFERENCES identity.users(id) ON DELETE SET NULL,
+                settings JSONB NOT NULL DEFAULT '{}'::jsonb
+            )
+        """))
         print("✅ Created roles table")
     else:
         print("[SKIP] roles table already exists")
@@ -136,14 +127,15 @@ def upgrade() -> None:
     """)).scalar()
     
     if not role_permissions_exists:
-        # Create role_permissions association table
-        op.create_table(
-            'role_permissions',
-            sa.Column('role_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('identity.roles.id', ondelete='CASCADE'), primary_key=True),
-            sa.Column('permission_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('identity.permissions.id', ondelete='CASCADE'), primary_key=True),
-            sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
-            schema='identity'
-        )
+        # Create role_permissions association table using raw SQL
+        conn.execute(sa.text("""
+            CREATE TABLE identity.role_permissions (
+                role_id UUID NOT NULL REFERENCES identity.roles(id) ON DELETE CASCADE,
+                permission_id UUID NOT NULL REFERENCES identity.permissions(id) ON DELETE CASCADE,
+                created_at TIMESTAMPTZ DEFAULT NOW(),
+                PRIMARY KEY (role_id, permission_id)
+            )
+        """))
         print("✅ Created role_permissions table")
     else:
         print("[SKIP] role_permissions table already exists")
@@ -158,44 +150,26 @@ def upgrade() -> None:
     """)).scalar()
     
     if not user_roles_exists:
-        # Create user_roles association table
-        op.create_table(
-            'user_roles',
-            sa.Column('user_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('identity.users.id', ondelete='CASCADE'), primary_key=True),
-            sa.Column('role_id', postgresql.UUID(as_uuid=True), sa.ForeignKey('identity.roles.id', ondelete='CASCADE'), primary_key=True),
-            sa.Column('assigned_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
-            sa.Column('assigned_by', postgresql.UUID(as_uuid=True), sa.ForeignKey('identity.users.id', ondelete='SET NULL'), nullable=True),
-            schema='identity'
-        )
+        # Create user_roles association table using raw SQL
+        conn.execute(sa.text("""
+            CREATE TABLE identity.user_roles (
+                user_id UUID NOT NULL REFERENCES identity.users(id) ON DELETE CASCADE,
+                role_id UUID NOT NULL REFERENCES identity.roles(id) ON DELETE CASCADE,
+                assigned_at TIMESTAMPTZ DEFAULT NOW(),
+                assigned_by UUID REFERENCES identity.users(id) ON DELETE SET NULL,
+                PRIMARY KEY (user_id, role_id)
+            )
+        """))
         print("✅ Created user_roles table")
     else:
         print("[SKIP] user_roles table already exists")
     
-    # Check and create indexes only if they don't exist
-    try:
-        op.create_index('idx_permissions_name', 'permissions', ['name'], unique=True, schema='identity', if_not_exists=True)
-    except:
-        print("[SKIP] idx_permissions_name already exists")
-    
-    try:
-        op.create_index('idx_permissions_resource', 'permissions', ['resource'], schema='identity', if_not_exists=True)
-    except:
-        print("[SKIP] idx_permissions_resource already exists")
-    
-    try:
-        op.create_index('idx_permissions_action', 'permissions', ['action'], schema='identity', if_not_exists=True)
-    except:
-        print("[SKIP] idx_permissions_action already exists")
-    
-    try:
-        op.create_index('idx_roles_name', 'roles', ['name'], unique=True, schema='identity', if_not_exists=True)
-    except:
-        print("[SKIP] idx_roles_name already exists")
-    
-    try:
-        op.create_index('idx_roles_created_at', 'roles', ['created_at'], schema='identity', if_not_exists=True)
-    except:
-        print("[SKIP] idx_roles_created_at already exists")
+    # Create indexes using raw SQL with IF NOT EXISTS
+    conn.execute(sa.text("CREATE UNIQUE INDEX IF NOT EXISTS idx_permissions_name ON identity.permissions(name)"))
+    conn.execute(sa.text("CREATE INDEX IF NOT EXISTS idx_permissions_resource ON identity.permissions(resource)"))
+    conn.execute(sa.text("CREATE INDEX IF NOT EXISTS idx_permissions_action ON identity.permissions(action)"))
+    conn.execute(sa.text("CREATE UNIQUE INDEX IF NOT EXISTS idx_roles_name ON identity.roles(name)"))
+    conn.execute(sa.text("CREATE INDEX IF NOT EXISTS idx_roles_created_at ON identity.roles(created_at)"))
     
     print("✅ Roles and permissions tables created successfully")
 

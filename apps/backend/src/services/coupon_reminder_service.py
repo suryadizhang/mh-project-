@@ -13,8 +13,7 @@ from uuid import UUID
 
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from models.legacy_feedback import DiscountCoupon
+from models import DiscountCoupon, CustomerReview
 from services.ringcentral_sms import ringcentral_sms
 from core.config import get_settings
 

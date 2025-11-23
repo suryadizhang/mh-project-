@@ -8,7 +8,7 @@ from sqlalchemy.dialects.postgresql import JSONB, ARRAY, INET
 
 # revision identifiers
 revision = "012_add_2fa_ip_verification"
-down_revision = "011_add_audit_logging"
+down_revision = "010_ai_hospitality_training"
 branch_labels = None
 depends_on = None
 

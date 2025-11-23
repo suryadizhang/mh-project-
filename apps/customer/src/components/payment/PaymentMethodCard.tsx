@@ -19,7 +19,7 @@ interface PaymentMethodCardProps {
 
 /**
  * PaymentMethodCard Component
- * 
+ *
  * Displays a single payment method option with:
  * - Icon and name
  * - Fee information (FREE or +X%)
@@ -63,8 +63,8 @@ export function PaymentMethodCard({ method, selected, onSelect }: PaymentMethodC
       onClick={onSelect}
       className={`
         relative w-full rounded-2xl border-2 p-6 transition-all duration-200
-        ${selected 
-          ? `${colors.border} ${colors.bg} scale-105 shadow-xl` 
+        ${selected
+          ? `${colors.border} ${colors.bg} scale-105 shadow-xl`
           : `border-gray-300 ${colors.hover} hover:scale-102 hover:shadow-lg`
         }
       `}
@@ -89,10 +89,10 @@ export function PaymentMethodCard({ method, selected, onSelect }: PaymentMethodC
       <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${colors.icon} text-white shadow-lg`}>
         <span className="text-2xl font-bold">{method.icon}</span>
       </div>
-      
+
       {/* Method Name */}
       <h3 className="mb-3 text-xl font-bold text-gray-900">{method.name}</h3>
-      
+
       {/* Fee Badge */}
       {method.isFree ? (
         <div className="mb-3 flex flex-col items-center gap-1">
@@ -115,7 +115,7 @@ export function PaymentMethodCard({ method, selected, onSelect }: PaymentMethodC
           </p>
         </div>
       )}
-      
+
       {/* Confirmation Time */}
       <div className="mb-4 flex items-center justify-center gap-2 text-sm text-gray-600">
         {method.isInstant ? (
@@ -130,7 +130,7 @@ export function PaymentMethodCard({ method, selected, onSelect }: PaymentMethodC
           </>
         )}
       </div>
-      
+
       {/* Total Amount */}
       <div className="mt-4 border-t border-gray-200 pt-4">
         <p className="mb-1 text-xs font-medium text-gray-500 uppercase tracking-wide">

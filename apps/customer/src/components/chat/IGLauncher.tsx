@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { MessageCircle, Instagram, X } from 'lucide-react'
+
 import { getContactData, openIG } from '@/lib/contactData'
 
 export default function IGLauncher() {

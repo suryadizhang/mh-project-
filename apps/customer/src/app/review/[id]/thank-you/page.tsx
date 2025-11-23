@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import Confetti from "react-confetti";
 
@@ -75,7 +76,7 @@ export default function ThankYouPage() {
             </h2>
             <p className="text-gray-600 leading-relaxed">
               Your feedback is incredibly valuable to us. Our team has been notified and
-              will review your concerns carefully. We're committed to making things right
+              will review your concerns carefully. {"We're"} committed to making things right
               and ensuring your next experience exceeds your expectations.
             </p>
           </div>
@@ -131,12 +132,12 @@ export default function ThankYouPage() {
             <div className="absolute top-0 right-0 transform translate-x-6 -translate-y-6 opacity-20">
               <div className="text-9xl">🎁</div>
             </div>
-            
+
             <div className="relative z-10">
               <div className="text-center mb-6">
                 <div className="text-5xl mb-3">✨</div>
                 <h2 className="text-3xl font-bold mb-2">
-                  Here's Our Apology Gift
+                  {"Here's"} Our Apology Gift
                 </h2>
                 <p className="text-green-100">
                   Use this coupon code for 10% off your next booking
@@ -192,22 +193,22 @@ export default function ThankYouPage() {
             Give Us Another Chance?
           </h3>
           <p className="text-gray-600 mb-6">
-            We'd love the opportunity to provide you with the amazing hibachi experience
+            {"We'd"} love the opportunity to provide you with the amazing hibachi experience
             you deserve. Our team is working hard to address your concerns.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
+            <Link
               href="/booking"
               className="bg-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700 transition"
             >
               Book Another Event
-            </a>
-            <a
+            </Link>
+            <Link
               href="/contact"
               className="bg-gray-100 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-200 transition"
             >
               Contact Us
-            </a>
+            </Link>
           </div>
         </motion.div>
 
@@ -232,12 +233,12 @@ export default function ThankYouPage() {
 
         {/* Return Home */}
         <div className="text-center mt-8">
-          <a
+          <Link
             href="/"
             className="text-gray-500 hover:text-gray-700 underline text-sm"
           >
             Return to Homepage
-          </a>
+          </Link>
         </div>
       </div>
     </div>

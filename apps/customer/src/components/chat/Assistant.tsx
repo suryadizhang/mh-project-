@@ -85,7 +85,7 @@ export default function Assistant({ page }: AssistantProps) {
   const pathname = usePathname()
 
   const storageKey = `mh_chat_${page}`
-  
+
   // Smart keywords that AI can handle even after escalation
   const aiCanHandleKeywords = [
     // Booking/Rebooking
@@ -101,7 +101,7 @@ export default function Assistant({ page }: AssistantProps) {
     // Location/Travel
     'location', 'area', 'travel', 'service area', 'do you go to',
   ]
-  
+
   // Issues that need human attention (don't auto-resume AI)
   const humanOnlyKeywords = [
     'complaint', 'complain', 'problem', 'issue', 'wrong', 'mistake', 'error',
@@ -236,17 +236,17 @@ export default function Assistant({ page }: AssistantProps) {
     // Check if user escalated but now asking something AI can handle
     if (isEscalated) {
       const messageLower = content.toLowerCase()
-      
+
       // Check if it's a human-only issue (complaint, refund, etc.)
       const isHumanOnlyIssue = humanOnlyKeywords.some(keyword =>
         messageLower.includes(keyword)
       )
-      
+
       // Check if it's something AI can help with (booking, pricing, info)
       const isAiHandleable = aiCanHandleKeywords.some(keyword =>
         messageLower.includes(keyword)
       )
-      
+
       if (isHumanOnlyIssue) {
         // Keep escalated for serious issues
         const blockedMessage: Message = {
@@ -259,7 +259,7 @@ export default function Assistant({ page }: AssistantProps) {
         setMessages(prev => [...prev, blockedMessage])
         return
       }
-      
+
       if (isAiHandleable) {
         // Auto-resume AI for simple questions/bookings
         setIsEscalated(false)
@@ -271,7 +271,7 @@ export default function Assistant({ page }: AssistantProps) {
           confidence: 'high'
         }
         setMessages(prev => [...prev, resumeMessage])
-        
+
         // GTM tracking - AI auto-resumed
         if (typeof window !== 'undefined' && (window as unknown as { dataLayer?: unknown[] }).dataLayer) {
           ;(window as unknown as { dataLayer: unknown[] }).dataLayer.push({
@@ -294,7 +294,7 @@ export default function Assistant({ page }: AssistantProps) {
         return
       }
     }
-    
+
     // Handle user's choice in ambiguous case
     const contentLower = content.toLowerCase()
     if (contentLower.includes('ai help') || contentLower.includes('yes') && messages[messages.length - 1]?.content.includes('Would you like me to answer')) {
@@ -582,7 +582,7 @@ export default function Assistant({ page }: AssistantProps) {
             </div>
           </div>
         )}
-        
+
         <div className="flex space-x-2">
           <input
             ref={inputRef}
@@ -738,7 +738,7 @@ export default function Assistant({ page }: AssistantProps) {
                       setIsEscalated(true)
                       setEscalationReason('sms_requested')
                       setShowHandoff(false)
-                      
+
                       // Add escalation message with smart hint
                       const escalationMessage: Message = {
                         id: Date.now().toString(),
@@ -748,7 +748,7 @@ export default function Assistant({ page }: AssistantProps) {
                         confidence: 'high'
                       }
                       setMessages(prev => [...prev, escalationMessage])
-                      
+
                       // GTM tracking
                       if (typeof window !== 'undefined' && (window as unknown as { dataLayer?: unknown[] }).dataLayer) {
                         ;(window as unknown as { dataLayer: unknown[] }).dataLayer.push({
@@ -785,7 +785,7 @@ export default function Assistant({ page }: AssistantProps) {
                       setIsEscalated(true)
                       setEscalationReason('phone_requested')
                       setShowHandoff(false)
-                      
+
                       // Add escalation message with smart hint
                       const escalationMessage: Message = {
                         id: Date.now().toString(),
@@ -795,7 +795,7 @@ export default function Assistant({ page }: AssistantProps) {
                         confidence: 'high'
                       }
                       setMessages(prev => [...prev, escalationMessage])
-                      
+
                       // GTM tracking
                       if (typeof window !== 'undefined' && (window as unknown as { dataLayer?: unknown[] }).dataLayer) {
                         ;(window as unknown as { dataLayer: unknown[] }).dataLayer.push({

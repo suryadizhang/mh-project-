@@ -77,7 +77,7 @@ describe('useBooking', () => {
   describe('Booked Dates Fetching', () => {
     it('should fetch booked dates on mount', async () => {
       const mockBookedDates = ['2025-10-25', '2025-10-26', '2025-10-27']
-      
+
       vi.mocked(api.apiFetch).mockResolvedValue({
         success: true,
         data: { bookedDates: mockBookedDates }
@@ -204,7 +204,7 @@ describe('useBooking', () => {
 
     it('should handle availability fetch error', async () => {
       const testDate = new Date('2025-10-25')
-      
+
       vi.mocked(api.apiFetch).mockRejectedValue(new Error('Network error'))
 
       const { result } = renderHook(() => useBooking())
@@ -220,7 +220,7 @@ describe('useBooking', () => {
 
     it('should set loading state while fetching availability', async () => {
       const testDate = new Date('2025-10-25')
-      
+
       vi.mocked(api.apiFetch).mockImplementation(() =>
         new Promise(resolve => setTimeout(() => resolve({
           success: true,

@@ -105,7 +105,7 @@ const AdvancedTagCloud: React.FC<AdvancedTagCloudProps> = ({
   // Color generation helper
   const getTagColor = (tagName: string, scheme: string) => {
     const hash = tagName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    
+
     switch (scheme) {
       case 'gradient':
         const hue = (hash * 137.5) % 360; // Golden angle distribution

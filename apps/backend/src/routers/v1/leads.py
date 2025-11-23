@@ -6,17 +6,8 @@ from typing import Any
 from uuid import UUID
 
 from core.database import get_db
-from models.legacy_lead_newsletter import (
-    ContactChannel,
-    Lead,
-    LeadContact,
-    LeadContext,
-    LeadQuality,
-    LeadSource,
-    LeadStatus,
-    SocialPlatform,
-    SocialThread,
-)
+from models import Lead, LeadContact, LeadContext, SocialThread
+from models.enums import ContactChannel, LeadQuality, LeadSource, LeadStatus, SocialPlatform
 from services.ai_lead_management import (
     get_ai_lead_manager,
     get_social_media_ai,

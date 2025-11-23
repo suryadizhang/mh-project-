@@ -12,9 +12,7 @@ from typing import Any
 from uuid import UUID, uuid4
 
 # Import unified Base (avoid circular import)
-from models.legacy_declarative_base import (
-    Base,
-)  # Phase 2C: Updated from api.app.models.declarative_base
+from models.base import BaseModel as Base
 from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
 import bcrypt
 import jwt
@@ -37,12 +35,23 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 
+class AuthProvider(str, Enum):
+    """Authentication provider types"""
+    
+    GOOGLE = "google"
+    EMAIL = "email"
+    MICROSOFT = "microsoft"
+    APPLE = "apple"
+
+
 class UserStatus(str, Enum):
     """User account status."""
 
+    PENDING = "pending"  # Awaiting super admin approval
     ACTIVE = "active"
     INACTIVE = "inactive"
     SUSPENDED = "suspended"
+    DEACTIVATED = "deactivated"  # Permanently disabled
     LOCKED = "locked"
     PENDING_VERIFICATION = "pending_verification"
 

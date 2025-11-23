@@ -7,7 +7,8 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.cache import CacheService, cached
-from models.legacy_lead_newsletter import CampaignChannel
+from models import Campaign, CampaignEvent, Subscriber, SMSDeliveryEvent
+from models.enums import CampaignEventType, SMSDeliveryStatus, CampaignChannel
 from repositories.newsletter_analytics import NewsletterAnalyticsRepository
 
 

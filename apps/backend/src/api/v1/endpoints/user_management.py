@@ -11,7 +11,7 @@ from core.database import get_db
 from core.exceptions import ForbiddenException, ValidationException
 from core.security import require_auth
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from models.user import User, UserStatus
+from core.auth.models import User, UserStatus
 from services.email_service import email_service
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

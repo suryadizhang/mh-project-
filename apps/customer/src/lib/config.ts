@@ -1,13 +1,13 @@
 /**
  * Environment Configuration with Runtime Validation
- * 
+ *
  * This module validates all environment variables at build time using Zod.
  * Invalid or missing variables will cause the build to fail with clear error messages.
- * 
+ *
  * Usage:
  *   import { config } from '@/lib/config';
  *   const apiUrl = config.apiUrl; // Type-safe and validated
- * 
+ *
  * @module config
  */
 
@@ -74,7 +74,7 @@ const envSchema = z.object({
 
 /**
  * Validated environment variables
- * 
+ *
  * This will throw a ZodError at build time if validation fails.
  * The error message will clearly indicate which variable is invalid and why.
  */
@@ -104,7 +104,7 @@ try {
 
 /**
  * Type-safe, validated configuration object
- * 
+ *
  * Use this instead of accessing process.env directly to ensure:
  * - Type safety (TypeScript knows the types)
  * - Runtime validation (invalid values caught at build time)
@@ -114,20 +114,20 @@ try {
 export const config = {
   // API
   apiUrl: env.NEXT_PUBLIC_API_URL,
-  
+
   // Stripe
   stripeKey: env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
-  
+
   // Analytics
   gaId: env.NEXT_PUBLIC_GA_ID,
-  
+
   // WebSocket
   wsUrl: env.NEXT_PUBLIC_WS_URL,
-  
+
   // Social OAuth
   facebookAppId: env.NEXT_PUBLIC_FACEBOOK_APP_ID,
   googleClientId: env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-  
+
   // Environment
   isDevelopment: env.NODE_ENV === 'development',
   isProduction: env.NODE_ENV === 'production',

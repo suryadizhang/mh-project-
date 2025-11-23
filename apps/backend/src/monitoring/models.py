@@ -11,7 +11,7 @@ from typing import Optional
 from sqlalchemy import JSON, Column, DateTime, Enum as SQLEnum, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
 
-from db.base import Base
+from models.base import Base
 
 
 class AlertStatus(str, Enum):

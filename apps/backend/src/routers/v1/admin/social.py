@@ -6,14 +6,14 @@ from typing import Any
 from uuid import UUID
 
 from cqrs.base import CommandBus, QueryBus
-from cqrs.social_commands import (
+from cqrs.social.social_commands import (
     AcknowledgeReviewCommand,
     CreateLeadFromSocialCommand,
     EscalateReviewCommand,
     SendSocialReplyCommand,
     UpdateThreadStatusCommand,
 )
-from cqrs.social_queries import (
+from cqrs.social.social_queries import (
     GetReviewsBoardQuery,
     GetSocialAnalyticsQuery,
     GetSocialInboxQuery,
@@ -26,7 +26,7 @@ from core.dependencies import (
     get_current_admin_user,
     get_query_bus,
 )
-from models.legacy_social import ReviewStatus, SocialPlatform, ThreadStatus
+from models.enums import MessageKind, ReviewStatus, SocialPlatform, ThreadStatus
 from schemas.social import (
     AcknowledgeReviewRequest,
     CreateLeadRequest,

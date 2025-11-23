@@ -6,15 +6,15 @@ from typing import Any
 from uuid import UUID
 
 from cqrs.registry import get_command_bus  # Phase 2C: Updated from api.app.cqrs.registry
-from models.legacy_social import (  # Phase 2C: Updated from api.app.models.social
-    MessageDirection,
-    MessageKind,
-    SocialAccount,
-    SocialIdentity,
-    SocialMessage,
-    SocialPlatform,
-    SocialThread,
-)
+# TODO: Legacy social models not migrated yet - needs refactor
+    # MessageDirection,
+    # MessageKind,
+    # SocialAccount,
+    # SocialIdentity,
+    # SocialMessage,
+    # SocialPlatform,
+    # SocialThread,
+# )
 from schemas.social import SocialMessageCreate  # Phase 2C: Updated from api.app.schemas.social
 
 # Newsletter opt-out service

@@ -3,14 +3,13 @@ RingCentral Voice Service
 Handles voice calls, webhooks, and call state management.
 """
 
-import asyncio
 from datetime import datetime, timezone
 from enum import Enum
 import logging
 from typing import Any, Optional
 from uuid import UUID
 
-from models.call_recording import CallRecording, CallState
+from models.call_recording import CallRecording, CallStatus
 from services.speech_service import speech_service
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -59,8 +58,7 @@ class RingCentralVoiceService:
                 direction=CallDirection.INBOUND.value,
                 from_number=from_number,
                 to_number=to_number,
-                status="ringing",
-                state=CallState.INITIATED,
+                status=CallStatus.RINGING.value,
                 started_at=datetime.now(timezone.utc),
             )
 
@@ -74,7 +72,7 @@ class RingCentralVoiceService:
                 "recording_id": call_recording.id,
                 "from": from_number,
                 "to": to_number,
-                "state": CallState.INITIATED,
+                "status": CallStatus.RINGING.value,
                 "started_at": datetime.now(timezone.utc),
             }
 
@@ -120,20 +118,20 @@ class RingCentralVoiceService:
             if call_recording:
                 call_recording.status = status
 
-                # Map status to state
-                state_mapping = {
-                    "Setup": CallState.INITIATED,
-                    "Proceeding": CallState.INITIATED,
-                    "Answered": CallState.IN_PROGRESS,
-                    "InProgress": CallState.IN_PROGRESS,
-                    "Disconnected": CallState.COMPLETED,
-                    "Voicemail": CallState.FAILED,
-                    "Rejected": CallState.FAILED,
-                    "Missed": CallState.FAILED,
-                    "Busy": CallState.FAILED,
+                # Map RingCentral status to our CallStatus enum
+                status_mapping = {
+                    "Setup": CallStatus.RINGING,
+                    "Proceeding": CallStatus.RINGING,
+                    "Answered": CallStatus.IN_PROGRESS,
+                    "InProgress": CallStatus.IN_PROGRESS,
+                    "Disconnected": CallStatus.COMPLETED,
+                    "Voicemail": CallStatus.VOICEMAIL,
+                    "Rejected": CallStatus.MISSED,
+                    "Missed": CallStatus.MISSED,
+                    "Busy": CallStatus.MISSED,
                 }
 
-                call_recording.state = state_mapping.get(status, CallState.IN_PROGRESS)
+                call_recording.status = status_mapping.get(status, CallStatus.IN_PROGRESS).value
 
                 if status in ["Disconnected", "Voicemail", "Rejected", "Missed"]:
                     call_recording.ended_at = datetime.now(timezone.utc)
@@ -145,8 +143,7 @@ class RingCentralVoiceService:
 
                 # Update active calls tracking
                 if call_id in self.active_calls:
-                    self.active_calls[call_id]["state"] = call_recording.state
-                    self.active_calls[call_id]["status"] = status
+                    self.active_calls[call_id]["status"] = call_recording.status
 
                     # Remove from active if ended
                     if status in ["Disconnected", "Voicemail", "Rejected", "Missed"]:
@@ -187,20 +184,26 @@ class RingCentralVoiceService:
 
             if call_recording:
                 call_recording.recording_uri = recording_uri
-                call_recording.state = CallState.RECORDED
+                # Recording is available - mark as completed
+                call_recording.status = CallStatus.COMPLETED.value
                 await db.commit()
 
                 # Queue transcript fetch from RingCentral AI + entity linking
                 # Using delay=30s to allow RC AI to process the recording
                 # Then automatically link to customer/booking
                 from celery import chain
-                from workers.recording_tasks import fetch_recording_transcript, link_recording_entities
-                
+                from workers.recording_tasks import (
+                    fetch_recording_transcript,
+                    link_recording_entities,
+                )
+
                 chain(
                     fetch_recording_transcript.si(str(call_recording.id), call_id),
-                    link_recording_entities.si(str(call_recording.id))
-                ).apply_async(countdown=30)  # Wait 30 seconds for RC AI to process
-                
+                    link_recording_entities.si(str(call_recording.id)),
+                ).apply_async(
+                    countdown=30
+                )  # Wait 30 seconds for RC AI to process
+
                 logger.info(
                     f"Recording URI saved, transcript fetch + entity linking queued: {recording_uri}"
                 )
@@ -230,9 +233,7 @@ class RingCentralVoiceService:
         """
         try:
             # Get call recording
-            result = await db.execute(
-                select(CallRecording).where(CallRecording.id == recording_id)
-            )
+            result = await db.execute(select(CallRecording).where(CallRecording.id == recording_id))
             call_recording = result.scalar_one_or_none()
 
             if not call_recording:
@@ -251,7 +252,7 @@ class RingCentralVoiceService:
             # Update database
             call_recording.transcript = transcript
             call_recording.transcript_confidence = confidence
-            call_recording.state = CallState.TRANSCRIBED
+            # Keep status as COMPLETED (transcription is metadata, not a status change)
 
             # Store word-level timing (optional, for advanced features)
             if words:
@@ -261,8 +262,7 @@ class RingCentralVoiceService:
             await db.commit()
 
             logger.info(
-                f"Transcription complete: {len(transcript)} chars, "
-                f"{confidence:.2%} confidence"
+                f"Transcription complete: {len(transcript)} chars, " f"{confidence:.2%} confidence"
             )
 
             return {
