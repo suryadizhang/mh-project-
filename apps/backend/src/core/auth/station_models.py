@@ -7,9 +7,7 @@ from enum import Enum
 from uuid import UUID, uuid4
 
 # Import unified Base (avoid circular import)
-from models.legacy_declarative_base import (
-    Base,
-)  # Phase 2C: Updated from api.app.models.declarative_base
+from models.base import BaseModel as Base
 from sqlalchemy import (
     JSON,
     Boolean,

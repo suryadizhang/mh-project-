@@ -42,11 +42,16 @@ class PaymentStatus(str, Enum):
 
 
 class Booking(BaseModel):
-    """Booking model"""
+    """
+    Booking model - ALIGNED WITH PRODUCTION
+    
+    Critical: customer_id is String (VARCHAR) to match customers.id
+    """
 
     __tablename__ = "bookings"
 
-    customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False, index=True)
+    # Foreign key - MUST be String to match public.customers.id (VARCHAR in production)
+    customer_id = Column(String, ForeignKey("customers.id"), nullable=True, index=True)  # String, not Integer!
     booking_datetime = Column(DateTime, nullable=False, index=True)
     party_size = Column(Integer, nullable=False)
     status = Column(
@@ -74,7 +79,10 @@ class Booking(BaseModel):
     # Relationships
     customer = relationship("Customer", back_populates="bookings", lazy="select")
     payments = relationship("Payment", back_populates="booking", lazy="select")
-    message_threads = relationship("Thread", back_populates="booking", lazy="select", foreign_keys="[Thread.booking_id]")
+    # TODO: Fix circular import - Thread model not found in registry
+    # message_threads = relationship("Thread", back_populates="booking", lazy="select", foreign_keys="[Thread.booking_id]")
+    # TODO: Fix circular import - add back after resolving SQLAlchemy mapper issue
+    # reminders = relationship("BookingReminder", back_populates="booking", lazy="select", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Booking(id={self.id}, customer_id={self.customer_id}, datetime={self.booking_datetime}, status={self.status})>"

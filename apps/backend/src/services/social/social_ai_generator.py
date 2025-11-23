@@ -13,9 +13,9 @@ from cqrs.base import (
     CommandBus,
     QueryBus,
 )  # Phase 2C: Updated from api.app.cqrs.base
-from models.legacy_social import (
-    SocialPlatform,
-)  # Phase 2C: Updated from api.app.models.social
+# TODO: Legacy social models not migrated yet - needs refactor
+    # SocialPlatform,
+# )  # Phase 2C: Updated from api.app.models.social
 from services.social.social_ai_tools import (
     SocialMediaToolKit,
 )  # Phase 2C: Updated from api.app.services.social_ai_tools

@@ -1,3 +1,0 @@
-"Test","Status","Details"
-"Public Quote Calculation","PASS","Status 200 OK"
-"Public Lead Capture","FAIL","The remote server returned an error: (500) Internal Server Error."

@@ -20,10 +20,11 @@ Features:
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = '009_payment_notifications'
-down_revision = '06fc7e9891b1'  # merge_all_heads
+down_revision = 'cd22216ae9d3'  # Depends on roles + users merge (ensures identity.users exists)
 branch_labels = None
 depends_on = None
 
@@ -31,58 +32,9 @@ depends_on = None
 def upgrade() -> None:
     """Create payment notification system tables"""
     
-    # Create catering_bookings table
-    op.create_table(
-        'catering_bookings',
-        sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-        sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-        
-        # Customer Information
-        sa.Column('customer_name', sa.String(length=255), nullable=False),
-        sa.Column('customer_email', sa.String(length=255), nullable=False),
-        sa.Column('customer_phone', sa.String(length=20), nullable=False),
-        
-        # Alternative payer (friend/family payments)
-        sa.Column('alternative_payer_name', sa.String(length=255), nullable=True),
-        sa.Column('alternative_payer_email', sa.String(length=255), nullable=True),
-        sa.Column('alternative_payer_phone', sa.String(length=20), nullable=True),
-        sa.Column('alternative_payer_venmo', sa.String(length=100), nullable=True),
-        
-        # Event Details
-        sa.Column('event_date', sa.DateTime(), nullable=False),
-        sa.Column('event_location', sa.Text(), nullable=False),
-        sa.Column('guest_count', sa.Integer(), nullable=False),
-        sa.Column('service_type', sa.String(length=100), nullable=True),
-        
-        # Pricing
-        sa.Column('base_amount', sa.Numeric(precision=10, scale=2), nullable=False),
-        sa.Column('tip_amount', sa.Numeric(precision=10, scale=2), nullable=True, server_default='0'),
-        sa.Column('tax_amount', sa.Numeric(precision=10, scale=2), nullable=True, server_default='0'),
-        sa.Column('total_amount', sa.Numeric(precision=10, scale=2), nullable=False),
-        
-        # Booking Status
-        sa.Column('status', sa.String(length=50), nullable=True, server_default='pending'),
-        
-        # Special Requests
-        sa.Column('special_requests', sa.Text(), nullable=True),
-        sa.Column('dietary_restrictions', sa.Text(), nullable=True),
-        sa.Column('internal_notes', sa.Text(), nullable=True),
-        
-        # Timestamps
-        sa.Column('confirmed_at', sa.DateTime(), nullable=True),
-        sa.Column('completed_at', sa.DateTime(), nullable=True),
-        sa.Column('cancelled_at', sa.DateTime(), nullable=True),
-        
-        sa.PrimaryKeyConstraint('id')
-    )
-    
-    # Create indexes for catering_bookings
-    op.create_index('idx_catering_booking_customer_name', 'catering_bookings', ['customer_name'])
-    op.create_index('idx_catering_booking_customer_email', 'catering_bookings', ['customer_email'])
-    op.create_index('idx_catering_booking_customer_phone', 'catering_bookings', ['customer_phone'])
-    op.create_index('idx_catering_booking_event_date', 'catering_bookings', ['event_date'])
-    op.create_index('idx_catering_booking_status', 'catering_bookings', ['status'])
+    # Note: This migration originally created a catering_bookings table,
+    # but we use core.bookings instead. catering_payments and payment_notifications
+    # reference core.bookings.id via UUID foreign keys.
     
     # Create catering_payments table
     op.create_table(
@@ -92,7 +44,7 @@ def upgrade() -> None:
         sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         
         # Foreign Keys
-        sa.Column('booking_id', sa.Integer(), nullable=False),
+        sa.Column('booking_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('notification_id', sa.Integer(), nullable=True),
         
         # Payment Details
@@ -120,7 +72,7 @@ def upgrade() -> None:
         sa.Column('admin_note', sa.Text(), nullable=True),
         
         sa.PrimaryKeyConstraint('id'),
-        sa.ForeignKeyConstraint(['booking_id'], ['catering_bookings.id'], ondelete='CASCADE'),
+        sa.ForeignKeyConstraint(['booking_id'], ['core.bookings.id'], ondelete='CASCADE'),
     )
     
     # Create indexes for catering_payments
@@ -163,7 +115,7 @@ def upgrade() -> None:
         sa.Column('match_details', sa.JSON(), nullable=True),
         
         # Foreign Keys
-        sa.Column('booking_id', sa.Integer(), nullable=True),
+        sa.Column('booking_id', postgresql.UUID(as_uuid=True), nullable=True),
         sa.Column('payment_id', sa.Integer(), nullable=True),
         
         # Processing
@@ -183,7 +135,7 @@ def upgrade() -> None:
         sa.Column('error_message', sa.Text(), nullable=True),
         
         sa.PrimaryKeyConstraint('id'),
-        sa.ForeignKeyConstraint(['booking_id'], ['catering_bookings.id'], ondelete='SET NULL'),
+        sa.ForeignKeyConstraint(['booking_id'], ['core.bookings.id'], ondelete='SET NULL'),
         sa.ForeignKeyConstraint(['payment_id'], ['catering_payments.id'], ondelete='SET NULL'),
         sa.ForeignKeyConstraint(['reviewed_by'], ['identity.users.id'], ondelete='SET NULL'),
     )
@@ -225,7 +177,7 @@ def downgrade() -> None:
     # Drop tables in reverse order
     op.drop_table('payment_notifications')
     op.drop_table('catering_payments')
-    op.drop_table('catering_bookings')
+    # Note: We no longer create catering_bookings in upgrade(), so we don't drop it here
     
     # Drop enums
     op.execute('DROP TYPE IF EXISTS paymentnotificationstatus')

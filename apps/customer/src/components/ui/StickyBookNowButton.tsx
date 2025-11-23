@@ -27,7 +27,7 @@ export default function StickyBookNowButton() {
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const currentScrollY = window.scrollY;
-          
+
           // Detect scroll direction
           const scrollingUp = currentScrollY < lastScrollY;
           setLastScrollY(currentScrollY);

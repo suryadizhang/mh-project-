@@ -1,6 +1,6 @@
 /**
  * Customer Review Newsfeed - Performance Optimized
- * 
+ *
  * Performance Optimizations:
  * - React Query for data fetching and caching
  * - Memoized review cards to prevent unnecessary re-renders
@@ -8,7 +8,7 @@
  * - No nested loops - O(n) complexity
  * - Efficient data structures (Map for lookups)
  * - Code splitting and lazy loading
- * 
+ *
  * Privacy Compliant:
  * - Displays customer_name from API (backend handles initials/full name)
  * - Never displays email or phone
@@ -78,31 +78,31 @@ class ReviewAPI {
     const response = await fetch(
       `${API_URL}/api/customer-reviews/approved-reviews?page=${page}&per_page=${REVIEWS_PER_PAGE}`
     );
-    
+
     if (!response.ok) {
       throw new Error('Failed to fetch reviews');
     }
-    
+
     return response.json();
   }
-  
+
   static async likeReview(reviewId: number): Promise<void> {
     const response = await fetch(
       `${API_URL}/api/customer-reviews/reviews/${reviewId}/like`,
       { method: 'POST' }
     );
-    
+
     if (!response.ok) {
       throw new Error('Failed to like review');
     }
   }
-  
+
   static async markHelpful(reviewId: number): Promise<void> {
     const response = await fetch(
       `${API_URL}/api/customer-reviews/reviews/${reviewId}/helpful`,
       { method: 'POST' }
     );
-    
+
     if (!response.ok) {
       throw new Error('Failed to mark helpful');
     }
@@ -120,7 +120,7 @@ const StarRating = React.memo(({ rating }: { rating: number }) => {
       ★
     </span>
   ));
-  
+
   return <div className="flex gap-1">{stars}</div>;
 });
 
@@ -134,10 +134,10 @@ const LazyImage = React.memo(({ src, alt, className }: { src: string; alt: strin
   const [isLoaded, setIsLoaded] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const imgRef = React.useRef<HTMLImageElement>(null);
-  
+
   React.useEffect(() => {
     if (!imgRef.current) return;
-    
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -147,12 +147,12 @@ const LazyImage = React.memo(({ src, alt, className }: { src: string; alt: strin
       },
       { rootMargin: '50px' } // Preload 50px before visible
     );
-    
+
     observer.observe(imgRef.current);
-    
+
     return () => observer.disconnect();
   }, []);
-  
+
   return (
     <div ref={imgRef as any} className={`relative ${className || ''}`}>
       {!isLoaded && (
@@ -180,18 +180,20 @@ LazyImage.displayName = 'LazyImage';
 
 const MediaGallery = React.memo(({ media, reviewId }: { media: MediaFile[]; reviewId: number }) => {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  
-  if (!media || media.length === 0) return null;
-  
+
   // Optimize: Use Map for O(1) lookup instead of array iteration
+  // Must be called before any conditional returns (React Hooks rule)
   const mediaMap = useMemo(() => {
+    if (!media || media.length === 0) return new Map();
     const map = new Map<number, MediaFile>();
     media.forEach((m, i) => map.set(i, m));
     return map;
   }, [media]);
-  
+
+  if (!media || media.length === 0) return null;
+
   const gridCols = media.length === 1 ? 'grid-cols-1' : media.length === 2 ? 'grid-cols-2' : 'grid-cols-3';
-  
+
   return (
     <>
       <div className={`grid ${gridCols} gap-2 mt-4`}>
@@ -224,7 +226,7 @@ const MediaGallery = React.memo(({ media, reviewId }: { media: MediaFile[]; revi
           </div>
         ))}
       </div>
-      
+
       {/* Lightbox Modal */}
       {lightboxIndex !== null && (
         <div
@@ -240,7 +242,7 @@ const MediaGallery = React.memo(({ media, reviewId }: { media: MediaFile[]; revi
           >
             ×
           </button>
-          
+
           {mediaMap.get(lightboxIndex)?.resource_type === 'image' ? (
             <img
               src={mediaMap.get(lightboxIndex)?.url}
@@ -257,7 +259,7 @@ const MediaGallery = React.memo(({ media, reviewId }: { media: MediaFile[]; revi
               onClick={(e) => e.stopPropagation()}
             />
           )}
-          
+
           {/* Navigation */}
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4">
             <button
@@ -293,25 +295,25 @@ MediaGallery.displayName = 'MediaGallery';
 // Review Card Component (Memoized for Performance)
 // ============================================================================
 
-const ReviewCard = React.memo(({ 
-  review, 
-  onLike, 
-  onHelpful 
-}: { 
-  review: Review; 
+const ReviewCard = React.memo(({
+  review,
+  onLike,
+  onHelpful
+}: {
+  review: Review;
   onLike: (id: number) => void;
   onHelpful: (id: number) => void;
 }) => {
   // Format date (memoized)
   const formattedDate = useMemo(() => {
     const date = new Date(review.created_at);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
   }, [review.created_at]);
-  
+
   return (
     <article className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
       {/* Header */}
@@ -330,14 +332,14 @@ const ReviewCard = React.memo(({
           <StarRating rating={review.rating} />
         </div>
       </div>
-      
+
       {/* Content */}
       <h3 className="text-xl font-bold mb-2">{review.title}</h3>
       <p className="text-gray-700 mb-4 whitespace-pre-line">{review.content}</p>
-      
+
       {/* Media Gallery */}
       <MediaGallery media={review.media} reviewId={review.id} />
-      
+
       {/* External Links */}
       {(review.google_review_link || review.yelp_review_link) && (
         <div className="mt-4 flex gap-3 text-sm">
@@ -363,7 +365,7 @@ const ReviewCard = React.memo(({
           )}
         </div>
       )}
-      
+
       {/* Actions */}
       <div className="mt-6 pt-4 border-t flex gap-4">
         <button
@@ -374,7 +376,7 @@ const ReviewCard = React.memo(({
           <span className="font-semibold">{review.likes_count}</span>
           <span className="text-sm">Likes</span>
         </button>
-        
+
         <button
           onClick={() => onHelpful(review.id)}
           className="flex items-center gap-2 text-gray-600 hover:text-green-600 transition"
@@ -383,7 +385,7 @@ const ReviewCard = React.memo(({
           <span className="font-semibold">{review.helpful_count}</span>
           <span className="text-sm">Helpful</span>
         </button>
-        
+
         <button className="flex items-center gap-2 text-gray-600 hover:text-purple-600 transition ml-auto">
           <span className="text-xl">🔗</span>
           <span className="text-sm">Share</span>
@@ -401,7 +403,7 @@ ReviewCard.displayName = 'ReviewCard';
 
 export default function CustomerReviewNewsfeed() {
   const queryClient = useQueryClient();
-  
+
   // React Query: Infinite scroll with automatic caching
   const {
     data,
@@ -419,7 +421,7 @@ export default function CustomerReviewNewsfeed() {
       lastPage.pagination.has_next ? lastPage.pagination.page + 1 : undefined,
     gcTime: 10 * 60 * 1000, // 10 minutes (React Query v5: cacheTime → gcTime)
   });
-  
+
   // Mutations for like/helpful
   const likeMutation = useMutation({
     mutationFn: ReviewAPI.likeReview,
@@ -427,35 +429,35 @@ export default function CustomerReviewNewsfeed() {
       queryClient.invalidateQueries({ queryKey: ['reviews'] });
     },
   });
-  
+
   const helpfulMutation = useMutation({
     mutationFn: ReviewAPI.markHelpful,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reviews'] });
     },
   });
-  
+
   // Memoized handlers (prevent unnecessary re-renders)
   const handleLike = useCallback((id: number) => {
     likeMutation.mutate(id);
   }, [likeMutation]);
-  
+
   const handleHelpful = useCallback((id: number) => {
     helpfulMutation.mutate(id);
   }, [helpfulMutation]);
-  
+
   // Flatten reviews from all pages (O(n) complexity, no nested loops)
   const allReviews = useMemo(() => {
     if (!data?.pages) return [];
     return data.pages.flatMap((page) => page.reviews);
   }, [data?.pages]);
-  
+
   // Intersection Observer for infinite scroll
   const observerTarget = React.useRef<HTMLDivElement>(null);
-  
+
   React.useEffect(() => {
     if (!observerTarget.current) return;
-    
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
@@ -464,12 +466,12 @@ export default function CustomerReviewNewsfeed() {
       },
       { threshold: 0.1 }
     );
-    
+
     observer.observe(observerTarget.current);
-    
+
     return () => observer.disconnect();
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
-  
+
   // Loading state
   if (isLoading) {
     return (
@@ -487,7 +489,7 @@ export default function CustomerReviewNewsfeed() {
       </div>
     );
   }
-  
+
   // Error state
   if (isError) {
     return (
@@ -500,7 +502,7 @@ export default function CustomerReviewNewsfeed() {
       </div>
     );
   }
-  
+
   // Empty state
   if (allReviews.length === 0) {
     return (
@@ -519,7 +521,7 @@ export default function CustomerReviewNewsfeed() {
       </div>
     );
   }
-  
+
   // Main content
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -530,7 +532,7 @@ export default function CustomerReviewNewsfeed() {
           Read what our customers are saying about their hibachi experience
         </p>
       </div>
-      
+
       {/* Reviews Grid - O(n) iteration, no nested loops */}
       <div className="space-y-6">
         {allReviews.map((review) => (
@@ -542,7 +544,7 @@ export default function CustomerReviewNewsfeed() {
           />
         ))}
       </div>
-      
+
       {/* Infinite Scroll Trigger */}
       <div ref={observerTarget} className="mt-8">
         {isFetchingNextPage && (
@@ -551,7 +553,7 @@ export default function CustomerReviewNewsfeed() {
             <p className="text-gray-600 mt-2">Loading more reviews...</p>
           </div>
         )}
-        
+
         {!hasNextPage && allReviews.length > 0 && (
           <div className="text-center py-8 text-gray-500">
             <span className="text-2xl block mb-2">🎉</span>

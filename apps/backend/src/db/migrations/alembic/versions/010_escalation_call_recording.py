@@ -108,7 +108,7 @@ def upgrade() -> None:
         sa.Column(
             "priority",
             postgresql.ENUM(
-                "low", "medium", "high", "urgent", name="escalation_priority", create_type=False
+                "low", "medium", "high", "urgent", name="escalation_priority", schema="support", create_type=False
             ),
             nullable=False,
             server_default="medium",
@@ -116,7 +116,7 @@ def upgrade() -> None:
         sa.Column(
             "method",
             postgresql.ENUM(
-                "phone", "email", "preferred_method", name="escalation_method", create_type=False
+                "phone", "email", "preferred_method", name="escalation_method", schema="support", create_type=False
             ),
             nullable=False,
             server_default="phone",
@@ -132,6 +132,7 @@ def upgrade() -> None:
                 "closed",
                 "error",
                 name="escalation_status",
+                schema="support",
                 create_type=False,
             ),
             nullable=False,
@@ -179,7 +180,7 @@ def upgrade() -> None:
         sa.Column(
             "recording_type",
             postgresql.ENUM(
-                "inbound", "outbound", "internal", name="recording_type", create_type=False
+                "inbound", "outbound", "internal", name="recording_type", schema="communications", create_type=False
             ),
             nullable=False,
             server_default="inbound",
@@ -194,6 +195,7 @@ def upgrade() -> None:
                 "deleted",
                 "error",
                 name="recording_status",
+                schema="communications",
                 create_type=False,
             ),
             nullable=False,

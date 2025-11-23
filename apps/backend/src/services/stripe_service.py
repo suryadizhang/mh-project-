@@ -10,13 +10,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import stripe
 
 settings = get_settings()
-from models.legacy_core import Customer, Payment  # Phase 2C: Updated from api.app.models.core
-from models.legacy_stripe_models import (  # Phase 2C: Updated from api.app.models.stripe_models
-    Dispute,
-    Invoice,
-    StripeCustomer,
-    StripePayment,
-)
+from models import Customer, Payment  # Phase 2C: Updated from api.app.models.core
+# TODO: Legacy stripe models not migrated - needs refactor
+# from models.legacy_stripe_models import (  # Phase 2C: Updated from api.app.models.stripe_models
+#     Dispute,
+#     Invoice,
+#     StripeCustomer,
+#     StripePayment,
+# )
 from schemas.stripe_schemas import (
     PaymentAnalytics,
 )  # Phase 2C: Updated from api.app.schemas.stripe_schemas

@@ -13,15 +13,9 @@ from cqrs.social.social_commands import (  # Phase 2C: Updated from api.app.cqrs
     SendSocialReplyCommand,
     UpdateThreadStatusCommand,
 )
-from models.legacy_core import Customer, Lead  # Phase 2C: Updated from api.app.models.core
-from models.legacy_events import OutboxEntry  # Phase 2C: Updated from api.app.models.events
-from models.legacy_social import (  # Phase 2C: Updated from api.app.models.social
-    Review,
-    SocialAccount,
-    SocialIdentity,
-    SocialMessage,
-    SocialThread,
-)
+from models import Customer, DomainEvent, Lead, OutboxEntry  # Phase 2C: Updated from api.app.models.core
+from models import Review, SocialMessage, SocialThread
+from models.enums import MessageDirection, ReviewStatus, ThreadStatus
 from services.social.social_service import (
     SocialService,
 )  # Phase 2C: Updated from api.app.services.social_service

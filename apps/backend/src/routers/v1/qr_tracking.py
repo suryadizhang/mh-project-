@@ -6,7 +6,7 @@ Handles QR code redirects and tracking analytics
 import secrets
 
 from core.database import get_db
-from models.legacy_qr_tracking import QRCodeType
+# TODO: Legacy QR tracking not migrated yet - needs refactor
 from services.qr_tracking_service import QRTrackingService
 from fastapi import APIRouter, Depends, Request, Response
 from fastapi.responses import RedirectResponse

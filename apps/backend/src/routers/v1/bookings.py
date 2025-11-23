@@ -281,7 +281,7 @@ async def get_bookings(
     """
     from uuid import UUID
 
-    from models.legacy_core import Booking
+    from models import Booking
     from sqlalchemy import select
     from sqlalchemy.orm import joinedload
     from utils.pagination import paginate_query
@@ -447,7 +447,7 @@ async def get_booking(
     """
     from uuid import UUID
 
-    from models.legacy_core import Booking
+    from models import Booking
     from sqlalchemy import select
     from sqlalchemy.orm import joinedload, selectinload
 
@@ -1003,7 +1003,7 @@ async def delete_booking(
     from datetime import timedelta
     from uuid import UUID
 
-    from models.legacy_core import Booking
+    from models import Booking
     from sqlalchemy import select
 
     # Fetch booking
@@ -1218,7 +1218,7 @@ async def get_weekly_bookings(
     from datetime import datetime
     from uuid import UUID
 
-    from models.legacy_core import Booking
+    from models import Booking
     from core.security import decrypt_pii
     from sqlalchemy import and_, select
     from sqlalchemy.orm import joinedload
@@ -1509,7 +1509,7 @@ async def update_booking_datetime(
     import re
     from uuid import UUID
 
-    from models.legacy_core import Booking
+    from models import Booking
     from sqlalchemy import select
 
     # TODO: Add admin role check
@@ -1609,7 +1609,7 @@ async def get_booked_dates(
     current_user: dict[str, Any] | None = Depends(get_current_user),
 ) -> dict[str, Any]:
     """Get all dates that have bookings."""
-    from models.legacy_booking_models import Booking
+    from models import Booking
     from sqlalchemy import select, func
     from uuid import UUID
 
@@ -1666,7 +1666,7 @@ async def check_availability(
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Check availability for a specific date."""
-    from models.legacy_booking_models import Booking
+    from models import Booking
     from sqlalchemy import select, func
     from datetime import datetime
 

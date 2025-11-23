@@ -1,7 +1,7 @@
 """add_menu_items_table
 
 Revision ID: 8ecb9a7d48f7
-Revises: bd8856cf6aa0
+Revises: 5034d1bfa5f0
 Create Date: 2025-11-12 12:05:51.237899
 
 Creates menu_items and pricing_tiers tables for dynamic menu management.
@@ -14,7 +14,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = '8ecb9a7d48f7'
-down_revision = 'bd8856cf6aa0'
+down_revision = '5034d1bfa5f0'
 branch_labels = None
 depends_on = None
 

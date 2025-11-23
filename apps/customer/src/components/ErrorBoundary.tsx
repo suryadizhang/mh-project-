@@ -22,7 +22,6 @@
  */
 
 import React from "react";
-
 import { ErrorBoundary as ReactErrorBoundary, FallbackProps } from "react-error-boundary";
 
 import { logger } from "@/lib/logger";

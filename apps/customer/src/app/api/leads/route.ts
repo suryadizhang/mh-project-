@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    
+
     // Forward query parameters to backend
     const queryString = searchParams.toString()
     const url = `${BACKEND_API_URL}/api/v1/leads/${queryString ? `?${queryString}` : ''}`

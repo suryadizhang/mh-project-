@@ -19,6 +19,11 @@ Before generating code, reviewing code, or answering questions, you
    Deep Audit Methodology)
 3. **Apply all other instructions** in `.github/instructions/`
    directory
+4. **Follow all best practices** for code quality and maintainability
+5. **Prioritize safety and correctness** over speed or simplicity
+6. **When auditing, use ALL 8 techniques** (A–H) simultaneously
+7. **We need to fix all bugs at all costs; quality is our priority.**
+8. make sure all our logic and features are 100% correct and working as intended
 
 ---
 

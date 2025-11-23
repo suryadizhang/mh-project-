@@ -10,7 +10,7 @@ from api.ai.shadow.model_router import get_model_router
 from api.ai.shadow.quality_monitor import get_quality_monitor
 from api.ai.shadow.readiness_service import get_readiness_service
 from core.config import get_settings
-from db.session import get_db
+from core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession

@@ -16,6 +16,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { z } from 'zod';
 
 // ============================================================================
@@ -60,11 +61,11 @@ export default function CustomerReviewForm() {
     googleReviewUrl: '',
     yelpReviewUrl: '',
   });
-  
+
   // Media state
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const [dragActive, setDragActive] = useState(false);
-  
+
   // UI state
   const [showPreview, setShowPreview] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -77,46 +78,46 @@ export default function CustomerReviewForm() {
 
   const handleMediaUpload = (files: FileList | null) => {
     if (!files) return;
-    
+
     const newMedia: MediaFile[] = [];
     const maxFiles = 10;
-    
+
     // Check total files limit
     if (mediaFiles.length + files.length > maxFiles) {
       alert(`Maximum ${maxFiles} files allowed`);
       return;
     }
-    
+
     Array.from(files).forEach((file) => {
       // Check file type
       const isImage = file.type.startsWith('image/');
       const isVideo = file.type.startsWith('video/');
-      
+
       if (!isImage && !isVideo) {
         alert(`${file.name} is not a valid image or video`);
         return;
       }
-      
+
       // Check file size
       const maxImageSize = 10 * 1024 * 1024; // 10MB
       const maxVideoSize = 100 * 1024 * 1024; // 100MB
       const maxSize = isVideo ? maxVideoSize : maxImageSize;
-      
+
       if (file.size > maxSize) {
         alert(`${file.name} exceeds max size (${isVideo ? '100MB' : '10MB'})`);
         return;
       }
-      
+
       // Create preview URL
       const preview = URL.createObjectURL(file);
-      
+
       newMedia.push({
         file,
         preview,
         type: isImage ? 'image' : 'video',
       });
     });
-    
+
     setMediaFiles([...mediaFiles, ...newMedia]);
   };
 
@@ -134,7 +135,7 @@ export default function CustomerReviewForm() {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleMediaUpload(e.dataTransfer.files);
     }
@@ -163,7 +164,7 @@ export default function CustomerReviewForm() {
 
   const validateStep = (step: number): boolean => {
     const newErrors: Record<string, string> = {};
-    
+
     switch (step) {
       case 1:
         if (!formData.rating || formData.rating === 0) {
@@ -197,7 +198,7 @@ export default function CustomerReviewForm() {
         }
         break;
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -228,14 +229,14 @@ export default function CustomerReviewForm() {
         break;
       }
     }
-    
+
     if (!allValid) {
       alert('Please fix validation errors');
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
       // Prepare form data
       const submitData = new FormData();
@@ -247,7 +248,7 @@ export default function CustomerReviewForm() {
       submitData.append('title', formData.title || '');
       submitData.append('content', formData.content || '');
       submitData.append('rating', String(formData.rating || 0));
-      
+
       if (formData.googleReviewUrl) {
         submitData.append('reviewed_on_google', 'true');
         submitData.append('google_review_link', formData.googleReviewUrl);
@@ -256,31 +257,31 @@ export default function CustomerReviewForm() {
         submitData.append('reviewed_on_yelp', 'true');
         submitData.append('yelp_review_link', formData.yelpReviewUrl);
       }
-      
+
       // Add media files
       mediaFiles.forEach((media) => {
         submitData.append('media_files', media.file);
       });
-      
+
       // Submit to backend
       const response = await fetch('http://localhost:8000/api/customer-reviews/submit-review', {
         method: 'POST',
         body: submitData,
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to submit review');
       }
-      
+
       const result = await response.json();
-      
+
       // Success!
       setSubmitted(true);
       setShowPreview(false);
-      
+
       // Cleanup media previews
       mediaFiles.forEach((media) => URL.revokeObjectURL(media.preview));
-      
+
     } catch (error) {
       console.error('Submit error:', error);
       alert('Failed to submit review. Please try again.');
@@ -303,7 +304,7 @@ export default function CustomerReviewForm() {
           </h2>
           <p className="text-lg text-green-700 mb-6">
             Your review has been submitted and is pending approval by our team.
-            We'll review it shortly and it will appear on our website once approved.
+            {"We'll"} review it shortly and it will appear on our website once approved.
           </p>
           <div className="flex gap-4 justify-center">
             <button
@@ -317,12 +318,12 @@ export default function CustomerReviewForm() {
             >
               Submit Another Review
             </button>
-            <a
+            <Link
               href="/"
               className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
             >
               Back to Home
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -334,7 +335,7 @@ export default function CustomerReviewForm() {
       <div className="max-w-4xl mx-auto p-8">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <h2 className="text-3xl font-bold mb-6">Preview Your Review</h2>
-          
+
           <div className="border-2 border-gray-200 rounded-lg p-6 mb-6">
             {/* Rating Stars */}
             <div className="flex items-center gap-2 mb-4">
@@ -349,13 +350,13 @@ export default function CustomerReviewForm() {
                 </span>
               ))}
             </div>
-            
+
             {/* Title */}
             <h3 className="text-2xl font-bold mb-4">{formData.title}</h3>
-            
+
             {/* Content */}
             <p className="text-gray-700 whitespace-pre-wrap mb-6">{formData.content}</p>
-            
+
             {/* Media Gallery */}
             {mediaFiles.length > 0 && (
               <div className="mb-6">
@@ -384,7 +385,7 @@ export default function CustomerReviewForm() {
                 </div>
               </div>
             )}
-            
+
             {/* Customer Info */}
             <div className="border-t pt-4 mt-4">
               <p className="font-semibold text-gray-900">
@@ -409,7 +410,7 @@ export default function CustomerReviewForm() {
                 )}
               </p>
             </div>
-            
+
             {/* External Links */}
             {(formData.googleReviewUrl || formData.yelpReviewUrl) && (
               <div className="border-t pt-4 mt-4">
@@ -439,7 +440,7 @@ export default function CustomerReviewForm() {
               </div>
             )}
           </div>
-          
+
           {/* Action Buttons */}
           <div className="flex gap-4 justify-between">
             <button
@@ -547,7 +548,7 @@ export default function CustomerReviewForm() {
         {currentStep === 2 && (
           <div>
             <h2 className="text-2xl font-bold mb-6">Tell us about your experience</h2>
-            
+
             {/* Privacy Notice */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
               <div className="flex items-start gap-3">
@@ -563,7 +564,7 @@ export default function CustomerReviewForm() {
                 </div>
               </div>
             </div>
-            
+
             {/* Customer Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
@@ -577,7 +578,7 @@ export default function CustomerReviewForm() {
                 />
                 {errors.customerName && <p className="text-red-600 text-sm mt-1">{errors.customerName}</p>}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-semibold mb-2">Email *</label>
                 <input
@@ -590,7 +591,7 @@ export default function CustomerReviewForm() {
                 {errors.customerEmail && <p className="text-red-600 text-sm mt-1">{errors.customerEmail}</p>}
               </div>
             </div>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-semibold mb-2">Phone (Optional)</label>
               <input
@@ -601,7 +602,7 @@ export default function CustomerReviewForm() {
                 placeholder="(555) 123-4567"
               />
             </div>
-            
+
             {/* Privacy Option - Show Initials Only */}
             <div className="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
               <label className="flex items-start gap-3 cursor-pointer">
@@ -632,7 +633,7 @@ export default function CustomerReviewForm() {
                 </div>
               </label>
             </div>
-            
+
             {/* Review Title */}
             <div className="mb-4">
               <label className="block text-sm font-semibold mb-2">Review Title *</label>
@@ -646,7 +647,7 @@ export default function CustomerReviewForm() {
               />
               {errors.title && <p className="text-red-600 text-sm mt-1">{errors.title}</p>}
             </div>
-            
+
             {/* Review Content */}
             <div className="mb-6">
               <label className="block text-sm font-semibold mb-2">Your Review *</label>
@@ -662,7 +663,7 @@ export default function CustomerReviewForm() {
               </div>
               {errors.content && <p className="text-red-600 text-sm mt-1">{errors.content}</p>}
             </div>
-            
+
             <div className="flex justify-between">
               <button
                 onClick={handleBack}
@@ -687,7 +688,7 @@ export default function CustomerReviewForm() {
             <p className="text-gray-600 mb-6">
               Upload up to 10 images or videos to showcase your experience
             </p>
-            
+
             {/* Upload Area */}
             <div
               onDragEnter={handleDrag}
@@ -721,7 +722,7 @@ export default function CustomerReviewForm() {
                 Choose Files
               </label>
             </div>
-            
+
             {/* Media Preview Grid */}
             {mediaFiles.length > 0 && (
               <div className="mb-6">
@@ -765,7 +766,7 @@ export default function CustomerReviewForm() {
                 </div>
               </div>
             )}
-            
+
             <div className="flex justify-between">
               <button
                 onClick={handleBack}
@@ -790,7 +791,7 @@ export default function CustomerReviewForm() {
             <p className="text-gray-600 mb-6">
               Have you also reviewed us on Google or Yelp? Share the links!
             </p>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-semibold mb-2">
                 Google Review URL
@@ -804,7 +805,7 @@ export default function CustomerReviewForm() {
               />
               {errors.googleReviewUrl && <p className="text-red-600 text-sm mt-1">{errors.googleReviewUrl}</p>}
             </div>
-            
+
             <div className="mb-6">
               <label className="block text-sm font-semibold mb-2">
                 Yelp Review URL
@@ -818,7 +819,7 @@ export default function CustomerReviewForm() {
               />
               {errors.yelpReviewUrl && <p className="text-red-600 text-sm mt-1">{errors.yelpReviewUrl}</p>}
             </div>
-            
+
             <div className="flex justify-between">
               <button
                 onClick={handleBack}

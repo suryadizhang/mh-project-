@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
 from core.auth import get_current_user
-from models.user import User
+from core.auth.models import User
 from services.totp_service import get_totp_service, TOTPService
 from services.ip_verification_service import get_ip_verification_service, IPVerificationService
 from services.audit_service import get_audit_service, AuditService

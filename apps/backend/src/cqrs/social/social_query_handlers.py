@@ -10,13 +10,9 @@ from cqrs.social.social_queries import (  # Phase 2C: Updated from api.app.cqrs.
     GetThreadDetailQuery,
     GetUnreadCountsQuery,
 )
-from models.legacy_core import Customer  # Phase 2C: Updated from api.app.models.core
-from models.legacy_social import (  # Phase 2C: Updated from api.app.models.social
-    Review,
-    SocialAccount,
-    SocialMessage,
-    SocialThread,
-)
+from models import Customer  # Phase 2C: Updated from api.app.models.core
+from models import Review, SocialMessage, SocialThread
+from models.enums import MessageDirection, ReviewStatus, ThreadStatus
 from sqlalchemy import and_, asc, desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload

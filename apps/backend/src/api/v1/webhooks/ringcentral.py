@@ -13,8 +13,8 @@ from workers.recording_tasks import (
 )
 from models.call_recording import CallRecording, RecordingStatus, RecordingType
 from models.escalation import Escalation, EscalationStatus
-from models.sms_delivery_event import SMSDeliveryEvent, SMSDeliveryStatus
-from models.subscriber import Subscriber
+from models import SMSDeliveryEvent, Subscriber
+from models.enums import SMSDeliveryStatus
 from core.database import get_db_session
 from datetime import datetime
 from sqlalchemy import select
@@ -377,8 +377,8 @@ async def handle_sms_delivery_status(payload: dict):
             )
             return
 
-        # Get the associated subscriber
-        from models.campaign_event import CampaignEvent
+        # Get the associated campaign event
+        from models import CampaignEvent
 
         campaign_event = (
             db.query(CampaignEvent)

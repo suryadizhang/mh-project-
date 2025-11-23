@@ -5,12 +5,7 @@ from typing import Literal
 from uuid import UUID
 
 from cqrs.base import Query  # Phase 2C: Updated from api.app.cqrs.base
-from models.legacy_social import (  # Phase 2C: Updated from api.app.models.social
-    MessageKind,
-    ReviewStatus,
-    SocialPlatform,
-    ThreadStatus,
-)
+from models.enums import MessageKind, ReviewStatus, SocialPlatform, ThreadStatus
 from pydantic import ConfigDict, Field
 
 

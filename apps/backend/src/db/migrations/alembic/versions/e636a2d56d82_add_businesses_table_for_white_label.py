@@ -69,47 +69,93 @@ def upgrade() -> None:
     """
     )
 
-    # Add business_id to existing tables
-    tables_to_update = [
-        "users",
-        "bookings",
-        "leads",
-        "reviews",
-        "newsletter_subscribers",
+    # Add business_id to existing tables (with correct schemas)
+    tables_with_schemas = [
+        ("users", "identity"),
+        ("bookings", "bookings"),
+        ("leads", "lead"),
+        ("reviews", "feedback"),
+        ("newsletter_subscribers", "newsletter"),
     ]
 
-    for table in tables_to_update:
+    conn = op.get_bind()
+    
+    for table, schema in tables_with_schemas:
+        # Check if table exists before adding column
+        table_exists = conn.execute(sa.text(f"""
+            SELECT EXISTS (
+                SELECT 1 FROM information_schema.tables 
+                WHERE table_schema = '{schema}' 
+                AND table_name = '{table}'
+            )
+        """)).scalar()
+        
+        if not table_exists:
+            print(f"[SKIP] {schema}.{table} does not exist")
+            continue
+            
+        # Check if business_id column already exists
+        column_exists = conn.execute(sa.text(f"""
+            SELECT EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_schema = '{schema}'
+                AND table_name = '{table}'
+                AND column_name = 'business_id'
+            )
+        """)).scalar()
+        
+        if column_exists:
+            print(f"[SKIP] {schema}.{table}.business_id already exists")
+            continue
+        
         # Add business_id column (nullable first)
-        op.add_column(table, sa.Column("business_id", UUID(as_uuid=True), nullable=True))
+        op.add_column(table, sa.Column("business_id", UUID(as_uuid=True), nullable=True), schema=schema)
 
         # Set all existing records to My Hibachi Chef
         op.execute(
             f"""
-            UPDATE {table}
+            UPDATE {schema}.{table}
             SET business_id = (SELECT id FROM businesses WHERE slug = 'my-hibachi-chef')
         """
         )
 
         # Make business_id NOT NULL
-        op.alter_column(table, "business_id", nullable=False)
+        op.alter_column(table, "business_id", nullable=False, schema=schema)
 
         # Add foreign key
         op.create_foreign_key(
-            f"fk_{table}_business", table, "businesses", ["business_id"], ["id"], ondelete="CASCADE"
+            f"fk_{table}_business", 
+            table, 
+            "businesses", 
+            ["business_id"], 
+            ["id"], 
+            source_schema=schema,
+            ondelete="CASCADE"
         )
+        
+        print(f"✅ Added business_id to {schema}.{table}")
 
         # Add index for performance
-        op.create_index(f"idx_{table}_business_id", table, ["business_id"])
+        op.create_index(f"idx_{table}_business_id", table, ["business_id"], schema=schema)
 
 
 def downgrade() -> None:
-    # Remove business_id from tables
-    tables = ["users", "bookings", "leads", "reviews", "newsletter_subscribers"]
+    # Remove business_id from tables (with correct schemas)
+    tables_with_schemas = [
+        ("users", "identity"),
+        ("bookings", "bookings"),
+        ("leads", "lead"),
+        ("reviews", "feedback"),
+        ("newsletter_subscribers", "newsletter"),
+    ]
 
-    for table in tables:
-        op.drop_index(f"idx_{table}_business_id", table_name=table)
-        op.drop_constraint(f"fk_{table}_business", table, type_="foreignkey")
-        op.drop_column(table, "business_id")
+    for table, schema in tables_with_schemas:
+        try:
+            op.drop_index(f"idx_{table}_business_id", table_name=table, schema=schema)
+            op.drop_constraint(f"fk_{table}_business", table, schema=schema, type_="foreignkey")
+            op.drop_column(table, "business_id", schema=schema)
+        except Exception as e:
+            print(f"[SKIP] Could not remove business_id from {schema}.{table}: {e}")
 
     # Drop businesses table
     op.drop_table("businesses")

@@ -1,10 +1,11 @@
 """
 Customer model and related types
+ALIGNED WITH PRODUCTION DATABASE (public.customers)
 """
 
 from enum import Enum
 
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, Integer, Numeric, String, Text
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import relationship
 
@@ -32,86 +33,71 @@ class CustomerPreference(str, Enum):
 
 
 class Customer(BaseModel):
-    """Customer model"""
+    """
+    Customer model - PRODUCTION SCHEMA
+    
+    This model matches the actual production database structure in public.customers.
+    DO NOT modify without corresponding database migration.
+    
+    Key fields:
+    - id: VARCHAR (Stripe/Supabase customer ID, not auto-increment)
+    - user_id: VARCHAR (Supabase auth.users reference)
+    - stripe_customer_id: VARCHAR (Stripe customer identifier)
+    - name: VARCHAR (single field, not first_name/last_name)
+    """
 
     __tablename__ = "customers"
 
-    # Basic information
-    first_name = Column(String(100), nullable=False)
-    last_name = Column(String(100), nullable=False)
-    email = Column(String(255), unique=True, nullable=False, index=True)
-    phone = Column(String(20), index=True)
+    # Primary identifiers (VARCHAR in production DB)
+    id = Column(String, primary_key=True)  # Matches production: VARCHAR, not Integer!
+    user_id = Column(String, nullable=False, unique=True, index=True)
+    email = Column(String, nullable=False, unique=True, index=True)
+    stripe_customer_id = Column(String, nullable=False, unique=True, index=True)
 
-    # Status and preferences
-    status = Column(SQLEnum(CustomerStatus), default=CustomerStatus.ACTIVE, nullable=False)
-    dietary_preferences = Column(Text)  # JSON string of preferences
-    special_notes = Column(Text)
+    # Basic information (single name field in production)
+    name = Column(String, nullable=True)  # Production has single 'name', not first_name/last_name
+    phone = Column(String, nullable=True)
 
-    # Communication preferences
-    email_notifications = Column(Boolean, default=True)
-    sms_notifications = Column(Boolean, default=False)
-    marketing_emails = Column(Boolean, default=True)
+    # Payment preferences
+    preferred_payment_method = Column(String, nullable=True)
 
-    # Profile completion
-    date_of_birth = Column(DateTime)
-    anniversary_date = Column(DateTime)
+    # Financial tracking (Numeric in production for precision)
+    total_spent = Column(Numeric(10, 2), default=0, nullable=True)
+    zelle_savings = Column(Numeric(10, 2), default=0, nullable=True)
 
-    # Loyalty information
-    loyalty_points = Column(Integer, default=0)
-    total_visits = Column(Integer, default=0)
-    total_spent = Column(Integer, default=0)  # in cents
+    # Loyalty program
+    total_bookings = Column(Integer, default=0, nullable=True)
+    loyalty_tier = Column(String, nullable=True)
 
-    # Last activity
-    last_booking_date = Column(DateTime)
-    last_visit_date = Column(DateTime)
-
+    # Legacy fields (keep for backward compatibility but not in production DB)
+    # These will be handled via computed properties or separate preference tables
+    
     # Relationships
     bookings = relationship("Booking", back_populates="customer", lazy="select")
-    tone_preferences = relationship("CustomerTonePreference", back_populates="customer", lazy="select")
+    # TODO: tone_preferences removed - no FK exists in production
+    # TODO: Consider adding via separate migration if needed
 
     def __repr__(self):
-        return f"<Customer(id={self.id}, email={self.email}, name={self.full_name})>"
+        return f"<Customer(id={self.id}, email={self.email}, name={self.name})>"
 
     @property
     def full_name(self) -> str:
-        """Get customer's full name"""
-        return f"{self.first_name} {self.last_name}"
+        """Get customer's full name (for backward compatibility)"""
+        return self.name or "Unknown"
 
     @property
-    def is_active(self) -> bool:
-        """Check if customer is active"""
-        return self.status == CustomerStatus.ACTIVE
+    def first_name(self) -> str:
+        """Extract first name from full name (for backward compatibility)"""
+        if self.name:
+            parts = self.name.split()
+            return parts[0] if parts else ""
+        return ""
 
     @property
-    def is_vip(self) -> bool:
-        """Check if customer has VIP status"""
-        return self.status == CustomerStatus.VIP
+    def last_name(self) -> str:
+        """Extract last name from full name (for backward compatibility)"""
+        if self.name:
+            parts = self.name.split()
+            return " ".join(parts[1:]) if len(parts) > 1 else ""
+        return ""
 
-    def get_dietary_preferences_list(self) -> list[str]:
-        """Parse dietary preferences from JSON string"""
-        import json
-
-        try:
-            if self.dietary_preferences:
-                return json.loads(self.dietary_preferences)
-        except (json.JSONDecodeError, TypeError):
-            pass
-        return []
-
-    def set_dietary_preferences(self, preferences: list[str]):
-        """Set dietary preferences as JSON string"""
-        import json
-
-        self.dietary_preferences = json.dumps(preferences) if preferences else None
-
-    def add_loyalty_points(self, points: int):
-        """Add loyalty points to customer account"""
-        self.loyalty_points = (self.loyalty_points or 0) + points
-
-    def can_receive_notifications(self, notification_type: str = "email") -> bool:
-        """Check if customer can receive notifications"""
-        if notification_type == "email":
-            return self.email_notifications and self.status != CustomerStatus.SUSPENDED
-        elif notification_type == "sms":
-            return self.sms_notifications and self.phone and self.status != CustomerStatus.SUSPENDED
-        return False

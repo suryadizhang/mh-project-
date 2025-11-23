@@ -779,7 +779,7 @@ async def delete_station(
             )
 
         # Safety check 1: Check for active bookings
-        from models.legacy_booking_models import Booking
+        from models import Booking
 
         active_bookings_result = await db.execute(
             select(func.count(Booking.id)).where(
