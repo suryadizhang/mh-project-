@@ -23,7 +23,7 @@ from typing import AsyncGenerator, Optional, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 
-from db.session import AsyncSessionLocal
+from core.database import AsyncSessionLocal
 from services.lead_service import LeadService
 from services.newsletter_service import SubscriberService
 from services.event_service import EventService

@@ -480,7 +480,7 @@ def example_business_alert(alert_service: AlertService):
 """
 STEP 1: Initialize AlertService with database session
 ```python
-from db.session import get_db
+from core.database import get_db
 from monitoring.alert_service import AlertService
 
 db = next(get_db())

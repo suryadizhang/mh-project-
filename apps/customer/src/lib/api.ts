@@ -177,7 +177,7 @@ export async function apiFetch<T = Record<string, unknown>>(
 
   // Generate cache key
   const cacheKey = cacheConfig?.key || `${method}:${path}`;
-  
+
   // Generate request ID for distributed tracing
   const requestId = crypto.randomUUID();
 

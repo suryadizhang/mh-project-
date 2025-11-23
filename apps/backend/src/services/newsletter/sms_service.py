@@ -12,13 +12,8 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.legacy_lead_newsletter import (
-    CampaignEvent,
-    CampaignEventType,
-    SMSDeliveryEvent,
-    SMSDeliveryStatus,
-    Subscriber,
-)
+from models import CampaignEvent, SMSDeliveryEvent, Subscriber
+from models.enums import CampaignEventType, SMSDeliveryStatus
 from services.email.base import EmailResult  # We'll reuse this structure for consistency
 
 

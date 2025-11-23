@@ -28,23 +28,23 @@ def upgrade() -> None:
     """Add SMS consent fields to bookings table"""
     # Add sms_consent column (default False for existing records)
     op.add_column(
-        "bookings", sa.Column("sms_consent", sa.Boolean(), nullable=False, server_default="false")
+        "bookings", sa.Column("sms_consent", sa.Boolean(), nullable=False, server_default="false"), schema="core"
     )
 
     # Add sms_consent_timestamp column (nullable - only set when consent given)
     op.add_column(
-        "bookings", sa.Column("sms_consent_timestamp", sa.DateTime(timezone=True), nullable=True)
+        "bookings", sa.Column("sms_consent_timestamp", sa.DateTime(timezone=True), nullable=True), schema="core"
     )
 
     # Create index for consent queries (useful for compliance reports)
-    op.create_index("ix_bookings_sms_consent", "bookings", ["sms_consent"], unique=False)
+    op.create_index("ix_bookings_sms_consent", "bookings", ["sms_consent"], unique=False, schema="core")
 
 
 def downgrade() -> None:
     """Remove SMS consent fields"""
     # Drop index first
-    op.drop_index("ix_bookings_sms_consent", table_name="bookings")
+    op.drop_index("ix_bookings_sms_consent", table_name="bookings", schema="core")
 
     # Drop columns
-    op.drop_column("bookings", "sms_consent_timestamp")
-    op.drop_column("bookings", "sms_consent")
+    op.drop_column("bookings", "sms_consent_timestamp", schema="core")
+    op.drop_column("bookings", "sms_consent", schema="core")

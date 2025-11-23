@@ -16,11 +16,11 @@ from cqrs.social_queries import (  # Phase 2C: Updated from api.app.cqrs.social_
     GetThreadDetailQuery,
     SearchSocialContentQuery,
 )
-from models.legacy_social import (
-    MessageKind,
-    SocialPlatform,
-    ThreadStatus,
-)  # Phase 2C: Updated from api.app.models.social
+# TODO: Legacy social models not migrated yet - needs refactor
+    # MessageKind,
+    # SocialPlatform,
+    # ThreadStatus,
+# )  # Phase 2C: Updated from api.app.models.social
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)

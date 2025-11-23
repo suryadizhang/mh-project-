@@ -17,13 +17,13 @@ from sqlalchemy.orm import Session
 
 settings = get_settings()
 from models.legacy_core import Event
-from models.legacy_lead_newsletter import (
-    Lead,
-    LeadSource,
-    LeadStatus,
-    SocialThread,
-    ThreadStatus,
-)
+# TODO: Legacy lead/newsletter models not migrated yet - needs refactor
+    # Lead,
+    # LeadSource,
+    # LeadStatus,
+    # SocialThread,
+    # ThreadStatus,
+# )
 from services.ai_lead_management import get_ai_lead_manager
 
 logger = logging.getLogger(__name__)

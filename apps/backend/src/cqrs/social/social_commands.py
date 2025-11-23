@@ -5,11 +5,7 @@ from typing import Any
 from uuid import UUID
 
 from cqrs.base import Command  # Phase 2C: Updated from api.app.cqrs.base
-from models.legacy_social import (
-    MessageKind,
-    SocialPlatform,
-    ThreadStatus,
-)  # Phase 2C: Updated from api.app.models.social
+from models.enums import MessageKind, SocialPlatform, ThreadStatus
 from pydantic import ConfigDict, Field
 
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
 
 interface ReviewData {
@@ -43,10 +44,10 @@ export default function ReviewPage() {
     try {
       const response = await fetch(`/api/reviews/${reviewId}`);
       if (!response.ok) throw new Error("Review not found");
-      
+
       const data = await response.json();
       setReview(data);
-      
+
       // If already submitted, redirect appropriately
       if (data.submitted && data.rating) {
         if (["great", "good"].includes(data.rating)) {
@@ -130,12 +131,12 @@ export default function ReviewPage() {
           <div className="text-6xl mb-4">😕</div>
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Oops!</h1>
           <p className="text-gray-600 mb-6">{error}</p>
-          <a
+          <Link
             href="/"
             className="inline-block bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition"
           >
             Go to Home
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -228,7 +229,7 @@ export default function ReviewPage() {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <p className="text-sm text-blue-800">
                   <strong>We appreciate your feedback!</strong> Our team will review your
-                  concerns and reach out to make things right. Plus, you'll receive a
+                  concerns and reach out to make things right. Plus, {"you'll"} receive a
                   special discount coupon for your next booking. 🎁
                 </p>
               </div>

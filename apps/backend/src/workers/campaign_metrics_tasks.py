@@ -5,7 +5,8 @@ Periodic tasks for updating campaign cached metrics
 
 from workers.celery_config import celery_app
 from core.database import get_db_session
-from models.legacy_lead_newsletter import Campaign, CampaignStatus
+from models import Campaign, CampaignEvent
+from models.enums import CampaignStatus, CampaignEventType
 from datetime import datetime, timedelta
 import logging
 

@@ -7,11 +7,8 @@ import logging
 from typing import Any
 from uuid import UUID
 
-from models.legacy_feedback import (  # Phase 2C: Updated from api.app.models.feedback
-    CustomerReview,
-    DiscountCoupon,
-    ReviewEscalation,
-)
+from models import CustomerReview, DiscountCoupon
+# ReviewEscalation will be added when needed
 from services.ringcentral_sms import (
     ringcentral_sms,
 )  # Phase 2C: Updated from api.app.services.ringcentral_sms
@@ -157,15 +154,17 @@ class ReviewService:
                     review.ai_escalated_at = datetime.now()
 
                     # Create escalation for AI to review
-                    escalation = ReviewEscalation(
-                        review_id=review.id,
-                        escalation_type="ai_agent",
-                        priority="low",
-                        escalation_reason=f"Customer feedback (okay rating): {complaint_text[:200]}",
-                        status="open",
-                    )
-                    self.db.add(escalation)
+                    # TODO: ReviewEscalation model not yet created
+                    # escalation = ReviewEscalation(
+                    #     review_id=review.id,
+                    #     escalation_type="ai_agent",
+                    #     priority="low",
+                    #     escalation_reason=f"Customer feedback (okay rating): {complaint_text[:200]}",
+                    #     status="open",
+                    # )
+                    # self.db.add(escalation)
                     # AI will interact and decide if coupon needed
+                    logger.info(f"Review {review.id} needs AI escalation (okay rating)")
 
                 # "Could be better" - Immediate escalation, AI handles coupon
                 elif rating == "could_be_better":
@@ -174,14 +173,16 @@ class ReviewService:
                     review.admin_notified_at = datetime.now()
 
                     # Escalate to AI for immediate attention
-                    escalation = ReviewEscalation(
-                        review_id=review.id,
-                        escalation_type="ai_agent",
-                        priority="high",
-                        escalation_reason=f"Serious complaint: {complaint_text[:200]}",
-                        status="open",
-                    )
-                    self.db.add(escalation)
+                    # TODO: ReviewEscalation model not yet created
+                    # escalation = ReviewEscalation(
+                    #     review_id=review.id,
+                    #     escalation_type="ai_agent",
+                    #     priority="high",
+                    #     escalation_reason=f"Serious complaint: {complaint_text[:200]}",
+                    #     status="open",
+                    # )
+                    logger.warning(f"Review {review.id} needs urgent AI escalation (could be better)")
+                    # self.db.add(escalation)  # Commented until ReviewEscalation model created
 
                     # Note: AI will issue coupon after interaction
                     # Coupon issued by AI service, not automatically here
@@ -387,15 +388,17 @@ class ReviewService:
                 return False
 
             # Create human escalation
-            escalation = ReviewEscalation(
-                review_id=review.id,
-                escalation_type="admin_notification",
-                priority=priority,
-                escalation_reason=f"AI unable to resolve: {ai_notes[:200]}",
-                status="open",
-            )
-
-            self.db.add(escalation)
+            # TODO: ReviewEscalation model not yet created
+            # escalation = ReviewEscalation(
+            #     review_id=review.id,
+            #     escalation_type="admin_notification",
+            #     priority=priority,
+            #     escalation_reason=f"AI unable to resolve: {ai_notes[:200]}",
+            #     status="open",
+            # )
+            # self.db.add(escalation)
+            logger.warning(f"Review {review_id} escalated to admin (AI unable to resolve)")
+            
             review.status = "escalated"
             review.admin_notified_at = datetime.now()
 

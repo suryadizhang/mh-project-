@@ -6,15 +6,8 @@ from uuid import UUID
 
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from models.legacy_lead_newsletter import (
-    Campaign,
-    CampaignChannel,
-    CampaignEvent,
-    CampaignEventType,
-    CampaignStatus,
-    Subscriber,
-)
+from models import Campaign, CampaignEvent, Subscriber
+from models.enums import CampaignChannel, CampaignEventType, CampaignStatus
 
 
 class NewsletterAnalyticsRepository:

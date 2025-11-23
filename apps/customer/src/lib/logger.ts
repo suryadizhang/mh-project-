@@ -1,6 +1,6 @@
 /**
  * Production-safe logging utility
- * 
+ *
  * Features:
  * - Automatically strips debug logs in production
  * - Structured logging with context
@@ -20,7 +20,7 @@ class Logger {
 
   constructor() {
     this.isDevelopment = process.env.NODE_ENV === 'development';
-    
+
     // In production, only log warnings and errors
     this.enabledLevels = this.isDevelopment
       ? new Set(['debug', 'info', 'warn', 'error'])
@@ -32,7 +32,7 @@ class Logger {
    */
   debug(message: string, context?: LogContext): void {
     if (!this.enabledLevels.has('debug')) return;
-    
+
     if (context) {
       console.log(`[DEBUG] ${message}`, context);
     } else {
@@ -45,7 +45,7 @@ class Logger {
    */
   info(message: string, context?: LogContext): void {
     if (!this.enabledLevels.has('info')) return;
-    
+
     if (context) {
       console.info(`[INFO] ${message}`, context);
     } else {
@@ -58,7 +58,7 @@ class Logger {
    */
   warn(message: string, context?: LogContext): void {
     if (!this.enabledLevels.has('warn')) return;
-    
+
     if (context) {
       console.warn(`[WARN] ${message}`, context);
     } else {
@@ -71,7 +71,7 @@ class Logger {
    */
   error(message: string, error?: Error, context?: LogContext): void {
     if (!this.enabledLevels.has('error')) return;
-    
+
     const errorData = {
       message,
       ...(error && {

@@ -20,19 +20,37 @@ settings = get_settings()
 from models.base import Base  # noqa: E402
 
 # Import all models for Alembic discovery
+# Import models so Alembic can detect tables
 from models import (  # noqa: E402, F401
-    booking,
-    customer,
-    review,
-    business,
-    escalation,
-    user,
-    role,
-    station,
-    lead,
-    call_recording,
-    payment_notification,
-    knowledge_base,
+    # Core models
+    Booking,
+    Customer,
+    Review,
+    Lead,
+    Campaign,
+    # Social media & communications
+    SocialAccount,
+    SocialIdentity,
+    SocialThread,
+    SocialMessage,
+    # RingCentral communications (call recordings, SMS)
+    CallRecording,
+    # Event sourcing
+    DomainEvent,
+    OutboxEntry,
+    # Business & multi-tenancy
+    Business,
+    # Customer support
+    Escalation,
+    # Payment processing
+    PaymentNotification,
+    # RBAC
+    Role,
+    Permission,
+    # System events & audit
+    SystemEvent,
+    # Terms & conditions
+    TermsAcknowledgment,
 )
 
 # this is the Alembic Config object, which provides

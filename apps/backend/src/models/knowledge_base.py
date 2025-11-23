@@ -466,8 +466,9 @@ class CustomerTonePreference(Base):
     interaction_date = Column(DateTime(timezone=True), nullable=False)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
     
+    # TODO: Fix circular import - add back after resolving SQLAlchemy mapper issue
     # Relationship
-    customer = relationship("Customer", back_populates="tone_preferences")
+    # customer = relationship("Customer", back_populates="tone_preferences")
     
     def to_dict(self) -> Dict:
         """Convert to dictionary for API responses"""

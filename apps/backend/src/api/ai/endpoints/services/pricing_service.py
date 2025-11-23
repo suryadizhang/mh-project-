@@ -14,7 +14,7 @@ from typing import Any
 from core.auth.station_models import Station
 
 # Import models
-from models.legacy_booking_models import AddonItem, MenuItem
+# TODO: Legacy booking models not migrated yet - needs refactor
 import requests
 from sqlalchemy import select
 from sqlalchemy.orm import Session

@@ -14,7 +14,8 @@ from sqlalchemy import select, and_, func, or_
 
 from core.base_service import BaseService, EventTrackingMixin, NotificationMixin
 from services.event_service import EventService
-from models.legacy_lead_newsletter import Lead
+from models import Lead, LeadContact, LeadContext, LeadEvent
+from models.enums import LeadSource, LeadStatus
 from core.exceptions import BusinessLogicException, NotFoundException, ErrorCode
 
 

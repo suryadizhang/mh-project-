@@ -755,6 +755,13 @@ app.include_router(bookings.router, prefix="/api/bookings", tags=["bookings"])
 # Also register with /api/v1 prefix for frontend compatibility
 app.include_router(bookings.router, prefix="/api/v1/bookings", tags=["bookings-v1"])
 
+# Include Booking Reminders endpoints (Sprint 1 - Feature Flag: BOOKING_REMINDERS)
+try:
+    from routers.v1.booking_reminders import router as booking_reminders_router
+    app.include_router(booking_reminders_router, prefix="/api/v1", tags=["booking-reminders"])
+except ImportError:
+    pass
+
 # Include Knowledge Sync endpoints (Admin/Superadmin)
 try:
     from routers.v1.knowledge_sync import router as knowledge_sync_router
@@ -765,37 +772,40 @@ except ImportError as e:
     logger.warning(f"Knowledge Sync endpoints not available: {e}")
 
 # Stripe router from NEW location
-try:
-    from routers.v1.stripe import router as stripe_router
-
-    app.include_router(stripe_router, prefix="/api/stripe", tags=["payments"])
-
-    # Also register customer endpoints at /api/v1 for frontend compatibility
-    # Create a sub-router for customer endpoints only
-    from fastapi import APIRouter as _APIRouter
-    from fastapi import Depends as _Depends
-    from sqlalchemy.ext.asyncio import AsyncSession as _AsyncSession
-    from core.database import get_db as _get_db
-
-    customer_compat_router = _APIRouter(tags=["customers-compat"])
-
-    # Import the actual endpoint functions and re-register them
-    # This creates aliases at /api/v1/customers/* that point to /api/stripe/v1/customers/*
-    @customer_compat_router.get("/v1/customers/dashboard")
-    async def customer_dashboard_compat(
-        customer_id: str,
-        request: Request,
-        db: _AsyncSession = _Depends(_get_db),
-    ):
-        """Compatibility endpoint - redirects to stripe router"""
-        from routers.v1.stripe import get_customer_dashboard
-
-        return await get_customer_dashboard(customer_id=customer_id, db=db)
-
-    app.include_router(customer_compat_router, prefix="/api")
-    logger.info("✅ Stripe router included from NEW location with customer compatibility endpoints")
-except ImportError as e_stripe:
-    logger.error(f"❌ Stripe router not available: {e_stripe}")
+# TODO: Temporarily disabled - stripe_service.py uses unmigrated StripeCustomer model
+# Legacy model in backups/pre-nuclear-cleanup-20251120_220938/
+# try:
+#     from routers.v1.stripe import router as stripe_router
+#
+#     app.include_router(stripe_router, prefix="/api/stripe", tags=["payments"])
+#
+#     # Also register customer endpoints at /api/v1 for frontend compatibility
+#     # Create a sub-router for customer endpoints only
+#     from fastapi import APIRouter as _APIRouter
+#     from fastapi import Depends as _Depends
+#     from sqlalchemy.ext.asyncio import AsyncSession as _AsyncSession
+#     from core.database import get_db as _get_db
+#
+#     customer_compat_router = _APIRouter(tags=["customers-compat"])
+#
+#     # Import the actual endpoint functions and re-register them
+#     # This creates aliases at /api/v1/customers/* that point to /api/stripe/v1/customers/*
+#     @customer_compat_router.get("/v1/customers/dashboard")
+#     async def customer_dashboard_compat(
+#         customer_id: str,
+#         request: Request,
+#         db: _AsyncSession = _Depends(_get_db),
+#     ):
+#         """Compatibility endpoint - redirects to stripe router"""
+#         from routers.v1.stripe import get_customer_dashboard
+#
+#         return await get_customer_dashboard(customer_id=customer_id, db=db)
+#
+#     app.include_router(customer_compat_router, prefix="/api")
+#     logger.info("✅ Stripe router included from NEW location with customer compatibility endpoints")
+# except ImportError as e_stripe:
+#     logger.error(f"❌ Stripe router not available: {e_stripe}")
+logger.info("⚠️  Stripe router temporarily disabled (StripeCustomer model not migrated)")
 
 # CRM router removed - functionality distributed across other routers
 # OLD: app.include_router(crm_router, prefix="/api/crm", tags=["crm"])
@@ -816,7 +826,7 @@ try:
         "✅ Station Management and Auth endpoints included from NEW location (Multi-tenant RBAC)"
     )
 except ImportError as e:
-    logger.error(f"❌ Station Management endpoints not available: {e}")
+    logger.error(f"❌ Station Auth endpoints not available: {e}")
 
 # Enhanced Booking Admin API (includes /admin/kpis and /admin/customer-analytics) - NEW location
 try:
@@ -852,13 +862,16 @@ except ImportError as e:
     logger.error(f"❌ Real-time Voice endpoints not available: {e}")
 
 # QR Code Tracking System - NEW location
-try:
-    from routers.v1.qr_tracking import router as qr_tracking_router
-
-    app.include_router(qr_tracking_router, prefix="/api/qr", tags=["qr-tracking", "marketing"])
-    logger.info("✅ QR Code Tracking System included from NEW location")
-except ImportError as e:
-    logger.error(f"❌ QR Tracking endpoints not available: {e}")
+# TODO: Temporarily disabled until QRCode and QRScan models are migrated
+# Legacy models in backups/pre-nuclear-cleanup-20251120_220938/legacy_qr_tracking.py
+# try:
+#     from routers.v1.qr_tracking import router as qr_tracking_router
+#
+#     app.include_router(qr_tracking_router, prefix="/api/qr", tags=["qr-tracking", "marketing"])
+#     logger.info("✅ QR Code Tracking System included from NEW location")
+# except ImportError as e:
+#     logger.error(f"❌ QR Tracking endpoints not available: {e}")
+logger.info("⚠️  QR Code Tracking System temporarily disabled (models not migrated)")
 
 # Admin Error Logs (for monitoring and debugging) - NEW location
 try:
@@ -900,10 +913,6 @@ except ImportError as e:
 # Customer Review System (from legacy - comprehensive) - NEW location
 try:
     from routers.v1.reviews import router as reviews_router
-
-    # DEBUG: Check for router-level dependencies
-    logger.info(f"🔍 DEBUG: Reviews router dependencies: {reviews_router.dependencies}")
-    logger.info(f"🔍 DEBUG: Reviews router prefix: {reviews_router.prefix}")
 
     app.include_router(reviews_router, prefix="/api/reviews", tags=["reviews", "feedback"])
     logger.info(
@@ -949,7 +958,7 @@ try:
     app.include_router(conversations_router, prefix="/api/v1", tags=["conversations"])
     app.include_router(referrals_router, prefix="/api/v1", tags=["referrals"])
     app.include_router(campaigns_router, prefix="/api/v1", tags=["campaigns"])
-    logger.info("✅ Additional CRM routers included from NEW location (leads, newsletter, newsletter analytics, SMS, conversations, referrals, campaigns)")
+    logger.info("✅ All CRM routers included (leads, newsletter, campaigns, referrals, SMS, conversations)")
 except ImportError as e:
     logger.error(f"❌ Some additional routers not available: {e}")
 

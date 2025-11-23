@@ -10,7 +10,7 @@ from api.deps import get_current_user
 from core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
 from models.role import Permission, Role
-from models.user import User
+from core.auth.models import User
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload

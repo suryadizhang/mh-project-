@@ -20,7 +20,7 @@ from models.legacy_core import (  # Phase 2C: Updated from api.app.models.core
     MessageThread,
     Payment,
 )
-from models.legacy_events import IdempotencyKey  # Phase 2C: Updated from api.app.models.events
+# TODO: Legacy event sourcing not migrated yet - needs refactor
 from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession

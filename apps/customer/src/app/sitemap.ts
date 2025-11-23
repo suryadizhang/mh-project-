@@ -1,5 +1,4 @@
 import { MetadataRoute } from 'next';
-
 import type { BlogPost } from '@my-hibachi/blog-types';
 
 import { blogService } from '@/lib/blog/blogService';

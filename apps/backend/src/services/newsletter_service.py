@@ -7,10 +7,8 @@ from datetime import datetime, timezone
 import logging
 import re
 
-from models.legacy_lead_newsletter import (
-    LeadSource,
-    Subscriber,
-)  # Phase 2C: Updated from api.app.models.lead_newsletter
+from models import Subscriber
+from models.enums import LeadSource
 from core.base_service import BaseService, EventTrackingMixin
 from core.compliance import ComplianceValidator
 from services.event_service import EventService

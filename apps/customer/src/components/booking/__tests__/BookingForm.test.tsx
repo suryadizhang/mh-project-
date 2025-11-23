@@ -1,6 +1,6 @@
 /**
  * BookingForm Component Tests
- * 
+ *
  * Tests the critical booking flow component including:
  * - Form rendering and initial state
  * - User input handling and validation
@@ -13,7 +13,6 @@ import React from 'react'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import BookingForm from '../BookingForm'
 
 // Mock dependencies
 vi.mock('@/lib/api', () => ({
@@ -31,6 +30,8 @@ vi.mock('@/lib/logger', () => ({
 
 import { apiFetch } from '@/lib/api'
 import { logger } from '@/lib/logger'
+
+import BookingForm from '../BookingForm'
 
 describe('BookingForm', () => {
   beforeEach(() => {
@@ -278,9 +279,9 @@ describe('BookingForm', () => {
     it('should show loading state during submission', async () => {
       const user = userEvent.setup()
       const mockApiFetch = vi.mocked(apiFetch)
-      
+
       // Mock API with delay to capture loading state
-      mockApiFetch.mockImplementation(() => 
+      mockApiFetch.mockImplementation(() =>
         new Promise(resolve => {
           setTimeout(() => resolve({ success: true, data: { id: '123' } }), 100)
         })
@@ -315,7 +316,7 @@ describe('BookingForm', () => {
     it('should disable submit button during submission', async () => {
       const user = userEvent.setup()
       const mockApiFetch = vi.mocked(apiFetch)
-      mockApiFetch.mockImplementation(() => 
+      mockApiFetch.mockImplementation(() =>
         new Promise(resolve => setTimeout(() => resolve({ success: true, data: {} }), 100))
       )
 
@@ -446,7 +447,7 @@ describe('BookingForm', () => {
     it('should allow retry after failed submission', async () => {
       const user = userEvent.setup()
       const mockApiFetch = vi.mocked(apiFetch)
-      
+
       // First call fails, second succeeds
       mockApiFetch
         .mockRejectedValueOnce(new Error('API Error'))

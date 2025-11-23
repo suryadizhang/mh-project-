@@ -6,11 +6,8 @@ import json
 import logging
 from typing import Any
 
-from models.legacy_lead_newsletter import (  # Phase 2C: Updated from api.app.models.lead_newsletter
-    Lead,
-    LeadQuality,
-    LeadSource,
-)
+from models import Lead
+from models.enums import LeadQuality, LeadSource
 from services.openai_service import (
     OpenAIService,
 )  # Phase 2C: Updated from api.app.services.openai_service

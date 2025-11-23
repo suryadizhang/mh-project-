@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 
 import type { FaqItem } from '@/data/faqsData';
-
 import { logger } from '@/lib/logger';
 interface FaqItemComponentProps {
   faq: FaqItem;
@@ -115,5 +114,4 @@ export function FaqItemComponent({ faq, isOpen, onToggle }: FaqItemComponentProp
     </div>
   );
 }
-
 

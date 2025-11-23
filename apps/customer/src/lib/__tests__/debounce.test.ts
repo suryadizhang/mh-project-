@@ -271,14 +271,14 @@ describe('createAbortController', () => {
 
     it('should work with short timeouts', () => {
       const controller = createAbortController(100)
-      
+
       vi.advanceTimersByTime(100)
       expect(controller.signal.aborted).toBe(true)
     })
 
     it('should work with long timeouts', () => {
       const controller = createAbortController(5000)
-      
+
       vi.advanceTimersByTime(4999)
       expect(controller.signal.aborted).toBe(false)
 
@@ -322,7 +322,7 @@ describe('createAbortController', () => {
 
     it('should handle undefined timeout (no auto-abort)', () => {
       const controller = createAbortController(undefined)
-      
+
       vi.advanceTimersByTime(10000)
       expect(controller.signal.aborted).toBe(false)
     })

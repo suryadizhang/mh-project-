@@ -49,9 +49,9 @@ def upgrade() -> None:
             nullable=False,
             server_default=sa.text("now()"),
         ),
-        # Who agreed - use INTEGER to match public.customers and public.bookings
-        sa.Column("customer_id", sa.Integer(), nullable=False),
-        sa.Column("booking_id", sa.Integer(), nullable=True),
+        # Who agreed - use UUID to match core.customers.id
+        sa.Column("customer_id", UUID(as_uuid=True), nullable=False),
+        sa.Column("booking_id", UUID(as_uuid=True), nullable=True),
         # What they agreed to
         sa.Column("terms_version", sa.String(length=20), nullable=False, server_default="1.0"),
         sa.Column("terms_url", sa.String(length=500), nullable=False),
@@ -82,9 +82,9 @@ def upgrade() -> None:
         # Verification
         sa.Column("verified", sa.Boolean(), nullable=False, server_default="true"),
         sa.Column("verification_notes", sa.Text(), nullable=True),
-        # Foreign keys to public schema tables
-        sa.ForeignKeyConstraint(["customer_id"], ["public.customers.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["booking_id"], ["public.bookings.id"], ondelete="SET NULL"),
+        # Foreign keys to core schema tables
+        sa.ForeignKeyConstraint(["customer_id"], ["core.customers.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(["booking_id"], ["core.bookings.id"], ondelete="SET NULL"),
         schema="public",
     )
 

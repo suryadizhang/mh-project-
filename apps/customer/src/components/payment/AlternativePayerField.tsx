@@ -1,14 +1,14 @@
 /**
  * Alternative Payer Component
- * 
+ *
  * Allows customers to specify if someone else (friend/family) will make the payment.
  * This helps with payment matching when the payer name/email doesn't match booking.
- * 
+ *
  * Usage in payment page:
  * ```tsx
  * const [alternativePayer, setAlternativePayer] = useState<AlternativePayerData | null>(null);
- * 
- * <AlternativePayerField 
+ *
+ * <AlternativePayerField
  *   value={alternativePayer}
  *   onChange={setAlternativePayer}
  * />
@@ -257,7 +257,7 @@ export default function AlternativePayerField({
           <div className="rounded-lg bg-blue-100 p-4">
             <p className="text-sm text-blue-900">
               <strong>Why we ask:</strong> This information helps us automatically match the payment to your
-              booking, even if the payer's name doesn't match yours. The more details you provide, the faster
+              booking, even if the {"payer's"} name {"doesn't"} match yours. The more details you provide, the faster
               we can confirm your payment.
             </p>
           </div>
@@ -269,21 +269,21 @@ export default function AlternativePayerField({
 
 /**
  * Integration Instructions:
- * 
+ *
  * 1. Add state to payment page:
  * ```tsx
  * const [alternativePayer, setAlternativePayer] = useState<AlternativePayerData | null>(null);
  * ```
- * 
+ *
  * 2. Add component before payment method selection:
  * ```tsx
- * <AlternativePayerField 
+ * <AlternativePayerField
  *   value={alternativePayer}
  *   onChange={setAlternativePayer}
  *   className="mb-6"
  * />
  * ```
- * 
+ *
  * 3. Include in API call when creating payment intent:
  * ```tsx
  * const response = await apiFetch('/api/v1/payments/create-intent', {
@@ -294,13 +294,13 @@ export default function AlternativePayerField({
  *   }),
  * });
  * ```
- * 
+ *
  * 4. Backend will store in catering_bookings table:
  * - alternative_payer_name
  * - alternative_payer_email
  * - alternative_payer_phone
  * - alternative_payer_venmo
- * 
+ *
  * 5. Payment matching service will check both:
  * - Customer info (name, phone, email)
  * - Alternative payer info (if provided)
