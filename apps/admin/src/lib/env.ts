@@ -3,14 +3,10 @@ import { z } from 'zod';
 // Admin Panel environment schema
 const AdminEnvSchema = z.object({
   // App configuration
-  NODE_ENV: z
-    .enum(['development', 'production', 'test'])
-    .default('development'),
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   NEXT_PUBLIC_APP_URL: z.string().url(),
   NEXT_PUBLIC_APP_NAME: z.string().default('MyHibachi Admin'),
-  NEXT_PUBLIC_ENV: z
-    .enum(['development', 'staging', 'production'])
-    .default('development'),
+  NEXT_PUBLIC_ENV: z.enum(['development', 'staging', 'production']).default('development'),
 
   // API configuration
   NEXT_PUBLIC_API_URL: z.string().url(),
@@ -25,36 +21,15 @@ const AdminEnvSchema = z.object({
   // Default to 'false' in production for safety
 
   // Admin-Specific Features
-  NEXT_PUBLIC_FEATURE_ADMIN_DASHBOARD_V2: z
-    .string()
-    .default('false')
-    .transform(val => val === 'true'),
-  NEXT_PUBLIC_FEATURE_ADMIN_ANALYTICS_BETA: z
-    .string()
-    .default('false')
-    .transform(val => val === 'true'),
-  NEXT_PUBLIC_FEATURE_ADMIN_BOOKING_MANAGER_V2: z
-    .string()
-    .default('false')
-    .transform(val => val === 'true'),
-  NEXT_PUBLIC_FEATURE_ADMIN_TRAVEL_FEE_EDITOR: z
-    .string()
-    .default('false')
-    .transform(val => val === 'true'),
-  NEXT_PUBLIC_FEATURE_ADMIN_AI_INSIGHTS: z
-    .string()
-    .default('false')
-    .transform(val => val === 'true'),
+  NEXT_PUBLIC_FEATURE_ADMIN_DASHBOARD_V2: z.string().default('false').transform(val => val === 'true'),
+  NEXT_PUBLIC_FEATURE_ADMIN_ANALYTICS_BETA: z.string().default('false').transform(val => val === 'true'),
+  NEXT_PUBLIC_FEATURE_ADMIN_BOOKING_MANAGER_V2: z.string().default('false').transform(val => val === 'true'),
+  NEXT_PUBLIC_FEATURE_ADMIN_TRAVEL_FEE_EDITOR: z.string().default('false').transform(val => val === 'true'),
+  NEXT_PUBLIC_FEATURE_ADMIN_AI_INSIGHTS: z.string().default('false').transform(val => val === 'true'),
 
   // Shared Features (across customer + admin)
-  NEXT_PUBLIC_FEATURE_SHARED_MULTI_CHEF_SCHEDULING: z
-    .string()
-    .default('false')
-    .transform(val => val === 'true'),
-  NEXT_PUBLIC_FEATURE_SHARED_ONEDRIVE_SYNC: z
-    .string()
-    .default('false')
-    .transform(val => val === 'true'),
+  NEXT_PUBLIC_FEATURE_SHARED_MULTI_CHEF_SCHEDULING: z.string().default('false').transform(val => val === 'true'),
+  NEXT_PUBLIC_FEATURE_SHARED_ONEDRIVE_SYNC: z.string().default('false').transform(val => val === 'true'),
 
   // Security
   NEXTAUTH_SECRET: z.string().min(32),
@@ -72,10 +47,7 @@ function createEnv(): AdminEnv {
   const parsed = AdminEnvSchema.safeParse(process.env);
 
   if (!parsed.success) {
-    console.error(
-      '❌ Invalid environment variables:',
-      parsed.error.flatten().fieldErrors
-    );
+    console.error('❌ Invalid environment variables:', parsed.error.flatten().fieldErrors);
     throw new Error('Invalid environment variables');
   }
 
@@ -139,9 +111,7 @@ export function isFeatureEnabled(flag: keyof AdminEnv): boolean {
  */
 export function getEnabledFeatures(): string[] {
   return Object.entries(env)
-    .filter(
-      ([key, value]) => key.startsWith('NEXT_PUBLIC_FEATURE_') && value === true
-    )
+    .filter(([key, value]) => key.startsWith('NEXT_PUBLIC_FEATURE_') && value === true)
     .map(([key]) => key);
 }
 
@@ -164,22 +134,19 @@ export function getAllFeatureFlags(): FeatureFlagMetadata[] {
       name: 'NEXT_PUBLIC_FEATURE_ADMIN_DASHBOARD_V2',
       scope: 'admin',
       enabled: env.NEXT_PUBLIC_FEATURE_ADMIN_DASHBOARD_V2,
-      description:
-        'New admin dashboard with enhanced analytics and real-time updates',
+      description: 'New admin dashboard with enhanced analytics and real-time updates',
     },
     {
       name: 'NEXT_PUBLIC_FEATURE_ADMIN_ANALYTICS_BETA',
       scope: 'admin',
       enabled: env.NEXT_PUBLIC_FEATURE_ADMIN_ANALYTICS_BETA,
-      description:
-        'Advanced analytics dashboard with custom reports and insights',
+      description: 'Advanced analytics dashboard with custom reports and insights',
     },
     {
       name: 'NEXT_PUBLIC_FEATURE_ADMIN_BOOKING_MANAGER_V2',
       scope: 'admin',
       enabled: env.NEXT_PUBLIC_FEATURE_ADMIN_BOOKING_MANAGER_V2,
-      description:
-        'Redesigned booking manager with bulk operations and filters',
+      description: 'Redesigned booking manager with bulk operations and filters',
     },
     {
       name: 'NEXT_PUBLIC_FEATURE_ADMIN_TRAVEL_FEE_EDITOR',

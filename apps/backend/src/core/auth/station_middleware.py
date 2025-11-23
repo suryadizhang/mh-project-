@@ -9,7 +9,7 @@ import logging
 from typing import Any
 from uuid import UUID
 
-from core.auth.models import User, UserSession  # Phase 2C: Updated from api.app.auth.models
+from core.auth.models import StationUser, UserSession  # Phase 2C: Updated from api.app.auth.models
 from core.auth.station_auth import (  # Phase 2C: Updated from api.app.auth.station_auth
     StationAuthenticationService,
     StationContext,
@@ -35,7 +35,7 @@ class AuthenticatedUser:
     """Enhanced user object with station context."""
 
     def __init__(
-        self, user: User, session: UserSession, station_context: StationContext, request: Request
+        self, user: StationUser, session: UserSession, station_context: StationContext, request: Request
     ):
         self.user = user
         self.session = session

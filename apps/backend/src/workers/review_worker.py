@@ -8,7 +8,8 @@ from datetime import datetime, timedelta
 import logging
 
 from core.database import AsyncSessionLocal
-from models import Booking, Customer, CustomerReview
+from models.legacy_core import CoreBooking, CoreCustomer
+from models.legacy_feedback import CustomerReview
 from core.config import get_settings
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -23,10 +24,10 @@ class ReviewRequestWorker:
 
     def __init__(self):
         self.base_url = settings.customer_app_url or "https://myhibachi.com"
-        
+
         # Lazy-loaded services
         self._review_service = None
-    
+
     @property
     def review_service(self):
         """Lazy load review service (Google APIs)"""
@@ -83,12 +84,12 @@ class ReviewRequestWorker:
                 logger.error(f"Error processing completed bookings: {e}", exc_info=True)
                 return 0
 
-    async def _send_review_request(self, db: AsyncSession, booking: Booking) -> bool:
+    async def _send_review_request(self, db: AsyncSession, booking: CoreBooking) -> bool:
         """Send review request for a single booking."""
         try:
             # Get customer details
             customer_result = await db.execute(
-                select(Customer).where(Customer.id == booking.customer_id)
+                select(CoreCustomer).where(CoreCustomer.id == booking.customer_id)
             )
             customer = customer_result.scalar_one_or_none()
 
@@ -237,8 +238,8 @@ class ReviewRequestWorker:
         """Mark expired coupons as expired. Returns number of coupons updated."""
         async with AsyncSessionLocal() as db:
             try:
-                from models import DiscountCoupon
-                
+                from models.legacy_feedback import DiscountCoupon
+
                 # Find active coupons past expiration
                 query = select(DiscountCoupon).where(
                     and_(

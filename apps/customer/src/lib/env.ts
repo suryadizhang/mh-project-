@@ -30,10 +30,22 @@ const CustomerEnvSchema = z.object({
   NEXT_PUBLIC_HOTJAR_ID: z.string().optional(),
   VERCEL_URL: z.string().optional(),
 
-  // Feature flags
+  // Feature Flags - Customer Site
+  // Following naming convention: NEXT_PUBLIC_FEATURE_<SCOPE>_<DESCRIPTION>_<VERSION>
+  // Default to 'false' in production for safety
+
+  // Core Features
   NEXT_PUBLIC_MAINTENANCE_MODE: z.string().default('false').transform(val => val === 'true'),
   NEXT_PUBLIC_BOOKING_ENABLED: z.string().default('true').transform(val => val === 'true'),
   NEXT_PUBLIC_AI_CHAT_ENABLED: z.string().default('true').transform(val => val === 'true'),
+
+  // New Features (Behind Flags)
+  NEXT_PUBLIC_FEATURE_NEW_BOOKING_CALENDAR: z.string().default('false').transform(val => val === 'true'),
+  NEXT_PUBLIC_FEATURE_V2_PRICING_ENGINE: z.string().default('false').transform(val => val === 'true'),
+  NEXT_PUBLIC_FEATURE_CUSTOMER_PORTAL_BETA: z.string().default('false').transform(val => val === 'true'),
+  NEXT_PUBLIC_FEATURE_NEW_MENU_SELECTOR: z.string().default('false').transform(val => val === 'true'),
+  NEXT_PUBLIC_FEATURE_BETA_PAYMENT_FLOW: z.string().default('false').transform(val => val === 'true'),
+  NEXT_PUBLIC_FEATURE_SHARED_MULTI_CHEF_SCHEDULING: z.string().default('false').transform(val => val === 'true'),
 
   // Security
   NEXTAUTH_SECRET: z.string().min(32),
@@ -81,3 +93,48 @@ export const getApiUrl = () => {
 export const getAiApiUrl = () => {
   return env.NEXT_PUBLIC_AI_API_URL || `${env.NEXT_PUBLIC_API_URL}/ai`;
 };
+
+/**
+ * Type-safe feature flag checker for customer site
+ *
+ * @param flag - Feature flag name (must start with NEXT_PUBLIC_FEATURE_)
+ * @returns boolean - True if feature is enabled
+ * @throws Error if flag name is invalid or doesn't exist
+ *
+ * @example
+ * if (isFeatureEnabled('NEXT_PUBLIC_FEATURE_NEW_BOOKING_CALENDAR')) {
+ *   return <NewBookingCalendar />;
+ * }
+ * return <LegacyBookingCalendar />;
+ */
+export function isFeatureEnabled(flag: keyof CustomerEnv): boolean {
+  const flagStr = flag as string;
+
+  if (!flagStr.startsWith('NEXT_PUBLIC_FEATURE_')) {
+    throw new Error(
+      `Invalid feature flag: ${flag}. Must start with NEXT_PUBLIC_FEATURE_`
+    );
+  }
+
+  if (!(flag in env)) {
+    throw new Error(
+      `Feature flag not found: ${flag}. Add it to CustomerEnvSchema in env.ts`
+    );
+  }
+
+  return env[flag] as boolean;
+}
+
+/**
+ * Get all enabled feature flags (for debugging/monitoring)
+ * Only works in development/staging
+ */
+export function getEnabledFeatures(): string[] {
+  if (isProd) {
+    return []; // Don't expose in production
+  }
+
+  return Object.entries(env)
+    .filter(([key, value]) => key.startsWith('NEXT_PUBLIC_FEATURE_') && value === true)
+    .map(([key]) => key);
+}

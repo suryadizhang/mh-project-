@@ -86,9 +86,12 @@ class Settings(BaseSettings):
     RC_CLIENT_ID: str
     RC_CLIENT_SECRET: str
     RC_JWT_TOKEN: str
-    RC_WEBHOOK_SECRET: str
+    RC_WEBHOOK_SECRET: str  # For validating incoming webhook signatures
     RC_SMS_FROM: str = "+19167408768"  # Public business phone
     RC_SERVER_URL: str = "https://platform.ringcentral.com"
+
+    # Webhook Security
+    SKIP_WEBHOOK_VALIDATION: bool = False  # Set to True ONLY in development/testing
 
     # OpenAI - REQUIRED: Must come from .env
     OPENAI_API_KEY: str
@@ -135,14 +138,49 @@ class Settings(BaseSettings):
     # Logging
     LOG_LEVEL: str = "INFO"
 
-    # Feature Flags
+    # ========================================
+    # FEATURE FLAGS (Enterprise Standard)
+    # ========================================
+    # All flags default to False in production
+    # Enable gradually in staging → production
+    # Naming: FEATURE_FLAG_<SCOPE>_<DESCRIPTION>
+    # See: .github/FEATURE_FLAG_STANDARD.md
+    # ========================================
+
+    # Business Logic Feature Flags
+    FEATURE_FLAG_V2_TRAVEL_FEE_CALCULATOR: bool = False  # New travel fee calculation with improved accuracy
+    FEATURE_FLAG_BETA_DYNAMIC_PRICING: bool = False  # Dynamic pricing based on demand/season
+    FEATURE_FLAG_NEW_BOOKING_VALIDATION: bool = False  # Enhanced booking validation with race condition fixes
+    FEATURE_FLAG_V2_DEPOSIT_CALCULATION: bool = False  # New deposit calculation logic
+
+    # Scheduling & Availability Feature Flags
+    FEATURE_FLAG_SHARED_MULTI_CHEF_SCHEDULING: bool = False  # Multi-chef scheduling system (shared with frontends)
+    FEATURE_FLAG_BETA_SMART_AVAILABILITY: bool = False  # AI-powered availability suggestions
+
+    # AI Feature Flags
+    FEATURE_FLAG_ADMIN_AI_INSIGHTS: bool = False  # AI-powered admin insights (shared with admin panel)
+    FEATURE_FLAG_BETA_AI_CUSTOMER_TONE: bool = False  # Adaptive AI tone based on customer profile
+    FEATURE_FLAG_V2_AI_BOOKING_ASSISTANT: bool = False  # Enhanced AI booking assistance
+
+    # Integration Feature Flags
+    FEATURE_FLAG_SHARED_ONEDRIVE_SYNC: bool = False  # OneDrive Excel sync (shared with admin panel)
+    FEATURE_FLAG_BETA_STRIPE_CONNECT: bool = False  # Stripe Connect for multi-chef payments
+    FEATURE_FLAG_NEW_RINGCENTRAL_INTEGRATION: bool = False  # Enhanced RingCentral SMS integration
+
+    # Infrastructure Feature Flags
+    FEATURE_FLAG_ENABLE_RATE_LIMITING: bool = True  # Rate limiting for API endpoints (enabled by default for security)
+    FEATURE_FLAG_ENABLE_FIELD_ENCRYPTION: bool = False  # Field-level encryption for sensitive data
+    FEATURE_FLAG_ENABLE_AUDIT_LOGGING: bool = False  # Detailed audit logging for compliance
+
+    # Legacy Feature Flags (Deprecated - kept for backwards compatibility)
+    # TODO: Remove after migrating to FEATURE_FLAG_* pattern
     WORKERS_ENABLED: bool = False
     SMS_WORKER_ENABLED: bool = False
     EMAIL_WORKER_ENABLED: bool = False
     STRIPE_WORKER_ENABLED: bool = False
-    RATE_LIMIT_ENABLED: bool = True
-    ENABLE_FIELD_ENCRYPTION: bool = False
-    ENABLE_AUDIT_LOGGING: bool = False
+    RATE_LIMIT_ENABLED: bool = True  # Use FEATURE_FLAG_ENABLE_RATE_LIMITING instead
+    ENABLE_FIELD_ENCRYPTION: bool = False  # Use FEATURE_FLAG_ENABLE_FIELD_ENCRYPTION instead
+    ENABLE_AUDIT_LOGGING: bool = False  # Use FEATURE_FLAG_ENABLE_AUDIT_LOGGING instead
     RINGCENTRAL_ENABLED: bool = False
     EMAIL_ENABLED: bool = False
     EMAIL_PROVIDER: str = "smtp"
@@ -344,6 +382,11 @@ class Settings(BaseSettings):
         return self.RC_WEBHOOK_SECRET
 
     @property
+    def ringcentral_webhook_validation_token(self) -> str:
+        """Alias for webhook secret - used for signature validation"""
+        return self.RC_WEBHOOK_SECRET
+
+    @property
     def ringcentral_sandbox(self) -> bool:
         return self.ENVIRONMENT == Environment.DEVELOPMENT
 
@@ -502,14 +545,15 @@ class Settings(BaseSettings):
     STRIPE_WORKER_MAX_RETRIES: int = 3
     STRIPE_WORKER_BATCH_SIZE: int = 5
 
-    # Feature Flags
-    ENABLE_STRIPE_CONNECT: bool = False
+    # Legacy Feature Flags (Duplicate Section - Use Section ~141 Instead)
+    # TODO: Consolidate with main feature flag section around line 141
+    ENABLE_STRIPE_CONNECT: bool = False  # Use FEATURE_FLAG_BETA_STRIPE_CONNECT instead
     ENABLE_AUTOMATIC_TAX: bool = False
     ENABLE_SUBSCRIPTIONS: bool = False
     ENABLE_WEBSOCKETS: bool = True
-    ENABLE_RATE_LIMITING: bool = True
-    ENABLE_AUDIT_LOGGING: bool = True
-    ENABLE_FIELD_ENCRYPTION: bool = True
+    ENABLE_RATE_LIMITING: bool = True  # Use FEATURE_FLAG_ENABLE_RATE_LIMITING instead
+    ENABLE_AUDIT_LOGGING: bool = True  # Use FEATURE_FLAG_ENABLE_AUDIT_LOGGING instead
+    ENABLE_FIELD_ENCRYPTION: bool = True  # Use FEATURE_FLAG_ENABLE_FIELD_ENCRYPTION instead
 
     # AI Settings
     ENABLE_AI_AUTO_REPLY: bool = True
@@ -931,6 +975,74 @@ class Settings(BaseSettings):
             "email_worker": {"enabled": self.EMAIL_WORKER_ENABLED},
             "stripe_worker": {"enabled": self.STRIPE_WORKER_ENABLED},
         }
+
+    def is_feature_enabled(self, flag_name: str) -> bool:
+        """
+        Type-safe feature flag checker with validation.
+
+        Args:
+            flag_name: Name of the feature flag (must start with FEATURE_FLAG_)
+
+        Returns:
+            bool: True if feature is enabled, False otherwise
+
+        Raises:
+            ValueError: If flag_name doesn't follow naming convention or doesn't exist
+
+        Examples:
+            >>> settings = get_settings()
+            >>> if settings.is_feature_enabled('FEATURE_FLAG_V2_TRAVEL_FEE_CALCULATOR'):
+            ...     return calculate_travel_fee_v2(distance)
+            ... else:
+            ...     return calculate_travel_fee_legacy(distance)
+        """
+        # Validate naming convention
+        if not flag_name.startswith('FEATURE_FLAG_'):
+            raise ValueError(
+                f"Invalid feature flag name: {flag_name}. "
+                f"Must start with 'FEATURE_FLAG_'. "
+                f"See .github/FEATURE_FLAG_STANDARD.md for naming conventions."
+            )
+
+        # Check if flag exists
+        if not hasattr(self, flag_name):
+            raise ValueError(
+                f"Feature flag not found: {flag_name}. "
+                f"Please add to Settings class in src/core/config.py."
+            )
+
+        # Get flag value
+        flag_value = getattr(self, flag_name)
+
+        # Validate it's a boolean
+        if not isinstance(flag_value, bool):
+            raise ValueError(
+                f"Feature flag {flag_name} is not a boolean (got {type(flag_value).__name__})"
+            )
+
+        return flag_value
+
+    def get_enabled_features(self) -> list[str]:
+        """
+        Get list of all enabled feature flags.
+
+        Returns:
+            List of enabled feature flag names
+
+        Note:
+            Only returns flags following FEATURE_FLAG_* naming convention
+            Use for debugging and admin dashboards only (not production logic)
+        """
+        enabled_flags = []
+
+        # Get all attributes that start with FEATURE_FLAG_
+        for attr_name in dir(self):
+            if attr_name.startswith('FEATURE_FLAG_'):
+                flag_value = getattr(self, attr_name)
+                if isinstance(flag_value, bool) and flag_value:
+                    enabled_flags.append(attr_name)
+
+        return enabled_flags
 
 
 @lru_cache

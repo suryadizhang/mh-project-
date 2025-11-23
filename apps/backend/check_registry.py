@@ -1,8 +1,6 @@
 """Check what classes are registered in SQLAlchemy Base registry."""
-
 import sys
-
-sys.path.insert(0, "src")
+sys.path.insert(0, 'src')
 
 from models.base import Base
 

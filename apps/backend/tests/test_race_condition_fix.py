@@ -24,7 +24,7 @@ Fix Validation:
 """
 
 import pytest
-from datetime import datetime, timezone
+from datetime import datetime, date, timedelta, timezone
 from sqlalchemy.exc import IntegrityError
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
@@ -44,7 +44,11 @@ class TestRaceConditionFix:
     @pytest.fixture
     def customer(self, db_session):
         """Create test customer"""
-        customer = Customer(name="Test Customer", email="test@example.com", phone="+1234567890")
+        customer = Customer(
+            name="Test Customer",
+            email="test@example.com",
+            phone="+1234567890"
+        )
         db_session.add(customer)
         db_session.commit()
         return customer
@@ -67,9 +71,7 @@ class TestRaceConditionFix:
             special_requests="Test booking for race condition",
         )
 
-    def test_unique_constraint_prevents_double_booking(
-        self, db_session, customer, booking_datetime
-    ):
+    def test_unique_constraint_prevents_double_booking(self, db_session, customer, booking_datetime):
         """
         Test that database-level unique constraint prevents double bookings.
 
@@ -151,7 +153,10 @@ class TestRaceConditionFix:
 
         # Launch 5 concurrent threads all trying to book same datetime
         with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [executor.submit(create_booking_thread, i) for i in range(5)]
+            futures = [
+                executor.submit(create_booking_thread, i)
+                for i in range(5)
+            ]
 
             # Wait for all threads to complete
             for future in as_completed(futures):
@@ -165,7 +170,7 @@ class TestRaceConditionFix:
         bookings = repository.find_by_date_range(
             start_date=booking_datetime.date(),
             end_date=booking_datetime.date(),
-            include_cancelled=True,
+            include_cancelled=True
         )
         assert len(bookings) == 1, f"Expected 1 booking in DB, found {len(bookings)}"
 
@@ -203,9 +208,7 @@ class TestRaceConditionFix:
 
         db_session.rollback()  # Release lock
 
-    def test_optimistic_locking_prevents_concurrent_updates(
-        self, db_session, customer, booking_datetime
-    ):
+    def test_optimistic_locking_prevents_concurrent_updates(self, db_session, customer, booking_datetime):
         """
         Test that version column prevents lost updates in concurrent modifications.
 
@@ -249,9 +252,7 @@ class TestRaceConditionFix:
         assert final_booking.version == initial_version + 1
         assert final_booking.status == BookingStatus.CONFIRMED
 
-    def test_integrity_error_handling_and_user_message(
-        self, db_session, customer, booking_datetime, booking_data
-    ):
+    def test_integrity_error_handling_and_user_message(self, db_session, customer, booking_datetime, booking_data):
         """
         Test that IntegrityError is caught and converted to user-friendly ConflictException.
 
@@ -270,16 +271,12 @@ class TestRaceConditionFix:
 
         # Verify error message is user-friendly (not technical IntegrityError)
         error_message = str(exc_info.value.message)
-        assert (
-            "was just booked by another customer" in error_message.lower()
-            or "not available" in error_message.lower()
-        )
+        assert "was just booked by another customer" in error_message.lower() or \
+               "not available" in error_message.lower()
         assert "IntegrityError" not in error_message  # No technical jargon
         assert "constraint" not in error_message.lower()
 
-    def test_cancelled_bookings_dont_block_new_bookings(
-        self, db_session, customer, booking_datetime, booking_data
-    ):
+    def test_cancelled_bookings_dont_block_new_bookings(self, db_session, customer, booking_datetime, booking_data):
         """
         Test that cancelled bookings don't prevent new bookings (unique constraint only covers active statuses).
 
@@ -291,7 +288,8 @@ class TestRaceConditionFix:
         # Create and cancel first booking
         booking1 = service.create_booking(booking_data)
         cancelled_booking = repository.cancel_booking(
-            booking_id=booking1.id, cancellation_reason="Test cancellation"
+            booking_id=booking1.id,
+            cancellation_reason="Test cancellation"
         )
         assert cancelled_booking.status == BookingStatus.CANCELLED
 
@@ -304,16 +302,14 @@ class TestRaceConditionFix:
         all_bookings = repository.find_by_date_range(
             start_date=booking_datetime.date(),
             end_date=booking_datetime.date(),
-            include_cancelled=True,
+            include_cancelled=True
         )
         assert len(all_bookings) == 2
 
         active_bookings = [b for b in all_bookings if b.status != BookingStatus.CANCELLED]
         assert len(active_bookings) == 1
 
-    def test_high_concurrency_stress_test(
-        self, db_session, customer, booking_datetime, booking_data
-    ):
+    def test_high_concurrency_stress_test(self, db_session, customer, booking_datetime, booking_data):
         """
         Stress test with 20 concurrent booking attempts.
 
@@ -349,7 +345,10 @@ class TestRaceConditionFix:
 
         # Launch 20 concurrent threads
         with ThreadPoolExecutor(max_workers=20) as executor:
-            futures = [executor.submit(create_booking_thread, i) for i in range(20)]
+            futures = [
+                executor.submit(create_booking_thread, i)
+                for i in range(20)
+            ]
 
             for future in as_completed(futures):
                 try:
@@ -362,13 +361,9 @@ class TestRaceConditionFix:
         assert conflict_count == 19, f"Expected 19 conflicts, got {conflict_count}"
         assert error_count == 0, f"Expected 0 errors, got {error_count}"
 
-        print(
-            f"✅ Stress test passed: {success_count} success, {conflict_count} conflicts, {error_count} errors"
-        )
+        print(f"✅ Stress test passed: {success_count} success, {conflict_count} conflicts, {error_count} errors")
 
-    def test_race_condition_with_different_party_sizes(
-        self, db_session, customer, booking_datetime
-    ):
+    def test_race_condition_with_different_party_sizes(self, db_session, customer, booking_datetime):
         """
         Test race condition with different party sizes (edge case).
 

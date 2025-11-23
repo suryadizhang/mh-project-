@@ -14,13 +14,13 @@ from cqrs.base import (  # Phase 2C: Updated from api.app.cqrs.base
 )
 from cqrs.crm_operations import *  # Phase 2C: Updated from api.app.cqrs.crm_operations
 from models.legacy_core import (  # Phase 2C: Updated from api.app.models.core
-    Booking,
-    Customer,
-    Message,
-    MessageThread,
-    Payment,
+    CoreBooking,
+    CoreCustomer,
+    CoreMessage,
+    CoreMessageThread,
+    CorePayment,
 )
-# TODO: Legacy event sourcing not migrated yet - needs refactor
+from models.legacy_events import IdempotencyKey  # Phase 2C: Updated from api.app.models.events
 from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -63,7 +63,7 @@ class CreateBookingCommandHandler(CommandHandler):
 
             # Create booking
             booking_id = uuid4()
-            booking = Booking(
+            booking = CoreBooking(
                 id=booking_id,
                 customer_id=customer.id,
                 date=command.date,
@@ -158,7 +158,7 @@ class CreateBookingCommandHandler(CommandHandler):
         # Try to find by email first
         encrypted_email = self.encryption.encrypt(email)
 
-        stmt = select(Customer).where(Customer.email_encrypted == encrypted_email)
+        stmt = select(CoreCustomer).where(CoreCustomer.email_encrypted == encrypted_email)
         result = await self.session.execute(stmt)
         customer = result.scalar_one_or_none()
 
@@ -183,7 +183,7 @@ class CreateBookingCommandHandler(CommandHandler):
 
         # Create new customer
         customer_id = uuid4()
-        customer = Customer(
+        customer = CoreCustomer(
             id=customer_id,
             email_encrypted=encrypted_email,
             name_encrypted=self.encryption.encrypt(name),
@@ -249,7 +249,7 @@ class RecordPaymentCommandHandler(CommandHandler):
                     return existing
 
             # Validate booking exists
-            booking_stmt = select(Booking).where(Booking.id == command.booking_id)
+            booking_stmt = select(CoreBooking).where(CoreBooking.id == command.booking_id)
             booking_result = await self.session.execute(booking_stmt)
             booking = booking_result.scalar_one_or_none()
 
@@ -276,7 +276,7 @@ class RecordPaymentCommandHandler(CommandHandler):
 
             # Create payment record
             payment_id = uuid4()
-            payment = Payment(
+            payment = CorePayment(
                 id=payment_id,
                 booking_id=command.booking_id,
                 amount_cents=command.amount_cents,
@@ -398,7 +398,7 @@ class ReceiveMessageCommandHandler(CommandHandler):
 
             if command.thread_id:
                 # Use existing thread
-                thread_stmt = select(MessageThread).where(MessageThread.id == command.thread_id)
+                thread_stmt = select(CoreMessageThread).where(CoreMessageThread.id == command.thread_id)
                 thread_result = await self.session.execute(thread_stmt)
                 thread = thread_result.scalar_one_or_none()
 
@@ -406,7 +406,7 @@ class ReceiveMessageCommandHandler(CommandHandler):
                 # Find thread by phone number
                 encrypted_phone = self.encryption.encrypt(command.phone_number)
                 thread_stmt = (
-                    select(MessageThread)
+                    select(CoreMessageThread)
                     .where(MessageThread.phone_number_encrypted == encrypted_phone)
                     .order_by(MessageThread.created_at.desc())
                 )
@@ -419,7 +419,7 @@ class ReceiveMessageCommandHandler(CommandHandler):
             if not thread:
                 # Create new thread
                 thread_id = uuid4()
-                thread = MessageThread(
+                thread = CoreMessageThread(
                     id=thread_id,
                     phone_number_encrypted=self.encryption.encrypt(command.phone_number),
                     customer_id=None,  # Will be linked later if customer found
@@ -431,7 +431,7 @@ class ReceiveMessageCommandHandler(CommandHandler):
 
             # Create message record
             message_id = uuid4()
-            message = Message(
+            message = CoreMessage(
                 id=message_id,
                 thread_id=thread.id,
                 content_encrypted=self.encryption.encrypt(command.content),

@@ -174,7 +174,7 @@ class Thread(Base):
     # Relationships
     messages = relationship("Message", back_populates="thread", order_by="Message.created_at")
     contact = relationship("Contact", back_populates="threads")
-    booking = relationship("Booking", back_populates="message_threads")
+    booking = relationship("models.booking.Booking", back_populates="message_threads")
 
     # Indexes
     __table_args__ = (
