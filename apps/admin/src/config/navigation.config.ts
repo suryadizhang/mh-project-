@@ -96,7 +96,17 @@ const DAILY_OPERATIONS: NavSection = {
       badge: 'count',
       roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT],
       tier: 'daily',
-      description: 'Unified communications',
+      description: 'Unified communications (SMS, Social)',
+      showInQuickBar: true,
+    },
+    {
+      name: 'Emails',
+      href: '/emails',
+      icon: '📧',
+      badge: 'count',
+      roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.CUSTOMER_SUPPORT],
+      tier: 'daily',
+      description: 'Customer support & payment emails',
       showInQuickBar: true,
     },
     {

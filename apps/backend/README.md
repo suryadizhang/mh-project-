@@ -1,12 +1,12 @@
 # 🍱 MyHibachi Backend - Clean Architecture
 
-**Production-Ready FastAPI Backend with Clean Architecture**  
-**Version**: 2.0 (Post Nuclear Refactor)  
-**Status**: ✅ Production Ready
+**Production-Ready FastAPI Backend with Clean Architecture**
+**Version**: 2.0 (Post Nuclear Refactor) **Status**: ✅ Production
+Ready
 
 > 🎉 **November 2025**: Successfully completed nuclear refactor to
-> clean architecture!  
-> See [MIGRATION_SUMMARY.md](./MIGRATION_SUMMARY.md) for complete
+> clean architecture! See
+> [MIGRATION_SUMMARY.md](./MIGRATION_SUMMARY.md) for complete
 > migration details.
 
 ---
@@ -372,6 +372,19 @@ DELETE /api/v1/bookings/{id}      - Delete booking
 
 ### Payments (Stripe)
 
+> **📚 For comprehensive Stripe integration details, see
+> [STRIPE_INTEGRATION.md](./STRIPE_INTEGRATION.md)**
+
+We leverage **Stripe's native features** for all payment processing:
+
+- ✅ Stripe Dashboard for analytics
+- ✅ Stripe Reporting API for exports
+- ✅ Stripe Webhooks for real-time events
+- ✅ Stripe Customer Portal for self-service
+- ✅ Stripe Checkout for PCI-compliant payments
+
+**API Endpoints:**
+
 ```
 POST /api/v1/stripe/create-checkout-session  - Create Checkout session
 POST /api/v1/stripe/create-payment-intent    - Create Payment Intent
@@ -523,7 +536,14 @@ uvicorn src.main:app --host 0.0.0.0 --port 8000 --workers 4
    - Import patterns
    - Best practices
 
-2. **[MIGRATION_SUMMARY.md](./MIGRATION_SUMMARY.md)** - Migration
+2. **[STRIPE_INTEGRATION.md](./STRIPE_INTEGRATION.md)** - Stripe
+   integration architecture ⭐ **NEW**
+   - Architecture decision (November 2025)
+   - Stripe native features we use
+   - Code removed vs benefits gained
+   - Migration summary and analytics workflow
+
+3. **[MIGRATION_SUMMARY.md](./MIGRATION_SUMMARY.md)** - Migration
    history
    - Phase 1-3 timeline
    - 74 files migrated

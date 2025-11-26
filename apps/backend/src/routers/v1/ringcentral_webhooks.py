@@ -1,6 +1,6 @@
 """RingCentral SMS webhook and integration endpoints."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from uuid import UUID
 
@@ -86,7 +86,7 @@ async def sync_recent_messages(
 
     try:
         # Get messages from the specified time range
-        date_from = datetime.now() - datetime.timedelta(hours=hours_back)
+        date_from = datetime.now(timezone.utc) - datetime.timedelta(hours=hours_back)
 
         async with ringcentral_sms as sms_service:
             messages = await sms_service.get_messages(date_from=date_from)
@@ -271,7 +271,7 @@ async def _process_message_with_ai(lead: Lead, message_content: str, db: Session
             {
                 "role": "customer",
                 "content": message_content,
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
         )
 
@@ -396,10 +396,10 @@ async def _record_outbound_sms(
                     "to_number": to_number,
                     "message": message,
                     "message_id": message_id,
-                    "sent_at": datetime.now().isoformat(),
+                    "sent_at": datetime.now(timezone.utc).isoformat(),
                 },
             )
-            lead.last_contact_date = datetime.now()
+            lead.last_contact_date = datetime.now(timezone.utc)
             db.commit()
 
     except Exception as e:

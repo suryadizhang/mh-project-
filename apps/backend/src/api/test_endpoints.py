@@ -16,8 +16,7 @@ from api.deps_enhanced import (
 )
 from core.exceptions import create_success_response, raise_not_found
 from fastapi import APIRouter, Depends
-from models.booking import BookingStatus
-from models.customer import CustomerStatus
+from db.models.core import BookingStatus, CustomerStatus
 from pydantic import BaseModel, Field
 
 # Create router

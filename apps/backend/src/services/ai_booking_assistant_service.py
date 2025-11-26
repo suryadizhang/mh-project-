@@ -22,8 +22,7 @@ from config.ai_booking_config import (
     INFO_EXTRACTOR_PROMPT,
     get_response_generator_prompt,
 )
-from models.booking import Booking
-from models.customer import Customer
+from db.models.core import Booking, Customer
 from repositories.customer_repository import CustomerRepository
 from services.booking_service import BookingService
 from services.unified_notification_service import UnifiedNotificationService

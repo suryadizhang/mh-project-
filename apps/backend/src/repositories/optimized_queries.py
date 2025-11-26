@@ -8,7 +8,7 @@ Performance target: 20x improvement on complex queries
 from datetime import date
 from typing import Any
 
-from models.booking import Booking
+from db.models.core import Booking
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 

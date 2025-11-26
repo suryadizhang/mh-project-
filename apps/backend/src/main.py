@@ -103,6 +103,26 @@ async def lifespan(app: FastAPI):
     logger.info(f"Environment: {settings.ENVIRONMENT}")
     logger.info(f"Debug mode: {settings.DEBUG}")
 
+    # Initialize Google Secret Manager (Phase 1A: GSM Integration)
+    try:
+        logger.info("🔐 Initializing Google Secret Manager...")
+        gsm_status = await settings.initialize_gsm()
+        
+        if gsm_status.get("status") == "success":
+            logger.info(
+                f"✅ GSM initialized: {gsm_status.get('secrets_from_gsm', 0)} secrets from GSM, "
+                f"{gsm_status.get('secrets_from_env', 0)} from environment"
+            )
+        elif gsm_status.get("status") == "env_only":
+            logger.info("✅ GSM not available - using environment variables only (OK for dev)")
+        else:
+            logger.warning(
+                f"⚠️ GSM initialization failed - using environment variables: "
+                f"{gsm_status.get('error', 'unknown')}"
+            )
+    except Exception as e:
+        logger.warning(f"⚠️ GSM initialization error: {e} - using environment variables")
+
     # Initialize Cache Service with timeout (non-blocking)
     try:
         from core.cache import CacheService
@@ -194,6 +214,18 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"⚠️ Payment email scheduler not available: {e}")
 
+    # Start email notification scheduler (WhatsApp alerts for new emails)
+    try:
+        from tasks.email_notification_task import start_email_notification_task
+
+        # Start in background - checks for new emails every 60s
+        asyncio.create_task(start_email_notification_task())
+        logger.info("✅ Email notification scheduler started (WhatsApp alerts enabled)")
+    except ImportError as e:
+        logger.warning(f"⚠️ Email notification scheduler not available (missing dependencies): {e}")
+    except Exception as e:
+        logger.warning(f"⚠️ Email notification scheduler not available: {e}")
+
     # Initialize and start AI Orchestrator with Follow-Up Scheduler (Phase 1B)
     # Phase 3: Using DI Container pattern
     try:
@@ -253,22 +285,22 @@ async def lifespan(app: FastAPI):
 
     # Shutdown
     logger.info("🛑 Starting graceful shutdown...")
-    
+
     # Stop real-time voice call sessions
     try:
         from services.realtime_voice.call_session import call_session_manager
-        
+
         active_sessions = list(call_session_manager.active_sessions.values())
         if active_sessions:
             logger.info(f"📞 Gracefully closing {len(active_sessions)} active voice calls...")
-            
+
             for session in active_sessions:
                 try:
                     # Stop STT bridge
                     if session.stt_bridge and session.stt_bridge.is_running:
                         session.stt_bridge.stop()
                         logger.info(f"✅ Stopped STT bridge for call {session.call_id}")
-                    
+
                     # Close WebSocket
                     if session.websocket:
                         try:
@@ -276,7 +308,7 @@ async def lifespan(app: FastAPI):
                             logger.info(f"✅ Closed WebSocket for call {session.call_id}")
                         except Exception as ws_error:
                             logger.debug(f"WebSocket already closed: {ws_error}")
-                    
+
                     # Mark session ended and save logs
                     session.mark_ended()
                     logger.info(
@@ -285,13 +317,13 @@ async def lifespan(app: FastAPI):
                         f"transcripts={session.transcripts_count} | "
                         f"turns={session.turn_count}"
                     )
-                    
+
                 except Exception as session_error:
                     logger.error(f"Error closing session {session.call_id}: {session_error}")
-            
+
             # Final cleanup
             await call_session_manager.cleanup_all_sessions()
-            
+
             stats = call_session_manager.get_stats()
             logger.info(
                 f"📊 Voice AI final stats | "
@@ -302,12 +334,12 @@ async def lifespan(app: FastAPI):
             )
         else:
             logger.info("✅ No active voice calls to close")
-            
+
     except ImportError:
         logger.debug("Real-time voice module not imported")
     except Exception as e:
         logger.error(f"Error during voice call shutdown: {e}")
-    
+
     # Stop outbox processor workers
     if hasattr(app.state, "worker_manager") and app.state.worker_manager:
         try:
@@ -765,7 +797,7 @@ except ImportError:
 # Include Knowledge Sync endpoints (Admin/Superadmin)
 try:
     from routers.v1.knowledge_sync import router as knowledge_sync_router
-    
+
     app.include_router(knowledge_sync_router, tags=["Knowledge Sync"])
     logger.info("✅ Knowledge Sync endpoints included")
 except ImportError as e:
@@ -909,6 +941,15 @@ try:
     logger.info("✅ Admin Analytics endpoints included from NEW location")
 except ImportError as e:
     logger.error(f"❌ Admin Analytics endpoints not available: {e}")
+
+# Admin Email Management (Gmail-style interface for 2 inboxes) - NEW
+try:
+    from routers.v1.admin_emails import router as admin_emails_router
+
+    app.include_router(admin_emails_router, prefix="/api", tags=["admin", "emails"])
+    logger.info("✅ Admin Email Management endpoints included (cs@ + gmail)")
+except ImportError as e:
+    logger.error(f"❌ Admin Email Management endpoints not available: {e}")
 
 # Customer Review System (from legacy - comprehensive) - NEW location
 try:

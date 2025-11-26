@@ -21,7 +21,7 @@ Features:
 """
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 import logging
 import os
@@ -120,7 +120,7 @@ class UnifiedNotificationService:
 
     def _is_quiet_hours(self) -> bool:
         """Check if current time is in quiet hours"""
-        now = datetime.now().time()
+        now = datetime.now(timezone.utc).time()
         current_hour = now.hour
 
         if self.quiet_start > self.quiet_end:  # e.g., 22:00 to 8:00 (crosses midnight)

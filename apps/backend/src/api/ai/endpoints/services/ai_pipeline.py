@@ -8,7 +8,7 @@ import time
 from typing import Any
 from uuid import UUID
 
-from api.ai.endpoints.models import Message, MessageRole
+from api.ai.endpoints.models import AIMessage, MessageRole
 from api.ai.endpoints.schemas import ChatReplyResponse
 from api.ai.endpoints.services.knowledge_base_simple import kb_service
 from api.ai.endpoints.services.openai_service import openai_service
@@ -34,7 +34,7 @@ class AIPipeline:
             "medium": 0.50,  # Use GPT with KB context
             "low": 0.30,  # Use GPT-4 or escalate
         }
-        
+
         # Initialize enhanced NLP service if available
         if ENHANCED_NLP_AVAILABLE:
             self.nlp_service = get_nlp_service()
@@ -131,24 +131,24 @@ class AIPipeline:
         if self.nlp_service:
             try:
                 nlp_entities = self.nlp_service.extract_entities(message)
-                
+
                 # Convert to expected format
                 entities = {}
-                
+
                 if 'DATE' in nlp_entities:
                     entities['dates'] = nlp_entities['DATE']
-                
+
                 if 'GPE' in nlp_entities or 'LOC' in nlp_entities:
                     entities['locations'] = nlp_entities.get('GPE', []) + nlp_entities.get('LOC', [])
-                
+
                 if 'CARDINAL' in nlp_entities:
                     entities['numbers'] = [int(n) for n in nlp_entities['CARDINAL'] if n.isdigit() and int(n) < 1000]
-                
+
                 return entities
-                
+
             except Exception:
                 pass  # Fall back to regex
-        
+
         # Fallback: regex-based extraction
         entities = {}
 
@@ -266,7 +266,7 @@ class AIPipeline:
                     source = "gpt-4-mini"
 
             # Step 5: Save message to database
-            user_message = Message(
+            user_message = AIMessage(
                 conversation_id=conversation_id,
                 role=user_role,
                 text=message,
@@ -276,7 +276,7 @@ class AIPipeline:
                 processing_time_ms=int((time.time() - start_time) * 1000),
             )
 
-            ai_message = Message(
+            ai_message = AIMessage(
                 conversation_id=conversation_id,
                 role=(MessageRole.AI.value if "gpt" not in source else MessageRole.GPT.value),
                 text=response_text,

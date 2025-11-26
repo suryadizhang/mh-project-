@@ -17,6 +17,7 @@ import logging
 from typing import Any
 
 from core.database import get_db
+from db.models.core import Booking
 from utils.auth import (
     can_access_station,
     get_current_user,
@@ -1542,7 +1543,7 @@ async def update_booking_datetime(
         )
 
     # Check if date is in the past
-    if parsed_date < datetime.now():
+    if parsed_date < datetime.now(timezone.utc):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cannot reschedule to past dates",
@@ -1572,7 +1573,7 @@ async def update_booking_datetime(
     # Update booking
     booking.date = parsed_date
     booking.slot = new_slot
-    booking.updated_at = datetime.now()
+    booking.updated_at = datetime.now(timezone.utc)
 
     # Commit changes
     await db.commit()
@@ -1681,7 +1682,7 @@ async def check_availability(
             )
 
         # Check if date is in the past
-        if parsed_date < datetime.now().date():
+        if parsed_date < datetime.now(timezone.utc).date():
             return {
                 "success": True,
                 "date": date,

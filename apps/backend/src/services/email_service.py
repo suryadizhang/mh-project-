@@ -1,15 +1,27 @@
 """
-Email Notification Service
+Email Notification Service using Resend API
 Sends emails for user approval, rejection, and other events
-Supports SMTP for IONOS and other providers
+Migrated from SMTP (IONOS + Gmail) to Resend API on November 24, 2025
+
+Benefits:
+- Better deliverability (99%+ inbox rate vs 95% SMTP)
+- Email analytics (opens, clicks, bounces)
+- Webhook events for tracking
+- Simpler code (no SMTP complexity)
+- FREE tier (3,000 emails/month)
+- Same email addresses (cs@myhibachichef.com, myhibachichef@gmail.com)
 """
 
 from datetime import datetime, timezone
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 import logging
 import os
-import smtplib
+from typing import Optional
+
+try:
+    import resend
+except ImportError:
+    resend = None
+    logging.warning("Resend library not installed. Install with: pip install resend")
 
 logger = logging.getLogger(__name__)
 
@@ -236,39 +248,29 @@ If you need immediate access, please contact us at support@myhibachi.com.
 
 
 class EmailService:
-    """Service for sending email notifications with SMTP support"""
+    """Service for sending email notifications using Resend API"""
 
     def __init__(self):
-        self.enabled = os.getenv("EMAIL_NOTIFICATIONS_ENABLED", "false").lower() == "true"
-        self.from_email = os.getenv("EMAIL_FROM_ADDRESS", "cs@myhibachichef.com")
-        self.from_name = os.getenv("EMAIL_FROM_NAME", "MyHibachi Chef")
+        self.enabled = os.getenv("EMAIL_ENABLED", "false").lower() == "true"
+        self.api_key = os.getenv("RESEND_API_KEY")
+        self.from_email = os.getenv("RESEND_FROM_EMAIL", "cs@myhibachichef.com")
+        self.from_name = os.getenv("RESEND_FROM_NAME", "My Hibachi Chef")
         self.frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3001")
 
-        # Email routing configuration
-        self.customer_smtp = "ionos"  # Use IONOS for customer emails
-        self.admin_smtp = "gmail"  # Use Gmail for internal admin emails
-        self.admin_domain = "@myhibachichef.com"  # Internal domain
+        # Initialize Resend client
+        if self.enabled and self.api_key and resend:
+            resend.api_key = self.api_key
+            logger.info(f"✅ Resend email service initialized (from: {self.from_email})")
+        elif self.enabled and not self.api_key:
+            logger.error("❌ EMAIL_ENABLED=true but RESEND_API_KEY not found in environment")
+        elif self.enabled and not resend:
+            logger.error("❌ EMAIL_ENABLED=true but resend library not installed")
+        else:
+            logger.info("📧 Email service disabled (EMAIL_ENABLED=false)")
 
-        logger.info(f"Email service initialized (enabled={self.enabled})")
-        if self.enabled:
-            logger.info(f"Customer emails via: {self.customer_smtp}")
-            logger.info(f"Admin emails via: {self.admin_smtp}")
-
-    def _is_admin_email(self, email: str) -> bool:
-        """Check if email is an admin/internal email"""
-        email_lower = email.lower()
-        return (
-            email.endswith(self.admin_domain)
-            or email_lower == "myhibachichef@gmail.com"  # Specific business Gmail only
-            or "admin" in email_lower
-            or "staff" in email_lower
-        )
-
-    def _get_smtp_provider(self, to_email: str) -> str:
-        """Automatically select SMTP provider based on recipient"""
-        if self._is_admin_email(to_email):
-            return self.admin_smtp
-        return self.customer_smtp
+    def _format_sender(self) -> str:
+        """Format sender email with name"""
+        return f"{self.from_name} <{self.from_email}>"
 
     def send_approval_email(self, email: str, full_name: str) -> bool:
         """Send approval notification email"""
@@ -362,144 +364,42 @@ class EmailService:
             logger.exception(f"Failed to send welcome email to {email}: {e}")
             return False
 
-    def _send_email(self, to_email: str, subject: str, html_body: str, text_body: str) -> bool:
-        """Internal method to send email via SMTP with automatic routing"""
+    def _send_email(self, to_email: str, subject: str, html_body: str, text_body: str, tags: Optional[list] = None) -> bool:
+        """Internal method to send email via Resend API"""
         if not self.enabled:
-            logger.info(f"Email notifications disabled. Would send to {to_email}: {subject}")
-            logger.debug(f"Email body:\n{text_body}")
+            logger.info(f"📧 Email disabled. Would send to {to_email}: {subject}")
+            logger.debug(f"Email preview:\n{text_body[:200]}...")
             return True
 
-        # Automatically select SMTP provider based on recipient
-        smtp_provider = self._get_smtp_provider(to_email)
-        logger.info(f"Routing email to {to_email} via {smtp_provider.upper()} SMTP")
+        if not self.api_key or not resend:
+            logger.error(f"❌ Cannot send email: Resend not configured properly")
+            return False
 
-        if smtp_provider == "ionos":
-            return self._send_smtp_ionos(to_email, subject, html_body, text_body)
-        elif smtp_provider == "gmail":
-            return self._send_smtp_gmail(to_email, subject, html_body, text_body)
-        else:
-            # Fallback to generic SMTP
-            return self._send_smtp_generic(to_email, subject, html_body, text_body)
-
-    def _send_smtp_ionos(self, to_email: str, subject: str, html_body: str, text_body: str) -> bool:
-        """Send email via IONOS SMTP"""
         try:
-            # IONOS SMTP settings
-            smtp_host = os.getenv("SMTP_HOST", "smtp.ionos.com")
-            smtp_port = int(os.getenv("SMTP_PORT", "587"))  # 587 for TLS, 465 for SSL
-            smtp_username = os.getenv("SMTP_USERNAME", "cs@myhibachichef.com")
-            smtp_password = os.getenv("SMTP_PASSWORD")
+            # Prepare email parameters
+            params = {
+                "from": self._format_sender(),
+                "to": [to_email],
+                "subject": subject,
+                "html": html_body,
+                "text": text_body,
+            }
 
-            if not smtp_password:
-                logger.error("SMTP_PASSWORD not configured in environment")
-                return False
+            # Add tags if provided
+            if tags:
+                params["tags"] = tags
 
-            # Create message
-            msg = MIMEMultipart("alternative")
-            msg["Subject"] = subject
-            msg["From"] = f"{self.from_name} <{smtp_username}>"
-            msg["To"] = to_email
+            # Send via Resend API
+            response = resend.Emails.send(params)
 
-            # Attach both plain text and HTML versions
-            part1 = MIMEText(text_body, "plain")
-            part2 = MIMEText(html_body, "html")
-            msg.attach(part1)
-            msg.attach(part2)
-
-            # Send email via SMTP
-            with smtplib.SMTP(smtp_host, smtp_port) as server:
-                server.starttls()  # Enable TLS
-                server.login(smtp_username, smtp_password)
-                server.send_message(msg)
-
-            logger.info(f"✅ Email sent successfully via IONOS SMTP to {to_email}")
+            logger.info(f"✅ Email sent via Resend to {to_email} | Subject: {subject} | ID: {response.get('id', 'N/A')}")
             return True
 
         except Exception as e:
-            logger.exception(f"Failed to send email via IONOS SMTP to {to_email}: {e}")
+            logger.exception(f"❌ Failed to send email via Resend to {to_email}: {e}")
             return False
 
-    def _send_smtp_gmail(self, to_email: str, subject: str, html_body: str, text_body: str) -> bool:
-        """Send email via Gmail SMTP (for internal admin communications)"""
-        try:
-            # Gmail SMTP settings
-            smtp_host = "smtp.gmail.com"
-            smtp_port = 587
-            smtp_username = os.getenv("GMAIL_USERNAME", "myhibachichef@gmail.com")
-            smtp_password = os.getenv(
-                "GMAIL_APP_PASSWORD"
-            )  # Use App Password, not regular password
 
-            if not smtp_password:
-                logger.error("GMAIL_APP_PASSWORD not configured in environment")
-                return False
-
-            # Create message
-            msg = MIMEMultipart("alternative")
-            msg["Subject"] = subject
-            msg["From"] = f"{self.from_name} <{smtp_username}>"
-            msg["To"] = to_email
-
-            # Attach both plain text and HTML versions
-            part1 = MIMEText(text_body, "plain")
-            part2 = MIMEText(html_body, "html")
-            msg.attach(part1)
-            msg.attach(part2)
-
-            # Send email via SMTP
-            with smtplib.SMTP(smtp_host, smtp_port) as server:
-                server.starttls()
-                server.login(smtp_username, smtp_password)
-                server.send_message(msg)
-
-            logger.info(f"✅ Email sent successfully via Gmail SMTP to {to_email}")
-            return True
-
-        except Exception as e:
-            logger.exception(f"Failed to send email via Gmail SMTP to {to_email}: {e}")
-            return False
-
-    def _send_smtp_generic(
-        self, to_email: str, subject: str, html_body: str, text_body: str
-    ) -> bool:
-        """Send email via generic SMTP configuration"""
-        try:
-            smtp_host = os.getenv("SMTP_HOST", "localhost")
-            smtp_port = int(os.getenv("SMTP_PORT", "587"))
-            smtp_username = os.getenv("SMTP_USERNAME")
-            smtp_password = os.getenv("SMTP_PASSWORD")
-            smtp_use_tls = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
-
-            if not smtp_username or not smtp_password:
-                logger.error("SMTP credentials not configured")
-                return False
-
-            # Create message
-            msg = MIMEMultipart("alternative")
-            msg["Subject"] = subject
-            msg["From"] = f"{self.from_name} <{smtp_username}>"
-            msg["To"] = to_email
-
-            # Attach both plain text and HTML versions
-            part1 = MIMEText(text_body, "plain")
-            part2 = MIMEText(html_body, "html")
-            msg.attach(part1)
-            msg.attach(part2)
-
-            # Send email via SMTP
-            with smtplib.SMTP(smtp_host, smtp_port) as server:
-                if smtp_use_tls:
-                    server.starttls()
-                if smtp_username and smtp_password:
-                    server.login(smtp_username, smtp_password)
-                server.send_message(msg)
-
-            logger.info(f"✅ Email sent successfully via SMTP to {to_email}")
-            return True
-
-        except Exception as e:
-            logger.exception(f"Failed to send email via SMTP to {to_email}: {e}")
-            return False
 
 
 # Global email service instance

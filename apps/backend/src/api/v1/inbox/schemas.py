@@ -3,7 +3,7 @@ Unified Inbox API Schemas
 Pydantic models for request/response validation
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID
 
@@ -272,7 +272,7 @@ class WebSocketMessage(BaseModel):
     @classmethod
     def create(cls, type: str, data: dict[str, Any]) -> "WebSocketMessage":
         """Factory method to create WebSocketMessage with automatic timestamp."""
-        return cls(type=type, data=data, timestamp=datetime.now())
+        return cls(type=type, data=data, timestamp=datetime.now(timezone.utc))
 
 
 class WebSocketMessageNotification(BaseModel):
@@ -313,7 +313,7 @@ class WebSocketStatusUpdate(BaseModel):
             message_id=message_id,
             old_status=old_status,
             new_status=new_status,
-            timestamp=datetime.now(),
+            timestamp=datetime.now(timezone.utc),
         )
 
 

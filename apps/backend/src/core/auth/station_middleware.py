@@ -14,10 +14,12 @@ from core.auth.station_auth import (  # Phase 2C: Updated from api.app.auth.stat
     StationAuthenticationService,
     StationContext,
 )
+# Phase 1.1: Keep enums from station_models during transition (will migrate in Phase 2)
+# Fixed: StationPermission and StationRole don't exist in db.models.identity, use station_models
 from core.auth.station_models import (
     StationPermission,
     StationRole,
-)  # Phase 2C: Updated from api.app.auth.station_models
+)
 from core.database import get_db_session  # Phase 2C: Updated from api.app.database
 from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
 from fastapi import Depends, HTTPException, Request, status

@@ -3,7 +3,7 @@ RingCentral seed data and testing utilities.
 Provides tools for generating test data and validation scenarios.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import random
 from typing import Any
 
@@ -61,7 +61,7 @@ def generate_test_leads_for_sms(count: int = 20) -> list[dict[str, Any]]:
             "event_date": fake.date_between(start_date="+1d", end_date="+6M"),
             "guest_count": random.randint(10, 200),
             "budget": random.randint(500, 5000),
-            "created_at": datetime.now() - timedelta(days=random.randint(0, 30)),
+            "created_at": datetime.now(timezone.utc) - timedelta(days=random.randint(0, 30)),
         }
         leads.append(lead_data)
 
@@ -363,7 +363,7 @@ def create_test_environment() -> dict[str, Any]:
         "conversation_scenarios": generate_sms_conversation_scenarios(),
         "webhook_payloads": generate_webhook_test_payloads(),
         "ai_test_cases": generate_ai_analysis_test_cases(),
-        "created_at": datetime.now().isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
         "instructions": {
             "leads": "Use these leads to populate your database for testing",
             "phone_numbers": "Use these for testing SMS sending",

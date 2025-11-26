@@ -72,12 +72,12 @@ async def test_background_scheduling_doesnt_block():
 
     # Verify follow-up was scheduled
     try:
-        from api.ai.scheduler.follow_up_scheduler import ScheduledFollowUp
+        from db.models.ai import CustomerEngagementFollowUp
         from core.database import get_db_context
         from sqlalchemy import select
 
         async with get_db_context() as db:
-            stmt = select(ScheduledFollowUp).where(ScheduledFollowUp.user_id == user_id)
+            stmt = select(CustomerEngagementFollowUp).where(CustomerEngagementFollowUp.user_id == user_id)
             result = await db.execute(stmt)
             followup = result.scalar_one_or_none()
 
@@ -145,12 +145,12 @@ async def test_simulated_booking_flow():
 
     # Verify scheduling completed
     try:
-        from api.ai.scheduler.follow_up_scheduler import ScheduledFollowUp
+        from db.models.ai import CustomerEngagementFollowUp
         from core.database import get_db_context
         from sqlalchemy import select
 
         async with get_db_context() as db:
-            stmt = select(ScheduledFollowUp).where(ScheduledFollowUp.user_id == user_id)
+            stmt = select(CustomerEngagementFollowUp).where(CustomerEngagementFollowUp.user_id == user_id)
             result = await db.execute(stmt)
             followup = result.scalar_one_or_none()
 
@@ -247,3 +247,4 @@ async def run_all_tests():
 if __name__ == "__main__":
     success = asyncio.run(run_all_tests())
     sys.exit(0 if success else 1)
+

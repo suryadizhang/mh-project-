@@ -3,7 +3,7 @@ Meta (Facebook/Instagram) webhook handler for unified inbox.
 Handles Instagram DMs and Facebook messages integration.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import hashlib
 import hmac
 import json
@@ -148,7 +148,7 @@ async def process_instagram_message(
                 "sender_id": sender_id,
                 "text": message_text,
                 "attachments": attachment_data,
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "direction": "inbound",
                 "channel": "instagram",
             },
@@ -156,7 +156,7 @@ async def process_instagram_message(
         db.add(message_event)
 
         # Update thread
-        thread.last_message_at = datetime.now()
+        thread.last_message_at = datetime.now(timezone.utc)
         thread.unread_count = (thread.unread_count or 0) + 1
 
         db.commit()
@@ -248,14 +248,14 @@ async def process_facebook_message(
                 "message_id": message_id,
                 "sender_id": sender_id,
                 "text": message_text,
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "direction": "inbound",
                 "channel": "facebook",
             },
         )
         db.add(message_event)
 
-        thread.last_message_at = datetime.now()
+        thread.last_message_at = datetime.now(timezone.utc)
         thread.unread_count = (thread.unread_count or 0) + 1
 
         db.commit()
@@ -399,4 +399,4 @@ async def broadcast_thread_update(thread_data: dict[str, Any]):
 @router.get("/health")
 async def webhook_health():
     """Health check for Meta webhook."""
-    return {"status": "healthy", "service": "meta_webhook", "timestamp": datetime.now().isoformat()}
+    return {"status": "healthy", "service": "meta_webhook", "timestamp": datetime.now(timezone.utc).isoformat()}

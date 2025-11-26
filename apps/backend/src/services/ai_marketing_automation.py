@@ -22,7 +22,7 @@ Usage:
     )
 """
 
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 from typing import List, Dict, Optional
 from enum import Enum
 import logging
@@ -155,7 +155,7 @@ class AIMarketingAutomation:
                 "target_audience": campaign_config["target_audience"],
                 "ai_content": ai_content,
                 "kpis": campaign_config["kpis"],
-                "created_at": datetime.now(),
+                "created_at": datetime.now(timezone.utc),
             }
             
             campaigns.append(campaign)

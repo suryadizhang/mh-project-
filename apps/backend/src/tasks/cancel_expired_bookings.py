@@ -39,7 +39,8 @@ from decimal import Decimal
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
-from models.booking import Booking, BookingStatus, Payment
+from db.models.core import Booking, BookingStatus
+from models.booking import Payment
 from core.database import get_db
 
 logger = logging.getLogger(__name__)

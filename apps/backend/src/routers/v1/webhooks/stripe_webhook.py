@@ -3,7 +3,7 @@ Stripe webhook handler for unified inbox.
 Handles payment events, customer communications, and financial notifications.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import logging
 from typing import Any
@@ -22,7 +22,7 @@ from sqlalchemy.orm import Session
 import stripe
 
 settings = get_settings()
-from models.legacy_core import CoreEvent
+from cqrs.base import Event
 from models.legacy_lead_newsletter import (
     Lead,
     LeadSource,
@@ -168,7 +168,7 @@ async def process_payment_event(stripe_event: dict[str, Any], db: Session) -> di
                 "customer_id": customer_id,
                 "message": message_content,
                 "event_data": event_data,
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "direction": "system",
                 "channel": "stripe",
             },
@@ -176,7 +176,7 @@ async def process_payment_event(stripe_event: dict[str, Any], db: Session) -> di
         db.add(payment_event)
 
         # Update thread
-        thread.last_message_at = datetime.now()
+        thread.last_message_at = datetime.now(timezone.utc)
         if event_type in ["payment_intent.payment_failed", "invoice.payment_failed"]:
             thread.unread_count = (thread.unread_count or 0) + 1  # Failed payments need attention
 
@@ -281,7 +281,7 @@ async def process_dispute_event(stripe_event: dict[str, Any], db: Session) -> di
                 "amount": event_data.get("amount", 0) / 100,
                 "reason": event_data.get("reason"),
                 "status": event_data.get("status"),
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "direction": "system",
                 "channel": "stripe",
                 "priority": "high",
@@ -289,7 +289,7 @@ async def process_dispute_event(stripe_event: dict[str, Any], db: Session) -> di
         )
         db.add(dispute_event)
 
-        thread.last_message_at = datetime.now()
+        thread.last_message_at = datetime.now(timezone.utc)
         thread.unread_count = 1
 
         db.commit()
@@ -440,7 +440,7 @@ async def webhook_health():
     return {
         "status": "healthy",
         "service": "stripe_webhook",
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
 

@@ -14,16 +14,18 @@ from core.auth.models import (  # Phase 2C: Updated from api.app.auth.models
     StationUser,
     UserSession,
 )
-from core.auth.station_models import (  # Phase 2C: Updated from api.app.auth.station_models
+# Phase 1.1: Use canonical db.models.identity instead of deprecated station_models
+from db.models.identity import (
     Station,
     StationAccessToken,
     StationAuditLog,
+    StationUser,  # Renamed from UserStationAssignment
+)
+# Keep enums and helper functions from station_models during transition
+# Fixed: StationPermission doesn't exist in db.models.identity, use station_models
+from core.auth.station_models import (
     StationPermission,
     StationRole,
-    UserStationAssignment,
-    can_access_station,
-    can_perform_cross_station_action,
-    get_station_permissions,
 )
 from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
 import jwt
@@ -139,11 +141,12 @@ class StationAuthenticationService(BaseAuthenticationService):
         """Get station context for a user including all assignments and permissions."""
         try:
             # Get user's station assignments with station details
+            # Phase 1.1: Use StationUser (canonical name from db.models.identity)
             stmt = (
-                select(UserStationAssignment, Station)
-                .join(Station, UserStationAssignment.station_id == Station.id)
-                .where(and_(UserStationAssignment.user_id == user.id, UserStationAssignment.is_active))
-                .options(selectinload(UserStationAssignment.station))
+                select(StationUser, Station)
+                .join(Station, StationUser.station_id == Station.id)
+                .where(and_(StationUser.user_id == user.id, StationUser.is_active))
+                .options(selectinload(StationUser.station))
             )
 
             result = await db.execute(stmt)

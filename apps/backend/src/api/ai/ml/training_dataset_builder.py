@@ -12,7 +12,7 @@ Author: MyHibachi Development Team
 Created: October 31, 2025
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import logging
 from pathlib import Path
@@ -44,7 +44,7 @@ class TrainingDatasetBuilder:
         builder = TrainingDatasetBuilder()
         result = await builder.build_dataset(
             db,
-            since_date=datetime.now() - timedelta(days=90),
+            since_date=datetime.now(timezone.utc) - timedelta(days=90),
             output_path="data/training/mhc_support_v1.jsonl"
         )
         print(f"Built {result['total_examples']} training examples")
@@ -243,7 +243,7 @@ class TrainingDatasetBuilder:
                 "skipped_pii": skipped_pii,
                 "skipped_quality": skipped_quality,
                 "output_path": str(output_path_obj.absolute()),
-                "date_range": {"start": since_date.isoformat(), "end": datetime.now().isoformat()},
+                "date_range": {"start": since_date.isoformat(), "end": datetime.now(timezone.utc).isoformat()},
                 "quality_filters": {
                     "min_quality_score": self.min_quality_score,
                     "min_user_rating": self.min_user_rating,
@@ -333,7 +333,7 @@ class TrainingDatasetBuilder:
 
     def _generate_version(self, since_date: datetime, example_count: int) -> str:
         """Generate dataset version string"""
-        date_str = datetime.now().strftime("%Y%m%d")
+        date_str = datetime.now(timezone.utc).strftime("%Y%m%d")
         return f"mhc-support-{date_str}-{example_count}ex"
 
     async def export_for_evaluation(
@@ -389,7 +389,7 @@ class TrainingDatasetBuilder:
             return {
                 "total_samples": len(evaluation_data),
                 "output_path": output_path,
-                "exported_at": datetime.now().isoformat(),
+                "exported_at": datetime.now(timezone.utc).isoformat(),
             }
 
         except Exception as e:

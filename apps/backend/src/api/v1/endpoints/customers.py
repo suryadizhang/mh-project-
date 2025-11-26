@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 # Pydantic models for request/response
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 
 from pydantic import BaseModel, EmailStr, Field
@@ -93,11 +93,11 @@ mock_customers = [
         "city": "Sacramento",
         "state": "CA",
         "status": "active",
-        "created_at": datetime.now(),
-        "updated_at": datetime.now(),
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
         "total_bookings": 3,
         "total_spent": 1250.00,
-        "last_booking_date": datetime.now(),
+        "last_booking_date": datetime.now(timezone.utc),
     },
     {
         "id": 2,
@@ -108,11 +108,11 @@ mock_customers = [
         "city": "Fremont",
         "state": "CA",
         "status": "active",
-        "created_at": datetime.now(),
-        "updated_at": datetime.now(),
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
         "total_bookings": 1,
         "total_spent": 450.00,
-        "last_booking_date": datetime.now(),
+        "last_booking_date": datetime.now(timezone.utc),
     },
 ]
 
@@ -224,8 +224,8 @@ async def create_customer(
         new_customer = {
             "id": new_id,
             **customer.dict(),
-            "created_at": datetime.now(),
-            "updated_at": datetime.now(),
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
             "total_bookings": 0,
             "total_spent": 0.0,
             "last_booking_date": None,
@@ -269,7 +269,7 @@ async def update_customer(
 
         # Update fields
         update_data = customer_update.dict(exclude_unset=True)
-        update_data["updated_at"] = datetime.now()
+        update_data["updated_at"] = datetime.now(timezone.utc)
 
         mock_customers[customer_idx].update(update_data)
 
@@ -308,7 +308,7 @@ async def delete_customer(
 
         # Soft delete by setting status to inactive
         mock_customers[customer_idx]["status"] = "inactive"
-        mock_customers[customer_idx]["updated_at"] = datetime.now()
+        mock_customers[customer_idx]["updated_at"] = datetime.now(timezone.utc)
 
         logger.info(f"Admin {current_admin.email} deleted customer {customer_id}")
 
@@ -350,7 +350,7 @@ async def get_customer_bookings(
                 "menu_type": "Hibachi Dinner",
                 "total_amount": 450.00,
                 "status": "confirmed",
-                "created_at": datetime.now(),
+                "created_at": datetime.now(timezone.utc),
             }
         ]
 

@@ -3,7 +3,7 @@ Enhanced RingCentral webhook handler for unified inbox integration.
 Integrates with existing RingCentralSMSService for consistent processing.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import hashlib
 import hmac
 import json
@@ -113,7 +113,7 @@ async def ringcentral_sms_webhook(
                     # Log outbound SMS for thread tracking
                     logger.info(f"Outbound SMS logged: {message_data.get('id')}")
 
-        return {"status": "processed", "timestamp": datetime.now().isoformat()}
+        return {"status": "processed", "timestamp": datetime.now(timezone.utc).isoformat()}
 
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid JSON payload")
@@ -157,7 +157,7 @@ async def ringcentral_voice_webhook(
                 # Future: Process call data with unified message router
                 # This would create call records and link to leads
 
-        return {"status": "processed", "timestamp": datetime.now().isoformat()}
+        return {"status": "processed", "timestamp": datetime.now(timezone.utc).isoformat()}
 
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid JSON payload")
@@ -192,7 +192,7 @@ async def process_inbound_sms(
 async def broadcast_message_update(processing_result: dict[str, Any]):
     """Broadcast message updates to WebSocket connections."""
     try:
-        {"type": "sms_received", "data": processing_result, "timestamp": datetime.now().isoformat()}
+        {"type": "sms_received", "data": processing_result, "timestamp": datetime.now(timezone.utc).isoformat()}
 
         # Note: WebSocket manager would be imported here if available
         # await manager.broadcast_to_subscribers(update_message, "inbox_updates")
@@ -209,7 +209,7 @@ async def webhook_health():
     return {
         "status": "healthy",
         "service": "ringcentral_webhook",
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "endpoints": ["sms", "voice", "health"],
         "integration": "ringcentral_sms_service",
     }

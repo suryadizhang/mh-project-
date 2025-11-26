@@ -9,7 +9,8 @@ from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 import logging
 
-from models.booking import Booking, Payment, PaymentStatus
+from db.models.core import Booking
+from models.booking import Payment, PaymentStatus
 from services.email_service import EmailService
 from services.notification_service import NotificationService
 from services.payment_email_monitor import PaymentEmailMonitor

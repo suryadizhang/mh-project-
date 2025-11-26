@@ -108,3 +108,4 @@ async def test_performance():
 if __name__ == "__main__":
     success = asyncio.run(test_performance())
     sys.exit(0 if success else 1)
+

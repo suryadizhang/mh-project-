@@ -1,6 +1,6 @@
 """Newsletter analytics service for campaign and subscriber metrics."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import UUID
 
@@ -56,7 +56,7 @@ class NewsletterAnalyticsService:
                 "channel_comparison": {...channel comparison...}
             }
         """
-        end_date = datetime.now()
+        end_date = datetime.now(timezone.utc)
         start_date = end_date - timedelta(days=days)
         
         # Get overall metrics

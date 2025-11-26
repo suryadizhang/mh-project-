@@ -10,12 +10,27 @@ This script populates the database with:
 
 Run: python scripts/seed_ai_training_data.py
 """
-
 import asyncio
 from datetime import datetime
 import os
 from dotenv import load_dotenv
 import asyncpg
+from sqlalchemy.ext.asyncio import AsyncSession
+
+# Import knowledge base models
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+
+from models.knowledge_base import (
+    BusinessRule,
+    FAQItem,
+    TrainingData,
+    UpsellRule,
+    SeasonalOffer,
+    KnowledgeCache,
+    MenuItem,
+    PricingTier,
+)
 
 load_dotenv()
 

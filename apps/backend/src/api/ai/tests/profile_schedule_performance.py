@@ -86,13 +86,13 @@ async def profile_schedule_followup():
     # Step 6: Insert into database
     t10 = time.time()
     from api.ai.memory.database import get_db_context
-    from api.ai.scheduler.models import FollowUpStatus, ScheduledFollowUp
+    from db.models.ai import FollowUpStatus, CustomerEngagementFollowUp
 
     scheduled_at = event_date + timedelta(hours=24)
     job_id = f"profile_{user_id}_{int(scheduled_at.timestamp())}"
 
     async with get_db_context() as db:
-        followup = ScheduledFollowUp(
+        followup = CustomerEngagementFollowUp(
             id=job_id,
             conversation_id=conversation_id,
             user_id=user_id,
@@ -171,3 +171,4 @@ async def profile_schedule_followup():
 
 if __name__ == "__main__":
     asyncio.run(profile_schedule_followup())
+

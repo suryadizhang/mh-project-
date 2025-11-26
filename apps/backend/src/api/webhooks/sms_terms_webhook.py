@@ -28,7 +28,7 @@ from core.config import settings
 from services.terms_acknowledgment_service import TermsAcknowledgmentService
 from services.ai_booking_assistant_service import process_sms_booking_message
 from services.unified_notification_service import UnifiedNotificationService
-from models.customer import Customer
+from db.models.core import Customer
 
 logger = logging.getLogger(__name__)
 

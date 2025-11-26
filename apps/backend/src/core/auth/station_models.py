@@ -1,15 +1,39 @@
 """
+⚠️ DEPRECATED: Use db.models.identity instead
+
+This module contains duplicate Station/Auth models that map to the same tables
+as db.models.identity. This causes SQLAlchemy mapper conflicts.
+
+**Migration Path:**
+- Station → db.models.identity.Station
+- UserStationAssignment → db.models.identity.StationUser
+- StationAccessToken → db.models.identity.StationAccessToken
+- StationAuditLog → db.models.identity.StationAuditLog
+
+This file will be moved to DEPRECATED/ in Phase 3 of model consolidation.
+See: MODEL_CONSOLIDATION_IMPLEMENTATION_PLAN.md
+
+Original Documentation:
 Multi-Tenant Station Models for RBAC System
 Implements station-scoped authentication and authorization with proper isolation.
 """
 
+import warnings
 from enum import Enum
+from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
+# Emit deprecation warning when this module is imported
+warnings.warn(
+    "core.auth.station_models is deprecated. Use db.models.identity instead. "
+    "This module will be removed in Phase 3 of model consolidation.",
+    DeprecationWarning,
+    stacklevel=2
+)
+
 # Import unified Base (avoid circular import)
-from models.legacy_declarative_base import (
-    Base,
-)  # Phase 2C: Updated from api.app.models.declarative_base
+# Fixed: Import from core.database instead of missing legacy_declarative_base
+from core.database import Base
 from sqlalchemy import (
     JSON,
     Boolean,
@@ -24,7 +48,13 @@ from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
+# Import User from db.models.identity for relationship references
+from db.models.identity import User
 
+# TYPE_CHECKING import to avoid circular dependency
+if TYPE_CHECKING:
+    # User already imported above
+    from core.auth.models import UserSession
 class StationStatus(str, Enum):
     """Station operational status."""
 
@@ -257,9 +287,13 @@ class Station(Base):
 
 
 class UserStationAssignment(Base):
-    """Junction table for user-station assignments with role-based permissions."""
+    """Junction table for user-station assignments with role-based permissions.
 
-    __tablename__ = "user_station_assignments"
+    Maps to identity.station_users table in database (12 columns).
+    Allows users (identity.users) to be assigned to multiple stations with different roles.
+    """
+
+    __tablename__ = "station_users"  # Matches database: identity.station_users
     __table_args__ = {"schema": "identity", "extend_existing": True}
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -293,10 +327,10 @@ class UserStationAssignment(Base):
         DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now()
     )
 
-    # Relationships
-    user = relationship("User", foreign_keys=[user_id])
+    # Relationships (using lambda primaryjoin for cross-registry compatibility)
+    user = relationship(User, primaryjoin=lambda: UserStationAssignment.user_id == User.id, foreign_keys=[user_id])
     station = relationship("Station", back_populates="station_users")
-    assigned_by_user = relationship("User", foreign_keys=[assigned_by])
+    assigned_by_user = relationship(User, primaryjoin=lambda: UserStationAssignment.assigned_by == User.id, foreign_keys=[assigned_by])
 
 
 class StationAuditLog(Base):
@@ -339,10 +373,10 @@ class StationAuditLog(Base):
     # Timestamp
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
 
-    # Relationships
+    # Relationships (using lambda primaryjoin for cross-registry compatibility)
     station = relationship("Station")
-    user = relationship("User")
-    session = relationship("UserSession")
+    user = relationship(User, primaryjoin=lambda: StationAuditLog.user_id == User.id, foreign_keys=[user_id])
+    # session = relationship("core.auth.models.UserSession")  # Commented - invalid path causing mapper errors
 
 
 class StationAccessToken(Base):
@@ -379,10 +413,10 @@ class StationAccessToken(Base):
     revoked_at = Column(DateTime(timezone=True), nullable=True)
     is_revoked = Column(Boolean, nullable=False, default=False)
 
-    # Relationships
-    user = relationship("User")
+    # Relationships (using lambda primaryjoin for cross-registry compatibility)
+    user = relationship(User, primaryjoin=lambda: StationAccessToken.user_id == User.id, foreign_keys=[user_id])
     station = relationship("Station")
-    session = relationship("UserSession")
+    # session = relationship("core.auth.models.UserSession")  # Commented - invalid path causing mapper errors
 
 
 # Helper functions for permission management

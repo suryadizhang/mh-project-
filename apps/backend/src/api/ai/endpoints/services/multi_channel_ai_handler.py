@@ -9,7 +9,7 @@ Version: 2.0 - Integrated with AI Orchestrator (Tool Calling)
 Updated: October 31, 2025
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import logging
 import re
@@ -602,7 +602,7 @@ Subtotal: ${inquiry_details.get('party_size', 0) * 75 if inquiry_details.get('pa
                     customer_context=customer_context or {},
                     metadata={
                         "inquiry_details": inquiry_details,
-                        "extracted_at": datetime.now().isoformat(),
+                        "extracted_at": datetime.now(timezone.utc).isoformat(),
                     },
                 )
 

@@ -16,6 +16,7 @@ from collections.abc import AsyncGenerator, Generator
 from contextlib import asynccontextmanager
 import logging
 import os
+import time
 
 from core.config import get_settings
 from sqlalchemy import MetaData, create_engine, text
@@ -351,9 +352,9 @@ async def check_database_health() -> dict:
     """
     try:
         async with AsyncSessionLocal() as session:
-            start_time = __import__("time").time()
+            start_time = time.time()
             await session.execute(text("SELECT 1"))
-            response_time = __import__("time").time() - start_time
+            response_time = time.time() - start_time
 
         pool_stats = db_config.get_pool_stats()
 

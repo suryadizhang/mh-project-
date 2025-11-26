@@ -1,12 +1,34 @@
 """
-Models package - Export all database models
+Models package - Export all database models and mixins
 """
 
-from .base import BaseModel
+from .base import Base, BaseModel
+# Export mixins for modern model composition
+from .mixins import (
+    # Primary Key Mixins
+    IntegerPKMixin,
+    UUIDPKMixin,
+    # Timestamp Mixins
+    TimestampMixin,
+    # Soft Delete Mixins
+    SoftDeleteBooleanMixin,
+    SoftDeleteTimestampMixin,
+    # Multi-Tenant Mixins (for future scalability)
+    StationTenantMixin,
+    BusinessTenantMixin,
+    # Audit & Concurrency Mixins
+    AuditableMixin,
+    OptimisticLockMixin,
+)
 # Import booking_reminder BEFORE booking to avoid circular dependency
 from .booking_reminder import BookingReminder, ReminderType, ReminderStatus
 from .booking import Booking, BookingStatus, Payment, PaymentStatus
-from .customer import Customer, CustomerPreference, CustomerStatus
+# REMOVED: from .customer import Customer, CustomerPreference, CustomerStatus (deleted - use db.models.core)
+# CRM Contact model (for unified inbox)
+from .contact import Contact
+# Email storage models
+from .email import EmailMessage, EmailThread, EmailSyncStatus
+from .email_label import EmailLabel
 from .events import DomainEvent, OutboxEntry
 from .notification import NotificationGroup, NotificationGroupMember, NotificationGroupEvent, NotificationEventType
 from .review import CustomerReviewBlogPost, ReviewApprovalLog
@@ -28,7 +50,7 @@ from .knowledge_base import (
     PricingTierLevel,
 )
 # Lead management models
-from .lead import Lead, LeadContact, LeadContext, LeadEvent
+# REMOVED: from .lead import Lead, LeadContact, LeadContext, LeadEvent (deleted - use db.models.lead)
 # Newsletter/Campaign models
 from .newsletter import Campaign, CampaignEvent, SMSDeliveryEvent, Subscriber
 # Social media & review models
@@ -41,7 +63,7 @@ from .social import (
     CustomerReview,
     DiscountCoupon,
 )
-# RingCentral call recording and communications
+# RingCentral call recording and communications (external system - metadata only)
 from .call_recording import CallRecording, RecordingStatus, CallStatus, CallDirection, RecordingType
 # Business/Multi-tenancy models
 from .business import Business
@@ -57,14 +79,21 @@ from .system_event import SystemEvent
 from .terms_acknowledgment import TermsAcknowledgment, AcknowledgmentChannel
 
 __all__ = [
-    "BaseModel",
+    # Base classes
+    "Base",
+    "BaseModel",  # DEPRECATED: Use mixins for new models
+    # Models
     "Booking",
     "BookingReminder",
     "BookingStatus",
-    "Customer",
-    "CustomerPreference",
+    "Contact",
+    # REMOVED: Customer, CustomerPreference, CustomerStatus (use db.models.core.Customer)
     "CustomerReviewBlogPost",
-    "CustomerStatus",
+    # Email Storage Models
+    "EmailMessage",
+    "EmailThread",
+    "EmailSyncStatus",
+    "EmailLabel",
     "DomainEvent",
     "OutboxEntry",
     "NotificationGroup",
@@ -84,11 +113,7 @@ __all__ = [
     "CustomerTonePreference",
     "MenuItem",
     "PricingTier",
-    # Lead Management Models
-    "Lead",
-    "LeadContact",
-    "LeadContext",
-    "LeadEvent",
+    # REMOVED: Lead Management Models (use db.models.lead.Lead)
     # Newsletter/Campaign Models
     "Campaign",
     "CampaignEvent",
@@ -102,7 +127,7 @@ __all__ = [
     "Review",
     "CustomerReview",
     "DiscountCoupon",
-    # RingCentral Communications
+    # RingCentral Communications (external system)
     "CallRecording",
     "RecordingStatus",
     "CallStatus",
@@ -138,5 +163,15 @@ __all__ = [
     "OfferStatus",
     "MenuCategory",
     "PricingTierLevel",
+    # Mixins (Enterprise Pattern - for scalable model composition)
+    "IntegerPKMixin",
+    "UUIDPKMixin",
+    "TimestampMixin",
+    "SoftDeleteBooleanMixin",
+    "SoftDeleteTimestampMixin",
+    "StationTenantMixin",
+    "BusinessTenantMixin",
+    "AuditableMixin",
+    "OptimisticLockMixin",
 ]
 

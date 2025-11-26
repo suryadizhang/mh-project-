@@ -14,7 +14,8 @@ from core.auth.station_middleware import (
 from core.auth.station_middleware import (
     audit_log_action as log_station_activity,
 )
-from core.auth.station_models import (
+# Phase 1.1: Use canonical db.models.identity instead of deprecated station_models
+from db.models.identity import (
     Station,
     StationAuditLog,
     StationUser,
@@ -1006,7 +1007,8 @@ async def assign_user_to_station(
             )
 
         # Get default permissions for role
-        from core.auth.station_models import (
+        # Phase 1.1: Keep enums from station_models during transition
+        from db.models.identity import (
             STATION_ROLE_PERMISSIONS,
             StationRole,
         )

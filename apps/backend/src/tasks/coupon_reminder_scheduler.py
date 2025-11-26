@@ -14,7 +14,7 @@ Schedule:
 """
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -35,7 +35,7 @@ async def send_daily_reminders():
     - Celery/RQ (queue system)
     """
     logger.info("=" * 60)
-    logger.info(f"Starting daily coupon reminder job at {datetime.now()}")
+    logger.info(f"Starting daily coupon reminder job at {datetime.now(timezone.utc)}")
     logger.info("=" * 60)
     
     async for db in get_db():
@@ -192,7 +192,7 @@ async def send_daily_reminders():
             
             # ===== HOLIDAY REMINDERS (Using Centralized Holiday Service) =====
             logger.info("\n--- Checking holiday-specific reminders ---")
-            today = datetime.now().date()
+            today = datetime.now(timezone.utc).date()
             
             # Use centralized holiday service for accurate, dynamic holiday detection
             holiday_service = get_holiday_service()

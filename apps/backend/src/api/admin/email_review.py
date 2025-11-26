@@ -3,7 +3,7 @@ Admin Email Review Dashboard API
 Allows human review and approval of AI-generated email responses before sending
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 import logging
 from typing import Any
@@ -203,7 +203,7 @@ async def approve_and_send_email(
 
     # Update status
     email.status = EmailStatus.APPROVED if not approval.schedule_send else EmailStatus.PENDING
-    email.reviewed_at = datetime.now()
+    email.reviewed_at = datetime.now(timezone.utc)
     email.reviewer_notes = approval.reviewer_notes
 
     if approval.edited_response:
@@ -220,7 +220,7 @@ async def approve_and_send_email(
             cc=approval.add_cc,
             bcc=approval.add_bcc,
         )
-        email.sent_at = datetime.now()
+        email.sent_at = datetime.now(timezone.utc)
         email.status = EmailStatus.SENT
 
     logger.info(f"Email {email_id} approved and queued for sending to {email.customer_email}")
@@ -260,7 +260,7 @@ async def edit_email_response(email_id: str, edit_request: EmailEditRequest):
     email.edited_response = edit_request.edited_body
     email.ai_subject = edit_request.edited_subject
     email.status = EmailStatus.EDITED
-    email.reviewed_at = datetime.now()
+    email.reviewed_at = datetime.now(timezone.utc)
 
     # Save as template if requested
     if edit_request.save_as_template and edit_request.template_name:
@@ -297,7 +297,7 @@ async def reject_ai_response(email_id: str, reject_request: EmailRejectRequest):
 
     email = pending_emails[email_id]
     email.status = EmailStatus.REJECTED
-    email.reviewed_at = datetime.now()
+    email.reviewed_at = datetime.now(timezone.utc)
     email.reviewer_notes = f"REJECTED: {reject_request.reason}. {reject_request.notes or ''}"
 
     # Assign to human if requested
@@ -448,7 +448,7 @@ async def add_email_to_review_queue(
         customer_email=customer_email,
         original_subject=original_subject,
         original_body=original_body,
-        received_at=datetime.now(),
+        received_at=datetime.now(timezone.utc),
         ai_response=ai_response_data.get("response_text", ""),
         ai_subject=f"Re: {original_subject}",
         ai_confidence=ai_response_data.get("ai_metadata", {}).get("confidence", 0.0),
@@ -463,7 +463,7 @@ async def add_email_to_review_queue(
         quote_breakdown=ai_response_data.get("metadata", {}).get("quote_breakdown"),
         priority=determine_priority(ai_response_data),
         requires_follow_up=ai_response_data.get("metadata", {}).get("requires_follow_up", False),
-        processed_at=datetime.now(),
+        processed_at=datetime.now(timezone.utc),
     )
 
     pending_emails[email_id] = pending_email

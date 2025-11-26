@@ -34,7 +34,7 @@ export async function apiFetch<T = Record<string, unknown>>(
   const { timeout = 10000, ...fetchOptions } = options
 
   const url = `${API_BASE_URL}${path}`
-  
+
   // Generate request ID for distributed tracing
   const requestId = crypto.randomUUID()
 
@@ -43,6 +43,8 @@ export async function apiFetch<T = Record<string, unknown>>(
   const timeoutId = setTimeout(() => controller.abort(), timeout)
 
   try {
+    console.log('Fetching:', url);
+
     const response = await fetch(url, {
       ...fetchOptions,
       signal: controller.signal,
@@ -53,13 +55,17 @@ export async function apiFetch<T = Record<string, unknown>>(
       }
     })
 
+    console.log('Response received:', response.status, response.statusText);
     clearTimeout(timeoutId)
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      const errorText = await response.text();
+      console.error(`API Error [${response.status}]:`, errorText);
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
     const data = await response.json()
+    console.log('Data parsed:', data);
     return {
       data,
       success: true
@@ -67,15 +73,35 @@ export async function apiFetch<T = Record<string, unknown>>(
   } catch (error) {
     clearTimeout(timeoutId)
 
+    // Extract all error details
+    let errorMessage = 'Unknown error occurred';
+
+    console.log('=== API FETCH ERROR DEBUG ===');
+    console.log('URL:', url);
+    console.log('Method:', fetchOptions.method || 'GET');
+    console.log('Error type:', typeof error);
+    console.log('Error instanceof Error:', error instanceof Error);
+    console.log('Error constructor:', error?.constructor?.name);
+    console.log('Error keys:', error && typeof error === 'object' ? Object.keys(error) : 'N/A');
+    console.log('Error toString:', String(error));
+
     if (error instanceof Error) {
-      return {
-        error: error.message,
-        success: false
+      errorMessage = error.message;
+      console.log('Error name:', error.name);
+      console.log('Error message:', error.message);
+      console.log('Error stack:', error.stack);
+    } else {
+      console.log('Error value:', error);
+      try {
+        console.log('Error JSON:', JSON.stringify(error));
+      } catch (e) {
+        console.log('Cannot stringify error');
       }
     }
+    console.log('=== END DEBUG ===');
 
     return {
-      error: 'Unknown error occurred',
+      error: errorMessage,
       success: false
     }
   }

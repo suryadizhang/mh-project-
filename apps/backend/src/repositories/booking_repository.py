@@ -7,7 +7,7 @@ MEDIUM #34 Optimizations Applied:
 - Phase 3: CTEs for complex queries (20x faster on analytics)
 """
 
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from enum import Enum
 from typing import Any
 
@@ -17,7 +17,7 @@ from core.exceptions import (
     raise_not_found,
 )
 from core.repository import BaseRepository
-from models.booking import Booking, BookingStatus
+from db.models.core import Booking, BookingStatus
 from sqlalchemy import and_, func, text
 from sqlalchemy.orm import Session, joinedload
 
@@ -203,10 +203,10 @@ class BookingRepository(BaseRepository[Booking]):
     # Availability Methods
 
     def check_availability(
-        self, booking_datetime: datetime, party_size: int, exclude_booking_id: int | None = None
+        self, event_date: date, event_slot: str, party_size: int, exclude_booking_id: str | None = None
     ) -> bool:
         """
-        Check if a time slot is available for the given party size
+        Check if a date/slot is available for the given party size
 
         Uses SELECT FOR UPDATE to prevent race conditions:
         - Locks rows until transaction commits
@@ -214,8 +214,9 @@ class BookingRepository(BaseRepository[Booking]):
         - Prevents TOCTOU (Time-Of-Check, Time-Of-Use) bugs
 
         Args:
-            booking_datetime: Desired booking datetime
-            party_size: Number of guests
+            event_date: Desired booking date (date object)
+            event_slot: Desired time slot (TIME string like "18:00:00")
+            party_size: Number of guests (adults + kids)
             exclude_booking_id: Optional booking ID to exclude (for updates)
 
         Returns:
@@ -223,37 +224,35 @@ class BookingRepository(BaseRepository[Booking]):
 
         Security:
             ✅ SELECT FOR UPDATE prevents race conditions
-            ✅ Unique constraint at DB level (idx_booking_datetime_active)
+            ✅ Unique constraint at DB level (idx_booking_date_slot_active)
             ✅ Optimistic locking with version column
         """
-        # Get bookings in the same time window (±2 hours)
-        time_window_start = booking_datetime - timedelta(hours=2)
-        time_window_end = booking_datetime + timedelta(hours=2)
+        # Parse slot to time object if it's a string
+        from datetime import time as time_type
+        if isinstance(event_slot, str):
+            hour, minute, *_ = event_slot.split(':')
+            slot_time = time_type(int(hour), int(minute))
+        else:
+            slot_time = event_slot
 
         # SELECT FOR UPDATE: Lock rows to prevent concurrent modifications
-        # This creates a transaction-level lock that queues concurrent requests
-        query = self.session.query(self.model).filter(
+        # Check for exact match on date + slot
+        query = self.db.query(self.model).filter(
             and_(
-                self.model.booking_datetime >= time_window_start,
-                self.model.booking_datetime <= time_window_end,
-                self.model.status.in_(
-                    [BookingStatus.CONFIRMED, BookingStatus.PENDING, BookingStatus.SEATED]
-                ),
+                self.model.date == event_date,
+                self.model.slot == slot_time,
+                self.model.status.notin_(['cancelled', 'completed', 'no_show']),
+                self.model.deleted_at.is_(None)
             )
         ).with_for_update()  # ← RACE CONDITION FIX: Row-level locking
 
         if exclude_booking_id:
             query = query.filter(self.model.id != exclude_booking_id)
 
-        existing_bookings = query.all()
+        existing_booking = query.first()
 
-        # Calculate total party size in the time window
-        total_party_size = sum(booking.party_size for booking in existing_bookings)
-
-        # Assume maximum capacity of 100 (this should come from configuration)
-        max_capacity = 100
-
-        return (total_party_size + party_size) <= max_capacity
+        # Slot is available if no active booking exists
+        return existing_booking is None
 
     def get_available_time_slots(
         self, target_date: date, party_size: int, time_increment_minutes: int = 30

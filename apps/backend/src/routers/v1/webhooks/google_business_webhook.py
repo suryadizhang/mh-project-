@@ -3,7 +3,7 @@ Google Business Messages webhook handler for unified inbox.
 Handles customer messages from Google My Business and Google Search.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import hashlib
 import hmac
 import json
@@ -164,7 +164,7 @@ async def process_google_business_message(
                 "customer_id": customer_id,
                 "text": text_content,
                 "attachments": attachments,
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "direction": "inbound",
                 "channel": "google_business",
             },
@@ -172,7 +172,7 @@ async def process_google_business_message(
         db.add(message_event)
 
         # Update thread
-        thread.last_message_at = datetime.now()
+        thread.last_message_at = datetime.now(timezone.utc)
         thread.unread_count = (thread.unread_count or 0) + 1
 
         db.commit()
@@ -236,7 +236,7 @@ async def process_google_business_event(
             data={
                 "conversation_id": conversation_id,
                 "event_type": event_type,
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "channel": "google_business",
             },
         )
@@ -245,7 +245,7 @@ async def process_google_business_event(
         # Update thread status if conversation ended
         if event_type == "CONVERSATION_ENDED":
             thread.status = ThreadStatus.CLOSED
-            thread.closed_at = datetime.now()
+            thread.closed_at = datetime.now(timezone.utc)
 
         db.commit()
 
@@ -341,7 +341,7 @@ async def analyze_business_message(thread_id: str, message_text: str):
 async def check_business_hours_response(conversation_id: str):
     """Check if auto-response needed based on business hours."""
     try:
-        current_hour = datetime.now().hour
+        current_hour = datetime.now(timezone.utc).hour
 
         # Check if outside business hours (9 AM - 6 PM)
         if current_hour < 9 or current_hour >= 18:
@@ -368,7 +368,7 @@ async def webhook_health():
     return {
         "status": "healthy",
         "service": "google_business_webhook",
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
 
@@ -403,7 +403,7 @@ async def send_business_message(conversation_id: str, message: str, db: Session 
             data={
                 "conversation_id": conversation_id,
                 "text": message,
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "direction": "outbound",
                 "channel": "google_business",
             },
@@ -411,7 +411,7 @@ async def send_business_message(conversation_id: str, message: str, db: Session 
         db.add(message_event)
 
         # Update thread
-        thread.last_message_at = datetime.now()
+        thread.last_message_at = datetime.now(timezone.utc)
         db.commit()
 
         return {"status": "sent", "conversation_id": conversation_id, "message": message}
