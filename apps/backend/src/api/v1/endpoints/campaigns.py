@@ -4,7 +4,7 @@ Automated campaign creation for Email, SMS, Facebook, Instagram, Google Ads, Tik
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from api.deps import AdminUser, get_current_admin_user, get_db
@@ -310,7 +310,7 @@ async def generate_campaign_content(
             "campaign_type": content["campaign_type"],
             "budget_tier": content["budget_tier"],
             "target_audience": content["target_audience"],
-            "generated_at": datetime.now(),
+            "generated_at": datetime.now(timezone.utc),
         }
 
         # Add channel-specific content
@@ -379,7 +379,7 @@ async def launch_campaign(
             f"Admin {current_user.email} launching campaign: {request.campaign_id}"
         )
 
-        launch_date = request.launch_date or datetime.now()
+        launch_date = request.launch_date or datetime.now(timezone.utc)
 
         # TODO: Implement actual campaign launch
         # For now, return mock response

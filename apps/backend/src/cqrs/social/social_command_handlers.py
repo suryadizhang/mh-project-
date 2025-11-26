@@ -14,7 +14,7 @@ from cqrs.social.social_commands import (  # Phase 2C: Updated from api.app.cqrs
     UpdateThreadStatusCommand,
 )
 from models.legacy_core import CoreCustomer  # Phase 2C: Updated from api.app.models.core
-from models.legacy_lead_newsletter import Lead
+# Fixed: Use unified lead schema instead of legacy model\nfrom db.models.lead import Lead
 from models.legacy_events import OutboxEntry  # Phase 2C: Updated from api.app.models.events
 from models.legacy_social import (  # Phase 2C: Updated from api.app.models.social
     Review,

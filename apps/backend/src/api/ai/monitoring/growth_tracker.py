@@ -9,7 +9,8 @@ from datetime import datetime, timezone, timedelta
 import logging
 import os
 
-from models.customer import Customer
+# Use production Customer model from core schema (not legacy models.customer)
+from db.models.core import Customer
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 

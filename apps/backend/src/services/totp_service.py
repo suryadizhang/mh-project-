@@ -9,7 +9,7 @@ import base64
 from typing import Tuple, List
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.auth.models import User
+from db.models.identity import User
 from core.security import get_password_hash, verify_password
 from services.audit_service import AuditService
 

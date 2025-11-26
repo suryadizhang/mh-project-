@@ -11,7 +11,7 @@ Features:
 This service generates newsletter content. Use newsletter_service.py for subscriber management.
 """
 
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 from typing import List, Dict, Optional
 from enum import Enum
 import logging
@@ -104,7 +104,7 @@ class AINewsletterGenerator:
                     "subject": await self._generate_subject_line(holiday_obj, segment, context),
                     "content": await self.generate_content(holiday_key, segment, context),
                     "cta": self._get_cta(holiday_obj),
-                    "created_at": datetime.now(),
+                    "created_at": datetime.now(timezone.utc),
                 }
                 
                 newsletters.append(newsletter)

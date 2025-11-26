@@ -24,7 +24,7 @@ Fix Validation:
 """
 
 import pytest
-from datetime import datetime, date, timedelta, timezone
+from datetime import datetime, date, time as datetime_time, timedelta, timezone
 from sqlalchemy.exc import IntegrityError
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
@@ -42,73 +42,124 @@ class TestRaceConditionFix:
     """Test suite for Bug #13 race condition fix"""
 
     @pytest.fixture
-    def customer(self, db_session):
-        """Create test customer"""
+    async def customer(self, db_session):
+        """Create real customer in database for Bug #13 tests
+
+        Uses proper models from db.models (both Customer and Station are now schema-aligned!)
+        ✅ Station model updated in Option C Phase 2
+        ✅ Customer model updated in Option C Phase 2
+        """
+        from db.models.core import Customer
+        from db.models.identity import Station
+        import uuid
+
+        # Create station using proper model (Station is now fixed!)
+        station = Station(
+            id=uuid.uuid4(),
+            name=f"Test Station for Bug #13 {uuid.uuid4().hex[:8]}",  # Unique name
+            code=f"TEST{uuid.uuid4().hex[:6].upper()}",  # Unique code
+            display_name="Test Station Display Name",
+            email="test@station.example.com",
+            phone="+1234567890",
+            address="123 Test Street",
+            city="Test City",
+            state="CA",
+            postal_code="90001",  # ✅ Correct field name
+            country="US",
+            timezone="America/Los_Angeles",
+            status="active"
+        )
+        db_session.add(station)
+        await db_session.commit()
+        await db_session.refresh(station)
+
+        # Create customer with proper schema-aligned model
         customer = Customer(
-            name="Test Customer",
-            email="test@example.com",
-            phone="+1234567890"
+            id=uuid.uuid4(),
+            station_id=station.id,  # ✅ Required (NOT NULL)
+            first_name="Test",
+            last_name="Customer",
+            email=f"test-race-{uuid.uuid4().hex[:8]}@example.com",  # ✅ Unique email
+            phone="+1234567890",  # ✅ Uses @property setter
+            consent_sms=True,  # ✅ Correct field name
+            consent_email=True,  # ✅ Correct field name
+            timezone="America/New_York"  # ✅ Required field
         )
         db_session.add(customer)
-        db_session.commit()
+        await db_session.commit()
+        await db_session.refresh(customer)
+
         return customer
 
     @pytest.fixture
-    def booking_datetime(self):
-        """Fixed booking datetime for testing"""
-        return datetime(2025, 6, 15, 18, 0, 0, tzinfo=timezone.utc)
+    def booking_date_and_slot(self):
+        """Fixed booking date and slot for testing"""
+        return date(2025, 12, 15), datetime_time(18, 0)
 
     @pytest.fixture
-    def booking_data(self, customer, booking_datetime):
+    def booking_data(self, customer, booking_date_and_slot):
         """Standardized booking data"""
+        booking_date, booking_slot = booking_date_and_slot
         return BookingCreate(
             customer_id=customer.id,
-            event_date=booking_datetime.date(),
-            event_time=booking_datetime.strftime("%H:%M"),
+            event_date=booking_date,
+            event_time=booking_slot.strftime("%H:%M"),
             party_size=10,
-            contact_email=customer.email,
-            contact_phone=customer.phone,
             special_requests="Test booking for race condition",
         )
 
-    def test_unique_constraint_prevents_double_booking(self, db_session, customer, booking_datetime):
+    async def test_unique_constraint_prevents_double_booking(self, db_session, customer, booking_date_and_slot):
         """
         Test that database-level unique constraint prevents double bookings.
 
         Validates Layer 1 of race condition fix: UNIQUE constraint
         """
+        booking_date, booking_slot = booking_date_and_slot
+
         # Create first booking directly (bypass service layer to test DB constraint)
         booking1 = Booking(
             customer_id=customer.id,
-            booking_datetime=booking_datetime,
-            party_size=10,
+            date=booking_date,
+            slot=booking_slot,
+            party_adults=8,
+            party_kids=2,  # Total party_size = 10
             status=BookingStatus.PENDING,
-            contact_email=customer.email,
-            contact_phone=customer.phone,
+            station_id="00000000-0000-0000-0000-000000000001",
+            address_encrypted="test_address",
+            zone="Zone A",
+            deposit_due_cents=5000,
+            total_due_cents=15000,
+            source="test",
         )
         db_session.add(booking1)
-        db_session.commit()
+        await db_session.commit()
 
-        # Attempt to create second booking with EXACT same datetime
+        # Attempt to create second booking with EXACT same date and slot
         booking2 = Booking(
             customer_id=customer.id,
-            booking_datetime=booking_datetime,  # Same datetime
-            party_size=5,
+            date=booking_date,  # Same date
+            slot=booking_slot,  # Same slot
+            party_adults=3,
+            party_kids=2,  # Total party_size = 5
             status=BookingStatus.PENDING,
-            contact_email=customer.email,
-            contact_phone=customer.phone,
+            station_id="00000000-0000-0000-0000-000000000001",
+            address_encrypted="test_address",
+            zone="Zone A",
+            deposit_due_cents=5000,
+            total_due_cents=15000,
+            source="test",
         )
         db_session.add(booking2)
 
         # Should raise IntegrityError due to unique constraint
         with pytest.raises(IntegrityError) as exc_info:
-            db_session.commit()
+            await db_session.commit()
 
-        assert "idx_booking_datetime_active" in str(exc_info.value)
-        db_session.rollback()
+        assert "idx_booking_date_slot_active" in str(exc_info.value)
+        await db_session.rollback()
 
-    def test_concurrent_booking_attempts_only_one_succeeds(
-        self, db_session, customer, booking_datetime, booking_data
+    async def test_concurrent_booking_attempts_only_one_succeeds(
+        self, db_session, customer, booking_date_and_slot, booking_data
     ):
         """
         Test concurrent booking attempts - only ONE should succeed.
@@ -124,6 +175,7 @@ class TestRaceConditionFix:
         - Layer 2: Optimistic locking prevents conflicts
         - Layer 3: SELECT FOR UPDATE queues requests
         """
+        booking_date, booking_slot = booking_date_and_slot
         repository = BookingRepository(db_session)
         service = BookingService(repository=repository)
 
@@ -151,7 +203,7 @@ class TestRaceConditionFix:
                     results.append(("error", thread_id, str(e)))
                 raise
 
-        # Launch 5 concurrent threads all trying to book same datetime
+        # Launch 5 concurrent threads all trying to book same date/slot
         with ThreadPoolExecutor(max_workers=5) as executor:
             futures = [
                 executor.submit(create_booking_thread, i)
@@ -167,9 +219,9 @@ class TestRaceConditionFix:
         assert conflict_count == 4, f"Expected 4 conflicts, got {conflict_count}"
 
         # Verify only one booking exists in database
-        bookings = repository.find_by_date_range(
-            start_date=booking_datetime.date(),
-            end_date=booking_datetime.date(),
+        bookings = await repository.find_by_date_range(
+            start_date=booking_date,
+            end_date=booking_date,
             include_cancelled=True
         )
         assert len(bookings) == 1, f"Expected 1 booking in DB, found {len(bookings)}"
@@ -178,52 +230,72 @@ class TestRaceConditionFix:
         for result_type, thread_id, info in results:
             print(f"  Thread {thread_id}: {result_type} - {info}")
 
-    def test_select_for_update_row_locking(self, db_session, customer, booking_datetime):
+    async def test_select_for_update_row_locking(self, db_session, customer, booking_date_and_slot):
         """
         Test that SELECT FOR UPDATE properly locks rows during availability check.
 
         Validates Layer 3 of race condition fix: Row-level locking
         """
+        booking_date, booking_slot = booking_date_and_slot
         repository = BookingRepository(db_session)
 
         # Create first booking
         booking1 = Booking(
             customer_id=customer.id,
-            booking_datetime=booking_datetime,
-            party_size=10,
+            date=booking_date,
+            slot=booking_slot,
+            party_adults=8,
+            party_kids=2,  # Total party_size = 10
             status=BookingStatus.PENDING,
+            station_id="00000000-0000-0000-0000-000000000001",
+            address_encrypted="test_address",
+            zone="Zone A",
+            deposit_due_cents=5000,
+            total_due_cents=15000,
+            source="test",
         )
         db_session.add(booking1)
-        db_session.commit()
+        await db_session.commit()
 
         # Start transaction and lock the row
-        db_session.begin_nested()  # Savepoint
-        is_available = repository.check_availability(
-            booking_datetime=booking_datetime,
+        await db_session.begin_nested()  # Savepoint
+        is_available = await repository.check_availability(
+            event_date=booking_date,
+            event_slot=booking_slot.strftime("%H:%M"),
             party_size=50,  # Would exceed capacity
         )
 
         # Should be unavailable due to existing booking
         assert not is_available
 
-        db_session.rollback()  # Release lock
+        await db_session.rollback()  # Release lock
 
-    def test_optimistic_locking_prevents_concurrent_updates(self, db_session, customer, booking_datetime):
+    async def test_optimistic_locking_prevents_concurrent_updates(self, db_session, customer, booking_date_and_slot):
         """
         Test that version column prevents lost updates in concurrent modifications.
 
         Validates Layer 2 of race condition fix: Optimistic locking
         """
+        booking_date, booking_slot = booking_date_and_slot
+
         # Create booking
         booking = Booking(
             customer_id=customer.id,
-            booking_datetime=booking_datetime,
-            party_size=10,
+            date=booking_date,
+            slot=booking_slot,
+            party_adults=8,
+            party_kids=2,  # Total party_size = 10
             status=BookingStatus.PENDING,
             version=1,  # Initial version
+            station_id="00000000-0000-0000-0000-000000000001",
+            address_encrypted="test_address",
+            zone="Zone A",
+            deposit_due_cents=5000,
+            total_due_cents=15000,
+            source="test",
         )
         db_session.add(booking)
-        db_session.commit()
+        await db_session.commit()
         booking_id = booking.id
         initial_version = booking.version
 
@@ -237,7 +309,7 @@ class TestRaceConditionFix:
         # Thread 1: Update (should succeed)
         booking_thread1.status = BookingStatus.CONFIRMED
         booking_thread1.version += 1
-        db_session.commit()
+        await db_session.commit()
 
         # Thread 2: Try to update (should fail due to version mismatch)
         booking_thread2.status = BookingStatus.CANCELLED
@@ -252,7 +324,7 @@ class TestRaceConditionFix:
         assert final_booking.version == initial_version + 1
         assert final_booking.status == BookingStatus.CONFIRMED
 
-    def test_integrity_error_handling_and_user_message(self, db_session, customer, booking_datetime, booking_data):
+    async def test_integrity_error_handling_and_user_message(self, db_session, customer, booking_date_and_slot, booking_data):
         """
         Test that IntegrityError is caught and converted to user-friendly ConflictException.
 
@@ -262,12 +334,12 @@ class TestRaceConditionFix:
         service = BookingService(repository=repository)
 
         # Create first booking
-        booking1 = service.create_booking(booking_data)
+        booking1 = await service.create_booking(booking_data)
         assert booking1 is not None
 
         # Try to create second booking (should fail with friendly error)
         with pytest.raises(ConflictException) as exc_info:
-            booking2 = service.create_booking(booking_data)
+            booking2 = await service.create_booking(booking_data)
 
         # Verify error message is user-friendly (not technical IntegrityError)
         error_message = str(exc_info.value.message)
@@ -276,32 +348,33 @@ class TestRaceConditionFix:
         assert "IntegrityError" not in error_message  # No technical jargon
         assert "constraint" not in error_message.lower()
 
-    def test_cancelled_bookings_dont_block_new_bookings(self, db_session, customer, booking_datetime, booking_data):
+    async def test_cancelled_bookings_dont_block_new_bookings(self, db_session, customer, booking_date_and_slot, booking_data):
         """
         Test that cancelled bookings don't prevent new bookings (unique constraint only covers active statuses).
 
-        Validates that partial index allows same datetime for cancelled bookings.
+        Validates that partial index allows same date/slot for cancelled bookings.
         """
+        booking_date, booking_slot = booking_date_and_slot
         repository = BookingRepository(db_session)
         service = BookingService(repository=repository)
 
         # Create and cancel first booking
-        booking1 = service.create_booking(booking_data)
-        cancelled_booking = repository.cancel_booking(
+        booking1 = await service.create_booking(booking_data)
+        cancelled_booking = await repository.cancel_booking(
             booking_id=booking1.id,
             cancellation_reason="Test cancellation"
         )
         assert cancelled_booking.status == BookingStatus.CANCELLED
 
-        # Should be able to create new booking at same datetime
-        booking2 = service.create_booking(booking_data)
+        # Should be able to create new booking at same date/slot
+        booking2 = await service.create_booking(booking_data)
         assert booking2 is not None
         assert booking2.status == BookingStatus.PENDING
 
         # Verify two bookings exist but only one is active
-        all_bookings = repository.find_by_date_range(
-            start_date=booking_datetime.date(),
-            end_date=booking_datetime.date(),
+        all_bookings = await repository.find_by_date_range(
+            start_date=booking_date,
+            end_date=booking_date,
             include_cancelled=True
         )
         assert len(all_bookings) == 2
@@ -309,7 +382,7 @@ class TestRaceConditionFix:
         active_bookings = [b for b in all_bookings if b.status != BookingStatus.CANCELLED]
         assert len(active_bookings) == 1
 
-    def test_high_concurrency_stress_test(self, db_session, customer, booking_datetime, booking_data):
+    async def test_high_concurrency_stress_test(self, db_session, customer, booking_date_and_slot, booking_data):
         """
         Stress test with 20 concurrent booking attempts.
 
@@ -363,37 +436,54 @@ class TestRaceConditionFix:
 
         print(f"✅ Stress test passed: {success_count} success, {conflict_count} conflicts, {error_count} errors")
 
-    def test_race_condition_with_different_party_sizes(self, db_session, customer, booking_datetime):
+    async def test_race_condition_with_different_party_sizes(self, db_session, customer, booking_date_and_slot):
         """
         Test race condition with different party sizes (edge case).
 
         Ensures unique constraint works regardless of party_size.
         """
+        booking_date, booking_slot = booking_date_and_slot
         repository = BookingRepository(db_session)
 
-        # Create bookings with different party sizes but same datetime
+        # Create bookings with different party sizes but same date/slot
         booking1 = Booking(
             customer_id=customer.id,
-            booking_datetime=booking_datetime,
-            party_size=10,
+            date=booking_date,
+            slot=booking_slot,
+            party_adults=8,
+            party_kids=2,  # Total party_size = 10
             status=BookingStatus.PENDING,
+            station_id="00000000-0000-0000-0000-000000000001",
+            address_encrypted="test_address",
+            zone="Zone A",
+            deposit_due_cents=5000,
+            total_due_cents=15000,
+            source="test",
         )
         db_session.add(booking1)
-        db_session.commit()
+        await db_session.commit()
 
         booking2 = Booking(
             customer_id=customer.id,
-            booking_datetime=booking_datetime,
-            party_size=20,  # Different party size
+            date=booking_date,
+            slot=booking_slot,
+            party_adults=15,
+            party_kids=5,  # Total party_size = 20 (Different party size)
             status=BookingStatus.PENDING,
+            station_id="00000000-0000-0000-0000-000000000001",
+            address_encrypted="test_address",
+            zone="Zone A",
+            deposit_due_cents=10000,
+            total_due_cents=30000,
+            source="test",
         )
         db_session.add(booking2)
 
-        # Should still fail - datetime is the same
+        # Should still fail - date/slot is the same
         with pytest.raises(IntegrityError):
-            db_session.commit()
+            await db_session.commit()
 
-        db_session.rollback()
+        await db_session.rollback()
 
 
 # A-H Audit Results for Race Condition Fix

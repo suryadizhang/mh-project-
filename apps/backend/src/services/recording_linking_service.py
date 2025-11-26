@@ -18,9 +18,8 @@ import phonenumbers
 from sqlalchemy import and_, select, or_, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.booking import Booking, BookingStatus
+from db.models.core import Booking, BookingStatus, Customer
 from models.call_recording import CallRecording
-from models.customer import Customer
 
 logger = logging.getLogger(__name__)
 
@@ -35,14 +34,14 @@ class RecordingLinkingService:
     def normalize_phone(phone: str, default_region: str = "US") -> Optional[str]:
         """
         Normalize phone number to E.164 format: +1XXXXXXXXXX
-        
+
         Args:
             phone: Phone number in any format
             default_region: Default country code (US, CA, etc.)
-            
+
         Returns:
             Normalized phone in E.164 format, or None if invalid
-            
+
         Examples:
             "555-0123" → "+15550123"
             "(555) 012-3456" → "+15550123456"
@@ -59,7 +58,7 @@ class RecordingLinkingService:
                 )
         except phonenumbers.NumberParseException:
             pass
-        
+
         # Fallback: strip non-digits, add +1 for US numbers
         digits = re.sub(r'\D', '', phone)
         if len(digits) == 7:  # US local number (no area code)
@@ -78,13 +77,13 @@ class RecordingLinkingService:
     ) -> Optional[UUID]:
         """
         Match recording to customer by phone number.
-        
+
         Tries both from_phone (inbound calls) and to_phone (outbound calls).
         Normalizes phone numbers before matching.
-        
+
         Args:
             recording: CallRecording object with phone numbers
-            
+
         Returns:
             Customer UUID if found, None otherwise
         """
@@ -146,16 +145,16 @@ class RecordingLinkingService:
     ) -> Optional[UUID]:
         """
         Match recording to booking by timing and context.
-        
+
         Strategy:
         1. Find bookings for customer within ±24 hours of call
         2. Score each booking by relevance (date proximity, status, etc.)
         3. Return highest scoring booking
-        
+
         Args:
             recording: CallRecording object with timestamp
             customer_id: Customer UUID (must be set)
-            
+
         Returns:
             Booking UUID if confident match found, None otherwise
         """
@@ -183,7 +182,7 @@ class RecordingLinkingService:
         ).order_by(
             # Order by closest booking time
             func.abs(
-                func.extract('epoch', Booking.booking_datetime) - 
+                func.extract('epoch', Booking.booking_datetime) -
                 func.extract('epoch', call_time)
             )
         )
@@ -228,15 +227,15 @@ class RecordingLinkingService:
     ) -> float:
         """
         Calculate relevance score for a booking match.
-        
+
         Scoring:
         - Same day: +5 points
-        - Within 3 hours: +5 points  
+        - Within 3 hours: +5 points
         - Within 1 hour: +3 points
         - Booking in future (pre-booking call): +2 points
         - Active status (pending/confirmed): +3 points
         - Contact phone matches: +10 points
-        
+
         Returns:
             Relevance score (higher = better match)
         """
@@ -278,17 +277,17 @@ class RecordingLinkingService:
     async def link_recording(self, recording_id: UUID) -> dict:
         """
         Complete linking process for a recording.
-        
+
         Workflow:
         1. Get recording from database
         2. Link to customer by phone number
         3. Link to booking (if customer found)
         4. Update database with results
         5. Return summary
-        
+
         Args:
             recording_id: UUID of CallRecording to link
-            
+
         Returns:
             dict with linking results: {
                 "recording_id": UUID,
@@ -370,11 +369,11 @@ class RecordingLinkingService:
     ) -> dict:
         """
         Link multiple recordings in batch (for backfilling).
-        
+
         Args:
             recording_ids: List of recording UUIDs to link
             batch_size: Number of recordings to process at once
-            
+
         Returns:
             dict with summary statistics
         """

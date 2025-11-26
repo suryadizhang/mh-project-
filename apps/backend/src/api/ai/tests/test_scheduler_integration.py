@@ -270,13 +270,13 @@ class TestSchedulerIntegration(unittest.TestCase):
             user_id = f"{self.test_user_id}_inactive"
 
             # Create conversation with old last_message_at
-            from api.ai.memory.postgresql_memory import AIConversation
+            from db.models.ai import UnifiedConversation
             from core.database import get_db_context
 
             inactive_date = datetime.now(timezone.utc) - timedelta(days=31)
 
             async with get_db_context() as db:
-                conversation = AIConversation(
+                conversation = UnifiedConversation(
                     id=conv_id,
                     user_id=user_id,
                     channel="web",
@@ -341,12 +341,12 @@ class TestSchedulerIntegration(unittest.TestCase):
             # Schedule a follow-up that executes immediately
             from api.ai.scheduler.follow_up_scheduler import (
                 FollowUpStatus,
-                ScheduledFollowUp,
+                CustomerEngagementFollowUp,
             )
             from core.database import get_db_context
 
             job_id = f"callback_test_{user_id}"
-            followup = ScheduledFollowUp(
+            followup = CustomerEngagementFollowUp(
                 id=job_id,
                 conversation_id=conv_id,
                 user_id=user_id,
@@ -371,7 +371,7 @@ class TestSchedulerIntegration(unittest.TestCase):
             async with get_db_context() as db:
                 from sqlalchemy import select
 
-                stmt = select(ScheduledFollowUp).where(ScheduledFollowUp.id == job_id)
+                stmt = select(CustomerEngagementFollowUp).where(CustomerEngagementFollowUp.id == job_id)
                 result = await db.execute(stmt)
                 updated_followup = result.scalar_one_or_none()
 
@@ -403,3 +403,4 @@ def run_integration_tests():
 
 if __name__ == "__main__":
     sys.exit(run_integration_tests())
+

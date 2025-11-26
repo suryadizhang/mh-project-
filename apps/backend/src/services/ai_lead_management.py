@@ -1,7 +1,7 @@
 """Enhanced AI lead management and social media integration."""
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import logging
 from typing import Any
@@ -204,7 +204,7 @@ class AILeadManager:
         lead_context = {
             "quality": lead.quality.value if lead.quality else "unknown",
             "source": lead.source.value,
-            "days_since_created": (datetime.now() - lead.created_at).days,
+            "days_since_created": (datetime.now(timezone.utc) - lead.created_at).days,
             "has_context": bool(lead.context),
             "last_contact": lead.last_contacted_at.isoformat() if lead.last_contacted_at else None,
         }
@@ -242,7 +242,7 @@ class AILeadManager:
 
         if not lead.last_contacted_at:
             actions.append("Send initial welcome message")
-        elif (datetime.now() - lead.last_contacted_at).days > 3:
+        elif (datetime.now(timezone.utc) - lead.last_contacted_at).days > 3:
             actions.append("Send follow-up message")
 
         if not lead.context or not lead.context.event_date_pref:
@@ -438,7 +438,7 @@ class LeadNurtureAI:
         if (
             lead.context
             and lead.context.event_date_pref
-            and (lead.context.event_date_pref - datetime.now().date()).days <= 30
+            and (lead.context.event_date_pref - datetime.now(timezone.utc).date()).days <= 30
         ):
             sequence.append(
                 {

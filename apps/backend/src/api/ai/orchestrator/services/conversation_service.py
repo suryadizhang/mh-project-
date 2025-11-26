@@ -12,7 +12,7 @@ Author: MyHibachi Development Team
 Created: October 31, 2025
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from typing import Any
 
@@ -98,7 +98,7 @@ class ConversationService:
             Conversation ID
         """
         # Phase 1: Simple timestamp-based ID
-        conversation_id = f"conv_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        conversation_id = f"conv_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
 
         self.logger.info(
             f"Created conversation: {conversation_id}",

@@ -13,7 +13,7 @@ from core.exceptions import (
     raise_validation_error,
 )
 from core.repository import BaseRepository
-from models.customer import Customer, CustomerStatus
+from db.models.core import Customer, CustomerStatus
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session
 

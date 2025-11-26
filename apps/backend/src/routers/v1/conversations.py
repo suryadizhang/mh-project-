@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
 from api.deps import get_current_admin_user
-from core.auth.models import User
+from db.models.identity import User
 from services.conversation_history_service import ConversationHistoryService
 
 logger = logging.getLogger(__name__)

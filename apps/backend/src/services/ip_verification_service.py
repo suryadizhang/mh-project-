@@ -5,7 +5,7 @@ IP Verification Service - Detect new IP addresses and send SMS alerts
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.auth.models import User
+from db.models.identity import User  # Correct: identity.users table (37 columns)
 from services.audit_service import AuditService
 from services.ringcentral_service import RingCentralSMSService
 

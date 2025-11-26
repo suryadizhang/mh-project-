@@ -6,7 +6,8 @@ Example: STATION-CA-BAY-001, STATION-TX-AUSTIN-002
 
 import re
 
-from core.auth.station_models import Station  # Phase 2C: Updated from api.app.auth.station_models
+# Phase 1.1: Use canonical db.models.identity instead of deprecated station_models
+from db.models.identity import Station
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 

@@ -65,8 +65,8 @@ class TestFollowUpScheduler(unittest.TestCase):
         os.environ["MEMORY_BACKEND"] = "postgresql"
         os.environ["OPENAI_API_KEY"] = "test-key"  # Mock key for testing
 
-        cls.test_user_id = f"test_user_{datetime.now().timestamp()}"
-        cls.test_conv_id = f"test_conv_{datetime.now().timestamp()}"
+        cls.test_user_id = f"test_user_{datetime.now(timezone.utc).timestamp()}"
+        cls.test_conv_id = f"test_conv_{datetime.now(timezone.utc).timestamp()}"
 
         # Create single event loop for all tests
         cls.loop = asyncio.new_event_loop()
@@ -513,3 +513,4 @@ def run_tests():
 
 if __name__ == "__main__":
     sys.exit(run_tests())
+

@@ -18,8 +18,7 @@ from core.exceptions import (
     ErrorCode,
     NotFoundException,
 )
-from models.booking import Booking, BookingStatus
-from models.customer import Customer
+from db.models.core import Booking, BookingStatus, Customer
 from repositories.booking_repository import BookingRepository
 from schemas.booking import BookingCreate
 from services.audit_service import AuditService

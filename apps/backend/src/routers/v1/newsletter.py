@@ -1,6 +1,6 @@
 """Newsletter and campaign management API endpoints."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import logging
 from typing import Any
 from uuid import UUID
@@ -167,7 +167,7 @@ async def create_subscriber(
         sms_consent=subscriber_data.sms_consent,
         email_consent=subscriber_data.email_consent,
         tags=subscriber_data.tags or [],
-        consent_updated_at=datetime.now(),
+        consent_updated_at=datetime.now(timezone.utc),
     )
 
     db.add(subscriber)
@@ -261,11 +261,11 @@ async def update_subscriber(
 
     if subscriber_update.sms_consent is not None:
         subscriber.sms_consent = subscriber_update.sms_consent
-        subscriber.consent_updated_at = datetime.now()
+        subscriber.consent_updated_at = datetime.now(timezone.utc)
 
     if subscriber_update.email_consent is not None:
         subscriber.email_consent = subscriber_update.email_consent
-        subscriber.consent_updated_at = datetime.now()
+        subscriber.consent_updated_at = datetime.now(timezone.utc)
 
     if subscriber_update.tags is not None:
         subscriber.tags = subscriber_update.tags
@@ -273,7 +273,7 @@ async def update_subscriber(
     if subscriber_update.subscribed is not None:
         subscriber.subscribed = subscriber_update.subscribed
         if not subscriber_update.subscribed:
-            subscriber.unsubscribed_at = datetime.now()
+            subscriber.unsubscribed_at = datetime.now(timezone.utc)
 
     # Update engagement score
     subscriber.update_engagement_score()
@@ -305,7 +305,7 @@ async def unsubscribe_subscriber(
         )
 
     subscriber.subscribed = False
-    subscriber.unsubscribed_at = datetime.now()
+    subscriber.unsubscribed_at = datetime.now(timezone.utc)
 
     await db.commit()
 
@@ -676,7 +676,7 @@ async def send_campaign(
     # Update campaign status
     campaign.status = CampaignStatus.SCHEDULED
     if not campaign.scheduled_at:
-        campaign.scheduled_at = datetime.now()
+        campaign.scheduled_at = datetime.now(timezone.utc)
 
     await db.commit()
 
@@ -808,7 +808,7 @@ async def preview_segment(
         )
 
     if "last_opened_days" in filter_criteria:
-        cutoff_date = datetime.now() - timedelta(
+        cutoff_date = datetime.now(timezone.utc) - timedelta(
             days=filter_criteria["last_opened_days"]
         )
         query = query.where(Subscriber.last_opened_date >= cutoff_date)
@@ -832,7 +832,7 @@ async def preview_segment(
             Subscriber.engagement_score <= filter_criteria["engagement_max"]
         )
     if "last_opened_days" in filter_criteria:
-        cutoff_date = datetime.now() - timedelta(
+        cutoff_date = datetime.now(timezone.utc) - timedelta(
             days=filter_criteria["last_opened_days"]
         )
         count_stmt = count_stmt.where(
@@ -965,7 +965,7 @@ async def _send_campaign_async(campaign_id: UUID):
                                 
                                 # Update subscriber stats
                                 subscriber.total_sms_sent = (subscriber.total_sms_sent or 0) + 1
-                                subscriber.last_sms_sent_date = datetime.now()
+                                subscriber.last_sms_sent_date = datetime.now(timezone.utc)
                                 
                                 logger.info(
                                     f"✅ SMS campaign sent: {phone[-4:]}",
@@ -1005,7 +1005,7 @@ async def _send_campaign_async(campaign_id: UUID):
 
             # Mark campaign as sent
             campaign.status = CampaignStatus.SENT
-            campaign.sent_at = datetime.now()
+            campaign.sent_at = datetime.now(timezone.utc)
             await db.commit()
 
         except Exception as e:
@@ -1208,7 +1208,7 @@ async def get_compliance_report(
     
     # Default to last 30 days if not specified
     if not end_date:
-        end_date = datetime.now()
+        end_date = datetime.now(timezone.utc)
     if not start_date:
         start_date = end_date - timedelta(days=30)
     

@@ -18,9 +18,8 @@ from uuid import UUID
 from sqlalchemy import and_, desc, or_, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.booking import Booking, BookingStatus
+from db.models.core import Booking, BookingStatus, Customer
 from models.call_recording import CallRecording
-from models.customer import Customer
 
 logger = logging.getLogger(__name__)
 
@@ -40,16 +39,16 @@ class ConversationHistoryService:
     ) -> dict:
         """
         Get conversation history for a customer.
-        
+
         Returns all call recordings with transcripts, sorted by most recent.
         Includes AI insights, sentiment, and topics.
-        
+
         Args:
             customer_id: Customer UUID
             limit: Maximum number of conversations to return (default 20)
             offset: Pagination offset (default 0)
             include_no_transcript: Include calls without transcripts (default False)
-            
+
         Returns:
             dict with customer info and conversations list
         """
@@ -69,7 +68,7 @@ class ConversationHistoryService:
 
             # Build query for recordings
             query_filters = [CallRecording.customer_id == customer_id]
-            
+
             if not include_no_transcript:
                 # Only include recordings with transcripts
                 query_filters.append(CallRecording.rc_transcript.isnot(None))
@@ -175,15 +174,15 @@ class ConversationHistoryService:
     async def get_booking_context(self, booking_id: UUID) -> dict:
         """
         Get all conversations related to a booking.
-        
+
         Groups conversations into timeline:
         - Pre-booking (before booking date)
         - Day-of (same day as booking)
         - Post-booking (after booking date)
-        
+
         Args:
             booking_id: Booking UUID
-            
+
         Returns:
             dict with booking info and grouped conversations
         """
@@ -304,24 +303,24 @@ class ConversationHistoryService:
     ) -> str:
         """
         Format recent conversation history as context string for AI prompts.
-        
+
         Creates a concise summary of recent interactions that AI agents can
         use to provide personalized, context-aware service.
-        
+
         Args:
             customer_id: Customer UUID
             max_conversations: Maximum conversations to include (default 5)
-            
+
         Returns:
             Formatted context string for AI prompt
-            
+
         Example output:
             Customer: John Smith (555-0123)
             Recent interactions (last 5 calls):
             - 2024-11-15 10:27: Asked about vegetarian options for Nov 15 event. Positive.
             - 2024-11-10 14:20: Booking confirmation. Asked about parking. Positive.
             - 2024-11-08 09:15: Initial inquiry about catering prices. Neutral.
-            
+
             Key preferences: Vegetarian options, parking concerns
             Active booking: 2024-11-15, 30 guests, confirmed
         """
@@ -460,9 +459,9 @@ class ConversationHistoryService:
     ) -> dict:
         """
         Search across all call transcripts.
-        
+
         Supports full-text search on transcript content with filters.
-        
+
         Args:
             query: Search query (searched in transcript text)
             customer_id: Filter by customer (optional)
@@ -472,7 +471,7 @@ class ConversationHistoryService:
             sentiment: Filter by sentiment: positive, neutral, negative (optional)
             limit: Maximum results (default 50)
             offset: Pagination offset (default 0)
-            
+
         Returns:
             dict with search results and metadata
         """
@@ -531,14 +530,14 @@ class ConversationHistoryService:
             results = []
             for recording in recordings:
                 conversation = await self._format_conversation(recording)
-                
+
                 # Add search context (surrounding text)
                 if query and recording.rc_transcript:
                     context = self._extract_search_context(
                         recording.rc_transcript, query
                     )
                     conversation["search_context"] = context
-                
+
                 results.append(conversation)
 
             logger.info(
@@ -569,19 +568,19 @@ class ConversationHistoryService:
         """Extract text around search query match"""
         query_lower = query.lower()
         transcript_lower = transcript.lower()
-        
+
         index = transcript_lower.find(query_lower)
         if index == -1:
             return transcript[:context_chars] + "..."
-        
+
         # Get surrounding context
         start = max(0, index - context_chars)
         end = min(len(transcript), index + len(query) + context_chars)
-        
+
         context = transcript[start:end]
         if start > 0:
             context = "..." + context
         if end < len(transcript):
             context = context + "..."
-        
+
         return context

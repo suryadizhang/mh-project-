@@ -57,11 +57,12 @@ facebook-business==18.0.2
 
 # Google Cloud integration
 google-cloud-storage==2.10.0
-google-cloud-secretmanager==2.18.1
+google-cloud-secret-manager==2.25.0  # GSM for secure secret management (Phase 1A)
 
 # Email
 email-validator==2.1.0
 jinja2==3.1.2
+resend==2.19.0  # Resend API for email delivery (replaces SMTP)
 
 # Environment and configuration
 python-dotenv==1.0.0

@@ -8,7 +8,7 @@ import logging
 from uuid import uuid4
 
 from api.ai.endpoints.database import get_db
-from api.ai.endpoints.models import Conversation, Message
+from api.ai.endpoints.models import Conversation, AIMessage
 from api.ai.endpoints.services.chat_service import ChatService
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
@@ -124,7 +124,7 @@ async def get_chat_analytics(
 
         # Total conversations and messages
         total_conversations = db.query(func.count(Conversation.id)).scalar() or 0
-        total_messages = db.query(func.count(Message.id)).scalar() or 0
+        total_messages = db.query(func.count(AIMessage.id)).scalar() or 0
 
         # Today's conversations and messages
         conversations_today = (
@@ -135,7 +135,7 @@ async def get_chat_analytics(
         )
 
         messages_today = (
-            db.query(func.count(Message.id)).filter(Message.created_at >= today_start).scalar() or 0
+            db.query(func.count(AIMessage.id)).filter(AIMessage.created_at >= today_start).scalar() or 0
         )
 
         # Average messages per conversation
@@ -237,7 +237,7 @@ async def get_admin_conversations(
         response_conversations = []
         for conv in conversations:
             # Get message count
-            message_count = db.query(Message).filter(Message.conversation_id == conv.id).count()
+            message_count = db.query(AIMessage).filter(AIMessage.conversation_id == conv.id).count()
 
             response_conversations.append(
                 {

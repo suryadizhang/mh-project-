@@ -3,7 +3,7 @@ Knowledge Base service for semantic search and embeddings
 Uses sentence-transformers for embeddings and FAISS for similarity search
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import os
 from typing import Any
@@ -105,7 +105,7 @@ class KnowledgeBaseService:
     ) -> tuple[list[dict[str, Any]], int]:
         """Search knowledge base chunks by semantic similarity"""
         try:
-            start_time = datetime.now()
+            start_time = datetime.now(timezone.utc)
 
             # Generate query embedding
             query_embedding = self.encode_text(request.query)
@@ -162,7 +162,7 @@ class KnowledgeBaseService:
                 )
                 await db.commit()
 
-            query_time_ms = int((datetime.now() - start_time).total_seconds() * 1000)
+            query_time_ms = int((datetime.now(timezone.utc) - start_time).total_seconds() * 1000)
 
             return response_chunks, query_time_ms
 

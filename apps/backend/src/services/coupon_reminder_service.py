@@ -6,7 +6,7 @@ Duration: 6 months (180 days)
 Final Reminder: 2 weeks before expiration (customers need planning time)
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import logging
 from typing import Any
 from uuid import UUID
@@ -330,7 +330,7 @@ class CouponReminderService:
         - newyear: Mid-January
         """
         try:
-            now = datetime.now()
+            now = datetime.now(timezone.utc)
             
             # Define time windows for each reminder type
             reminder_windows = {
@@ -423,7 +423,7 @@ class CouponReminderService:
             if reminder_type not in reminders_sent:
                 reminders_sent.append(reminder_type)
                 metadata["reminders_sent"] = reminders_sent
-                metadata[f"{reminder_type}_sent_at"] = datetime.now().isoformat()
+                metadata[f"{reminder_type}_sent_at"] = datetime.now(timezone.utc).isoformat()
                 
                 coupon.extra_metadata = metadata
                 await self.db.commit()
@@ -450,7 +450,7 @@ class CouponReminderService:
         - newyear: Mid-January
         """
         try:
-            now = datetime.now()
+            now = datetime.now(timezone.utc)
             
             # Query all active coupons
             result = await self.db.execute(

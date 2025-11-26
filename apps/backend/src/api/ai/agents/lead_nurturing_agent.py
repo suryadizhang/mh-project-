@@ -533,7 +533,7 @@ Remember: You're selling an EXPERIENCE, not just a meal. Match the customer's to
     async def _check_promotion(self, args: dict[str, Any]) -> dict[str, Any]:
         """Check active promotions"""
 
-        from datetime import datetime
+        from datetime import datetime, timezone
 
         args.get("event_date")
         is_weekday = args.get("is_weekday", False)
@@ -541,7 +541,7 @@ Remember: You're selling an EXPERIENCE, not just a meal. Match the customer's to
         promotions = []
 
         # Parse date if provided
-        current_month = datetime.now().month
+        current_month = datetime.now(timezone.utc).month
 
         # Off-season discount (Oct-Apr)
         if current_month in [10, 11, 12, 1, 2, 3, 4]:

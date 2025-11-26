@@ -12,7 +12,7 @@ Author: MyHibachi Development Team
 Created: October 31, 2025
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 import hashlib
 import logging
@@ -86,7 +86,7 @@ class ModelDeployment:
             "base_model": self.base_model,
             "candidate_model": self.candidate_model,
             "traffic_split": self.traffic_split,
-            "deployed_at": datetime.now().isoformat(),
+            "deployed_at": datetime.now(timezone.utc).isoformat(),
         }
 
         self.deployment_history.append(deployment)
@@ -149,7 +149,7 @@ class ModelDeployment:
 
         try:
 
-            since = datetime.now() - timedelta(days=days)
+            since = datetime.now(timezone.utc) - timedelta(days=days)
 
             # Fetch messages from both models
             base_messages = await self._get_model_messages(db, self.base_model, since)
@@ -169,7 +169,7 @@ class ModelDeployment:
                 "candidate_model": {"name": self.candidate_model, **candidate_metrics},
                 "winner": winner,
                 "recommendation": recommendation,
-                "analyzed_at": datetime.now().isoformat(),
+                "analyzed_at": datetime.now(timezone.utc).isoformat(),
             }
 
             self.logger.info(f"Performance comparison complete: {winner} wins", extra=comparison)
@@ -185,7 +185,7 @@ class ModelDeployment:
     ) -> list[Any]:
         """Fetch messages from specific model"""
         try:
-            from api.ai.endpoints.models import Message, MessageRole
+            from api.ai.endpoints.models import AIMessage, MessageRole
 
             query = select(Message).where(
                 and_(
@@ -336,7 +336,7 @@ class ModelDeployment:
             "previous_model": old_base,
             "new_model": model_id,
             "traffic_split": "100%",
-            "promoted_at": datetime.now().isoformat(),
+            "promoted_at": datetime.now(timezone.utc).isoformat(),
         }
 
         self.deployment_history.append(promotion)
@@ -360,7 +360,7 @@ class ModelDeployment:
             "status": "rolled_back",
             "kept_model": self.base_model,
             "removed_model": old_candidate,
-            "rolled_back_at": datetime.now().isoformat(),
+            "rolled_back_at": datetime.now(timezone.utc).isoformat(),
         }
 
         self.deployment_history.append(rollback)

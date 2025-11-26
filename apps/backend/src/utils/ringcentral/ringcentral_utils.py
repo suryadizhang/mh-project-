@@ -98,7 +98,7 @@ async def register_webhooks(
             "status": "success",
             "subscriptions": subscriptions,
             "webhook_urls": webhook_urls,
-            "registered_at": datetime.now().isoformat(),
+            "registered_at": datetime.now(timezone.utc).isoformat(),
         }
 
     except Exception as e:
@@ -166,7 +166,7 @@ async def cleanup_webhooks(sms_service: RingCentralSMSService | None = None) -> 
         async with sms_service:
             health_info = await sms_service.health_check()
             cleanup_results["service_status"] = health_info.get("status", "unknown")
-            cleanup_results["timestamp"] = datetime.now().isoformat()
+            cleanup_results["timestamp"] = datetime.now(timezone.utc).isoformat()
 
     except Exception as e:
         cleanup_results["error"] = str(e)
@@ -276,7 +276,7 @@ async def test_connection(sms_service: RingCentralSMSService | None = None) -> d
             "connected": False,
             "status": "error",
             "error": str(e),
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
 
@@ -332,7 +332,7 @@ async def send_test_sms(
         Send results
     """
     if not message:
-        message = f"Test message from My Hibachi Chef CRM - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        message = f"Test message from My Hibachi Chef CRM - {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')}"
 
     try:
         # Use the utility function that leverages the existing service
@@ -342,7 +342,7 @@ async def send_test_sms(
             "success": success,
             "to": to_number,
             "message": message,
-            "sent_at": datetime.now().isoformat(),
+            "sent_at": datetime.now(timezone.utc).isoformat(),
             "service": "ringcentral_sms",
         }
 
@@ -351,7 +351,7 @@ async def send_test_sms(
             "success": False,
             "error": str(e),
             "to": to_number,
-            "attempted_at": datetime.now().isoformat(),
+            "attempted_at": datetime.now(timezone.utc).isoformat(),
             "service": "ringcentral_sms",
         }
 

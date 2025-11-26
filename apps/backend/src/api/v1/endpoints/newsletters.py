@@ -7,7 +7,7 @@ Email is only used for admin/transactional purposes (invoices, bookings, etc.)
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from api.deps import AdminUser, get_current_admin_user, get_db
@@ -241,12 +241,12 @@ async def generate_newsletter_content(
         
         if not holiday_date:
             # Use context if available
-            holiday_date = datetime.now().date()
+            holiday_date = datetime.now(timezone.utc).date()
 
         logger.info(f"Generated content for {request.holiday_key}")
 
         return NewsletterContentResponse(
-            id=f"{request.holiday_key}_{request.segment.value}_{datetime.now().timestamp()}",
+            id=f"{request.holiday_key}_{request.segment.value}_{datetime.now(timezone.utc).timestamp()}",
             holiday_key=request.holiday_key,
             holiday_name=holiday_name,
             holiday_date=holiday_date.isoformat(),
@@ -255,8 +255,8 @@ async def generate_newsletter_content(
             content_html=content.get("html_content", ""),
             content_text=content.get("text_content", ""),
             preview_text=content.get("preview_text", ""),
-            send_date=datetime.now().isoformat(),
-            generated_at=datetime.now(),
+            send_date=datetime.now(timezone.utc).isoformat(),
+            generated_at=datetime.now(timezone.utc),
         )
 
     except HTTPException:
@@ -304,7 +304,7 @@ async def send_newsletter(
         # For now, return mock response
         return NewsletterSendResponse(
             success=True,
-            newsletter_id=f"nl_{request.holiday_key}_{request.segment.value}_{datetime.now().timestamp()}",
+            newsletter_id=f"nl_{request.holiday_key}_{request.segment.value}_{datetime.now(timezone.utc).timestamp()}",
             recipients_count=0,  # TODO: Get actual subscriber count
             send_status="scheduled" if request.scheduled_time else "sent",
             scheduled_time=request.scheduled_time,

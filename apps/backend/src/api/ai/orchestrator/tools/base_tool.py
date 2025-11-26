@@ -17,7 +17,7 @@ Created: October 31, 2025
 """
 
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from typing import Any
 
@@ -297,7 +297,7 @@ class BaseTool(ABC):
         Returns:
             ToolResult: Execution result
         """
-        start_time = datetime.now()
+        start_time = datetime.now(timezone.utc)
 
         try:
             # Validate parameters
@@ -310,12 +310,12 @@ class BaseTool(ABC):
             result = await self.execute(**kwargs)
 
             # Add metadata
-            execution_time_ms = (datetime.now() - start_time).total_seconds() * 1000
+            execution_time_ms = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
             result.metadata.update(
                 {
                     "tool_name": self.name,
                     "execution_time_ms": round(execution_time_ms, 2),
-                    "timestamp": datetime.now().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
             )
 
@@ -329,7 +329,7 @@ class BaseTool(ABC):
 
         except Exception as e:
             # Log error
-            execution_time_ms = (datetime.now() - start_time).total_seconds() * 1000
+            execution_time_ms = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
             self.logger.error(
                 f"Tool execution failed: {self.name}",
                 extra={
@@ -347,7 +347,7 @@ class BaseTool(ABC):
                 metadata={
                     "tool_name": self.name,
                     "execution_time_ms": round(execution_time_ms, 2),
-                    "timestamp": datetime.now().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 },
             )
 

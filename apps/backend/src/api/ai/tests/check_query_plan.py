@@ -66,3 +66,4 @@ async def check_query_plan():
 
 if __name__ == "__main__":
     asyncio.run(check_query_plan())
+

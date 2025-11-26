@@ -7,7 +7,7 @@ Provides AI agents with company rules and guidelines.
 Created: 2025-11-12
 """
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
 
 from sqlalchemy import select, and_, or_
@@ -43,11 +43,11 @@ class BusinessRulesService:
                     ),
                     or_(
                         BusinessRule.effective_from == None,
-                        BusinessRule.effective_from <= datetime.now()
+                        BusinessRule.effective_from <= datetime.now(timezone.utc)
                     ),
                     or_(
                         BusinessRule.effective_until == None,
-                        BusinessRule.effective_until >= datetime.now()
+                        BusinessRule.effective_until >= datetime.now(timezone.utc)
                     )
                 )
             ).order_by(BusinessRule.category, BusinessRule.priority.desc())
