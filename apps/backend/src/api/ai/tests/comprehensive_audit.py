@@ -13,7 +13,7 @@ Zero tolerance for errors, bugs, or glitches.
 """
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import sys
 import time
@@ -49,7 +49,12 @@ class ComprehensiveAudit:
     def __init__(self):
         self.memory = None
         self.emotion_service = None
-        self.results = {"passed": [], "failed": [], "warnings": [], "performance": {}}
+        self.results = {
+            "passed": [],
+            "failed": [],
+            "warnings": [],
+            "performance": {},
+        }
 
     async def run_audit(self):
         """Execute complete audit"""
@@ -93,18 +98,26 @@ class ComprehensiveAudit:
 
         try:
             # Create memory backend
-            self.memory = await create_memory_backend(MemoryBackendType.POSTGRESQL)
+            self.memory = await create_memory_backend(
+                MemoryBackendType.POSTGRESQL
+            )
             assert self.memory is not None, "Memory backend creation failed"
-            assert isinstance(self.memory, PostgreSQLMemory), "Wrong backend type"
+            assert isinstance(
+                self.memory, PostgreSQLMemory
+            ), "Wrong backend type"
             self.results["passed"].append("✓ Memory backend initialization")
 
             # Initialize memory
             await self.memory.initialize()
-            self.results["passed"].append("✓ Memory backend initialization complete")
+            self.results["passed"].append(
+                "✓ Memory backend initialization complete"
+            )
 
             # Create emotion service
             self.emotion_service = EmotionService()
-            assert self.emotion_service is not None, "Emotion service creation failed"
+            assert (
+                self.emotion_service is not None
+            ), "Emotion service creation failed"
             self.results["passed"].append("✓ Emotion service initialization")
 
         except Exception as e:
@@ -126,11 +139,17 @@ class ComprehensiveAudit:
 
             # Verify schema structure
             health = await self.memory.health_check()
-            assert health["status"] == "healthy", f"Database unhealthy: {health}"
-            self.results["passed"].append(f"✓ Database health: {health['status']}")
+            assert (
+                health["status"] == "healthy"
+            ), f"Database unhealthy: {health}"
+            self.results["passed"].append(
+                f"✓ Database health: {health['status']}"
+            )
 
         except Exception as e:
-            self.results["failed"].append(f"✗ Database schema audit failed: {e}")
+            self.results["failed"].append(
+                f"✗ Database schema audit failed: {e}"
+            )
             raise
 
     # =========================================================================
@@ -140,8 +159,8 @@ class ComprehensiveAudit:
     async def _audit_memory_operations(self):
         """Deep validation of memory operations"""
 
-        test_conv = f"audit_conv_{datetime.now().timestamp()}"
-        test_user = f"audit_user_{datetime.now().timestamp()}"
+        test_conv = f"audit_conv_{datetime.now(timezone.utc).timestamp()}"
+        test_user = f"audit_user_{datetime.now(timezone.utc).timestamp()}"
 
         try:
             # Test 1: Message storage with all fields
@@ -158,7 +177,9 @@ class ComprehensiveAudit:
             )
             assert msg1 is not None, "Message creation returned None"
             assert msg1.id is not None, "Message ID not generated"
-            assert msg1.emotion_score == 0.75, f"Emotion score mismatch: {msg1.emotion_score}"
+            assert (
+                msg1.emotion_score == 0.75
+            ), f"Emotion score mismatch: {msg1.emotion_score}"
             self.results["passed"].append("✓ Message storage with all fields")
 
             # Test 2: Message retrieval
@@ -184,14 +205,20 @@ class ComprehensiveAudit:
                 conversation_id=test_conv,
                 context={"booking_id": "BK999", "test_data": {"nested": True}},
             )
-            updated_metadata = await self.memory.get_conversation_metadata(test_conv)
+            updated_metadata = await self.memory.get_conversation_metadata(
+                test_conv
+            )
             assert "booking_id" in updated_metadata.context
             assert updated_metadata.context["booking_id"] == "BK999"
             self.results["passed"].append("✓ JSONB context update")
 
             # Test 6: Conversation lifecycle
-            await self.memory.close_conversation(test_conv, reason="audit_complete")
-            closed_metadata = await self.memory.get_conversation_metadata(test_conv)
+            await self.memory.close_conversation(
+                test_conv, reason="audit_complete"
+            )
+            closed_metadata = await self.memory.get_conversation_metadata(
+                test_conv
+            )
             assert not closed_metadata.is_active
             assert closed_metadata.closed_reason == "audit_complete"
             self.results["passed"].append("✓ Conversation lifecycle")
@@ -258,8 +285,12 @@ class ComprehensiveAudit:
     async def _audit_integration(self):
         """Validate emotion service + memory integration"""
 
-        test_conv = f"integration_conv_{datetime.now().timestamp()}"
-        test_user = f"integration_user_{datetime.now().timestamp()}"
+        test_conv = (
+            f"integration_conv_{datetime.now(timezone.utc).timestamp()}"
+        )
+        test_user = (
+            f"integration_user_{datetime.now(timezone.utc).timestamp()}"
+        )
 
         try:
             # Simulate real workflow: detect emotion → store message
@@ -303,8 +334,8 @@ class ComprehensiveAudit:
     async def _audit_performance(self):
         """Benchmark performance metrics"""
 
-        test_conv = f"perf_conv_{datetime.now().timestamp()}"
-        test_user = f"perf_user_{datetime.now().timestamp()}"
+        test_conv = f"perf_conv_{datetime.now(timezone.utc).timestamp()}"
+        test_user = f"perf_user_{datetime.now(timezone.utc).timestamp()}"
 
         try:
             # Benchmark message storage (target: <2000ms)
@@ -316,33 +347,57 @@ class ComprehensiveAudit:
                 user_id=test_user,
             )
             storage_time = (time.time() - start) * 1000
-            assert storage_time < 2000, f"Storage too slow: {storage_time:.0f}ms"
-            self.results["performance"]["message_storage_ms"] = round(storage_time, 2)
-            self.results["passed"].append(f"✓ Message storage: {storage_time:.0f}ms")
+            assert (
+                storage_time < 2000
+            ), f"Storage too slow: {storage_time:.0f}ms"
+            self.results["performance"]["message_storage_ms"] = round(
+                storage_time, 2
+            )
+            self.results["passed"].append(
+                f"✓ Message storage: {storage_time:.0f}ms"
+            )
 
             # Benchmark retrieval (target: <1000ms)
             start = time.time()
             await self.memory.get_conversation_history(test_conv)
             retrieval_time = (time.time() - start) * 1000
-            assert retrieval_time < 1000, f"Retrieval too slow: {retrieval_time:.0f}ms"
-            self.results["performance"]["message_retrieval_ms"] = round(retrieval_time, 2)
-            self.results["passed"].append(f"✓ Message retrieval: {retrieval_time:.0f}ms")
+            assert (
+                retrieval_time < 1000
+            ), f"Retrieval too slow: {retrieval_time:.0f}ms"
+            self.results["performance"]["message_retrieval_ms"] = round(
+                retrieval_time, 2
+            )
+            self.results["passed"].append(
+                f"✓ Message retrieval: {retrieval_time:.0f}ms"
+            )
 
             # Benchmark emotion detection (target: <5000ms for OpenAI API)
             start = time.time()
             await self.emotion_service.detect_emotion("Quick emotion test")
             emotion_time = (time.time() - start) * 1000
-            assert emotion_time < 10000, f"Emotion detection too slow: {emotion_time:.0f}ms"
-            self.results["performance"]["emotion_detection_ms"] = round(emotion_time, 2)
-            self.results["passed"].append(f"✓ Emotion detection: {emotion_time:.0f}ms")
+            assert (
+                emotion_time < 10000
+            ), f"Emotion detection too slow: {emotion_time:.0f}ms"
+            self.results["performance"]["emotion_detection_ms"] = round(
+                emotion_time, 2
+            )
+            self.results["passed"].append(
+                f"✓ Emotion detection: {emotion_time:.0f}ms"
+            )
 
             # Benchmark health check (target: <2000ms)
             start = time.time()
             await self.memory.health_check()
             health_time = (time.time() - start) * 1000
-            assert health_time < 2000, f"Health check too slow: {health_time:.0f}ms"
-            self.results["performance"]["health_check_ms"] = round(health_time, 2)
-            self.results["passed"].append(f"✓ Health check: {health_time:.0f}ms")
+            assert (
+                health_time < 2000
+            ), f"Health check too slow: {health_time:.0f}ms"
+            self.results["performance"]["health_check_ms"] = round(
+                health_time, 2
+            )
+            self.results["passed"].append(
+                f"✓ Health check: {health_time:.0f}ms"
+            )
 
         except Exception as e:
             self.results["failed"].append(f"✗ Performance audit failed: {e}")
@@ -357,16 +412,22 @@ class ComprehensiveAudit:
 
         try:
             # Test 1: Non-existent conversation (should return None)
-            result = await self.memory.get_conversation_metadata("nonexistent_conv")
+            result = await self.memory.get_conversation_metadata(
+                "nonexistent_conv"
+            )
             if result is None:
-                self.results["passed"].append("✓ Non-existent conversation returns None")
+                self.results["passed"].append(
+                    "✓ Non-existent conversation returns None"
+                )
             else:
-                self.results["failed"].append("✗ Should return None for non-existent conversation")
+                self.results["failed"].append(
+                    "✗ Should return None for non-existent conversation"
+                )
 
             # Test 2: Invalid channel
             try:
                 msg = await self.memory.store_message(
-                    conversation_id=f"test_{datetime.now().timestamp()}",
+                    conversation_id=f"test_{datetime.now(timezone.utc).timestamp()}",
                     role=MessageRole.USER,
                     content="Test",
                     user_id="test",
@@ -384,12 +445,14 @@ class ComprehensiveAudit:
                 assert result is not None
                 self.results["passed"].append("✓ Empty text emotion handling")
             except Exception:
-                self.results["warnings"].append("⚠ Empty text emotion handling could be improved")
+                self.results["warnings"].append(
+                    "⚠ Empty text emotion handling could be improved"
+                )
 
             # Test 4: Very long content
             long_content = "A" * 10000
             msg = await self.memory.store_message(
-                conversation_id=f"long_test_{datetime.now().timestamp()}",
+                conversation_id=f"long_test_{datetime.now(timezone.utc).timestamp()}",
                 role=MessageRole.USER,
                 content=long_content,
                 user_id="test",
@@ -398,7 +461,9 @@ class ComprehensiveAudit:
             self.results["passed"].append("✓ Long content handling")
 
         except Exception as e:
-            self.results["failed"].append(f"✗ Error handling audit failed: {e}")
+            self.results["failed"].append(
+                f"✗ Error handling audit failed: {e}"
+            )
             raise
 
     # =========================================================================
@@ -428,8 +493,12 @@ class ComprehensiveAudit:
             ]
 
             for method in required_methods:
-                assert hasattr(self.memory, method), f"Missing method: {method}"
-                assert callable(getattr(self.memory, method)), f"Method not callable: {method}"
+                assert hasattr(
+                    self.memory, method
+                ), f"Missing method: {method}"
+                assert callable(
+                    getattr(self.memory, method)
+                ), f"Method not callable: {method}"
 
             self.results["passed"].append(
                 f"✓ All {len(required_methods)} interface methods implemented"
@@ -444,15 +513,21 @@ class ComprehensiveAudit:
                 "get_emotion_trend",
             ]
             for method in emotion_methods:
-                assert hasattr(self.emotion_service, method), f"Missing method: {method}"
+                assert hasattr(
+                    self.emotion_service, method
+                ), f"Missing method: {method}"
 
             self.results["passed"].append(
                 f"✓ All {len(emotion_methods)} emotion service methods implemented"
             )
 
             # Type checking
-            assert isinstance(self.memory, PostgreSQLMemory), "Wrong backend type"
-            assert isinstance(self.emotion_service, EmotionService), "Wrong emotion service type"
+            assert isinstance(
+                self.memory, PostgreSQLMemory
+            ), "Wrong backend type"
+            assert isinstance(
+                self.emotion_service, EmotionService
+            ), "Wrong emotion service type"
             self.results["passed"].append("✓ Type safety validated")
 
         except Exception as e:

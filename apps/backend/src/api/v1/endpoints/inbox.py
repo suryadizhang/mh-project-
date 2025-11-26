@@ -4,7 +4,7 @@ Handles SMS, Instagram, Facebook, email communications in one place
 Admin users get 100-200 requests/minute vs 20 for public
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 import logging
 from typing import Any
@@ -87,7 +87,9 @@ class MessageResponse(MessageBase):
 class ThreadBase(BaseModel):
     channel: MessageChannel
     status: ThreadStatus = ThreadStatus.OPEN
-    customer_identifier: str = Field(..., description="Phone, email, or social username")
+    customer_identifier: str = Field(
+        ..., description="Phone, email, or social username"
+    )
     customer_name: str | None = None
     subject: str | None = None
     tags: list[str] | None = []
@@ -148,10 +150,10 @@ mock_threads = [
         "priority": 3,
         "message_count": 5,
         "unread_count": 1,
-        "last_message_at": datetime.now(),
+        "last_message_at": datetime.now(timezone.utc),
         "last_message_preview": "What time would work best for the hibachi setup?",
-        "created_at": datetime.now(),
-        "updated_at": datetime.now(),
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
         "assigned_to": "admin@myhibachichef.com",
         "customer_id": 1,
         "lead_id": None,
@@ -167,10 +169,10 @@ mock_threads = [
         "priority": 2,
         "message_count": 3,
         "unread_count": 2,
-        "last_message_at": datetime.now(),
+        "last_message_at": datetime.now(timezone.utc),
         "last_message_preview": "Can you do hibachi for 8 people next weekend?",
-        "created_at": datetime.now(),
-        "updated_at": datetime.now(),
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
         "assigned_to": None,
         "customer_id": 2,
         "lead_id": 2,
@@ -186,10 +188,10 @@ mock_threads = [
         "priority": 4,
         "message_count": 8,
         "unread_count": 0,
-        "last_message_at": datetime.now(),
+        "last_message_at": datetime.now(timezone.utc),
         "last_message_preview": "The quote looks good, let's proceed with the booking",
-        "created_at": datetime.now(),
-        "updated_at": datetime.now(),
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
         "assigned_to": "owner@myhibachichef.com",
         "customer_id": None,
         "lead_id": 1,
@@ -207,11 +209,11 @@ mock_messages = [
         "from_number": "+19165551234",
         "to_number": "+19167408768",
         "status": "read",
-        "created_at": datetime.now(),
-        "updated_at": datetime.now(),
-        "sent_at": datetime.now(),
-        "delivered_at": datetime.now(),
-        "read_at": datetime.now(),
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
+        "sent_at": datetime.now(timezone.utc),
+        "delivered_at": datetime.now(timezone.utc),
+        "read_at": datetime.now(timezone.utc),
         "attachments": [],
         "metadata": {"ringcentral_id": "msg_123"},
     },
@@ -224,10 +226,10 @@ mock_messages = [
         "from_number": "+19167408768",
         "to_number": "+19165551234",
         "status": "delivered",
-        "created_at": datetime.now(),
-        "updated_at": datetime.now(),
-        "sent_at": datetime.now(),
-        "delivered_at": datetime.now(),
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
+        "sent_at": datetime.now(timezone.utc),
+        "delivered_at": datetime.now(timezone.utc),
         "attachments": [],
         "metadata": {"ringcentral_id": "msg_124"},
     },
@@ -240,10 +242,10 @@ mock_messages = [
         "from_number": "+19165551234",
         "to_number": "+19167408768",
         "status": "delivered",
-        "created_at": datetime.now(),
-        "updated_at": datetime.now(),
-        "sent_at": datetime.now(),
-        "delivered_at": datetime.now(),
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
+        "sent_at": datetime.now(timezone.utc),
+        "delivered_at": datetime.now(timezone.utc),
         "attachments": [],
         "metadata": {"ringcentral_id": "msg_125"},
         "ai_suggested_reply": "For 8 guests, I recommend starting around 6:00 PM or 7:00 PM. This gives enough time for setup and a leisurely dining experience. What time preference do you have?",
@@ -255,10 +257,16 @@ mock_messages = [
 async def list_threads(
     page: int = Query(1, ge=1, description="Page number"),
     per_page: int = Query(20, ge=1, le=100, description="Items per page"),
-    channel: MessageChannel | None = Query(None, description="Filter by channel"),
+    channel: MessageChannel | None = Query(
+        None, description="Filter by channel"
+    ),
     status: ThreadStatus | None = Query(None, description="Filter by status"),
-    assigned_to: str | None = Query(None, description="Filter by assigned user"),
-    unread_only: bool = Query(False, description="Show only threads with unread messages"),
+    assigned_to: str | None = Query(
+        None, description="Filter by assigned user"
+    ),
+    unread_only: bool = Query(
+        False, description="Show only threads with unread messages"
+    ),
     db: AsyncSession = Depends(get_db),
     current_admin: AdminUser = Depends(get_current_admin_user),
 ):
@@ -271,19 +279,31 @@ async def list_threads(
         filtered_threads = mock_threads.copy()
 
         if channel:
-            filtered_threads = [t for t in filtered_threads if t["channel"] == channel]
+            filtered_threads = [
+                t for t in filtered_threads if t["channel"] == channel
+            ]
 
         if status:
-            filtered_threads = [t for t in filtered_threads if t["status"] == status]
+            filtered_threads = [
+                t for t in filtered_threads if t["status"] == status
+            ]
 
         if assigned_to:
-            filtered_threads = [t for t in filtered_threads if t.get("assigned_to") == assigned_to]
+            filtered_threads = [
+                t
+                for t in filtered_threads
+                if t.get("assigned_to") == assigned_to
+            ]
 
         if unread_only:
-            filtered_threads = [t for t in filtered_threads if t["unread_count"] > 0]
+            filtered_threads = [
+                t for t in filtered_threads if t["unread_count"] > 0
+            ]
 
         # Sort by last message time (most recent first)
-        filtered_threads.sort(key=lambda t: t["last_message_at"] or t["created_at"], reverse=True)
+        filtered_threads.sort(
+            key=lambda t: t["last_message_at"] or t["created_at"], reverse=True
+        )
 
         # Apply pagination
         total = len(filtered_threads)
@@ -300,7 +320,8 @@ async def list_threads(
     except Exception as e:
         logger.exception(f"Error listing threads: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to retrieve threads"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve threads",
         )
 
 
@@ -320,24 +341,29 @@ async def get_thread(
 
         if not thread:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=f"Thread {thread_id} not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Thread {thread_id} not found",
             )
 
         # Get messages for this thread
-        thread_messages = [m for m in mock_messages if m["thread_id"] == thread_id]
+        thread_messages = [
+            m for m in mock_messages if m["thread_id"] == thread_id
+        ]
         thread_messages.sort(key=lambda m: m["created_at"])
 
         # Mark messages as read
         for msg in mock_messages:
             if msg["thread_id"] == thread_id and msg["direction"] == "inbound":
                 msg["status"] = "read"
-                msg["read_at"] = datetime.now()
+                msg["read_at"] = datetime.now(timezone.utc)
 
         # Update thread unread count
         thread["unread_count"] = 0
-        thread["updated_at"] = datetime.now()
+        thread["updated_at"] = datetime.now(timezone.utc)
 
-        logger.info(f"Admin {current_admin.email} retrieved thread {thread_id}")
+        logger.info(
+            f"Admin {current_admin.email} retrieved thread {thread_id}"
+        )
 
         return ThreadWithMessages(
             **thread, messages=[MessageResponse(**m) for m in thread_messages]
@@ -348,7 +374,8 @@ async def get_thread(
     except Exception as e:
         logger.exception(f"Error getting thread {thread_id}: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to retrieve thread"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve thread",
         )
 
 
@@ -373,7 +400,8 @@ async def send_message(
 
         if not thread:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=f"Thread {thread_id} not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Thread {thread_id} not found",
             )
 
         # Create new message
@@ -384,10 +412,10 @@ async def send_message(
             "thread_id": thread_id,
             "direction": "outbound",
             "status": "sent",
-            "created_at": datetime.now(),
-            "updated_at": datetime.now(),
-            "sent_at": datetime.now(),
-            "delivered_at": datetime.now(),
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
+            "sent_at": datetime.now(timezone.utc),
+            "delivered_at": datetime.now(timezone.utc),
             "assigned_to": current_admin.email,
         }
 
@@ -403,11 +431,11 @@ async def send_message(
 
         # Update thread
         thread["message_count"] += 1
-        thread["last_message_at"] = datetime.now()
+        thread["last_message_at"] = datetime.now(timezone.utc)
         thread["last_message_preview"] = message.content[:50] + (
             "..." if len(message.content) > 50 else ""
         )
-        thread["updated_at"] = datetime.now()
+        thread["updated_at"] = datetime.now(timezone.utc)
 
         logger.info(
             f"Admin {current_admin.email} sent message in thread {thread_id} via {message.channel}"
@@ -428,7 +456,8 @@ async def send_message(
     except Exception as e:
         logger.exception(f"Error sending message in thread {thread_id}: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to send message"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to send message",
         )
 
 
@@ -445,16 +474,20 @@ async def update_thread(
     """
     try:
         # Find and update thread
-        thread_idx = next((i for i, t in enumerate(mock_threads) if t["id"] == thread_id), None)
+        thread_idx = next(
+            (i for i, t in enumerate(mock_threads) if t["id"] == thread_id),
+            None,
+        )
 
         if thread_idx is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=f"Thread {thread_id} not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Thread {thread_id} not found",
             )
 
         # Update fields
         update_data = thread_update.dict(exclude_unset=True)
-        update_data["updated_at"] = datetime.now()
+        update_data["updated_at"] = datetime.now(timezone.utc)
 
         mock_threads[thread_idx].update(update_data)
 
@@ -466,13 +499,15 @@ async def update_thread(
     except Exception as e:
         logger.exception(f"Error updating thread {thread_id}: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update thread"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update thread",
         )
 
 
 @router.get("/stats", response_model=InboxStats)
 async def get_inbox_stats(
-    db: AsyncSession = Depends(get_db), current_admin: AdminUser = Depends(get_current_admin_user)
+    db: AsyncSession = Depends(get_db),
+    current_admin: AdminUser = Depends(get_current_admin_user),
 ):
     """
     Get inbox statistics
@@ -483,8 +518,12 @@ async def get_inbox_stats(
         stats = InboxStats()
 
         stats.total_threads = len(mock_threads)
-        stats.open_threads = len([t for t in mock_threads if t["status"] == "open"])
-        stats.pending_threads = len([t for t in mock_threads if t["status"] == "pending"])
+        stats.open_threads = len(
+            [t for t in mock_threads if t["status"] == "open"]
+        )
+        stats.pending_threads = len(
+            [t for t in mock_threads if t["status"] == "pending"]
+        )
         stats.unread_messages = sum(t["unread_count"] for t in mock_threads)
 
         # Channel breakdown
@@ -522,11 +561,14 @@ async def generate_ai_reply(
 
         if not thread:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=f"Thread {thread_id} not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Thread {thread_id} not found",
             )
 
         # Get recent messages for context
-        thread_messages = [m for m in mock_messages if m["thread_id"] == thread_id]
+        thread_messages = [
+            m for m in mock_messages if m["thread_id"] == thread_id
+        ]
         thread_messages.sort(key=lambda m: m["created_at"], reverse=True)
 
         # Mock AI reply generation (replace with actual AI service call)
@@ -540,7 +582,9 @@ async def generate_ai_reply(
 
         ai_reply = random.choice(ai_replies)
 
-        logger.info(f"Admin {current_admin.email} generated AI reply for thread {thread_id}")
+        logger.info(
+            f"Admin {current_admin.email} generated AI reply for thread {thread_id}"
+        )
 
         return {
             "suggested_reply": ai_reply,
@@ -551,9 +595,12 @@ async def generate_ai_reply(
     except HTTPException:
         raise
     except Exception as e:
-        logger.exception(f"Error generating AI reply for thread {thread_id}: {e}")
+        logger.exception(
+            f"Error generating AI reply for thread {thread_id}: {e}"
+        )
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to generate AI reply"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to generate AI reply",
         )
 
 
@@ -570,18 +617,24 @@ async def assign_thread(
     """
     try:
         # Find thread
-        thread_idx = next((i for i, t in enumerate(mock_threads) if t["id"] == thread_id), None)
+        thread_idx = next(
+            (i for i, t in enumerate(mock_threads) if t["id"] == thread_id),
+            None,
+        )
 
         if thread_idx is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=f"Thread {thread_id} not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Thread {thread_id} not found",
             )
 
         # Update assignment
         mock_threads[thread_idx]["assigned_to"] = assigned_to
-        mock_threads[thread_idx]["updated_at"] = datetime.now()
+        mock_threads[thread_idx]["updated_at"] = datetime.now(timezone.utc)
 
-        logger.info(f"Admin {current_admin.email} assigned thread {thread_id} to {assigned_to}")
+        logger.info(
+            f"Admin {current_admin.email} assigned thread {thread_id} to {assigned_to}"
+        )
 
         return {"message": f"Thread {thread_id} assigned to {assigned_to}"}
 
@@ -590,5 +643,6 @@ async def assign_thread(
     except Exception as e:
         logger.exception(f"Error assigning thread {thread_id}: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to assign thread"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to assign thread",
         )

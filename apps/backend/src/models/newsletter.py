@@ -9,8 +9,7 @@ Enterprise-grade email/SMS marketing and campaign management with:
 - Engagement metrics
 """
 
-from datetime import datetime
-from typing import Optional
+from datetime import datetime, timezone
 import uuid
 
 from sqlalchemy import (
@@ -41,26 +40,45 @@ class Campaign(BaseModel):
     __tablename__ = "campaigns"
     __table_args__ = {"schema": "lead", "extend_existing": True}
 
-    id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(
+        PostgresUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
     name = Column(String(200), nullable=False)
-    channel = Column(Enum(CampaignChannel, name='campaign_channel', create_type=False), nullable=False)
-    status = Column(Enum(CampaignStatus, name='campaign_status', create_type=False), nullable=False, default=CampaignStatus.DRAFT)
-    
+    channel = Column(
+        Enum(CampaignChannel, name="campaign_channel", create_type=False),
+        nullable=False,
+    )
+    status = Column(
+        Enum(CampaignStatus, name="campaign_status", create_type=False),
+        nullable=False,
+        default=CampaignStatus.DRAFT,
+    )
+
     subject = Column(String(500), nullable=True)
     content = Column(Text, nullable=False)
     sender_name = Column(String(100), nullable=True)
     reply_to = Column(String(200), nullable=True)
-    
+
     scheduled_at = Column(DateTime(timezone=True), nullable=True)
     sent_at = Column(DateTime(timezone=True), nullable=True)
     completed_at = Column(DateTime(timezone=True), nullable=True)
-    
+
     target_segment = Column(String(100), nullable=True)
-    extra_data = Column(JSONB, nullable=True, comment="Campaign metadata and custom fields")
+    extra_data = Column(
+        JSONB, nullable=True, comment="Campaign metadata and custom fields"
+    )
 
     # Relationships
-    events = relationship("CampaignEvent", back_populates="campaign", cascade="all, delete-orphan")
-    sms_deliveries = relationship("SMSDeliveryEvent", back_populates="campaign", cascade="all, delete-orphan")
+    events = relationship(
+        "CampaignEvent",
+        back_populates="campaign",
+        cascade="all, delete-orphan",
+    )
+    sms_deliveries = relationship(
+        "SMSDeliveryEvent",
+        back_populates="campaign",
+        cascade="all, delete-orphan",
+    )
 
     def __repr__(self):
         return f"<Campaign {self.name} ({self.channel.value}) {self.status.value}>"
@@ -72,16 +90,34 @@ class CampaignEvent(BaseModel):
     __tablename__ = "campaign_events"
     __table_args__ = {"schema": "lead", "extend_existing": True}
 
-    id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(
+        PostgresUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
     campaign_id = Column(
-        PostgresUUID(as_uuid=True), ForeignKey("lead.campaigns.id", ondelete="CASCADE"), nullable=False, index=True
+        PostgresUUID(as_uuid=True),
+        ForeignKey("lead.campaigns.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     subscriber_id = Column(
-        PostgresUUID(as_uuid=True), ForeignKey("lead.subscribers.id", ondelete="SET NULL"), nullable=True, index=True
+        PostgresUUID(as_uuid=True),
+        ForeignKey("lead.subscribers.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
     )
-    event_type = Column(Enum(CampaignEventType, name='campaign_event_type', create_type=False), nullable=False, index=True)
-    occurred_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(datetime.now().astimezone().tzinfo))
-    extra_data = Column(JSONB, nullable=True, comment="Event metadata and tracking info")
+    event_type = Column(
+        Enum(CampaignEventType, name="campaign_event_type", create_type=False),
+        nullable=False,
+        index=True,
+    )
+    occurred_at = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+    )
+    extra_data = Column(
+        JSONB, nullable=True, comment="Event metadata and tracking info"
+    )
 
     # Relationships
     campaign = relationship("Campaign", back_populates="events")
@@ -97,27 +133,41 @@ class SMSDeliveryEvent(BaseModel):
     __tablename__ = "sms_delivery_events"
     __table_args__ = {"schema": "lead", "extend_existing": True}
 
-    id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(
+        PostgresUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
     campaign_id = Column(
-        PostgresUUID(as_uuid=True), ForeignKey("lead.campaigns.id", ondelete="CASCADE"), nullable=True, index=True
+        PostgresUUID(as_uuid=True),
+        ForeignKey("lead.campaigns.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
     )
     subscriber_id = Column(
-        PostgresUUID(as_uuid=True), ForeignKey("lead.subscribers.id", ondelete="SET NULL"), nullable=True, index=True
+        PostgresUUID(as_uuid=True),
+        ForeignKey("lead.subscribers.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
     )
-    
+
     phone_number = Column(String(20), nullable=False)
     message_sid = Column(String(100), nullable=True, unique=True)
-    status = Column(Enum(SMSDeliveryStatus, name='sms_delivery_status', create_type=False), nullable=False, index=True)
-    
+    status = Column(
+        Enum(SMSDeliveryStatus, name="sms_delivery_status", create_type=False),
+        nullable=False,
+        index=True,
+    )
+
     sent_at = Column(DateTime(timezone=True), nullable=True)
     delivered_at = Column(DateTime(timezone=True), nullable=True)
     failed_at = Column(DateTime(timezone=True), nullable=True)
-    
+
     error_code = Column(String(50), nullable=True)
     error_message = Column(Text, nullable=True)
-    
+
     cost = Column(Integer, nullable=True, comment="Cost in cents")
-    extra_data = Column(JSONB, nullable=True, comment="SMS delivery metadata and carrier info")
+    extra_data = Column(
+        JSONB, nullable=True, comment="SMS delivery metadata and carrier info"
+    )
 
     # Relationships
     campaign = relationship("Campaign", back_populates="sms_deliveries")
@@ -143,30 +193,38 @@ class Subscriber(BaseModel):
     __tablename__ = "subscribers"
     __table_args__ = {"schema": "lead", "extend_existing": True}
 
-    id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    
+    id = Column(
+        PostgresUUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+
     # Contact info
     email = Column(String(255), nullable=True, index=True)
     phone = Column(String(20), nullable=True, index=True)
     first_name = Column(String(100), nullable=True)
     last_name = Column(String(100), nullable=True)
-    
+
     # Subscription status
     email_subscribed = Column(Boolean, nullable=False, default=True)
     sms_subscribed = Column(Boolean, nullable=False, default=False)
     push_subscribed = Column(Boolean, nullable=False, default=False)
     whatsapp_subscribed = Column(Boolean, nullable=False, default=False)
-    
+
     # Subscription metadata
-    subscribed_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(datetime.now().astimezone().tzinfo))
+    subscribed_at = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+    )
     email_unsubscribed_at = Column(DateTime(timezone=True), nullable=True)
     sms_unsubscribed_at = Column(DateTime(timezone=True), nullable=True)
-    
+
     # Preferences
     language = Column(String(10), nullable=False, default="en")
     timezone = Column(String(50), nullable=True)
-    tags = Column(JSONB, nullable=True, comment="Subscriber tags for segmentation")
-    
+    tags = Column(
+        JSONB, nullable=True, comment="Subscriber tags for segmentation"
+    )
+
     # Soft reference to customer
     customer_id = Column(
         PostgresUUID(as_uuid=True),
@@ -174,7 +232,7 @@ class Subscriber(BaseModel):
         index=True,
         comment="Soft reference to customer (validated at application level)",
     )
-    
+
     # Soft reference to lead
     lead_id = Column(
         PostgresUUID(as_uuid=True),
@@ -182,28 +240,38 @@ class Subscriber(BaseModel):
         index=True,
         comment="Soft reference to lead (validated at application level)",
     )
-    
+
     # Source tracking
     source = Column(String(100), nullable=True)
     utm_source = Column(String(100), nullable=True)
     utm_medium = Column(String(100), nullable=True)
     utm_campaign = Column(String(100), nullable=True)
-    
+
     # Engagement metrics
     last_email_sent_at = Column(DateTime(timezone=True), nullable=True)
     last_email_opened_at = Column(DateTime(timezone=True), nullable=True)
     last_email_clicked_at = Column(DateTime(timezone=True), nullable=True)
     last_sms_sent_at = Column(DateTime(timezone=True), nullable=True)
-    
+
     email_open_count = Column(Integer, nullable=False, default=0)
     email_click_count = Column(Integer, nullable=False, default=0)
     sms_response_count = Column(Integer, nullable=False, default=0)
-    
-    extra_data = Column(JSONB, nullable=True, comment="Subscriber metadata and custom fields")
+
+    extra_data = Column(
+        JSONB, nullable=True, comment="Subscriber metadata and custom fields"
+    )
 
     # Relationships
-    campaign_events = relationship("CampaignEvent", back_populates="subscriber", cascade="all, delete-orphan")
-    sms_deliveries = relationship("SMSDeliveryEvent", back_populates="subscriber", cascade="all, delete-orphan")
+    campaign_events = relationship(
+        "CampaignEvent",
+        back_populates="subscriber",
+        cascade="all, delete-orphan",
+    )
+    sms_deliveries = relationship(
+        "SMSDeliveryEvent",
+        back_populates="subscriber",
+        cascade="all, delete-orphan",
+    )
 
     @property
     def full_name(self) -> str:
@@ -216,18 +284,21 @@ class Subscriber(BaseModel):
         """Check if subscriber is engaged (opened/clicked within 30 days)."""
         if not self.last_email_opened_at:
             return False
-        days_since_open = (datetime.now(self.last_email_opened_at.tzinfo) - self.last_email_opened_at).days
+        days_since_open = (
+            datetime.now(self.last_email_opened_at.tzinfo)
+            - self.last_email_opened_at
+        ).days
         return days_since_open <= 30
 
     def unsubscribe_email(self):
         """Unsubscribe from email communications."""
         self.email_subscribed = False
-        self.email_unsubscribed_at = datetime.now(datetime.now().astimezone().tzinfo)
+        self.email_unsubscribed_at = datetime.now(timezone.utc)
 
     def unsubscribe_sms(self):
         """Unsubscribe from SMS communications."""
         self.sms_subscribed = False
-        self.sms_unsubscribed_at = datetime.now(datetime.now().astimezone().tzinfo)
+        self.sms_unsubscribed_at = datetime.now(timezone.utc)
 
     def __repr__(self):
         channels = []

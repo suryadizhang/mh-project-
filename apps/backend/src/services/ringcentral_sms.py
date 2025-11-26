@@ -1,7 +1,7 @@
 """RingCentral SMS integration service."""
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import logging
 from typing import Any
 
@@ -44,16 +44,23 @@ class RingCentralSMSService:
     def __init__(self):
         self.client_id = settings.ringcentral_client_id
         self.client_secret = settings.ringcentral_client_secret
-        self.server_url = settings.ringcentral_server_url or "https://platform.ringcentral.com"
+        self.server_url = (
+            settings.ringcentral_server_url
+            or "https://platform.ringcentral.com"
+        )
         self.username = settings.ringcentral_username
         self.extension = getattr(settings, "ringcentral_extension", "101")
         self.password = settings.ringcentral_password
         # Enhanced configuration support
         self.jwt_token = getattr(settings, "ringcentral_jwt_token", "")
         self.phone_number = getattr(
-            settings, "ringcentral_phone_number", settings.ringcentral_from_number
+            settings,
+            "ringcentral_phone_number",
+            settings.ringcentral_from_number,
         )
-        self.webhook_secret = getattr(settings, "ringcentral_webhook_secret", "")
+        self.webhook_secret = getattr(
+            settings, "ringcentral_webhook_secret", ""
+        )
         self.sandbox_mode = getattr(settings, "ringcentral_sandbox", True)
         self.access_token: str | None = None
         self.token_expires_at: datetime | None = None
@@ -77,7 +84,9 @@ class RingCentralSMSService:
             return await self._authenticate_with_jwt()
 
         # Fall back to username/password authentication
-        if not all([self.client_id, self.client_secret, self.username, self.password]):
+        if not all(
+            [self.client_id, self.client_secret, self.username, self.password]
+        ):
             logger.error("RingCentral credentials not configured")
             return False
 
@@ -102,7 +111,9 @@ class RingCentralSMSService:
                 token_data = response.json()
                 self.access_token = token_data["access_token"]
                 expires_in = token_data.get("expires_in", 3600)
-                self.token_expires_at = datetime.now() + timedelta(seconds=expires_in - 60)
+                self.token_expires_at = datetime.now(timezone.utc) + timedelta(
+                    seconds=expires_in - 60
+                )
                 logger.info("RingCentral authentication successful")
                 return True
             else:
@@ -136,7 +147,9 @@ class RingCentralSMSService:
                 token_data = response.json()
                 self.access_token = token_data["access_token"]
                 expires_in = token_data.get("expires_in", 3600)
-                self.token_expires_at = datetime.now() + timedelta(seconds=expires_in - 60)
+                self.token_expires_at = datetime.now(timezone.utc) + timedelta(
+                    seconds=expires_in - 60
+                )
                 logger.info("RingCentral JWT authentication successful")
                 return True
             else:
@@ -152,7 +165,8 @@ class RingCentralSMSService:
     async def _ensure_authenticated(self) -> bool:
         """Ensure we have a valid access token."""
         if not self.access_token or (
-            self.token_expires_at and datetime.now() >= self.token_expires_at
+            self.token_expires_at
+            and datetime.now(timezone.utc) >= self.token_expires_at
         ):
             return await self.authenticate()
         return True
@@ -183,7 +197,9 @@ class RingCentralSMSService:
 
             if response.status_code in [200, 201]:
                 result = response.json()
-                return SMSResponse(success=True, message_id=str(result.get("id")))
+                return SMSResponse(
+                    success=True, message_id=str(result.get("id"))
+                )
             else:
                 error_msg = f"SMS send failed: {response.status_code} - {response.text}"
                 logger.error(error_msg)
@@ -216,7 +232,10 @@ class RingCentralSMSService:
             if direction:
                 params["direction"] = direction
 
-            headers = {"Authorization": f"Bearer {self.access_token}", "Accept": "application/json"}
+            headers = {
+                "Authorization": f"Bearer {self.access_token}",
+                "Accept": "application/json",
+            }
 
             response = await self._client.get(
                 f"{self.server_url}/restapi/v1.0/account/~/extension/~/message-store",
@@ -260,20 +279,27 @@ class RingCentralSMSService:
 
                 return messages
             else:
-                logger.error(f"Get messages failed: {response.status_code} - {response.text}")
+                logger.error(
+                    f"Get messages failed: {response.status_code} - {response.text}"
+                )
                 return []
 
         except Exception as e:
             logger.exception(f"Get messages error: {e!s}")
             return []
 
-    async def get_conversation_messages(self, conversation_id: str) -> list[SMSMessage]:
+    async def get_conversation_messages(
+        self, conversation_id: str
+    ) -> list[SMSMessage]:
         """Get all messages in a conversation."""
         if not await self._ensure_authenticated():
             return []
 
         try:
-            headers = {"Authorization": f"Bearer {self.access_token}", "Accept": "application/json"}
+            headers = {
+                "Authorization": f"Bearer {self.access_token}",
+                "Accept": "application/json",
+            }
 
             response = await self._client.get(
                 f"{self.server_url}/restapi/v1.0/account/~/extension/~/message-store/{conversation_id}",
@@ -284,22 +310,30 @@ class RingCentralSMSService:
                 response.json()
                 # Process conversation data similar to get_messages
                 # This is a simplified version - you may need to adapt based on actual API response
-                return await self.get_messages()  # Fallback to general message retrieval
+                return (
+                    await self.get_messages()
+                )  # Fallback to general message retrieval
             else:
-                logger.error(f"Get conversation failed: {response.status_code} - {response.text}")
+                logger.error(
+                    f"Get conversation failed: {response.status_code} - {response.text}"
+                )
                 return []
 
         except Exception as e:
             logger.exception(f"Get conversation error: {e!s}")
             return []
 
-    async def setup_webhook(self, webhook_url: str, event_filters: list[str] | None = None) -> bool:
+    async def setup_webhook(
+        self, webhook_url: str, event_filters: list[str] | None = None
+    ) -> bool:
         """Setup webhook for real-time SMS notifications."""
         if not await self._ensure_authenticated():
             return False
 
         if event_filters is None:
-            event_filters = ["/restapi/v1.0/account/~/extension/~/message-store/instant?type=SMS"]
+            event_filters = [
+                "/restapi/v1.0/account/~/extension/~/message-store/instant?type=SMS"
+            ]
 
         try:
             webhook_data = {
@@ -314,7 +348,9 @@ class RingCentralSMSService:
             }
 
             response = await self._client.post(
-                f"{self.server_url}/restapi/v1.0/subscription", json=webhook_data, headers=headers
+                f"{self.server_url}/restapi/v1.0/subscription",
+                json=webhook_data,
+                headers=headers,
             )
 
             if response.status_code in [200, 201]:
@@ -322,14 +358,18 @@ class RingCentralSMSService:
                 logger.info(f"Webhook created: {result.get('id')}")
                 return True
             else:
-                logger.error(f"Webhook setup failed: {response.status_code} - {response.text}")
+                logger.error(
+                    f"Webhook setup failed: {response.status_code} - {response.text}"
+                )
                 return False
 
         except Exception as e:
             logger.exception(f"Webhook setup error: {e!s}")
             return False
 
-    async def handle_webhook_notification(self, payload: dict[str, Any]) -> list[SMSMessage]:
+    async def handle_webhook_notification(
+        self, payload: dict[str, Any]
+    ) -> list[SMSMessage]:
         """Process incoming webhook notification."""
         messages = []
 
@@ -349,9 +389,13 @@ class RingCentralSMSService:
 
                         message = SMSMessage(
                             id=str(msg_data["id"]),
-                            from_number=msg_data.get("from", {}).get("phoneNumber", ""),
+                            from_number=msg_data.get("from", {}).get(
+                                "phoneNumber", ""
+                            ),
                             to_number=(
-                                msg_data.get("to", [{}])[0].get("phoneNumber", "")
+                                msg_data.get("to", [{}])[0].get(
+                                    "phoneNumber", ""
+                                )
                                 if msg_data.get("to")
                                 else ""
                             ),
@@ -360,7 +404,9 @@ class RingCentralSMSService:
                             creation_time=creation_time,
                             last_modified_time=creation_time,
                             message_status=msg_data.get("messageStatus", ""),
-                            conversation_id=str(msg_data.get("conversationId", "")),
+                            conversation_id=str(
+                                msg_data.get("conversationId", "")
+                            ),
                         )
                         messages.append(message)
 
@@ -390,7 +436,9 @@ class RingCentralSMSService:
             logger.exception(f"Account info error: {e!s}")
             return {}
 
-    async def verify_webhook_signature(self, payload: bytes, signature: str) -> bool:
+    async def verify_webhook_signature(
+        self, payload: bytes, signature: str
+    ) -> bool:
         """Verify webhook signature for security."""
         if not self.webhook_secret or not signature:
             return False
@@ -411,7 +459,7 @@ class RingCentralSMSService:
             "status": "unknown",
             "authentication": "failed",
             "configuration": "incomplete",
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
         try:
@@ -420,10 +468,14 @@ class RingCentralSMSService:
             auth_method = (
                 "jwt"
                 if self.jwt_token
-                else "password" if (self.username and self.password) else "none"
+                else (
+                    "password" if (self.username and self.password) else "none"
+                )
             )
 
-            health_status["configuration"] = "complete" if config_ok else "incomplete"
+            health_status["configuration"] = (
+                "complete" if config_ok else "incomplete"
+            )
             health_status["auth_method"] = auth_method
 
             if config_ok and auth_method != "none":
@@ -435,8 +487,12 @@ class RingCentralSMSService:
                     # Get account info for additional details
                     account_info = await self.get_account_info()
                     if account_info:
-                        health_status["account_name"] = account_info.get("name", "Unknown")
-                        health_status["account_status"] = account_info.get("status", "Unknown")
+                        health_status["account_name"] = account_info.get(
+                            "name", "Unknown"
+                        )
+                        health_status["account_status"] = account_info.get(
+                            "status", "Unknown"
+                        )
                 else:
                     health_status["status"] = "unhealthy"
             else:
@@ -464,5 +520,5 @@ async def sync_sms_messages() -> list[SMSMessage]:
     """Sync recent SMS messages from RingCentral."""
     async with ringcentral_sms as sms_service:
         # Get messages from the last 24 hours
-        date_from = datetime.now() - timedelta(days=1)
+        date_from = datetime.now(timezone.utc) - timedelta(days=1)
         return await sms_service.get_messages(date_from=date_from)
