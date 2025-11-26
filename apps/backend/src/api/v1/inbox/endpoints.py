@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from .models import (
-    Message,
+    InboxMessage,
     MessageChannel,
     MessageStatus,
     TCPAOptStatus,
@@ -68,26 +68,26 @@ async def get_messages(
 ):
     """Get messages with filtering and pagination"""
     try:
-        query = select(Message).options(selectinload(Message.thread))
+        query = select(InboxMessage).options(selectinload(InboxMessage.thread))
 
         # Apply filters
         conditions = []
         if channel:
-            conditions.append(Message.channel == channel)
+            conditions.append(InboxMessage.channel == channel)
         if contact_id:
-            conditions.append(Message.contact_id == contact_id)
+            conditions.append(InboxMessage.contact_id == contact_id)
         if thread_id:
-            conditions.append(Message.thread_id == thread_id)
+            conditions.append(InboxMessage.thread_id == thread_id)
         if status:
-            conditions.append(Message.status == status)
+            conditions.append(InboxMessage.status == status)
         if phone_number:
-            conditions.append(Message.phone_number == phone_number)
+            conditions.append(InboxMessage.phone_number == phone_number)
 
         if conditions:
             query = query.where(and_(*conditions))
 
         # Apply pagination and ordering
-        query = query.order_by(desc(Message.created_at))
+        query = query.order_by(desc(InboxMessage.created_at))
         query = query.offset((page - 1) * limit).limit(limit)
 
         result = await db.execute(query)
@@ -103,7 +103,7 @@ async def get_messages(
 @router.get("/messages/{message_id}", response_model=MessageResponse)
 async def get_message(message_id: UUID, db: AsyncSession = Depends(get_db)):
     """Get specific message by ID"""
-    message = await db.get(Message, message_id)
+    message = await db.get(InboxMessage, message_id)
     if not message:
         raise HTTPException(status_code=404, detail="Message not found")
 
@@ -115,7 +115,7 @@ async def update_message_status(
     message_id: UUID, new_status: MessageStatus, db: AsyncSession = Depends(get_db)
 ):
     """Update message status (read, replied, etc.)"""
-    message = await db.get(Message, message_id)
+    message = await db.get(InboxMessage, message_id)
     if not message:
         raise HTTPException(status_code=404, detail="Message not found")
 
@@ -197,13 +197,13 @@ async def get_threads(
         response_threads = []
         for thread in threads:
             # Count messages in thread
-            count_query = select(func.count(Message.id)).where(Message.thread_id == thread.id)
+            count_query = select(func.count(InboxMessage.id)).where(InboxMessage.thread_id == thread.id)
             count_result = await db.execute(count_query)
             message_count = count_result.scalar()
 
             # Count unread messages
-            unread_query = select(func.count(Message.id)).where(
-                and_(Message.thread_id == thread.id, Message.status != MessageStatus.READ)
+            unread_query = select(func.count(InboxMessage.id)).where(
+                and_(InboxMessage.thread_id == thread.id, InboxMessage.status != MessageStatus.READ)
             )
             unread_result = await db.execute(unread_query)
             unread_count = unread_result.scalar()
@@ -237,8 +237,8 @@ async def get_thread_with_messages(
 
     if include_messages:
         # Get messages for thread
-        query = select(Message).where(Message.thread_id == thread_id)
-        query = query.order_by(Message.created_at).limit(message_limit)
+        query = select(InboxMessage).where(InboxMessage.thread_id == thread_id)
+        query = query.order_by(InboxMessage.created_at).limit(message_limit)
 
         result = await db.execute(query)
         messages = result.scalars().all()
@@ -341,10 +341,10 @@ async def get_message_stats(
         # Base query conditions
         conditions = []
         if channel:
-            conditions.append(Message.channel == channel)
+            conditions.append(InboxMessage.channel == channel)
 
         # Total messages
-        total_query = select(func.count(Message.id))
+        total_query = select(func.count(InboxMessage.id))
         if conditions:
             total_query = total_query.where(and_(*conditions))
         total_result = await db.execute(total_query)
@@ -358,20 +358,20 @@ async def get_message_stats(
         total_threads = thread_result.scalar()
 
         # Channel stats
-        channel_query = select(Message.channel, func.count(Message.id)).group_by(Message.channel)
+        channel_query = select(InboxMessage.channel, func.count(InboxMessage.id)).group_by(InboxMessage.channel)
         channel_result = await db.execute(channel_query)
         channel_stats = {row[0]: row[1] for row in channel_result}
 
         # Status stats
-        status_query = select(Message.status, func.count(Message.id)).group_by(Message.status)
+        status_query = select(InboxMessage.status, func.count(InboxMessage.id)).group_by(InboxMessage.status)
         if conditions:
             status_query = status_query.where(and_(*conditions))
         status_result = await db.execute(status_query)
         status_stats = {row[0]: row[1] for row in status_result}
 
         # Direction stats
-        direction_query = select(Message.direction, func.count(Message.id)).group_by(
-            Message.direction
+        direction_query = select(InboxMessage.direction, func.count(InboxMessage.id)).group_by(
+            InboxMessage.direction
         )
         if conditions:
             direction_query = direction_query.where(and_(*conditions))
@@ -381,7 +381,7 @@ async def get_message_stats(
         # Recent activity (last 24 hours)
         last_24h = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
 
-        recent_msg_query = select(func.count(Message.id)).where(Message.created_at >= last_24h)
+        recent_msg_query = select(func.count(InboxMessage.id)).where(InboxMessage.created_at >= last_24h)
         if conditions:
             recent_msg_query = recent_msg_query.where(and_(*conditions))
         recent_msg_result = await db.execute(recent_msg_query)

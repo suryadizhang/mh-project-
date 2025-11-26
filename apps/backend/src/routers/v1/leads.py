@@ -1,6 +1,6 @@
 """Lead management API endpoints."""
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 import logging
 from typing import Any
 from uuid import UUID
@@ -229,7 +229,7 @@ async def list_leads(
         stmt = stmt.where(
             and_(
                 Lead.follow_up_date.isnot(None),
-                Lead.follow_up_date < datetime.now(),
+                Lead.follow_up_date < datetime.now(timezone.utc),
             )
         )
 
@@ -300,7 +300,7 @@ async def update_lead(
 
         # Special handling for status changes
         if lead_update.status == LeadStatus.CONVERTED:
-            lead.conversion_date = datetime.now()
+            lead.conversion_date = datetime.now(timezone.utc)
 
     if lead_update.quality and lead_update.quality != lead.quality:
         changes["quality"] = {
@@ -356,7 +356,7 @@ async def add_lead_event(
         )
 
     lead.add_event(event_type, payload)
-    lead.last_contact_date = datetime.now()
+    lead.last_contact_date = datetime.now(timezone.utc)
 
     await db.commit()
 

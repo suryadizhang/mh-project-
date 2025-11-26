@@ -24,57 +24,57 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = '009_payment_notifications'
-down_revision = 'cd22216ae9d3'  # Depends on roles + users merge (ensures identity.users exists)
+down_revision = '008_add_user_roles'  # Fixed: was cd22216ae9d3 (deleted duplicate merge)
 branch_labels = None
 depends_on = None
 
 
 def upgrade() -> None:
     """Create payment notification system tables"""
-    
+
     # Note: This migration originally created a catering_bookings table,
     # but we use core.bookings instead. catering_payments and payment_notifications
     # reference core.bookings.id via UUID foreign keys.
-    
+
     # Create catering_payments table
     op.create_table(
         'catering_payments',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-        
+
         # Foreign Keys
         sa.Column('booking_id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column('notification_id', sa.Integer(), nullable=True),
-        
+
         # Payment Details
         sa.Column('amount', sa.Numeric(precision=10, scale=2), nullable=False),
         sa.Column('payment_method', sa.Enum('STRIPE', 'VENMO', 'ZELLE', 'BANK_OF_AMERICA', 'PLAID', 'CASH', 'CHECK', 'OTHER', name='paymentprovider'), nullable=False),
         sa.Column('status', sa.String(length=50), nullable=True, server_default='pending'),
-        
+
         # Transaction Information
         sa.Column('transaction_id', sa.String(length=255), nullable=True),
         sa.Column('sender_name', sa.String(length=255), nullable=True),
         sa.Column('sender_email', sa.String(length=255), nullable=True),
         sa.Column('sender_phone', sa.String(length=20), nullable=True),
         sa.Column('sender_username', sa.String(length=100), nullable=True),
-        
+
         # Payment Type
         sa.Column('payment_type', sa.String(length=50), nullable=True, server_default='full'),
-        
+
         # Processing
         sa.Column('processed_at', sa.DateTime(), nullable=True),
         sa.Column('confirmed_at', sa.DateTime(), nullable=True),
         sa.Column('confirmation_sent', sa.Boolean(), nullable=True, server_default='false'),
-        
+
         # Notes
         sa.Column('payment_note', sa.Text(), nullable=True),
         sa.Column('admin_note', sa.Text(), nullable=True),
-        
+
         sa.PrimaryKeyConstraint('id'),
         sa.ForeignKeyConstraint(['booking_id'], ['core.bookings.id'], ondelete='CASCADE'),
     )
-    
+
     # Create indexes for catering_payments
     op.create_index('idx_payment_booking_id', 'catering_payments', ['booking_id'])
     op.create_index('idx_payment_notification_id', 'catering_payments', ['notification_id'])
@@ -83,63 +83,63 @@ def upgrade() -> None:
     op.create_index('idx_payment_transaction_id', 'catering_payments', ['transaction_id'], unique=True)
     op.create_index('idx_payment_booking_status', 'catering_payments', ['booking_id', 'status'])
     op.create_index('idx_payment_method_status', 'catering_payments', ['payment_method', 'status'])
-    
+
     # Create payment_notifications table
     op.create_table(
         'payment_notifications',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
-        
+
         # Email Details
         sa.Column('email_id', sa.String(length=255), nullable=False),
         sa.Column('email_subject', sa.String(length=500), nullable=False),
         sa.Column('email_from', sa.String(length=255), nullable=False),
         sa.Column('email_body', sa.Text(), nullable=True),
         sa.Column('received_at', sa.DateTime(), nullable=False),
-        
+
         # Parsed Payment Information
         sa.Column('provider', sa.Enum('STRIPE', 'VENMO', 'ZELLE', 'BANK_OF_AMERICA', 'PLAID', 'CASH', 'CHECK', 'OTHER', name='paymentprovider'), nullable=False),
         sa.Column('amount', sa.Numeric(precision=10, scale=2), nullable=False),
         sa.Column('transaction_id', sa.String(length=255), nullable=True),
-        
+
         # Sender Information
         sa.Column('sender_name', sa.String(length=255), nullable=True),
         sa.Column('sender_email', sa.String(length=255), nullable=True),
         sa.Column('sender_phone', sa.String(length=20), nullable=True),
         sa.Column('sender_username', sa.String(length=100), nullable=True),
-        
+
         # Matching Information
         sa.Column('status', sa.Enum('DETECTED', 'PENDING_MATCH', 'MATCHED', 'CONFIRMED', 'MANUAL_REVIEW', 'IGNORED', 'ERROR', name='paymentnotificationstatus'), nullable=False, server_default='DETECTED'),
         sa.Column('match_score', sa.Integer(), nullable=True, server_default='0'),
         sa.Column('match_details', sa.JSON(), nullable=True),
-        
+
         # Foreign Keys
         sa.Column('booking_id', postgresql.UUID(as_uuid=True), nullable=True),
         sa.Column('payment_id', sa.Integer(), nullable=True),
-        
+
         # Processing
         sa.Column('parsed_at', sa.DateTime(), nullable=False, server_default=sa.text('CURRENT_TIMESTAMP')),
         sa.Column('matched_at', sa.DateTime(), nullable=True),
         sa.Column('confirmed_at', sa.DateTime(), nullable=True),
         sa.Column('reviewed_by', postgresql.UUID(as_uuid=True), nullable=True),
-        
+
         # Flags
         sa.Column('is_read', sa.Boolean(), nullable=True, server_default='false'),
         sa.Column('is_processed', sa.Boolean(), nullable=True, server_default='false'),
         sa.Column('requires_manual_review', sa.Boolean(), nullable=True, server_default='false'),
         sa.Column('is_duplicate', sa.Boolean(), nullable=True, server_default='false'),
-        
+
         # Notes
         sa.Column('admin_notes', sa.Text(), nullable=True),
         sa.Column('error_message', sa.Text(), nullable=True),
-        
+
         sa.PrimaryKeyConstraint('id'),
         sa.ForeignKeyConstraint(['booking_id'], ['core.bookings.id'], ondelete='SET NULL'),
         sa.ForeignKeyConstraint(['payment_id'], ['catering_payments.id'], ondelete='SET NULL'),
         sa.ForeignKeyConstraint(['reviewed_by'], ['identity.users.id'], ondelete='SET NULL'),
     )
-    
+
     # Create indexes for payment_notifications
     op.create_index('idx_notification_email_id', 'payment_notifications', ['email_id'], unique=True)
     op.create_index('idx_notification_email_from', 'payment_notifications', ['email_from'])
@@ -156,7 +156,7 @@ def upgrade() -> None:
     op.create_index('idx_notification_status_processed', 'payment_notifications', ['status', 'is_processed'])
     op.create_index('idx_notification_provider_date', 'payment_notifications', ['provider', 'received_at'])
     op.create_index('idx_notification_manual_review', 'payment_notifications', ['requires_manual_review', 'is_processed'])
-    
+
     # Add foreign key constraint for notification_id in catering_payments (after payment_notifications is created)
     op.create_foreign_key(
         'fk_catering_payments_notification_id',
@@ -170,15 +170,15 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Drop payment notification system tables"""
-    
+
     # Drop foreign key constraint first
     op.drop_constraint('fk_catering_payments_notification_id', 'catering_payments', type_='foreignkey')
-    
+
     # Drop tables in reverse order
     op.drop_table('payment_notifications')
     op.drop_table('catering_payments')
     # Note: We no longer create catering_bookings in upgrade(), so we don't drop it here
-    
+
     # Drop enums
     op.execute('DROP TYPE IF EXISTS paymentnotificationstatus')
     op.execute('DROP TYPE IF EXISTS paymentprovider')

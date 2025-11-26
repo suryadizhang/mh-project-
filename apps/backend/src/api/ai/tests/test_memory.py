@@ -19,7 +19,7 @@ Run:
 """
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import sys
 
@@ -54,8 +54,8 @@ class MemoryBackendTests:
 
     def __init__(self):
         self.memory = None
-        self.test_conv_id = f"test_conv_{datetime.now().timestamp()}"
-        self.test_user_id = f"test_user_{datetime.now().timestamp()}"
+        self.test_conv_id = f"test_conv_{datetime.now(timezone.utc).timestamp()}"
+        self.test_user_id = f"test_user_{datetime.now(timezone.utc).timestamp()}"
 
     async def setup(self):
         """Initialize memory backend"""
@@ -466,3 +466,4 @@ async def run_all_tests():
 
 if __name__ == "__main__":
     asyncio.run(run_all_tests())
+

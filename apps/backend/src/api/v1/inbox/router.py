@@ -12,7 +12,7 @@ from sqlalchemy import and_, desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import (
-    Message,
+    InboxMessage,
     MessageChannel,
     MessageDirection,
     MessageStatus,
@@ -121,7 +121,7 @@ class MessageRouter:
             contact_id = await self._find_or_create_contact(sender_info, channel)
 
             # Create message record
-            message = Message(
+            message = InboxMessage(
                 id=uuid4(),
                 channel=channel,
                 direction=MessageDirection.INBOUND,
@@ -162,9 +162,9 @@ class MessageRouter:
             await self.db.rollback()
             raise
 
-    async def _create_message_record(self, request: SendMessageRequest) -> Message:
+    async def _create_message_record(self, request: SendMessageRequest) -> InboxMessage:
         """Create message database record"""
-        message = Message(
+        message = InboxMessage(
             id=uuid4(),
             channel=request.channel,
             direction=request.direction,
@@ -186,7 +186,7 @@ class MessageRouter:
         return message
 
     async def _get_or_create_thread(
-        self, message: Message, request: SendMessageRequest | None
+        self, message: InboxMessage, request: SendMessageRequest | None
     ) -> Thread:
         """Get existing thread or create new one"""
 
@@ -238,7 +238,7 @@ class MessageRouter:
         # For now, return None to allow anonymous messaging
         return None
 
-    async def _notify_websocket_clients(self, message: Message, event_type: str):
+    async def _notify_websocket_clients(self, message: InboxMessage, event_type: str):
         """Notify connected WebSocket clients of message events"""
         try:
             # Get active WebSocket connections
@@ -287,7 +287,7 @@ class MessageRouter:
 
         return await self.route_message(auto_request)
 
-    async def _check_auto_responses(self, message: Message):
+    async def _check_auto_responses(self, message: InboxMessage):
         """Check and trigger auto-responses if configured"""
         # Auto-response logic would be implemented here
 
@@ -387,7 +387,7 @@ class TCPAHandler:
 class SMSHandler:
     """SMS message handler"""
 
-    async def send_message(self, message: Message, request: SendMessageRequest) -> dict[str, Any]:
+    async def send_message(self, message: InboxMessage, request: SendMessageRequest) -> dict[str, Any]:
         """Send SMS message via provider"""
         # Implementation would integrate with SMS provider (Twilio, etc.)
         return {
@@ -400,7 +400,7 @@ class SMSHandler:
 class EmailHandler:
     """Email message handler"""
 
-    async def send_message(self, message: Message, request: SendMessageRequest) -> dict[str, Any]:
+    async def send_message(self, message: InboxMessage, request: SendMessageRequest) -> dict[str, Any]:
         """Send email message via provider"""
         # Implementation would integrate with email provider (SendGrid, etc.)
         return {
@@ -413,7 +413,7 @@ class EmailHandler:
 class WebSocketHandler:
     """WebSocket message handler"""
 
-    async def send_message(self, message: Message, request: SendMessageRequest) -> dict[str, Any]:
+    async def send_message(self, message: InboxMessage, request: SendMessageRequest) -> dict[str, Any]:
         """Send WebSocket message to connected clients"""
         # Implementation would use WebSocket manager
         return {
@@ -429,7 +429,7 @@ class SocialMediaHandler:
     def __init__(self, platform: str):
         self.platform = platform
 
-    async def send_message(self, message: Message, request: SendMessageRequest) -> dict[str, Any]:
+    async def send_message(self, message: InboxMessage, request: SendMessageRequest) -> dict[str, Any]:
         """Send social media message via platform API"""
         # Implementation would integrate with platform APIs
         return {

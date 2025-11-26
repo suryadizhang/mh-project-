@@ -12,9 +12,8 @@ from typing import Any
 from uuid import UUID, uuid4
 
 # Import unified Base (avoid circular import)
-from models.legacy_declarative_base import (
-    Base,
-)  # Phase 2C: Updated from api.app.models.declarative_base
+# Fixed: Import from core.database instead of missing legacy_declarative_base
+from core.database import Base
 from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
 import bcrypt
 import jwt
@@ -163,10 +162,15 @@ class StationUser(Base):
 
     NOTE: This is separate from models.user.User (OAuth/general users).
     Station users require encrypted PII storage for compliance.
+
+    ⚠️ DEPRECATED: This model doesn't match database schema.
+    Database uses identity.users (37 columns) for all auth.
+    This model (20+ encrypted columns) was designed for separate auth_users table that doesn't exist.
+    TODO: Remove after verifying no dependencies.
     """
 
-    __tablename__ = "station_users"  # Renamed from "users" to avoid conflict
-    __table_args__ = {"schema": "identity", "extend_existing": True}
+    __tablename__ = "station_users"  # ⚠️ CONFLICTS with junction table - needs migration
+    __table_args__ = {"schema": "identity", "extend_existing": True, "info": {"deprecated": True}}
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
 
@@ -562,6 +566,9 @@ class AuthenticationService:
         return len(errors) == 0, errors
 
 
+# Create alias for backward compatibility
+User = StationUser
+
 __all__ = [
     "ROLE_PERMISSIONS",
     "AuditLog",
@@ -570,7 +577,8 @@ __all__ = [
     "Permission",
     "Role",
     "SessionStatus",
-    "User",
+    "StationUser",
+    "User",  # Alias to StationUser
     "UserSession",
     "UserStatus",
 ]

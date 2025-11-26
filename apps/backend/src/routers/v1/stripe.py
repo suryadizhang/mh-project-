@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 settings = get_settings()
 from core.database import get_db
-from models.legacy_core import CorePayment
+from models.booking import Payment
 from models.legacy_stripe_models import (
     Invoice,
     Refund,

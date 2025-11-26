@@ -60,6 +60,9 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import attributes, relationship
 
+# Import unified models from db.models.ai package
+from db.models.ai import UnifiedConversation, UnifiedMessage
+
 logger = logging.getLogger(__name__)
 
 # Background task tracking for emotion stats updates
@@ -67,112 +70,16 @@ _background_tasks = set()
 
 
 # =============================================================================
-# DATABASE MODELS
+# UNIFIED MODELS (imported from db.models.ai)
 # =============================================================================
-
-
-class AIConversation(Base):
-    """Conversation metadata table"""
-
-    __tablename__ = "ai_conversations"
-
-    # Primary key
-    id = Column(String(100), primary_key=True)
-
-    # User info
-    user_id = Column(String(100), nullable=True, index=True)
-
-    # Channel
-    channel = Column(String(20), nullable=False, default="web")
-
-    # Timestamps
-    started_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    last_message_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-
-    # Counts
-    message_count = Column(Integer, nullable=False, default=0)
-
-    # Context (JSONB for flexibility)
-    context = Column(JSONB, nullable=False, default=dict)
-
-    # Emotion tracking
-    average_emotion_score = Column(Float, nullable=True)
-    emotion_trend = Column(String(20), nullable=True)  # improving/declining/stable
-    escalated = Column(Boolean, nullable=False, default=False)
-    escalated_at = Column(DateTime, nullable=True)
-
-    # Status
-    is_active = Column(Boolean, nullable=False, default=True, index=True)
-    closed_at = Column(DateTime, nullable=True)
-    closed_reason = Column(String(100), nullable=True)
-
-    # Relationships
-    messages = relationship(
-        "AIMessage", back_populates="conversation", cascade="all, delete-orphan"
-    )
-
-    # Indexes
-    __table_args__ = (
-        Index("idx_ai_conversations_user_active", user_id, is_active),
-        Index("idx_ai_conversations_channel", channel),
-        Index("idx_ai_conversations_escalated", escalated, escalated_at),
-        Index("idx_ai_conversations_last_message", last_message_at),
-        # GIN index for JSONB context
-        Index("idx_ai_conversations_context", context, postgresql_using="gin"),
-    )
-
-
-class AIMessage(Base):
-    """Individual message table"""
-
-    __tablename__ = "ai_messages"
-
-    # Primary key
-    id = Column(String(100), primary_key=True, default=lambda: str(uuid4()))
-
-    # Foreign key to conversation
-    conversation_id = Column(
-        String(100),
-        ForeignKey("ai_conversations.id", ondelete="CASCADE"),
-        nullable=False,
-        index=True,
-    )
-
-    # Message data
-    role = Column(String(20), nullable=False)  # user/assistant/system/tool
-    content = Column(Text, nullable=False)
-    timestamp = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
-
-    # Message metadata (JSONB) - renamed to avoid SQLAlchemy reserved word
-    message_metadata = Column(JSONB, nullable=False, default=dict)
-    channel = Column(String(20), nullable=False, default="web")
-
-    # Emotion tracking
-    emotion_score = Column(Float, nullable=True)
-    emotion_label = Column(String(20), nullable=True)  # negative/neutral/positive
-    detected_emotions = Column(JSONB, nullable=True)  # Array of emotion strings
-
-    # Token tracking
-    input_tokens = Column(Integer, nullable=True)
-    output_tokens = Column(Integer, nullable=True)
-
-    # Tool usage (JSONB)
-    tool_calls = Column(JSONB, nullable=True)
-    tool_results = Column(JSONB, nullable=True)
-
-    # Relationship
-    conversation = relationship("AIConversation", back_populates="messages")
-
-    # Indexes
-    __table_args__ = (
-        Index("idx_ai_messages_conversation_timestamp", conversation_id, timestamp),
-        Index("idx_ai_messages_role", role),
-        Index("idx_ai_messages_emotion_score", emotion_score),
-        # Composite index for emotion history lookup (optimizes scheduler queries)
-        Index("idx_ai_messages_emotion_history", conversation_id, emotion_score, timestamp),
-        # GIN index for JSONB metadata
-        Index("idx_ai_messages_message_metadata", message_metadata, postgresql_using="gin"),
-    )
+# Models now live in: apps/backend/src/db/models/ai/
+# - UnifiedConversation: Multi-channel conversation with emotion tracking
+# - UnifiedMessage: Messages with role, emotion, tools, training data
+#
+# Old tables (public.ai_conversations, public.ai_messages) have been:
+# - Migrated to ai.conversations and ai.messages
+# - Renamed to *_legacy for safety
+# =============================================================================
 
 
 # =============================================================================
@@ -215,7 +122,7 @@ class PostgreSQLMemory(MemoryBackend):
         try:
             # Test connection
             async with get_db_context() as db:
-                result = await db.execute(select(func.count()).select_from(AIConversation))
+                result = await db.execute(select(func.count()).select_from(UnifiedConversation))
                 count = result.scalar()
                 logger.info(f"PostgreSQL memory initialized - {count} conversations in database")
 
@@ -232,12 +139,12 @@ class PostgreSQLMemory(MemoryBackend):
         try:
             async with get_db_context() as db:
                 # Count messages
-                result = await db.execute(select(func.count()).select_from(AIMessage))
+                result = await db.execute(select(func.count()).select_from(UnifiedMessage))
                 message_count = result.scalar()
 
                 # Count active conversations
                 result = await db.execute(
-                    select(func.count()).select_from(AIConversation).where(AIConversation.is_active)
+                    select(func.count()).select_from(UnifiedConversation).where(UnifiedConversation.status == 'active')
                 )
                 active_count = result.scalar()
 
@@ -289,7 +196,7 @@ class PostgreSQLMemory(MemoryBackend):
                 # OPTIMIZATION: Use UPSERT to create/update conversation in one query
                 # This eliminates the SELECT + conditional INSERT (saves ~180ms)
                 upsert_stmt = (
-                    insert(AIConversation)
+                    insert(UnifiedConversation)
                     .values(
                         id=conversation_id,
                         user_id=user_id,
@@ -298,13 +205,13 @@ class PostgreSQLMemory(MemoryBackend):
                         last_message_at=message_timestamp,
                         message_count=1,
                         context={},
-                        is_active=True,
+                        status='active',
                     )
                     .on_conflict_do_update(
                         index_elements=["id"],
                         set_={
                             "last_message_at": message_timestamp,
-                            "message_count": AIConversation.message_count + 1,
+                            "message_count": UnifiedConversation.message_count + 1,
                         },
                     )
                 )
@@ -312,7 +219,7 @@ class PostgreSQLMemory(MemoryBackend):
                 await db.execute(upsert_stmt)
 
                 # Create message
-                message = AIMessage(
+                message = UnifiedMessage(
                     id=message_id,
                     conversation_id=conversation_id,
                     role=role.value,
@@ -375,12 +282,12 @@ class PostgreSQLMemory(MemoryBackend):
         try:
             async with get_db_context() as db:
                 # Build query
-                query = select(AIMessage).where(AIMessage.conversation_id == conversation_id)
+                query = select(UnifiedMessage).where(UnifiedMessage.conversation_id == conversation_id)
 
                 if not include_system:
-                    query = query.where(AIMessage.role != "system")
+                    query = query.where(UnifiedMessage.role != "system")
 
-                query = query.order_by(AIMessage.timestamp.asc())
+                query = query.order_by(UnifiedMessage.timestamp.asc())
 
                 if offset > 0:
                     query = query.offset(offset)
@@ -405,9 +312,9 @@ class PostgreSQLMemory(MemoryBackend):
         try:
             async with get_db_context() as db:
                 query = (
-                    select(AIMessage)
-                    .where(AIMessage.conversation_id == conversation_id)
-                    .order_by(AIMessage.timestamp.desc())
+                    select(UnifiedMessage)
+                    .where(UnifiedMessage.conversation_id == conversation_id)
+                    .order_by(UnifiedMessage.timestamp.desc())
                     .limit(count)
                 )
 
@@ -437,11 +344,11 @@ class PostgreSQLMemory(MemoryBackend):
         try:
             async with get_db_context() as db:
                 # Get user's conversations
-                conv_query = select(AIConversation.id).where(AIConversation.user_id == user_id)
+                conv_query = select(UnifiedConversation.id).where(UnifiedConversation.user_id == user_id)
 
                 if channels:
                     channel_values = [ch.value for ch in channels]
-                    conv_query = conv_query.where(AIConversation.channel.in_(channel_values))
+                    conv_query = conv_query.where(UnifiedConversation.channel.in_(channel_values))
 
                 result = await db.execute(conv_query)
                 conversation_ids = [row[0] for row in result.all()]
@@ -450,13 +357,13 @@ class PostgreSQLMemory(MemoryBackend):
                     return []
 
                 # Get messages from these conversations
-                msg_query = select(AIMessage).where(AIMessage.conversation_id.in_(conversation_ids))
+                msg_query = select(UnifiedMessage).where(UnifiedMessage.conversation_id.in_(conversation_ids))
 
                 if days:
                     cutoff = datetime.now(timezone.utc) - timedelta(days=days)
-                    msg_query = msg_query.where(AIMessage.timestamp >= cutoff)
+                    msg_query = msg_query.where(UnifiedMessage.timestamp >= cutoff)
 
-                msg_query = msg_query.order_by(AIMessage.timestamp.desc()).limit(limit)
+                msg_query = msg_query.order_by(UnifiedMessage.timestamp.desc()).limit(limit)
 
                 result = await db.execute(msg_query)
                 messages = result.scalars().all()
@@ -475,12 +382,12 @@ class PostgreSQLMemory(MemoryBackend):
 
         try:
             async with get_db_context() as db:
-                query = select(AIConversation).where(AIConversation.user_id == user_id)
+                query = select(UnifiedConversation).where(UnifiedConversation.user_id == user_id)
 
                 if not include_inactive:
-                    query = query.where(AIConversation.is_active)
+                    query = query.where(UnifiedConversation.status == 'active')
 
-                query = query.order_by(AIConversation.last_message_at.desc())
+                query = query.order_by(UnifiedConversation.last_message_at.desc())
 
                 result = await db.execute(query)
                 conversations = result.scalars().all()
@@ -500,7 +407,7 @@ class PostgreSQLMemory(MemoryBackend):
 
         try:
             async with get_db_context() as db:
-                conversation = await db.get(AIConversation, conversation_id)
+                conversation = await db.get(UnifiedConversation, conversation_id)
 
                 if not conversation:
                     return None
@@ -522,7 +429,7 @@ class PostgreSQLMemory(MemoryBackend):
 
         try:
             async with get_db_context() as db:
-                conversation = await db.get(AIConversation, conversation_id)
+                conversation = await db.get(UnifiedConversation, conversation_id)
 
                 if not conversation:
                     raise MemoryNotFoundError(f"Conversation {conversation_id} not found")
@@ -553,12 +460,12 @@ class PostgreSQLMemory(MemoryBackend):
 
         try:
             async with get_db_context() as db:
-                conversation = await db.get(AIConversation, conversation_id)
+                conversation = await db.get(UnifiedConversation, conversation_id)
 
                 if not conversation:
                     raise MemoryNotFoundError(f"Conversation {conversation_id} not found")
 
-                conversation.is_active = False
+                conversation.status = 'closed'
                 conversation.closed_at = datetime.now(timezone.utc)
                 conversation.closed_reason = reason
 
@@ -589,18 +496,18 @@ class PostgreSQLMemory(MemoryBackend):
                 # OPTIMIZATION: Only select needed columns to enable covering index
                 query = (
                     select(
-                        AIMessage.timestamp,
-                        AIMessage.emotion_score,
-                        AIMessage.emotion_label,
-                        AIMessage.detected_emotions,
+                        UnifiedMessage.timestamp,
+                        UnifiedMessage.emotion_score,
+                        UnifiedMessage.emotion_label,
+                        UnifiedMessage.detected_emotions,
                     )
                     .where(
                         and_(
-                            AIMessage.conversation_id == conversation_id,
-                            AIMessage.emotion_score.isnot(None),
+                            UnifiedMessage.conversation_id == conversation_id,
+                            UnifiedMessage.emotion_score.isnot(None),
                         )
                     )
-                    .order_by(AIMessage.timestamp.desc())
+                    .order_by(UnifiedMessage.timestamp.desc())
                     .limit(limit)
                 )
 
@@ -634,14 +541,14 @@ class PostgreSQLMemory(MemoryBackend):
             async with get_db_context() as db:
                 cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
 
-                query = select(AIConversation).where(
-                    and_(AIConversation.escalated, AIConversation.escalated_at >= cutoff)
+                query = select(UnifiedConversation).where(
+                    and_(UnifiedConversation.escalated, UnifiedConversation.escalated_at >= cutoff)
                 )
 
                 if channel:
-                    query = query.where(AIConversation.channel == channel.value)
+                    query = query.where(UnifiedConversation.channel == channel.value)
 
-                query = query.order_by(AIConversation.escalated_at.desc())
+                query = query.order_by(UnifiedConversation.escalated_at.desc())
 
                 result = await db.execute(query)
                 conversations = result.scalars().all()
@@ -668,9 +575,9 @@ class PostgreSQLMemory(MemoryBackend):
             # Get recent messages (newest first)
             async with get_db_context() as db:
                 query = (
-                    select(AIMessage)
-                    .where(AIMessage.conversation_id == conversation_id)
-                    .order_by(AIMessage.timestamp.desc())
+                    select(UnifiedMessage)
+                    .where(UnifiedMessage.conversation_id == conversation_id)
+                    .order_by(UnifiedMessage.timestamp.desc())
                     .limit(50)  # Maximum to consider
                 )
 
@@ -710,40 +617,40 @@ class PostgreSQLMemory(MemoryBackend):
                 cutoff = datetime.now(timezone.utc) - timedelta(days=days)
 
                 # Base query filters
-                conv_filter = AIConversation.started_at >= cutoff
-                msg_filter = AIMessage.timestamp >= cutoff
+                conv_filter = UnifiedConversation.started_at >= cutoff
+                msg_filter = UnifiedMessage.timestamp >= cutoff
 
                 if user_id:
-                    conv_filter = and_(conv_filter, AIConversation.user_id == user_id)
+                    conv_filter = and_(conv_filter, UnifiedConversation.user_id == user_id)
 
                 # Total conversations
                 result = await db.execute(
-                    select(func.count()).select_from(AIConversation).where(conv_filter)
+                    select(func.count()).select_from(UnifiedConversation).where(conv_filter)
                 )
                 total_conversations = result.scalar()
 
                 # Active conversations
                 result = await db.execute(
                     select(func.count())
-                    .select_from(AIConversation)
-                    .where(and_(conv_filter, AIConversation.is_active))
+                    .select_from(UnifiedConversation)
+                    .where(and_(conv_filter, UnifiedConversation.status == 'active'))
                 )
                 active_conversations = result.scalar()
 
                 # Total messages
-                query = select(func.count()).select_from(AIMessage).where(msg_filter)
+                query = select(func.count()).select_from(UnifiedMessage).where(msg_filter)
                 if user_id:
-                    query = query.join(AIConversation).where(AIConversation.user_id == user_id)
+                    query = query.join(UnifiedConversation).where(UnifiedConversation.user_id == user_id)
 
                 result = await db.execute(query)
                 total_messages = result.scalar()
 
                 # Average emotion score
-                query = select(func.avg(AIMessage.emotion_score)).where(
-                    and_(msg_filter, AIMessage.emotion_score.isnot(None))
+                query = select(func.avg(UnifiedMessage.emotion_score)).where(
+                    and_(msg_filter, UnifiedMessage.emotion_score.isnot(None))
                 )
                 if user_id:
-                    query = query.join(AIConversation).where(AIConversation.user_id == user_id)
+                    query = query.join(UnifiedConversation).where(UnifiedConversation.user_id == user_id)
 
                 result = await db.execute(query)
                 avg_emotion = result.scalar() or 0.5
@@ -751,8 +658,8 @@ class PostgreSQLMemory(MemoryBackend):
                 # Escalation rate
                 result = await db.execute(
                     select(func.count())
-                    .select_from(AIConversation)
-                    .where(and_(conv_filter, AIConversation.escalated))
+                    .select_from(UnifiedConversation)
+                    .where(and_(conv_filter, UnifiedConversation.escalated))
                 )
                 escalated_count = result.scalar()
                 escalation_rate = (
@@ -761,12 +668,12 @@ class PostgreSQLMemory(MemoryBackend):
 
                 # Channel breakdown
                 query = (
-                    select(AIMessage.channel, func.count())
+                    select(UnifiedMessage.channel, func.count())
                     .where(msg_filter)
-                    .group_by(AIMessage.channel)
+                    .group_by(UnifiedMessage.channel)
                 )
                 if user_id:
-                    query = query.join(AIConversation).where(AIConversation.user_id == user_id)
+                    query = query.join(UnifiedConversation).where(UnifiedConversation.user_id == user_id)
 
                 result = await db.execute(query)
                 channels = {row[0]: row[1] for row in result.all()}
@@ -793,20 +700,20 @@ class PostgreSQLMemory(MemoryBackend):
     # =========================================================================
 
     async def _update_emotion_stats(
-        self, db: AsyncSession, conversation: AIConversation, new_score: float
+        self, db: AsyncSession, conversation: UnifiedConversation, new_score: float
     ) -> None:
         """Update conversation emotion statistics"""
 
         # Get recent emotion scores (DESC order - newest first)
         query = (
-            select(AIMessage.emotion_score)
+            select(UnifiedMessage.emotion_score)
             .where(
                 and_(
-                    AIMessage.conversation_id == conversation.id,
-                    AIMessage.emotion_score.isnot(None),
+                    UnifiedMessage.conversation_id == conversation.id,
+                    UnifiedMessage.emotion_score.isnot(None),
                 )
             )
-            .order_by(AIMessage.timestamp.desc())
+            .order_by(UnifiedMessage.timestamp.desc())
             .limit(10)
         )
 
@@ -857,7 +764,7 @@ class PostgreSQLMemory(MemoryBackend):
         try:
             async with get_db_context() as db:
                 # Get conversation
-                conversation = await db.get(AIConversation, conversation_id)
+                conversation = await db.get(UnifiedConversation, conversation_id)
                 if not conversation:
                     logger.warning(
                         f"Conversation {conversation_id} not found for emotion stats update"
@@ -878,7 +785,7 @@ class PostgreSQLMemory(MemoryBackend):
             )
             # Don't raise - this is a background task, failures are logged but don't affect user
 
-    def _db_message_to_model(self, db_message: AIMessage) -> ConversationMessage:
+    def _db_message_to_model(self, db_message: UnifiedMessage) -> ConversationMessage:
         """Convert database message to ConversationMessage model"""
         return ConversationMessage(
             id=db_message.id,
@@ -897,7 +804,7 @@ class PostgreSQLMemory(MemoryBackend):
             tool_results=db_message.tool_results,
         )
 
-    def _db_conversation_to_metadata(self, db_conv: AIConversation) -> ConversationMetadata:
+    def _db_conversation_to_metadata(self, db_conv: UnifiedConversation) -> ConversationMetadata:
         """Convert database conversation to ConversationMetadata model"""
         return ConversationMetadata(
             conversation_id=db_conv.id,
@@ -911,7 +818,7 @@ class PostgreSQLMemory(MemoryBackend):
             emotion_trend=db_conv.emotion_trend,
             escalated=db_conv.escalated,
             escalated_at=db_conv.escalated_at,
-            is_active=db_conv.is_active,
+            is_active=db_conv.status == 'active',
             closed_at=db_conv.closed_at,
             closed_reason=db_conv.closed_reason,
         )

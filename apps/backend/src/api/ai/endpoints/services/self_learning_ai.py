@@ -72,7 +72,7 @@ class SelfLearningAI:
             conversation_id = interaction_data.get("conversation_id")
 
             # Create message record with learning metadata
-            message = Message(
+            message = AIMessage(
                 conversation_id=conversation_id,
                 role=MessageRole.ASSISTANT.value,
                 content=interaction_data["ai_response"],
@@ -115,10 +115,10 @@ class SelfLearningAI:
         }
         """
         try:
-            from api.ai.endpoints.models import Message
+            from api.ai.endpoints.models import AIMessage
 
             # Fetch message
-            query = select(Message).where(Message.id == message_id)
+            query = select(AIMessage).where(AIMessage.id == message_id)
             result = await db.execute(query)
             message = result.scalar_one_or_none()
 
@@ -204,7 +204,7 @@ class SelfLearningAI:
         Identify common question patterns from recent interactions
         """
         try:
-            from api.ai.endpoints.models import Message, MessageRole
+            from api.ai.endpoints.models import AIMessage, MessageRole
 
             # Get recent user messages
             since_date = datetime.now(timezone.utc) - timedelta(days=days)
@@ -288,15 +288,15 @@ class SelfLearningAI:
         Generate knowledge base updates based on successful interactions
         """
         try:
-            from api.ai.endpoints.models import Message
+            from api.ai.endpoints.models import AIMessage
 
             # Find high-quality responses
             query = (
-                select(Message)
+                select(AIMessage)
                 .where(
                     and_(
-                        Message.confidence >= min_confidence,
-                        Message.metadata.contains({"user_feedback": {"helpful": True}}),
+                        AIMessage.confidence >= min_confidence,
+                        AIMessage.metadata.contains({"user_feedback": {"helpful": True}}),
                     )
                 )
                 .limit(100)
@@ -388,22 +388,22 @@ class SelfLearningAI:
     async def get_learning_metrics(self, db: AsyncSession) -> dict[str, Any]:
         """Get comprehensive learning metrics"""
         try:
-            from api.ai.endpoints.models import Message
+            from api.ai.endpoints.models import AIMessage
 
             # Calculate various metrics
-            total_messages = await db.execute(select(func.count(Message.id)))
+            total_messages = await db.execute(select(func.count(AIMessage.id)))
             total_count = total_messages.scalar()
 
             # Average confidence
-            avg_confidence_query = select(func.avg(Message.confidence)).where(
-                Message.confidence.isnot(None)
+            avg_confidence_query = select(func.avg(AIMessage.confidence)).where(
+                AIMessage.confidence.isnot(None)
             )
             avg_conf_result = await db.execute(avg_confidence_query)
             avg_confidence = avg_conf_result.scalar() or 0
 
             # Feedback metrics
-            feedback_query = select(func.count(Message.id)).where(
-                Message.metadata.contains({"user_feedback": {}})
+            feedback_query = select(func.count(AIMessage.id)).where(
+                AIMessage.metadata.contains({"user_feedback": {}})
             )
             feedback_result = await db.execute(feedback_query)
             feedback_count = feedback_result.scalar()

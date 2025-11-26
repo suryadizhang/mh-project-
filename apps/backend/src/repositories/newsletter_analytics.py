@@ -1,6 +1,6 @@
 """Newsletter analytics repository for campaign and subscriber metrics."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import UUID
 
@@ -214,7 +214,7 @@ class NewsletterAnalyticsRepository:
                 ...
             ]
         """
-        start_date = datetime.now() - timedelta(days=days)
+        start_date = datetime.now(timezone.utc) - timedelta(days=days)
         
         # Get daily sent counts
         sent_query = (

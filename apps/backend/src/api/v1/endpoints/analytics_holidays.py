@@ -4,7 +4,7 @@ Track bookings, revenue, and marketing ROI by holiday/season
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from api.deps import AdminUser, get_current_admin_user, get_db
@@ -114,7 +114,7 @@ async def get_seasonal_trends(
     - Forecast demand for upcoming holidays
     """
     try:
-        target_year = year or datetime.now().year
+        target_year = year or datetime.now(timezone.utc).year
         logger.info(f"Admin {current_user.email} fetching seasonal trends for {target_year}")
 
         # Get analytics service
@@ -211,7 +211,7 @@ async def get_holiday_summary(
     - Identifying top revenue drivers
     """
     try:
-        target_year = year or datetime.now().year
+        target_year = year or datetime.now(timezone.utc).year
         logger.info(f"Admin {current_user.email} fetching holiday summary for {target_year}")
 
         # Get analytics service
@@ -282,7 +282,7 @@ async def get_peak_seasons(
     - Compare holiday performance
     """
     try:
-        target_year = year or datetime.now().year
+        target_year = year or datetime.now(timezone.utc).year
         logger.info(f"Admin {current_user.email} fetching top {limit} holidays for {target_year}")
 
         # Get analytics service
@@ -343,7 +343,7 @@ async def forecast_holiday(
     - Set realistic goals and targets
     """
     try:
-        target_year = year or (datetime.now().year + 1)
+        target_year = year or (datetime.now(timezone.utc).year + 1)
         logger.info(
             f"Admin {current_user.email} forecasting {holiday_key} for {target_year}"
         )

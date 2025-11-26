@@ -24,8 +24,7 @@ from core.database import get_db
 from core.security import create_access_token
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
-from core.auth.models import User, AuthProvider, UserStatus
-from core.auth.oauth_models import OAuthAccount
+from db.models.identity import User, AuthProvider, UserStatus, GoogleOAuthAccount
 from pydantic import BaseModel
 from services.google_oauth import google_oauth_service
 from sqlalchemy import select

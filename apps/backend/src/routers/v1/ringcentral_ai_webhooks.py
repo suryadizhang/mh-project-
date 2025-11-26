@@ -3,7 +3,7 @@ RingCentral Webhook Handler
 Receives SMS, Voice Call, and other events from RingCentral
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import hashlib
 import hmac
 import logging
@@ -377,6 +377,6 @@ async def webhook_health():
     """Health check for webhook endpoint."""
     return {
         "status": "healthy",
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "webhook_url": f"{settings.api_url}/ringcentral/webhooks/events",
     }

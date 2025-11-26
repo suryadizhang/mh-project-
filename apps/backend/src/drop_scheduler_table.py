@@ -6,7 +6,7 @@ sys.path.insert(0, "src")
 
 import asyncio
 
-from api.ai.scheduler.follow_up_scheduler import ScheduledFollowUp
+from db.models.ai import CustomerEngagementFollowUp
 from core.database import engine, get_db_context
 from sqlalchemy import text
 
@@ -18,7 +18,7 @@ async def drop_and_recreate():
         await db.commit()
 
     async with engine.begin() as conn:
-        await conn.run_sync(ScheduledFollowUp.__table__.create, checkfirst=True)
+        await conn.run_sync(CustomerEngagementFollowUp.__table__.create, checkfirst=True)
 
     # Verify new schema
     async with get_db_context() as db:

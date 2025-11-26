@@ -6,7 +6,8 @@ Provides station-aware authentication endpoints for the admin interface.
 from typing import Any
 
 from core.auth.middleware import get_current_user, get_db_session
-from core.auth.models import AuthenticationService, User
+from core.auth.models import AuthenticationService
+from db.models.identity import User
 from core.auth.station_auth import (
     StationAuthenticationService,
 )

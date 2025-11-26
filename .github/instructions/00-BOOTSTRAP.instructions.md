@@ -23,7 +23,18 @@ Before generating code, reviewing code, or answering questions, you
 5. **Prioritize safety and correctness** over speed or simplicity
 6. **When auditing, use ALL 8 techniques** (A–H) simultaneously
 7. **We need to fix all bugs at all costs; quality is our priority.**
-8. make sure all our logic and features are 100% correct and working as intended
+8. make sure all our logic and features are 100% correct and working
+   as intended
+9. on everything we do, make sure to follow best practices for
+   security, performance, and scalability
+10. on everything we do, make sure to follow best practices for user
+    experience and accessibility
+11. on everything we do, make sure to follow best practices for code
+    readability and maintainability
+12. on everything we do, make sure to follow best practices for
+    testing and documentation
+13. on everything we build avoid creating any duplications or
+    redundancies; always aim for a single source of truth
 
 ---
 

@@ -254,11 +254,13 @@ class WebhookResponse(BaseModel):
 
 # Analytics schemas
 class PaymentAnalytics(BaseModel):
+    """Payment analytics response - powered by Stripe's native APIs."""
     total_payments: int
     total_amount: Decimal
     avg_payment: Decimal
     payment_methods: dict[str, int]
     monthly_revenue: list[dict[str, Any]]
+    stripe_dashboard_url: str | None = None  # Direct link to Stripe Dashboard for advanced analytics
 
 
 class CustomerAnalytics(BaseModel):

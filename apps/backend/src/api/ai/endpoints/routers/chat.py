@@ -9,7 +9,7 @@ import logging
 from uuid import uuid4
 
 from api.ai.endpoints.database import get_db
-from api.ai.endpoints.models import Conversation, Message
+from api.ai.endpoints.models import Conversation, AIMessage
 from api.ai.endpoints.services.admin_management_ai import admin_management_ai
 from api.ai.endpoints.services.chat_service import ChatService
 from api.ai.endpoints.services.customer_booking_ai import customer_booking_ai
@@ -221,7 +221,7 @@ async def get_conversations(
         response_conversations = []
         for conv in conversations:
             # Get message count for each conversation
-            message_count = db.query(Message).filter(Message.conversation_id == conv.id).count()
+            message_count = db.query(AIMessage).filter(AIMessage.conversation_id == conv.id).count()
 
             response_conversations.append(
                 {

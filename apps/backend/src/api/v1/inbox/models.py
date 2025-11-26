@@ -61,7 +61,7 @@ class TCPAStatus(str, Enum):
     PENDING = "pending"
 
 
-class Message(Base):
+class InboxMessage(Base):
     """Unified message model for all communication channels"""
 
     __tablename__ = "inbox_messages"
@@ -108,10 +108,10 @@ class Message(Base):
     read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    contact = relationship("Contact", back_populates="messages")
+    contact = relationship("models.contact.Contact", back_populates="messages", lazy="select")
     thread = relationship("Thread", back_populates="messages")
-    parent_message = relationship("Message", remote_side=[id])
-    replies = relationship("Message", back_populates="parent_message")
+    parent_message = relationship("InboxMessage", remote_side=[id])
+    replies = relationship("InboxMessage", back_populates="parent_message")
 
     # Indexes for performance
     __table_args__ = (
@@ -146,7 +146,7 @@ class Thread(Base):
         UUID(as_uuid=True), ForeignKey("crm_contacts.id"), nullable=True
     )
     booking_id: Mapped[UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("bookings.id"), nullable=True
+        UUID(as_uuid=True), ForeignKey("core.bookings.id"), nullable=True  # core schema
     )
 
     # Thread status
@@ -171,10 +171,10 @@ class Thread(Base):
     )
     last_message_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    # Relationships
-    messages = relationship("Message", back_populates="thread", order_by="Message.created_at")
-    contact = relationship("Contact", back_populates="threads")
-    booking = relationship("models.booking.Booking", back_populates="message_threads")
+    # Relationships (temporarily commented booking for Bug #13 schema fixes)
+    messages = relationship("InboxMessage", back_populates="thread", order_by="InboxMessage.created_at")
+    contact = relationship("models.contact.Contact", back_populates="threads", lazy="select")
+    # booking = relationship("models.booking.Booking", back_populates="message_threads")
 
     # Indexes
     __table_args__ = (
@@ -223,7 +223,7 @@ class TCPAOptStatus(Base):
     )
 
     # Relationships
-    contact = relationship("Contact", back_populates="tcpa_statuses")
+    contact = relationship("models.contact.Contact", back_populates="tcpa_statuses", lazy="select")
 
     # Constraints
     __table_args__ = (

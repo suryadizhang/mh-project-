@@ -7,10 +7,23 @@ from enum import Enum
 from functools import lru_cache
 import os
 from pathlib import Path
+from typing import Optional, Dict, Any
+import logging
 
 from dotenv import load_dotenv
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Import Google Secret Manager integration
+try:
+    from config.gsm_config import GSMConfig, get_gsm_config
+    GSM_AVAILABLE = True
+except ImportError:
+    GSMConfig = None
+    get_gsm_config = None
+    GSM_AVAILABLE = False
+
+logger = logging.getLogger(__name__)
 
 # Load environment variables from .env file (in parent directory)
 env_path = Path(__file__).parent.parent.parent / ".env"
@@ -43,6 +56,122 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    # ========================================
+    # GOOGLE SECRET MANAGER INTEGRATION
+    # ========================================
+    # Configuration for loading secrets from Google Cloud
+    # Falls back to environment variables if GSM unavailable
+    
+    # GCP Project Configuration
+    GCP_PROJECT_ID: str = "my-hibachi-crm"  # Google Cloud project ID
+    GCP_ENVIRONMENT: str = "prod"  # GSM environment prefix (prod, dev, staging)
+    
+    # GSM Runtime State (populated after async initialization)
+    _gsm_config: Optional['GSMConfig'] = None  # GSM client instance (initialized async)
+    _gsm_initialized: bool = False  # Whether GSM has been initialized
+    _secrets_loaded_from_gsm: bool = False  # Whether secrets came from GSM
+    
+    async def initialize_gsm(self) -> Dict[str, Any]:
+        """
+        Initialize Google Secret Manager and load secrets asynchronously.
+        
+        This method is called during application startup (main.py lifespan)
+        to load secrets from GSM with automatic fallback to environment variables.
+        
+        Returns:
+            Dict with loaded secrets and status information
+            
+        Behavior:
+            - If GSM available: Loads secrets from Google Cloud Secret Manager
+            - If GSM unavailable: Uses environment variables (already loaded by Pydantic)
+            - Caches secrets for 15 minutes to reduce API calls
+            - Logs which secrets came from GSM vs environment variables
+        """
+        if not GSM_AVAILABLE:
+            logger.info("🔑 GSM not available - using environment variables only")
+            self._gsm_initialized = True
+            self._secrets_loaded_from_gsm = False
+            return {"status": "env_only", "gsm_available": False}
+        
+        try:
+            # Initialize GSM client
+            self._gsm_config = get_gsm_config()
+            logger.info(f"🔑 Initializing GSM for project: {self.GCP_PROJECT_ID}")
+            
+            # Define critical secrets to load from GSM
+            # Format: (category, key, env_var_fallback)
+            critical_secrets = [
+                ("global", "STRIPE_SECRET_KEY", "STRIPE_SECRET_KEY"),
+                ("global", "OPENAI_API_KEY", "OPENAI_API_KEY"),
+                ("backend-api", "JWT_SECRET", "JWT_SECRET"),
+                ("backend-api", "ENCRYPTION_KEY", "ENCRYPTION_KEY"),
+                ("backend-api", "DB_URL", "DATABASE_URL"),
+                ("backend-api", "REDIS_URL", "REDIS_URL"),
+                ("backend-api", "SMTP_PASSWORD", "SMTP_PASSWORD"),
+            ]
+            
+            # Load secrets from GSM
+            loaded_secrets = await self._gsm_config.get_secrets_batch(critical_secrets)
+            
+            # Update Settings with GSM values (if loaded)
+            gsm_count = 0
+            env_count = 0
+            
+            for category, key, env_var in critical_secrets:
+                if key in loaded_secrets:
+                    # Secret loaded from GSM - update Settings
+                    if hasattr(self, env_var):
+                        setattr(self, env_var, loaded_secrets[key])
+                        gsm_count += 1
+                        logger.debug(f"✅ Loaded {env_var} from GSM")
+                else:
+                    # Fallback to environment variable (already loaded by Pydantic)
+                    env_count += 1
+                    logger.debug(f"⚠️ Using environment variable for {env_var}")
+            
+            self._gsm_initialized = True
+            self._secrets_loaded_from_gsm = gsm_count > 0
+            
+            logger.info(
+                f"🔑 GSM initialization complete: "
+                f"{gsm_count} from GSM, {env_count} from environment"
+            )
+            
+            return {
+                "status": "success",
+                "gsm_available": True,
+                "secrets_from_gsm": gsm_count,
+                "secrets_from_env": env_count,
+            }
+            
+        except Exception as e:
+            logger.warning(f"⚠️ GSM initialization failed: {e} - using environment variables")
+            self._gsm_initialized = True
+            self._secrets_loaded_from_gsm = False
+            return {
+                "status": "fallback_to_env",
+                "gsm_available": False,
+                "error": str(e),
+            }
+    
+    def get_secret_source(self, secret_name: str) -> str:
+        """
+        Get the source of a secret (GSM or environment variable).
+        
+        Args:
+            secret_name: Name of the secret (e.g., 'STRIPE_SECRET_KEY')
+            
+        Returns:
+            'gsm' if loaded from Google Secret Manager
+            'env' if loaded from environment variable
+            'unknown' if GSM not initialized
+        """
+        if not self._gsm_initialized:
+            return "unknown"
+        return "gsm" if self._secrets_loaded_from_gsm else "env"
+    
+    # ========================================
+
     # Application
     APP_NAME: str = "My Hibachi Chef CRM"
     DEBUG: bool = False
@@ -73,6 +202,11 @@ class Settings(BaseSettings):
     SECRET_KEY: str  # REQUIRED: Must come from .env (32+ chars)
     JWT_SECRET: str | None = None
     ENCRYPTION_KEY: str  # REQUIRED: Must come from .env (32+ chars)
+
+    # Field-Level Encryption (Fernet) - for Customer PII
+    FIELD_ENCRYPTION_KEY: str | None = None  # Base64-encoded Fernet key (generate with: Fernet.generate_key())
+    FIELD_ENCRYPTION_KEY_OLD: str | None = None  # Previous key for rotation support
+
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # CORS - Multi-Domain Configuration (PRODUCTION)
@@ -128,6 +262,11 @@ class Settings(BaseSettings):
     CLOUDINARY_CLOUD_NAME: str
     CLOUDINARY_API_KEY: str
     CLOUDINARY_API_SECRET: str
+
+    # Resend Email Service (Replaces SMTP) - REQUIRED: Must come from .env
+    RESEND_API_KEY: str
+    RESEND_FROM_EMAIL: str = "cs@myhibachichef.com"
+    RESEND_FROM_NAME: str = "My Hibachi Chef"
 
     # Sentry Error Tracking (Optional)
     SENTRY_DSN: str | None = None
@@ -260,8 +399,17 @@ class Settings(BaseSettings):
         return self.DATABASE_URL
 
     @property
-    def database_url_sync(self) -> str | None:
-        return self.DATABASE_URL_SYNC or os.getenv("DATABASE_URL_SYNC")
+    def database_url_sync(self) -> str:
+        """Get sync database URL (auto-converts from async URL if needed)"""
+        sync_url = self.DATABASE_URL_SYNC or os.getenv("DATABASE_URL_SYNC")
+        if sync_url:
+            return sync_url
+
+        # Auto-convert async URL to sync for Alembic migrations
+        async_url = str(self.DATABASE_URL)
+        if "postgresql+asyncpg://" in async_url:
+            return async_url.replace("postgresql+asyncpg://", "postgresql://")
+        return async_url
 
     @property
     def sqlite_url(self) -> str | None:
@@ -462,6 +610,10 @@ class Settings(BaseSettings):
             "workers_enabled": self.workers_enabled,
             "worker_batch_size": self.worker_batch_size,
             "worker_poll_interval": self.worker_poll_interval,
+            "email_poll_business_hours": self.EMAIL_POLL_INTERVAL_BUSINESS_HOURS,
+            "email_poll_off_hours": self.EMAIL_POLL_INTERVAL_OFF_HOURS,
+            "email_poll_idle": self.EMAIL_POLL_INTERVAL_IDLE,
+            "email_business_hours": f"{self.EMAIL_BUSINESS_START_HOUR}:00-{self.EMAIL_BUSINESS_END_HOUR}:00",
             "worker_max_retries": self.worker_max_retries,
             "ringcentral": {
                 "enabled": self.ringcentral_enabled,
@@ -539,6 +691,15 @@ class Settings(BaseSettings):
     EMAIL_WORKER_ENABLED: bool = False
     EMAIL_WORKER_MAX_RETRIES: int = 3
     EMAIL_WORKER_BATCH_SIZE: int = 20
+
+    # Email Monitoring (IMAP IDLE Fallback)
+    # Intelligent adaptive polling when IMAP IDLE not supported
+    EMAIL_POLL_INTERVAL_BUSINESS_HOURS: int = 30  # 30s during business hours (120 checks/hour max)
+    EMAIL_POLL_INTERVAL_OFF_HOURS: int = 300  # 5min during off-hours (12 checks/hour)
+    EMAIL_POLL_INTERVAL_IDLE: int = 600  # 10min when no activity detected (6 checks/hour)
+    EMAIL_BUSINESS_START_HOUR: int = 11  # 11 AM (actual restaurant business hours)
+    EMAIL_BUSINESS_END_HOUR: int = 21  # 9 PM
+    EMAIL_IDLE_THRESHOLD_MINUTES: int = 120  # 2 hours of no activity = switch to idle mode
 
     # Stripe Worker
     STRIPE_WORKER_ENABLED: bool = False

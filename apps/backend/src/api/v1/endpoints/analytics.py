@@ -3,7 +3,7 @@ Analytics Endpoints - Composite Service
 Aggregates data from bookings, payments, reviews, leads, newsletter
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import logging
 from typing import Any
 
@@ -95,7 +95,7 @@ class EngagementTrends(BaseModel):
 
 def get_date_range(period: str) -> tuple:
     """Get start and end dates based on period"""
-    end_date = datetime.now()
+    end_date = datetime.now(timezone.utc)
 
     if period == "7d":
         start_date = end_date - timedelta(days=7)
@@ -441,7 +441,7 @@ async def get_newsletter_analytics(
             ORDER BY date
         """
         )
-        start_date = datetime.now() - timedelta(days=30)
+        start_date = datetime.now(timezone.utc) - timedelta(days=30)
         growth_result = await db.execute(growth_query, {"start_date": start_date})
         growth = [{"date": str(row.date), "count": row.new_subscribers} for row in growth_result]
 

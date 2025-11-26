@@ -4,11 +4,11 @@ Runs daily to send review SMS 1 day after booking completion.
 """
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import logging
 
 from core.database import AsyncSessionLocal
-from models.legacy_core import CoreBooking, CoreCustomer
+from db.models.core import Booking, Customer
 from models.legacy_feedback import CustomerReview
 from core.config import get_settings
 from sqlalchemy import and_, select
@@ -45,7 +45,7 @@ class ReviewRequestWorker:
         async with AsyncSessionLocal() as db:
             try:
                 # Calculate time window (24 hours ago, with 1-hour tolerance)
-                now = datetime.now()
+                now = datetime.now(timezone.utc)
                 target_time_start = now - timedelta(hours=25)  # 25 hours ago
                 target_time_end = now - timedelta(hours=23)  # 23 hours ago
 
@@ -84,12 +84,12 @@ class ReviewRequestWorker:
                 logger.error(f"Error processing completed bookings: {e}", exc_info=True)
                 return 0
 
-    async def _send_review_request(self, db: AsyncSession, booking: CoreBooking) -> bool:
+    async def _send_review_request(self, db: AsyncSession, booking: Booking) -> bool:
         """Send review request for a single booking."""
         try:
             # Get customer details
             customer_result = await db.execute(
-                select(CoreCustomer).where(CoreCustomer.id == booking.customer_id)
+                select(Customer).where(Customer.id == booking.customer_id)
             )
             customer = customer_result.scalar_one_or_none()
 
@@ -154,7 +154,7 @@ class ReviewRequestWorker:
         async with AsyncSessionLocal() as db:
             try:
                 # Find pending reviews 3 days old
-                reminder_time = datetime.now() - timedelta(days=3)
+                reminder_time = datetime.now(timezone.utc) - timedelta(days=3)
 
                 query = select(CustomerReview).where(
                     and_(
@@ -222,7 +222,7 @@ class ReviewRequestWorker:
                 # Update metadata to track reminder sent
                 if not review.metadata:
                     review.metadata = {}
-                review.metadata["reminder_sent_at"] = datetime.now().isoformat()
+                review.metadata["reminder_sent_at"] = datetime.now(timezone.utc).isoformat()
                 await db.commit()
 
                 logger.info(f"Sent reminder for review {review.id}")
@@ -244,7 +244,7 @@ class ReviewRequestWorker:
                 query = select(DiscountCoupon).where(
                     and_(
                         DiscountCoupon.status == "active",
-                        DiscountCoupon.valid_until < datetime.now(),
+                        DiscountCoupon.valid_until < datetime.now(timezone.utc),
                     )
                 )
 

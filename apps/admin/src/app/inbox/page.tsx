@@ -9,12 +9,13 @@ import {
   MessageCircle,
   MessageSquare,
   Phone,
+  Plus,
   Send,
   Sparkles,
   Target,
   UserPlus,
 } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -23,6 +24,8 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Modal } from '@/components/ui/modal';
 import { StatsCard } from '@/components/ui/stats-card';
 import { useToast } from '@/components/ui/Toast';
+import { LabelList } from '@/components/email/LabelBadge';
+import { LabelPicker } from '@/components/email/LabelPicker';
 import {
   useFilters,
   usePagination,
@@ -30,6 +33,8 @@ import {
   useSocialThreads,
 } from '@/hooks/useApi';
 import { smsService } from '@/services/api';
+import { emailService, labelService } from '@/services/email-api';
+import type { Email, EmailThread as EmailThreadType, Label } from '@/types/email';
 
 // Channel types
 const CHANNELS = {
@@ -129,6 +134,10 @@ export default function UnifiedInboxPage() {
   const [showQuickReplies, setShowQuickReplies] = useState(false);
   const [smsThreads, setSmsThreads] = useState<any[]>([]);
   const [loadingSms, setLoadingSms] = useState(false);
+  const [emailThreads, setEmailThreads] = useState<Email[]>([]);
+  const [loadingEmail, setLoadingEmail] = useState(false);
+  const [labels, setLabels] = useState<Label[]>([]);
+  const [showLabelPicker, setShowLabelPicker] = useState(false);
 
   // Pagination and filters
   const { page, limit } = usePagination(1, 50);
@@ -184,12 +193,42 @@ export default function UnifiedInboxPage() {
     }
   }, [activeChannel]);
 
-  // Load SMS on mount and when channel changes
-  useMemo(() => {
+  // Load email threads when channel is active
+  const loadEmailThreads = useCallback(async () => {
+    if (activeChannel !== CHANNELS.EMAIL && activeChannel !== CHANNELS.ALL)
+      return;
+
+    setLoadingEmail(true);
+    try {
+      const response = await emailService.getEmails({ page: 1, limit: 50 });
+      setEmailThreads(response.emails || []);
+    } catch (err) {
+      console.error('Failed to load email threads:', err);
+    } finally {
+      setLoadingEmail(false);
+    }
+  }, [activeChannel]);
+
+  // Load labels on mount
+  const loadLabels = useCallback(async () => {
+    try {
+      const data = await labelService.getLabels();
+      setLabels(data);
+    } catch (err) {
+      console.error('Failed to load labels:', err);
+    }
+  }, []);
+
+  // Load SMS and Email on mount and when channel changes
+  useEffect(() => {
     if (activeChannel === CHANNELS.SMS || activeChannel === CHANNELS.ALL) {
       loadSmsThreads();
     }
-  }, [activeChannel, loadSmsThreads]);
+    if (activeChannel === CHANNELS.EMAIL || activeChannel === CHANNELS.ALL) {
+      loadEmailThreads();
+    }
+    loadLabels();
+  }, [activeChannel, loadSmsThreads, loadEmailThreads, loadLabels]);
 
   // Combine and filter all threads based on active channel
   const allThreads = useMemo(() => {
@@ -200,10 +239,28 @@ export default function UnifiedInboxPage() {
       combined = [
         ...socialThreads.map((t: any) => ({ ...t, channel: t.platform })),
         ...smsThreads.map((t: any) => ({ ...t, channel: CHANNELS.SMS })),
+        ...emailThreads.map((e: Email) => ({
+          ...e,
+          channel: CHANNELS.EMAIL,
+          thread_id: e.thread_id,
+          customer_name: e.from_name || e.from_address.split('@')[0],
+          updated_at: e.received_at,
+          is_read: e.is_read,
+        })),
       ];
     } else if (activeChannel === CHANNELS.SMS) {
       // Show only SMS
       combined = smsThreads.map((t: any) => ({ ...t, channel: CHANNELS.SMS }));
+    } else if (activeChannel === CHANNELS.EMAIL) {
+      // Show only Email
+      combined = emailThreads.map((e: Email) => ({
+        ...e,
+        channel: CHANNELS.EMAIL,
+        thread_id: e.thread_id,
+        customer_name: e.from_name || e.from_address.split('@')[0],
+        updated_at: e.received_at,
+        is_read: e.is_read,
+      }));
     } else {
       // Show only selected social platform
       combined = socialThreads.map((t: any) => ({ ...t, channel: t.platform }));
@@ -215,9 +272,9 @@ export default function UnifiedInboxPage() {
       const dateB = new Date(b.updated_at || b.timestamp).getTime();
       return dateB - dateA;
     });
-  }, [socialThreads, smsThreads, activeChannel]);
+  }, [socialThreads, smsThreads, emailThreads, activeChannel]);
 
-  const loading = loadingSocial || loadingSms;
+  const loading = loadingSocial || loadingSms || loadingEmail;
   const totalCount = allThreads.length;
 
   // Calculate stats by channel
@@ -225,6 +282,7 @@ export default function UnifiedInboxPage() {
     const allCombined = [
       ...socialThreads.map((t: any) => ({ ...t, channel: t.platform })),
       ...smsThreads.map((t: any) => ({ ...t, channel: CHANNELS.SMS })),
+      ...emailThreads.map((e: Email) => ({ ...e, channel: CHANNELS.EMAIL, is_read: e.is_read })),
     ];
 
     const unreadCount = allCombined.filter((t: any) => !t.is_read).length;
@@ -235,6 +293,7 @@ export default function UnifiedInboxPage() {
       (t: any) => t.channel === CHANNELS.INSTAGRAM
     ).length;
     const smsCount = smsThreads.length;
+    const emailCount = emailThreads.length;
 
     return {
       total: allCombined.length,
@@ -242,8 +301,9 @@ export default function UnifiedInboxPage() {
       facebook: fbCount,
       instagram: igCount,
       sms: smsCount,
+      email: emailCount,
     };
-  }, [socialThreads, smsThreads]);
+  }, [socialThreads, smsThreads, emailThreads]);
 
   // Handlers
   const handleChannelChange = (channel: ChannelType) => {
@@ -518,7 +578,7 @@ export default function UnifiedInboxPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
         <StatsCard
           title="Total Messages"
           value={stats.total}
@@ -549,6 +609,12 @@ export default function UnifiedInboxPage() {
           value={stats.sms}
           icon={MessageCircle}
           color="green"
+        />
+        <StatsCard
+          title="Email"
+          value={stats.email}
+          icon={Mail}
+          color="purple"
         />
       </div>
 
@@ -616,14 +682,18 @@ export default function UnifiedInboxPage() {
               </div>
             </button>
 
-            {/* Email Tab (Future) */}
+            {/* Email Tab */}
             <button
-              disabled
-              className="px-6 py-3 text-sm font-medium text-gray-400 cursor-not-allowed"
+              onClick={() => handleChannelChange(CHANNELS.EMAIL)}
+              className={`px-6 py-3 text-sm font-medium transition-colors ${
+                activeChannel === CHANNELS.EMAIL
+                  ? 'text-purple-600 border-b-2 border-purple-600 bg-purple-50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
             >
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4" />
-                Email (Soon)
+                Email ({stats.email})
               </div>
             </button>
           </div>
@@ -734,8 +804,20 @@ export default function UnifiedInboxPage() {
                       <p className="text-sm text-gray-600 mb-1 line-clamp-2">
                         {thread.last_message ||
                           thread.message ||
+                          thread.subject ||
                           'No messages yet'}
                       </p>
+
+                      {/* Labels for Email Threads */}
+                      {thread.channel === CHANNELS.EMAIL && thread.labels && thread.labels.length > 0 && (
+                        <div className="mb-2">
+                          <LabelList
+                            labels={labels.filter((l) => thread.labels.includes(l.slug))}
+                            maxVisible={2}
+                            size="sm"
+                          />
+                        </div>
+                      )}
 
                       {/* Time and Channel */}
                       <div className="flex items-center justify-between text-xs text-gray-500">
@@ -789,7 +871,41 @@ export default function UnifiedInboxPage() {
                                   </span>
                                 </span>
                               )}
+                            {selectedThread.channel === CHANNELS.EMAIL &&
+                              selectedThread.from_address && (
+                                <span className="text-xs">
+                                  {selectedThread.from_address}
+                                </span>
+                              )}
                           </p>
+                          {/* Email Labels */}
+                          {selectedThread.channel === CHANNELS.EMAIL && (
+                            <div className="mt-2 flex items-center gap-2">
+                              {selectedThread.labels && selectedThread.labels.length > 0 ? (
+                                <LabelList
+                                  labels={labels.filter((l) => selectedThread.labels.includes(l.slug))}
+                                  onRemove={async (labelSlug) => {
+                                    const updatedLabels = selectedThread.labels.filter((l: string) => l !== labelSlug);
+                                    await emailService.updateEmail(selectedThread.message_id, {
+                                      labels: updatedLabels,
+                                    });
+                                    await loadEmailThreads();
+                                  }}
+                                  maxVisible={5}
+                                  size="sm"
+                                />
+                              ) : (
+                                <span className="text-xs text-gray-400">No labels</span>
+                              )}
+                              <button
+                                onClick={() => setShowLabelPicker(true)}
+                                className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                              >
+                                <Plus className="w-3 h-3" />
+                                Add Label
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <Button
@@ -1035,6 +1151,37 @@ export default function UnifiedInboxPage() {
             </div>
           </div>
         </Modal>
+      )}
+
+      {/* Label Picker Modal */}
+      {showLabelPicker && selectedThread?.channel === CHANNELS.EMAIL && (
+        <LabelPicker
+          isOpen={showLabelPicker}
+          onClose={() => setShowLabelPicker(false)}
+          selectedLabels={selectedThread.labels || []}
+          onToggleLabel={async (labelSlug) => {
+            const currentLabels = selectedThread.labels || [];
+            const updatedLabels = currentLabels.includes(labelSlug)
+              ? currentLabels.filter((l: string) => l !== labelSlug)
+              : [...currentLabels, labelSlug];
+
+            try {
+              await emailService.updateEmail(selectedThread.message_id, {
+                labels: updatedLabels,
+              });
+              // Update local state
+              setSelectedThread({
+                ...selectedThread,
+                labels: updatedLabels,
+              });
+              // Reload email threads
+              await loadEmailThreads();
+              toast.success('Labels updated', 'Email labels have been updated successfully');
+            } catch (error) {
+              toast.error('Failed to update labels', 'Please try again');
+            }
+          }}
+        />
       )}
     </div>
   );

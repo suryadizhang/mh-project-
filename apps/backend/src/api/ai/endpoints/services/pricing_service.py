@@ -5,13 +5,14 @@ Calculates accurate travel fees using Google Maps Distance Matrix API
 NO MORE HARDCODED PRICES - Always use real data from system
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 import logging
 import os
 from typing import Any
 
-from core.auth.station_models import Station
+# Phase 1.1: Use canonical db.models.identity instead of deprecated station_models
+from db.models.identity import Station
 
 # Import models
 # TODO: Legacy booking models not migrated yet - needs refactor
@@ -767,7 +768,7 @@ Your appreciation means the world to our chefs! 🙏✨
             ),
             "gratuity_guidance": gratuity_guidance,  # Enhanced gratuity guidance
             "total_guests": adults + children + children_under_5,
-            "pricing_as_of": datetime.now().isoformat(),
+            "pricing_as_of": datetime.now(timezone.utc).isoformat(),
             "note": "All pricing is dynamic and subject to change. Current prices pulled from live database.",
             "travel_policy": (
                 self.get_travel_fee_explanation(detailed=True)
@@ -826,7 +827,7 @@ Your appreciation means the world to our chefs! 🙏✨
                 "payment_method": "Direct to chef (cash, Venmo, Zelle)",
                 "not_included": "Gratuity is NOT included in quoted prices",
             },
-            "last_updated": datetime.now().isoformat(),
+            "last_updated": datetime.now(timezone.utc).isoformat(),
         }
 
 

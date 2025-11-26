@@ -586,8 +586,8 @@ Would you like to:
 
         # Extract date keywords
         date_keywords = {
-            "today": datetime.now().strftime("%Y-%m-%d"),
-            "tomorrow": (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d"),
+            "today": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+            "tomorrow": (datetime.now(timezone.utc) + timedelta(days=1)).strftime("%Y-%m-%d"),
             "friday": "this Friday",
             "saturday": "this Saturday",
             "sunday": "this Sunday",

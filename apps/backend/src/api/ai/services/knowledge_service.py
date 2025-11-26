@@ -12,7 +12,7 @@ Key Features:
 - Seasonal offer detection
 """
 
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from typing import Dict, List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
@@ -88,7 +88,7 @@ class KnowledgeService:
             "time_slots": ["12PM", "3PM", "6PM", "9PM"],
             "party_minimum": 550,
             "large_party_threshold": 30,
-            "last_updated": datetime.now().isoformat(),
+            "last_updated": datetime.now(timezone.utc).isoformat(),
         }
 
         self.cache[cache_key] = charter
@@ -625,14 +625,14 @@ class KnowledgeService:
                 preference.preferred_tone = detected_tone
 
             preference.interaction_count += 1
-            preference.last_interaction = datetime.now()
+            preference.last_interaction = datetime.now(timezone.utc)
         else:
             # Create new preference
             preference = CustomerTonePreference(
                 customer_id=customer_id,
                 preferred_tone=detected_tone,
                 tone_confidence=confidence,
-                last_interaction=datetime.now(),
+                last_interaction=datetime.now(timezone.utc),
                 interaction_count=1,
             )
             self.db.add(preference)

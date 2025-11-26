@@ -8,12 +8,8 @@ from uuid import UUID
 
 from core.database import get_db
 from core.dependencies import admin_required
-# TODO: Legacy lead/newsletter models not migrated yet - needs refactor
-    # Campaign,
-    # CampaignChannel,
-    # CampaignStatus,
-    # Subscriber,
-# )
+from models.enums import CampaignChannel, CampaignStatus
+from models.newsletter import Campaign, Subscriber
 from services.ringcentral_sms import RingCentralSMSService
 from fastapi import (
     APIRouter,

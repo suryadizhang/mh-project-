@@ -26,11 +26,12 @@ from api.ai.memory.memory_backend import MemoryBackend
 from api.ai.services.emotion_service import EmotionService
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.date import DateTrigger
-from core.database import Base, get_db_context
+from core.database import get_db_context
 from pydantic import BaseModel, Field
 import pytz
-from sqlalchemy import Column, DateTime, Index, Integer, String, Text
-from sqlalchemy.dialects.postgresql import JSONB
+
+# Import unified models from db.models.ai package
+from db.models.ai import CustomerEngagementFollowUp, FollowUpTriggerType, FollowUpStatus
 
 logger = logging.getLogger(__name__)
 
@@ -39,75 +40,23 @@ _scheduling_background_tasks = set()
 
 
 # =============================================================================
-# DATABASE MODEL
+# UNIFIED MODEL (imported from db.models.ai)
 # =============================================================================
-
-
-class ScheduledFollowUp(Base):
-    """Model for scheduled follow-up messages."""
-
-    __tablename__ = "scheduled_followups"
-
-    id = Column(String(255), primary_key=True)  # Increased from 50 to 255 for generated IDs
-    conversation_id = Column(String(255), nullable=False, index=True)
-    user_id = Column(String(255), nullable=False, index=True)
-
-    # Trigger information
-    trigger_type = Column(String(50), nullable=False)  # post_event/reengagement/emotion_based
-    trigger_data = Column(JSONB, nullable=False, default={})  # Event date, booking ID, etc.
-
-    # Scheduling
-    scheduled_at = Column(DateTime, nullable=False, index=True)
-    executed_at = Column(DateTime, nullable=True)
-    cancelled_at = Column(DateTime, nullable=True)
-    status = Column(
-        String(20), nullable=False, default="pending"
-    )  # pending/executed/cancelled/failed
-
-    # Message
-    template_id = Column(String(50), nullable=True)
-    message_content = Column(Text, nullable=True)
-
-    # Metadata
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    error_message = Column(Text, nullable=True)
-    retry_count = Column(Integer, default=0)
-
-    __table_args__ = (
-        Index("idx_scheduled_followups_status_scheduled", "status", "scheduled_at"),
-        Index("idx_scheduled_followups_user_status", "user_id", "status"),
-        # Composite index for duplicate check optimization (covers most common query pattern)
-        Index(
-            "idx_scheduled_followups_duplicate_check",
-            "user_id",
-            "trigger_type",
-            "status",
-            "scheduled_at",
-        ),
-    )
+# Model now lives in: apps/backend/src/db/models/ai/engagement.py
+# - CustomerEngagementFollowUp: Unified follow-up scheduler model
+# - Table: ai.customer_engagement_followups
+#
+# Old table (public.scheduled_followups) has been migrated to ai schema
+# =============================================================================
 
 
 # =============================================================================
 # ENUMS AND MODELS
 # =============================================================================
-
-
-class FollowUpTriggerType(str, Enum):
-    """Follow-up trigger types"""
-
-    POST_EVENT = "post_event"  # After booking/event (24h)
-    RE_ENGAGEMENT = "reengagement"  # Inactive user (30d)
-    EMOTION_BASED = "emotion_based"  # Low emotion score follow-up
-    CUSTOM = "custom"  # Custom scheduled message
-
-
-class FollowUpStatus(str, Enum):
-    """Follow-up execution status"""
-
-    PENDING = "pending"
-    EXECUTED = "executed"
-    CANCELLED = "cancelled"
-    FAILED = "failed"
+# Enums now imported from db.models.ai:
+# - FollowUpTriggerType (post_event, reengagement, emotion_based, custom)
+# - FollowUpStatus (pending, executed, cancelled, failed)
+# =============================================================================
 
 
 class FollowUpTemplate(BaseModel):
@@ -321,18 +270,23 @@ class FollowUpScheduler:
             logger.info("FollowUpScheduler stopped")
 
     async def _restore_pending_jobs(self) -> None:
-        """Restore pending jobs from database after restart"""
+        """Restore pending jobs from database after restart
+
+        SAFETY: Wrapped in try-except to prevent backend crash if database schema changes
+        or relationships are missing. This allows backend to start even if follow-up
+        scheduler has issues.
+        """
         try:
             async with get_db_context() as db:
                 from sqlalchemy import select
 
                 # Use timezone-naive datetime since scheduled_at column is TIMESTAMP WITHOUT TIME ZONE
                 now_utc = datetime.now(timezone.utc).replace(tzinfo=None)
-                
+
                 # Get all pending jobs
-                stmt = select(ScheduledFollowUp).where(
-                    ScheduledFollowUp.status == FollowUpStatus.PENDING.value,
-                    ScheduledFollowUp.scheduled_at > now_utc,
+                stmt = select(CustomerEngagementFollowUp).where(
+                    CustomerEngagementFollowUp.status == FollowUpStatus.PENDING.value,
+                    CustomerEngagementFollowUp.scheduled_at > now_utc,
                 )
                 result = await db.execute(stmt)
                 pending_jobs = result.scalars().all()
@@ -350,7 +304,10 @@ class FollowUpScheduler:
                 logger.info(f"Restored {len(pending_jobs)} pending follow-up jobs")
 
         except Exception as e:
-            logger.exception(f"Failed to restore pending jobs: {e}")
+            # Don't crash backend if job restoration fails
+            # Common causes: missing relationships, schema changes, database migration issues
+            logger.warning(f"Could not restore pending follow-up jobs: {e}")
+            logger.warning("Backend will continue without restored jobs. New jobs will work normally.")
 
     async def schedule_post_event_followup(
         self,
@@ -394,7 +351,7 @@ class FollowUpScheduler:
             job_id = f"followup_{user_id}_{int(scheduled_at.timestamp())}"
 
             async with get_db_context() as db:
-                followup = ScheduledFollowUp(
+                followup = CustomerEngagementFollowUp(
                     id=job_id,
                     conversation_id=conversation_id,
                     user_id=user_id,
@@ -504,7 +461,7 @@ class FollowUpScheduler:
             job_id = f"reengagement_{user_id}_{int(scheduled_at.timestamp())}"
 
             async with get_db_context() as db:
-                followup = ScheduledFollowUp(
+                followup = CustomerEngagementFollowUp(
                     id=job_id,
                     conversation_id="",  # No specific conversation
                     user_id=user_id,
@@ -559,7 +516,7 @@ class FollowUpScheduler:
             async with get_db_context() as db:
                 from sqlalchemy import select
 
-                stmt = select(ScheduledFollowUp).where(ScheduledFollowUp.id == job_id)
+                stmt = select(CustomerEngagementFollowUp).where(CustomerEngagementFollowUp.id == job_id)
                 result = await db.execute(stmt)
                 followup = result.scalar_one_or_none()
 
@@ -595,15 +552,15 @@ class FollowUpScheduler:
             async with get_db_context() as db:
                 from sqlalchemy import select
 
-                stmt = select(ScheduledFollowUp)
+                stmt = select(CustomerEngagementFollowUp)
 
                 if user_id:
-                    stmt = stmt.where(ScheduledFollowUp.user_id == user_id)
+                    stmt = stmt.where(CustomerEngagementFollowUp.user_id == user_id)
 
                 if status:
-                    stmt = stmt.where(ScheduledFollowUp.status == status.value)
+                    stmt = stmt.where(CustomerEngagementFollowUp.status == status.value)
 
-                stmt = stmt.order_by(ScheduledFollowUp.scheduled_at.desc()).limit(limit)
+                stmt = stmt.order_by(CustomerEngagementFollowUp.scheduled_at.desc()).limit(limit)
 
                 result = await db.execute(stmt)
                 followups = result.scalars().all()
@@ -644,7 +601,7 @@ class FollowUpScheduler:
             async with get_db_context() as db:
                 from sqlalchemy import select
 
-                stmt = select(ScheduledFollowUp).where(ScheduledFollowUp.id == job_id)
+                stmt = select(CustomerEngagementFollowUp).where(CustomerEngagementFollowUp.id == job_id)
                 result = await db.execute(stmt)
                 followup = result.scalar_one_or_none()
 
@@ -693,7 +650,7 @@ class FollowUpScheduler:
                 async with get_db_context() as db:
                     from sqlalchemy import select
 
-                    stmt = select(ScheduledFollowUp).where(ScheduledFollowUp.id == job_id)
+                    stmt = select(CustomerEngagementFollowUp).where(CustomerEngagementFollowUp.id == job_id)
                     result = await db.execute(stmt)
                     followup = result.scalar_one_or_none()
 
@@ -714,9 +671,9 @@ class FollowUpScheduler:
                 from sqlalchemy import and_, select
 
                 conditions = [
-                    ScheduledFollowUp.user_id == user_id,
-                    ScheduledFollowUp.trigger_type == trigger_type.value,
-                    ScheduledFollowUp.status == FollowUpStatus.PENDING.value,
+                    CustomerEngagementFollowUp.user_id == user_id,
+                    CustomerEngagementFollowUp.trigger_type == trigger_type.value,
+                    CustomerEngagementFollowUp.status == FollowUpStatus.PENDING.value,
                 ]
 
                 if event_date:
@@ -725,12 +682,12 @@ class FollowUpScheduler:
                     date_end = event_date + timedelta(days=1)
                     conditions.append(
                         and_(
-                            ScheduledFollowUp.scheduled_at >= date_start,
-                            ScheduledFollowUp.scheduled_at <= date_end,
+                            CustomerEngagementFollowUp.scheduled_at >= date_start,
+                            CustomerEngagementFollowUp.scheduled_at <= date_end,
                         )
                     )
 
-                stmt = select(ScheduledFollowUp).where(and_(*conditions))
+                stmt = select(CustomerEngagementFollowUp).where(and_(*conditions))
                 result = await db.execute(stmt)
                 return result.scalar_one_or_none() is not None
 
@@ -806,8 +763,8 @@ class FollowUpScheduler:
                 from sqlalchemy import func, select
 
                 # Count pending jobs
-                stmt = select(func.count(ScheduledFollowUp.id)).where(
-                    ScheduledFollowUp.status == FollowUpStatus.PENDING.value
+                stmt = select(func.count(CustomerEngagementFollowUp.id)).where(
+                    CustomerEngagementFollowUp.status == FollowUpStatus.PENDING.value
                 )
                 result = await db.execute(stmt)
                 pending_count = result.scalar()
@@ -816,9 +773,9 @@ class FollowUpScheduler:
                 today = datetime.now(timezone.utc).replace(
                     hour=0, minute=0, second=0, microsecond=0
                 )
-                stmt = select(func.count(ScheduledFollowUp.id)).where(
-                    ScheduledFollowUp.status == FollowUpStatus.EXECUTED.value,
-                    ScheduledFollowUp.executed_at >= today,
+                stmt = select(func.count(CustomerEngagementFollowUp.id)).where(
+                    CustomerEngagementFollowUp.status == FollowUpStatus.EXECUTED.value,
+                    CustomerEngagementFollowUp.executed_at >= today,
                 )
                 result = await db.execute(stmt)
                 executed_today = result.scalar()

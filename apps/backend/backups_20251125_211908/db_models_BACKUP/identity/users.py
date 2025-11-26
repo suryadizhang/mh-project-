@@ -1,0 +1,234 @@
+"""
+User Models - Identity Schema
+
+This module contains user account models for the identity schema.
+
+Business Requirements:
+- User authentication and profile management
+- Support multiple authentication providers (Google, Facebook, Email)
+- User status lifecycle (ACTIVE, INACTIVE, SUSPENDED, PENDING)
+- Email verification workflow
+- User metadata for extensibility
+- Last login tracking for security
+- Audit trail integration
+
+Models:
+- User: Core user account with authentication and profile
+- UserStatus: User account status enum
+- AuthProvider: OAuth authentication providers enum
+"""
+
+import enum
+from datetime import datetime
+from typing import List, Optional
+from uuid import UUID, uuid4
+
+from sqlalchemy import Boolean, DateTime, Index, String
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import func
+from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from db.base_class import Base
+
+
+# ==================== ENUMS ====================
+
+class UserStatus(str, enum.Enum):
+    """
+    User account status.
+
+    Business Rules:
+    - ACTIVE: User can log in and access system
+    - INACTIVE: User account disabled (can be reactivated)
+    - SUSPENDED: User suspended for policy violation (requires admin review)
+    - PENDING: New account awaiting email verification
+
+    Status Transitions:
+    - PENDING → ACTIVE (after email verification)
+    - ACTIVE ↔ INACTIVE (admin action)
+    - ACTIVE → SUSPENDED (policy violation)
+    - SUSPENDED → ACTIVE (after admin review)
+    """
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    SUSPENDED = "suspended"
+    PENDING = "pending"
+
+
+class AuthProvider(str, enum.Enum):
+    """
+    OAuth authentication providers.
+
+    Business Rules:
+    - GOOGLE: Google OAuth 2.0 (primary for admin accounts)
+    - FACEBOOK: Facebook OAuth (customer social login)
+    - INSTAGRAM: Instagram OAuth (customer social login)
+    - EMAIL: Email/password authentication (traditional)
+
+    Access Control:
+    - Admin accounts: GOOGLE only (via GoogleOAuthAccount)
+    - Customer accounts: Any provider (via OAuthAccount)
+    - Station users: EMAIL or GOOGLE
+    """
+    GOOGLE = "google"
+    FACEBOOK = "facebook"
+    INSTAGRAM = "instagram"
+    EMAIL = "email"
+
+
+# ==================== MODELS ====================
+
+class User(Base):
+    """
+    User entity (in identity schema).
+
+    Core user account with authentication and profile.
+    Referenced by identity.stations and other schemas.
+
+    Business Requirements:
+    - Unique email address per user
+    - Support OAuth and password authentication
+    - Track verification status
+    - Track last login for security
+    - Store user metadata (flexible JSON)
+    - Support multiple roles (via UserRole)
+    - Support multiple OAuth accounts (via OAuthAccount, GoogleOAuthAccount)
+    - Support multiple station assignments (via StationUser)
+
+    Authentication Methods:
+    1. Email/Password: password_hash populated
+    2. OAuth (Google/Facebook/Instagram): password_hash NULL, oauth_accounts populated
+    3. Admin Google OAuth: password_hash NULL, google_oauth_accounts populated
+
+    Status Lifecycle:
+    - New user: PENDING → requires email verification
+    - Verified: ACTIVE → can access system
+    - Disabled: INACTIVE → temporarily disabled
+    - Policy violation: SUSPENDED → requires admin review
+
+    Security:
+    - Email must be unique and validated
+    - Password hash uses bcrypt (if password auth)
+    - OAuth tokens stored in separate tables (encrypted in production)
+    - Last login tracked for audit
+    - Status changes logged via audit tables
+
+    Access Control:
+    - User can view/update their own profile
+    - Super admin can view/update any user
+    - Station admin can view users in their station
+    """
+    __tablename__ = "users"
+    __table_args__ = (
+        Index("idx_users_email", "email"),
+        Index("idx_users_status", "status"),
+        Index("idx_users_created_at", "created_at"),
+        {"schema": "identity"}
+    )
+
+    # Primary Key
+    id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True),
+        primary_key=True,
+        default=uuid4
+    )
+
+    # Authentication
+    email: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+        unique=True,
+        index=True
+    )
+    password_hash: Mapped[Optional[str]] = mapped_column(
+        String(255),
+        nullable=True
+    )  # NULL for OAuth-only users
+
+    # Profile
+    first_name: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    last_name: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    avatar_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+
+    # Status
+    status: Mapped[UserStatus] = mapped_column(
+        SQLEnum(UserStatus, name="userstatus", schema="public", create_type=False),
+        nullable=False,
+        default=UserStatus.ACTIVE,
+        index=True
+    )
+    is_verified: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False
+    )
+
+    # Metadata (extensible JSON for custom fields)
+    user_metadata: Mapped[dict] = mapped_column(
+        JSONB,
+        nullable=False,
+        default=dict
+    )
+
+    # Timestamps
+    last_login_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now()
+    )
+
+    # Relationships
+    user_roles: Mapped[List["UserRole"]] = relationship(
+        "UserRole",
+        foreign_keys="[UserRole.user_id]",
+        back_populates="user"
+    )
+    oauth_accounts: Mapped[List["OAuthAccount"]] = relationship(
+        "OAuthAccount",
+        back_populates="user"
+    )
+    google_oauth_accounts: Mapped[List["GoogleOAuthAccount"]] = relationship(
+        "GoogleOAuthAccount",
+        foreign_keys="[GoogleOAuthAccount.user_id]",
+        back_populates="user"
+    )
+    station_users: Mapped[List["StationUser"]] = relationship(
+        "StationUser",
+        back_populates="user"
+    )
+    sent_invitations: Mapped[List["AdminInvitation"]] = relationship(
+        "AdminInvitation",
+        foreign_keys="[AdminInvitation.invited_by]",
+        back_populates="inviter"
+    )
+    accepted_invitations: Mapped[List["AdminInvitation"]] = relationship(
+        "AdminInvitation",
+        foreign_keys="[AdminInvitation.accepted_by_user_id]",
+        back_populates="accepted_user"
+    )
+
+    def __repr__(self) -> str:
+        return f"<User(id={self.id}, email={self.email}, status={self.status})>"
+
+    @property
+    def full_name(self) -> str:
+        """Get user's full name."""
+        if self.first_name and self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        return self.first_name or self.last_name or self.email
+
+    def is_active_user(self) -> bool:
+        """Check if user is active and verified."""
+        return self.status == UserStatus.ACTIVE and self.is_verified

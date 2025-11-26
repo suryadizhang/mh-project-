@@ -9,11 +9,14 @@ from api.ai.scheduler.follow_up_scheduler import (
     FOLLOW_UP_TEMPLATES,
     FollowUpJob,
     FollowUpScheduler,
-    FollowUpStatus,
     FollowUpTemplate,
-    FollowUpTriggerType,
-    ScheduledFollowUp,
     schedule_followup_in_background,
+)
+# Import enums and model from db.models.ai
+from db.models.ai import (
+    CustomerEngagementFollowUp,
+    FollowUpStatus,
+    FollowUpTriggerType,
 )
 
 # Global scheduler instance (initialized by application startup)
@@ -32,13 +35,13 @@ def get_scheduler() -> FollowUpScheduler:
 
 
 __all__ = [
+    "CustomerEngagementFollowUp",
     "FOLLOW_UP_TEMPLATES",
     "FollowUpJob",
     "FollowUpScheduler",
     "FollowUpStatus",
     "FollowUpTemplate",
     "FollowUpTriggerType",
-    "ScheduledFollowUp",
     "get_scheduler",
     "schedule_followup_in_background",
     "set_scheduler",

@@ -4,7 +4,7 @@ Alert Data Models
 Database models for storing and managing system alerts.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional
 
@@ -94,8 +94,8 @@ class AlertModel(Base):
     suppression_reason = Column(Text, nullable=True)
 
     # Timestamps
-    triggered_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    triggered_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), index=True)
+    updated_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     expires_at = Column(DateTime, nullable=True)  # Auto-resolve after this time
 
     def __repr__(self):
@@ -170,8 +170,8 @@ class AlertRule(Base):
     last_triggered_at = Column(DateTime, nullable=True)
 
     # Metadata
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     created_by = Column(String(100), nullable=True)
 
     def __repr__(self):

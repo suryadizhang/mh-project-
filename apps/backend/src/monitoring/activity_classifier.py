@@ -16,7 +16,7 @@ Action-based alert viewing:
 import json
 import logging
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
 
 import redis
@@ -195,7 +195,7 @@ class SmartActivityClassifier:
                 "path": request.url.path,
                 "method": request.method,
                 "reason": reason,
-                "hour": datetime.now().hour,
+                "hour": datetime.now(timezone.utc).hour,
             }
             
             # Add to wake log (keep last 1000 events)
@@ -204,7 +204,7 @@ class SmartActivityClassifier:
             
             # Update hourly pattern
             hour_key = f"traffic:hours:{request.url.path}"
-            self.redis.sadd(hour_key, str(datetime.now().hour))
+            self.redis.sadd(hour_key, str(datetime.now(timezone.utc).hour))
             self.redis.expire(hour_key, 604800)  # 7 days
             
         except Exception as e:
@@ -233,7 +233,7 @@ class SmartActivityClassifier:
         """
         path = request.url.path
         method = request.method
-        hour = datetime.now().hour
+        hour = datetime.now(timezone.utc).hour
         
         # ====================================================================
         # Heuristic 1: Write operations = activity

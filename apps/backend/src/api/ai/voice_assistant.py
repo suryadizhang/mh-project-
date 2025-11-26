@@ -113,7 +113,7 @@ class VoiceAssistant:
 
                         # Update conversation
                         conversation_state["messages"].append(
-                            {"role": "user", "content": full_text, "timestamp": datetime.now()}
+                            {"role": "user", "content": full_text, "timestamp": datetime.now(timezone.utc)}
                         )
 
                         # Generate response
@@ -220,7 +220,7 @@ class VoiceAssistant:
 
             # Update conversation
             state["messages"].append(
-                {"role": "assistant", "content": response_text, "timestamp": datetime.now()}
+                {"role": "assistant", "content": response_text, "timestamp": datetime.now(timezone.utc)}
             )
 
             # Transition state

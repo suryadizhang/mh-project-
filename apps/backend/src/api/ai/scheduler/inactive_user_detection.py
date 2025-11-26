@@ -13,7 +13,8 @@ This module:
 from datetime import datetime, timezone, timedelta
 import logging
 
-from api.ai.memory.postgresql_memory import AIConversation
+# Import unified models from db.models.ai package
+from db.models.ai import UnifiedConversation
 from core.database import get_db_context
 from sqlalchemy import and_, func, select
 
@@ -40,18 +41,18 @@ async def detect_inactive_users(
             # Find users whose last message was before threshold
             query = (
                 select(
-                    AIConversation.user_id,
-                    func.max(AIConversation.last_message_at).label("last_activity"),
+                    UnifiedConversation.user_id,
+                    func.max(UnifiedConversation.last_message_at).label("last_activity"),
                 )
                 .where(
                     and_(
-                        AIConversation.user_id.isnot(None),
-                        AIConversation.last_message_at < threshold_date,
-                        AIConversation.is_active,
+                        UnifiedConversation.user_id.isnot(None),
+                        UnifiedConversation.last_message_at < threshold_date,
+                        UnifiedConversation.is_active,
                     )
                 )
-                .group_by(AIConversation.user_id)
-                .order_by(func.max(AIConversation.last_message_at).asc())
+                .group_by(UnifiedConversation.user_id)
+                .order_by(func.max(UnifiedConversation.last_message_at).asc())
             )
 
             if limit:

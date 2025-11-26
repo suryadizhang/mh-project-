@@ -19,10 +19,10 @@ from sqlalchemy import (
     String,
     Text,
 )
-from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import relationship
 
-Base = declarative_base()
+# Use the unified Base from core.database to avoid cross-registry issues
+from core.database import Base
 
 
 class ChannelType(str, Enum):
@@ -84,7 +84,8 @@ class Conversation(Base):
     escalation_reason = Column(Text, nullable=True)
 
     # Option 2 foundations (ready, not used yet)
-    customer_id = Column(String(36), ForeignKey("customers.id"), nullable=True, index=True)
+    # NOTE: customer_id removed - use user_id and channel_metadata for customer identification
+    # Avoids cross-schema FK complexity (AI conversations in public, customers in core)
     confidence_score = Column(Float, default=1.0, nullable=True)  # For hybrid routing
     route_decision = Column(String(50), default="teacher", nullable=True)  # student/teacher/human
     student_response = Column(Text, nullable=True)  # For tutor pairs
@@ -92,11 +93,10 @@ class Conversation(Base):
     reward_score = Column(Float, nullable=True)  # For RLHF-Lite
 
     # Relationships
-    messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
+    messages = relationship("AIMessage", back_populates="conversation", cascade="all, delete-orphan")
     usage_records = relationship(
         "AIUsage", back_populates="conversation", cascade="all, delete-orphan"
     )
-    customer = relationship("Customer", back_populates="conversations")
 
     # Indexes
     __table_args__ = (
@@ -107,8 +107,8 @@ class Conversation(Base):
     )
 
 
-class Message(Base):
-    """Individual messages within conversations"""
+class AIMessage(Base):
+    """Individual messages within AI conversations"""
 
     __tablename__ = "messages"
 
@@ -351,27 +351,6 @@ class AIUsage(Base):
     )
 
 
-class Customer(Base):
-    """
-    Customer model for growth tracking.
-
-    Used by growth_tracker to monitor customer count and trigger
-    Neo4j migration alert at 1,000 customers.
-    """
-
-    __tablename__ = "customers"
-    __table_args__ = {"extend_existing": True}
-
-    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-
-    # Customer info
-    email = Column(String(255), unique=True, nullable=False, index=True)
-    name = Column(String(255), nullable=True)
-    phone = Column(String(50), nullable=True)
-
-    # Lifecycle
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    # Relationships
-    conversations = relationship("Conversation", back_populates="customer")
+# AICustomer model REMOVED - was duplicate of core.Customer
+# Growth tracker now uses db.models.core.Customer (production model)
+# AI conversations use user_id and channel_metadata for customer identification

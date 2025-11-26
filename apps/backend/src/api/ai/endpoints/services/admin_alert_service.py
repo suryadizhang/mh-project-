@@ -5,7 +5,7 @@ Handles escalation and notifications to administrators for critical issues
 that require human intervention.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import os
 from typing import Any
@@ -56,14 +56,14 @@ class AdminAlertService:
             Dict with alert status
         """
         alert_data = {
-            "alert_id": f"ALERT_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+            "alert_id": f"ALERT_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}",
             "type": alert_type,
             "type_label": self.ALERT_TYPES.get(alert_type, "Unknown"),
             "title": title,
             "message": message,
             "priority": priority,
             "priority_level": self.PRIORITY_LEVELS.get(priority, 2),
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "customer_info": customer_info,
             "error_details": error_details,
             "channels_notified": [],

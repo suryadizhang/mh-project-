@@ -13,7 +13,7 @@ This replaces static prompts with database-driven knowledge.
 Created: 2025-11-12
 """
 import logging
-from datetime import datetime, date, time, timedelta
+from datetime import datetime, date, time, timedelta, timezone
 from typing import Dict, List, Optional, Any
 from decimal import Decimal
 
@@ -81,11 +81,11 @@ class KnowledgeService:
                     ),
                     or_(
                         BusinessRule.effective_from == None,
-                        BusinessRule.effective_from <= datetime.now()
+                        BusinessRule.effective_from <= datetime.now(timezone.utc)
                     ),
                     or_(
                         BusinessRule.effective_until == None,
-                        BusinessRule.effective_until >= datetime.now()
+                        BusinessRule.effective_until >= datetime.now(timezone.utc)
                     )
                 )
             ).order_by(BusinessRule.category, BusinessRule.priority.desc())
@@ -411,7 +411,7 @@ class KnowledgeService:
             List of active offers
         """
         try:
-            now = datetime.now()
+            now = datetime.now(timezone.utc)
             check_date = event_date or now.date()
             
             stmt = select(SeasonalOffer).where(
