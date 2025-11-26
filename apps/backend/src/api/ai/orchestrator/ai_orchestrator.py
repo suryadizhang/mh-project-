@@ -18,7 +18,7 @@ Created: October 31, 2025
 Version: 2.0.0 (Phase 1A - Multi-Agent Foundation)
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import logging
 import os
@@ -65,7 +65,9 @@ try:
     from ..routers import get_intent_router
 
     ROUTER_ENABLED = True
-    logger.info("✅ Intent Router imported successfully - multi-agent system available")
+    logger.info(
+        "✅ Intent Router imported successfully - multi-agent system available"
+    )
 except ImportError as e:
     ROUTER_ENABLED = False
     logger.warning(f"Intent router not available - using legacy mode: {e}")
@@ -77,7 +79,9 @@ try:
     logger.info("✅ Model Provider imported successfully")
 except ImportError as e:
     PROVIDER_ENABLED = False
-    logger.warning(f"Model provider not available - using OpenAI client directly: {e}")
+    logger.warning(
+        f"Model provider not available - using OpenAI client directly: {e}"
+    )
 
 # Phase 3: Import adaptive reasoning layers
 try:
@@ -98,7 +102,9 @@ try:
     )
 except ImportError as e:
     REASONING_ENABLED = False
-    logger.warning(f"Adaptive reasoning not available - using direct routing: {e}")
+    logger.warning(
+        f"Adaptive reasoning not available - using direct routing: {e}"
+    )
 
 
 class AIOrchestrator:
@@ -189,15 +195,21 @@ class AIOrchestrator:
                 except ImportError:
                     # Fallback to old way if container not available
                     self.router = get_intent_router()
-            self.logger.info("Intent router enabled - using multi-agent system")
+            self.logger.info(
+                "Intent router enabled - using multi-agent system"
+            )
         else:
             self.router = None
-            self.logger.info("Intent router disabled - using legacy OpenAI client")
+            self.logger.info(
+                "Intent router disabled - using legacy OpenAI client"
+            )
 
             # Initialize OpenAI client (legacy mode)
             api_key = os.getenv("OPENAI_API_KEY")
             if not api_key:
-                raise ValueError("OPENAI_API_KEY environment variable is required")
+                raise ValueError(
+                    "OPENAI_API_KEY environment variable is required"
+                )
 
             self.client = OpenAI(api_key=api_key)
 
@@ -216,7 +228,9 @@ class AIOrchestrator:
                 except ImportError:
                     # Fallback to old way if container not available
                     self.provider = get_provider()
-            self.logger.info(f"Model provider initialized: {self.provider.__class__.__name__}")
+            self.logger.info(
+                f"Model provider initialized: {self.provider.__class__.__name__}"
+            )
         else:
             self.provider = None
 
@@ -224,12 +238,22 @@ class AIOrchestrator:
         if self.enable_reasoning:
             try:
                 self.complexity_router = ComplexityRouter()
-                self.react_agent = None  # Lazy init when needed (requires provider + tools)
-                self.multi_agent_system = None  # Lazy init when needed (requires provider + tools)
-                self.human_escalation_service = None  # Lazy init when needed (requires provider)
-                self.logger.info("✅ Adaptive reasoning enabled - ComplexityRouter initialized")
+                self.react_agent = (
+                    None  # Lazy init when needed (requires provider + tools)
+                )
+                self.multi_agent_system = (
+                    None  # Lazy init when needed (requires provider + tools)
+                )
+                self.human_escalation_service = (
+                    None  # Lazy init when needed (requires provider)
+                )
+                self.logger.info(
+                    "✅ Adaptive reasoning enabled - ComplexityRouter initialized"
+                )
             except Exception as e:
-                self.logger.warning(f"⚠️ Failed to initialize reasoning layers: {e}")
+                self.logger.warning(
+                    f"⚠️ Failed to initialize reasoning layers: {e}"
+                )
                 self.complexity_router = None
                 self.react_agent = None
                 self.multi_agent_system = None
@@ -245,8 +269,12 @@ class AIOrchestrator:
             enable_threading=self.config.enable_threading
         )
         self.rag_service = get_rag_service(enable_rag=self.config.enable_rag)
-        self.voice_service = get_voice_service(enable_voice=self.config.enable_voice)
-        self.identity_resolver = get_identity_resolver(enable_identity=self.config.enable_identity)
+        self.voice_service = get_voice_service(
+            enable_voice=self.config.enable_voice
+        )
+        self.identity_resolver = get_identity_resolver(
+            enable_identity=self.config.enable_identity
+        )
 
         # Week 1: Initialize AI Hospitality Training System services
         if TONE_ANALYZER_ENABLED:
@@ -256,7 +284,9 @@ class AIOrchestrator:
                 self.knowledge_service = None
                 self.logger.info("✅ ToneAnalyzer initialized successfully")
             except Exception as e:
-                self.logger.warning(f"⚠️ Failed to initialize tone analyzer: {e}")
+                self.logger.warning(
+                    f"⚠️ Failed to initialize tone analyzer: {e}"
+                )
                 self.tone_analyzer = None
                 self.knowledge_service = None
         else:
@@ -308,13 +338,19 @@ class AIOrchestrator:
 
                 self.memory_backend = await get_memory_backend()
                 self.emotion_service = get_emotion_service()
-                self.logger.info("✅ Memory backend and emotion service initialized")
+                self.logger.info(
+                    "✅ Memory backend and emotion service initialized"
+                )
             except ImportError as e:
-                self.logger.warning(f"⚠️ Memory backend or emotion service not available: {e}")
+                self.logger.warning(
+                    f"⚠️ Memory backend or emotion service not available: {e}"
+                )
                 self.memory_backend = None
                 self.emotion_service = None
             except Exception as e:
-                self.logger.exception(f"❌ Failed to initialize memory backend: {e}")
+                self.logger.exception(
+                    f"❌ Failed to initialize memory backend: {e}"
+                )
                 self.memory_backend = None
                 self.emotion_service = None
 
@@ -332,12 +368,18 @@ class AIOrchestrator:
                     timezone=timezone,
                     orchestrator_callback=self._send_followup_message,
                 )
-                self.logger.info(f"✅ Follow-up scheduler initialized (timezone: {timezone})")
+                self.logger.info(
+                    f"✅ Follow-up scheduler initialized (timezone: {timezone})"
+                )
             except ImportError as e:
-                self.logger.warning(f"⚠️ Follow-up scheduler not available: {e}")
+                self.logger.warning(
+                    f"⚠️ Follow-up scheduler not available: {e}"
+                )
                 self.scheduler = None
             except Exception as e:
-                self.logger.exception(f"❌ Failed to initialize scheduler: {e}")
+                self.logger.exception(
+                    f"❌ Failed to initialize scheduler: {e}"
+                )
                 self.scheduler = None
 
         # Start scheduler
@@ -360,7 +402,9 @@ class AIOrchestrator:
                     id="daily_reengagement_check",
                     replace_existing=True,
                 )
-                self.logger.info("✅ Daily inactive user re-engagement check scheduled (9 AM)")
+                self.logger.info(
+                    "✅ Daily inactive user re-engagement check scheduled (9 AM)"
+                )
             except Exception as e:
                 self.logger.exception(f"❌ Failed to start scheduler: {e}")
 
@@ -397,7 +441,9 @@ class AIOrchestrator:
             Job ID if scheduled, None if not scheduled (e.g., duplicate or scheduler disabled)
         """
         if not self.scheduler:
-            self.logger.warning("Scheduler not available - cannot schedule follow-up")
+            self.logger.warning(
+                "Scheduler not available - cannot schedule follow-up"
+            )
             return None
 
         try:
@@ -413,13 +459,19 @@ class AIOrchestrator:
             if job_id:
                 self.logger.info(f"Scheduled post-event follow-up: {job_id}")
             else:
-                self.logger.debug(f"Follow-up not scheduled (duplicate): {user_id}")
+                self.logger.debug(
+                    f"Follow-up not scheduled (duplicate): {user_id}"
+                )
             return job_id
         except Exception as e:
-            self.logger.exception(f"Failed to schedule post-event follow-up: {e}")
+            self.logger.exception(
+                f"Failed to schedule post-event follow-up: {e}"
+            )
             return None
 
-    async def schedule_reengagement(self, user_id: str, last_activity: datetime) -> str | None:
+    async def schedule_reengagement(
+        self, user_id: str, last_activity: datetime
+    ) -> str | None:
         """
         Schedule a re-engagement campaign for an inactive user.
 
@@ -431,26 +483,36 @@ class AIOrchestrator:
             Job ID if scheduled, None if not scheduled
         """
         if not self.scheduler:
-            self.logger.warning("Scheduler not available - cannot schedule re-engagement")
+            self.logger.warning(
+                "Scheduler not available - cannot schedule re-engagement"
+            )
             return None
 
         try:
             from datetime import timedelta
 
             job_id = await self.scheduler.schedule_reengagement(
-                user_id=user_id, last_activity=last_activity, inactive_threshold=timedelta(days=30)
+                user_id=user_id,
+                last_activity=last_activity,
+                inactive_threshold=timedelta(days=30),
             )
             if job_id:
                 self.logger.info(f"Scheduled re-engagement: {job_id}")
             else:
-                self.logger.debug(f"Re-engagement not scheduled (duplicate): {user_id}")
+                self.logger.debug(
+                    f"Re-engagement not scheduled (duplicate): {user_id}"
+                )
             return job_id
         except Exception as e:
             self.logger.exception(f"Failed to schedule re-engagement: {e}")
             return None
 
     async def _send_followup_message(
-        self, user_id: str, conversation_id: str, content: str, metadata: dict[str, Any]
+        self,
+        user_id: str,
+        conversation_id: str,
+        content: str,
+        metadata: dict[str, Any],
     ) -> None:
         """
         Send a follow-up message to the user.
@@ -488,7 +550,11 @@ class AIOrchestrator:
                     "conversation_id": conversation_id,
                     "followup_id": metadata.get("followup_id"),
                     "trigger_type": metadata.get("trigger_type"),
-                    "content_preview": content[:100] + "..." if len(content) > 100 else content,
+                    "content_preview": (
+                        content[:100] + "..."
+                        if len(content) > 100
+                        else content
+                    ),
                 },
             )
 
@@ -587,7 +653,9 @@ Adjust your tone and length for this channel accordingly.
 
 Generate accurate, helpful responses that make customers excited to book!"""
 
-    async def process_inquiry(self, request: OrchestratorRequest) -> OrchestratorResponse:
+    async def process_inquiry(
+        self, request: OrchestratorRequest
+    ) -> OrchestratorResponse:
         """
         Process customer inquiry with AI orchestration.
 
@@ -611,7 +679,7 @@ Generate accurate, helpful responses that make customers excited to book!"""
         Returns:
             Orchestrator response with AI-generated reply and tool usage
         """
-        start_time = datetime.now()
+        start_time = datetime.now(timezone.utc)
 
         try:
             # Step 1: Detect customer tone (Week 1: AI Hospitality Training)
@@ -622,13 +690,17 @@ Generate accurate, helpful responses that make customers excited to book!"""
 
             if self.tone_analyzer:
                 try:
-                    tone_result = self.tone_analyzer.detect_tone(request.message)
+                    tone_result = self.tone_analyzer.detect_tone(
+                        request.message
+                    )
                     customer_tone = tone_result.detected_tone.value
                     tone_confidence = tone_result.confidence
 
                     # Get response guidelines for this tone
-                    tone_guidelines = await self.tone_analyzer.get_response_guidelines(
-                        tone_result.detected_tone
+                    tone_guidelines = (
+                        await self.tone_analyzer.get_response_guidelines(
+                            tone_result.detected_tone
+                        )
                     )
 
                     self.logger.info(
@@ -641,23 +713,31 @@ Generate accurate, helpful responses that make customers excited to book!"""
                         },
                     )
                 except Exception as e:
-                    self.logger.warning(f"Tone detection failed, using default: {e}")
+                    self.logger.warning(
+                        f"Tone detection failed, using default: {e}"
+                    )
 
             # Step 1B: Get dynamic business knowledge (Week 1: Knowledge Service)
             if self.knowledge_service:
                 try:
-                    business_charter = await self.knowledge_service.get_business_charter()
+                    business_charter = (
+                        await self.knowledge_service.get_business_charter()
+                    )
 
                     self.logger.debug(
                         "Business knowledge loaded",
                         extra={
-                            "last_updated": business_charter.get("last_updated"),
+                            "last_updated": business_charter.get(
+                                "last_updated"
+                            ),
                             "has_pricing": "pricing" in business_charter,
                             "has_policies": "policies" in business_charter,
                         },
                     )
                 except Exception as e:
-                    self.logger.warning(f"Failed to load business knowledge: {e}")
+                    self.logger.warning(
+                        f"Failed to load business knowledge: {e}"
+                    )
 
             # Step 2: Resolve customer identity (Phase 3 - currently no-op)
             customer_id = (
@@ -671,12 +751,18 @@ Generate accurate, helpful responses that make customers excited to book!"""
 
             # Step 3: Create/retrieve conversation
             if not request.conversation_id:
-                request.conversation_id = await self.conversation_service.create_conversation(
-                    customer_id=customer_id, channel=request.channel, message=request.message
+                request.conversation_id = (
+                    await self.conversation_service.create_conversation(
+                        customer_id=customer_id,
+                        channel=request.channel,
+                        message=request.message,
+                    )
                 )
 
             # Step 4: Get conversation history
-            conversation_history = self._conversation_history.get(request.conversation_id, [])
+            conversation_history = self._conversation_history.get(
+                request.conversation_id, []
+            )
 
             # Week 1: Add tone to request context for agents
             request.customer_context["detected_tone"] = customer_tone
@@ -720,13 +806,23 @@ Generate accurate, helpful responses that make customers excited to book!"""
                     if complexity_level == ComplexityLevel.REACT:
                         # Use ReAct agent for medium complexity
                         response = await self._process_with_react(
-                            request, customer_id, conversation_history, start_time, routing_context
+                            request,
+                            customer_id,
+                            conversation_history,
+                            start_time,
+                            routing_context,
                         )
                     elif complexity_level == ComplexityLevel.MULTI_AGENT:
                         # Route to multi-agent system (Layer 4)
-                        self.logger.info("Routing to multi-agent system for complex reasoning")
+                        self.logger.info(
+                            "Routing to multi-agent system for complex reasoning"
+                        )
                         response = await self._process_with_multi_agent(
-                            request, customer_id, conversation_history, start_time, routing_context
+                            request,
+                            customer_id,
+                            conversation_history,
+                            start_time,
+                            routing_context,
                         )
                     elif complexity_level == ComplexityLevel.HUMAN:
                         # Route to human escalation (Layer 5)
@@ -734,7 +830,11 @@ Generate accurate, helpful responses that make customers excited to book!"""
                             "Routing to human escalation with AI context preparation"
                         )
                         response = await self._process_with_human_escalation(
-                            request, customer_id, conversation_history, start_time, routing_context
+                            request,
+                            customer_id,
+                            conversation_history,
+                            start_time,
+                            routing_context,
                         )
                     else:  # ComplexityLevel.CACHE or fallback
                         # Use standard routing for simple queries
@@ -788,10 +888,14 @@ Generate accurate, helpful responses that make customers excited to book!"""
 
             # Add to conversation service (Phase 3)
             await self.conversation_service.add_message(
-                conversation_id=request.conversation_id, role="user", content=request.message
+                conversation_id=request.conversation_id,
+                role="user",
+                content=request.message,
             )
             await self.conversation_service.add_message(
-                conversation_id=request.conversation_id, role="assistant", content=response.response
+                conversation_id=request.conversation_id,
+                role="assistant",
+                content=response.response,
             )
 
             return response
@@ -800,10 +904,18 @@ Generate accurate, helpful responses that make customers excited to book!"""
             self.logger.error(
                 f"Inquiry processing failed: {e!s}",
                 exc_info=True,
-                extra={"request": request.dict() if hasattr(request, "dict") else str(request)},
+                extra={
+                    "request": (
+                        request.dict()
+                        if hasattr(request, "dict")
+                        else str(request)
+                    )
+                },
             )
 
-            execution_time_ms = (datetime.now() - start_time).total_seconds() * 1000
+            execution_time_ms = (
+                datetime.now(timezone.utc) - start_time
+            ).total_seconds() * 1000
 
             return OrchestratorResponse(
                 success=False,
@@ -849,7 +961,9 @@ Generate accurate, helpful responses that make customers excited to book!"""
 
         # Route to appropriate agent
         agent_response = await self.router.route(
-            message=request.message, context=context, conversation_history=conversation_history
+            message=request.message,
+            context=context,
+            conversation_history=conversation_history,
         )
 
         # Convert agent tool calls to orchestrator format
@@ -873,16 +987,28 @@ Generate accurate, helpful responses that make customers excited to book!"""
                     ToolCall(
                         tool_name=function_name,
                         parameters=function_args,
-                        result=tool_result.get("result", {}) if tool_result else {},
-                        execution_time_ms=(
-                            tool_result.get("execution_time_ms", 0) if tool_result else 0
+                        result=(
+                            tool_result.get("result", {})
+                            if tool_result
+                            else {}
                         ),
-                        success=tool_result.get("success", False) if tool_result else False,
+                        execution_time_ms=(
+                            tool_result.get("execution_time_ms", 0)
+                            if tool_result
+                            else 0
+                        ),
+                        success=(
+                            tool_result.get("success", False)
+                            if tool_result
+                            else False
+                        ),
                     )
                 )
 
         # Calculate metadata
-        execution_time_ms = (datetime.now() - start_time).total_seconds() * 1000
+        execution_time_ms = (
+            datetime.now(timezone.utc) - start_time
+        ).total_seconds() * 1000
         routing_metadata = agent_response.get("routing", {})
 
         # Determine if admin review needed
@@ -905,7 +1031,9 @@ Generate accurate, helpful responses that make customers excited to book!"""
                 "router_enabled": True,
                 "agent_type": routing_metadata.get("agent_type"),
                 "routing_confidence": routing_metadata.get("confidence"),
-                "classification_latency_ms": routing_metadata.get("classification_latency_ms"),
+                "classification_latency_ms": routing_metadata.get(
+                    "classification_latency_ms"
+                ),
                 "agent_latency_ms": routing_metadata.get("agent_latency_ms"),
                 "intent_transition": routing_metadata.get("intent_transition"),
                 "usage": agent_response.get("usage", {}),
@@ -968,11 +1096,15 @@ Generate accurate, helpful responses that make customers excited to book!"""
                 # Get tools from router or tool registry
                 if self.use_router and self.router:
                     # Extract tools from one of the agents (they share the same registry)
-                    tool_registry = self.router.agents.get("lead_nurturing").tool_registry
+                    tool_registry = self.router.agents.get(
+                        "lead_nurturing"
+                    ).tool_registry
                 elif hasattr(self, "tool_registry"):
                     tool_registry = self.tool_registry
                 else:
-                    raise ValueError("No tool registry available for ReAct agent")
+                    raise ValueError(
+                        "No tool registry available for ReAct agent"
+                    )
 
                 self.react_agent = ReActAgent(
                     model_provider=self.provider or self.client,
@@ -980,7 +1112,9 @@ Generate accurate, helpful responses that make customers excited to book!"""
                 )
                 self.logger.info("✅ ReAct agent initialized on-demand")
             except Exception as e:
-                self.logger.error(f"Failed to initialize ReAct agent: {e}", exc_info=True)
+                self.logger.error(
+                    f"Failed to initialize ReAct agent: {e}", exc_info=True
+                )
                 # Fall back to standard routing
                 return await self._process_with_router_or_legacy(
                     request, customer_id, conversation_history, start_time
@@ -996,10 +1130,14 @@ Generate accurate, helpful responses that make customers excited to book!"""
 
         try:
             # Process with ReAct agent
-            react_result = await self.react_agent.process(request.message, react_context)
+            react_result = await self.react_agent.process(
+                request.message, react_context
+            )
 
             # Convert ReAct result to OrchestratorResponse
-            execution_time_ms = (datetime.now() - start_time).total_seconds() * 1000
+            execution_time_ms = (
+                datetime.now(timezone.utc) - start_time
+            ).total_seconds() * 1000
 
             # Convert tools used
             tools_used = []
@@ -1023,7 +1161,8 @@ Generate accurate, helpful responses that make customers excited to book!"""
                 response=react_result.response,
                 tools_used=tools_used,
                 conversation_id=request.conversation_id,
-                requires_admin_review=not react_result.success or self.config.auto_admin_review,
+                requires_admin_review=not react_result.success
+                or self.config.auto_admin_review,
                 metadata={
                     "model": self.config.model,
                     "execution_time_ms": round(execution_time_ms, 2),
@@ -1039,7 +1178,9 @@ Generate accurate, helpful responses that make customers excited to book!"""
             )
 
         except Exception as e:
-            self.logger.error(f"ReAct agent processing failed: {e}", exc_info=True)
+            self.logger.error(
+                f"ReAct agent processing failed: {e}", exc_info=True
+            )
             # Fall back to standard routing
             return await self._process_with_router_or_legacy(
                 request, customer_id, conversation_history, start_time
@@ -1067,11 +1208,15 @@ Generate accurate, helpful responses that make customers excited to book!"""
                 # Get tools from router or tool registry
                 if self.use_router and self.router:
                     # Extract tools from one of the agents (they share the same registry)
-                    tool_registry = self.router.agents.get("lead_nurturing").tool_registry
+                    tool_registry = self.router.agents.get(
+                        "lead_nurturing"
+                    ).tool_registry
                 elif hasattr(self, "tool_registry"):
                     tool_registry = self.tool_registry
                 else:
-                    raise ValueError("No tool registry available for multi-agent system")
+                    raise ValueError(
+                        "No tool registry available for multi-agent system"
+                    )
 
                 # Configure multi-agent system
                 config = MultiAgentConfig(
@@ -1088,7 +1233,10 @@ Generate accurate, helpful responses that make customers excited to book!"""
                 )
                 self.logger.info("✅ Multi-Agent System initialized on-demand")
             except Exception as e:
-                self.logger.error(f"Failed to initialize Multi-Agent System: {e}", exc_info=True)
+                self.logger.error(
+                    f"Failed to initialize Multi-Agent System: {e}",
+                    exc_info=True,
+                )
                 # Fall back to standard routing
                 return await self._process_with_router_or_legacy(
                     request, customer_id, conversation_history, start_time
@@ -1110,7 +1258,9 @@ Generate accurate, helpful responses that make customers excited to book!"""
             )
 
             # Convert Multi-Agent result to OrchestratorResponse
-            execution_time_ms = (datetime.now() - start_time).total_seconds() * 1000
+            execution_time_ms = (
+                datetime.now(timezone.utc) - start_time
+            ).total_seconds() * 1000
 
             # Convert tools used
             tools_used = []
@@ -1151,13 +1301,16 @@ Generate accurate, helpful responses that make customers excited to book!"""
                     "multi_agent_cost_usd": multi_agent_result.cost_usd,
                     "multi_agent_duration_ms": multi_agent_result.duration_ms,
                     "multi_agent_agents_used": [
-                        msg.from_agent.value for msg in multi_agent_result.messages
+                        msg.from_agent.value
+                        for msg in multi_agent_result.messages
                     ],
                 },
             )
 
         except Exception as e:
-            self.logger.error(f"Multi-Agent System processing failed: {e}", exc_info=True)
+            self.logger.error(
+                f"Multi-Agent System processing failed: {e}", exc_info=True
+            )
             # Fall back to standard routing
             return await self._process_with_router_or_legacy(
                 request, customer_id, conversation_history, start_time
@@ -1198,15 +1351,21 @@ Generate accurate, helpful responses that make customers excited to book!"""
         try:
             # Lazy initialize HumanEscalationService if needed
             if self.human_escalation_service is None:
-                self.logger.info("Initializing HumanEscalationService (Layer 5)...")
+                self.logger.info(
+                    "Initializing HumanEscalationService (Layer 5)..."
+                )
                 self.human_escalation_service = HumanEscalationService(
                     model_provider=self.model_provider,
                     escalation_service=None,  # Will use direct DB access instead
                 )
-                self.logger.info("✅ HumanEscalationService initialized successfully")
+                self.logger.info(
+                    "✅ HumanEscalationService initialized successfully"
+                )
 
             # Determine escalation reason from routing context
-            escalation_reason = self._determine_escalation_reason(routing_context)
+            escalation_reason = self._determine_escalation_reason(
+                routing_context
+            )
 
             self.logger.info(
                 "Preparing human escalation context",
@@ -1234,21 +1393,31 @@ Generate accurate, helpful responses that make customers excited to book!"""
                 "email": request.customer_context.get("email"),
                 "phone": request.customer_context.get("phone"),
                 "zipcode": request.customer_context.get("zipcode"),
-                "lifetime_value": request.customer_context.get("lifetime_value", 0.0),
-                "booking_count": request.customer_context.get("booking_count", 0),
-                "vip_status": request.customer_context.get("vip_status", False),
-                "previous_escalations": request.customer_context.get("previous_escalations", 0),
+                "lifetime_value": request.customer_context.get(
+                    "lifetime_value", 0.0
+                ),
+                "booking_count": request.customer_context.get(
+                    "booking_count", 0
+                ),
+                "vip_status": request.customer_context.get(
+                    "vip_status", False
+                ),
+                "previous_escalations": request.customer_context.get(
+                    "previous_escalations", 0
+                ),
             }
 
             # Call HumanEscalationService to prepare complete context
-            escalation_result = await self.human_escalation_service.prepare_escalation(
-                query=request.message,
-                customer_id=customer_id,
-                customer_context=customer_context,
-                conversation_history=conversation_history,
-                ai_attempt=ai_attempt,
-                escalation_reason=escalation_reason,
-                channel=request.channel,
+            escalation_result = (
+                await self.human_escalation_service.prepare_escalation(
+                    query=request.message,
+                    customer_id=customer_id,
+                    customer_context=customer_context,
+                    conversation_history=conversation_history,
+                    ai_attempt=ai_attempt,
+                    escalation_reason=escalation_reason,
+                    channel=request.channel,
+                )
             )
 
             if not escalation_result.success:
@@ -1281,11 +1450,14 @@ Generate accurate, helpful responses that make customers excited to book!"""
                     }
 
                     escalation_record = await escalation_svc.create_escalation(
-                        conversation_id=request.conversation_id or str(uuid4()),
+                        conversation_id=request.conversation_id
+                        or str(uuid4()),
                         phone=request.customer_context.get("phone"),
                         reason=escalation_context.why_ai_failed,
                         preferred_method="sms",
-                        priority=priority_map.get(escalation_context.urgency_level.name, "medium"),
+                        priority=priority_map.get(
+                            escalation_context.urgency_level.name, "medium"
+                        ),
                         email=request.customer_context.get("email"),
                         customer_id=customer_id,
                         customer_consent=True,
@@ -1300,18 +1472,26 @@ Generate accurate, helpful responses that make customers excited to book!"""
                     )
 
                     escalation_id = str(escalation_record.id)
-                    self.logger.info(f"✅ Escalation record created: {escalation_id}")
+                    self.logger.info(
+                        f"✅ Escalation record created: {escalation_id}"
+                    )
 
                 except Exception as e:
-                    self.logger.warning(f"Failed to create escalation record: {e}")
+                    self.logger.warning(
+                        f"Failed to create escalation record: {e}"
+                    )
                     # Continue without database record
 
             # Build response message for customer
-            response_message = self._build_escalation_response_message(escalation_context)
+            response_message = self._build_escalation_response_message(
+                escalation_context
+            )
 
             # Calculate processing time
-            end_time = datetime.now()
-            processing_time_ms = int((end_time - start_time).total_seconds() * 1000)
+            end_time = datetime.now(timezone.utc)
+            processing_time_ms = int(
+                (end_time - start_time).total_seconds() * 1000
+            )
 
             # Create orchestrator response
             return OrchestratorResponse(
@@ -1344,13 +1524,17 @@ Generate accurate, helpful responses that make customers excited to book!"""
             )
 
         except Exception as e:
-            self.logger.error(f"Human Escalation processing failed: {e}", exc_info=True)
+            self.logger.error(
+                f"Human Escalation processing failed: {e}", exc_info=True
+            )
             # Fall back to standard routing
             return await self._process_with_router_or_legacy(
                 request, customer_id, conversation_history, start_time
             )
 
-    def _determine_escalation_reason(self, routing_context: dict) -> EscalationReason:
+    def _determine_escalation_reason(
+        self, routing_context: dict
+    ) -> EscalationReason:
         """
         Determine escalation reason from routing context.
 
@@ -1376,7 +1560,9 @@ Generate accurate, helpful responses that make customers excited to book!"""
         # Default to complex unsolved
         return EscalationReason.COMPLEX_UNSOLVED
 
-    def _build_escalation_response_message(self, escalation_context: EscalationContext) -> str:
+    def _build_escalation_response_message(
+        self, escalation_context: EscalationContext
+    ) -> str:
         """
         Build customer-facing response message for human escalation.
 
@@ -1384,7 +1570,9 @@ Generate accurate, helpful responses that make customers excited to book!"""
         """
         # Get customer name if available
         customer_name = escalation_context.customer_context.name
-        greeting = f"Hi {customer_name}! " if customer_name != "Unknown" else "Hi! "
+        greeting = (
+            f"Hi {customer_name}! " if customer_name != "Unknown" else "Hi! "
+        )
 
         # Base message
         message = (
@@ -1433,7 +1621,9 @@ Generate accurate, helpful responses that make customers excited to book!"""
         This maintains backward compatibility with Phase 1.
         """
         # Get RAG knowledge (Phase 3 - currently None)
-        rag_knowledge = await self.rag_service.retrieve_knowledge(request.message)
+        rag_knowledge = await self.rag_service.retrieve_knowledge(
+            request.message
+        )
 
         # Build messages for OpenAI
         messages = self._build_messages(
@@ -1446,10 +1636,14 @@ Generate accurate, helpful responses that make customers excited to book!"""
 
         # Call OpenAI with function calling
         tools_used = []
-        response_text = await self._call_openai_with_tools(messages, tools_used)
+        response_text = await self._call_openai_with_tools(
+            messages, tools_used
+        )
 
         # Calculate metadata
-        execution_time_ms = (datetime.now() - start_time).total_seconds() * 1000
+        execution_time_ms = (
+            datetime.now(timezone.utc) - start_time
+        ).total_seconds() * 1000
 
         # Determine if admin review needed
         requires_admin_review = self.config.auto_admin_review
@@ -1498,19 +1692,32 @@ Generate accurate, helpful responses that make customers excited to book!"""
         Returns:
             List of messages for OpenAI
         """
-        messages = [{"role": "system", "content": self._build_system_prompt(channel)}]
+        messages = [
+            {"role": "system", "content": self._build_system_prompt(channel)}
+        ]
 
         # Add conversation history (Phase 3)
         for msg in history:
-            messages.append({"role": msg.get("role", "user"), "content": msg.get("content", "")})
+            messages.append(
+                {
+                    "role": msg.get("role", "user"),
+                    "content": msg.get("content", ""),
+                }
+            )
 
         # Add RAG knowledge context (Phase 3)
         if rag_knowledge:
             knowledge_text = "\n\n".join(
-                [f"**Knowledge**: {doc.get('content', '')}" for doc in rag_knowledge]
+                [
+                    f"**Knowledge**: {doc.get('content', '')}"
+                    for doc in rag_knowledge
+                ]
             )
             messages.append(
-                {"role": "system", "content": f"**Additional Context**:\n{knowledge_text}"}
+                {
+                    "role": "system",
+                    "content": f"**Additional Context**:\n{knowledge_text}",
+                }
             )
 
         # Add customer context if available
@@ -1522,8 +1729,12 @@ Generate accurate, helpful responses that make customers excited to book!"""
                 context_parts.append(f"Email: {customer_context['email']}")
             if customer_context.get("phone"):
                 context_parts.append(f"Phone: {customer_context['phone']}")
-            if customer_context.get("address") or customer_context.get("zipcode"):
-                location = customer_context.get("address") or customer_context.get("zipcode")
+            if customer_context.get("address") or customer_context.get(
+                "zipcode"
+            ):
+                location = customer_context.get(
+                    "address"
+                ) or customer_context.get("zipcode")
                 context_parts.append(f"Location: {location}")
 
             if context_parts:
@@ -1583,7 +1794,9 @@ Generate accurate, helpful responses that make customers excited to book!"""
         if message.tool_calls:
             self.logger.info(
                 f"AI requested {len(message.tool_calls)} tool calls",
-                extra={"tools": [tc.function.name for tc in message.tool_calls]},
+                extra={
+                    "tools": [tc.function.name for tc in message.tool_calls]
+                },
             )
 
             # Add assistant message to history
@@ -1610,7 +1823,10 @@ Generate accurate, helpful responses that make customers excited to book!"""
                 tool_name = tool_call.function.name
                 tool_args = json.loads(tool_call.function.arguments)
 
-                self.logger.info(f"Executing tool: {tool_name}", extra={"arguments": tool_args})
+                self.logger.info(
+                    f"Executing tool: {tool_name}",
+                    extra={"arguments": tool_args},
+                )
 
                 # Get tool from registry
                 tool = self.tool_registry.get(tool_name)
@@ -1619,9 +1835,11 @@ Generate accurate, helpful responses that make customers excited to book!"""
                     continue
 
                 # Execute tool with logging
-                tool_start = datetime.now()
+                tool_start = datetime.now(timezone.utc)
                 tool_result = await tool.execute_with_logging(**tool_args)
-                tool_time_ms = (datetime.now() - tool_start).total_seconds() * 1000
+                tool_time_ms = (
+                    datetime.now(timezone.utc) - tool_start
+                ).total_seconds() * 1000
 
                 # Record tool usage
                 tools_used.append(
@@ -1658,7 +1876,9 @@ Generate accurate, helpful responses that make customers excited to book!"""
             # No tools used, return direct response
             return message.content
 
-    def get_conversation_history(self, conversation_id: str) -> list[dict[str, str]]:
+    def get_conversation_history(
+        self, conversation_id: str
+    ) -> list[dict[str, str]]:
         """
         Get conversation history for a given conversation ID.
 
@@ -1681,7 +1901,9 @@ Generate accurate, helpful responses that make customers excited to book!"""
         """
         if conversation_id in self._conversation_history:
             del self._conversation_history[conversation_id]
-            self.logger.info(f"Cleared conversation history: {conversation_id}")
+            self.logger.info(
+                f"Cleared conversation history: {conversation_id}"
+            )
 
     def get_statistics(self) -> dict[str, Any]:
         """
@@ -1712,7 +1934,9 @@ Generate accurate, helpful responses that make customers excited to book!"""
 _orchestrator: AIOrchestrator | None = None
 
 
-def get_ai_orchestrator(config: OrchestratorConfig | None = None) -> AIOrchestrator:
+def get_ai_orchestrator(
+    config: OrchestratorConfig | None = None,
+) -> AIOrchestrator:
     """
     Get AI orchestrator singleton.
 

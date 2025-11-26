@@ -14,7 +14,7 @@ Run with:
 """
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 
 from api.ai.orchestrator import AIOrchestrator, OrchestratorRequest
@@ -22,7 +22,8 @@ from api.ai.routers import get_intent_router
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -148,7 +149,7 @@ class IntegrationTestSuite:
     async def test_multi_turn_conversation(self):
         """Test 5: Multi-turn conversation with context"""
 
-        conversation_id = f"test_conv_{datetime.now().timestamp()}"
+        conversation_id = f"test_conv_{datetime.now(timezone.utc).timestamp()}"
 
         turns = [
             {
@@ -181,9 +182,11 @@ class IntegrationTestSuite:
                 customer_context={"email": "test@example.com"},
             )
 
-            start_time = datetime.now()
+            start_time = datetime.now(timezone.utc)
             response = await self.orchestrator.process_inquiry(request)
-            latency = (datetime.now() - start_time).total_seconds() * 1000
+            latency = (
+                datetime.now(timezone.utc) - start_time
+            ).total_seconds() * 1000
 
             agent_type = response.metadata.get("agent_type")
             success = agent_type == turn_data["expected_agent"]
@@ -205,7 +208,9 @@ class IntegrationTestSuite:
     async def test_intent_transitions(self):
         """Test 6: Intent transitions (switching agents mid-conversation)"""
 
-        conversation_id = f"test_transition_{datetime.now().timestamp()}"
+        conversation_id = (
+            f"test_transition_{datetime.now(timezone.utc).timestamp()}"
+        )
 
         transitions = [
             {
@@ -274,7 +279,9 @@ class IntegrationTestSuite:
             # Use router's fallback method
             response = await self.router.route_with_fallback(
                 message=message,
-                context={"conversation_id": f"test_fallback_{datetime.now().timestamp()}"},
+                context={
+                    "conversation_id": f"test_fallback_{datetime.now(timezone.utc).timestamp()}"
+                },
                 confidence_threshold=0.65,
             )
 
@@ -283,7 +290,9 @@ class IntegrationTestSuite:
             agent_type = routing.get("agent_type")
 
             # Should route to knowledge agent or have low confidence
-            success = agent_type == "knowledge" or (fallback and fallback.get("triggered"))
+            success = agent_type == "knowledge" or (
+                fallback and fallback.get("triggered")
+            )
 
             if success:
                 self.passed += 1
@@ -295,7 +304,9 @@ class IntegrationTestSuite:
                     "test": f"Fallback: {message}",
                     "passed": success,
                     "agent": agent_type,
-                    "fallback": fallback.get("triggered") if fallback else False,
+                    "fallback": (
+                        fallback.get("triggered") if fallback else False
+                    ),
                 }
             )
 
@@ -327,7 +338,7 @@ class IntegrationTestSuite:
             request = OrchestratorRequest(
                 message=test_case["message"],
                 channel="webchat",
-                conversation_id=f"test_tools_{datetime.now().timestamp()}",
+                conversation_id=f"test_tools_{datetime.now(timezone.utc).timestamp()}",
                 customer_context={},
             )
 
@@ -340,7 +351,9 @@ class IntegrationTestSuite:
             has_tools = len(tools_used) > 0
             correct_agent = agent_type == test_case["expected_agent"]
 
-            success = correct_agent and (has_tools == test_case["should_have_tools"])
+            success = correct_agent and (
+                has_tools == test_case["should_have_tools"]
+            )
 
             if tools_used:
                 pass
@@ -376,7 +389,7 @@ class IntegrationTestSuite:
         ]
 
         # Run concurrent requests
-        start_time = datetime.now()
+        start_time = datetime.now(timezone.utc)
 
         tasks = []
         for i, message in enumerate(messages):
@@ -390,10 +403,10 @@ class IntegrationTestSuite:
 
         responses = await asyncio.gather(*tasks)
 
-        total_time = (datetime.now() - start_time).total_seconds()
-        avg_latency = sum(r.metadata.get("execution_time_ms", 0) for r in responses) / len(
-            responses
-        )
+        total_time = (datetime.now(timezone.utc) - start_time).total_seconds()
+        avg_latency = sum(
+            r.metadata.get("execution_time_ms", 0) for r in responses
+        ) / len(responses)
 
         # All should succeed
         success = all(r.success for r in responses)
@@ -418,13 +431,15 @@ class IntegrationTestSuite:
         request = OrchestratorRequest(
             message=test_case["message"],
             channel="webchat",
-            conversation_id=f"test_{agent_name}_{datetime.now().timestamp()}",
+            conversation_id=f"test_{agent_name}_{datetime.now(timezone.utc).timestamp()}",
             customer_context={"email": "test@example.com"},
         )
 
-        start_time = datetime.now()
+        start_time = datetime.now(timezone.utc)
         response = await self.orchestrator.process_inquiry(request)
-        latency = (datetime.now() - start_time).total_seconds() * 1000
+        latency = (
+            datetime.now(timezone.utc) - start_time
+        ).total_seconds() * 1000
 
         agent_type = response.metadata.get("agent_type")
         tools_used = len(response.tools_used)
@@ -434,7 +449,9 @@ class IntegrationTestSuite:
         agent_match = agent_type == test_case["expected_agent"]
 
         # Check if tools were used as expected
-        tools_match = (tools_used > 0) == test_case.get("should_use_tools", False)
+        tools_match = (tools_used > 0) == test_case.get(
+            "should_use_tools", False
+        )
 
         success = agent_match and tools_match
 
@@ -461,7 +478,9 @@ class IntegrationTestSuite:
         pass_rate = (self.passed / total * 100) if total > 0 else 0
 
         # Calculate average latency
-        latencies = [r.get("latency_ms") for r in self.results if r.get("latency_ms")]
+        latencies = [
+            r.get("latency_ms") for r in self.results if r.get("latency_ms")
+        ]
         if latencies:
             sum(latencies) / len(latencies)
 

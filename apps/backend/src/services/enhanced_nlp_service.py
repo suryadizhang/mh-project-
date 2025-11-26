@@ -12,12 +12,13 @@ import logging
 import time
 from functools import wraps
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
 
 # ========== Performance Monitoring ==========
+
 
 class PerformanceMonitor:
     """
@@ -27,88 +28,107 @@ class PerformanceMonitor:
     - Average/min/max latencies
     - Resource usage patterns
     """
-    
+
     def __init__(self):
-        self.metrics = defaultdict(lambda: {
-            'total_calls': 0,
-            'total_time': 0.0,
-            'min_time': float('inf'),
-            'max_time': 0.0,
-            'errors': 0,
-            'last_called': None
-        })
-        self.start_time = datetime.now()
-    
-    def record_call(self, method_name: str, execution_time: float, success: bool = True):
+        self.metrics = defaultdict(
+            lambda: {
+                "total_calls": 0,
+                "total_time": 0.0,
+                "min_time": float("inf"),
+                "max_time": 0.0,
+                "errors": 0,
+                "last_called": None,
+            }
+        )
+        self.start_time = datetime.now(timezone.utc)
+
+    def record_call(
+        self, method_name: str, execution_time: float, success: bool = True
+    ):
         """Record a method call with its execution time"""
         metrics = self.metrics[method_name]
-        metrics['total_calls'] += 1
-        metrics['total_time'] += execution_time
-        metrics['min_time'] = min(metrics['min_time'], execution_time)
-        metrics['max_time'] = max(metrics['max_time'], execution_time)
-        metrics['last_called'] = datetime.now()
-        
+        metrics["total_calls"] += 1
+        metrics["total_time"] += execution_time
+        metrics["min_time"] = min(metrics["min_time"], execution_time)
+        metrics["max_time"] = max(metrics["max_time"], execution_time)
+        metrics["last_called"] = datetime.now(timezone.utc)
+
         if not success:
-            metrics['errors'] += 1
-    
+            metrics["errors"] += 1
+
     def get_metrics(self, method_name: str = None) -> Dict[str, Any]:
         """Get performance metrics for a specific method or all methods"""
         if method_name:
             if method_name not in self.metrics:
                 return {}
-            
+
             m = self.metrics[method_name]
-            avg_time = m['total_time'] / m['total_calls'] if m['total_calls'] > 0 else 0
-            
+            avg_time = (
+                m["total_time"] / m["total_calls"]
+                if m["total_calls"] > 0
+                else 0
+            )
+
             return {
-                'method': method_name,
-                'total_calls': m['total_calls'],
-                'average_time_ms': round(avg_time * 1000, 2),
-                'min_time_ms': round(m['min_time'] * 1000, 2) if m['min_time'] != float('inf') else 0,
-                'max_time_ms': round(m['max_time'] * 1000, 2),
-                'total_time_s': round(m['total_time'], 2),
-                'errors': m['errors'],
-                'error_rate': round(m['errors'] / m['total_calls'] * 100, 2) if m['total_calls'] > 0 else 0,
-                'last_called': m['last_called'].isoformat() if m['last_called'] else None
+                "method": method_name,
+                "total_calls": m["total_calls"],
+                "average_time_ms": round(avg_time * 1000, 2),
+                "min_time_ms": (
+                    round(m["min_time"] * 1000, 2)
+                    if m["min_time"] != float("inf")
+                    else 0
+                ),
+                "max_time_ms": round(m["max_time"] * 1000, 2),
+                "total_time_s": round(m["total_time"], 2),
+                "errors": m["errors"],
+                "error_rate": (
+                    round(m["errors"] / m["total_calls"] * 100, 2)
+                    if m["total_calls"] > 0
+                    else 0
+                ),
+                "last_called": (
+                    m["last_called"].isoformat() if m["last_called"] else None
+                ),
             }
-        
+
         # Return all metrics
         return {
-            'uptime_seconds': (datetime.now() - self.start_time).total_seconds(),
-            'methods': {
+            "uptime_seconds": (
+                datetime.now(timezone.utc) - self.start_time
+            ).total_seconds(),
+            "methods": {
                 method: self.get_metrics(method)
                 for method in self.metrics.keys()
-            }
+            },
         }
-    
+
     def reset(self):
         """Reset all metrics"""
         self.metrics.clear()
-        self.start_time = datetime.now()
+        self.start_time = datetime.now(timezone.utc)
 
 
 def monitor_performance(method):
     """Decorator to monitor method performance"""
+
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         start_time = time.time()
         success = True
-        
+
         try:
             result = method(self, *args, **kwargs)
             return result
-        except Exception as e:
+        except Exception:
             success = False
             raise
         finally:
             execution_time = time.time() - start_time
-            if hasattr(self, 'performance_monitor'):
+            if hasattr(self, "performance_monitor"):
                 self.performance_monitor.record_call(
-                    method.__name__,
-                    execution_time,
-                    success
+                    method.__name__, execution_time, success
                 )
-    
+
     return wrapper
 
 
@@ -144,7 +164,9 @@ class EnhancedNLPService:
             logger.info("Loading sentence-transformer model...")
             start_time = time.time()
             self.semantic_model = SentenceTransformer("all-MiniLM-L6-v2")
-            logger.info(f"✅ sentence-transformer loaded in {time.time() - start_time:.2f}s")
+            logger.info(
+                f"✅ sentence-transformer loaded in {time.time() - start_time:.2f}s"
+            )
 
             self._initialized = True
             logger.info("✅ Enhanced NLP models loaded successfully")
@@ -198,25 +220,45 @@ class EnhancedNLPService:
         # Feature extraction
         features = {
             "has_greeting": any(
-                token.text.lower() in ["hi", "hello", "hey", "good morning", "good afternoon"]
+                token.text.lower()
+                in ["hi", "hello", "hey", "good morning", "good afternoon"]
                 for token in doc
             ),
             "has_question": "?" in text,
             "has_exclamation": "!" in text,
             "word_count": len([token for token in doc if not token.is_punct]),
-            "avg_word_length": sum(len(token.text) for token in doc if not token.is_punct)
+            "avg_word_length": sum(
+                len(token.text) for token in doc if not token.is_punct
+            )
             / max(len([token for token in doc if not token.is_punct]), 1),
             "has_emoji": bool(re.search(r"[😀-🙏]", text)),
             "has_formal_words": any(
-                token.text.lower() in ["inquiring", "regarding", "kindly", "please", "sir", "madam"]
+                token.text.lower()
+                in [
+                    "inquiring",
+                    "regarding",
+                    "kindly",
+                    "please",
+                    "sir",
+                    "madam",
+                ]
                 for token in doc
             ),
             "has_casual_words": any(
-                token.text.lower() in ["wanna", "gonna", "yeah", "cool", "awesome", "hey"]
+                token.text.lower()
+                in ["wanna", "gonna", "yeah", "cool", "awesome", "hey"]
                 for token in doc
             ),
             "has_anxiety_markers": any(
-                token.text.lower() in ["nervous", "worried", "anxious", "scared", "unsure", "help"]
+                token.text.lower()
+                in [
+                    "nervous",
+                    "worried",
+                    "anxious",
+                    "scared",
+                    "unsure",
+                    "help",
+                ]
                 for token in doc
             ),
             "sentence_count": len(list(doc.sents)),
@@ -260,7 +302,9 @@ class EnhancedNLPService:
         return tone, confidence
 
     @monitor_performance
-    def semantic_search_faqs(self, query: str, faq_list: List[Dict], top_k: int = 3) -> List[Dict]:
+    def semantic_search_faqs(
+        self, query: str, faq_list: List[Dict], top_k: int = 3
+    ) -> List[Dict]:
         """
         Semantic search for FAQs - finds similar questions even if worded differently
 
@@ -296,7 +340,9 @@ class EnhancedNLPService:
                     {
                         **faq_list[idx],
                         "similarity_score": float(similarities[idx]),
-                        "confidence": "high" if similarities[idx] > 0.7 else "medium",
+                        "confidence": (
+                            "high" if similarities[idx] > 0.7 else "medium"
+                        ),
                     }
                 )
 
@@ -306,7 +352,7 @@ class EnhancedNLPService:
     def extract_booking_details(self, text: str) -> Dict[str, any]:
         """
         Extract comprehensive booking-related information from text
-        
+
         Returns: {
             'guest_count': int | None,
             'date': str | None,
@@ -320,7 +366,7 @@ class EnhancedNLPService:
             'dietary_restrictions': List[str],
             'confidence': float (0.0-1.0)
         }
-        
+
         Examples:
         - "50 people Friday at 6pm" → {guest_count: 50, date: "Friday", time: "6pm"}
         - "chicken and steak for 30 guests" → {guest_count: 30, proteins: ["Chicken", "Steak"]}
@@ -331,7 +377,7 @@ class EnhancedNLPService:
 
         entities = self.extract_entities(text)
         text_lower = text.lower()
-        
+
         # Track confidence factors
         confidence_factors = []
 
@@ -344,8 +390,17 @@ class EnhancedNLPService:
                     # Check context for party size indicators
                     if 5 <= count <= 200:
                         # Look for party size keywords nearby
-                        party_keywords = ["people", "person", "guest", "pax", "folks", "attendees"]
-                        if any(keyword in text_lower for keyword in party_keywords):
+                        party_keywords = [
+                            "people",
+                            "person",
+                            "guest",
+                            "pax",
+                            "folks",
+                            "attendees",
+                        ]
+                        if any(
+                            keyword in text_lower for keyword in party_keywords
+                        ):
                             guest_count = count
                             confidence_factors.append(0.3)
                             break
@@ -357,13 +412,18 @@ class EnhancedNLPService:
         # ===== DATE EXTRACTION (Enhanced) =====
         date = None
         date_entities = entities.get("DATE", [])
-        
+
         # Also check for relative date keywords
         from datetime import datetime, timedelta
+
         relative_dates = {
-            "today": datetime.now().strftime("%Y-%m-%d"),
-            "tomorrow": (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d"),
-            "next week": (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d"),
+            "today": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+            "tomorrow": (
+                datetime.now(timezone.utc) + timedelta(days=1)
+            ).strftime("%Y-%m-%d"),
+            "next week": (
+                datetime.now(timezone.utc) + timedelta(days=7)
+            ).strftime("%Y-%m-%d"),
             "this weekend": "this weekend",
             "this friday": "this Friday",
             "this saturday": "this Saturday",
@@ -372,13 +432,13 @@ class EnhancedNLPService:
             "next saturday": "next Saturday",
             "next sunday": "next Sunday",
         }
-        
+
         for keyword, date_value in relative_dates.items():
             if keyword in text_lower:
                 date = date_value
                 confidence_factors.append(0.25)
                 break
-        
+
         if not date and date_entities:
             date = date_entities[0]
             confidence_factors.append(0.25)
@@ -391,7 +451,7 @@ class EnhancedNLPService:
             r"(\d{1,2})\s*o['\']?clock",  # 6 o'clock
             r"at\s+(\d{1,2})",  # at 6
         ]
-        
+
         for pattern in time_patterns:
             match = re.search(pattern, text)
             if match:
@@ -401,15 +461,29 @@ class EnhancedNLPService:
 
         # ===== LOCATION EXTRACTION =====
         locations = entities.get("GPE", []) + entities.get("LOC", [])
-        
+
         # Add CA cities not caught by NER
         ca_cities = [
-            "sacramento", "san francisco", "san jose", "oakland", "palo alto",
-            "mountain view", "santa clara", "sunnyvale", "fremont", "roseville",
-            "folsom", "davis", "berkeley", "hayward", "milpitas", "elk grove",
-            "citrus heights", "rancho cordova"
+            "sacramento",
+            "san francisco",
+            "san jose",
+            "oakland",
+            "palo alto",
+            "mountain view",
+            "santa clara",
+            "sunnyvale",
+            "fremont",
+            "roseville",
+            "folsom",
+            "davis",
+            "berkeley",
+            "hayward",
+            "milpitas",
+            "elk grove",
+            "citrus heights",
+            "rancho cordova",
         ]
-        
+
         for city in ca_cities:
             if city in text_lower and city.title() not in locations:
                 locations.append(city.title())
@@ -432,7 +506,7 @@ class EnhancedNLPService:
             "ribeye": "Ribeye",
             "ny strip": "NY Strip",
         }
-        
+
         for keyword, protein_name in protein_keywords.items():
             if keyword in text_lower and protein_name not in proteins:
                 proteins.append(protein_name)
@@ -451,7 +525,7 @@ class EnhancedNLPService:
             "salad": "Salad",
             "miso soup": "Miso Soup",
         }
-        
+
         for keyword, addon_name in addon_keywords.items():
             if keyword in text_lower and addon_name not in add_ons:
                 add_ons.append(addon_name)
@@ -460,20 +534,20 @@ class EnhancedNLPService:
         # ===== CONTACT INFO EXTRACTION =====
         contact_phone = None
         contact_email = None
-        
+
         # Phone patterns
         phone_patterns = [
             r"\b(\d{3}[-.\s]?\d{3}[-.\s]?\d{4})\b",  # 555-123-4567
             r"\b\((\d{3})\)\s*(\d{3})-(\d{4})\b",  # (555) 123-4567
         ]
-        
+
         for pattern in phone_patterns:
             match = re.search(pattern, text)
             if match:
                 contact_phone = match.group(0)
                 confidence_factors.append(0.2)
                 break
-        
+
         # Email pattern
         email_match = re.search(r"\b[\w\.-]+@[\w\.-]+\.\w+\b", text)
         if email_match:
@@ -483,10 +557,18 @@ class EnhancedNLPService:
         # ===== SPECIAL REQUESTS EXTRACTION =====
         special_requests = []
         request_keywords = [
-            "outdoor", "indoor", "private", "surprise", "birthday", "anniversary",
-            "proposal", "corporate", "team building", "celebration"
+            "outdoor",
+            "indoor",
+            "private",
+            "surprise",
+            "birthday",
+            "anniversary",
+            "proposal",
+            "corporate",
+            "team building",
+            "celebration",
         ]
-        
+
         for keyword in request_keywords:
             if keyword in text_lower:
                 special_requests.append(keyword.title())
@@ -506,16 +588,19 @@ class EnhancedNLPService:
             "kosher": "Kosher",
             "halal": "Halal",
         }
-        
+
         for keyword, restriction in dietary_keywords.items():
-            if keyword in text_lower and restriction not in dietary_restrictions:
+            if (
+                keyword in text_lower
+                and restriction not in dietary_restrictions
+            ):
                 dietary_restrictions.append(restriction)
                 confidence_factors.append(0.1)
 
         # ===== CALCULATE OVERALL CONFIDENCE =====
         # Confidence based on how many fields we successfully extracted
         confidence = min(sum(confidence_factors), 1.0)
-        
+
         # Boost confidence if we got the critical booking fields
         if guest_count and (date or time):
             confidence = min(confidence + 0.2, 1.0)
@@ -532,7 +617,22 @@ class EnhancedNLPService:
             "special_requests": special_requests,
             "dietary_restrictions": dietary_restrictions,
             "confidence": round(confidence, 2),
-            "entities_found": len([x for x in [guest_count, date, time, contact_phone, contact_email] if x]) + len(proteins) + len(add_ons) + len(locations),
+            "entities_found": len(
+                [
+                    x
+                    for x in [
+                        guest_count,
+                        date,
+                        time,
+                        contact_phone,
+                        contact_email,
+                    ]
+                    if x
+                ]
+            )
+            + len(proteins)
+            + len(add_ons)
+            + len(locations),
         }
 
     def normalize_text(self, text: str) -> str:
@@ -568,13 +668,15 @@ class EnhancedNLPService:
 
     # ========== Performance & Monitoring Methods ==========
 
-    def get_performance_metrics(self, method_name: str = None) -> Dict[str, Any]:
+    def get_performance_metrics(
+        self, method_name: str = None
+    ) -> Dict[str, Any]:
         """
         Get performance metrics for NLP operations
-        
+
         Args:
             method_name: Specific method to get metrics for, or None for all methods
-            
+
         Returns:
             Dictionary with performance metrics including:
             - Call counts
@@ -583,16 +685,16 @@ class EnhancedNLPService:
             - Uptime
         """
         return self.performance_monitor.get_metrics(method_name)
-    
+
     def reset_metrics(self):
         """Reset all performance metrics"""
         self.performance_monitor.reset()
         logger.info("Performance metrics reset")
-    
+
     def health_check(self) -> Dict[str, Any]:
         """
         Comprehensive health check for NLP service
-        
+
         Returns:
             {
                 'status': 'healthy' | 'degraded' | 'unhealthy',
@@ -606,48 +708,52 @@ class EnhancedNLPService:
             }
         """
         metrics = self.get_performance_metrics()
-        
+
         # Calculate aggregate statistics
         total_calls = sum(
-            m['total_calls'] 
-            for m in metrics.get('methods', {}).values()
+            m["total_calls"] for m in metrics.get("methods", {}).values()
         )
-        
+
         total_errors = sum(
-            m['errors'] 
-            for m in metrics.get('methods', {}).values()
+            m["errors"] for m in metrics.get("methods", {}).values()
         )
-        
-        error_rate = (total_errors / total_calls * 100) if total_calls > 0 else 0
-        
+
+        error_rate = (
+            (total_errors / total_calls * 100) if total_calls > 0 else 0
+        )
+
         # Calculate average response time across all methods
         all_times = [
-            m['average_time_ms']
-            for m in metrics.get('methods', {}).values()
-            if m.get('average_time_ms', 0) > 0
+            m["average_time_ms"]
+            for m in metrics.get("methods", {}).values()
+            if m.get("average_time_ms", 0) > 0
         ]
         avg_response_time = sum(all_times) / len(all_times) if all_times else 0
-        
+
         # Determine health status
-        status = 'healthy'
+        status = "healthy"
         if not self._initialized:
-            status = 'degraded'  # Running on fallback
+            status = "degraded"  # Running on fallback
         elif error_rate > 10:
-            status = 'unhealthy'  # >10% error rate
+            status = "unhealthy"  # >10% error rate
         elif avg_response_time > 100:
-            status = 'degraded'  # Slow responses (>100ms avg)
-        
+            status = "degraded"  # Slow responses (>100ms avg)
+
         return {
-            'status': status,
-            'models_loaded': self._initialized,
-            'spacy_available': self.nlp is not None,
-            'semantic_model_available': self.semantic_model is not None,
-            'uptime_seconds': metrics.get('uptime_seconds', 0),
-            'total_requests': total_calls,
-            'average_response_time_ms': round(avg_response_time, 2),
-            'error_rate': round(error_rate, 2),
-            'performance_target': '<50ms per request',
-            'performance_status': 'good' if avg_response_time < 50 else 'acceptable' if avg_response_time < 100 else 'slow'
+            "status": status,
+            "models_loaded": self._initialized,
+            "spacy_available": self.nlp is not None,
+            "semantic_model_available": self.semantic_model is not None,
+            "uptime_seconds": metrics.get("uptime_seconds", 0),
+            "total_requests": total_calls,
+            "average_response_time_ms": round(avg_response_time, 2),
+            "error_rate": round(error_rate, 2),
+            "performance_target": "<50ms per request",
+            "performance_status": (
+                "good"
+                if avg_response_time < 50
+                else "acceptable" if avg_response_time < 100 else "slow"
+            ),
         }
 
     # ========== Fallback Methods (if models fail to load) ==========
@@ -682,24 +788,36 @@ class EnhancedNLPService:
         # Formal indicators
         if any(
             word in text_lower
-            for word in ["inquiring", "regarding", "kindly", "please sir", "please madam"]
+            for word in [
+                "inquiring",
+                "regarding",
+                "kindly",
+                "please sir",
+                "please madam",
+            ]
         ):
             return "formal", 0.70
 
         # Anxious indicators
         if any(
-            word in text_lower for word in ["nervous", "worried", "anxious", "scared", "help me"]
+            word in text_lower
+            for word in ["nervous", "worried", "anxious", "scared", "help me"]
         ):
             return "anxious", 0.75
 
         # Casual indicators
-        if any(word in text_lower for word in ["hey", "wanna", "gonna", "yeah", "😊", "🎉"]):
+        if any(
+            word in text_lower
+            for word in ["hey", "wanna", "gonna", "yeah", "😊", "🎉"]
+        ):
             return "casual", 0.70
 
         # Default
         return "casual", 0.60
 
-    def _fallback_keyword_search(self, query: str, faq_list: List[Dict], top_k: int) -> List[Dict]:
+    def _fallback_keyword_search(
+        self, query: str, faq_list: List[Dict], top_k: int
+    ) -> List[Dict]:
         """Simple keyword-based FAQ search"""
         query_words = set(query.lower().split())
 
@@ -709,7 +827,11 @@ class EnhancedNLPService:
             overlap = len(query_words & question_words)
             if overlap > 0:
                 scored_faqs.append(
-                    {**faq, "similarity_score": overlap / len(query_words), "confidence": "medium"}
+                    {
+                        **faq,
+                        "similarity_score": overlap / len(query_words),
+                        "confidence": "medium",
+                    }
                 )
 
         scored_faqs.sort(key=lambda x: x["similarity_score"], reverse=True)
