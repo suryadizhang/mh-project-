@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 # Pydantic models for request/response
-from datetime import datetime
+from datetime import datetime, timezone
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -25,7 +25,9 @@ class LeadBase(BaseModel):
     first_name: str = Field(..., min_length=1, max_length=50)
     last_name: str = Field(..., min_length=1, max_length=50)
     email: EmailStr | None = None
-    phone: str | None = Field(None, pattern=r"^\+?1?[2-9]\d{2}[2-9]\d{2}\d{4}$")
+    phone: str | None = Field(
+        None, pattern=r"^\+?1?[2-9]\d{2}[2-9]\d{2}\d{4}$"
+    )
     event_date: datetime | None = None
     guest_count: int | None = Field(None, ge=1, le=500)
     event_location: str | None = Field(None, max_length=200)
@@ -45,7 +47,9 @@ class LeadUpdate(BaseModel):
     first_name: str | None = Field(None, min_length=1, max_length=50)
     last_name: str | None = Field(None, min_length=1, max_length=50)
     email: EmailStr | None = None
-    phone: str | None = Field(None, pattern=r"^\+?1?[2-9]\d{2}[2-9]\d{2}\d{4}$")
+    phone: str | None = Field(
+        None, pattern=r"^\+?1?[2-9]\d{2}[2-9]\d{2}\d{4}$"
+    )
     event_date: datetime | None = None
     guest_count: int | None = Field(None, ge=1, le=500)
     event_location: str | None = Field(None, max_length=200)
@@ -103,9 +107,9 @@ mock_leads = [
         "source": "website",
         "status": "qualified",
         "message": "Looking for hibachi dinner for anniversary party",
-        "created_at": datetime.now(),
-        "updated_at": datetime.now(),
-        "last_contact_date": datetime.now(),
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
+        "last_contact_date": datetime.now(timezone.utc),
         "assigned_to": "admin@myhibachichef.com",
         "conversion_probability": 75,
     },
@@ -122,8 +126,8 @@ mock_leads = [
         "source": "instagram",
         "status": "contacted",
         "message": "Birthday party for my husband",
-        "created_at": datetime.now(),
-        "updated_at": datetime.now(),
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
         "last_contact_date": None,
         "assigned_to": None,
         "conversion_probability": 50,
@@ -141,9 +145,9 @@ mock_leads = [
         "source": "referral",
         "status": "quoted",
         "message": "Corporate team building event",
-        "created_at": datetime.now(),
-        "updated_at": datetime.now(),
-        "last_contact_date": datetime.now(),
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
+        "last_contact_date": datetime.now(timezone.utc),
         "assigned_to": "owner@myhibachichef.com",
         "conversion_probability": 85,
     },
@@ -154,10 +158,14 @@ mock_leads = [
 async def list_leads(
     page: int = Query(1, ge=1, description="Page number"),
     per_page: int = Query(20, ge=1, le=100, description="Items per page"),
-    search: str | None = Query(None, description="Search by name, email, or phone"),
+    search: str | None = Query(
+        None, description="Search by name, email, or phone"
+    ),
     status: LeadStatus | None = Query(None, description="Filter by status"),
     source: LeadSource | None = Query(None, description="Filter by source"),
-    assigned_to: str | None = Query(None, description="Filter by assigned user"),
+    assigned_to: str | None = Query(
+        None, description="Filter by assigned user"
+    ),
     db: AsyncSession = Depends(get_db),
     current_admin: AdminUser = Depends(get_current_admin_user),
 ):
@@ -183,13 +191,21 @@ async def list_leads(
             ]
 
         if status:
-            filtered_leads = [l for l in filtered_leads if l["status"] == status]
+            filtered_leads = [
+                l for l in filtered_leads if l["status"] == status
+            ]
 
         if source:
-            filtered_leads = [l for l in filtered_leads if l["source"] == source]
+            filtered_leads = [
+                l for l in filtered_leads if l["source"] == source
+            ]
 
         if assigned_to:
-            filtered_leads = [l for l in filtered_leads if l.get("assigned_to") == assigned_to]
+            filtered_leads = [
+                l
+                for l in filtered_leads
+                if l.get("assigned_to") == assigned_to
+            ]
 
         # Apply pagination
         total = len(filtered_leads)
@@ -199,7 +215,9 @@ async def list_leads(
 
         total_pages = (total + per_page - 1) // per_page
 
-        logger.info(f"Admin {current_admin.email} listed leads - page {page}, found {total} total")
+        logger.info(
+            f"Admin {current_admin.email} listed leads - page {page}, found {total} total"
+        )
 
         return LeadSearchResponse(
             leads=[LeadResponse(**l) for l in leads_page],
@@ -212,13 +230,15 @@ async def list_leads(
     except Exception as e:
         logger.exception(f"Error listing leads: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to retrieve leads"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve leads",
         )
 
 
 @router.get("/pipeline/stats", response_model=LeadPipelineStats)
 async def get_pipeline_stats(
-    db: AsyncSession = Depends(get_db), current_admin: AdminUser = Depends(get_current_admin_user)
+    db: AsyncSession = Depends(get_db),
+    current_admin: AdminUser = Depends(get_current_admin_user),
 ):
     """
     Get lead pipeline statistics
@@ -280,7 +300,8 @@ async def get_lead(
 
         if not lead:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=f"Lead {lead_id} not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Lead {lead_id} not found",
             )
 
         logger.info(f"Admin {current_admin.email} retrieved lead {lead_id}")
@@ -291,11 +312,14 @@ async def get_lead(
     except Exception as e:
         logger.exception(f"Error getting lead {lead_id}: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to retrieve lead"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve lead",
         )
 
 
-@router.post("/", response_model=LeadResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/", response_model=LeadResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_lead(
     lead: LeadCreate,
     db: AsyncSession = Depends(get_db),
@@ -311,8 +335,8 @@ async def create_lead(
         new_lead = {
             "id": new_id,
             **lead.dict(),
-            "created_at": datetime.now(),
-            "updated_at": datetime.now(),
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc),
             "last_contact_date": None,
             "assigned_to": current_admin.email,
             "conversion_probability": 25,  # Default for new leads
@@ -328,7 +352,8 @@ async def create_lead(
     except Exception as e:
         logger.exception(f"Error creating lead: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create lead"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create lead",
         )
 
 
@@ -345,16 +370,19 @@ async def update_lead(
     """
     try:
         # Find and update lead in mock data
-        lead_idx = next((i for i, l in enumerate(mock_leads) if l["id"] == lead_id), None)
+        lead_idx = next(
+            (i for i, l in enumerate(mock_leads) if l["id"] == lead_id), None
+        )
 
         if lead_idx is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=f"Lead {lead_id} not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Lead {lead_id} not found",
             )
 
         # Update fields
         update_data = lead_update.dict(exclude_unset=True)
-        update_data["updated_at"] = datetime.now()
+        update_data["updated_at"] = datetime.now(timezone.utc)
 
         # Update conversion probability based on status
         if "status" in update_data:
@@ -381,7 +409,8 @@ async def update_lead(
     except Exception as e:
         logger.exception(f"Error updating lead {lead_id}: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update lead"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update lead",
         )
 
 
@@ -397,11 +426,14 @@ async def delete_lead(
     """
     try:
         # Find and remove lead from mock data
-        lead_idx = next((i for i, l in enumerate(mock_leads) if l["id"] == lead_id), None)
+        lead_idx = next(
+            (i for i, l in enumerate(mock_leads) if l["id"] == lead_id), None
+        )
 
         if lead_idx is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=f"Lead {lead_id} not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Lead {lead_id} not found",
             )
 
         mock_leads.pop(lead_idx)
@@ -413,7 +445,8 @@ async def delete_lead(
     except Exception as e:
         logger.exception(f"Error deleting lead {lead_id}: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to delete lead"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete lead",
         )
 
 
@@ -430,18 +463,23 @@ async def assign_lead(
     """
     try:
         # Find lead in mock data
-        lead_idx = next((i for i, l in enumerate(mock_leads) if l["id"] == lead_id), None)
+        lead_idx = next(
+            (i for i, l in enumerate(mock_leads) if l["id"] == lead_id), None
+        )
 
         if lead_idx is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=f"Lead {lead_id} not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Lead {lead_id} not found",
             )
 
         # Update assignment
         mock_leads[lead_idx]["assigned_to"] = assigned_to
-        mock_leads[lead_idx]["updated_at"] = datetime.now()
+        mock_leads[lead_idx]["updated_at"] = datetime.now(timezone.utc)
 
-        logger.info(f"Admin {current_admin.email} assigned lead {lead_id} to {assigned_to}")
+        logger.info(
+            f"Admin {current_admin.email} assigned lead {lead_id} to {assigned_to}"
+        )
 
         return {"message": f"Lead {lead_id} assigned to {assigned_to}"}
 
@@ -450,5 +488,6 @@ async def assign_lead(
     except Exception as e:
         logger.exception(f"Error assigning lead {lead_id}: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to assign lead"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to assign lead",
         )

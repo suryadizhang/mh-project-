@@ -6,7 +6,9 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 # Add src directory to path (go up from alembic/versions to src)
-backend_src = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+backend_src = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "..")
+)
 if backend_src not in sys.path:
     sys.path.insert(0, backend_src)
 
@@ -21,19 +23,29 @@ from models.base import Base  # noqa: E402
 
 # Import all models for Alembic discovery
 # Import models so Alembic can detect tables
-from models import (  # noqa: E402, F401
-    # Core models
+
+# Core business models (from db.models.core)
+from db.models.core import (
     Booking,
-    Customer,
-    Review,
-    Lead,
+    Customer as CoreCustomer,
+)  # noqa: E402, F401
+
+# Lead models (from db.models.lead)
+from db.models.lead import Lead  # noqa: E402, F401
+
+# Identity models (from db.models.identity)
+from db.models.identity import User, Station  # noqa: E402, F401
+
+# Legacy models (from models package)
+from models import (  # noqa: E402, F401
     Campaign,
     # Social media & communications
     SocialAccount,
     SocialIdentity,
     SocialThread,
     SocialMessage,
-    # RingCentral communications (call recordings, SMS)
+    Review,
+    # RingCentral communications (external system - metadata only)
     CallRecording,
     # Event sourcing
     DomainEvent,
@@ -65,7 +77,9 @@ if not database_url:
     # If no sync URL provided, convert async URL to sync
     database_url = os.getenv("DATABASE_URL", settings.database_url)
     if database_url and "postgresql+asyncpg://" in database_url:
-        database_url = database_url.replace("postgresql+asyncpg://", "postgresql://")
+        database_url = database_url.replace(
+            "postgresql+asyncpg://", "postgresql://"
+        )
 config.set_main_option("sqlalchemy.url", database_url)
 
 # Interpret the config file for Python logging.
@@ -121,7 +135,9 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection, target_metadata=target_metadata
+        )
 
         with context.begin_transaction():
             context.run_migrations()

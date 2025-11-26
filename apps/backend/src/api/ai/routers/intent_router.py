@@ -14,7 +14,7 @@ Author: AI Team
 Date: 2025-10-31
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 import logging
 from typing import Any
@@ -274,7 +274,9 @@ class IntentRouter:
         # Calculate cosine similarity with each intent centroid
         similarities = {}
         for agent_type, intent_embedding in self._intent_embeddings.items():
-            similarity = self._cosine_similarity(message_embedding, intent_embedding)
+            similarity = self._cosine_similarity(
+                message_embedding, intent_embedding
+            )
             similarities[agent_type] = similarity
 
         # Get best match
@@ -299,7 +301,9 @@ class IntentRouter:
                 f"(confidence: {best_confidence:.2f})"
             )
 
-        logger.info(f"Classified intent: {best_agent.value} (confidence: {best_confidence:.2f})")
+        logger.info(
+            f"Classified intent: {best_agent.value} (confidence: {best_confidence:.2f})"
+        )
 
         return best_agent, best_confidence
 
@@ -349,22 +353,24 @@ class IntentRouter:
         current_agent = conv_state.get("current_agent")
 
         # Classify intent
-        start_time = datetime.now()
+        start_time = datetime.now(timezone.utc)
         agent_type, confidence = await self.classify_intent(
             message, conversation_history, current_agent
         )
-        classification_latency = (datetime.now() - start_time).total_seconds()
+        classification_latency = (
+            datetime.now(timezone.utc) - start_time
+        ).total_seconds()
 
         # Update conversation state
         self._conversation_states[conversation_id] = {
             "current_agent": agent_type,
-            "last_message_time": datetime.now(),
+            "last_message_time": datetime.now(timezone.utc),
             "intent_history": [
                 *conv_state.get("intent_history", []),
                 {
                     "agent_type": agent_type.value,
                     "confidence": confidence,
-                    "timestamp": datetime.now().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 },
             ],
         }
@@ -375,39 +381,59 @@ class IntentRouter:
         # Load dynamic knowledge context from database
         try:
             async for db in get_db():
-                knowledge_service = KnowledgeService(db, station_id=context.get("station_id"))
-                
-                knowledge_context = await knowledge_service.get_full_ai_context(
-                    include_menu=True,
-                    include_charter=True,
-                    include_faqs=True,
-                    guest_count=context.get("guest_count"),
-                    event_type=context.get("event_type")
+                knowledge_service = KnowledgeService(
+                    db, station_id=context.get("station_id")
                 )
-                
+
+                knowledge_context = (
+                    await knowledge_service.get_full_ai_context(
+                        include_menu=True,
+                        include_charter=True,
+                        include_faqs=True,
+                        guest_count=context.get("guest_count"),
+                        event_type=context.get("event_type"),
+                    )
+                )
+
                 context["knowledge_context"] = knowledge_context
-                logger.debug(f"Loaded knowledge context ({len(knowledge_context)} chars) for {agent_type.value}")
+                logger.debug(
+                    f"Loaded knowledge context ({len(knowledge_context)} chars) for {agent_type.value}"
+                )
                 break  # Only need one iteration
         except Exception as e:
-            logger.warning(f"Failed to load knowledge context for {agent_type.value}: {e}")
-            context["knowledge_context"] = ""  # Agent will show warning and use tools
+            logger.warning(
+                f"Failed to load knowledge context for {agent_type.value}: {e}"
+            )
+            context["knowledge_context"] = (
+                ""  # Agent will show warning and use tools
+            )
 
         # Process message with agent
-        agent_start_time = datetime.now()
+        agent_start_time = datetime.now(timezone.utc)
         agent_response = await agent.process(
-            message=message, context=context, conversation_history=conversation_history
+            message=message,
+            context=context,
+            conversation_history=conversation_history,
         )
-        agent_latency = (datetime.now() - agent_start_time).total_seconds()
+        agent_latency = (
+            datetime.now(timezone.utc) - agent_start_time
+        ).total_seconds()
 
         # Add routing metadata
         agent_response["routing"] = {
             "agent_type": agent_type.value,
             "confidence": round(confidence, 3),
-            "classification_latency_ms": round(classification_latency * 1000, 2),
+            "classification_latency_ms": round(
+                classification_latency * 1000, 2
+            ),
             "agent_latency_ms": round(agent_latency * 1000, 2),
-            "total_latency_ms": round((classification_latency + agent_latency) * 1000, 2),
+            "total_latency_ms": round(
+                (classification_latency + agent_latency) * 1000, 2
+            ),
             "intent_transition": (
-                current_agent.value if current_agent and current_agent != agent_type else None
+                current_agent.value
+                if current_agent and current_agent != agent_type
+                else None
             ),
         }
 
@@ -419,7 +445,9 @@ class IntentRouter:
 
         return agent_response
 
-    async def get_conversation_state(self, conversation_id: str) -> dict[str, Any] | None:
+    async def get_conversation_state(
+        self, conversation_id: str
+    ) -> dict[str, Any] | None:
         """
         Get conversation state for a given conversation ID.
 
@@ -482,7 +510,10 @@ class IntentRouter:
         is_fallback = False
         original_agent = None
 
-        if confidence < confidence_threshold and agent_type != AgentType.KNOWLEDGE:
+        if (
+            confidence < confidence_threshold
+            and agent_type != AgentType.KNOWLEDGE
+        ):
             logger.warning(
                 f"Low confidence ({confidence:.2f}) for {agent_type.value}, "
                 f"falling back to knowledge_agent"
@@ -494,7 +525,9 @@ class IntentRouter:
         # Update context with fallback info
         if is_fallback:
             context["fallback_mode"] = True
-            context["original_intent"] = original_agent.value if original_agent else None
+            context["original_intent"] = (
+                original_agent.value if original_agent else None
+            )
 
         # Get agent
         agent = self._get_agent(agent_type)
@@ -502,32 +535,44 @@ class IntentRouter:
         # Load dynamic knowledge context from database
         try:
             async for db in get_db():
-                knowledge_service = KnowledgeService(db, station_id=context.get("station_id"))
-                
-                knowledge_context = await knowledge_service.get_full_ai_context(
-                    include_menu=True,
-                    include_charter=True,
-                    include_faqs=True,
-                    guest_count=context.get("guest_count"),
-                    event_type=context.get("event_type")
+                knowledge_service = KnowledgeService(
+                    db, station_id=context.get("station_id")
                 )
-                
+
+                knowledge_context = (
+                    await knowledge_service.get_full_ai_context(
+                        include_menu=True,
+                        include_charter=True,
+                        include_faqs=True,
+                        guest_count=context.get("guest_count"),
+                        event_type=context.get("event_type"),
+                    )
+                )
+
                 context["knowledge_context"] = knowledge_context
-                logger.debug(f"Loaded knowledge context ({len(knowledge_context)} chars) for {agent_type.value}")
+                logger.debug(
+                    f"Loaded knowledge context ({len(knowledge_context)} chars) for {agent_type.value}"
+                )
                 break  # Only need one iteration
         except Exception as e:
-            logger.warning(f"Failed to load knowledge context for {agent_type.value}: {e}")
-            context["knowledge_context"] = ""  # Agent will show warning and use tools
+            logger.warning(
+                f"Failed to load knowledge context for {agent_type.value}: {e}"
+            )
+            context["knowledge_context"] = (
+                ""  # Agent will show warning and use tools
+            )
 
         # Process message
         agent_response = await agent.process(
-            message=message, context=context, conversation_history=conversation_history
+            message=message,
+            context=context,
+            conversation_history=conversation_history,
         )
 
         # Add routing metadata (same as route() method)
         if "routing" not in agent_response:
             agent_response["routing"] = {}
-        
+
         agent_response["routing"]["agent_type"] = agent_type.value
         agent_response["routing"]["confidence"] = round(confidence, 3)
 
@@ -543,7 +588,9 @@ class IntentRouter:
 
         return agent_response
 
-    async def suggest_agent(self, message: str, top_k: int = 3) -> list[dict[str, Any]]:
+    async def suggest_agent(
+        self, message: str, top_k: int = 3
+    ) -> list[dict[str, Any]]:
         """
         Suggest top K agents for a message with confidence scores.
 
@@ -577,7 +624,9 @@ class IntentRouter:
         # Calculate similarities
         suggestions = []
         for agent_type, intent_embedding in self._intent_embeddings.items():
-            similarity = self._cosine_similarity(message_embedding, intent_embedding)
+            similarity = self._cosine_similarity(
+                message_embedding, intent_embedding
+            )
             suggestions.append(
                 {
                     "agent_type": agent_type.value,
@@ -625,7 +674,10 @@ class IntentRouter:
 
             # Count transitions
             for i in range(1, len(intent_history)):
-                if intent_history[i]["agent_type"] != intent_history[i - 1]["agent_type"]:
+                if (
+                    intent_history[i]["agent_type"]
+                    != intent_history[i - 1]["agent_type"]
+                ):
                     intent_transitions += 1
 
         return {
