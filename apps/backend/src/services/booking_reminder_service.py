@@ -12,7 +12,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from db.models.core import Booking
-from models.booking_reminder import BookingReminder, ReminderStatus
+
+# MIGRATED: from models.booking_reminder → db.models.booking_reminder
+from db.models.booking_reminder import BookingReminder, ReminderStatus
 from schemas.booking_reminder import BookingReminderCreate, BookingReminderUpdate
 
 
@@ -36,9 +38,7 @@ class BookingReminderService:
             ValueError: If booking doesn't exist
         """
         # Verify booking exists
-        booking_result = await self.db.execute(
-            select(Booking).where(Booking.id == data.booking_id)
-        )
+        booking_result = await self.db.execute(select(Booking).where(Booking.id == data.booking_id))
         booking = booking_result.scalar_one_or_none()
 
         if not booking:
@@ -50,7 +50,7 @@ class BookingReminderService:
             reminder_type=data.reminder_type.value,
             scheduled_for=data.scheduled_for,
             message=data.message,
-            status=ReminderStatus.PENDING.value
+            status=ReminderStatus.PENDING.value,
         )
 
         self.db.add(reminder)
@@ -88,7 +88,7 @@ class BookingReminderService:
         booking_id: Optional[int] = None,
         status: Optional[ReminderStatus] = None,
         page: int = 1,
-        page_size: int = 50
+        page_size: int = 50,
     ) -> tuple[list[BookingReminder], int]:
         """
         List reminders with optional filtering.
@@ -133,9 +133,7 @@ class BookingReminderService:
         return list(reminders), total
 
     async def update_reminder(
-        self,
-        reminder_id: UUID,
-        data: BookingReminderUpdate
+        self, reminder_id: UUID, data: BookingReminderUpdate
     ) -> Optional[BookingReminder]:
         """
         Update a reminder.
@@ -155,8 +153,11 @@ class BookingReminderService:
         update_data = data.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             if hasattr(reminder, field):
-                if isinstance(value, (ReminderStatus, str)) and field in ['status', 'reminder_type']:
-                    setattr(reminder, field, value.value if hasattr(value, 'value') else value)
+                if isinstance(value, (ReminderStatus, str)) and field in [
+                    "status",
+                    "reminder_type",
+                ]:
+                    setattr(reminder, field, value.value if hasattr(value, "value") else value)
                 else:
                     setattr(reminder, field, value)
 
@@ -197,9 +198,7 @@ class BookingReminderService:
         return reminder
 
     async def mark_as_sent(
-        self,
-        reminder_id: UUID,
-        error_message: Optional[str] = None
+        self, reminder_id: UUID, error_message: Optional[str] = None
     ) -> Optional[BookingReminder]:
         """
         Mark reminder as sent (or failed).

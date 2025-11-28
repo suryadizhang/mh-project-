@@ -3,20 +3,20 @@ RingCentral Voice Service
 Handles inbound/outbound phone calls with AI voice assistant integration.
 """
 
-import asyncio
 from datetime import datetime, timezone
 from enum import Enum
-import json
 import logging
 import os
-from typing import Any, Optional
-from uuid import UUID, uuid4
+from typing import Any
+from uuid import uuid4
 
 from services.speech_service import speech_service
 from services.ringcentral_service import RingCentralService
-from models.call_recording import CallRecording, CallStatus, CallDirection
+
+# MIGRATED: from models.call_recording → db.models.call_recording
+from db.models.call_recording import CallRecording, CallStatus, CallDirection
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
+from sqlalchemy import select
 
 logger = logging.getLogger(__name__)
 
@@ -67,9 +67,7 @@ class RingCentralVoiceService:
 
         # Voice AI configuration
         self.voice_ai_enabled = os.getenv("ENABLE_VOICE_AI", "false").lower() == "true"
-        self.default_mode = VoiceAIMode(
-            os.getenv("VOICE_AI_MODE", VoiceAIMode.TRIAGE.value)
-        )
+        self.default_mode = VoiceAIMode(os.getenv("VOICE_AI_MODE", VoiceAIMode.TRIAGE.value))
         self.max_call_duration = int(os.getenv("MAX_CALL_DURATION_SECONDS", "1800"))  # 30 min
 
         # Call routing

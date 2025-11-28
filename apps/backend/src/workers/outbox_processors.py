@@ -12,7 +12,10 @@ from typing import Any
 
 import aiohttp
 from core.database import get_db_context
-from models import DomainEvent, OutboxEntry
+
+# MIGRATED: Imports moved from OLD models to NEW db.models system
+# TODO: Manual migration needed for: OutboxEntry
+# from models import OutboxEntry
 from utils.encryption import decrypt_field, get_field_encryption
 from sqlalchemy import and_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession

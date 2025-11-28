@@ -10,7 +10,9 @@ from decimal import Decimal
 import logging
 
 from db.models.core import Booking
-from models.booking import Payment, PaymentStatus
+
+# MIGRATED: from models.booking → db.models.core
+from db.models.core import Payment, PaymentStatus
 from services.email_service import EmailService
 from services.notification_service import NotificationService
 from services.payment_email_monitor import PaymentEmailMonitor

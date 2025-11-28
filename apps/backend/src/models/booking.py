@@ -72,14 +72,14 @@ class Booking(Base, UUIDPKMixin, TimestampMixin, SoftDeleteTimestampMixin, Optim
     """
 
     __tablename__ = "bookings"
-    __table_args__ = (
-        {'schema': 'core', 'extend_existing': True}
-    )
+    __table_args__ = {"schema": "core", "extend_existing": True}
 
     # ═══════════════════════════════════════════════════════════════════
     # CORE IDENTIFICATION (UUID in production!)
     # ═══════════════════════════════════════════════════════════════════
-    customer_id = Column(UUID(as_uuid=True), ForeignKey("customers.id"), nullable=False, index=True)
+    customer_id = Column(
+        UUID(as_uuid=True), ForeignKey("core.customers.id"), nullable=False, index=True
+    )  # Fixed: customers table is in core schema
 
     # ═══════════════════════════════════════════════════════════════════
     # EVENT DETAILS
@@ -93,7 +93,9 @@ class Booking(Base, UUIDPKMixin, TimestampMixin, SoftDeleteTimestampMixin, Optim
     address_encrypted = Column(Text, nullable=False)  # Encrypted customer address
     zone = Column(String, nullable=False)  # Service zone (e.g., "Zone A", "Zone B")
     chef_id = Column(UUID(as_uuid=True), nullable=True)  # Assigned chef
-    station_id = Column(UUID(as_uuid=True), nullable=False)  # Multi-station support (CRITICAL - 50+ usages)
+    station_id = Column(
+        UUID(as_uuid=True), nullable=False
+    )  # Multi-station support (CRITICAL - 50+ usages)
 
     # ═══════════════════════════════════════════════════════════════════
     # PARTY COMPOSITION
@@ -105,10 +107,16 @@ class Booking(Base, UUIDPKMixin, TimestampMixin, SoftDeleteTimestampMixin, Optim
     # STATUS (PostgreSQL ENUM type - native database enum for type safety)
     # ═══════════════════════════════════════════════════════════════════
     status = Column(
-        SQLEnum(BookingStatus, name="booking_status", native_enum=True, create_constraint=True, values_callable=lambda x: [e.value for e in x]),
+        SQLEnum(
+            BookingStatus,
+            name="booking_status",
+            native_enum=True,
+            create_constraint=True,
+            values_callable=lambda x: [e.value for e in x],
+        ),
         default=BookingStatus.DEPOSIT_PENDING,
         nullable=False,
-        index=True
+        index=True,
     )
 
     # ═══════════════════════════════════════════════════════════════════
@@ -121,8 +129,12 @@ class Booking(Base, UUIDPKMixin, TimestampMixin, SoftDeleteTimestampMixin, Optim
     # MENU & TRACKING (Production JSONB columns)
     # ═══════════════════════════════════════════════════════════════════
     menu_items = Column(sa.JSON, nullable=True)  # Selected menu items (JSONB in production)
-    source = Column(String, nullable=False)  # Booking source tracking (e.g., "website", "phone", "ai_agent")
-    booking_metadata = Column("metadata", sa.JSON, nullable=True)  # Extensibility field (JSONB in production) - Column name "metadata" mapped to attribute "booking_metadata"
+    source = Column(
+        String, nullable=False
+    )  # Booking source tracking (e.g., "website", "phone", "ai_agent")
+    booking_metadata = Column(
+        "metadata", sa.JSON, nullable=True
+    )  # Extensibility field (JSONB in production) - Column name "metadata" mapped to attribute "booking_metadata"
 
     # ═══════════════════════════════════════════════════════════════════
     # NOTES
@@ -163,11 +175,13 @@ class Booking(Base, UUIDPKMixin, TimestampMixin, SoftDeleteTimestampMixin, Optim
     version = Column(Integer, default=1, nullable=False)
 
     # ═══════════════════════════════════════════════════════════════════
-    # RELATIONSHIPS (Commented temporarily during Bug #13 FK fixes)
+    # RELATIONSHIPS
     # ═══════════════════════════════════════════════════════════════════
     # customer = relationship("models.customer.Customer", back_populates="bookings", lazy="select")
     # payments = relationship("models.booking.Payment", back_populates="booking", lazy="select")
-    # reminders = relationship("BookingReminder", back_populates="booking", lazy="select", cascade="all, delete-orphan")
+    reminders = relationship(
+        "BookingReminder", back_populates="booking", lazy="select", cascade="all, delete-orphan"
+    )
     # message_threads = relationship("Thread", back_populates="booking", lazy="select", foreign_keys="[Thread.booking_id]")
     # terms_acknowledgments = relationship("TermsAcknowledgment", back_populates="booking", lazy="select")
 
@@ -177,17 +191,17 @@ class Booking(Base, UUIDPKMixin, TimestampMixin, SoftDeleteTimestampMixin, Optim
     @property
     def is_active(self) -> bool:
         """Check if booking is in an active state"""
-        return self.status not in ['cancelled', 'completed', 'no_show']
+        return self.status not in ["cancelled", "completed", "no_show"]
 
     @property
     def can_be_cancelled(self) -> bool:
         """Check if booking can be cancelled"""
-        return self.status in ['pending', 'confirmed', 'seated']
+        return self.status in ["pending", "confirmed", "seated"]
 
     @property
     def can_be_confirmed(self) -> bool:
         """Check if booking can be confirmed"""
-        return self.status == 'pending'
+        return self.status == "pending"
 
     @property
     def event_time(self) -> str:
@@ -231,9 +245,11 @@ class Payment(BaseModel):
     """Payment model for tracking booking payments"""
 
     __tablename__ = "payments"
-    __table_args__ = {'schema': 'core', 'extend_existing': True}  # core schema
+    __table_args__ = {"schema": "core", "extend_existing": True}  # core schema
 
-    booking_id = Column(Integer, ForeignKey("core.bookings.id"), nullable=False, index=True)  # Reference core.bookings
+    booking_id = Column(
+        Integer, ForeignKey("core.bookings.id"), nullable=False, index=True
+    )  # Reference core.bookings
 
     # Payment details
     amount = Column(Numeric(10, 2), nullable=False)  # Using Decimal for money

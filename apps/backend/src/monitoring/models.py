@@ -6,12 +6,11 @@ Database models for storing and managing system alerts.
 
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Optional
 
 from sqlalchemy import JSON, Column, DateTime, Enum as SQLEnum, Integer, String, Text
-from sqlalchemy.ext.declarative import declarative_base
 
-from models.base import Base
+# MIGRATED: from models.base → db.base_class (2 levels up from monitoring)
+from db.base_class import Base
 
 
 class AlertStatus(str, Enum):
@@ -63,7 +62,9 @@ class AlertModel(Base):
     message = Column(Text, nullable=False)
 
     # Priority and status
-    priority = Column(SQLEnum(AlertPriority), nullable=False, default=AlertPriority.MEDIUM, index=True)
+    priority = Column(
+        SQLEnum(AlertPriority), nullable=False, default=AlertPriority.MEDIUM, index=True
+    )
     status = Column(SQLEnum(AlertStatus), nullable=False, default=AlertStatus.ACTIVE, index=True)
 
     # Context and metadata
@@ -94,8 +95,15 @@ class AlertModel(Base):
     suppression_reason = Column(Text, nullable=True)
 
     # Timestamps
-    triggered_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), index=True)
-    updated_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    triggered_at = Column(
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), index=True
+    )
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
     expires_at = Column(DateTime, nullable=True)  # Auto-resolve after this time
 
     def __repr__(self):
@@ -121,14 +129,18 @@ class AlertModel(Base):
             "metric_value": self.metric_value,
             "threshold_value": self.threshold_value,
             "notification_channels": self.notification_channels,
-            "notification_sent_at": self.notification_sent_at.isoformat() if self.notification_sent_at else None,
+            "notification_sent_at": (
+                self.notification_sent_at.isoformat() if self.notification_sent_at else None
+            ),
             "notification_count": self.notification_count,
             "acknowledged_by": self.acknowledged_by,
             "acknowledged_at": self.acknowledged_at.isoformat() if self.acknowledged_at else None,
             "resolved_by": self.resolved_by,
             "resolved_at": self.resolved_at.isoformat() if self.resolved_at else None,
             "resolution_notes": self.resolution_notes,
-            "suppressed_until": self.suppressed_until.isoformat() if self.suppressed_until else None,
+            "suppressed_until": (
+                self.suppressed_until.isoformat() if self.suppressed_until else None
+            ),
             "suppressed_by": self.suppressed_by,
             "suppression_reason": self.suppression_reason,
             "triggered_at": self.triggered_at.isoformat() if self.triggered_at else None,
@@ -171,7 +183,12 @@ class AlertRule(Base):
 
     # Metadata
     created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
     created_by = Column(String(100), nullable=True)
 
     def __repr__(self):
@@ -193,7 +210,9 @@ class AlertRule(Base):
             "notification_channels": self.notification_channels,
             "cooldown_seconds": self.cooldown_seconds,
             "is_enabled": bool(self.is_enabled),
-            "last_triggered_at": self.last_triggered_at.isoformat() if self.last_triggered_at else None,
+            "last_triggered_at": (
+                self.last_triggered_at.isoformat() if self.last_triggered_at else None
+            ),
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
             "created_by": self.created_by,

@@ -13,7 +13,7 @@ Created: October 31, 2025
 
 import logging
 
-from api.ai.endpoints.services.pricing_service import get_pricing_service
+from ...endpoints.services.pricing_service import get_pricing_service
 
 from .base_tool import BaseTool, ToolParameter, ToolResult
 

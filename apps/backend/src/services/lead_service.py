@@ -8,8 +8,17 @@ import logging
 from typing import Any
 from uuid import UUID, uuid4
 
-from models import Lead, LeadContact, LeadContext, LeadEvent
-from models.enums import ContactChannel, LeadQuality, LeadSource, LeadStatus
+# FIXED: Import from db.models (NEW system) instead of models (OLD system)
+from db.models.lead import (
+    Lead,
+    LeadContact,
+    LeadContext,
+    LeadEvent,
+    ContactChannel,
+    LeadQuality,
+    LeadSource,
+    LeadStatus,
+)
 from core.base_service import BaseService, EventTrackingMixin
 from core.cache import CacheService
 from core.compliance import ComplianceValidator, ConsentRecord
@@ -36,7 +45,7 @@ class LeadService(BaseService, EventTrackingMixin):
     - Contact management
     - Event tracking
     - TCPA/CAN-SPAM compliance
-    
+
     Dependencies (injected):
     - db: Database session
     - compliance_validator: TCPA/CAN-SPAM validator
@@ -45,8 +54,8 @@ class LeadService(BaseService, EventTrackingMixin):
     """
 
     def __init__(
-        self, 
-        db: AsyncSession, 
+        self,
+        db: AsyncSession,
         compliance_validator: ComplianceValidator,
         event_service: EventService,
         cache: CacheService | None = None,

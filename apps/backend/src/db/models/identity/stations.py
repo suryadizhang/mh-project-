@@ -45,6 +45,7 @@ from db.base_class import Base
 
 # ==================== ENUMS ====================
 
+
 class AuditAction(str, enum.Enum):
     """
     Audit log action types.
@@ -67,6 +68,7 @@ class AuditAction(str, enum.Enum):
     - Immutable logs (no updates/deletes)
     - Minimum 1-year retention
     """
+
     LOGIN = "login"
     LOGOUT = "logout"
     CREATE = "create"
@@ -80,6 +82,7 @@ class AuditAction(str, enum.Enum):
 
 
 # ==================== MODELS ====================
+
 
 class Station(Base):
     """
@@ -126,72 +129,55 @@ class Station(Base):
     - Staff manages bookings and customers
     - Station can be deactivated (status='inactive')
     """
+
     __tablename__ = "stations"
     __table_args__ = (
-        CheckConstraint(
-            "booking_lead_time_hours >= 0",
-            name="station_lead_time_non_negative"
-        ),
-        CheckConstraint(
-            "max_concurrent_bookings > 0",
-            name="station_max_bookings_positive"
-        ),
+        CheckConstraint("booking_lead_time_hours >= 0", name="station_lead_time_non_negative"),
+        CheckConstraint("max_concurrent_bookings > 0", name="station_max_bookings_positive"),
         CheckConstraint(
             "status IN ('active', 'inactive', 'suspended', 'maintenance')",
-            name="station_status_valid"
+            name="station_status_valid",
         ),
         UniqueConstraint("code", name="unique_station_code"),
         Index("idx_station_code", "code"),
         Index("idx_station_status", "status"),
-        {"schema": "identity"}
+        {"schema": "identity", "extend_existing": True},
     )
 
     # Primary Key
     id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        primary_key=True,
-        server_default=func.gen_random_uuid()
+        PGUUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
     )
 
     # Station Identity (REQUIRED FIELDS)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    code: Mapped[str] = mapped_column(String(20), nullable=False)  # NEW: Unique code for API/integration
-    display_name: Mapped[str] = mapped_column(String(200), nullable=False)  # NEW: Public-facing name
+    code: Mapped[str] = mapped_column(
+        String(20), nullable=False
+    )  # NEW: Unique code for API/integration
+    display_name: Mapped[str] = mapped_column(
+        String(200), nullable=False
+    )  # NEW: Public-facing name
 
     # Geographic and Contact (REQUIRED FIELDS)
-    country: Mapped[str] = mapped_column(
-        String(100),
-        nullable=False,
-        server_default="'US'"
-    )
+    country: Mapped[str] = mapped_column(String(100), nullable=False, server_default="'US'")
     timezone: Mapped[str] = mapped_column(
-        String(50),
-        nullable=False,
-        server_default="'America/New_York'"
+        String(50), nullable=False, server_default="'America/New_York'"
     )
 
     # Status (REQUIRED FIELD)
     status: Mapped[str] = mapped_column(
         String(20),
         nullable=False,
-        server_default="'active'"  # active, inactive, suspended, maintenance
+        server_default="'active'",  # active, inactive, suspended, maintenance
     )
 
     # Business Configuration (REQUIRED FIELDS)
-    settings: Mapped[dict] = mapped_column(
-        JSON,
-        nullable=False,
-        server_default="'{}'"
-    )
+    settings: Mapped[dict] = mapped_column(JSON, nullable=False, server_default="'{}'")
     max_concurrent_bookings: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
-        server_default="10"
+        Integer, nullable=False, server_default="10"
     )
     booking_lead_time_hours: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
-        server_default="24"
+        Integer, nullable=False, server_default="24"
     )
 
     # Contact (OPTIONAL FIELDS)
@@ -206,36 +192,28 @@ class Station(Base):
 
     # Business Operations (OPTIONAL FIELDS)
     business_hours: Mapped[Optional[dict]] = mapped_column(JSON)  # NEW: Operating hours config
-    service_area_radius: Mapped[Optional[int]] = mapped_column(Integer)  # NEW: Service radius in miles
+    service_area_radius: Mapped[Optional[int]] = mapped_column(
+        Integer
+    )  # NEW: Service radius in miles
     branding_config: Mapped[Optional[dict]] = mapped_column(JSON)  # NEW: Custom branding settings
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
     # Relationships
     station_users: Mapped[List["StationUser"]] = relationship(
-        "StationUser",
-        back_populates="station",
-        cascade="all, delete-orphan"
+        "StationUser", back_populates="station", cascade="all, delete-orphan"
     )
     access_tokens: Mapped[List["StationAccessToken"]] = relationship(
-        "StationAccessToken",
-        back_populates="station",
-        cascade="all, delete-orphan"
+        "StationAccessToken", back_populates="station", cascade="all, delete-orphan"
     )
     audit_logs: Mapped[List["StationAuditLog"]] = relationship(
-        "StationAuditLog",
-        back_populates="station",
-        cascade="all, delete-orphan"
+        "StationAuditLog", back_populates="station", cascade="all, delete-orphan"
     )
 
     # ==================== BACKWARD COMPATIBILITY ====================
@@ -291,51 +269,35 @@ class StationUser(Base):
     - Deactivating station_user blocks station access
     - Deleting station_user removes all station access
     """
+
     __tablename__ = "station_users"
     __table_args__ = (
         Index("idx_station_users_station_id", "station_id"),
         Index("idx_station_users_user_id", "user_id"),
         UniqueConstraint("station_id", "user_id", name="uq_station_users"),
-        {"schema": "identity"}
+        {"schema": "identity"},
     )
 
     # Primary Key
-    id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        primary_key=True,
-        default=uuid4
-    )
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Foreign Keys
     station_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("identity.stations.id"),
-        nullable=False
+        PGUUID(as_uuid=True), ForeignKey("identity.stations.id"), nullable=False
     )
     user_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("identity.users.id"),
-        nullable=False
+        PGUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=False
     )
 
     # Access Details
-    is_active: Mapped[bool] = mapped_column(
-        Boolean,
-        nullable=False,
-        default=True
-    )
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Relationships
@@ -387,74 +349,46 @@ class StationAccessToken(Base):
     - Expired tokens rejected (if expires_at < now)
     - Revoked tokens rejected (if is_active=False)
     """
+
     __tablename__ = "station_access_tokens"
     __table_args__ = (
         Index("idx_station_access_tokens_station_id", "station_id"),
         Index("idx_station_access_tokens_token", "token"),
         Index("idx_station_access_tokens_active", "is_active"),
-        {"schema": "identity"}
+        {"schema": "identity"},
     )
 
     # Primary Key
-    id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        primary_key=True,
-        default=uuid4
-    )
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Foreign Keys
     station_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("identity.stations.id"),
-        nullable=False
+        PGUUID(as_uuid=True), ForeignKey("identity.stations.id"), nullable=False
     )
 
     # Token Details
     token: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False,
-        unique=True,
-        index=True
+        String(255), nullable=False, unique=True, index=True
     )  # Stored hashed in production
     name: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Expiration
-    expires_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True
-    )
+    expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Status
-    is_active: Mapped[bool] = mapped_column(
-        Boolean,
-        nullable=False,
-        default=True,
-        index=True
-    )
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, index=True)
 
     # Usage Tracking
-    last_used_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True
-    )
-    use_count: Mapped[int] = mapped_column(
-        Integer,
-        nullable=False,
-        default=0
-    )
+    last_used_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    use_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Relationships
@@ -511,47 +445,38 @@ class StationAuditLog(Base):
     - Store user agent for device tracking
     - Metadata (JSONB) for additional context
     """
+
     __tablename__ = "station_audit_logs"
     __table_args__ = (
         Index("idx_station_audit_logs_station_id", "station_id"),
         Index("idx_station_audit_logs_user_id", "user_id"),
         Index("idx_station_audit_logs_action", "action"),
         Index("idx_station_audit_logs_created_at", "created_at"),
-        {"schema": "identity"}
+        {"schema": "identity"},
     )
 
     # Primary Key
-    id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        primary_key=True,
-        default=uuid4
-    )
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Foreign Keys
     station_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("identity.stations.id"),
-        nullable=False
+        PGUUID(as_uuid=True), ForeignKey("identity.stations.id"), nullable=False
     )
     user_id: Mapped[Optional[UUID]] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("identity.users.id"),
-        nullable=True
+        PGUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=True
     )  # NULL for system actions
 
     # Action Details
     action: Mapped[AuditAction] = mapped_column(
         SQLEnum(AuditAction, name="audit_action", schema="public", create_type=False),
         nullable=False,
-        index=True
+        index=True,
     )
     resource_type: Mapped[str] = mapped_column(
-        String(100),
-        nullable=False
+        String(100), nullable=False
     )  # e.g., "booking", "customer", "user"
     resource_id: Mapped[Optional[str]] = mapped_column(
-        String(255),
-        nullable=True
+        String(255), nullable=True
     )  # Resource identifier (UUID, ID, etc.)
 
     # Details
@@ -560,18 +485,11 @@ class StationAuditLog(Base):
     user_agent: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     # Metadata (additional context as JSON)
-    audit_metadata: Mapped[dict] = mapped_column(
-        JSONB,
-        nullable=False,
-        default=dict
-    )
+    audit_metadata: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
 
     # Timestamp (immutable - no updated_at)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        index=True
+        DateTime(timezone=True), nullable=False, server_default=func.now(), index=True
     )
 
     # Relationships

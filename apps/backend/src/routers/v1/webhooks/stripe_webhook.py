@@ -23,7 +23,9 @@ import stripe
 
 settings = get_settings()
 from cqrs.base import Event
-from models.legacy_lead_newsletter import (
+
+# MIGRATED: from models.legacy_lead_newsletter → db.models.legacy_lead_newsletter
+from db.models.legacy_lead_newsletter import (
     Lead,
     LeadSource,
     LeadStatus,

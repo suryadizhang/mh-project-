@@ -7,8 +7,11 @@ from datetime import datetime, timezone
 import logging
 import re
 
-from models import Subscriber
-from models.enums import LeadSource
+# MIGRATED: Imports moved from OLD models to NEW db.models system
+from db.models.newsletter import Subscriber
+
+# MIGRATED: Enum imports moved from models.enums to NEW db.models system
+from db.models.lead import LeadSource
 from core.base_service import BaseService, EventTrackingMixin
 from core.compliance import ComplianceValidator
 from services.event_service import EventService
@@ -22,13 +25,13 @@ logger = logging.getLogger(__name__)
 class SubscriberService(BaseService, EventTrackingMixin):
     """
     Service for managing Subscriber subscriptions with dependency injection.
-    
+
     Handles:
     - Newsletter subscriptions and unsubscriptions
     - STOP/START/HELP SMS commands
     - CAN-SPAM compliance
     - Subscriber tracking
-    
+
     Dependencies (injected):
     - db: Database session
     - compliance_validator: CAN-SPAM validator
@@ -44,7 +47,7 @@ class SubscriberService(BaseService, EventTrackingMixin):
     ):
         """
         Initialize subscriber service with injected dependencies.
-        
+
         Args:
             db: Database session
             compliance_validator: Validator for CAN-SPAM compliance

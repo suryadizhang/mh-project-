@@ -21,8 +21,15 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
-    Column, String, Text, Integer, BigInteger, Boolean, DateTime,
-    ForeignKey, Index, Enum as SQLEnum
+    String,
+    Text,
+    Integer,
+    BigInteger,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Index,
+    Enum as SQLEnum,
 )
 from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB
 from sqlalchemy.orm import relationship, Mapped, mapped_column
@@ -35,8 +42,10 @@ from ..base_class import Base
 
 import enum
 
+
 class EscalationPriority(str, enum.Enum):
     """Escalation priority levels"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -45,6 +54,7 @@ class EscalationPriority(str, enum.Enum):
 
 class EscalationMethod(str, enum.Enum):
     """Escalation contact methods"""
+
     PHONE = "phone"
     EMAIL = "email"
     PREFERRED_METHOD = "preferred_method"
@@ -52,6 +62,7 @@ class EscalationMethod(str, enum.Enum):
 
 class EscalationStatus(str, enum.Enum):
     """Escalation workflow status"""
+
     PENDING = "pending"
     ASSIGNED = "assigned"
     IN_PROGRESS = "in_progress"
@@ -63,6 +74,7 @@ class EscalationStatus(str, enum.Enum):
 
 class RecordingType(str, enum.Enum):
     """Call recording types"""
+
     INBOUND = "inbound"
     OUTBOUND = "outbound"
     INTERNAL = "internal"
@@ -70,6 +82,7 @@ class RecordingType(str, enum.Enum):
 
 class RecordingStatus(str, enum.Enum):
     """Recording processing status"""
+
     PENDING = "pending"
     DOWNLOADING = "downloading"
     AVAILABLE = "available"
@@ -80,6 +93,7 @@ class RecordingStatus(str, enum.Enum):
 
 # ==================== SUPPORT SCHEMA ====================
 
+
 class Escalation(Base):
     """
     Escalation entity
@@ -87,6 +101,7 @@ class Escalation(Base):
     Tracks AI to human escalations with customer contact info,
     priority, assignment, and resolution workflow.
     """
+
     __tablename__ = "escalations"
     __table_args__ = (
         Index("idx_escalations_conversation_id", "conversation_id"),
@@ -96,7 +111,7 @@ class Escalation(Base):
         Index("idx_escalations_created_at", "created_at"),
         Index("idx_escalations_status_priority", "status", "priority"),
         Index("idx_escalations_assigned_status", "assigned_to_id", "status"),
-        {"schema": "support"}
+        {"schema": "support"},
     )
 
     # Primary Key
@@ -105,9 +120,11 @@ class Escalation(Base):
     # Foreign Keys
     assigned_to_id: Mapped[Optional[UUID]] = mapped_column(
         PGUUID(as_uuid=True),
-        ForeignKey("public.users.id", ondelete="SET NULL"),
+        ForeignKey(
+            "identity.users.id", ondelete="SET NULL"
+        ),  # Fixed: users table is in identity schema
         nullable=True,
-        index=True
+        index=True,
     )
 
     # Conversation Reference
@@ -121,20 +138,22 @@ class Escalation(Base):
     # Escalation Details
     reason: Mapped[str] = mapped_column(Text, nullable=False)
     priority: Mapped[EscalationPriority] = mapped_column(
-        SQLEnum(EscalationPriority, name="escalation_priority", schema="support", create_type=False),
+        SQLEnum(
+            EscalationPriority, name="escalation_priority", schema="support", create_type=False
+        ),
         nullable=False,
-        server_default="medium"
+        server_default="medium",
     )
     method: Mapped[EscalationMethod] = mapped_column(
         SQLEnum(EscalationMethod, name="escalation_method", schema="support", create_type=False),
         nullable=False,
-        server_default="phone"
+        server_default="phone",
     )
     status: Mapped[EscalationStatus] = mapped_column(
         SQLEnum(EscalationStatus, name="escalation_status", schema="support", create_type=False),
         nullable=False,
         server_default="pending",
-        index=True
+        index=True,
     )
 
     # Workflow Timestamps
@@ -147,13 +166,17 @@ class Escalation(Base):
     resume_ai_chat: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
 
     # Customer Response Tracking
-    last_customer_response_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_customer_response_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # Communication Tracking
     sms_sent: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
     sms_sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     call_initiated: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
-    call_initiated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    call_initiated_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # Error Handling
     error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
@@ -164,26 +187,20 @@ class Escalation(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Relationships
     call_recordings: Mapped[list["CallRecording"]] = relationship(
-        "CallRecording",
-        back_populates="escalation",
-        foreign_keys="CallRecording.escalation_id"
+        "CallRecording", back_populates="escalation", foreign_keys="CallRecording.escalation_id"
     )
 
 
 # ==================== COMMUNICATIONS SCHEMA ====================
+
 
 class CallRecording(Base):
     """
@@ -192,6 +209,7 @@ class CallRecording(Base):
     Metadata for RingCentral call recordings with retention policy,
     access audit, and S3 storage details.
     """
+
     __tablename__ = "call_recordings"
     __table_args__ = (
         Index("idx_call_recordings_escalation_id", "escalation_id"),
@@ -200,7 +218,7 @@ class CallRecording(Base):
         Index("idx_call_recordings_call_started_at", "call_started_at"),
         Index("idx_call_recordings_delete_after", "delete_after"),
         Index("idx_call_recordings_date_status", "call_started_at", "status"),
-        {"schema": "communications"}
+        {"schema": "communications"},
     )
 
     # Primary Key
@@ -211,12 +229,14 @@ class CallRecording(Base):
         PGUUID(as_uuid=True),
         ForeignKey("support.escalations.id", ondelete="SET NULL"),
         nullable=True,
-        index=True
+        index=True,
     )
     last_accessed_by_id: Mapped[Optional[UUID]] = mapped_column(
         PGUUID(as_uuid=True),
-        ForeignKey("public.users.id", ondelete="SET NULL"),
-        nullable=True
+        ForeignKey(
+            "identity.users.id", ondelete="SET NULL"
+        ),  # Fixed: users table is in identity schema
+        nullable=True,
     )
 
     # RingCentral Details
@@ -228,17 +248,21 @@ class CallRecording(Base):
     recording_type: Mapped[RecordingType] = mapped_column(
         SQLEnum(RecordingType, name="recording_type", schema="communications", create_type=False),
         nullable=False,
-        server_default="inbound"
+        server_default="inbound",
     )
     status: Mapped[RecordingStatus] = mapped_column(
-        SQLEnum(RecordingStatus, name="recording_status", schema="communications", create_type=False),
+        SQLEnum(
+            RecordingStatus, name="recording_status", schema="communications", create_type=False
+        ),
         nullable=False,
         server_default="pending",
-        index=True
+        index=True,
     )
 
     # Call Metadata
-    call_started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    call_started_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, index=True
+    )
     duration_seconds: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
     # File Details
@@ -252,10 +276,14 @@ class CallRecording(Base):
 
     # Retention Policy
     retention_days: Mapped[int] = mapped_column(Integer, nullable=False, server_default="90")
-    delete_after: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
+    delete_after: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
+    )
 
     # Processing Timestamps
-    downloaded_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    downloaded_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     archived_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
@@ -265,27 +293,22 @@ class CallRecording(Base):
 
     # Access Audit
     accessed_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
-    last_accessed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_accessed_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # Metadata
     recording_metadata: Mapped[dict] = mapped_column(JSONB, nullable=False, server_default="{}")
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Relationships
     escalation: Mapped[Optional["Escalation"]] = relationship(
-        "Escalation",
-        back_populates="call_recordings",
-        foreign_keys=[escalation_id]
+        "Escalation", back_populates="call_recordings", foreign_keys=[escalation_id]
     )

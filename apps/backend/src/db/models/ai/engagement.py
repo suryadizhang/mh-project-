@@ -23,7 +23,8 @@ from enum import Enum
 from sqlalchemy import Column, DateTime, Index, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
 
-from models.base import Base
+# MIGRATED: from models.base → ...base_class (3 levels up from ai/)
+from ...base_class import Base
 
 
 # ============================================================================
@@ -41,6 +42,7 @@ class FollowUpTriggerType(str, Enum):
     - EMOTION_BASED: Triggered by low emotion score in conversation
     - CUSTOM: Manually scheduled by admin for specific users
     """
+
     POST_EVENT = "post_event"
     RE_ENGAGEMENT = "reengagement"
     EMOTION_BASED = "emotion_based"
@@ -57,6 +59,7 @@ class FollowUpStatus(str, Enum):
     - CANCELLED: Cancelled before execution (user opted out, booking cancelled)
     - FAILED: Failed to send (retry if retry_count < 3)
     """
+
     PENDING = "pending"
     EXECUTED = "executed"
     CANCELLED = "cancelled"
@@ -134,32 +137,20 @@ class CustomerEngagementFollowUp(Base):
         # CRITICAL: Scheduler queries (most frequent operation)
         # Finds all pending messages ready to send
         Index("idx_followups_status_scheduled", "status", "scheduled_at"),
-
         # User follow-up history (admin dashboard, analytics)
         Index("idx_followups_user_status", "user_id", "status"),
-
         # Duplicate prevention (UNIQUE constraint enforced by business logic)
         # Prevents multiple follow-ups for same user + trigger within 24h
-        Index(
-            "idx_followups_duplicate_check",
-            "user_id",
-            "trigger_type",
-            "status",
-            "scheduled_at"
-        ),
-
+        Index("idx_followups_duplicate_check", "user_id", "trigger_type", "status", "scheduled_at"),
         # Conversation tracking (link follow-ups to original conversation)
         Index("idx_followups_conversation", "conversation_id"),
-
         # Trigger type analytics (measure campaign effectiveness)
         Index("idx_followups_trigger_type", "trigger_type", "status"),
-
         # Time-based analytics (execution rates, delays)
         Index("idx_followups_created", "created_at"),
         Index("idx_followups_executed", "executed_at"),
-
         # Schema assignment
-        {"schema": "ai"}
+        {"schema": "ai"},
     )
 
     # ========================================================================
@@ -169,7 +160,7 @@ class CustomerEngagementFollowUp(Base):
     id = Column(
         String(255),
         primary_key=True,
-        comment="Unique follow-up identifier (UUID, max 255 for compatibility)"
+        comment="Unique follow-up identifier (UUID, max 255 for compatibility)",
     )
 
     # ========================================================================
@@ -180,14 +171,11 @@ class CustomerEngagementFollowUp(Base):
         String(255),
         nullable=False,
         index=True,
-        comment="Original conversation ID that triggered this follow-up"
+        comment="Original conversation ID that triggered this follow-up",
     )
 
     user_id = Column(
-        String(255),
-        nullable=False,
-        index=True,
-        comment="User ID to send follow-up to"
+        String(255), nullable=False, index=True, comment="User ID to send follow-up to"
     )
 
     # ========================================================================
@@ -197,7 +185,7 @@ class CustomerEngagementFollowUp(Base):
     trigger_type = Column(
         String(50),
         nullable=False,
-        comment="Trigger type (post_event/reengagement/emotion_based/custom)"
+        comment="Trigger type (post_event/reengagement/emotion_based/custom)",
     )
 
     trigger_data = Column(
@@ -210,7 +198,7 @@ class CustomerEngagementFollowUp(Base):
         - RE_ENGAGEMENT: {last_active_date, booking_count, total_spent}
         - EMOTION_BASED: {emotion_score, emotion_trend, message_id}
         - CUSTOM: {admin_id, campaign_name, promo_code}
-        """
+        """,
     )
 
     # ========================================================================
@@ -221,26 +209,24 @@ class CustomerEngagementFollowUp(Base):
         DateTime,
         nullable=False,
         index=True,
-        comment="When to send this follow-up (scheduler queries this field)"
+        comment="When to send this follow-up (scheduler queries this field)",
     )
 
     executed_at = Column(
         DateTime,
         nullable=True,
-        comment="When follow-up was actually sent (NULL if not executed yet)"
+        comment="When follow-up was actually sent (NULL if not executed yet)",
     )
 
     cancelled_at = Column(
-        DateTime,
-        nullable=True,
-        comment="When follow-up was cancelled (NULL if not cancelled)"
+        DateTime, nullable=True, comment="When follow-up was cancelled (NULL if not cancelled)"
     )
 
     status = Column(
         String(20),
         nullable=False,
         default=FollowUpStatus.PENDING.value,
-        comment="Execution status (pending/executed/cancelled/failed)"
+        comment="Execution status (pending/executed/cancelled/failed)",
     )
 
     # ========================================================================
@@ -258,7 +244,7 @@ class CustomerEngagementFollowUp(Base):
         - reengagement_general
         - emotion_recovery
         - custom_admin
-        """
+        """,
     )
 
     message_content = Column(
@@ -267,7 +253,7 @@ class CustomerEngagementFollowUp(Base):
         comment="""
         Pre-rendered message content (template variables replaced).
         NULL if not yet rendered. Rendered at scheduling time or execution time.
-        """
+        """,
     )
 
     # ========================================================================
@@ -278,20 +264,18 @@ class CustomerEngagementFollowUp(Base):
         DateTime,
         nullable=False,
         default=datetime.utcnow,
-        comment="When follow-up was created/scheduled"
+        comment="When follow-up was created/scheduled",
     )
 
     error_message = Column(
-        Text,
-        nullable=True,
-        comment="Error message if execution failed (for debugging)"
+        Text, nullable=True, comment="Error message if execution failed (for debugging)"
     )
 
     retry_count = Column(
         Integer,
         nullable=False,
         default=0,
-        comment="Number of retry attempts (max 3, exponential backoff)"
+        comment="Number of retry attempts (max 3, exponential backoff)",
     )
 
 
@@ -354,10 +338,7 @@ def calculate_reengagement_schedule_time(last_active: datetime) -> datetime:
 
 
 def should_send_followup(
-    user_id: str,
-    trigger_type: FollowUpTriggerType,
-    scheduled_at: datetime,
-    session
+    user_id: str, trigger_type: FollowUpTriggerType, scheduled_at: datetime, session
 ) -> bool:
     """
     Check if follow-up should be sent (duplicate prevention).
@@ -379,14 +360,17 @@ def should_send_followup(
     window_start = scheduled_at - timedelta(hours=12)
     window_end = scheduled_at + timedelta(hours=12)
 
-    existing = session.query(CustomerEngagementFollowUp).filter(
-        CustomerEngagementFollowUp.user_id == user_id,
-        CustomerEngagementFollowUp.trigger_type == trigger_type.value,
-        CustomerEngagementFollowUp.status.in_([
-            FollowUpStatus.PENDING.value,
-            FollowUpStatus.EXECUTED.value
-        ]),
-        CustomerEngagementFollowUp.scheduled_at.between(window_start, window_end)
-    ).first()
+    existing = (
+        session.query(CustomerEngagementFollowUp)
+        .filter(
+            CustomerEngagementFollowUp.user_id == user_id,
+            CustomerEngagementFollowUp.trigger_type == trigger_type.value,
+            CustomerEngagementFollowUp.status.in_(
+                [FollowUpStatus.PENDING.value, FollowUpStatus.EXECUTED.value]
+            ),
+            CustomerEngagementFollowUp.scheduled_at.between(window_start, window_end),
+        )
+        .first()
+    )
 
     return existing is None

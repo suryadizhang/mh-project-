@@ -5,17 +5,19 @@ Periodic tasks for updating campaign cached metrics
 
 from workers.celery_config import celery_app
 from core.database import get_db_session
-from models import Campaign, CampaignEvent
-from models.enums import CampaignStatus, CampaignEventType
+
+# MIGRATED: Imports moved from OLD models to NEW db.models system
+from db.models.newsletter import Campaign
+
+# MIGRATED: Enum imports moved from models.enums to NEW db.models system
+from db.models.newsletter import CampaignStatus
 from datetime import datetime, timedelta
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-@celery_app.task(
-    name="workers.campaign_metrics_tasks.update_active_campaign_metrics"
-)
+@celery_app.task(name="workers.campaign_metrics_tasks.update_active_campaign_metrics")
 def update_active_campaign_metrics():
     """
     Update cached metrics for all active campaigns
@@ -36,9 +38,7 @@ def update_active_campaign_metrics():
         campaigns = (
             db.query(Campaign)
             .filter(
-                Campaign.status.in_(
-                    [CampaignStatus.ACTIVE, CampaignStatus.SCHEDULED]
-                ),
+                Campaign.status.in_([CampaignStatus.ACTIVE, CampaignStatus.SCHEDULED]),
                 Campaign.last_metrics_updated < cutoff_time,
             )
             .all()
@@ -65,9 +65,7 @@ def update_active_campaign_metrics():
 
             except Exception as e:
                 error_count += 1
-                logger.error(
-                    f"Failed to update metrics for campaign {campaign.id}: {str(e)}"
-                )
+                logger.error(f"Failed to update metrics for campaign {campaign.id}: {str(e)}")
                 # Continue processing other campaigns
                 continue
 
@@ -93,9 +91,7 @@ def update_active_campaign_metrics():
         db.close()
 
 
-@celery_app.task(
-    name="workers.campaign_metrics_tasks.update_single_campaign_metrics"
-)
+@celery_app.task(name="workers.campaign_metrics_tasks.update_single_campaign_metrics")
 def update_single_campaign_metrics(campaign_id: str):
     """
     Update cached metrics for a single campaign
@@ -111,9 +107,7 @@ def update_single_campaign_metrics(campaign_id: str):
     db = next(get_db_session())
 
     try:
-        campaign = (
-            db.query(Campaign).filter(Campaign.id == campaign_id).first()
-        )
+        campaign = db.query(Campaign).filter(Campaign.id == campaign_id).first()
 
         if not campaign:
             logger.error(f"Campaign {campaign_id} not found")
@@ -138,9 +132,7 @@ def update_single_campaign_metrics(campaign_id: str):
         }
 
     except Exception as e:
-        logger.error(
-            f"Failed to update metrics for campaign {campaign_id}: {str(e)}"
-        )
+        logger.error(f"Failed to update metrics for campaign {campaign_id}: {str(e)}")
         db.rollback()
         raise
 
@@ -148,9 +140,7 @@ def update_single_campaign_metrics(campaign_id: str):
         db.close()
 
 
-@celery_app.task(
-    name="workers.campaign_metrics_tasks.cleanup_completed_campaign_metrics"
-)
+@celery_app.task(name="workers.campaign_metrics_tasks.cleanup_completed_campaign_metrics")
 def cleanup_completed_campaign_metrics():
     """
     Final metrics update for completed campaigns
@@ -190,16 +180,12 @@ def cleanup_completed_campaign_metrics():
                 )
 
             except Exception as e:
-                logger.error(
-                    f"Failed final metrics update for campaign {campaign.id}: {str(e)}"
-                )
+                logger.error(f"Failed final metrics update for campaign {campaign.id}: {str(e)}")
                 continue
 
         db.commit()
 
-        logger.info(
-            f"Completed campaign metrics update: {updated_count} campaigns"
-        )
+        logger.info(f"Completed campaign metrics update: {updated_count} campaigns")
 
         return {"status": "success", "updated_count": updated_count}
 

@@ -3,18 +3,23 @@ Growth Tracker for Customer Count Monitoring
 
 Monitors customer growth and triggers alerts when milestones are reached.
 This enables proactive scaling decisions (e.g., migrating to Neo4j).
+
+Uses lazy import pattern to avoid circular dependencies with db.models.
 """
 
 from datetime import datetime, timezone, timedelta
 import logging
 import os
+from typing import TYPE_CHECKING
 
-# Use production Customer model from core schema (not legacy models.customer)
-from db.models.core import Customer
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .alerts import AlertManager
+
+# Type-only import (no runtime circular dependency)
+if TYPE_CHECKING:
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -34,9 +39,14 @@ class GrowthTracker:
         """
         Check customer count and send alert if threshold crossed.
 
+        Uses lazy import to avoid circular dependency with db.models.
+
         Returns:
             Dict with customer count and alert status
         """
+        # Lazy import to avoid circular dependency (enterprise pattern)
+        from db.models.core import Customer
+
         # Get total customer count
         result = await db.execute(select(func.count(Customer.id)))
         customer_count = result.scalar() or 0
@@ -121,10 +131,17 @@ Migrate to Neo4j graph database (6-hour upgrade) for 10x query speedup.
         """
         Get comprehensive growth summary for dashboard.
 
+        Uses lazy import to avoid circular dependency with db.models.
+
         Returns:
             Dict with customer counts, growth rates, and recommendations
         """
-        # Total customers
+        # Lazy import to avoid circular dependency (enterprise pattern)
+        from db.models.core import Customer
+
+        # Lazy import to avoid circular dependency (enterprise pattern)
+
+        # Total count
         result = await db.execute(select(func.count(Customer.id)))
         total_customers = result.scalar() or 0
 

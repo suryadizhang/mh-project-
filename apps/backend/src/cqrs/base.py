@@ -9,7 +9,8 @@ import json
 from typing import Any
 from uuid import UUID, uuid4
 
-from models.events import DomainEvent, OutboxEntry
+# MIGRATED: from models.events → db.models.events
+from db.models.events import DomainEvent, Outbox  # FIXED: Outbox → Outbox
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -233,13 +234,13 @@ class OutboxProcessor:
 
     async def create_outbox_entries(
         self, events: list[DomainEvent], targets: list[str]
-    ) -> list[OutboxEntry]:
+    ) -> list[Outbox]:
         """Create outbox entries for reliable delivery."""
         outbox_entries = []
 
         for event in events:
             for target in targets:
-                entry = OutboxEntry(
+                entry = Outbox(
                     id=uuid4(),
                     event_id=event.id,
                     target=target,
@@ -327,18 +328,18 @@ class OutboxProcessor:
 
     async def get_pending_entries(
         self, target: str | None = None, limit: int = 100
-    ) -> list[OutboxEntry]:
+    ) -> list[Outbox]:
         """Get pending outbox entries for processing."""
         stmt = (
-            select(OutboxEntry)
-            .where(OutboxEntry.status == "pending")
-            .where(OutboxEntry.next_attempt_at <= datetime.now(UTC))
+            select(Outbox)
+            .where(Outbox.status == "pending")
+            .where(Outbox.next_attempt_at <= datetime.now(UTC))
         )
 
         if target:
-            stmt = stmt.where(OutboxEntry.target == target)
+            stmt = stmt.where(Outbox.target == target)
 
-        stmt = stmt.order_by(OutboxEntry.created_at.asc()).limit(limit)
+        stmt = stmt.order_by(Outbox.created_at.asc()).limit(limit)
 
         result = await self.session.execute(stmt)
         return list(result.scalars().all())

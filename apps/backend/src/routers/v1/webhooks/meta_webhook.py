@@ -24,8 +24,11 @@ from fastapi import (
 from sqlalchemy.orm import Session
 
 settings = get_settings()
-from models.legacy_core import CoreEvent
-from models.legacy_lead_newsletter import (
+# MIGRATED: from models.legacy_core → db.models.legacy_core
+from db.models.legacy_core import CoreEvent
+
+# MIGRATED: from models.legacy_lead_newsletter → db.models.legacy_lead_newsletter
+from db.models.legacy_lead_newsletter import (
     Lead,
     LeadSource,
     LeadStatus,
@@ -399,4 +402,8 @@ async def broadcast_thread_update(thread_data: dict[str, Any]):
 @router.get("/health")
 async def webhook_health():
     """Health check for Meta webhook."""
-    return {"status": "healthy", "service": "meta_webhook", "timestamp": datetime.now(timezone.utc).isoformat()}
+    return {
+        "status": "healthy",
+        "service": "meta_webhook",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }

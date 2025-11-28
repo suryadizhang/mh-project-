@@ -5,7 +5,10 @@ from typing import Literal
 from uuid import UUID
 
 from cqrs.base import Query  # Phase 2C: Updated from api.app.cqrs.base
-from models.enums import MessageKind, ReviewStatus, SocialPlatform, ThreadStatus
+
+# MIGRATED: Enum imports moved from models.enums to NEW db.models system
+from db.models.core import MessageKind, ReviewStatus, ThreadStatus
+from db.models.lead import SocialPlatform
 from pydantic import ConfigDict, Field
 
 

@@ -8,7 +8,7 @@ import logging
 from typing import Any
 
 # Import models (will need to create chef-related models)
-from api.app.models.core import Booking
+from db.models.core import Booking
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session
 

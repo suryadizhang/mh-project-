@@ -7,20 +7,22 @@ and campaign performance tracking.
 
 import logging
 from datetime import datetime, timedelta
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 from enum import Enum
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_, or_
+from sqlalchemy import select
 
 from core.base_service import BaseService, EventTrackingMixin, NotificationMixin
 from services.event_service import EventService
-from models import Campaign, CampaignEvent, Subscriber, Lead
-from models.enums import CampaignChannel, CampaignStatus as CampaignStatusEnum, CampaignEventType, LeadStatus
+
+# FIXED: Import from db.models (NEW system) instead of models (OLD system)
+from db.models.lead import Lead
 from core.exceptions import BusinessLogicException, NotFoundException, ErrorCode
 
 
 class CampaignType(str, Enum):
     """Campaign type enumeration."""
+
     WELCOME = "welcome"
     POST_INQUIRY = "post_inquiry"
     ABANDONED_QUOTE = "abandoned_quote"
@@ -31,6 +33,7 @@ class CampaignType(str, Enum):
 
 class CampaignStatus(str, Enum):
     """Campaign enrollment status."""
+
     ACTIVE = "active"
     PAUSED = "paused"
     COMPLETED = "completed"
@@ -40,6 +43,7 @@ class CampaignStatus(str, Enum):
 
 class MessageStatus(str, Enum):
     """Individual message status."""
+
     PENDING = "pending"
     SENT = "sent"
     DELIVERED = "delivered"
@@ -52,7 +56,7 @@ class MessageStatus(str, Enum):
 class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin):
     """
     Service for automated lead nurturing campaigns.
-    
+
     Features:
     - Multi-step drip campaigns
     - Scheduled message delivery
@@ -60,13 +64,13 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
     - Campaign performance analytics
     - Dynamic content personalization
     - A/B testing support
-    
+
     Dependencies (injected):
     - db: Database session
     - event_service: Event tracking
     - notification_service: For sending messages (optional)
     """
-    
+
     # Campaign templates (in production, store in database)
     CAMPAIGN_TEMPLATES = {
         CampaignType.WELCOME: [
@@ -141,7 +145,7 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
             },
         ],
     }
-    
+
     def __init__(
         self,
         db: AsyncSession,
@@ -151,7 +155,7 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
     ):
         """
         Initialize nurture campaign service with injected dependencies.
-        
+
         Args:
             db: Database session
             event_service: Service for event tracking
@@ -161,7 +165,7 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
         super().__init__(db, logger)
         self.event_service = event_service
         self.notification_service = notification_service
-    
+
     async def enroll_lead(
         self,
         lead_id: int,
@@ -171,16 +175,16 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
     ) -> Dict[str, Any]:
         """
         Enroll a lead in a nurture campaign.
-        
+
         Args:
             lead_id: ID of the lead to enroll
             campaign_type: Type of campaign to enroll in
             personalization: Dynamic content variables (e.g., name, event_type)
             skip_if_enrolled: Skip if already enrolled in this campaign
-        
+
         Returns:
             Dictionary with enrollment details
-        
+
         Raises:
             NotFoundException: If lead not found
             BusinessLogicException: If enrollment fails
@@ -190,25 +194,25 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
             lead = await self._get_lead(lead_id)
             if not lead:
                 raise NotFoundException(f"Lead {lead_id} not found")
-            
+
             # Check if already enrolled
             if skip_if_enrolled:
                 existing = await self._find_active_enrollment(lead_id, campaign_type)
                 if existing:
                     self.logger.info(
                         f"Lead {lead_id} already enrolled in {campaign_type}",
-                        extra={"lead_id": lead_id, "campaign_type": campaign_type}
+                        extra={"lead_id": lead_id, "campaign_type": campaign_type},
                     )
                     return existing
-            
+
             # Get campaign template
             template = self.CAMPAIGN_TEMPLATES.get(campaign_type)
             if not template:
                 raise BusinessLogicException(
                     message=f"Unknown campaign type: {campaign_type}",
-                    error_code=ErrorCode.BUSINESS_RULE_VIOLATION
+                    error_code=ErrorCode.BUSINESS_RULE_VIOLATION,
                 )
-            
+
             # Create enrollment record
             enrollment = {
                 "lead_id": lead_id,
@@ -220,7 +224,7 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
                 "enrolled_at": datetime.utcnow(),
                 "next_message_at": datetime.utcnow(),
             }
-            
+
             # Track enrollment event
             await self.track_event(
                 action="campaign_enrolled",
@@ -230,18 +234,18 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
                 metadata={
                     "campaign_type": campaign_type.value,
                     "total_steps": len(template),
-                }
+                },
             )
-            
+
             self.logger.info(
                 f"Enrolled lead {lead_id} in {campaign_type} campaign",
                 extra={
                     "lead_id": lead_id,
                     "campaign_type": campaign_type.value,
                     "total_steps": len(template),
-                }
+                },
             )
-            
+
             return {
                 "lead_id": lead_id,
                 "campaign_type": campaign_type.value,
@@ -249,11 +253,11 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
                 "total_steps": len(template),
                 "enrolled_at": enrollment["enrolled_at"].isoformat(),
             }
-            
+
         except Exception as e:
             await self._handle_error(e, "enroll_lead")
             raise
-    
+
     async def send_next_message(
         self,
         lead_id: int,
@@ -261,16 +265,16 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
     ) -> Dict[str, Any]:
         """
         Send the next scheduled message in a campaign.
-        
+
         Called by scheduled job to process pending messages.
-        
+
         Args:
             lead_id: Lead ID
             campaign_type: Campaign type
-        
+
         Returns:
             Dictionary with message send details
-        
+
         Raises:
             NotFoundException: If enrollment not found
         """
@@ -281,15 +285,15 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
                 raise NotFoundException(
                     f"No active enrollment found for lead {lead_id} in {campaign_type}"
                 )
-            
+
             # Get campaign template
             template = self.CAMPAIGN_TEMPLATES.get(campaign_type)
             if not template:
                 raise BusinessLogicException(
                     message=f"Unknown campaign type: {campaign_type}",
-                    error_code=ErrorCode.BUSINESS_RULE_VIOLATION
+                    error_code=ErrorCode.BUSINESS_RULE_VIOLATION,
                 )
-            
+
             current_step = enrollment.get("current_step", 0)
             if current_step >= len(template):
                 # Campaign complete
@@ -298,18 +302,16 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
                     "status": "completed",
                     "message": "Campaign completed",
                 }
-            
+
             # Get message template
             message_template = template[current_step]
-            
+
             # Personalize content
             lead = await self._get_lead(lead_id)
             personalized_content = self._personalize_content(
-                message_template["content"],
-                lead,
-                enrollment.get("personalization", {})
+                message_template["content"], lead, enrollment.get("personalization", {})
             )
-            
+
             # Send message
             if self.notification_service:
                 await self.send_notification(
@@ -320,9 +322,9 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
                         "subject": message_template["subject"],
                         "campaign_type": campaign_type.value,
                         "step": current_step + 1,
-                    }
+                    },
                 )
-            
+
             # Track message sent
             await self.track_event(
                 action="campaign_message_sent",
@@ -333,18 +335,18 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
                     "campaign_type": campaign_type.value,
                     "step": current_step + 1,
                     "channel": message_template["channel"],
-                }
+                },
             )
-            
+
             self.logger.info(
                 f"Sent campaign message to lead {lead_id}",
                 extra={
                     "lead_id": lead_id,
                     "campaign_type": campaign_type.value,
                     "step": current_step + 1,
-                }
+                },
             )
-            
+
             # Schedule next message
             next_step = current_step + 1
             if next_step < len(template):
@@ -352,7 +354,7 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
                 next_send_at = datetime.utcnow() + timedelta(hours=next_message["delay_hours"])
             else:
                 next_send_at = None
-            
+
             return {
                 "lead_id": lead_id,
                 "campaign_type": campaign_type.value,
@@ -360,11 +362,11 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
                 "status": MessageStatus.SENT.value,
                 "next_message_at": next_send_at.isoformat() if next_send_at else None,
             }
-            
+
         except Exception as e:
             await self._handle_error(e, "send_next_message")
             raise
-    
+
     async def handle_response(
         self,
         lead_id: int,
@@ -373,12 +375,12 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
     ) -> Dict[str, Any]:
         """
         Handle lead response to campaign message.
-        
+
         Args:
             lead_id: Lead ID
             response_type: Type of response ('reply', 'click', 'opt_out', 'booking')
             response_data: Additional response data
-        
+
         Returns:
             Dictionary with response handling result
         """
@@ -389,41 +391,41 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
                 entity_type="nurture_campaign",
                 entity_id=lead_id,
                 user_id=lead_id,
-                metadata=response_data or {}
+                metadata=response_data or {},
             )
-            
+
             # Handle opt-out
             if response_type == "opt_out":
                 await self._pause_all_campaigns(lead_id)
                 self.logger.info(f"Lead {lead_id} opted out of all campaigns")
                 return {"status": "opted_out", "message": "All campaigns paused"}
-            
+
             # Handle booking conversion
             if response_type == "booking":
                 await self._complete_all_campaigns(lead_id)
                 self.logger.info(f"Lead {lead_id} converted - completing campaigns")
                 return {"status": "converted", "message": "All campaigns completed"}
-            
+
             return {
                 "lead_id": lead_id,
                 "response_type": response_type,
                 "status": "processed",
             }
-            
+
         except Exception as e:
             await self._handle_error(e, "handle_response")
             raise
-    
+
     async def get_campaign_stats(
         self,
         campaign_type: Optional[CampaignType] = None,
     ) -> Dict[str, Any]:
         """
         Get campaign performance statistics.
-        
+
         Args:
             campaign_type: Optional filter by campaign type
-        
+
         Returns:
             Dictionary with campaign metrics
         """
@@ -442,18 +444,18 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
                 "click_rate": 0.0,
                 "conversion_rate": 0.0,
             }
-            
+
             if campaign_type:
                 stats["campaign_type"] = campaign_type.value
-            
+
             return stats
-            
+
         except Exception as e:
             await self._handle_error(e, "get_campaign_stats")
             raise
-    
+
     # Helper methods
-    
+
     def _personalize_content(
         self,
         content: str,
@@ -467,12 +469,12 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
             "{phone}": lead.phone or "",
             **personalization,
         }
-        
+
         for key, value in replacements.items():
             content = content.replace(key, str(value))
-        
+
         return content
-    
+
     async def _find_active_enrollment(
         self,
         lead_id: int,
@@ -481,7 +483,7 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
         """Find active enrollment for lead in campaign."""
         # In real implementation, query enrollments table
         return None
-    
+
     async def _mark_campaign_complete(
         self,
         lead_id: int,
@@ -493,9 +495,9 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
             entity_type="nurture_campaign",
             entity_id=lead_id,
             user_id=lead_id,
-            metadata={"campaign_type": campaign_type.value}
+            metadata={"campaign_type": campaign_type.value},
         )
-    
+
     async def _pause_all_campaigns(self, lead_id: int) -> None:
         """Pause all active campaigns for a lead."""
         await self.track_event(
@@ -503,9 +505,9 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
             entity_type="nurture_campaign",
             entity_id=lead_id,
             user_id=lead_id,
-            metadata={"reason": "opt_out"}
+            metadata={"reason": "opt_out"},
         )
-    
+
     async def _complete_all_campaigns(self, lead_id: int) -> None:
         """Complete all campaigns for a lead (e.g., after conversion)."""
         await self.track_event(
@@ -513,9 +515,9 @@ class NurtureCampaignService(BaseService, EventTrackingMixin, NotificationMixin)
             entity_type="nurture_campaign",
             entity_id=lead_id,
             user_id=lead_id,
-            metadata={"reason": "conversion"}
+            metadata={"reason": "conversion"},
         )
-    
+
     async def _get_lead(self, lead_id: int) -> Optional[Lead]:
         """Get lead by ID."""
         query = select(Lead).where(Lead.id == lead_id)

@@ -6,9 +6,7 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 # Add src directory to path (go up from alembic/versions to src)
-backend_src = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..")
-)
+backend_src = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 if backend_src not in sys.path:
     sys.path.insert(0, backend_src)
 
@@ -18,52 +16,23 @@ from core.config import get_settings  # noqa: E402
 settings = get_settings()
 
 # Import Base without importing async engine
-# Use models.base instead of api.app.database to avoid async engine creation
-from models.base import Base  # noqa: E402
+# CRITICAL: Import Base directly from core.database (not models.base) to avoid
+# triggering models/__init__.py which eagerly loads all legacy models causing conflicts
+from core.database import Base  # noqa: E402
 
 # Import all models for Alembic discovery
-# Import models so Alembic can detect tables
+# CRITICAL: Import from db.models package (not individual modules) to avoid double registration
+# The __init__.py already imports all models, so this registers them with metadata
+import db.models  # noqa: E402, F401
 
-# Core business models (from db.models.core)
-from db.models.core import (
-    Booking,
-    Customer as CoreCustomer,
-)  # noqa: E402, F401
+# Also import schema-specific model packages to ensure Phase 1B models are loaded
+import db.models.ai  # noqa: E402, F401
+import db.models.crm  # noqa: E402, F401
+import db.models.ops  # noqa: E402, F401
 
-# Lead models (from db.models.lead)
-from db.models.lead import Lead  # noqa: E402, F401
-
-# Identity models (from db.models.identity)
-from db.models.identity import User, Station  # noqa: E402, F401
-
-# Legacy models (from models package)
-from models import (  # noqa: E402, F401
-    Campaign,
-    # Social media & communications
-    SocialAccount,
-    SocialIdentity,
-    SocialThread,
-    SocialMessage,
-    Review,
-    # RingCentral communications (external system - metadata only)
-    CallRecording,
-    # Event sourcing
-    DomainEvent,
-    OutboxEntry,
-    # Business & multi-tenancy
-    Business,
-    # Customer support
-    Escalation,
-    # Payment processing
-    PaymentNotification,
-    # RBAC
-    Role,
-    Permission,
-    # System events & audit
-    SystemEvent,
-    # Terms & conditions
-    TermsAcknowledgment,
-)
+# NOTE: Legacy models from models/ package are DEPRECATED and not imported here
+# They will be phased out as we migrate to db.models/ structure
+# This prevents table registration conflicts (e.g., core.bookings, events.domain_events)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -77,9 +46,7 @@ if not database_url:
     # If no sync URL provided, convert async URL to sync
     database_url = os.getenv("DATABASE_URL", settings.database_url)
     if database_url and "postgresql+asyncpg://" in database_url:
-        database_url = database_url.replace(
-            "postgresql+asyncpg://", "postgresql://"
-        )
+        database_url = database_url.replace("postgresql+asyncpg://", "postgresql://")
 config.set_main_option("sqlalchemy.url", database_url)
 
 # Interpret the config file for Python logging.
@@ -135,9 +102,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

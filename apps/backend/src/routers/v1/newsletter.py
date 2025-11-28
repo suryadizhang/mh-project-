@@ -6,8 +6,16 @@ from typing import Any
 from uuid import UUID
 
 from core.database import get_db
-from models import Campaign, CampaignEvent, Subscriber
-from models.enums import CampaignChannel, CampaignEventType, CampaignStatus
+
+# FIXED: Import from db.models (NEW system) instead of models (OLD system)
+from db.models.newsletter import (
+    Campaign,
+    CampaignEvent,
+    Subscriber,
+    CampaignChannel,
+    CampaignEventType,
+    CampaignStatus,
+)
 from services.ai_lead_management import get_social_media_ai
 from fastapi import (
     APIRouter,
@@ -48,7 +56,7 @@ class SubscriberUpdate(BaseModel):
 
 class SubscriberResponse(BaseModel):
     """Subscriber information response model.
-    
+
     IMPORTANT Field Usage Clarification:
     - email: Used for identification, NOT for marketing newsletters
     - sms_consent: Controls SMS newsletters (primary marketing channel via RingCentral)
@@ -56,6 +64,7 @@ class SubscriberResponse(BaseModel):
     - total_emails_sent: Tracks admin emails, NOT marketing newsletters
     - total_sms_sent: Would track SMS newsletters (primary marketing channel)
     """
+
     id: UUID
     customer_id: UUID | None
     email: str  # For identification, NOT newsletters
@@ -141,15 +150,12 @@ class CampaignEventResponse(BaseModel):
 
 # Subscriber endpoints
 @router.post("/subscribers", response_model=SubscriberResponse)
-async def create_subscriber(
-    subscriber_data: SubscriberCreate, db: AsyncSession = Depends(get_db)
-):
+async def create_subscriber(subscriber_data: SubscriberCreate, db: AsyncSession = Depends(get_db)):
     """Create a new newsletter subscriber."""
 
     # Check if subscriber already exists
     stmt = select(Subscriber).where(
-        Subscriber.email_enc
-        == Subscriber._encrypt_email(subscriber_data.email)
+        Subscriber.email_enc == Subscriber._encrypt_email(subscriber_data.email)
     )
     result = await db.execute(stmt)
     existing = result.scalars().first()
@@ -203,11 +209,7 @@ async def list_subscribers(
     if engagement_max is not None:
         stmt = stmt.where(Subscriber.engagement_score <= engagement_max)
 
-    stmt = (
-        stmt.order_by(desc(Subscriber.engagement_score))
-        .offset(offset)
-        .limit(limit)
-    )
+    stmt = stmt.order_by(desc(Subscriber.engagement_score)).offset(offset).limit(limit)
     result = await db.execute(stmt)
     subscribers = result.scalars().all()
 
@@ -215,9 +217,7 @@ async def list_subscribers(
 
 
 @router.get("/subscribers/{subscriber_id}", response_model=SubscriberResponse)
-async def get_subscriber(
-    subscriber_id: UUID, db: AsyncSession = Depends(get_db)
-):
+async def get_subscriber(subscriber_id: UUID, db: AsyncSession = Depends(get_db)):
     """Get subscriber details."""
 
     stmt = select(Subscriber).where(Subscriber.id == subscriber_id)
@@ -242,11 +242,7 @@ async def update_subscriber(
     """Update subscriber information."""
 
     subscriber = (
-        (
-            await db.execute(
-                select(Subscriber).where(Subscriber.id == subscriber_id)
-            )
-        )
+        (await db.execute(select(Subscriber).where(Subscriber.id == subscriber_id)))
         .scalars()
         .first()
     )
@@ -284,17 +280,11 @@ async def update_subscriber(
 
 
 @router.delete("/subscribers/{subscriber_id}")
-async def unsubscribe_subscriber(
-    subscriber_id: UUID, db: AsyncSession = Depends(get_db)
-):
+async def unsubscribe_subscriber(subscriber_id: UUID, db: AsyncSession = Depends(get_db)):
     """Unsubscribe a subscriber."""
 
     subscriber = (
-        (
-            await db.execute(
-                select(Subscriber).where(Subscriber.id == subscriber_id)
-            )
-        )
+        (await db.execute(select(Subscriber).where(Subscriber.id == subscriber_id)))
         .scalars()
         .first()
     )
@@ -320,21 +310,21 @@ async def public_unsubscribe_email(
 ):
     """
     Public email unsubscribe endpoint for CAN-SPAM compliance.
-    
+
     This endpoint allows users to unsubscribe from marketing emails via a link
     without requiring authentication. The token parameter prevents abuse.
-    
+
     CAN-SPAM Requirements Met:
     - One-click unsubscribe (no login required)
     - Immediate processing (unsubscribe within 10 business days)
     - Clear confirmation message
     - Secure token prevents unauthorized unsubscribes
-    
+
     Args:
         email: Email address to unsubscribe (from email link)
         token: HMAC token for verification (prevents abuse)
         db: Database session
-    
+
     Returns:
         HTMLResponse with success/error message
     """
@@ -342,10 +332,10 @@ async def public_unsubscribe_email(
     from core.config import get_settings
     from services.newsletter_service import SubscriberService
     from services.event_service import EventService
-    
+
     settings = get_settings()
     compliance = get_compliance_validator()
-    
+
     # Verify token to prevent abuse
     if not compliance.verify_unsubscribe_token(email, token, settings.SECRET_KEY):
         logger.warning(
@@ -361,14 +351,14 @@ async def public_unsubscribe_email(
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Invalid Link - My Hibachi Chef</title>
                 <style>
-                    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
+                    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
                            background: #f5f5f5; padding: 40px 20px; text-align: center; }
-                    .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; 
+                    .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px;
                                 border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
                     .error { color: #e74c3c; font-size: 48px; margin-bottom: 20px; }
                     h1 { color: #2c3e50; margin-bottom: 20px; }
                     p { color: #7f8c8d; line-height: 1.6; margin-bottom: 30px; }
-                    .button { display: inline-block; background: #e74c3c; color: white; padding: 12px 30px; 
+                    .button { display: inline-block; background: #e74c3c; color: white; padding: 12px 30px;
                              text-decoration: none; border-radius: 5px; font-weight: 600; }
                     .button:hover { background: #c0392b; }
                 </style>
@@ -390,7 +380,7 @@ async def public_unsubscribe_email(
             """,
             status_code=400,
         )
-    
+
     # Initialize subscriber service with dependencies
     try:
         event_service = EventService(db)
@@ -399,10 +389,10 @@ async def public_unsubscribe_email(
             compliance_validator=compliance,
             event_service=event_service,
         )
-        
+
         # Attempt to unsubscribe
         success = await subscriber_service.unsubscribe(email=email)
-        
+
         if success:
             logger.info(
                 f"Successfully unsubscribed email via public endpoint: {email}",
@@ -417,15 +407,15 @@ async def public_unsubscribe_email(
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <title>Unsubscribed - My Hibachi Chef</title>
                     <style>
-                        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
+                        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
                                background: #f5f5f5; padding: 40px 20px; text-align: center; }
-                        .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; 
+                        .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px;
                                     border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
                         .success { color: #27ae60; font-size: 48px; margin-bottom: 20px; }
                         h1 { color: #2c3e50; margin-bottom: 20px; }
                         p { color: #7f8c8d; line-height: 1.6; margin-bottom: 20px; }
                         .info-box { background: #ecf0f1; padding: 20px; border-radius: 5px; margin: 30px 0; }
-                        .button { display: inline-block; background: #e74c3c; color: white; padding: 12px 30px; 
+                        .button { display: inline-block; background: #e74c3c; color: white; padding: 12px 30px;
                                  text-decoration: none; border-radius: 5px; font-weight: 600; margin-top: 20px; }
                         .button:hover { background: #c0392b; }
                     </style>
@@ -436,20 +426,20 @@ async def public_unsubscribe_email(
                         <h1>Unsubscribed Successfully</h1>
                         <p>You've been successfully removed from My Hibachi Chef's email newsletter list.</p>
                         <p>We're sorry to see you go! You will no longer receive marketing emails from us.</p>
-                        
+
                         <div class="info-box">
                             <p style="margin: 0; font-size: 14px;">
-                                <strong>Note:</strong> You may still receive transactional emails related to any active bookings 
+                                <strong>Note:</strong> You may still receive transactional emails related to any active bookings
                                 or orders you have with us. These are important for your service and cannot be unsubscribed from.
                             </p>
                         </div>
-                        
+
                         <p style="font-size: 14px; color: #95a5a6;">
                             Changed your mind? You can resubscribe anytime by visiting our website.<br>
-                            Questions? Contact us at <a href="mailto:cs@myhibachichef.com" style="color: #e74c3c;">cs@myhibachichef.com</a> 
+                            Questions? Contact us at <a href="mailto:cs@myhibachichef.com" style="color: #e74c3c;">cs@myhibachichef.com</a>
                             or call <a href="tel:+19167408768" style="color: #e74c3c;">(916) 740-8768</a>
                         </p>
-                        
+
                         <a href="https://myhibachichef.com" class="button">Visit Our Website</a>
                     </div>
                 </body>
@@ -471,14 +461,14 @@ async def public_unsubscribe_email(
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <title>Email Not Found - My Hibachi Chef</title>
                     <style>
-                        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
+                        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
                                background: #f5f5f5; padding: 40px 20px; text-align: center; }
-                        .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; 
+                        .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px;
                                     border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
                         .info { color: #3498db; font-size: 48px; margin-bottom: 20px; }
                         h1 { color: #2c3e50; margin-bottom: 20px; }
                         p { color: #7f8c8d; line-height: 1.6; margin-bottom: 20px; }
-                        .button { display: inline-block; background: #e74c3c; color: white; padding: 12px 30px; 
+                        .button { display: inline-block; background: #e74c3c; color: white; padding: 12px 30px;
                                  text-decoration: none; border-radius: 5px; font-weight: 600; margin-top: 20px; }
                         .button:hover { background: #c0392b; }
                     </style>
@@ -491,7 +481,7 @@ async def public_unsubscribe_email(
                         <p>You may have already been unsubscribed, or you never subscribed to our newsletter.</p>
                         <p style="font-size: 14px; color: #95a5a6;">
                             If you believe this is an error, please contact us:<br>
-                            <a href="mailto:cs@myhibachichef.com" style="color: #e74c3c;">cs@myhibachichef.com</a> | 
+                            <a href="mailto:cs@myhibachichef.com" style="color: #e74c3c;">cs@myhibachichef.com</a> |
                             <a href="tel:+19167408768" style="color: #e74c3c;">(916) 740-8768</a>
                         </p>
                         <a href="https://myhibachichef.com" class="button">Visit Our Website</a>
@@ -501,7 +491,7 @@ async def public_unsubscribe_email(
                 """,
                 status_code=404,
             )
-    
+
     except Exception as e:
         logger.exception(
             f"Error processing unsubscribe request: {e}",
@@ -516,14 +506,14 @@ async def public_unsubscribe_email(
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Error - My Hibachi Chef</title>
                 <style>
-                    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
+                    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
                            background: #f5f5f5; padding: 40px 20px; text-align: center; }
-                    .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; 
+                    .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px;
                                 border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
                     .error { color: #e74c3c; font-size: 48px; margin-bottom: 20px; }
                     h1 { color: #2c3e50; margin-bottom: 20px; }
                     p { color: #7f8c8d; line-height: 1.6; margin-bottom: 20px; }
-                    .button { display: inline-block; background: #e74c3c; color: white; padding: 12px 30px; 
+                    .button { display: inline-block; background: #e74c3c; color: white; padding: 12px 30px;
                              text-decoration: none; border-radius: 5px; font-weight: 600; margin-top: 20px; }
                     .button:hover { background: #c0392b; }
                 </style>
@@ -590,12 +580,7 @@ async def list_campaigns(
     if channel:
         query = query.where(Campaign.channel == channel)
 
-    campaigns = (
-        query.order_by(desc(Campaign.created_at))
-        .offset(offset)
-        .limit(limit)
-        .all()
-    )
+    campaigns = query.order_by(desc(Campaign.created_at)).offset(offset).limit(limit).all()
 
     return campaigns
 
@@ -605,14 +590,10 @@ async def get_campaign(campaign_id: UUID, db: AsyncSession = Depends(get_db)):
     """Get campaign details."""
 
     campaign = (
-        (await db.execute(select(Campaign).where(Campaign.id == campaign_id)))
-        .scalars()
-        .first()
+        (await db.execute(select(Campaign).where(Campaign.id == campaign_id))).scalars().first()
     )
     if not campaign:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
 
     return campaign
 
@@ -626,14 +607,10 @@ async def update_campaign(
     """Update campaign information."""
 
     campaign = (
-        (await db.execute(select(Campaign).where(Campaign.id == campaign_id)))
-        .scalars()
-        .first()
+        (await db.execute(select(Campaign).where(Campaign.id == campaign_id))).scalars().first()
     )
     if not campaign:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
 
     if campaign.status in [CampaignStatus.SENT, CampaignStatus.SENDING]:
         raise HTTPException(
@@ -658,14 +635,10 @@ async def send_campaign(
     """Send campaign to subscribers."""
 
     campaign = (
-        (await db.execute(select(Campaign).where(Campaign.id == campaign_id)))
-        .scalars()
-        .first()
+        (await db.execute(select(Campaign).where(Campaign.id == campaign_id))).scalars().first()
     )
     if not campaign:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
 
     if campaign.status != CampaignStatus.DRAFT:
         raise HTTPException(
@@ -686,23 +659,15 @@ async def send_campaign(
     return {"success": True, "message": "Campaign scheduled for sending"}
 
 
-@router.get(
-    "/campaigns/{campaign_id}/stats", response_model=CampaignStatsResponse
-)
-async def get_campaign_stats(
-    campaign_id: UUID, db: AsyncSession = Depends(get_db)
-):
+@router.get("/campaigns/{campaign_id}/stats", response_model=CampaignStatsResponse)
+async def get_campaign_stats(campaign_id: UUID, db: AsyncSession = Depends(get_db)):
     """Get campaign performance statistics."""
 
     campaign = (
-        (await db.execute(select(Campaign).where(Campaign.id == campaign_id)))
-        .scalars()
-        .first()
+        (await db.execute(select(Campaign).where(Campaign.id == campaign_id))).scalars().first()
     )
     if not campaign:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
 
     # Count events by type
     stmt = (
@@ -747,19 +712,12 @@ async def get_campaign_events(
 ):
     """Get campaign events."""
 
-    query = select(CampaignEvent).where(
-        CampaignEvent.campaign_id == campaign_id
-    )
+    query = select(CampaignEvent).where(CampaignEvent.campaign_id == campaign_id)
 
     if event_type:
         query = query.where(CampaignEvent.type == event_type)
 
-    events = (
-        query.order_by(desc(CampaignEvent.occurred_at))
-        .offset(offset)
-        .limit(limit)
-        .all()
-    )
+    events = query.order_by(desc(CampaignEvent.occurred_at)).offset(offset).limit(limit).all()
 
     return events
 
@@ -773,9 +731,7 @@ async def generate_campaign_content(
     """Generate AI-powered campaign content."""
 
     social_ai = await get_social_media_ai()
-    content = await social_ai.create_promotional_content(
-        campaign_type, target_audience
-    )
+    content = await social_ai.create_promotional_content(campaign_type, target_audience)
 
     return {
         "generated_content": content,
@@ -786,9 +742,7 @@ async def generate_campaign_content(
 
 # Segmentation endpoints
 @router.get("/segments/preview")
-async def preview_segment(
-    filter_criteria: dict[str, Any], db: AsyncSession = Depends(get_db)
-):
+async def preview_segment(filter_criteria: dict[str, Any], db: AsyncSession = Depends(get_db)):
     """Preview subscribers matching segment criteria."""
 
     query = select(Subscriber).where(Subscriber.subscribed)
@@ -798,14 +752,10 @@ async def preview_segment(
         query = query.where(Subscriber.tags.overlap(filter_criteria["tags"]))
 
     if "engagement_min" in filter_criteria:
-        query = query.where(
-            Subscriber.engagement_score >= filter_criteria["engagement_min"]
-        )
+        query = query.where(Subscriber.engagement_score >= filter_criteria["engagement_min"])
 
     if "engagement_max" in filter_criteria:
-        query = query.where(
-            Subscriber.engagement_score <= filter_criteria["engagement_max"]
-        )
+        query = query.where(Subscriber.engagement_score <= filter_criteria["engagement_max"])
 
     if "last_opened_days" in filter_criteria:
         cutoff_date = datetime.now(timezone.utc) - timedelta(
@@ -820,9 +770,7 @@ async def preview_segment(
     count_stmt = select(func.count()).select_from(Subscriber)
     # Re-apply filters to count_stmt if present
     if "tags" in filter_criteria:
-        count_stmt = count_stmt.where(
-            Subscriber.tags.overlap(filter_criteria["tags"])
-        )
+        count_stmt = count_stmt.where(Subscriber.tags.overlap(filter_criteria["tags"]))
     if "engagement_min" in filter_criteria:
         count_stmt = count_stmt.where(
             Subscriber.engagement_score >= filter_criteria["engagement_min"]
@@ -835,9 +783,7 @@ async def preview_segment(
         cutoff_date = datetime.now(timezone.utc) - timedelta(
             days=filter_criteria["last_opened_days"]
         )
-        count_stmt = count_stmt.where(
-            Subscriber.last_opened_date >= cutoff_date
-        )
+        count_stmt = count_stmt.where(Subscriber.last_opened_date >= cutoff_date)
 
     total_res = await db.execute(count_stmt)
     total_count = int(total_res.scalar_one())
@@ -857,11 +803,7 @@ async def _send_campaign_async(campaign_id: UUID):
     async with get_db_context() as db:
         try:
             campaign = (
-                (
-                    await db.execute(
-                        select(Campaign).where(Campaign.id == campaign_id)
-                    )
-                )
+                (await db.execute(select(Campaign).where(Campaign.id == campaign_id)))
                 .scalars()
                 .first()
             )
@@ -913,10 +855,10 @@ async def _send_campaign_async(campaign_id: UUID):
             from core.config import get_settings
             from services.ringcentral_sms import RingCentralSMSService
             from services.newsletter.sms_service import NewsletterSMSService
-            
+
             settings = get_settings()
             compliance_validator = get_compliance_validator()
-            
+
             # For SMS campaigns (newsletter/marketing)
             if campaign.channel in [CampaignChannel.SMS, CampaignChannel.BOTH]:
                 async with RingCentralSMSService() as ringcentral:
@@ -925,27 +867,30 @@ async def _send_campaign_async(campaign_id: UUID):
                         compliance_validator=compliance_validator,
                         business_phone=settings.ringcentral_from_number,
                     )
-                    
+
                     # Send to SMS subscribers
                     sms_content = campaign.content.get("text", campaign.content.get("html", ""))
-                    
+
                     for subscriber in subscribers:
                         if not subscriber.sms_consent or not subscriber.phone_enc:
                             continue
-                        
+
                         try:
                             from utils.encryption import decrypt_phone
+
                             phone = decrypt_phone(subscriber.phone_enc)
-                            
+
                             # Send SMS with TCPA compliance
                             result = await sms_service.send_campaign_sms(
                                 subscriber_phone=phone,
-                                subscriber_name=subscriber.email.split('@')[0],  # Use email prefix as name
+                                subscriber_name=subscriber.email.split("@")[
+                                    0
+                                ],  # Use email prefix as name
                                 message_content=sms_content,
                                 campaign_id=campaign.id,
                                 include_stop_instructions=True,
                             )
-                            
+
                             # Create sent event
                             event = CampaignEvent(
                                 campaign_id=campaign.id,
@@ -953,7 +898,7 @@ async def _send_campaign_async(campaign_id: UUID):
                                 type=CampaignEventType.SENT,
                             )
                             db.add(event)
-                            
+
                             if result.success:
                                 # Create delivered event
                                 delivery_event = CampaignEvent(
@@ -962,11 +907,11 @@ async def _send_campaign_async(campaign_id: UUID):
                                     type=CampaignEventType.DELIVERED,
                                 )
                                 db.add(delivery_event)
-                                
+
                                 # Update subscriber stats
                                 subscriber.total_sms_sent = (subscriber.total_sms_sent or 0) + 1
                                 subscriber.last_sms_sent_date = datetime.now(timezone.utc)
-                                
+
                                 logger.info(
                                     f"✅ SMS campaign sent: {phone[-4:]}",
                                     extra={
@@ -984,14 +929,14 @@ async def _send_campaign_async(campaign_id: UUID):
                                         "error": result.error,
                                     },
                                 )
-                        
+
                         except Exception as e:
                             logger.exception(
                                 f"Failed to send SMS to subscriber {subscriber.id}: {e}"
                             )
-                    
+
                     await db.commit()
-            
+
             # For EMAIL campaigns (admin/transactional only - NOT newsletters)
             if campaign.channel in [CampaignChannel.EMAIL]:
                 # Email service integration for admin/transactional emails
@@ -1027,7 +972,7 @@ async def get_analytics_dashboard(
     db: AsyncSession = Depends(get_db),
 ):
     """Get comprehensive analytics dashboard overview.
-    
+
     Returns metrics for:
     - Overall unsubscribe rates
     - SMS-specific metrics (primary newsletter channel)
@@ -1035,19 +980,19 @@ async def get_analytics_dashboard(
     - Daily trend data
     - Channel comparison
     - Compliance status
-    
+
     Args:
         days: Number of days to analyze (1-365, default: 30)
         db: Database session
-        
+
     Returns:
         Dictionary with comprehensive dashboard metrics
     """
     from services.newsletter_analytics_service import NewsletterAnalyticsService
-    
+
     service = NewsletterAnalyticsService(db)
     overview = await service.get_dashboard_overview(days=days)
-    
+
     return {
         "success": True,
         "data": overview,
@@ -1060,33 +1005,33 @@ async def get_campaign_analytics(
     db: AsyncSession = Depends(get_db),
 ):
     """Get detailed analytics for a specific campaign.
-    
+
     Returns metrics for:
     - Total sent/delivered/opened/clicked
     - Delivery, open, click, and unsubscribe rates
     - Campaign details (name, channel, status, sent date)
-    
+
     Args:
         campaign_id: Campaign UUID
         db: Database session
-        
+
     Returns:
         Dictionary with campaign performance metrics
-        
+
     Raises:
         HTTPException: 404 if campaign not found
     """
     from services.newsletter_analytics_service import NewsletterAnalyticsService
-    
+
     service = NewsletterAnalyticsService(db)
     analytics = await service.get_campaign_details(campaign_id)
-    
+
     if not analytics:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Campaign {campaign_id} not found",
         )
-    
+
     return {
         "success": True,
         "data": analytics,
@@ -1099,34 +1044,34 @@ async def get_subscriber_analytics(
     db: AsyncSession = Depends(get_db),
 ):
     """Get lifetime analytics for a specific subscriber.
-    
+
     Returns metrics for:
     - Total campaigns received/opened/clicked
     - Engagement rate
     - Subscription status and consent preferences
     - Last interaction date
-    
+
     Args:
         subscriber_id: Subscriber UUID
         db: Database session
-        
+
     Returns:
         Dictionary with subscriber lifetime metrics
-        
+
     Raises:
         HTTPException: 404 if subscriber not found
     """
     from services.newsletter_analytics_service import NewsletterAnalyticsService
-    
+
     service = NewsletterAnalyticsService(db)
     analytics = await service.get_subscriber_analytics(subscriber_id)
-    
+
     if not analytics:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Subscriber {subscriber_id} not found",
         )
-    
+
     return {
         "success": True,
         "data": analytics,
@@ -1140,25 +1085,25 @@ async def get_unsubscribe_trend(
     db: AsyncSession = Depends(get_db),
 ):
     """Get daily unsubscribe trend for the past N days.
-    
+
     Returns daily metrics for:
     - Total sent per day
     - Total unsubscribed per day
     - Daily unsubscribe rate
-    
+
     Args:
         days: Number of days to analyze (1-365, default: 30)
         channel: Optional channel filter (EMAIL, SMS, BOTH)
         db: Database session
-        
+
     Returns:
         List of daily unsubscribe metrics
-        
+
     Raises:
         HTTPException: 400 if invalid channel
     """
     from services.newsletter_analytics_service import NewsletterAnalyticsService
-    
+
     # Validate channel parameter
     channel_enum = None
     if channel:
@@ -1169,13 +1114,13 @@ async def get_unsubscribe_trend(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid channel: {channel}. Must be EMAIL, SMS, or BOTH",
             )
-    
+
     service = NewsletterAnalyticsService(db)
     trend = await service.get_unsubscribe_trend(
         days=days,
         channel=channel_enum,
     )
-    
+
     return {
         "success": True,
         "data": trend,
@@ -1189,35 +1134,35 @@ async def get_compliance_report(
     db: AsyncSession = Depends(get_db),
 ):
     """Get comprehensive compliance report.
-    
+
     Returns compliance metrics for:
     - SMS/TCPA compliance (STOP instructions, unsubscribe rate)
     - Email/CAN-SPAM compliance (List-Unsubscribe headers, unsubscribe rate)
     - Overall health status
     - Actionable recommendations
-    
+
     Args:
         start_date: Start of date range (default: 30 days ago)
         end_date: End of date range (default: now)
         db: Database session
-        
+
     Returns:
         Dictionary with compliance metrics and recommendations
     """
     from services.newsletter_analytics_service import NewsletterAnalyticsService
-    
+
     # Default to last 30 days if not specified
     if not end_date:
         end_date = datetime.now(timezone.utc)
     if not start_date:
         start_date = end_date - timedelta(days=30)
-    
+
     service = NewsletterAnalyticsService(db)
     report = await service.get_compliance_report(
         start_date=start_date,
         end_date=end_date,
     )
-    
+
     return {
         "success": True,
         "data": report,

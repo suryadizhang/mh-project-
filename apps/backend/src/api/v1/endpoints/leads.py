@@ -5,7 +5,8 @@ Admin users get 100-200 requests/minute vs 20 for public
 
 import logging
 
-from api.app.models.lead_newsletter import LeadSource, LeadStatus
+# MIGRATED: Enum imports moved from OLD models.enums.lead_enums to NEW db.models.lead
+from db.models.lead import LeadSource, LeadStatus
 from api.deps import AdminUser, get_current_admin_user
 from core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -25,9 +26,7 @@ class LeadBase(BaseModel):
     first_name: str = Field(..., min_length=1, max_length=50)
     last_name: str = Field(..., min_length=1, max_length=50)
     email: EmailStr | None = None
-    phone: str | None = Field(
-        None, pattern=r"^\+?1?[2-9]\d{2}[2-9]\d{2}\d{4}$"
-    )
+    phone: str | None = Field(None, pattern=r"^\+?1?[2-9]\d{2}[2-9]\d{2}\d{4}$")
     event_date: datetime | None = None
     guest_count: int | None = Field(None, ge=1, le=500)
     event_location: str | None = Field(None, max_length=200)
@@ -47,9 +46,7 @@ class LeadUpdate(BaseModel):
     first_name: str | None = Field(None, min_length=1, max_length=50)
     last_name: str | None = Field(None, min_length=1, max_length=50)
     email: EmailStr | None = None
-    phone: str | None = Field(
-        None, pattern=r"^\+?1?[2-9]\d{2}[2-9]\d{2}\d{4}$"
-    )
+    phone: str | None = Field(None, pattern=r"^\+?1?[2-9]\d{2}[2-9]\d{2}\d{4}$")
     event_date: datetime | None = None
     guest_count: int | None = Field(None, ge=1, le=500)
     event_location: str | None = Field(None, max_length=200)
@@ -158,14 +155,10 @@ mock_leads = [
 async def list_leads(
     page: int = Query(1, ge=1, description="Page number"),
     per_page: int = Query(20, ge=1, le=100, description="Items per page"),
-    search: str | None = Query(
-        None, description="Search by name, email, or phone"
-    ),
+    search: str | None = Query(None, description="Search by name, email, or phone"),
     status: LeadStatus | None = Query(None, description="Filter by status"),
     source: LeadSource | None = Query(None, description="Filter by source"),
-    assigned_to: str | None = Query(
-        None, description="Filter by assigned user"
-    ),
+    assigned_to: str | None = Query(None, description="Filter by assigned user"),
     db: AsyncSession = Depends(get_db),
     current_admin: AdminUser = Depends(get_current_admin_user),
 ):
@@ -191,21 +184,13 @@ async def list_leads(
             ]
 
         if status:
-            filtered_leads = [
-                l for l in filtered_leads if l["status"] == status
-            ]
+            filtered_leads = [l for l in filtered_leads if l["status"] == status]
 
         if source:
-            filtered_leads = [
-                l for l in filtered_leads if l["source"] == source
-            ]
+            filtered_leads = [l for l in filtered_leads if l["source"] == source]
 
         if assigned_to:
-            filtered_leads = [
-                l
-                for l in filtered_leads
-                if l.get("assigned_to") == assigned_to
-            ]
+            filtered_leads = [l for l in filtered_leads if l.get("assigned_to") == assigned_to]
 
         # Apply pagination
         total = len(filtered_leads)
@@ -215,9 +200,7 @@ async def list_leads(
 
         total_pages = (total + per_page - 1) // per_page
 
-        logger.info(
-            f"Admin {current_admin.email} listed leads - page {page}, found {total} total"
-        )
+        logger.info(f"Admin {current_admin.email} listed leads - page {page}, found {total} total")
 
         return LeadSearchResponse(
             leads=[LeadResponse(**l) for l in leads_page],
@@ -317,9 +300,7 @@ async def get_lead(
         )
 
 
-@router.post(
-    "/", response_model=LeadResponse, status_code=status.HTTP_201_CREATED
-)
+@router.post("/", response_model=LeadResponse, status_code=status.HTTP_201_CREATED)
 async def create_lead(
     lead: LeadCreate,
     db: AsyncSession = Depends(get_db),
@@ -370,9 +351,7 @@ async def update_lead(
     """
     try:
         # Find and update lead in mock data
-        lead_idx = next(
-            (i for i, l in enumerate(mock_leads) if l["id"] == lead_id), None
-        )
+        lead_idx = next((i for i, l in enumerate(mock_leads) if l["id"] == lead_id), None)
 
         if lead_idx is None:
             raise HTTPException(
@@ -426,9 +405,7 @@ async def delete_lead(
     """
     try:
         # Find and remove lead from mock data
-        lead_idx = next(
-            (i for i, l in enumerate(mock_leads) if l["id"] == lead_id), None
-        )
+        lead_idx = next((i for i, l in enumerate(mock_leads) if l["id"] == lead_id), None)
 
         if lead_idx is None:
             raise HTTPException(
@@ -463,9 +440,7 @@ async def assign_lead(
     """
     try:
         # Find lead in mock data
-        lead_idx = next(
-            (i for i, l in enumerate(mock_leads) if l["id"] == lead_id), None
-        )
+        lead_idx = next((i for i, l in enumerate(mock_leads) if l["id"] == lead_id), None)
 
         if lead_idx is None:
             raise HTTPException(
@@ -477,9 +452,7 @@ async def assign_lead(
         mock_leads[lead_idx]["assigned_to"] = assigned_to
         mock_leads[lead_idx]["updated_at"] = datetime.now(timezone.utc)
 
-        logger.info(
-            f"Admin {current_admin.email} assigned lead {lead_id} to {assigned_to}"
-        )
+        logger.info(f"Admin {current_admin.email} assigned lead {lead_id} to {assigned_to}")
 
         return {"message": f"Lead {lead_id} assigned to {assigned_to}"}
 

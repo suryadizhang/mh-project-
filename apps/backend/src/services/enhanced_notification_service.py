@@ -9,7 +9,9 @@ import logging
 from typing import Any
 from uuid import UUID
 
-from models.enums import NotificationEventType
+# MIGRATED: Enum imports moved from models.enums to NEW db.models system
+# TODO: Manual migration needed for enums: NotificationEventType
+# from models.enums import NotificationEventType
 from services.notification_group_service import NotificationGroupService
 from services.unified_notification_service import UnifiedNotificationService
 from sqlalchemy.ext.asyncio import AsyncSession

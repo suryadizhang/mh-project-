@@ -4,7 +4,8 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from models.enums import (
+# MIGRATED: Enum imports moved from models.enums to NEW db.models system
+from db.models.core import (
     MessageDirection,
     MessageKind,
     ReviewStatus,

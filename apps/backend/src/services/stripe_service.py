@@ -65,7 +65,9 @@ import stripe
 
 settings = get_settings()
 from db.models.core import Customer
-from models.booking import Payment
+
+# MIGRATED: from models.booking → db.models.core
+from db.models.core import Payment
 from schemas.stripe_schemas import PaymentAnalytics
 
 logger = logging.getLogger(__name__)
@@ -437,8 +439,8 @@ class StripeService:
                     total_count += 1
 
                     # Get payment method from charge
-                    if hasattr(txn, 'source') and txn.source:
-                        method = txn.source.get('brand', 'unknown')
+                    if hasattr(txn, "source") and txn.source:
+                        method = txn.source.get("brand", "unknown")
                         payment_methods[method] = payment_methods.get(method, 0) + 1
 
             avg_payment = total_amount / total_count if total_count > 0 else Decimal(0)
@@ -464,7 +466,6 @@ class StripeService:
         station_id: str | None = None,
     ) -> PaymentAnalytics:
         """Fallback analytics using local database (if Stripe API unavailable)."""
-        from collections import defaultdict
 
         query = select(Payment).filter(
             Payment.created_at >= start_date,
@@ -487,4 +488,3 @@ class StripeService:
             payment_methods={},
             monthly_revenue=[],
         )
-

@@ -10,16 +10,18 @@ Used by: workers/recording_tasks.py (link_recording_entities)
 
 import logging
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from typing import Optional
 from uuid import UUID
 
 import phonenumbers
-from sqlalchemy import and_, select, or_, func
+from sqlalchemy import and_, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.models.core import Booking, BookingStatus, Customer
-from models.call_recording import CallRecording
+
+# MIGRATED: from models.call_recording → db.models.call_recording
+from db.models.call_recording import CallRecording
 
 logger = logging.getLogger(__name__)
 
@@ -53,28 +55,24 @@ class RecordingLinkingService:
         try:
             parsed = phonenumbers.parse(phone, default_region)
             if phonenumbers.is_valid_number(parsed):
-                return phonenumbers.format_number(
-                    parsed, phonenumbers.PhoneNumberFormat.E164
-                )
+                return phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
         except phonenumbers.NumberParseException:
             pass
 
         # Fallback: strip non-digits, add +1 for US numbers
-        digits = re.sub(r'\D', '', phone)
+        digits = re.sub(r"\D", "", phone)
         if len(digits) == 7:  # US local number (no area code)
             logger.warning(f"Phone has no area code, cannot normalize: {phone}")
             return None
         elif len(digits) == 10:  # US number without country code
             return f"+1{digits}"
-        elif len(digits) == 11 and digits.startswith('1'):  # US with country code
+        elif len(digits) == 11 and digits.startswith("1"):  # US with country code
             return f"+{digits}"
         else:
             logger.warning(f"Could not normalize phone: {phone}")
             return None
 
-    async def link_customer_by_phone(
-        self, recording: CallRecording
-    ) -> Optional[UUID]:
+    async def link_customer_by_phone(self, recording: CallRecording) -> Optional[UUID]:
         """
         Match recording to customer by phone number.
 
@@ -167,23 +165,29 @@ class RecordingLinkingService:
         time_window_end = call_time + timedelta(hours=24)
 
         # Query bookings for this customer near the call time
-        stmt = select(Booking).where(
-            and_(
-                Booking.customer_id == customer_id,
-                Booking.booking_datetime >= time_window_start,
-                Booking.booking_datetime <= time_window_end,
-                Booking.status.in_([
-                    BookingStatus.PENDING,
-                    BookingStatus.CONFIRMED,
-                    BookingStatus.SEATED,
-                    BookingStatus.COMPLETED,
-                ])
+        stmt = (
+            select(Booking)
+            .where(
+                and_(
+                    Booking.customer_id == customer_id,
+                    Booking.booking_datetime >= time_window_start,
+                    Booking.booking_datetime <= time_window_end,
+                    Booking.status.in_(
+                        [
+                            BookingStatus.PENDING,
+                            BookingStatus.CONFIRMED,
+                            BookingStatus.SEATED,
+                            BookingStatus.COMPLETED,
+                        ]
+                    ),
+                )
             )
-        ).order_by(
-            # Order by closest booking time
-            func.abs(
-                func.extract('epoch', Booking.booking_datetime) -
-                func.extract('epoch', call_time)
+            .order_by(
+                # Order by closest booking time
+                func.abs(
+                    func.extract("epoch", Booking.booking_datetime)
+                    - func.extract("epoch", call_time)
+                )
             )
         )
 
@@ -202,9 +206,7 @@ class RecordingLinkingService:
         best_score = 0
 
         for booking in bookings:
-            score = self._calculate_booking_relevance_score(
-                booking, call_time, recording
-            )
+            score = self._calculate_booking_relevance_score(booking, call_time, recording)
             if score > best_score:
                 best_score = score
                 best_booking = booking
@@ -267,8 +269,7 @@ class RecordingLinkingService:
             normalized_to = self.normalize_phone(recording.to_phone)
 
             if normalized_contact and (
-                normalized_contact == normalized_from or
-                normalized_contact == normalized_to
+                normalized_contact == normalized_from or normalized_contact == normalized_to
             ):
                 score += 10
 
@@ -340,9 +341,7 @@ class RecordingLinkingService:
 
             # Link booking (only if customer found)
             if recording.customer_id and not recording.booking_id:
-                booking_id = await self.link_booking_by_context(
-                    recording, recording.customer_id
-                )
+                booking_id = await self.link_booking_by_context(recording, recording.customer_id)
                 if booking_id:
                     recording.booking_id = booking_id
                     result["booking_linked"] = True
@@ -364,9 +363,7 @@ class RecordingLinkingService:
 
         return result
 
-    async def bulk_link_recordings(
-        self, recording_ids: list[UUID], batch_size: int = 50
-    ) -> dict:
+    async def bulk_link_recordings(self, recording_ids: list[UUID], batch_size: int = 50) -> dict:
         """
         Link multiple recordings in batch (for backfilling).
 
@@ -385,7 +382,7 @@ class RecordingLinkingService:
         logger.info(f"Starting bulk link for {total} recordings")
 
         for i in range(0, total, batch_size):
-            batch = recording_ids[i:i+batch_size]
+            batch = recording_ids[i : i + batch_size]
             logger.info(f"Processing batch {i//batch_size + 1} ({len(batch)} recordings)")
 
             for recording_id in batch:

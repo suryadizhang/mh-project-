@@ -24,14 +24,11 @@ Fix Validation:
 """
 
 import pytest
-from datetime import datetime, date, time as datetime_time, timedelta, timezone
+from datetime import date, time as datetime_time
 from sqlalchemy.exc import IntegrityError
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import threading
-import time
+import asyncio
 
-from models.booking import Booking, BookingStatus
-from models.customer import Customer
+from db.models.core import Booking, BookingStatus, Customer
 from repositories.booking_repository import BookingRepository
 from services.booking_service import BookingService
 from schemas.booking import BookingCreate
@@ -49,7 +46,6 @@ class TestRaceConditionFix:
         ✅ Station model updated in Option C Phase 2
         ✅ Customer model updated in Option C Phase 2
         """
-        from db.models.core import Customer
         from db.models.identity import Station
         import uuid
 
@@ -67,7 +63,7 @@ class TestRaceConditionFix:
             postal_code="90001",  # ✅ Correct field name
             country="US",
             timezone="America/Los_Angeles",
-            status="active"
+            status="active",
         )
         db_session.add(station)
         await db_session.commit()
@@ -83,7 +79,7 @@ class TestRaceConditionFix:
             phone="+1234567890",  # ✅ Uses @property setter
             consent_sms=True,  # ✅ Correct field name
             consent_email=True,  # ✅ Correct field name
-            timezone="America/New_York"  # ✅ Required field
+            timezone="America/New_York",  # ✅ Required field
         )
         db_session.add(customer)
         await db_session.commit()
@@ -108,7 +104,9 @@ class TestRaceConditionFix:
             special_requests="Test booking for race condition",
         )
 
-    async def test_unique_constraint_prevents_double_booking(self, db_session, customer, booking_date_and_slot):
+    async def test_unique_constraint_prevents_double_booking(
+        self, db_session, customer, booking_date_and_slot
+    ):
         """
         Test that database-level unique constraint prevents double bookings.
 
@@ -175,6 +173,8 @@ class TestRaceConditionFix:
         - Layer 2: Optimistic locking prevents conflicts
         - Layer 3: SELECT FOR UPDATE queues requests
         """
+        import asyncio
+
         booking_date, booking_slot = booking_date_and_slot
         repository = BookingRepository(db_session)
         service = BookingService(repository=repository)
@@ -182,37 +182,26 @@ class TestRaceConditionFix:
         success_count = 0
         conflict_count = 0
         results = []
-        lock = threading.Lock()
 
-        def create_booking_thread(thread_id):
-            """Thread function to create booking"""
+        async def create_booking_task(task_id):
+            """Async task function to create booking"""
             nonlocal success_count, conflict_count
             try:
-                booking = service.create_booking(booking_data)
-                with lock:
-                    success_count += 1
-                    results.append(("success", thread_id, booking.id))
+                booking = await service.create_booking(booking_data)
+                success_count += 1
+                results.append(("success", task_id, booking.id))
                 return booking
             except ConflictException as e:
-                with lock:
-                    conflict_count += 1
-                    results.append(("conflict", thread_id, str(e.message)))
+                conflict_count += 1
+                results.append(("conflict", task_id, str(e.message)))
                 return None
             except Exception as e:
-                with lock:
-                    results.append(("error", thread_id, str(e)))
+                results.append(("error", task_id, str(e)))
                 raise
 
-        # Launch 5 concurrent threads all trying to book same date/slot
-        with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [
-                executor.submit(create_booking_thread, i)
-                for i in range(5)
-            ]
-
-            # Wait for all threads to complete
-            for future in as_completed(futures):
-                future.result()  # Raises exception if thread failed
+        # Launch 5 concurrent async tasks all trying to book same date/slot
+        tasks = [create_booking_task(i) for i in range(5)]
+        await asyncio.gather(*tasks, return_exceptions=True)
 
         # Assertions
         assert success_count == 1, f"Expected exactly 1 success, got {success_count}"
@@ -220,15 +209,13 @@ class TestRaceConditionFix:
 
         # Verify only one booking exists in database
         bookings = await repository.find_by_date_range(
-            start_date=booking_date,
-            end_date=booking_date,
-            include_cancelled=True
+            start_date=booking_date, end_date=booking_date, include_cancelled=True
         )
         assert len(bookings) == 1, f"Expected 1 booking in DB, found {len(bookings)}"
 
         print(f"✅ Race condition test passed: {success_count} success, {conflict_count} conflicts")
-        for result_type, thread_id, info in results:
-            print(f"  Thread {thread_id}: {result_type} - {info}")
+        for result_type, task_id, info in results:
+            print(f"  Task {task_id}: {result_type} - {info}")
 
     async def test_select_for_update_row_locking(self, db_session, customer, booking_date_and_slot):
         """
@@ -270,7 +257,9 @@ class TestRaceConditionFix:
 
         await db_session.rollback()  # Release lock
 
-    async def test_optimistic_locking_prevents_concurrent_updates(self, db_session, customer, booking_date_and_slot):
+    async def test_optimistic_locking_prevents_concurrent_updates(
+        self, db_session, customer, booking_date_and_slot
+    ):
         """
         Test that version column prevents lost updates in concurrent modifications.
 
@@ -324,7 +313,9 @@ class TestRaceConditionFix:
         assert final_booking.version == initial_version + 1
         assert final_booking.status == BookingStatus.CONFIRMED
 
-    async def test_integrity_error_handling_and_user_message(self, db_session, customer, booking_date_and_slot, booking_data):
+    async def test_integrity_error_handling_and_user_message(
+        self, db_session, customer, booking_date_and_slot, booking_data
+    ):
         """
         Test that IntegrityError is caught and converted to user-friendly ConflictException.
 
@@ -343,12 +334,16 @@ class TestRaceConditionFix:
 
         # Verify error message is user-friendly (not technical IntegrityError)
         error_message = str(exc_info.value.message)
-        assert "was just booked by another customer" in error_message.lower() or \
-               "not available" in error_message.lower()
+        assert (
+            "was just booked by another customer" in error_message.lower()
+            or "not available" in error_message.lower()
+        )
         assert "IntegrityError" not in error_message  # No technical jargon
         assert "constraint" not in error_message.lower()
 
-    async def test_cancelled_bookings_dont_block_new_bookings(self, db_session, customer, booking_date_and_slot, booking_data):
+    async def test_cancelled_bookings_dont_block_new_bookings(
+        self, db_session, customer, booking_date_and_slot, booking_data
+    ):
         """
         Test that cancelled bookings don't prevent new bookings (unique constraint only covers active statuses).
 
@@ -361,8 +356,7 @@ class TestRaceConditionFix:
         # Create and cancel first booking
         booking1 = await service.create_booking(booking_data)
         cancelled_booking = await repository.cancel_booking(
-            booking_id=booking1.id,
-            cancellation_reason="Test cancellation"
+            booking_id=booking1.id, cancellation_reason="Test cancellation"
         )
         assert cancelled_booking.status == BookingStatus.CANCELLED
 
@@ -373,16 +367,16 @@ class TestRaceConditionFix:
 
         # Verify two bookings exist but only one is active
         all_bookings = await repository.find_by_date_range(
-            start_date=booking_date,
-            end_date=booking_date,
-            include_cancelled=True
+            start_date=booking_date, end_date=booking_date, include_cancelled=True
         )
         assert len(all_bookings) == 2
 
         active_bookings = [b for b in all_bookings if b.status != BookingStatus.CANCELLED]
         assert len(active_bookings) == 1
 
-    async def test_high_concurrency_stress_test(self, db_session, customer, booking_date_and_slot, booking_data):
+    async def test_high_concurrency_stress_test(
+        self, db_session, customer, booking_date_and_slot, booking_data
+    ):
         """
         Stress test with 20 concurrent booking attempts.
 
@@ -394,49 +388,45 @@ class TestRaceConditionFix:
         success_count = 0
         conflict_count = 0
         error_count = 0
-        lock = threading.Lock()
 
-        def create_booking_thread(thread_id):
+        async def create_booking_task(task_id):
             nonlocal success_count, conflict_count, error_count
             try:
                 # Add small random delay to increase race condition likelihood
-                time.sleep(0.001 * (thread_id % 5))  # 0-4ms delay
+                await asyncio.sleep(0.001 * (task_id % 5))  # 0-4ms delay
 
-                booking = service.create_booking(booking_data)
-                with lock:
-                    success_count += 1
+                booking = await service.create_booking(booking_data)
+                success_count += 1
                 return booking
             except ConflictException:
-                with lock:
-                    conflict_count += 1
+                conflict_count += 1
                 return None
             except Exception as e:
-                with lock:
-                    error_count += 1
-                print(f"❌ Thread {thread_id} unexpected error: {e}")
+                error_count += 1
+                print(f"❌ Task {task_id} unexpected error: {e}")
                 raise
 
-        # Launch 20 concurrent threads
-        with ThreadPoolExecutor(max_workers=20) as executor:
-            futures = [
-                executor.submit(create_booking_thread, i)
-                for i in range(20)
-            ]
+        # Launch 20 concurrent async tasks
+        tasks = [create_booking_task(i) for i in range(20)]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
 
-            for future in as_completed(futures):
-                try:
-                    future.result()
-                except Exception as e:
-                    print(f"Thread failed: {e}")
+        # Check for unexpected exceptions
+        for i, result in enumerate(results):
+            if isinstance(result, Exception) and not isinstance(result, ConflictException):
+                print(f"Task {i} failed: {result}")
 
         # Assertions
         assert success_count == 1, f"Expected 1 success, got {success_count}"
         assert conflict_count == 19, f"Expected 19 conflicts, got {conflict_count}"
         assert error_count == 0, f"Expected 0 errors, got {error_count}"
 
-        print(f"✅ Stress test passed: {success_count} success, {conflict_count} conflicts, {error_count} errors")
+        print(
+            f"✅ Stress test passed: {success_count} success, {conflict_count} conflicts, {error_count} errors"
+        )
 
-    async def test_race_condition_with_different_party_sizes(self, db_session, customer, booking_date_and_slot):
+    async def test_race_condition_with_different_party_sizes(
+        self, db_session, customer, booking_date_and_slot
+    ):
         """
         Test race condition with different party sizes (edge case).
 

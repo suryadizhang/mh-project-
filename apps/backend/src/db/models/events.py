@@ -19,10 +19,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID, uuid4
 
-from sqlalchemy import (
-    Column, String, Text, Integer, Boolean, DateTime,
-    Index, Enum as SQLEnum
-)
+from sqlalchemy import String, Text, Integer, Boolean, DateTime, Index, Enum as SQLEnum
 from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
@@ -34,8 +31,10 @@ from ..base_class import Base
 
 import enum
 
+
 class OutboxStatus(str, enum.Enum):
     """Outbox message status"""
+
     PENDING = "pending"
     PROCESSING = "processing"
     SENT = "sent"
@@ -45,6 +44,7 @@ class OutboxStatus(str, enum.Enum):
 
 # ==================== MODELS ====================
 
+
 class DomainEvent(Base):
     """
     Domain event entity
@@ -52,13 +52,14 @@ class DomainEvent(Base):
     Immutable event log for event sourcing pattern.
     Records all significant domain events for audit and replay.
     """
+
     __tablename__ = "domain_events"
     __table_args__ = (
         Index("idx_domain_events_aggregate_id", "aggregate_id"),
         Index("idx_domain_events_event_type", "event_type"),
         Index("idx_domain_events_occurred_at", "occurred_at"),
         Index("idx_domain_events_aggregate_type_id", "aggregate_type", "aggregate_id"),
-        {"schema": "events"}
+        {"schema": "events", "extend_existing": True},
     )
 
     # Primary Key
@@ -69,7 +70,9 @@ class DomainEvent(Base):
     event_version: Mapped[str] = mapped_column(String(20), nullable=False, default="1.0")
 
     # Aggregate Reference
-    aggregate_type: Mapped[str] = mapped_column(String(100), nullable=False)  # e.g., "Booking", "Customer"
+    aggregate_type: Mapped[str] = mapped_column(
+        String(100), nullable=False
+    )  # e.g., "Booking", "Customer"
     aggregate_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     aggregate_version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
 
@@ -80,18 +83,19 @@ class DomainEvent(Base):
     event_metadata: Mapped[dict] = mapped_column("metadata", JSONB, nullable=False, default=dict)
 
     # Causation & Correlation (for event chains)
-    causation_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)  # Event that caused this
-    correlation_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)  # Request/session ID
+    causation_id: Mapped[Optional[str]] = mapped_column(
+        String(255), nullable=True
+    )  # Event that caused this
+    correlation_id: Mapped[Optional[str]] = mapped_column(
+        String(255), nullable=True
+    )  # Request/session ID
 
     # Actor (who triggered the event)
     user_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
     # Timestamp (immutable)
     occurred_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        index=True
+        DateTime(timezone=True), nullable=False, server_default=func.now(), index=True
     )
 
 
@@ -102,13 +106,14 @@ class Inbox(Base):
     Inbound events from external systems (webhooks, integrations).
     Ensures exactly-once processing with idempotency.
     """
+
     __tablename__ = "inbox"
     __table_args__ = (
         Index("idx_inbox_message_id", "message_id"),
         Index("idx_inbox_source", "source"),
         Index("idx_inbox_processed", "is_processed"),
         Index("idx_inbox_received_at", "received_at"),
-        {"schema": "events"}
+        {"schema": "events", "extend_existing": True},
     )
 
     # Primary Key
@@ -118,7 +123,9 @@ class Inbox(Base):
     message_id: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
 
     # Source
-    source: Mapped[str] = mapped_column(String(100), nullable=False, index=True)  # e.g., "stripe", "ringcentral"
+    source: Mapped[str] = mapped_column(
+        String(100), nullable=False, index=True
+    )  # e.g., "stripe", "ringcentral"
     source_type: Mapped[str] = mapped_column(String(100), nullable=False)  # e.g., "webhook", "api"
 
     # Message Details
@@ -139,10 +146,7 @@ class Inbox(Base):
 
     # Timestamps
     received_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        index=True
+        DateTime(timezone=True), nullable=False, server_default=func.now(), index=True
     )
 
 
@@ -153,6 +157,7 @@ class Outbox(Base):
     Outbound events to external systems (webhooks, notifications).
     Ensures reliable delivery with retry logic.
     """
+
     __tablename__ = "outbox"
     __table_args__ = (
         Index("idx_outbox_aggregate_id", "aggregate_id"),
@@ -160,19 +165,23 @@ class Outbox(Base):
         Index("idx_outbox_destination", "destination"),
         Index("idx_outbox_scheduled_at", "scheduled_at"),
         Index("idx_outbox_created_at", "created_at"),
-        {"schema": "events"}
+        {"schema": "events", "extend_existing": True},
     )
 
     # Primary Key
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Event Reference
-    event_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)  # Reference to domain_events.id
+    event_id: Mapped[Optional[str]] = mapped_column(
+        String(255), nullable=True
+    )  # Reference to domain_events.id
     aggregate_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     event_type: Mapped[str] = mapped_column(String(255), nullable=False)
 
     # Destination
-    destination: Mapped[str] = mapped_column(String(100), nullable=False, index=True)  # e.g., "webhook", "email", "sms"
+    destination: Mapped[str] = mapped_column(
+        String(100), nullable=False, index=True
+    )  # e.g., "webhook", "email", "sms"
     destination_url: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
 
     # Payload
@@ -184,20 +193,19 @@ class Outbox(Base):
         SQLEnum(OutboxStatus, name="outbox_status", schema="public", create_type=False),
         nullable=False,
         server_default="pending",
-        index=True
+        index=True,
     )
 
     # Retry Logic
     retry_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     max_retries: Mapped[int] = mapped_column(Integer, nullable=False, default=3)
-    next_retry_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    next_retry_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # Scheduling
     scheduled_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        index=True
+        DateTime(timezone=True), nullable=False, server_default=func.now(), index=True
     )
 
     # Processing
@@ -210,14 +218,8 @@ class Outbox(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        index=True
+        DateTime(timezone=True), nullable=False, server_default=func.now(), index=True
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )

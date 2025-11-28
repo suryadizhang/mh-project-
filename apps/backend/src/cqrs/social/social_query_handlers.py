@@ -10,8 +10,12 @@ from cqrs.social.social_queries import (  # Phase 2C: Updated from api.app.cqrs.
     GetThreadDetailQuery,
     GetUnreadCountsQuery,
 )
-from models.legacy_core import CoreCustomer  # Phase 2C: Updated from api.app.models.core
-from models.legacy_social import (  # Phase 2C: Updated from api.app.models.social
+
+# MIGRATED: from models.legacy_core → db.models.legacy_core
+from db.models.legacy_core import CoreCustomer  # Phase 2C: Updated from api.app.models.core
+
+# MIGRATED: from models.legacy_social → db.models.legacy_social
+from db.models.legacy_social import (  # Phase 2C: Updated from api.app.models.social
     Review,
     SocialAccount,
     SocialMessage,

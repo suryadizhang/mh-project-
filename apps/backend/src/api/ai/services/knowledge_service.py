@@ -20,7 +20,8 @@ from cachetools import TTLCache
 import logging
 import time
 
-from models.knowledge_base import (
+# MIGRATED: from models.knowledge_base → db.models.knowledge_base
+from db.models.knowledge_base import (
     BusinessRule,
     FAQItem,
     TrainingData,
@@ -133,7 +134,8 @@ class KnowledgeService:
             "party_minimum": 550,
             "travel_fee_free_miles": travel_fee_free_miles,
             "travel_fee_per_mile": travel_fee_per_mile,
-            "travel_fee_origin": "Fremont, CA 94539",
+            "travel_fee_origin": self.pricing_service._station_address
+            or "our location",  # Dynamic from database/env (NOT hardcoded)
         }
 
     async def _get_active_policies(self) -> List[Dict]:

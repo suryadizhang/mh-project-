@@ -8,7 +8,8 @@ from enum import Enum
 from typing import Any
 from uuid import uuid4
 
-from models.base import Base
+# MIGRATED: from models.base → db.base_class (4 levels up from api/v1/inbox)
+from db.base_class import Base
 from sqlalchemy import (
     JSON,
     Boolean,
@@ -172,7 +173,9 @@ class Thread(Base):
     last_message_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships (temporarily commented booking for Bug #13 schema fixes)
-    messages = relationship("InboxMessage", back_populates="thread", order_by="InboxMessage.created_at")
+    messages = relationship(
+        "InboxMessage", back_populates="thread", order_by="InboxMessage.created_at"
+    )
     contact = relationship("models.contact.Contact", back_populates="threads", lazy="select")
     # booking = relationship("models.booking.Booking", back_populates="message_threads")
 

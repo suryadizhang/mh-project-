@@ -22,11 +22,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
 
 from core.base_service import BaseService, EventTrackingMixin
-from models.enums.lead_enums import LeadSource
-from models.enums.social_enums import ThreadStatus
-from models.social import SocialThread
+
+# MIGRATED: Enum imports moved from OLD models.enums to NEW db.models system
+from db.models.lead import LeadSource
+from db.models.core import (
+    SocialThreadStatus as ThreadStatus,
+    SocialThread,
+)  # ✅ SocialThread is in core, not lead
 from services.lead_service import LeadService
 from services.event_service import EventService
+
 # TODO: Legacy lead/newsletter models not migrated yet - needs refactor
 
 
@@ -227,11 +232,7 @@ class MetaWebhookHandler(BaseWebhookHandler):
             return False
 
         # Calculate expected signature
-        expected = "sha256=" + hmac.new(
-            secret.encode(),
-            payload,
-            hashlib.sha256
-        ).hexdigest()
+        expected = "sha256=" + hmac.new(secret.encode(), payload, hashlib.sha256).hexdigest()
 
         # Constant-time comparison to prevent timing attacks
         return hmac.compare_digest(signature, expected)
@@ -399,7 +400,7 @@ class MetaWebhookHandler(BaseWebhookHandler):
 
         self.logger.info(
             f"Processed Instagram message from {sender_username}",
-            extra={"lead_id": lead.id, "message_id": message_id}
+            extra={"lead_id": lead.id, "message_id": message_id},
         )
 
     async def _process_facebook_message(self, event: Dict[str, Any]) -> None:
@@ -434,10 +435,7 @@ class MetaWebhookHandler(BaseWebhookHandler):
             context=context,
         )
 
-        self.logger.info(
-            f"Processed Facebook message from {sender_id}",
-            extra={"lead_id": lead.id}
-        )
+        self.logger.info(f"Processed Facebook message from {sender_id}", extra={"lead_id": lead.id})
 
     async def _process_leadgen_form(self, value: Dict[str, Any]) -> None:
         """
@@ -468,6 +466,5 @@ class MetaWebhookHandler(BaseWebhookHandler):
         )
 
         self.logger.info(
-            f"Processed leadgen form submission",
-            extra={"lead_id": lead.id, "form_id": form_id}
+            "Processed leadgen form submission", extra={"lead_id": lead.id, "form_id": form_id}
         )

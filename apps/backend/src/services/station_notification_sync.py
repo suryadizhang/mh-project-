@@ -8,7 +8,8 @@ Integrates with station CRUD operations to keep notification groups in sync.
 import logging
 from uuid import UUID, uuid4
 
-from models.notification import (
+# MIGRATED: from models.notification → db.models.notification
+from db.models.notification import (
     NotificationGroup,
     NotificationGroupEvent,
 )

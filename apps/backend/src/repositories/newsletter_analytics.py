@@ -4,10 +4,14 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import UUID
 
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from models import Campaign, CampaignEvent, Subscriber
-from models.enums import CampaignChannel, CampaignEventType, CampaignStatus
+
+# MIGRATED: Imports moved from OLD models to NEW db.models system
+from db.models.newsletter import Campaign, CampaignEvent, Subscriber
+
+# MIGRATED: Enum imports moved from models.enums to NEW db.models system
+from db.models.newsletter import CampaignChannel, CampaignEventType
 
 
 class NewsletterAnalyticsRepository:
@@ -15,7 +19,7 @@ class NewsletterAnalyticsRepository:
 
     def __init__(self, db: AsyncSession):
         """Initialize repository with database session.
-        
+
         Args:
             db: SQLAlchemy async database session
         """
@@ -28,12 +32,12 @@ class NewsletterAnalyticsRepository:
         channel: Optional[CampaignChannel] = None,
     ) -> dict:
         """Get unsubscribe rate for a time period.
-        
+
         Args:
             start_date: Start of date range
             end_date: End of date range
             channel: Optional channel filter (EMAIL, SMS, BOTH)
-            
+
         Returns:
             Dictionary with unsubscribe metrics:
             {
@@ -57,7 +61,7 @@ class NewsletterAnalyticsRepository:
                 )
             )
         )
-        
+
         # Get total unsubscribes in period
         unsub_query = (
             select(func.count(CampaignEvent.id))
@@ -70,21 +74,19 @@ class NewsletterAnalyticsRepository:
                 )
             )
         )
-        
+
         # Apply channel filter if specified
         if channel:
             sent_query = sent_query.where(Campaign.channel == channel)
             unsub_query = unsub_query.where(Campaign.channel == channel)
-        
+
         # Execute queries
         total_sent = (await self.db.execute(sent_query)).scalar() or 0
         total_unsubscribed = (await self.db.execute(unsub_query)).scalar() or 0
-        
+
         # Calculate rate
-        unsubscribe_rate = (
-            (total_unsubscribed / total_sent * 100) if total_sent > 0 else 0.0
-        )
-        
+        unsubscribe_rate = (total_unsubscribed / total_sent * 100) if total_sent > 0 else 0.0
+
         return {
             "total_sent": total_sent,
             "total_unsubscribed": total_unsubscribed,
@@ -99,10 +101,10 @@ class NewsletterAnalyticsRepository:
         campaign_id: UUID,
     ) -> dict:
         """Get detailed performance metrics for a specific campaign.
-        
+
         Args:
             campaign_id: Campaign UUID
-            
+
         Returns:
             Dictionary with campaign metrics:
             {
@@ -120,14 +122,14 @@ class NewsletterAnalyticsRepository:
         """
         # Get campaign details
         campaign = (
-            await self.db.execute(
-                select(Campaign).where(Campaign.id == campaign_id)
-            )
-        ).scalars().first()
-        
+            (await self.db.execute(select(Campaign).where(Campaign.id == campaign_id)))
+            .scalars()
+            .first()
+        )
+
         if not campaign:
             return {}
-        
+
         # Count events by type
         event_counts = (
             await self.db.execute(
@@ -139,7 +141,7 @@ class NewsletterAnalyticsRepository:
                 .group_by(CampaignEvent.type)
             )
         ).all()
-        
+
         # Build metrics dictionary
         metrics = {
             CampaignEventType.SENT: 0,
@@ -148,12 +150,12 @@ class NewsletterAnalyticsRepository:
             CampaignEventType.CLICKED: 0,
             CampaignEventType.UNSUBSCRIBED: 0,
         }
-        
+
         for event_type, count in event_counts:
             metrics[event_type] = count
-        
+
         total_sent = metrics[CampaignEventType.SENT]
-        
+
         return {
             "campaign_id": str(campaign_id),
             "campaign_name": campaign.name,
@@ -166,27 +168,39 @@ class NewsletterAnalyticsRepository:
             "total_clicked": metrics[CampaignEventType.CLICKED],
             "total_unsubscribed": metrics[CampaignEventType.UNSUBSCRIBED],
             "delivery_rate": round(
-                (metrics[CampaignEventType.DELIVERED] / total_sent * 100)
-                if total_sent > 0
-                else 0.0,
+                (
+                    (metrics[CampaignEventType.DELIVERED] / total_sent * 100)
+                    if total_sent > 0
+                    else 0.0
+                ),
                 2,
             ),
             "open_rate": round(
-                (metrics[CampaignEventType.OPENED] / metrics[CampaignEventType.DELIVERED] * 100)
-                if metrics[CampaignEventType.DELIVERED] > 0
-                else 0.0,
+                (
+                    (metrics[CampaignEventType.OPENED] / metrics[CampaignEventType.DELIVERED] * 100)
+                    if metrics[CampaignEventType.DELIVERED] > 0
+                    else 0.0
+                ),
                 2,
             ),
             "click_rate": round(
-                (metrics[CampaignEventType.CLICKED] / metrics[CampaignEventType.DELIVERED] * 100)
-                if metrics[CampaignEventType.DELIVERED] > 0
-                else 0.0,
+                (
+                    (
+                        metrics[CampaignEventType.CLICKED]
+                        / metrics[CampaignEventType.DELIVERED]
+                        * 100
+                    )
+                    if metrics[CampaignEventType.DELIVERED] > 0
+                    else 0.0
+                ),
                 2,
             ),
             "unsubscribe_rate": round(
-                (metrics[CampaignEventType.UNSUBSCRIBED] / total_sent * 100)
-                if total_sent > 0
-                else 0.0,
+                (
+                    (metrics[CampaignEventType.UNSUBSCRIBED] / total_sent * 100)
+                    if total_sent > 0
+                    else 0.0
+                ),
                 2,
             ),
         }
@@ -197,11 +211,11 @@ class NewsletterAnalyticsRepository:
         channel: Optional[CampaignChannel] = None,
     ) -> list[dict]:
         """Get daily unsubscribe trend for the past N days.
-        
+
         Args:
             days: Number of days to look back (default: 30)
             channel: Optional channel filter (EMAIL, SMS, BOTH)
-            
+
         Returns:
             List of daily metrics:
             [
@@ -215,7 +229,7 @@ class NewsletterAnalyticsRepository:
             ]
         """
         start_date = datetime.now(timezone.utc) - timedelta(days=days)
-        
+
         # Get daily sent counts
         sent_query = (
             select(
@@ -232,7 +246,7 @@ class NewsletterAnalyticsRepository:
             .group_by(func.date(CampaignEvent.created_at))
             .order_by(func.date(CampaignEvent.created_at))
         )
-        
+
         # Get daily unsubscribe counts
         unsub_query = (
             select(
@@ -249,38 +263,40 @@ class NewsletterAnalyticsRepository:
             .group_by(func.date(CampaignEvent.created_at))
             .order_by(func.date(CampaignEvent.created_at))
         )
-        
+
         # Apply channel filter if specified
         if channel:
             sent_query = sent_query.where(Campaign.channel == channel)
             unsub_query = unsub_query.where(Campaign.channel == channel)
-        
+
         # Execute queries
         sent_results = (await self.db.execute(sent_query)).all()
         unsub_results = (await self.db.execute(unsub_query)).all()
-        
+
         # Build lookup dictionaries
         sent_by_date = {str(date): count for date, count in sent_results}
         unsub_by_date = {str(date): count for date, count in unsub_results}
-        
+
         # Merge results
         all_dates = sorted(set(sent_by_date.keys()) | set(unsub_by_date.keys()))
-        
+
         trend = []
         for date_str in all_dates:
             sent = sent_by_date.get(date_str, 0)
             unsubscribed = unsub_by_date.get(date_str, 0)
-            
-            trend.append({
-                "date": date_str,
-                "sent": sent,
-                "unsubscribed": unsubscribed,
-                "unsubscribe_rate": round(
-                    (unsubscribed / sent * 100) if sent > 0 else 0.0,
-                    2,
-                ),
-            })
-        
+
+            trend.append(
+                {
+                    "date": date_str,
+                    "sent": sent,
+                    "unsubscribed": unsubscribed,
+                    "unsubscribe_rate": round(
+                        (unsubscribed / sent * 100) if sent > 0 else 0.0,
+                        2,
+                    ),
+                }
+            )
+
         return trend
 
     async def get_subscriber_lifetime_stats(
@@ -288,10 +304,10 @@ class NewsletterAnalyticsRepository:
         subscriber_id: UUID,
     ) -> dict:
         """Get lifetime statistics for a subscriber.
-        
+
         Args:
             subscriber_id: Subscriber UUID
-            
+
         Returns:
             Dictionary with subscriber lifetime metrics:
             {
@@ -307,14 +323,14 @@ class NewsletterAnalyticsRepository:
         """
         # Get subscriber
         subscriber = (
-            await self.db.execute(
-                select(Subscriber).where(Subscriber.id == subscriber_id)
-            )
-        ).scalars().first()
-        
+            (await self.db.execute(select(Subscriber).where(Subscriber.id == subscriber_id)))
+            .scalars()
+            .first()
+        )
+
         if not subscriber:
             return {}
-        
+
         # Get event counts
         event_counts = (
             await self.db.execute(
@@ -326,37 +342,38 @@ class NewsletterAnalyticsRepository:
                 .group_by(CampaignEvent.type)
             )
         ).all()
-        
+
         metrics = {
             CampaignEventType.SENT: 0,
             CampaignEventType.DELIVERED: 0,
             CampaignEventType.OPENED: 0,
             CampaignEventType.CLICKED: 0,
         }
-        
+
         for event_type, count in event_counts:
             if event_type in metrics:
                 metrics[event_type] = count
-        
+
         # Get last interaction date
         last_interaction = (
             await self.db.execute(
-                select(func.max(CampaignEvent.created_at))
-                .where(
+                select(func.max(CampaignEvent.created_at)).where(
                     and_(
                         CampaignEvent.subscriber_id == subscriber_id,
-                        CampaignEvent.type.in_([
-                            CampaignEventType.OPENED,
-                            CampaignEventType.CLICKED,
-                        ]),
+                        CampaignEvent.type.in_(
+                            [
+                                CampaignEventType.OPENED,
+                                CampaignEventType.CLICKED,
+                            ]
+                        ),
                     )
                 )
             )
         ).scalar()
-        
+
         total_delivered = metrics[CampaignEventType.DELIVERED]
         total_engaged = metrics[CampaignEventType.OPENED] + metrics[CampaignEventType.CLICKED]
-        
+
         return {
             "subscriber_id": str(subscriber_id),
             "email": subscriber.email,
@@ -380,11 +397,11 @@ class NewsletterAnalyticsRepository:
         end_date: datetime,
     ) -> dict:
         """Compare performance across channels (EMAIL vs SMS).
-        
+
         Args:
             start_date: Start of date range
             end_date: End of date range
-            
+
         Returns:
             Dictionary with channel comparison metrics:
             {
@@ -394,7 +411,7 @@ class NewsletterAnalyticsRepository:
             }
         """
         comparison = {}
-        
+
         for channel in [CampaignChannel.EMAIL, CampaignChannel.SMS, CampaignChannel.BOTH]:
             # Get metrics for this channel
             metrics = await self.get_unsubscribe_rate(
@@ -402,7 +419,7 @@ class NewsletterAnalyticsRepository:
                 end_date=end_date,
                 channel=channel,
             )
-            
+
             comparison[channel.value] = metrics
-        
+
         return comparison

@@ -13,7 +13,9 @@ from typing import Any
 from core.database import get_db
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 from api.app.auth import require_roles
-from models.payment_notification import (
+
+# MIGRATED: from models.payment_notification → db.models.payment_notification
+from db.models.payment_notification import (
     CateringBooking,
     CateringPayment,
     PaymentNotification,

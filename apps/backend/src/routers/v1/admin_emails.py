@@ -13,15 +13,12 @@ Provides Gmail-style email interface for 2 inboxes:
 from datetime import datetime, timezone
 from typing import Optional
 import logging
-import hmac
-import hashlib
 import email
-import base64
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Header, Request
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
-from sqlalchemy import select, update, delete, func, and_
+from sqlalchemy import select, update, func, and_
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,9 +26,10 @@ from core.database import get_db, get_async_session
 from core.config import get_settings
 from services.customer_email_monitor import customer_email_monitor
 from services.payment_email_monitor import PaymentEmailMonitor
-from services.email_service import email_service
 from repositories.email_repository import EmailRepository
-from models.email import EmailMessage
+
+# MIGRATED: from models.email → db.models.email
+from db.models.email import EmailMessage
 from utils.auth import superadmin_required
 
 router = APIRouter(prefix="/admin/emails", tags=["admin", "emails"])
@@ -159,11 +157,10 @@ class BulkUpdateEmailRequest(BaseModel):
     labels: Optional[list[str]] = None
     action: Optional[str] = Field(
         None,
-        description="Action: mark_read, mark_unread, star, unstar, archive, unarchive, delete, apply_label, remove_label"
+        description="Action: mark_read, mark_unread, star, unstar, archive, unarchive, delete, apply_label, remove_label",
     )
     label_slug: Optional[str] = Field(
-        None,
-        description="Label slug for apply_label/remove_label actions"
+        None, description="Label slug for apply_label/remove_label actions"
     )
 
 
@@ -188,7 +185,7 @@ def _convert_imap_email_to_model(imap_email: dict, inbox: str) -> Email:
         is_read=imap_email.get("is_read", False),
         has_attachments=imap_email.get("has_attachments", False),
         attachments=[],  # TODO: Parse attachments
-        labels=[]
+        labels=[],
     )
 
 
@@ -219,10 +216,7 @@ def _group_emails_into_threads(emails: list[Email]) -> list[EmailThread]:
         participants_set = set()
         for email_msg in thread_emails:
             participants_set.add((email_msg.from_address, email_msg.from_name))
-        participants = [
-            EmailAddress(email=addr, name=name)
-            for addr, name in participants_set
-        ]
+        participants = [EmailAddress(email=addr, name=name) for addr, name in participants_set]
 
         # Calculate stats
         unread_count = sum(1 for e in thread_emails if not e.is_read)
@@ -242,7 +236,7 @@ def _group_emails_into_threads(emails: list[Email]) -> list[EmailThread]:
                 is_read=is_read,
                 is_starred=is_starred,
                 is_archived=is_archived,
-                labels=[]
+                labels=[],
             )
         )
 
@@ -388,7 +382,7 @@ async def get_customer_support_emails(
                 "archived": archived,
                 "search": search,
                 "label": label,
-            }
+            },
         )
 
         # Convert to API models
@@ -397,56 +391,61 @@ async def get_customer_support_emails(
             # Convert messages to Email models
             messages = []
             for db_message in db_thread.messages:
-                messages.append(Email(
-                    message_id=db_message.message_id,
-                    thread_id=db_message.thread_id,
-                    from_address=db_message.from_address,
-                    from_name=db_message.from_name,
-                    to_address=db_message.to_addresses[0] if db_message.to_addresses else "cs@myhibachichef.com",
-                    to_name="My Hibachi Chef",
-                    cc=[EmailAddress(email=addr) for addr in (db_message.cc_addresses or [])],
-                    bcc=[],
-                    subject=db_message.subject,
-                    text_body=db_message.text_body,
-                    html_body=db_message.html_body,
-                    received_at=db_message.received_at,
-                    is_read=db_message.is_read,
-                    is_starred=db_message.is_starred,
-                    is_archived=db_message.is_archived,
-                    has_attachments=db_message.has_attachments,
-                    attachments=[
-                        EmailAttachment(
-                            filename=att["filename"],
-                            content_type=att.get("content_type", "application/octet-stream"),
-                            size_bytes=att.get("size_bytes", 0)
-                        )
-                        for att in (db_message.attachments or [])
-                    ],
-                    labels=db_message.labels or [],
-                ))
+                messages.append(
+                    Email(
+                        message_id=db_message.message_id,
+                        thread_id=db_message.thread_id,
+                        from_address=db_message.from_address,
+                        from_name=db_message.from_name,
+                        to_address=(
+                            db_message.to_addresses[0]
+                            if db_message.to_addresses
+                            else "cs@myhibachichef.com"
+                        ),
+                        to_name="My Hibachi Chef",
+                        cc=[EmailAddress(email=addr) for addr in (db_message.cc_addresses or [])],
+                        bcc=[],
+                        subject=db_message.subject,
+                        text_body=db_message.text_body,
+                        html_body=db_message.html_body,
+                        received_at=db_message.received_at,
+                        is_read=db_message.is_read,
+                        is_starred=db_message.is_starred,
+                        is_archived=db_message.is_archived,
+                        has_attachments=db_message.has_attachments,
+                        attachments=[
+                            EmailAttachment(
+                                filename=att["filename"],
+                                content_type=att.get("content_type", "application/octet-stream"),
+                                size_bytes=att.get("size_bytes", 0),
+                            )
+                            for att in (db_message.attachments or [])
+                        ],
+                        labels=db_message.labels or [],
+                    )
+                )
 
             # Extract unique participants
             participants_set = set()
             for msg in db_thread.messages:
                 participants_set.add((msg.from_address, msg.from_name))
-            participants = [
-                EmailAddress(email=addr, name=name)
-                for addr, name in participants_set
-            ]
+            participants = [EmailAddress(email=addr, name=name) for addr, name in participants_set]
 
-            threads.append(EmailThread(
-                thread_id=db_thread.thread_id,
-                subject=db_thread.subject,
-                participants=participants,
-                messages=messages,
-                message_count=db_thread.message_count,
-                unread_count=db_thread.unread_count,
-                last_message_at=db_thread.last_message_at,
-                is_read=(db_thread.unread_count == 0),
-                is_starred=db_thread.is_starred,
-                is_archived=db_thread.is_archived,
-                labels=db_thread.labels or [],
-            ))
+            threads.append(
+                EmailThread(
+                    thread_id=db_thread.thread_id,
+                    subject=db_thread.subject,
+                    participants=participants,
+                    messages=messages,
+                    message_count=db_thread.message_count,
+                    unread_count=db_thread.unread_count,
+                    last_message_at=db_thread.last_message_at,
+                    is_read=(db_thread.unread_count == 0),
+                    is_starred=db_thread.is_starred,
+                    is_archived=db_thread.is_archived,
+                    labels=db_thread.labels or [],
+                )
+            )
 
         # Get stats for total/unread counts
         stats = await repo.get_email_stats("customer_support")
@@ -488,7 +487,8 @@ async def get_customer_support_emails(
             if search:
                 search_lower = search.lower()
                 emails = [
-                    e for e in emails
+                    e
+                    for e in emails
                     if search_lower in e.subject.lower()
                     or search_lower in (e.from_name or "").lower()
                     or search_lower in e.from_address.lower()
@@ -521,7 +521,9 @@ async def get_customer_support_emails(
             )
         except Exception as fallback_error:
             logger.exception(f"IMAP fallback also failed: {fallback_error}")
-            raise HTTPException(status_code=500, detail=f"Failed to fetch emails: {str(fallback_error)}")
+            raise HTTPException(
+                status_code=500, detail=f"Failed to fetch emails: {str(fallback_error)}"
+            )
 
 
 @router.get("/payments", response_model=EmailListResponse)
@@ -630,6 +632,7 @@ async def send_customer_support_email(
         # Use email_service (which uses Resend)
         # This is a workaround until we extend email_service for generic sends
         from resend import Resend
+
         resend_client = Resend(api_key=settings.RESEND_API_KEY)
 
         response = resend_client.emails.send(
@@ -729,25 +732,24 @@ async def bulk_update_customer_support_emails(
             # Validate label_slug is provided
             if not request.label_slug:
                 raise HTTPException(
-                    status_code=400,
-                    detail="label_slug is required for apply_label action"
+                    status_code=400, detail="label_slug is required for apply_label action"
                 )
             # Verify label exists
             from models.email_label import EmailLabel
+
             label_result = await db.execute(
                 select(EmailLabel).where(
                     and_(
                         EmailLabel.slug == request.label_slug,
                         EmailLabel.is_archived == False,
-                        EmailLabel.is_deleted == False
+                        EmailLabel.is_deleted == False,
                     )
                 )
             )
             label = label_result.scalar_one_or_none()
             if not label:
                 raise HTTPException(
-                    status_code=404,
-                    detail=f"Label '{request.label_slug}' not found or archived"
+                    status_code=404, detail=f"Label '{request.label_slug}' not found or archived"
                 )
             # Handle in processing loop
             pass
@@ -755,14 +757,15 @@ async def bulk_update_customer_support_emails(
             # Validate label_slug is provided
             if not request.label_slug:
                 raise HTTPException(
-                    status_code=400,
-                    detail="label_slug is required for remove_label action"
+                    status_code=400, detail="label_slug is required for remove_label action"
                 )
             # Handle in processing loop
             pass
         else:
             # Use explicit fields from request
-            update_data = request.dict(exclude_none=True, exclude={"message_ids", "action", "label_slug"})
+            update_data = request.dict(
+                exclude_none=True, exclude={"message_ids", "action", "label_slug"}
+            )
 
         # Process each message
         for message_id in request.message_ids:
@@ -790,21 +793,19 @@ async def bulk_update_customer_support_emails(
             except Exception as e:
                 logger.error(f"Failed to update email {message_id}: {e}")
                 failed_count += 1
-                errors.append({
-                    "message_id": message_id,
-                    "error": str(e)
-                })
+                errors.append({"message_id": message_id, "error": str(e)})
 
         # Update email_count on label if apply_label/remove_label was used
         if request.action in ["apply_label", "remove_label"] and request.label_slug:
             from models.email_label import EmailLabel
+
             try:
                 # Count messages with this label
                 count_result = await db.execute(
                     select(func.count(EmailMessage.id)).where(
                         and_(
                             EmailMessage.labels.contains([request.label_slug]),
-                            EmailMessage.is_deleted == False
+                            EmailMessage.is_deleted == False,
                         )
                     )
                 )
@@ -870,7 +871,7 @@ async def delete_customer_support_email(
         msg_num = message_numbers[0].split()[0]
 
         # Mark email as deleted (\Deleted flag)
-        customer_email_monitor.imap_connection.store(msg_num, '+FLAGS', '\\Deleted')
+        customer_email_monitor.imap_connection.store(msg_num, "+FLAGS", "\\Deleted")
 
         # Expunge (permanently remove) deleted emails
         customer_email_monitor.imap_connection.expunge()
@@ -930,7 +931,7 @@ async def delete_payment_email(
         msg_num = message_numbers[0].split()[0]
 
         # Mark email as deleted (\Deleted flag)
-        payment_monitor.imap_connection.store(msg_num, '+FLAGS', '\\Deleted')
+        payment_monitor.imap_connection.store(msg_num, "+FLAGS", "\\Deleted")
 
         # Expunge (permanently remove) deleted emails
         payment_monitor.imap_connection.expunge()
@@ -988,9 +989,7 @@ async def download_attachment(
         msg_num = message_numbers[0].split()[0]
 
         # Fetch email
-        _, msg_data = customer_email_monitor.imap_connection.fetch(
-            msg_num, "(RFC822)"
-        )
+        _, msg_data = customer_email_monitor.imap_connection.fetch(msg_num, "(RFC822)")
 
         if not msg_data or not msg_data[0]:
             raise HTTPException(status_code=404, detail="Email data not found")
@@ -1019,9 +1018,7 @@ async def download_attachment(
                     return Response(
                         content=payload,
                         media_type=content_type,
-                        headers={
-                            "Content-Disposition": f'attachment; filename="{filename}"'
-                        },
+                        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
                     )
 
                 attachment_count += 1
@@ -1029,20 +1026,14 @@ async def download_attachment(
         # Disconnect
         customer_email_monitor.disconnect()
 
-        raise HTTPException(
-            status_code=404,
-            detail=f"Attachment {attachment_index} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Attachment {attachment_index} not found")
 
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Failed to download attachment: {e}", exc_info=True)
         customer_email_monitor.disconnect()
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to download attachment: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to download attachment: {str(e)}")
 
 
 # ============================================================================
@@ -1099,6 +1090,7 @@ async def resend_webhook(
 
         # Parse event
         import json
+
         event_data = json.loads(payload)
         event_type = event_data.get("type")
 
@@ -1175,6 +1167,7 @@ async def resend_webhook(
 
 class LabelCreate(BaseModel):
     """Create new email label"""
+
     name: str = Field(..., min_length=1, max_length=100)
     description: Optional[str] = None
     color: str = Field(default="#6B7280", pattern="^#[0-9A-Fa-f]{6}$")
@@ -1183,6 +1176,7 @@ class LabelCreate(BaseModel):
 
 class LabelUpdate(BaseModel):
     """Update existing label"""
+
     name: Optional[str] = Field(None, min_length=1, max_length=100)
     description: Optional[str] = None
     color: Optional[str] = Field(None, pattern="^#[0-9A-Fa-f]{6}$")
@@ -1193,6 +1187,7 @@ class LabelUpdate(BaseModel):
 
 class LabelResponse(BaseModel):
     """Label response"""
+
     id: int
     name: str
     slug: str
@@ -1268,12 +1263,11 @@ async def create_label(
     import re
 
     # Generate slug from name
-    slug = re.sub(r'[^a-z0-9]+', '-', data.name.lower()).strip('-')
+    slug = re.sub(r"[^a-z0-9]+", "-", data.name.lower()).strip("-")
 
     # Check if name or slug already exists
     existing_query = select(EmailLabel).where(
-        (EmailLabel.name == data.name) | (EmailLabel.slug == slug),
-        EmailLabel.is_deleted == False
+        (EmailLabel.name == data.name) | (EmailLabel.slug == slug), EmailLabel.is_deleted == False
     )
     result = await db.execute(existing_query)
     if result.scalar_one_or_none():
@@ -1345,11 +1339,11 @@ async def update_label(
     # Update fields
     if data.name and data.name != label.name:
         # Check name uniqueness
-        slug = re.sub(r'[^a-z0-9]+', '-', data.name.lower()).strip('-')
+        slug = re.sub(r"[^a-z0-9]+", "-", data.name.lower()).strip("-")
         existing_query = select(EmailLabel).where(
             (EmailLabel.name == data.name) | (EmailLabel.slug == slug),
             EmailLabel.id != label_id,
-            EmailLabel.is_deleted == False
+            EmailLabel.is_deleted == False,
         )
         result = await db.execute(existing_query)
         if result.scalar_one_or_none():

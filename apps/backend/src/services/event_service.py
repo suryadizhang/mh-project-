@@ -10,25 +10,25 @@ All services that use EventTrackingMixin will use this service.
 
 from typing import Optional, Dict, Any, List
 from datetime import datetime, timedelta
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, desc
-from sqlalchemy.dialects.postgresql import insert
 
 from core.base_service import BaseService
-from models.system_event import SystemEvent  # We'll need to create this model
+
+# MIGRATED: from models.system_event → db.models.system_event
+from db.models.system_event import SystemEvent  # We'll need to create this model
 
 
 class EventService(BaseService):
     """
     Service for logging and retrieving system events.
-    
+
     Events are used for:
     - Analytics and reporting
     - Audit trails for compliance
     - Debugging and troubleshooting
     - User activity tracking
     - System health monitoring
-    
+
     Usage:
         event_service = EventService(db)
         await event_service.log_event(
@@ -40,7 +40,7 @@ class EventService(BaseService):
             metadata={"source": "facebook", "campaign_id": "summer2024"}
         )
     """
-    
+
     async def log_event(
         self,
         service: str,
@@ -53,7 +53,7 @@ class EventService(BaseService):
     ) -> SystemEvent:
         """
         Log an event to the database.
-        
+
         Args:
             service: Name of the service logging the event (e.g., "LeadService")
             action: Action being performed (e.g., "lead_created", "booking_confirmed")
@@ -62,7 +62,7 @@ class EventService(BaseService):
             user_id: ID of user who triggered the event
             metadata: Additional JSON data about the event
             severity: Event severity ("debug", "info", "warning", "error")
-        
+
         Returns:
             SystemEvent: The created event record
         """
@@ -77,24 +77,24 @@ class EventService(BaseService):
                 severity=severity,
                 timestamp=datetime.utcnow(),
             )
-            
+
             self.db.add(event)
             await self.db.flush()
-            
+
             await self._log_action(
                 action="event_logged",
                 entity_type="system_event",
                 entity_id=event.id,
-                metadata={"service": service, "action": action}
+                metadata={"service": service, "action": action},
             )
-            
+
             return event
-            
+
         except Exception as e:
             await self._handle_error(e, "log_event")
             # Re-raise since we want to know if event logging fails
             raise
-    
+
     async def log_lead_event(
         self,
         lead_id: int,
@@ -104,13 +104,13 @@ class EventService(BaseService):
     ) -> SystemEvent:
         """
         Convenience method for logging lead-related events.
-        
+
         Args:
             lead_id: ID of the lead
             action: Action performed (e.g., "created", "updated", "converted")
             user_id: User who performed the action
             metadata: Additional context
-        
+
         Returns:
             SystemEvent: The logged event
         """
@@ -122,7 +122,7 @@ class EventService(BaseService):
             user_id=user_id,
             metadata=metadata,
         )
-    
+
     async def log_booking_event(
         self,
         booking_id: int,
@@ -132,13 +132,13 @@ class EventService(BaseService):
     ) -> SystemEvent:
         """
         Convenience method for logging booking-related events.
-        
+
         Args:
             booking_id: ID of the booking
             action: Action performed (e.g., "created", "confirmed", "cancelled")
             user_id: User who performed the action
             metadata: Additional context
-        
+
         Returns:
             SystemEvent: The logged event
         """
@@ -150,7 +150,7 @@ class EventService(BaseService):
             user_id=user_id,
             metadata=metadata,
         )
-    
+
     async def log_user_event(
         self,
         user_id: int,
@@ -159,12 +159,12 @@ class EventService(BaseService):
     ) -> SystemEvent:
         """
         Convenience method for logging user-related events.
-        
+
         Args:
             user_id: ID of the user
             action: Action performed (e.g., "login", "logout", "profile_updated")
             metadata: Additional context
-        
+
         Returns:
             SystemEvent: The logged event
         """
@@ -176,7 +176,7 @@ class EventService(BaseService):
             user_id=user_id,
             metadata=metadata,
         )
-    
+
     async def get_events(
         self,
         entity_type: Optional[str] = None,
@@ -192,7 +192,7 @@ class EventService(BaseService):
     ) -> List[SystemEvent]:
         """
         Query events with filters.
-        
+
         Args:
             entity_type: Filter by entity type
             entity_id: Filter by entity ID
@@ -204,13 +204,13 @@ class EventService(BaseService):
             end_date: Filter events before this date
             limit: Maximum number of results
             offset: Pagination offset
-        
+
         Returns:
             List of matching events
         """
         try:
             query = select(SystemEvent)
-            
+
             filters = []
             if entity_type:
                 filters.append(SystemEvent.entity_type == entity_type)
@@ -228,20 +228,20 @@ class EventService(BaseService):
                 filters.append(SystemEvent.timestamp >= start_date)
             if end_date:
                 filters.append(SystemEvent.timestamp <= end_date)
-            
+
             if filters:
                 query = query.where(and_(*filters))
-            
+
             query = query.order_by(desc(SystemEvent.timestamp))
             query = query.limit(limit).offset(offset)
-            
+
             result = await self.db.execute(query)
             return list(result.scalars().all())
-            
+
         except Exception as e:
             await self._handle_error(e, "get_events")
             return []
-    
+
     async def get_recent_events(
         self,
         hours: int = 24,
@@ -249,17 +249,17 @@ class EventService(BaseService):
     ) -> List[SystemEvent]:
         """
         Get recent events from the last N hours.
-        
+
         Args:
             hours: Number of hours to look back
             limit: Maximum number of events to return
-        
+
         Returns:
             List of recent events
         """
         start_date = datetime.utcnow() - timedelta(hours=hours)
         return await self.get_events(start_date=start_date, limit=limit)
-    
+
     async def get_entity_timeline(
         self,
         entity_type: str,
@@ -268,12 +268,12 @@ class EventService(BaseService):
     ) -> List[SystemEvent]:
         """
         Get chronological timeline of events for a specific entity.
-        
+
         Args:
             entity_type: Type of entity (e.g., "lead", "booking")
             entity_id: ID of the entity
             limit: Maximum number of events
-        
+
         Returns:
             List of events in chronological order
         """
@@ -282,33 +282,33 @@ class EventService(BaseService):
             entity_id=entity_id,
             limit=limit,
         )
-    
+
     async def delete_old_events(self, days: int = 90) -> int:
         """
         Delete events older than specified days (for maintenance).
-        
+
         Args:
             days: Delete events older than this many days
-        
+
         Returns:
             Number of events deleted
         """
         try:
             cutoff_date = datetime.utcnow() - timedelta(days=days)
-            
+
             query = select(SystemEvent).where(SystemEvent.timestamp < cutoff_date)
             result = await self.db.execute(query)
             events_to_delete = result.scalars().all()
-            
+
             for event in events_to_delete:
                 await self.db.delete(event)
-            
+
             await self.db.flush()
-            
+
             count = len(events_to_delete)
             self.logger.info(f"Deleted {count} events older than {days} days")
             return count
-            
+
         except Exception as e:
             await self._handle_error(e, "delete_old_events")
             return 0
