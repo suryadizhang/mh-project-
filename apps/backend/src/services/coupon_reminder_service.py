@@ -13,7 +13,10 @@ from uuid import UUID
 
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from models import DiscountCoupon, CustomerReview
+
+# MIGRATED: Imports moved from OLD models to NEW db.models system
+# TODO: Manual migration needed for: DiscountCoupon, CustomerReview
+# from models import DiscountCoupon, CustomerReview
 from services.ringcentral_sms import ringcentral_sms
 from core.config import get_settings
 
@@ -37,12 +40,12 @@ class CouponReminderService:
     ) -> bool:
         """
         Day 0: Send welcome SMS immediately after coupon issuance.
-        
+
         Purpose: Confirm coupon receipt and provide key details.
         """
         try:
             expiry_formatted = expiration_date.strftime("%B %d, %Y")
-            
+
             message = (
                 f"Hi {customer_name}! 🎉\n\n"
                 f"Thank you for your feedback! We've issued you a special coupon:\n\n"
@@ -55,16 +58,15 @@ class CouponReminderService:
             )
 
             async with ringcentral_sms as sms_service:
-                response = await sms_service.send_sms(
-                    to_number=customer_phone,
-                    message=message
-                )
+                response = await sms_service.send_sms(to_number=customer_phone, message=message)
 
             if response.success:
                 logger.info(f"Welcome SMS sent for coupon {coupon_code}")
                 return True
             else:
-                logger.error(f"Failed to send welcome SMS for coupon {coupon_code}: {response.error}")
+                logger.error(
+                    f"Failed to send welcome SMS for coupon {coupon_code}: {response.error}"
+                )
                 return False
 
         except Exception as e:
@@ -79,7 +81,7 @@ class CouponReminderService:
     ) -> bool:
         """
         Day 30: Send helpful event ideas (not pushy).
-        
+
         Purpose: Keep coupon top-of-mind with helpful suggestions.
         """
         try:
@@ -95,10 +97,7 @@ class CouponReminderService:
             )
 
             async with ringcentral_sms as sms_service:
-                response = await sms_service.send_sms(
-                    to_number=customer_phone,
-                    message=message
-                )
+                response = await sms_service.send_sms(to_number=customer_phone, message=message)
 
             if response.success:
                 logger.info(f"Helpful ideas SMS sent for coupon {coupon_code}")
@@ -120,7 +119,7 @@ class CouponReminderService:
     ) -> bool:
         """
         Day 90 (3 months): Mid-point check-in.
-        
+
         Purpose: Gentle reminder that time is passing.
         """
         try:
@@ -133,10 +132,7 @@ class CouponReminderService:
             )
 
             async with ringcentral_sms as sms_service:
-                response = await sms_service.send_sms(
-                    to_number=customer_phone,
-                    message=message
-                )
+                response = await sms_service.send_sms(to_number=customer_phone, message=message)
 
             if response.success:
                 logger.info(f"Mid-point reminder SMS sent for coupon {coupon_code}")
@@ -159,7 +155,7 @@ class CouponReminderService:
     ) -> bool:
         """
         Holiday triggers: Context-aware reminders for upcoming holidays.
-        
+
         Purpose: Suggest using coupon for relevant upcoming events.
         """
         try:
@@ -172,10 +168,7 @@ class CouponReminderService:
             )
 
             async with ringcentral_sms as sms_service:
-                response = await sms_service.send_sms(
-                    to_number=customer_phone,
-                    message=message
-                )
+                response = await sms_service.send_sms(to_number=customer_phone, message=message)
 
             if response.success:
                 logger.info(f"Holiday reminder SMS sent for {holiday_name} - coupon {coupon_code}")
@@ -197,12 +190,12 @@ class CouponReminderService:
     ) -> bool:
         """
         Day 120 (2 months left): Gentle urgency.
-        
+
         Purpose: Remind customer to start planning.
         """
         try:
             expiry_formatted = expiration_date.strftime("%B %d")
-            
+
             message = (
                 f"Hi {customer_name}! ⏰\n\n"
                 f"Heads up: Your coupon {coupon_code} expires in 2 months ({expiry_formatted}).\n\n"
@@ -212,10 +205,7 @@ class CouponReminderService:
             )
 
             async with ringcentral_sms as sms_service:
-                response = await sms_service.send_sms(
-                    to_number=customer_phone,
-                    message=message
-                )
+                response = await sms_service.send_sms(to_number=customer_phone, message=message)
 
             if response.success:
                 logger.info(f"2-month warning SMS sent for coupon {coupon_code}")
@@ -237,12 +227,12 @@ class CouponReminderService:
     ) -> bool:
         """
         Day 150 (1 month left): Increased urgency.
-        
+
         Purpose: Create action motivation.
         """
         try:
             expiry_formatted = expiration_date.strftime("%B %d")
-            
+
             message = (
                 f"Hi {customer_name}! ⚠️\n\n"
                 f"Your coupon {coupon_code} expires in 1 month ({expiry_formatted})!\n\n"
@@ -252,10 +242,7 @@ class CouponReminderService:
             )
 
             async with ringcentral_sms as sms_service:
-                response = await sms_service.send_sms(
-                    to_number=customer_phone,
-                    message=message
-                )
+                response = await sms_service.send_sms(to_number=customer_phone, message=message)
 
             if response.success:
                 logger.info(f"1-month warning SMS sent for coupon {coupon_code}")
@@ -277,13 +264,13 @@ class CouponReminderService:
     ) -> bool:
         """
         Day 166 (2 weeks left): FINAL reminder - customers need planning time!
-        
+
         Purpose: Last chance to book and plan event.
         User requirement: "people need to prepare time for the party"
         """
         try:
             expiry_formatted = expiration_date.strftime("%B %d")
-            
+
             message = (
                 f"🚨 FINAL REMINDER {customer_name}!\n\n"
                 f"Your coupon {coupon_code} expires in 2 WEEKS ({expiry_formatted}).\n\n"
@@ -295,13 +282,12 @@ class CouponReminderService:
             )
 
             async with ringcentral_sms as sms_service:
-                response = await sms_service.send_sms(
-                    to_number=customer_phone,
-                    message=message
-                )
+                response = await sms_service.send_sms(to_number=customer_phone, message=message)
 
             if response.success:
-                logger.info(f"FINAL reminder SMS sent for coupon {coupon_code} (2 weeks before expiry)")
+                logger.info(
+                    f"FINAL reminder SMS sent for coupon {coupon_code} (2 weeks before expiry)"
+                )
                 return True
             else:
                 logger.error(f"Failed to send final reminder SMS: {response.error}")
@@ -317,7 +303,7 @@ class CouponReminderService:
     ) -> list[dict[str, Any]]:
         """
         Get coupons that need a specific reminder sent.
-        
+
         Reminder Types:
         - welcome: Just issued (Day 0)
         - helpful_ideas: Day 30
@@ -331,7 +317,7 @@ class CouponReminderService:
         """
         try:
             now = datetime.now(timezone.utc)
-            
+
             # Define time windows for each reminder type
             reminder_windows = {
                 "welcome": (0, 1),  # Within 24 hours of creation
@@ -341,19 +327,18 @@ class CouponReminderService:
                 "one_month_warning": (149, 151),  # Around day 150
                 "final_warning": (165, 167),  # Around day 166 (2 weeks before expiry)
             }
-            
+
             if reminder_type not in reminder_windows:
                 logger.error(f"Invalid reminder type: {reminder_type}")
                 return []
-            
+
             min_days, max_days = reminder_windows[reminder_type]
             min_date = now - timedelta(days=max_days)
             max_date = now - timedelta(days=min_days)
-            
+
             # Query active coupons in the target date range
             result = await self.db.execute(
-                select(DiscountCoupon)
-                .where(
+                select(DiscountCoupon).where(
                     and_(
                         DiscountCoupon.status == "active",
                         DiscountCoupon.times_used == 0,
@@ -363,35 +348,37 @@ class CouponReminderService:
                     )
                 )
             )
-            
+
             coupons = result.scalars().all()
-            
+
             # Format coupon data for reminders
             coupon_data = []
             for coupon in coupons:
                 # Check if this reminder was already sent
                 metadata = coupon.extra_metadata or {}
                 reminders_sent = metadata.get("reminders_sent", [])
-                
+
                 if reminder_type not in reminders_sent:
                     days_since_creation = (now - coupon.created_at).days
                     days_until_expiry = (coupon.valid_until - now).days
-                    
-                    coupon_data.append({
-                        "coupon_id": coupon.id,
-                        "coupon_code": coupon.coupon_code,
-                        "customer_id": coupon.customer_id,
-                        "discount_percentage": coupon.discount_value,
-                        "created_at": coupon.created_at,
-                        "valid_until": coupon.valid_until,
-                        "days_since_creation": days_since_creation,
-                        "days_until_expiry": days_until_expiry,
-                        "metadata": metadata,
-                    })
-            
+
+                    coupon_data.append(
+                        {
+                            "coupon_id": coupon.id,
+                            "coupon_code": coupon.coupon_code,
+                            "customer_id": coupon.customer_id,
+                            "discount_percentage": coupon.discount_value,
+                            "created_at": coupon.created_at,
+                            "valid_until": coupon.valid_until,
+                            "days_since_creation": days_since_creation,
+                            "days_until_expiry": days_until_expiry,
+                            "metadata": metadata,
+                        }
+                    )
+
             logger.info(f"Found {len(coupon_data)} coupons for {reminder_type} reminder")
             return coupon_data
-        
+
         except Exception as e:
             logger.exception(f"Error getting coupons for reminder: {e}")
             return []
@@ -403,7 +390,7 @@ class CouponReminderService:
     ) -> bool:
         """
         Mark a reminder as sent in the coupon metadata.
-        
+
         Prevents duplicate reminders.
         """
         try:
@@ -411,27 +398,29 @@ class CouponReminderService:
                 select(DiscountCoupon).where(DiscountCoupon.id == coupon_id)
             )
             coupon = result.scalar_one_or_none()
-            
+
             if not coupon:
                 logger.error(f"Coupon {coupon_id} not found")
                 return False
-            
+
             # Update metadata
             metadata = coupon.extra_metadata or {}
             reminders_sent = metadata.get("reminders_sent", [])
-            
+
             if reminder_type not in reminders_sent:
                 reminders_sent.append(reminder_type)
                 metadata["reminders_sent"] = reminders_sent
                 metadata[f"{reminder_type}_sent_at"] = datetime.now(timezone.utc).isoformat()
-                
+
                 coupon.extra_metadata = metadata
                 await self.db.commit()
-                
-                logger.info(f"Marked {reminder_type} reminder as sent for coupon {coupon.coupon_code}")
-            
+
+                logger.info(
+                    f"Marked {reminder_type} reminder as sent for coupon {coupon.coupon_code}"
+                )
+
             return True
-        
+
         except Exception as e:
             logger.exception(f"Error marking reminder as sent: {e}")
             await self.db.rollback()
@@ -443,7 +432,7 @@ class CouponReminderService:
     ) -> list[dict[str, Any]]:
         """
         Get active coupons that should receive holiday-specific reminders.
-        
+
         Holidays:
         - thanksgiving: 2 weeks before Thanksgiving
         - christmas: Early December
@@ -451,11 +440,10 @@ class CouponReminderService:
         """
         try:
             now = datetime.now(timezone.utc)
-            
+
             # Query all active coupons
             result = await self.db.execute(
-                select(DiscountCoupon)
-                .where(
+                select(DiscountCoupon).where(
                     and_(
                         DiscountCoupon.status == "active",
                         DiscountCoupon.times_used == 0,
@@ -463,30 +451,32 @@ class CouponReminderService:
                     )
                 )
             )
-            
+
             coupons = result.scalars().all()
-            
+
             # Filter coupons that haven't received this holiday reminder
             coupon_data = []
             for coupon in coupons:
                 metadata = coupon.extra_metadata or {}
                 reminders_sent = metadata.get("reminders_sent", [])
-                
+
                 holiday_reminder_key = f"holiday_{holiday_name}"
                 if holiday_reminder_key not in reminders_sent:
                     days_until_expiry = (coupon.valid_until - now).days
-                    
-                    coupon_data.append({
-                        "coupon_id": coupon.id,
-                        "coupon_code": coupon.coupon_code,
-                        "customer_id": coupon.customer_id,
-                        "days_until_expiry": days_until_expiry,
-                        "metadata": metadata,
-                    })
-            
+
+                    coupon_data.append(
+                        {
+                            "coupon_id": coupon.id,
+                            "coupon_code": coupon.coupon_code,
+                            "customer_id": coupon.customer_id,
+                            "days_until_expiry": days_until_expiry,
+                            "metadata": metadata,
+                        }
+                    )
+
             logger.info(f"Found {len(coupon_data)} coupons for {holiday_name} holiday reminder")
             return coupon_data
-        
+
         except Exception as e:
             logger.exception(f"Error getting holiday reminders: {e}")
             return []
@@ -507,7 +497,6 @@ HOLIDAY_MESSAGES = {
         "name": "New Year",
         "context": "Ring in the New Year! 🎊 Celebrate with friends and family!",
     },
-    
     # Spring Holidays
     "easter": {
         "name": "Easter",
@@ -517,7 +506,6 @@ HOLIDAY_MESSAGES = {
         "name": "Mother's Day",
         "context": "Mother's Day is approaching! 💐 Treat Mom to an unforgettable hibachi experience!",
     },
-    
     # Summer Holidays & Seasons
     "fathers_day": {
         "name": "Father's Day",
@@ -531,7 +519,6 @@ HOLIDAY_MESSAGES = {
         "name": "Independence Day",
         "context": "4th of July is approaching! 🇺🇸 Perfect for patriotic celebrations and BBQ parties!",
     },
-    
     # Fall Holidays
     "halloween": {
         "name": "Halloween",

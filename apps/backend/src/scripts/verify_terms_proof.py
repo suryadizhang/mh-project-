@@ -22,7 +22,9 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from core.database import SessionLocal
-from models.terms_acknowledgment import TermsAcknowledgment
+
+# MIGRATED: from models.terms_acknowledgment → db.models.terms_acknowledgment
+from db.models.terms_acknowledgment import TermsAcknowledgment
 
 
 def calculate_message_hash(

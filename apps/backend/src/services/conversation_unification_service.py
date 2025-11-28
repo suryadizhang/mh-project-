@@ -17,17 +17,17 @@ from datetime import datetime
 from typing import Optional, List, Dict, Any
 from uuid import UUID
 
-from sqlalchemy import select, and_, or_, desc
+from sqlalchemy import select, or_, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models import (
+# MIGRATED: Imports moved from OLD models to NEW db.models system
+from db.models.core import (
     Customer,
     SocialIdentity,
     SocialThread,
     SocialMessage,
-    Lead,
 )
-from models.enums import SocialPlatform
+from db.models.lead import Lead
 
 logger = logging.getLogger(__name__)
 

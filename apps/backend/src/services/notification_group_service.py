@@ -9,7 +9,8 @@ import logging
 from typing import Any
 from uuid import UUID, uuid4
 
-from models.notification import (
+# MIGRATED: from models.notification → db.models.notification
+from db.models.notification import (
     DEFAULT_GROUPS,
     NotificationEventType,
     NotificationGroup,

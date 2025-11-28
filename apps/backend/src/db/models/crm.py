@@ -103,7 +103,8 @@ from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
-from models.base import Base
+# MIGRATED: from models.base → ..base_class (NEW unified architecture)
+from ..base_class import Base
 
 
 # ============================================================================

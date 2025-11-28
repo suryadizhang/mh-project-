@@ -5,8 +5,9 @@ import logging
 from uuid import UUID
 
 from core.database import get_db
-from models import Lead, LeadContact
-from models.enums import ContactChannel
+
+# FIXED: Import from db.models (NEW system) instead of models (OLD system)
+from db.models.lead import Lead, LeadContact, ContactChannel
 from services.ai_lead_management import (
     get_ai_lead_manager,
     get_social_media_ai,

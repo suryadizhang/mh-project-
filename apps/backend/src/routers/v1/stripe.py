@@ -10,12 +10,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import stripe
 
 if TYPE_CHECKING:
-    from services.stripe_service import StripeService
+    pass
 
 settings = get_settings()
 from core.database import get_db
-from models.booking import Payment
-from models.legacy_stripe_models import (
+
+# MIGRATED: from models.booking → db.models.core
+from db.models.core import Payment
+
+# MIGRATED: from models.legacy_stripe_models → db.models.legacy_stripe_models
+from db.models.legacy_stripe_models import (
     Invoice,
     Refund,
     StripePayment,
@@ -48,13 +52,14 @@ logger = logging.getLogger(__name__)
 async def get_stripe_service(db: AsyncSession = Depends(get_db)):
     """Lazy load StripeService only when needed."""
     from services.stripe_service import StripeService
+
     return StripeService(db)
 
 
 @router.post("/create-checkout-session", response_model=CheckoutSessionResponse)
 async def create_checkout_session(
     data: CreateCheckoutSession,
-    stripe_service = Depends(get_stripe_service),
+    stripe_service=Depends(get_stripe_service),
     current_user=Depends(get_current_user),
 ):
     """Create a Stripe Checkout session for payment."""
@@ -184,7 +189,7 @@ async def verify_checkout_session(
 @router.post("/create-payment-intent", response_model=PaymentIntentResponse)
 async def create_payment_intent(
     data: CreatePaymentIntent,
-    stripe_service = Depends(get_stripe_service),
+    stripe_service=Depends(get_stripe_service),
     current_user=Depends(get_current_user),
 ):
     """Create a Stripe Payment Intent for Payment Element."""
@@ -243,8 +248,7 @@ async def create_payment_intent(
 
 @router.post("/portal-link", response_model=CustomerPortalResponse)
 async def create_portal_link(
-    stripe_service = Depends(get_stripe_service),
-    current_user=Depends(get_current_user)
+    stripe_service=Depends(get_stripe_service), current_user=Depends(get_current_user)
 ):
     """Create Stripe Customer Portal link."""
     try:
@@ -282,9 +286,7 @@ async def create_portal_link(
 
 @router.post("/webhook", response_model=WebhookResponse)
 async def webhook_endpoint(
-    request: Request,
-    db: AsyncSession = Depends(get_db),
-    stripe_service = Depends(get_stripe_service)
+    request: Request, db: AsyncSession = Depends(get_db), stripe_service=Depends(get_stripe_service)
 ):
     """Handle Stripe webhook events."""
     try:
@@ -550,7 +552,7 @@ async def get_invoices(
 async def get_payment_analytics(
     start_date: datetime | None = None,
     end_date: datetime | None = None,
-    stripe_service = Depends(get_stripe_service),
+    stripe_service=Depends(get_stripe_service),
     admin_user=Depends(get_admin_user),
 ):
     """Get payment analytics (admin only)."""
@@ -576,7 +578,7 @@ async def get_payment_analytics(
 async def get_customer_dashboard(
     customer_id: str | None = None,
     email: str | None = None,
-    stripe_service = Depends(get_stripe_service),
+    stripe_service=Depends(get_stripe_service),
 ):
     """
     MIGRATED FROM: /api/v1/customers/dashboard/route.ts
@@ -716,10 +718,7 @@ async def create_customer_portal_session(data: dict, db: AsyncSession = Depends(
 
 
 @router.post("/v1/payments/create-intent")
-async def create_payment_intent_v1(
-    data: dict,
-    stripe_service = Depends(get_stripe_service)
-):
+async def create_payment_intent_v1(data: dict, stripe_service=Depends(get_stripe_service)):
     """
     MIGRATED FROM: /api/v1/payments/create-intent/route.ts
     Create payment intent with customer management
@@ -895,9 +894,7 @@ def determine_loyalty_status(total_bookings: int, total_spent: float, zelle_adop
 
 @router.post("/v1/payments/webhook")
 async def payments_webhook_v1(
-    request: Request,
-    db: AsyncSession = Depends(get_db),
-    stripe_service = Depends(get_stripe_service)
+    request: Request, db: AsyncSession = Depends(get_db), stripe_service=Depends(get_stripe_service)
 ):
     """
     MIGRATED FROM: /api/v1/payments/webhook/route.ts
@@ -1000,9 +997,7 @@ async def payments_webhook_v1(
 
 @router.post("/v1/webhooks/stripe")
 async def stripe_webhook_v1(
-    request: Request,
-    db: AsyncSession = Depends(get_db),
-    stripe_service = Depends(get_stripe_service)
+    request: Request, db: AsyncSession = Depends(get_db), stripe_service=Depends(get_stripe_service)
 ):
     """
     MIGRATED FROM: /api/v1/webhooks/stripe/route.ts
@@ -1092,9 +1087,7 @@ async def store_webhook_event(event: dict, db: AsyncSession):
         logger.exception(f"Error storing webhook event: {error}")
 
 
-async def handle_payment_success(
-    payment_intent: dict, stripe_service, db: AsyncSession
-):
+async def handle_payment_success(payment_intent: dict, stripe_service, db: AsyncSession):
     """Handle successful payment with analytics"""
     try:
         metadata = payment_intent.get("metadata", {})
@@ -1127,9 +1120,7 @@ async def handle_payment_success(
         logger.exception(f"Error handling payment success: {error}")
 
 
-async def handle_payment_failure(
-    payment_intent: dict, stripe_service, db: AsyncSession
-):
+async def handle_payment_failure(payment_intent: dict, stripe_service, db: AsyncSession):
     """Handle failed payment"""
     try:
         metadata = payment_intent.get("metadata", {})
@@ -1151,9 +1142,7 @@ async def handle_payment_failure(
         logger.exception(f"Error handling payment failure: {error}")
 
 
-async def handle_payment_cancellation(
-    payment_intent: dict, stripe_service, db: AsyncSession
-):
+async def handle_payment_cancellation(payment_intent: dict, stripe_service, db: AsyncSession):
     """Handle payment cancellation"""
     try:
         metadata = payment_intent.get("metadata", {})
@@ -1172,9 +1161,7 @@ async def handle_payment_cancellation(
         logger.exception(f"Error handling payment cancellation: {error}")
 
 
-async def handle_payment_processing(
-    payment_intent: dict, stripe_service, db: AsyncSession
-):
+async def handle_payment_processing(payment_intent: dict, stripe_service, db: AsyncSession):
     """Handle payment processing status"""
     try:
         logger.info(
@@ -1221,9 +1208,7 @@ async def handle_customer_updated(customer: dict, stripe_service, db: AsyncSessi
 
 
 # Simplified handlers for the alternative webhook endpoint
-async def handle_payment_success_simple(
-    payment_intent: dict, stripe_service, db: AsyncSession
-):
+async def handle_payment_success_simple(payment_intent: dict, stripe_service, db: AsyncSession):
     """Simplified payment success handler"""
     logger.info(
         f"[PAYMENT SUCCESS] Payment Intent: {payment_intent['id']}, "
@@ -1248,9 +1233,7 @@ async def handle_payment_success_simple(
         )
 
 
-async def handle_customer_created_simple(
-    customer: dict, stripe_service, db: AsyncSession
-):
+async def handle_customer_created_simple(customer: dict, stripe_service, db: AsyncSession):
     """Simplified customer creation handler"""
     logger.info(
         f"[CUSTOMER CREATED] Customer: {customer['id']}, "
@@ -1258,9 +1241,7 @@ async def handle_customer_created_simple(
     )
 
 
-async def handle_invoice_payment_succeeded_simple(
-    invoice: dict, stripe_service, db: AsyncSession
-):
+async def handle_invoice_payment_succeeded_simple(invoice: dict, stripe_service, db: AsyncSession):
     """Simplified invoice payment handler"""
     logger.info(
         f"[INVOICE PAID] Invoice: {invoice['id']}, "
@@ -1268,9 +1249,7 @@ async def handle_invoice_payment_succeeded_simple(
     )
 
 
-async def handle_subscription_update_simple(
-    subscription: dict, stripe_service, db: AsyncSession
-):
+async def handle_subscription_update_simple(subscription: dict, stripe_service, db: AsyncSession):
     """Simplified subscription handler"""
     logger.info(
         f"[SUBSCRIPTION UPDATE] Subscription: {subscription['id']}, "
@@ -1279,16 +1258,12 @@ async def handle_subscription_update_simple(
 
 
 # Additional handlers for comprehensive webhook coverage
-async def handle_invoice_payment_succeeded(
-    invoice: dict, stripe_service, db: AsyncSession
-):
+async def handle_invoice_payment_succeeded(invoice: dict, stripe_service, db: AsyncSession):
     """Handle successful invoice payment"""
     # Implementation similar to simple version but with database updates
 
 
-async def handle_invoice_payment_failed(
-    invoice: dict, stripe_service, db: AsyncSession
-):
+async def handle_invoice_payment_failed(invoice: dict, stripe_service, db: AsyncSession):
     """Handle failed invoice payment"""
 
 

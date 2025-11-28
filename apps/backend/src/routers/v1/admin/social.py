@@ -26,7 +26,10 @@ from core.dependencies import (
     get_current_admin_user,
     get_query_bus,
 )
-from models.enums import MessageKind, ReviewStatus, SocialPlatform, ThreadStatus
+
+# MIGRATED: Enum imports moved from models.enums to NEW db.models system
+from db.models.core import ReviewStatus, ThreadStatus
+from db.models.lead import SocialPlatform
 from schemas.social import (
     AcknowledgeReviewRequest,
     CreateLeadRequest,

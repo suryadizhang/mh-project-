@@ -106,11 +106,12 @@ from sqlalchemy import (
     Enum as SQLEnum,
     ARRAY,
 )
-from sqlalchemy.dialects.postgresql import UUID as PGUUID
+from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
-from models.base import Base
+# MIGRATED: from models.base → ..base_class (NEW unified architecture)
+from ..base_class import Base
 
 
 # ============================================================================
@@ -686,6 +687,203 @@ class ShiftSchedule(Base):
 
 
 # ============================================================================
+# TRAVEL ZONE MODEL (Phase 2A - Distance Agent)
+# ============================================================================
+
+
+class TravelZone(Base):
+    """
+    Travel zones with dynamic fee calculation - Operations schema
+
+    Defines service areas with zip codes and travel fee structures.
+    Used by Distance Agent for dynamic travel fee calculation.
+
+    Schema: ops.travel_zones
+
+    Business Logic:
+    - NO hardcoded travel fees (violates Rule 01)
+    - Fees based on zone and distance
+    - Supports multiple zip codes per zone
+    - Max distance enforcement
+    """
+
+    __tablename__ = "travel_zones"
+    __table_args__ = (
+        Index("idx_ops_travel_zones_active", "is_active"),
+        {"schema": "ops"},
+    )
+
+    # Primary Key
+    id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    )
+
+    # Zone Details
+    name: Mapped[str] = mapped_column(String(100), nullable=False)  # e.g., "Downtown Phoenix"
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Coverage (JSONB for flexible zip code lists)
+    zip_codes: Mapped[dict] = mapped_column(
+        JSONB, nullable=False, default=list
+    )  # ["85001", "85002", ...]
+
+    # Pricing Structure
+    base_fee: Mapped[Decimal] = mapped_column(
+        Numeric(10, 2), nullable=False, default=Decimal("0.00")
+    )  # Base travel fee
+    per_mile_fee: Mapped[Decimal] = mapped_column(
+        Numeric(10, 2), nullable=False, default=Decimal("2.00")
+    )  # Fee per mile
+    max_distance_miles: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=50
+    )  # Maximum service distance
+
+    # Status
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+    )
+
+
+# ============================================================================
+# MENU ITEM MODEL (Phase 2A - Menu Advisor Agent)
+# ============================================================================
+
+
+class MenuItem(Base):
+    """
+    Menu items catalog for recommendations - Operations schema
+
+    Menu items with pricing, dietary info, and availability.
+    Used by Menu Advisor Agent for dynamic recommendations.
+
+    Schema: ops.menu_items
+
+    Business Logic:
+    - NO hardcoded menu prices (violates Rule 01)
+    - Dietary tag filtering
+    - Seasonal availability
+    - Ingredient tracking for allergies
+    """
+
+    __tablename__ = "menu_items"
+    __table_args__ = (
+        Index("idx_ops_menu_items_category", "category"),
+        Index("idx_ops_menu_items_available", "is_available"),
+        {"schema": "ops"},
+    )
+
+    # Primary Key
+    id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    )
+
+    # Item Details
+    name: Mapped[str] = mapped_column(String(200), nullable=False)  # e.g., "Hibachi Chicken"
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    category: Mapped[str] = mapped_column(
+        String(50), nullable=False
+    )  # "protein", "side", "appetizer", "dessert"
+
+    # Pricing
+    base_price_per_person: Mapped[Decimal] = mapped_column(
+        Numeric(10, 2), nullable=False
+    )  # Price per person
+
+    # Dietary & Ingredients (JSONB for flexible arrays)
+    dietary_tags: Mapped[dict] = mapped_column(
+        JSONB, nullable=False, default=list
+    )  # ["gluten-free", "vegetarian", "vegan"]
+    ingredients: Mapped[dict] = mapped_column(
+        JSONB, nullable=False, default=list
+    )  # ["chicken", "soy sauce", "garlic"]
+
+    # Availability
+    is_available: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    seasonal: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+    )
+
+
+# ============================================================================
+# PRICING RULE MODEL (Phase 2A - Pricing Calculator Agent)
+# ============================================================================
+
+
+class PricingRule(Base):
+    """
+    Dynamic pricing rules (NO HARDCODED VALUES) - Operations schema
+
+    Defines pricing formulas based on conditions.
+    Used by Pricing Calculator Agent for dynamic pricing.
+
+    Schema: ops.pricing_rules
+
+    Business Logic:
+    - NO hardcoded prices (violates Rule 01)
+    - Condition-based pricing
+    - Priority-based conflict resolution
+    - Effective date ranges
+    """
+
+    __tablename__ = "pricing_rules"
+    __table_args__ = (
+        Index("idx_ops_pricing_rules_type", "rule_type"),
+        Index("idx_ops_pricing_rules_active", "is_active"),
+        Index("idx_ops_pricing_rules_priority", "priority"),
+        {"schema": "ops"},
+    )
+
+    # Primary Key
+    id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    )
+
+    # Rule Details
+    rule_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    rule_type: Mapped[str] = mapped_column(
+        String(50), nullable=False
+    )  # "base_price", "travel_fee", "discount", "service_fee"
+
+    # Conditions & Formula (JSONB for flexible rules)
+    conditions: Mapped[dict] = mapped_column(
+        JSONB, nullable=False, default=dict
+    )  # {"guest_count": ">10", "day": "weekend"}
+    pricing_formula: Mapped[dict] = mapped_column(
+        JSONB, nullable=False, default=dict
+    )  # {"base": 55, "per_person": 50, "multiplier": 1.2}
+
+    # Effective Dates
+    effective_start_date: Mapped[date] = mapped_column(Date, nullable=False)
+    effective_end_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+
+    # Priority (higher = takes precedence)
+    priority: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    # Status
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+    )
+
+
+# ============================================================================
 # EXPORTS
 # ============================================================================
 
@@ -712,6 +910,10 @@ __all__ = [
     "TransactionType",
     # Shift Models
     "ShiftSchedule",
+    # Phase 2A Models (Distance, Menu, Pricing Agents)
+    "TravelZone",
+    "MenuItem",
+    "PricingRule",
 ]
 
 # Schema metadata for Phase 1B validation

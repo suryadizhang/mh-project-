@@ -8,6 +8,7 @@ from fastapi import APIRouter
 
 # Import endpoint routers
 from .endpoints import (
+    addon_items,
     ai_costs,
     ai_readiness,
     analytics_holidays,
@@ -17,7 +18,9 @@ from .endpoints import (
     customers,
     inbox,
     leads,
+    menu_items,
     newsletters,
+    pricing,
     rate_limit_metrics,
     shadow_learning,
 )
@@ -35,6 +38,9 @@ api_router.include_router(bookings.router, prefix="/bookings", tags=["Bookings"]
 api_router.include_router(customers.router, prefix="/customers", tags=["Customers"])
 api_router.include_router(leads.router, prefix="/leads", tags=["Leads"])
 api_router.include_router(inbox.router, prefix="/inbox", tags=["Inbox"])
+api_router.include_router(pricing.router, tags=["Pricing"])
+api_router.include_router(menu_items.router, tags=["Pricing", "Menu Items"])
+api_router.include_router(addon_items.router, tags=["Pricing", "Addon Items"])
 
 # AI endpoints (integrated, not separate API)
 api_router.include_router(chat.router, prefix="/ai", tags=["AI"])
@@ -53,9 +59,13 @@ api_router.include_router(ai_readiness.router, tags=["AI Readiness"])
 api_router.include_router(rate_limit_metrics.router, prefix="/monitoring", tags=["Monitoring"])
 
 # AI-Powered Marketing endpoints (NEW)
-api_router.include_router(newsletters.router, prefix="/marketing", tags=["AI Marketing", "Newsletters"])
+api_router.include_router(
+    newsletters.router, prefix="/marketing", tags=["AI Marketing", "Newsletters"]
+)
 api_router.include_router(campaigns.router, prefix="/marketing", tags=["AI Marketing", "Campaigns"])
-api_router.include_router(analytics_holidays.router, prefix="/marketing", tags=["AI Marketing", "Analytics"])
+api_router.include_router(
+    analytics_holidays.router, prefix="/marketing", tags=["AI Marketing", "Analytics"]
+)
 
 # TODO: Add remaining AI endpoints
 # api_router.include_router(voice.router, prefix="/ai/voice", tags=["AI Voice"])

@@ -12,8 +12,14 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models import SMSDeliveryEvent, Subscriber
-from models.enums import SMSDeliveryStatus
+# MIGRATED: Imports moved from OLD models to NEW db.models system
+from db.models.newsletter import Subscriber
+
+# TODO: Manual migration needed for: SMSDeliveryEvent
+# from models import SMSDeliveryEvent
+# MIGRATED: Enum imports moved from models.enums to NEW db.models system
+# TODO: Manual migration needed for enums: SMSDeliveryStatus
+# from models.enums import SMSDeliveryStatus
 from services.email.base import (
     EmailResult,
 )  # We'll reuse this structure for consistency
@@ -134,10 +140,7 @@ class NewsletterSMSService:
             )
 
             # Check if send was successful
-            success = (
-                result.get("messageStatus") == "Sent"
-                or result.get("id") is not None
-            )
+            success = result.get("messageStatus") == "Sent" or result.get("id") is not None
             segments = self._calculate_segments(message_content)
             ringcentral_msg_id = result.get("id")
 
@@ -164,9 +167,7 @@ class NewsletterSMSService:
                     f"✅ Campaign SMS sent: {subscriber_phone}",
                     extra={
                         "phone": subscriber_phone,
-                        "campaign_id": (
-                            str(campaign_id) if campaign_id else None
-                        ),
+                        "campaign_id": (str(campaign_id) if campaign_id else None),
                         "message_id": ringcentral_msg_id,
                         "segments": segments,
                     },
@@ -178,12 +179,8 @@ class NewsletterSMSService:
                     metadata={
                         "phone": subscriber_phone,
                         "segments": segments,
-                        "campaign_id": (
-                            str(campaign_id) if campaign_id else None
-                        ),
-                        "subscriber_id": (
-                            str(subscriber_id) if subscriber_id else None
-                        ),
+                        "campaign_id": (str(campaign_id) if campaign_id else None),
+                        "subscriber_id": (str(subscriber_id) if subscriber_id else None),
                     },
                 )
             else:
@@ -202,8 +199,7 @@ class NewsletterSMSService:
                 if self.db and campaign_event_id and ringcentral_msg_id:
                     await self._create_delivery_event(
                         campaign_event_id=campaign_event_id,
-                        ringcentral_msg_id=ringcentral_msg_id
-                        or f"failed-{subscriber_phone}",
+                        ringcentral_msg_id=ringcentral_msg_id or f"failed-{subscriber_phone}",
                         status=SMSDeliveryStatus.FAILED,
                         segments=self._calculate_segments(message_content),
                         failure_reason=error_msg,
@@ -213,9 +209,7 @@ class NewsletterSMSService:
                     f"❌ Campaign SMS failed: {subscriber_phone} - {error_msg}",
                     extra={
                         "phone": subscriber_phone,
-                        "campaign_id": (
-                            str(campaign_id) if campaign_id else None
-                        ),
+                        "campaign_id": (str(campaign_id) if campaign_id else None),
                         "error": error_msg,
                     },
                 )
@@ -326,9 +320,7 @@ class NewsletterSMSService:
             subscriber = result.scalar_one_or_none()
 
             if not subscriber:
-                logger.warning(
-                    f"Subscriber {subscriber_id} not found for metric update"
-                )
+                logger.warning(f"Subscriber {subscriber_id} not found for metric update")
                 return
 
             # Update counters
@@ -374,9 +366,7 @@ class NewsletterSMSService:
                     }
                 )
             except Exception as ws_error:
-                logger.debug(
-                    f"Failed to broadcast compliance update: {ws_error}"
-                )
+                logger.debug(f"Failed to broadcast compliance update: {ws_error}")
                 # Don't fail the operation if WebSocket broadcast fails
 
         except Exception as e:
@@ -452,9 +442,7 @@ class NewsletterSMSService:
                     }
                 )
             except Exception as ws_error:
-                logger.debug(
-                    f"Failed to broadcast compliance update: {ws_error}"
-                )
+                logger.debug(f"Failed to broadcast compliance update: {ws_error}")
                 # Don't fail the operation if WebSocket broadcast fails
 
         except Exception as e:

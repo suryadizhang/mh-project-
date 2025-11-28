@@ -17,6 +17,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 # Import Google Secret Manager integration
 try:
     from config.gsm_config import GSMConfig, get_gsm_config
+
     GSM_AVAILABLE = True
 except ImportError:
     GSMConfig = None
@@ -61,26 +62,26 @@ class Settings(BaseSettings):
     # ========================================
     # Configuration for loading secrets from Google Cloud
     # Falls back to environment variables if GSM unavailable
-    
+
     # GCP Project Configuration
     GCP_PROJECT_ID: str = "my-hibachi-crm"  # Google Cloud project ID
     GCP_ENVIRONMENT: str = "prod"  # GSM environment prefix (prod, dev, staging)
-    
+
     # GSM Runtime State (populated after async initialization)
-    _gsm_config: Optional['GSMConfig'] = None  # GSM client instance (initialized async)
+    _gsm_config: Optional["GSMConfig"] = None  # GSM client instance (initialized async)
     _gsm_initialized: bool = False  # Whether GSM has been initialized
     _secrets_loaded_from_gsm: bool = False  # Whether secrets came from GSM
-    
+
     async def initialize_gsm(self) -> Dict[str, Any]:
         """
         Initialize Google Secret Manager and load secrets asynchronously.
-        
+
         This method is called during application startup (main.py lifespan)
         to load secrets from GSM with automatic fallback to environment variables.
-        
+
         Returns:
             Dict with loaded secrets and status information
-            
+
         Behavior:
             - If GSM available: Loads secrets from Google Cloud Secret Manager
             - If GSM unavailable: Uses environment variables (already loaded by Pydantic)
@@ -92,12 +93,12 @@ class Settings(BaseSettings):
             self._gsm_initialized = True
             self._secrets_loaded_from_gsm = False
             return {"status": "env_only", "gsm_available": False}
-        
+
         try:
             # Initialize GSM client
             self._gsm_config = get_gsm_config()
             logger.info(f"🔑 Initializing GSM for project: {self.GCP_PROJECT_ID}")
-            
+
             # Define critical secrets to load from GSM
             # Format: (category, key, env_var_fallback)
             critical_secrets = [
@@ -109,14 +110,14 @@ class Settings(BaseSettings):
                 ("backend-api", "REDIS_URL", "REDIS_URL"),
                 ("backend-api", "SMTP_PASSWORD", "SMTP_PASSWORD"),
             ]
-            
+
             # Load secrets from GSM
             loaded_secrets = await self._gsm_config.get_secrets_batch(critical_secrets)
-            
+
             # Update Settings with GSM values (if loaded)
             gsm_count = 0
             env_count = 0
-            
+
             for category, key, env_var in critical_secrets:
                 if key in loaded_secrets:
                     # Secret loaded from GSM - update Settings
@@ -128,22 +129,22 @@ class Settings(BaseSettings):
                     # Fallback to environment variable (already loaded by Pydantic)
                     env_count += 1
                     logger.debug(f"⚠️ Using environment variable for {env_var}")
-            
+
             self._gsm_initialized = True
             self._secrets_loaded_from_gsm = gsm_count > 0
-            
+
             logger.info(
                 f"🔑 GSM initialization complete: "
                 f"{gsm_count} from GSM, {env_count} from environment"
             )
-            
+
             return {
                 "status": "success",
                 "gsm_available": True,
                 "secrets_from_gsm": gsm_count,
                 "secrets_from_env": env_count,
             }
-            
+
         except Exception as e:
             logger.warning(f"⚠️ GSM initialization failed: {e} - using environment variables")
             self._gsm_initialized = True
@@ -153,14 +154,14 @@ class Settings(BaseSettings):
                 "gsm_available": False,
                 "error": str(e),
             }
-    
+
     def get_secret_source(self, secret_name: str) -> str:
         """
         Get the source of a secret (GSM or environment variable).
-        
+
         Args:
             secret_name: Name of the secret (e.g., 'STRIPE_SECRET_KEY')
-            
+
         Returns:
             'gsm' if loaded from Google Secret Manager
             'env' if loaded from environment variable
@@ -169,7 +170,7 @@ class Settings(BaseSettings):
         if not self._gsm_initialized:
             return "unknown"
         return "gsm" if self._secrets_loaded_from_gsm else "env"
-    
+
     # ========================================
 
     # Application
@@ -204,7 +205,9 @@ class Settings(BaseSettings):
     ENCRYPTION_KEY: str  # REQUIRED: Must come from .env (32+ chars)
 
     # Field-Level Encryption (Fernet) - for Customer PII
-    FIELD_ENCRYPTION_KEY: str | None = None  # Base64-encoded Fernet key (generate with: Fernet.generate_key())
+    FIELD_ENCRYPTION_KEY: str | None = (
+        None  # Base64-encoded Fernet key (generate with: Fernet.generate_key())
+    )
     FIELD_ENCRYPTION_KEY_OLD: str | None = None  # Previous key for rotation support
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
@@ -287,17 +290,25 @@ class Settings(BaseSettings):
     # ========================================
 
     # Business Logic Feature Flags
-    FEATURE_FLAG_V2_TRAVEL_FEE_CALCULATOR: bool = False  # New travel fee calculation with improved accuracy
+    FEATURE_FLAG_V2_TRAVEL_FEE_CALCULATOR: bool = (
+        False  # New travel fee calculation with improved accuracy
+    )
     FEATURE_FLAG_BETA_DYNAMIC_PRICING: bool = False  # Dynamic pricing based on demand/season
-    FEATURE_FLAG_NEW_BOOKING_VALIDATION: bool = False  # Enhanced booking validation with race condition fixes
+    FEATURE_FLAG_NEW_BOOKING_VALIDATION: bool = (
+        False  # Enhanced booking validation with race condition fixes
+    )
     FEATURE_FLAG_V2_DEPOSIT_CALCULATION: bool = False  # New deposit calculation logic
 
     # Scheduling & Availability Feature Flags
-    FEATURE_FLAG_SHARED_MULTI_CHEF_SCHEDULING: bool = False  # Multi-chef scheduling system (shared with frontends)
+    FEATURE_FLAG_SHARED_MULTI_CHEF_SCHEDULING: bool = (
+        False  # Multi-chef scheduling system (shared with frontends)
+    )
     FEATURE_FLAG_BETA_SMART_AVAILABILITY: bool = False  # AI-powered availability suggestions
 
     # AI Feature Flags
-    FEATURE_FLAG_ADMIN_AI_INSIGHTS: bool = False  # AI-powered admin insights (shared with admin panel)
+    FEATURE_FLAG_ADMIN_AI_INSIGHTS: bool = (
+        False  # AI-powered admin insights (shared with admin panel)
+    )
     FEATURE_FLAG_BETA_AI_CUSTOMER_TONE: bool = False  # Adaptive AI tone based on customer profile
     FEATURE_FLAG_V2_AI_BOOKING_ASSISTANT: bool = False  # Enhanced AI booking assistance
 
@@ -307,7 +318,9 @@ class Settings(BaseSettings):
     FEATURE_FLAG_NEW_RINGCENTRAL_INTEGRATION: bool = False  # Enhanced RingCentral SMS integration
 
     # Infrastructure Feature Flags
-    FEATURE_FLAG_ENABLE_RATE_LIMITING: bool = True  # Rate limiting for API endpoints (enabled by default for security)
+    FEATURE_FLAG_ENABLE_RATE_LIMITING: bool = (
+        True  # Rate limiting for API endpoints (enabled by default for security)
+    )
     FEATURE_FLAG_ENABLE_FIELD_ENCRYPTION: bool = False  # Field-level encryption for sensitive data
     FEATURE_FLAG_ENABLE_AUDIT_LOGGING: bool = False  # Detailed audit logging for compliance
 
@@ -1158,7 +1171,7 @@ class Settings(BaseSettings):
             ...     return calculate_travel_fee_legacy(distance)
         """
         # Validate naming convention
-        if not flag_name.startswith('FEATURE_FLAG_'):
+        if not flag_name.startswith("FEATURE_FLAG_"):
             raise ValueError(
                 f"Invalid feature flag name: {flag_name}. "
                 f"Must start with 'FEATURE_FLAG_'. "
@@ -1198,7 +1211,7 @@ class Settings(BaseSettings):
 
         # Get all attributes that start with FEATURE_FLAG_
         for attr_name in dir(self):
-            if attr_name.startswith('FEATURE_FLAG_'):
+            if attr_name.startswith("FEATURE_FLAG_"):
                 flag_value = getattr(self, attr_name)
                 if isinstance(flag_value, bool) and flag_value:
                     enabled_flags.append(attr_name)

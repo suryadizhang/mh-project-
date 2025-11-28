@@ -15,7 +15,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from core.database import get_db
-from models.call_recording import CallRecording, RecordingStatus
+
+# MIGRATED: from models.call_recording → db.models.call_recording
+from db.models.call_recording import CallRecording, RecordingStatus
 from services.ringcentral_service import get_ringcentral_service
 from api.deps import get_current_admin_user
 
@@ -32,21 +34,19 @@ async def get_recording(
 ):
     """
     Get call recording metadata and transcript.
-    
+
     Returns:
         - Recording metadata (duration, timestamps, status)
         - RingCentral AI transcript (if available)
         - AI insights (sentiment, topics, action items)
     """
     try:
-        result = await db.execute(
-            select(CallRecording).where(CallRecording.id == recording_id)
-        )
+        result = await db.execute(select(CallRecording).where(CallRecording.id == recording_id))
         recording = result.scalar_one_or_none()
-        
+
         if not recording:
             raise HTTPException(status_code=404, detail="Recording not found")
-        
+
         return {
             "id": str(recording.id),
             "rc_call_id": recording.rc_call_id,
@@ -57,8 +57,11 @@ async def get_recording(
             "transcript": {
                 "text": recording.rc_transcript,
                 "confidence": recording.rc_transcript_confidence,
-                "fetched_at": recording.rc_transcript_fetched_at.isoformat() 
-                    if recording.rc_transcript_fetched_at else None,
+                "fetched_at": (
+                    recording.rc_transcript_fetched_at.isoformat()
+                    if recording.rc_transcript_fetched_at
+                    else None
+                ),
             },
             "ai_insights": recording.rc_ai_insights or {},
             "metadata": {
@@ -68,7 +71,7 @@ async def get_recording(
                 "updated_at": recording.updated_at.isoformat(),
             },
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -84,32 +87,27 @@ async def stream_recording(
 ):
     """
     Get streaming URL for call recording audio.
-    
+
     Returns redirect to RingCentral's CDN with time-limited auth token.
     No download needed - stream directly from RingCentral.
     """
     try:
-        result = await db.execute(
-            select(CallRecording).where(CallRecording.id == recording_id)
-        )
+        result = await db.execute(select(CallRecording).where(CallRecording.id == recording_id))
         recording = result.scalar_one_or_none()
-        
+
         if not recording:
             raise HTTPException(status_code=404, detail="Recording not found")
-        
+
         if not recording.rc_recording_id:
-            raise HTTPException(
-                status_code=400, 
-                detail="Recording not available in RingCentral"
-            )
-        
+            raise HTTPException(status_code=400, detail="Recording not available in RingCentral")
+
         # Get streaming URL from RingCentral
         rc_service = get_ringcentral_service()
         stream_url = rc_service.get_recording_stream_url(recording.rc_recording_id)
-        
+
         # Redirect to RingCentral CDN
         return RedirectResponse(url=stream_url)
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -132,7 +130,7 @@ async def search_recordings(
 ):
     """
     Search call recordings with filters.
-    
+
     Supports filtering by:
     - Phone number
     - Date range
@@ -143,7 +141,7 @@ async def search_recordings(
     try:
         # Build query
         query = select(CallRecording)
-        
+
         # Apply filters
         if phone_number:
             # Need to join with related tables to filter by phone
@@ -154,41 +152,41 @@ async def search_recordings(
                     CallRecording.phone_number == phone_number,
                 )
             )
-        
+
         if start_date:
             query = query.where(CallRecording.recorded_at >= start_date)
-        
+
         if end_date:
             query = query.where(CallRecording.recorded_at <= end_date)
-        
+
         if search_text:
             # PostgreSQL full-text search on transcript
             query = query.where(CallRecording.rc_transcript.ilike(f"%{search_text}%"))
-        
+
         if has_transcript is not None:
             if has_transcript:
                 query = query.where(CallRecording.rc_transcript.isnot(None))
             else:
                 query = query.where(CallRecording.rc_transcript.is_(None))
-        
+
         if status:
             query = query.where(CallRecording.status == status)
-        
+
         # Apply ordering (newest first)
         query = query.order_by(CallRecording.recorded_at.desc())
-        
+
         # Get total count
         count_query = select(select(CallRecording).count())
         total_result = await db.execute(count_query)
         total = total_result.scalar()
-        
+
         # Apply pagination
         query = query.limit(limit).offset(offset)
-        
+
         # Execute query
         result = await db.execute(query)
         recordings = result.scalars().all()
-        
+
         return {
             "total": total,
             "limit": limit,
@@ -202,14 +200,18 @@ async def search_recordings(
                     "recorded_at": rec.recorded_at.isoformat() if rec.recorded_at else None,
                     "has_transcript": bool(rec.rc_transcript),
                     "transcript_preview": (
-                        rec.rc_transcript[:200] + "..." 
-                        if rec.rc_transcript and len(rec.rc_transcript) > 200 
+                        rec.rc_transcript[:200] + "..."
+                        if rec.rc_transcript and len(rec.rc_transcript) > 200
                         else rec.rc_transcript
                     ),
                     "confidence": rec.rc_transcript_confidence,
                     "ai_insights_summary": {
-                        "sentiment": rec.rc_ai_insights.get("sentiment", {}) if rec.rc_ai_insights else {},
-                        "topics": (rec.rc_ai_insights.get("topics", []) if rec.rc_ai_insights else [])[:3],
+                        "sentiment": (
+                            rec.rc_ai_insights.get("sentiment", {}) if rec.rc_ai_insights else {}
+                        ),
+                        "topics": (
+                            rec.rc_ai_insights.get("topics", []) if rec.rc_ai_insights else []
+                        )[:3],
                         "has_action_items": bool(
                             rec.rc_ai_insights.get("action_items") if rec.rc_ai_insights else False
                         ),
@@ -218,7 +220,7 @@ async def search_recordings(
                 for rec in recordings
             ],
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to search recordings: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to search recordings")

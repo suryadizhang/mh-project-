@@ -28,7 +28,7 @@ warnings.warn(
     "core.auth.station_models is deprecated. Use db.models.identity instead. "
     "This module will be removed in Phase 3 of model consolidation.",
     DeprecationWarning,
-    stacklevel=2
+    stacklevel=2,
 )
 
 # Import unified Base (avoid circular import)
@@ -54,7 +54,9 @@ from db.models.identity import User
 # TYPE_CHECKING import to avoid circular dependency
 if TYPE_CHECKING:
     # User already imported above
-    from core.auth.models import UserSession
+    pass
+
+
 class StationStatus(str, Enum):
     """Station operational status."""
 
@@ -240,7 +242,7 @@ class Station(Base):
     """Multi-tenant station model with comprehensive metadata."""
 
     __tablename__ = "stations"
-    __table_args__ = {"schema": "identity"}
+    __table_args__ = {"schema": "identity", "extend_existing": True}
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
 
@@ -328,16 +330,22 @@ class UserStationAssignment(Base):
     )
 
     # Relationships (using lambda primaryjoin for cross-registry compatibility)
-    user = relationship(User, primaryjoin=lambda: UserStationAssignment.user_id == User.id, foreign_keys=[user_id])
+    user = relationship(
+        User, primaryjoin=lambda: UserStationAssignment.user_id == User.id, foreign_keys=[user_id]
+    )
     station = relationship("Station", back_populates="station_users")
-    assigned_by_user = relationship(User, primaryjoin=lambda: UserStationAssignment.assigned_by == User.id, foreign_keys=[assigned_by])
+    assigned_by_user = relationship(
+        User,
+        primaryjoin=lambda: UserStationAssignment.assigned_by == User.id,
+        foreign_keys=[assigned_by],
+    )
 
 
 class StationAuditLog(Base):
     """Station-scoped audit logging for compliance and security."""
 
     __tablename__ = "station_audit_logs"
-    __table_args__ = {"schema": "identity"}
+    __table_args__ = {"schema": "identity", "extend_existing": True}
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
 
@@ -375,7 +383,9 @@ class StationAuditLog(Base):
 
     # Relationships (using lambda primaryjoin for cross-registry compatibility)
     station = relationship("Station")
-    user = relationship(User, primaryjoin=lambda: StationAuditLog.user_id == User.id, foreign_keys=[user_id])
+    user = relationship(
+        User, primaryjoin=lambda: StationAuditLog.user_id == User.id, foreign_keys=[user_id]
+    )
     # session = relationship("core.auth.models.UserSession")  # Commented - invalid path causing mapper errors
 
 
@@ -383,7 +393,7 @@ class StationAccessToken(Base):
     """Station-specific access tokens for enhanced security."""
 
     __tablename__ = "station_access_tokens"
-    __table_args__ = {"schema": "identity"}
+    __table_args__ = {"schema": "identity", "extend_existing": True}
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
 
@@ -414,7 +424,9 @@ class StationAccessToken(Base):
     is_revoked = Column(Boolean, nullable=False, default=False)
 
     # Relationships (using lambda primaryjoin for cross-registry compatibility)
-    user = relationship(User, primaryjoin=lambda: StationAccessToken.user_id == User.id, foreign_keys=[user_id])
+    user = relationship(
+        User, primaryjoin=lambda: StationAccessToken.user_id == User.id, foreign_keys=[user_id]
+    )
     station = relationship("Station")
     # session = relationship("core.auth.models.UserSession")  # Commented - invalid path causing mapper errors
 

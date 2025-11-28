@@ -107,7 +107,7 @@ async def lifespan(app: FastAPI):
     try:
         logger.info("🔐 Initializing Google Secret Manager...")
         gsm_status = await settings.initialize_gsm()
-        
+
         if gsm_status.get("status") == "success":
             logger.info(
                 f"✅ GSM initialized: {gsm_status.get('secrets_from_gsm', 0)} secrets from GSM, "
@@ -787,9 +787,19 @@ app.include_router(bookings.router, prefix="/api/bookings", tags=["bookings"])
 # Also register with /api/v1 prefix for frontend compatibility
 app.include_router(bookings.router, prefix="/api/v1/bookings", tags=["bookings-v1"])
 
+# Include v1 API router (pricing, menu items, addon items)
+try:
+    from api.v1.api import api_router as v1_api_router
+
+    app.include_router(v1_api_router, prefix="/api/v1")
+    logger.info("✅ V1 API endpoints included (pricing, menu items, addon items)")
+except ImportError as e:
+    logger.warning(f"V1 API endpoints not available: {e}")
+
 # Include Booking Reminders endpoints (Sprint 1 - Feature Flag: BOOKING_REMINDERS)
 try:
     from routers.v1.booking_reminders import router as booking_reminders_router
+
     app.include_router(booking_reminders_router, prefix="/api/v1", tags=["booking-reminders"])
 except ImportError:
     pass
@@ -992,14 +1002,18 @@ try:
     from routers.v1.newsletter import analytics_router as newsletter_analytics_router
 
     app.include_router(leads_router, prefix="/api/leads", tags=["leads"])
-    app.include_router(leads_router, prefix="/api/v1/public/leads", tags=["leads-public"])  # Public endpoint
+    app.include_router(
+        leads_router, prefix="/api/v1/public/leads", tags=["leads-public"]
+    )  # Public endpoint
     app.include_router(newsletter_router, prefix="/api/newsletter", tags=["newsletter"])
     app.include_router(newsletter_analytics_router, prefix="/api", tags=["newsletter-analytics"])
     app.include_router(ringcentral_router, prefix="/api/ringcentral", tags=["sms"])
     app.include_router(conversations_router, prefix="/api/v1", tags=["conversations"])
     app.include_router(referrals_router, prefix="/api/v1", tags=["referrals"])
     app.include_router(campaigns_router, prefix="/api/v1", tags=["campaigns"])
-    logger.info("✅ All CRM routers included (leads, newsletter, campaigns, referrals, SMS, conversations)")
+    logger.info(
+        "✅ All CRM routers included (leads, newsletter, campaigns, referrals, SMS, conversations)"
+    )
 except ImportError as e:
     logger.error(f"❌ Some additional routers not available: {e}")
 
@@ -1024,6 +1038,7 @@ except ImportError as e:
             "message": "AI chat endpoint - moved from apps/ai-api",
             "note": "Full implementation pending import path fixes",
         }
+
 
 # NLP Monitoring endpoints
 try:

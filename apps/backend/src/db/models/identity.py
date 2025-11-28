@@ -26,8 +26,15 @@ from typing import Optional, List
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
-    Column, String, Text, Integer, Boolean, DateTime,
-    ForeignKey, Index, UniqueConstraint, Enum as SQLEnum
+    String,
+    Text,
+    Integer,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Index,
+    UniqueConstraint,
+    Enum as SQLEnum,
 )
 from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB
 from sqlalchemy.orm import relationship, Mapped, mapped_column
@@ -40,8 +47,10 @@ from ..base_class import Base
 
 import enum
 
+
 class RoleType(str, enum.Enum):
     """System role types"""
+
     SUPER_ADMIN = "super_admin"
     ADMIN = "admin"
     MANAGER = "manager"
@@ -52,6 +61,7 @@ class RoleType(str, enum.Enum):
 
 class PermissionType(str, enum.Enum):
     """Permission types"""
+
     READ = "read"
     WRITE = "write"
     DELETE = "delete"
@@ -61,6 +71,7 @@ class PermissionType(str, enum.Enum):
 
 class UserStatus(str, enum.Enum):
     """User account status"""
+
     ACTIVE = "active"
     INACTIVE = "inactive"
     SUSPENDED = "suspended"
@@ -69,6 +80,7 @@ class UserStatus(str, enum.Enum):
 
 class AuthProvider(str, enum.Enum):
     """OAuth authentication providers"""
+
     GOOGLE = "google"
     FACEBOOK = "facebook"
     INSTAGRAM = "instagram"
@@ -77,6 +89,7 @@ class AuthProvider(str, enum.Enum):
 
 class AuditAction(str, enum.Enum):
     """Audit log action types"""
+
     LOGIN = "login"
     LOGOUT = "logout"
     CREATE = "create"
@@ -91,6 +104,7 @@ class AuditAction(str, enum.Enum):
 
 # ==================== MODELS ====================
 
+
 class User(Base):
     """
     User entity (in identity schema)
@@ -98,12 +112,13 @@ class User(Base):
     Core user account with authentication and profile.
     Referenced by identity.stations and other schemas.
     """
+
     __tablename__ = "users"
     __table_args__ = (
         Index("idx_users_email", "email"),
         Index("idx_users_status", "status"),
         Index("idx_users_created_at", "created_at"),
-        {"schema": "identity"}
+        {"schema": "identity"},
     )
 
     # Primary Key
@@ -124,7 +139,7 @@ class User(Base):
         SQLEnum(UserStatus, name="userstatus", schema="public", create_type=False),
         nullable=False,
         default=UserStatus.ACTIVE,
-        index=True
+        index=True,
     )
     is_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
@@ -132,23 +147,26 @@ class User(Base):
     user_metadata: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
 
     # Timestamps
-    last_login_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_login_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Relationships
-    user_roles: Mapped[List["UserRole"]] = relationship("UserRole", foreign_keys="[UserRole.user_id]", back_populates="user")
-    oauth_accounts: Mapped[List["OAuthAccount"]] = relationship("OAuthAccount", back_populates="user")
-    google_oauth_accounts: Mapped[List["GoogleOAuthAccount"]] = relationship("GoogleOAuthAccount", foreign_keys="[GoogleOAuthAccount.user_id]", back_populates="user")
+    user_roles: Mapped[List["UserRole"]] = relationship(
+        "UserRole", foreign_keys="[UserRole.user_id]", back_populates="user"
+    )
+    oauth_accounts: Mapped[List["OAuthAccount"]] = relationship(
+        "OAuthAccount", back_populates="user"
+    )
+    google_oauth_accounts: Mapped[List["GoogleOAuthAccount"]] = relationship(
+        "GoogleOAuthAccount", foreign_keys="[GoogleOAuthAccount.user_id]", back_populates="user"
+    )
     station_users: Mapped[List["StationUser"]] = relationship("StationUser", back_populates="user")
 
 
@@ -158,12 +176,13 @@ class Role(Base):
 
     Defines user roles with permissions (RBAC).
     """
+
     __tablename__ = "roles"
     __table_args__ = (
         Index("idx_roles_name", "name"),
         Index("idx_roles_role_type", "role_type"),
         Index("idx_roles_active", "is_active"),
-        {"schema": "identity"}
+        {"schema": "identity"},
     )
 
     # Primary Key
@@ -175,7 +194,7 @@ class Role(Base):
     role_type: Mapped[RoleType] = mapped_column(
         SQLEnum(RoleType, name="roletype", schema="public", create_type=False),
         nullable=False,
-        index=True
+        index=True,
     )
 
     # Status
@@ -184,20 +203,19 @@ class Role(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Relationships
-    role_permissions: Mapped[List["RolePermission"]] = relationship("RolePermission", back_populates="role", cascade="all, delete-orphan")
-    user_roles: Mapped[List["UserRole"]] = relationship("UserRole", back_populates="role", cascade="all, delete-orphan")
+    role_permissions: Mapped[List["RolePermission"]] = relationship(
+        "RolePermission", back_populates="role", cascade="all, delete-orphan"
+    )
+    user_roles: Mapped[List["UserRole"]] = relationship(
+        "UserRole", back_populates="role", cascade="all, delete-orphan"
+    )
 
 
 class Permission(Base):
@@ -206,33 +224,36 @@ class Permission(Base):
 
     Defines granular permissions for RBAC.
     """
+
     __tablename__ = "permissions"
     __table_args__ = (
         Index("idx_permissions_resource_action", "resource", "action"),
         UniqueConstraint("resource", "action", name="uq_permissions_resource_action"),
-        {"schema": "identity"}
+        {"schema": "identity"},
     )
 
     # Primary Key
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Permission Details
-    resource: Mapped[str] = mapped_column(String(100), nullable=False)  # e.g., "bookings", "customers"
+    resource: Mapped[str] = mapped_column(
+        String(100), nullable=False
+    )  # e.g., "bookings", "customers"
     action: Mapped[PermissionType] = mapped_column(
         SQLEnum(PermissionType, name="permissiontype", schema="public", create_type=False),
-        nullable=False
+        nullable=False,
     )
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
     # Relationships
-    role_permissions: Mapped[List["RolePermission"]] = relationship("RolePermission", back_populates="permission", cascade="all, delete-orphan")
+    role_permissions: Mapped[List["RolePermission"]] = relationship(
+        "RolePermission", back_populates="permission", cascade="all, delete-orphan"
+    )
 
 
 class RolePermission(Base):
@@ -241,26 +262,29 @@ class RolePermission(Base):
 
     Many-to-many relationship between roles and permissions.
     """
+
     __tablename__ = "role_permissions"
     __table_args__ = (
         Index("idx_role_permissions_role_id", "role_id"),
         Index("idx_role_permissions_permission_id", "permission_id"),
         UniqueConstraint("role_id", "permission_id", name="uq_role_permissions"),
-        {"schema": "identity"}
+        {"schema": "identity"},
     )
 
     # Primary Key
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Foreign Keys
-    role_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("identity.roles.id"), nullable=False)
-    permission_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("identity.permissions.id"), nullable=False)
+    role_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("identity.roles.id"), nullable=False
+    )
+    permission_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("identity.permissions.id"), nullable=False
+    )
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
     # Relationships
@@ -280,38 +304,35 @@ class UserRole(Base):
     - CASCADE delete (if user or role deleted, assignment removed)
     - assigned_by: Optional tracking (who granted this role)
     """
+
     __tablename__ = "user_roles"
-    __table_args__ = (
-        {"schema": "identity"},
-    )
+    __table_args__ = ({"schema": "identity"},)
 
     # Composite primary key
     user_id: Mapped[UUID] = mapped_column(
         PGUUID(as_uuid=True),
         ForeignKey("identity.users.id", ondelete="CASCADE"),
         primary_key=True,
-        comment="User ID"
+        comment="User ID",
     )
 
     role_id: Mapped[UUID] = mapped_column(
         PGUUID(as_uuid=True),
         ForeignKey("identity.roles.id", ondelete="CASCADE"),
         primary_key=True,
-        comment="Role ID"
+        comment="Role ID",
     )
 
     # Audit fields
     assigned_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        comment="When role was assigned"
+        DateTime(timezone=True), server_default=func.now(), comment="When role was assigned"
     )
 
     assigned_by: Mapped[Optional[UUID]] = mapped_column(
         PGUUID(as_uuid=True),
         ForeignKey("identity.users.id", ondelete="SET NULL"),
         nullable=True,
-        comment="Who assigned this role"
+        comment="Who assigned this role",
     )
 
     # Relationships
@@ -325,11 +346,12 @@ class Station(Base):
 
     Represents a physical location/station with multi-tenant support.
     """
+
     __tablename__ = "stations"
     __table_args__ = (
         Index("idx_stations_name", "name"),
         Index("idx_stations_active", "is_active"),
-        {"schema": "identity"}
+        {"schema": "identity", "extend_existing": True},
     )
 
     # Primary Key
@@ -357,21 +379,22 @@ class Station(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Relationships
-    station_users: Mapped[List["StationUser"]] = relationship("StationUser", back_populates="station", cascade="all, delete-orphan")
-    access_tokens: Mapped[List["StationAccessToken"]] = relationship("StationAccessToken", back_populates="station", cascade="all, delete-orphan")
-    audit_logs: Mapped[List["StationAuditLog"]] = relationship("StationAuditLog", back_populates="station", cascade="all, delete-orphan")
+    station_users: Mapped[List["StationUser"]] = relationship(
+        "StationUser", back_populates="station", cascade="all, delete-orphan"
+    )
+    access_tokens: Mapped[List["StationAccessToken"]] = relationship(
+        "StationAccessToken", back_populates="station", cascade="all, delete-orphan"
+    )
+    audit_logs: Mapped[List["StationAuditLog"]] = relationship(
+        "StationAuditLog", back_populates="station", cascade="all, delete-orphan"
+    )
 
 
 class StationUser(Base):
@@ -381,35 +404,35 @@ class StationUser(Base):
     Many-to-many relationship between stations and users.
     Allows users to access multiple stations.
     """
+
     __tablename__ = "station_users"
     __table_args__ = (
         Index("idx_station_users_station_id", "station_id"),
         Index("idx_station_users_user_id", "user_id"),
         UniqueConstraint("station_id", "user_id", name="uq_station_users"),
-        {"schema": "identity"}
+        {"schema": "identity"},
     )
 
     # Primary Key
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Foreign Keys
-    station_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("identity.stations.id"), nullable=False)
-    user_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=False)
+    station_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("identity.stations.id"), nullable=False
+    )
+    user_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=False
+    )
 
     # Access Details
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Relationships
@@ -423,19 +446,22 @@ class StationAccessToken(Base):
 
     API tokens for station-level authentication.
     """
+
     __tablename__ = "station_access_tokens"
     __table_args__ = (
         Index("idx_station_access_tokens_station_id", "station_id"),
         Index("idx_station_access_tokens_token", "token"),
         Index("idx_station_access_tokens_active", "is_active"),
-        {"schema": "identity"}
+        {"schema": "identity"},
     )
 
     # Primary Key
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Foreign Keys
-    station_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("identity.stations.id"), nullable=False)
+    station_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("identity.stations.id"), nullable=False
+    )
 
     # Token Details
     token: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
@@ -454,15 +480,10 @@ class StationAccessToken(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Relationships
@@ -475,29 +496,36 @@ class StationAuditLog(Base):
 
     Tracks all actions performed at station level for compliance.
     """
+
     __tablename__ = "station_audit_logs"
     __table_args__ = (
         Index("idx_station_audit_logs_station_id", "station_id"),
         Index("idx_station_audit_logs_user_id", "user_id"),
         Index("idx_station_audit_logs_action", "action"),
         Index("idx_station_audit_logs_created_at", "created_at"),
-        {"schema": "identity"}
+        {"schema": "identity"},
     )
 
     # Primary Key
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Foreign Keys
-    station_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("identity.stations.id"), nullable=False)
-    user_id: Mapped[Optional[UUID]] = mapped_column(PGUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=True)
+    station_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("identity.stations.id"), nullable=False
+    )
+    user_id: Mapped[Optional[UUID]] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=True
+    )
 
     # Action Details
     action: Mapped[AuditAction] = mapped_column(
         SQLEnum(AuditAction, name="audit_action", schema="public", create_type=False),
         nullable=False,
-        index=True
+        index=True,
     )
-    resource_type: Mapped[str] = mapped_column(String(100), nullable=False)  # e.g., "booking", "customer"
+    resource_type: Mapped[str] = mapped_column(
+        String(100), nullable=False
+    )  # e.g., "booking", "customer"
     resource_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
     # Details
@@ -510,10 +538,7 @@ class StationAuditLog(Base):
 
     # Timestamp
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        index=True
+        DateTime(timezone=True), nullable=False, server_default=func.now(), index=True
     )
 
     # Relationships
@@ -527,25 +552,28 @@ class OAuthAccount(Base):
     Stores OAuth tokens for third-party login (Google, Facebook, etc.).
     Different from lead.SocialAccount (business social media pages).
     """
+
     __tablename__ = "social_accounts"
     __table_args__ = (
         Index("idx_social_accounts_user_id", "user_id"),
         Index("idx_social_accounts_provider", "provider"),
         UniqueConstraint("provider", "provider_account_id", name="uq_social_accounts_provider"),
-        {"schema": "identity"}
+        {"schema": "identity"},
     )
 
     # Primary Key
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Foreign Keys
-    user_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=False)
+    user_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=False
+    )
 
     # Provider Details
     provider: Mapped[AuthProvider] = mapped_column(
         SQLEnum(AuthProvider, name="authprovider", schema="public", create_type=False),
         nullable=False,
-        index=True
+        index=True,
     )
     provider_account_id: Mapped[str] = mapped_column(String(255), nullable=False)
 
@@ -559,15 +587,10 @@ class OAuthAccount(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Relationships
@@ -576,8 +599,10 @@ class OAuthAccount(Base):
 
 # ==================== GOOGLE OAUTH MODELS ====================
 
+
 class InvitationStatus(str, enum.Enum):
     """Status of admin invitation."""
+
     PENDING = "pending"
     ACCEPTED = "accepted"
     REJECTED = "rejected"
@@ -590,6 +615,7 @@ class AdminInvitation(Base):
     Admin invitation system for Google OAuth access control.
     Super admins can invite any Google account.
     """
+
     __tablename__ = "admin_invitations"
     __table_args__ = {"schema": "identity"}
 
@@ -597,7 +623,9 @@ class AdminInvitation(Base):
 
     # Invitation details
     email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
-    invitation_code: Mapped[str] = mapped_column(String(100), nullable=False, unique=True, index=True)
+    invitation_code: Mapped[str] = mapped_column(
+        String(100), nullable=False, unique=True, index=True
+    )
 
     # Role assignment
     role: Mapped[str] = mapped_column(String(30), nullable=False, default="customer_support")
@@ -606,9 +634,15 @@ class AdminInvitation(Base):
     )
 
     # Invitation lifecycle
-    status: Mapped[str] = mapped_column(String(20), nullable=False, default=InvitationStatus.PENDING.value)
-    invited_by: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=False)
-    invited_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default=InvitationStatus.PENDING.value
+    )
+    invited_by: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=False
+    )
+    invited_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     # Acceptance tracking
@@ -619,7 +653,9 @@ class AdminInvitation(Base):
 
     # Revocation tracking
     revoked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    revoked_by: Mapped[Optional[UUID]] = mapped_column(PGUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=True)
+    revoked_by: Mapped[Optional[UUID]] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=True
+    )
     revoked_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Metadata
@@ -628,7 +664,9 @@ class AdminInvitation(Base):
     # Relationships
     inviter: Mapped["User"] = relationship("User", foreign_keys=[invited_by])
     station: Mapped[Optional["Station"]] = relationship("Station")
-    accepted_user: Mapped[Optional["User"]] = relationship("User", foreign_keys=[accepted_by_user_id])
+    accepted_user: Mapped[Optional["User"]] = relationship(
+        "User", foreign_keys=[accepted_by_user_id]
+    )
     revoker: Mapped[Optional["User"]] = relationship("User", foreign_keys=[revoked_by])
 
 
@@ -637,13 +675,16 @@ class GoogleOAuthAccount(Base):
     Google OAuth account linking for admin authentication.
     Separate from general OAuthAccount to support Google-specific features.
     """
+
     __tablename__ = "oauth_accounts"
     __table_args__ = {"schema": "identity"}
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # User linkage
-    user_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=False, index=True)
+    user_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=False, index=True
+    )
 
     # OAuth provider details
     provider: Mapped[str] = mapped_column(String(20), nullable=False, default="google")
@@ -653,7 +694,9 @@ class GoogleOAuthAccount(Base):
     # OAuth tokens
     access_token: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     refresh_token: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    token_expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    token_expires_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # Profile information
     provider_profile: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
@@ -665,23 +708,33 @@ class GoogleOAuthAccount(Base):
 
     # Approval tracking
     is_approved: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    approved_by: Mapped[Optional[UUID]] = mapped_column(PGUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=True)
+    approved_by: Mapped[Optional[UUID]] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=True
+    )
     approved_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Revocation tracking
     revoked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    revoked_by: Mapped[Optional[UUID]] = mapped_column(PGUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=True)
+    revoked_by: Mapped[Optional[UUID]] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=True
+    )
     revoked_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Timestamps
-    linked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
-    last_login_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    linked_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    last_login_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Relationships
-    user: Mapped["User"] = relationship("User", foreign_keys=[user_id], back_populates="google_oauth_accounts")
+    user: Mapped["User"] = relationship(
+        "User", foreign_keys=[user_id], back_populates="google_oauth_accounts"
+    )
     approver: Mapped[Optional["User"]] = relationship("User", foreign_keys=[approved_by])
     revoker_user: Mapped[Optional["User"]] = relationship("User", foreign_keys=[revoked_by])
 
@@ -691,6 +744,7 @@ class AdminAccessLog(Base):
     Audit log for admin access via Google OAuth.
     Tracks login attempts, approvals, revocations.
     """
+
     __tablename__ = "admin_access_logs"
     __table_args__ = {"schema": "identity"}
 
@@ -718,7 +772,9 @@ class AdminAccessLog(Base):
     user_agent: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Timestamp
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
 
     # Relationships
     user: Mapped[Optional["User"]] = relationship("User", foreign_keys=[user_id])

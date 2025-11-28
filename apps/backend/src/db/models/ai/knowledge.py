@@ -31,7 +31,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import JSONB
 
-from models.base import Base
+# MIGRATED: from models.base → ...base_class (3 levels up from ai/)
+from ...base_class import Base
 
 
 # ============================================================================
@@ -51,6 +52,7 @@ class KnowledgeSourceType(str, Enum):
     - MENU: Menu items and pricing information
     - CUSTOM: Custom admin-created content
     """
+
     FAQ = "faq"
     POLICY = "policy"
     PROCEDURE = "procedure"
@@ -121,22 +123,17 @@ class KnowledgeBaseChunk(Base):
         # Category and source type lookups
         Index("idx_kb_category", "category"),
         Index("idx_kb_source_type", "source_type"),
-
         # Quality and usage tracking
         Index("idx_kb_usage_success", "usage_count", "success_rate"),
         Index("idx_kb_updated", "updated_at"),
-
         # Tagging system (JSONB array search)
         Index("idx_kb_tags", "tags", postgresql_using="gin"),
-
         # Source tracking (learned content)
         Index("idx_kb_source_message", "source_message_id"),
-
         # TODO: Vector index (requires pgvector extension)
         # Index("idx_kb_vector", "vector", postgresql_using="ivfflat")
         # Or: postgresql_using="hnsw" for better performance
-
-        {"schema": "ai"}
+        {"schema": "ai"},
     )
 
     # ========================================================================
@@ -147,24 +144,16 @@ class KnowledgeBaseChunk(Base):
         String(36),
         primary_key=True,
         default=lambda: str(uuid.uuid4()),
-        comment="Unique chunk identifier (UUID)"
+        comment="Unique chunk identifier (UUID)",
     )
 
     # ========================================================================
     # CONTENT
     # ========================================================================
 
-    title = Column(
-        String(500),
-        nullable=False,
-        comment="Chunk title (question, heading, topic)"
-    )
+    title = Column(String(500), nullable=False, comment="Chunk title (question, heading, topic)")
 
-    text = Column(
-        Text,
-        nullable=False,
-        comment="Chunk content (answer, documentation, procedure)"
-    )
+    text = Column(Text, nullable=False, comment="Chunk content (answer, documentation, procedure)")
 
     vector = Column(
         JSON,
@@ -174,7 +163,7 @@ class KnowledgeBaseChunk(Base):
         TODO: Change to VECTOR(384) when pgvector extension is enabled.
         Current: JSON array [0.1, 0.2, ..., 0.384]
         Future: VECTOR(384) with IVFFlat or HNSW index
-        """
+        """,
     )
 
     # ========================================================================
@@ -189,7 +178,7 @@ class KnowledgeBaseChunk(Base):
         Tag array for flexible categorization:
         ["booking", "pricing", "menu", "cancellation", "refund"]
         GIN index for fast array searches.
-        """
+        """,
     )
 
     category = Column(
@@ -202,13 +191,11 @@ class KnowledgeBaseChunk(Base):
         - policy (refunds, cancellations, guarantees)
         - procedure (step-by-step guides)
         - general (company info, contact)
-        """
+        """,
     )
 
     source_type = Column(
-        String(50),
-        nullable=True,
-        comment="Source type (faq/policy/procedure/learned/menu/custom)"
+        String(50), nullable=True, comment="Source type (faq/policy/procedure/learned/menu/custom)"
     )
 
     # ========================================================================
@@ -219,7 +206,7 @@ class KnowledgeBaseChunk(Base):
         Integer,
         nullable=False,
         default=0,
-        comment="Number of times this chunk was used in AI responses"
+        comment="Number of times this chunk was used in AI responses",
     )
 
     success_rate = Column(
@@ -230,7 +217,7 @@ class KnowledgeBaseChunk(Base):
         Success rate based on customer feedback (0.0-1.0).
         Calculated from: positive_feedback / total_usage
         Auto-deprecate chunks with low success rates (<0.5)
-        """
+        """,
     )
 
     # ========================================================================
@@ -238,10 +225,7 @@ class KnowledgeBaseChunk(Base):
     # ========================================================================
 
     created_at = Column(
-        DateTime,
-        nullable=False,
-        default=datetime.utcnow,
-        comment="Chunk creation timestamp"
+        DateTime, nullable=False, default=datetime.utcnow, comment="Chunk creation timestamp"
     )
 
     updated_at = Column(
@@ -249,7 +233,7 @@ class KnowledgeBaseChunk(Base):
         nullable=False,
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
-        comment="Last update timestamp"
+        comment="Last update timestamp",
     )
 
     # ========================================================================
@@ -263,7 +247,7 @@ class KnowledgeBaseChunk(Base):
         Source message ID for learned content.
         If this chunk was learned from a high-quality AI response,
         store the message_id here for traceability.
-        """
+        """,
     )
 
     created_by_agent_id = Column(
@@ -273,7 +257,7 @@ class KnowledgeBaseChunk(Base):
         Agent/admin ID who created this chunk.
         - Admin ID: Manual creation
         - 'ai_learning': Automatically learned from conversations
-        """
+        """,
     )
 
 
@@ -346,14 +330,11 @@ class EscalationRule(Base):
     __table_args__ = (
         # Active rules in priority order (most critical query)
         Index("idx_escalation_active_priority", "is_active", "priority"),
-
         # Rule name uniqueness (business requirement)
         # Enforced at database level + application level
-
         # Lifecycle tracking
         Index("idx_escalation_updated", "updated_at"),
-
-        {"schema": "ai"}
+        {"schema": "ai"},
     )
 
     # ========================================================================
@@ -364,7 +345,7 @@ class EscalationRule(Base):
         String(36),
         primary_key=True,
         default=lambda: str(uuid.uuid4()),
-        comment="Unique rule identifier (UUID)"
+        comment="Unique rule identifier (UUID)",
     )
 
     # ========================================================================
@@ -382,13 +363,11 @@ class EscalationRule(Base):
         - negative_sentiment
         - complex_query
         - payment_issue
-        """
+        """,
     )
 
     description = Column(
-        Text,
-        nullable=True,
-        comment="Human-readable description of what triggers this rule"
+        Text, nullable=True, comment="Human-readable description of what triggers this rule"
     )
 
     # ========================================================================
@@ -403,7 +382,7 @@ class EscalationRule(Base):
         Keywords that trigger escalation (case-insensitive):
         ["speak to human", "manager", "complaint", "angry", "frustrated"]
         Empty array = no keyword trigger
-        """
+        """,
     )
 
     confidence_threshold = Column(
@@ -413,7 +392,7 @@ class EscalationRule(Base):
         Escalate if AI confidence below this threshold (0.0-1.0).
         Example: 0.6 = escalate if confidence <60%
         NULL = no confidence trigger
-        """
+        """,
     )
 
     sentiment_threshold = Column(
@@ -423,7 +402,7 @@ class EscalationRule(Base):
         Escalate if emotion score below this threshold (0.0-1.0).
         Example: 0.3 = escalate if emotion <30% (negative)
         NULL = no sentiment trigger
-        """
+        """,
     )
 
     # ========================================================================
@@ -431,10 +410,7 @@ class EscalationRule(Base):
     # ========================================================================
 
     is_active = Column(
-        Boolean,
-        nullable=False,
-        default=True,
-        comment="Active/inactive toggle (no deletion needed)"
+        Boolean, nullable=False, default=True, comment="Active/inactive toggle (no deletion needed)"
     )
 
     priority = Column(
@@ -448,7 +424,7 @@ class EscalationRule(Base):
         - 8: High (severe negative sentiment)
         - 5: Medium (low confidence)
         - 1: Low (general fallbacks)
-        """
+        """,
     )
 
     # ========================================================================
@@ -456,10 +432,7 @@ class EscalationRule(Base):
     # ========================================================================
 
     created_at = Column(
-        DateTime,
-        nullable=False,
-        default=datetime.utcnow,
-        comment="Rule creation timestamp"
+        DateTime, nullable=False, default=datetime.utcnow, comment="Rule creation timestamp"
     )
 
     updated_at = Column(
@@ -467,5 +440,5 @@ class EscalationRule(Base):
         nullable=False,
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
-        comment="Last update timestamp"
+        comment="Last update timestamp",
     )

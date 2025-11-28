@@ -8,7 +8,8 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID, uuid4
 
-from models.escalation import Escalation, EscalationStatus, EscalationMethod, EscalationPriority
+# MIGRATED: from models.escalation → db.models.escalation
+from db.models.escalation import Escalation, EscalationStatus, EscalationMethod, EscalationPriority
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
 
@@ -118,7 +119,9 @@ class EscalationService:
                             "customer_phone": escalation.phone,
                             "reason": escalation.reason[:100],
                             "method": escalation.preferred_method,
-                            "created_at": escalation.created_at.isoformat() if escalation.created_at else None,
+                            "created_at": (
+                                escalation.created_at.isoformat() if escalation.created_at else None
+                            ),
                         },
                     )
                 )
@@ -173,7 +176,9 @@ class EscalationService:
                         "id": str(escalation.id),
                         "status": escalation.status,
                         "assigned_to_id": str(escalation.assigned_to_id),
-                        "assigned_at": escalation.assigned_at.isoformat() if escalation.assigned_at else None,
+                        "assigned_at": (
+                            escalation.assigned_at.isoformat() if escalation.assigned_at else None
+                        ),
                         "update_type": "assigned",
                     },
                 )

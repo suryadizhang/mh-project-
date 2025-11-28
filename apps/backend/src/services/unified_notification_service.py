@@ -193,9 +193,16 @@ Your hibachi event is confirmed:
 
 Booking #{booking_id}
 
-We'll send payment instructions shortly.
+⚠️ ALLERGEN REMINDER:
+Please reply with ANY food allergies or dietary restrictions.
 
-Questions? Reply here or call {self.admin_phone}
+We track: shellfish, fish, gluten, soy, eggs, celery, corn, sulfites.
+
+⚠️ We use shared cooking surfaces and cannot guarantee 100% allergen-free.
+
+Reply with allergies or "NONE" to confirm.
+
+Questions? Call {self.admin_phone}
 
 - My Hibachi Chef Team"""
 

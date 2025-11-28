@@ -102,8 +102,8 @@ class PricingService:
             ).scalar_one_or_none()
 
             if station:
-                # Build full address
-                address_parts = [station.address, station.city, station.state, station.postal_code]
+                # Build full address (NOTE: Station model uses zip_code, not postal_code)
+                address_parts = [station.address, station.city, station.state, station.zip_code]
                 self._station_address = ", ".join([p for p in address_parts if p])
                 logger.info(f"Loaded station location: {self._station_address}")
             else:
@@ -115,12 +115,30 @@ class PricingService:
 
     def _load_station_from_env(self) -> None:
         """Load station location from environment variables (fallback)"""
-        # Try business address from environment
+        # Try full business address from environment
         self._station_address = os.getenv("BUSINESS_ADDRESS")
-        if not self._station_address:
-            # Build from components
-            parts = [os.getenv("BUSINESS_CITY"), os.getenv("BUSINESS_STATE")]
+        if self._station_address:
+            # Append city, state, zip if address exists
+            city = os.getenv("BUSINESS_CITY")
+            state = os.getenv("BUSINESS_STATE")
+            zip_code = os.getenv("BUSINESS_ZIP")
+            parts = [self._station_address, city, state, zip_code]
             self._station_address = ", ".join([p for p in parts if p])
+        else:
+            # Build from components only
+            parts = [
+                os.getenv("BUSINESS_CITY"),
+                os.getenv("BUSINESS_STATE"),
+                os.getenv("BUSINESS_ZIP"),
+            ]
+            self._station_address = ", ".join([p for p in parts if p])
+
+        if self._station_address:
+            logger.info(f"Using environment station location: {self._station_address}")
+        else:
+            logger.error(
+                "No station location found in environment variables (BUSINESS_ADDRESS, BUSINESS_CITY, BUSINESS_STATE, BUSINESS_ZIP)"
+            )
 
     def calculate_travel_distance(
         self, destination_address: str, destination_zipcode: str | None = None

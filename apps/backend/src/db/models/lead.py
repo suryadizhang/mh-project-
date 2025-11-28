@@ -32,8 +32,18 @@ from uuid import UUID, uuid4
 from decimal import Decimal
 
 from sqlalchemy import (
-    Column, String, Text, Integer, Float, Boolean, DateTime, Date, Numeric,
-    ForeignKey, Index, CheckConstraint, UniqueConstraint, Enum as SQLEnum, ARRAY
+    String,
+    Text,
+    Integer,
+    Float,
+    Boolean,
+    DateTime,
+    Date,
+    Numeric,
+    ForeignKey,
+    Index,
+    CheckConstraint,
+    Enum as SQLEnum,
 )
 from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB
 from sqlalchemy.orm import relationship, Mapped, mapped_column
@@ -46,9 +56,12 @@ from ..base_class import Base
 
 import enum
 
+
 class LeadSource(str, enum.Enum):
     """Where the lead came from"""
+
     WEB_QUOTE = "web_quote"
+    WEBSITE = "website"  # General website lead (not from quote form)
     CHAT = "chat"
     INSTAGRAM = "instagram"
     FACEBOOK = "facebook"
@@ -62,6 +75,7 @@ class LeadSource(str, enum.Enum):
 
 class LeadStatus(str, enum.Enum):
     """Lead workflow status"""
+
     NEW = "new"
     WORKING = "working"
     QUALIFIED = "qualified"
@@ -72,6 +86,7 @@ class LeadStatus(str, enum.Enum):
 
 class LeadQuality(str, enum.Enum):
     """Lead temperature/quality"""
+
     HOT = "hot"
     WARM = "warm"
     COLD = "cold"
@@ -79,6 +94,7 @@ class LeadQuality(str, enum.Enum):
 
 class ContactChannel(str, enum.Enum):
     """Contact method channels"""
+
     EMAIL = "email"
     SMS = "sms"
     INSTAGRAM = "instagram"
@@ -90,6 +106,7 @@ class ContactChannel(str, enum.Enum):
 
 class SocialPlatform(str, enum.Enum):
     """Social media platforms"""
+
     INSTAGRAM = "instagram"
     FACEBOOK = "facebook"
     GOOGLE = "google"
@@ -98,12 +115,14 @@ class SocialPlatform(str, enum.Enum):
 
 class SocialThreadStatus(str, enum.Enum):
     """Social conversation status"""
+
     OPEN = "open"
     PENDING = "pending"
     RESOLVED = "resolved"
 
 
 # ==================== MODELS ====================
+
 
 class Lead(Base):
     """
@@ -112,6 +131,7 @@ class Lead(Base):
     Represents a potential customer with scoring, qualification, and conversion tracking.
     Supports multi-channel attribution (UTM tracking).
     """
+
     __tablename__ = "leads"
     __table_args__ = (
         Index("ix_lead_leads_status", "status"),
@@ -120,20 +140,17 @@ class Lead(Base):
         Index("ix_lead_leads_followup", "follow_up_date"),
         Index("ix_lead_leads_customer", "customer_id"),
         CheckConstraint("score >= 0 AND score <= 100", name="check_lead_score_range"),
-        {"schema": "lead"}
+        {"schema": "lead"},
     )
 
     # Primary Key
     id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        primary_key=True,
-        server_default=func.gen_random_uuid()
+        PGUUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
     )
 
     # Source & Attribution
     source: Mapped[LeadSource] = mapped_column(
-        SQLEnum(LeadSource, name="lead_source", schema="public", create_type=False),
-        nullable=False
+        SQLEnum(LeadSource, name="lead_source", schema="public", create_type=False), nullable=False
     )
     utm_source: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     utm_medium: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
@@ -143,40 +160,30 @@ class Lead(Base):
     status: Mapped[LeadStatus] = mapped_column(
         SQLEnum(LeadStatus, name="lead_status", schema="public", create_type=False),
         nullable=False,
-        default=LeadStatus.NEW
+        default=LeadStatus.NEW,
     )
     quality: Mapped[Optional[LeadQuality]] = mapped_column(
-        SQLEnum(LeadQuality, name="lead_quality", schema="public", create_type=False),
-        nullable=True
+        SQLEnum(LeadQuality, name="lead_quality", schema="public", create_type=False), nullable=True
     )
-    score: Mapped[Decimal] = mapped_column(
-        Numeric(5, 2),
-        nullable=False,
-        default=Decimal("0")
-    )
+    score: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False, default=Decimal("0"))
 
     # Assignment
     assigned_to: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
 
     # Customer Link (when converted)
     customer_id: Mapped[Optional[UUID]] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("core.customers.id", ondelete="SET NULL"),
-        nullable=True
+        PGUUID(as_uuid=True), ForeignKey("core.customers.id", ondelete="SET NULL"), nullable=True
     )
 
     # Follow-up & Conversion
     last_contact_date: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True
+        DateTime(timezone=True), nullable=True
     )
     follow_up_date: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True
+        DateTime(timezone=True), nullable=True
     )
     conversion_date: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True
+        DateTime(timezone=True), nullable=True
     )
 
     # Loss Tracking
@@ -184,41 +191,25 @@ class Lead(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
-    deleted_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True
-    )
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     contacts: Mapped[List["LeadContact"]] = relationship(
-        "LeadContact",
-        back_populates="lead",
-        cascade="all, delete-orphan"
+        "LeadContact", back_populates="lead", cascade="all, delete-orphan"
     )
     context: Mapped[Optional["LeadContext"]] = relationship(
-        "LeadContext",
-        back_populates="lead",
-        uselist=False,
-        cascade="all, delete-orphan"
+        "LeadContext", back_populates="lead", uselist=False, cascade="all, delete-orphan"
     )
     events: Mapped[List["LeadEvent"]] = relationship(
-        "LeadEvent",
-        back_populates="lead",
-        cascade="all, delete-orphan"
+        "LeadEvent", back_populates="lead", cascade="all, delete-orphan"
     )
     social_threads: Mapped[List["LeadSocialThread"]] = relationship(
-        "LeadSocialThread",
-        back_populates="lead"
+        "LeadSocialThread", back_populates="lead"
     )
 
 
@@ -229,40 +220,35 @@ class LeadContact(Base):
     Multi-channel contact methods for a lead (email, SMS, social, etc.).
     Supports verification status.
     """
+
     __tablename__ = "lead_contacts"
     __table_args__ = (
         Index("ix_lead_contacts_lead", "lead_id"),
         Index("ix_lead_contacts_channel", "channel", "handle_or_address"),
-        {"schema": "lead"}
+        {"schema": "lead"},
     )
 
     # Primary Key
     id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        primary_key=True,
-        server_default=func.gen_random_uuid()
+        PGUUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
     )
 
     # Foreign Keys
     lead_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("lead.leads.id", ondelete="CASCADE"),
-        nullable=False
+        PGUUID(as_uuid=True), ForeignKey("lead.leads.id", ondelete="CASCADE"), nullable=False
     )
 
     # Contact Info
     channel: Mapped[ContactChannel] = mapped_column(
         SQLEnum(ContactChannel, name="contact_channel", schema="public", create_type=False),
-        nullable=False
+        nullable=False,
     )
     handle_or_address: Mapped[str] = mapped_column(Text, nullable=False)
     verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
     # Relationships
@@ -276,16 +262,13 @@ class LeadContext(Base):
     Stores event details, budget, and preferences collected during lead capture.
     One-to-one with Lead.
     """
+
     __tablename__ = "lead_context"
-    __table_args__ = (
-        {"schema": "lead"}
-    )
+    __table_args__ = {"schema": "lead"}
 
     # Primary Key (also FK to Lead)
     lead_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("lead.leads.id", ondelete="CASCADE"),
-        primary_key=True
+        PGUUID(as_uuid=True), ForeignKey("lead.leads.id", ondelete="CASCADE"), primary_key=True
     )
 
     # Party Size
@@ -311,10 +294,7 @@ class LeadContext(Base):
 
     # Timestamps
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Relationships
@@ -328,24 +308,18 @@ class LeadEvent(Base):
     Tracks all actions/events related to a lead for audit trail and analytics.
     Event sourcing pattern for lead lifecycle.
     """
+
     __tablename__ = "lead_events"
-    __table_args__ = (
-        Index("ix_lead_events_lead", "lead_id", "occurred_at"),
-        {"schema": "lead"}
-    )
+    __table_args__ = (Index("ix_lead_events_lead", "lead_id", "occurred_at"), {"schema": "lead"})
 
     # Primary Key
     id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        primary_key=True,
-        server_default=func.gen_random_uuid()
+        PGUUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
     )
 
     # Foreign Keys
     lead_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("lead.leads.id", ondelete="CASCADE"),
-        nullable=False
+        PGUUID(as_uuid=True), ForeignKey("lead.leads.id", ondelete="CASCADE"), nullable=False
     )
 
     # Event Details
@@ -354,9 +328,7 @@ class LeadEvent(Base):
 
     # Timestamp
     occurred_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
     # Relationships
@@ -371,12 +343,13 @@ class BusinessSocialAccount(Base):
     Used for admin panel social media management and lead generation.
     Different from identity.OAuthAccount (user authentication).
     """
+
     __tablename__ = "social_accounts"
     __table_args__ = (
         Index("ix_social_accounts_platform_page_id", "platform", "page_id", unique=True),
         Index("ix_social_accounts_platform", "platform"),
         Index("ix_social_accounts_is_active", "is_active"),
-        {"schema": "lead"}
+        {"schema": "lead"},
     )
 
     # Primary Key
@@ -384,24 +357,16 @@ class BusinessSocialAccount(Base):
 
     # Platform Info
     platform: Mapped[str] = mapped_column(
-        String(50),
-        nullable=False,
-        comment="Social media platform (instagram, facebook, etc.)"
+        String(50), nullable=False, comment="Social media platform (instagram, facebook, etc.)"
     )
     page_id: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False,
-        comment="Platform-specific page/business ID"
+        String(255), nullable=False, comment="Platform-specific page/business ID"
     )
     page_name: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False,
-        comment="Display name of the business page"
+        String(255), nullable=False, comment="Display name of the business page"
     )
     handle: Mapped[Optional[str]] = mapped_column(
-        String(100),
-        nullable=True,
-        comment="@username or handle if applicable"
+        String(100), nullable=True, comment="@username or handle if applicable"
     )
 
     # Profile
@@ -410,67 +375,46 @@ class BusinessSocialAccount(Base):
 
     # Connection
     connected_by: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        nullable=False,
-        comment="User ID who connected this account"
+        PGUUID(as_uuid=True), nullable=False, comment="User ID who connected this account"
     )
     connected_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
     # Security
     token_ref: Mapped[Optional[str]] = mapped_column(
         Text,
         nullable=True,
-        comment="Encrypted reference to access tokens (do not store plaintext tokens)"
+        comment="Encrypted reference to access tokens (do not store plaintext tokens)",
     )
     webhook_verified: Mapped[bool] = mapped_column(
-        Boolean,
-        nullable=False,
-        default=False,
-        comment="Whether webhook subscription is verified"
+        Boolean, nullable=False, default=False, comment="Whether webhook subscription is verified"
     )
 
     # Sync
     last_sync_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True,
-        comment="Last successful sync with platform API"
+        DateTime(timezone=True), nullable=True, comment="Last successful sync with platform API"
     )
 
     # Status
     is_active: Mapped[bool] = mapped_column(
-        Boolean,
-        nullable=False,
-        default=True,
-        comment="Whether account is currently active"
+        Boolean, nullable=False, default=True, comment="Whether account is currently active"
     )
 
     # Metadata
     platform_metadata: Mapped[Optional[dict]] = mapped_column(
-        JSONB,
-        nullable=True,
-        comment="Platform-specific settings, capabilities, and metadata"
+        JSONB, nullable=True, comment="Platform-specific settings, capabilities, and metadata"
     )
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
     deleted_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True,
-        comment="Soft delete timestamp"
+        DateTime(timezone=True), nullable=True, comment="Soft delete timestamp"
     )
 
 
@@ -481,12 +425,13 @@ class SocialIdentity(Base):
     Maps social media handles to customers for identity resolution.
     Supports confidence scoring and verification workflow.
     """
+
     __tablename__ = "social_identities"
     __table_args__ = (
         Index("ix_social_identities_platform_handle", "platform", "handle", unique=True),
         Index("ix_social_identities_platform", "platform"),
         Index("ix_social_identities_customer_id", "customer_id"),
-        {"schema": "lead"}
+        {"schema": "lead"},
     )
 
     # Primary Key
@@ -495,9 +440,7 @@ class SocialIdentity(Base):
     # Platform Info
     platform: Mapped[str] = mapped_column(String(50), nullable=False)
     handle: Mapped[str] = mapped_column(
-        String(100),
-        nullable=False,
-        comment="Social handle without @ prefix"
+        String(100), nullable=False, comment="Social handle without @ prefix"
     )
     display_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
@@ -507,21 +450,16 @@ class SocialIdentity(Base):
 
     # Customer Mapping
     customer_id: Mapped[Optional[UUID]] = mapped_column(
-        PGUUID(as_uuid=True),
-        nullable=True,
-        comment="Link to known customer (soft reference)"
+        PGUUID(as_uuid=True), nullable=True, comment="Link to known customer (soft reference)"
     )
     confidence_score: Mapped[float] = mapped_column(
-        Float,
-        nullable=False,
-        default=1.0,
-        comment="Confidence in customer mapping (0.0 to 1.0)"
+        Float, nullable=False, default=1.0, comment="Confidence in customer mapping (0.0 to 1.0)"
     )
     verification_status: Mapped[str] = mapped_column(
         String(50),
         nullable=False,
         default="unverified",
-        comment="Verification status: unverified, pending, verified, rejected"
+        comment="Verification status: unverified, pending, verified, rejected",
     )
 
     # Activity
@@ -529,32 +467,23 @@ class SocialIdentity(Base):
         DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
-        comment="When this identity was first detected"
+        comment="When this identity was first detected",
     )
     last_active_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True,
-        comment="Last interaction timestamp"
+        DateTime(timezone=True), nullable=True, comment="Last interaction timestamp"
     )
 
     # Metadata
     platform_metadata: Mapped[Optional[dict]] = mapped_column(
-        JSONB,
-        nullable=True,
-        comment="Platform-specific profile data"
+        JSONB, nullable=True, comment="Platform-specific profile data"
     )
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
 
@@ -565,63 +494,53 @@ class LeadSocialThread(Base):
     Tracks conversations from social platforms, linked to leads or customers.
     Separate from core.social_threads to maintain lead-specific context.
     """
+
     __tablename__ = "social_threads"
     __table_args__ = (
         Index("ix_social_threads_platform", "platform", "thread_ref", unique=True),
         Index("ix_social_threads_lead", "lead_id"),
         Index("ix_social_threads_customer", "customer_id"),
-        {"schema": "lead"}
+        {"schema": "lead"},
     )
 
     # Primary Key
     id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        primary_key=True,
-        server_default=func.gen_random_uuid()
+        PGUUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
     )
 
     # Platform Info
     platform: Mapped[SocialPlatform] = mapped_column(
         SQLEnum(SocialPlatform, name="social_platform", schema="public", create_type=False),
-        nullable=False
+        nullable=False,
     )
     account_id: Mapped[str] = mapped_column(String(100), nullable=False)
     thread_ref: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False,
-        comment="Platform-specific thread/conversation ID"
+        String(255), nullable=False, comment="Platform-specific thread/conversation ID"
     )
 
     # Entity Links
     lead_id: Mapped[Optional[UUID]] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("lead.leads.id", ondelete="SET NULL"),
-        nullable=True
+        PGUUID(as_uuid=True), ForeignKey("lead.leads.id", ondelete="SET NULL"), nullable=True
     )
     customer_id: Mapped[Optional[UUID]] = mapped_column(
-        PGUUID(as_uuid=True),
-        ForeignKey("core.customers.id", ondelete="SET NULL"),
-        nullable=True
+        PGUUID(as_uuid=True), ForeignKey("core.customers.id", ondelete="SET NULL"), nullable=True
     )
 
     # Status
     status: Mapped[SocialThreadStatus] = mapped_column(
         SQLEnum(SocialThreadStatus, name="thread_status", schema="public", create_type=False),
         nullable=False,
-        default=SocialThreadStatus.OPEN
+        default=SocialThreadStatus.OPEN,
     )
 
     # Activity
     last_message_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True
+        DateTime(timezone=True), nullable=True
     )
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
     # Relationships

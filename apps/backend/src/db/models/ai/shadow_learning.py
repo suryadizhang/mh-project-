@@ -33,7 +33,8 @@ from sqlalchemy import (
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import relationship
 
-from models.base import Base
+# MIGRATED: from models.base → ...base_class (3 levels up from ai/)
+from ...base_class import Base
 
 
 # ============================================================================
@@ -49,6 +50,7 @@ class ModelType(str, Enum):
     - TEACHER: OpenAI models (GPT-4, GPT-3.5) - Production quality
     - STUDENT: Local models (Llama-3-8B) - Cost savings target
     """
+
     TEACHER = "teacher"
     STUDENT = "student"
 
@@ -63,6 +65,7 @@ class ExportStatus(str, Enum):
     - COMPLETED: Export successful, file ready
     - FAILED: Export failed, check error_message
     """
+
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
@@ -136,21 +139,16 @@ class AITutorPair(Base):
     __table_args__ = (
         # Time-series analysis (most common query)
         Index("idx_tutor_created", "created_at"),
-
         # Quality filtering (find high-quality pairs for training)
         Index("idx_tutor_similarity", "similarity_score", "created_at"),
         Index("idx_tutor_quality", "quality_score", "created_at"),
-
         # Agent-specific analysis
         Index("idx_tutor_agent", "agent_type", "created_at"),
-
         # Production usage trends (ROI calculation)
         Index("idx_tutor_production", "used_in_production", "created_at"),
-
         # Customer feedback analysis
         Index("idx_tutor_feedback", "customer_feedback", "created_at"),
-
-        {"schema": "ai"}
+        {"schema": "ai"},
     )
 
     # ========================================================================
@@ -162,18 +160,14 @@ class AITutorPair(Base):
         primary_key=True,
         index=True,
         autoincrement=True,
-        comment="Auto-incrementing ID (sequential)"
+        comment="Auto-incrementing ID (sequential)",
     )
 
     # ========================================================================
     # REQUEST CONTEXT
     # ========================================================================
 
-    prompt = Column(
-        Text,
-        nullable=False,
-        comment="User's original prompt (training input)"
-    )
+    prompt = Column(Text, nullable=False, comment="User's original prompt (training input)")
 
     context = Column(
         Text,
@@ -184,7 +178,7 @@ class AITutorPair(Base):
         - Customer preferences
         - Booking details
         - Session state
-        """
+        """,
     )
 
     agent_type = Column(
@@ -196,7 +190,7 @@ class AITutorPair(Base):
         - menu_agent
         - support_agent
         - general_agent
-        """
+        """,
     )
 
     # ========================================================================
@@ -204,33 +198,21 @@ class AITutorPair(Base):
     # ========================================================================
 
     teacher_model = Column(
-        String(50),
-        nullable=False,
-        comment="Teacher model name (gpt-4-turbo, gpt-3.5-turbo)"
+        String(50), nullable=False, comment="Teacher model name (gpt-4-turbo, gpt-3.5-turbo)"
     )
 
-    teacher_response = Column(
-        Text,
-        nullable=False,
-        comment="Teacher's response (gold standard)"
-    )
+    teacher_response = Column(Text, nullable=False, comment="Teacher's response (gold standard)")
 
     teacher_tokens = Column(
-        Integer,
-        nullable=True,
-        comment="Teacher tokens consumed (input + output)"
+        Integer, nullable=True, comment="Teacher tokens consumed (input + output)"
     )
 
     teacher_cost_usd = Column(
-        Float,
-        nullable=True,
-        comment="Teacher cost in USD (GPT-4: ~$0.02/1K tokens)"
+        Float, nullable=True, comment="Teacher cost in USD (GPT-4: ~$0.02/1K tokens)"
     )
 
     teacher_response_time_ms = Column(
-        Integer,
-        nullable=True,
-        comment="Teacher response time in milliseconds"
+        Integer, nullable=True, comment="Teacher response time in milliseconds"
     )
 
     # ========================================================================
@@ -238,27 +220,17 @@ class AITutorPair(Base):
     # ========================================================================
 
     student_model = Column(
-        String(50),
-        nullable=False,
-        comment="Student model name (llama-3-8b-instruct)"
+        String(50), nullable=False, comment="Student model name (llama-3-8b-instruct)"
     )
 
-    student_response = Column(
-        Text,
-        nullable=False,
-        comment="Student's response (training target)"
-    )
+    student_response = Column(Text, nullable=False, comment="Student's response (training target)")
 
     student_tokens = Column(
-        Integer,
-        nullable=True,
-        comment="Student tokens generated (output only, input is local)"
+        Integer, nullable=True, comment="Student tokens generated (output only, input is local)"
     )
 
     student_response_time_ms = Column(
-        Integer,
-        nullable=True,
-        comment="Student response time in milliseconds (should be faster)"
+        Integer, nullable=True, comment="Student response time in milliseconds (should be faster)"
     )
 
     # ========================================================================
@@ -274,7 +246,7 @@ class AITutorPair(Base):
         - 0.85+: Very similar (safe to use student)
         - 0.7-0.84: Similar (review needed)
         - <0.7: Different (use teacher)
-        """
+        """,
     )
 
     quality_score = Column(
@@ -287,7 +259,7 @@ class AITutorPair(Base):
         - RLHF scores (if available)
         - Customer feedback
         - Resolution success
-        """
+        """,
     )
 
     # ========================================================================
@@ -302,7 +274,7 @@ class AITutorPair(Base):
         Did we use student response in production?
         True = Used student (cost savings!)
         False = Used teacher (quality priority)
-        """
+        """,
     )
 
     customer_feedback = Column(
@@ -313,7 +285,7 @@ class AITutorPair(Base):
         - positive (thumbs up, 4-5 rating)
         - neutral (3 rating, no feedback)
         - negative (thumbs down, 1-2 rating)
-        """
+        """,
     )
 
     # ========================================================================
@@ -325,7 +297,7 @@ class AITutorPair(Base):
         nullable=False,
         default=datetime.utcnow,
         index=True,
-        comment="Pair creation timestamp"
+        comment="Pair creation timestamp",
     )
 
     updated_at = Column(
@@ -333,7 +305,7 @@ class AITutorPair(Base):
         nullable=False,
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
-        comment="Last update timestamp (feedback, RLHF scores)"
+        comment="Last update timestamp (feedback, RLHF scores)",
     )
 
     # ========================================================================
@@ -341,9 +313,7 @@ class AITutorPair(Base):
     # ========================================================================
 
     rlhf_scores = relationship(
-        "AIRLHFScore",
-        back_populates="tutor_pair",
-        cascade="all, delete-orphan"
+        "AIRLHFScore", back_populates="tutor_pair", cascade="all, delete-orphan"
     )
 
 
@@ -404,17 +374,13 @@ class AIRLHFScore(Base):
     __table_args__ = (
         # Tutor pair linkage
         Index("idx_rlhf_tutor", "tutor_pair_id"),
-
         # Quality trends
         Index("idx_rlhf_overall", "overall_score", "created_at"),
-
         # Production readiness
         Index("idx_rlhf_production", "would_use_in_production", "created_at"),
-
         # Reviewer analytics
         Index("idx_rlhf_reviewer", "reviewer_id", "created_at"),
-
-        {"schema": "ai"}
+        {"schema": "ai"},
     )
 
     # ========================================================================
@@ -426,7 +392,7 @@ class AIRLHFScore(Base):
         primary_key=True,
         index=True,
         autoincrement=True,
-        comment="Auto-incrementing ID (sequential)"
+        comment="Auto-incrementing ID (sequential)",
     )
 
     # ========================================================================
@@ -438,18 +404,14 @@ class AIRLHFScore(Base):
         ForeignKey("ai.ai_tutor_pairs.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
-        comment="Parent tutor pair ID (CASCADE delete)"
+        comment="Parent tutor pair ID (CASCADE delete)",
     )
 
     # ========================================================================
     # HUMAN FEEDBACK
     # ========================================================================
 
-    reviewer_id = Column(
-        Integer,
-        nullable=True,
-        comment="Admin user ID who reviewed this pair"
-    )
+    reviewer_id = Column(Integer, nullable=True, comment="Admin user ID who reviewed this pair")
 
     # ========================================================================
     # SCORING DIMENSIONS (1-5 scale)
@@ -465,7 +427,7 @@ class AIRLHFScore(Base):
         3 = Somewhat accurate, some errors
         2 = Inaccurate, major errors
         1 = Completely wrong
-        """
+        """,
     )
 
     helpfulness_score = Column(
@@ -478,7 +440,7 @@ class AIRLHFScore(Base):
         3 = Somewhat helpful
         2 = Not very helpful
         1 = Not helpful at all
-        """
+        """,
     )
 
     tone_score = Column(
@@ -491,7 +453,7 @@ class AIRLHFScore(Base):
         3 = Acceptable tone
         2 = Off-brand tone
         1 = Wrong tone entirely
-        """
+        """,
     )
 
     completeness_score = Column(
@@ -504,18 +466,14 @@ class AIRLHFScore(Base):
         3 = Somewhat complete
         2 = Missing key information
         1 = Incomplete answer
-        """
+        """,
     )
 
     # ========================================================================
     # OVERALL ASSESSMENT
     # ========================================================================
 
-    overall_score = Column(
-        Float,
-        nullable=False,
-        comment="Average of all scoring dimensions (1-5)"
-    )
+    overall_score = Column(Float, nullable=False, comment="Average of all scoring dimensions (1-5)")
 
     would_use_in_production = Column(
         Boolean,
@@ -524,7 +482,7 @@ class AIRLHFScore(Base):
         Would you use this student response with a real customer?
         True = Production-ready
         False = Needs improvement
-        """
+        """,
     )
 
     # ========================================================================
@@ -539,7 +497,7 @@ class AIRLHFScore(Base):
         - What was good?
         - What needs improvement?
         - Specific examples
-        """
+        """,
     )
 
     # ========================================================================
@@ -547,21 +505,14 @@ class AIRLHFScore(Base):
     # ========================================================================
 
     created_at = Column(
-        DateTime,
-        nullable=False,
-        default=datetime.utcnow,
-        index=True,
-        comment="Review timestamp"
+        DateTime, nullable=False, default=datetime.utcnow, index=True, comment="Review timestamp"
     )
 
     # ========================================================================
     # RELATIONSHIPS
     # ========================================================================
 
-    tutor_pair = relationship(
-        "AITutorPair",
-        back_populates="rlhf_scores"
-    )
+    tutor_pair = relationship("AITutorPair", back_populates="rlhf_scores")
 
 
 # ============================================================================
@@ -619,14 +570,11 @@ class AIExportJob(Base):
     __table_args__ = (
         # Active jobs monitoring
         Index("idx_export_status", "status", "created_at"),
-
         # Job type analytics
         Index("idx_export_type", "export_type", "status"),
-
         # Creator tracking
         Index("idx_export_creator", "created_by", "created_at"),
-
-        {"schema": "ai"}
+        {"schema": "ai"},
     )
 
     # ========================================================================
@@ -638,7 +586,7 @@ class AIExportJob(Base):
         primary_key=True,
         index=True,
         autoincrement=True,
-        comment="Auto-incrementing ID (sequential)"
+        comment="Auto-incrementing ID (sequential)",
     )
 
     # ========================================================================
@@ -646,9 +594,7 @@ class AIExportJob(Base):
     # ========================================================================
 
     export_type = Column(
-        String(50),
-        nullable=False,
-        comment="Export type (fine_tuning/evaluation/backup)"
+        String(50), nullable=False, comment="Export type (fine_tuning/evaluation/backup)"
     )
 
     status = Column(
@@ -656,7 +602,7 @@ class AIExportJob(Base):
         nullable=False,
         default=ExportStatus.PENDING,
         index=True,
-        comment="Job status (pending/in_progress/completed/failed)"
+        comment="Job status (pending/in_progress/completed/failed)",
     )
 
     # ========================================================================
@@ -664,28 +610,19 @@ class AIExportJob(Base):
     # ========================================================================
 
     min_similarity_score = Column(
-        Float,
-        nullable=False,
-        default=0.85,
-        comment="Minimum similarity score threshold (0.0-1.0)"
+        Float, nullable=False, default=0.85, comment="Minimum similarity score threshold (0.0-1.0)"
     )
 
     min_rlhf_score = Column(
-        Float,
-        nullable=True,
-        comment="Minimum RLHF score threshold (1.0-5.0) if available"
+        Float, nullable=True, comment="Minimum RLHF score threshold (1.0-5.0) if available"
     )
 
     date_range_start = Column(
-        DateTime,
-        nullable=True,
-        comment="Export pairs created after this date (NULL = all)"
+        DateTime, nullable=True, comment="Export pairs created after this date (NULL = all)"
     )
 
     date_range_end = Column(
-        DateTime,
-        nullable=True,
-        comment="Export pairs created before this date (NULL = all)"
+        DateTime, nullable=True, comment="Export pairs created before this date (NULL = all)"
     )
 
     # ========================================================================
@@ -693,48 +630,29 @@ class AIExportJob(Base):
     # ========================================================================
 
     pairs_exported = Column(
-        Integer,
-        nullable=False,
-        default=0,
-        comment="Number of tutor pairs exported"
+        Integer, nullable=False, default=0, comment="Number of tutor pairs exported"
     )
 
-    output_file_path = Column(
-        String(500),
-        nullable=True,
-        comment="Path to generated JSONL file"
-    )
+    output_file_path = Column(String(500), nullable=True, comment="Path to generated JSONL file")
 
-    output_file_size_mb = Column(
-        Float,
-        nullable=True,
-        comment="File size in megabytes"
-    )
+    output_file_size_mb = Column(Float, nullable=True, comment="File size in megabytes")
 
     # ========================================================================
     # ERROR HANDLING
     # ========================================================================
 
-    error_message = Column(
-        Text,
-        nullable=True,
-        comment="Error message if job failed"
-    )
+    error_message = Column(Text, nullable=True, comment="Error message if job failed")
 
     # ========================================================================
     # METADATA
     # ========================================================================
 
     started_at = Column(
-        DateTime,
-        nullable=True,
-        comment="Job start timestamp (when worker began processing)"
+        DateTime, nullable=True, comment="Job start timestamp (when worker began processing)"
     )
 
     completed_at = Column(
-        DateTime,
-        nullable=True,
-        comment="Job completion timestamp (success or failure)"
+        DateTime, nullable=True, comment="Job completion timestamp (success or failure)"
     )
 
     created_at = Column(
@@ -742,11 +660,7 @@ class AIExportJob(Base):
         nullable=False,
         default=datetime.utcnow,
         index=True,
-        comment="Job creation timestamp"
+        comment="Job creation timestamp",
     )
 
-    created_by = Column(
-        Integer,
-        nullable=True,
-        comment="Admin user ID who created this job"
-    )
+    created_by = Column(Integer, nullable=True, comment="Admin user ID who created this job")

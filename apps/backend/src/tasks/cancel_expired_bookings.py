@@ -40,7 +40,9 @@ from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from db.models.core import Booking, BookingStatus
-from models.booking import Payment
+
+# MIGRATED: from models.booking → db.models.core
+from db.models.core import Payment
 from core.database import get_db
 
 logger = logging.getLogger(__name__)
