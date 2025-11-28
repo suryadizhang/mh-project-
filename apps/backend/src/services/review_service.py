@@ -7,7 +7,8 @@ import logging
 from typing import Any
 from uuid import UUID
 
-from models import CustomerReview, DiscountCoupon
+# MIGRATED: Imports moved from OLD models to NEW db.models system
+from db.models.feedback_marketing import CustomerReview, DiscountCoupon
 
 # ReviewEscalation will be added when needed
 from services.ringcentral_sms import (
@@ -36,9 +37,7 @@ class ReviewService:
         try:
             # Check if review already exists
             existing = await self.db.execute(
-                select(CustomerReview).where(
-                    CustomerReview.booking_id == booking_id
-                )
+                select(CustomerReview).where(CustomerReview.booking_id == booking_id)
             )
             if existing.scalar_one_or_none():
                 logger.info(f"Review already exists for booking {booking_id}")
@@ -56,9 +55,7 @@ class ReviewService:
             await self.db.commit()
             await self.db.refresh(review)
 
-            logger.info(
-                f"Created review request {review.id} for booking {booking_id}"
-            )
+            logger.info(f"Created review request {review.id} for booking {booking_id}")
             return review
 
         except Exception as e:
@@ -94,9 +91,7 @@ class ReviewService:
 
             # Send SMS via RingCentral
             async with ringcentral_sms as sms_service:
-                response = await sms_service.send_sms(
-                    to_number=customer_phone, message=message
-                )
+                response = await sms_service.send_sms(to_number=customer_phone, message=message)
 
             if response.success:
                 # Update review record
@@ -163,9 +158,7 @@ class ReviewService:
 
                 # "Okay" - Escalate to AI but no coupon (still acceptable)
                 if rating == "okay":
-                    review.status = (
-                        "submitted"  # Keep as submitted, AI will handle
-                    )
+                    review.status = "submitted"  # Keep as submitted, AI will handle
                     review.ai_escalated_at = datetime.now(timezone.utc)
 
                     # Create escalation for AI to review
@@ -179,9 +172,7 @@ class ReviewService:
                     # )
                     # self.db.add(escalation)
                     # AI will interact and decide if coupon needed
-                    logger.info(
-                        f"Review {review.id} needs AI escalation (okay rating)"
-                    )
+                    logger.info(f"Review {review.id} needs AI escalation (okay rating)")
 
                 # "Could be better" - Immediate escalation, AI handles coupon
                 elif rating == "could_be_better":
@@ -222,14 +213,10 @@ class ReviewService:
                 result["google_url"] = settings.google_review_url
             elif rating == "okay":
                 result["redirect"] = "ai_followup"
-                result["message"] = (
-                    "Our team will review your feedback and reach out if needed."
-                )
+                result["message"] = "Our team will review your feedback and reach out if needed."
             elif rating == "could_be_better":
                 result["redirect"] = "ai_interaction"
-                result["message"] = (
-                    "We'd like to understand more and make this right."
-                )
+                result["message"] = "We'd like to understand more and make this right."
 
             logger.info(f"Review {review_id} submitted with rating {rating}")
             return result
@@ -305,9 +292,7 @@ class ReviewService:
                 review.metadata["coupon_denial_reason"] = (
                     "Not an existing customer - no booking_id (AI coupons only for complaint compensation)"
                 )
-                review.metadata["coupon_denial_at"] = datetime.now(
-                    timezone.utc
-                ).isoformat()
+                review.metadata["coupon_denial_at"] = datetime.now(timezone.utc).isoformat()
                 await self.db.commit()
                 return None
 
@@ -322,16 +307,12 @@ class ReviewService:
                 review.metadata["coupon_denial_reason"] = (
                     f"Not a complaint - rating is '{review.rating}' (AI coupons only for 'could_be_better')"
                 )
-                review.metadata["coupon_denial_at"] = datetime.now(
-                    timezone.utc
-                ).isoformat()
+                review.metadata["coupon_denial_at"] = datetime.now(timezone.utc).isoformat()
                 await self.db.commit()
                 return None
 
             # 🔒 RESTRICTION 1: Check if customer already has active coupon
-            existing_active = await self._check_existing_active_coupon(
-                review.customer_id
-            )
+            existing_active = await self._check_existing_active_coupon(review.customer_id)
             if existing_active:
                 logger.warning(
                     f"Customer {review.customer_id} already has active coupon {existing_active.coupon_code}. "
@@ -340,15 +321,9 @@ class ReviewService:
                 # Store denial reason for admin review
                 if not review.metadata:
                     review.metadata = {}
-                review.metadata["coupon_denial_reason"] = (
-                    "Customer has active unused coupon"
-                )
-                review.metadata["coupon_denial_at"] = datetime.now(
-                    timezone.utc
-                ).isoformat()
-                review.metadata["existing_coupon_code"] = (
-                    existing_active.coupon_code
-                )
+                review.metadata["coupon_denial_reason"] = "Customer has active unused coupon"
+                review.metadata["coupon_denial_at"] = datetime.now(timezone.utc).isoformat()
+                review.metadata["existing_coupon_code"] = existing_active.coupon_code
                 await self.db.commit()
                 return None
 
@@ -365,12 +340,8 @@ class ReviewService:
                     # Store denial reason
                     if not review.metadata:
                         review.metadata = {}
-                    review.metadata["coupon_denial_reason"] = (
-                        "Booking already issued coupon"
-                    )
-                    review.metadata["coupon_denial_at"] = datetime.now(
-                        timezone.utc
-                    ).isoformat()
+                    review.metadata["coupon_denial_reason"] = "Booking already issued coupon"
+                    review.metadata["coupon_denial_at"] = datetime.now(timezone.utc).isoformat()
                     await self.db.commit()
                     return None
 
@@ -391,9 +362,7 @@ class ReviewService:
                 if not review.metadata:
                     review.metadata = {}
                 review.metadata["ai_interaction_notes"] = ai_interaction_notes
-                review.metadata["coupon_issued_at"] = datetime.now(
-                    timezone.utc
-                ).isoformat()
+                review.metadata["coupon_issued_at"] = datetime.now(timezone.utc).isoformat()
                 review.metadata["coupon_type"] = "complaint_compensation"
                 review.metadata["coupon_restrictions_passed"] = [
                     "existing_customer_with_booking",
@@ -444,9 +413,7 @@ class ReviewService:
             #     status="open",
             # )
             # self.db.add(escalation)
-            logger.warning(
-                f"Review {review_id} escalated to admin (AI unable to resolve)"
-            )
+            logger.warning(f"Review {review_id} escalated to admin (AI unable to resolve)")
 
             review.status = "escalated"
             review.admin_notified_at = datetime.now(timezone.utc)
@@ -456,18 +423,14 @@ class ReviewService:
                 review.metadata = {}
             review.metadata["escalated_to_human"] = True
             review.metadata["escalation_reason"] = ai_notes
-            review.metadata["escalated_at"] = datetime.now(
-                timezone.utc
-            ).isoformat()
+            review.metadata["escalated_at"] = datetime.now(timezone.utc).isoformat()
 
             await self.db.commit()
 
             # TODO: Send urgent notification to admin dashboard
             # TODO: Send email/SMS to admin team
 
-            logger.info(
-                f"Escalated review {review_id} to human admin with priority {priority}"
-            )
+            logger.info(f"Escalated review {review_id} to human admin with priority {priority}")
             return True
 
         except Exception as e:
@@ -522,8 +485,7 @@ class ReviewService:
                 max_uses=1,
                 issue_reason=reason,
                 valid_from=datetime.now(timezone.utc),
-                valid_until=datetime.now(timezone.utc)
-                + timedelta(days=validity_days),
+                valid_until=datetime.now(timezone.utc) + timedelta(days=validity_days),
                 status="active",
                 # Store max discount cap + customer contact info for SMS reminders
                 extra_metadata={
@@ -567,9 +529,7 @@ class ReviewService:
         self, customer_id: UUID, station_id: UUID | None = None
     ) -> list[CustomerReview]:
         """Get all reviews for a customer."""
-        query = select(CustomerReview).where(
-            CustomerReview.customer_id == customer_id
-        )
+        query = select(CustomerReview).where(CustomerReview.customer_id == customer_id)
 
         if station_id:
             query = query.where(CustomerReview.station_id == station_id)
@@ -658,9 +618,7 @@ class ReviewService:
         active_only: bool = True,
     ) -> list[DiscountCoupon]:
         """Get customer's discount coupons."""
-        query = select(DiscountCoupon).where(
-            DiscountCoupon.customer_id == customer_id
-        )
+        query = select(DiscountCoupon).where(DiscountCoupon.customer_id == customer_id)
 
         if station_id:
             query = query.where(DiscountCoupon.station_id == station_id)
@@ -687,9 +645,7 @@ class ReviewService:
         Enforces discount cap: 10% OR $100, whichever is LESS
         """
         result = await self.db.execute(
-            select(DiscountCoupon).where(
-                DiscountCoupon.coupon_code == coupon_code
-            )
+            select(DiscountCoupon).where(DiscountCoupon.coupon_code == coupon_code)
         )
         coupon = result.scalar_one_or_none()
 
@@ -717,18 +673,14 @@ class ReviewService:
 
         if coupon.discount_type == "percentage":
             # Calculate percentage discount
-            discount_cents = int(
-                order_total_cents * coupon.discount_value / 100
-            )
+            discount_cents = int(order_total_cents * coupon.discount_value / 100)
 
             # 🔒 ENFORCE CAP: Take minimum of calculated discount or $100
             discount_cents = min(discount_cents, MAX_DISCOUNT_CENTS)
 
             # Calculate what percentage was actually applied (for display)
             actual_percentage = (
-                (discount_cents / order_total_cents * 100)
-                if order_total_cents > 0
-                else 0
+                (discount_cents / order_total_cents * 100) if order_total_cents > 0 else 0
             )
 
             logger.info(
@@ -759,9 +711,7 @@ class ReviewService:
             },
         }
 
-    async def _check_existing_active_coupon(
-        self, customer_id: UUID
-    ) -> DiscountCoupon | None:
+    async def _check_existing_active_coupon(self, customer_id: UUID) -> DiscountCoupon | None:
         """
         Check if customer has any active (unused) coupons.
 
@@ -774,17 +724,14 @@ class ReviewService:
                 DiscountCoupon.customer_id == customer_id,
                 DiscountCoupon.status == "active",
                 DiscountCoupon.times_used == 0,  # Unused
-                DiscountCoupon.valid_until
-                >= datetime.now(timezone.utc),  # Not expired
+                DiscountCoupon.valid_until >= datetime.now(timezone.utc),  # Not expired
             )
             .order_by(DiscountCoupon.created_at.desc())
             .limit(1)
         )
         return result.scalar_one_or_none()
 
-    async def _check_coupon_for_booking(
-        self, customer_id: UUID, booking_id: UUID
-    ) -> bool:
+    async def _check_coupon_for_booking(self, customer_id: UUID, booking_id: UUID) -> bool:
         """
         Check if this booking already generated a coupon.
 
@@ -793,9 +740,7 @@ class ReviewService:
         """
         result = await self.db.execute(
             select(func.count(DiscountCoupon.id))
-            .join(
-                CustomerReview, CustomerReview.id == DiscountCoupon.review_id
-            )
+            .join(CustomerReview, CustomerReview.id == DiscountCoupon.review_id)
             .where(
                 DiscountCoupon.customer_id == customer_id,
                 CustomerReview.booking_id == booking_id,
@@ -808,9 +753,7 @@ class ReviewService:
         """Apply coupon to booking."""
         try:
             result = await self.db.execute(
-                select(DiscountCoupon).where(
-                    DiscountCoupon.coupon_code == coupon_code
-                )
+                select(DiscountCoupon).where(DiscountCoupon.coupon_code == coupon_code)
             )
             coupon = result.scalar_one_or_none()
 
@@ -820,9 +763,7 @@ class ReviewService:
             coupon.mark_used(str(booking_id))
             await self.db.commit()
 
-            logger.info(
-                f"Applied coupon {coupon_code} to booking {booking_id}"
-            )
+            logger.info(f"Applied coupon {coupon_code} to booking {booking_id}")
             return True
 
         except Exception as e:

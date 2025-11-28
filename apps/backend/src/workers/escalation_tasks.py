@@ -9,7 +9,9 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from workers.celery_config import celery_app
 from core.database import get_sync_db
-from models.escalation import Escalation, EscalationStatus
+
+# MIGRATED: from models.escalation → db.models.escalation
+from db.models.escalation import Escalation, EscalationStatus
 from services.ringcentral_service import get_ringcentral_service
 from datetime import datetime
 

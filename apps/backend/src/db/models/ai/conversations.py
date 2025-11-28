@@ -34,7 +34,6 @@ from enum import Enum
 import uuid
 
 from sqlalchemy import (
-    JSON,
     Boolean,
     Column,
     DateTime,
@@ -48,7 +47,8 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
-from models.base import Base
+# MIGRATED: from models.base → ...base_class (3 levels up from ai/)
+from ...base_class import Base
 
 
 # ============================================================================
@@ -69,6 +69,7 @@ class ChannelType(str, Enum):
     - EMAIL: Email conversations
     - WHATSAPP: WhatsApp Business API (future)
     """
+
     WEB = "web"
     SMS = "sms"
     VOICE = "voice"
@@ -88,6 +89,7 @@ class ConversationStatus(str, Enum):
     - CLOSED: Conversation ended (resolved or timeout)
     - ARCHIVED: Historical conversation (retention)
     """
+
     ACTIVE = "active"
     ESCALATED = "escalated"
     CLOSED = "closed"
@@ -105,6 +107,7 @@ class MessageRole(str, Enum):
     - HUMAN: Human agent response (after escalation)
     - TOOL: Function call result (internal)
     """
+
     USER = "user"
     ASSISTANT = "assistant"
     SYSTEM = "system"
@@ -121,6 +124,7 @@ class EmotionTrend(str, Enum):
     - STABLE: Neutral throughout
     - DECLINING: Customer getting frustrated (escalate?)
     """
+
     IMPROVING = "improving"
     STABLE = "stable"
     DECLINING = "declining"
@@ -135,6 +139,7 @@ class EmotionLabel(str, Enum):
     - NEUTRAL: Informational conversation
     - NEGATIVE: Frustrated, upset (trigger follow-up)
     """
+
     POSITIVE = "positive"
     NEUTRAL = "neutral"
     NEGATIVE = "negative"
@@ -183,35 +188,27 @@ class UnifiedConversation(Base):
         # User and status lookups (most common queries)
         Index("idx_conversations_user_active", "user_id", "is_active"),
         Index("idx_conversations_user_channel", "user_id", "channel"),
-
         # Channel and status analytics
         Index("idx_conversations_channel_status", "channel", "status"),
         Index("idx_conversations_status_updated", "status", "updated_at"),
-
         # Emotion-based queries (for scheduler and analytics)
         Index("idx_conversations_emotion_trend", "average_emotion_score", "emotion_trend"),
         Index("idx_conversations_emotion_active", "average_emotion_score", "is_active"),
-
         # Escalation tracking
         Index("idx_conversations_escalated", "escalated", "escalated_at"),
         Index("idx_conversations_assigned_agent", "assigned_agent_id", "status"),
-
         # Time-based queries (inactive detection, analytics)
         Index("idx_conversations_last_message", "last_message_at"),
         Index("idx_conversations_created", "created_at"),
         Index("idx_conversations_closed", "closed_at"),
-
         # JSONB indexes for flexible queries
         Index("idx_conversations_context", "context", postgresql_using="gin"),
         Index("idx_conversations_channel_metadata", "channel_metadata", postgresql_using="gin"),
-
         # Shadow learning lookups
         Index("idx_conversations_route_decision", "route_decision", "confidence_score"),
-
         # Foreign key index
         Index("idx_conversations_customer_id", "customer_id"),
-
-        {"schema": "ai"}
+        {"schema": "ai"},
     )
 
     # ========================================================================
@@ -222,7 +219,7 @@ class UnifiedConversation(Base):
         String(100),
         primary_key=True,
         default=lambda: str(uuid.uuid4()),
-        comment="Unique conversation identifier (UUID)"
+        comment="Unique conversation identifier (UUID)",
     )
 
     # ========================================================================
@@ -233,35 +230,35 @@ class UnifiedConversation(Base):
         String(255),
         nullable=True,  # Nullable for anonymous users
         index=True,
-        comment="User identifier (from auth system or anonymous session)"
+        comment="User identifier (from auth system or anonymous session)",
     )
 
     customer_id = Column(
         String(36),
-        ForeignKey("public.customers.id", ondelete="SET NULL"),
+        ForeignKey("core.customers.id", ondelete="SET NULL"),
         nullable=True,
         index=True,
-        comment="Link to customer record (if identified)"
+        comment="Link to customer record (if identified)",
     )
 
     channel = Column(
         String(20),
         nullable=False,
         default=ChannelType.WEB.value,
-        comment="Communication channel (web/sms/voice/facebook/instagram/email)"
+        comment="Communication channel (web/sms/voice/facebook/instagram/email)",
     )
 
     thread_id = Column(
         String(255),
         nullable=True,
-        comment="Channel-specific thread ID (SMS phone number, FB thread, etc.)"
+        comment="Channel-specific thread ID (SMS phone number, FB thread, etc.)",
     )
 
     channel_metadata = Column(
         JSONB,
         nullable=False,
         default=dict,
-        comment="Channel-specific metadata (phone numbers, FB page IDs, email addresses)"
+        comment="Channel-specific metadata (phone numbers, FB page IDs, email addresses)",
     )
 
     # ========================================================================
@@ -272,7 +269,7 @@ class UnifiedConversation(Base):
         String(20),
         nullable=False,
         default=ConversationStatus.ACTIVE.value,
-        comment="Conversation status (active/escalated/closed/archived)"
+        comment="Conversation status (active/escalated/closed/archived)",
     )
 
     is_active = Column(
@@ -280,14 +277,11 @@ class UnifiedConversation(Base):
         nullable=False,
         default=True,
         index=True,
-        comment="Quick active/inactive flag (optimized queries)"
+        comment="Quick active/inactive flag (optimized queries)",
     )
 
     created_at = Column(
-        DateTime,
-        nullable=False,
-        default=datetime.utcnow,
-        comment="Conversation start timestamp"
+        DateTime, nullable=False, default=datetime.utcnow, comment="Conversation start timestamp"
     )
 
     updated_at = Column(
@@ -295,26 +289,22 @@ class UnifiedConversation(Base):
         nullable=False,
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
-        comment="Last update timestamp (any change)"
+        comment="Last update timestamp (any change)",
     )
 
     last_message_at = Column(
         DateTime,
         nullable=False,
         default=datetime.utcnow,
-        comment="Last message timestamp (for inactive detection)"
+        comment="Last message timestamp (for inactive detection)",
     )
 
-    closed_at = Column(
-        DateTime,
-        nullable=True,
-        comment="Conversation closure timestamp"
-    )
+    closed_at = Column(DateTime, nullable=True, comment="Conversation closure timestamp")
 
     closed_reason = Column(
         String(100),
         nullable=True,
-        comment="Closure reason (resolved/timeout/customer_ended/escalated)"
+        comment="Closure reason (resolved/timeout/customer_ended/escalated)",
     )
 
     # ========================================================================
@@ -325,14 +315,14 @@ class UnifiedConversation(Base):
         Integer,
         nullable=False,
         default=0,
-        comment="Total messages in conversation (performance optimization)"
+        comment="Total messages in conversation (performance optimization)",
     )
 
     context = Column(
         JSONB,
         nullable=False,
         default=dict,
-        comment="Conversation context (booking details, customer preferences, session data)"
+        comment="Conversation context (booking details, customer preferences, session data)",
     )
 
     # ========================================================================
@@ -342,13 +332,11 @@ class UnifiedConversation(Base):
     average_emotion_score = Column(
         Float,
         nullable=True,
-        comment="Average emotion score across all messages (0.0=negative, 1.0=positive)"
+        comment="Average emotion score across all messages (0.0=negative, 1.0=positive)",
     )
 
     emotion_trend = Column(
-        String(20),
-        nullable=True,
-        comment="Emotion trend (improving/stable/declining)"
+        String(20), nullable=True, comment="Emotion trend (improving/stable/declining)"
     )
 
     # ========================================================================
@@ -356,28 +344,19 @@ class UnifiedConversation(Base):
     # ========================================================================
 
     escalated = Column(
-        Boolean,
-        nullable=False,
-        default=False,
-        comment="Escalated to human agent flag"
+        Boolean, nullable=False, default=False, comment="Escalated to human agent flag"
     )
 
-    escalated_at = Column(
-        DateTime,
-        nullable=True,
-        comment="Escalation timestamp"
-    )
+    escalated_at = Column(DateTime, nullable=True, comment="Escalation timestamp")
 
     assigned_agent_id = Column(
-        String(255),
-        nullable=True,
-        comment="Human agent ID (after escalation)"
+        String(255), nullable=True, comment="Human agent ID (after escalation)"
     )
 
     escalation_reason = Column(
         Text,
         nullable=True,
-        comment="Why conversation was escalated (emotion/complexity/customer_request)"
+        comment="Why conversation was escalated (emotion/complexity/customer_request)",
     )
 
     # ========================================================================
@@ -385,35 +364,26 @@ class UnifiedConversation(Base):
     # ========================================================================
 
     confidence_score = Column(
-        Float,
-        nullable=True,
-        default=1.0,
-        comment="AI confidence score (for routing decisions)"
+        Float, nullable=True, default=1.0, comment="AI confidence score (for routing decisions)"
     )
 
     route_decision = Column(
         String(50),
         nullable=True,
         default="teacher",
-        comment="Routing decision (student/teacher/human) for shadow learning"
+        comment="Routing decision (student/teacher/human) for shadow learning",
     )
 
     student_response = Column(
-        Text,
-        nullable=True,
-        comment="Student model response (local Llama-3) for comparison"
+        Text, nullable=True, comment="Student model response (local Llama-3) for comparison"
     )
 
     teacher_response = Column(
-        Text,
-        nullable=True,
-        comment="Teacher model response (OpenAI GPT-4) for training"
+        Text, nullable=True, comment="Teacher model response (OpenAI GPT-4) for training"
     )
 
     reward_score = Column(
-        Float,
-        nullable=True,
-        comment="RLHF reward score (human feedback on conversation quality)"
+        Float, nullable=True, comment="RLHF reward score (human feedback on conversation quality)"
     )
 
     # ========================================================================
@@ -425,13 +395,11 @@ class UnifiedConversation(Base):
         back_populates="conversation",
         cascade="all, delete-orphan",
         lazy="dynamic",
-        order_by="UnifiedMessage.timestamp"
+        order_by="UnifiedMessage.timestamp",
     )
 
     usage_records = relationship(
-        "AIUsage",
-        back_populates="conversation",
-        cascade="all, delete-orphan"
+        "AIUsage", back_populates="conversation", cascade="all, delete-orphan"
     )
 
     # Note: Customer relationship defined in customers table
@@ -482,27 +450,22 @@ class UnifiedMessage(Base):
         # Conversation message lookups (most common)
         Index("idx_messages_conversation_timestamp", "conversation_id", "timestamp"),
         Index("idx_messages_conversation_role", "conversation_id", "role"),
-
         # Emotion history (for scheduler emotion-based follow-ups)
         Index("idx_messages_emotion_history", "conversation_id", "emotion_score", "timestamp"),
         Index("idx_messages_emotion_label", "emotion_label"),
-
         # Analytics queries
         Index("idx_messages_role_created", "role", "timestamp"),
         Index("idx_messages_model_used", "model_used", "timestamp"),
         Index("idx_messages_channel", "channel"),
-
         # Training data collection
         Index("idx_messages_training_data", "is_training_data", "timestamp"),
         Index("idx_messages_human_feedback", "human_feedback", "timestamp"),
-
         # JSONB indexes for complex queries
         Index("idx_messages_metadata", "message_metadata", postgresql_using="gin"),
         Index("idx_messages_kb_sources", "kb_sources_used", postgresql_using="gin"),
         Index("idx_messages_tool_calls", "tool_calls", postgresql_using="gin"),
         Index("idx_messages_detected_emotions", "detected_emotions", postgresql_using="gin"),
-
-        {"schema": "ai"}
+        {"schema": "ai"},
     )
 
     # ========================================================================
@@ -513,7 +476,7 @@ class UnifiedMessage(Base):
         String(100),
         primary_key=True,
         default=lambda: str(uuid.uuid4()),
-        comment="Unique message identifier (UUID)"
+        comment="Unique message identifier (UUID)",
     )
 
     # ========================================================================
@@ -525,7 +488,7 @@ class UnifiedMessage(Base):
         ForeignKey("ai.conversations.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
-        comment="Parent conversation ID (CASCADE delete)"
+        comment="Parent conversation ID (CASCADE delete)",
     )
 
     # ========================================================================
@@ -533,28 +496,22 @@ class UnifiedMessage(Base):
     # ========================================================================
 
     role = Column(
-        String(20),
-        nullable=False,
-        comment="Message role (user/assistant/system/human/tool)"
+        String(20), nullable=False, comment="Message role (user/assistant/system/human/tool)"
     )
 
     content = Column(
-        Text,
-        nullable=False,
-        comment="Message content (primary field for AI processing)"
+        Text, nullable=False, comment="Message content (primary field for AI processing)"
     )
 
     text = Column(
-        Text,
-        nullable=True,
-        comment="Display text (may differ from content for tool calls)"
+        Text, nullable=True, comment="Display text (may differ from content for tool calls)"
     )
 
     channel = Column(
         String(20),
         nullable=False,
         default=ChannelType.WEB.value,
-        comment="Message channel (inherited from conversation)"
+        comment="Message channel (inherited from conversation)",
     )
 
     # ========================================================================
@@ -566,13 +523,11 @@ class UnifiedMessage(Base):
         nullable=False,
         default=datetime.utcnow,
         index=True,
-        comment="Message creation timestamp"
+        comment="Message creation timestamp",
     )
 
     edited_at = Column(
-        DateTime,
-        nullable=True,
-        comment="Message edit timestamp (if edited by human)"
+        DateTime, nullable=True, comment="Message edit timestamp (if edited by human)"
     )
 
     # ========================================================================
@@ -583,7 +538,7 @@ class UnifiedMessage(Base):
         JSONB,
         nullable=False,
         default=dict,
-        comment="Message-specific metadata (attachments, formatting, channel-specific data)"
+        comment="Message-specific metadata (attachments, formatting, channel-specific data)",
     )
 
     # ========================================================================
@@ -591,21 +546,15 @@ class UnifiedMessage(Base):
     # ========================================================================
 
     emotion_score = Column(
-        Float,
-        nullable=True,
-        comment="Emotion score for this message (0.0=negative, 1.0=positive)"
+        Float, nullable=True, comment="Emotion score for this message (0.0=negative, 1.0=positive)"
     )
 
     emotion_label = Column(
-        String(20),
-        nullable=True,
-        comment="Simplified emotion label (positive/neutral/negative)"
+        String(20), nullable=True, comment="Simplified emotion label (positive/neutral/negative)"
     )
 
     detected_emotions = Column(
-        JSONB,
-        nullable=True,
-        comment="Detailed emotion detection (joy, anger, sadness, fear, etc.)"
+        JSONB, nullable=True, comment="Detailed emotion detection (joy, anger, sadness, fear, etc.)"
     )
 
     # ========================================================================
@@ -615,37 +564,23 @@ class UnifiedMessage(Base):
     model_used = Column(
         String(50),
         nullable=True,
-        comment="AI model used (gpt-4-turbo, gpt-3.5-turbo, llama-3-8b, etc.)"
+        comment="AI model used (gpt-4-turbo, gpt-3.5-turbo, llama-3-8b, etc.)",
     )
 
-    confidence = Column(
-        Float,
-        nullable=True,
-        comment="AI confidence score (0.0-1.0)"
-    )
+    confidence = Column(Float, nullable=True, comment="AI confidence score (0.0-1.0)")
 
     input_tokens = Column(
-        Integer,
-        nullable=True,
-        comment="Input tokens consumed (for cost tracking)"
+        Integer, nullable=True, comment="Input tokens consumed (for cost tracking)"
     )
 
     output_tokens = Column(
-        Integer,
-        nullable=True,
-        comment="Output tokens generated (for cost tracking)"
+        Integer, nullable=True, comment="Output tokens generated (for cost tracking)"
     )
 
-    cost_usd = Column(
-        Float,
-        nullable=True,
-        comment="Message cost in USD (calculated from tokens)"
-    )
+    cost_usd = Column(Float, nullable=True, comment="Message cost in USD (calculated from tokens)")
 
     processing_time_ms = Column(
-        Integer,
-        nullable=True,
-        comment="Processing time in milliseconds (performance monitoring)"
+        Integer, nullable=True, comment="Processing time in milliseconds (performance monitoring)"
     )
 
     # ========================================================================
@@ -653,16 +588,14 @@ class UnifiedMessage(Base):
     # ========================================================================
 
     intent_classification = Column(
-        String(50),
-        nullable=True,
-        comment="Detected intent (booking/menu/pricing/complaint/etc.)"
+        String(50), nullable=True, comment="Detected intent (booking/menu/pricing/complaint/etc.)"
     )
 
     kb_sources_used = Column(
         JSONB,
         nullable=True,
         default=list,
-        comment="Knowledge base chunk IDs used (for transparency and training)"
+        comment="Knowledge base chunk IDs used (for transparency and training)",
     )
 
     # ========================================================================
@@ -670,45 +603,29 @@ class UnifiedMessage(Base):
     # ========================================================================
 
     tool_calls = Column(
-        JSONB,
-        nullable=True,
-        comment="Tool/function calls made by AI (structured data)"
+        JSONB, nullable=True, comment="Tool/function calls made by AI (structured data)"
     )
 
-    tool_results = Column(
-        JSONB,
-        nullable=True,
-        comment="Tool call results (structured data)"
-    )
+    tool_results = Column(JSONB, nullable=True, comment="Tool call results (structured data)")
 
     # ========================================================================
     # HUMAN FEEDBACK (Training Data)
     # ========================================================================
 
     human_feedback = Column(
-        String(20),
-        nullable=True,
-        comment="Human feedback (thumbs_up/thumbs_down/neutral)"
+        String(20), nullable=True, comment="Human feedback (thumbs_up/thumbs_down/neutral)"
     )
 
     human_correction = Column(
-        Text,
-        nullable=True,
-        comment="Human correction of AI response (for training)"
+        Text, nullable=True, comment="Human correction of AI response (for training)"
     )
 
     is_training_data = Column(
-        Boolean,
-        nullable=False,
-        default=False,
-        comment="Flag for high-quality training data"
+        Boolean, nullable=False, default=False, comment="Flag for high-quality training data"
     )
 
     # ========================================================================
     # RELATIONSHIPS
     # ========================================================================
 
-    conversation = relationship(
-        "UnifiedConversation",
-        back_populates="messages"
-    )
+    conversation = relationship("UnifiedConversation", back_populates="messages")

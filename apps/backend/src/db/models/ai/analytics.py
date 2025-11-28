@@ -19,7 +19,6 @@ from enum import Enum
 import uuid
 
 from sqlalchemy import (
-    JSON,
     Boolean,
     Column,
     DateTime,
@@ -33,7 +32,8 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
-from models.base import Base
+# MIGRATED: from models.base → ...base_class (3 levels up from ai/)
+from ...base_class import Base
 
 
 # ============================================================================
@@ -51,6 +51,7 @@ class ResolutionStatus(str, Enum):
     - ESCALATED: Transferred to human agent
     - ABANDONED: Customer left mid-conversation
     """
+
     RESOLVED = "resolved"
     UNRESOLVED = "unresolved"
     ESCALATED = "escalated"
@@ -110,24 +111,18 @@ class ConversationAnalytics(Base):
     __table_args__ = (
         # Conversation linkage (most critical)
         Index("idx_analytics_conversation", "conversation_id"),
-
         # Resolution analytics
         Index("idx_analytics_resolution", "resolution_status", "created_at"),
-
         # Satisfaction tracking
         Index("idx_analytics_satisfaction", "customer_satisfaction", "created_at"),
-
         # Cost analytics
         Index("idx_analytics_cost", "total_cost_usd", "created_at"),
-
         # Performance analytics
         Index("idx_analytics_response_time", "first_response_time_seconds"),
         Index("idx_analytics_resolution_time", "resolution_time_seconds"),
-
         # Confidence tracking
         Index("idx_analytics_confidence", "avg_confidence"),
-
-        {"schema": "ai"}
+        {"schema": "ai"},
     )
 
     # ========================================================================
@@ -138,7 +133,7 @@ class ConversationAnalytics(Base):
         String(36),
         primary_key=True,
         default=lambda: str(uuid.uuid4()),
-        comment="Unique analytics record identifier (UUID)"
+        comment="Unique analytics record identifier (UUID)",
     )
 
     conversation_id = Column(
@@ -146,7 +141,7 @@ class ConversationAnalytics(Base):
         ForeignKey("ai.conversations.id", ondelete="CASCADE"),
         nullable=False,
         unique=True,  # One analytics record per conversation
-        comment="Parent conversation ID (CASCADE delete)"
+        comment="Parent conversation ID (CASCADE delete)",
     )
 
     # ========================================================================
@@ -154,24 +149,15 @@ class ConversationAnalytics(Base):
     # ========================================================================
 
     total_messages = Column(
-        Integer,
-        nullable=False,
-        default=0,
-        comment="Total messages in conversation"
+        Integer, nullable=False, default=0, comment="Total messages in conversation"
     )
 
     ai_messages = Column(
-        Integer,
-        nullable=False,
-        default=0,
-        comment="AI-generated messages (assistant role)"
+        Integer, nullable=False, default=0, comment="AI-generated messages (assistant role)"
     )
 
     human_messages = Column(
-        Integer,
-        nullable=False,
-        default=0,
-        comment="Human agent messages (after escalation)"
+        Integer, nullable=False, default=0, comment="Human agent messages (after escalation)"
     )
 
     # ========================================================================
@@ -179,15 +165,13 @@ class ConversationAnalytics(Base):
     # ========================================================================
 
     avg_confidence = Column(
-        Float,
-        nullable=True,
-        comment="Average AI confidence across all messages (0.0-1.0)"
+        Float, nullable=True, comment="Average AI confidence across all messages (0.0-1.0)"
     )
 
     resolution_status = Column(
         String(20),
         nullable=True,
-        comment="Resolution status (resolved/unresolved/escalated/abandoned)"
+        comment="Resolution status (resolved/unresolved/escalated/abandoned)",
     )
 
     customer_satisfaction = Column(
@@ -201,7 +185,7 @@ class ConversationAnalytics(Base):
         2 = Dissatisfied
         1 = Very dissatisfied
         NULL = No rating provided
-        """
+        """,
     )
 
     # ========================================================================
@@ -211,13 +195,13 @@ class ConversationAnalytics(Base):
     first_response_time_seconds = Column(
         Integer,
         nullable=True,
-        comment="Time from first user message to first AI response (seconds)"
+        comment="Time from first user message to first AI response (seconds)",
     )
 
     resolution_time_seconds = Column(
         Integer,
         nullable=True,
-        comment="Time from conversation start to resolution/closure (seconds)"
+        comment="Time from conversation start to resolution/closure (seconds)",
     )
 
     # ========================================================================
@@ -225,17 +209,14 @@ class ConversationAnalytics(Base):
     # ========================================================================
 
     total_tokens = Column(
-        Integer,
-        nullable=False,
-        default=0,
-        comment="Total tokens consumed (input + output)"
+        Integer, nullable=False, default=0, comment="Total tokens consumed (input + output)"
     )
 
     total_cost_usd = Column(
         Float,
         nullable=False,
         default=0.0,
-        comment="Total cost in USD (calculated from token usage)"
+        comment="Total cost in USD (calculated from token usage)",
     )
 
     # ========================================================================
@@ -246,7 +227,7 @@ class ConversationAnalytics(Base):
         DateTime,
         nullable=False,
         default=datetime.utcnow,
-        comment="Analytics record creation timestamp"
+        comment="Analytics record creation timestamp",
     )
 
     updated_at = Column(
@@ -254,7 +235,7 @@ class ConversationAnalytics(Base):
         nullable=False,
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
-        comment="Last update timestamp (recalculated metrics)"
+        comment="Last update timestamp (recalculated metrics)",
     )
 
 
@@ -306,17 +287,13 @@ class AIUsage(Base):
     __table_args__ = (
         # Conversation usage history
         Index("idx_usage_conversation", "conversation_id", "created_at"),
-
         # Model analytics
         Index("idx_usage_model", "model_name", "created_at"),
-
         # Cost analytics
         Index("idx_usage_cost", "cost_usd", "created_at"),
-
         # Performance analytics
         Index("idx_usage_performance", "response_time_ms"),
-
-        {"schema": "ai"}
+        {"schema": "ai"},
     )
 
     # ========================================================================
@@ -327,14 +304,14 @@ class AIUsage(Base):
         String(36),
         primary_key=True,
         default=lambda: str(uuid.uuid4()),
-        comment="Unique usage record identifier (UUID)"
+        comment="Unique usage record identifier (UUID)",
     )
 
     conversation_id = Column(
         String(100),
         ForeignKey("ai.conversations.id", ondelete="CASCADE"),
         nullable=False,
-        comment="Parent conversation ID (CASCADE delete)"
+        comment="Parent conversation ID (CASCADE delete)",
     )
 
     # ========================================================================
@@ -350,7 +327,7 @@ class AIUsage(Base):
         - gpt-3.5-turbo
         - llama-3-8b-instruct
         - claude-3-sonnet
-        """
+        """,
     )
 
     # ========================================================================
@@ -358,24 +335,15 @@ class AIUsage(Base):
     # ========================================================================
 
     input_tokens = Column(
-        Integer,
-        nullable=False,
-        default=0,
-        comment="Input tokens (prompt + context)"
+        Integer, nullable=False, default=0, comment="Input tokens (prompt + context)"
     )
 
     output_tokens = Column(
-        Integer,
-        nullable=False,
-        default=0,
-        comment="Output tokens (generated response)"
+        Integer, nullable=False, default=0, comment="Output tokens (generated response)"
     )
 
     total_tokens = Column(
-        Integer,
-        nullable=False,
-        default=0,
-        comment="Total tokens (input + output)"
+        Integer, nullable=False, default=0, comment="Total tokens (input + output)"
     )
 
     # ========================================================================
@@ -391,38 +359,28 @@ class AIUsage(Base):
         GPT-4 Turbo: $0.01/1K input, $0.03/1K output
         GPT-3.5 Turbo: $0.0005/1K input, $0.0015/1K output
         Llama-3: Free (local model)
-        """
+        """,
     )
 
     # ========================================================================
     # PERFORMANCE METRICS
     # ========================================================================
 
-    response_time_ms = Column(
-        Integer,
-        nullable=True,
-        comment="API response time in milliseconds"
-    )
+    response_time_ms = Column(Integer, nullable=True, comment="API response time in milliseconds")
 
     # ========================================================================
     # LIFECYCLE
     # ========================================================================
 
     created_at = Column(
-        DateTime,
-        nullable=False,
-        default=datetime.utcnow,
-        comment="Usage record creation timestamp"
+        DateTime, nullable=False, default=datetime.utcnow, comment="Usage record creation timestamp"
     )
 
     # ========================================================================
     # RELATIONSHIPS
     # ========================================================================
 
-    conversation = relationship(
-        "UnifiedConversation",
-        back_populates="usage_records"
-    )
+    conversation = relationship("UnifiedConversation", back_populates="usage_records")
 
 
 # ============================================================================
@@ -485,18 +443,14 @@ class TrainingData(Base):
     __table_args__ = (
         # Approved data for export
         Index("idx_training_approved", "is_approved", "created_at"),
-
         # Category-specific datasets
         Index("idx_training_category", "category", "is_approved"),
-
         # Quality filtering
         Index("idx_training_quality", "quality_score", "is_approved"),
-
         # Source tracking
         Index("idx_training_conversation", "conversation_id"),
         Index("idx_training_message", "message_id"),
-
-        {"schema": "ai"}
+        {"schema": "ai"},
     )
 
     # ========================================================================
@@ -507,7 +461,7 @@ class TrainingData(Base):
         String(36),
         primary_key=True,
         default=lambda: str(uuid.uuid4()),
-        comment="Unique training data identifier (UUID)"
+        comment="Unique training data identifier (UUID)",
     )
 
     # ========================================================================
@@ -518,30 +472,24 @@ class TrainingData(Base):
         String(100),
         ForeignKey("ai.conversations.id", ondelete="SET NULL"),
         nullable=True,
-        comment="Source conversation ID (SET NULL on delete)"
+        comment="Source conversation ID (SET NULL on delete)",
     )
 
     message_id = Column(
         String(100),
         ForeignKey("ai.messages.id", ondelete="SET NULL"),
         nullable=True,
-        comment="Source message ID (SET NULL on delete)"
+        comment="Source message ID (SET NULL on delete)",
     )
 
     # ========================================================================
     # TRAINING CONTENT
     # ========================================================================
 
-    prompt = Column(
-        Text,
-        nullable=False,
-        comment="User prompt/question (training input)"
-    )
+    prompt = Column(Text, nullable=False, comment="User prompt/question (training input)")
 
     response = Column(
-        Text,
-        nullable=False,
-        comment="AI response (training output - original or corrected)"
+        Text, nullable=False, comment="AI response (training output - original or corrected)"
     )
 
     human_correction = Column(
@@ -551,7 +499,7 @@ class TrainingData(Base):
         Human-corrected response (if original was wrong).
         NULL = original response was good
         Non-NULL = use this instead of 'response' field
-        """
+        """,
     )
 
     # ========================================================================
@@ -569,7 +517,7 @@ class TrainingData(Base):
         - Customer satisfaction
         - Human feedback
         - Resolution status
-        """
+        """,
     )
 
     category = Column(
@@ -581,7 +529,7 @@ class TrainingData(Base):
         - menu (dishes, pricing)
         - support (general questions)
         - policy (refunds, cancellations)
-        """
+        """,
     )
 
     # ========================================================================
@@ -596,7 +544,7 @@ class TrainingData(Base):
         Human approval flag:
         True = Ready for training/export
         False = Needs review
-        """
+        """,
     )
 
     # Renamed from 'metadata' to 'training_metadata' to avoid SQLAlchemy reserved word
@@ -613,7 +561,7 @@ class TrainingData(Base):
             "model_used": "gpt-4-turbo",
             "tokens": 150
         }
-        """
+        """,
     )
 
     # ========================================================================
@@ -624,17 +572,11 @@ class TrainingData(Base):
         DateTime,
         nullable=False,
         default=datetime.utcnow,
-        comment="Training data collection timestamp"
+        comment="Training data collection timestamp",
     )
 
-    approved_at = Column(
-        DateTime,
-        nullable=True,
-        comment="Human approval timestamp"
-    )
+    approved_at = Column(DateTime, nullable=True, comment="Human approval timestamp")
 
     approved_by = Column(
-        String(255),
-        nullable=True,
-        comment="Admin ID who approved this training data"
+        String(255), nullable=True, comment="Admin ID who approved this training data"
     )

@@ -13,10 +13,16 @@ from cqrs.social.social_commands import (  # Phase 2C: Updated from api.app.cqrs
     SendSocialReplyCommand,
     UpdateThreadStatusCommand,
 )
-from models.legacy_core import CoreCustomer  # Phase 2C: Updated from api.app.models.core
+
+# MIGRATED: from models.legacy_core → db.models.legacy_core
+from db.models.legacy_core import CoreCustomer  # Phase 2C: Updated from api.app.models.core
+
 # Fixed: Use unified lead schema instead of legacy model\nfrom db.models.lead import Lead
-from models.legacy_events import OutboxEntry  # Phase 2C: Updated from api.app.models.events
-from models.legacy_social import (  # Phase 2C: Updated from api.app.models.social
+# MIGRATED: from models.legacy_events → db.models.legacy_events
+from db.models.legacy_events import OutboxEntry  # Phase 2C: Updated from api.app.models.events
+
+# MIGRATED: from models.legacy_social → db.models.legacy_social
+from db.models.legacy_social import (  # Phase 2C: Updated from api.app.models.social
     Review,
     SocialAccount,
     SocialIdentity,

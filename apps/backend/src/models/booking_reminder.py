@@ -5,7 +5,7 @@ Stores scheduled reminders for bookings (email/SMS).
 
 from datetime import datetime
 from enum import Enum
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID as PostgreSQLUUID
@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 
 class ReminderType(str, Enum):
     """Types of reminders"""
+
     EMAIL = "email"
     SMS = "sms"
     BOTH = "both"
@@ -29,6 +30,7 @@ class ReminderType(str, Enum):
 
 class ReminderStatus(str, Enum):
     """Status of reminder delivery"""
+
     PENDING = "pending"
     SENT = "sent"
     FAILED = "failed"
@@ -56,14 +58,14 @@ class BookingReminder(Base):
     """
 
     __tablename__ = "booking_reminders"
-    __table_args__ = {'schema': 'core', 'extend_existing': True}  # core schema
+    __table_args__ = {"schema": "core", "extend_existing": True}  # core schema
 
     id = Column(PostgreSQLUUID(as_uuid=True), primary_key=True, default=uuid4)
     booking_id = Column(
         Integer,
         ForeignKey("core.bookings.id", ondelete="CASCADE"),  # Reference core.bookings
         nullable=False,
-        index=True
+        index=True,
     )
     reminder_type = Column(String(50), nullable=False)
     scheduled_for = Column(DateTime(timezone=True), nullable=False, index=True)
@@ -72,10 +74,12 @@ class BookingReminder(Base):
     message = Column(Text, nullable=True)
     error_message = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(
+        DateTime(timezone=True), nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
-    # Relationships (temporarily commented for Bug #13 schema fixes)
-    # booking = relationship("Booking", back_populates="reminders")
+    # Relationships
+    booking = relationship("Booking", back_populates="reminders")
 
     def __repr__(self) -> str:
         return f"<BookingReminder(id={self.id}, booking_id={self.booking_id}, type={self.reminder_type}, status={self.status})>"

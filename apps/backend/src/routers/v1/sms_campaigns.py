@@ -8,8 +8,12 @@ from uuid import UUID
 
 from core.database import get_db
 from core.dependencies import admin_required
-from models.enums import CampaignChannel, CampaignStatus
-from models.newsletter import Campaign, Subscriber
+
+# MIGRATED: Enum imports moved from models.enums to NEW db.models system
+from db.models.newsletter import CampaignChannel, CampaignStatus
+
+# MIGRATED: from models.newsletter → db.models.newsletter
+from db.models.newsletter import Campaign, Subscriber
 from services.ringcentral_sms import RingCentralSMSService
 from fastapi import (
     APIRouter,

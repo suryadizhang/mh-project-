@@ -9,7 +9,9 @@ import logging
 from api.deps import get_current_user
 from core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
-from models.role import Permission, Role
+
+# MIGRATED: from models.role → db.models.role
+from db.models.role import Permission, Role
 from db.models.identity import User
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

@@ -24,8 +24,16 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
-    Column, String, Text, Integer, Boolean, DateTime, Numeric,
-    ForeignKey, Index, CheckConstraint, Enum as SQLEnum
+    String,
+    Text,
+    Integer,
+    Boolean,
+    DateTime,
+    Numeric,
+    ForeignKey,
+    Index,
+    CheckConstraint,
+    Enum as SQLEnum,
 )
 from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB
 from sqlalchemy.orm import relationship, Mapped, mapped_column
@@ -38,8 +46,10 @@ from ..base_class import Base
 
 import enum
 
+
 class ReviewRating(str, enum.Enum):
     """Review rating levels"""
+
     ONE_STAR = "1"
     TWO_STAR = "2"
     THREE_STAR = "3"
@@ -49,6 +59,7 @@ class ReviewRating(str, enum.Enum):
 
 class ReviewStatus(str, enum.Enum):
     """Review moderation status"""
+
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
@@ -57,6 +68,7 @@ class ReviewStatus(str, enum.Enum):
 
 class CouponStatus(str, enum.Enum):
     """Coupon lifecycle status"""
+
     ACTIVE = "active"
     USED = "used"
     EXPIRED = "expired"
@@ -65,6 +77,7 @@ class CouponStatus(str, enum.Enum):
 
 class QRCodeType(str, enum.Enum):
     """QR code types"""
+
     MENU = "menu"
     BOOKING = "booking"
     REVIEW = "review"
@@ -74,6 +87,7 @@ class QRCodeType(str, enum.Enum):
 
 # ==================== FEEDBACK SCHEMA ====================
 
+
 class CustomerReview(Base):
     """
     Customer review entity
@@ -81,6 +95,7 @@ class CustomerReview(Base):
     Tracks customer reviews with rating, sentiment analysis,
     and moderation workflow.
     """
+
     __tablename__ = "customer_reviews"
     __table_args__ = (
         Index("idx_customer_reviews_booking_id", "booking_id"),
@@ -89,7 +104,7 @@ class CustomerReview(Base):
         Index("idx_customer_reviews_status", "status"),
         Index("idx_customer_reviews_created_at", "created_at"),
         CheckConstraint("rating >= 1 AND rating <= 5", name="check_rating_range"),
-        {"schema": "feedback"}
+        {"schema": "feedback"},
     )
 
     # Primary Key
@@ -100,13 +115,13 @@ class CustomerReview(Base):
         PGUUID(as_uuid=True),
         ForeignKey("core.bookings.id", ondelete="SET NULL"),
         nullable=True,
-        index=True
+        index=True,
     )
     customer_id: Mapped[Optional[UUID]] = mapped_column(
         PGUUID(as_uuid=True),
         ForeignKey("core.customers.id", ondelete="SET NULL"),
         nullable=True,
-        index=True
+        index=True,
     )
 
     # Review Details
@@ -114,21 +129,27 @@ class CustomerReview(Base):
     review_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Sentiment Analysis (from AI)
-    sentiment_score: Mapped[Optional[float]] = mapped_column(Numeric(3, 2), nullable=True)  # -1.0 to 1.0
-    sentiment_label: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)  # positive/neutral/negative
+    sentiment_score: Mapped[Optional[float]] = mapped_column(
+        Numeric(3, 2), nullable=True
+    )  # -1.0 to 1.0
+    sentiment_label: Mapped[Optional[str]] = mapped_column(
+        String(50), nullable=True
+    )  # positive/neutral/negative
 
     # Moderation
     status: Mapped[ReviewStatus] = mapped_column(
         SQLEnum(ReviewStatus, name="review_status", schema="feedback", create_type=False),
         nullable=False,
         server_default="pending",
-        index=True
+        index=True,
     )
     moderation_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     moderated_by_id: Mapped[Optional[UUID]] = mapped_column(
         PGUUID(as_uuid=True),
-        ForeignKey("public.users.id", ondelete="SET NULL"),
-        nullable=True
+        ForeignKey(
+            "identity.users.id", ondelete="SET NULL"
+        ),  # Fixed: users table is in identity schema
+        nullable=True,
     )
     moderated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
@@ -138,19 +159,16 @@ class CustomerReview(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Relationships
-    escalations: Mapped[list["ReviewEscalation"]] = relationship("ReviewEscalation", back_populates="review")
+    escalations: Mapped[list["ReviewEscalation"]] = relationship(
+        "ReviewEscalation", back_populates="review"
+    )
 
 
 class DiscountCoupon(Base):
@@ -159,16 +177,20 @@ class DiscountCoupon(Base):
 
     Promotional codes for discounts and special offers.
     """
+
     __tablename__ = "discount_coupons"
     __table_args__ = (
         Index("idx_discount_coupons_code", "code"),
         Index("idx_discount_coupons_status", "status"),
         Index("idx_discount_coupons_valid_from", "valid_from"),
         Index("idx_discount_coupons_valid_until", "valid_until"),
-        CheckConstraint("discount_percentage >= 0 AND discount_percentage <= 100", name="check_discount_percentage"),
+        CheckConstraint(
+            "discount_percentage >= 0 AND discount_percentage <= 100",
+            name="check_discount_percentage",
+        ),
         CheckConstraint("discount_amount >= 0", name="check_discount_amount"),
         CheckConstraint("max_uses > 0", name="check_max_uses_positive"),
-        {"schema": "feedback"}
+        {"schema": "feedback"},
     )
 
     # Primary Key
@@ -183,8 +205,12 @@ class DiscountCoupon(Base):
     discount_amount: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # cents
 
     # Validity
-    valid_from: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
-    valid_until: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    valid_from: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, index=True
+    )
+    valid_until: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, index=True
+    )
 
     # Usage Limits
     max_uses: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
@@ -199,7 +225,7 @@ class DiscountCoupon(Base):
         SQLEnum(CouponStatus, name="coupon_status", schema="feedback", create_type=False),
         nullable=False,
         server_default="active",
-        index=True
+        index=True,
     )
 
     # Metadata
@@ -207,15 +233,10 @@ class DiscountCoupon(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
 
@@ -225,12 +246,13 @@ class ReviewEscalation(Base):
 
     Tracks negative reviews that require management attention.
     """
+
     __tablename__ = "review_escalations"
     __table_args__ = (
         Index("idx_review_escalations_review_id", "review_id"),
         Index("idx_review_escalations_assigned_to_id", "assigned_to_id"),
         Index("idx_review_escalations_is_resolved", "is_resolved"),
-        {"schema": "feedback"}
+        {"schema": "feedback"},
     )
 
     # Primary Key
@@ -241,18 +263,22 @@ class ReviewEscalation(Base):
         PGUUID(as_uuid=True),
         ForeignKey("feedback.customer_reviews.id", ondelete="CASCADE"),
         nullable=False,
-        index=True
+        index=True,
     )
     assigned_to_id: Mapped[Optional[UUID]] = mapped_column(
         PGUUID(as_uuid=True),
-        ForeignKey("public.users.id", ondelete="SET NULL"),
+        ForeignKey(
+            "identity.users.id", ondelete="SET NULL"
+        ),  # Fixed: users table is in identity schema
         nullable=True,
-        index=True
+        index=True,
     )
 
     # Escalation Details
     reason: Mapped[str] = mapped_column(Text, nullable=False)
-    priority: Mapped[str] = mapped_column(String(50), nullable=False, default="medium")  # low/medium/high
+    priority: Mapped[str] = mapped_column(
+        String(50), nullable=False, default="medium"
+    )  # low/medium/high
 
     # Resolution
     is_resolved: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, index=True)
@@ -261,15 +287,10 @@ class ReviewEscalation(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Relationships
@@ -278,18 +299,20 @@ class ReviewEscalation(Base):
 
 # ==================== MARKETING SCHEMA ====================
 
+
 class QRCode(Base):
     """
     QR code entity
 
     Dynamic QR codes for menus, bookings, reviews, and promotions.
     """
+
     __tablename__ = "qr_codes"
     __table_args__ = (
         Index("idx_qr_codes_code", "code"),
         Index("idx_qr_codes_type", "type"),
         Index("idx_qr_codes_active", "is_active"),
-        {"schema": "marketing"}
+        {"schema": "marketing"},
     )
 
     # Primary Key
@@ -300,7 +323,7 @@ class QRCode(Base):
     type: Mapped[QRCodeType] = mapped_column(
         SQLEnum(QRCodeType, name="qr_code_type", schema="marketing", create_type=False),
         nullable=False,
-        index=True
+        index=True,
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
@@ -310,7 +333,9 @@ class QRCode(Base):
 
     # Tracking
     scan_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    last_scanned_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_scanned_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # Status
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, index=True)
@@ -320,19 +345,16 @@ class QRCode(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Relationships
-    scans: Mapped[list["QRScan"]] = relationship("QRScan", back_populates="qr_code", cascade="all, delete-orphan")
+    scans: Mapped[list["QRScan"]] = relationship(
+        "QRScan", back_populates="qr_code", cascade="all, delete-orphan"
+    )
 
 
 class QRScan(Base):
@@ -341,11 +363,12 @@ class QRScan(Base):
 
     Tracks individual QR code scans for analytics.
     """
+
     __tablename__ = "qr_scans"
     __table_args__ = (
         Index("idx_qr_scans_qr_code_id", "qr_code_id"),
         Index("idx_qr_scans_scanned_at", "scanned_at"),
-        {"schema": "marketing"}
+        {"schema": "marketing"},
     )
 
     # Primary Key
@@ -356,7 +379,7 @@ class QRScan(Base):
         PGUUID(as_uuid=True),
         ForeignKey("marketing.qr_codes.id", ondelete="CASCADE"),
         nullable=False,
-        index=True
+        index=True,
     )
 
     # Scan Details
@@ -375,10 +398,7 @@ class QRScan(Base):
 
     # Timestamp
     scanned_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        index=True
+        DateTime(timezone=True), nullable=False, server_default=func.now(), index=True
     )
 
     # Relationships

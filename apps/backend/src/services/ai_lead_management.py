@@ -6,8 +6,8 @@ import json
 import logging
 from typing import Any
 
-from models import Lead
-from models.enums import LeadQuality, LeadSource
+# FIXED: Import from db.models (NEW system) instead of models (OLD system)
+from db.models.lead import Lead, LeadQuality, LeadSource
 from services.openai_service import (
     OpenAIService,
 )  # Phase 2C: Updated from api.app.services.openai_service

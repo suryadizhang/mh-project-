@@ -27,22 +27,37 @@ from typing import Optional, List
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
-    Column, String, Text, Integer, BigInteger, Boolean, DateTime, Date, Time,
-    ForeignKey, ForeignKeyConstraint, Index, CheckConstraint, UniqueConstraint, Enum as SQLEnum, text
+    String,
+    Text,
+    Integer,
+    Boolean,
+    DateTime,
+    Date,
+    Time,
+    ForeignKey,
+    ForeignKeyConstraint,
+    Index,
+    CheckConstraint,
+    Enum as SQLEnum,
+    text,
 )
 from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB, ARRAY
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.sql import func
 
-from ..base_class import Base
+# CRITICAL: Must use unified Base from core.database (same as models.base.Base)
+# This ensures all models share the same metadata registry (enterprise single-source-of-truth)
+from core.database import Base
 
 
 # ==================== ENUMS ====================
 
 import enum
 
+
 class BookingStatus(str, enum.Enum):
     """Booking status workflow"""
+
     PENDING = "pending"
     DEPOSIT_PENDING = "deposit_pending"
     DEPOSIT_PAID = "deposit_paid"
@@ -55,6 +70,7 @@ class BookingStatus(str, enum.Enum):
 
 class MenuCategory(str, enum.Enum):
     """Menu categories for catering"""
+
     APPETIZER = "appetizer"
     ENTREE = "entree"
     DESSERT = "dessert"
@@ -64,6 +80,7 @@ class MenuCategory(str, enum.Enum):
 
 class MessageChannel(str, enum.Enum):
     """Communication channels"""
+
     SMS = "sms"
     EMAIL = "email"
     PHONE = "phone"
@@ -73,6 +90,7 @@ class MessageChannel(str, enum.Enum):
 
 class ThreadStatus(str, enum.Enum):
     """Message thread status"""
+
     ACTIVE = "active"
     ARCHIVED = "archived"
     CLOSED = "closed"
@@ -81,6 +99,7 @@ class ThreadStatus(str, enum.Enum):
 
 class SocialPlatform(str, enum.Enum):
     """Social media platforms"""
+
     INSTAGRAM = "instagram"
     FACEBOOK = "facebook"
     TWITTER = "twitter"
@@ -90,6 +109,7 @@ class SocialPlatform(str, enum.Enum):
 
 class SocialThreadStatus(str, enum.Enum):
     """Social thread status"""
+
     OPEN = "open"
     PENDING = "pending"
     REPLIED = "replied"
@@ -98,6 +118,7 @@ class SocialThreadStatus(str, enum.Enum):
 
 class ReviewStatus(str, enum.Enum):
     """Review moderation status"""
+
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
@@ -106,6 +127,7 @@ class ReviewStatus(str, enum.Enum):
 
 class PricingTierLevel(str, enum.Enum):
     """Pricing tier levels"""
+
     STANDARD = "standard"
     PREMIUM = "premium"
     DELUXE = "deluxe"
@@ -113,6 +135,7 @@ class PricingTierLevel(str, enum.Enum):
 
 
 # ==================== MODELS ====================
+
 
 class Booking(Base):
     """
@@ -126,26 +149,48 @@ class Booking(Base):
     - Added: sms_consent, sms_consent_timestamp, version, hold_on_request
     - Added: customer_deposit_deadline, internal_deadline, deposit_confirmed_at
     """
+
     __tablename__ = "bookings"
     __table_args__ = (
-        CheckConstraint('deposit_due_cents >= 0', name='check_deposit_non_negative'),
-        CheckConstraint('party_adults > 0', name='check_party_adults_positive'),
-        CheckConstraint('party_kids >= 0', name='check_party_kids_non_negative'),
-        CheckConstraint('total_due_cents >= deposit_due_cents', name='check_total_gte_deposit'),
-        ForeignKeyConstraint(['chef_id'], ['core.chefs.id'], ondelete='SET NULL', name='bookings_chef_id_fkey'),
-        ForeignKeyConstraint(['customer_id'], ['core.customers.id'], ondelete='RESTRICT', name='bookings_customer_id_fkey'),
-        ForeignKeyConstraint(['station_id'], ['identity.stations.id'], ondelete='RESTRICT', name='fk_bookings_station'),
-        Index('idx_booking_date_slot_active', 'date', 'slot', 'status', unique=True),
-        Index('idx_booking_station_customer', 'station_id', 'customer_id'),
-        Index('idx_booking_station_date', 'station_id', 'date', 'slot'),
-        Index('ix_bookings_customer_deposit_deadline', 'customer_deposit_deadline', 'status'),
-        Index('ix_bookings_internal_deadline', 'internal_deadline', 'status', 'hold_on_request', 'deposit_confirmed_at'),
-        Index('ix_bookings_sms_consent', 'sms_consent'),
-        Index('ix_core_bookings_chef_slot_unique', 'chef_id', 'date', 'slot', unique=True),
-        Index('ix_core_bookings_customer_id', 'customer_id'),
-        Index('ix_core_bookings_date_slot', 'date', 'slot'),
-        Index('ix_core_bookings_status', 'status'),
-        {"schema": "core"}
+        CheckConstraint("deposit_due_cents >= 0", name="check_deposit_non_negative"),
+        CheckConstraint("party_adults > 0", name="check_party_adults_positive"),
+        CheckConstraint("party_kids >= 0", name="check_party_kids_non_negative"),
+        CheckConstraint("total_due_cents >= deposit_due_cents", name="check_total_gte_deposit"),
+        ForeignKeyConstraint(
+            ["chef_id"], ["core.chefs.id"], ondelete="SET NULL", name="bookings_chef_id_fkey"
+        ),
+        ForeignKeyConstraint(
+            ["customer_id"],
+            ["core.customers.id"],
+            ondelete="RESTRICT",
+            name="bookings_customer_id_fkey",
+        ),
+        ForeignKeyConstraint(
+            ["station_id"],
+            ["identity.stations.id"],
+            ondelete="RESTRICT",
+            name="fk_bookings_station",
+        ),
+        Index("idx_booking_date_slot_active", "date", "slot", "status", unique=True),
+        Index("idx_booking_station_customer", "station_id", "customer_id"),
+        Index("idx_booking_station_date", "station_id", "date", "slot"),
+        Index("ix_bookings_customer_deposit_deadline", "customer_deposit_deadline", "status"),
+        Index(
+            "ix_bookings_internal_deadline",
+            "internal_deadline",
+            "status",
+            "hold_on_request",
+            "deposit_confirmed_at",
+        ),
+        Index("ix_bookings_sms_consent", "sms_consent"),
+        Index("ix_core_bookings_chef_slot_unique", "chef_id", "date", "slot", unique=True),
+        Index("ix_core_bookings_customer_id", "customer_id"),
+        Index("ix_core_bookings_date_slot", "date", "slot"),
+        Index("ix_core_bookings_status", "status"),
+        {
+            "schema": "core",
+            "extend_existing": True,
+        },  # Allow coexistence with legacy models.booking.Booking
     )
 
     # Primary Key
@@ -174,32 +219,44 @@ class Booking(Base):
 
     # Status
     status: Mapped[BookingStatus] = mapped_column(
-        SQLEnum(BookingStatus, name="booking_status", schema="public", create_type=False, values_callable=lambda x: [e.value for e in x]),
+        SQLEnum(
+            BookingStatus,
+            name="booking_status",
+            schema="public",
+            create_type=False,
+            values_callable=lambda x: [e.value for e in x],
+        ),
         nullable=False,
-        index=True
+        index=True,
     )
 
     # Source tracking
     source: Mapped[str] = mapped_column(String(50), nullable=False)
 
     # TCPA Compliance (NEW - from database)
-    sms_consent: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text('false'))
-    sms_consent_timestamp: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    sms_consent: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
+    sms_consent_timestamp: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # Optimistic Locking (NEW - Bug #13 fix)
-    version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text('1'))
+    version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("1"))
 
     # Dual Deadline System (UPDATED - match database)
     customer_deposit_deadline: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     internal_deadline: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
-    deposit_deadline: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)  # Legacy compatibility
+    deposit_deadline: Mapped[Optional[datetime]] = mapped_column(
+        DateTime, nullable=True
+    )  # Legacy compatibility
 
     # Manual Deposit Confirmation (NEW - from database)
     deposit_confirmed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     deposit_confirmed_by: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
     # Admin Hold System (NEW - from database)
-    hold_on_request: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text('false'))
+    hold_on_request: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("false")
+    )
     held_by: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     held_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     hold_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
@@ -217,20 +274,22 @@ class Booking(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Relationships
     customer: Mapped["Customer"] = relationship("Customer", back_populates="bookings")
     chef: Mapped[Optional["Chef"]] = relationship("Chef", back_populates="bookings")
+    reminders: Mapped[List["BookingReminder"]] = relationship(
+        "BookingReminder", back_populates="booking", lazy="select", cascade="all, delete-orphan"
+    )
+    payments: Mapped[List["Payment"]] = relationship(
+        "Payment", back_populates="booking", lazy="select", cascade="all, delete-orphan"
+    )
+    # reminders: Mapped[list["BookingReminder"]] = relationship("BookingReminder", back_populates="booking", lazy="select", cascade="all, delete-orphan")  # Commented: BookingReminder not in db.models yet
 
 
 class Customer(Base):
@@ -245,13 +304,19 @@ class Customer(Base):
     - station_id is NOT NULL (required)
     - Added: timezone, tags, notes, deleted_at, consent_updated_at
     """
+
     __tablename__ = "customers"
     __table_args__ = (
-        ForeignKeyConstraint(["station_id"], ["identity.stations.id"], ondelete="RESTRICT", name="fk_customers_station"),
+        ForeignKeyConstraint(
+            ["station_id"],
+            ["identity.stations.id"],
+            ondelete="RESTRICT",
+            name="fk_customers_station",
+        ),
         Index("idx_customer_station_email", "station_id", "email_encrypted", unique=True),
         Index("idx_customer_station_created", "station_id", "created_at"),
         Index("ix_core_customers_email_active", "email_encrypted", unique=True),
-        {"schema": "core"}
+        {"schema": "core"},
     )
 
     # Primary Key
@@ -281,20 +346,17 @@ class Customer(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Relationships
     bookings: Mapped[List["Booking"]] = relationship("Booking", back_populates="customer")
-    message_threads: Mapped[List["MessageThread"]] = relationship("MessageThread", back_populates="customer")
+    message_threads: Mapped[List["MessageThread"]] = relationship(
+        "MessageThread", back_populates="customer"
+    )
 
     # ==================== BACKWARD COMPATIBILITY HELPERS ====================
     # These @property decorators allow existing code to use customer.email/customer.phone
@@ -309,6 +371,7 @@ class Customer(Base):
         If FIELD_ENCRYPTION_KEY not set, returns plaintext (safe for migration).
         """
         from core.encryption import decrypt_email
+
         return decrypt_email(self.email_encrypted)
 
     @email.setter
@@ -320,6 +383,7 @@ class Customer(Base):
         If FIELD_ENCRYPTION_KEY not set, stores plaintext (safe for migration).
         """
         from core.encryption import encrypt_email
+
         self.email_encrypted = encrypt_email(value)
 
     @property
@@ -330,6 +394,7 @@ class Customer(Base):
         Uses core/encryption.py with passthrough mode for gradual migration.
         """
         from core.encryption import decrypt_phone
+
         return decrypt_phone(self.phone_encrypted)
 
     @phone.setter
@@ -340,6 +405,7 @@ class Customer(Base):
         Uses core/encryption.py with passthrough mode for gradual migration.
         """
         from core.encryption import encrypt_phone
+
         self.phone_encrypted = encrypt_phone(value)
 
 
@@ -349,12 +415,13 @@ class Chef(Base):
 
     Represents a hibachi chef with skills, availability, and assignments.
     """
+
     __tablename__ = "chefs"
     __table_args__ = (
         Index("idx_chefs_email", "email"),
         Index("idx_chefs_phone", "phone"),
         Index("idx_chefs_active", "is_active"),
-        {"schema": "core"}
+        {"schema": "core"},
     )
 
     # Primary Key
@@ -379,19 +446,193 @@ class Chef(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Relationships
     bookings: Mapped[List["Booking"]] = relationship("Booking", back_populates="chef")
+
+
+# ==================== BOOKING REMINDERS ====================
+
+
+class ReminderType(str, enum.Enum):
+    """Types of booking reminders"""
+
+    EMAIL = "email"
+    SMS = "sms"
+    BOTH = "both"
+
+
+class ReminderStatus(str, enum.Enum):
+    """Status of reminder delivery"""
+
+    PENDING = "pending"
+    SENT = "sent"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+
+
+class BookingReminder(Base):
+    """
+    Booking reminder entity
+
+    Stores scheduled reminders for bookings (email/SMS).
+    Integrates with Celery for async sending.
+    """
+
+    __tablename__ = "booking_reminders"
+    __table_args__ = (
+        Index("idx_booking_reminders_booking_id", "booking_id"),
+        Index("idx_booking_reminders_status", "status"),
+        Index("idx_booking_reminders_scheduled_for", "scheduled_for"),
+        {"schema": "core", "extend_existing": True},
+    )
+
+    # Primary Key
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+
+    # Foreign Keys
+    booking_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("core.bookings.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    # Reminder Details
+    reminder_type: Mapped[ReminderType] = mapped_column(
+        SQLEnum(ReminderType, name="reminder_type", schema="public", create_type=False),
+        nullable=False,
+    )
+    scheduled_for: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, index=True
+    )
+    sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    # Status
+    status: Mapped[ReminderStatus] = mapped_column(
+        SQLEnum(ReminderStatus, name="reminder_status", schema="public", create_type=False),
+        nullable=False,
+        default=ReminderStatus.PENDING,
+        index=True,
+    )
+
+    # Content
+    message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+    )
+
+    # Relationships
+    booking: Mapped["Booking"] = relationship("Booking", back_populates="reminders")
+
+
+# ==================== PAYMENTS ====================
+
+
+class PaymentStatus(str, enum.Enum):
+    """Payment status workflow"""
+
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    REFUNDED = "refunded"
+    PARTIALLY_REFUNDED = "partially_refunded"
+
+
+class PaymentType(str, enum.Enum):
+    """Payment types"""
+
+    DEPOSIT = "deposit"
+    FULL_PAYMENT = "full_payment"
+    PARTIAL_PAYMENT = "partial_payment"
+    REFUND = "refund"
+
+
+class Payment(Base):
+    """
+    Payment entity
+
+    Tracks all payments and refunds for bookings.
+    Integrates with Stripe for payment processing.
+    """
+
+    __tablename__ = "payments"
+    __table_args__ = (
+        Index("idx_payments_booking_id", "booking_id"),
+        Index("idx_payments_status", "status"),
+        Index("idx_payments_stripe_payment_intent_id", "stripe_payment_intent_id"),
+        Index("idx_payments_created_at", "created_at"),
+        {"schema": "core", "extend_existing": True},
+    )
+
+    # Primary Key
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+
+    # Foreign Keys
+    booking_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("core.bookings.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    # Stripe Integration
+    stripe_payment_intent_id: Mapped[Optional[str]] = mapped_column(
+        String(255), nullable=True, unique=True, index=True
+    )
+    stripe_customer_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    stripe_charge_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+
+    # Payment Details
+    amount: Mapped[int] = mapped_column(Integer, nullable=False)  # Amount in cents
+    currency: Mapped[str] = mapped_column(String(3), nullable=False, default="usd")
+    payment_type: Mapped[PaymentType] = mapped_column(
+        SQLEnum(PaymentType, name="payment_type", schema="public", create_type=False),
+        nullable=False,
+    )
+
+    # Status
+    status: Mapped[PaymentStatus] = mapped_column(
+        SQLEnum(PaymentStatus, name="payment_status", schema="public", create_type=False),
+        nullable=False,
+        default=PaymentStatus.PENDING,
+        index=True,
+    )
+
+    # Metadata
+    payment_method: Mapped[Optional[str]] = mapped_column(
+        String(50), nullable=True
+    )  # card, bank_transfer, etc.
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Refund Details (if applicable)
+    refunded_amount: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    refund_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), index=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+    )
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    # Relationships
+    booking: Mapped["Booking"] = relationship("Booking", back_populates="payments")
 
 
 class MessageThread(Base):
@@ -400,34 +641,39 @@ class MessageThread(Base):
 
     Groups messages by customer and context (booking, support, etc.).
     """
+
     __tablename__ = "message_threads"
     __table_args__ = (
         Index("idx_message_threads_customer_id", "customer_id"),
         Index("idx_message_threads_station_id", "station_id"),
         Index("idx_message_threads_status", "status"),
         Index("idx_message_threads_created_at", "created_at"),
-        {"schema": "core"}
+        {"schema": "core"},
     )
 
     # Primary Key
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Foreign Keys
-    customer_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("core.customers.id"), nullable=False)
-    station_id: Mapped[Optional[UUID]] = mapped_column(PGUUID(as_uuid=True), ForeignKey("identity.stations.id"), nullable=True)
+    customer_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("core.customers.id"), nullable=False
+    )
+    station_id: Mapped[Optional[UUID]] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("identity.stations.id"), nullable=True
+    )
 
     # Thread Details
     subject: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     channel: Mapped[MessageChannel] = mapped_column(
         SQLEnum(MessageChannel, name="message_channel", schema="public", create_type=False),
         nullable=False,
-        default=MessageChannel.WEB_CHAT
+        default=MessageChannel.WEB_CHAT,
     )
     status: Mapped[ThreadStatus] = mapped_column(
         SQLEnum(ThreadStatus, name="thread_status", schema="public", create_type=False),
         nullable=False,
         default=ThreadStatus.ACTIVE,
-        index=True
+        index=True,
     )
 
     # Metadata
@@ -435,21 +681,20 @@ class MessageThread(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
-    last_message_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_message_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # Relationships
     customer: Mapped["Customer"] = relationship("Customer", back_populates="message_threads")
-    messages: Mapped[List["CoreMessage"]] = relationship("CoreMessage", back_populates="thread", cascade="all, delete-orphan")
+    messages: Mapped[List["CoreMessage"]] = relationship(
+        "CoreMessage", back_populates="thread", cascade="all, delete-orphan"
+    )
 
 
 class CoreMessage(Base):
@@ -458,21 +703,26 @@ class CoreMessage(Base):
 
     Represents a single message in a thread.
     """
+
     __tablename__ = "messages"
     __table_args__ = (
         Index("idx_messages_thread_id", "thread_id"),
         Index("idx_messages_created_at", "created_at"),
-        {"schema": "core"}
+        {"schema": "core"},
     )
 
     # Primary Key
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Foreign Keys
-    thread_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("core.message_threads.id"), nullable=False)
+    thread_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("core.message_threads.id"), nullable=False
+    )
 
     # Message Details
-    sender_type: Mapped[str] = mapped_column(String(50), nullable=False)  # 'customer', 'staff', 'system', 'ai'
+    sender_type: Mapped[str] = mapped_column(
+        String(50), nullable=False
+    )  # 'customer', 'staff', 'system', 'ai'
     sender_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     is_read: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
@@ -482,9 +732,7 @@ class CoreMessage(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
     # Relationships
@@ -497,6 +745,7 @@ class PricingTier(Base):
 
     Defines pricing levels (standard, premium, deluxe, custom).
     """
+
     __tablename__ = "pricing_tiers"
     __table_args__ = (
         Index("idx_pricing_tiers_level", "level"),
@@ -504,7 +753,7 @@ class PricingTier(Base):
         CheckConstraint("base_price >= 0", name="check_base_price_positive"),
         CheckConstraint("min_guests > 0", name="check_min_guests_positive"),
         CheckConstraint("max_guests >= min_guests", name="check_max_guests_valid"),
-        {"schema": "core"}
+        {"schema": "core"},
     )
 
     # Primary Key
@@ -515,7 +764,7 @@ class PricingTier(Base):
     level: Mapped[PricingTierLevel] = mapped_column(
         SQLEnum(PricingTierLevel, name="pricing_tier_level", schema="public", create_type=False),
         nullable=False,
-        index=True
+        index=True,
     )
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
@@ -535,19 +784,15 @@ class PricingTier(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Relationships
-    bookings: Mapped[List["Booking"]] = relationship("Booking", back_populates="pricing_tier")
+    # NOTE: Removed broken relationship - Booking model doesn't have pricing_tier_id FK
+    # bookings: Mapped[List["Booking"]] = relationship("Booking", back_populates="pricing_tier")
 
 
 class SocialThread(Base):
@@ -556,12 +801,13 @@ class SocialThread(Base):
 
     Tracks conversations from social media platforms.
     """
+
     __tablename__ = "social_threads"
     __table_args__ = (
         Index("idx_social_threads_platform", "platform"),
         Index("idx_social_threads_status", "status"),
         Index("idx_social_threads_created_at", "created_at"),
-        {"schema": "core"}
+        {"schema": "core"},
     )
 
     # Primary Key
@@ -571,7 +817,7 @@ class SocialThread(Base):
     platform: Mapped[SocialPlatform] = mapped_column(
         SQLEnum(SocialPlatform, name="social_platform", schema="public", create_type=False),
         nullable=False,
-        index=True
+        index=True,
     )
     platform_thread_id: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
 
@@ -581,10 +827,12 @@ class SocialThread(Base):
 
     # Thread Status
     status: Mapped[SocialThreadStatus] = mapped_column(
-        SQLEnum(SocialThreadStatus, name="social_thread_status", schema="public", create_type=False),
+        SQLEnum(
+            SocialThreadStatus, name="social_thread_status", schema="public", create_type=False
+        ),
         nullable=False,
         default=SocialThreadStatus.OPEN,
-        index=True
+        index=True,
     )
 
     # Metadata
@@ -592,17 +840,14 @@ class SocialThread(Base):
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
-    last_message_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_message_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # Relationships
     reviews: Mapped[List["Review"]] = relationship("Review", back_populates="thread")
@@ -614,20 +859,23 @@ class Review(Base):
 
     Tracks reviews with moderation workflow.
     """
+
     __tablename__ = "reviews"
     __table_args__ = (
         Index("idx_reviews_thread_id", "thread_id"),
         Index("idx_reviews_status", "status"),
         Index("idx_reviews_rating", "rating"),
         CheckConstraint("rating >= 1 AND rating <= 5", name="check_rating_range"),
-        {"schema": "core"}
+        {"schema": "core"},
     )
 
     # Primary Key
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Foreign Keys
-    thread_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), ForeignKey("core.social_threads.id"), nullable=False)
+    thread_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("core.social_threads.id"), nullable=False
+    )
 
     # Review Details
     rating: Mapped[int] = mapped_column(Integer, nullable=False)  # 1-5 stars
@@ -638,15 +886,13 @@ class Review(Base):
         SQLEnum(ReviewStatus, name="review_status", schema="public", create_type=False),
         nullable=False,
         default=ReviewStatus.PENDING,
-        index=True
+        index=True,
     )
     moderation_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     moderated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 

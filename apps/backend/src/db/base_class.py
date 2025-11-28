@@ -1,49 +1,31 @@
 """
-SQLAlchemy Base Class
-=====================
+SQLAlchemy Base Class - Import Facade
+======================================
 
-Declarative base for all SQLAlchemy models.
-Provides common functionality and type checking.
+DEPRECATED: This module is now an import facade for backward compatibility.
+
+All models MUST use the unified Base from core.database to avoid metadata fragmentation.
+This facade ensures old imports still work during migration.
+
+Enterprise Pattern: Single Source of Truth
+- ONE canonical Base: core.database.Base
+- ALL models share same metadata registry
+- Import facades provide backward compatibility
+
+Migration Path:
+- OLD: from db.base_class import Base  # DEPRECATED
+- NEW: from core.database import Base  # RECOMMENDED
+
+Why This Matters:
+- Prevents "NoReferencedTableError" in alembic migrations
+- Ensures foreign keys resolve across schemas
+- Maintains single metadata object for SQLAlchemy
+- Industry standard (Google, Uber, Shopify pattern)
 """
 
-from typing import Any
-from sqlalchemy.orm import DeclarativeBase, declared_attr
+# CRITICAL: Import facade - redirects to unified Base
+# DO NOT define a new Base class here - it causes metadata fragmentation
+from core.database import Base
 
-
-class Base(DeclarativeBase):
-    """
-    Base class for all SQLAlchemy models
-
-    Provides:
-    - Declarative base functionality
-    - Common table naming conventions
-    - Type checking support
-    """
-
-    # Use type annotation helper for better IDE support
-    __abstract__ = True
-
-    @declared_attr
-    def __tablename__(cls) -> str:
-        """
-        Auto-generate table name from class name
-        Override in model if custom name needed
-        """
-        return cls.__name__.lower()
-
-    def dict(self) -> dict[str, Any]:
-        """
-        Convert model instance to dictionary
-        Useful for serialization
-        """
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-    def __repr__(self) -> str:
-        """String representation of model"""
-        class_name = self.__class__.__name__
-        attrs = ", ".join(
-            f"{c.name}={getattr(self, c.name)!r}"
-            for c in self.__table__.columns
-            if c.primary_key
-        )
-        return f"{class_name}({attrs})"
+# Re-export for backward compatibility
+__all__ = ["Base"]

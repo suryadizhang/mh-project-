@@ -8,7 +8,7 @@ from uuid import uuid4
 from api.ai.endpoints.models import (
     Conversation,
     ConversationStatus,
-    Message,
+    AIMessage,  # FIXED: Was 'Message', should be 'AIMessage'
     MessageRole,
 )
 from api.ai.endpoints.schemas import ChatIngestRequest, ChatIngestResponse
@@ -91,7 +91,7 @@ class ChatService:
                 await db.flush()
 
             # Store the incoming message
-            incoming_message = Message(
+            incoming_message = AIMessage(
                 conversation_id=conversation.id,
                 role=MessageRole.USER.value,
                 content=request.text,  # ✅ Use request.text
@@ -158,7 +158,7 @@ class ChatService:
                 )
 
             # Store AI response
-            response_message = Message(
+            response_message = AIMessage(
                 conversation_id=conversation.id,
                 role=MessageRole.ASSISTANT.value,
                 content=ai_response.message,

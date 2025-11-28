@@ -1,0 +1,256 @@
+"""
+CRUD API endpoints for menu items management
+Supports Create, Read, Update, Delete operations for menu_items table
+"""
+
+from typing import List
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel, Field
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.database import get_async_session
+
+# MIGRATED: from models.knowledge_base → db.models.knowledge_base
+from db.models.knowledge_base import MenuItem
+
+router = APIRouter(prefix="/menu-items", tags=["menu-items"])
+
+
+# Pydantic schemas
+class MenuItemCreate(BaseModel):
+    """Schema for creating a menu item"""
+
+    name: str = Field(..., min_length=1, max_length=200)
+    description: str | None = None
+    price: float = Field(..., ge=0)
+    category: str = Field(..., pattern="^(base_pricing|protein|side)$")
+    is_included: bool = False
+    is_active: bool = True
+    display_order: int = Field(default=0, ge=0)
+
+
+class MenuItemUpdate(BaseModel):
+    """Schema for updating a menu item"""
+
+    name: str | None = Field(None, min_length=1, max_length=200)
+    description: str | None = None
+    price: float | None = Field(None, ge=0)
+    category: str | None = Field(None, pattern="^(base_pricing|protein|side)$")
+    is_included: bool | None = None
+    is_active: bool | None = None
+    display_order: int | None = Field(None, ge=0)
+
+
+class MenuItemResponse(BaseModel):
+    """Schema for menu item response"""
+
+    id: UUID
+    name: str
+    description: str | None
+    price: float
+    category: str
+    is_included: bool
+    is_active: bool
+    display_order: int
+    created_at: str
+    updated_at: str
+
+    class Config:
+        from_attributes = True
+
+
+@router.get("", response_model=List[MenuItemResponse])
+async def get_menu_items(
+    active_only: bool = False, session: AsyncSession = Depends(get_async_session)
+):
+    """
+    Get all menu items
+
+    Args:
+        active_only: If True, only return active items
+        session: Database session
+
+    Returns:
+        List of menu items
+    """
+    query = select(MenuItem)
+
+    if active_only:
+        query = query.where(MenuItem.is_active == True)
+
+    query = query.order_by(MenuItem.display_order, MenuItem.name)
+
+    result = await session.execute(query)
+    items = result.scalars().all()
+
+    return [
+        MenuItemResponse(
+            id=item.id,
+            name=item.name,
+            description=item.description,
+            price=float(item.price),
+            category=item.category,
+            is_included=item.is_included,
+            is_active=item.is_active,
+            display_order=item.display_order,
+            created_at=item.created_at.isoformat(),
+            updated_at=item.updated_at.isoformat(),
+        )
+        for item in items
+    ]
+
+
+@router.get("/{item_id}", response_model=MenuItemResponse)
+async def get_menu_item(item_id: UUID, session: AsyncSession = Depends(get_async_session)):
+    """
+    Get a specific menu item by ID
+
+    Args:
+        item_id: Menu item UUID
+        session: Database session
+
+    Returns:
+        Menu item details
+    """
+    result = await session.execute(select(MenuItem).where(MenuItem.id == item_id))
+    item = result.scalar_one_or_none()
+
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Menu item {item_id} not found"
+        )
+
+    return MenuItemResponse(
+        id=item.id,
+        name=item.name,
+        description=item.description,
+        price=float(item.price),
+        category=item.category,
+        is_included=item.is_included,
+        is_active=item.is_active,
+        display_order=item.display_order,
+        created_at=item.created_at.isoformat(),
+        updated_at=item.updated_at.isoformat(),
+    )
+
+
+@router.post("", response_model=MenuItemResponse, status_code=status.HTTP_201_CREATED)
+async def create_menu_item(
+    data: MenuItemCreate, session: AsyncSession = Depends(get_async_session)
+):
+    """
+    Create a new menu item
+
+    Args:
+        data: Menu item creation data
+        session: Database session
+
+    Returns:
+        Created menu item
+    """
+    item = MenuItem(
+        name=data.name,
+        description=data.description,
+        price=data.price,
+        category=data.category,
+        is_included=data.is_included,
+        is_active=data.is_active,
+        display_order=data.display_order,
+    )
+
+    session.add(item)
+    await session.commit()
+    await session.refresh(item)
+
+    return MenuItemResponse(
+        id=item.id,
+        name=item.name,
+        description=item.description,
+        price=float(item.price),
+        category=item.category,
+        is_included=item.is_included,
+        is_active=item.is_active,
+        display_order=item.display_order,
+        created_at=item.created_at.isoformat(),
+        updated_at=item.updated_at.isoformat(),
+    )
+
+
+@router.put("/{item_id}", response_model=MenuItemResponse)
+async def update_menu_item(
+    item_id: UUID, data: MenuItemUpdate, session: AsyncSession = Depends(get_async_session)
+):
+    """
+    Update an existing menu item
+
+    Args:
+        item_id: Menu item UUID
+        data: Update data
+        session: Database session
+
+    Returns:
+        Updated menu item
+    """
+    result = await session.execute(select(MenuItem).where(MenuItem.id == item_id))
+    item = result.scalar_one_or_none()
+
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Menu item {item_id} not found"
+        )
+
+    # Update only provided fields
+    if data.name is not None:
+        item.name = data.name
+    if data.description is not None:
+        item.description = data.description
+    if data.price is not None:
+        item.price = data.price
+    if data.category is not None:
+        item.category = data.category
+    if data.is_included is not None:
+        item.is_included = data.is_included
+    if data.is_active is not None:
+        item.is_active = data.is_active
+    if data.display_order is not None:
+        item.display_order = data.display_order
+
+    await session.commit()
+    await session.refresh(item)
+
+    return MenuItemResponse(
+        id=item.id,
+        name=item.name,
+        description=item.description,
+        price=float(item.price),
+        category=item.category,
+        is_included=item.is_included,
+        is_active=item.is_active,
+        display_order=item.display_order,
+        created_at=item.created_at.isoformat(),
+        updated_at=item.updated_at.isoformat(),
+    )
+
+
+@router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_menu_item(item_id: UUID, session: AsyncSession = Depends(get_async_session)):
+    """
+    Delete a menu item
+
+    Args:
+        item_id: Menu item UUID
+        session: Database session
+    """
+    result = await session.execute(select(MenuItem).where(MenuItem.id == item_id))
+    item = result.scalar_one_or_none()
+
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Menu item {item_id} not found"
+        )
+
+    await session.delete(item)
+    await session.commit()

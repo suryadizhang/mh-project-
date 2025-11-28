@@ -59,9 +59,9 @@ class Contact(Base):
     last_contacted_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    messages = relationship("api.v1.inbox.models.InboxMessage", back_populates="contact", lazy="select")
-    threads = relationship("api.v1.inbox.models.Thread", back_populates="contact", lazy="select")
-    tcpa_statuses = relationship("api.v1.inbox.models.TCPAOptStatus", back_populates="contact", lazy="select")
+    messages = relationship("InboxMessage", back_populates="contact", lazy="select")
+    threads = relationship("Thread", back_populates="contact", lazy="select")
+    tcpa_statuses = relationship("TCPAOptStatus", back_populates="contact", lazy="select")
 
     def __repr__(self):
         name = f"{self.first_name} {self.last_name}".strip() or "Unknown"

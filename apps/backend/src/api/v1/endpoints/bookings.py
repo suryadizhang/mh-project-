@@ -16,7 +16,7 @@ All endpoints return HTTP 501 Not Implemented in headers to indicate mock status
 TODO comments have been documented - no implementation planned for this file.
 """
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from enum import Enum
 import logging
 from typing import Any
@@ -27,7 +27,7 @@ from api.deps import (
     get_pagination_params,
 )
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()

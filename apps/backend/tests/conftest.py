@@ -56,13 +56,10 @@ from src.main import app
 from src.core.security import create_access_token
 from src.core.config import UserRole
 
-# NOTE: Models imported lazily in fixtures to avoid cross-registry issues
-# from src.models.user import User as LegacyUser
-# from src.models.booking import Booking, Payment
-# from src.models.customer import Customer
+# Import NEW db.models (unified architecture)
+from db.models.identity import User, Station
+from db.models.core import Customer, Booking, Payment
 
-# NOTE: Lead and Subscriber not imported to avoid multiple declarative_base conflicts
-# from src.models.legacy_lead_newsletter import Lead, Subscriber
 from unittest.mock import AsyncMock, MagicMock
 from src.services.event_service import EventService
 from src.services.lead_service import LeadService
@@ -234,10 +231,7 @@ async def create_test_bookings(db_session, test_admin_user):
         base_date = datetime.now()
         timestamp = int(time.time() * 1000)
 
-        # Import Station model to use ORM (avoids manual field mapping)
-        from src.core.auth.station_models import Station
-
-        # Create test station using ORM
+        # Create test station using ORM (already imported at top)
         test_station = Station(
             name="Test Station",
             code=f"TEST-{timestamp}",
@@ -249,8 +243,8 @@ async def create_test_bookings(db_session, test_admin_user):
         await db_session.flush()
         test_station_id = test_station.id
 
-        # Create test user in public.users for authentication
-        test_user = LegacyUser(
+        # Create test user in identity.users for authentication
+        test_user = User(
             id=f"test-user-{timestamp}",
             email=f"testuser{timestamp}@example.com",
             password_hash="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5XGvA8qBYMwBK",

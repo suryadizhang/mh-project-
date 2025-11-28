@@ -15,11 +15,13 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import UUID
 
-from sqlalchemy import and_, desc, or_, select, func
+from sqlalchemy import and_, desc, select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.models.core import Booking, BookingStatus, Customer
-from models.call_recording import CallRecording
+
+# MIGRATED: from models.call_recording → db.models.call_recording
+from db.models.call_recording import CallRecording
 
 logger = logging.getLogger(__name__)
 
@@ -75,9 +77,7 @@ class ConversationHistoryService:
                 query_filters.append(CallRecording.rc_transcript != "")
 
             # Count total conversations
-            count_stmt = select(func.count()).select_from(CallRecording).where(
-                and_(*query_filters)
-            )
+            count_stmt = select(func.count()).select_from(CallRecording).where(and_(*query_filters))
             count_result = await self.db.execute(count_stmt)
             total_count = count_result.scalar()
 
@@ -153,14 +153,18 @@ class ConversationHistoryService:
 
         return {
             "id": str(recording.id),
-            "call_started_at": recording.call_started_at.isoformat() if recording.call_started_at else None,
+            "call_started_at": (
+                recording.call_started_at.isoformat() if recording.call_started_at else None
+            ),
             "duration_seconds": recording.duration_seconds,
             "call_direction": call_direction,
             "from_phone": recording.from_phone,
             "to_phone": recording.to_phone,
             "booking_id": str(recording.booking_id) if recording.booking_id else None,
             "transcript_excerpt": transcript_excerpt,
-            "transcript_full_length": len(recording.rc_transcript) if recording.rc_transcript else 0,
+            "transcript_full_length": (
+                len(recording.rc_transcript) if recording.rc_transcript else 0
+            ),
             "transcript_confidence": recording.rc_transcript_confidence,
             "ai_insights": {
                 "sentiment": sentiment,
@@ -234,9 +238,7 @@ class ConversationHistoryService:
             key_topics = self._extract_common_topics(all_insights)
             sentiment_summary = self._summarize_sentiment(all_insights)
 
-            logger.info(
-                f"Retrieved {len(recordings)} conversations for booking {booking_id}"
-            )
+            logger.info(f"Retrieved {len(recordings)} conversations for booking {booking_id}")
 
             return {
                 "booking_id": str(booking_id),
@@ -257,9 +259,7 @@ class ConversationHistoryService:
             }
 
         except Exception as e:
-            logger.error(
-                f"Error getting booking context for {booking_id}: {e}", exc_info=True
-            )
+            logger.error(f"Error getting booking context for {booking_id}: {e}", exc_info=True)
             return {
                 "booking_id": booking_id,
                 "error": str(e),
@@ -335,12 +335,8 @@ class ConversationHistoryService:
 
             # Build context string
             lines = []
-            lines.append(
-                f"Customer: {history['customer_name']} ({history['customer_phone']})"
-            )
-            lines.append(
-                f"Recent interactions (last {len(history['conversations'])} calls):"
-            )
+            lines.append(f"Customer: {history['customer_name']} ({history['customer_phone']})")
+            lines.append(f"Recent interactions (last {len(history['conversations'])} calls):")
 
             for conv in history["conversations"]:
                 # Format: Date Time: Brief summary. Sentiment.
@@ -418,11 +414,13 @@ class ConversationHistoryService:
                 .where(
                     and_(
                         Booking.customer_id == customer_id,
-                        Booking.status.in_([
-                            BookingStatus.PENDING,
-                            BookingStatus.CONFIRMED,
-                            BookingStatus.SEATED,
-                        ]),
+                        Booking.status.in_(
+                            [
+                                BookingStatus.PENDING,
+                                BookingStatus.CONFIRMED,
+                                BookingStatus.SEATED,
+                            ]
+                        ),
                         Booking.booking_datetime >= datetime.now(timezone.utc) - timedelta(hours=4),
                     )
                 )
@@ -485,9 +483,7 @@ class ConversationHistoryService:
             # Full-text search on transcript
             if query:
                 # Use PostgreSQL full-text search or LIKE for simplicity
-                filters.append(
-                    CallRecording.rc_transcript.ilike(f"%{query}%")
-                )
+                filters.append(CallRecording.rc_transcript.ilike(f"%{query}%"))
 
             if customer_id:
                 filters.append(CallRecording.customer_id == customer_id)
@@ -503,14 +499,10 @@ class ConversationHistoryService:
 
             if sentiment:
                 # Note: This requires JSONB query
-                filters.append(
-                    CallRecording.rc_ai_insights["sentiment"].astext == sentiment
-                )
+                filters.append(CallRecording.rc_ai_insights["sentiment"].astext == sentiment)
 
             # Count total results
-            count_stmt = select(func.count()).select_from(CallRecording).where(
-                and_(*filters)
-            )
+            count_stmt = select(func.count()).select_from(CallRecording).where(and_(*filters))
             count_result = await self.db.execute(count_stmt)
             total_count = count_result.scalar()
 
@@ -533,9 +525,7 @@ class ConversationHistoryService:
 
                 # Add search context (surrounding text)
                 if query and recording.rc_transcript:
-                    context = self._extract_search_context(
-                        recording.rc_transcript, query
-                    )
+                    context = self._extract_search_context(recording.rc_transcript, query)
                     conversation["search_context"] = context
 
                 results.append(conversation)

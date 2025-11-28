@@ -58,6 +58,7 @@ facebook-business==18.0.2
 # Google Cloud integration
 google-cloud-storage==2.10.0
 google-cloud-secret-manager==2.25.0  # GSM for secure secret management (Phase 1A)
+googlemaps==4.10.0  # Google Maps API for distance calculation (Phase 2A)
 
 # Email
 email-validator==2.1.0

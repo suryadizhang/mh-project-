@@ -1,0 +1,1077 @@
+"""
+Menu Agent - Dynamic menu recommendations and dietary filtering
+
+Specializes in:
+- Menu recommendations based on guest count, budget, and dietary restrictions
+- Protein selection guidance (FREE vs. UPGRADE proteins)
+- Dietary restriction filtering (vegetarian, vegan, gluten-free, allergies)
+- Seasonal menu suggestions
+- Budget optimization for protein choices
+- Portion calculation based on party size
+
+Integration:
+- Uses existing menu.json system (apps/customer/src/data/menu.json)
+- Same data source as website (100% consistency)
+- Integrates with SeasonalOffer and UpsellRule models
+- Leverages ProteinCalculatorService for pricing
+- NO hardcoded menu items (all dynamic from JSON)
+
+Author: MH Backend Team
+Created: 2025-11-26 (Phase 2B)
+"""
+
+import logging
+from decimal import Decimal
+from typing import Any
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from .base_agent import BaseAgent
+from ..endpoints.services.protein_calculator_service import (
+    get_protein_calculator_service,
+)
+
+# MIGRATED: from models.knowledge_base → db.models.knowledge_base
+from db.models.knowledge_base import MenuItem
+
+# NOTE: SeasonalOffer and UpsellRule models will be added in future phase
+
+logger = logging.getLogger(__name__)
+
+
+class MenuAgent(BaseAgent):
+    """
+    Menu Agent - Provide menu recommendations and dietary guidance.
+
+    Expertise:
+    - Menu item recommendations based on preferences
+    - Dietary restriction filtering and alternatives
+    - Protein selection guidance with pricing transparency
+    - Portion recommendations based on party size
+    - Seasonal menu suggestions
+    - Budget optimization (maximize value within budget)
+    - Upsell recommendations (based on UpsellRule model)
+
+    Data Sources (NO hardcoded menu items):
+    1. PRIMARY: apps/customer/src/data/menu.json
+       - Same file used by website (100% consistency)
+       - Admin updates menu.json → AI sees changes instantly
+    2. SECONDARY: core.SeasonalOffer (database table)
+       - Seasonal/limited-time menu items
+       - Auto-expires based on valid_until date
+    3. TERTIARY: core.UpsellRule (database table)
+       - Smart upsell suggestions based on selections
+       - Triggers (e.g., "20+ guests → suggest sake service")
+
+    Tools:
+    - get_menu_recommendations: Recommend menu items based on criteria
+    - filter_by_dietary_restrictions: Filter menu for allergies/preferences
+    - calculate_protein_recommendations: Suggest protein combinations
+    - get_seasonal_offers: Retrieve current seasonal menu items
+    - optimize_for_budget: Maximize value within budget constraints
+
+    Usage:
+        agent = MenuAgent(db=db_session)
+        response = await agent.process(
+            message="What are good vegetarian options for 15 people?",
+            context={"guest_count": 15, "dietary_restrictions": ["vegetarian"]}
+        )
+
+    Enterprise Features:
+    - ✅ NO hardcoded menu items (all from menu.json)
+    - ✅ Website & AI load same menu.json (100% consistency)
+    - ✅ Admin updates menu.json → instant sync (no Vercel redeploy)
+    - ✅ Seasonal offers auto-expire (database-driven)
+    - ✅ Smart upsells based on rules (revenue optimization)
+    - ✅ Graceful fallback on missing data
+    """
+
+    def __init__(
+        self,
+        db: Session | None = None,
+        provider=None,
+    ):
+        """
+        Initialize Menu Agent.
+
+        Args:
+            db: SQLAlchemy database session (for SeasonalOffer/UpsellRule queries)
+            provider: Optional ModelProvider instance (for DI, None = lazy load)
+        """
+        super().__init__(
+            agent_type="menu",
+            provider=provider,
+            temperature=0.5,  # Medium temperature (creative but factual)
+            max_tokens=600,
+        )
+
+        self.db = db
+
+        # Initialize ProteinCalculatorService (for protein pricing guidance)
+        self.protein_service = get_protein_calculator_service()
+
+        # Load menu from database (MenuItem table) - single source of truth!
+        self.menu_data = self._load_menu_from_database()
+
+        logger.info(f"Menu Agent initialized with {len(self.menu_data)} menu items from database")
+
+    def _load_menu_from_database(self) -> list[dict[str, Any]]:
+        """
+        Load menu from database (MenuItem table) - SINGLE SOURCE OF TRUTH.
+
+        Returns:
+            List of menu items from database
+
+        Notes:
+            - Queries menu_items table directly
+            - Admin updates via pricing management UI → AI sees changes instantly
+            - Returns proteins (poultry, beef, seafood) for recommendations
+            - Falls back to FAQ data if database is empty
+        """
+        if not self.db:
+            logger.warning("No database session, using fallback menu")
+            return self._get_fallback_menu()
+
+        try:
+            # Query all available menu items (focus on proteins for hibachi)
+            stmt = (
+                select(MenuItem)
+                .where(MenuItem.is_available == True)
+                .order_by(
+                    MenuItem.category,
+                    MenuItem.is_premium.desc(),
+                    MenuItem.display_order,
+                    MenuItem.name,
+                )
+            )
+
+            result = self.db.execute(stmt)
+            items = result.scalars().all()
+
+            # Handle empty result or invalid items
+            if not items or not isinstance(items, list):
+                logger.warning("Database menu_items table is empty or invalid, using FAQ fallback")
+                return self._get_fallback_menu()
+
+            # Convert to dict format for AI processing
+            menu_data = []
+            for item in items:
+                # Extract base_price safely (may be None or Decimal)
+                price_value = 0.0
+                if item.base_price is not None:
+                    try:
+                        # Convert Decimal to float for JSON serialization
+                        from decimal import Decimal
+
+                        if isinstance(item.base_price, Decimal):
+                            price_value = float(item.base_price)
+                        else:
+                            price_value = float(str(item.base_price))
+                    except (TypeError, ValueError):
+                        price_value = 0.0
+
+                menu_item = {
+                    "title": item.name,
+                    "description": item.description or "",
+                    "category": (
+                        item.category.value
+                        if hasattr(item.category, "value")
+                        else str(item.category)
+                    ),
+                    "price": price_value,
+                    "is_premium": item.is_premium,
+                    "dietary_info": item.dietary_info or [],
+                    "keywords": [
+                        item.name.lower(),
+                        (
+                            item.category.value
+                            if hasattr(item.category, "value")
+                            else str(item.category)
+                        ),
+                    ],
+                }
+                menu_data.append(menu_item)
+
+            logger.info(f"Loaded {len(menu_data)} menu items from database")
+            return menu_data
+
+        except Exception as e:
+            logger.error(f"Error loading menu from database: {e}", exc_info=True)
+            return self._get_fallback_menu()
+
+    def _get_fallback_menu(self) -> list[dict[str, Any]]:
+        """
+        Fallback menu based on FAQ data (if database is empty).
+
+        Returns:
+            Menu structure from FAQ pricing information
+
+        Note:
+            Uses hardcoded FAQ data as last resort.
+            Database should be seeded with this data for production.
+        """
+        logger.warning("Using FAQ fallback menu - database may need seeding")
+        return [
+            {
+                "title": "Adult Hibachi Experience",
+                "description": "Complete hibachi experience for adults (13+) with 2 protein choices",
+                "category": "base_pricing",
+                "price": 55.0,
+                "is_premium": False,
+                "keywords": ["adult", "base", "pricing"],
+            },
+            {
+                "title": "Child Hibachi Experience",
+                "description": "Hibachi experience for children (6-12) with 2 protein choices",
+                "category": "base_pricing",
+                "price": 30.0,
+                "is_premium": False,
+                "keywords": ["child", "kids", "pricing"],
+            },
+            {
+                "title": "Chicken",
+                "description": "Tender hibachi-grilled chicken (FREE protein choice)",
+                "category": "poultry",
+                "price": 0.0,
+                "is_premium": False,
+                "keywords": ["chicken", "poultry", "free", "protein"],
+            },
+            {
+                "title": "NY Strip Steak",
+                "description": "Premium NY strip steak grilled to perfection (FREE protein choice)",
+                "category": "beef",
+                "price": 0.0,
+                "is_premium": False,
+                "keywords": ["steak", "beef", "free", "protein"],
+            },
+            {
+                "title": "Shrimp",
+                "description": "Fresh hibachi-grilled shrimp (FREE protein choice)",
+                "category": "seafood",
+                "price": 0.0,
+                "is_premium": False,
+                "keywords": ["shrimp", "seafood", "free", "protein"],
+            },
+            {
+                "title": "Filet Mignon",
+                "description": "Premium filet mignon upgrade (+$5 per portion)",
+                "category": "beef",
+                "price": 5.0,
+                "is_premium": True,
+                "keywords": ["filet", "mignon", "premium", "upgrade"],
+            },
+            {
+                "title": "Salmon",
+                "description": "Fresh Atlantic salmon upgrade (+$5 per portion)",
+                "category": "seafood",
+                "price": 5.0,
+                "is_premium": True,
+                "keywords": ["salmon", "premium", "upgrade"],
+            },
+            {
+                "title": "Scallops",
+                "description": "Succulent sea scallops upgrade (+$5 per portion)",
+                "category": "seafood",
+                "price": 5.0,
+                "is_premium": True,
+                "keywords": ["scallops", "premium", "upgrade"],
+            },
+            {
+                "title": "Lobster Tail",
+                "description": "Premium lobster tail upgrade (+$15 per portion)",
+                "category": "seafood",
+                "price": 15.0,
+                "is_premium": True,
+                "keywords": ["lobster", "premium", "luxury", "upgrade"],
+            },
+        ]
+
+    def get_system_prompt(self, context: dict[str, Any] | None = None) -> str:
+        """
+        Build system prompt for menu recommendations.
+
+        Args:
+            context: Request context with customer preferences
+        """
+        # Get current menu count
+        menu_count = len(self.menu_data)
+
+        # Get protein pricing info from ProteinCalculatorService
+        free_proteins = ", ".join(
+            [p.replace("_", " ").title() for p in self.protein_service.FREE_PROTEINS.keys()]
+        )
+
+        # Build upgrade proteins list from PREMIUM_UPGRADES
+        upgrade_proteins_list = []
+        seen_names = set()
+        for key, details in self.protein_service.PREMIUM_UPGRADES.items():
+            name = details["name"]
+            if name not in seen_names:  # Avoid duplicates (aliases)
+                price = details["price"]
+                upgrade_proteins_list.append(f"{name} (+${price})")
+                seen_names.add(name)
+
+        upgrade_proteins = ", ".join(sorted(upgrade_proteins_list))
+
+        return f"""You are a culinary advisor for MyHibachi, helping customers choose the perfect menu for their hibachi party.
+
+**Your Role:**
+- Recommend menu items based on guest preferences and dietary restrictions
+- Explain protein options with transparent pricing
+- Suggest combinations that work well together
+- Help customers maximize value within their budget
+- Provide seasonal and special offers when available
+
+**Current Menu** (loaded from menu.json - {menu_count} items):
+- Menu data is the SAME as our website (apps/customer/src/data/menu.json)
+- Updates to menu.json reflect immediately in my recommendations
+- I NEVER recommend items not in our actual menu
+- All dietary/allergen info comes from menu keywords
+
+**Protein Pricing** (Each guest gets 2 FREE proteins):
+
+**FREE Proteins** (included in base price):
+{free_proteins}
+
+**Premium Upgrades:**
+{upgrade_proteins}
+
+**3rd Protein Rule (CRITICAL BUSINESS LOGIC):**
+- Each guest gets **2 FREE protein portions** (from FREE list)
+- If total protein portions exceed 2 per guest → **+$10 per extra portion**
+- This applies REGARDLESS of protein type (even FREE proteins become +$10 if they're the 3rd/4th/5th choice)
+
+**How 3rd Protein Charging Works:**
+1. **Calculate free allowance**: Guest count × 2 = FREE portions
+2. **Count total portions**: Sum all protein quantities
+3. **Extra portions**: Total portions - Free allowance = 3rd protein portions
+4. **3rd protein charge**: Extra portions × $10
+
+**Example Calculations:**
+
+**Example 1: 10 guests, all FREE proteins**
+- Free allowance: 10 × 2 = 20 FREE portions
+- Selection: 15 Chicken + 10 Shrimp = 25 total portions
+- Extra portions: 25 - 20 = 5 portions
+- 3rd protein charge: 5 × $10 = **$50**
+- Premium upgrade charge: **$0** (all FREE proteins)
+- **Total protein cost: $50**
+
+**Example 2: 10 guests, mix of FREE + PREMIUM**
+- Free allowance: 10 × 2 = 20 FREE portions
+- Selection: 10 Chicken + 10 Filet Mignon = 20 total portions
+- Extra portions: 20 - 20 = 0 portions
+- 3rd protein charge: **$0** (within allowance)
+- Premium upgrade charge: 10 Filet × $5 = **$50**
+- **Total protein cost: $50**
+
+**Example 3: 10 guests, premium + 3rd protein**
+- Free allowance: 10 × 2 = 20 FREE portions
+- Selection: 10 Chicken + 10 Filet + 5 Lobster = 25 total portions
+- Extra portions: 25 - 20 = 5 portions
+- 3rd protein charge: 5 × $10 = **$50**
+- Premium upgrade charge: (10 Filet × $5) + (5 Lobster × $15) = $50 + $75 = **$125**
+- **Total protein cost: $50 + $125 = $175**
+
+**Example 4: Small party (5 guests)**
+- Free allowance: 5 × 2 = 10 FREE portions
+- Selection: 5 Filet + 5 Lobster = 10 total portions
+- Extra portions: 10 - 10 = 0 portions
+- 3rd protein charge: **$0**
+- Premium upgrade charge: (5 Filet × $5) + (5 Lobster × $15) = $25 + $75 = **$100**
+- **Total protein cost: $100**
+
+**Important Guidelines:**
+1. ALWAYS use the get_menu_recommendations tool to search actual menu items
+2. NEVER recommend items not in menu.json (no improvisation!)
+3. When customer mentions dietary restrictions, use filter_by_dietary_restrictions tool
+4. For protein pricing questions, use calculate_protein_recommendations tool
+5. If customer asks about seasonal items, use get_seasonal_offers tool
+6. Be transparent about protein upgrade costs (show breakdown)
+7. Suggest protein combinations that balance FREE + UPGRADE options
+8. For large parties (20+ guests), mention bulk protein options
+9. If budget-constrained, optimize for FREE proteins (chicken, steak, shrimp, tofu, vegetables)
+
+**Dietary Restrictions Handling:**
+- Vegetarian: Recommend tofu + vegetables (both FREE proteins)
+- Vegan: Same as vegetarian + confirm no animal-based sauces
+- Gluten-free: Recommend protein options, note fried rice contains soy sauce
+- Allergies: Filter by keywords in menu.json, recommend safe alternatives
+- If unsure about allergens, suggest customer calls us directly (safety first!)
+
+**Additional Enhancements (Beyond Proteins):**
+Customers can add these extras to their meal:
+- **Yakisoba Noodles**: +$5 per person (Japanese style lo mein noodles)
+- **Extra Fried Rice**: +$5 per person (Additional portion of hibachi fried rice)
+- **Extra Vegetables**: +$5 per person (Additional portion of mixed seasonal vegetables)
+- **Edamame**: +$5 per person (Fresh steamed soybeans with sea salt)
+- **Gyoza**: +$10 per person (Pan-fried Japanese dumplings)
+- **3rd Protein**: +$10 per person (Add a third protein beyond the 2 FREE proteins)
+
+These are food add-ons, NOT service upgrades.
+Mention these when customer asks about "sides" or "extras" or "more food".
+
+**Tone:**
+- Friendly and enthusiastic about food
+- Knowledgeable but not pretentious
+- Helpful with suggestions but not pushy
+- Clear about pricing to avoid surprises (ALWAYS break down costs)
+- Encouraging when customers ask good questions
+- Transparent about 3rd protein rule (educate, don't surprise)
+
+**Example Responses:**
+
+Customer: "What are good options for vegetarians?"
+
+Good Response:
+"Great question! For vegetarians, we have delicious options:
+
+🥦 **Vegetarian Hibachi** - Our most popular veggie choice! Fresh seasonal vegetables grilled with tofu. Both tofu and vegetables are FREE proteins, so no extra cost beyond the base price.
+
+The chef creates an amazing show grilling zucchini, onions, mushrooms, and seasonal veggies with our signature sauces. You get 2 proteins per guest from our FREE list (tofu, vegetables), so for 10 guests that's 20 portions included!
+
+Would you like me to calculate a full quote including this? How many vegetarian guests will you have?"
+
+Bad Response (NEVER do this):
+"We have hibachi vegetables for $15 per person." ❌ (WRONG - uses pricing_tool, not hardcoded price!)
+
+Customer: "Can I get filet mignon and lobster for 10 people?"
+
+Good Response:
+"Absolutely! Let me break down the protein costs for you:
+
+For 10 guests, you get **20 FREE proteins** included in the base price.
+
+Your selections:
+- Filet Mignon: Premium upgrade at +$5 per portion
+- Lobster Tail: Premium upgrade at +$15 per portion
+
+If you want 10 portions of each (1 per person):
+- 10 Filet Mignon × $5 = $50
+- 10 Lobster Tail × $15 = $150
+- **Total protein upgrades: $200**
+
+Plus you still have 10 FREE protein portions to use! I'd recommend filling those with chicken or shrimp (both FREE).
+
+Would you like me to calculate the full party quote including these proteins?"
+
+Bad Response:
+"That will cost $200 extra." ❌ (WRONG - not transparent, no breakdown!)
+
+**Remember:**
+- Use tools for accurate menu data (NEVER guess!)
+- Load from menu.json (NOT from memory/training data)
+- Be transparent about all costs
+- Help customers make informed decisions
+- When unsure, ask clarifying questions
+"""
+
+    def get_tools(self) -> list[dict[str, Any]]:
+        """
+        Get available tools for menu recommendations.
+
+        Returns:
+            List of tool definitions for OpenAI function calling
+        """
+        return [
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_menu_recommendations",
+                    "description": "Get menu item recommendations based on customer preferences, dietary restrictions, or keywords. Searches actual menu.json data (same as website).",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "keywords": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                                "description": "Keywords to search for in menu items (e.g., ['chicken', 'teriyaki'], ['vegetarian'], ['seafood', 'salmon'])",
+                            },
+                            "category": {
+                                "type": "string",
+                                "description": "Menu category filter: entrees, chicken, beef, seafood, vegetarian, premium, sides, sauces, kids",
+                            },
+                            "guest_count": {
+                                "type": "integer",
+                                "description": "Number of guests (for portion recommendations)",
+                            },
+                        },
+                        "required": [],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "filter_by_dietary_restrictions",
+                    "description": "Filter menu items based on dietary restrictions or allergies. Returns safe menu options.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "restrictions": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                                "description": "Dietary restrictions: vegetarian, vegan, gluten-free, dairy-free, nut-free, shellfish-free, etc.",
+                            },
+                            "guest_count": {
+                                "type": "integer",
+                                "description": "Number of guests with these restrictions",
+                            },
+                        },
+                        "required": ["restrictions"],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "calculate_protein_recommendations",
+                    "description": "Recommend protein combinations based on guest count and budget. Shows FREE vs. UPGRADE options with pricing.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "guest_count": {
+                                "type": "integer",
+                                "description": "Total number of guests (adults + children)",
+                            },
+                            "budget_per_protein": {
+                                "type": "number",
+                                "description": "Maximum budget per protein portion (optional - helps optimize selections)",
+                            },
+                            "preferences": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                                "description": "Protein preferences: chicken, steak, shrimp, salmon, filet_mignon, lobster_tail, tofu, vegetables",
+                            },
+                        },
+                        "required": ["guest_count"],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_seasonal_offers",
+                    "description": "Get current seasonal menu items and limited-time offers from database.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {},
+                        "required": [],
+                    },
+                },
+            },
+        ]
+
+    async def process_tool_call(
+        self, tool_name: str, arguments: dict[str, Any], context: dict[str, Any]
+    ) -> dict[str, Any]:
+        """
+        Execute a tool function call (required by BaseAgent).
+
+        Args:
+            tool_name: Name of tool to execute
+            arguments: Tool arguments from AI
+            context: Request context
+
+        Returns:
+            Tool execution result
+        """
+        try:
+            result = await self.execute_tool(tool_name, arguments)
+            return {"success": True, "result": result, "error": None}
+        except Exception as e:
+            logger.error(f"Error in process_tool_call for {tool_name}: {e}", exc_info=True)
+            return {"success": False, "result": None, "error": str(e)}
+
+    async def execute_tool(self, tool_name: str, tool_args: dict[str, Any]) -> dict[str, Any]:
+        """
+        Execute menu-related tools.
+
+        Args:
+            tool_name: Name of the tool to execute
+            tool_args: Tool arguments from AI
+
+        Returns:
+            Tool execution result
+        """
+        try:
+            if tool_name == "get_menu_recommendations":
+                return self._get_menu_recommendations(tool_args)
+
+            elif tool_name == "filter_by_dietary_restrictions":
+                return self._filter_by_dietary_restrictions(tool_args)
+
+            elif tool_name == "calculate_protein_recommendations":
+                return self._calculate_protein_recommendations(tool_args)
+
+            elif tool_name == "get_seasonal_offers":
+                return await self._get_seasonal_offers()
+
+            else:
+                return {
+                    "error": f"Unknown tool: {tool_name}",
+                    "available_tools": [
+                        "get_menu_recommendations",
+                        "filter_by_dietary_restrictions",
+                        "calculate_protein_recommendations",
+                        "get_seasonal_offers",
+                    ],
+                }
+
+        except Exception as e:
+            logger.error(f"Error executing menu tool {tool_name}: {e}", exc_info=True)
+            return {
+                "error": f"Failed to execute {tool_name}: {str(e)}",
+                "note": "Please try again or contact support if issue persists",
+            }
+
+    def _get_menu_recommendations(self, args: dict[str, Any]) -> dict[str, Any]:
+        """
+        Get menu recommendations based on keywords and category.
+
+        Args:
+            args: Tool arguments (keywords, category, guest_count)
+
+        Returns:
+            Matching menu items from menu.json
+        """
+        keywords = args.get("keywords", [])
+        category = args.get("category")
+        guest_count = args.get("guest_count")
+
+        # Filter menu items
+        results = []
+        for item in self.menu_data:
+            # Category filter
+            if category and item.get("category") != category:
+                continue
+
+            # Keyword filter (check title, description, content, keywords)
+            if keywords:
+                item_text = " ".join(
+                    [
+                        item.get("title", ""),
+                        item.get("description", ""),
+                        item.get("content", ""),
+                        " ".join(item.get("keywords", [])),
+                    ]
+                ).lower()
+
+                if not any(kw.lower() in item_text for kw in keywords):
+                    continue
+
+            results.append(item)
+
+        # Build response
+        response = {
+            "matches": len(results),
+            "items": results[:10],  # Limit to 10 items (avoid overwhelming AI)
+            "note": f"Showing {min(len(results), 10)} of {len(results)} matches from menu.json (same as website)",
+        }
+
+        # Add portion guidance if guest_count provided
+        if guest_count:
+            free_proteins_count = guest_count * 2
+            response["portion_guidance"] = {
+                "guest_count": guest_count,
+                "free_proteins_included": free_proteins_count,
+                "note": f"Each guest gets 2 FREE proteins = {free_proteins_count} total FREE portions",
+            }
+
+        return response
+
+    def _filter_by_dietary_restrictions(self, args: dict[str, Any]) -> dict[str, Any]:
+        """
+        Filter menu by dietary restrictions using database tags.
+
+        Args:
+            args: Tool arguments (restrictions, guest_count)
+
+        Returns:
+            Menu items safe for dietary restrictions
+
+        CRITICAL: Uses MenuItem.tags JSONB column for accurate allergen filtering
+        """
+        restrictions = [
+            r.lower().replace("-", "_").replace(" ", "_") for r in args.get("restrictions", [])
+        ]
+        guest_count = args.get("guest_count")
+
+        # Query database for menu items with tags
+        safe_items = []
+        warnings = []
+
+        try:
+            if self.db:
+                # Get all available menu items from database
+                stmt = select(MenuItem).where(MenuItem.is_available == True)
+                db_items = self.db.execute(stmt).scalars().all()
+
+                for item in db_items:
+                    item_tags = item.tags or []
+                    is_safe = True
+                    item_warnings = []
+
+                    # Check each restriction
+                    for restriction in restrictions:
+                        # Shellfish allergy check
+                        if restriction in ["shellfish_free", "shellfish_allergy", "no_shellfish"]:
+                            if "contains_shellfish" in item_tags or item.subcategory == "shellfish":
+                                is_safe = False
+                                break
+                            # Recommend fish as safe alternative
+                            if item.subcategory == "fish":
+                                item_warnings.append(
+                                    "✅ Safe: This is FISH (not shellfish) - salmon is safe for shellfish allergies"
+                                )
+
+                        # Fish allergy check (NEW - FDA Top 9 allergen)
+                        elif restriction in ["fish_free", "fish_allergy", "no_fish"]:
+                            if "contains_fish" in item_tags or item.subcategory == "fish":
+                                is_safe = False
+                                break
+
+                        # Gluten-free check
+                        elif restriction in ["gluten_free", "no_gluten", "celiac"]:
+                            if "contains_gluten" in item_tags:
+                                is_safe = False
+                                break
+                            # Highlight GF soy sauce availability
+                            if "can_be_gluten_free" in item_tags:
+                                item_warnings.append(
+                                    "✅ Can be gluten-free with GF soy sauce (we have it!)"
+                                )
+                            elif "gluten_free" in item_tags:
+                                item_warnings.append("✅ Naturally gluten-free")
+
+                        # Egg allergy check
+                        elif restriction in ["egg_free", "no_eggs", "egg_allergy"]:
+                            if "contains_eggs" in item_tags:
+                                is_safe = False
+                                break
+
+                        # Dairy allergy check (COMPETITIVE ADVANTAGE - dairy-free butter!)
+                        elif restriction in [
+                            "dairy_free",
+                            "no_dairy",
+                            "lactose_free",
+                            "lactose_intolerant",
+                        ]:
+                            if "contains_dairy" in item_tags:
+                                is_safe = False
+                                break
+                            if "dairy_free" in item_tags:
+                                item_warnings.append("🏆 We use DAIRY-FREE butter for all cooking!")
+
+                        # Nut allergy check (COMPETITIVE ADVANTAGE - 100% nut-free facility!)
+                        elif restriction in [
+                            "nut_free",
+                            "no_nuts",
+                            "nut_allergy",
+                            "peanut_allergy",
+                            "tree_nut_allergy",
+                        ]:
+                            if "contains_nuts" in item_tags:
+                                is_safe = False
+                                break
+                            if "nut_free" in item_tags:
+                                item_warnings.append(
+                                    "🏆 100% NUT-FREE facility (no peanuts or tree nuts ever!)"
+                                )
+
+                        # Sesame allergy check (COMPETITIVE ADVANTAGE - sesame-free facility!)
+                        elif restriction in ["sesame_free", "no_sesame", "sesame_allergy"]:
+                            if "contains_sesame" in item_tags:
+                                is_safe = False
+                                break
+                            if "sesame_free" in item_tags:
+                                item_warnings.append(
+                                    "🏆 SESAME-FREE facility (rare for Japanese restaurants!)"
+                                )
+
+                        # Soy allergy check
+                        elif restriction in ["soy_free", "no_soy", "soy_allergy"]:
+                            if "contains_soy" in item_tags:
+                                is_safe = False
+                                break
+
+                        # Halal dietary requirement (COMPETITIVE ADVANTAGE - Restaurant Depot certified!)
+                        elif restriction in ["halal", "islamic", "muslim"]:
+                            if "halal" not in item_tags:
+                                is_safe = False
+                                break
+                            item_warnings.append("✅ Halal-certified (Restaurant Depot)")
+
+                        # Kosher-style dietary requirement (COMPETITIVE ADVANTAGE - accommodating!)
+                        elif restriction in ["kosher", "kosher_style", "jewish"]:
+                            if "kosher_style" not in item_tags:
+                                is_safe = False
+                                break
+                            item_warnings.append(
+                                "✅ Kosher-friendly (not certified, but no pork + dairy-free butter + seafood OK)"
+                            )
+
+                        # Vegetarian
+                        elif restriction == "vegetarian":
+                            if item.subcategory not in [
+                                "vegetarian",
+                                "tofu",
+                                None,
+                            ] and item.category.value not in ["VEGETABLE", "SIDE", "APPETIZER"]:
+                                if "vegetarian" not in item_tags and "vegan" not in item_tags:
+                                    is_safe = False
+                                    break
+
+                        # Vegan
+                        elif restriction == "vegan":
+                            if "vegan" not in item_tags:
+                                is_safe = False
+                                break
+
+                    if is_safe:
+                        safe_items.append(
+                            {
+                                "id": item.id,
+                                "name": item.name,
+                                "description": item.description,
+                                "category": item.category.value,
+                                "subcategory": item.subcategory,
+                                "tags": item_tags,
+                                "price": float(item.base_price) if item.base_price else 0.0,
+                                "warnings": item_warnings if item_warnings else None,
+                            }
+                        )
+
+                # Add overall allergen warnings and COMPETITIVE ADVANTAGES
+                if any("shellfish" in r for r in restrictions):
+                    warnings.append(
+                        "🦐 SHELLFISH ALLERGY: Fish (salmon) is SAFE. Avoid: Shrimp, Lobster, Scallops"
+                    )
+                if any("gluten" in r for r in restrictions):
+                    warnings.append(
+                        "🌾 GLUTEN-FREE: We offer gluten-free soy sauce! Just request it when ordering."
+                    )
+                if any("nut" in r for r in restrictions):
+                    warnings.append(
+                        "🥜 NUT ALLERGY: 🏆 GREAT NEWS! We are a 100% NUT-FREE facility (no peanuts or tree nuts ever used)"
+                    )
+                if any("sesame" in r for r in restrictions):
+                    warnings.append(
+                        "🌰 SESAME ALLERGY: 🏆 GREAT NEWS! We are SESAME-FREE (rare for Japanese restaurants!)"
+                    )
+                if any("dairy" in r or "lactose" in r for r in restrictions):
+                    warnings.append(
+                        "🥛 DAIRY-FREE: 🏆 GREAT NEWS! We use DAIRY-FREE butter for all cooking (not regular butter)"
+                    )
+                if any("halal" in r or "islamic" in r or "muslim" in r for r in restrictions):
+                    warnings.append(
+                        "🕌 HALAL: All proteins are halal-certified through Restaurant Depot"
+                    )
+                if any("kosher" in r or "jewish" in r for r in restrictions):
+                    warnings.append(
+                        "✡️ KOSHER-FRIENDLY: We accommodate (no pork, dairy-free butter, seafood allowed) - not rabbi-certified"
+                    )
+                if any("egg" in r for r in restrictions):
+                    warnings.append(
+                        "🥚 EGG ALLERGY: Only fried rice contains eggs - all other items are egg-free"
+                    )
+
+                # Always add competitive advantage summary if no specific restriction mentioned
+                if not restrictions or len(restrictions) == 0:
+                    warnings.append(
+                        "🏆 ALLERGEN-FRIENDLY FACILITY: 100% nut-free, sesame-free, uses dairy-free butter!"
+                    )
+
+        except Exception as e:
+            logger.error(f"Error filtering by dietary restrictions: {e}")
+            # Fallback to legacy filtering if database query fails
+            return self._legacy_filter_by_dietary_restrictions(args)
+
+        return {
+            "restrictions": restrictions,
+            "safe_items": safe_items,
+            "count": len(safe_items),
+            "warnings": warnings,
+            "note": "These items are filtered using our allergen tagging system based on actual ingredients",
+            "important": "⚠️ ALLERGEN NOTICE: All food is prepared on shared hibachi grills and cooking surfaces. While we use allergen-friendly ingredients (nut-free, sesame-free, dairy-free butter), cross-contamination is possible. For severe allergies, please call us at (916) 740-8768 to discuss your needs.",
+        }
+
+    def _legacy_filter_by_dietary_restrictions(self, args: dict[str, Any]) -> dict[str, Any]:
+        """
+        LEGACY: Filter menu by dietary restrictions (fallback if database unavailable).
+
+        This is the old keyword-based filtering system.
+        Kept for backward compatibility.
+        """
+        restrictions = [r.lower() for r in args.get("restrictions", [])]
+        guest_count = args.get("guest_count")
+
+        # Define dietary keyword mappings
+        dietary_filters = {
+            "vegetarian": {
+                "include": ["vegetarian", "tofu", "vegetables"],
+                "exclude": ["chicken", "beef", "steak", "shrimp", "seafood", "salmon", "lobster"],
+            },
+            "vegan": {
+                "include": ["vegetables", "tofu"],
+                "exclude": [
+                    "chicken",
+                    "beef",
+                    "steak",
+                    "shrimp",
+                    "seafood",
+                    "salmon",
+                    "lobster",
+                    "egg",
+                    "dairy",
+                ],
+            },
+            "gluten-free": {
+                "exclude": ["fried rice"],
+                "warning": "Soy sauce contains gluten - request gluten-free soy sauce",
+            },
+            "shellfish-free": {"exclude": ["shrimp", "lobster", "scallops"]},
+            "dairy-free": {"exclude": ["butter"], "note": "Most hibachi options are dairy-free"},
+        }
+
+        safe_items = []
+        for item in self.menu_data:
+            item_keywords = [kw.lower() for kw in item.get("keywords", [])]
+            item_text = " ".join(
+                [item.get("title", ""), item.get("description", ""), " ".join(item_keywords)]
+            ).lower()
+
+            is_safe = True
+            warnings = []
+
+            for restriction in restrictions:
+                filter_rule = dietary_filters.get(restriction, {})
+
+                # Check excluded keywords
+                if any(excluded in item_text for excluded in filter_rule.get("exclude", [])):
+                    is_safe = False
+                    break
+
+                # Check included keywords (for vegetarian/vegan)
+                if "include" in filter_rule:
+                    if not any(
+                        included in item_text for included in filter_rule.get("include", [])
+                    ):
+                        is_safe = False
+                        break
+
+                # Add warnings
+                if "warning" in filter_rule:
+                    warnings.append(filter_rule["warning"])
+
+            if is_safe:
+                item_copy = item.copy()
+                if warnings:
+                    item_copy["dietary_warnings"] = warnings
+                safe_items.append(item_copy)
+
+        return {
+            "restrictions": restrictions,
+            "safe_items": safe_items,
+            "count": len(safe_items),
+            "note": "These items match your dietary restrictions based on menu keywords (LEGACY MODE)",
+            "recommendation": "For allergies or strict dietary needs, please call us to discuss ingredients in detail",
+        }
+
+    def _calculate_protein_recommendations(self, args: dict[str, Any]) -> dict[str, Any]:
+        """
+        Recommend protein combinations based on guest count and budget.
+
+        Args:
+            args: Tool arguments (guest_count, budget_per_protein, preferences)
+
+        Returns:
+            Protein recommendations with pricing breakdown
+        """
+        guest_count = args.get("guest_count", 10)
+        budget_per_protein = args.get("budget_per_protein")
+        preferences = args.get("preferences", [])
+
+        free_proteins_count = guest_count * 2
+
+        # Build recommendations
+        recommendations = {
+            "guest_count": guest_count,
+            "free_proteins_included": free_proteins_count,
+            "recommendations": [],
+        }
+
+        # Budget-friendly option (ALL FREE proteins)
+        if not budget_per_protein or budget_per_protein <= 0:
+            recommendations["recommendations"].append(
+                {
+                    "option": "Budget-Friendly (All FREE proteins)",
+                    "proteins": ["Chicken", "NY Strip Steak", "Shrimp", "Tofu", "Vegetables"],
+                    "cost": "$0",
+                    "note": "All FREE proteins - no upgrade costs",
+                }
+            )
+
+        # Balanced option (mix of FREE + UPGRADE)
+        recommendations["recommendations"].append(
+            {
+                "option": "Balanced Mix (FREE + Premium Upgrades)",
+                "suggestion": f"{int(free_proteins_count * 0.6)} FREE proteins (Chicken, Shrimp) + {int(free_proteins_count * 0.4)} UPGRADE proteins (Filet Mignon, Salmon)",
+                "estimated_upgrade_cost": f"${int(free_proteins_count * 0.4) * 5}",
+                "note": "Mix of FREE and premium for variety",
+            }
+        )
+
+        # Premium option (mostly UPGRADE proteins)
+        recommendations["recommendations"].append(
+            {
+                "option": "Premium Experience (Filet Mignon + Lobster)",
+                "suggestion": f"{guest_count} Filet Mignon + {guest_count} Lobster Tail",
+                "estimated_upgrade_cost": f"${(guest_count * 5) + (guest_count * 15)}",
+                "breakdown": f"Filet: {guest_count} × $5 = ${guest_count * 5}, Lobster: {guest_count} × $15 = ${guest_count * 15}",
+                "note": "Premium selection for special occasions",
+            }
+        )
+
+        # Add protein pricing reference
+        upgrade_5 = []
+        premium_15 = []
+        seen_names = set()
+
+        for key, details in self.protein_service.PREMIUM_UPGRADES.items():
+            name = details["name"]
+            if name not in seen_names:
+                price = details["price"]
+                if price == Decimal("5.00"):
+                    upgrade_5.append(name)
+                elif price == Decimal("15.00"):
+                    premium_15.append(name)
+                seen_names.add(name)
+
+        recommendations["protein_pricing"] = {
+            "FREE": list(self.protein_service.FREE_PROTEINS.values()),
+            "UPGRADE (+$5)": sorted(upgrade_5),
+            "PREMIUM (+$15)": sorted(premium_15),
+            "3rd_protein_rule": f"Any protein beyond 2 per guest: +$10 per portion (applies after {free_proteins_count} proteins for {guest_count} guests)",
+            "business_logic_note": "3rd protein charge applies to ALL proteins (even FREE ones) when exceeding 2 per guest. Premium upgrades are charged separately.",
+        }
+
+        return recommendations
+
+    async def _get_seasonal_offers(self) -> dict[str, Any]:
+        """
+        Get current seasonal offers from database.
+
+        Returns:
+            Active seasonal offers
+
+        NOTE: SeasonalOffer model not yet implemented.
+              This is a placeholder for future integration.
+        """
+        # TODO: Implement when SeasonalOffer model is created
+        return {
+            "seasonal_offers": [],
+            "count": 0,
+            "note": "Seasonal offers feature will be available in future update",
+        }

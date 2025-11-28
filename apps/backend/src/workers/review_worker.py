@@ -9,7 +9,9 @@ import logging
 
 from core.database import AsyncSessionLocal
 from db.models.core import Booking, Customer
-from models.legacy_feedback import CustomerReview
+
+# MIGRATED: from models.legacy_feedback → db.models.legacy_feedback
+from db.models.legacy_feedback import CustomerReview
 from core.config import get_settings
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -34,6 +36,7 @@ class ReviewRequestWorker:
         if self._review_service is None:
             logger.info("Loading review service...")
             from services.review_service import ReviewService
+
             self._review_service = ReviewService()
         return self._review_service
 
@@ -114,6 +117,7 @@ class ReviewRequestWorker:
 
             # Create review service (lazy loaded)
             from services.review_service import ReviewService
+
             review_service = ReviewService(db)
 
             # Create review record

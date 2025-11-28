@@ -13,14 +13,18 @@ from cqrs.base import (  # Phase 2C: Updated from api.app.cqrs.base
     OutboxProcessor,
 )
 from cqrs.crm_operations import *  # Phase 2C: Updated from api.app.cqrs.crm_operations
-from models.legacy_core import (  # Phase 2C: Updated from api.app.models.core
+
+# MIGRATED: from models.legacy_core → db.models.legacy_core
+from db.models.legacy_core import (  # Phase 2C: Updated from api.app.models.core
     CoreBooking,
     CoreCustomer,
     CoreMessage,
     CoreMessageThread,
     CorePayment,
 )
-from models.legacy_events import IdempotencyKey  # Phase 2C: Updated from api.app.models.events
+
+# MIGRATED: from models.legacy_events → db.models.legacy_events
+from db.models.legacy_events import IdempotencyKey  # Phase 2C: Updated from api.app.models.events
 from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -398,7 +402,9 @@ class ReceiveMessageCommandHandler(CommandHandler):
 
             if command.thread_id:
                 # Use existing thread
-                thread_stmt = select(CoreMessageThread).where(CoreMessageThread.id == command.thread_id)
+                thread_stmt = select(CoreMessageThread).where(
+                    CoreMessageThread.id == command.thread_id
+                )
                 thread_result = await self.session.execute(thread_stmt)
                 thread = thread_result.scalar_one_or_none()
 

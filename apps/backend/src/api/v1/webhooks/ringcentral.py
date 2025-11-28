@@ -11,13 +11,23 @@ from services.ringcentral_service import get_ringcentral_service
 from workers.recording_tasks import (
     fetch_call_recording,
 )
-from models.call_recording import CallRecording, RecordingStatus, RecordingType
-from models.escalation import Escalation, EscalationStatus
-from models import SMSDeliveryEvent, Subscriber
-from models.enums import SMSDeliveryStatus
+
+# MIGRATED: from models.call_recording → db.models.call_recording
+from db.models.call_recording import CallRecording, RecordingStatus, RecordingType
+
+# MIGRATED: from models.escalation → db.models.escalation
+from db.models.escalation import Escalation, EscalationStatus
+
+# MIGRATED: Imports moved from OLD models to NEW db.models system
+from db.models.newsletter import Subscriber
+
+# TODO: Manual migration needed for: SMSDeliveryEvent
+# from models import SMSDeliveryEvent
+# MIGRATED: Enum imports moved from models.enums to NEW db.models system
+# TODO: Manual migration needed for enums: SMSDeliveryStatus
+# from models.enums import SMSDeliveryStatus
 from core.database import get_db_session
 from datetime import datetime
-from sqlalchemy import select
 
 router = APIRouter(prefix="/webhooks/ringcentral", tags=["webhooks"])
 logger = logging.getLogger(__name__)
@@ -391,9 +401,7 @@ async def handle_sms_delivery_status(payload: dict):
             return
 
         subscriber = (
-            db.query(Subscriber)
-            .filter(Subscriber.id == campaign_event.subscriber_id)
-            .first()
+            db.query(Subscriber).filter(Subscriber.id == campaign_event.subscriber_id).first()
         )
 
         if not subscriber:
