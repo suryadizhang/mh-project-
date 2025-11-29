@@ -1,0 +1,237 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#nutritionGradient)"/>
+  
+  <!-- Nutrition Facts Panel -->
+  <rect x="80" y="60" width="120" height="180" fill="#FFFFFF" stroke="#000000" stroke-width="2"/>
+  <rect x="85" y="65" width="110" height="20" fill="#000000"/>
+  <text x="140" y="78" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="14" font-weight="bold">
+    Nutrition Facts
+  </text>
+  
+  <!-- Serving Size -->
+  <text x="90" y="95" fill="#000000" font-family="Arial" font-size="10" font-weight="bold">
+    Serving Size: 1 plate (300g)
+  </text>
+  <line x1="90" y1="100" x2="185" y2="100" stroke="#000000" stroke-width="4"/>
+  
+  <!-- Calories -->
+  <text x="90" y="115" fill="#000000" font-family="Arial" font-size="12" font-weight="bold">
+    Calories 450
+  </text>
+  <text x="160" y="115" fill="#000000" font-family="Arial" font-size="10">
+    Calories from Fat 120
+  </text>
+  <line x1="90" y1="120" x2="185" y2="120" stroke="#000000" stroke-width="2"/>
+  
+  <!-- Daily Values -->
+  <text x="185" y="135" text-anchor="end" fill="#000000" font-family="Arial" font-size="8" font-weight="bold">
+    % Daily Value*
+  </text>
+  
+  <!-- Nutrition Details -->
+  <text x="90" y="145" fill="#000000" font-family="Arial" font-size="9">
+    Total Fat 13g
+  </text>
+  <text x="185" y="145" text-anchor="end" fill="#000000" font-family="Arial" font-size="9" font-weight="bold">
+    20%
+  </text>
+  
+  <text x="95" y="155" fill="#000000" font-family="Arial" font-size="8">
+    Saturated Fat 4g
+  </text>
+  <text x="185" y="155" text-anchor="end" fill="#000000" font-family="Arial" font-size="8" font-weight="bold">
+    20%
+  </text>
+  
+  <text x="90" y="170" fill="#000000" font-family="Arial" font-size="9">
+    Cholesterol 65mg
+  </text>
+  <text x="185" y="170" text-anchor="end" fill="#000000" font-family="Arial" font-size="9" font-weight="bold">
+    22%
+  </text>
+  
+  <text x="90" y="180" fill="#000000" font-family="Arial" font-size="9">
+    Sodium 890mg
+  </text>
+  <text x="185" y="180" text-anchor="end" fill="#000000" font-family="Arial" font-size="9" font-weight="bold">
+    37%
+  </text>
+  
+  <text x="90" y="195" fill="#000000" font-family="Arial" font-size="9">
+    Total Carbohydrate 45g
+  </text>
+  <text x="185" y="195" text-anchor="end" fill="#000000" font-family="Arial" font-size="9" font-weight="bold">
+    15%
+  </text>
+  
+  <text x="95" y="205" fill="#000000" font-family="Arial" font-size="8">
+    Dietary Fiber 3g
+  </text>
+  <text x="185" y="205" text-anchor="end" fill="#000000" font-family="Arial" font-size="8" font-weight="bold">
+    12%
+  </text>
+  
+  <text x="90" y="220" fill="#000000" font-family="Arial" font-size="9">
+    Protein 32g
+  </text>
+  <text x="185" y="220" text-anchor="end" fill="#000000" font-family="Arial" font-size="9" font-weight="bold">
+    64%
+  </text>
+  
+  <line x1="90" y1="225" x2="185" y2="225" stroke="#000000" stroke-width="2"/>
+  
+  <text x="90" y="235" fill="#000000" font-family="Arial" font-size="8">
+    *Based on 2000 calorie diet
+  </text>
+  
+  <!-- Healthy Food Pyramid -->
+  <g transform="translate(250, 80)">
+    <!-- Base - Grains -->
+    <rect x="0" y="80" width="60" height="15" fill="#DEB887"/>
+    <text x="30" y="90" text-anchor="middle" fill="#000000" font-family="Arial" font-size="8">
+      Rice & Grains
+    </text>
+    
+    <!-- Vegetables -->
+    <rect x="10" y="65" width="40" height="15" fill="#32CD32"/>
+    <text x="30" y="75" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="8">
+      Vegetables
+    </text>
+    
+    <!-- Protein -->
+    <rect x="15" y="50" width="30" height="15" fill="#FF6347"/>
+    <text x="30" y="60" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="7">
+      Protein
+    </text>
+    
+    <!-- Fats -->
+    <rect x="22" y="35" width="16" height="15" fill="#FFD700"/>
+    <text x="30" y="45" text-anchor="middle" fill="#000000" font-family="Arial" font-size="6">
+      Fats
+    </text>
+  </g>
+  
+  <!-- Calorie Breakdown Chart -->
+  <circle cx="320" cy="160" r="30" fill="none" stroke="#E0E0E0" stroke-width="20"/>
+  
+  <!-- Protein Section (35%) -->
+  <circle cx="320" cy="160" r="30" fill="none" stroke="#FF6347" stroke-width="20" 
+          stroke-dasharray="65.97 188.5" stroke-dashoffset="0" transform="rotate(-90 320 160)"/>
+  
+  <!-- Carbs Section (40%) -->
+  <circle cx="320" cy="160" r="30" fill="none" stroke="#32CD32" stroke-width="20" 
+          stroke-dasharray="75.4 188.5" stroke-dashoffset="-65.97" transform="rotate(-90 320 160)"/>
+  
+  <!-- Fats Section (25%) -->
+  <circle cx="320" cy="160" r="30" fill="none" stroke="#FFD700" stroke-width="20" 
+          stroke-dasharray="47.12 188.5" stroke-dashoffset="-141.37" transform="rotate(-90 320 160)"/>
+  
+  <!-- Chart Legend -->
+  <rect x="290" y="205" width="8" height="8" fill="#FF6347"/>
+  <text x="302" y="212" fill="#000000" font-family="Arial" font-size="9">Protein 35%</text>
+  
+  <rect x="290" y="218" width="8" height="8" fill="#32CD32"/>
+  <text x="302" y="225" fill="#000000" font-family="Arial" font-size="9">Carbs 40%</text>
+  
+  <rect x="290" y="231" width="8" height="8" fill="#FFD700"/>
+  <text x="302" y="238" fill="#000000" font-family="Arial" font-size="9">Fats 25%</text>
+  
+  <!-- Health Benefits Icons -->
+  <!-- Heart Health -->
+  <g transform="translate(50, 120)">
+    <path d="M15 8 C15 5 17 3 20 3 C23 3 25 5 25 8 C25 11 20 16 20 16 C20 16 15 11 15 8 Z" fill="#FF6347"/>
+    <text x="20" y="25" text-anchor="middle" fill="#000000" font-family="Arial" font-size="8">
+      Heart Health
+    </text>
+  </g>
+  
+  <!-- Muscle Building -->
+  <g transform="translate(30, 160)">
+    <ellipse cx="20" cy="8" rx="6" ry="4" fill="#4169E1"/>
+    <ellipse cx="14" cy="12" rx="4" ry="6" fill="#4169E1"/>
+    <ellipse cx="26" cy="12" rx="4" ry="6" fill="#4169E1"/>
+    <text x="20" y="25" text-anchor="middle" fill="#000000" font-family="Arial" font-size="8">
+      Muscle Build
+    </text>
+  </g>
+  
+  <!-- Energy -->
+  <g transform="translate(350, 120)">
+    <polygon points="20,5 25,15 15,15" fill="#FFD700"/>
+    <polygon points="20,10 25,20 15,20" fill="#FFA500"/>
+    <text x="20" y="30" text-anchor="middle" fill="#000000" font-family="Arial" font-size="8">
+      Energy
+    </text>
+  </g>
+  
+  <!-- Vitamin Icons -->
+  <!-- Vitamin B -->
+  <circle cx="240" cy="130" r="8" fill="#32CD32"/>
+  <text x="240" y="135" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="10" font-weight="bold">
+    B
+  </text>
+  <text x="240" y="150" text-anchor="middle" fill="#000000" font-family="Arial" font-size="8">
+    B Vitamins
+  </text>
+  
+  <!-- Iron -->
+  <rect x="235" y="160" width="10" height="10" fill="#8B4513"/>
+  <text x="240" y="167" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="8" font-weight="bold">
+    Fe
+  </text>
+  <text x="240" y="180" text-anchor="middle" fill="#000000" font-family="Arial" font-size="8">
+    Iron
+  </text>
+  
+  <!-- Protein Sources -->
+  <!-- Chicken -->
+  <ellipse cx="350" cy="60" rx="8" ry="5" fill="#F4A460"/>
+  <ellipse cx="350" cy="59" rx="6" ry="4" fill="#DEB887"/>
+  <text x="350" y="76" text-anchor="middle" fill="#000000" font-family="Arial" font-size="8">
+    Lean Protein
+  </text>
+  
+  <!-- Healthy Cooking Methods -->
+  <rect x="220" y="40" width="80" height="30" fill="#E6F3E6" stroke="#228B22" stroke-width="2"/>
+  <text x="260" y="50" text-anchor="middle" fill="#228B22" font-family="Arial" font-size="10" font-weight="bold">
+    HEALTHY COOKING
+  </text>
+  <text x="225" y="60" fill="#000000" font-family="Arial" font-size="8">• Low Oil Grilling</text>
+  <text x="225" y="68" fill="#000000" font-family="Arial" font-size="8">• High Heat Searing</text>
+  
+  <!-- Water Glass -->
+  <rect x="40" y="200" width="8" height="15" fill="#87CEEB"/>
+  <ellipse cx="44" cy="199" rx="4" ry="2" fill="#87CEEB"/>
+  <rect x="41" y="202" width="6" height="10" fill="#E0F6FF"/>
+  <text x="44" y="225" text-anchor="middle" fill="#000000" font-family="Arial" font-size="8">
+    Stay Hydrated
+  </text>
+  
+  <!-- Serving Suggestions -->
+  <rect x="300" y="250" width="90" height="40" fill="#FFFACD" stroke="#DAA520" stroke-width="2"/>
+  <text x="345" y="260" text-anchor="middle" fill="#8B4513" font-family="Arial" font-size="10" font-weight="bold">
+    SERVING TIPS
+  </text>
+  <text x="305" y="270" fill="#000000" font-family="Arial" font-size="8">• Add vegetables</text>
+  <text x="305" y="278" fill="#000000" font-family="Arial" font-size="8">• Control portions</text>
+  <text x="305" y="286" fill="#000000" font-family="Arial" font-size="8">• Balance macros</text>
+  
+  <!-- Title -->
+  <text x="200" y="25" text-anchor="middle" fill="#228B22" font-family="Arial, sans-serif" font-size="24" font-weight="bold">
+    Hibachi Nutrition Facts
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="45" text-anchor="middle" fill="#4682B4" font-family="Arial, sans-serif" font-size="16">
+    Healthy • Balanced • Nutritious • Informed Choices
+  </text>
+  
+  <defs>
+    <linearGradient id="nutritionGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0FFF0;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#F5FFFA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F0F8FF;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

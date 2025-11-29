@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fremont anniversary celebration hibachi milestone moments -->
+  <defs>
+    <linearGradient id="anniversarySky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#E6E6FA"/>
+      <stop offset="50%" style="stop-color:#DDA0DD"/>
+      <stop offset="100%" style="stop-color:#8B008B"/>
+    </linearGradient>
+    <linearGradient id="fremontBuilding" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#CD853F"/>
+      <stop offset="100%" style="stop-color:#A0522D"/>
+    </linearGradient>
+    <radialGradient id="milestoneGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFD700; opacity:0.8"/>
+      <stop offset="100%" style="stop-color:transparent"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Anniversary celebration sky -->
+  <rect width="800" height="600" fill="url(#anniversarySky)"/>
+  
+  <!-- Anniversary stars -->
+  <circle cx="120" cy="60" r="3" fill="#FFD700"/>
+  <circle cx="240" cy="45" r="2.5" fill="white"/>
+  <circle cx="380" cy="75" r="3" fill="#FFD700"/>
+  <circle cx="530" cy="50" r="2.5" fill="white"/>
+  <circle cx="650" cy="80" r="3" fill="#FFD700"/>
+  <circle cx="720" cy="65" r="2.5" fill="white"/>
+  
+  <!-- Fremont cityscape -->
+  <rect x="70" y="140" width="90" height="150" fill="url(#fremontBuilding)" rx="8"/>
+  <rect x="180" y="120" width="110" height="170" fill="url(#fremontBuilding)" rx="8"/>
+  <rect x="310" y="150" width="85" height="140" fill="url(#fremontBuilding)" rx="8"/>
+  <rect x="415" y="130" width="100" height="160" fill="url(#fremontBuilding)" rx="8"/>
+  <rect x="535" y="145" width="95" height="145" fill="url(#fremontBuilding)" rx="8"/>
+  <rect x="650" y="160" width="110" height="130" fill="url(#fremontBuilding)" rx="8"/>
+  
+  <!-- Anniversary celebration venue -->
+  <rect x="140" y="320" width="520" height="200" fill="#FFF8DC" opacity="0.95" rx="30"/>
+  <text x="400" y="355" text-anchor="middle" fill="#8B008B" font-family="Arial, sans-serif" font-size="26" font-weight="bold">FREMONT ANNIVERSARY</text>
+  <text x="400" y="385" text-anchor="middle" fill="#DDA0DD" font-family="Arial, sans-serif" font-size="20">MILESTONE HIBACHI CELEBRATION</text>
+  
+  <!-- Anniversary hibachi setup -->
+  <rect x="160" y="290" width="480" height="140" fill="#2F4F4F" rx="20"/>
+  <rect x="170" y="285" width="460" height="30" fill="#8B008B"/>
+  
+  <!-- Golden anniversary hibachi arrangement -->
+  <circle cx="190" cy="295" r="12" fill="#FFD700"/>
+  <circle cx="220" cy="295" r="12" fill="#DDA0DD"/>
+  <circle cx="250" cy="295" r="12" fill="#FFD700"/>
+  <circle cx="280" cy="295" r="12" fill="#DDA0DD"/>
+  <circle cx="310" cy="295" r="12" fill="#FFD700"/>
+  <circle cx="340" cy="295" r="12" fill="#DDA0DD"/>
+  <circle cx="370" cy="295" r="12" fill="#FFD700"/>
+  <circle cx="400" cy="295" r="12" fill="#DDA0DD"/>
+  <circle cx="430" cy="295" r="12" fill="#FFD700"/>
+  <circle cx="460" cy="295" r="12" fill="#DDA0DD"/>
+  <circle cx="490" cy="295" r="12" fill="#FFD700"/>
+  <circle cx="520" cy="295" r="12" fill="#DDA0DD"/>
+  <circle cx="550" cy="295" r="12" fill="#FFD700"/>
+  <circle cx="580" cy="295" r="12" fill="#DDA0DD"/>
+  <circle cx="610" cy="295" r="12" fill="#FFD700"/>
+  
+  <!-- Anniversary hibachi chef -->
+  <circle cx="400" cy="230" r="20" fill="#FDBCB4"/>
+  <rect x="385" y="250" width="30" height="35" fill="white"/>
+  <rect x="380" y="285" width="40" height="42" fill="#8B008B"/> <!-- Anniversary purple outfit -->
+  <rect x="384" y="327" width="12" height="30" fill="#FDBCB4"/>
+  <rect x="404" y="327" width="12" height="30" fill="#FDBCB4"/>
+  
+  <!-- Anniversary chef hat -->
+  <rect x="390" y="215" width="20" height="12" fill="white"/>
+  <circle cx="400" cy="215" r="14" fill="white"/>
+  <text x="400" y="213" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="8" font-weight="bold">25</text>
+  
+  <!-- Anniversary couple -->
+  <!-- Wife -->
+  <circle cx="310" cy="440" r="18" fill="#FDBCB4"/>
+  <rect x="295" y="458" width="30" height="35" fill="#DDA0DD"/> <!-- Purple anniversary dress -->
+  <rect x="297" y="493" width="26" height="30" fill="#DDA0DD"/>
+  <rect x="299" y="523" width="22" height="22" fill="#8B4513"/> <!-- Golden heels -->
+  <!-- Anniversary jewelry -->
+  <circle cx="295" cy="468" r="2" fill="#FFD700"/>
+  <rect x="292" y="463" width="6" height="2" fill="#FFD700"/> <!-- Necklace -->
+  <!-- Anniversary flowers -->
+  <circle cx="335" cy="475" r="5" fill="#FFD700"/>
+  <circle cx="338" cy="471" r="4" fill="#DDA0DD"/>
+  <circle cx="332" cy="479" r="4" fill="#8B008B"/>
+  
+  <!-- Husband -->
+  <circle cx="490" cy="440" r="18" fill="#FDBCB4"/>
+  <rect x="475" y="458" width="30" height="35" fill="#000080"/> <!-- Navy anniversary suit -->
+  <rect x="477" y="493" width="26" height="30" fill="#000080"/>
+  <rect x="479" y="523" width="22" height="22" fill="#000000"/> <!-- Dress shoes -->
+  <!-- Anniversary watch -->
+  <rect x="470" y="470" width="4" height="3" fill="#FFD700"/>
+  <!-- Anniversary gift -->
+  <rect x="505" y="470" width="8" height="6" fill="#FFD700"/>
+  <rect x="506" y="471" width="6" height="2" fill="#8B008B"/>
+  
+  <!-- Anniversary celebration guests -->
+  <!-- Family member with photo album -->
+  <circle cx="270" cy="460" r="16" fill="#FDBCB4"/>
+  <rect x="258" y="476" width="24" height="32" fill="#006400"/> <!-- Green dress -->
+  <rect x="260" y="508" width="20" height="26" fill="#006400"/>
+  <rect x="262" y="534" width="16" height="20" fill="#8B4513"/>
+  <!-- Photo album -->
+  <rect x="250" y="485" width="10" height="8" fill="#8B4513"/>
+  <rect x="251" y="486" width="8" height="2" fill="#FFD700"/>
+  
+  <!-- Friends with anniversary card -->
+  <circle cx="530" cy="460" r="16" fill="#FDBCB4"/>
+  <rect x="518" y="476" width="24" height="32" fill="#FF6347"/> <!-- Coral outfit -->
+  <rect x="520" y="508" width="20" height="26" fill="#000080"/>
+  <rect x="522" y="534" width="16" height="20" fill="#654321"/>
+  <!-- Anniversary card -->
+  <rect x="545" y="485" width="8" height="10" fill="white"/>
+  <polygon points="549,487 551,489 549,491" fill="#FFD700"/> <!-- Heart -->
+  
+  <!-- Adult children -->
+  <circle cx="350" cy="470" r="15" fill="#FDBCB4"/>
+  <rect x="339" y="485" width="22" height="30" fill="#9370DB"/> <!-- Purple dress -->
+  <rect x="341" y="515" width="18" height="24" fill="#9370DB"/>
+  <rect x="343" y="539" width="14" height="18" fill="#FFD700"/>
+  <!-- Anniversary toast -->
+  <rect x="365" y="490" width="3" height="8" fill="#FFD700"/> <!-- Champagne glass -->
+  
+  <circle cx="450" cy="470" r="15" fill="#FDBCB4"/>
+  <rect x="439" y="485" width="22" height="30" fill="#4169E1"/> <!-- Blue suit -->
+  <rect x="441" y="515" width="18" height="24" fill="#4169E1"/>
+  <rect x="443" y="539" width="14" height="18" fill="#000000"/>
+  <!-- Anniversary camera -->
+  <rect x="430" y="490" width="8" height="6" fill="#2F4F4F"/>
+  <circle cx="433" cy="493" r="2" fill="#FFD700"/>
+  
+  <!-- Anniversary dining table -->
+  <ellipse cx="400" cy="560" rx="180" ry="50" fill="#8B4513"/>
+  <ellipse cx="400" cy="555" rx="170" ry="45" fill="#FFD700" opacity="0.3"/>
+  
+  <!-- Golden anniversary place settings -->
+  <circle cx="270" cy="555" r="14" fill="white"/>
+  <circle cx="270" cy="555" r="10" fill="#FFD700"/>
+  <circle cx="320" cy="555" r="14" fill="white"/>
+  <circle cx="320" cy="555" r="10" fill="#FFD700"/>
+  <circle cx="370" cy="555" r="14" fill="white"/>
+  <circle cx="370" cy="555" r="10" fill="#FFD700"/>
+  <circle cx="420" cy="555" r="14" fill="white"/>
+  <circle cx="420" cy="555" r="10" fill="#FFD700"/>
+  <circle cx="470" cy="555" r="14" fill="white"/>
+  <circle cx="470" cy="555" r="10" fill="#FFD700"/>
+  <circle cx="520" cy="555" r="14" fill="white"/>
+  <circle cx="520" cy="555" r="10" fill="#FFD700"/>
+  <circle cx="570" cy="555" r="14" fill="white"/>
+  <circle cx="570" cy="555" r="10" fill="#FFD700"/>
+  
+  <!-- Anniversary beverages -->
+  <rect x="265" y="545" width="5" height="14" fill="#FFD700"/> <!-- Champagne -->
+  <rect x="315" y="545" width="5" height="14" fill="#8B008B"/> <!-- Wine -->
+  <rect x="365" y="545" width="5" height="14" fill="#FFD700"/> <!-- Champagne -->
+  <rect x="415" y="545" width="5" height="14" fill="#8B008B"/> <!-- Wine -->
+  <rect x="465" y="545" width="5" height="14" fill="#FFD700"/> <!-- Champagne -->
+  <rect x="515" y="545" width="5" height="14" fill="#8B008B"/> <!-- Wine -->
+  <rect x="565" y="545" width="5" height="14" fill="#FFD700"/> <!-- Champagne -->
+  
+  <!-- Anniversary title -->
+  <text x="400" y="110" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="32" font-weight="bold">FREMONT ANNIVERSARY</text>
+  <text x="400" y="145" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="22">MILESTONE HIBACHI CELEBRATION</text>
+  
+  <!-- Milestone zones -->
+  <rect x="20" y="490" width="130" height="100" fill="#FFD700" opacity="0.8" rx="15"/>
+  <text x="85" y="515" text-anchor="middle" fill="#8B008B" font-family="Arial, sans-serif" font-size="16" font-weight="bold">MILESTONE</text>
+  <text x="85" y="535" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">MEMORIES</text>
+  <text x="85" y="550" text-anchor="middle" fill="#8B008B" font-family="Arial, sans-serif" font-size="13">HIBACHI</text>
+  <text x="85" y="565" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">CELEBRATION</text>
+  <text x="85" y="580" text-anchor="middle" fill="#8B008B" font-family="Arial, sans-serif" font-size="11">FREMONT</text>
+  
+  <rect x="650" y="490" width="130" height="100" fill="#8B008B" opacity="0.8" rx="15"/>
+  <text x="715" y="515" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="16" font-weight="bold">ANNIVERSARY</text>
+  <text x="715" y="535" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">LOVE</text>
+  <text x="715" y="550" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="13">INTERACTIVE</text>
+  <text x="715" y="565" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">DINING</text>
+  <text x="715" y="580" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="11">MOMENTS</text>
+  
+  <!-- Golden anniversary hibachi specialties -->
+  <ellipse cx="200" cy="293" rx="16" ry="10" fill="#FFD700"/>
+  <ellipse cx="230" cy="293" rx="17" ry="10" fill="#DDA0DD"/>
+  <ellipse cx="260" cy="293" rx="16" ry="10" fill="#FFD700"/>
+  <ellipse cx="290" cy="293" rx="15" ry="9" fill="#DDA0DD"/>
+  <ellipse cx="320" cy="293" rx="16" ry="10" fill="#FFD700"/>
+  <ellipse cx="350" cy="293" rx="17" ry="10" fill="#DDA0DD"/>
+  <ellipse cx="380" cy="293" rx="16" ry="10" fill="#FFD700"/>
+  <ellipse cx="410" cy="293" rx="15" ry="9" fill="#DDA0DD"/>
+  <ellipse cx="440" cy="293" rx="16" ry="10" fill="#FFD700"/>
+  <ellipse cx="470" cy="293" rx="17" ry="10" fill="#DDA0DD"/>
+  <ellipse cx="500" cy="293" rx="16" ry="10" fill="#FFD700"/>
+  <ellipse cx="530" cy="293" rx="15" ry="9" fill="#DDA0DD"/>
+  <ellipse cx="560" cy="293" rx="16" ry="10" fill="#FFD700"/>
+  <ellipse cx="590" cy="293" rx="17" ry="10" fill="#DDA0DD"/>
+  <ellipse cx="620" cy="293" rx="16" ry="10" fill="#FFD700"/>
+  
+  <!-- Golden anniversary flames -->
+  <polygon points="200,293 206,283 194,283" fill="#FFD700" opacity="0.9"/>
+  <polygon points="230,293 236,283 224,283" fill="#DDA0DD" opacity="0.9"/>
+  <polygon points="260,293 266,283 254,283" fill="#FFD700" opacity="0.9"/>
+  <polygon points="290,293 296,283 284,283" fill="#DDA0DD" opacity="0.9"/>
+  <polygon points="320,293 326,283 314,283" fill="#FFD700" opacity="0.9"/>
+  <polygon points="350,293 356,283 344,283" fill="#DDA0DD" opacity="0.9"/>
+  <polygon points="380,293 386,283 374,283" fill="#FFD700" opacity="0.9"/>
+  <polygon points="410,293 416,283 404,283" fill="#DDA0DD" opacity="0.9"/>
+  <polygon points="440,293 446,283 434,283" fill="#FFD700" opacity="0.9"/>
+  <polygon points="470,293 476,283 464,283" fill="#DDA0DD" opacity="0.9"/>
+  <polygon points="500,293 506,283 494,283" fill="#FFD700" opacity="0.9"/>
+  <polygon points="530,293 536,283 524,283" fill="#DDA0DD" opacity="0.9"/>
+  <polygon points="560,293 566,283 554,283" fill="#FFD700" opacity="0.9"/>
+  <polygon points="590,293 596,283 584,283" fill="#DDA0DD" opacity="0.9"/>
+  <polygon points="620,293 626,283 614,283" fill="#FFD700" opacity="0.9"/>
+  
+  <!-- Anniversary candles -->
+  <rect x="150" y="390" width="4" height="18" fill="#FFD700"/>
+  <ellipse cx="152" cy="390" rx="3" ry="4" fill="#FF6347"/>
+  
+  <rect x="646" y="400" width="4" height="18" fill="#FFD700"/>
+  <ellipse cx="648" cy="400" rx="3" ry="4" fill="#FF6347"/>
+  
+  <!-- Golden anniversary numbers -->
+  <circle cx="100" cy="360" r="20" fill="#FFD700"/>
+  <text x="100" y="368" text-anchor="middle" fill="#8B008B" font-family="Arial, sans-serif" font-size="18" font-weight="bold">25</text>
+  
+  <circle cx="700" cy="370" r="20" fill="#FFD700"/>
+  <text x="700" y="378" text-anchor="middle" fill="#8B008B" font-family="Arial, sans-serif" font-size="18" font-weight="bold">25</text>
+  
+  <!-- Anniversary atmosphere -->
+  <circle cx="400" cy="390" r="240" fill="url(#milestoneGlow)"/>
+  
+  <!-- Anniversary flowers -->
+  <circle cx="80" cy="410" r="10" fill="#32CD32"/>
+  <circle cx="86" cy="405" r="4" fill="#FFD700"/>
+  <circle cx="74" cy="405" r="4" fill="#DDA0DD"/>
+  <circle cx="80" cy="415" r="4" fill="#8B008B"/>
+  <circle cx="68" cy="410" r="4" fill="#9370DB"/>
+  <circle cx="92" cy="410" r="4" fill="#FFD700"/>
+  
+  <circle cx="720" cy="420" r="10" fill="#32CD32"/>
+  <circle cx="726" cy="415" r="4" fill="#FFD700"/>
+  <circle cx="714" cy="415" r="4" fill="#DDA0DD"/>
+  <circle cx="720" cy="425" r="4" fill="#8B008B"/>
+  <circle cx="708" cy="420" r="4" fill="#9370DB"/>
+  <circle cx="732" cy="420" r="4" fill="#FFD700"/>
+  
+  <!-- Anniversary subtitle -->
+  <text x="400" y="80" text-anchor="middle" fill="#DDA0DD" font-family="Arial, sans-serif" font-size="18" font-weight="bold">CELEBRATING MILESTONE MOMENTS WITH INTERACTIVE DINING</text>
+</svg>

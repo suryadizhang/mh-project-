@@ -1,0 +1,241 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#sacramentoGradient)"/>
+  
+  <!-- Capitol Building -->
+  <rect x="150" y="80" width="40" height="60" fill="#F5F5DC"/>
+  <rect x="152" y="82" width="36" height="56" fill="#FFFFFF"/>
+  
+  <!-- Capitol Dome -->
+  <ellipse cx="170" cy="75" rx="20" ry="10" fill="#DAA520"/>
+  <ellipse cx="170" cy="72" rx="18" ry="8" fill="#FFD700"/>
+  <circle cx="170" cy="65" r="5" fill="#DAA520"/>
+  <circle cx="170" cy="65" r="3" fill="#FFD700"/>
+  
+  <!-- Capitol Columns -->
+  <g fill="#F5F5DC">
+    <rect x="155" y="100" width="3" height="20"/>
+    <rect x="162" y="100" width="3" height="20"/>
+    <rect x="175" y="100" width="3" height="20"/>
+    <rect x="182" y="100" width="3" height="20"/>
+  </g>
+  
+  <!-- Sacramento River -->
+  <ellipse cx="200" cy="220" rx="80" ry="15" fill="#4682B4"/>
+  <ellipse cx="200" cy="218" rx="75" ry="12" fill="#87CEEB"/>
+  <ellipse cx="200" cy="216" rx="70" ry="10" fill="#B0E0E6"/>
+  
+  <!-- Tower Bridge -->
+  <g stroke="#FFD700" stroke-width="4" fill="none">
+    <line x1="120" y1="180" x2="280" y2="180"/>
+    <line x1="140" y1="160" x2="140" y2="200"/>
+    <line x1="260" y1="160" x2="260" y2="200"/>
+    <path d="M140 160 Q200 140 260 160"/>
+  </g>
+  <g fill="#FFD700">
+    <rect x="138" y="155" width="4" height="10"/>
+    <rect x="258" y="155" width="4" height="10"/>
+  </g>
+  
+  <!-- Sacramento Hibachi Setup -->
+  <rect x="180" y="170" width="80" height="35" rx="8" fill="#8B0000"/>
+  <rect x="188" y="178" width="64" height="22" rx="5" fill="#2D1810"/>
+  <rect x="195" y="185" width="50" height="12" rx="3" fill="#4A4A4A"/>
+  
+  <!-- State Fair Table -->
+  <ellipse cx="220" cy="210" rx="70" ry="25" fill="#8B4513"/>
+  <ellipse cx="220" cy="205" rx="65" ry="20" fill="#A0522D"/>
+  <ellipse cx="220" cy="202" rx="60" ry="17" fill="#DEB887"/>
+  
+  <!-- Sacramento Chef -->
+  <circle cx="140" cy="140" r="16" fill="#F4C2A1"/>
+  <rect x="130" y="154" width="20" height="30" fill="#4B0082"/>
+  <rect x="132" y="156" width="16" height="3" fill="#FFFFFF"/>
+  
+  <!-- Kings Hat/Crown -->
+  <polygon points="140,120 135,130 145,130" fill="#800080"/>
+  <g fill="#FFD700">
+    <circle cx="137" cy="125" r="1"/>
+    <circle cx="140" cy="123" r="1.5"/>
+    <circle cx="143" cy="125" r="1"/>
+  </g>
+  
+  <!-- State Fair Customers -->
+  <!-- Family with Kids -->
+  <circle cx="280" cy="145" r="14" fill="#F4C2A1"/>
+  <rect x="272" y="157" width="16" height="26" fill="#228B22"/>
+  <circle cx="276" cy="140" r="1" fill="#000000"/>
+  <circle cx="284" cy="140" r="1" fill="#000000"/>
+  <path d="M280 143 Q280 147 285 147" stroke="#000000" stroke-width="1" fill="none"/>
+  
+  <!-- Ice Cream Cone -->
+  <polygon points="295,165 299,175 291,175" fill="#DEB887"/>
+  <ellipse cx="295" cy="164" rx="3" ry="2" fill="#FFB6C1"/>
+  <ellipse cx="295" cy="161" rx="2" ry="1.5" fill="#FF69B4"/>
+  
+  <!-- Child -->
+  <circle cx="320" cy="160" r="12" fill="#F4C2A1"/>
+  <rect x="314" y="170" width="12" height="22" fill="#FF6347"/>
+  <ellipse cx="320" cy="150" rx="8" ry="4" fill="#4169E1"/>
+  <text x="320" y="152" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="6">KINGS</text>
+  
+  <!-- Sacramento Flames -->
+  <ellipse cx="205" cy="187" rx="4" ry="8" fill="#800080" opacity="0.9"/>
+  <ellipse cx="220" cy="185" rx="5" ry="10" fill="#4B0082" opacity="1.0"/>
+  <ellipse cx="235" cy="187" rx="4" ry="8" fill="#8B008B" opacity="0.9"/>
+  
+  <!-- California State Fair Food -->
+  <!-- Corn Dog -->
+  <rect x="210" y="182" width="2" height="8" fill="#8B4513"/>
+  <ellipse cx="211" cy="180" rx="2" ry="3" fill="#FFD700"/>
+  <ellipse cx="211" cy="179" rx="1.5" ry="2.5" fill="#FFFF99"/>
+  
+  <!-- Fair Funnel Cake -->
+  <ellipse cx="225" cy="182" rx="4" ry="2.5" fill="#F5F5DC"/>
+  <ellipse cx="225" cy="181" rx="3" ry="2" fill="#FFFFFF"/>
+  <g fill="#FFD700" opacity="0.7">
+    <circle cx="223" cy="180" r="0.5"/>
+    <circle cx="227" cy="181" r="0.5"/>
+    <circle cx="225" cy="182" r="0.5"/>
+  </g>
+  
+  <!-- California Vegetables -->
+  <circle cx="200" cy="184" r="2" fill="#32CD32"/>
+  <circle cx="240" cy="183" r="1.5" fill="#FF6347"/>
+  <circle cx="230" cy="185" r="1.5" fill="#FFD700"/>
+  
+  <!-- State Capitol Gardens -->
+  <g fill="#228B22">
+    <circle cx="120" cy="190" r="8"/>
+    <circle cx="120" cy="188" r="6"/>
+    <circle cx="118" cy="185" r="2"/>
+    <circle cx="122" cy="185" r="2"/>
+  </g>
+  <rect x="118" y="195" width="4" height="10" fill="#8B4513"/>
+  
+  <g fill="#32CD32">
+    <circle cx="300" cy="200" r="6"/>
+    <circle cx="300" cy="198" r="4"/>
+    <circle cx="299" cy="196" r="1.5"/>
+    <circle cx="301" cy="196" r="1.5"/>
+  </g>
+  <rect x="298" y="203" width="4" height="8" fill="#8B4513"/>
+  
+  <!-- California Grapes -->
+  <g fill="#800080">
+    <circle cx="350" cy="130" r="1.5"/>
+    <circle cx="352" cy="132" r="1.5"/>
+    <circle cx="348" cy="132" r="1.5"/>
+    <circle cx="350" cy="134" r="1.5"/>
+    <circle cx="349" cy="136" r="1.5"/>
+    <circle cx="351" cy="136" r="1.5"/>
+  </g>
+  <path d="M350 127 L348 125" stroke="#228B22" stroke-width="2"/>
+  
+  <!-- Agricultural Fields -->
+  <rect x="50" y="240" width="100" height="15" fill="#9ACD32"/>
+  <rect x="52" y="242" width="96" height="11" fill="#90EE90"/>
+  <g stroke="#228B22" stroke-width="1">
+    <line x1="60" y1="245" x2="60" y2="250"/>
+    <line x1="70" y1="245" x2="70" y2="250"/>
+    <line x1="80" y1="245" x2="80" y2="250"/>
+    <line x1="90" y1="245" x2="90" y2="250"/>
+    <line x1="100" y1="245" x2="100" y2="250"/>
+  </g>
+  
+  <!-- Sacramento Steam -->
+  <g stroke="#800080" stroke-width="2" fill="none" opacity="0.8">
+    <path d="M205 182 Q207 177 205 172 Q203 167 205 162"/>
+    <path d="M220 182 Q222 177 220 172 Q218 167 220 162"/>
+    <path d="M235 182 Q237 177 235 172 Q233 167 235 162"/>
+  </g>
+  
+  <!-- Sacramento Kings Logo Elements -->
+  <circle cx="50" cy="120" r="15" fill="#800080"/>
+  <circle cx="50" cy="120" r="10" fill="#4B0082"/>
+  <polygon points="50,115 47,120 53,120" fill="#FFD700"/>
+  <text x="50" y="125" text-anchor="middle" fill="#FFD700" font-family="Arial" font-size="6" font-weight="bold">SAC</text>
+  
+  <!-- California State Flag Elements -->
+  <rect x="300" y="60" width="30" height="20" fill="#FF0000"/>
+  <rect x="302" y="62" width="26" height="16" fill="#FFFFFF"/>
+  <circle cx="310" cy="68" r="2" fill="#8B4513"/>
+  <ellipse cx="310" cy="66" rx="3" ry="1" fill="#8B4513"/>
+  <text x="315" y="75" fill="#000000" font-family="Arial" font-size="6">CA</text>
+  
+  <!-- Farm-to-Table Sign -->
+  <rect x="370" y="180" width="25" height="30" fill="#F5DEB3"/>
+  <rect x="372" y="182" width="21" height="26" fill="#FFF8DC"/>
+  <text x="382" y="190" text-anchor="middle" fill="#228B22" font-family="Arial" font-size="7" font-weight="bold">
+    FARM
+  </text>
+  <text x="382" y="198" text-anchor="middle" fill="#228B22" font-family="Arial" font-size="7" font-weight="bold">
+    TO
+  </text>
+  <text x="382" y="206" text-anchor="middle" fill="#228B22" font-family="Arial" font-size="7" font-weight="bold">
+    TABLE
+  </text>
+  
+  <!-- Central Valley Products -->
+  <!-- Almonds -->
+  <ellipse cx="100" cy="260" rx="2" ry="1" fill="#DEB887"/>
+  <ellipse cx="104" cy="262" rx="2" ry="1" fill="#DEB887"/>
+  <ellipse cx="108" cy="260" rx="2" ry="1" fill="#DEB887"/>
+  
+  <!-- Rice -->
+  <g fill="#F5F5DC">
+    <ellipse cx="320" cy="255" rx="1" ry="0.5"/>
+    <ellipse cx="322" cy="256" rx="1" ry="0.5"/>
+    <ellipse cx="324" cy="255" rx="1" ry="0.5"/>
+    <ellipse cx="326" cy="257" rx="1" ry="0.5"/>
+    <ellipse cx="328" cy="255" rx="1" ry="0.5"/>
+  </g>
+  
+  <!-- State Fair Ferris Wheel -->
+  <circle cx="350" cy="110" r="20" fill="none" stroke="#FFD700" stroke-width="3"/>
+  <g fill="#FF6347">
+    <rect x="340" y="105" width="4" height="3"/>
+    <rect x="356" y="105" width="4" height="3"/>
+    <rect x="345" y="95" width="4" height="3"/>
+    <rect x="351" y="95" width="4" height="3"/>
+    <rect x="345" y="125" width="4" height="3"/>
+    <rect x="351" y="125" width="4" height="3"/>
+  </g>
+  
+  <!-- California Sun -->
+  <circle cx="80" cy="60" r="15" fill="#FFD700"/>
+  <circle cx="80" cy="60" r="12" fill="#FFA500"/>
+  <g stroke="#FFD700" stroke-width="2">
+    <line x1="80" y1="35" x2="80" y2="45"/>
+    <line x1="80" y1="75" x2="80" y2="85"/>
+    <line x1="55" y1="60" x2="65" y2="60"/>
+    <line x1="95" y1="60" x2="105" y2="60"/>
+    <line x1="65" y1="45" x2="72" y2="52"/>
+    <line x1="88" y1="68" x2="95" y2="75"/>
+    <line x1="95" y1="45" x2="88" y2="52"/>
+    <line x1="65" y1="75" x2="72" y2="68"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="30" text-anchor="middle" fill="#800080" font-family="Arial, sans-serif" font-size="24" font-weight="bold">
+    Sacramento Hibachi Catering
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="50" text-anchor="middle" fill="#4B0082" font-family="Arial, sans-serif" font-size="16">
+    State Capital • Farm Fresh • Family Fun • Community Pride
+  </text>
+  
+  <!-- Sacramento Message -->
+  <text x="200" y="285" text-anchor="middle" fill="#8B0000" font-family="Arial, sans-serif" font-size="14">
+    "Bringing capital city hospitality to your celebration"
+  </text>
+  
+  <defs>
+    <linearGradient id="sacramentoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFE4E1;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFF0F5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F0F8FF;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

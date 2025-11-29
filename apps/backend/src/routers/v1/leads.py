@@ -8,7 +8,7 @@ from uuid import UUID
 from core.database import get_db
 
 # FIXED: Import from db.models (NEW system) instead of models (OLD system)
-from db.models.lead import (
+from db.models.crm import (
     Lead,
     LeadContact,
     LeadContext,

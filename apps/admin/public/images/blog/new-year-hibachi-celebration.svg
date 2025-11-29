@@ -1,0 +1,181 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#newYearGradient)"/>
+  
+  <!-- Fireworks in Sky -->
+  <g fill="#FFD700" opacity="0.8">
+    <circle cx="80" cy="60" r="2"/>
+    <path d="M80 55 L80 65 M75 60 L85 60 M77 57 L83 63 M83 57 L77 63"/>
+    
+    <circle cx="320" cy="70" r="2"/>
+    <path d="M320 65 L320 75 M315 70 L325 70 M317 67 L323 73 M323 67 L317 73"/>
+    
+    <circle cx="150" cy="50" r="2"/>
+    <path d="M150 45 L150 55 M145 50 L155 50 M147 47 L153 53 M153 47 L147 53"/>
+    
+    <circle cx="250" cy="80" r="2"/>
+    <path d="M250 75 L250 85 M245 80 L255 80 M247 77 L253 83 M253 77 L247 83"/>
+  </g>
+  
+  <!-- Sparkles -->
+  <g fill="#FFFFFF" opacity="0.9">
+    <polygon points="100,90 102,95 107,95 103,98 105,103 100,100 95,103 97,98 93,95 98,95"/>
+    <polygon points="300,60 302,65 307,65 303,68 305,73 300,70 295,73 297,68 293,65 298,65"/>
+    <polygon points="50,100 52,105 57,105 53,108 55,113 50,110 45,113 47,108 43,105 48,105"/>
+    <polygon points="350,90 352,95 357,95 353,98 355,103 350,100 345,103 347,98 343,95 348,95"/>
+  </g>
+  
+  <!-- Celebration Table Setting -->
+  <rect x="50" y="180" width="300" height="20" fill="#8B4513"/>
+  
+  <!-- Festive Table -->
+  <ellipse cx="200" cy="210" rx="120" ry="40" fill="#8B0000"/>
+  <ellipse cx="200" cy="205" rx="115" ry="35" fill="#DC143C"/>
+  
+  <!-- Gold Tablecloth -->
+  <ellipse cx="200" cy="205" rx="110" ry="32" fill="#DAA520" opacity="0.8"/>
+  <ellipse cx="200" cy="202" rx="105" ry="28" fill="#FFD700" opacity="0.5"/>
+  
+  <!-- New Year Hibachi Setup -->
+  <rect x="170" y="180" width="60" height="30" rx="8" fill="#1A1A1A"/>
+  <rect x="178" y="188" width="44" height="18" rx="5" fill="#2D1810"/>
+  <rect x="185" y="195" width="30" height="8" rx="3" fill="#4A4A4A"/>
+  
+  <!-- Celebratory Flames -->
+  <ellipse cx="190" cy="197" rx="4" ry="8" fill="#FFD700" opacity="0.9"/>
+  <ellipse cx="200" cy="195" rx="5" ry="10" fill="#FF6347" opacity="1.0"/>
+  <ellipse cx="210" cy="197" rx="4" ry="8" fill="#FFA500" opacity="0.9"/>
+  
+  <!-- Party Chef -->
+  <circle cx="130" cy="135" r="16" fill="#F4C2A1"/>
+  <rect x="120" y="149" width="20" height="30" fill="#FFFFFF"/>
+  <rect x="122" y="151" width="16" height="3" fill="#000000"/>
+  
+  <!-- Party Hat on Chef -->
+  <path d="M130 115 L125 125 L135 125 Z" fill="#FFD700"/>
+  <circle cx="130" cy="115" r="2" fill="#FF6347"/>
+  <path d="M125 125 L135 125" stroke="#FF6347" stroke-width="2"/>
+  
+  <!-- Celebrating Guests -->
+  <!-- Person with Champagne -->
+  <circle cx="280" cy="140" r="14" fill="#F4C2A1"/>
+  <rect x="272" y="152" width="16" height="26" fill="#4169E1"/>
+  <circle cx="278" cy="135" r="1" fill="#000000"/>
+  <circle cx="282" cy="135" r="1" fill="#000000"/>
+  <path d="M280 138 Q280 140 282 140" stroke="#000000" stroke-width="1" fill="none"/>
+  
+  <!-- Champagne Glass -->
+  <rect x="290" y="155" width="2" height="8" fill="#C0C0C0"/>
+  <ellipse cx="291" cy="154" rx="2" ry="1" fill="#C0C0C0"/>
+  <ellipse cx="291" cy="151" rx="1.5" ry="3" fill="#FFD700" opacity="0.8"/>
+  
+  <!-- Party Guests -->
+  <circle cx="250" cy="165" r="12" fill="#F4C2A1"/>
+  <rect x="244" y="175" width="12" height="22" fill="#FF69B4"/>
+  
+  <circle cx="150" cy="165" r="12" fill="#F4C2A1"/>
+  <rect x="144" y="175" width="12" height="22" fill="#800080"/>
+  
+  <!-- New Year's Food -->
+  <!-- Lucky Foods -->
+  <!-- Black-eyed Peas -->
+  <circle cx="180" cy="192" r="2" fill="#F5F5DC"/>
+  <circle cx="180" cy="192" r="1" fill="#000000"/>
+  
+  <!-- Grapes -->
+  <circle cx="190" cy="190" r="1.5" fill="#800080"/>
+  <circle cx="192" cy="192" r="1.5" fill="#800080"/>
+  <circle cx="188" cy="192" r="1.5" fill="#800080"/>
+  
+  <!-- Champagne-glazed Items -->
+  <ellipse cx="205" cy="192" rx="3" ry="2" fill="#FFD700"/>
+  <ellipse cx="205" cy="191" rx="2" ry="1.5" fill="#FFA500"/>
+  
+  <!-- Resolution Ribbon -->
+  <ellipse cx="220" cy="190" rx="4" ry="2" fill="#FF6347"/>
+  <rect x="218" y="189" width="4" height="1" fill="#FFD700"/>
+  
+  <!-- Countdown Clock -->
+  <circle cx="350" cy="120" r="15" fill="#000000"/>
+  <circle cx="350" cy="120" r="12" fill="#FFFFFF"/>
+  <text x="350" y="118" text-anchor="middle" fill="#FF0000" font-family="Arial" font-size="8" font-weight="bold">11:59</text>
+  <text x="350" y="128" text-anchor="middle" fill="#000000" font-family="Arial" font-size="6">PM</text>
+  
+  <!-- Confetti -->
+  <g opacity="0.8">
+    <rect x="90" y="120" width="3" height="2" fill="#FF6347" transform="rotate(45 90 120)"/>
+    <rect x="150" y="100" width="3" height="2" fill="#FFD700" transform="rotate(30 150 100)"/>
+    <rect x="250" y="110" width="3" height="2" fill="#4169E1" transform="rotate(60 250 110)"/>
+    <rect x="310" y="130" width="3" height="2" fill="#FF69B4" transform="rotate(15 310 130)"/>
+    <rect x="120" y="140" width="3" height="2" fill="#32CD32" transform="rotate(75 120 140)"/>
+  </g>
+  
+  <!-- Champagne Bottles -->
+  <rect x="60" y="185" width="6" height="15" fill="#2E8B57"/>
+  <rect x="61" y="183" width="4" height="3" fill="#FFD700"/>
+  <circle cx="63" cy="181" r="1" fill="#FFD700"/>
+  
+  <rect x="330" y="185" width="6" height="15" fill="#2E8B57"/>
+  <rect x="331" y="183" width="4" height="3" fill="#FFD700"/>
+  <circle cx="333" cy="181" r="1" fill="#FFD700"/>
+  
+  <!-- Party Poppers -->
+  <rect x="110" y="180" width="3" height="8" fill="#FF6347"/>
+  <circle cx="111" cy="178" r="1" fill="#FFD700"/>
+  
+  <rect x="290" y="180" width="3" height="8" fill="#4169E1"/>
+  <circle cx="291" cy="178" r="1" fill="#FFD700"/>
+  
+  <!-- Resolution Cards -->
+  <rect x="140" y="195" width="12" height="8" fill="#FFFFFF"/>
+  <text x="146" y="200" text-anchor="middle" fill="#000000" font-family="Arial" font-size="6">2026</text>
+  <text x="146" y="206" text-anchor="middle" fill="#000000" font-family="Arial" font-size="4">GOALS</text>
+  
+  <!-- Noisemakers -->
+  <ellipse cx="260" cy="185" rx="3" ry="1" fill="#FFD700"/>
+  <rect x="258" y="186" width="4" height="6" fill="#FF6347"/>
+  
+  <!-- Year 2026 Banner -->
+  <rect x="150" y="80" width="100" height="15" fill="#DAA520"/>
+  <text x="200" y="90" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="12" font-weight="bold">2026</text>
+  
+  <!-- Midnight Steam -->
+  <g stroke="#FFD700" stroke-width="2" fill="none" opacity="0.8">
+    <path d="M190 190 Q192 185 190 180 Q188 175 190 170"/>
+    <path d="M200 190 Q202 185 200 180 Q198 175 200 170"/>
+    <path d="M210 190 Q212 185 210 180 Q208 175 210 170"/>
+  </g>
+  
+  <!-- Balloon -->
+  <ellipse cx="50" cy="140" rx="8" ry="12" fill="#FF6347"/>
+  <rect x="49" y="152" width="2" height="15" fill="#000000"/>
+  
+  <!-- Party Streamers -->
+  <g stroke="#FF69B4" stroke-width="3" fill="none" opacity="0.6">
+    <path d="M20 160 Q40 150 60 160 Q80 170 100 160"/>
+    <path d="M300 160 Q320 150 340 160 Q360 170 380 160"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="30" text-anchor="middle" fill="#DAA520" font-family="Arial, sans-serif" font-size="26" font-weight="bold">
+    New Year's Eve Hibachi
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="50" text-anchor="middle" fill="#FF6347" font-family="Arial, sans-serif" font-size="18">
+    Ring in 2026 • Midnight Countdown • Champagne & Celebration
+  </text>
+  
+  <!-- New Year Message -->
+  <text x="200" y="275" text-anchor="middle" fill="#8B0000" font-family="Arial, sans-serif" font-size="14">
+    "Start the new year with unforgettable flavors and celebration"
+  </text>
+  
+  <defs>
+    <linearGradient id="newYearGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#191970;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#4B0082;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2F4F4F;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

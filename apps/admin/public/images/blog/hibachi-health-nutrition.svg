@@ -1,0 +1,229 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#healthyGradient)"/>
+  
+  <!-- Nutrition Facts Panel -->
+  <rect x="50" y="40" width="120" height="180" fill="#FFFFFF" stroke="#000000" stroke-width="2"/>
+  <rect x="52" y="42" width="116" height="176" fill="#F8F8FF"/>
+  
+  <!-- Nutrition Facts Header -->
+  <rect x="52" y="42" width="116" height="25" fill="#000000"/>
+  <text x="110" y="58" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="14" font-weight="bold">
+    Nutrition Facts
+  </text>
+  
+  <!-- Serving Info -->
+  <g fill="#000000" font-family="Arial" font-size="8">
+    <text x="55" y="75">Serving Size: 1 hibachi meal</text>
+    <text x="55" y="85">Servings per container: 1</text>
+  </g>
+  
+  <!-- Calories -->
+  <rect x="52" y="90" width="116" height="1" fill="#000000"/>
+  <text x="55" y="105" fill="#000000" font-family="Arial" font-size="12" font-weight="bold">Calories 450</text>
+  <text x="130" y="105" fill="#000000" font-family="Arial" font-size="8">Calories from Fat 120</text>
+  
+  <!-- Daily Values -->
+  <rect x="52" y="110" width="116" height="1" fill="#000000"/>
+  <text x="130" y="125" fill="#000000" font-family="Arial" font-size="8" font-weight="bold">% Daily Value*</text>
+  
+  <!-- Nutrient List -->
+  <g fill="#000000" font-family="Arial" font-size="7">
+    <text x="55" y="135">Total Fat 13g</text>
+    <text x="150" y="135" font-weight="bold">20%</text>
+    
+    <text x="60" y="145">Saturated Fat 4g</text>
+    <text x="150" y="145" font-weight="bold">20%</text>
+    
+    <text x="55" y="155">Cholesterol 75mg</text>
+    <text x="150" y="155" font-weight="bold">25%</text>
+    
+    <text x="55" y="165">Sodium 850mg</text>
+    <text x="150" y="165" font-weight="bold">35%</text>
+    
+    <text x="55" y="175">Total Carbohydrate 35g</text>
+    <text x="150" y="175" font-weight="bold">12%</text>
+    
+    <text x="60" y="185">Dietary Fiber 4g</text>
+    <text x="150" y="185" font-weight="bold">16%</text>
+    
+    <text x="55" y="195">Protein 40g</text>
+    <text x="150" y="195" font-weight="bold">80%</text>
+    
+    <text x="55" y="205">Vitamin C 45mg</text>
+    <text x="150" y="205" font-weight="bold">75%</text>
+    
+    <text x="55" y="215">Iron 6mg</text>
+    <text x="150" y="215" font-weight="bold">35%</text>
+  </g>
+  
+  <!-- Healthy Hibachi Setup -->
+  <rect x="220" y="120" width="100" height="50" rx="8" fill="#228B22"/>
+  <rect x="225" y="125" width="90" height="40" rx="6" fill="#2F4F4F"/>
+  <rect x="230" y="130" width="80" height="30" rx="4" fill="#1C1C1C"/>
+  
+  <!-- Health-Conscious Chef -->
+  <circle cx="190" cy="140" r="18" fill="#F4C2A1"/>
+  <rect x="177" y="156" width="26" height="32" fill="#FFFFFF"/>
+  <rect x="179" y="158" width="22" height="4" fill="#228B22"/>
+  
+  <!-- Chef Hat with Health Symbol -->
+  <ellipse cx="190" cy="125" rx="12" ry="8" fill="#FFFFFF"/>
+  <rect x="178" y="125" width="24" height="10" fill="#FFFFFF"/>
+  <path d="M190 120 L185 110 L195 110 Z" fill="#FF0000"/>
+  <rect x="185" y="112" width="10" height="2" fill="#FF0000"/>
+  
+  <!-- Nutritionist Badge -->
+  <circle cx="175" cy="165" r="5" fill="#FFD700"/>
+  <text x="175" y="168" text-anchor="middle" fill="#000000" font-family="Arial" font-size="6" font-weight="bold">RD</text>
+  
+  <!-- Healthy Vegetables on Grill -->
+  <g>
+    <!-- Broccoli -->
+    <ellipse cx="250" cy="145" rx="4" ry="3" fill="#228B22"/>
+    <ellipse cx="250" cy="144" rx="3" ry="2" fill="#32CD32"/>
+    <rect x="248" y="148" width="4" height="3" fill="#228B22"/>
+    
+    <!-- Bell Peppers -->
+    <ellipse cx="265" cy="147" rx="3" ry="4" fill="#FF6347"/>
+    <ellipse cx="265" cy="146" rx="2" ry="3" fill="#FF7F50"/>
+    
+    <ellipse cx="280" cy="145" rx="3" ry="4" fill="#FFD700"/>
+    <ellipse cx="280" cy="144" rx="2" ry="3" fill="#FFFF99"/>
+    
+    <!-- Zucchini -->
+    <ellipse cx="295" cy="148" rx="4" ry="2" fill="#9ACD32"/>
+    <ellipse cx="295" cy="147" rx="3" ry="1" fill="#ADFF2F"/>
+  </g>
+  
+  <!-- Lean Protein -->
+  <ellipse cx="270" cy="152" rx="6" ry="3" fill="#DEB887"/>
+  <ellipse cx="270" cy="151" rx="5" ry="2" fill="#F5DEB3"/>
+  <text x="270" y="154" text-anchor="middle" fill="#8B4513" font-family="Arial" font-size="4">LEAN</text>
+  
+  <!-- Heart-Healthy Indicators -->
+  <g fill="#FF0000">
+    <path d="M340 100 Q342 98 344 100 Q346 98 348 100 Q348 104 344 108 Q340 104 340 100"/>
+    <path d="M370 130 Q372 128 374 130 Q376 128 378 130 Q378 134 374 138 Q370 134 370 130"/>
+  </g>
+  
+  <!-- Health Benefits Icons -->
+  <!-- Vitamin Icons -->
+  <circle cx="350" cy="80" r="15" fill="#FF6347"/>
+  <text x="350" y="85" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="12" font-weight="bold">C</text>
+  
+  <circle cx="380" cy="100" r="12" fill="#FFD700"/>
+  <text x="380" y="105" text-anchor="middle" fill="#000000" font-family="Arial" font-size="10" font-weight="bold">B</text>
+  
+  <circle cx="360" cy="160" r="10" fill="#32CD32"/>
+  <text x="360" y="165" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="8" font-weight="bold">A</text>
+  
+  <!-- Protein Power -->
+  <rect x="300" y="180" width="40" height="25" fill="#8B4513"/>
+  <rect x="302" y="182" width="36" height="21" fill="#D2691E"/>
+  <text x="320" y="195" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="10" font-weight="bold">40g</text>
+  <text x="320" y="205" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="6">PROTEIN</text>
+  
+  <!-- Fiber Counter -->
+  <rect x="350" y="200" width="35" height="20" fill="#228B22"/>
+  <rect x="352" y="202" width="31" height="16" fill="#32CD32"/>
+  <text x="367" y="212" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="8" font-weight="bold">4g FIBER</text>
+  
+  <!-- Low Calorie Badge -->
+  <circle cx="30" cy="250" r="20" fill="#00BFFF"/>
+  <circle cx="30" cy="250" r="15" fill="#87CEEB"/>
+  <text x="30" y="247" text-anchor="middle" fill="#000080" font-family="Arial" font-size="8" font-weight="bold">LOW</text>
+  <text x="30" y="257" text-anchor="middle" fill="#000080" font-family="Arial" font-size="8" font-weight="bold">CAL</text>
+  
+  <!-- Fresh Ingredients Display -->
+  <rect x="180" y="220" width="160" height="40" fill="#F0F8FF"/>
+  <rect x="182" y="222" width="156" height="36" fill="#F8F8FF"/>
+  
+  <!-- Fresh Vegetables -->
+  <g>
+    <!-- Tomatoes -->
+    <circle cx="200" cy="240" r="6" fill="#FF6347"/>
+    <circle cx="200" cy="240" r="4" fill="#FF7F50"/>
+    <ellipse cx="197" cy="235" rx="2" ry="3" fill="#228B22"/>
+    
+    <!-- Lettuce -->
+    <ellipse cx="220" cy="235" rx="8" ry="5" fill="#228B22"/>
+    <ellipse cx="220" cy="233" rx="6" ry="3" fill="#32CD32"/>
+    <ellipse cx="220" cy="245" rx="6" ry="4" fill="#9ACD32"/>
+    
+    <!-- Carrots -->
+    <ellipse cx="245" cy="240" rx="2" ry="8" fill="#FF8C00"/>
+    <ellipse cx="245" cy="240" rx="1" ry="6" fill="#FFA500"/>
+    <ellipse cx="243" cy="232" rx="1" ry="2" fill="#228B22"/>
+    
+    <!-- Onions -->
+    <circle cx="265" cy="240" r="5" fill="#FFFACD"/>
+    <circle cx="265" cy="240" r="3" fill="#F5F5DC"/>
+    
+    <!-- Mushrooms -->
+    <ellipse cx="285" cy="242" rx="4" ry="6" fill="#DEB887"/>
+    <ellipse cx="285" cy="241" rx="3" ry="4" fill="#F5DEB3"/>
+    <rect x="283" y="248" width="4" height="3" fill="#DEB887"/>
+    
+    <!-- Bean Sprouts -->
+    <g stroke="#32CD32" stroke-width="1" fill="none">
+      <path d="M305 235 Q307 240 305 245"/>
+      <path d="M308 236 Q310 241 308 246"/>
+      <path d="M311 234 Q313 239 311 244"/>
+    </g>
+    
+    <!-- Ginger -->
+    <ellipse cx="325" cy="240" rx="3" ry="5" fill="#DEB887"/>
+    <ellipse cx="325" cy="240" rx="2" ry="3" fill="#F5DEB3"/>
+  </g>
+  
+  <!-- Healthy Cooking Methods -->
+  <text x="200" y="210" fill="#228B22" font-family="Arial" font-size="10" font-weight="bold">GRILLED NOT FRIED</text>
+  
+  <!-- Health Steam -->
+  <g stroke="#98FB98" stroke-width="2" fill="none" opacity="0.8">
+    <path d="M250 125 Q252 120 250 115 Q248 110 250 105"/>
+    <path d="M270 125 Q272 120 270 115 Q268 110 270 105"/>
+    <path d="M290 125 Q292 120 290 115 Q288 110 290 105"/>
+  </g>
+  
+  <!-- Antioxidant Indicators -->
+  <g fill="#8A2BE2">
+    <circle cx="60" cy="100" r="3"/>
+    <circle cx="370" cy="180" r="4"/>
+    <circle cx="320" cy="60" r="2"/>
+  </g>
+  <text x="200" y="280" text-anchor="middle" fill="#8A2BE2" font-family="Arial" font-size="8">Rich in Antioxidants</text>
+  
+  <!-- Health Scale -->
+  <rect x="350" y="30" width="30" height="5" fill="#FF0000"/>
+  <rect x="355" y="30" width="25" height="5" fill="#FFFF00"/>
+  <rect x="360" y="30" width="20" height="5" fill="#00FF00"/>
+  <circle cx="375" cy="32" r="2" fill="#000000"/>
+  <text x="365" y="45" fill="#00FF00" font-family="Arial" font-size="8" font-weight="bold">HEALTHY</text>
+  
+  <!-- Balanced Plate Diagram -->
+  <circle cx="80" cy="190" r="25" stroke="#000000" stroke-width="2" fill="none"/>
+  
+  <!-- Plate Sections -->
+  <path d="M80 165 A 25 25 0 0 1 105 190 L 80 190 Z" fill="#228B22" opacity="0.7"/>
+  <path d="M80 190 A 25 25 0 0 1 55 190 L 80 190 Z" fill="#8B4513" opacity="0.7"/>
+  <path d="M80 190 A 25 25 0 0 1 80 215 L 80 190 Z" fill="#FFD700" opacity="0.7"/>
+  
+  <text x="92" y="175" fill="#FFFFFF" font-family="Arial" font-size="5">VEG</text>
+  <text x="65" y="195" fill="#FFFFFF" font-family="Arial" font-size="5">PROTEIN</text>
+  <text x="75" y="210" fill="#000000" font-family="Arial" font-size="5">CARBS</text>
+  
+  <!-- Title -->
+  <text x="200" y="20" text-anchor="middle" fill="#228B22" font-family="Arial, sans-serif" font-size="20" font-weight="bold">
+    Hibachi Health & Nutrition
+  </text>
+  
+  <defs>
+    <linearGradient id="healthyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0FFF0;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#F5FFFA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F0F8FF;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

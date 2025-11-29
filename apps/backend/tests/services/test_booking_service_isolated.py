@@ -50,13 +50,14 @@ class TestBookingServiceInfrastructure:
         assert booking_service is not None
         assert booking_service.repository == mock_repository
 
-    def test_get_dashboard_stats_calls_repository(self, booking_service, mock_repository):
+    @pytest.mark.asyncio
+    async def test_get_dashboard_stats_calls_repository(self, booking_service, mock_repository):
         """Test: Dashboard stats calls repository with correct parameters"""
         # Arrange
         mock_repository.find_by_date_range.return_value = []
 
         # Act
-        result = booking_service.get_dashboard_stats()
+        result = await booking_service.get_dashboard_stats()
 
         # Assert
         assert mock_repository.find_by_date_range.called

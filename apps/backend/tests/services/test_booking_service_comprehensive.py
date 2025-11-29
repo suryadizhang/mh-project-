@@ -28,8 +28,8 @@ from core.exceptions import (
     ConflictException,
     NotFoundException,
 )
-from models.booking import Booking, BookingStatus
-from models.customer import Customer
+from db.models.core import Booking, BookingStatus
+from db.models.core import Customer
 from repositories.booking_repository import BookingRepository
 from schemas.booking import BookingCreate
 from services.booking_service import BookingService

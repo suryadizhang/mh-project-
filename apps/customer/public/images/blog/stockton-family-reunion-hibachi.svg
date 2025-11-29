@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Family reunion background -->
+  <defs>
+    <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB"/>
+      <stop offset="100%" style="stop-color:#E0F6FF"/>
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="50%" cy="20%" r="30%">
+      <stop offset="0%" style="stop-color:#FFD700; opacity:0.3"/>
+      <stop offset="100%" style="stop-color:transparent"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Sky background -->
+  <rect width="800" height="600" fill="url(#skyGradient)"/>
+  <circle cx="150" cy="120" r="50" fill="#FFD700" opacity="0.8"/>
+  <ellipse cx="150" cy="120" rx="80" ry="60" fill="url(#sunGlow)"/>
+  
+  <!-- Park setting with trees -->
+  <ellipse cx="100" cy="500" rx="80" ry="70" fill="#228B22"/>
+  <rect x="95" y="520" width="10" height="40" fill="#8B4513"/>
+  <ellipse cx="700" cy="480" rx="70" ry="60" fill="#32CD32"/>
+  <rect x="695" y="500" width="10" height="35" fill="#8B4513"/>
+  
+  <!-- Large picnic tables with families -->
+  <rect x="150" y="380" width="120" height="20" fill="#8B4513" rx="3"/>
+  <rect x="145" y="390" width="8" height="25" fill="#654321"/>
+  <rect x="267" y="390" width="8" height="25" fill="#654321"/>
+  <rect x="500" y="360" width="120" height="20" fill="#8B4513" rx="3"/>
+  <rect x="495" y="370" width="8" height="25" fill="#654321"/>
+  <rect x="617" y="370" width="8" height="25" fill="#654321"/>
+  
+  <!-- Hibachi grill stations -->
+  <rect x="300" y="280" width="60" height="40" fill="#2F4F4F" rx="5"/>
+  <rect x="315" y="275" width="30" height="8" fill="#FF4500"/>
+  <circle cx="320" r="3" cy="278" fill="#FFD700"/>
+  <circle cx="335" r="3" cy="278" fill="#FF6347"/>
+  <circle cx="350" r="3" cy="278" fill="#FFD700"/>
+  
+  <!-- Chef with spatula -->
+  <circle cx="330" cy="250" r="12" fill="#FDBCB4"/>
+  <rect x="325" y="260" width="10" height="20" fill="white"/>
+  <rect x="323" y="280" width="14" height="25" fill="#000080"/>
+  <rect x="325" y="305" width="4" height="15" fill="#FDBCB4"/>
+  <rect x="331" y="305" width="4" height="15" fill="#FDBCB4"/>
+  <rect x="340" y="245" width="15" height="3" fill="#C0C0C0"/>
+  <rect x="352" y="243" width="8" height="7" fill="#C0C0C0"/>
+  
+  <!-- Multi-generational family members -->
+  <!-- Grandparents sitting -->
+  <circle cx="180" cy="350" r="10" fill="#FDBCB4"/>
+  <rect x="175" y="358" width="10" height="18" fill="#4B0082"/>
+  <rect x="177" y="375" width="6" height="12" fill="#000080"/>
+  <circle cx="180" cy="345" r="8" fill="#D3D3D3"/>
+  
+  <circle cx="240" cy="350" r="10" fill="#FDBCB4"/>
+  <rect x="235" y="358" width="10" height="18" fill="#800080"/>
+  <rect x="237" y="375" width="6" height="12" fill="#000080"/>
+  <circle cx="240" cy="345" r="8" fill="#D3D3D3"/>
+  
+  <!-- Parents standing -->
+  <circle cx="450" cy="320" r="11" fill="#FDBCB4"/>
+  <rect x="445" y="330" width="10" height="25" fill="#FF69B4"/>
+  <rect x="447" y="355" width="6" height="18" fill="#000080"/>
+  <rect x="447" y="373" width="6" height="8" fill="#8B4513"/>
+  
+  <circle cx="480" cy="320" r="11" fill="#FDBCB4"/>
+  <rect x="475" y="330" width="10" height="25" fill="#4169E1"/>
+  <rect x="477" y="355" width="6" height="18" fill="#654321"/>
+  <rect x="477" y="373" width="6" height="8" fill="#8B4513"/>
+  
+  <!-- Children playing -->
+  <circle cx="550" cy="340" r="8" fill="#FDBCB4"/>
+  <rect x="546" y="347" width="8" height="15" fill="#FF1493"/>
+  <rect x="547" y="362" width="6" height="12" fill="#000080"/>
+  <rect x="548" y="374" width="4" height="6" fill="#FF0000"/>
+  
+  <circle cx="580" cy="335" r="8" fill="#FDBCB4"/>
+  <rect x="576" y="342" width="8" height="15" fill="#00CED1"/>
+  <rect x="577" y="357" width="6" height="12" fill="#8B4513"/>
+  <rect x="578" y="369" width="4" height="6" fill="#32CD32"/>
+  
+  <!-- Teenagers -->
+  <circle cx="200" cy="320" r="10" fill="#FDBCB4"/>
+  <rect x="195" y="329" width="10" height="22" fill="#FF4500"/>
+  <rect x="197" y="351" width="6" height="16" fill="#000080"/>
+  <rect x="198" y="367" width="4" height="8" fill="#ADFF2F"/>
+  
+  <!-- Family reunion banner -->
+  <rect x="250" y="180" width="300" height="40" fill="#FF69B4" opacity="0.8" rx="10"/>
+  <text x="400" y="205" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">FAMILY REUNION 2025</text>
+  
+  <!-- Balloons -->
+  <circle cx="120" cy="200" r="8" fill="#FF1493"/>
+  <line x1="120" y1="208" x2="120" y2="250" stroke="#000" stroke-width="1"/>
+  <circle cx="135" cy="190" r="8" fill="#00CED1"/>
+  <line x1="135" y1="198" x2="135" y2="250" stroke="#000" stroke-width="1"/>
+  <circle cx="680" cy="220" r="8" fill="#FFD700"/>
+  <line x1="680" y1="228" x2="680" y2="270" stroke="#000" stroke-width="1"/>
+  
+  <!-- Food on tables -->
+  <ellipse cx="210" cy="378" rx="15" ry="8" fill="#8B4513"/>
+  <ellipse cx="190" cy="378" rx="12" ry="6" fill="#FF6347"/>
+  <ellipse cx="560" cy="358" rx="15" ry="8" fill="#32CD32"/>
+  <ellipse cx="540" cy="358" rx="12" ry="6" fill="#FFD700"/>
+  
+  <!-- Photo session area -->
+  <rect x="350" y="450" width="100" height="60" fill="#F5F5DC" opacity="0.7" rx="5"/>
+  <text x="400" y="475" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="12">PHOTO</text>
+  <text x="400" y="490" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="12">BOOTH</text>
+  
+  <!-- Hibachi flames and cooking effects -->
+  <polygon points="320,275 325,265 315,265" fill="#FF4500" opacity="0.7"/>
+  <polygon points="335,275 340,265 330,265" fill="#FF6347" opacity="0.7"/>
+  <polygon points="350,275 355,265 345,265" fill="#FFD700" opacity="0.7"/>
+  
+  <!-- Smoke effects -->
+  <ellipse cx="325" cy="260" rx="8" ry="4" fill="#D3D3D3" opacity="0.5"/>
+  <ellipse cx="340" cy="255" rx="6" ry="3" fill="#D3D3D3" opacity="0.4"/>
+  <ellipse cx="355" cy="250" rx="4" ry="2" fill="#D3D3D3" opacity="0.3"/>
+  
+  <!-- Picnic blankets -->
+  <rect x="400" y="480" width="60" height="40" fill="#FF69B4" opacity="0.6" rx="5" transform="rotate(15 430 500)"/>
+  <rect x="150" y="460" width="50" height="35" fill="#00CED1" opacity="0.6" rx="5" transform="rotate(-10 175 477)"/>
+  
+  <!-- Games area -->
+  <circle cx="600" cy="480" r="25" fill="#32CD32" opacity="0.5"/>
+  <text x="600" y="485" text-anchor="middle" fill="#006400" font-family="Arial, sans-serif" font-size="10">GAMES</text>
+</svg>

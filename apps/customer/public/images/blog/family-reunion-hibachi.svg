@@ -1,0 +1,135 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#familyGradient)"/>
+  
+  <!-- Home Setting -->
+  <rect x="20" y="80" width="120" height="140" fill="#8B4513"/>
+  <rect x="30" y="90" width="100" height="120" fill="#D2B48C"/>
+  <rect x="50" y="110" width="20" height="30" fill="#654321"/>
+  <rect x="80" y="110" width="20" height="30" fill="#654321"/>
+  <rect x="110" y="110" width="15" height="25" fill="#654321"/>
+  <rect x="50" y="150" width="20" height="30" fill="#654321"/>
+  <rect x="80" y="150" width="20" height="30" fill="#654321"/>
+  <rect x="110" y="150" width="15" height="25" fill="#654321"/>
+  
+  <!-- Windows with warm light -->
+  <rect x="52" y="112" width="16" height="26" fill="#FFD700" opacity="0.8"/>
+  <rect x="82" y="112" width="16" height="26" fill="#FFD700" opacity="0.8"/>
+  <rect x="52" y="152" width="16" height="26" fill="#FFD700" opacity="0.8"/>
+  <rect x="82" y="152" width="16" height="26" fill="#FFD700" opacity="0.8"/>
+  
+  <!-- Backyard Scene -->
+  <rect x="0" y="220" width="400" height="80" fill="#228B22"/>
+  
+  <!-- Patio -->
+  <rect x="150" y="180" width="200" height="40" fill="#A0522D"/>
+  <rect x="155" y="185" width="190" height="30" fill="#D2B48C"/>
+  
+  <!-- Family Around Hibachi Table -->
+  <ellipse cx="250" cy="200" rx="80" ry="30" fill="#8B4513"/>
+  
+  <!-- Hibachi Grill -->
+  <rect x="230" y="185" width="40" height="25" rx="5" fill="#1A1A1A"/>
+  <rect x="235" y="190" width="30" height="15" rx="3" fill="#2D1810"/>
+  
+  <!-- Flames -->
+  <ellipse cx="245" cy="195" rx="5" ry="8" fill="#FF6B35" opacity="0.8"/>
+  <ellipse cx="255" cy="193" rx="4" ry="6" fill="#FF8C42" opacity="0.9"/>
+  <ellipse cx="265" cy="195" rx="3" ry="5" fill="#FFB14E" opacity="0.7"/>
+  
+  <!-- Family Members -->
+  <!-- Dad -->
+  <circle cx="200" cy="150" r="12" fill="#D4A574"/>
+  <rect x="195" y="160" width="10" height="20" fill="#4169E1"/>
+  
+  <!-- Mom -->
+  <circle cx="300" cy="150" r="12" fill="#F4C2A1"/>
+  <rect x="295" y="160" width="10" height="20" fill="#FF69B4"/>
+  <path d="M290 145 Q300 135 310 145" fill="#8B4513"/>
+  
+  <!-- Kids -->
+  <circle cx="180" cy="170" r="8" fill="#F4C2A1"/>
+  <rect x="177" y="175" width="6" height="15" fill="#32CD32"/>
+  
+  <circle cx="320" cy="170" r="8" fill="#D4A574"/>
+  <rect x="317" y="175" width="6" height="15" fill="#FF6347"/>
+  
+  <!-- Grandparents -->
+  <circle cx="220" cy="180" r="10" fill="#E6B887"/>
+  <rect x="217" y="187" width="6" height="18" fill="#8B0000"/>
+  <circle cx="227" cy="175" r="2" fill="#C0C0C0"/>
+  
+  <circle cx="280" cy="180" r="10" fill="#F4C2A1"/>
+  <rect x="277" y="187" width="6" height="18" fill="#4B0082"/>
+  <path d="M275 170 Q280 160 285 170" fill="#C0C0C0"/>
+  
+  <!-- Chef -->
+  <circle cx="250" cy="130" r="15" fill="#F4C2A1"/>
+  <rect x="243" y="142" width="14" height="25" fill="#FFFFFF"/>
+  <ellipse cx="250" cy="118" rx="12" ry="8" fill="#FFFFFF"/>
+  
+  <!-- Spatula */
+  <rect x="270" y="145" width="2" height="20" fill="#8B4513" transform="rotate(15 270 145)"/>
+  <ellipse cx="278" cy="140" rx="5" ry="3" fill="#C0C0C0" transform="rotate(15 278 140)"/>
+  
+  <!-- Food on Table -->
+  <circle cx="240" cy="190" r="3" fill="#D2691E"/>
+  <circle cx="260" cy="188" r="2" fill="#FF6347"/>
+  <rect x="250" y="187" width="4" height="3" rx="1" fill="#32CD32"/>
+  
+  <!-- Family Activities -->
+  <!-- Child playing -->
+  <circle cx="120" cy="250" r="6" fill="#F4C2A1"/>
+  <rect x="117" y="255" width="6" height="12" fill="#FFD700"/>
+  <circle cx="115" cy="245" r="4" fill="#FF0000"/>
+  
+  <!-- Dog -->
+  <ellipse cx="160" cy="250" rx="8" ry="5" fill="#8B4513"/>
+  <circle cx="155" cy="247" r="3" fill="#8B4513"/>
+  <circle cx="153" cy="246" r="1" fill="#000000"/>
+  <path d="M150 244 L148 242 M150 248 L148 250" stroke="#8B4513" stroke-width="1"/>
+  
+  <!-- Garden -->
+  <circle cx="80" cy="240" r="8" fill="#FF69B4"/>
+  <circle cx="90" cy="245" r="6" fill="#FF1493"/>
+  <circle cx="100" cy="240" r="7" fill="#FFB6C1"/>
+  <rect x="85" y="250" width="2" height="15" fill="#228B22"/>
+  <rect x="95" y="255" width="2" height="10" fill="#228B22"/>
+  
+  <!-- Outdoor Furniture -->
+  <rect x="350" y="200" width="25" height="15" fill="#8B4513"/>
+  <rect x="352" y="190" width="21" height="10" fill="#FF6347"/>
+  <rect x="347" y="215" width="8" height="10" fill="#8B4513"/>
+  <rect x="370" y="215" width="8" height="10" fill="#8B4513"/>
+  
+  <!-- String Lights -->
+  <line x1="150" y1="100" x2="350" y2="100" stroke="#FFD700" stroke-width="2"/>
+  <circle cx="170" cy="100" r="3" fill="#FFD700"/>
+  <circle cx="200" cy="100" r="3" fill="#FFD700"/>
+  <circle cx="230" cy="100" r="3" fill="#FFD700"/>
+  <circle cx="260" cy="100" r="3" fill="#FFD700"/>
+  <circle cx="290" cy="100" r="3" fill="#FFD700"/>
+  <circle cx="320" cy="100" r="3" fill="#FFD700"/>
+  
+  <!-- Hearts floating around family -->
+  <path d="M190 125 C190 120, 195 120, 195 125 C195 120, 200 120, 200 125 C200 130, 195 135, 195 135 C195 135, 190 130, 190 125" fill="#FF69B4" opacity="0.6"/>
+  <path d="M310 135 C310 132, 313 132, 313 135 C313 132, 316 132, 316 135 C316 138, 313 141, 313 141 C313 141, 310 138, 310 135" fill="#FF1493" opacity="0.7"/>
+  
+  <!-- Title -->
+  <text x="200" y="30" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="20" font-weight="bold">
+    Family Reunion Hibachi
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="50" text-anchor="middle" fill="#A0522D" font-family="Arial, sans-serif" font-size="14">
+    Bringing Generations Together
+  </text>
+  
+  <defs>
+    <linearGradient id="familyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF8DC;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFFACD;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F0E68C;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

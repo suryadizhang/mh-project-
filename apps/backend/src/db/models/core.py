@@ -198,6 +198,7 @@ class Booking(Base):
 
     # Foreign Keys (UPDATED - match database)
     customer_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)
+    # NOTE: chef_id references ops.chefs (not core.chefs) - see ops.Chef model
     chef_id: Mapped[Optional[UUID]] = mapped_column(PGUUID(as_uuid=True), nullable=True)
     station_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)
 
@@ -282,7 +283,7 @@ class Booking(Base):
 
     # Relationships
     customer: Mapped["Customer"] = relationship("Customer", back_populates="bookings")
-    chef: Mapped[Optional["Chef"]] = relationship("Chef", back_populates="bookings")
+    # NOTE: chef relationship removed - use ops.Chef directly via chef_id FK to ops.chefs
     reminders: Mapped[List["BookingReminder"]] = relationship(
         "BookingReminder", back_populates="booking", lazy="select", cascade="all, delete-orphan"
     )
@@ -409,51 +410,10 @@ class Customer(Base):
         self.phone_encrypted = encrypt_phone(value)
 
 
-class Chef(Base):
-    """
-    Chef entity
-
-    Represents a hibachi chef with skills, availability, and assignments.
-    """
-
-    __tablename__ = "chefs"
-    __table_args__ = (
-        Index("idx_chefs_email", "email"),
-        Index("idx_chefs_phone", "phone"),
-        Index("idx_chefs_active", "is_active"),
-        {"schema": "core"},
-    )
-
-    # Primary Key
-    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
-
-    # Personal Info
-    first_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    last_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
-    phone: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
-
-    # Professional Info
-    bio: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    specialties: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    years_experience: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-
-    # Status
-    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, index=True)
-
-    # Metadata
-    chef_metadata: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
-
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now()
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
-    )
-
-    # Relationships
-    bookings: Mapped[List["Booking"]] = relationship("Booking", back_populates="chef")
+# ==================== CHEF MODEL ====================
+# NOTE: Chef model moved to ops schema (db.models.ops.Chef)
+# Use ops.Chef as the single source of truth for all chef data
+# Migration: core.chefs table deprecated, use ops.chefs
 
 
 # ==================== BOOKING REMINDERS ====================

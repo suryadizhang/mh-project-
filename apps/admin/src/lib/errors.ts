@@ -1,6 +1,6 @@
 /**
  * Error Message System
- * 
+ *
  * Converts API errors and generic errors into user-friendly messages
  * with actionable guidance.
  */

@@ -59,7 +59,7 @@ interface EscalationListResponse {
 export default function EscalationsPage() {
   const router = useRouter();
   const toast = useToast();
-  
+
   // WebSocket connection for real-time updates
   const {
     isConnected: wsConnected,
@@ -439,9 +439,9 @@ export default function EscalationsPage() {
       ) : (
         <div className="space-y-3">
           {escalations.map(escalation => (
-            <EscalationCard 
-              key={escalation.id} 
-              escalation={escalation} 
+            <EscalationCard
+              key={escalation.id}
+              escalation={escalation}
             />
           ))}
         </div>

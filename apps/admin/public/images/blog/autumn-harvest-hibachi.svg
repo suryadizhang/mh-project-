@@ -1,0 +1,162 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#autumnGradient)"/>
+  
+  <!-- Autumn Leaves Falling -->
+  <g opacity="0.8">
+    <path d="M50 60 Q55 65 50 70 Q45 65 50 60" fill="#FF6347"/>
+    <path d="M100 40 Q105 45 100 50 Q95 45 100 40" fill="#FF8C00"/>
+    <path d="M300 70 Q305 75 300 80 Q295 75 300 70" fill="#DC143C"/>
+    <path d="M350 50 Q355 55 350 60 Q345 55 350 50" fill="#B22222"/>
+    <path d="M80 100 Q85 105 80 110 Q75 105 80 100" fill="#FF4500"/>
+    <path d="M320 90 Q325 95 320 100 Q315 95 320 90" fill="#CD853F"/>
+    
+    <!-- More scattered leaves -->
+    <path d="M120 80 Q125 85 120 90 Q115 85 120 80" fill="#D2691E"/>
+    <path d="M280 60 Q285 65 280 70 Q275 65 280 60" fill="#FF6347"/>
+    <path d="M150 120 Q155 125 150 130 Q145 125 150 120" fill="#FF8C00"/>
+    <path d="M250 100 Q255 105 250 110 Q245 105 250 100" fill="#8B0000"/>
+  </g>
+  
+  <!-- Autumn Trees -->
+  <ellipse cx="40" cy="170" rx="20" ry="50" fill="#8B4513"/>
+  <ellipse cx="35" cy="150" rx="25" ry="30" fill="#FF6347"/>
+  <ellipse cx="45" cy="155" rx="20" ry="25" fill="#FF8C00"/>
+  
+  <ellipse cx="360" cy="165" rx="22" ry="45" fill="#8B4513"/>
+  <ellipse cx="355" cy="145" rx="28" ry="35" fill="#DC143C"/>
+  <ellipse cx="365" cy="150" rx="22" ry="28" fill="#B22222"/>
+  
+  <!-- Pumpkins -->
+  <ellipse cx="80" cy="210" rx="12" ry="10" fill="#FF8C00"/>
+  <rect x="79" y="200" width="2" height="6" fill="#228B22"/>
+  <path d="M75 205 Q80 200 85 205" stroke="#228B22" stroke-width="1" fill="none"/>
+  
+  <ellipse cx="320" cy="215" rx="15" ry="12" fill="#FF6347"/>
+  <rect x="319" y="203" width="2" height="8" fill="#228B22"/>
+  <path d="M315 208 Q320 203 325 208" stroke="#228B22" stroke-width="1" fill="none"/>
+  
+  <!-- Harvest Table -->
+  <ellipse cx="200" cy="200" rx="100" ry="35" fill="#8B4513"/>
+  <ellipse cx="200" cy="195" rx="95" ry="30" fill="#A0522D"/>
+  
+  <!-- Autumn Tablecloth -->
+  <ellipse cx="200" cy="195" rx="90" ry="28" fill="#8B0000" opacity="0.7"/>
+  <ellipse cx="200" cy="192" rx="85" ry="25" fill="#FF8C00" opacity="0.3"/>
+  
+  <!-- Autumn-themed Hibachi -->
+  <rect x="170" y="175" width="60" height="30" rx="8" fill="#1A1A1A"/>
+  <rect x="178" y="183" width="44" height="18" rx="5" fill="#2D1810"/>
+  <rect x="185" y="190" width="30" height="8" rx="3" fill="#4A4A4A"/>
+  
+  <!-- Harvest Flames -->
+  <ellipse cx="190" cy="192" rx="4" ry="7" fill="#FF8C00" opacity="0.9"/>
+  <ellipse cx="200" cy="190" rx="5" ry="9" fill="#FF6347" opacity="0.8"/>
+  <ellipse cx="210" cy="192" rx="4" ry="7" fill="#DC143C" opacity="0.9"/>
+  
+  <!-- Harvest Chef -->
+  <circle cx="250" cy="135" r="16" fill="#F4C2A1"/>
+  <rect x="240" y="149" width="20" height="28" fill="#FFFFFF"/>
+  <rect x="242" y="151" width="16" height="3" fill="#000000"/>
+  
+  <!-- Autumn Chef Hat -->
+  <ellipse cx="250" cy="125" rx="10" ry="14" fill="#FFFFFF"/>
+  <rect x="244" y="132" width="12" height="3" fill="#000000"/>
+  <path d="M250 118 Q255 115 260 118 Q255 122 250 118" fill="#FF8C00"/> <!-- autumn decoration -->
+  
+  <!-- Seasonal Family -->
+  <!-- Father in Sweater -->
+  <circle cx="120" cy="145" r="14" fill="#F4C2A1"/>
+  <rect x="112" y="157" width="16" height="26" fill="#8B0000"/>
+  <rect x="114" y="159" width="12" height="8" fill="#FF8C00" opacity="0.6"/> <!-- sweater pattern -->
+  
+  <!-- Mother with Scarf -->
+  <circle cx="280" cy="145" r="12" fill="#F4C2A1"/>
+  <rect x="274" y="155" width="12" height="22" fill="#4169E1"/>
+  <rect x="272" y="152" width="16" height="4" fill="#FF6347"/> <!-- scarf -->
+  
+  <!-- Children in Autumn Wear -->
+  <circle cx="150" cy="170" r="10" fill="#F4C2A1"/>
+  <rect x="145" y="178" width="10" height="18" fill="#FF8C00"/>
+  
+  <circle cx="250" cy="170" r="10" fill="#F4C2A1"/>
+  <rect x="245" y="178" width="10" height="18" fill="#8B4513"/>
+  
+  <!-- Harvest Food -->
+  <!-- Seasonal Vegetables -->
+  <ellipse cx="185" cy="187" rx="2" ry="3" fill="#FF8C00"/> <!-- butternut squash -->
+  <circle cx="195" cy="188" r="2" fill="#8B0000"/> <!-- beets -->
+  <ellipse cx="205" cy="187" rx="3" ry="2" fill="#228B22"/> <!-- Brussels sprouts -->
+  <circle cx="215" cy="188" r="2" fill="#FFD700"/> <!-- corn -->
+  
+  <!-- Apple Cider -->
+  <rect x="130" y="185" width="4" height="8" fill="#8B4513"/>
+  <ellipse cx="132" cy="184" rx="2.5" ry="1.5" fill="#CD853F"/>
+  <circle cx="132" cy="182" r="0.5" fill="#228B22"/> <!-- apple garnish -->
+  
+  <rect x="270" y="185" width="4" height="8" fill="#8B4513"/>
+  <ellipse cx="272" cy="184" rx="2.5" ry="1.5" fill="#CD853F"/>
+  <circle cx="272" cy="182" r="0.5" fill="#DC143C"/>
+  
+  <!-- Autumn Centerpiece -->
+  <ellipse cx="200" cy="185" rx="15" ry="8" fill="#8B4513"/>
+  <circle cx="195" cy="180" r="2" fill="#FF8C00"/>
+  <circle cx="200" cy="178" r="2" fill="#DC143C"/>
+  <circle cx="205" cy="180" r="2" fill="#B22222"/>
+  <path d="M190 180 Q200 175 210 180" stroke="#228B22" stroke-width="2" fill="none"/>
+  
+  <!-- Cornucopia -->
+  <path d="M320 180 Q340 175 350 185 Q340 195 320 190 Q325 185 320 180" fill="#8B4513"/>
+  <circle cx="325" cy="183" r="1.5" fill="#FF8C00"/>
+  <circle cx="330" cy="185" r="1" fill="#DC143C"/>
+  <ellipse cx="335" cy="187" rx="1" ry="2" fill="#228B22"/>
+  
+  <!-- Thanksgiving Elements -->
+  <!-- Turkey Decoration -->
+  <ellipse cx="60" cy="170" rx="8" ry="6" fill="#8B4513"/>
+  <circle cx="55" cy="167" r="3" fill="#8B4513"/>
+  <path d="M65 165 Q70 160 75 165 Q70 170 65 165" fill="#FF8C00"/>
+  <path d="M67 167 Q72 162 77 167 Q72 172 67 167" fill="#DC143C"/>
+  <path d="M69 169 Q74 164 79 169 Q74 174 69 169" fill="#B22222"/>
+  
+  <!-- Acorns -->
+  <ellipse cx="340" cy="190" rx="2" ry="3" fill="#8B4513"/>
+  <ellipse cx="340" cy="187" rx="1.5" ry="2" fill="#CD853F"/>
+  
+  <ellipse cx="350" cy="195" rx="2" ry="3" fill="#8B4513"/>
+  <ellipse cx="350" cy="192" rx="1.5" ry="2" fill="#CD853F"/>
+  
+  <!-- Maple Leaves on Ground -->
+  <path d="M100 220 Q110 215 120 220 Q110 225 100 220" fill="#DC143C"/>
+  <path d="M280 225 Q290 220 300 225 Q290 230 280 225" fill="#FF8C00"/>
+  
+  <!-- Harvest Steam -->
+  <g stroke="#F5DEB3" stroke-width="1.5" fill="none" opacity="0.7">
+    <path d="M190 185 Q192 180 190 175 Q188 170 190 165"/>
+    <path d="M200 185 Q202 180 200 175 Q198 170 200 165"/>
+    <path d="M210 185 Q212 180 210 175 Q208 170 210 165"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="30" text-anchor="middle" fill="#8B0000" font-family="Georgia, serif" font-size="24" font-weight="bold">
+    Autumn Harvest Hibachi
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="50" text-anchor="middle" fill="#FF8C00" font-family="Georgia, serif" font-size="16">
+    Celebrating the Season of Gratitude
+  </text>
+  
+  <!-- Harvest Message -->
+  <text x="200" y="275" text-anchor="middle" fill="#8B4513" font-family="Georgia, serif" font-size="12">
+    "Gathering together for the flavors of fall"
+  </text>
+  
+  <defs>
+    <linearGradient id="autumnGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF8DC;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFEFD5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFE4B5;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

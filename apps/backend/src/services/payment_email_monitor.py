@@ -435,7 +435,7 @@ class PaymentEmailMonitor:
                 return None
 
             # Calculate payment totals
-            from models.legacy_core import CorePayment
+            from db.models.core import Payment
             payments = self.db_session.query(Payment).filter(
                 Payment.booking_id == booking.id,
                 Payment.status == "completed"

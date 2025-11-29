@@ -1,0 +1,178 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#premiumGradient)"/>
+  
+  <!-- Luxury Setting -->
+  <rect x="0" y="200" width="400" height="100" fill="#2F2F2F" opacity="0.3"/>
+  <rect x="50" y="180" width="300" height="20" fill="#8B4513"/>
+  
+  <!-- Premium Marble Table -->
+  <ellipse cx="200" cy="210" rx="130" ry="45" fill="#F8F8FF"/>
+  <ellipse cx="200" cy="205" rx="125" ry="40" fill="#FFFFFF"/>
+  
+  <!-- Gold Trim -->
+  <ellipse cx="200" cy="205" rx="120" ry="37" fill="none" stroke="#DAA520" stroke-width="2"/>
+  <ellipse cx="200" cy="202" rx="115" ry="34" fill="#FFFACD" opacity="0.5"/>
+  
+  <!-- Luxury Hibachi Setup -->
+  <rect x="160" y="175" width="80" height="35" rx="8" fill="#1A1A1A"/>
+  <rect x="168" y="183" width="64" height="20" rx="5" fill="#2D1810"/>
+  <rect x="175" y="190" width="50" height="8" rx="3" fill="#4A4A4A"/>
+  
+  <!-- Premium Blue Flames -->
+  <ellipse cx="185" cy="192" rx="4" ry="8" fill="#0000FF" opacity="0.9"/>
+  <ellipse cx="200" cy="190" rx="5" ry="10" fill="#4169E1" opacity="1.0"/>
+  <ellipse cx="215" cy="192" rx="4" ry="8" fill="#1E90FF" opacity="0.9"/>
+  
+  <!-- Premium Wagyu Display -->
+  <!-- A5 Wagyu Steak -->
+  <ellipse cx="180" cy="195" rx="6" ry="4" fill="#8B0000"/>
+  <ellipse cx="180" cy="194" rx="5" ry="3" fill="#DC143C"/>
+  <g stroke="#FFFFFF" stroke-width="0.5" opacity="0.8">
+    <path d="M176 192 Q180 190 184 192"/>
+    <path d="M176 194 Q180 192 184 194"/>
+    <path d="M176 196 Q180 194 184 196"/>
+  </g>
+  
+  <!-- Premium Lobster Tail -->
+  <ellipse cx="220" cy="193" rx="8" ry="4" fill="#FF6347"/>
+  <ellipse cx="225" cy="191" rx="3" ry="2" fill="#FF4500"/>
+  <g stroke="#DC143C" stroke-width="1">
+    <path d="M212 191 Q210 186 215 186"/>
+    <path d="M212 195 Q210 200 215 200"/>
+  </g>
+  
+  <!-- Premium Scallops -->
+  <circle cx="190" cy="200" r="3" fill="#F5DEB3"/>
+  <circle cx="190" cy="200" r="2" fill="#FFFACD"/>
+  <circle cx="210" cy="198" r="3" fill="#F5DEB3"/>
+  <circle cx="210" cy="198" r="2" fill="#FFFACD"/>
+  
+  <!-- Master Chef -->
+  <circle cx="120" cy="125" r="18" fill="#F4C2A1"/>
+  <rect x="108" y="141" width="24" height="32" fill="#FFFFFF"/>
+  <rect x="110" y="143" width="20" height="4" fill="#000000"/>
+  
+  <!-- Master Chef Hat -->
+  <ellipse cx="120" cy="113" rx="12" ry="16" fill="#FFFFFF"/>
+  <rect x="111" y="122" width="18" height="4" fill="#000000"/>
+  <circle cx="120" cy="105" r="3" fill="#DAA520"/>
+  
+  <!-- Executive Diner -->
+  <circle cx="280" cy="130" r="16" fill="#F4C2A1"/>
+  <rect x="270" y="144" width="20" height="28" fill="#1C1C1C"/>
+  <rect x="272" y="146" width="16" height="3" fill="#DAA520"/>
+  <rect x="275" y="149" width="10" height="5" fill="#FFFFFF"/>
+  
+  <!-- Premium Accessories -->
+  <!-- Champagne Flute -->
+  <rect x="130" y="190" width="2" height="12" fill="#C0C0C0"/>
+  <ellipse cx="131" cy="189" rx="3" ry="1" fill="#C0C0C0"/>
+  <ellipse cx="131" cy="186" rx="2" ry="4" fill="#FFD700" opacity="0.7"/>
+  
+  <!-- Wine Glass -->
+  <rect x="270" y="195" width="2" height="8" fill="#C0C0C0"/>
+  <ellipse cx="271" cy="194" rx="3" ry="5" fill="none" stroke="#C0C0C0" stroke-width="1"/>
+  <ellipse cx="271" cy="190" rx="2" ry="3" fill="#8B0000" opacity="0.8"/>
+  
+  <!-- Premium Seasonings -->
+  <!-- Truffle Oil -->
+  <rect x="320" y="185" width="4" height="8" fill="#654321"/>
+  <ellipse cx="322" cy="184" rx="2" ry="1" fill="#8B4513"/>
+  <circle cx="322" cy="182" r="0.5" fill="#DAA520"/>
+  
+  <!-- Sea Salt -->
+  <rect x="310" y="188" width="5" height="6" fill="#F5F5F5"/>
+  <ellipse cx="312" cy="187" rx="2" ry="1" fill="#FFFFFF"/>
+  <g fill="#F0F0F0" opacity="0.8">
+    <circle cx="311" cy="190" r="0.3"/>
+    <circle cx="313" cy="189" r="0.3"/>
+    <circle cx="312" cy="191" r="0.3"/>
+  </g>
+  
+  <!-- Master Chef Tools -->
+  <!-- Professional Tongs -->
+  <path d="M140 155 Q142 150 144 155" stroke="#C0C0C0" stroke-width="3" fill="none"/>
+  <path d="M146 155 Q148 150 150 155" stroke="#C0C0C0" stroke-width="3" fill="none"/>
+  <ellipse cx="143" cy="157" rx="1.5" ry="3" fill="#C0C0C0"/>
+  <ellipse cx="149" cy="157" rx="1.5" ry="3" fill="#C0C0C0"/>
+  
+  <!-- Golden Spatula -->
+  <rect x="260" y="150" width="3" height="18" fill="#8B4513" transform="rotate(20 260 150)"/>
+  <ellipse cx="270" cy="145" rx="6" ry="3" fill="#DAA520" transform="rotate(20 270 145)"/>
+  <rect x="267" y="143" width="8" height="1" fill="#FFD700" transform="rotate(20 267 143)"/>
+  
+  <!-- Luxury Presentation -->
+  <!-- Crystal Serving Bowl -->
+  <ellipse cx="350" cy="190" rx="8" ry="5" fill="none" stroke="#E6E6FA" stroke-width="2"/>
+  <ellipse cx="350" cy="188" rx="6" ry="3" fill="#F0F8FF" opacity="0.6"/>
+  
+  <!-- Premium Garnish -->
+  <!-- Microgreens -->
+  <g fill="#32CD32" opacity="0.8">
+    <circle cx="175" cy="188" r="0.5"/>
+    <circle cx="177" cy="187" r="0.5"/>
+    <circle cx="179" cy="188" r="0.5"/>
+    <circle cx="225" cy="186" r="0.5"/>
+    <circle cx="227" cy="185" r="0.5"/>
+    <circle cx="229" cy="186" r="0.5"/>
+  </g>
+  
+  <!-- Gold Leaf -->
+  <path d="M185 190 Q187 188 189 190" stroke="#DAA520" stroke-width="1" fill="#FFD700" opacity="0.8"/>
+  <path d="M215 188 Q217 186 219 188" stroke="#DAA520" stroke-width="1" fill="#FFD700" opacity="0.8"/>
+  
+  <!-- Ambient Lighting -->
+  <ellipse cx="80" cy="60" rx="20" ry="10" fill="#FFD700" opacity="0.3"/>
+  <ellipse cx="200" cy="60" rx="25" ry="12" fill="#FFD700" opacity="0.3"/>
+  <ellipse cx="320" cy="60" rx="20" ry="10" fill="#FFD700" opacity="0.3"/>
+  
+  <!-- Luxury Steam -->
+  <g stroke="#F5F5DC" stroke-width="2" fill="none" opacity="0.8">
+    <path d="M185 185 Q187 180 185 175 Q183 170 185 165"/>
+    <path d="M200 185 Q202 180 200 175 Q198 170 200 165"/>
+    <path d="M215 185 Q217 180 215 175 Q213 170 215 165"/>
+  </g>
+  
+  <!-- Premium Brand Elements -->
+  <!-- Chef's Signature -->
+  <text x="350" y="120" text-anchor="end" fill="#DAA520" font-family="serif" font-size="12" font-style="italic">
+    Chef's Selection
+  </text>
+  
+  <!-- Five-Star Rating -->
+  <g fill="#DAA520">
+    <polygon points="60,100 62,106 68,106 63,110 65,116 60,112 55,116 57,110 52,106 58,106"/>
+    <polygon points="75,100 77,106 83,106 78,110 80,116 75,112 70,116 72,110 67,106 73,106"/>
+    <polygon points="90,100 92,106 98,106 93,110 95,116 90,112 85,116 87,110 82,106 88,106"/>
+    <polygon points="105,100 107,106 113,106 108,110 110,116 105,112 100,116 102,110 97,106 103,106"/>
+    <polygon points="120,100 122,106 128,106 123,110 125,116 120,112 115,116 117,110 112,106 118,106"/>
+  </g>
+  
+  <!-- Luxury Backdrop -->
+  <rect x="30" y="80" width="60" height="80" fill="#2F2F2F" opacity="0.5"/>
+  <rect x="310" y="80" width="60" height="80" fill="#2F2F2F" opacity="0.5"/>
+  
+  <!-- Title -->
+  <text x="200" y="30" text-anchor="middle" fill="#8B0000" font-family="serif" font-size="26" font-weight="bold">
+    Premium Wagyu Experience
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="50" text-anchor="middle" fill="#DAA520" font-family="serif" font-size="18">
+    A5 Wagyu • Master Chef • Five-Star Service
+  </text>
+  
+  <!-- Luxury Message -->
+  <text x="200" y="275" text-anchor="middle" fill="#8B4513" font-family="serif" font-size="14">
+    "Exceptional ingredients deserve exceptional presentation"
+  </text>
+  
+  <defs>
+    <linearGradient id="premiumGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF8DC;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFFACD;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F5F5DC;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

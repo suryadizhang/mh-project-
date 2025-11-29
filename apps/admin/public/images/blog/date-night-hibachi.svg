@@ -1,0 +1,281 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#datingGradient)"/>
+  
+  <!-- Date Night Banner -->
+  <path d="M50 30 Q200 40 350 30" stroke="#FF69B4" stroke-width="4" fill="none"/>
+  <g fill="#8B008B">
+    <text x="200" y="25" text-anchor="middle" font-family="Arial" font-size="20" font-weight="bold">DATE NIGHT HIBACHI</text>
+  </g>
+  
+  <!-- Intimate Table for Two -->
+  <ellipse cx="200" cy="200" rx="80" ry="30" fill="#8B4513"/>
+  <ellipse cx="200" cy="195" rx="75" ry="25" fill="#DEB887"/>
+  <ellipse cx="200" cy="192" rx="70" ry="22" fill="#F5DEB3"/>
+  
+  <!-- Romantic Hibachi Setup -->
+  <rect x="180" y="170" width="40" height="25" rx="6" fill="#8B008B"/>
+  <rect x="185" y="175" width="30" height="15" rx="4" fill="#2F4F4F"/>
+  <rect x="190" y="180" width="20" height="10" rx="3" fill="#1C1C1C"/>
+  
+  <!-- Couple on Date -->
+  
+  <!-- Male Partner -->
+  <circle cx="170" cy="140" r="18" fill="#F4C2A1"/>
+  <rect x="157" y="156" width="26" height="32" fill="#000080"/>
+  <rect x="159" y="158" width="22" height="4" fill="#C0C0C0"/>
+  <ellipse cx="170" cy="125" rx="10" ry="5" fill="#8B4513"/>
+  <circle cx="166" cy="138" r="1" fill="#000000"/>
+  <circle cx="174" cy="138" r="1" fill="#000000"/>
+  <path d="M170 145 Q165 150 170 155" stroke="#000000" stroke-width="1" fill="none"/>
+  
+  <!-- Dress Shirt Details -->
+  <circle cx="170" cy="165" r="1" fill="#C0C0C0"/>
+  <circle cx="170" cy="172" r="1" fill="#C0C0C0"/>
+  
+  <!-- Female Partner -->
+  <circle cx="230" cy="145" r="16" fill="#F4C2A1"/>
+  <rect x="218" y="159" width="24" height="28" fill="#8B008B"/>
+  <ellipse cx="230" cy="132" rx="8" ry="4" fill="#FFD700"/>
+  <circle cx="226" cy="143" r="1" fill="#000000"/>
+  <circle cx="234" cy="143" r="1" fill="#000000"/>
+  <path d="M230 150 Q225 155 230 160" stroke="#FF69B4" stroke-width="1" fill="none"/>
+  
+  <!-- Elegant Jewelry -->
+  <ellipse cx="230" cy="158" rx="6" ry="1" fill="#FFD700"/>
+  <circle cx="227" cy="158" r="0.5" fill="#FF1493"/>
+  <circle cx="233" cy="158" r="0.5" fill="#FF1493"/>
+  
+  <!-- Romantic Ambiance -->
+  
+  <!-- Candles -->
+  <g>
+    <!-- Candle 1 -->
+    <rect x="155" y="175" width="3" height="10" fill="#FFD700"/>
+    <ellipse cx="156.5" cy="173" rx="1.5" ry="1" fill="#FF6347"/>
+    <ellipse cx="156.5" cy="171" rx="0.5" ry="3" fill="#FFA500" opacity="0.8"/>
+    
+    <!-- Candle 2 -->
+    <rect x="240" y="178" width="3" height="10" fill="#FFD700"/>
+    <ellipse cx="241.5" cy="176" rx="1.5" ry="1" fill="#FF6347"/>
+    <ellipse cx="241.5" cy="174" rx="0.5" ry="3" fill="#FFA500" opacity="0.8"/>
+  </g>
+  
+  <!-- Rose Petals -->
+  <g fill="#FF69B4" opacity="0.7">
+    <ellipse cx="150" cy="190" rx="2" ry="1" transform="rotate(30 150 190)"/>
+    <ellipse cx="180" cy="185" rx="2" ry="1" transform="rotate(60 180 185)"/>
+    <ellipse cx="220" cy="188" rx="2" ry="1" transform="rotate(15 220 188)"/>
+    <ellipse cx="250" cy="192" rx="2" ry="1" transform="rotate(45 250 192)"/>
+  </g>
+  
+  <!-- Wine Glasses -->
+  <g stroke="#87CEEB" stroke-width="2" fill="none">
+    <path d="M160 165 L160 175 L165 175 L165 165"/>
+    <path d="M235 168 L235 178 L240 178 L240 168"/>
+  </g>
+  
+  <!-- Red Wine -->
+  <g fill="#8B0000" opacity="0.8">
+    <rect x="161" y="168" width="3" height="6"/>
+    <rect x="236" y="171" width="3" height="6"/>
+  </g>
+  
+  <!-- Heart-Shaped Elements -->
+  <g fill="#FF1493" opacity="0.8">
+    <path d="M190 160 Q192 158 194 160 Q196 158 198 160 Q198 164 194 168 Q190 164 190 160"/>
+    <path d="M205 165 Q207 163 209 165 Q211 163 213 165 Q213 169 209 173 Q205 169 205 165"/>
+  </g>
+  
+  <!-- Romantic Flowers -->
+  
+  <!-- Single Red Rose -->
+  <rect x="120" y="180" width="2" height="15" fill="#228B22"/>
+  <ellipse cx="121" cy="175" rx="3" ry="5" fill="#FF0000"/>
+  <g fill="#8B0000">
+    <ellipse cx="121" cy="173" rx="2" ry="3"/>
+    <ellipse cx="121" cy="177" rx="1" ry="2"/>
+  </g>
+  
+  <!-- Flower Bouquet -->
+  <g fill="#FF69B4">
+    <circle cx="280" cy="175" r="3"/>
+    <circle cx="285" cy="172" r="2.5"/>
+    <circle cx="290" cy="175" r="3"/>
+    <circle cx="282" cy="178" r="2"/>
+    <circle cx="287" cy="177" r="2.5"/>
+  </g>
+  <rect x="285" y="178" width="2" height="8" fill="#228B22"/>
+  
+  <!-- Romantic Flames -->
+  <g opacity="0.9">
+    <ellipse cx="185" cy="177" rx="4" ry="8" fill="#FF69B4"/>
+    <ellipse cx="200" cy="175" rx="5" ry="10" fill="#8B008B"/>
+    <ellipse cx="215" cy="177" rx="4" ry="8" fill="#FF1493"/>
+  </g>
+  
+  <!-- Date Night Food -->
+  <!-- Filet Mignon -->
+  <ellipse cx="190" cy="185" rx="5" ry="3" fill="#8B0000"/>
+  <ellipse cx="190" cy="184" rx="4" ry="2" fill="#B22222"/>
+  
+  <!-- Lobster Tail -->
+  <ellipse cx="210" cy="186" rx="4" ry="2" fill="#FF6347"/>
+  <ellipse cx="210" cy="185" rx="3" ry="1" fill="#FF7F50"/>
+  
+  <!-- Dating Atmosphere -->
+  
+  <!-- Soft Lighting -->
+  <g fill="#FFD700" opacity="0.6">
+    <circle cx="80" cy="100" r="15"/>
+    <circle cx="320" cy="110" r="12"/>
+    <circle cx="60" cy="160" r="10"/>
+    <circle cx="340" cy="140" r="8"/>
+  </g>
+  
+  <!-- Intimate Conversation -->
+  <ellipse cx="200" cy="100" rx="35" ry="15" fill="#FFFFFF" stroke="#FF69B4" stroke-width="2" opacity="0.9"/>
+  <text x="200" y="97" text-anchor="middle" fill="#8B008B" font-family="Arial" font-size="8" font-weight="bold">
+    "Getting to know each other"
+  </text>
+  <text x="200" y="107" text-anchor="middle" fill="#FF1493" font-family="Arial" font-size="7">
+    First Date Magic
+  </text>
+  
+  <!-- Date Activities -->
+  
+  <!-- Phone on Silent -->
+  <rect x="140" y="200" width="8" height="12" fill="#000000"/>
+  <rect x="141" y="201" width="6" height="10" fill="#C0C0C0"/>
+  <text x="144" y="214" text-anchor="middle" fill="#8B0000" font-family="Arial" font-size="4">SILENT</text>
+  
+  <!-- Menu for Two -->
+  <rect x="260" y="195" width="12" height="15" fill="#FFFACD"/>
+  <rect x="261" y="196" width="10" height="13" fill="#FFF8DC"/>
+  <g fill="#8B4513" font-family="Arial" font-size="3">
+    <text x="266" y="200" text-anchor="middle">MENU</text>
+    <text x="266" y="204" text-anchor="middle">Surf & Turf</text>
+    <text x="266" y="208" text-anchor="middle">For Two</text>
+  </g>
+  
+  <!-- Date Night Beverages -->
+  
+  <!-- Sake for Two -->
+  <rect x="300" y="170" width="4" height="8" fill="#FFFFFF"/>
+  <ellipse cx="302" cy="167" rx="2" ry="2" fill="#FFFFFF"/>
+  <rect x="308" y="172" width="4" height="8" fill="#FFFFFF"/>
+  <ellipse cx="310" cy="169" rx="2" ry="2" fill="#FFFFFF"/>
+  
+  <!-- Romantic Dessert -->
+  <ellipse cx="320" cy="200" rx="8" ry="5" fill="#DEB887"/>
+  <ellipse cx="320" cy="198" rx="6" ry="3" fill="#F5DEB3"/>
+  <g fill="#FF69B4">
+    <circle cx="317" cy="197" r="0.5"/>
+    <circle cx="323" cy="197" r="0.5"/>
+  </g>
+  <text x="320" y="210" text-anchor="middle" fill="#8B4513" font-family="Arial" font-size="5">DESSERT</text>
+  
+  <!-- Nervous Energy -->
+  <g fill="#FFD700" opacity="0.5">
+    <circle cx="150" cy="130" r="1"/>
+    <circle cx="155" cy="125" r="1"/>
+    <circle cx="160" cy="130" r="1"/>
+    <circle cx="240" cy="125" r="1"/>
+    <circle cx="245" cy="120" r="1"/>
+    <circle cx="250" cy="125" r="1"/>
+  </g>
+  
+  <!-- Eye Contact -->
+  <g stroke="#FF69B4" stroke-width="1" fill="none" opacity="0.7">
+    <path d="M174 138 Q200 135 226 143"/>
+  </g>
+  
+  <!-- Date Night Steam -->
+  <g stroke="#FF69B4" stroke-width="2" fill="none" opacity="0.8">
+    <path d="M185 170 Q187 165 185 160 Q183 155 185 150"/>
+    <path d="M200 170 Q202 165 200 160 Q198 155 200 150"/>
+    <path d="M215 170 Q217 165 215 160 Q213 155 215 150"/>
+  </g>
+  
+  <!-- Dating App Reference -->
+  <rect x="30" y="220" width="15" height="20" fill="#FF69B4"/>
+  <rect x="32" y="222" width="11" height="16" fill="#FFB6C1"/>
+  <text x="37" y="230" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="6" font-weight="bold">❤</text>
+  <text x="37" y="237" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="4">MATCH</text>
+  
+  <!-- First Impressions -->
+  <rect x="350" y="200" width="25" height="20" fill="#FFFFFF"/>
+  <rect x="352" y="202" width="21" height="16" fill="#F0F8FF"/>
+  <g fill="#8B008B" font-family="Arial" font-size="4">
+    <text x="362" y="208" text-anchor="middle">FIRST</text>
+    <text x="362" y="213" text-anchor="middle">DATE</text>
+    <text x="362" y="218" text-anchor="middle">SUCCESS!</text>
+  </g>
+  
+  <!-- Date Night Fashion -->
+  
+  <!-- His Cologne -->
+  <rect x="100" y="240" width="6" height="12" fill="#4169E1"/>
+  <rect x="101" y="242" width="4" height="8" fill="#6495ED"/>
+  <circle cx="103" cy="240" r="1" fill="#C0C0C0"/>
+  
+  <!-- Her Perfume -->
+  <rect x="300" y="240" width="6" height="12" fill="#FF69B4"/>
+  <rect x="301" y="242" width="4" height="8" fill="#FFB6C1"/>
+  <circle cx="303" cy="240" r="1" fill="#FFD700"/>
+  
+  <!-- Shared Laughter -->
+  <g fill="#FFD700" opacity="0.8">
+    <text x="120" y="120" text-anchor="middle" font-family="Arial" font-size="12">😊</text>
+    <text x="280" y="115" text-anchor="middle" font-family="Arial" font-size="12">😊</text>
+  </g>
+  
+  <!-- Chemistry Sparks -->
+  <g fill="#FF6347" opacity="0.6">
+    <path d="M175 120 L180 115 L175 110"/>
+    <path d="M225 115 L230 120 L225 125"/>
+    <path d="M195 125 L200 120 L205 125"/>
+  </g>
+  
+  <!-- Date Location -->
+  <rect x="20" y="80" width="30" height="20" fill="#8B4513"/>
+  <rect x="22" y="82" width="26" height="16" fill="#DEB887"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="5">
+    <text x="35" y="88" text-anchor="middle">ROMANTIC</text>
+    <text x="35" y="94" text-anchor="middle">HIBACHI</text>
+    <text x="35" y="100" text-anchor="middle">SPOT</text>
+  </g>
+  
+  <!-- Future Plans -->
+  <rect x="350" y="80" width="25" height="25" fill="#FFB6C1"/>
+  <rect x="352" y="82" width="21" height="21" fill="#FFC0CB"/>
+  <g fill="#8B008B" font-family="Arial" font-size="4">
+    <text x="362" y="88" text-anchor="middle">SECOND</text>
+    <text x="362" y="93" text-anchor="middle">DATE?</text>
+    <text x="362" y="98" text-anchor="middle">YES!</text>
+  </g>
+  
+  <!-- Love Connection -->
+  <g stroke="#FF1493" stroke-width="2" fill="none" opacity="0.6">
+    <path d="M170 140 Q200 130 230 145"/>
+  </g>
+  <text x="200" y="135" text-anchor="middle" fill="#FF1493" font-family="Arial" font-size="8">💕</text>
+  
+  <!-- Title -->
+  <text x="200" y="15" text-anchor="middle" fill="#8B008B" font-family="Arial, sans-serif" font-size="22" font-weight="bold">
+    Date Night Hibachi Experience
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="285" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="14">
+    "Creating romantic memories with intimate dining and entertainment"
+  </text>
+  
+  <defs>
+    <linearGradient id="datingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF0F5;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFE4E1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFFACD;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

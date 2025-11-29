@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.svg/2000/svg">
+  <!-- Mountain View Google area tech birthday -->
+  <defs>
+    <linearGradient id="googleSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4285F4"/>
+      <stop offset="50%" style="stop-color:#34A853"/>
+      <stop offset="100%" style="stop-color:#FBBC05"/>
+    </linearGradient>
+    <linearGradient id="techCampus" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F8F9FA"/>
+      <stop offset="100%" style="stop-color:#E8EAED"/>
+    </linearGradient>
+    <radialGradient id="birthdayTechGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#EA4335; opacity:0.5"/>
+      <stop offset="100%" style="stop-color:transparent"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Google-inspired Mountain View sky -->
+  <rect width="800" height="600" fill="url(#googleSky)"/>
+  
+  <!-- Tech innovation stars -->
+  <circle cx="140" cy="70" r="2" fill="#FBBC05"/>
+  <circle cx="280" cy="55" r="1.5" fill="white"/>
+  <circle cx="460" cy="80" r="2" fill="#EA4335"/>
+  <circle cx="620" cy="60" r="1.5" fill="white"/>
+  <circle cx="720" cy="45" r="2" fill="#34A853"/>
+  
+  <!-- Google campus buildings -->
+  <rect x="80" y="200" width="100" height="150" fill="url(#techCampus)" rx="8"/>
+  <rect x="200" y="180" width="120" height="170" fill="url(#techCampus)" rx="8"/>
+  <rect x="340" y="220" width="90" height="130" fill="url(#techCampus)" rx="8"/>
+  <rect x="450" y="190" width="110" height="160" fill="url(#techCampus)" rx="8"/>
+  <rect x="580" y="210" width="95" height="140" fill="url(#techCampus)" rx="8"/>
+  <rect x="690" y="230" width="80" height="120" fill="url(#techCampus)" rx="8"/>
+  
+  <!-- Google logo colors on buildings -->
+  <circle cx="130" cy="240" r="10" fill="#4285F4"/>
+  <text x="130" y="246" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">G</text>
+  
+  <rect x="250" y="220" width="20" height="20" fill="#EA4335" rx="3"/>
+  <text x="260" y="233" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">O</text>
+  
+  <rect x="375" y="250" width="20" height="20" fill="#FBBC05" rx="3"/>
+  <text x="385" y="263" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">O</text>
+  
+  <circle cx="505" cy="240" r="10" fill="#4285F4"/>
+  <text x="505" y="246" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">G</text>
+  
+  <rect x="615" y="250" width="20" height="20" fill="#34A853" rx="3"/>
+  <text x="625" y="263" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">L</text>
+  
+  <circle cx="720" cy="270" r="10" fill="#EA4335"/>
+  <text x="720" y="276" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">E</text>
+  
+  <!-- Tech worker birthday venue -->
+  <rect x="280" y="300" width="240" height="140" fill="#F8F9FA" opacity="0.95" rx="15"/>
+  <text x="400" y="330" text-anchor="middle" fill="#4285F4" font-family="Arial, sans-serif" font-size="16" font-weight="bold">GOOGLE AREA BIRTHDAY</text>
+  <text x="400" y="350" text-anchor="middle" fill="#EA4335" font-family="Arial, sans-serif" font-size="14">TECH WORKER CELEBRATION</text>
+  
+  <!-- Tech birthday hibachi setup -->
+  <rect x="300" y="270" width="200" height="70" fill="#2F4F4F" rx="10"/>
+  <rect x="310" y="265" width="180" height="12" fill="#EA4335"/>
+  
+  <!-- Google-colored hibachi grills -->
+  <circle cx="320" r="6" cy="268" fill="#4285F4"/>
+  <circle cx="340" r="6" cy="268" fill="#EA4335"/>
+  <circle cx="360" r="6" cy="268" fill="#FBBC05"/>
+  <circle cx="380" r="6" cy="268" fill="#34A853"/>
+  <circle cx="400" r="6" cy="268" fill="#4285F4"/>
+  <circle cx="420" r="6" cy="268" fill="#EA4335"/>
+  <circle cx="440" r="6" cy="268" fill="#FBBC05"/>
+  <circle cx="460" r="6" cy="268" fill="#34A853"/>
+  <circle cx="480" r="6" cy="268" fill="#4285F4"/>
+  
+  <!-- Tech hibachi chef -->
+  <circle cx="400" cy="230" r="15" fill="#FDBCB4"/>
+  <rect x="390" y="245" width="20" height="25" fill="white"/>
+  <rect x="386" y="270" width="28" height="30" fill="#4285F4"/>
+  <rect x="390" y="300" width="8" height="20" fill="#FDBCB4"/>
+  <rect x="402" y="300" width="8" height="20" fill="#FDBCB4"/>
+  
+  <!-- Tech chef hat -->
+  <rect x="394" y="218" width="12" height="9" fill="white"/>
+  <ellipse cx="400" cy="212" rx="9" ry="6" fill="white"/>
+  <circle cx="400" cy="212" r="2" fill="#4285F4"/>
+  
+  <!-- Google employees celebrating -->
+  <!-- Birthday person with Google shirt -->
+  <circle cx="350" cy="380" r="12" fill="#FDBCB4"/>
+  <rect x="343" y="392" width="14" height="22" fill="#4285F4"/>
+  <rect x="345" y="414" width="10" height="18" fill="#654321"/>
+  <rect x="346" y="432" width="8" height="15" fill="#8B4513"/>
+  <!-- Google logo on shirt -->
+  <circle cx="350" cy="400" r="3" fill="white"/>
+  <text x="350" y="403" text-anchor="middle" fill="#4285F4" font-family="Arial, sans-serif" font-size="4">G</text>
+  
+  <!-- Tech colleagues -->
+  <circle cx="450" cy="380" r="12" fill="#FDBCB4"/>
+  <rect x="443" y="392" width="14" height="22" fill="#EA4335"/>
+  <rect x="445" y="414" width="10" height="18" fill="#8B4513"/>
+  <rect x="446" y="432" width="8" height="15" fill="#654321"/>
+  
+  <circle cx="380" cy="390" r="11" fill="#FDBCB4"/>
+  <rect x="374" y="401" width="12" height="20" fill="#34A853"/>
+  <rect x="376" y="421" width="8" height="16" fill="#8B4513"/>
+  
+  <circle cx="420" cy="390" r="11" fill="#FDBCB4"/>
+  <rect x="414" y="401" width="12" height="20" fill="#FBBC05"/>
+  <rect x="416" y="421" width="8" height="16" fill="#654321"/>
+  
+  <!-- Tech birthday table -->
+  <ellipse cx="400" cy="470" rx="100" ry="25" fill="#E8EAED"/>
+  
+  <!-- Modern tech chairs -->
+  <rect x="340" y="480" width="10" height="25" fill="#4285F4"/>
+  <circle cx="345" cy="477" r="5" fill="#FBBC05"/>
+  <rect x="365" y="480" width="10" height="25" fill="#EA4335"/>
+  <circle cx="370" cy="477" r="5" fill="#34A853"/>
+  <rect x="390" y="480" width="10" height="25" fill="#34A853"/>
+  <circle cx="395" cy="477" r="5" fill="#4285F4"/>
+  <rect x="410" y="480" width="10" height="25" fill="#FBBC05"/>
+  <circle cx="415" cy="477" r="5" fill="#EA4335"/>
+  <rect x="430" y="480" width="10" height="25" fill="#4285F4"/>
+  <circle cx="435" cy="477" r="5" fill="#34A853"/>
+  <rect x="450" y="480" width="10" height="25" fill="#EA4335"/>
+  <circle cx="455" cy="477" r="5" fill="#FBBC05"/>
+  
+  <!-- Google-themed place settings -->
+  <circle cx="350" cy="465" r="7" fill="white"/>
+  <circle cx="375" cy="465" r="7" fill="white"/>
+  <circle cx="400" cy="465" r="7" fill="white"/>
+  <circle cx="425" cy="465" r="7" fill="white"/>
+  <circle cx="450" cy="465" r="7" fill="white"/>
+  
+  <!-- Tech drinks -->
+  <rect x="345" y="455" width="4" height="10" fill="#4285F4"/>
+  <rect x="370" y="455" width="4" height="10" fill="#EA4335"/>
+  <rect x="395" y="455" width="4" height="10" fill="#FBBC05"/>
+  <rect x="420" y="455" width="4" height="10" fill="#34A853"/>
+  <rect x="445" y="455" width="4" height="10" fill="#4285F4"/>
+  
+  <!-- Mountain View tech title -->
+  <text x="400" y="180" text-anchor="middle" fill="#4285F4" font-family="Arial, sans-serif" font-size="24" font-weight="bold">MOUNTAIN VIEW</text>
+  <text x="400" y="205" text-anchor="middle" fill="#EA4335" font-family="Arial, sans-serif" font-size="16">GOOGLE AREA TECH BIRTHDAYS</text>
+  
+  <!-- Google innovation -->
+  <rect x="120" y="450" width="140" height="90" fill="#4285F4" opacity="0.8" rx="12"/>
+  <text x="190" y="475" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="13" font-weight="bold">GOOGLE</text>
+  <text x="190" y="490" text-anchor="middle" fill="#FBBC05" font-family="Arial, sans-serif" font-size="12">INNOVATION</text>
+  <text x="190" y="505" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">TECH WORKERS</text>
+  <text x="190" y="520" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">BIRTHDAYS</text>
+  <text x="190" y="535" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">MOUNTAIN VIEW</text>
+  
+  <!-- Tech birthday advantages -->
+  <rect x="540" y="450" width="140" height="90" fill="#EA4335" opacity="0.8" rx="12"/>
+  <text x="610" y="475" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="13" font-weight="bold">TECH</text>
+  <text x="610" y="490" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">BIRTHDAY</text>
+  <text x="610" y="505" text-anchor="middle" fill="#FBBC05" font-family="Arial, sans-serif" font-size="12">HIBACHI</text>
+  <text x="610" y="520" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">CELEBRATIONS</text>
+  <text x="610" y="535" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">INTERACTIVE</text>
+  
+  <!-- Google-colored hibachi specialties -->
+  <ellipse cx="325" cy="266" rx="9" ry="5" fill="#4285F4"/>
+  <ellipse cx="345" cy="266" rx="10" ry="5" fill="#EA4335"/>
+  <ellipse cx="365" cy="266" rx="9" ry="5" fill="#FBBC05"/>
+  <ellipse cx="385" cy="266" rx="8" ry="4" fill="#34A853"/>
+  <ellipse cx="405" cy="266" rx="9" ry="5" fill="#4285F4"/>
+  <ellipse cx="425" cy="266" rx="10" ry="5" fill="#EA4335"/>
+  <ellipse cx="445" cy="266" rx="9" ry="5" fill="#FBBC05"/>
+  <ellipse cx="465" cy="266" rx="8" ry="4" fill="#34A853"/>
+  <ellipse cx="485" cy="266" rx="9" ry="5" fill="#4285F4"/>
+  
+  <!-- Google-colored hibachi flames -->
+  <polygon points="325,266 329,258 321,258" fill="#4285F4" opacity="0.8"/>
+  <polygon points="345,266 349,258 341,258" fill="#EA4335" opacity="0.8"/>
+  <polygon points="365,266 369,258 361,258" fill="#FBBC05" opacity="0.8"/>
+  <polygon points="385,266 389,258 381,258" fill="#34A853" opacity="0.8"/>
+  <polygon points="405,266 409,258 401,258" fill="#4285F4" opacity="0.8"/>
+  <polygon points="425,266 429,258 421,258" fill="#EA4335" opacity="0.8"/>
+  <polygon points="445,266 449,258 441,258" fill="#FBBC05" opacity="0.8"/>
+  <polygon points="465,266 469,258 461,258" fill="#34A853" opacity="0.8"/>
+  <polygon points="485,266 489,258 481,258" fill="#4285F4" opacity="0.8"/>
+  
+  <!-- Google birthday cake -->
+  <rect x="200" y="380" width="50" height="35" fill="#F8F9FA"/>
+  <rect x="210" y="370" width="30" height="12" fill="#4285F4"/>
+  <rect x="215" y="360" width="20" height="10" fill="#EA4335"/>
+  <rect x="220" y="350" width="10" height="8" fill="#FBBC05"/>
+  
+  <!-- Birthday candles in Google colors -->
+  <rect x="222" y="345" width="2" height="8" fill="#34A853"/>
+  <ellipse cx="223" cy="342" rx="1" ry="2" fill="#EA4335"/>
+  <rect x="227" y="345" width="2" height="8" fill="#4285F4"/>
+  <ellipse cx="228" cy="342" rx="1" ry="2" fill="#FBBC05"/>
+  
+  <!-- Google balloons -->
+  <circle cx="550" cy="320" r="14" fill="#4285F4"/>
+  <rect x="549" y="334" width="2" height="25" fill="#654321"/>
+  <circle cx="570" cy="305" r="12" fill="#EA4335"/>
+  <rect x="569" y="317" width="2" height="22" fill="#654321"/>
+  <circle cx="590" cy="315" r="13" fill="#FBBC05"/>
+  <rect x="589" y="328" width="2" height="24" fill="#654321"/>
+  <circle cx="610" cy="300" r="11" fill="#34A853"/>
+  <rect x="609" y="311" width="2" height="21" fill="#654321"/>
+  
+  <!-- Google devices -->
+  <rect x="150" y="470" width="40" height="25" fill="#4285F4" rx="3"/>
+  <rect x="155" y="475" width="30" height="15" fill="white"/>
+  <text x="170" y="485" text-anchor="middle" fill="#4285F4" font-family="Arial, sans-serif" font-size="8">PIXEL</text>
+  
+  <rect x="610" y="370" width="35" height="20" fill="#E8EAED" rx="2"/>
+  <circle cx="627" cy="380" r="5" fill="#4285F4"/>
+  <text x="627" y="383" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="6">HOME</text>
+  
+  <!-- Android mascot -->
+  <circle cx="650" cy="480" r="8" fill="#34A853"/>
+  <rect x="645" y="485" width="10" height="12" fill="#34A853"/>
+  <circle cx="647" cy="478" r="1" fill="white"/>
+  <circle cx="653" cy="478" r="1" fill="white"/>
+  <rect x="644" y="475" width="2" height="4" fill="#34A853"/>
+  <rect x="654" y="475" width="2" height="4" fill="#34A853"/>
+  
+  <!-- Google search bar -->
+  <rect x="100" y="120" width="200" height="25" fill="white" rx="12"/>
+  <text x="200" y="137" text-anchor="middle" fill="#5F6368" font-family="Arial, sans-serif" font-size="12">Mountain View Birthday Hibachi</text>
+  <circle cx="270" cy="132" r="8" fill="#4285F4"/>
+  <text x="270" y="137" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">🔍</text>
+  
+  <!-- WiFi and connectivity -->
+  <path d="M500,120 Q525,95 550,120" stroke="#4285F4" stroke-width="3" fill="none"/>
+  <path d="M505,125 Q525,110 545,125" stroke="#4285F4" stroke-width="3" fill="none"/>
+  <path d="M510,130 Q525,120 540,130" stroke="#4285F4" stroke-width="3" fill="none"/>
+  <circle cx="525" cy="135" r="3" fill="#4285F4"/>
+  
+  <!-- Tech innovation glow -->
+  <circle cx="400" cy="350" r="120" fill="url(#birthdayTechGlow)"/>
+  
+  <!-- Google shuttle -->
+  <rect x="50" y="540" width="80" height="20" fill="#4285F4" rx="8"/>
+  <text x="90" y="554" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">GOOGLE BUS</text>
+  <circle cx="65" cy="555" r="4" fill="#34A853"/>
+  <circle cx="125" cy="555" r="4" fill="#34A853"/>
+  
+  <!-- Google innovation message -->
+  <text x="400" y="150" text-anchor="middle" fill="#34A853" font-family="Arial, sans-serif" font-size="14" font-weight="bold">GOOGLE AREA TECH WORKER BIRTHDAY CELEBRATIONS</text>
+</svg>

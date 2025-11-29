@@ -9,15 +9,17 @@ from typing import Any
 from uuid import UUID, uuid4
 
 # FIXED: Import from db.models (NEW system) instead of models (OLD system)
-from db.models.lead import (
+from db.models.crm import (
     Lead,
-    LeadContact,
-    LeadContext,
-    LeadEvent,
     ContactChannel,
     LeadQuality,
     LeadSource,
     LeadStatus,
+)
+from db.models.lead import (
+    LeadContact,
+    LeadContext,
+    LeadEvent,
 )
 from core.base_service import BaseService, EventTrackingMixin
 from core.cache import CacheService

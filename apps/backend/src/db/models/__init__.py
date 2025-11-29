@@ -24,10 +24,9 @@ All models use SQLAlchemy 2.0 declarative mapping with full type hints.
 # Base class (required for all models) - import from parent db/ directory
 from ..base_class import Base
 
-# Core schema (10 tables)
+# Core schema (7 tables) - NOTE: Chef moved to ops schema
 from .core import (
     Booking,
-    Chef,
     Customer,
     CoreMessage,  # Renamed from Message to avoid conflicts
     MessageThread,
@@ -36,7 +35,7 @@ from .core import (
     SocialThread,
 )
 
-# Identity schema (9 tables)
+# Identity schema (9 tables) - Using modular identity/ package
 from .identity import (
     OAuthAccount,
     Permission,
@@ -48,6 +47,17 @@ from .identity import (
     StationUser,
     User,
     UserRole,
+)
+
+# Operations schema (Chef + operational models)
+from .ops import (
+    Chef,  # Moved from core to ops for operations management
+)
+
+# CRM schema (Contact, Lead, Campaign models)
+from .crm import (
+    Contact,  # Unified contact record for inbox and CRM
+    Lead,  # Lead tracking with scoring and qualification (moved from lead.py)
 )
 
 # Support & Communications schemas (2 tables)
@@ -72,10 +82,9 @@ from .events import (
     Outbox,
 )
 
-# Lead schema (7 tables)
+# Lead schema (6 tables - Lead moved to crm.py)
 from .lead import (
     BusinessSocialAccount,
-    Lead,
     LeadContact,
     LeadContext,
     LeadEvent,
@@ -107,9 +116,11 @@ __all__ = [
     # Base
     "Base",
 
-    # Core schema (10 models)
+    # CRM schema (1 model)
+    "Contact",
+
+    # Core schema (7 models - Chef moved to ops)
     "Booking",
-    "Chef",
     "Customer",
     "CoreMessage",  # Renamed from Message to avoid conflicts
     "MessageThread",
@@ -172,15 +183,21 @@ __all__ = [
 
 # Model registry by schema (useful for reflection/introspection)
 MODELS_BY_SCHEMA = {
+    "crm": [
+        Contact,  # Unified contact record (table: crm_contacts)
+        Lead,  # Lead tracking (moved from lead schema to crm schema)
+    ],
     "core": [
         Booking,
-        Chef,
         Customer,
         CoreMessage,  # Renamed from Message
         MessageThread,
         PricingTier,
         Review,
         SocialThread,
+    ],
+    "ops": [
+        Chef,  # Moved from core to ops
     ],
     "identity": [
         OAuthAccount,
@@ -212,7 +229,6 @@ MODELS_BY_SCHEMA = {
     ],
     "lead": [
         BusinessSocialAccount,
-        Lead,
         LeadContact,
         LeadContext,
         LeadEvent,
@@ -240,5 +256,8 @@ MODELS_BY_SCHEMA = {
 # Note: Renamed models to avoid conflicts:
 # - OAuthAccount (identity.social_accounts) vs BusinessSocialAccount (lead.social_accounts)
 # - LeadSocialThread (lead.social_threads) vs SocialThread (core.social_threads)
+# Moved models to consolidate:
+# - Lead: from db.models.lead → db.models.crm (schema: lead → crm)
+# - Contact: added to db.models.crm (table: crm_contacts)
 TOTAL_MODELS = sum(len(models) for models in MODELS_BY_SCHEMA.values())
-assert TOTAL_MODELS == 46, f"Expected 46 models, found {TOTAL_MODELS}"
+assert TOTAL_MODELS == 47, f"Expected 47 models, found {TOTAL_MODELS}"

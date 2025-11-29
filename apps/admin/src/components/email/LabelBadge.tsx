@@ -44,7 +44,7 @@ export function LabelBadge({
       {onRemove && (
         <button
           type="button"
-          onClick={(e) => {
+          onClick={e => {
             e.stopPropagation();
             onRemove();
           }}
@@ -85,7 +85,7 @@ export function LabelList({
 
   return (
     <div className={`flex items-center gap-1 flex-wrap ${className}`}>
-      {visibleLabels.map((label) => (
+      {visibleLabels.map(label => (
         <LabelBadge
           key={label.slug}
           label={label}
@@ -101,8 +101,7 @@ export function LabelList({
             ${size === 'sm' ? 'text-xs px-2 py-0.5' : 'text-sm px-3 py-1'}
           `}
         >
-          <Tag className="w-3 h-3" />
-          +{remainingCount}
+          <Tag className="w-3 h-3" />+{remainingCount}
         </span>
       )}
     </div>

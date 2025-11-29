@@ -8,13 +8,17 @@ from enum import Enum
 import hashlib
 from io import BytesIO
 import secrets
-from typing import Any
+from typing import Any, TYPE_CHECKING
 from uuid import UUID, uuid4
 
 # Import unified Base (avoid circular import)
 # Fixed: Import from core.database instead of missing legacy_declarative_base
 from core.database import Base
 from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
+
+# Type checking imports to avoid circular dependencies
+if TYPE_CHECKING:
+    from db.models.identity import StationUser, User
 import bcrypt
 import jwt
 import pyotp
@@ -156,68 +160,15 @@ ROLE_PERMISSIONS: dict[Role, set[Permission]] = {
 }
 
 
-class StationUser(Base):
-    """
-    Station user accounts with encrypted PII for high-security environments.
-
-    NOTE: This is separate from models.user.User (OAuth/general users).
-    Station users require encrypted PII storage for compliance.
-
-    ⚠️ DEPRECATED: This model doesn't match database schema.
-    Database uses identity.users (37 columns) for all auth.
-    This model (20+ encrypted columns) was designed for separate auth_users table that doesn't exist.
-    TODO: Remove after verifying no dependencies.
-    """
-
-    __tablename__ = "station_users"  # ⚠️ CONFLICTS with junction table - needs migration
-    __table_args__ = {"schema": "identity", "extend_existing": True, "info": {"deprecated": True}}
-
-    id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
-
-    # Identity (encrypted)
-    email_encrypted = Column(String(500), nullable=False, unique=True)
-    username = Column(String(100), nullable=False, unique=True)
-
-    # Authentication
-    password_hash = Column(String(100), nullable=False)  # bcrypt hash
-    password_salt = Column(String(32), nullable=False)  # Additional salt
-
-    # MFA
-    mfa_enabled = Column(Boolean, nullable=False, default=False)
-    mfa_secret_encrypted = Column(String(500), nullable=True)  # TOTP secret
-    backup_codes_encrypted = Column(JSON, nullable=True)  # Recovery codes
-
-    # Profile (encrypted)
-    first_name_encrypted = Column(String(500), nullable=True)
-    last_name_encrypted = Column(String(500), nullable=True)
-    phone_encrypted = Column(String(500), nullable=True)
-
-    # Access Control
-    role = Column(String(20), nullable=False, default=Role.STAFF.value)
-    status = Column(String(20), nullable=False, default=UserStatus.PENDING_VERIFICATION.value)
-    additional_permissions = Column(
-        JSON, nullable=False, default=list
-    )  # Extra permissions beyond role
-
-    # Security tracking
-    failed_login_attempts = Column(Integer, nullable=False, default=0)
-    last_failed_login = Column(DateTime(timezone=True), nullable=True)
-    lockout_until = Column(DateTime(timezone=True), nullable=True)
-
-    # Activity
-    last_login_at = Column(DateTime(timezone=True), nullable=True)
-    last_active_at = Column(DateTime(timezone=True), nullable=True)
-    password_changed_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
-
-    # Timestamps
-    created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
-    updated_at = Column(
-        DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now()
-    )
-
-    # Relationships
-    sessions = relationship("UserSession", back_populates="user")
-    audit_logs = relationship("AuditLog", back_populates="user")
+# ==================== STATIONUSER MODEL ====================
+# NOTE: StationUser model REMOVED (was deprecated)
+# This was a duplicate/conflicting model designed for encrypted auth_users table that doesn't exist.
+# Database uses identity.users (37 columns) for all auth.
+#
+# CORRECT MODEL: Use db.models.identity.StationUser (junction table for station-user many-to-many)
+# Location: db/models/identity/stations.py
+# Purpose: Links users to stations (user can access multiple stations)
+# Table: identity.station_users (junction table with station_id, user_id)
 
 
 class UserSession(Base):
@@ -360,7 +311,7 @@ class AuthenticationService:
         except Exception:
             return False
 
-    async def authenticate_user(self, db: AsyncSession, email: str, password: str) -> StationUser | None:
+    async def authenticate_user(self, db: AsyncSession, email: str, password: str) -> "StationUser | None":
         """
         Authenticate user with email and password.
 
@@ -373,6 +324,9 @@ class AuthenticationService:
             User object if authentication successful, None otherwise
         """
         try:
+            # Import here to avoid circular dependency
+            from db.models.identity import StationUser, UserStatus
+
             # Encrypt email for database lookup
             encrypted_email = self.encryption.encrypt(email)
 
@@ -461,7 +415,7 @@ class AuthenticationService:
 
         return False, hashed_codes
 
-    def create_jwt_tokens(self, user: StationUser, session_id: UUID) -> tuple[str, str]:
+    def create_jwt_tokens(self, user: "StationUser", session_id: UUID) -> tuple[str, str]:
         """Create access and refresh JWT tokens."""
         now = datetime.now(timezone.utc)
 
@@ -516,7 +470,7 @@ class AuthenticationService:
         except jwt.InvalidTokenError:
             return None
 
-    def get_user_permissions(self, user: StationUser) -> set[str]:
+    def get_user_permissions(self, user: "StationUser") -> set[str]:
         """Get all permissions for a user based on role and additional permissions."""
         role = Role(user.role)
         permissions = ROLE_PERMISSIONS.get(role, set())
@@ -566,8 +520,8 @@ class AuthenticationService:
         return len(errors) == 0, errors
 
 
-# Create alias for backward compatibility
-User = StationUser
+# Import models for backward compatibility
+from db.models.identity import StationUser, User
 
 __all__ = [
     "ROLE_PERMISSIONS",
@@ -578,7 +532,7 @@ __all__ = [
     "Role",
     "SessionStatus",
     "StationUser",
-    "User",  # Alias to StationUser
+    "User",
     "UserSession",
     "UserStatus",
 ]

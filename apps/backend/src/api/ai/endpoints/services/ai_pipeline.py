@@ -8,7 +8,7 @@ import time
 from typing import Any
 from uuid import UUID
 
-from api.ai.endpoints.models import AIMessage, MessageRole
+from db.models.ai.conversations import UnifiedMessage as AIMessage, MessageRole
 from api.ai.endpoints.schemas import ChatReplyResponse
 from api.ai.endpoints.services.knowledge_base_simple import kb_service
 from api.ai.endpoints.services.openai_service import openai_service

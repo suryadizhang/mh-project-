@@ -132,7 +132,7 @@ export default function CustomersPage() {
     setSelectedCustomer(customer);
     setIsDetailModalOpen(true);
     setLoadingDetail(true);
-    
+
     try {
       const response = await api.get(`/api/v1/bookings/admin/customer/${customer.email}`);
       if (response.success) {
@@ -450,13 +450,13 @@ export default function CustomersPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
-                        <button 
+                        <button
                           onClick={() => handleViewCustomer(customer)}
                           className="text-blue-600 hover:text-blue-900"
                         >
                           View
                         </button>
-                        <button 
+                        <button
                           onClick={() => toast.info('Coming Soon', 'Edit customer functionality will be available in the next update')}
                           className="text-gray-600 hover:text-gray-900"
                         >

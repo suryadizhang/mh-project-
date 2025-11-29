@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sunnyvale family reunion multi-generational hibachi -->
+  <defs>
+    <linearGradient id="familySky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFB6C1"/>
+      <stop offset="50%" style="stop-color:#FFA0C9"/>
+      <stop offset="100%" style="stop-color:#FF69B4"/>
+    </linearGradient>
+    <linearGradient id="sunnyvaleHomes" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F5DEB3"/>
+      <stop offset="100%" style="stop-color:#DEB887"/>
+    </linearGradient>
+    <radialGradient id="familyLove" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFB6C1; opacity:0.6"/>
+      <stop offset="100%" style="stop-color:transparent"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Sunnyvale family sky -->
+  <rect width="800" height="600" fill="url(#familySky)"/>
+  
+  <!-- Family stars -->
+  <circle cx="130" cy="50" r="2" fill="#FFD700"/>
+  <circle cx="250" cy="35" r="1.5" fill="white"/>
+  <circle cx="390" cy="60" r="2" fill="#FFD700"/>
+  <circle cx="540" cy="40" r="1.5" fill="white"/>
+  <circle cx="670" cy="55" r="2" fill="#FFD700"/>
+  <circle cx="750" cy="70" r="1.5" fill="white"/>
+  
+  <!-- Sunnyvale residential homes -->
+  <rect x="60" y="150" width="100" height="120" fill="url(#sunnyvaleHomes)" rx="8"/>
+  <polygon points="55,150 165,150 110,110" fill="#8B4513"/>
+  
+  <rect x="180" y="140" width="120" height="130" fill="url(#sunnyvaleHomes)" rx="8"/>
+  <polygon points="175,140 305,140 240,100" fill="#654321"/>
+  
+  <rect x="320" y="160" width="90" height="110" fill="url(#sunnyvaleHomes)" rx="8"/>
+  <polygon points="315,160 415,160 365,120" fill="#8B4513"/>
+  
+  <rect x="430" y="145" width="110" height="125" fill="url(#sunnyvaleHomes)" rx="8"/>
+  <polygon points="425,145 545,145 485,105" fill="#654321"/>
+  
+  <rect x="560" y="155" width="95" height="115" fill="url(#sunnyvaleHomes)" rx="8"/>
+  <polygon points="555,155 660,155 607.5,115" fill="#8B4513"/>
+  
+  <rect x="680" y="165" width="85" height="105" fill="url(#sunnyvaleHomes)" rx="8"/>
+  <polygon points="675,165 770,165 722.5,125" fill="#654321"/>
+  
+  <!-- Family reunion venue -->
+  <rect x="150" y="290" width="500" height="220" fill="#F0F8FF" opacity="0.95" rx="25"/>
+  <text x="400" y="325" text-anchor="middle" fill="#4B0082" font-family="Arial, sans-serif" font-size="24" font-weight="bold">SUNNYVALE FAMILY REUNION</text>
+  <text x="400" y="355" text-anchor="middle" fill="#FF69B4" font-family="Arial, sans-serif" font-size="18">MULTI-GENERATIONAL HIBACHI</text>
+  
+  <!-- Family hibachi setup -->
+  <rect x="170" y="260" width="460" height="140" fill="#2F4F4F" rx="18"/>
+  <rect x="180" y="255" width="440" height="25" fill="#FF6347"/>
+  
+  <!-- Multi-generational hibachi grills -->
+  <circle cx="200" cy="265" r="10" fill="#FFB6C1"/>
+  <circle cx="230" cy="265" r="10" fill="#FF69B4"/>
+  <circle cx="260" cy="265" r="10" fill="#FFD700"/>
+  <circle cx="290" cy="265" r="10" fill="#98FB98"/>
+  <circle cx="320" cy="265" r="10" fill="#87CEEB"/>
+  <circle cx="350" cy="265" r="10" fill="#DDA0DD"/>
+  <circle cx="380" cy="265" r="10" fill="#F0E68C"/>
+  <circle cx="410" cy="265" r="10" fill="#FFA07A"/>
+  <circle cx="440" cy="265" r="10" fill="#20B2AA"/>
+  <circle cx="470" cy="265" r="10" fill="#F4A460"/>
+  <circle cx="500" cy="265" r="10" fill="#9370DB"/>
+  <circle cx="530" cy="265" r="10" fill="#3CB371"/>
+  <circle cx="560" cy="265" r="10" fill="#FF6347"/>
+  <circle cx="590" cy="265" r="10" fill="#4169E1"/>
+  
+  <!-- Family hibachi chef -->
+  <circle cx="400" cy="200" r="20" fill="#FDBCB4"/>
+  <rect x="385" y="220" width="30" height="36" fill="white"/>
+  <rect x="380" y="256" width="40" height="42" fill="#4B0082"/>
+  <rect x="384" y="298" width="12" height="32" fill="#FDBCB4"/>
+  <rect x="404" y="298" width="12" height="32" fill="#FDBCB4"/>
+  
+  <!-- Family chef hat -->
+  <rect x="388" y="184" width="24" height="14" fill="white"/>
+  <circle cx="400" cy="184" r="16" fill="white"/>
+  <rect x="396" y="175" width="8" height="6" fill="#FF69B4"/> <!-- Family love accent -->
+  
+  <!-- Multi-generational family members -->
+  <!-- Grandparents -->
+  <circle cx="250" cy="420" r="17" fill="#FDBCB4"/>
+  <rect x="237" y="437" width="26" height="34" fill="#4B0082"/> <!-- Grandpa -->
+  <rect x="239" y="471" width="22" height="28" fill="#000080"/>
+  <rect x="241" y="499" width="18" height="22" fill="#8B4513"/>
+  <!-- Cane -->
+  <rect x="268" y="430" width="2" height="25" fill="#8B4513"/>
+  <circle cx="269" cy="430" r="2" fill="#654321"/>
+  
+  <circle cx="550" cy="420" r="17" fill="#FDBCB4"/>
+  <rect x="537" y="437" width="26" height="34" fill="#9370DB"/> <!-- Grandma -->
+  <rect x="539" y="471" width="22" height="28" fill="#000080"/>
+  <rect x="541" y="499" width="18" height="22" fill="#654321"/>
+  <!-- Purse -->
+  <rect x="560" y="445" width="8" height="6" fill="#FF69B4"/>
+  
+  <!-- Parents -->
+  <circle cx="300" cy="430" r="16" fill="#FDBCB4"/>
+  <rect x="288" y="446" width="24" height="32" fill="#32CD32"/> <!-- Dad -->
+  <rect x="290" y="478" width="20" height="26" fill="#000080"/>
+  <rect x="292" y="504" width="16" height="20" fill="#8B4513"/>
+  
+  <circle cx="500" cy="430" r="16" fill="#FDBCB4"/>
+  <rect x="488" y="446" width="24" height="32" fill="#FF6347"/> <!-- Mom -->
+  <rect x="490" y="478" width="20" height="26" fill="#000080"/>
+  <rect x="492" y="504" width="16" height="20" fill="#654321"/>
+  
+  <!-- Teenagers -->
+  <circle cx="350" cy="440" r="15" fill="#FDBCB4"/>
+  <rect x="339" y="455" width="22" height="30" fill="#00BFFF"/> <!-- Teen boy -->
+  <rect x="341" y="485" width="18" height="24" fill="#696969"/>
+  <rect x="343" y="509" width="14" height="18" fill="white"/>
+  <!-- Phone -->
+  <rect x="347" y="450" width="3" height="6" fill="#2F4F4F"/>
+  <rect x="347" y="451" width="3" height="4" fill="#00BFFF"/>
+  
+  <circle cx="450" cy="440" r="15" fill="#FDBCB4"/>
+  <rect x="439" y="455" width="22" height="30" fill="#FF69B4"/> <!-- Teen girl -->
+  <rect x="441" y="485" width="18" height="24" fill="#8B4513"/>
+  <rect x="443" y="509" width="14" height="18" fill="#FF6347"/>
+  <!-- Phone -->
+  <rect x="447" y="450" width="3" height="6" fill="#2F4F4F"/>
+  <rect x="447" y="451" width="3" height="4" fill="#FF69B4"/>
+  
+  <!-- Children -->
+  <circle cx="320" cy="450" r="13" fill="#FDBCB4"/>
+  <rect x="310" y="463" width="20" height="26" fill="#FFD700"/> <!-- Young boy -->
+  <rect x="312" y="489" width="16" height="20" fill="#4169E1"/>
+  <rect x="314" y="509" width="12" height="16" fill="#32CD32"/>
+  <!-- Toy -->
+  <circle cx="306" cy="468" r="3" fill="#FF6347"/>
+  
+  <circle cx="480" cy="450" r="13" fill="#FDBCB4"/>
+  <rect x="470" y="463" width="20" height="26" fill="#9370DB"/> <!-- Young girl -->
+  <rect x="472" y="489" width="16" height="20" fill="#FF69B4"/>
+  <rect x="474" y="509" width="12" height="16" fill="#FFD700"/>
+  <!-- Doll -->
+  <circle cx="493" cy="470" r="2" fill="#FDBCB4"/>
+  <rect x="491" y="472" width="4" height="6" fill="#FF69B4"/>
+  
+  <!-- Toddlers -->
+  <circle cx="380" cy="460" r="11" fill="#FDBCB4"/>
+  <rect x="372" y="471" width="16" height="22" fill="#98FB98"/> <!-- Toddler -->
+  <rect x="374" y="493" width="12" height="16" fill="#87CEEB"/>
+  <rect x="376" y="509" width="8" height="12" fill="#FFD700"/>
+  <!-- Pacifier -->
+  <circle cx="383" cy="465" r="1" fill="#FF69B4"/>
+  
+  <circle cx="420" cy="460" r="11" fill="#FDBCB4"/>
+  <rect x="412" y="471" width="16" height="22" fill="#FFA07A"/> <!-- Toddler -->
+  <rect x="414" y="493" width="12" height="16" fill="#98FB98"/>
+  <rect x="416" y="509" width="8" height="12" fill="#FF6347"/>
+  <!-- Toy -->
+  <circle cx="408" cy="475" r="2" fill="#FFD700"/>
+  
+  <!-- Multi-generational dining table -->
+  <ellipse cx="400" cy="550" rx="180" ry="50" fill="#8B4513"/>
+  
+  <!-- Family place settings -->
+  <circle cx="260" cy="545" r="12" fill="white"/>
+  <circle cx="300" cy="545" r="12" fill="white"/>
+  <circle cx="340" cy="545" r="12" fill="white"/>
+  <circle cx="380" cy="545" r="12" fill="white"/>
+  <circle cx="420" cy="545" r="12" fill="white"/>
+  <circle cx="460" cy="545" r="12" fill="white"/>
+  <circle cx="500" cy="545" r="12" fill="white"/>
+  <circle cx="540" cy="545" r="12" fill="white"/>
+  
+  <!-- Family beverages -->
+  <rect x="255" y="535" width="5" height="12" fill="#8B4513"/> <!-- Coffee for grandpa -->
+  <rect x="295" y="535" width="5" height="12" fill="#32CD32"/> <!-- Green tea for dad -->
+  <rect x="335" y="535" width="5" height="12" fill="#FF69B4"/> <!-- Pink lemonade for teen girl -->
+  <rect x="375" y="535" width="5" height="12" fill="#FFD700"/> <!-- Orange juice for child -->
+  <rect x="415" y="535" width="5" height="12" fill="#87CEEB"/> <!-- Milk for toddler -->
+  <rect x="455" y="535" width="5" height="12" fill="#9370DB"/> <!-- Grape juice for child -->
+  <rect x="495" y="535" width="5" height="12" fill="#FF6347"/> <!-- Wine for mom -->
+  <rect x="535" y="535" width="5" height="12" fill="#DDA0DD"/> <!-- Tea for grandma -->
+  
+  <!-- Family reunion title -->
+  <text x="400" y="130" text-anchor="middle" fill="#4B0082" font-family="Arial, sans-serif" font-size="30" font-weight="bold">SUNNYVALE FAMILY REUNION</text>
+  <text x="400" y="165" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="20">MULTI-GENERATIONAL DINING</text>
+  
+  <!-- Generation zones -->
+  <rect x="30" y="480" width="140" height="90" fill="#9370DB" opacity="0.8" rx="12"/>
+  <text x="100" y="505" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">FOUR</text>
+  <text x="100" y="520" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="13">GENERATIONS</text>
+  <text x="100" y="535" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">TOGETHER</text>
+  <text x="100" y="550" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">SUNNYVALE</text>
+  <text x="100" y="565" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">FAMILY</text>
+  
+  <rect x="630" y="480" width="140" height="90" fill="#FF6347" opacity="0.8" rx="12"/>
+  <text x="700" y="505" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">FAMILY</text>
+  <text x="700" y="520" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="13">BONDING</text>
+  <text x="700" y="535" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">HIBACHI</text>
+  <text x="700" y="550" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">REUNION</text>
+  <text x="700" y="565" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">TRADITION</text>
+  
+  <!-- Family hibachi specialties -->
+  <ellipse cx="210" cy="263" rx="14" ry="9" fill="#FFB6C1"/>
+  <ellipse cx="240" cy="263" rx="15" ry="9" fill="#FF69B4"/>
+  <ellipse cx="270" cy="263" rx="14" ry="9" fill="#FFD700"/>
+  <ellipse cx="300" cy="263" rx="13" ry="8" fill="#98FB98"/>
+  <ellipse cx="330" cy="263" rx="14" ry="9" fill="#87CEEB"/>
+  <ellipse cx="360" cy="263" rx="15" ry="9" fill="#DDA0DD"/>
+  <ellipse cx="390" cy="263" rx="14" ry="9" fill="#F0E68C"/>
+  <ellipse cx="420" cy="263" rx="13" ry="8" fill="#FFA07A"/>
+  <ellipse cx="450" cy="263" rx="14" ry="9" fill="#20B2AA"/>
+  <ellipse cx="480" cy="263" rx="15" ry="9" fill="#F4A460"/>
+  <ellipse cx="510" cy="263" rx="14" ry="9" fill="#9370DB"/>
+  <ellipse cx="540" cy="263" rx="13" ry="8" fill="#3CB371"/>
+  <ellipse cx="570" cy="263" rx="14" ry="9" fill="#FF6347"/>
+  <ellipse cx="600" cy="263" rx="15" ry="9" fill="#4169E1"/>
+  
+  <!-- Family cooking flames -->
+  <polygon points="210,263 215,253 205,253" fill="#FFB6C1" opacity="0.9"/>
+  <polygon points="240,263 245,253 235,253" fill="#FF69B4" opacity="0.9"/>
+  <polygon points="270,263 275,253 265,253" fill="#FFD700" opacity="0.9"/>
+  <polygon points="300,263 305,253 295,253" fill="#98FB98" opacity="0.9"/>
+  <polygon points="330,263 335,253 325,253" fill="#87CEEB" opacity="0.9"/>
+  <polygon points="360,263 365,253 355,253" fill="#DDA0DD" opacity="0.9"/>
+  <polygon points="390,263 395,253 385,253" fill="#F0E68C" opacity="0.9"/>
+  <polygon points="420,263 425,253 415,253" fill="#FFA07A" opacity="0.9"/>
+  <polygon points="450,263 455,253 445,253" fill="#20B2AA" opacity="0.9"/>
+  <polygon points="480,263 485,253 475,253" fill="#F4A460" opacity="0.9"/>
+  <polygon points="510,263 515,253 505,253" fill="#9370DB" opacity="0.9"/>
+  <polygon points="540,263 545,253 535,253" fill="#3CB371" opacity="0.9"/>
+  <polygon points="570,263 575,253 565,253" fill="#FF6347" opacity="0.9"/>
+  <polygon points="600,263 605,253 595,253" fill="#4169E1" opacity="0.9"/>
+  
+  <!-- Family trees (symbolic) -->
+  <rect x="70" y="220" width="8" height="50" fill="#8B4513"/>
+  <circle cx="74" cy="220" r="15" fill="#32CD32"/>
+  <circle cx="68" cy="210" r="5" fill="#FFB6C1"/>
+  <circle cx="80" cy="215" r="4" fill="#FF69B4"/>
+  <circle cx="74" cy="205" r="4" fill="#FFD700"/>
+  
+  <rect x="722" y="230" width="8" height="40" fill="#8B4513"/>
+  <circle cx="726" cy="230" r="12" fill="#32CD32"/>
+  <circle cx="720" cy="222" r="4" fill="#FFB6C1"/>
+  <circle cx="732" cy="225" r="3" fill="#FF69B4"/>
+  <circle cx="726" cy="218" r="3" fill="#FFD700"/>
+  
+  <!-- Family love atmosphere -->
+  <circle cx="400" cy="380" r="240" fill="url(#familyLove)"/>
+  
+  <!-- Family photos -->
+  <rect x="80" y="350" width="30" height="20" fill="#DDA0DD" rx="3"/>
+  <rect x="85" y="355" width="20" height="10" fill="#FFB6C1"/>
+  <text x="95" y="365" text-anchor="middle" fill="#4B0082" font-family="Arial, sans-serif" font-size="6">FAMILY</text>
+  
+  <rect x="690" y="360" width="30" height="20" fill="#87CEEB" rx="3"/>
+  <rect x="695" y="365" width="20" height="10" fill="#FF69B4"/>
+  <text x="705" y="375" text-anchor="middle" fill="#4B0082" font-family="Arial, sans-serif" font-size="6">MEMORIES</text>
+  
+  <!-- Family balloons -->
+  <circle cx="120" cy="300" r="12" fill="#FFB6C1"/>
+  <rect x="119" y="312" width="2" height="20" fill="#654321"/>
+  <circle cx="135" cy="290" r="10" fill="#FF69B4"/>
+  <rect x="134" y="300" width="2" height="18" fill="#654321"/>
+  
+  <circle cx="680" cy="310" r="12" fill="#9370DB"/>
+  <rect x="679" y="322" width="2" height="20" fill="#654321"/>
+  <circle cx="695" cy="300" r="10" fill="#FFD700"/>
+  <rect x="694" y="310" width="2" height="18" fill="#654321"/>
+  
+  <!-- Reunion subtitle -->
+  <text x="400" y="195" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16">ALL AGES • ALL TASTES • ALL TOGETHER</text>
+</svg>

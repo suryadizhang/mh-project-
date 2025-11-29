@@ -1,0 +1,299 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#realtorGradient)"/>
+  
+  <!-- Real Estate Banner -->
+  <rect x="50" y="15" width="300" height="35" fill="#4169E1"/>
+  <rect x="52" y="17" width="296" height="31" fill="#6495ED"/>
+  <text x="200" y="28" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="14" font-weight="bold">REALTOR APPRECIATION HIBACHI</text>
+  <text x="200" y="40" text-anchor="middle" fill="#FFD700" font-family="Arial" font-size="10">Celebrating Real Estate Excellence</text>
+  
+  <!-- Professional Dining Setup -->
+  <rect x="120" y="220" width="160" height="60" fill="#8B4513"/>
+  <rect x="122" y="222" width="156" height="56" fill="#DEB887"/>
+  <rect x="125" y="225" width="150" height="50" fill="#F5DEB3"/>
+  
+  <!-- Hibachi Setup -->
+  <rect x="180" y="190" width="40" height="30" rx="6" fill="#2F4F4F"/>
+  <rect x="185" y="195" width="30" height="20" rx="4" fill="#1C1C1C"/>
+  
+  <!-- Real Estate Professionals -->
+  
+  <!-- Top Realtor -->
+  <g>
+    <circle cx="200" cy="130" r="20" fill="#F4C2A1"/>
+    <rect x="185" y="148" width="30" height="35" fill="#2F4F4F"/>
+    <rect x="187" y="150" width="26" height="4" fill="#FFD700"/>
+    <ellipse cx="200" cy="117" rx="10" ry="5" fill="#8B4513"/>
+    <circle cx="195" cy="128" r="1" fill="#000000"/>
+    <circle cx="205" cy="128" r="1" fill="#000000"/>
+    <path d="M200 135 Q195 140 200 145" stroke="#000000" stroke-width="1" fill="none"/>
+    
+    <!-- Award Pin -->
+    <circle cx="210" cy="155" r="3" fill="#FFD700"/>
+    <circle cx="210" cy="155" r="2" fill="#FF6347"/>
+    <text x="210" y="157" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="3">#1</text>
+    
+    <!-- Business Card -->
+    <rect x="170" y="160" width="12" height="8" fill="#FFFFFF"/>
+    <rect x="171" y="161" width="10" height="6" fill="#F0F8FF"/>
+    <g fill="#4169E1" font-family="Arial" font-size="2">
+      <text x="176" y="164" text-anchor="middle">REALTOR</text>
+      <text x="176" y="167" text-anchor="middle">LICENSE</text>
+    </g>
+  </g>
+  
+  <!-- Real Estate Team -->
+  
+  <!-- Senior Agent -->
+  <g>
+    <circle cx="150" cy="140" r="16" fill="#F4C2A1"/>
+    <rect x="137" y="154" width="26" height="30" fill="#8B008B"/>
+    <ellipse cx="150" cy="128" rx="8" ry="4" fill="#FFD700"/>
+    <circle cx="146" cy="138" r="1" fill="#000000"/>
+    <circle cx="154" cy="138" r="1" fill="#000000"/>
+    <path d="M150 145 Q145 150 150 155" stroke="#000000" stroke-width="1" fill="none"/>
+    
+    <!-- Years of Service Pin -->
+    <rect x="140" y="158" width="6" height="4" fill="#C0C0C0"/>
+    <text x="143" y="161" text-anchor="middle" fill="#000000" font-family="Arial" font-size="2">15yr</text>
+  </g>
+  
+  <!-- New Agent -->
+  <g>
+    <circle cx="250" cy="145" r="16" fill="#F4C2A1"/>
+    <rect x="237" y="159" width="26" height="30" fill="#228B22"/>
+    <ellipse cx="250" cy="133" rx="8" ry="4" fill="#8B4513"/>
+    <circle cx="246" cy="143" r="1" fill="#000000"/>
+    <circle cx="254" cy="143" r="1" fill="#000000"/>
+    <path d="M250 150 Q245 155 250 160" stroke="#000000" stroke-width="1" fill="none"/>
+    
+    <!-- Rookie of Year Badge -->
+    <circle cx="260" cy="165" r="2" fill="#FFD700"/>
+    <text x="260" y="167" text-anchor="middle" fill="#000000" font-family="Arial" font-size="2">ROY</text>
+  </g>
+  
+  <!-- Real Estate Tools -->
+  
+  <!-- MLS Tablet -->
+  <rect x="120" y="195" width="15" height="20" fill="#2F4F4F"/>
+  <rect x="122" y="197" width="11" height="16" fill="#87CEEB"/>
+  <g fill="#000000" font-family="Arial" font-size="3">
+    <text x="127" y="202" text-anchor="middle">MLS</text>
+    <text x="127" y="206" text-anchor="middle">SEARCH</text>
+    <text x="127" y="210" text-anchor="middle">RESULTS</text>
+  </g>
+  
+  <!-- Property Listings -->
+  <rect x="265" y="195" width="20" height="25" fill="#FFFACD"/>
+  <rect x="267" y="197" width="16" height="21" fill="#FFF8DC"/>
+  <g fill="#8B4513" font-family="Arial" font-size="3">
+    <text x="275" y="202" text-anchor="middle">LISTINGS</text>
+    <text x="275" y="206" text-anchor="middle">SOLD</text>
+    <text x="275" y="210" text-anchor="middle">PENDING</text>
+    <text x="275" y="214" text-anchor="middle">ACTIVE</text>
+  </g>
+  
+  <!-- Professional Achievement Display -->
+  
+  <!-- Sales Awards -->
+  <rect x="30" y="100" width="50" height="40" fill="#FFD700"/>
+  <rect x="32" y="102" width="46" height="36" fill="#FFA500"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="5">
+    <text x="55" y="110" text-anchor="middle">TOP</text>
+    <text x="55" y="117" text-anchor="middle">PRODUCER</text>
+    <text x="55" y="124" text-anchor="middle">2024</text>
+    <text x="55" y="131" text-anchor="middle">$50M+</text>
+    <text x="55" y="138" text-anchor="middle">SALES</text>
+  </g>
+  
+  <!-- Client Satisfaction -->
+  <rect x="320" y="110" width="40" height="30" fill="#32CD32"/>
+  <rect x="322" y="112" width="36" height="26" fill="#90EE90"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="4">
+    <text x="340" y="120" text-anchor="middle">CLIENT</text>
+    <text x="340" y="126" text-anchor="middle">RATING</text>
+    <text x="340" y="132" text-anchor="middle">⭐⭐⭐⭐⭐</text>
+  </g>
+  
+  <!-- Real Estate Market Data -->
+  
+  <!-- Market Trends -->
+  <rect x="80" y="70" width="40" height="30" fill="#87CEEB"/>
+  <rect x="82" y="72" width="36" height="26" fill="#E0F6FF"/>
+  <g fill="#4169E1" font-family="Arial" font-size="4">
+    <text x="100" y="79" text-anchor="middle">MARKET</text>
+    <text x="100" y="85" text-anchor="middle">TRENDS</text>
+    <text x="100" y="91" text-anchor="middle">📈 UP 8%</text>
+  </g>
+  
+  <!-- Property Values -->
+  <rect x="280" y="70" width="40" height="30" fill="#DC143C"/>
+  <rect x="282" y="72" width="36" height="26" fill="#FFB6C1"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="4">
+    <text x="300" y="79" text-anchor="middle">AVG HOME</text>
+    <text x="300" y="85" text-anchor="middle">VALUE</text>
+    <text x="300" y="91" text-anchor="middle">$850K</text>
+  </g>
+  
+  <!-- Professional Networking -->
+  
+  <!-- Business Cards Exchange -->
+  <g>
+    <rect x="290" y="185" width="8" height="5" fill="#FFFFFF"/>
+    <rect x="291" y="186" width="6" height="3" fill="#F0F8FF"/>
+    <rect x="299" y="187" width="8" height="5" fill="#FFFFFF"/>
+    <rect x="300" y="188" width="6" height="3" fill="#F0F8FF"/>
+    <rect x="294" y="180" width="8" height="5" fill="#FFFFFF"/>
+    <rect x="295" y="181" width="6" height="3" fill="#F0F8FF"/>
+  </g>
+  
+  <!-- Professional Certificates -->
+  <rect x="50" y="180" width="25" height="20" fill="#FFFACD"/>
+  <rect x="52" y="182" width="21" height="16" fill="#FFF8DC"/>
+  <g fill="#8B4513" font-family="Arial" font-size="3">
+    <text x="62" y="187" text-anchor="middle">CERTIFIED</text>
+    <text x="62" y="191" text-anchor="middle">REALTOR</text>
+    <text x="62" y="195" text-anchor="middle">CRS • GRI</text>
+  </g>
+  
+  <!-- Appreciation Feast -->
+  
+  <!-- Premium Dining -->
+  <g>
+    <!-- Wagyu Beef -->
+    <ellipse cx="185" cy="200" rx="6" ry="4" fill="#8B0000"/>
+    <ellipse cx="185" cy="199" rx="5" ry="3" fill="#B22222"/>
+    
+    <!-- Lobster -->
+    <ellipse cx="200" cy="202" rx="5" ry="3" fill="#FF6347"/>
+    <ellipse cx="200" cy="201" rx="4" ry="2" fill="#FF7F50"/>
+    
+    <!-- Scallops -->
+    <ellipse cx="215" cy="200" rx="4" ry="3" fill="#F5DEB3"/>
+    <ellipse cx="215" cy="199" rx="3" ry="2" fill="#FFFACD"/>
+  </g>
+  
+  <!-- Professional Recognition -->
+  
+  <!-- Million Dollar Club -->
+  <rect x="150" y="70" width="50" height="25" fill="#FFD700"/>
+  <rect x="152" y="72" width="46" height="21" fill="#FFFF00"/>
+  <g fill="#8B4513" font-family="Arial" font-size="5">
+    <text x="175" y="80" text-anchor="middle">MILLION</text>
+    <text x="175" y="87" text-anchor="middle">DOLLAR</text>
+    <text x="175" y="94" text-anchor="middle">CLUB</text>
+  </g>
+  
+  <!-- Real Estate Tools on Table -->
+  
+  <!-- Keys -->
+  <g>
+    <ellipse cx="160" cy="205" rx="2" ry="1" fill="#C0C0C0"/>
+    <rect x="162" y="204" width="4" height="1" fill="#C0C0C0"/>
+    <rect x="165" y="203" width="2" height="1" fill="#C0C0C0"/>
+    <rect x="165" y="205" width="2" height="1" fill="#C0C0C0"/>
+    
+    <ellipse cx="165" cy="208" rx="2" ry="1" fill="#FFD700"/>
+    <rect x="167" y="207" width="4" height="1" fill="#FFD700"/>
+    <rect x="170" y="206" width="2" height="1" fill="#FFD700"/>
+    <rect x="170" y="208" width="2" height="1" fill="#FFD700"/>
+  </g>
+  
+  <!-- Contract Documents -->
+  <rect x="230" y="200" width="15" height="10" fill="#FFFFFF"/>
+  <rect x="231" y="201" width="13" height="8" fill="#F0F8FF"/>
+  <g fill="#000000" font-family="Arial" font-size="2">
+    <line x1="233" y1="203" x2="242" y2="203" stroke="#000000" stroke-width="0.3"/>
+    <line x1="233" y1="205" x2="242" y2="205" stroke="#000000" stroke-width="0.3"/>
+    <line x1="233" y1="207" x2="242" y2="207" stroke="#000000" stroke-width="0.3"/>
+  </g>
+  <text x="237" y="213" text-anchor="middle" fill="#8B4513" font-family="Arial" font-size="3">CONTRACTS</text>
+  
+  <!-- Professional Beverages -->
+  
+  <!-- Coffee for Energy -->
+  <rect x="300" y="200" width="6" height="10" fill="#8B4513"/>
+  <ellipse cx="303" cy="198" rx="3" ry="2" fill="#8B4513"/>
+  <rect x="302" y="203" width="2" height="6" fill="#654321"/>
+  <g stroke="#8B4513" stroke-width="1" fill="none" opacity="0.8">
+    <path d="M301 198 Q303 195 305 198"/>
+    <path d="M302 196 Q303 194 304 196"/>
+  </g>
+  
+  <!-- Celebratory Wine -->
+  <rect x="340" y="200" width="6" height="12" fill="#228B22"/>
+  <ellipse cx="343" cy="198" rx="3" ry="2" fill="#228B22"/>
+  <rect x="342" y="205" width="2" height="6" fill="#8B0000"/>
+  
+  <!-- Real Estate Success Metrics -->
+  
+  <!-- Closed Deals -->
+  <rect x="30" y="230" width="30" height="20" fill="#32CD32"/>
+  <rect x="32" y="232" width="26" height="16" fill="#90EE90"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="4">
+    <text x="45" y="238" text-anchor="middle">DEALS</text>
+    <text x="45" y="243" text-anchor="middle">CLOSED</text>
+    <text x="45" y="248" text-anchor="middle">156</text>
+  </g>
+  
+  <!-- Happy Clients -->
+  <rect x="340" y="230" width="30" height="20" fill="#FF69B4"/>
+  <rect x="342" y="232" width="26" height="16" fill="#FFB6C1"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="4">
+    <text x="355" y="238" text-anchor="middle">HAPPY</text>
+    <text x="355" y="243" text-anchor="middle">CLIENTS</text>
+    <text x="355" y="248" text-anchor="middle">350+</text>
+  </g>
+  
+  <!-- Professional Development -->
+  <ellipse cx="200" cy="110" rx="70" ry="18" fill="#FFFFFF" stroke="#4169E1" stroke-width="2" opacity="0.9"/>
+  <text x="200" y="105" text-anchor="middle" fill="#4169E1" font-family="Arial" font-size="9" font-weight="bold">
+    "Excellence in Real Estate Service"
+  </text>
+  <text x="200" y="115" text-anchor="middle" fill="#8B4513" font-family="Arial" font-size="7">
+    Professional Recognition • Client Success
+  </text>
+  
+  <!-- Steam from Hibachi -->
+  <g stroke="#C0C0C0" stroke-width="2" fill="none" opacity="0.8">
+    <path d="M185 185 Q187 180 185 175 Q183 170 185 165"/>
+    <path d="M200 185 Q202 180 200 175 Q198 170 200 165"/>
+    <path d="M215 185 Q217 180 215 175 Q213 170 215 165"/>
+  </g>
+  
+  <!-- Real Estate Icons -->
+  <g fill="#4169E1" opacity="0.7">
+    <text x="70" y="160" text-anchor="middle" font-family="Arial" font-size="12">🏠</text>
+    <text x="330" y="165" text-anchor="middle" font-family="Arial" font-size="12">🔑</text>
+    <text x="40" y="60" text-anchor="middle" font-family="Arial" font-size="12">📈</text>
+    <text x="360" y="65" text-anchor="middle" font-family="Arial" font-size="12">💼</text>
+  </g>
+  
+  <!-- Professional Network -->
+  <rect x="220" y="80" width="35" height="20" fill="#8B008B"/>
+  <rect x="222" y="82" width="31" height="16" fill="#9370DB"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="4">
+    <text x="237" y="88" text-anchor="middle">NETWORK</text>
+    <text x="237" y="93" text-anchor="middle">REFERRALS</text>
+    <text x="237" y="98" text-anchor="middle">500+</text>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="12" text-anchor="middle" fill="#4169E1" font-family="Arial, sans-serif" font-size="16" font-weight="bold">
+    Real Estate Professional Appreciation
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="290" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="11">
+    "Celebrating excellence in real estate service with exceptional dining and recognition"
+  </text>
+  
+  <defs>
+    <linearGradient id="realtorGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0F8FF;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#E6E6FA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFFACD;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

@@ -18,6 +18,7 @@ import type {
   CalendarBooking,
   WeekView,
 } from '../types/calendar.types';
+
 import { BookingCard } from './BookingCard';
 
 interface WeeklyCalendarProps {

@@ -17,7 +17,8 @@ from cqrs.social.social_commands import (  # Phase 2C: Updated from api.app.cqrs
 # MIGRATED: from models.legacy_core → db.models.legacy_core
 from db.models.legacy_core import CoreCustomer  # Phase 2C: Updated from api.app.models.core
 
-# Fixed: Use unified lead schema instead of legacy model\nfrom db.models.lead import Lead
+# Fixed: Use unified lead schema instead of legacy model
+from db.models.crm import Lead
 # MIGRATED: from models.legacy_events → db.models.legacy_events
 from db.models.legacy_events import OutboxEntry  # Phase 2C: Updated from api.app.models.events
 

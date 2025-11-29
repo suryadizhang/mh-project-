@@ -7,7 +7,7 @@ import logging
 from typing import Any
 
 # FIXED: Import from db.models (NEW system) instead of models (OLD system)
-from db.models.lead import Lead, LeadQuality, LeadSource
+from db.models.crm import Lead, LeadQuality, LeadSource
 from services.openai_service import (
     OpenAIService,
 )  # Phase 2C: Updated from api.app.services.openai_service

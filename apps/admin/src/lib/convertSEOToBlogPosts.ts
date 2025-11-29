@@ -2,6 +2,7 @@
 // Converts worldClassSEO.ts posts to standard blogPosts.ts format
 
 import type { BlogPost } from '../data/blogPosts';
+
 import { generateSEOBlogCalendar, type SEOBlogPost } from './worldClassSEO';
 
 // Conversion function to transform SEO posts to regular blog posts

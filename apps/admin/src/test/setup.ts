@@ -31,11 +31,11 @@ afterEach(() => {
 global.WebSocket = class MockWebSocket {
   url: string;
   readyState: number = 0;
-  
+
   constructor(url: string) {
     this.url = url;
   }
-  
+
   send() {}
   close() {}
 } as unknown as typeof WebSocket;

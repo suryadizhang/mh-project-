@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Test Corrected AI Backend</title>
+  </head>
+  <body>
+    <h1>Test MyHibachi AI Backend</h1>
+    <div id="results"></div>
+
+    <script>
+      async function testQuestions() {
+        const questions = [
+          "What's included in the hibachi service?",
+          'Do you serve Sacramento?',
+          'How much is the deposit?'
+        ]
+
+        const results = document.getElementById('results')
+
+        for (const question of questions) {
+          try {
+            const response = await fetch('http://localhost:8001/api/v1/chat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                message: question,
+                page: '/test',
+                consent_to_save: true
+              })
+            })
+
+            const data = await response.json()
+
+            results.innerHTML += `
+                        <div style="margin: 20px; padding: 10px; border: 1px solid #ccc;">
+                            <h3>Q: ${question}</h3>
+                            <p><strong>Answer:</strong> ${data.answer}</p>
+                            <p><strong>Confidence:</strong> ${Math.round(data.confidence * 100)}%</p>
+                            <p><strong>Route:</strong> ${data.route}</p>
+                        </div>
+                    `
+          } catch (error) {
+            results.innerHTML += `
+                        <div style="margin: 20px; padding: 10px; border: 1px solid red;">
+                            <h3>Q: ${question}</h3>
+                            <p style="color: red;">Error: ${error.message}</p>
+                        </div>
+                    `
+          }
+        }
+      }
+
+      // Auto-test when page loads
+      window.onload = testQuestions
+    </script>
+  </body>
+</html>

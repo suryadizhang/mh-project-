@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Bay Area pool party hibachi summer entertainment -->
+  <defs>
+    <linearGradient id="poolSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB"/>
+      <stop offset="50%" style="stop-color:#00BFFF"/>
+      <stop offset="100%" style="stop-color:#1E90FF"/>
+    </linearGradient>
+    <linearGradient id="poolWater" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#00BFFF"/>
+      <stop offset="50%" style="stop-color:#0080FF"/>
+      <stop offset="100%" style="stop-color:#0066CC"/>
+    </linearGradient>
+    <radialGradient id="summerSun" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFD700; opacity:0.8"/>
+      <stop offset="100%" style="stop-color:transparent"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Bay Area summer sky -->
+  <rect width="800" height="400" fill="url(#poolSky)"/>
+  <rect x="0" y="400" width="800" height="200" fill="#32CD32"/>
+  
+  <!-- Summer sun -->
+  <circle cx="700" cy="80" r="40" fill="#FFD700"/>
+  <rect x="665" y="65" width="70" height="12" fill="#FFD700" opacity="0.6"/>
+  <rect x="680" y="45" width="40" height="12" fill="#FFD700" opacity="0.6"/>
+  <rect x="680" y="115" width="40" height="12" fill="#FFD700" opacity="0.6"/>
+  <rect x="665" y="95" width="70" height="12" fill="#FFD700" opacity="0.6"/>
+  
+  <!-- Pool area -->
+  <ellipse cx="400" cy="380" rx="180" ry="80" fill="url(#poolWater)"/>
+  <ellipse cx="400" cy="375" rx="170" ry="75" fill="#00BFFF" opacity="0.7"/>
+  
+  <!-- Pool deck -->
+  <rect x="150" y="320" width="500" height="30" fill="#F5DEB3"/>
+  <rect x="150" y="470" width="500" height="30" fill="#F5DEB3"/>
+  <rect x="120" y="350" width="30" height="120" fill="#F5DEB3"/>
+  <rect x="650" y="350" width="30" height="120" fill="#F5DEB3"/>
+  
+  <!-- Pool party hibachi setup -->
+  <rect x="200" y="250" width="400" height="120" fill="#2F4F4F" rx="15"/>
+  <rect x="210" y="245" width="380" height="20" fill="#FF6347"/>
+  <text x="400" y="200" text-anchor="middle" fill="#FF6347" font-family="Arial, sans-serif" font-size="22" font-weight="bold">BAY AREA POOL PARTY HIBACHI</text>
+  <text x="400" y="225" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="16">SUMMER SPLASH ENTERTAINMENT</text>
+  
+  <!-- Pool party hibachi grills -->
+  <circle cx="230" cy="255" r="9" fill="#00BFFF"/>
+  <circle cx="260" cy="255" r="9" fill="#FFD700"/>
+  <circle cx="290" cy="255" r="9" fill="#FF6347"/>
+  <circle cx="320" cy="255" r="9" fill="#32CD32"/>
+  <circle cx="350" cy="255" r="9" fill="#FF69B4"/>
+  <circle cx="380" cy="255" r="9" fill="#87CEEB"/>
+  <circle cx="410" cy="255" r="9" fill="#9370DB"/>
+  <circle cx="440" cy="255" r="9" fill="#FFD700"/>
+  <circle cx="470" cy="255" r="9" fill="#00BFFF"/>
+  <circle cx="500" cy="255" r="9" fill="#FF6347"/>
+  <circle cx="530" cy="255" r="9" fill="#32CD32"/>
+  <circle cx="560" cy="255" r="9" fill="#FF69B4"/>
+  
+  <!-- Pool party hibachi chef -->
+  <circle cx="400" cy="180" r="18" fill="#FDBCB4"/>
+  <rect x="387" y="198" width="26" height="32" fill="white"/>
+  <rect x="382" y="230" width="36" height="38" fill="#00BFFF"/> <!-- Summer pool outfit -->
+  <rect x="386" y="268" width="10" height="28" fill="#FDBCB4"/>
+  <rect x="404" y="268" width="10" height="28" fill="#FDBCB4"/>
+  
+  <!-- Pool chef hat -->
+  <rect x="391" y="167" width="18" height="10" fill="white"/>
+  <circle cx="400" cy="167" r="12" fill="white"/>
+  <rect x="397" y="160" width="6" height="4" fill="#00BFFF"/> <!-- Pool theme accent -->
+  
+  <!-- Pool party guests -->
+  <!-- Swimmer 1 -->
+  <circle cx="320" cy="380" r="12" fill="#FDBCB4"/>
+  <rect x="312" y="392" width="16" height="20" fill="#FF6347"/> <!-- Swimsuit -->
+  <rect x="314" y="412" width="12" height="16" fill="#FDBCB4"/> <!-- Legs in water -->
+  <!-- Swim goggles -->
+  <ellipse cx="320" cy="375" rx="8" ry="3" fill="#000080"/>
+  
+  <!-- Swimmer 2 -->
+  <circle cx="480" cy="385" r="12" fill="#FDBCB4"/>
+  <rect x="472" y="397" width="16" height="20" fill="#00BFFF"/> <!-- Swim trunks -->
+  <rect x="474" y="417" width="12" height="16" fill="#FDBCB4"/> <!-- Legs in water -->
+  <!-- Pool noodle -->
+  <rect x="465" y="390" width="30" height="4" fill="#FFD700" rx="2"/>
+  
+  <!-- Poolside loungers -->
+  <rect x="250" y="500" width="60" height="25" fill="#8B4513"/>
+  <rect x="255" y="495" width="50" height="5" fill="#FF69B4"/> <!-- Towel -->
+  <circle cx="280" cy="480" r="14" fill="#FDBCB4"/>
+  <rect x="270" y="494" width="20" height="26" fill="#9370DB"/> <!-- Bikini -->
+  <rect x="272" y="520" width="16" height="20" fill="#FDBCB4"/>
+  <!-- Sunglasses -->
+  <ellipse cx="280" cy="477" rx="6" ry="2" fill="#000000"/>
+  
+  <rect x="490" y="500" width="60" height="25" fill="#8B4513"/>
+  <rect x="495" y="495" width="50" height="5" fill="#00BFFF"/> <!-- Towel -->
+  <circle cx="520" cy="480" r="14" fill="#FDBCB4"/>
+  <rect x="510" y="494" width="20" height="26" fill="#32CD32"/> <!-- Swimwear -->
+  <rect x="512" y="520" width="16" height="20" fill="#FDBCB4"/>
+  <!-- Sun hat -->
+  <circle cx="520" cy="470" r="12" fill="#FFD700" opacity="0.8"/>
+  <circle cx="520" cy="470" r="8" fill="#87CEEB"/>
+  
+  <!-- Pool party kids -->
+  <circle cx="380" cy="420" r="10" fill="#FDBCB4"/>
+  <rect x="374" y="430" width="12" height="16" fill="#FF69B4"/> <!-- Kid swimsuit -->
+  <rect x="376" y="446" width="8" height="12" fill="#FDBCB4"/>
+  <!-- Pool floatie -->
+  <circle cx="380" cy="440" r="8" fill="#FFD700" opacity="0.6"/>
+  <circle cx="380" cy="440" r="5" fill="transparent" stroke="#FFD700" stroke-width="2"/>
+  
+  <circle cx="420" cy="425" r="10" fill="#FDBCB4"/>
+  <rect x="414" y="435" width="12" height="16" fill="#00BFFF"/> <!-- Kid swim trunks -->
+  <rect x="416" y="451" width="8" height="12" fill="#FDBCB4"/>
+  <!-- Water wings -->
+  <ellipse cx="410" cy="438" rx="4" ry="2" fill="#FF6347"/>
+  <ellipse cx="430" cy="438" rx="4" ry="2" fill="#FF6347"/>
+  
+  <!-- Pool party dining setup -->
+  <rect x="100" y="520" width="600" height="60" fill="#F5DEB3" opacity="0.9" rx="10"/>
+  <text x="400" y="545" text-anchor="middle" fill="#2F4F4F" font-family="Arial, sans-serif" font-size="18" font-weight="bold">POOLSIDE HIBACHI DINING</text>
+  <text x="400" y="565" text-anchor="middle" fill="#FF6347" font-family="Arial, sans-serif" font-size="14">SUMMER SPLASH ENTERTAINMENT</text>
+  
+  <!-- Pool party beverages -->
+  <rect x="150" y="480" width="6" height="15" fill="#FF69B4"/> <!-- Pink lemonade -->
+  <rect x="170" y="480" width="6" height="15" fill="#FFD700"/> <!-- Iced tea -->
+  <rect x="190" y="480" width="6" height="15" fill="#00BFFF"/> <!-- Blue sports drink -->
+  <rect x="210" y="480" width="6" height="15" fill="#32CD32"/> <!-- Green smoothie -->
+  <rect x="590" y="480" width="6" height="15" fill="#FF6347"/> <!-- Fruit punch -->
+  <rect x="610" y="480" width="6" height="15" fill="#9370DB"/> <!-- Purple drink -->
+  <rect x="630" y="480" width="6" height="15" fill="#87CEEB"/> <!-- Ice water -->
+  <rect x="650" y="480" width="6" height="15" fill="#FFD700"/> <!-- Beer -->
+  
+  <!-- Pool hibachi specialties -->
+  <ellipse cx="240" cy="253" rx="13" ry="8" fill="#00BFFF"/>
+  <ellipse cx="270" cy="253" rx="14" ry="8" fill="#FFD700"/>
+  <ellipse cx="300" cy="253" rx="13" ry="8" fill="#FF6347"/>
+  <ellipse cx="330" cy="253" rx="12" ry="7" fill="#32CD32"/>
+  <ellipse cx="360" cy="253" rx="13" ry="8" fill="#FF69B4"/>
+  <ellipse cx="390" cy="253" rx="14" ry="8" fill="#87CEEB"/>
+  <ellipse cx="420" cy="253" rx="13" ry="8" fill="#9370DB"/>
+  <ellipse cx="450" cy="253" rx="12" ry="7" fill="#FFD700"/>
+  <ellipse cx="480" cy="253" rx="13" ry="8" fill="#00BFFF"/>
+  <ellipse cx="510" cy="253" rx="14" ry="8" fill="#FF6347"/>
+  <ellipse cx="540" cy="253" rx="13" ry="8" fill="#32CD32"/>
+  <ellipse cx="570" cy="253" rx="12" ry="7" fill="#FF69B4"/>
+  
+  <!-- Pool party flames -->
+  <polygon points="240,253 245,243 235,243" fill="#00BFFF" opacity="0.9"/>
+  <polygon points="270,253 275,243 265,243" fill="#FFD700" opacity="0.9"/>
+  <polygon points="300,253 305,243 295,243" fill="#FF6347" opacity="0.9"/>
+  <polygon points="330,253 335,243 325,243" fill="#32CD32" opacity="0.9"/>
+  <polygon points="360,253 365,243 355,243" fill="#FF69B4" opacity="0.9"/>
+  <polygon points="390,253 395,243 385,243" fill="#87CEEB" opacity="0.9"/>
+  <polygon points="420,253 425,243 415,243" fill="#9370DB" opacity="0.9"/>
+  <polygon points="450,253 455,243 445,243" fill="#FFD700" opacity="0.9"/>
+  <polygon points="480,253 485,243 475,243" fill="#00BFFF" opacity="0.9"/>
+  <polygon points="510,253 515,243 505,243" fill="#FF6347" opacity="0.9"/>
+  <polygon points="540,253 545,243 535,243" fill="#32CD32" opacity="0.9"/>
+  <polygon points="570,253 575,243 565,243" fill="#FF69B4" opacity="0.9"/>
+  
+  <!-- Pool accessories -->
+  <!-- Beach balls -->
+  <circle cx="180" cy="350" r="12" fill="#FF6347"/>
+  <path d="M 168,350 Q 180,338 192,350" stroke="white" stroke-width="2" fill="none"/>
+  <path d="M 180,338 Q 192,350 180,362" stroke="white" stroke-width="2" fill="none"/>
+  
+  <circle cx="620" cy="360" r="10" fill="#00BFFF"/>
+  <path d="M 610,360 Q 620,350 630,360" stroke="white" stroke-width="2" fill="none"/>
+  <path d="M 620,350 Q 630,360 620,370" stroke="white" stroke-width="2" fill="none"/>
+  
+  <!-- Pool umbrellas -->
+  <rect x="220" y="300" width="4" height="40" fill="#8B4513"/>
+  <circle cx="222" cy="300" r="18" fill="#FF69B4"/>
+  <path d="M 204,300 A 18,18 0 0,1 240,300" stroke="white" stroke-width="2" fill="none"/>
+  
+  <rect x="576" y="310" width="4" height="35" fill="#8B4513"/>
+  <circle cx="578" cy="310" r="15" fill="#32CD32"/>
+  <path d="M 563,310 A 15,15 0 0,1 593,310" stroke="white" stroke-width="2" fill="none"/>
+  
+  <!-- Pool party atmosphere -->
+  <circle cx="400" cy="350" r="200" fill="url(#summerSun)"/>
+  
+  <!-- Summer clouds -->
+  <ellipse cx="150" cy="70" rx="30" ry="15" fill="white" opacity="0.8"/>
+  <ellipse cx="165" cy="60" rx="20" ry="10" fill="white" opacity="0.8"/>
+  <ellipse cx="135" cy="55" rx="15" ry="8" fill="white" opacity="0.8"/>
+  
+  <ellipse cx="450" cy="90" rx="35" ry="18" fill="white" opacity="0.7"/>
+  <ellipse cx="470" cy="80" rx="25" ry="12" fill="white" opacity="0.7"/>
+  <ellipse cx="430" cy="75" rx="20" ry="10" fill="white" opacity="0.7"/>
+  
+  <!-- Pool party zones -->
+  <rect x="50" y="440" width="100" height="80" fill="#00BFFF" opacity="0.8" rx="10"/>
+  <text x="100" y="465" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">POOL</text>
+  <text x="100" y="480" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="13">PARTY</text>
+  <text x="100" y="495" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">HIBACHI</text>
+  <text x="100" y="510" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">BAY AREA</text>
+  
+  <rect x="650" y="440" width="100" height="80" fill="#FF6347" opacity="0.8" rx="10"/>
+  <text x="700" y="465" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">SUMMER</text>
+  <text x="700" y="480" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="13">SPLASH</text>
+  <text x="700" y="495" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">DINING</text>
+  <text x="700" y="510" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">ENTERTAINMENT</text>
+  
+  <!-- Pool water effects -->
+  <ellipse cx="350" cy="390" rx="15" ry="8" fill="white" opacity="0.3"/>
+  <ellipse cx="450" cy="385" rx="12" ry="6" fill="white" opacity="0.3"/>
+  <ellipse cx="400" cy="370" rx="18" ry="9" fill="white" opacity="0.3"/>
+  <ellipse cx="380" cy="400" rx="10" ry="5" fill="white" opacity="0.3"/>
+  <ellipse cx="420" cy="395" rx="14" ry="7" fill="white" opacity="0.3"/>
+  
+  <!-- Pool title -->
+  <text x="400" y="130" text-anchor="middle" fill="#FF6347" font-family="Arial, sans-serif" font-size="28" font-weight="bold">POOL PARTY HIBACHI</text>
+  <text x="400" y="160" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="18">BAY AREA SUMMER ENTERTAINMENT</text>
+  
+  <!-- Summer subtitle -->
+  <text x="400" y="100" text-anchor="middle" fill="#00BFFF" font-family="Arial, sans-serif" font-size="16" font-weight="bold">MAKING A SPLASH WITH HIBACHI</text>
+</svg>

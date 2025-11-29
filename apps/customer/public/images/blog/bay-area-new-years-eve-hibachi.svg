@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- New Year's Eve celebration background -->
+  <defs>
+    <linearGradient id="nightSkyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#191970"/>
+      <stop offset="50%" style="stop-color:#483D8B"/>
+      <stop offset="100%" style="stop-color:#2F4F4F"/>
+    </linearGradient>
+    <radialGradient id="fireworks1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFD700"/>
+      <stop offset="50%" style="stop-color:#FF6347"/>
+      <stop offset="100%" style="stop-color:transparent"/>
+    </radialGradient>
+    <radialGradient id="fireworks2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FF69B4"/>
+      <stop offset="50%" style="stop-color:#00CED1"/>
+      <stop offset="100%" style="stop-color:transparent"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Night sky background -->
+  <rect width="800" height="600" fill="url(#nightSkyGradient)"/>
+  
+  <!-- Stars -->
+  <circle cx="100" cy="80" r="2" fill="#FFD700"/>
+  <circle cx="200" cy="60" r="1.5" fill="white"/>
+  <circle cx="300" cy="90" r="2" fill="#FFD700"/>
+  <circle cx="600" cy="70" r="1.5" fill="white"/>
+  <circle cx="700" cy="50" r="2" fill="#FFD700"/>
+  <circle cx="150" cy="120" r="1" fill="white"/>
+  <circle cx="500" cy="110" r="1" fill="white"/>
+  
+  <!-- Fireworks -->
+  <circle cx="650" cy="150" r="30" fill="url(#fireworks1)" opacity="0.7"/>
+  <line x1="650" y1="120" x2="650" y2="180" stroke="#FFD700" stroke-width="2"/>
+  <line x1="620" y1="150" x2="680" y2="150" stroke="#FFD700" stroke-width="2"/>
+  <line x1="630" y1="130" x2="670" y2="170" stroke="#FF6347" stroke-width="1.5"/>
+  <line x1="670" y1="130" x2="630" y2="170" stroke="#FF6347" stroke-width="1.5"/>
+  
+  <circle cx="150" cy="180" r="25" fill="url(#fireworks2)" opacity="0.6"/>
+  <line x1="150" y1="155" x2="150" y2="205" stroke="#FF69B4" stroke-width="2"/>
+  <line x1="125" y1="180" x2="175" y2="180" stroke="#FF69B4" stroke-width="2"/>
+  <line x1="135" y1="165" x2="165" y2="195" stroke="#00CED1" stroke-width="1.5"/>
+  <line x1="165" y1="165" x2="135" y2="195" stroke="#00CED1" stroke-width="1.5"/>
+  
+  <!-- Bay Area cityscape silhouette -->
+  <rect x="0" y="450" width="800" height="150" fill="#2F4F4F"/>
+  <rect x="50" y="350" width="40" height="100" fill="#1C1C1C"/>
+  <rect x="100" y="380" width="30" height="70" fill="#1C1C1C"/>
+  <rect x="140" y="360" width="45" height="90" fill="#1C1C1C"/>
+  <rect x="200" y="340" width="35" height="110" fill="#1C1C1C"/>
+  <rect x="250" y="370" width="40" height="80" fill="#1C1C1C"/>
+  <rect x="650" y="320" width="50" height="130" fill="#1C1C1C"/>
+  <rect x="710" y="360" width="35" height="90" fill="#1C1C1C"/>
+  
+  <!-- Building windows (lit up for celebration) -->
+  <rect x="55" y="360" width="4" height="4" fill="#FFD700"/>
+  <rect x="65" y="360" width="4" height="4" fill="#FFD700"/>
+  <rect x="75" y="360" width="4" height="4" fill="#FFD700"/>
+  <rect x="145" y="370" width="4" height="4" fill="#FFD700"/>
+  <rect x="155" y="370" width="4" height="4" fill="#FFD700"/>
+  <rect x="205" y="350" width="4" height="4" fill="#FFD700"/>
+  <rect x="215" y="350" width="4" height="4" fill="#FFD700"/>
+  
+  <!-- Elegant hibachi dining setup -->
+  <rect x="300" y="380" width="200" height="30" fill="#8B4513" rx="8"/>
+  <rect x="295" y="400" width="10" height="35" fill="#654321"/>
+  <rect x="505" y="400" width="10" height="35" fill="#654321"/>
+  
+  <!-- Hibachi grill with New Year's special -->
+  <rect x="350" y="320" width="100" height="60" fill="#2F4F4F" rx="10"/>
+  <rect x="370" y="315" width="60" height="10" fill="#FF4500"/>
+  <circle cx="380" r="5" cy="318" fill="#FFD700"/>
+  <circle cx="400" r="5" cy="318" fill="#FF6347"/>
+  <circle cx="420" r="5" cy="318" fill="#FFD700"/>
+  
+  <!-- Professional hibachi chef in formal attire -->
+  <circle cx="400" cy="280" r="18" fill="#FDBCB4"/>
+  <rect x="388" y="298" width="24" height="30" fill="white"/>
+  <rect x="385" y="328" width="30" height="35" fill="#000"/>
+  <rect x="388" y="363" width="8" height="25" fill="#FDBCB4"/>
+  <rect x="404" y="363" width="8" height="25" fill="#FDBCB4"/>
+  
+  <!-- Chef's formal hat -->
+  <rect x="392" y="270" width="16" height="10" fill="white"/>
+  <ellipse cx="400" cy="265" rx="12" ry="8" fill="white"/>
+  
+  <!-- Bow tie -->
+  <polygon points="395,310 405,310 400,315 395,320 405,320 400,315" fill="#000"/>
+  
+  <!-- Elegant guests in formal wear -->
+  <!-- Lady in evening dress -->
+  <circle cx="320" cy="340" r="12" fill="#FDBCB4"/>
+  <rect x="312" y="352" width="16" height="35" fill="#8B008B"/>
+  <rect x="314" y="387" width="12" height="20" fill="#000080"/>
+  <rect x="316" y="407" width="8" height="10" fill="#8B4513"/>
+  
+  <!-- Gentleman in tuxedo -->
+  <circle cx="480" cy="340" r="12" fill="#FDBCB4"/>
+  <rect x="472" y="352" width="16" height="35" fill="#000"/>
+  <rect x="474" y="387" width="12" height="20" fill="#000"/>
+  <rect x="476" y="407" width="8" height="10" fill="#8B4513"/>
+  <rect x="476" y="352" width="8" height="25" fill="white"/>
+  
+  <!-- Champagne service -->
+  <rect x="550" y="350" width="30" height="50" fill="#C0C0C0" rx="5"/>
+  <ellipse cx="565" cy="345" rx="8" ry="3" fill="#FFD700"/>
+  <rect x="560" y="340" width="10" height="8" fill="#32CD32"/>
+  <rect x="562" y="335" width="6" height="8" fill="#228B22"/>
+  
+  <!-- Champagne glasses -->
+  <polygon points="340,375 345,375 344,365 341,365" fill="white"/>
+  <ellipse cx="342.5" cy="360" rx="3" ry="2" fill="#FFD700"/>
+  
+  <polygon points="460,375 465,375 464,365 461,365" fill="white"/>
+  <ellipse cx="462.5" cy="360" rx="3" ry="2" fill="#FFD700"/>
+  
+  <!-- Countdown clock/timer -->
+  <circle cx="400" cy="220" r="40" fill="#000" stroke="#FFD700" stroke-width="3"/>
+  <text x="400" y="210" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="14" font-weight="bold">11:59</text>
+  <text x="400" y="225" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="10">DEC 31</text>
+  <text x="400" y="240" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="12" font-weight="bold">2025</text>
+  
+  <!-- Clock hands -->
+  <line x1="400" y1="220" x2="400" y2="195" stroke="#FFD700" stroke-width="3"/>
+  <line x1="400" y1="220" x2="420" y2="220" stroke="#FFD700" stroke-width="2"/>
+  
+  <!-- Party decorations -->
+  <!-- Golden streamers -->
+  <path d="M 200 250 Q 220 240 240 250 Q 260 260 280 250" stroke="#FFD700" stroke-width="3" fill="none"/>
+  <path d="M 520 250 Q 540 240 560 250 Q 580 260 600 250" stroke="#FFD700" stroke-width="3" fill="none"/>
+  
+  <!-- Balloons -->
+  <circle cx="150" cy="300" r="12" fill="#FFD700"/>
+  <line x1="150" y1="312" x2="150" y2="350" stroke="#000" stroke-width="1"/>
+  <circle cx="170" cy="290" r="12" fill="#FF69B4"/>
+  <line x1="170" y1="302" x2="170" y2="350" stroke="#000" stroke-width="1"/>
+  <circle cx="630" cy="280" r="12" fill="#00CED1"/>
+  <line x1="630" y1="292" x2="630" y2="330" stroke="#000" stroke-width="1"/>
+  <circle cx="650" cy="270" r="12" fill="#FFD700"/>
+  <line x1="650" y1="282" x2="650" y2="330" stroke="#000" stroke-width="1"/>
+  
+  <!-- Special NYE hibachi menu -->
+  <rect x="100" y="400" width="80" height="60" fill="#8B008B" opacity="0.8" rx="8"/>
+  <text x="140" y="420" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="11" font-weight="bold">NYE</text>
+  <text x="140" y="435" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="11" font-weight="bold">SPECIAL</text>
+  <text x="140" y="450" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="9">LOBSTER</text>
+  
+  <!-- Gourmet food on grill -->
+  <ellipse cx="380" cy="315" rx="10" ry="6" fill="#FF69B4"/>
+  <ellipse cx="400" cy="315" rx="12" ry="7" fill="#FFD700"/>
+  <ellipse cx="420" cy="315" rx="10" ry="6" fill="#FF6347"/>
+  
+  <!-- Hibachi flames -->
+  <polygon points="380,315 385,305 375,305" fill="#FF4500" opacity="0.8"/>
+  <polygon points="400,315 405,305 395,305" fill="#FF6347" opacity="0.8"/>
+  <polygon points="420,315 425,305 415,305" fill="#FFD700" opacity="0.8"/>
+  
+  <!-- Confetti falling -->
+  <rect x="250" y="200" width="2" height="2" fill="#FFD700" transform="rotate(45 251 201)"/>
+  <rect x="300" y="180" width="2" height="2" fill="#FF69B4" transform="rotate(30 301 181)"/>
+  <rect x="450" y="190" width="2" height="2" fill="#00CED1" transform="rotate(60 451 191)"/>
+  <rect x="500" y="170" width="2" height="2" fill="#FFD700" transform="rotate(15 501 171)"/>
+  <rect x="350" y="160" width="2" height="2" fill="#FF6347" transform="rotate(75 351 161)"/>
+  
+  <!-- "2026" text appearing -->
+  <text x="700" y="250" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="24" font-weight="bold" opacity="0.8">2026</text>
+  
+  <!-- Party hats -->
+  <polygon points="315,325 325,325 320,310" fill="#8B008B"/>
+  <circle cx="320" cy="310" r="2" fill="#FFD700"/>
+  <polygon points="475,325 485,325 480,310" fill="#000"/>
+  <circle cx="480" cy="310" r="2" fill="#FFD700"/>
+</svg>

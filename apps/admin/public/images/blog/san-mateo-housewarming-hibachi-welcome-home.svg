@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- San Mateo housewarming hibachi welcome home -->
+  <defs>
+    <linearGradient id="housewarmingSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF8DC"/>
+      <stop offset="50%" style="stop-color:#F0E68C"/>
+      <stop offset="100%" style="stop-color:#DAA520"/>
+    </linearGradient>
+    <linearGradient id="sanMateoBuilding" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#DEB887"/>
+      <stop offset="100%" style="stop-color:#CD853F"/>
+    </linearGradient>
+    <radialGradient id="welcomeGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#F0E68C; opacity:0.8"/>
+      <stop offset="100%" style="stop-color:transparent"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Housewarming celebration sky -->
+  <rect width="800" height="600" fill="url(#housewarmingSky)"/>
+  
+  <!-- Welcome stars -->
+  <circle cx="140" cy="50" r="3.5" fill="#DAA520"/>
+  <circle cx="270" cy="35" r="3" fill="white"/>
+  <circle cx="410" cy="65" r="3.5" fill="#DAA520"/>
+  <circle cx="550" cy="40" r="3" fill="white"/>
+  <circle cx="690" cy="70" r="3.5" fill="#DAA520"/>
+  
+  <!-- San Mateo residential area -->
+  <rect x="70" y="150" width="95" height="140" fill="url(#sanMateoBuilding)" rx="10"/>
+  <rect x="185" y="130" width="105" height="160" fill="url(#sanMateoBuilding)" rx="10"/>
+  <rect x="310" y="160" width="85" height="130" fill="url(#sanMateoBuilding)" rx="10"/>
+  <rect x="415" y="140" width="100" height="150" fill="url(#sanMateoBuilding)" rx="10"/>
+  <rect x="535" y="155" width="90" height="135" fill="url(#sanMateoBuilding)" rx="10"/>
+  <rect x="645" y="165" width="105" height="125" fill="url(#sanMateoBuilding)" rx="10"/>
+  
+  <!-- New home (featured house) -->
+  <rect x="350" y="120" width="100" height="80" fill="#8B4513"/>
+  <polygon points="345,120 455,120 400,80" fill="#CD853F"/> <!-- Roof -->
+  <rect x="370" y="150" width="15" height="25" fill="#654321"/> <!-- Door -->
+  <circle cx="377" cy="162" r="1" fill="#FFD700"/> <!-- Door knob -->
+  <rect x="360" y="135" width="12" height="12" fill="#87CEEB"/> <!-- Window -->
+  <rect x="428" y="135" width="12" height="12" fill="#87CEEB"/> <!-- Window -->
+  <!-- Welcome mat -->
+  <rect x="375" y="175" width="10" height="6" fill="#8B008B"/>
+  <text x="380" y="179" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="4" font-weight="bold">WELCOME</text>
+  
+  <!-- Housewarming celebration venue -->
+  <rect x="120" y="320" width="560" height="220" fill="#FFFACD" opacity="0.95" rx="40"/>
+  <text x="400" y="355" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="30" font-weight="bold">SAN MATEO HOUSEWARMING</text>
+  <text x="400" y="385" text-anchor="middle" fill="#DAA520" font-family="Arial, sans-serif" font-size="24">WELCOME HOME HIBACHI CELEBRATION</text>
+  
+  <!-- Housewarming hibachi setup -->
+  <rect x="140" y="290" width="520" height="160" fill="#2F4F4F" rx="25"/>
+  <rect x="150" y="285" width="500" height="40" fill="#8B4513"/>
+  
+  <!-- Welcome home hibachi arrangement -->
+  <circle cx="170" cy="295" r="15" fill="#DAA520"/>
+  <circle cx="210" cy="295" r="15" fill="#F0E68C"/>
+  <circle cx="250" cy="295" r="15" fill="#DAA520"/>
+  <circle cx="290" cy="295" r="15" fill="#F0E68C"/>
+  <circle cx="330" cy="295" r="15" fill="#DAA520"/>
+  <circle cx="370" cy="295" r="15" fill="#F0E68C"/>
+  <circle cx="410" cy="295" r="15" fill="#DAA520"/>
+  <circle cx="450" cy="295" r="15" fill="#F0E68C"/>
+  <circle cx="490" cy="295" r="15" fill="#DAA520"/>
+  <circle cx="530" cy="295" r="15" fill="#F0E68C"/>
+  <circle cx="570" cy="295" r="15" fill="#DAA520"/>
+  <circle cx="610" cy="295" r="15" fill="#F0E68C"/>
+  <circle cx="650" cy="295" r="15" fill="#DAA520"/>
+  
+  <!-- Housewarming hibachi chef -->
+  <circle cx="400" cy="220" r="23" fill="#FDBCB4"/>
+  <rect x="382" y="243" width="36" height="40" fill="white"/>
+  <rect x="377" y="283" width="46" height="47" fill="#8B4513"/> <!-- Brown welcome outfit -->
+  <rect x="381" y="330" width="16" height="33" fill="#FDBCB4"/>
+  <rect x="403" y="330" width="16" height="33" fill="#FDBCB4"/>
+  
+  <!-- Housewarming chef hat -->
+  <rect x="387" y="204" width="26" height="15" fill="white"/>
+  <circle cx="400" cy="204" r="17" fill="white"/>
+  <polygon points="395,199 405,199 400,194" fill="#DAA520"/> <!-- House accent -->
+  
+  <!-- New homeowners -->
+  <!-- Wife -->
+  <circle cx="310" cy="440" r="21" fill="#FDBCB4"/>
+  <rect x="294" y="461" width="32" height="38" fill="#F0E68C"/> <!-- Golden welcome dress -->
+  <rect x="296" y="499" width="28" height="32" fill="#F0E68C"/>
+  <rect x="298" y="531" width="24" height="24" fill="#CD853F"/> <!-- Comfortable shoes -->
+  <!-- House keys -->
+  <rect x="325" y="475" width="4" height="8" fill="#FFD700"/>
+  <circle cx="327" cy="477" r="2" fill="#8B4513"/>
+  <!-- Welcome gift -->
+  <rect x="280" y="480" width="8" height="6" fill="#8B4513"/>
+  <rect x="281" y="481" width="6" height="2" fill="#DAA520"/>
+  
+  <!-- Husband -->
+  <circle cx="490" cy="440" r="21" fill="#FDBCB4"/>
+  <rect x="474" y="461" width="32" height="38" fill="#8B4513"/> <!-- Brown casual outfit -->
+  <rect x="476" y="499" width="28" height="32" fill="#000080"/>
+  <rect x="478" y="531" width="24" height="24" fill="#654321"/>
+  <!-- New home deed -->
+  <rect x="510" y="475" width="10" height="8" fill="white"/>
+  <rect x="511" y="476" width="8" height="2" fill="#8B4513"/>
+  <!-- Tool for house projects -->
+  <rect x="505" y="485" width="2" height="12" fill="#8B4513"/>
+  <rect x="503" y="490" width="6" height="3" fill="#DAA520"/>
+  
+  <!-- Housewarming guests -->
+  <!-- Neighbor with welcome basket -->
+  <circle cx="260" cy="460" r="19" fill="#FDBCB4"/>
+  <rect x="246" y="479" width="28" height="34" fill="#9370DB"/> <!-- Purple neighborly outfit -->
+  <rect x="248" y="513" width="24" height="28" fill="#9370DB"/>
+  <rect x="250" y="541" width="20" height="22" fill="#8B4513"/>
+  <!-- Welcome basket -->
+  <ellipse cx="235" cy="495" rx="8" ry="6" fill="#8B4513"/>
+  <rect x="232" y="490" width="6" height="3" fill="#DAA520"/> <!-- Basket contents -->
+  <rect x="237" y="488" width="4" height="4" fill="#FF6347"/> <!-- Fruit -->
+  
+  <!-- Friend with housewarming gift -->
+  <circle cx="540" cy="460" r="19" fill="#FDBCB4"/>
+  <rect x="526" y="479" width="28" height="34" fill="#32CD32"/> <!-- Green celebration outfit -->
+  <rect x="528" y="513" width="24" height="28" fill="#000080"/>
+  <rect x="530" y="541" width="20" height="22" fill="#654321"/>
+  <!-- Housewarming gift box -->
+  <rect x="555" y="485" width="10" height="8" fill="#DAA520"/>
+  <rect x="556" y="486" width="8" height="2" fill="#8B4513"/>
+  <!-- Gift bow -->
+  <polygon points="560,483 562,485 558,485" fill="#FF6347"/>
+  
+  <!-- Family member with plants -->
+  <circle cx="370" cy="470" r="18" fill="#FDBCB4"/>
+  <rect x="357" y="488" width="26" height="32" fill="#FF6347"/> <!-- Coral family outfit -->
+  <rect x="359" y="520" width="22" height="26" fill="#FF6347"/>
+  <rect x="361" y="546" width="18" height="20" fill="#8B4513"/>
+  <!-- Housewarming plant -->
+  <rect x="345" y="495" width="4" height="8" fill="#8B4513"/> <!-- Pot -->
+  <circle cx="347" cy="495" r="3" fill="#32CD32"/> <!-- Plant -->
+  <rect x="346" y="492" width="2" height="6" fill="#228B22"/> <!-- Stem -->
+  
+  <!-- Colleague with house decor -->
+  <circle cx="430" cy="470" r="18" fill="#FDBCB4"/>
+  <rect x="417" y="488" width="26" height="32" fill="#4169E1"/> <!-- Blue professional outfit -->
+  <rect x="419" y="520" width="22" height="26" fill="#4169E1"/>
+  <rect x="421" y="546" width="18" height="20" fill="#000000"/>
+  <!-- Home decoration -->
+  <rect x="450" y="495" width="8" height="6" fill="#DAA520"/>
+  <circle cx="454" cy="498" r="2" fill="#8B4513"/> <!-- Picture frame -->
+  
+  <!-- Housewarming dining table -->
+  <ellipse cx="400" cy="575" rx="200" ry="60" fill="#8B4513"/>
+  <ellipse cx="400" cy="570" rx="190" ry="55" fill="#DAA520" opacity="0.3"/>
+  
+  <!-- Welcome home place settings -->
+  <circle cx="250" cy="570" r="17" fill="white"/>
+  <circle cx="250" cy="570" r="13" fill="#DAA520"/>
+  <circle cx="320" cy="570" r="17" fill="white"/>
+  <circle cx="320" cy="570" r="13" fill="#F0E68C"/>
+  <circle cx="390" cy="570" r="17" fill="white"/>
+  <circle cx="390" cy="570" r="13" fill="#DAA520"/>
+  <circle cx="460" cy="570" r="17" fill="white"/>
+  <circle cx="460" cy="570" r="13" fill="#F0E68C"/>
+  <circle cx="530" cy="570" r="17" fill="white"/>
+  <circle cx="530" cy="570" r="13" fill="#DAA520"/>
+  <circle cx="600" cy="570" r="17" fill="white"/>
+  <circle cx="600" cy="570" r="13" fill="#F0E68C"/>
+  
+  <!-- Housewarming beverages -->
+  <rect x="244" y="558" width="6" height="17" fill="#DAA520"/> <!-- Golden cider -->
+  <rect x="314" y="558" width="6" height="17" fill="#8B008B"/> <!-- Wine -->
+  <rect x="384" y="558" width="6" height="17" fill="#F0E68C"/> <!-- Sparkling cider -->
+  <rect x="454" y="558" width="6" height="17" fill="#DAA520"/> <!-- Golden cider -->
+  <rect x="524" y="558" width="6" height="17" fill="#8B008B"/> <!-- Wine -->
+  <rect x="594" y="558" width="6" height="17" fill="#F0E68C"/> <!-- Sparkling cider -->
+  
+  <!-- Housewarming title -->
+  <text x="400" y="100" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="34" font-weight="bold">SAN MATEO HOUSEWARMING</text>
+  <text x="400" y="140" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="26">WELCOME HOME HIBACHI</text>
+  
+  <!-- Welcome home zones -->
+  <rect x="20" y="490" width="140" height="105" fill="#8B4513" opacity="0.8" rx="20"/>
+  <text x="90" y="520" text-anchor="middle" fill="#DAA520" font-family="Arial, sans-serif" font-size="18" font-weight="bold">WELCOME</text>
+  <text x="90" y="540" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16">HOME</text>
+  <text x="90" y="555" text-anchor="middle" fill="#DAA520" font-family="Arial, sans-serif" font-size="15">HIBACHI</text>
+  <text x="90" y="570" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">CELEBRATION</text>
+  <text x="90" y="585" text-anchor="middle" fill="#DAA520" font-family="Arial, sans-serif" font-size="13">SAN MATEO</text>
+  
+  <rect x="640" y="490" width="140" height="105" fill="#DAA520" opacity="0.8" rx="20"/>
+  <text x="710" y="520" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">NEW HOME</text>
+  <text x="710" y="540" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="16">INTERACTIVE</text>
+  <text x="710" y="555" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="15">DINING</text>
+  <text x="710" y="570" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="14">FIRST</text>
+  <text x="710" y="585" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="13">IMPRESSION</text>
+  
+  <!-- Welcome home hibachi specialties -->
+  <ellipse cx="180" cy="293" rx="19" ry="13" fill="#DAA520"/>
+  <ellipse cx="220" cy="293" rx="20" ry="13" fill="#F0E68C"/>
+  <ellipse cx="260" cy="293" rx="19" ry="13" fill="#DAA520"/>
+  <ellipse cx="300" cy="293" rx="18" ry="12" fill="#F0E68C"/>
+  <ellipse cx="340" cy="293" rx="19" ry="13" fill="#DAA520"/>
+  <ellipse cx="380" cy="293" rx="20" ry="13" fill="#F0E68C"/>
+  <ellipse cx="420" cy="293" rx="19" ry="13" fill="#DAA520"/>
+  <ellipse cx="460" cy="293" rx="18" ry="12" fill="#F0E68C"/>
+  <ellipse cx="500" cy="293" rx="19" ry="13" fill="#DAA520"/>
+  <ellipse cx="540" cy="293" rx="20" ry="13" fill="#F0E68C"/>
+  <ellipse cx="580" cy="293" rx="19" ry="13" fill="#DAA520"/>
+  <ellipse cx="620" cy="293" rx="18" ry="12" fill="#F0E68C"/>
+  <ellipse cx="660" cy="293" rx="19" ry="13" fill="#DAA520"/>
+  
+  <!-- Welcome home flames -->
+  <polygon points="180,293 187,282 173,282" fill="#DAA520" opacity="0.9"/>
+  <polygon points="220,293 227,282 213,282" fill="#F0E68C" opacity="0.9"/>
+  <polygon points="260,293 267,282 253,282" fill="#DAA520" opacity="0.9"/>
+  <polygon points="300,293 307,282 293,282" fill="#F0E68C" opacity="0.9"/>
+  <polygon points="340,293 347,282 333,282" fill="#DAA520" opacity="0.9"/>
+  <polygon points="380,293 387,282 373,282" fill="#F0E68C" opacity="0.9"/>
+  <polygon points="420,293 427,282 413,282" fill="#DAA520" opacity="0.9"/>
+  <polygon points="460,293 467,282 453,282" fill="#F0E68C" opacity="0.9"/>
+  <polygon points="500,293 507,282 493,282" fill="#DAA520" opacity="0.9"/>
+  <polygon points="540,293 547,282 533,282" fill="#F0E68C" opacity="0.9"/>
+  <polygon points="580,293 587,282 573,282" fill="#DAA520" opacity="0.9"/>
+  <polygon points="620,293 627,282 613,282" fill="#F0E68C" opacity="0.9"/>
+  <polygon points="660,293 667,282 653,282" fill="#DAA520" opacity="0.9"/>
+  
+  <!-- Housewarming lighting -->
+  <rect x="130" y="405" width="5" height="23" fill="#DAA520"/>
+  <ellipse cx="132.5" cy="405" rx="4" ry="6" fill="#FF6347"/>
+  
+  <rect x="665" y="415" width="5" height="23" fill="#DAA520"/>
+  <ellipse cx="667.5" cy="415" rx="4" ry="6" fill="#FF6347"/>
+  
+  <!-- Home sweet home decorations -->
+  <polygon points="80,370 90,370 85,360" fill="#8B4513"/> <!-- House shape -->
+  <rect x="81" y="370" width="8" height="6" fill="#DAA520"/>
+  <text x="85" y="385" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="8" font-weight="bold">HOME</text>
+  
+  <polygon points="710,380 720,380 715,370" fill="#8B4513"/> <!-- House shape -->
+  <rect x="711" y="380" width="8" height="6" fill="#DAA520"/>
+  <text x="715" y="395" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="8" font-weight="bold">SWEET</text>
+  
+  <!-- Welcome atmosphere -->
+  <circle cx="400" cy="410" r="270" fill="url(#welcomeGlow)"/>
+  
+  <!-- Moving boxes -->
+  <rect x="60" y="430" width="15" height="12" fill="#8B4513"/>
+  <rect x="62" y="432" width="11" height="2" fill="#DAA520"/>
+  <text x="67" y="439" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="6" font-weight="bold">BOOKS</text>
+  
+  <rect x="725" y="440" width="15" height="12" fill="#8B4513"/>
+  <rect x="727" y="442" width="11" height="2" fill="#DAA520"/>
+  <text x="732" y="449" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="6" font-weight="bold">DISHES</text>
+  
+  <!-- Welcome subtitle -->
+  <text x="400" y="75" text-anchor="middle" fill="#DAA520" font-family="Arial, sans-serif" font-size="22" font-weight="bold">PERFECT FIRST IMPRESSION WITH INTERACTIVE ENTERTAINMENT</text>
+</svg>

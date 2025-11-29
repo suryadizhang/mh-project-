@@ -126,10 +126,10 @@ export const faqs: FaqItem[] = [
     id: 'deposit-policy',
     question: "What's the deposit policy?",
     answer:
-      '$100 refundable deposit secures your date and is deducted from final bill (refundable if canceled 7+ days before event). Remaining balance due on event date. Accept Venmo Business, Zelle Business, Cash, Credit Card.',
+      '$100 refundable deposit secures your date and is deducted from final bill. Deposit is refundable if canceled 4+ days before event, non-refundable within 4 days. Remaining balance due on event date. Accept Venmo Business, Zelle Business, Cash, Credit Card.',
     category: 'Booking & Payments',
     subcategory: 'Deposits & Balance',
-    tags: ['$100 deposit', 'refundable', 'deducted', 'final bill'],
+    tags: ['$100 deposit', 'refundable', '4 days', 'deducted', 'final bill'],
     confidence: 'high',
     source_urls: ['/BookUs']
   },
@@ -231,10 +231,131 @@ export const faqs: FaqItem[] = [
     id: 'dietary-restrictions',
     question: 'Can you accommodate dietary restrictions?',
     answer:
-      'Yes! Vegetarian, vegan, gluten-free, dairy-free, halal, kosher. Please notify us 48+ hours in advance so our chef can prepare. Email cs@myhibachichef.com with specific needs.',
+      '✅ YES! We accommodate: Vegetarian, Vegan, Gluten-Free, Dairy-Free (we use dairy-free butter!), Nut-Free (100% nut-free facility!), Sesame-Free, Halal (Restaurant Depot certified), and Kosher-Friendly. 🏆 ALLERGEN ADVANTAGES: We are 100% nut-free, sesame-free, use dairy-free butter, and offer gluten-free soy sauce. Please notify us 48+ hours in advance. ⚠️ IMPORTANT: Shared cooking surfaces mean we cannot guarantee 100% allergen-free. View /allergens or email cs@myhibachichef.com for details.',
     category: 'Dietary & Allergens',
     subcategory: 'Dietary Accommodations',
-    tags: ['vegetarian', 'vegan', 'gluten-free', 'dairy-free', 'halal', 'kosher', '48 hours'],
+    tags: ['vegetarian', 'vegan', 'gluten-free', 'dairy-free', 'halal', 'kosher', 'nut-free', 'sesame-free', '48 hours', 'allergens', 'cross-contamination'],
+    confidence: 'high',
+    source_urls: ['/BookUs', '/allergens']
+  },
+  {
+    id: 'allergen-list',
+    question: 'What allergens are in your hibachi menu?',
+    answer:
+      'Our menu only contains 2 major allergens: Shellfish (shrimp, scallops, lobster) and Eggs (fried rice only). 🏆 ALLERGEN-FRIENDLY ADVANTAGES: We are 100% NUT-FREE (no peanuts, tree nuts), SESAME-FREE (no sesame oil/seeds), use DAIRY-FREE butter, and offer GLUTEN-FREE soy sauce. We use halal-certified ingredients from Restaurant Depot and do NOT use pork or cooking alcohol. ⚠️ Cross-contamination risk due to shared cooking surfaces. View full guide at /allergens.',
+    category: 'Dietary & Allergens',
+    subcategory: 'Shellfish & Sesame',
+    tags: ['allergens', 'shellfish', 'eggs', 'nut-free', 'sesame-free', 'dairy-free', 'gluten-free option', 'halal', 'fda major 9', 'cross-contamination'],
+    confidence: 'high',
+    source_urls: ['/allergens']
+  },
+  {
+    id: 'allergen-friendly-facility',
+    question: 'Is your facility allergen-friendly?',
+    answer:
+      '🏆 YES! We are proudly: 100% NUT-FREE (no peanuts or tree nuts ever), SESAME-FREE (no sesame oil or seeds), DAIRY-FREE (we use dairy-free butter), and offer GLUTEN-FREE soy sauce option. Our only major allergens are: Shellfish (shrimp, scallops, lobster - which guests can avoid) and Eggs (only in fried rice). This makes us one of the MOST allergen-friendly hibachi services available!',
+    category: 'Dietary & Allergens',
+    subcategory: 'Dietary Accommodations',
+    tags: ['allergen-friendly', 'nut-free', 'sesame-free', 'dairy-free', 'gluten-free', '100% safe', 'competitive advantage'],
+    confidence: 'high',
+    source_urls: ['/allergens']
+  },
+  {
+    id: 'halal-certification',
+    question: 'Is your menu halal-certified?',
+    answer:
+      '✅ YES! All our proteins (chicken, beef, seafood) are halal-certified through Restaurant Depot. We do NOT use pork products, and sake is served as a complementary DRINK only (never used in cooking). Our dairy-free butter and vegetable oil are halal-compliant. We are proud to serve our Muslim customers with confidence!',
+    category: 'Dietary & Allergens',
+    subcategory: 'Dietary Accommodations',
+    tags: ['halal', 'halal-certified', 'restaurant depot', 'muslim', 'islamic dietary', 'no pork', 'no cooking alcohol'],
+    confidence: 'high',
+    source_urls: ['/menu', '/allergens']
+  },
+  {
+    id: 'kosher-friendly',
+    question: 'Can you accommodate kosher dietary requirements?',
+    answer:
+      '✅ KOSHER-FRIENDLY (not certified): We do NOT use pork, use dairy-free butter (no meat/dairy mixing), and offer salmon (fish with fins and scales = kosher). Our Jewish customers can choose: Chicken, Beef, Salmon, or Vegetables (avoiding shellfish). Most Conservative and Reform Jewish customers find our menu very accommodating. For strictly Orthodox kosher certification, we would need rabbi approval and cannot guarantee due to our shellfish offerings.',
+    category: 'Dietary & Allergens',
+    subcategory: 'Dietary Accommodations',
+    tags: ['kosher', 'kosher-friendly', 'jewish', 'no pork', 'dairy-free', 'salmon', 'fins and scales', 'accommodating'],
+    confidence: 'high',
+    source_urls: ['/menu', '/allergens']
+  },
+  {
+    id: 'dairy-free-menu',
+    question: 'Is your menu dairy-free?',
+    answer:
+      '✅ YES! We use DAIRY-FREE butter for all cooking. This means our chicken, steak, seafood, and vegetables are naturally dairy-free. Perfect for lactose intolerant guests, paleo diets, and vegan customers. Only our fried rice contains eggs (no dairy). This is a MAJOR advantage over typical hibachi restaurants that use regular butter.',
+    category: 'Dietary & Allergens',
+    subcategory: 'Dietary Accommodations',
+    tags: ['dairy-free', 'lactose intolerant', 'no dairy', 'dairy-free butter', 'vegan option', 'paleo'],
+    confidence: 'high',
+    source_urls: ['/menu', '/allergens']
+  },
+  {
+    id: 'nut-free-facility',
+    question: 'Are you a nut-free facility?',
+    answer:
+      '✅ 100% NUT-FREE! We do NOT use peanuts, tree nuts, or any nut products in our cooking, sauces, or ingredients. This makes us SAFE for severe nut allergy customers. We use canola oil for cooking (nut-free). ⚠️ However, we still use shared cooking surfaces, so please contact us for severe allergy protocols: cs@myhibachichef.com or (916) 740-8768.',
+    category: 'Dietary & Allergens',
+    subcategory: 'Dietary Accommodations',
+    tags: ['nut-free', '100% nut-free', 'peanut-free', 'tree nut-free', 'severe allergies', 'safe', 'canola oil'],
+    confidence: 'high',
+    source_urls: ['/allergens']
+  },
+  {
+    id: 'gluten-free-options',
+    question: 'Do you have gluten-free options?',
+    answer:
+      '✅ YES! We offer GLUTEN-FREE soy sauce as an option. All our proteins (chicken, steak, seafood, tofu) are naturally gluten-free when cooked without regular soy sauce. Vegetables, salads, and rice are gluten-free. ⚠️ Items to avoid for celiac: Gyoza (contains wheat), yakisoba noodles (wheat), and regular teriyaki sauce (contains wheat-based soy sauce). Request gluten-free soy sauce when booking!',
+    category: 'Dietary & Allergens',
+    subcategory: 'Gluten-Free',
+    tags: ['gluten-free', 'celiac', 'gluten-free soy sauce', 'wheat-free', 'gf options'],
+    confidence: 'high',
+    source_urls: ['/menu', '/allergens']
+  },
+  {
+    id: 'cross-contamination',
+    question: 'Can you guarantee allergen-free cooking?',
+    answer:
+      'No. We use shared cooking surfaces (hibachi grill), shared utensils, and shared oil for all cooking. While we take precautions to accommodate dietary restrictions, we CANNOT GUARANTEE a 100% allergen-free environment. Airborne particles from shellfish, fish, and soy sauce may be present. If you have severe allergies, please contact us before booking to discuss safety protocols: cs@myhibachichef.com or (916) 740-8768.',
+    category: 'Dietary & Allergens',
+    subcategory: 'Cross‑Contact',
+    tags: ['cross-contamination', 'shared surfaces', 'allergen-free', 'severe allergies', 'safety protocols'],
+    confidence: 'high',
+    source_urls: ['/allergens']
+  },
+  {
+    id: 'menu-change-deadline',
+    question: 'Can I change my menu close to the event date?',
+    answer:
+      'Menu changes are NOT allowed within 12 hours of your event. We prepare fresh ingredients specifically for your party based on your menu selections. Please finalize your menu at least 12 hours before your event date to ensure we have proper ingredients prepared.',
+    category: 'Booking & Payments',
+    subcategory: 'Modifying a Booking',
+    tags: ['menu changes', '12 hours', 'deadline', 'fresh ingredients', 'finalize menu'],
+    confidence: 'high',
+    source_urls: ['/BookUs']
+  },
+  {
+    id: 'food-refund-policy',
+    question: 'Can I get a refund for leftover or uneaten food?',
+    answer:
+      'No refund for ordered food. We cannot keep food that has been out of refrigeration for more than 4 hours due to food safety regulations. Once we prepare and bring your ingredients to the event, those costs are non-refundable even if the food is not consumed.',
+    category: 'Policies (Cancellation, Weather, Refunds)',
+    subcategory: 'Refunds & Credits',
+    tags: ['food refund', 'no refund', 'food safety', '4 hours', 'leftovers', 'uneaten food'],
+    confidence: 'high',
+    source_urls: ['/BookUs']
+  },
+  {
+    id: 'reschedule-timing',
+    question: 'When can I reschedule my event for free?',
+    answer:
+      'One free reschedule is allowed if requested 24+ hours before your event. This gives us time to adjust our chef schedule and ingredient preparation. Reschedules requested within 24 hours of the event or additional reschedules cost $100. This covers our preparation costs and chef scheduling.',
+    category: 'Policies (Cancellation, Weather, Refunds)',
+    subcategory: 'Cancellation & Changes',
+    tags: ['reschedule', 'free reschedule', '24 hours', '$100 fee', 'chef schedule'],
     confidence: 'high',
     source_urls: ['/BookUs']
   },
@@ -244,10 +365,10 @@ export const faqs: FaqItem[] = [
     id: 'cancellation-policy',
     question: "What's your cancellation policy?",
     answer:
-      'Full refund if canceled 7+ days before event. $100 deposit is refundable for cancellations 7+ days before event, non-refundable within 7 days. One free reschedule within 48 hours of booking; additional reschedules cost $100.',
+      '$100 deposit is refundable if canceled 4+ days before event, non-refundable within 4 days. One free reschedule allowed if requested 24+ hours before event; additional reschedules cost $100. Menu changes not allowed within 12 hours of event. No refund for ordered food as we cannot keep food out of refrigeration for more than 4 hours.',
     category: 'Policies (Cancellation, Weather, Refunds)',
     subcategory: 'Cancellation & Changes',
-    tags: ['7 days', 'full refund', 'deposit refundable', 'free reschedule', '$100 fee'],
+    tags: ['4 days', 'deposit refundable', 'free reschedule', '24 hours', '$100 fee', 'menu changes', '12 hours', 'food safety'],
     confidence: 'high',
     source_urls: ['/BookUs']
   },

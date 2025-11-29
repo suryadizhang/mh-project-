@@ -1,0 +1,152 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="oceanSkyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB"/>
+      <stop offset="50%" style="stop-color:#B0E0E6"/>
+      <stop offset="100%" style="stop-color:#E0F6FF"/>
+    </linearGradient>
+    <linearGradient id="oceanGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4682B4"/>
+      <stop offset="100%" style="stop-color:#191970"/>
+    </linearGradient>
+    <linearGradient id="flameGradient" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#4682B4"/>
+      <stop offset="50%" style="stop-color:#87CEEB"/>
+      <stop offset="100%" style="stop-color:#FFD700"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Ocean Sky -->
+  <rect width="800" height="600" fill="url(#oceanSkyGradient)"/>
+  
+  <!-- Ocean Water -->
+  <rect x="0" y="300" width="800" height="150" fill="url(#oceanGradient)"/>
+  
+  <!-- Ocean Waves -->
+  <path d="M 0 350 Q 100 340 200 350 Q 300 360 400 350 Q 500 340 600 350 Q 700 360 800 350 L 800 450 L 0 450 Z" fill="#87CEEB" opacity="0.6"/>
+  
+  <!-- Sandy Beach -->
+  <rect x="0" y="450" width="800" height="150" fill="#F4A460"/>
+  
+  <!-- Half Moon Bay Cliffs -->
+  <path d="M 0 200 Q 150 150 300 200 Q 450 250 600 200 Q 700 150 800 200 L 800 300 L 0 300 Z" fill="#8FBC8F"/>
+  
+  <!-- Coastal Wedding Banner -->
+  <rect x="150" y="50" width="500" height="50" fill="#4682B4" stroke="#FFD700" stroke-width="3"/>
+  <text x="400" y="75" text-anchor="middle" font-family="serif" font-size="18" font-weight="bold" fill="#FFFFFF">HALF MOON BAY COASTAL WEDDING</text>
+  <text x="400" y="92" text-anchor="middle" font-family="serif" font-size="12" fill="#FFD700">Ocean Views Meet Interactive Dining</text>
+
+  <!-- Lighthouse -->
+  <rect x="100" y="180" width="15" height="80" fill="#FFFFFF" stroke="#C0C0C0" stroke-width="2"/>
+  <polygon points="95,180 107,160 120,180" fill="#FF0000"/>
+  <circle cx="107" cy="170" r="5" fill="#FFD700"/>
+
+  <!-- Seagulls -->
+  <path d="M 250 150 Q 255 145 260 150" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+  <path d="M 255 150 Q 260 145 265 150" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+  
+  <path d="M 550 120 Q 555 115 560 120" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+  <path d="M 555 120 Q 560 115 565 120" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+
+  <!-- Beach Hibachi Setup -->
+  <rect x="350" y="520" width="100" height="30" fill="#2F4F4F" stroke="#000" stroke-width="2"/>
+  <circle cx="400" cy="535" r="25" fill="#1C1C1C" stroke="#000" stroke-width="2"/>
+  
+  <!-- Ocean-Themed Flames -->
+  <ellipse cx="400" cy="525" rx="15" ry="20" fill="url(#flameGradient)" opacity="0.9"/>
+  <ellipse cx="395" cy="520" rx="10" ry="15" fill="#87CEEB" opacity="0.8"/>
+  <ellipse cx="405" cy="520" rx="10" ry="15" fill="#4682B4" opacity="0.8"/>
+  <ellipse cx="400" cy="515" rx="8" ry="12" fill="#FFD700" opacity="0.7"/>
+
+  <!-- Coastal Wedding Chef -->
+  <circle cx="420" cy="555" r="12" fill="#FDBCB4"/>
+  <rect x="415" y="567" width="10" height="25" fill="#FFFFFF"/>
+  <rect x="410" y="592" width="20" height="8" fill="#8B4513"/>
+  <!-- Sailor-style chef hat -->
+  <ellipse cx="420" cy="550" rx="10" ry="6" fill="#FFFFFF"/>
+  <rect x="415" y="538" width="10" height="12" fill="#FFFFFF"/>
+  <rect x="415" y="540" width="10" height="3" fill="#4682B4"/>
+  <!-- Chef with seashell and spatula -->
+  <ellipse cx="435" cy="575" rx="3" ry="2" fill="#FFB6C1"/>
+  <line x1="440" y1="580" x2="450" y2="570" stroke="#C0C0C0" stroke-width="2"/>
+
+  <!-- Bride and Groom on Beach -->
+  <!-- Bride -->
+  <circle cx="280" cy="555" r="11" fill="#FDBCB4"/>
+  <rect x="275" y="566" width="10" height="25" fill="#FFFFFF"/>
+  <rect x="270" y="591" width="20" height="8" fill="#F4A460"/>
+  <ellipse cx="280" cy="550" rx="8" ry="4" fill="#FFD700"/>
+  <!-- Ocean breeze veil -->
+  <path d="M 272 548 Q 280 535 295 545 Q 290 560 275 560 Z" fill="#FFFFFF" opacity="0.8"/>
+  <!-- Beach bouquet -->
+  <circle cx="265" cy="575" r="4" fill="#87CEEB"/>
+  <circle cx="268" cy="573" r="3" fill="#FFFFFF"/>
+  <circle cx="262" cy="578" r="3" fill="#4682B4"/>
+
+  <!-- Groom -->
+  <circle cx="300" cy="560" r="11" fill="#FDBCB4"/>
+  <rect x="295" y="571" width="10" height="25" fill="#4682B4"/>
+  <rect x="293" y="596" width="14" height="8" fill="#F4A460"/>
+  <ellipse cx="300" cy="555" rx="8" ry="4" fill="#8B4513"/>
+  <!-- Casual coastal tie -->
+  <polygon points="295,574 300,577 305,574 300,580" fill="#FFFFFF"/>
+
+  <!-- Wedding Guests with Ocean Theme -->
+  <circle cx="520" cy="555" r="10" fill="#FDBCB4"/>
+  <rect x="515" y="565" width="10" height="20" fill="#87CEEB"/>
+  <rect x="513" y="585" width="14" height="8" fill="#F4A460"/>
+  <ellipse cx="520" cy="550" rx="7" ry="4" fill="#C0C0C0"/>
+  <!-- Sunhat -->
+  <ellipse cx="520" cy="545" rx="12" ry="4" fill="#F4A460"/>
+
+  <circle cx="540" cy="560" r="9" fill="#D2B48C"/>
+  <rect x="536" y="569" width="8" height="18" fill="#4682B4"/>
+  <rect x="534" y="587" width="12" height="7" fill="#F4A460"/>
+  <ellipse cx="540" cy="556" rx="6" ry="3" fill="#8B4513"/>
+
+  <!-- Seafood Display Table -->
+  <ellipse cx="400" cy="580" rx="80" ry="20" fill="#D2691E" stroke="#8B4513" stroke-width="2"/>
+  <ellipse cx="400" cy="578" rx="80" ry="20" fill="#F4A460"/>
+
+  <!-- Fresh Seafood Items -->
+  <ellipse cx="360" cy="575" rx="6" ry="3" fill="#FF6347"/>
+  <circle cx="360" cy="573" r="2" fill="#000"/>
+  <text x="360" y="590" text-anchor="middle" font-family="serif" font-size="6" fill="#000">LOBSTER</text>
+
+  <ellipse cx="380" cy="575" rx="5" ry="2" fill="#FFB6C1"/>
+  <text x="380" y="588" text-anchor="middle" font-family="serif" font-size="6" fill="#000">SHRIMP</text>
+
+  <ellipse cx="420" cy="575" rx="6" ry="3" fill="#C0C0C0"/>
+  <text x="420" y="590" text-anchor="middle" font-family="serif" font-size="6" fill="#000">SCALLOPS</text>
+
+  <ellipse cx="440" cy="575" rx="7" ry="3" fill="#FF69B4"/>
+  <text x="440" y="588" text-anchor="middle" font-family="serif" font-size="6" fill="#000">SALMON</text>
+
+  <!-- Beach Wedding Decorations -->
+  <circle cx="200" cy="500" r="8" fill="#FFB6C1"/>
+  <circle cx="205" cy="495" r="3" fill="#FFFFFF"/>
+  <circle cx="195" cy="495" r="3" fill="#87CEEB"/>
+
+  <circle cx="600" cy="480" r="8" fill="#FFFFFF"/>
+  <circle cx="605" cy="475" r="3" fill="#87CEEB"/>
+  <circle cx="595" cy="475" r="3" fill="#FFB6C1"/>
+
+  <!-- Seashells on Beach -->
+  <ellipse cx="150" cy="520" rx="3" ry="2" fill="#FFB6C1"/>
+  <ellipse cx="650" cy="540" rx="3" ry="2" fill="#FFFFFF"/>
+  <ellipse cx="300" cy="530" rx="3" ry="2" fill="#87CEEB"/>
+  <ellipse cx="500" cy="525" rx="3" ry="2" fill="#C0C0C0"/>
+
+  <!-- Driftwood Elements -->
+  <ellipse cx="100" cy="480" rx="20" ry="5" fill="#8B4513"/>
+  <ellipse cx="700" cy="500" rx="25" ry="6" fill="#D2691E"/>
+
+  <!-- Ocean Sunset Reflection -->
+  <ellipse cx="400" cy="350" rx="60" ry="15" fill="#FFD700" opacity="0.4"/>
+  <ellipse cx="400" cy="360" rx="40" ry="10" fill="#FFA500" opacity="0.3"/>
+
+  <!-- Beach Wedding Smoke -->
+  <ellipse cx="400" cy="505" rx="20" ry="8" fill="#87CEEB" opacity="0.6"/>
+  <ellipse cx="405" cy="495" rx="25" ry="10" fill="#B0E0E6" opacity="0.4"/>
+  <ellipse cx="395" cy="485" rx="30" ry="12" fill="#E0F6FF" opacity="0.3"/>
+</svg>

@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Palo Alto Stanford corporate event -->
+  <defs>
+    <linearGradient id="stanfordSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB"/>
+      <stop offset="50%" style="stop-color:#E0F6FF"/>
+      <stop offset="100%" style="stop-color:#F0F8FF"/>
+    </linearGradient>
+    <linearGradient id="stanfordBuilding" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F5DEB3"/>
+      <stop offset="100%" style="stop-color:#DEB887"/>
+    </linearGradient>
+    <radialGradient id="stanfordSpirit" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#8C1515"/>
+      <stop offset="100%" style="stop-color:#B83A4B"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Stanford campus sky -->
+  <rect width="800" height="600" fill="url(#stanfordSky)"/>
+  
+  <!-- Stanford University campus -->
+  <rect x="50" y="200" width="120" height="250" fill="url(#stanfordBuilding)" rx="8"/>
+  <polygon points="50,200 110,150 170,200" fill="#8C1515"/>
+  <rect x="80" y="220" width="15" height="20" fill="#8C1515"/>
+  <rect x="105" y="210" width="20" height="15" fill="#FFD700"/>
+  <rect x="135" y="210" width="20" height="15" fill="#FFD700"/>
+  
+  <!-- Hoover Tower -->
+  <rect x="100" y="100" width="20" height="100" fill="#8C1515"/>
+  <polygon points="100,100 110,85 120,100" fill="#8C1515"/>
+  <rect x="105" y="120" width="4" height="6" fill="#FFD700"/>
+  <rect x="111" y="120" width="4" height="6" fill="#FFD700"/>
+  
+  <!-- Stanford corporate event space -->
+  <rect x="250" y="320" width="300" height="180" fill="#F5F5DC" opacity="0.9" rx="12"/>
+  <text x="400" y="350" text-anchor="middle" fill="#8C1515" font-family="Arial, sans-serif" font-size="16" font-weight="bold">STANFORD AREA CORPORATE EVENT</text>
+  
+  <!-- Professional hibachi setup -->
+  <rect x="350" y="380" width="100" height="60" fill="#2F4F4F" rx="8"/>
+  <rect x="365" y="375" width="70" height="10" fill="#FF4500"/>
+  
+  <!-- Corporate hibachi grills -->
+  <circle cx="375" r="5" cy="378" fill="#8C1515"/>
+  <circle cx="390" r="5" cy="378" fill="#FFD700"/>
+  <circle cx="405" r="5" cy="378" fill="#8C1515"/>
+  <circle cx="420" r="5" cy="378" fill="#FFD700"/>
+  <circle cx="435" r="5" cy="378" fill="#8C1515"/>
+  
+  <!-- Professional hibachi chef -->
+  <circle cx="400" cy="340" r="14" fill="#FDBCB4"/>
+  <rect x="391" y="354" width="18" height="24" fill="white"/>
+  <rect x="388" y="378" width="24" height="28" fill="#000080"/>
+  <rect x="391" y="406" width="7" height="20" fill="#FDBCB4"/>
+  <rect x="402" y="406" width="7" height="20" fill="#FDBCB4"/>
+  
+  <!-- Professional chef hat -->
+  <rect x="395" y="330" width="10" height="8" fill="white"/>
+  <ellipse cx="400" cy="325" rx="8" ry="5" fill="white"/>
+  
+  <!-- Premium cooking utensils -->
+  <rect x="420" y="335" width="20" height="3" fill="#C0C0C0"/>
+  <rect x="437" y="332" width="12" height="9" fill="#C0C0C0"/>
+  <circle cx="443" cy="336" r="2" fill="#8C1515"/>
+  
+  <!-- Corporate professionals -->
+  <circle cx="300" cy="410" r="11" fill="#FDBCB4"/>
+  <rect x="294" y="421" width="12" height="22" fill="#000"/>
+  <rect x="296" y="443" width="8" height="18" fill="#654321"/>
+  <rect x="297" y="461" width="6" height="12" fill="#8B4513"/>
+  
+  <circle cx="500" cy="410" r="11" fill="#FDBCB4"/>
+  <rect x="494" y="421" width="12" height="22" fill="#8C1515"/>
+  <rect x="496" y="443" width="8" height="18" fill="#000080"/>
+  <rect x="497" y="461" width="6" height="12" fill="#8B4513"/>
+  
+  <!-- University professors/administrators -->
+  <circle cx="320" cy="420" r="10" fill="#FDBCB4"/>
+  <rect x="315" y="430" width="10" height="20" fill="#8B008B"/>
+  <rect x="317" y="450" width="6" height="16" fill="#654321"/>
+  <rect x="318" y="466" width="4" height="10" fill="#8B4513"/>
+  <rect x="310" y="425" width="20" height="2" fill="#000"/>
+  
+  <circle cx="480" cy="420" r="10" fill="#FDBCB4"/>
+  <rect x="475" y="430" width="10" height="20" fill="#4169E1"/>
+  <rect x="477" y="450" width="6" height="16" fill="#000080"/>
+  <rect x="478" y="466" width="4" height="10" fill="#8B4513"/>
+  
+  <!-- Stanford students/researchers -->
+  <circle cx="370" cy="430" r="9" fill="#FDBCB4"/>
+  <rect x="366" y="439" width="8" height="18" fill="#8C1515"/>
+  <rect x="367" y="457" width="6" height="14" fill="#8B4513"/>
+  
+  <circle cx="430" cy="430" r="9" fill="#FDBCB4"/>
+  <rect x="426" y="439" width="8" height="18" fill="#FFD700"/>
+  <rect x="427" y="457" width="6" height="14" fill="#000080"/>
+  
+  <!-- Corporate dining table -->
+  <rect x="280" y="460" width="240" height="30" fill="#8B4513" rx="8"/>
+  <rect x="275" y="480" width="10" height="30" fill="#654321"/>
+  <rect x="515" y="480" width="10" height="30" fill="#654321"/>
+  
+  <!-- Executive place settings -->
+  <circle cx="300" cy="458" r="7" fill="white"/>
+  <circle cx="330" cy="458" r="7" fill="white"/>
+  <circle cx="360" cy="458" r="7" fill="white"/>
+  <circle cx="390" cy="458" r="7" fill="white"/>
+  <circle cx="420" cy="458" r="7" fill="white"/>
+  <circle cx="450" cy="458" r="7" fill="white"/>
+  <circle cx="480" cy="458" r="7" fill="white"/>
+  <circle cx="510" cy="458" r="7" fill="white"/>
+  
+  <!-- Palo Alto title -->
+  <text x="400" y="250" text-anchor="middle" fill="#8C1515" font-family="Arial, sans-serif" font-size="22" font-weight="bold">PALO ALTO</text>
+  <text x="400" y="275" text-anchor="middle" fill="#8B008B" font-family="Arial, sans-serif" font-size="16">STANFORD CORPORATE HIBACHI</text>
+  
+  <!-- Stanford branding -->
+  <rect x="580" y="280" width="150" height="120" fill="#8C1515" opacity="0.8" rx="15"/>
+  <text x="655" y="310" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">STANFORD</text>
+  <text x="655" y="330" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="12">UNIVERSITY</text>
+  <text x="655" y="350" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">CORPORATE</text>
+  <text x="655" y="370" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">EVENTS</text>
+  <text x="655" y="385" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">TEAM BUILDING</text>
+  
+  <!-- Academic excellence symbols -->
+  <rect x="180" y="280" width="100" height="100" fill="#FFD700" opacity="0.7" rx="15"/>
+  <text x="230" y="310" text-anchor="middle" fill="#8C1515" font-family="Arial, sans-serif" font-size="12" font-weight="bold">ACADEMIC</text>
+  <text x="230" y="330" text-anchor="middle" fill="#8C1515" font-family="Arial, sans-serif" font-size="11">EXCELLENCE</text>
+  <text x="230" y="350" text-anchor="middle" fill="#8C1515" font-family="Arial, sans-serif" font-size="11">MEETS</text>
+  <text x="230" y="365" text-anchor="middle" fill="#8C1515" font-family="Arial, sans-serif" font-size="11">CULINARY</text>
+  
+  <!-- Premium hibachi food -->
+  <ellipse cx="380" cy="375" rx="8" ry="5" fill="#FF69B4"/>
+  <ellipse cx="395" cy="375" rx="9" ry="5" fill="#FFA500"/>
+  <ellipse cx="410" cy="375" rx="8" ry="5" fill="#FF6347"/>
+  <ellipse cx="425" cy="375" rx="7" ry="4" fill="#32CD32"/>
+  
+  <!-- Stanford hibachi flames -->
+  <polygon points="380,375 384,368 376,368" fill="#8C1515" opacity="0.8"/>
+  <polygon points="395,375 399,368 391,368" fill="#FFD700" opacity="0.8"/>
+  <polygon points="410,375 414,368 406,368" fill="#8C1515" opacity="0.8"/>
+  <polygon points="425,375 429,368 421,368" fill="#FFD700" opacity="0.8"/>
+  
+  <!-- University campus trees -->
+  <ellipse cx="200" cy="430" rx="30" ry="35" fill="#228B22"/>
+  <rect x="197" y="450" width="6" height="30" fill="#8B4513"/>
+  <ellipse cx="650" cy="440" rx="25" ry="30" fill="#32CD32"/>
+  <rect x="647" y="460" width="6" height="25" fill="#8B4513"/>
+  
+  <!-- Executive vehicles -->
+  <ellipse cx="120" cy="470" rx="25" ry="8" fill="#2F4F4F"/>
+  <circle cx="105" cy="470" r="3" fill="#C0C0C0"/>
+  <circle cx="135" cy="470" r="3" fill="#C0C0C0"/>
+  <rect x="115" y="465" width="10" height="3" fill="#FFD700"/>
+  
+  <!-- Campus walkways -->
+  <rect x="0" y="480" width="800" height="20" fill="#D2B48C"/>
+  <rect x="0" y="500" width="800" height="100" fill="#228B22"/>
+  
+  <!-- Stanford spirit -->
+  <circle cx="400" cy="180" r="50" fill="url(#stanfordSpirit)" opacity="0.3"/>
+  <text x="400" y="185" text-anchor="middle" fill="#8C1515" font-family="Arial, sans-serif" font-size="16" font-weight="bold">STANFORD EXCELLENCE</text>
+  
+  <!-- Business networking -->
+  <rect x="70" y="380" width="80" height="60" fill="#4169E1" opacity="0.7" rx="10"/>
+  <text x="110" y="400" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">BUSINESS</text>
+  <text x="110" y="415" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">NETWORKING</text>
+  <text x="110" y="430" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="9">EVENTS</text>
+</svg>

@@ -90,17 +90,17 @@ const ENDPOINTS = {
   customers: '/api/crm/customers',
   dashboard: '/api/crm/dashboard/stats',
   availability: '/api/crm/availability',
-  
-  // Auth endpoints  
+
+  // Auth endpoints
   auth: '/api/auth',
   stationAuth: '/api/station/station-login',
-  
+
   // Station admin endpoints
   stations: '/api/admin/stations',
-  
+
   // Health endpoints
   health: '/api/health',
-  
+
   // Stripe endpoints
   payments: '/api/stripe/payments',
   invoices: '/api/stripe/invoices',
@@ -116,7 +116,7 @@ export const authService = {
   async login(email: string, password: string) {
     return api.post<{ access_token: string; token_type: string }>(
       `${ENDPOINTS.auth}/login`,
-      { 
+      {
         username: email, // FastAPI uses 'username' field
         password,
         grant_type: 'password'
@@ -130,7 +130,7 @@ export const authService = {
   async stationLogin(email: string, password: string, stationId?: number) {
     return api.post<StationLoginResponse>(
       ENDPOINTS.stationAuth,
-      { 
+      {
         email,
         password,
         station_id: stationId
@@ -168,27 +168,27 @@ export const authService = {
 export const bookingService = {
   /**
    * Get all bookings with cursor-based pagination (MEDIUM #34 Phase 2)
-   * 
+   *
    * @param filters - Filter options
    * @param filters.cursor - Pagination cursor from previous response
    * @param filters.limit - Number of items per page (default: 50, max: 100)
    * @param filters.page - Legacy page number (deprecated, use cursor instead)
-   * 
+   *
    * Performance: O(1) regardless of page depth (150x faster for deep pages)
    */
   async getBookings(filters: BookingFilters = {}) {
     const params = new URLSearchParams();
-    
+
     // Modern cursor-based pagination (preferred)
     if (filters.cursor) {
       params.append('cursor', filters.cursor);
     }
-    
+
     // Legacy page-based pagination (fallback for backward compatibility)
     if (filters.page && !filters.cursor) {
       params.append('page', filters.page.toString());
     }
-    
+
     if (filters.limit) params.append('limit', filters.limit.toString());
     if (filters.sort_by) params.append('sort_by', filters.sort_by);
     if (filters.sort_order) params.append('sort_order', filters.sort_order);
@@ -200,7 +200,7 @@ export const bookingService = {
 
     const query = params.toString();
     const url = query ? `${ENDPOINTS.bookings}?${query}` : ENDPOINTS.bookings;
-    
+
     return api.get<ApiResponse<Booking[]>>(url);
   },
 
@@ -257,7 +257,7 @@ export const customerService = {
    */
   async getCustomers(filters: CustomerFilters = {}) {
     const params = new URLSearchParams();
-    
+
     if (filters.page) params.append('page', filters.page.toString());
     if (filters.limit) params.append('limit', filters.limit.toString());
     if (filters.sort_by) params.append('sort_by', filters.sort_by);
@@ -267,7 +267,7 @@ export const customerService = {
 
     const query = params.toString();
     const url = query ? `${ENDPOINTS.customers}?${query}` : ENDPOINTS.customers;
-    
+
     return api.get<ApiResponse<Customer[]>>(url);
   },
 
@@ -317,7 +317,7 @@ export const paymentService = {
     const params = new URLSearchParams(filters);
     const query = params.toString();
     const url = query ? `${ENDPOINTS.payments}?${query}` : ENDPOINTS.payments;
-    
+
     return api.get<ApiResponse<Payment[]>>(url);
   },
 
@@ -325,8 +325,8 @@ export const paymentService = {
    * Get payment analytics
    */
   async getPaymentAnalytics(period?: string) {
-    const url = period 
-      ? `${ENDPOINTS.payments}/analytics?period=${period}` 
+    const url = period
+      ? `${ENDPOINTS.payments}/analytics?period=${period}`
       : `${ENDPOINTS.payments}/analytics`;
     return api.get<ApiResponse<any>>(url);
   },
@@ -343,7 +343,7 @@ export const invoiceService = {
     const params = new URLSearchParams(filters);
     const query = params.toString();
     const url = query ? `${ENDPOINTS.invoices}?${query}` : ENDPOINTS.invoices;
-    
+
     return api.get<ApiResponse<Invoice[]>>(url);
   },
 
@@ -391,10 +391,10 @@ export const stationService = {
   async getStations(includeStats: boolean = false) {
     const params = new URLSearchParams();
     if (includeStats) params.append('include_stats', 'true');
-    
+
     const query = params.toString();
     const url = query ? `${ENDPOINTS.stations}?${query}` : ENDPOINTS.stations;
-    
+
     return api.get<Station[]>(url);
   },
 
@@ -404,10 +404,10 @@ export const stationService = {
   async getStation(stationId: number, includeStats: boolean = false) {
     const params = new URLSearchParams();
     if (includeStats) params.append('include_stats', 'true');
-    
+
     const query = params.toString();
     const url = query ? `${ENDPOINTS.stations}/${stationId}?${query}` : `${ENDPOINTS.stations}/${stationId}`;
-    
+
     return api.get<Station>(url);
   },
 
@@ -431,10 +431,10 @@ export const stationService = {
   async getStationUsers(stationId: number, includeUserDetails: boolean = false) {
     const params = new URLSearchParams();
     if (includeUserDetails) params.append('include_user_details', 'true');
-    
+
     const query = params.toString();
     const url = query ? `${ENDPOINTS.stations}/${stationId}/users?${query}` : `${ENDPOINTS.stations}/${stationId}/users`;
-    
+
     return api.get<StationUser[]>(url);
   },
 
@@ -479,7 +479,7 @@ export const stationService = {
     limit?: number;
   } = {}) {
     const params = new URLSearchParams();
-    
+
     if (filters.action) params.append('action', filters.action);
     if (filters.resource_type) params.append('resource_type', filters.resource_type);
     if (filters.user_id) params.append('user_id', filters.user_id.toString());
@@ -489,7 +489,7 @@ export const stationService = {
 
     const query = params.toString();
     const url = query ? `${ENDPOINTS.stations}/${stationId}/audit?${query}` : `${ENDPOINTS.stations}/${stationId}/audit`;
-    
+
     return api.get<AuditLog[]>(url);
   },
 };
@@ -517,7 +517,7 @@ export const tokenManager = {
     if (typeof window === 'undefined') return null;
     const stored = localStorage.getItem('station_context');
     if (!stored) return null;
-    
+
     try {
       return JSON.parse(stored);
     } catch {
@@ -543,17 +543,17 @@ export const tokenManager = {
   hasPermission(permission: string): boolean {
     const context = this.getStationContext();
     if (!context) return false;
-    
+
     // Super admin has all permissions
     if (context.is_super_admin) return true;
-    
+
     return context.permissions.includes(permission);
   },
 
   hasRole(role: string): boolean {
     const context = this.getStationContext();
     if (!context) return false;
-    
+
     return context.role === role;
   },
 
@@ -854,7 +854,7 @@ export const smsService = {
     if (filters.channel) params.append('channel', filters.channel);
     if (filters.status) params.append('status', filters.status);
     if (filters.phone_number) params.append('phone_number', filters.phone_number);
-    
+
     const query = params.toString();
     const url = query ? `/api/v1/inbox/messages?${query}` : '/api/v1/inbox/messages';
     return api.get(url);

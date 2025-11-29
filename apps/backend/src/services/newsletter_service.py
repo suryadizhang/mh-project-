@@ -11,7 +11,7 @@ import re
 from db.models.newsletter import Subscriber
 
 # MIGRATED: Enum imports moved from models.enums to NEW db.models system
-from db.models.lead import LeadSource
+from db.models.crm import LeadSource
 from core.base_service import BaseService, EventTrackingMixin
 from core.compliance import ComplianceValidator
 from services.event_service import EventService

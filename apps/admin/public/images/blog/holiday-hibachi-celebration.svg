@@ -1,0 +1,152 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#holidayGradient)"/>
+  
+  <!-- Snow falling -->
+  <circle cx="50" cy="30" r="2" fill="white" opacity="0.8"/>
+  <circle cx="100" cy="20" r="1.5" fill="white" opacity="0.9"/>
+  <circle cx="150" cy="40" r="2" fill="white" opacity="0.7"/>
+  <circle cx="200" cy="25" r="1" fill="white" opacity="0.8"/>
+  <circle cx="250" cy="35" r="2" fill="white" opacity="0.9"/>
+  <circle cx="300" cy="20" r="1.5" fill="white" opacity="0.8"/>
+  <circle cx="350" cy="45" r="1" fill="white" opacity="0.7"/>
+  
+  <circle cx="80" cy="60" r="1" fill="white" opacity="0.6"/>
+  <circle cx="180" cy="70" r="1.5" fill="white" opacity="0.8"/>
+  <circle cx="320" cy="65" r="1" fill="white" opacity="0.7"/>
+  
+  <!-- House with Holiday Decorations -->
+  <rect x="50" y="120" width="100" height="80" fill="#8B4513"/>
+  <rect x="60" y="130" width="80" height="60" fill="#D2B48C"/>
+  
+  <!-- Roof with snow -->
+  <path d="M45 120 L100 80 L155 120 Z" fill="#654321"/>
+  <path d="M45 120 L100 85 L155 120 Z" fill="white"/>
+  
+  <!-- Windows with warm light -->
+  <rect x="70" y="145" width="15" height="20" fill="#FFD700"/>
+  <rect x="95" y="145" width="15" height="20" fill="#FFD700"/>
+  <rect x="70" y="170" width="15" height="15" fill="#FFD700"/>
+  <rect x="95" y="170" width="15" height="15" fill="#FFD700"/>
+  
+  <!-- Door -->
+  <rect x="120" y="160" width="12" height="25" fill="#8B0000"/>
+  <circle cx="130" cy="172" r="1" fill="#FFD700"/>
+  
+  <!-- Holiday Wreath -->
+  <circle cx="126" cy="150" r="8" fill="#228B22"/>
+  <circle cx="126" cy="150" r="6" fill="#32CD32"/>
+  <circle cx="124" cy="148" r="1" fill="#FF0000"/>
+  <circle cx="128" cy="152" r="1" fill="#FF0000"/>
+  <circle cx="126" cy="145" r="1" fill="#FF0000"/>
+  
+  <!-- Christmas Tree -->
+  <path d="M30 200 L15 170 L45 170 Z" fill="#228B22"/>
+  <path d="M30 185 L20 160 L40 160 Z" fill="#228B22"/>
+  <path d="M30 170 L25 150 L35 150 Z" fill="#228B22"/>
+  <rect x="28" y="200" width="4" height="10" fill="#8B4513"/>
+  <circle cx="30" cy="145" r="2" fill="#FFD700"/>
+  
+  <!-- Holiday Lights on House -->
+  <circle cx="65" cy="125" r="2" fill="#FF0000"/>
+  <circle cx="75" cy="122" r="2" fill="#00FF00"/>
+  <circle cx="85" cy="125" r="2" fill="#0000FF"/>
+  <circle cx="95" cy="122" r="2" fill="#FFD700"/>
+  <circle cx="105" cy="125" r="2" fill="#FF69B4"/>
+  <circle cx="115" cy="122" r="2" fill="#FF0000"/>
+  <circle cx="125" cy="125" r="2" fill="#00FF00"/>
+  <circle cx="135" cy="122" r="2" fill="#0000FF"/>
+  <circle cx="145" cy="125" r="2" fill="#FFD700"/>
+  
+  <!-- Outdoor Holiday Party Setup -->
+  <ellipse cx="250" cy="220" rx="100" ry="40" fill="#8B4513"/>
+  <ellipse cx="250" cy="215" rx="95" ry="35" fill="#A0522D"/>
+  
+  <!-- Holiday Tablecloth -->
+  <ellipse cx="250" cy="215" rx="90" ry="30" fill="#8B0000" opacity="0.8"/>
+  <circle cx="230" cy="210" r="3" fill="#FFD700"/>
+  <circle cx="250" cy="205" r="3" fill="#32CD32"/>
+  <circle cx="270" cy="210" r="3" fill="#FFD700"/>
+  <circle cx="240" cy="220" r="3" fill="#32CD32"/>
+  <circle cx="260" cy="220" r="3" fill="#FFD700"/>
+  
+  <!-- Hibachi Grill -->
+  <rect x="230" y="200" width="40" height="25" rx="5" fill="#1A1A1A"/>
+  <rect x="235" y="205" width="30" height="15" rx="3" fill="#2D1810"/>
+  
+  <!-- Holiday Flames (red and green) -->
+  <ellipse cx="245" cy="210" rx="5" ry="8" fill="#FF0000" opacity="0.8"/>
+  <ellipse cx="255" cy="208" rx="4" ry="6" fill="#00FF00" opacity="0.9"/>
+  <ellipse cx="265" cy="210" rx="3" ry="5" fill="#FFD700" opacity="0.7"/>
+  
+  <!-- Holiday Party Guests -->
+  <!-- Guest 1 with Santa hat -->
+  <circle cx="200" cy="160" r="12" fill="#F4C2A1"/>
+  <rect x="195" y="170" width="10" height="20" fill="#8B0000"/>
+  <path d="M190 150 Q200 140 210 150" fill="#FF0000"/>
+  <circle cx="210" cy="145" r="3" fill="white"/>
+  
+  <!-- Guest 2 with holiday sweater -->
+  <circle cx="300" cy="160" r="12" fill="#D4A574"/>
+  <rect x="295" y="170" width="10" height="20" fill="#228B22"/>
+  <rect x="297" y="175" width="6" height="3" fill="#FF0000"/>
+  <rect x="297" y="180" width="6" height="3" fill="white"/>
+  
+  <!-- Chef with holiday apron -->
+  <circle cx="250" cy="140" r="15" fill="#F4C2A1"/>
+  <rect x="243" y="152" width="14" height="25" fill="#FFFFFF"/>
+  <rect x="245" y="157" width="10" height="15" fill="#8B0000"/>
+  <ellipse cx="250" cy="128" rx="12" ry="8" fill="#FFFFFF"/>
+  
+  <!-- Holiday decorations on chef hat -->
+  <circle cx="245" cy="125" r="1" fill="#FF0000"/>
+  <circle cx="255" cy="125" r="1" fill="#00FF00"/>
+  
+  <!-- Spatula with ribbon -->
+  <rect x="270" y="155" width="2" height="20" fill="#8B4513" transform="rotate(15 270 155)"/>
+  <ellipse cx="278" cy="150" rx="5" ry="3" fill="#C0C0C0" transform="rotate(15 278 150)"/>
+  <rect x="275" y="145" width="6" height="2" fill="#FF0000" transform="rotate(15 275 145)"/>
+  
+  <!-- Holiday Food Items -->
+  <circle cx="240" cy="205" r="3" fill="#8B4513"/>
+  <circle cx="260" cy="203" r="2" fill="#FF6347"/>
+  <rect x="250" y="202" width="4" height="3" rx="1" fill="#32CD32"/>
+  <circle cx="245" cy="208" r="2" fill="#FFD700"/>
+  
+  <!-- Gift Boxes -->
+  <rect x="180" y="240" width="15" height="12" fill="#FF0000"/>
+  <rect x="185" y="235" width="5" height="22" fill="#FFD700"/>
+  <rect x="180" y="245" width="15" height="2" fill="#FFD700"/>
+  
+  <rect x="300" y="245" width="12" height="10" fill="#00FF00"/>
+  <rect x="304" y="240" width="4" height="20" fill="#FF0000"/>
+  <rect x="300" y="249" width="12" height="2" fill="#FF0000"/>
+  
+  <!-- Candy Canes -->
+  <path d="M350 200 Q355 195 360 200 Q355 205 350 200" stroke="#FF0000" stroke-width="3" fill="none"/>
+  <path d="M352 200 Q355 197 358 200" stroke="white" stroke-width="1" fill="none"/>
+  
+  <!-- Holly -->
+  <path d="M20 180 Q25 175 30 180 Q25 185 20 180" fill="#228B22"/>
+  <path d="M25 175 Q30 170 35 175 Q30 180 25 175" fill="#228B22"/>
+  <circle cx="27" cy="178" r="2" fill="#FF0000"/>
+  <circle cx="30" cy="176" r="1.5" fill="#FF0000"/>
+  
+  <!-- Title -->
+  <text x="200" y="30" text-anchor="middle" fill="#8B0000" font-family="Arial, sans-serif" font-size="20" font-weight="bold">
+    Holiday Hibachi Celebration
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="50" text-anchor="middle" fill="#228B22" font-family="Arial, sans-serif" font-size="14">
+    Festive Winter Gatherings
+  </text>
+  
+  <defs>
+    <linearGradient id="holidayGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E6F3FF;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#F0F8FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F5FFFA;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

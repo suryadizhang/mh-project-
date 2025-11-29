@@ -27,7 +27,7 @@ from db.models.core import (
     SocialThread,
     SocialMessage,
 )
-from db.models.lead import Lead
+from db.models.crm import Lead
 
 logger = logging.getLogger(__name__)
 

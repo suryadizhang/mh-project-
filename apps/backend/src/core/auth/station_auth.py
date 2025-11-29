@@ -21,11 +21,11 @@ from db.models.identity import (
     StationAuditLog,
     StationUser,  # Renamed from UserStationAssignment
 )
-# Keep enums and helper functions from station_models during transition
-# Fixed: StationPermission doesn't exist in db.models.identity, use station_models
-from core.auth.station_models import (
+# Import enums from canonical identity models
+from db.models.identity import (
     StationPermission,
     StationRole,
+    AuditAction,
 )
 from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
 import jwt

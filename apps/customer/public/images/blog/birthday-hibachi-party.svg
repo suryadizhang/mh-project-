@@ -1,0 +1,89 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#birthdayGradient)"/>
+  
+  <!-- Table Setup -->
+  <rect x="50" y="180" width="300" height="100" rx="10" fill="#8B4513"/>
+  <rect x="60" y="190" width="280" height="80" rx="5" fill="#A0522D"/>
+  
+  <!-- Birthday Banner -->
+  <path d="M50 80 L350 80 L340 100 L60 100 Z" fill="#FF69B4"/>
+  <text x="200" y="94" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">
+    HAPPY BIRTHDAY
+  </text>
+  
+  <!-- Balloons -->
+  <circle cx="80" cy="50" r="12" fill="#FF0000"/>
+  <circle cx="100" cy="45" r="12" fill="#00FF00"/>
+  <circle cx="120" cy="50" r="12" fill="#0000FF"/>
+  <circle cx="140" cy="45" r="12" fill="#FFFF00"/>
+  <line x1="80" y1="62" x2="80" y2="120" stroke="#333" stroke-width="1"/>
+  <line x1="100" y1="57" x2="100" y2="115" stroke="#333" stroke-width="1"/>
+  <line x1="120" y1="62" x2="120" y2="120" stroke="#333" stroke-width="1"/>
+  <line x1="140" y1="57" x2="140" y2="115" stroke="#333" stroke-width="1"/>
+  
+  <!-- Birthday Cake -->
+  <rect x="180" y="160" width="40" height="30" fill="#8B4513"/>
+  <rect x="175" y="150" width="50" height="20" fill="#FFB6C1"/>
+  <rect x="170" y="140" width="60" height="20" fill="#FFFFFF"/>
+  
+  <!-- Candles -->
+  <rect x="185" y="125" width="2" height="15" fill="#FFFACD"/>
+  <rect x="195" y="125" width="2" height="15" fill="#FFFACD"/>
+  <rect x="205" y="125" width="2" height="15" fill="#FFFACD"/>
+  <rect x="215" y="125" width="2" height="15" fill="#FFFACD"/>
+  
+  <!-- Flames -->
+  <ellipse cx="186" cy="122" rx="2" ry="3" fill="#FF4500"/>
+  <ellipse cx="196" cy="122" rx="2" ry="3" fill="#FF4500"/>
+  <ellipse cx="206" cy="122" rx="2" ry="3" fill="#FF4500"/>
+  <ellipse cx="216" cy="122" rx="2" ry="3" fill="#FF4500"/>
+  
+  <!-- Hibachi Grill -->
+  <rect x="250" y="210" width="80" height="40" rx="5" fill="#1A1A1A"/>
+  <rect x="255" y="215" width="70" height="30" rx="3" fill="#2D1810"/>
+  
+  <!-- Flames from Grill -->
+  <ellipse cx="270" cy="230" rx="8" ry="12" fill="#FF6B35" opacity="0.8"/>
+  <ellipse cx="285" cy="228" rx="6" ry="10" fill="#FF8C42" opacity="0.9"/>
+  <ellipse cx="300" cy="230" rx="5" ry="8" fill="#FFB14E" opacity="0.7"/>
+  <ellipse cx="315" cy="228" rx="7" ry="11" fill="#FF6B35" opacity="0.8"/>
+  
+  <!-- Chef with Party Hat -->
+  <circle cx="280" cy="140" r="15" fill="#F4C2A1"/>
+  <rect x="273" y="150" width="14" height="25" fill="#FFFFFF"/>
+  
+  <!-- Party Hat -->
+  <path d="M280 120 L270 140 L290 140 Z" fill="#FF1493"/>
+  <circle cx="280" cy="120" r="3" fill="#FFD700"/>
+  
+  <!-- Spatula -->
+  <rect x="300" y="160" width="2" height="20" fill="#8B4513" transform="rotate(15 300 160)"/>
+  <ellipse cx="308" cy="155" rx="5" ry="3" fill="#C0C0C0" transform="rotate(15 308 155)"/>
+  
+  <!-- Food Items -->
+  <circle cx="270" cy="225" r="4" fill="#D2691E"/>
+  <circle cx="285" cy="223" r="3" fill="#FF6347"/>
+  <rect x="295" y="222" width="6" height="4" rx="1" fill="#32CD32"/>
+  <circle cx="310" cy="225" r="4" fill="#FFD700"/>
+  
+  <!-- Confetti -->
+  <rect x="320" y="60" width="3" height="3" fill="#FF0000" transform="rotate(45 320 60)"/>
+  <rect x="340" y="70" width="3" height="3" fill="#00FF00" transform="rotate(30 340 70)"/>
+  <rect x="360" y="80" width="3" height="3" fill="#0000FF" transform="rotate(60 360 80)"/>
+  <rect x="300" y="90" width="3" height="3" fill="#FFFF00" transform="rotate(15 300 90)"/>
+  <rect x="330" y="110" width="3" height="3" fill="#FF69B4" transform="rotate(75 330 110)"/>
+  
+  <!-- Title -->
+  <text x="200" y="30" text-anchor="middle" fill="#8B0000" font-family="Arial, sans-serif" font-size="20" font-weight="bold">
+    Birthday Hibachi Celebration
+  </text>
+  
+  <defs>
+    <linearGradient id="birthdayGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF8DC;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFFACD;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFE4B5;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

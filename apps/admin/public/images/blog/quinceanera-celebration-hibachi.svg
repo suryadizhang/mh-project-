@@ -1,0 +1,294 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#quinceaneraGradient)"/>
+  
+  <!-- Quinceañera Princess Theme Banner -->
+  <g fill="#FF69B4">
+    <path d="M50 30 Q200 40 350 30" stroke="#FFD700" stroke-width="3" fill="none"/>
+    <text x="200" y="25" text-anchor="middle" font-family="Arial" font-size="20" font-weight="bold">QUINCEAÑERA</text>
+  </g>
+  
+  <!-- Elegant Table Setup -->
+  <ellipse cx="200" cy="200" rx="110" ry="40" fill="#8B4513"/>
+  <ellipse cx="200" cy="195" rx="105" ry="35" fill="#DEB887"/>
+  <ellipse cx="200" cy="192" rx="100" ry="32" fill="#F5DEB3"/>
+  
+  <!-- Princess Crown on Table -->
+  <g fill="#FFD700">
+    <path d="M170 160 L175 150 L180 155 L185 145 L190 155 L195 140 L200 155 L205 140 L210 155 L215 145 L220 155 L225 150 L230 160 Z"/>
+    <ellipse cx="200" cy="160" rx="30" ry="5" fill="#FFA500"/>
+  </g>
+  
+  <!-- Crown Gems -->
+  <g fill="#FF1493">
+    <circle cx="185" cy="150" r="1.5"/>
+    <circle cx="200" cy="145" r="2"/>
+    <circle cx="215" cy="150" r="1.5"/>
+  </g>
+  
+  <!-- Hibachi Setup -->
+  <rect x="170" y="170" width="60" height="35" rx="8" fill="#8A2BE2"/>
+  <rect x="175" y="175" width="50" height="25" rx="6" fill="#2F4F4F"/>
+  <rect x="180" y="180" width="40" height="15" rx="4" fill="#1C1C1C"/>
+  
+  <!-- Quinceañera (Birthday Girl) - Center Stage -->
+  <circle cx="200" cy="130" r="22" fill="#F4C2A1"/>
+  <rect x="182" y="150" width="36" height="45" fill="url(#princessDress)"/>
+  
+  <!-- Princess Hair with Tiara -->
+  <ellipse cx="200" cy="115" rx="15" ry="8" fill="#8B4513"/>
+  <path d="M190 108 L195 103 L200 105 L205 103 L210 108" stroke="#FFD700" stroke-width="3" fill="none"/>
+  <circle cx="200" cy="105" r="2" fill="#FF1493"/>
+  
+  <!-- Princess Makeup -->
+  <circle cx="195" cy="127" r="1" fill="#000000"/>
+  <circle cx="205" cy="127" r="1" fill="#000000"/>
+  <path d="M200 135 Q195 140 200 145" stroke="#FF69B4" stroke-width="2" fill="none"/>
+  <ellipse cx="192" cy="125" rx="2" ry="1" fill="#FF69B4"/>
+  <ellipse cx="208" cy="125" rx="2" ry="1" fill="#FF69B4"/>
+  
+  <!-- Princess Jewelry -->
+  <ellipse cx="200" cy="147" rx="12" ry="2" fill="#FFD700"/>
+  <circle cx="195" cy="147" r="1" fill="#FF1493"/>
+  <circle cx="205" cy="147" r="1" fill="#FF1493"/>
+  
+  <!-- Family Members in Formal Attire -->
+  
+  <!-- Mother in Elegant Dress -->
+  <circle cx="120" cy="140" r="20" fill="#F4C2A1"/>
+  <rect x="105" y="158" width="30" height="40" fill="#8B008B"/>
+  <ellipse cx="120" cy="125" rx="12" ry="7" fill="#000000"/>
+  <circle cx="115" cy="138" r="1" fill="#000000"/>
+  <circle cx="125" cy="138" r="1" fill="#000000"/>
+  <path d="M120 145 Q115 150 120 155" stroke="#FF69B4" stroke-width="1" fill="none"/>
+  <!-- Mother's Pearl Necklace -->
+  <ellipse cx="120" cy="155" rx="8" ry="1" fill="#FFFFFF"/>
+  
+  <!-- Father in Formal Suit -->
+  <circle cx="280" cy="145" r="18" fill="#F4C2A1"/>
+  <rect x="267" y="161" width="26" height="35" fill="#000080"/>
+  <rect x="269" y="163" width="22" height="4" fill="#FFD700"/>
+  <ellipse cx="280" cy="132" rx="10" ry="6" fill="#8B4513"/>
+  <circle cx="276" cy="143" r="1" fill="#000000"/>
+  <circle cx="284" cy="143" r="1" fill="#000000"/>
+  <path d="M280 150 Q275 155 280 160" stroke="#000000" stroke-width="1" fill="none"/>
+  <!-- Father's Boutonniere -->
+  <circle cx="270" cy="165" r="2" fill="#FF69B4"/>
+  
+  <!-- Godparents -->
+  <!-- Madrina -->
+  <circle cx="150" cy="220" r="15" fill="#F4C2A1"/>
+  <rect x="138" y="233" width="24" height="30" fill="#FF1493"/>
+  <ellipse cx="150" cy="208" rx="8" ry="5" fill="#8B4513"/>
+  <circle cx="146" cy="218" r="1" fill="#000000"/>
+  <circle cx="154" cy="218" r="1" fill="#000000"/>
+  <ellipse cx="150" cy="223" rx="3" ry="2" fill="#FF69B4"/>
+  
+  <!-- Padrino -->
+  <circle cx="250" cy="225" r="16" fill="#F4C2A1"/>
+  <rect x="238" y="239" width="24" height="32" fill="#000080"/>
+  <rect x="240" y="241" width="20" height="3" fill="#FFD700"/>
+  <ellipse cx="250" cy="212" rx="9" ry="5" fill="#000000"/>
+  <circle cx="246" cy="223" r="1" fill="#000000"/>
+  <circle cx="254" cy="223" r="1" fill="#000000"/>
+  <path d="M250 230 Q245 235 250 240" stroke="#000000" stroke-width="1" fill="none"/>
+  
+  <!-- Quinceañera Decorations -->
+  
+  <!-- Pink Roses Centerpiece -->
+  <g fill="#FF69B4">
+    <circle cx="170" cy="190" r="3"/>
+    <circle cx="175" cy="187" r="2.5"/>
+    <circle cx="180" cy="190" r="3"/>
+    <circle cx="172" cy="193" r="2"/>
+    <circle cx="177" cy="191" r="2.5"/>
+  </g>
+  
+  <!-- More Roses -->
+  <g fill="#FF1493">
+    <circle cx="220" cy="188" r="2.5"/>
+    <circle cx="225" cy="191" r="3"/>
+    <circle cx="230" cy="189" r="2"/>
+    <circle cx="227" cy="185" r="2.5"/>
+  </g>
+  
+  <!-- Crystal Glasses -->
+  <g stroke="#87CEEB" stroke-width="2" fill="none">
+    <path d="M140 175 L140 185 L145 185 L145 175"/>
+    <path d="M260 178 L260 188 L265 188 L265 178"/>
+    <path d="M320 180 L320 190 L325 190 L325 180"/>
+  </g>
+  
+  <!-- Champagne in Glasses -->
+  <g fill="#FFD700" opacity="0.7">
+    <rect x="141" y="178" width="3" height="6"/>
+    <rect x="261" y="181" width="3" height="6"/>
+    <rect x="321" y="183" width="3" height="6"/>
+  </g>
+  
+  <!-- Quinceañera Cake -->
+  <ellipse cx="320" cy="240" rx="30" ry="10" fill="#FF69B4"/>
+  <ellipse cx="320" cy="237" rx="28" ry="8" fill="#FFB6C1"/>
+  <ellipse cx="320" cy="235" rx="25" ry="6" fill="#FFFFFF"/>
+  
+  <!-- Cake Decorations -->
+  <g fill="#FFD700">
+    <circle cx="310" cy="235" r="1"/>
+    <circle cx="320" cy="233" r="1.5"/>
+    <circle cx="330" cy="235" r="1"/>
+  </g>
+  
+  <!-- Number 15 on Cake -->
+  <text x="320" y="238" text-anchor="middle" fill="#8B008B" font-family="Arial" font-size="12" font-weight="bold">15</text>
+  
+  <!-- Princess Flowers -->
+  <g fill="#FF69B4">
+    <circle cx="60" cy="120" r="4"/>
+    <circle cx="65" cy="115" r="3"/>
+    <circle cx="70" cy="120" r="4"/>
+    <circle cx="65" cy="125" r="3"/>
+  </g>
+  
+  <!-- Quinceañera Balloons -->
+  <g>
+    <!-- Pink Balloon -->
+    <ellipse cx="50" cy="80" rx="10" ry="15" fill="#FF69B4"/>
+    <ellipse cx="50" cy="77" rx="8" ry="13" fill="#FFB6C1"/>
+    <line x1="50" y1="95" x2="50" y2="130" stroke="#FFD700" stroke-width="2"/>
+    
+    <!-- Gold Balloon -->
+    <ellipse cx="350" cy="90" rx="12" ry="18" fill="#FFD700"/>
+    <ellipse cx="350" cy="87" rx="10" ry="16" fill="#FFA500"/>
+    <line x1="350" y1="108" x2="350" y2="140" stroke="#FF69B4" stroke-width="2"/>
+    
+    <!-- Purple Balloon -->
+    <ellipse cx="380" cy="110" rx="8" ry="12" fill="#8A2BE2"/>
+    <ellipse cx="380" cy="108" rx="6" ry="10" fill="#9370DB"/>
+    <line x1="380" y1="122" x2="380" y2="155" stroke="#FFD700" stroke-width="2"/>
+  </g>
+  
+  <!-- Mariachi Musicians -->
+  
+  <!-- Mariachi 1 - Guitarist -->
+  <circle cx="80" cy="180" r="12" fill="#F4C2A1"/>
+  <rect x="72" y="190" width="16" height="25" fill="#000000"/>
+  <rect x="74" y="192" width="12" height="4" fill="#FFD700"/>
+  <ellipse cx="80" cy="170" rx="8" ry="5" fill="#000000"/>
+  <!-- Sombrero -->
+  <ellipse cx="80" cy="165" rx="12" ry="4" fill="#8B4513"/>
+  <ellipse cx="80" cy="163" rx="10" ry="3" fill="#DEB887"/>
+  <!-- Guitar -->
+  <ellipse cx="85" cy="200" rx="4" ry="8" fill="#8B4513"/>
+  <rect x="85" y="208" width="1" height="10" fill="#654321"/>
+  
+  <!-- Mariachi 2 - Trumpeter -->
+  <circle cx="320" cy="190" r="11" fill="#F4C2A1"/>
+  <rect x="313" y="199" width="14" height="22" fill="#000000"/>
+  <rect x="315" y="201" width="10" height="3" fill="#FFD700"/>
+  <ellipse cx="320" cy="182" rx="7" ry="4" fill="#000000"/>
+  <!-- Sombrero -->
+  <ellipse cx="320" cy="178" rx="10" ry="3" fill="#8B4513"/>
+  <ellipse cx="320" cy="176" rx="8" ry="2" fill="#DEB887"/>
+  <!-- Trumpet -->
+  <rect x="325" y="195" width="8" height="2" fill="#FFD700"/>
+  <circle cx="333" cy="196" r="2" fill="#FFD700"/>
+  
+  <!-- Quinceañera Special Flames -->
+  <g opacity="0.9">
+    <ellipse cx="185" cy="177" rx="5" ry="10" fill="#FF69B4"/>
+    <ellipse cx="200" cy="175" rx="6" ry="12" fill="#8A2BE2"/>
+    <ellipse cx="215" cy="177" rx="5" ry="10" fill="#FF1493"/>
+  </g>
+  
+  <!-- Special Quinceañera Food -->
+  <!-- Mole -->
+  <ellipse cx="190" cy="185" rx="6" ry="4" fill="#8B4513"/>
+  <ellipse cx="190" cy="184" rx="5" ry="3" fill="#A0522D"/>
+  
+  <!-- Carne Asada -->
+  <ellipse cx="210" cy="186" rx="5" ry="3" fill="#8B0000"/>
+  <ellipse cx="210" cy="185" rx="4" ry="2" fill="#B22222"/>
+  
+  <!-- Last Doll Tradition -->
+  <circle cx="100" cy="240" r="6" fill="#F4C2A1"/>
+  <rect x="96" y="244" width="8" height="12" fill="#FFB6C1"/>
+  <ellipse cx="100" cy="236" rx="4" ry="3" fill="#FFD700"/>
+  <circle cx="98" cy="239" r="0.5" fill="#000000"/>
+  <circle cx="102" cy="239" r="0.5" fill="#000000"/>
+  
+  <!-- Doll's Dress Details -->
+  <g fill="#FF69B4">
+    <circle cx="98" cy="248" r="0.5"/>
+    <circle cx="102" cy="248" r="0.5"/>
+    <circle cx="100" cy="250" r="0.5"/>
+  </g>
+  
+  <!-- Religious Medal -->
+  <circle cx="200" cy="165" r="3" fill="#FFD700"/>
+  <circle cx="200" cy="165" r="2" fill="#FFFFFF"/>
+  <text x="200" y="167" text-anchor="middle" fill="#8B4513" font-family="Arial" font-size="4">M</text>
+  
+  <!-- Quinceañera Values Scroll -->
+  <rect x="340" y="200" width="25" height="35" fill="#FFFACD"/>
+  <rect x="342" y="202" width="21" height="31" fill="#FFF8DC"/>
+  <g fill="#8B4513" font-family="Arial" font-size="5">
+    <text x="352" y="210" text-anchor="middle">Faith</text>
+    <text x="352" y="216" text-anchor="middle">Family</text>
+    <text x="352" y="222" text-anchor="middle">Tradition</text>
+    <text x="352" y="228" text-anchor="middle">Future</text>
+  </g>
+  
+  <!-- Waltz Dance Floor Symbol -->
+  <circle cx="30" cy="200" r="15" fill="#FFD700"/>
+  <circle cx="30" cy="200" r="12" fill="#FFFFFF"/>
+  <text x="30" y="205" text-anchor="middle" fill="#8B008B" font-family="Arial" font-size="12" font-weight="bold">♪</text>
+  
+  <!-- Steam from Hibachi -->
+  <g stroke="#8A2BE2" stroke-width="2" fill="none" opacity="0.8">
+    <path d="M185 170 Q187 165 185 160 Q183 155 185 150"/>
+    <path d="M200 170 Q202 165 200 160 Q198 155 200 150"/>
+    <path d="M215 170 Q217 165 215 160 Q213 155 215 150"/>
+  </g>
+  
+  <!-- Papel Picado -->
+  <g>
+    <!-- Pink Flag -->
+    <rect x="150" y="50" width="12" height="8" fill="#FF69B4"/>
+    <path d="M150 58 L156 62 L162 58" fill="#FFB6C1"/>
+    <line x1="150" y1="50" x2="150" y2="70" stroke="#000000" stroke-width="1"/>
+    
+    <!-- Gold Flag -->
+    <rect x="170" y="55" width="12" height="8" fill="#FFD700"/>
+    <path d="M170 63 L176 67 L182 63" fill="#FFA500"/>
+    <line x1="170" y1="55" x2="170" y2="75" stroke="#000000" stroke-width="1"/>
+    
+    <!-- Purple Flag -->
+    <rect x="190" y="50" width="12" height="8" fill="#8A2BE2"/>
+    <path d="M190 58 L196 62 L202 58" fill="#9370DB"/>
+    <line x1="190" y1="50" x2="190" y2="70" stroke="#000000" stroke-width="1"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="15" text-anchor="middle" fill="#8B008B" font-family="Arial, sans-serif" font-size="22" font-weight="bold">
+    Quinceañera Celebration Hibachi
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="285" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="14">
+    "Celebrating a young woman's journey into adulthood with tradition and joy"
+  </text>
+  
+  <defs>
+    <linearGradient id="quinceaneraGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFE4E1;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFF0F5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFFACD;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="princessDress" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF69B4;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFB6C1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFC0CB;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

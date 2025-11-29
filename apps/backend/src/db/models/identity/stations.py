@@ -46,6 +46,87 @@ from db.base_class import Base
 # ==================== ENUMS ====================
 
 
+class StationStatus(str, enum.Enum):
+    """Station operational status."""
+
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    SUSPENDED = "suspended"
+    MAINTENANCE = "maintenance"
+
+
+class StationRole(str, enum.Enum):
+    """Station-specific user roles with hierarchical permissions."""
+
+    SUPER_ADMIN = "super_admin"  # Global access across all stations
+    ADMIN = "admin"  # Full access within specific stations
+    STATION_ADMIN = "station_admin"  # Admin access within single station
+    CUSTOMER_SUPPORT = "customer_support"  # Support access within station
+
+
+class StationPermission(str, enum.Enum):
+    """Station-scoped permissions for granular access control."""
+
+    # Station Management (Super Admin only)
+    STATION_CREATE = "station.create"
+    STATION_READ = "station.read"
+    STATION_UPDATE = "station.update"
+    STATION_DELETE = "station.delete"
+    STATION_MANAGE_USERS = "station.manage_users"
+
+    # Cross-Station Access (Admin+ only)
+    CROSS_STATION_READ = "cross_station.read"
+    CROSS_STATION_ANALYTICS = "cross_station.analytics"
+
+    # Booking Management (Station Admin+)
+    BOOKING_CREATE = "booking.create"
+    BOOKING_READ = "booking.read"
+    BOOKING_UPDATE = "booking.update"
+    BOOKING_CANCEL = "booking.cancel"
+    BOOKING_REPORTS = "booking.reports"
+
+    # Customer Management (Station Admin+)
+    CUSTOMER_CREATE = "customer.create"
+    CUSTOMER_READ = "customer.read"
+    CUSTOMER_UPDATE = "customer.update"
+    CUSTOMER_DELETE = "customer.delete"
+    CUSTOMER_EXPORT = "customer.export"
+
+    # Payment Operations (Station Admin+)
+    PAYMENT_RECORD = "payment.record"
+    PAYMENT_READ = "payment.read"
+    PAYMENT_REFUND = "payment.refund"
+    PAYMENT_REPORTS = "payment.reports"
+
+    # Communication (Customer Support+)
+    MESSAGE_READ = "message.read"
+    MESSAGE_SEND = "message.send"
+    MESSAGE_DELETE = "message.delete"
+    SMS_SEND = "sms.send"
+    EMAIL_SEND = "email.send"
+
+    # Lead Management (Customer Support+)
+    LEAD_CREATE = "lead.create"
+    LEAD_READ = "lead.read"
+    LEAD_UPDATE = "lead.update"
+    LEAD_CONVERT = "lead.convert"
+
+    # AI Agent Access (Customer Support+)
+    AI_CHAT = "ai.chat"
+    AI_BOOKING_ASSIST = "ai.booking_assist"
+    AI_ANALYTICS = "ai.analytics"
+
+    # Reports & Analytics (varies by role)
+    REPORTS_BASIC = "reports.basic"
+    REPORTS_ADVANCED = "reports.advanced"
+    REPORTS_EXPORT = "reports.export"
+
+    # System & Audit (Admin+ only)
+    AUDIT_READ = "audit.read"
+    SYSTEM_CONFIG = "system.config"
+    USER_MANAGE = "user.manage"
+
+
 class AuditAction(str, enum.Enum):
     """
     Audit log action types.
@@ -303,6 +384,12 @@ class StationUser(Base):
     # Relationships
     station: Mapped["Station"] = relationship("Station", back_populates="station_users")
     user: Mapped["User"] = relationship("User", back_populates="station_users")
+    sessions: Mapped[List["UserSession"]] = relationship(
+        "UserSession", back_populates="user", cascade="all, delete-orphan"
+    )
+    audit_logs: Mapped[List["AuditLog"]] = relationship(
+        "AuditLog", back_populates="user", cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"<StationUser(station_id={self.station_id}, user_id={self.user_id}, active={self.is_active})>"

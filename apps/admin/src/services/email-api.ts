@@ -23,11 +23,15 @@ function extractData<T>(response: ApiResponse<T>): T {
     success: response.success,
     hasData: !!response.data,
     hasError: !!response.error,
-    error: response.error
+    error: response.error,
   });
 
   if (!response || typeof response !== 'object') {
-    console.error('[extractData] Invalid response type:', typeof response, response);
+    console.error(
+      '[extractData] Invalid response type:',
+      typeof response,
+      response
+    );
     throw new Error('Invalid API response format');
   }
 

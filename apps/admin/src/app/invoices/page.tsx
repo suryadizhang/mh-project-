@@ -77,7 +77,7 @@ export default function InvoicesPage() {
         const response = await api.get<Invoice[]>(
           `/api/v1/payments/invoices?${params}`
         );
-        
+
         const invoiceList = Array.isArray(response) ? response : response.data || [];
         setInvoices(invoiceList);
         setTotal(invoiceList.length); // Note: Backend should return total count

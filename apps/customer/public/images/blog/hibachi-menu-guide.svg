@@ -1,0 +1,203 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#menuGradient)"/>
+  
+  <!-- Menu Board Background -->
+  <rect x="50" y="50" width="300" height="200" fill="#2F4F4F" stroke="#DAA520" stroke-width="4"/>
+  <rect x="55" y="55" width="290" height="190" fill="#1C1C1C"/>
+  
+  <!-- Menu Header -->
+  <rect x="70" y="70" width="260" height="30" fill="#8B0000"/>
+  <text x="200" y="90" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="20" font-weight="bold">
+    HIBACHI MENU
+  </text>
+  
+  <!-- Menu Sections -->
+  <!-- Appetizers -->
+  <text x="80" y="120" fill="#FFD700" font-family="Arial, sans-serif" font-size="14" font-weight="bold">
+    APPETIZERS
+  </text>
+  <line x1="80" y1="125" x2="160" y2="125" stroke="#DAA520" stroke-width="2"/>
+  
+  <text x="85" y="140" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="10">
+    Gyoza Dumplings.............$8
+  </text>
+  <text x="85" y="155" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="10">
+    Miso Soup....................$6
+  </text>
+  <text x="85" y="170" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="10">
+    Edamame.....................$5
+  </text>
+  
+  <!-- Main Courses -->
+  <text x="220" y="120" fill="#FFD700" font-family="Arial, sans-serif" font-size="14" font-weight="bold">
+    HIBACHI ENTREES
+  </text>
+  <line x1="220" y1="125" x2="320" y2="125" stroke="#DAA520" stroke-width="2"/>
+  
+  <text x="225" y="140" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="10">
+    Hibachi Chicken............$18
+  </text>
+  <text x="225" y="155" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="10">
+    Hibachi Steak..............$24
+  </text>
+  <text x="225" y="170" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="10">
+    Hibachi Salmon............$22
+  </text>
+  <text x="225" y="185" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="10">
+    Hibachi Shrimp............$20
+  </text>
+  
+  <!-- Combinations -->
+  <text x="80" y="200" fill="#FFD700" font-family="Arial, sans-serif" font-size="14" font-weight="bold">
+    COMBINATIONS
+  </text>
+  <line x1="80" y1="205" x2="180" y2="205" stroke="#DAA520" stroke-width="2"/>
+  
+  <text x="85" y="220" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="10">
+    Surf & Turf................$28
+  </text>
+  <text x="85" y="235" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="10">
+    Chicken & Shrimp...........$22
+  </text>
+  
+  <!-- Beverages -->
+  <text x="220" y="200" fill="#FFD700" font-family="Arial, sans-serif" font-size="14" font-weight="bold">
+    BEVERAGES
+  </text>
+  <line x1="220" y1="205" x2="290" y2="205" stroke="#DAA520" stroke-width="2"/>
+  
+  <text x="225" y="220" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="10">
+    Sake.......................$8
+  </text>
+  <text x="225" y="235" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="10">
+    Green Tea..................$4
+  </text>
+  
+  <!-- Menu Icons -->
+  <!-- Dumpling Icon -->
+  <circle cx="180" cy="145" r="3" fill="#F5DEB3"/>
+  <circle cx="180" cy="145" r="2" fill="#DEB887"/>
+  <g stroke="#8B4513" stroke-width="1">
+    <path d="M178 143 L182 143"/>
+    <path d="M178 147 L182 147"/>
+  </g>
+  
+  <!-- Chicken Icon -->
+  <ellipse cx="340" cy="145" rx="4" ry="3" fill="#DEB887"/>
+  <ellipse cx="340" cy="144" rx="3" ry="2" fill="#F4A460"/>
+  <circle cx="338" cy="144" r="0.5" fill="#000000"/>
+  
+  <!-- Steak Icon -->
+  <ellipse cx="340" cy="160" rx="4" ry="2.5" fill="#8B4513"/>
+  <ellipse cx="340" cy="159" rx="3" ry="2" fill="#A0522D"/>
+  <circle cx="339" cy="159" r="0.5" fill="#FF0000"/>
+  
+  <!-- Sake Cup -->
+  <rect x="305" y="217" width="4" height="5" fill="#FFFFFF"/>
+  <ellipse cx="307" cy="216" rx="2" ry="1" fill="#FFFFFF"/>
+  <rect x="306" y="216" width="2" height="3" fill="#87CEEB"/>
+  
+  <!-- Chef Character -->
+  <circle cx="200" cy="130" r="12" fill="#F4C2A1"/>
+  <rect x="192" y="140" width="16" height="20" fill="#FFFFFF"/>
+  <rect x="194" y="142" width="12" height="2" fill="#000000"/>
+  
+  <!-- Chef Hat -->
+  <ellipse cx="200" cy="120" rx="10" ry="6" fill="#FFFFFF"/>
+  <rect x="190" y="120" width="20" height="6" fill="#FFFFFF"/>
+  
+  <!-- Chef's Arms Pointing to Menu -->
+  <ellipse cx="180" cy="145" rx="2" ry="8" fill="#F4C2A1" transform="rotate(-30 180 145)"/>
+  <ellipse cx="220" cy="145" rx="2" ry="8" fill="#F4C2A1" transform="rotate(30 220 145)"/>
+  
+  <!-- Menu Special Highlights -->
+  <!-- Star Ratings -->
+  <g fill="#FFD700">
+    <polygon points="300,140 302,145 307,145 303,148 305,153 300,150 295,153 297,148 293,145 298,145"/>
+    <polygon points="180,168 182,173 187,173 183,176 185,181 180,178 175,181 177,176 173,173 178,173"/>
+  </g>
+  
+  <!-- Price Tags -->
+  <rect x="320" y="137" width="20" height="8" fill="#FF6347"/>
+  <text x="330" y="143" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="8" font-weight="bold">
+    $24
+  </text>
+  
+  <rect x="160" y="167" width="20" height="8" fill="#32CD32"/>
+  <text x="170" y="173" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="8" font-weight="bold">
+    $5
+  </text>
+  
+  <!-- Menu Border Decorations -->
+  <g fill="#DAA520">
+    <circle cx="65" cy="65" r="2"/>
+    <circle cx="335" cy="65" r="2"/>
+    <circle cx="65" cy="235" r="2"/>
+    <circle cx="335" cy="235" r="2"/>
+  </g>
+  
+  <!-- Chopsticks -->
+  <rect x="370" y="120" width="2" height="25" fill="#8B4513" transform="rotate(15 370 120)"/>
+  <rect x="375" y="120" width="2" height="25" fill="#8B4513" transform="rotate(25 375 120)"/>
+  
+  <!-- Napkin -->
+  <rect x="20" y="180" width="15" height="15" fill="#FFFFFF"/>
+  <rect x="21" y="181" width="13" height="13" fill="#F5F5F5"/>
+  <g stroke="#E0E0E0" stroke-width="1">
+    <line x1="23" y1="184" x2="33" y2="184"/>
+    <line x1="23" y1="188" x2="33" y2="188"/>
+    <line x1="23" y1="192" y2="33" y2="192"/>
+  </g>
+  
+  <!-- Plate -->
+  <ellipse cx="200" cy="280" rx="25" ry="8" fill="#E0E0E0"/>
+  <ellipse cx="200" cy="278" rx="22" ry="6" fill="#FFFFFF"/>
+  <ellipse cx="200" cy="276" rx="18" ry="4" fill="#F5F5F5"/>
+  
+  <!-- Food Items on Plate -->
+  <!-- Rice -->
+  <ellipse cx="190" cy="276" rx="6" ry="3" fill="#F5F5DC"/>
+  <ellipse cx="190" cy="275" rx="5" ry="2" fill="#FFFFFF"/>
+  
+  <!-- Vegetables -->
+  <circle cx="205" cy="276" r="2" fill="#32CD32"/>
+  <circle cx="210" cy="274" r="1.5" fill="#FF6347"/>
+  <circle cx="215" cy="276" r="1.5" fill="#FFD700"/>
+  
+  <!-- Menu Title Decoration -->
+  <g stroke="#DAA520" stroke-width="2" fill="none">
+    <path d="M80 85 Q90 80 100 85"/>
+    <path d="M300 85 Q310 80 320 85"/>
+  </g>
+  
+  <!-- Special Offer Banner -->
+  <rect x="350" y="200" width="40" height="60" fill="#FF6347" transform="rotate(15 350 200)"/>
+  <text x="370" y="220" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="8" font-weight="bold" transform="rotate(15 370 220)">
+    TODAY'S
+  </text>
+  <text x="370" y="230" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="8" font-weight="bold" transform="rotate(15 370 230)">
+    SPECIAL
+  </text>
+  <text x="370" y="240" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="10" font-weight="bold" transform="rotate(15 370 240)">
+    20% OFF
+  </text>
+  
+  <!-- Title -->
+  <text x="200" y="25" text-anchor="middle" fill="#8B0000" font-family="Arial, sans-serif" font-size="24" font-weight="bold">
+    Hibachi Menu Guide
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="45" text-anchor="middle" fill="#2F4F4F" font-family="Arial, sans-serif" font-size="16">
+    Explore Our Delicious Options • Fresh • Authentic
+  </text>
+  
+  <defs>
+    <linearGradient id="menuGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F5F5DC;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FAEBD7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFF8DC;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

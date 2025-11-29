@@ -10,7 +10,7 @@ from typing import Any, Optional
 from uuid import UUID
 
 # MIGRATED: from models.call_recording → db.models.call_recording
-from db.models.call_recording import CallRecording, CallStatus
+from db.models.support_communications import CallRecording, CallStatus
 from services.speech_service import speech_service
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

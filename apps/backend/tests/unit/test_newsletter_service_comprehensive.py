@@ -18,7 +18,8 @@ from unittest.mock import AsyncMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 
-from models.legacy_lead_newsletter import Subscriber, LeadSource
+from db.models.newsletter import Subscriber
+from db.models.crm import LeadSource
 from services.newsletter_service import SubscriberService
 
 
@@ -653,8 +654,8 @@ class TestNewsletterServiceProductionScenarios:
         result = await db_session.execute(
             text(
                 """
-                SELECT email_enc, phone_enc 
-                FROM newsletter.subscribers 
+                SELECT email_enc, phone_enc
+                FROM newsletter.subscribers
                 WHERE id = :id
             """
             ),

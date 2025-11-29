@@ -56,12 +56,7 @@ export function LabelPicker({
 
   return (
     <>
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        title="Manage Labels"
-        size="md"
-      >
+      <Modal isOpen={isOpen} onClose={onClose} title="Manage Labels" size="md">
         <div className="space-y-4">
           {/* Create New Label Button */}
           <Button
@@ -86,7 +81,7 @@ export function LabelPicker({
             </div>
           ) : (
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {labels.map((label) => {
+              {labels.map(label => {
                 const isSelected = selectedLabels.includes(label.slug);
                 return (
                   <button
@@ -122,7 +117,9 @@ export function LabelPicker({
                       <span className="text-sm text-gray-500">
                         {label.email_count || 0}
                       </span>
-                      {isSelected && <Check className="w-5 h-5 text-blue-600" />}
+                      {isSelected && (
+                        <Check className="w-5 h-5 text-blue-600" />
+                      )}
                     </div>
                   </button>
                 );
@@ -191,7 +188,7 @@ function CreateLabelModal({ onClose, onCreate }: CreateLabelModalProps) {
           <input
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={e => setName(e.target.value)}
             placeholder="e.g., VIP Customer, Urgent"
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             required
@@ -205,7 +202,7 @@ function CreateLabelModal({ onClose, onCreate }: CreateLabelModalProps) {
             Color
           </label>
           <div className="flex gap-2 flex-wrap">
-            {predefinedColors.map((c) => (
+            {predefinedColors.map(c => (
               <button
                 key={c}
                 type="button"
@@ -222,7 +219,7 @@ function CreateLabelModal({ onClose, onCreate }: CreateLabelModalProps) {
           <input
             type="color"
             value={color}
-            onChange={(e) => setColor(e.target.value)}
+            onChange={e => setColor(e.target.value)}
             className="mt-2 w-full h-10 rounded cursor-pointer"
           />
         </div>
@@ -235,7 +232,7 @@ function CreateLabelModal({ onClose, onCreate }: CreateLabelModalProps) {
           <input
             type="text"
             value={icon}
-            onChange={(e) => setIcon(e.target.value)}
+            onChange={e => setIcon(e.target.value)}
             placeholder="e.g., ⭐ 🔥 💎"
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             maxLength={2}

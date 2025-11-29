@@ -16,7 +16,7 @@ from core.base_service import BaseService, EventTrackingMixin, NotificationMixin
 from services.event_service import EventService
 
 # FIXED: Import from db.models (NEW system) instead of models (OLD system)
-from db.models.lead import Lead
+from db.models.crm import Lead
 from core.exceptions import BusinessLogicException, NotFoundException, ErrorCode
 
 

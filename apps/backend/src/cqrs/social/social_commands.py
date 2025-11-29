@@ -8,7 +8,7 @@ from cqrs.base import Command  # Phase 2C: Updated from api.app.cqrs.base
 
 # MIGRATED: Enum imports moved from models.enums to NEW db.models system
 from db.models.core import MessageKind, ThreadStatus
-from db.models.lead import SocialPlatform
+from db.models.crm import SocialPlatform
 from pydantic import ConfigDict, Field
 
 

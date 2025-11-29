@@ -79,10 +79,10 @@ export interface DashboardStats {
 export interface PaginationParams {
   // Modern cursor-based pagination (preferred - MEDIUM #34 Phase 2)
   cursor?: string;
-  
+
   // Legacy page-based pagination (deprecated, use cursor instead)
   page?: number;
-  
+
   limit?: number;
   sort_by?: string;
   sort_order?: 'asc' | 'desc';

@@ -1,0 +1,301 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#healthGradient)"/>
+  
+  <!-- Health & Wellness Banner -->
+  <rect x="40" y="15" width="320" height="35" fill="#228B22"/>
+  <rect x="42" y="17" width="316" height="31" fill="#32CD32"/>
+  <text x="200" y="30" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="14" font-weight="bold">HEALTHY HIBACHI DINING</text>
+  <text x="200" y="42" text-anchor="middle" fill="#FFFF00" font-family="Arial" font-size="10">Nutritious • Fresh • Balanced</text>
+  
+  <!-- Healthy Hibachi Setup -->
+  <rect x="150" y="220" width="100" height="60" fill="#8B4513"/>
+  <rect x="152" y="222" width="96" height="56" fill="#DEB887"/>
+  <rect x="155" y="225" width="90" height="50" fill="#F5DEB3"/>
+  
+  <!-- Clean Cooking Surface -->
+  <rect x="170" y="190" width="60" height="35" rx="8" fill="#2F4F4F"/>
+  <rect x="175" y="195" width="50" height="25" rx="6" fill="#1C1C1C"/>
+  
+  <!-- Health-Conscious Diners -->
+  
+  <!-- Fitness Enthusiast -->
+  <g>
+    <circle cx="130" cy="140" r="18" fill="#F4C2A1"/>
+    <rect x="117" y="156" width="26" height="35" fill="#228B22"/>
+    <ellipse cx="130" cy="127" rx="9" ry="4" fill="#8B4513"/>
+    <circle cx="126" cy="138" r="1" fill="#000000"/>
+    <circle cx="134" cy="138" r="1" fill="#000000"/>
+    <path d="M130 145 Q125 150 130 155" stroke="#000000" stroke-width="1" fill="none"/>
+    
+    <!-- Athletic Build -->
+    <rect x="120" y="158" width="20" height="4" fill="#32CD32"/>
+    <text x="130" y="163" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="4">FIT</text>
+    
+    <!-- Water Bottle -->
+    <rect x="110" y="170" width="4" height="12" fill="#87CEEB"/>
+    <ellipse cx="112" cy="168" rx="2" ry="2" fill="#87CEEB"/>
+    <rect x="111" y="175" width="2" height="6" fill="#00BFFF"/>
+  </g>
+  
+  <!-- Health Coach -->
+  <g>
+    <circle cx="270" cy="145" r="16" fill="#F4C2A1"/>
+    <rect x="257" y="159" width="26" height="30" fill="#FFFFFF"/>
+    <ellipse cx="270" cy="132" rx="8" ry="4" fill="#FFD700"/>
+    <circle cx="266" cy="143" r="1" fill="#000000"/>
+    <circle cx="274" cy="143" r="1" fill="#000000"/>
+    <path d="M270 150 Q265 155 270 160" stroke="#000000" stroke-width="1" fill="none"/>
+    
+    <!-- Medical Badge -->
+    <rect x="272" y="162" width="8" height="6" fill="#DC143C"/>
+    <circle cx="276" cy="165" r="1" fill="#FFFFFF"/>
+    
+    <!-- Nutritionist Clipboard -->
+    <rect x="285" y="155" width="8" height="12" fill="#8B4513"/>
+    <rect x="286" y="156" width="6" height="10" fill="#FFFACD"/>
+    <g fill="#000000" font-family="Arial" font-size="2">
+      <line x1="287" y1="158" x2="291" y2="158" stroke="#000000" stroke-width="0.3"/>
+      <line x1="287" y1="160" x2="291" y2="160" stroke="#000000" stroke-width="0.3"/>
+      <line x1="287" y1="162" x2="291" y2="162" stroke="#000000" stroke-width="0.3"/>
+    </g>
+  </g>
+  
+  <!-- Healthy Food Options -->
+  
+  <!-- Lean Proteins -->
+  <g>
+    <!-- Grilled Chicken Breast -->
+    <ellipse cx="180" cy="200" rx="8" ry="5" fill="#FFF8DC"/>
+    <ellipse cx="180" cy="199" rx="6" ry="3" fill="#F5DEB3"/>
+    <g fill="#228B22" font-size="3">
+      <circle cx="176" cy="198" r="0.5"/>
+      <circle cx="184" cy="198" r="0.5"/>
+    </g>
+    
+    <!-- Salmon -->
+    <ellipse cx="200" cy="202" rx="7" ry="4" fill="#FA8072"/>
+    <ellipse cx="200" cy="201" rx="5" ry="2" fill="#FF6347"/>
+    
+    <!-- Tofu -->
+    <rect x="215" y="198" width="8" height="6" fill="#FFFACD"/>
+    <rect x="216" y="199" width="6" height="4" fill="#FFF8DC"/>
+  </g>
+  
+  <!-- Fresh Vegetables -->
+  <g>
+    <!-- Broccoli -->
+    <circle cx="160" cy="205" r="3" fill="#228B22"/>
+    <circle cx="162" cy="203" r="2" fill="#32CD32"/>
+    <rect x="161" y="207" width="1" height="4" fill="#228B22"/>
+    
+    <!-- Bell Peppers -->
+    <ellipse cx="170" cy="207" rx="3" ry="2" fill="#FF6347"/>
+    <ellipse cx="174" cy="206" rx="2" ry="2" fill="#FFD700"/>
+    <ellipse cx="177" cy="208" rx="2" ry="2" fill="#32CD32"/>
+    
+    <!-- Zucchini -->
+    <ellipse cx="235" cy="205" rx="4" ry="2" fill="#90EE90"/>
+    <ellipse cx="235" cy="204" rx="3" ry="1" fill="#98FB98"/>
+    
+    <!-- Carrots -->
+    <ellipse cx="245" cy="207" rx="3" ry="2" fill="#FFA500"/>
+    <ellipse cx="245" cy="206" rx="2" ry="1" fill="#FF8C00"/>
+  </g>
+  
+  <!-- Health Benefits Display -->
+  
+  <!-- Nutrition Facts Panel -->
+  <rect x="30" y="100" width="50" height="60" fill="#FFFFFF"/>
+  <rect x="32" y="102" width="46" height="56" fill="#F0F8FF"/>
+  <g fill="#000000" font-family="Arial" font-size="4">
+    <text x="55" y="108" text-anchor="middle" font-weight="bold">NUTRITION</text>
+    <text x="55" y="115" text-anchor="middle">High Protein</text>
+    <text x="55" y="122" text-anchor="middle">Low Sodium</text>
+    <text x="55" y="129" text-anchor="middle">Fresh Veggies</text>
+    <text x="55" y="136" text-anchor="middle">Lean Cooking</text>
+    <text x="55" y="143" text-anchor="middle">Heart Healthy</text>
+    <text x="55" y="150" text-anchor="middle">Low Carb Option</text>
+  </g>
+  
+  <!-- Calorie Counter -->
+  <rect x="320" y="110" width="40" height="30" fill="#32CD32"/>
+  <rect x="322" y="112" width="36" height="26" fill="#90EE90"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="6">
+    <text x="340" y="120" text-anchor="middle" font-weight="bold">CALORIES</text>
+    <text x="340" y="128" text-anchor="middle">~450</text>
+    <text x="340" y="135" text-anchor="middle">per serving</text>
+  </g>
+  
+  <!-- Healthy Cooking Methods -->
+  
+  <!-- Steam Indicators -->
+  <g stroke="#90EE90" stroke-width="2" fill="none" opacity="0.8">
+    <path d="M175 185 Q177 180 175 175 Q173 170 175 165"/>
+    <path d="M190 185 Q192 180 190 175 Q188 170 190 165"/>
+    <path d="M205 185 Q207 180 205 175 Q203 170 205 165"/>
+    <path d="M220 185 Q222 180 220 175 Q218 170 220 165"/>
+  </g>
+  
+  <!-- Oil-Free Cooking -->
+  <rect x="300" y="190" width="30" height="20" fill="#FF6347"/>
+  <rect x="302" y="192" width="26" height="16" fill="#FFB6C1"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="5">
+    <text x="315" y="199" text-anchor="middle">NO OIL</text>
+    <text x="315" y="205" text-anchor="middle">COOKING</text>
+  </g>
+  
+  <!-- Wellness Accessories -->
+  
+  <!-- Heart Rate Monitor -->
+  <rect x="90" y="180" width="15" height="8" fill="#000000"/>
+  <rect x="91" y="181" width="13" height="6" fill="#87CEEB"/>
+  <g fill="#DC143C" font-family="Arial" font-size="3">
+    <text x="97" y="185" text-anchor="middle">❤ 75</text>
+  </g>
+  
+  <!-- Fitness Tracker -->
+  <rect x="310" y="175" width="8" height="12" fill="#2F4F4F"/>
+  <rect x="311" y="176" width="6" height="10" fill="#00BFFF"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="2">
+    <text x="314" y="180" text-anchor="middle">STEPS</text>
+    <text x="314" y="183" text-anchor="middle">8,567</text>
+  </g>
+  
+  <!-- Healthy Beverages -->
+  
+  <!-- Green Tea -->
+  <rect x="50" y="200" width="8" height="12" fill="#FFFFFF"/>
+  <ellipse cx="54" cy="198" rx="4" ry="2" fill="#FFFFFF"/>
+  <rect x="52" y="203" width="4" height="8" fill="#90EE90"/>
+  <text x="54" y="215" text-anchor="middle" fill="#228B22" font-family="Arial" font-size="3">GREEN TEA</text>
+  
+  <!-- Infused Water -->
+  <rect x="340" y="200" width="8" height="12" fill="#87CEEB"/>
+  <ellipse cx="344" cy="198" rx="4" ry="2" fill="#87CEEB"/>
+  <rect x="342" y="203" width="4" height="8" fill="#00BFFF"/>
+  <g fill="#32CD32">
+    <circle cx="343" cy="205" r="0.5"/>
+    <circle cx="345" cy="207" r="0.5"/>
+  </g>
+  
+  <!-- Health Goals -->
+  
+  <!-- Weight Management -->
+  <rect x="280" y="80" width="35" height="25" fill="#FFD700"/>
+  <rect x="282" y="82" width="31" height="21" fill="#FFFF00"/>
+  <g fill="#8B4513" font-family="Arial" font-size="4">
+    <text x="297" y="88" text-anchor="middle">WEIGHT</text>
+    <text x="297" y="93" text-anchor="middle">MANAGEMENT</text>
+    <text x="297" y="98" text-anchor="middle">GOAL</text>
+  </g>
+  
+  <!-- Muscle Building -->
+  <rect x="85" y="75" width="35" height="25" fill="#DC143C"/>
+  <rect x="87" y="77" width="31" height="21" fill="#FF6347"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="4">
+    <text x="102" y="83" text-anchor="middle">MUSCLE</text>
+    <text x="102" y="88" text-anchor="middle">BUILDING</text>
+    <text x="102" y="93" text-anchor="middle">PROTEIN</text>
+  </g>
+  
+  <!-- Dietary Preferences -->
+  
+  <!-- Keto Friendly -->
+  <rect x="150" y="75" width="25" height="20" fill="#8B008B"/>
+  <rect x="152" y="77" width="21" height="16" fill="#9370DB"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="4">
+    <text x="162" y="83" text-anchor="middle">KETO</text>
+    <text x="162" y="88" text-anchor="middle">OPTION</text>
+  </g>
+  
+  <!-- Paleo -->
+  <rect x="225" y="75" width="25" height="20" fill="#8B4513"/>
+  <rect x="227" y="77" width="21" height="16" fill="#DEB887"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="4">
+    <text x="237" y="83" text-anchor="middle">PALEO</text>
+    <text x="237" y="88" text-anchor="middle">FRIENDLY</text>
+  </g>
+  
+  <!-- Health Metrics -->
+  
+  <!-- Blood Pressure -->
+  <rect x="30" y="230" width="25" height="15" fill="#87CEEB"/>
+  <rect x="32" y="232" width="21" height="11" fill="#E0F6FF"/>
+  <g fill="#4169E1" font-family="Arial" font-size="3">
+    <text x="42" y="237" text-anchor="middle">BP: 120/80</text>
+    <text x="42" y="241" text-anchor="middle">HEALTHY</text>
+  </g>
+  
+  <!-- Cholesterol Level -->
+  <rect x="345" y="230" width="25" height="15" fill="#32CD32"/>
+  <rect x="347" y="232" width="21" height="11" fill="#F0FFF0"/>
+  <g fill="#228B22" font-family="Arial" font-size="3">
+    <text x="357" y="237" text-anchor="middle">CHOL: LOW</text>
+    <text x="357" y="241" text-anchor="middle">EXCELLENT</text>
+  </g>
+  
+  <!-- Fresh Ingredients -->
+  
+  <!-- Organic Label -->
+  <rect x="120" y="250" width="20" height="15" fill="#228B22"/>
+  <rect x="122" y="252" width="16" height="11" fill="#90EE90"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="4">
+    <text x="130" y="257" text-anchor="middle">ORGANIC</text>
+    <text x="130" y="261" text-anchor="middle">FRESH</text>
+  </g>
+  
+  <!-- Local Sourced -->
+  <rect x="260" y="250" width="20" height="15" fill="#FFD700"/>
+  <rect x="262" y="252" width="16" height="11" fill="#FFFF00"/>
+  <g fill="#8B4513" font-family="Arial" font-size="4">
+    <text x="270" y="257" text-anchor="middle">LOCAL</text>
+    <text x="270" y="261" text-anchor="middle">FARM</text>
+  </g>
+  
+  <!-- Wellness Benefits -->
+  <ellipse cx="200" cy="120" rx="80" ry="25" fill="#FFFFFF" stroke="#32CD32" stroke-width="2" opacity="0.9"/>
+  <text x="200" y="115" text-anchor="middle" fill="#228B22" font-family="Arial" font-size="10" font-weight="bold">
+    "Nourishing Your Body & Mind"
+  </text>
+  <text x="200" y="126" text-anchor="middle" fill="#8B4513" font-family="Arial" font-size="8">
+    Balanced Nutrition • Active Lifestyle
+  </text>
+  <text x="200" y="135" text-anchor="middle" fill="#4169E1" font-family="Arial" font-size="7">
+    Health-Conscious Hibachi Experience
+  </text>
+  
+  <!-- Vitamin Indicators -->
+  <g fill="#FFA500" opacity="0.8">
+    <text x="50" y="70" font-family="Arial" font-size="8">Vitamin C</text>
+    <text x="130" y="65" font-family="Arial" font-size="8">Protein</text>
+    <text x="270" y="70" font-family="Arial" font-size="8">Omega-3</text>
+    <text x="330" y="65" font-family="Arial" font-size="8">Fiber</text>
+  </g>
+  
+  <!-- Healthy Living Icons -->
+  <g fill="#32CD32" opacity="0.7">
+    <text x="60" y="160" text-anchor="middle" font-family="Arial" font-size="12">🥗</text>
+    <text x="340" y="155" text-anchor="middle" font-family="Arial" font-size="12">💪</text>
+    <text x="100" y="120" text-anchor="middle" font-family="Arial" font-size="12">❤️</text>
+    <text x="300" y="125" text-anchor="middle" font-family="Arial" font-size="12">🌱</text>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="12" text-anchor="middle" fill="#228B22" font-family="Arial, sans-serif" font-size="16" font-weight="bold">
+    Health & Wellness Hibachi Experience
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="290" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="11">
+    "Fresh ingredients, balanced nutrition, and mindful dining for optimal health"
+  </text>
+  
+  <defs>
+    <linearGradient id="healthGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0FFF0;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#E6FFE6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFFACD;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

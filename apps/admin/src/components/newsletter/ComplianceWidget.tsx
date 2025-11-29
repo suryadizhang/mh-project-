@@ -162,7 +162,7 @@ export function ComplianceWidget() {
               </h2>
               {lastUpdated && (
                 <p className="text-xs text-gray-500 mt-1">
-                  Last updated: {new Date().getTime() - lastUpdated.getTime() < 60000 
+                  Last updated: {new Date().getTime() - lastUpdated.getTime() < 60000
                     ? `${Math.floor((new Date().getTime() - lastUpdated.getTime()) / 1000)} seconds ago`
                     : `${Math.floor((new Date().getTime() - lastUpdated.getTime()) / 60000)} minutes ago`}
                 </p>
