@@ -24,6 +24,18 @@ dist/
 *.key
 gcp-key.json
 
+# GSM Secrets Scripts (contain real credentials)
+**/create-gsm-secrets*.ps1
+**/create-gsm-secrets*.sh
+!**/create-gsm-secrets*.template.ps1
+!**/create-gsm-secrets*.template.sh
+
+# Any file with secrets/credentials in name
+*secrets*.ps1
+*secrets*.sh
+*credentials*
+!*template*
+
 # ===== Python =====
 __pycache__/
 *.py[cod]
