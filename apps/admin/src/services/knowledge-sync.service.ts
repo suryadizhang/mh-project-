@@ -26,7 +26,7 @@ export class KnowledgeSyncService {
 
   constructor(baseURL?: string) {
     this.baseURL = baseURL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-    
+
     this.api = axios.create({
       baseURL: `${this.baseURL}/api/v1/ai/knowledge/sync`,
       timeout: 30000, // 30 seconds timeout for sync operations

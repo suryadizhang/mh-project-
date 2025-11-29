@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.svg/2000/svg">
+  <!-- San Francisco urban holiday party -->
+  <defs>
+    <linearGradient id="sfHolidaySky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2F4F4F"/>
+      <stop offset="50%" style="stop-color:#4682B4"/>
+      <stop offset="100%" style="stop-color:#87CEEB"/>
+    </linearGradient>
+    <linearGradient id="cityBuilding" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#D3D3D3"/>
+      <stop offset="100%" style="stop-color:#A9A9A9"/>
+    </linearGradient>
+    <radialGradient id="holidayGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFD700; opacity:0.4"/>
+      <stop offset="100%" style="stop-color:transparent"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- SF holiday evening sky -->
+  <rect width="800" height="600" fill="url(#sfHolidaySky)"/>
+  
+  <!-- Twinkling holiday stars -->
+  <circle cx="100" cy="80" r="2" fill="#FFD700"/>
+  <circle cx="200" cy="60" r="1.5" fill="white"/>
+  <circle cx="300" cy="90" r="2" fill="#FFD700"/>
+  <circle cx="500" cy="70" r="1.5" fill="white"/>
+  <circle cx="600" cy="50" r="2" fill="#FFD700"/>
+  <circle cx="700" cy="85" r="1.5" fill="white"/>
+  
+  <!-- San Francisco skyline -->
+  <rect x="50" y="300" width="60" height="200" fill="url(#cityBuilding)" rx="5"/>
+  <rect x="120" y="280" width="70" height="220" fill="url(#cityBuilding)" rx="5"/>
+  <rect x="200" y="320" width="50" height="180" fill="url(#cityBuilding)" rx="5"/>
+  <rect x="600" y="290" width="80" height="210" fill="url(#cityBuilding)" rx="5"/>
+  <rect x="690" y="310" width="60" height="190" fill="url(#cityBuilding)" rx="5"/>
+  
+  <!-- Holiday lights on buildings -->
+  <rect x="60" y="320" width="4" height="4" fill="#FF6347"/>
+  <rect x="70" y="320" width="4" height="4" fill="#32CD32"/>
+  <rect x="80" y="320" width="4" height="4" fill="#FFD700"/>
+  <rect x="90" y="320" width="4" height="4" fill="#FF6347"/>
+  <rect x="130" y="300" width="4" height="4" fill="#32CD32"/>
+  <rect x="140" y="300" width="4" height="4" fill="#FFD700"/>
+  <rect x="150" y="300" width="4" height="4" fill="#FF6347"/>
+  <rect x="160" y="300" width="4" height="4" fill="#32CD32"/>
+  
+  <!-- City apartment with rooftop hibachi -->
+  <rect x="300" y="350" width="200" height="150" fill="#F5F5DC" opacity="0.9" rx="10"/>
+  <text x="400" y="375" text-anchor="middle" fill="#4B0082" font-family="Arial, sans-serif" font-size="14" font-weight="bold">SF HOLIDAY HIBACHI PARTY</text>
+  
+  <!-- Rooftop hibachi setup -->
+  <rect x="350" y="320" width="100" height="60" fill="#2F4F4F" rx="8"/>
+  <rect x="365" y="315" width="70" height="10" fill="#FF4500"/>
+  
+  <!-- Urban hibachi grills -->
+  <circle cx="375" r="5" cy="318" fill="#FF6347"/>
+  <circle cx="390" r="5" cy="318" fill="#32CD32"/>
+  <circle cx="405" r="5" cy="318" fill="#FFD700"/>
+  <circle cx="420" r="5" cy="318" fill="#FF6347"/>
+  <circle cx="435" r="5" cy="318" fill="#32CD32"/>
+  
+  <!-- Urban hibachi chef -->
+  <circle cx="400" cy="280" r="14" fill="#FDBCB4"/>
+  <rect x="391" y="294" width="18" height="24" fill="white"/>
+  <rect x="388" y="318" width="24" height="28" fill="#000080"/>
+  <rect x="391" y="346" width="7" height="20" fill="#FDBCB4"/>
+  <rect x="402" y="346" width="7" height="20" fill="#FDBCB4"/>
+  
+  <!-- Chef hat -->
+  <rect x="395" y="270" width="10" height="8" fill="white"/>
+  <ellipse cx="400" cy="265" rx="8" ry="5" fill="white"/>
+  
+  <!-- Holiday decorations -->
+  <polygon points="320,250 340,250 330,270" fill="#FF6347"/>
+  <polygon points="340,250 360,250 350,270" fill="#32CD32"/>
+  <polygon points="360,250 380,250 370,270" fill="#FFD700"/>
+  <polygon points="420,250 440,250 430,270" fill="#FF6347"/>
+  <polygon points="440,250 460,250 450,270" fill="#32CD32"/>
+  <polygon points="460,250 480,250 470,270" fill="#FFD700"/>
+  
+  <!-- City apartment guests -->
+  <circle cx="320" cy="380" r="10" fill="#FDBCB4"/>
+  <rect x="315" y="390" width="10" height="18" fill="#8B008B"/>
+  <rect x="317" y="408" width="6" height="15" fill="#000080"/>
+  
+  <circle cx="480" cy="380" r="10" fill="#FDBCB4"/>
+  <rect x="475" y="390" width="10" height="18" fill="#4169E1"/>
+  <rect x="477" y="408" width="6" height="15" fill="#654321"/>
+  
+  <!-- Young urban professionals -->
+  <circle cx="360" cy="390" r="9" fill="#FDBCB4"/>
+  <rect x="356" y="399" width="8" height="16" fill="#FF69B4"/>
+  <rect x="357" y="415" width="6" height="13" fill="#8B4513"/>
+  
+  <circle cx="440" cy="390" r="9" fill="#FDBCB4"/>
+  <rect x="436" y="399" width="8" height="16" fill="#32CD32"/>
+  <rect x="437" y="415" width="6" height="13" fill="#000080"/>
+  
+  <!-- Compact urban dining -->
+  <rect x="320" y="420" width="160" height="25" fill="#8B4513" rx="8"/>
+  <rect x="315" y="435" width="8" height="25" fill="#654321"/>
+  <rect x="477" y="435" width="8" height="25" fill="#654321"/>
+  
+  <!-- Holiday place settings -->
+  <circle cx="340" cy="418" r="6" fill="white"/>
+  <circle cx="370" cy="418" r="6" fill="white"/>
+  <circle cx="400" cy="418" r="6" fill="white"/>
+  <circle cx="430" cy="418" r="6" fill="white"/>
+  <circle cx="460" cy="418" r="6" fill="white"/>
+  
+  <!-- Holiday drinks -->
+  <rect x="335" y="410" width="3" height="8" fill="#8B0000"/>
+  <rect x="365" y="410" width="3" height="8" fill="#32CD32"/>
+  <rect x="395" y="410" width="3" height="8" fill="#FFD700"/>
+  <rect x="425" y="410" width="3" height="8" fill="#8B0000"/>
+  <rect x="455" y="410" width="3" height="8" fill="#32CD32"/>
+  
+  <!-- San Francisco title -->
+  <text x="400" y="220" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="22" font-weight="bold">SAN FRANCISCO</text>
+  <text x="400" y="245" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16">HOLIDAY HIBACHI AT HOME</text>
+  
+  <!-- Urban holiday warmth -->
+  <rect x="150" y="400" width="120" height="80" fill="#8B0000" opacity="0.8" rx="12"/>
+  <text x="210" y="425" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="12" font-weight="bold">URBAN</text>
+  <text x="210" y="440" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">HOLIDAY</text>
+  <text x="210" y="455" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">WARMTH</text>
+  <text x="210" y="470" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">CITY CELEBRATION</text>
+  
+  <!-- Apartment living advantages -->
+  <rect x="530" y="400" width="120" height="80" fill="#32CD32" opacity="0.8" rx="12"/>
+  <text x="590" y="425" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">ROOFTOP</text>
+  <text x="590" y="440" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">HIBACHI</text>
+  <text x="590" y="455" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">PARTIES</text>
+  <text x="590" y="470" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="10">CITY VIEWS</text>
+  
+  <!-- Holiday hibachi food -->
+  <ellipse cx="380" cy="315" rx="8" ry="5" fill="#FF6347"/>
+  <ellipse cx="395" cy="315" rx="9" ry="5" fill="#32CD32"/>
+  <ellipse cx="410" cy="315" rx="8" ry="5" fill="#FFD700"/>
+  <ellipse cx="425" cy="315" rx="7" ry="4" fill="#FF69B4"/>
+  
+  <!-- Holiday hibachi flames -->
+  <polygon points="380,315 384,308 376,308" fill="#FF6347" opacity="0.8"/>
+  <polygon points="395,315 399,308 391,308" fill="#32CD32" opacity="0.8"/>
+  <polygon points="410,315 414,308 406,308" fill="#FFD700" opacity="0.8"/>
+  <polygon points="425,315 429,308 421,308" fill="#FF69B4" opacity="0.8"/>
+  
+  <!-- Cable cars with holiday decorations -->
+  <rect x="100" y="520" width="40" height="20" fill="#8B4513" rx="5"/>
+  <rect x="105" y="515" width="30" height="8" fill="#FFD700"/>
+  <text x="120" y="535" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="8">HOLIDAY</text>
+  <circle cx="110" cy="535" r="3" fill="#2F4F4F"/>
+  <circle cx="130" cy="535" r="3" fill="#2F4F4F"/>
+  
+  <!-- Golden Gate Bridge with holiday lights -->
+  <rect x="50" y="200" width="200" height="6" fill="#FF6347"/>
+  <rect x="70" y="150" width="6" height="56" fill="#FF6347"/>
+  <rect x="230" y="140" width="6" height="66" fill="#FF6347"/>
+  
+  <!-- Bridge holiday lights -->
+  <circle cx="80" cy="180" r="1" fill="#FFD700"/>
+  <circle cx="100" cy="185" r="1" fill="#32CD32"/>
+  <circle cx="120" cy="190" r="1" fill="#FF6347"/>
+  <circle cx="140" cy="185" r="1" fill="#FFD700"/>
+  <circle cx="160" cy="180" r="1" fill="#32CD32"/>
+  <circle cx="180" cy="185" r="1" fill="#FF6347"/>
+  <circle cx="200" cy="190" r="1" fill="#FFD700"/>
+  <circle cx="220" cy="185" r="1" fill="#32CD32"/>
+  
+  <!-- SF fog with holiday spirit -->
+  <ellipse cx="150" cy="250" rx="60" ry="20" fill="white" opacity="0.5"/>
+  <ellipse cx="600" cy="280" rx="80" ry="25" fill="white" opacity="0.4"/>
+  
+  <!-- Holiday glow over city -->
+  <circle cx="400" cy="350" r="100" fill="url(#holidayGlow)"/>
+  
+  <!-- Intimate city celebration -->
+  <text x="400" y="190" text-anchor="middle" fill="#FF6347" font-family="Arial, sans-serif" font-size="12" font-weight="bold">INTIMATE CITY CELEBRATIONS</text>
+</svg>

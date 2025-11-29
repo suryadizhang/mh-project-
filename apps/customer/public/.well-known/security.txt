@@ -1,0 +1,42 @@
+Contact: mailto:security@myhibachi.com
+Expires: 2026-09-01T00:00:00.000Z
+Encryption: https://myhibachi.com/.well-known/pgp-key.txt
+Acknowledgments: https://myhibachi.com/security/acknowledgments
+Policy: https://myhibachi.com/security/policy
+Hiring: https://myhibachi.com/careers
+
+# Security Policy
+
+We take security seriously and appreciate responsible disclosure of vulnerabilities.
+
+## Reporting Vulnerabilities
+
+If you discover a security vulnerability, please:
+
+1. Email us at security@myhibachi.com
+2. Provide detailed information about the vulnerability
+3. Allow us reasonable time to respond and fix the issue
+4. Do not publicly disclose the vulnerability until it has been resolved
+
+## Response Timeline
+
+- Initial response: Within 24 hours
+- Status update: Within 72 hours  
+- Resolution target: Within 30 days for critical issues
+
+## Scope
+
+This policy applies to:
+- myhibachi.com and all subdomains
+- Mobile applications
+- API endpoints
+- Backend services
+
+## Out of Scope
+
+- Social engineering attacks
+- Physical attacks
+- Denial of Service (DoS) attacks
+- Spam or phishing attacks
+
+Thank you for helping keep My Hibachi secure!

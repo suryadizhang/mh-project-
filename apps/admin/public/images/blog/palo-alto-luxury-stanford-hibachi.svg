@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Palo Alto luxury Stanford area atmosphere -->
+  <defs>
+    <linearGradient id="paloAltoSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB"/>
+      <stop offset="50%" style="stop-color:#E0F6FF"/>
+      <stop offset="100%" style="stop-color:#F0F8FF"/>
+    </linearGradient>
+    <linearGradient id="luxuryHome" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F5DEB3"/>
+      <stop offset="100%" style="stop-color:#DEB887"/>
+    </linearGradient>
+    <radialGradient id="stanfordSpirit" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#8C1515"/>
+      <stop offset="100%" style="stop-color:#B83A4B"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Elegant Palo Alto sky -->
+  <rect width="800" height="600" fill="url(#paloAltoSky)"/>
+  <circle cx="650" cy="80" r="35" fill="#FFD700" opacity="0.8"/>
+  
+  <!-- Palo Alto hills and luxury landscape -->
+  <ellipse cx="200" cy="480" rx="150" ry="60" fill="#9ACD32"/>
+  <ellipse cx="600" cy="500" rx="180" ry="50" fill="#8FBC8F"/>
+  
+  <!-- Stanford University tower silhouette -->
+  <rect x="50" y="250" width="25" height="200" fill="#8C1515"/>
+  <polygon points="50,250 62.5,225 75,250" fill="#8C1515"/>
+  <rect x="58" y="280" width="4" height="6" fill="#FFD700"/>
+  <rect x="66" y="280" width="4" height="6" fill="#FFD700"/>
+  <text x="62.5" y="470" text-anchor="middle" fill="#8C1515" font-family="Arial, sans-serif" font-size="10" font-weight="bold">STANFORD</text>
+  
+  <!-- Luxury Palo Alto mansion -->
+  <rect x="300" y="320" width="200" height="120" fill="url(#luxuryHome)"/>
+  <polygon points="300,320 400,270 500,320" fill="#8B4513"/>
+  <rect x="320" y="350" width="20" height="25" fill="#8B4513"/>
+  <rect x="350" y="340" width="25" height="20" fill="#4169E1"/>
+  <rect x="425" y="340" width="25" height="20" fill="#4169E1"/>
+  <rect x="460" y="350" width="20" height="25" fill="#8B4513"/>
+  
+  <!-- Luxury features -->
+  <rect x="380" y="260" width="40" height="30" fill="#8B4513"/>
+  <polygon points="380,260 400,245 420,260" fill="#654321"/>
+  
+  <!-- Elegant landscaping -->
+  <ellipse cx="250" cy="520" rx="50" ry="25" fill="#FF69B4"/>
+  <ellipse cx="550" cy="510" rx="45" ry="20" fill="#FFD700"/>
+  <ellipse cx="400" cy="530" rx="60" ry="30" fill="#32CD32"/>
+  
+  <!-- Premium hibachi setup -->
+  <rect x="350" y="450" width="100" height="60" fill="#2F4F4F" rx="10"/>
+  <rect x="365" y="445" width="70" height="10" fill="#FF4500"/>
+  
+  <!-- Luxury hibachi grills -->
+  <circle cx="375" r="5" cy="448" fill="#FFD700"/>
+  <circle cx="390" r="5" cy="448" fill="#FF6347"/>
+  <circle cx="405" r="5" cy="448" fill="#8C1515"/>
+  <circle cx="420" r="5" cy="448" fill="#FFD700"/>
+  <circle cx="435" r="5" cy="448" fill="#FF6347"/>
+  
+  <!-- Master hibachi chef -->
+  <circle cx="400" cy="410" r="16" fill="#FDBCB4"/>
+  <rect x="389" y="426" width="22" height="26" fill="white"/>
+  <rect x="386" y="452" width="28" height="30" fill="#000080"/>
+  <rect x="389" y="482" width="8" height="22" fill="#FDBCB4"/>
+  <rect x="403" y="482" width="8" height="22" fill="#FDBCB4"/>
+  
+  <!-- Luxury chef hat -->
+  <rect x="394" y="398" width="12" height="10" fill="white"/>
+  <ellipse cx="400" cy="392" rx="10" ry="6" fill="white"/>
+  
+  <!-- Premium cooking tools -->
+  <rect x="425" y="405" width="25" height="3" fill="#C0C0C0"/>
+  <rect x="447" y="402" width="15" height="9" fill="#C0C0C0"/>
+  <circle cx="455" cy="406" r="2" fill="#FFD700"/>
+  
+  <!-- Wealthy Palo Alto guests -->
+  <circle cx="320" cy="480" r="12" fill="#FDBCB4"/>
+  <rect x="313" y="492" width="14" height="24" fill="#8C1515"/>
+  <rect x="315" y="516" width="10" height="20" fill="#000080"/>
+  <rect x="317" y="536" width="6" height="12" fill="#8B4513"/>
+  
+  <circle cx="480" cy="480" r="12" fill="#FDBCB4"/>
+  <rect x="473" y="492" width="14" height="24" fill="#8B008B"/>
+  <rect x="475" y="516" width="10" height="20" fill="#654321"/>
+  <rect x="477" y="536" width="6" height="12" fill="#8B4513"/>
+  
+  <!-- Well-dressed children -->
+  <circle cx="290" cy="500" r="10" fill="#FDBCB4"/>
+  <rect x="285" y="510" width="10" height="18" fill="#FF69B4"/>
+  <rect x="287" y="528" width="6" height="15" fill="#000080"/>
+  
+  <circle cx="510" cy="500" r="10" fill="#FDBCB4"/>
+  <rect x="505" y="510" width="10" height="18" fill="#32CD32"/>
+  <rect x="507" y="528" width="6" height="15" fill="#8B4513"/>
+  
+  <!-- Luxury dining setup -->
+  <rect x="320" y="520" width="160" height="30" fill="#8B4513" rx="10"/>
+  <rect x="315" y="540" width="10" height="30" fill="#654321"/>
+  <rect x="475" y="540" width="10" height="30" fill="#654321"/>
+  
+  <!-- Fine china and crystal -->
+  <circle cx="340" cy="518" r="8" fill="white"/>
+  <circle cx="370" cy="518" r="8" fill="white"/>
+  <circle cx="400" cy="518" r="8" fill="white"/>
+  <circle cx="430" cy="518" r="8" fill="white"/>
+  <circle cx="460" cy="518" r="8" fill="white"/>
+  
+  <!-- Crystal wine glasses -->
+  <polygon points="335,515 345,515 344,505 336,505" fill="white"/>
+  <ellipse cx="340" cy="502" rx="3" ry="2" fill="#8B0000"/>
+  <polygon points="395,515 405,515 404,505 396,505" fill="white"/>
+  <ellipse cx="400" cy="502" rx="3" ry="2" fill="#8B0000"/>
+  <polygon points="455,515 465,515 464,505 456,505" fill="white"/>
+  <ellipse cx="460" cy="502" rx="3" ry="2" fill="#8B0000"/>
+  
+  <!-- Premium silver utensils -->
+  <rect x="330" y="508" width="2" height="8" fill="#C0C0C0"/>
+  <rect x="348" y="508" width="2" height="8" fill="#C0C0C0"/>
+  <rect x="360" y="508" width="2" height="8" fill="#C0C0C0"/>
+  <rect x="378" y="508" width="2" height="8" fill="#C0C0C0"/>
+  <rect x="390" y="508" width="2" height="8" fill="#C0C0C0"/>
+  <rect x="408" y="508" width="2" height="8" fill="#C0C0C0"/>
+  <rect x="420" y="508" width="2" height="8" fill="#C0C0C0"/>
+  <rect x="438" y="508" width="2" height="8" fill="#C0C0C0"/>
+  <rect x="450" y="508" width="2" height="8" fill="#C0C0C0"/>
+  <rect x="468" y="508" width="2" height="8" fill="#C0C0C0"/>
+  
+  <!-- Gourmet hibachi cuisine -->
+  <ellipse cx="380" cy="445" rx="9" ry="6" fill="#FF69B4"/>
+  <ellipse cx="395" cy="445" rx="10" ry="6" fill="#FFA500"/>
+  <ellipse cx="410" cy="445" rx="9" ry="6" fill="#FF6347"/>
+  <ellipse cx="425" cy="445" rx="8" ry="5" fill="#32CD32"/>
+  
+  <!-- Palo Alto title -->
+  <text x="400" y="220" text-anchor="middle" fill="#8C1515" font-family="Arial, sans-serif" font-size="22" font-weight="bold">PALO ALTO</text>
+  <text x="400" y="245" text-anchor="middle" fill="#8B008B" font-family="Arial, sans-serif" font-size="16">LUXURY HIBACHI EXPERIENCE</text>
+  
+  <!-- Wedding celebration elements -->
+  <rect x="150" y="380" width="100" height="80" fill="#8C1515" opacity="0.8" rx="12"/>
+  <text x="200" y="405" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">LUXURY</text>
+  <text x="200" y="420" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="11">WEDDING</text>
+  <text x="200" y="435" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">CATERING</text>
+  <text x="200" y="450" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">STANFORD AREA</text>
+  
+  <!-- Private chef service -->
+  <rect x="550" y="380" width="100" height="80" fill="#8B008B" opacity="0.8" rx="12"/>
+  <text x="600" y="405" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="12" font-weight="bold">PRIVATE</text>
+  <text x="600" y="420" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">CHEF</text>
+  <text x="600" y="435" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">SERVICE</text>
+  <text x="600" y="450" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">EXCLUSIVE</text>
+  
+  <!-- Elegant hibachi flames -->
+  <polygon points="380,445 384,438 376,438" fill="#FF4500" opacity="0.8"/>
+  <polygon points="395,445 399,438 391,438" fill="#8C1515" opacity="0.8"/>
+  <polygon points="410,445 414,438 406,438" fill="#FFD700" opacity="0.8"/>
+  <polygon points="425,445 429,438 421,438" fill="#FF6347" opacity="0.8"/>
+  
+  <!-- Luxury cars in driveway -->
+  <ellipse cx="150" cy="550" rx="30" ry="10" fill="#2F4F4F"/>
+  <circle cx="130" cy="550" r="4" fill="#C0C0C0"/>
+  <circle cx="170" cy="550" r="4" fill="#C0C0C0"/>
+  <rect x="145" y="545" width="10" height="3" fill="#FFD700"/>
+  
+  <ellipse cx="650" cy="545" rx="35" ry="12" fill="#8B0000"/>
+  <circle cx="625" cy="545" r="4" fill="#C0C0C0"/>
+  <circle cx="675" cy="545" r="4" fill="#C0C0C0"/>
+  <rect x="642" y="540" width="16" height="3" fill="#FFD700"/>
+  
+  <!-- Palm trees (California luxury) -->
+  <rect x="100" y="480" width="8" height="50" fill="#8B4513"/>
+  <ellipse cx="104" cy="475" rx="20" ry="12" fill="#228B22"/>
+  <rect x="700" y="490" width="8" height="40" fill="#8B4513"/>
+  <ellipse cx="704" cy="485" rx="18" ry="10" fill="#228B22"/>
+  
+  <!-- Sophisticated outdoor lighting -->
+  <circle cx="280" cy="420" r="5" fill="#FFD700"/>
+  <rect x="277" y="425" width="6" height="20" fill="#8B4513"/>
+  <circle cx="520" cy="420" r="5" fill="#FFD700"/>
+  <rect x="517" y="425" width="6" height="20" fill="#8B4513"/>
+  
+  <!-- Stanford academic influence -->
+  <circle cx="400" cy="180" r="40" fill="url(#stanfordSpirit)" opacity="0.3"/>
+  <text x="400" y="185" text-anchor="middle" fill="#8C1515" font-family="Arial, sans-serif" font-size="14" font-weight="bold">STANFORD AREA</text>
+</svg>

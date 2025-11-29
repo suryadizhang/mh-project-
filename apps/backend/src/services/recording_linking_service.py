@@ -21,7 +21,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db.models.core import Booking, BookingStatus, Customer
 
 # MIGRATED: from models.call_recording → db.models.call_recording
-from db.models.call_recording import CallRecording
+from db.models.support_communications import CallRecording
 
 logger = logging.getLogger(__name__)
 

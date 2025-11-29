@@ -322,7 +322,7 @@ class WhatsAppNotificationService:
                 "",
                 f"Match Confidence: {confidence} ({match_score}/225)",
                 "",
-                "View dashboard: https://admin.myhibachichef.com/payments",
+                "View dashboard: https://admin.mysticdatanode.net/payments",
             ]
         )
 

@@ -1,0 +1,181 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#outdoorGradient)"/>
+  
+  <!-- Sky and Clouds -->
+  <ellipse cx="80" cy="40" rx="25" ry="12" fill="#FFFFFF" opacity="0.8"/>
+  <ellipse cx="85" cy="45" rx="20" ry="10" fill="#FFFFFF" opacity="0.9"/>
+  <ellipse cx="320" cy="35" rx="30" ry="15" fill="#FFFFFF" opacity="0.8"/>
+  <ellipse cx="325" cy="40" rx="25" ry="12" fill="#FFFFFF" opacity="0.9"/>
+  
+  <!-- Sun -->
+  <circle cx="350" cy="50" r="20" fill="#FFD700"/>
+  <g stroke="#FFD700" stroke-width="2">
+    <path d="M350 20 L350 30"/>
+    <path d="M380 50 L370 50"/>
+    <path d="M365 35 L358 42"/>
+    <path d="M365 65 L358 58"/>
+    <path d="M335 65 L342 58"/>
+    <path d="M335 35 L342 42"/>
+    <path d="M350 80 L350 70"/>
+    <path d="M320 50 L330 50"/>
+  </g>
+  
+  <!-- Trees and Nature -->
+  <ellipse cx="30" cy="180" rx="15" ry="40" fill="#228B22"/>
+  <rect x="27" y="200" width="6" height="20" fill="#8B4513"/>
+  
+  <ellipse cx="370" cy="170" rx="18" ry="45" fill="#32CD32"/>
+  <rect x="367" y="195" width="6" height="25" fill="#8B4513"/>
+  
+  <!-- Grass -->
+  <ellipse cx="200" cy="240" rx="200" ry="20" fill="#90EE90" opacity="0.6"/>
+  
+  <!-- Outdoor Picnic Table -->
+  <rect x="120" y="190" width="160" height="10" fill="#8B4513"/>
+  <rect x="140" y="200" width="6" height="30" fill="#8B4513"/>
+  <rect x="254" y="200" width="6" height="30" fill="#8B4513"/>
+  
+  <!-- Bench Seating -->
+  <rect x="130" y="210" width="140" height="8" fill="#A0522D"/>
+  <rect x="150" y="218" width="4" height="15" fill="#8B4513"/>
+  <rect x="246" y="218" width="4" height="15" fill="#8B4513"/>
+  
+  <!-- Outdoor Hibachi Setup -->
+  <rect x="170" y="170" width="60" height="30" rx="8" fill="#1A1A1A"/>
+  <rect x="178" y="178" width="44" height="18" rx="5" fill="#2D1810"/>
+  <rect x="185" y="185" width="30" height="8" rx="3" fill="#4A4A4A"/>
+  
+  <!-- Natural Fire -->
+  <ellipse cx="190" cy="187" rx="4" ry="8" fill="#FF4500" opacity="0.9"/>
+  <ellipse cx="200" cy="185" rx="5" ry="10" fill="#FF6347" opacity="0.8"/>
+  <ellipse cx="210" cy="187" rx="4" ry="8" fill="#FF8C00" opacity="0.9"/>
+  
+  <!-- Outdoor Chef -->
+  <circle cx="250" cy="130" r="16" fill="#F4C2A1"/>
+  <rect x="240" y="144" width="20" height="30" fill="#FFFFFF"/>
+  <rect x="242" y="146" width="16" height="3" fill="#000000"/>
+  
+  <!-- Chef Hat -->
+  <ellipse cx="250" cy="120" rx="10" ry="14" fill="#FFFFFF"/>
+  <rect x="244" y="127" width="12" height="3" fill="#000000"/>
+  
+  <!-- Outdoor Apron with Nature Design -->
+  <rect x="245" y="150" width="10" height="15" fill="#8FBC8F"/>
+  <circle cx="248" cy="155" r="1" fill="#228B22"/>
+  <circle cx="252" cy="158" r="1" fill="#32CD32"/>
+  
+  <!-- Family Enjoying Outdoors -->
+  <!-- Dad -->
+  <circle cx="130" cy="140" r="14" fill="#F4C2A1"/>
+  <rect x="122" y="152" width="16" height="26" fill="#4169E1"/>
+  
+  <!-- Mom -->
+  <circle cx="160" cy="140" r="12" fill="#F4C2A1"/>
+  <rect x="154" y="150" width="12" height="22" fill="#FF69B4"/>
+  <path d="M160 130 Q155 125 165 125 Q165 128 160 130" fill="#8B4513"/>
+  
+  <!-- Kids Playing -->
+  <circle cx="300" cy="150" r="10" fill="#F4C2A1"/>
+  <rect x="295" y="158" width="10" height="18" fill="#FFD700"/>
+  
+  <circle cx="320" cy="155" r="8" fill="#F4C2A1"/>
+  <rect x="316" y="161" width="8" height="15" fill="#00BFFF"/>
+  
+  <!-- Outdoor Food -->
+  <!-- Fresh Vegetables -->
+  <circle cx="185" cy="183" r="2" fill="#FF6347"/> <!-- tomatoes -->
+  <ellipse cx="195" cy="184" rx="2" ry="1" fill="#32CD32"/> <!-- zucchini -->
+  <circle cx="205" cy="183" r="2" fill="#FF8C00"/> <!-- peppers -->
+  <ellipse cx="215" cy="184" rx="1.5" ry="2" fill="#9ACD32"/> <!-- corn -->
+  
+  <!-- Picnic Items -->
+  <!-- Cooler -->
+  <rect x="80" y="180" width="20" height="15" fill="#4682B4"/>
+  <rect x="82" y="182" width="16" height="3" fill="#F0F8FF"/>
+  <circle cx="98" cy="187" r="1" fill="#C0C0C0"/>
+  
+  <!-- Picnic Basket -->
+  <ellipse cx="320" cy="190" rx="12" ry="8" fill="#8B4513"/>
+  <path d="M308 190 Q308 185 332 185 Q332 190 320 190" fill="#A0522D"/>
+  <rect x="314" y="185" width="2" height="8" fill="#8B4513"/>
+  <rect x="324" y="185" width="2" height="8" fill="#8B4513"/>
+  
+  <!-- Outdoor Drinks -->
+  <rect x="110" y="185" width="4" height="10" fill="#FF4500"/>
+  <ellipse cx="112" cy="184" rx="2.5" ry="1.5" fill="#FFA500"/>
+  
+  <rect x="290" y="185" width="4" height="10" fill="#4169E1"/>
+  <ellipse cx="292" cy="184" rx="2.5" ry="1.5" fill="#87CEEB"/>
+  
+  <!-- Nature Elements -->
+  <!-- Butterflies -->
+  <g fill="#FFB6C1">
+    <ellipse cx="100" cy="120" rx="3" ry="2" transform="rotate(20 100 120)"/>
+    <ellipse cx="98" cy="122" rx="2" ry="1.5" transform="rotate(20 98 122)"/>
+    <path d="M99 121 L99 115" stroke="#000000" stroke-width="0.5"/>
+  </g>
+  
+  <g fill="#98FB98">
+    <ellipse cx="280" cy="110" rx="3" ry="2" transform="rotate(-30 280 110)"/>
+    <ellipse cx="282" cy="112" rx="2" ry="1.5" transform="rotate(-30 282 112)"/>
+    <path d="M281 111 L281 105" stroke="#000000" stroke-width="0.5"/>
+  </g>
+  
+  <!-- Birds -->
+  <path d="M120 80 Q125 75 130 80 Q125 85 120 80" fill="#696969"/>
+  <path d="M270 90 Q275 85 280 90 Q275 95 270 90" fill="#696969"/>
+  
+  <!-- Outdoor Utensils -->
+  <rect x="270" y="150" width="2" height="15" fill="#8B4513" transform="rotate(25 270 150)"/>
+  <ellipse cx="278" cy="145" rx="5" ry="2.5" fill="#C0C0C0" transform="rotate(25 278 145)"/>
+  
+  <!-- Fresh Air Steam -->
+  <g stroke="#F0F8FF" stroke-width="1" fill="none" opacity="0.6">
+    <path d="M190 180 Q192 175 190 170 Q188 165 190 160"/>
+    <path d="M200 180 Q202 175 200 170 Q198 165 200 160"/>
+    <path d="M210 180 Q212 175 210 170 Q208 165 210 160"/>
+  </g>
+  
+  <!-- Flowers -->
+  <g fill="#FF69B4">
+    <circle cx="60" cy="200" r="2"/>
+    <circle cx="58" cy="198" r="1"/>
+    <circle cx="62" cy="198" r="1"/>
+    <circle cx="58" cy="202" r="1"/>
+    <circle cx="62" cy="202" r="1"/>
+    <rect x="59.5" y="202" width="1" height="8" fill="#228B22"/>
+  </g>
+  
+  <g fill="#FFD700">
+    <circle cx="340" cy="210" r="2"/>
+    <circle cx="338" cy="208" r="1"/>
+    <circle cx="342" cy="208" r="1"/>
+    <circle cx="338" cy="212" r="1"/>
+    <circle cx="342" cy="212" r="1"/>
+    <rect x="339.5" y="212" width="1" height="8" fill="#228B22"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="25" text-anchor="middle" fill="#228B22" font-family="Arial, sans-serif" font-size="24" font-weight="bold">
+    Outdoor Hibachi Adventure
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="45" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="16">
+    Fresh Air, Fresh Flavors, Family Fun
+  </text>
+  
+  <!-- Nature Message -->
+  <text x="200" y="280" text-anchor="middle" fill="#228B22" font-family="Arial, sans-serif" font-size="12">
+    "Where nature meets culinary artistry"
+  </text>
+  
+  <defs>
+    <linearGradient id="outdoorGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#98FB98;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F0E68C;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

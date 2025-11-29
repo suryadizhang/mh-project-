@@ -27,7 +27,7 @@ All models use:
 """
 
 from datetime import datetime, date
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 from uuid import UUID, uuid4
 from decimal import Decimal
 
@@ -51,57 +51,15 @@ from sqlalchemy.sql import func
 
 from ..base_class import Base
 
+# Import shared enums from crm module (after Base to avoid circular import)
+from .crm import ContactChannel, LeadSource, LeadStatus, LeadQuality
+
 
 # ==================== ENUMS ====================
+# NOTE: LeadSource, LeadStatus, LeadQuality, ContactChannel moved to db.models.crm
+# Imported above from db.models.crm
 
 import enum
-
-
-class LeadSource(str, enum.Enum):
-    """Where the lead came from"""
-
-    WEB_QUOTE = "web_quote"
-    WEBSITE = "website"  # General website lead (not from quote form)
-    CHAT = "chat"
-    INSTAGRAM = "instagram"
-    FACEBOOK = "facebook"
-    GOOGLE = "google"
-    YELP = "yelp"
-    SMS = "sms"
-    PHONE = "phone"
-    REFERRAL = "referral"
-    EVENT = "event"
-
-
-class LeadStatus(str, enum.Enum):
-    """Lead workflow status"""
-
-    NEW = "new"
-    WORKING = "working"
-    QUALIFIED = "qualified"
-    DISQUALIFIED = "disqualified"
-    CONVERTED = "converted"
-    NURTURING = "nurturing"
-
-
-class LeadQuality(str, enum.Enum):
-    """Lead temperature/quality"""
-
-    HOT = "hot"
-    WARM = "warm"
-    COLD = "cold"
-
-
-class ContactChannel(str, enum.Enum):
-    """Contact method channels"""
-
-    EMAIL = "email"
-    SMS = "sms"
-    INSTAGRAM = "instagram"
-    FACEBOOK = "facebook"
-    GOOGLE = "google"
-    YELP = "yelp"
-    WEB = "web"
 
 
 class SocialPlatform(str, enum.Enum):
@@ -122,95 +80,8 @@ class SocialThreadStatus(str, enum.Enum):
 
 
 # ==================== MODELS ====================
-
-
-class Lead(Base):
-    """
-    Lead tracking entity
-
-    Represents a potential customer with scoring, qualification, and conversion tracking.
-    Supports multi-channel attribution (UTM tracking).
-    """
-
-    __tablename__ = "leads"
-    __table_args__ = (
-        Index("ix_lead_leads_status", "status"),
-        Index("ix_lead_leads_source", "source"),
-        Index("ix_lead_leads_score", "score"),
-        Index("ix_lead_leads_followup", "follow_up_date"),
-        Index("ix_lead_leads_customer", "customer_id"),
-        CheckConstraint("score >= 0 AND score <= 100", name="check_lead_score_range"),
-        {"schema": "lead"},
-    )
-
-    # Primary Key
-    id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
-    )
-
-    # Source & Attribution
-    source: Mapped[LeadSource] = mapped_column(
-        SQLEnum(LeadSource, name="lead_source", schema="public", create_type=False), nullable=False
-    )
-    utm_source: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    utm_medium: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    utm_campaign: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-
-    # Status & Quality
-    status: Mapped[LeadStatus] = mapped_column(
-        SQLEnum(LeadStatus, name="lead_status", schema="public", create_type=False),
-        nullable=False,
-        default=LeadStatus.NEW,
-    )
-    quality: Mapped[Optional[LeadQuality]] = mapped_column(
-        SQLEnum(LeadQuality, name="lead_quality", schema="public", create_type=False), nullable=True
-    )
-    score: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False, default=Decimal("0"))
-
-    # Assignment
-    assigned_to: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-
-    # Customer Link (when converted)
-    customer_id: Mapped[Optional[UUID]] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("core.customers.id", ondelete="SET NULL"), nullable=True
-    )
-
-    # Follow-up & Conversion
-    last_contact_date: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    follow_up_date: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    conversion_date: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-
-    # Loss Tracking
-    lost_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now()
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
-    )
-    deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-
-    # Relationships
-    contacts: Mapped[List["LeadContact"]] = relationship(
-        "LeadContact", back_populates="lead", cascade="all, delete-orphan"
-    )
-    context: Mapped[Optional["LeadContext"]] = relationship(
-        "LeadContext", back_populates="lead", uselist=False, cascade="all, delete-orphan"
-    )
-    events: Mapped[List["LeadEvent"]] = relationship(
-        "LeadEvent", back_populates="lead", cascade="all, delete-orphan"
-    )
-    social_threads: Mapped[List["LeadSocialThread"]] = relationship(
-        "LeadSocialThread", back_populates="lead"
-    )
+# NOTE: Lead model moved to db.models.crm (schema: crm)
+# All Lead imports should use: from db.models.crm import Lead
 
 
 class LeadContact(Base):
@@ -235,7 +106,7 @@ class LeadContact(Base):
 
     # Foreign Keys
     lead_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("lead.leads.id", ondelete="CASCADE"), nullable=False
+        PGUUID(as_uuid=True), ForeignKey("crm.leads.id", ondelete="CASCADE"), nullable=False
     )
 
     # Contact Info
@@ -267,8 +138,8 @@ class LeadContext(Base):
     __table_args__ = {"schema": "lead"}
 
     # Primary Key (also FK to Lead)
-    lead_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("lead.leads.id", ondelete="CASCADE"), primary_key=True
+    id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("crm.leads.id", ondelete="CASCADE"), primary_key=True
     )
 
     # Party Size
@@ -319,11 +190,11 @@ class LeadEvent(Base):
 
     # Foreign Keys
     lead_id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("lead.leads.id", ondelete="CASCADE"), nullable=False
+        PGUUID(as_uuid=True), ForeignKey("crm.leads.id", ondelete="CASCADE"), nullable=False
     )
 
     # Event Details
-    type: Mapped[str] = mapped_column(String(50), nullable=False)
+    event_type: Mapped[str] = mapped_column(String(50), nullable=False)
     payload: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
 
     # Timestamp
@@ -520,7 +391,7 @@ class LeadSocialThread(Base):
 
     # Entity Links
     lead_id: Mapped[Optional[UUID]] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("lead.leads.id", ondelete="SET NULL"), nullable=True
+        PGUUID(as_uuid=True), ForeignKey("crm.leads.id", ondelete="SET NULL"), nullable=True
     )
     customer_id: Mapped[Optional[UUID]] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("core.customers.id", ondelete="SET NULL"), nullable=True

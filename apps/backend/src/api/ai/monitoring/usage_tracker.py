@@ -11,7 +11,7 @@ Tracks token usage across all OpenAI API calls to enable:
 from datetime import datetime, timezone, timedelta
 import logging
 
-from api.ai.endpoints.models import AIUsage
+from db.models.ai.analytics import AIUsage
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 

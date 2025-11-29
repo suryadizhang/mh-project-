@@ -1,0 +1,217 @@
+<svg width="400" height="250" viewBox="0 0 400 250" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <defs>
+    <linearGradient id="fathersGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2d3436;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#636e72;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#74b9ff;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="grillGlow" cx="50%" cy="50%" r="40%">
+      <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:0.9" />
+      <stop offset="60%" style="stop-color:#d4422a;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#8b0000;stop-opacity:0.2" />
+    </radialGradient>
+    <linearGradient id="toolGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c0c0c0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#808080;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="400" height="250" fill="url(#fathersGradient)"/>
+  
+  <!-- Workshop/garage backdrop -->
+  <rect x="0" y="180" width="400" height="70" fill="#34495e" opacity="0.8"/>
+  <rect x="0" y="200" width="400" height="50" fill="#2c3e50" opacity="0.9"/>
+  
+  <!-- Tool board background -->
+  <rect x="30" y="40" width="80" height="100" fill="#8b4513" rx="5"/>
+  <rect x="290" y="50" width="70" height="90" fill="#8b4513" rx="5"/>
+  
+  <!-- Hibachi grill (center) -->
+  <ellipse cx="200" cy="160" rx="50" ry="22" fill="#2c2c2c"/>
+  <ellipse cx="200" cy="158" rx="45" ry="20" fill="url(#grillGlow)"/>
+  
+  <!-- Professional grill grates -->
+  <g stroke="#666" stroke-width="3" opacity="0.9">
+    <line x1="165" y1="150" x2="235" y2="150"/>
+    <line x1="165" y1="158" x2="235" y2="158"/>
+    <line x1="165" y1="166" x2="235" y2="166"/>
+  </g>
+  
+  <!-- Premium steaks and meat on grill -->
+  <ellipse cx="180" cy="155" rx="8" ry="6" fill="#8b0000"/> <!-- Ribeye -->
+  <ellipse cx="200" cy="152" rx="9" ry="7" fill="#a0522d"/> <!-- NY Strip -->
+  <ellipse cx="220" cy="160" rx="7" ry="5" fill="#8b4513"/> <!-- Filet -->
+  <rect x="175" y="165" width="8" height="4" fill="#d2691e" rx="1"/> <!-- Sausage -->
+  <rect x="215" y="165" width="8" height="4" fill="#d2691e" rx="1"/> <!-- Sausage -->
+  
+  <!-- Grill marks on steaks -->
+  <g stroke="#000" stroke-width="1" opacity="0.6">
+    <line x1="175" y1="153" x2="185" y2="153"/>
+    <line x1="176" y1="157" x2="184" y2="157"/>
+    <line x1="195" y1="150" x2="205" y2="150"/>
+    <line x1="196" y1="154" x2="204" y2="154"/>
+    <line x1="216" y1="158" x2="224" y2="158"/>
+    <line x1="217" y1="162" x2="223" y2="162"/>
+  </g>
+  
+  <!-- Dramatic smoke/steam -->
+  <g opacity="0.7">
+    <path d="M185 140 Q180 125 185 110 Q190 120 185 105 Q180 115 185 100" stroke="#e6e6e6" stroke-width="3" fill="none"/>
+    <path d="M200 138 Q195 123 200 108 Q205 118 200 103 Q195 113 200 98" stroke="#e6e6e6" stroke-width="3" fill="none"/>
+    <path d="M225 142 Q220 127 225 112 Q230 122 225 107 Q220 117 225 102" stroke="#e6e6e6" stroke-width="3" fill="none"/>
+  </g>
+  
+  <!-- Father/Dad as grill master -->
+  <g transform="translate(200, 105)">
+    <circle cx="0" cy="0" r="12" fill="#f4c2a1"/>
+    <path d="M-8 -6 Q0 -8 8 -6 Q8 2 0 2 Q-8 2 -8 -6" fill="#4a4a4a"/>
+    <circle cx="-3" cy="-2" r="1.5" fill="#000"/>
+    <circle cx="3" cy="-2" r="1.5" fill="#000"/>
+    <path d="M-3 3 Q0 5 3 3" stroke="#000" stroke-width="0.6" fill="none"/>
+    
+    <!-- Manly beard -->
+    <path d="M-6 2 Q0 8 6 2 Q6 6 0 6 Q-6 6 -6 2" fill="#4a4a4a"/>
+    
+    <!-- "World's Best Dad" apron -->
+    <rect x="-10" y="12" width="20" height="25" fill="#e74c3c" rx="2"/>
+    <text x="0" y="18" text-anchor="middle" font-family="Arial" font-size="6" fill="#fff">WORLD'S</text>
+    <text x="0" y="24" text-anchor="middle" font-family="Arial" font-size="6" fill="#fff">BEST</text>
+    <text x="0" y="30" text-anchor="middle" font-family="Arial" font-size="6" fill="#fff">DAD</text>
+    <circle cx="0" cy="33" r="2" fill="#ffd700"/>
+    
+    <!-- Strong arms -->
+    <circle cx="-12" cy="20" r="5" fill="#f4c2a1"/>
+    <circle cx="12" cy="20" r="5" fill="#f4c2a1"/>
+    <rect x="-15" y="15" width="6" height="18" fill="#f4c2a1" rx="3"/>
+    <rect x="9" y="15" width="6" height="18" fill="#f4c2a1" rx="3"/>
+    
+    <!-- Professional grilling tongs -->
+    <g transform="translate(18, 25)">
+      <rect x="0" y="0" width="12" height="2" fill="url(#toolGradient)" rx="1"/>
+      <rect x="0" y="3" width="12" height="2" fill="url(#toolGradient)" rx="1"/>
+      <circle x="0" cy="2.5" r="2" fill="#4a4a4a"/>
+      <rect x="10" y="-1" width="3" height="2" fill="url(#toolGradient)" rx="1"/>
+      <rect x="10" y="4" width="3" height="2" fill="url(#toolGradient)" rx="1"/>
+    </g>
+  </g>
+  
+  <!-- Family admiring dad's grilling skills -->
+  <!-- Son learning from dad -->
+  <g transform="translate(130, 130)">
+    <circle cx="0" cy="0" r="8" fill="#f4c2a1"/>
+    <path d="M-6 -4 Q0 -6 6 -4 Q6 0 0 0 Q-6 0 -6 -4" fill="#8b4513"/>
+    <circle cx="-2" cy="-1" r="1" fill="#000"/>
+    <circle cx="2" cy="-1" r="1" fill="#000"/>
+    <path d="M-2 2 Q0 4 2 2" stroke="#000" stroke-width="0.5" fill="none"/>
+    
+    <!-- Casual shirt -->
+    <rect x="-6" y="8" width="12" height="18" fill="#3498db" rx="2"/>
+    <rect x="-5" y="10" width="10" height="14" fill="#2980b9" rx="1"/>
+    
+    <!-- Arms reaching up to dad -->
+    <circle cx="-8" cy="15" r="3" fill="#f4c2a1"/>
+    <circle cx="8" cy="15" r="3" fill="#f4c2a1"/>
+    <rect x="-10" y="12" width="4" height="8" fill="#f4c2a1" rx="2"/>
+    <rect x="6" y="12" width="4" height="8" fill="#f4c2a1" rx="2"/>
+    
+    <!-- "Future Grill Master" thought bubble -->
+    <ellipse cx="15" cy="-5" rx="12" ry="6" fill="#fff" opacity="0.9"/>
+    <text x="15" y="-2" text-anchor="middle" font-family="Arial" font-size="4" fill="#000">Future Grill Master!</text>
+  </g>
+  
+  <!-- Wife/partner appreciating -->
+  <g transform="translate(270, 125)">
+    <circle cx="0" cy="0" r="9" fill="#f4c2a1"/>
+    <path d="M-7 -5 Q-2 -8 2 -8 Q7 -5 2 0" fill="#d2691e"/>
+    <circle cx="-2" cy="-2" r="1.2" fill="#000"/>
+    <circle cx="2" cy="-2" r="1.2" fill="#000"/>
+    <path d="M-2 2 Q0 4 2 2" stroke="#000" stroke-width="0.5" fill="none"/>
+    
+    <!-- Nice casual outfit -->
+    <rect x="-7" y="9" width="14" height="22" fill="#e74c3c" rx="2"/>
+    <circle cx="-4" cy="15" r="1.5" fill="#fff"/>
+    <circle cx="4" cy="15" r="1.5" fill="#fff"/>
+    
+    <!-- Arms -->
+    <circle cx="-9" cy="17" r="3.5" fill="#f4c2a1"/>
+    <circle cx="9" cy="17" r="3.5" fill="#f4c2a1"/>
+    <rect x="-11" y="14" width="5" height="12" fill="#f4c2a1" rx="2.5"/>
+    <rect x="6" y="14" width="5" height="12" fill="#f4c2a1" rx="2.5"/>
+    
+    <!-- Beer/drink for dad -->
+    <g transform="translate(13, 20)">
+      <rect x="0" y="0" width="4" height="8" fill="#8b4513" rx="1"/>
+      <ellipse cx="2" cy="-1" rx="2.5" ry="1" fill="#ffd700"/>
+      <rect x="0.5" y="1" width="3" height="6" fill="#d2691e" opacity="0.8"/>
+    </g>
+  </g>
+  
+  <!-- Dad's tools and accessories -->
+  <!-- Tool belt -->
+  <g transform="translate(70, 80)">
+    <rect x="0" y="0" width="6" height="15" fill="url(#toolGradient)" rx="1"/>
+    <rect x="1" y="1" width="4" height="13" fill="#8b4513"/>
+    <circle cx="3" cy="3" r="1" fill="url(#toolGradient)"/>
+    <rect x="2" y="8" width="2" height="5" fill="url(#toolGradient)"/>
+  </g>
+  
+  <!-- Grilling accessories on tool board -->
+  <g transform="translate(50, 60)">
+    <rect x="0" y="0" width="15" height="2" fill="url(#toolGradient)" rx="1"/>
+    <rect x="0" y="10" width="12" height="2" fill="url(#toolGradient)" rx="1"/>
+    <circle cx="20" cy="15" r="6" fill="url(#toolGradient)"/>
+    <circle cx="20" cy="15" r="4" fill="#2c3e50"/>
+    <rect x="0" y="25" width="8" height="15" fill="#8b4513"/>
+    <rect x="1" y="26" width="6" height="13" fill="url(#toolGradient)"/>
+  </g>
+  
+  <!-- Sports equipment (dad's hobbies) -->
+  <g transform="translate(320, 70)">
+    <circle cx="0" cy="0" r="8" fill="#8b4513"/>
+    <ellipse cx="0" cy="0" rx="6" ry="8" fill="#fff"/>
+    <path d="M-4 -6 Q0 -4 4 -6" stroke="#000" stroke-width="1" fill="none"/>
+    <path d="M-4 6 Q0 4 4 6" stroke="#000" stroke-width="1" fill="none"/>
+    <line x1="0" y1="-8" x2="0" y2="8" stroke="#000" stroke-width="1"/>
+  </g>
+  
+  <!-- Grill accessories table -->
+  <ellipse cx="80" cy="190" rx="30" ry="8" fill="#8b4513" opacity="0.8"/>
+  
+  <!-- BBQ sauce bottles -->
+  <rect x="60" y="175" width="6" height="15" fill="#8b0000" rx="1"/>
+  <rect x="60" y="170" width="6" height="5" fill="#000" rx="2"/>
+  <rect x="70" y="178" width="6" height="12" fill="#d2691e" rx="1"/>
+  <rect x="70" y="173" width="6" height="5" fill="#000" rx="2"/>
+  
+  <!-- Meat thermometer -->
+  <rect x="85" y="180" width="2" height="10" fill="#c0c0c0"/>
+  <circle cx="86" cy="175" r="3" fill="#000"/>
+  <circle cx="86" cy="175" r="2" fill="#fff"/>
+  <line x1="86" y1="175" x2="88" y2="173" stroke="#ff0000" stroke-width="1"/>
+  
+  <!-- Grill brush -->
+  <rect x="95" y="185" width="12" height="3" fill="#8b4513"/>
+  <rect x="95" y="182" width="8" height="3" fill="#4a4a4a"/>
+  
+  <!-- Father's Day decorations -->
+  <g opacity="0.6">
+    <rect x="150" y="20" width="100" height="15" fill="#2c3e50" rx="3"/>
+    <text x="200" y="30" text-anchor="middle" font-family="Arial" font-size="10" fill="#fff">HAPPY FATHER'S DAY</text>
+  </g>
+  
+  <!-- Masculine decorative elements -->
+  <g opacity="0.4">
+    <circle cx="370" cy="180" r="3" fill="#74b9ff"/>
+    <circle cx="380" cy="200" r="2" fill="#636e72"/>
+    <circle cx="30" cy="200" r="2.5" fill="#2d3436"/>
+    <rect x="10" y="170" width="4" height="4" fill="#74b9ff" transform="rotate(45 12 172)"/>
+    <rect x="360" y="160" width="3" height="3" fill="#636e72" transform="rotate(45 361.5 161.5)"/>
+  </g>
+  
+  <!-- "Dad's Domain" sign -->
+  <g transform="translate(300, 200)" opacity="0.8">
+    <rect x="0" y="0" width="40" height="12" fill="#8b4513" rx="2"/>
+    <text x="20" y="8" text-anchor="middle" font-family="serif" font-size="6" fill="#fff">DAD'S DOMAIN</text>
+  </g>
+</svg>

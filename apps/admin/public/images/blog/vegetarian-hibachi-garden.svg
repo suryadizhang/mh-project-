@@ -1,0 +1,194 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#vegetarianGradient)"/>
+  
+  <!-- Garden Background -->
+  <ellipse cx="200" cy="280" rx="200" ry="30" fill="#90EE90" opacity="0.6"/>
+  
+  <!-- Organic Garden Elements -->
+  <g opacity="0.4">
+    <ellipse cx="50" cy="260" rx="15" ry="8" fill="#228B22"/>
+    <ellipse cx="100" cy="270" rx="20" ry="10" fill="#32CD32"/>
+    <ellipse cx="300" cy="265" rx="18" ry="9" fill="#9ACD32"/>
+    <ellipse cx="350" cy="275" rx="16" ry="8" fill="#90EE90"/>
+  </g>
+  
+  <!-- Farm-to-Table Setting -->
+  <rect x="0" y="180" width="400" height="120" fill="#F5F5DC" opacity="0.3"/>
+  
+  <!-- Organic Wooden Table -->
+  <ellipse cx="200" cy="200" rx="110" ry="40" fill="#DEB887"/>
+  <ellipse cx="200" cy="195" rx="105" ry="35" fill="#F5DEB3"/>
+  
+  <!-- Natural Woven Placemat -->
+  <ellipse cx="200" cy="195" rx="100" ry="32" fill="#D2B48C" opacity="0.7"/>
+  <g stroke="#8B7355" stroke-width="1" opacity="0.6">
+    <ellipse cx="200" cy="190" rx="85" ry="25" fill="none"/>
+    <ellipse cx="200" cy="195" rx="90" ry="28" fill="none"/>
+    <ellipse cx="200" cy="200" rx="95" ry="30" fill="none"/>
+  </g>
+  
+  <!-- Vegetarian Hibachi Setup -->
+  <rect x="175" y="175" width="50" height="25" rx="6" fill="#2F4F4F"/>
+  <rect x="182" y="182" width="36" height="14" rx="4" fill="#556B2F"/>
+  
+  <!-- Green/Natural Flames -->
+  <ellipse cx="190" cy="185" rx="3" ry="6" fill="#32CD32" opacity="0.8"/>
+  <ellipse cx="200" cy="183" rx="4" ry="8" fill="#228B22" opacity="0.9"/>
+  <ellipse cx="210" cy="185" rx="3" ry="6" fill="#9ACD32" opacity="0.8"/>
+  
+  <!-- Fresh Organic Vegetables -->
+  <!-- Colorful Bell Peppers -->
+  <path d="M160 188 Q165 183 170 188 Q165 193 160 188" fill="#FF0000"/>
+  <path d="M165 189 Q170 184 175 189 Q170 194 165 189" fill="#FFD700"/>
+  <path d="M170 187 Q175 182 180 187 Q175 192 170 187" fill="#32CD32"/>
+  <path d="M175 189 Q180 184 185 189 Q180 194 175 189" fill="#FF8C00"/>
+  
+  <!-- Mushrooms -->
+  <ellipse cx="215" cy="190" rx="3" ry="2" fill="#DEB887"/>
+  <ellipse cx="215" cy="188" rx="2.5" ry="1.5" fill="#F5DEB3"/>
+  <rect x="214" y="190" width="2" height="3" fill="#F5F5DC"/>
+  
+  <ellipse cx="225" cy="188" rx="2.5" ry="1.5" fill="#8B7355"/>
+  <ellipse cx="225" cy="186" rx="2" ry="1" fill="#D2B48C"/>
+  <rect x="224" y="188" width="2" height="3" fill="#F5F5DC"/>
+  
+  <!-- Zucchini -->
+  <ellipse cx="235" cy="185" rx="5" ry="2" fill="#228B22"/>
+  <ellipse cx="235" cy="184" rx="4" ry="1.5" fill="#32CD32"/>
+  
+  <!-- Eggplant -->
+  <ellipse cx="245" cy="187" rx="3" ry="5" fill="#4B0082"/>
+  <ellipse cx="245" cy="186" rx="2" ry="4" fill="#663399"/>
+  
+  <!-- Broccoli -->
+  <circle cx="255" cy="185" r="3" fill="#228B22"/>
+  <circle cx="253" cy="183" r="1.5" fill="#32CD32"/>
+  <circle cx="257" cy="183" r="1.5" fill="#32CD32"/>
+  <circle cx="255" cy="187" r="1.5" fill="#32CD32"/>
+  <rect x="254" y="188" width="2" height="4" fill="#90EE90"/>
+  
+  <!-- Tofu -->
+  <rect x="265" y="186" width="5" height="4" rx="1" fill="#F5F5DC"/>
+  <rect x="266" y="187" width="3" height="2" rx="0.5" fill="#FFFACD"/>
+  
+  <!-- Vegetarian Chef -->
+  <circle cx="120" cy="130" r="16" fill="#F4C2A1"/>
+  <rect x="110" y="144" width="20" height="30" fill="#90EE90"/>
+  <rect x="112" y="146" width="16" height="3" fill="#228B22"/>
+  
+  <!-- Eco-Friendly Chef Hat -->
+  <ellipse cx="120" cy="120" rx="10" ry="14" fill="#F5F5DC"/>
+  <rect x="114" y="127" width="12" height="3" fill="#228B22"/>
+  <circle cx="120" cy="112" r="2" fill="#32CD32"/>
+  
+  <!-- Health-Conscious Customer -->
+  <circle cx="280" cy="135" r="14" fill="#F4C2A1"/>
+  <rect x="272" y="147" width="16" height="26" fill="#9ACD32"/>
+  <circle cx="278" cy="130" r="1" fill="#000000"/>
+  <circle cx="282" cy="130" r="1" fill="#000000"/>
+  <path d="M280 133 Q280 135 282 135" stroke="#000000" stroke-width="1" fill="none"/>
+  
+  <!-- Organic Herbs -->
+  <!-- Basil Plant -->
+  <rect x="140" y="185" width="2" height="8" fill="#228B22"/>
+  <ellipse cx="140" cy="182" rx="3" ry="2" fill="#32CD32"/>
+  <ellipse cx="138" cy="180" rx="2" ry="1" fill="#228B22"/>
+  <ellipse cx="142" cy="180" rx="2" ry="1" fill="#228B22"/>
+  <ellipse cx="140" cy="178" rx="1.5" ry="0.8" fill="#32CD32"/>
+  
+  <!-- Cilantro -->
+  <rect x="290" y="185" width="2" height="8" fill="#228B22"/>
+  <g fill="#90EE90">
+    <circle cx="289" cy="182" r="0.8"/>
+    <circle cx="291" cy="182" r="0.8"/>
+    <circle cx="290" cy="180" r="0.8"/>
+    <circle cx="288" cy="180" r="0.8"/>
+    <circle cx="292" cy="180" r="0.8"/>
+  </g>
+  
+  <!-- Organic Beverages -->
+  <!-- Green Smoothie -->
+  <rect x="130" y="188" width="4" height="10" fill="#32CD32" opacity="0.8"/>
+  <ellipse cx="132" cy="187" rx="2.5" ry="1.5" fill="#9ACD32"/>
+  <rect x="131" y="185" width="2" height="1" fill="#228B22"/>
+  
+  <!-- Herbal Tea -->
+  <ellipse cx="310" cy="188" rx="3" ry="2" fill="#F5F5DC"/>
+  <ellipse cx="310" cy="187" rx="2" ry="1.5" fill="#90EE90"/>
+  <g stroke="#32CD32" stroke-width="0.5" fill="none">
+    <path d="M313 186 Q316 183 319 186"/>
+    <path d="M314 186 Q317 183 320 186"/>
+  </g>
+  
+  <!-- Wooden Cooking Utensils -->
+  <!-- Bamboo Spatula -->
+  <rect x="150" y="155" width="2" height="12" fill="#DEB887" transform="rotate(25 150 155)"/>
+  <ellipse cx="158" cy="150" rx="4" ry="2" fill="#F5DEB3" transform="rotate(25 158 150)"/>
+  
+  <!-- Wooden Spoon -->
+  <rect x="270" y="155" width="1.5" height="10" fill="#8B4513" transform="rotate(-20 270 155)"/>
+  <ellipse cx="276" cy="152" rx="3" ry="1.5" fill="#DEB887" transform="rotate(-20 276 152)"/>
+  
+  <!-- Organic Certification Badge -->
+  <circle cx="50" cy="120" r="20" fill="#32CD32" opacity="0.8"/>
+  <text x="50" y="115" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="8" font-weight="bold">ORGANIC</text>
+  <text x="50" y="125" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="6">CERTIFIED</text>
+  
+  <!-- Compost Bin -->
+  <rect x="320" y="160" width="15" height="20" fill="#8B4513"/>
+  <ellipse cx="327" cy="160" rx="7" ry="3" fill="#654321"/>
+  <ellipse cx="327" cy="158" rx="6" ry="2" fill="#228B22"/>
+  <text x="327" y="185" text-anchor="middle" fill="#228B22" font-family="Arial" font-size="8">♻</text>
+  
+  <!-- Butterfly (Nature Element) -->
+  <g fill="#FFD700">
+    <ellipse cx="100" cy="100" rx="3" ry="2" transform="rotate(20 100 100)"/>
+    <ellipse cx="98" cy="102" rx="2" ry="1.5" transform="rotate(20 98 102)"/>
+    <path d="M99 101 L99 95" stroke="#000000" stroke-width="0.5"/>
+    <circle cx="99" cy="94" r="0.5" fill="#000000"/>
+  </g>
+  
+  <!-- Bee (Pollinator) -->
+  <ellipse cx="300" cy="110" rx="2" ry="4" fill="#FFD700"/>
+  <g stroke="#000000" stroke-width="0.5">
+    <line x1="299" y1="108" x2="301" y2="108"/>
+    <line x1="299" y1="110" x2="301" y2="110"/>
+    <line x1="299" y1="112" x2="301" y2="112"/>
+  </g>
+  <ellipse cx="298" cy="107" rx="1" ry="0.5" fill="none" stroke="#000000" stroke-width="0.5"/>
+  <ellipse cx="302" cy="107" rx="1" ry="0.5" fill="none" stroke="#000000" stroke-width="0.5"/>
+  
+  <!-- Steam from Vegetables -->
+  <g stroke="#E0FFE0" stroke-width="1" fill="none" opacity="0.7">
+    <path d="M190 178 Q192 173 190 168 Q188 163 190 158"/>
+    <path d="M200 178 Q202 173 200 168 Q198 163 200 158"/>
+    <path d="M210 178 Q212 173 210 168 Q208 163 210 158"/>
+  </g>
+  
+  <!-- Soil/Earth Element -->
+  <ellipse cx="200" cy="240" rx="150" ry="15" fill="#8B4513" opacity="0.4"/>
+  
+  <!-- Title -->
+  <text x="200" y="30" text-anchor="middle" fill="#228B22" font-family="Arial, sans-serif" font-size="24" font-weight="bold">
+    Vegetarian Hibachi Garden
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="50" text-anchor="middle" fill="#32CD32" font-family="Arial, sans-serif" font-size="16">
+    Farm Fresh • Plant-Based • Organic Ingredients
+  </text>
+  
+  <!-- Eco Message -->
+  <text x="200" y="275" text-anchor="middle" fill="#228B22" font-family="Arial, sans-serif" font-size="12">
+    "Celebrating nature's bounty with sustainable hibachi cooking"
+  </text>
+  
+  <defs>
+    <linearGradient id="vegetarianGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0FFF0;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#F5FFFA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E0FFE0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

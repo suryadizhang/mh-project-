@@ -130,11 +130,14 @@ export async function getCustomerSupportEmails(params?: {
   if (params?.limit) queryParams.set('limit', params.limit.toString());
   if (params?.unread_only) queryParams.set('unread_only', 'true');
   if (params?.starred_only) queryParams.set('starred_only', 'true');
-  if (params?.archived !== undefined) queryParams.set('archived', params.archived.toString());
+  if (params?.archived !== undefined)
+    queryParams.set('archived', params.archived.toString());
   if (params?.search) queryParams.set('search', params.search);
 
   const queryString = queryParams.toString();
-  const url = queryString ? `/admin/emails/customer-support?${queryString}` : '/admin/emails/customer-support';
+  const url = queryString
+    ? `/admin/emails/customer-support?${queryString}`
+    : '/admin/emails/customer-support';
 
   const response = await api.get<EmailListResponse>(url);
   return response.data!;
@@ -157,7 +160,9 @@ export async function getPaymentEmails(params?: {
   if (params?.search) queryParams.set('search', params.search);
 
   const queryString = queryParams.toString();
-  const url = queryString ? `/admin/emails/payments?${queryString}` : '/admin/emails/payments';
+  const url = queryString
+    ? `/admin/emails/payments?${queryString}`
+    : '/admin/emails/payments';
 
   const response = await api.get<EmailListResponse>(url);
   return response.data!;
@@ -169,7 +174,9 @@ export async function getPaymentEmails(params?: {
 export async function getCustomerSupportThread(
   thread_id: string
 ): Promise<EmailThread> {
-  const response = await api.get<EmailThread>(`/admin/emails/customer-support/${thread_id}`);
+  const response = await api.get<EmailThread>(
+    `/admin/emails/customer-support/${thread_id}`
+  );
   return response.data!;
 }
 
@@ -179,7 +186,11 @@ export async function getCustomerSupportThread(
 export async function sendCustomerSupportEmail(
   request: SendEmailRequest
 ): Promise<{ success: boolean; message_id: string; recipient: string }> {
-  const response = await api.post<{ success: boolean; message_id: string; recipient: string }>(
+  const response = await api.post<{
+    success: boolean;
+    message_id: string;
+    recipient: string;
+  }>(
     '/admin/emails/customer-support/send',
     request as unknown as Record<string, unknown>
   );
@@ -192,8 +203,16 @@ export async function sendCustomerSupportEmail(
 export async function updateCustomerSupportEmail(
   message_id: string,
   update: UpdateEmailRequest
-): Promise<{ success: boolean; message_id: string; updated_fields: UpdateEmailRequest }> {
-  const response = await api.patch<{ success: boolean; message_id: string; updated_fields: UpdateEmailRequest }>(
+): Promise<{
+  success: boolean;
+  message_id: string;
+  updated_fields: UpdateEmailRequest;
+}> {
+  const response = await api.patch<{
+    success: boolean;
+    message_id: string;
+    updated_fields: UpdateEmailRequest;
+  }>(
     `/admin/emails/customer-support/${message_id}`,
     update as unknown as Record<string, unknown>
   );
@@ -206,7 +225,14 @@ export async function updateCustomerSupportEmail(
  */
 export async function bulkUpdateCustomerSupportEmails(
   message_ids: string[],
-  action: 'mark_read' | 'mark_unread' | 'star' | 'unstar' | 'archive' | 'unarchive' | 'delete'
+  action:
+    | 'mark_read'
+    | 'mark_unread'
+    | 'star'
+    | 'unstar'
+    | 'archive'
+    | 'unarchive'
+    | 'delete'
 ): Promise<{
   success: boolean;
   total_requested: number;
@@ -220,13 +246,10 @@ export async function bulkUpdateCustomerSupportEmails(
     success_count: number;
     failed_count: number;
     errors: Array<{ message_id: string; error: string }>;
-  }>(
-    '/admin/emails/customer-support/bulk',
-    {
-      message_ids,
-      action,
-    } as unknown as Record<string, unknown>
-  );
+  }>('/admin/emails/customer-support/bulk', {
+    message_ids,
+    action,
+  } as unknown as Record<string, unknown>);
   return response.data!;
 }
 
@@ -236,9 +259,11 @@ export async function bulkUpdateCustomerSupportEmails(
 export async function deleteCustomerSupportEmail(
   message_id: string
 ): Promise<{ success: boolean; message_id: string; action: string }> {
-  const response = await api.delete<{ success: boolean; message_id: string; action: string }>(
-    `/admin/emails/customer-support/${message_id}`
-  );
+  const response = await api.delete<{
+    success: boolean;
+    message_id: string;
+    action: string;
+  }>(`/admin/emails/customer-support/${message_id}`);
   return response.data!;
 }
 
@@ -248,9 +273,11 @@ export async function deleteCustomerSupportEmail(
 export async function deletePaymentEmail(
   message_id: string
 ): Promise<{ success: boolean; message_id: string; action: string }> {
-  const response = await api.delete<{ success: boolean; message_id: string; action: string }>(
-    `/admin/emails/payments/${message_id}`
-  );
+  const response = await api.delete<{
+    success: boolean;
+    message_id: string;
+    action: string;
+  }>(`/admin/emails/payments/${message_id}`);
   return response.data!;
 }
 

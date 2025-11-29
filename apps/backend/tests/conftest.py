@@ -42,6 +42,10 @@ def event_loop_policy():
     return asyncio.get_event_loop_policy()
 
 
+# Remove session-scoped event_loop fixture - let pytest-asyncio handle it per function
+# This fixes "Future attached to a different loop" errors
+
+
 # Add src directory to Python path
 src_path = Path(__file__).parent.parent / "src"
 if str(src_path) not in sys.path:
@@ -299,10 +303,17 @@ async def create_test_bookings(db_session, test_admin_user):
 
 
 @pytest_asyncio.fixture
-async def create_test_payments(db_session):
+async def create_test_payments(db_session, create_test_bookings):
     """Fixture to create test payment records using core.Payment model."""
 
-    async def _create(booking_ids, count=None):
+    async def _create(booking_ids=None, count=None):
+        # If no booking_ids provided, create test bookings
+        if booking_ids is None:
+            if count is None:
+                count = 10
+            bookings = await create_test_bookings(count=count)
+            booking_ids = [b.id for b in bookings]
+
         if count is None:
             count = len(booking_ids)
 
@@ -335,6 +346,12 @@ async def create_test_payments(db_session):
 @pytest_asyncio.fixture
 async def client(async_client) -> AsyncGenerator[AsyncClient, None]:
     """Alias for async_client - used by comprehensive endpoint tests."""
+    yield async_client
+
+
+@pytest_asyncio.fixture
+async def auth_client(async_client) -> AsyncGenerator[AsyncClient, None]:
+    """Alias for async_client with authentication - used by load tests."""
     yield async_client
 
 

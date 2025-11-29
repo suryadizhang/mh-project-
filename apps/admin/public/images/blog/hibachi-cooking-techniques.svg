@@ -1,0 +1,213 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#cookingGradient)"/>
+  
+  <!-- Kitchen Counter -->
+  <rect x="0" y="200" width="400" height="100" fill="#8B4513"/>
+  <rect x="0" y="190" width="400" height="20" fill="#A0522D"/>
+  
+  <!-- Cooking Station -->
+  <rect x="150" y="160" width="100" height="40" rx="8" fill="#2F4F4F"/>
+  <rect x="160" y="170" width="80" height="25" rx="5" fill="#1C3A1C"/>
+  <rect x="170" y="177" width="60" height="15" rx="3" fill="#4A4A4A"/>
+  
+  <!-- Master Chef -->
+  <circle cx="200" cy="120" r="18" fill="#F4C2A1"/>
+  <rect x="188" y="136" width="24" height="35" fill="#FFFFFF"/>
+  <rect x="190" y="138" width="20" height="4" fill="#000000"/>
+  
+  <!-- Chef's Toque -->
+  <ellipse cx="200" cy="105" rx="14" ry="8" fill="#FFFFFF"/>
+  <rect x="186" y="105" width="28" height="10" fill="#FFFFFF"/>
+  <rect x="188" y="103" width="24" height="4" fill="#E0E0E0"/>
+  
+  <!-- Chef's Expression - Focused -->
+  <circle cx="194" cy="115" r="1" fill="#000000"/>
+  <circle cx="206" cy="115" r="1" fill="#000000"/>
+  <path d="M200 119 Q200 121 202 121" stroke="#000000" stroke-width="1" fill="none"/>
+  
+  <!-- Professional Knife -->
+  <rect x="220" y="135" width="15" height="2" fill="#C0C0C0"/>
+  <rect x="235" y="133" width="8" height="6" fill="#8B4513"/>
+  <rect x="236" y="134" width="6" height="4" fill="#A0522D"/>
+  
+  <!-- Ingredients Being Prepared -->
+  <!-- Cutting Board -->
+  <rect x="120" y="175" width="25" height="15" rx="2" fill="#DEB887"/>
+  <rect x="122" y="177" width="21" height="11" fill="#F5DEB3"/>
+  
+  <!-- Diced Vegetables -->
+  <g fill="#32CD32">
+    <rect x="125" y="180" width="2" height="2"/>
+    <rect x="128" y="180" width="2" height="2"/>
+    <rect x="131" y="180" width="2" height="2"/>
+    <rect x="125" y="183" width="2" height="2"/>
+    <rect x="128" y="183" width="2" height="2"/>
+  </g>
+  
+  <!-- Onion Slices -->
+  <g fill="#F5F5DC">
+    <ellipse cx="135" cy="181" rx="2" ry="1"/>
+    <ellipse cx="138" cy="183" rx="2" ry="1"/>
+    <ellipse cx="135" cy="185" rx="2" ry="1"/>
+  </g>
+  
+  <!-- Seasoning Station -->
+  <rect x="280" y="175" width="30" height="20" fill="#8B4513"/>
+  <rect x="282" y="177" width="26" height="16" fill="#F5DEB3"/>
+  
+  <!-- Salt and Pepper Shakers -->
+  <rect x="285" y="170" width="3" height="8" fill="#FFFFFF"/>
+  <circle cx="286.5" cy="168" r="1" fill="#E0E0E0"/>
+  <g fill="#000000">
+    <circle cx="286" cy="166" r="0.3"/>
+    <circle cx="287" cy="166" r="0.3"/>
+    <circle cx="286.5" cy="165.5" r="0.3"/>
+  </g>
+  
+  <rect x="295" y="170" width="3" height="8" fill="#000000"/>
+  <circle cx="296.5" cy="168" r="1" fill="#E0E0E0"/>
+  <g fill="#FFFFFF">
+    <circle cx="296" cy="166" r="0.3"/>
+    <circle cx="297" cy="166" r="0.3"/>
+    <circle cx="296.5" cy="165.5" r="0.3"/>
+  </g>
+  
+  <!-- Cooking Oils -->
+  <rect x="305" y="165" width="4" height="12" fill="#228B22"/>
+  <circle cx="307" cy="163" r="1" fill="#DAA520"/>
+  <rect x="306" y="160" width="2" height="5" fill="#FFD700" opacity="0.8"/>
+  
+  <!-- Hibachi Flames in Action -->
+  <ellipse cx="180" cy="179" rx="5" ry="10" fill="#FF4500" opacity="0.9"/>
+  <ellipse cx="200" cy="177" rx="6" ry="12" fill="#FF6347" opacity="1.0"/>
+  <ellipse cx="220" cy="179" rx="5" ry="10" fill="#FFA500" opacity="0.9"/>
+  
+  <!-- Food on Grill -->
+  <!-- Steak -->
+  <ellipse cx="185" cy="174" rx="6" ry="4" fill="#8B4513"/>
+  <ellipse cx="185" cy="173" rx="5" ry="3" fill="#A0522D"/>
+  <g stroke="#FF0000" stroke-width="1" opacity="0.8">
+    <line x1="182" y1="173" x2="188" y2="173"/>
+    <line x1="183" y1="175" x2="187" y2="175"/>
+  </g>
+  
+  <!-- Shrimp -->
+  <ellipse cx="210" cy="174" rx="3" ry="2" fill="#FFB6C1"/>
+  <ellipse cx="210" cy="173" rx="2.5" ry="1.5" fill="#FFC0CB"/>
+  <circle cx="209" cy="173" r="0.5" fill="#000000"/>
+  
+  <!-- Vegetables -->
+  <circle cx="195" cy="176" r="2" fill="#228B22"/>
+  <circle cx="205" cy="176" r="1.5" fill="#FF6347"/>
+  <circle cx="215" cy="174" r="2" fill="#FFD700"/>
+  
+  <!-- Steam Rising -->
+  <g stroke="#FFFFFF" stroke-width="2" fill="none" opacity="0.7">
+    <path d="M180 174 Q182 169 180 164 Q178 159 180 154"/>
+    <path d="M200 174 Q202 169 200 164 Q198 159 200 154"/>
+    <path d="M220 174 Q222 169 220 164 Q218 159 220 154"/>
+  </g>
+  
+  <!-- Cooking Tools -->
+  <!-- Spatula -->
+  <rect x="250" y="140" width="2" height="20" fill="#8B4513"/>
+  <ellipse cx="251" cy="138" rx="4" ry="2" fill="#C0C0C0"/>
+  
+  <!-- Tongs -->
+  <g stroke="#C0C0C0" stroke-width="2" fill="none">
+    <path d="M260 145 Q265 140 270 145"/>
+    <path d="M260 150 Q265 155 270 150"/>
+  </g>
+  <ellipse cx="260" cy="147.5" rx="1" ry="2" fill="#C0C0C0"/>
+  <ellipse cx="270" cy="147.5" rx="1" ry="2" fill="#C0C0C0"/>
+  
+  <!-- Oil Dispenser -->
+  <rect x="320" y="150" width="6" height="12" fill="#87CEEB"/>
+  <circle cx="323" cy="148" r="1.5" fill="#4169E1"/>
+  <rect x="322" y="145" width="2" height="5" fill="#FFD700" opacity="0.6"/>
+  
+  <!-- Cooking Timer -->
+  <circle cx="350" cy="120" r="12" fill="#FF6347"/>
+  <circle cx="350" cy="120" r="9" fill="#FFFFFF"/>
+  <circle cx="350" cy="120" r="1" fill="#000000"/>
+  <line x1="350" y1="120" x2="350" y2="115" stroke="#000000" stroke-width="2"/>
+  <line x1="350" y1="120" x2="355" y2="120" stroke="#000000" stroke-width="1"/>
+  <text x="350" y="140" text-anchor="middle" fill="#000000" font-family="Arial" font-size="8">5:30</text>
+  
+  <!-- Kitchen Equipment -->
+  <!-- Refrigerator -->
+  <rect x="50" y="120" width="25" height="50" fill="#C0C0C0"/>
+  <rect x="52" y="122" width="21" height="46" fill="#E0E0E0"/>
+  <rect x="70" y="140" width="3" height="8" fill="#8B4513"/>
+  <circle cx="71.5" cy="144" r="0.5" fill="#FFD700"/>
+  
+  <!-- Prep Bowls -->
+  <ellipse cx="100" cy="185" rx="8" ry="4" fill="#4169E1"/>
+  <ellipse cx="100" cy="183" rx="6" ry="3" fill="#87CEEB"/>
+  <ellipse cx="100" cy="181" rx="4" ry="2" fill="#228B22"/>
+  
+  <ellipse cx="120" cy="190" rx="6" ry="3" fill="#FF6347"/>
+  <ellipse cx="120" cy="188" rx="4" ry="2" fill="#FFB6C1"/>
+  
+  <!-- Recipe Card -->
+  <rect x="320" y="180" width="20" height="15" fill="#FFFFFF"/>
+  <rect x="321" y="181" width="18" height="13" fill="#F5F5F5"/>
+  <g stroke="#000000" stroke-width="0.5">
+    <line x1="323" y1="184" x2="337" y2="184"/>
+    <line x1="323" y1="187" x2="337" y2="187"/>
+    <line x1="323" y1="190" x2="337" y2="190"/>
+  </g>
+  <text x="330" y="178" text-anchor="middle" fill="#8B0000" font-family="Arial" font-size="6" font-weight="bold">RECIPE</text>
+  
+  <!-- Apron Strings -->
+  <g stroke="#000000" stroke-width="1" fill="none">
+    <path d="M185 170 Q175 165 170 170"/>
+    <path d="M215 170 Q225 165 230 170"/>
+  </g>
+  
+  <!-- Kitchen Towel -->
+  <rect x="260" y="185" width="12" height="8" fill="#FFFFFF"/>
+  <rect x="261" y="186" width="10" height="6" fill="#E0E0E0"/>
+  <g stroke="#C0C0C0" stroke-width="0.5">
+    <line x1="263" y1="188" x2="269" y2="188"/>
+    <line x1="263" y1="190" x2="269" y2="190"/>
+  </g>
+  
+  <!-- Temperature Gauge -->
+  <circle cx="80" cy="160" r="8" fill="#000000"/>
+  <circle cx="80" cy="160" r="6" fill="#FFFFFF"/>
+  <path d="M80 158 L80 155" stroke="#FF0000" stroke-width="2"/>
+  <path d="M80 162 L82 164" stroke="#000000" stroke-width="1"/>
+  <text x="80" y="175" text-anchor="middle" fill="#000000" font-family="Arial" font-size="6">350°F</text>
+  
+  <!-- Measuring Spoons -->
+  <ellipse cx="340" cy="165" rx="2" ry="1" fill="#C0C0C0"/>
+  <rect x="342" y="164" width="6" height="1" fill="#C0C0C0"/>
+  
+  <ellipse cx="345" cy="170" rx="1.5" ry="0.8" fill="#C0C0C0"/>
+  <rect x="346.5" y="169" width="5" height="1" fill="#C0C0C0"/>
+  
+  <!-- Title -->
+  <text x="200" y="30" text-anchor="middle" fill="#8B0000" font-family="Arial, sans-serif" font-size="24" font-weight="bold">
+    Hibachi Cooking Techniques
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="50" text-anchor="middle" fill="#2F4F4F" font-family="Arial, sans-serif" font-size="16">
+    Master the Art • Professional Tips • Perfect Results
+  </text>
+  
+  <!-- Cooking Message -->
+  <text x="200" y="285" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="14">
+    "Learn the secrets of authentic hibachi cooking"
+  </text>
+  
+  <defs>
+    <linearGradient id="cookingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF8DC;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFEFD5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFE4B5;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

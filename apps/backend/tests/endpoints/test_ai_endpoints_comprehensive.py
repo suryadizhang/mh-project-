@@ -8,7 +8,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import uuid4
 
-from models.customer import Customer
+from db.models.core import Customer
 
 
 @pytest.mark.asyncio
@@ -295,7 +295,7 @@ class TestAIBusinessLogic:
         self, client: AsyncClient, db: AsyncSession
     ):
         """Test AI uses customer's preferred tone"""
-        from models.customer import CustomerTonePreference
+        from db.models.ai import CustomerTonePreference
 
         customer = Customer(
             name="Formal Customer",

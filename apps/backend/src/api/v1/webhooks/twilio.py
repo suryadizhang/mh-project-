@@ -12,7 +12,7 @@ from fastapi import Depends
 from api.deps_enhanced import get_database_session
 
 # MIGRATED: from models.escalation → db.models.escalation
-from db.models.escalation import Escalation
+from db.models.support_communications import Escalation
 
 logger = logging.getLogger(__name__)
 

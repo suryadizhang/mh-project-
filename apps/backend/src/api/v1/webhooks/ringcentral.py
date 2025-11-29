@@ -12,11 +12,11 @@ from workers.recording_tasks import (
     fetch_call_recording,
 )
 
-# MIGRATED: from models.call_recording → db.models.call_recording
-from db.models.call_recording import CallRecording, RecordingStatus, RecordingType
+# MIGRATED: from models.call_recording → db.models.support_communications
+from db.models.support_communications import CallRecording, RecordingStatus, RecordingType
 
-# MIGRATED: from models.escalation → db.models.escalation
-from db.models.escalation import Escalation, EscalationStatus
+# MIGRATED: from models.escalation → db.models.support_communications
+from db.models.support_communications import Escalation, EscalationStatus
 
 # MIGRATED: Imports moved from OLD models to NEW db.models system
 from db.models.newsletter import Subscriber

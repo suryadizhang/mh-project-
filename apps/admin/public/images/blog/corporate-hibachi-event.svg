@@ -1,0 +1,148 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#corporateGradient)"/>
+  
+  <!-- Office/Conference Room Setting -->
+  <rect x="0" y="200" width="400" height="100" fill="#2F4F4F" opacity="0.3"/>
+  <rect x="50" y="180" width="300" height="20" fill="#708090"/>
+  
+  <!-- Professional Conference Table -->
+  <ellipse cx="200" cy="210" rx="130" ry="45" fill="#8B4513"/>
+  <ellipse cx="200" cy="205" rx="125" ry="40" fill="#A0522D"/>
+  
+  <!-- Business Tablecloth/Runner -->
+  <ellipse cx="200" cy="205" rx="120" ry="37" fill="#1C1C1C" opacity="0.8"/>
+  <rect x="80" y="185" width="240" height="8" fill="#DAA520"/>
+  
+  <!-- Professional Hibachi Setup -->
+  <!-- Main Corporate Grill -->
+  <rect x="160" y="180" width="80" height="35" rx="8" fill="#1A1A1A"/>
+  <rect x="168" y="188" width="64" height="20" rx="5" fill="#2D1810"/>
+  <rect x="175" y="195" width="50" height="8" rx="3" fill="#4A4A4A"/>
+  
+  <!-- Professional Flames -->
+  <ellipse cx="185" cy="197" rx="4" ry="7" fill="#4169E1" opacity="0.8"/>
+  <ellipse cx="200" cy="195" rx="5" ry="9" fill="#0000FF" opacity="0.9"/>
+  <ellipse cx="215" cy="197" rx="4" ry="7" fill="#1E90FF" opacity="0.7"/>
+  
+  <!-- Corporate Team Members -->
+  <!-- Executive Chef -->
+  <circle cx="200" cy="130" r="18" fill="#F4C2A1"/>
+  <rect x="188" y="146" width="24" height="32" fill="#FFFFFF"/>
+  <rect x="190" y="148" width="20" height="4" fill="#000000"/>
+  <!-- Chef Hat - Professional -->
+  <ellipse cx="200" cy="118" rx="12" ry="15" fill="#FFFFFF"/>
+  <rect x="192" y="125" width="16" height="4" fill="#000000"/>
+  
+  <!-- Business Executives -->
+  <!-- CEO/Manager -->
+  <circle cx="120" cy="140" r="15" fill="#F4C2A1"/>
+  <rect x="110" y="153" width="20" height="28" fill="#1C1C1C"/>
+  <rect x="112" y="155" width="16" height="3" fill="#FF0000"/> <!-- tie -->
+  <rect x="115" y="150" width="10" height="5" fill="#FFFFFF"/> <!-- shirt collar -->
+  
+  <!-- VP/Director -->
+  <circle cx="280" cy="140" r="15" fill="#F4C2A1"/>
+  <rect x="270" y="153" width="20" height="28" fill="#191970"/>
+  <rect x="272" y="155" width="16" height="3" fill="#DAA520"/> <!-- tie -->
+  <rect x="275" y="150" width="10" height="5" fill="#FFFFFF"/>
+  
+  <!-- Team Members -->
+  <circle cx="80" cy="160" r="12" fill="#F4C2A1"/>
+  <rect x="72" y="170" width="16" height="24" fill="#4682B4"/>
+  <rect x="74" y="172" width="12" height="2" fill="#FFFFFF"/>
+  
+  <circle cx="320" cy="160" r="12" fill="#F4C2A1"/>
+  <rect x="312" y="170" width="16" height="24" fill="#800080"/>
+  <rect x="314" y="172" width="12" height="2" fill="#FFFFFF"/>
+  
+  <!-- Junior Staff -->
+  <circle cx="140" cy="175" r="10" fill="#F4C2A1"/>
+  <rect x="134" y="183" width="12" height="20" fill="#2E8B57"/>
+  
+  <circle cx="260" cy="175" r="10" fill="#F4C2A1"/>
+  <rect x="254" y="183" width="12" height="20" fill="#8B0000"/>
+  
+  <!-- Professional Food Presentation -->
+  <!-- Gourmet Items -->
+  <rect x="180" y="192" width="6" height="4" fill="#8B0000"/> <!-- Premium steak -->
+  <circle cx="195" cy="193" r="2" fill="#FFA500"/> <!-- Scallops -->
+  <ellipse cx="205" rx="3" ry="1" fill="#FF6347"/> <!-- Shrimp -->
+  <rect x="215" y="192" width="4" height="3" fill="#32CD32"/> <!-- Asparagus -->
+  <circle cx="225" cy="193" r="2" fill="#FFFF00"/> <!-- Pineapple -->
+  
+  <!-- Executive Dining Accessories -->
+  <!-- Wine Glasses for Executives -->
+  <ellipse cx="105" cy="195" rx="3" ry="6" fill="none" stroke="#C0C0C0" stroke-width="1"/>
+  <rect x="104" y="201" width="2" height="8" fill="#C0C0C0"/>
+  <ellipse cx="105" cy="209" rx="4" ry="2" fill="#C0C0C0"/>
+  
+  <ellipse cx="295" cy="195" rx="3" ry="6" fill="none" stroke="#C0C0C0" stroke-width="1"/>
+  <rect x="294" y="201" width="2" height="8" fill="#C0C0C0"/>
+  <ellipse cx="295" cy="209" rx="4" ry="2" fill="#C0C0C0"/>
+  
+  <!-- Business Cards/Documents -->
+  <rect x="60" y="190" width="15" height="10" fill="#FFFFFF"/>
+  <rect x="62" y="192" width="11" height="1" fill="#000000"/>
+  <rect x="62" y="194" width="8" height="1" fill="#000000"/>
+  <rect x="62" y="196" width="9" height="1" fill="#000000"/>
+  
+  <rect x="325" y="190" width="15" height="10" fill="#FFFFFF"/>
+  <rect x="327" y="192" width="11" height="1" fill="#000000"/>
+  <rect x="327" y="194" width="8" height="1" fill="#000000"/>
+  <rect x="327" y="196" width="9" height="1" fill="#000000"/>
+  
+  <!-- Professional Utensils -->
+  <!-- Executive Chef's Premium Spatula -->
+  <rect x="220" y="150" width="3" height="18" fill="#8B4513" transform="rotate(15 220 150)"/>
+  <ellipse cx="230" cy="145" rx="6" ry="3" fill="#C0C0C0" transform="rotate(15 230 145)"/>
+  <rect x="225" y="143" width="8" height="1" fill="#DAA520"/> <!-- gold trim -->
+  
+  <!-- Corporate Presentation Elements -->
+  <!-- Wall Mounted Display -->
+  <rect x="50" y="80" width="80" height="50" fill="#1C1C1C"/>
+  <rect x="55" y="85" width="70" height="40" fill="#000080"/>
+  <text x="90" y="100" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="8">QUARTERLY</text>
+  <text x="90" y="110" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="8">RESULTS</text>
+  <text x="90" y="120" text-anchor="middle" fill="#00FF00" font-family="Arial" font-size="10">↗ 15%</text>
+  
+  <!-- Company Logo Area -->
+  <circle cx="350" cy="90" r="25" fill="#DAA520"/>
+  <text x="350" y="95" text-anchor="middle" fill="#1C1C1C" font-family="Arial" font-size="16" font-weight="bold">MH</text>
+  
+  <!-- Professional Steam Effects -->
+  <g stroke="#E6E6FA" stroke-width="1.5" fill="none" opacity="0.8">
+    <path d="M185 190 Q187 185 185 180 Q183 175 185 170"/>
+    <path d="M200 190 Q202 185 200 180 Q198 175 200 170"/>
+    <path d="M215 190 Q217 185 215 180 Q213 175 215 170"/>
+  </g>
+  
+  <!-- Business Ambiance -->
+  <!-- Office Lighting -->
+  <ellipse cx="100" cy="60" rx="15" ry="8" fill="#FFFACD" opacity="0.6"/>
+  <ellipse cx="200" cy="60" rx="15" ry="8" fill="#FFFACD" opacity="0.6"/>
+  <ellipse cx="300" cy="60" rx="15" ry="8" fill="#FFFACD" opacity="0.6"/>
+  
+  <!-- Title -->
+  <text x="200" y="25" text-anchor="middle" fill="#1C1C1C" font-family="Arial, sans-serif" font-size="22" font-weight="bold">
+    Corporate Hibachi Experience
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="45" text-anchor="middle" fill="#4169E1" font-family="Arial, sans-serif" font-size="14">
+    Team Building Through Culinary Excellence
+  </text>
+  
+  <!-- Corporate Message -->
+  <text x="200" y="280" text-anchor="middle" fill="#1C1C1C" font-family="Arial, sans-serif" font-size="11">
+    "Strengthening partnerships one shared meal at a time"
+  </text>
+  
+  <defs>
+    <linearGradient id="corporateGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F5F5F5;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#E6E6FA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D3D3D3;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

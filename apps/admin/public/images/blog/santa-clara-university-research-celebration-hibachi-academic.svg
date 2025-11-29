@@ -1,0 +1,216 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="academicSkyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4169E1"/>
+      <stop offset="50%" style="stop-color:#6495ED"/>
+      <stop offset="100%" style="stop-color:#87CEEB"/>
+    </linearGradient>
+    <linearGradient id="buildingGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F5F5DC"/>
+      <stop offset="100%" style="stop-color:#D2B48C"/>
+    </linearGradient>
+    <linearGradient id="flameGradient" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#4169E1"/>
+      <stop offset="50%" style="stop-color:#6495ED"/>
+      <stop offset="100%" style="stop-color:#FFD700"/>
+    </linearGradient>
+    <radialGradient id="lightBulbGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFD700" stop-opacity="0.8"/>
+      <stop offset="100%" style="stop-color:#FFD700" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Academic Sky Background -->
+  <rect width="800" height="600" fill="url(#academicSkyGradient)"/>
+  
+  <!-- University Campus Setting -->
+  <!-- Main Academic Building -->
+  <rect x="200" y="200" width="400" height="200" fill="url(#buildingGradient)" stroke="#8B4513" stroke-width="3"/>
+  
+  <!-- Building Windows -->
+  <rect x="230" y="240" width="30" height="40" fill="#4169E1" stroke="#000080" stroke-width="2"/>
+  <rect x="280" y="240" width="30" height="40" fill="#4169E1" stroke="#000080" stroke-width="2"/>
+  <rect x="330" y="240" width="30" height="40" fill="#4169E1" stroke="#000080" stroke-width="2"/>
+  <rect x="380" y="240" width="30" height="40" fill="#4169E1" stroke="#000080" stroke-width="2"/>
+  <rect x="430" y="240" width="30" height="40" fill="#4169E1" stroke="#000080" stroke-width="2"/>
+  <rect x="480" y="240" width="30" height="40" fill="#4169E1" stroke="#000080" stroke-width="2"/>
+  <rect x="530" y="240" width="30" height="40" fill="#4169E1" stroke="#000080" stroke-width="2"/>
+  
+  <rect x="230" y="300" width="30" height="40" fill="#4169E1" stroke="#000080" stroke-width="2"/>
+  <rect x="280" y="300" width="30" height="40" fill="#4169E1" stroke="#000080" stroke-width="2"/>
+  <rect x="330" y="300" width="30" height="40" fill="#4169E1" stroke="#000080" stroke-width="2"/>
+  <rect x="380" y="300" width="30" height="40" fill="#4169E1" stroke="#000080" stroke-width="2"/>
+  <rect x="430" y="300" width="30" height="40" fill="#4169E1" stroke="#000080" stroke-width="2"/>
+  <rect x="480" y="300" width="30" height="40" fill="#4169E1" stroke="#000080" stroke-width="2"/>
+  <rect x="530" y="300" width="30" height="40" fill="#4169E1" stroke="#000080" stroke-width="2"/>
+
+  <!-- University Entrance -->
+  <rect x="380" y="350" width="40" height="50" fill="#8B4513"/>
+  <circle cx="415" cy="375" r="3" fill="#FFD700"/>
+  
+  <!-- Academic Columns -->
+  <rect x="320" y="200" width="15" height="200" fill="#FFFFFF" stroke="#C0C0C0" stroke-width="2"/>
+  <rect x="360" y="200" width="15" height="200" fill="#FFFFFF" stroke="#C0C0C0" stroke-width="2"/>
+  <rect x="420" y="200" width="15" height="200" fill="#FFFFFF" stroke="#C0C0C0" stroke-width="2"/>
+  <rect x="460" y="200" width="15" height="200" fill="#FFFFFF" stroke="#C0C0C0" stroke-width="2"/>
+
+  <!-- University Sign -->
+  <rect x="250" y="150" width="300" height="40" fill="#000080" stroke="#FFD700" stroke-width="3"/>
+  <text x="400" y="170" text-anchor="middle" font-family="serif" font-size="14" font-weight="bold" fill="#FFD700">SANTA CLARA COUNTY UNIVERSITY</text>
+  <text x="400" y="185" text-anchor="middle" font-family="serif" font-size="10" fill="#FFFFFF">Research Excellence Center</text>
+
+  <!-- Campus Ground -->
+  <rect x="0" y="400" width="800" height="200" fill="#228B22"/>
+  
+  <!-- Campus Pathways -->
+  <rect x="0" y="450" width="800" height="20" fill="#696969"/>
+  <rect x="350" y="400" width="100" height="100" fill="#696969"/>
+
+  <!-- Research Innovation Symbols -->
+  <!-- Light Bulb (Innovation) -->
+  <circle cx="150" cy="350" r="20" fill="#FFD700" stroke="#FFA500" stroke-width="3"/>
+  <circle cx="150" cy="350" r="15" fill="url(#lightBulbGlow)" opacity="0.6"/>
+  <rect x="145" y="370" width="10" height="15" fill="#C0C0C0"/>
+  <rect x="143" y="385" width="14" height="8" fill="#000"/>
+  <!-- Light rays -->
+  <line x1="130" y1="330" x2="120" y2="320" stroke="#FFD700" stroke-width="3"/>
+  <line x1="170" y1="330" x2="180" y2="320" stroke="#FFD700" stroke-width="3"/>
+  <line x1="130" y1="370" x2="120" y2="380" stroke="#FFD700" stroke-width="3"/>
+  <line x1="170" y1="370" x2="180" y2="380" stroke="#FFD700" stroke-width="3"/>
+
+  <!-- DNA Helix (Research) -->
+  <g transform="translate(650,320)">
+    <ellipse cx="0" cy="0" rx="8" ry="3" fill="none" stroke="#4169E1" stroke-width="3"/>
+    <ellipse cx="0" cy="10" rx="8" ry="3" fill="none" stroke="#FF6347" stroke-width="3"/>
+    <ellipse cx="0" cy="20" rx="8" ry="3" fill="none" stroke="#4169E1" stroke-width="3"/>
+    <ellipse cx="0" cy="30" rx="8" ry="3" fill="none" stroke="#FF6347" stroke-width="3"/>
+    <ellipse cx="0" cy="40" rx="8" ry="3" fill="none" stroke="#4169E1" stroke-width="3"/>
+    <line x1="0" y1="-5" x2="0" y2="45" stroke="#32CD32" stroke-width="2"/>
+  </g>
+
+  <!-- Hibachi Setup (Center) -->
+  <rect x="350" y="520" width="100" height="30" fill="#2F4F4F" stroke="#000" stroke-width="2"/>
+  <circle cx="400" cy="535" r="25" fill="#1C1C1C" stroke="#000" stroke-width="2"/>
+  
+  <!-- Academic Achievement Flames -->
+  <ellipse cx="400" cy="525" rx="15" ry="20" fill="url(#flameGradient)" opacity="0.9"/>
+  <ellipse cx="395" cy="520" rx="10" ry="15" fill="#6495ED" opacity="0.8"/>
+  <ellipse cx="405" cy="520" rx="10" ry="15" fill="#4169E1" opacity="0.8"/>
+  <ellipse cx="400" cy="515" rx="8" ry="12" fill="#FFD700" opacity="0.7"/>
+
+  <!-- Academic Hibachi Chef -->
+  <circle cx="420" cy="555" r="12" fill="#FDBCB4"/>
+  <rect x="415" y="567" width="10" height="25" fill="#FFFFFF"/>
+  <rect x="410" y="592" width="20" height="8" fill="#000"/>
+  <!-- Academic chef hat with graduation cap design -->
+  <ellipse cx="420" cy="550" rx="10" ry="6" fill="#FFFFFF"/>
+  <rect x="415" y="538" width="10" height="12" fill="#FFFFFF"/>
+  <rect x="410" y="535" width="20" height="4" fill="#000080"/>
+  <polygon points="420,535 425,530 415,530" fill="#000080"/>
+  <circle cx="420" cy="532" r="2" fill="#FFD700"/>
+  <!-- Chef holding diploma and spatula -->
+  <line x1="435" y1="575" x2="445" y2="565" stroke="#C0C0C0" stroke-width="2"/>
+  <rect x="405" y="570" width="8" height="12" fill="#F5F5DC" stroke="#8B4513" stroke-width="1"/>
+  <text x="409" y="577" font-family="serif" font-size="4" fill="#000">PhD</text>
+
+  <!-- Research Faculty and Graduate Students -->
+  <!-- Professor 1 -->
+  <circle cx="280" cy="555" r="11" fill="#FDBCB4"/>
+  <rect x="275" y="566" width="10" height="22" fill="#000080"/>
+  <rect x="273" y="588" width="14" height="8" fill="#8B4513"/>
+  <ellipse cx="280" cy="550" rx="8" ry="4" fill="#C0C0C0"/>
+  <!-- Lab coat -->
+  <rect x="270" y="566" width="20" height="22" fill="#FFFFFF" stroke="#C0C0C0" stroke-width="1" opacity="0.8"/>
+  <!-- Glasses -->
+  <circle cx="277" cy="548" r="3" fill="none" stroke="#000" stroke-width="1"/>
+  <circle cx="283" cy="548" r="3" fill="none" stroke="#000" stroke-width="1"/>
+  <line x1="280" y1="547" x2="280" y2="549" stroke="#000" stroke-width="1"/>
+  <!-- Research papers -->
+  <rect x="295" y="570" width="10" height="15" fill="#FFFFFF" stroke="#000" stroke-width="1"/>
+  <line x1="297" y1="572" x2="303" y2="572" stroke="#000" stroke-width="0.5"/>
+  <line x1="297" y1="574" x2="303" y2="574" stroke="#000" stroke-width="0.5"/>
+
+  <!-- Graduate Student 1 -->
+  <circle cx="320" cy="560" r="10" fill="#D2B48C"/>
+  <rect x="315" y="570" width="10" height="20" fill="#8B0000"/>
+  <rect x="313" y="590" width="14" height="8" fill="#000"/>
+  <ellipse cx="320" cy="555" rx="7" ry="4" fill="#8B4513"/>
+  <!-- Student ID badge -->
+  <rect x="310" y="575" width="6" height="8" fill="#FFFFFF" stroke="#000" stroke-width="1"/>
+  <circle cx="313" cy="577" r="1" fill="#4169E1"/>
+
+  <!-- Professor 2 -->
+  <circle cx="520" cy="550" r="11" fill="#FDBCB4"/>
+  <rect x="515" y="561" width="10" height="22" fill="#2F4F4F"/>
+  <rect x="513" y="583" width="14" height="8" fill="#000"/>
+  <ellipse cx="520" cy="545" rx="8" ry="4" fill="#000"/>
+  <!-- Lab coat -->
+  <rect x="510" y="561" width="20" height="22" fill="#FFFFFF" stroke="#C0C0C0" stroke-width="1" opacity="0.8"/>
+  <!-- Awards pin -->
+  <circle cx="525" cy="570" r="2" fill="#FFD700"/>
+
+  <!-- Graduate Student 2 -->
+  <circle cx="480" cy="565" r="9" fill="#FDBCB4"/>
+  <rect x="476" y="574" width="8" height="18" fill="#4B0082"/>
+  <rect x="474" y="592" width="12" height="7" fill="#8B4513"/>
+  <ellipse cx="480" cy="561" rx="6" ry="3" fill="#FFD700"/>
+  <!-- Laptop -->
+  <rect x="465" y="575" width="8" height="6" fill="#2F4F4F" stroke="#000" stroke-width="1"/>
+
+  <!-- Research Equipment Display -->
+  <!-- Microscope -->
+  <rect x="250" y="500" width="15" height="20" fill="#C0C0C0" stroke="#000" stroke-width="1"/>
+  <circle cx="257" cy="495" r="5" fill="#4169E1"/>
+  <rect x="255" y="485" width="4" height="10" fill="#000"/>
+
+  <!-- Laboratory Beakers -->
+  <polygon points="550,500 560,500 558,515 552,515" fill="#E6E6FA" stroke="#C0C0C0" stroke-width="1"/>
+  <ellipse cx="555" cy="498" rx="4" ry="2" fill="#4169E1"/>
+  
+  <polygon points="570,505 580,505 578,520 572,520" fill="#E6E6FA" stroke="#C0C0C0" stroke-width="1"/>
+  <ellipse cx="575" cy="503" rx="4" ry="2" fill="#32CD32"/>
+
+  <!-- Academic Achievement Table -->
+  <ellipse cx="400" cy="580" rx="80" ry="20" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+  <ellipse cx="400" cy="578" rx="80" ry="20" fill="#A0522D"/>
+
+  <!-- Research Journals and Publications -->
+  <rect x="350" y="575" width="20" height="15" fill="#4169E1" stroke="#000" stroke-width="1"/>
+  <text x="360" y="583" text-anchor="middle" font-family="serif" font-size="6" font-weight="bold" fill="#FFFFFF">NATURE</text>
+
+  <rect x="380" y="575" width="20" height="15" fill="#8B0000" stroke="#000" stroke-width="1"/>
+  <text x="390" y="583" text-anchor="middle" font-family="serif" font-size="6" font-weight="bold" fill="#FFFFFF">SCIENCE</text>
+
+  <rect x="410" y="575" width="20" height="15" fill="#32CD32" stroke="#000" stroke-width="1"/>
+  <text x="420" y="583" text-anchor="middle" font-family="serif" font-size="6" font-weight="bold" fill="#FFFFFF">CELL</text>
+
+  <rect x="440" y="575" width="20" height="15" fill="#8B008B" stroke="#000" stroke-width="1"/>
+  <text x="450" y="583" text-anchor="middle" font-family="serif" font-size="6" font-weight="bold" fill="#FFFFFF">PNAS</text>
+
+  <!-- Research Awards and Trophies -->
+  <polygon points="330,575 340,565 345,575 340,580" fill="#FFD700" stroke="#B8860B" stroke-width="1"/>
+  <rect x="335" y="580" width="10" height="8" fill="#8B4513"/>
+  <text x="340" y="587" text-anchor="middle" font-family="serif" font-size="4" fill="#FFFFFF">GRANT</text>
+
+  <polygon points="460,575 470,565 475,575 470,580" fill="#C0C0C0" stroke="#696969" stroke-width="1"/>
+  <rect x="465" y="580" width="10" height="8" fill="#8B4513"/>
+  <text x="470" y="587" text-anchor="middle" font-family="serif" font-size="4" fill="#000">AWARD</text>
+
+  <!-- Academic Celebration Banner -->
+  <rect x="150" y="100" width="500" height="40" fill="#000080" stroke="#FFD700" stroke-width="3"/>
+  <text x="400" y="120" text-anchor="middle" font-family="serif" font-size="16" font-weight="bold" fill="#FFD700">RESEARCH ACHIEVEMENT CELEBRATION</text>
+  <text x="400" y="135" text-anchor="middle" font-family="serif" font-size="12" fill="#FFFFFF">Academic Excellence & Innovation</text>
+
+  <!-- Mathematical Formulas in Background -->
+  <text x="100" y="250" font-family="serif" font-size="12" fill="#4169E1" opacity="0.3">E=mc²</text>
+  <text x="680" y="280" font-family="serif" font-size="12" fill="#4169E1" opacity="0.3">∑∞</text>
+  <text x="80" y="480" font-family="serif" font-size="10" fill="#4169E1" opacity="0.3">DNA→RNA→Protein</text>
+
+  <!-- Academic Stars -->
+  <polygon points="120,200 125,210 135,210 127,218 130,228 120,222 110,228 113,218 105,210 115,210" fill="#FFD700"/>
+  <polygon points="700,150 705,160 715,160 707,168 710,178 700,172 690,178 693,168 685,160 695,160" fill="#FFD700"/>
+
+  <!-- Research Collaboration Circles -->
+  <circle cx="300" cy="520" r="30" fill="none" stroke="#4169E1" stroke-width="2" stroke-dasharray="5,5" opacity="0.7"/>
+  <circle cx="500" cy="520" r="35" fill="none" stroke="#FFD700" stroke-width="2" stroke-dasharray="5,5" opacity="0.7"/>
+</svg>

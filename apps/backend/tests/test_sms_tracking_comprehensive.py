@@ -19,7 +19,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # Models
-from models.legacy_lead_newsletter import (
+from db.models.newsletter import (
     Subscriber,
     Campaign,
     CampaignStatus,
@@ -28,6 +28,7 @@ from models.legacy_lead_newsletter import (
     SMSDeliveryEvent,
     SMSDeliveryStatus,
 )
+from db.models.crm import LeadSource
 
 # Services
 from services.newsletter.sms_service import NewsletterSMSService

@@ -1,0 +1,279 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#graduationGradient)"/>
+  
+  <!-- Graduation Banner -->
+  <rect x="30" y="20" width="340" height="40" fill="#4169E1"/>
+  <rect x="32" y="22" width="336" height="36" fill="#6495ED"/>
+  <text x="200" y="35" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="14" font-weight="bold">GRADUATION CELEBRATION HIBACHI</text>
+  <text x="200" y="50" text-anchor="middle" fill="#FFD700" font-family="Arial" font-size="12">Academic Achievement Recognition</text>
+  
+  <!-- Academic Stage -->
+  <rect x="50" y="220" width="300" height="60" fill="#8B4513"/>
+  <rect x="52" y="222" width="296" height="56" fill="#DEB887"/>
+  <rect x="55" y="225" width="290" height="50" fill="#F5DEB3"/>
+  
+  <!-- Hibachi Setup for Celebration -->
+  <rect x="180" y="190" width="40" height="30" rx="8" fill="#2F4F4F"/>
+  <rect x="185" y="195" width="30" height="20" rx="6" fill="#1C1C1C"/>
+  
+  <!-- Graduate - Main Focus -->
+  <g>
+    <!-- Graduate Head and Cap -->
+    <circle cx="200" cy="130" r="20" fill="#F4C2A1"/>
+    <rect x="185" y="115" width="30" height="8" fill="#000000"/>
+    <rect x="180" y="108" width="40" height="4" fill="#000000"/>
+    <rect x="190" y="102" width="20" height="6" fill="#000000"/>
+    <circle cx="200" cy="105" r="1" fill="#FFD700"/>
+    
+    <!-- Graduation Gown -->
+    <rect x="175" y="148" width="50" height="45" fill="#4169E1"/>
+    <rect x="180" y="153" width="40" height="35" fill="#6495ED"/>
+    
+    <!-- Academic Sash -->
+    <rect x="190" y="150" width="20" height="40" fill="#FFD700"/>
+    <rect x="192" y="152" width="16" height="36" fill="#FFA500"/>
+    
+    <!-- Diploma -->
+    <rect x="170" y="155" width="8" height="12" fill="#FFFACD"/>
+    <rect x="171" y="156" width="6" height="10" fill="#FFF8DC"/>
+    <ellipse cx="174" cy="161" rx="3" ry="1" fill="#DC143C"/>
+    
+    <!-- Academic Features -->
+    <circle cx="194" cy="128" r="1" fill="#000000"/>
+    <circle cx="206" cy="128" r="1" fill="#000000"/>
+    <path d="M200 135 Q195 140 200 145" stroke="#000000" stroke-width="1" fill="none"/>
+    
+    <!-- Academic Achievement Ribbon -->
+    <rect x="205" y="155" width="8" height="15" fill="#DC143C"/>
+    <rect x="206" y="156" width="6" height="13" fill="#FF6347"/>
+    <circle cx="209" cy="163" r="1" fill="#FFD700"/>
+  </g>
+  
+  <!-- Family Members Celebrating -->
+  
+  <!-- Parent 1 (Mother) -->
+  <g>
+    <circle cx="150" cy="140" r="16" fill="#F4C2A1"/>
+    <rect x="137" y="154" width="26" height="30" fill="#8B008B"/>
+    <ellipse cx="150" cy="128" rx="8" ry="4" fill="#8B4513"/>
+    <circle cx="146" cy="138" r="1" fill="#000000"/>
+    <circle cx="154" cy="138" r="1" fill="#000000"/>
+    <path d="M150 145 Q145 150 150 155" stroke="#000000" stroke-width="1" fill="none"/>
+    
+    <!-- Proud Tears -->
+    <circle cx="147" cy="145" r="0.5" fill="#87CEEB"/>
+    <circle cx="153" cy="145" r="0.5" fill="#87CEEB"/>
+  </g>
+  
+  <!-- Parent 2 (Father) -->
+  <g>
+    <circle cx="250" cy="145" r="18" fill="#F4C2A1"/>
+    <rect x="237" y="161" width="26" height="32" fill="#2F4F4F"/>
+    <rect x="239" y="163" width="22" height="4" fill="#C0C0C0"/>
+    <ellipse cx="250" cy="132" rx="9" ry="4" fill="#8B4513"/>
+    <circle cx="246" cy="143" r="1" fill="#000000"/>
+    <circle cx="254" cy="143" r="1" fill="#000000"/>
+    <path d="M250 150 Q245 155 250 160" stroke="#000000" stroke-width="1" fill="none"/>
+    
+    <!-- Proud Smile -->
+    <path d="M245 152 Q250 157 255 152" stroke="#000000" stroke-width="1" fill="none"/>
+  </g>
+  
+  <!-- Academic Symbols -->
+  
+  <!-- Books -->
+  <g>
+    <rect x="120" y="195" width="8" height="12" fill="#8B0000"/>
+    <rect x="121" y="196" width="6" height="10" fill="#DC143C"/>
+    <rect x="122" y="197" width="4" height="8" fill="#FFF8DC"/>
+    
+    <rect x="130" y="198" width="8" height="12" fill="#4169E1"/>
+    <rect x="131" y="199" width="6" height="10" fill="#6495ED"/>
+    <rect x="132" y="200" width="4" height="8" fill="#FFF8DC"/>
+    
+    <rect x="140" y="196" width="8" height="12" fill="#228B22"/>
+    <rect x="141" y="197" width="6" height="10" fill="#32CD32"/>
+    <rect x="142" y="198" width="4" height="8" fill="#FFF8DC"/>
+  </g>
+  
+  <!-- Graduation Flowers -->
+  <g>
+    <!-- Bouquet -->
+    <rect x="280" y="195" width="3" height="15" fill="#228B22"/>
+    <circle cx="281" cy="190" r="4" fill="#FF69B4"/>
+    <circle cx="284" cy="187" r="3" fill="#FFD700"/>
+    <circle cx="278" cy="186" r="3" fill="#FF6347"/>
+    <circle cx="285" cy="191" r="2" fill="#FF1493"/>
+    <circle cx="276" cy="191" r="2" fill="#9370DB"/>
+  </g>
+  
+  <!-- Academic Achievement Displays -->
+  
+  <!-- Honor Society Certificate -->
+  <rect x="300" y="180" width="20" height="25" fill="#FFFACD"/>
+  <rect x="302" y="182" width="16" height="21" fill="#FFF8DC"/>
+  <g fill="#8B4513" font-family="Arial" font-size="4">
+    <text x="310" y="188" text-anchor="middle">HONOR</text>
+    <text x="310" y="193" text-anchor="middle">SOCIETY</text>
+    <text x="310" y="198" text-anchor="middle">MEMBER</text>
+  </g>
+  <circle cx="310" cy="200" r="2" fill="#FFD700"/>
+  
+  <!-- Dean's List Recognition -->
+  <rect x="80" y="175" width="18" height="20" fill="#FFFFFF"/>
+  <rect x="82" y="177" width="14" height="16" fill="#F0F8FF"/>
+  <g fill="#4169E1" font-family="Arial" font-size="3">
+    <text x="89" y="182" text-anchor="middle">DEAN'S</text>
+    <text x="89" y="186" text-anchor="middle">LIST</text>
+    <text x="89" y="190" text-anchor="middle">4.0 GPA</text>
+  </g>
+  
+  <!-- Graduation Feast -->
+  
+  <!-- Celebration Meal -->
+  <g>
+    <!-- Filet Mignon -->
+    <ellipse cx="185" cy="200" rx="6" ry="4" fill="#8B0000"/>
+    <ellipse cx="185" cy="199" rx="5" ry="3" fill="#B22222"/>
+    
+    <!-- Lobster -->
+    <ellipse cx="200" cy="202" rx="5" ry="3" fill="#FF6347"/>
+    <ellipse cx="200" cy="201" rx="4" ry="2" fill="#FF7F50"/>
+    
+    <!-- Scallops -->
+    <ellipse cx="215" cy="200" rx="4" ry="3" fill="#F5DEB3"/>
+    <ellipse cx="215" cy="199" rx="3" ry="2" fill="#FFFACD"/>
+  </g>
+  
+  <!-- Academic Career Path -->
+  
+  <!-- Future Plans -->
+  <rect x="30" y="80" width="40" height="30" fill="#4169E1"/>
+  <rect x="32" y="82" width="36" height="26" fill="#6495ED"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="5">
+    <text x="50" y="88" text-anchor="middle">FUTURE</text>
+    <text x="50" y="94" text-anchor="middle">CAREER</text>
+    <text x="50" y="100" text-anchor="middle">PATH</text>
+    <text x="50" y="106" text-anchor="middle">SUCCESS</text>
+  </g>
+  
+  <!-- Academic Tools -->
+  
+  <!-- Calculator -->
+  <rect x="330" y="210" width="12" height="15" fill="#2F4F4F"/>
+  <rect x="331" y="211" width="10" height="13" fill="#C0C0C0"/>
+  <g fill="#000000" font-family="Arial" font-size="2">
+    <circle cx="334" cy="214" r="0.5"/>
+    <circle cx="337" cy="214" r="0.5"/>
+    <circle cx="340" cy="214" r="0.5"/>
+    <circle cx="334" cy="217" r="0.5"/>
+    <circle cx="337" cy="217" r="0.5"/>
+    <circle cx="340" cy="217" r="0.5"/>
+  </g>
+  
+  <!-- Laptop -->
+  <rect x="350" y="205" width="20" height="12" fill="#2F4F4F"/>
+  <rect x="352" y="207" width="16" height="8" fill="#000000"/>
+  <rect x="354" y="209" width="12" height="4" fill="#87CEEB"/>
+  
+  <!-- Graduation Decorations -->
+  
+  <!-- Balloons -->
+  <g>
+    <circle cx="70" cy="120" r="8" fill="#4169E1"/>
+    <circle cx="85" cy="115" r="7" fill="#FFD700"/>
+    <circle cx="95" cy="125" r="6" fill="#DC143C"/>
+    
+    <!-- Balloon Strings -->
+    <line x1="70" y1="128" x2="70" y2="150" stroke="#8B4513" stroke-width="1"/>
+    <line x1="85" y1="122" x2="85" y2="145" stroke="#8B4513" stroke-width="1"/>
+    <line x1="95" y1="131" x2="95" y2="155" stroke="#8B4513" stroke-width="1"/>
+  </g>
+  
+  <!-- Academic Achievement Banner -->
+  <path d="M350 60 Q370 65 390 60" stroke="#FFD700" stroke-width="3" fill="none"/>
+  <text x="370" y="58" text-anchor="middle" fill="#8B4513" font-family="Arial" font-size="8" font-weight="bold">CONGRATS!</text>
+  
+  <!-- Graduation Cap Toss -->
+  <g transform="rotate(15 320 90)">
+    <rect x="315" y="85" width="10" height="2" fill="#000000"/>
+    <rect x="310" y="83" width="20" height="2" fill="#000000"/>
+    <rect x="318" y="81" width="4" height="2" fill="#000000"/>
+    <circle cx="320" cy="82" r="0.5" fill="#FFD700"/>
+  </g>
+  
+  <!-- Academic Success Symbols -->
+  
+  <!-- Scholarship Award -->
+  <rect x="30" y="180" width="15" height="20" fill="#FFD700"/>
+  <rect x="32" y="182" width="11" height="16" fill="#FFA500"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="3">
+    <text x="37" y="187" text-anchor="middle">SCHOLAR</text>
+    <text x="37" y="191" text-anchor="middle">SHIP</text>
+    <text x="37" y="195" text-anchor="middle">AWARD</text>
+  </g>
+  
+  <!-- Graduation Year -->
+  <rect x="350" y="120" width="30" height="15" fill="#8B4513"/>
+  <rect x="352" y="122" width="26" height="11" fill="#DEB887"/>
+  <text x="365" y="130" text-anchor="middle" fill="#000000" font-family="Arial" font-size="8" font-weight="bold">2024</text>
+  
+  <!-- Academic Field -->
+  <rect x="120" y="70" width="50" height="25" fill="#FFFFFF"/>
+  <rect x="122" y="72" width="46" height="21" fill="#F0F8FF"/>
+  <g fill="#4169E1" font-family="Arial" font-size="6">
+    <text x="145" y="80" text-anchor="middle">DEGREE:</text>
+    <text x="145" y="87" text-anchor="middle">Business</text>
+    <text x="145" y="94" text-anchor="middle">Administration</text>
+  </g>
+  
+  <!-- Celebration Steam -->
+  <g stroke="#FFD700" stroke-width="3" fill="none" opacity="0.8">
+    <path d="M185 185 Q187 180 185 175 Q183 170 185 165"/>
+    <path d="M200 185 Q202 180 200 175 Q198 170 200 165"/>
+    <path d="M215 185 Q217 180 215 175 Q213 170 215 165"/>
+  </g>
+  
+  <!-- Future Success -->
+  <ellipse cx="200" cy="80" rx="60" ry="20" fill="#FFFFFF" stroke="#4169E1" stroke-width="2" opacity="0.9"/>
+  <text x="200" y="76" text-anchor="middle" fill="#4169E1" font-family="Arial" font-size="9" font-weight="bold">
+    "Ready for the Professional World"
+  </text>
+  <text x="200" y="87" text-anchor="middle" fill="#8B4513" font-family="Arial" font-size="7">
+    Academic Excellence Achieved
+  </text>
+  
+  <!-- Achievement Confetti -->
+  <g fill="#FFD700" opacity="0.7">
+    <rect x="110" y="100" width="2" height="2" transform="rotate(45 110 100)"/>
+    <rect x="150" y="90" width="2" height="2" transform="rotate(30 150 90)"/>
+    <rect x="250" y="95" width="2" height="2" transform="rotate(60 250 95)"/>
+    <rect x="290" y="105" width="2" height="2" transform="rotate(15 290 105)"/>
+    <rect x="320" y="110" width="2" height="2" transform="rotate(75 320 110)"/>
+  </g>
+  
+  <!-- Academic Pride -->
+  <g fill="#DC143C" opacity="0.6">
+    <text x="90" y="160" text-anchor="middle" font-family="Arial" font-size="10">🎓</text>
+    <text x="310" y="150" text-anchor="middle" font-family="Arial" font-size="10">🎓</text>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="15" text-anchor="middle" fill="#4169E1" font-family="Arial, sans-serif" font-size="18" font-weight="bold">
+    Graduation Celebration Hibachi
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="290" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="12">
+    "Honoring academic achievements with family, food, and celebration"
+  </text>
+  
+  <defs>
+    <linearGradient id="graduationGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0F8FF;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#E6E6FA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFFACD;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

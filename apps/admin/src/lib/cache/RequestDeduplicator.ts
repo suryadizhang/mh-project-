@@ -27,7 +27,7 @@ export class RequestDeduplicator {
     if (pending) {
       const timestamp = this.requestTimestamps.get(key);
       const age = Date.now() - (timestamp || 0);
-      
+
       // If request is very recent (within cache duration), reuse it
       if (age < this.CACHE_DURATION) {
         return pending as Promise<T>;
@@ -42,7 +42,7 @@ export class RequestDeduplicator {
           this.pendingRequests.delete(key);
           this.requestTimestamps.delete(key);
         }, this.CACHE_DURATION);
-        
+
         return result;
       })
       .catch((error) => {

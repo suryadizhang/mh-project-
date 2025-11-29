@@ -4,6 +4,7 @@ import { format } from 'date-fns'
 import React from 'react'
 
 import type { BookingFormData } from '../../data/booking/types'
+import { usePricing } from '@/hooks/usePricing'
 
 interface BookingSummaryProps {
   formData: BookingFormData
@@ -12,7 +13,9 @@ interface BookingSummaryProps {
 }
 
 export function BookingSummary({ formData, isSubmitting, onSubmit }: BookingSummaryProps) {
-  const adultPrice = 55
+  // Fetch dynamic pricing from database
+  const { adultPrice, childPrice, isLoading: isPricingLoading } = usePricing()
+
   const estimatedTotal = formData.guestCount * adultPrice // Simplified calculation
 
   return (
@@ -86,22 +89,33 @@ export function BookingSummary({ formData, isSubmitting, onSubmit }: BookingSumm
 
         <div className="summary-section pricing-section">
           <h4 className="summary-subtitle">Estimated Pricing</h4>
-          <div className="pricing-breakdown">
-            <div className="pricing-item">
-              <span className="pricing-label">{formData.guestCount} Adults @ $55 each:</span>
-              <span className="pricing-value">${estimatedTotal}</span>
+          {isPricingLoading ? (
+            <div className="pricing-loading">
+              <small>Loading current pricing...</small>
             </div>
-            <div className="pricing-note">
-              <small>
-                * Final pricing may vary based on specific menu selections and add-ons. Children
-                (6-12) are $30 each. Final quote will be provided after booking.
-              </small>
-            </div>
-          </div>
-          <div className="total-price">
-            <span className="total-label">Estimated Total:</span>
-            <span className="total-value">${estimatedTotal}</span>
-          </div>
+          ) : (
+            <>
+              <div className="pricing-breakdown">
+                <div className="pricing-item">
+                  <span className="pricing-label">
+                    {formData.guestCount} Adults @ ${adultPrice} each:
+                  </span>
+                  <span className="pricing-value">${estimatedTotal}</span>
+                </div>
+                <div className="pricing-note">
+                  <small>
+                    * Final pricing may vary based on specific menu selections and add-ons.
+                    Children (6-12) are ${childPrice} each. Final quote will be provided after
+                    booking.
+                  </small>
+                </div>
+              </div>
+              <div className="total-price">
+                <span className="total-label">Estimated Total:</span>
+                <span className="total-value">${estimatedTotal}</span>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="terms-section">

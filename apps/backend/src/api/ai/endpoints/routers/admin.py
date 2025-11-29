@@ -8,7 +8,7 @@ import logging
 from uuid import uuid4
 
 from api.ai.endpoints.database import get_db
-from api.ai.endpoints.models import Conversation, AIMessage
+from db.models.ai.conversations import UnifiedConversation as Conversation, UnifiedMessage as AIMessage
 from api.ai.endpoints.services.chat_service import ChatService
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field

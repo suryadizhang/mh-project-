@@ -1,0 +1,120 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#summerGradient)"/>
+  
+  <!-- Summer Sky with Clouds -->
+  <circle cx="80" cy="50" r="20" fill="white" opacity="0.8"/>
+  <circle cx="90" cy="45" r="15" fill="white" opacity="0.9"/>
+  <circle cx="100" cy="50" r="18" fill="white" opacity="0.8"/>
+  
+  <circle cx="300" cy="60" r="25" fill="white" opacity="0.7"/>
+  <circle cx="315" cy="55" r="18" fill="white" opacity="0.8"/>
+  <circle cx="330" cy="60" r="20" fill="white" opacity="0.7"/>
+  
+  <!-- Sun -->
+  <circle cx="350" cy="50" r="25" fill="#FFD700"/>
+  <g stroke="#FFD700" stroke-width="3" stroke-linecap="round">
+    <line x1="350" y1="15" x2="350" y2="25"/>
+    <line x1="380" y1="50" x2="375" y2="50"/>
+    <line x1="370" y1="30" x2="365" y2="35"/>
+    <line x1="370" y1="70" x2="365" y2="65"/>
+    <line x1="330" y1="30" x2="335" y2="35"/>
+    <line x1="330" y1="70" x2="335" y2="65"/>
+    <line x1="320" y1="50" x2="325" y2="50"/>
+    <line x1="350" y1="85" x2="350" y2="75"/>
+  </g>
+  
+  <!-- Pool -->
+  <ellipse cx="200" cy="220" rx="150" ry="60" fill="#4A90E2"/>
+  <ellipse cx="200" cy="215" rx="145" ry="55" fill="#5BA0F2"/>
+  
+  <!-- Pool Water Effects -->
+  <ellipse cx="180" cy="200" rx="20" ry="8" fill="#6BB0FF" opacity="0.6"/>
+  <ellipse cx="230" cy="210" rx="15" ry="6" fill="#6BB0FF" opacity="0.7"/>
+  <ellipse cx="160" cy="230" rx="25" ry="10" fill="#6BB0FF" opacity="0.5"/>
+  
+  <!-- Pool Deck -->
+  <rect x="50" y="180" width="300" height="20" fill="#D2B48C"/>
+  <rect x="50" y="270" width="300" height="20" fill="#D2B48C"/>
+  
+  <!-- Hibachi Grill by Pool -->
+  <rect x="280" y="160" width="60" height="35" rx="5" fill="#1A1A1A"/>
+  <rect x="285" y="165" width="50" height="25" rx="3" fill="#2D1810"/>
+  
+  <!-- Flames -->
+  <ellipse cx="300" cy="175" rx="6" ry="10" fill="#FF6B35" opacity="0.8"/>
+  <ellipse cx="315" cy="173" rx="5" ry="8" fill="#FF8C42" opacity="0.9"/>
+  <ellipse cx="330" cy="175" rx="4" ry="6" fill="#FFB14E" opacity="0.7"/>
+  
+  <!-- Chef in Summer Attire -->
+  <circle cx="310" cy="120" r="15" fill="#F4C2A1"/>
+  <rect x="303" y="132" width="14" height="25" fill="#87CEEB"/>
+  <rect x="300" y="137" width="20" height="15" fill="#FFFFFF"/>
+  
+  <!-- Summer Hat -->
+  <ellipse cx="310" cy="108" rx="18" ry="6" fill="#8B4513"/>
+  <ellipse cx="310" cy="105" rx="15" ry="8" fill="#FFFACD"/>
+  
+  <!-- Spatula -->
+  <rect x="330" y="140" width="2" height="20" fill="#8B4513" transform="rotate(15 330 140)"/>
+  <ellipse cx="338" cy="135" rx="5" ry="3" fill="#C0C0C0" transform="rotate(15 338 135)"/>
+  
+  <!-- Pool Chair -->
+  <rect x="100" y="140" width="40" height="30" fill="#FF6347"/>
+  <rect x="105" y="145" width="30" height="20" fill="#FF7F50"/>
+  <rect x="110" y="170" width="20" height="15" fill="#FF6347"/>
+  
+  <!-- Umbrella -->
+  <line x1="120" y1="80" x2="120" y2="140" stroke="#8B4513" stroke-width="3"/>
+  <path d="M90 80 Q120 65 150 80 Q120 95 90 80" fill="#FF1493"/>
+  <path d="M90 80 Q120 70 150 80" fill="#FF69B4"/>
+  
+  <!-- Food Items on Grill -->
+  <circle cx="295" cy="170" r="3" fill="#D2691E"/>
+  <circle cx="310" cy="168" r="2" fill="#FF6347"/>
+  <rect x="320" y="167" width="4" height="3" rx="1" fill="#32CD32"/>
+  <circle cx="330" cy="170" r="3" fill="#FFD700"/>
+  
+  <!-- Floating Pool Items -->
+  <circle cx="160" cy="210" r="8" fill="#FF69B4" opacity="0.8"/>
+  <circle cx="240" cy="200" r="6" fill="#00FF00" opacity="0.8"/>
+  <rect x="200" y="230" width="12" height="8" rx="4" fill="#FFFF00" opacity="0.8"/>
+  
+  <!-- Palm Trees -->
+  <rect x="30" y="100" width="6" height="60" fill="#8B4513"/>
+  <path d="M20 100 Q33 85 46 100" fill="#228B22"/>
+  <path d="M25 95 Q33 80 41 95" fill="#32CD32"/>
+  <path d="M27 90 Q33 75 39 90" fill="#228B22"/>
+  
+  <rect x="360" y="110" width="6" height="50" fill="#8B4513"/>
+  <path d="M350 110 Q363 95 376 110" fill="#228B22"/>
+  <path d="M355 105 Q363 90 371 105" fill="#32CD32"/>
+  
+  <!-- Beach Ball -->
+  <circle cx="70" cy="190" r="12" fill="#FF0000"/>
+  <path d="M58 190 Q70 178 82 190 Q70 202 58 190" fill="#FFFFFF"/>
+  <path d="M70 178 Q82 190 70 202 Q58 190 70 178" fill="#0000FF"/>
+  
+  <!-- Summer Drinks -->
+  <rect x="350" y="185" width="6" height="15" fill="#FFD700"/>
+  <circle cx="353" cy="180" r="4" fill="#FF6347"/>
+  <line x1="349" y1="175" x2="357" y2="175" stroke="#00FF00" stroke-width="2"/>
+  
+  <!-- Title -->
+  <text x="200" y="35" text-anchor="middle" fill="#FF4500" font-family="Arial, sans-serif" font-size="22" font-weight="bold">
+    Summer Pool Party Hibachi
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="55" text-anchor="middle" fill="#FF6347" font-family="Arial, sans-serif" font-size="14">
+    Beat the Heat in Style
+  </text>
+  
+  <defs>
+    <linearGradient id="summerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#98E4FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B0E0E6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

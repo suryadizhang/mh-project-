@@ -29,7 +29,7 @@ from core.dependencies import (
 
 # MIGRATED: Enum imports moved from models.enums to NEW db.models system
 from db.models.core import ReviewStatus, ThreadStatus
-from db.models.lead import SocialPlatform
+from db.models.crm import SocialPlatform
 from schemas.social import (
     AcknowledgeReviewRequest,
     CreateLeadRequest,

@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Pleasanton baby shower hibachi interactive entertainment -->
+  <defs>
+    <linearGradient id="babyShowerSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF8DC"/>
+      <stop offset="50%" style="stop-color:#FFB6C1"/>
+      <stop offset="100%" style="stop-color:#87CEEB"/>
+    </linearGradient>
+    <linearGradient id="pleasantonBuilding" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0E68C"/>
+      <stop offset="100%" style="stop-color:#DAA520"/>
+    </linearGradient>
+    <radialGradient id="babyGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFB6C1; opacity:0.8"/>
+      <stop offset="100%" style="stop-color:transparent"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Baby shower celebration sky -->
+  <rect width="800" height="600" fill="url(#babyShowerSky)"/>
+  
+  <!-- Fluffy clouds -->
+  <ellipse cx="150" cy="80" rx="25" ry="15" fill="white" opacity="0.8"/>
+  <ellipse cx="300" cy="60" rx="30" ry="18" fill="white" opacity="0.8"/>
+  <ellipse cx="500" cy="90" rx="28" ry="16" fill="white" opacity="0.8"/>
+  <ellipse cx="650" cy="70" rx="32" ry="20" fill="white" opacity="0.8"/>
+  
+  <!-- Pleasanton suburban skyline -->
+  <rect x="80" y="160" width="85" height="130" fill="url(#pleasantonBuilding)" rx="8"/>
+  <rect x="185" y="140" width="95" height="150" fill="url(#pleasantonBuilding)" rx="8"/>
+  <rect x="300" y="170" width="75" height="120" fill="url(#pleasantonBuilding)" rx="8"/>
+  <rect x="395" y="150" width="90" height="140" fill="url(#pleasantonBuilding)" rx="8"/>
+  <rect x="505" y="165" width="80" height="125" fill="url(#pleasantonBuilding)" rx="8"/>
+  <rect x="605" y="175" width="100" height="115" fill="url(#pleasantonBuilding)" rx="8"/>
+  <rect x="725" y="180" width="70" height="110" fill="url(#pleasantonBuilding)" rx="8"/>
+  
+  <!-- Baby shower celebration venue -->
+  <rect x="130" y="310" width="540" height="210" fill="#FFF0F5" opacity="0.95" rx="35"/>
+  <text x="400" y="345" text-anchor="middle" fill="#FF69B4" font-family="Arial, sans-serif" font-size="28" font-weight="bold">PLEASANTON BABY SHOWER</text>
+  <text x="400" y="375" text-anchor="middle" fill="#87CEEB" font-family="Arial, sans-serif" font-size="22">INTERACTIVE HIBACHI ENTERTAINMENT</text>
+  
+  <!-- Baby shower hibachi setup -->
+  <rect x="150" y="280" width="500" height="150" fill="#2F4F4F" rx="22"/>
+  <rect x="160" y="275" width="480" height="35" fill="#FF69B4"/>
+  
+  <!-- Baby-themed hibachi arrangement -->
+  <circle cx="180" cy="285" r="14" fill="#FFB6C1"/>
+  <circle cx="210" cy="285" r="14" fill="#87CEEB"/>
+  <circle cx="240" cy="285" r="14" fill="#FFB6C1"/>
+  <circle cx="270" cy="285" r="14" fill="#87CEEB"/>
+  <circle cx="300" cy="285" r="14" fill="#FFB6C1"/>
+  <circle cx="330" cy="285" r="14" fill="#87CEEB"/>
+  <circle cx="360" cy="285" r="14" fill="#FFB6C1"/>
+  <circle cx="390" cy="285" r="14" fill="#87CEEB"/>
+  <circle cx="420" cy="285" r="14" fill="#FFB6C1"/>
+  <circle cx="450" cy="285" r="14" fill="#87CEEB"/>
+  <circle cx="480" cy="285" r="14" fill="#FFB6C1"/>
+  <circle cx="510" cy="285" r="14" fill="#87CEEB"/>
+  <circle cx="540" cy="285" r="14" fill="#FFB6C1"/>
+  <circle cx="570" cy="285" r="14" fill="#87CEEB"/>
+  <circle cx="600" cy="285" r="14" fill="#FFB6C1"/>
+  <circle cx="630" cy="285" r="14" fill="#87CEEB"/>
+  
+  <!-- Baby shower hibachi chef -->
+  <circle cx="400" cy="220" r="22" fill="#FDBCB4"/>
+  <rect x="383" y="242" width="34" height="38" fill="white"/>
+  <rect x="378" y="280" width="44" height="45" fill="#FFB6C1"/> <!-- Pink baby shower outfit -->
+  <rect x="382" y="325" width="14" height="32" fill="#FDBCB4"/>
+  <rect x="404" y="325" width="14" height="32" fill="#FDBCB4"/>
+  
+  <!-- Baby shower chef hat -->
+  <rect x="388" y="205" width="24" height="14" fill="white"/>
+  <circle cx="400" cy="205" r="16" fill="white"/>
+  <circle cx="395" cy="200" r="3" fill="#FFB6C1"/> <!-- Baby footprint -->
+  <circle cx="405" cy="200" r="3" fill="#87CEEB"/> <!-- Baby footprint -->
+  
+  <!-- Expecting mother (guest of honor) -->
+  <circle cx="320" cy="430" r="20" fill="#FDBCB4"/>
+  <rect x="305" y="450" width="30" height="38" fill="#FFB6C1"/> <!-- Pink maternity dress -->
+  <ellipse cx="320" cy="468" rx="18" ry="12" fill="#FFB6C1"/> <!-- Baby bump -->
+  <rect x="307" y="488" width="26" height="32" fill="#FFB6C1"/>
+  <rect x="309" y="520" width="22" height="24" fill="#FFF8DC"/> <!-- Comfortable shoes -->
+  <!-- Baby shower crown -->
+  <polygon points="315,420 325,420 320,410" fill="#FFD700"/>
+  <circle cx="320" cy="415" r="2" fill="#FF69B4"/>
+  <!-- Baby shower gift -->
+  <rect x="340" cy="470" width="10" height="8" fill="#87CEEB"/>
+  <rect x="341" cy="471" width="8" height="2" fill="#FFD700"/>
+  
+  <!-- Baby shower guests -->
+  <!-- Best friend with baby toys -->
+  <circle cx="270" cy="450" r="18" fill="#FDBCB4"/>
+  <rect x="256" y="468" width="28" height="34" fill="#9370DB"/> <!-- Purple dress -->
+  <rect x="258" y="502" width="24" height="28" fill="#9370DB"/>
+  <rect x="260" y="530" width="20" height="22" fill="#8B4513"/>
+  <!-- Baby rattle -->
+  <circle cx="250" cy="480" r="4" fill="#FFD700"/>
+  <rect x="248" cy="484" width="2" height="8" fill="#8B4513"/>
+  
+  <!-- Grandmother with baby blanket -->
+  <circle cx="480" cy="450" r="18" fill="#FDBCB4"/>
+  <rect x="466" y="468" width="28" height="34" fill="#32CD32"/> <!-- Green outfit -->
+  <rect x="468" y="502" width="24" height="28" fill="#000080"/>
+  <rect x="470" y="530" width="20" height="22" fill="#654321"/>
+  <!-- Baby blanket -->
+  <rect x="500" cy="475" width="12" height="10" fill="#FFB6C1"/>
+  <rect x="501" cy="476" width="10" height="2" fill="#87CEEB"/>
+  
+  <!-- Sister with baby clothes -->
+  <circle cx="370" cy="460" r="17" fill="#FDBCB4"/>
+  <rect x="357" y="477" width="26" height="32" fill="#FF6347"/> <!-- Coral dress -->
+  <rect x="359" y="509" width="22" height="26" fill="#FF6347"/>
+  <rect x="361" y="535" width="18" height="20" fill="#FFD700"/>
+  <!-- Baby onesies -->
+  <rect x="390" cy="485" width="8" height="6" fill="#87CEEB"/>
+  <rect x="391" cy="486" width="6" height="2" fill="#FFB6C1"/>
+  
+  <!-- Friend with diaper cake -->
+  <circle cx="430" cy="460" r="17" fill="#FDBCB4"/>
+  <rect x="417" y="477" width="26" height="32" fill="#4169E1"/> <!-- Blue dress -->
+  <rect x="419" y="509" width="22" height="26" fill="#4169E1"/>
+  <rect x="421" y="535" width="18" height="20" fill="#000000"/>
+  <!-- Diaper cake -->
+  <ellipse cx="450" cy="485" rx="8" ry="12" fill="white"/>
+  <ellipse cx="450" cy="480" rx="6" ry="8" fill="white"/>
+  <ellipse cx="450" cy="476" rx="4" ry="6" fill="white"/>
+  <circle cx="450" cy="472" r="2" fill="#FFB6C1"/>
+  
+  <!-- Baby shower dining table -->
+  <ellipse cx="400" cy="570" rx="190" ry="55" fill="#8B4513"/>
+  <ellipse cx="400" cy="565" rx="180" ry="50" fill="#FFB6C1" opacity="0.3"/>
+  
+  <!-- Baby-themed place settings -->
+  <circle cx="260" cy="565" r="16" fill="white"/>
+  <circle cx="260" cy="565" r="12" fill="#FFB6C1"/>
+  <circle cx="320" cy="565" r="16" fill="white"/>
+  <circle cx="320" cy="565" r="12" fill="#87CEEB"/>
+  <circle cx="380" cy="565" r="16" fill="white"/>
+  <circle cx="380" cy="565" r="12" fill="#FFB6C1"/>
+  <circle cx="440" cy="565" r="16" fill="white"/>
+  <circle cx="440" cy="565" r="12" fill="#87CEEB"/>
+  <circle cx="500" cy="565" r="16" fill="white"/>
+  <circle cx="500" cy="565" r="12" fill="#FFB6C1"/>
+  <circle cx="560" cy="565" r="16" fill="white"/>
+  <circle cx="560" cy="565" r="12" fill="#87CEEB"/>
+  
+  <!-- Baby shower beverages -->
+  <rect x="255" y="553" width="6" height="16" fill="#FFB6C1"/> <!-- Pink lemonade -->
+  <rect x="315" y="553" width="6" height="16" fill="#87CEEB"/> <!-- Blue punch -->
+  <rect x="375" y="553" width="6" height="16" fill="#FFFACD"/> <!-- Sparkling cider -->
+  <rect x="435" y="553" width="6" height="16" fill="#FFB6C1"/> <!-- Pink lemonade -->
+  <rect x="495" y="553" width="6" height="16" fill="#87CEEB"/> <!-- Blue punch -->
+  <rect x="555" y="553" width="6" height="16" fill="#FFFACD"/> <!-- Sparkling cider -->
+  
+  <!-- Baby shower title -->
+  <text x="400" y="120" text-anchor="middle" fill="#FF69B4" font-family="Arial, sans-serif" font-size="34" font-weight="bold">PLEASANTON BABY SHOWER</text>
+  <text x="400" y="155" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="24">INTERACTIVE HIBACHI ENTERTAINMENT</text>
+  
+  <!-- Baby celebration zones -->
+  <rect x="20" y="480" width="140" height="110" fill="#FFB6C1" opacity="0.8" rx="18"/>
+  <text x="90" y="510" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">BABY</text>
+  <text x="90" y="530" text-anchor="middle" fill="#87CEEB" font-family="Arial, sans-serif" font-size="15">CELEBRATION</text>
+  <text x="90" y="545" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">INTERACTIVE</text>
+  <text x="90" y="560" text-anchor="middle" fill="#87CEEB" font-family="Arial, sans-serif" font-size="13">HIBACHI</text>
+  <text x="90" y="575" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">PLEASANTON</text>
+  
+  <rect x="640" y="480" width="140" height="110" fill="#87CEEB" opacity="0.8" rx="18"/>
+  <text x="710" y="510" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">NEW LIFE</text>
+  <text x="710" y="530" text-anchor="middle" fill="#FFB6C1" font-family="Arial, sans-serif" font-size="15">SHOWER</text>
+  <text x="710" y="545" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14">FAMILY</text>
+  <text x="710" y="560" text-anchor="middle" fill="#FFB6C1" font-family="Arial, sans-serif" font-size="13">DINING</text>
+  <text x="710" y="575" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">MEMORIES</text>
+  
+  <!-- Baby-themed hibachi specialties -->
+  <ellipse cx="190" cy="283" rx="18" ry="12" fill="#FFB6C1"/>
+  <ellipse cx="220" cy="283" rx="19" ry="12" fill="#87CEEB"/>
+  <ellipse cx="250" cy="283" rx="18" ry="12" fill="#FFB6C1"/>
+  <ellipse cx="280" cy="283" rx="17" ry="11" fill="#87CEEB"/>
+  <ellipse cx="310" cy="283" rx="18" ry="12" fill="#FFB6C1"/>
+  <ellipse cx="340" cy="283" rx="19" ry="12" fill="#87CEEB"/>
+  <ellipse cx="370" cy="283" rx="18" ry="12" fill="#FFB6C1"/>
+  <ellipse cx="400" cy="283" rx="17" ry="11" fill="#87CEEB"/>
+  <ellipse cx="430" cy="283" rx="18" ry="12" fill="#FFB6C1"/>
+  <ellipse cx="460" cy="283" rx="19" ry="12" fill="#87CEEB"/>
+  <ellipse cx="490" cy="283" rx="18" ry="12" fill="#FFB6C1"/>
+  <ellipse cx="520" cy="283" rx="17" ry="11" fill="#87CEEB"/>
+  <ellipse cx="550" cy="283" rx="18" ry="12" fill="#FFB6C1"/>
+  <ellipse cx="580" cy="283" rx="19" ry="12" fill="#87CEEB"/>
+  <ellipse cx="610" cy="283" rx="18" ry="12" fill="#FFB6C1"/>
+  
+  <!-- Gentle baby shower flames -->
+  <polygon points="190,283 196,273 184,273" fill="#FFB6C1" opacity="0.8"/>
+  <polygon points="220,283 226,273 214,273" fill="#87CEEB" opacity="0.8"/>
+  <polygon points="250,283 256,273 244,273" fill="#FFB6C1" opacity="0.8"/>
+  <polygon points="280,283 286,273 274,273" fill="#87CEEB" opacity="0.8"/>
+  <polygon points="310,283 316,273 304,273" fill="#FFB6C1" opacity="0.8"/>
+  <polygon points="340,283 346,273 334,273" fill="#87CEEB" opacity="0.8"/>
+  <polygon points="370,283 376,273 364,273" fill="#FFB6C1" opacity="0.8"/>
+  <polygon points="400,283 406,273 394,273" fill="#87CEEB" opacity="0.8"/>
+  <polygon points="430,283 436,273 424,273" fill="#FFB6C1" opacity="0.8"/>
+  <polygon points="460,283 466,273 454,273" fill="#87CEEB" opacity="0.8"/>
+  <polygon points="490,283 496,273 484,273" fill="#FFB6C1" opacity="0.8"/>
+  <polygon points="520,283 526,273 514,273" fill="#87CEEB" opacity="0.8"/>
+  <polygon points="550,283 556,273 544,273" fill="#FFB6C1" opacity="0.8"/>
+  <polygon points="580,283 586,273 574,273" fill="#87CEEB" opacity="0.8"/>
+  <polygon points="610,283 616,273 604,273" fill="#FFB6C1" opacity="0.8"/>
+  
+  <!-- Baby shower decorations -->
+  <rect x="140" y="395" width="4" height="20" fill="#FFD700"/>
+  <ellipse cx="142" cy="395" rx="3" ry="5" fill="#FF6347"/>
+  
+  <rect x="656" y="405" width="4" height="20" fill="#FFD700"/>
+  <ellipse cx="658" cy="405" rx="3" ry="5" fill="#FF6347"/>
+  
+  <!-- Baby items -->
+  <circle cx="90" cy="360" r="12" fill="#FFB6C1"/>
+  <circle cx="87" cy="357" r="2" fill="#87CEEB"/> <!-- Baby bottle nipple -->
+  <rect x="85" y="360" width="4" height="8" fill="white"/> <!-- Baby bottle -->
+  
+  <circle cx="710" cy="370" r="12" fill="#87CEEB"/>
+  <ellipse cx="710" cy="370" rx="6" ry="8" fill="white"/> <!-- Pacifier -->
+  <circle cx="710" cy="366" r="3" fill="#FFB6C1"/>
+  
+  <!-- Baby shower atmosphere -->
+  <circle cx="400" cy="400" r="260" fill="url(#babyGlow)"/>
+  
+  <!-- Baby shower balloons -->
+  <circle cx="70" cy="320" r="8" fill="#FFB6C1"/>
+  <circle cx="78" cy="315" r="7" fill="#87CEEB"/>
+  <circle cx="85" cy="320" r="8" fill="#FFFACD"/>
+  <rect x="76" y="328" width="2" height="20" fill="#654321"/> <!-- Balloon strings -->
+  <rect x="84" y="322" width="2" height="26" fill="#654321"/>
+  <rect x="91" y="328" width="2" height="22" fill="#654321"/>
+  
+  <circle cx="730" cy="330" r="8" fill="#87CEEB"/>
+  <circle cx="722" cy="325" r="7" fill="#FFB6C1"/>
+  <circle cx="715" cy="330" r="8" fill="#FFFACD"/>
+  <rect x="724" y="338" width="2" height="20" fill="#654321"/>
+  <rect x="716" y="332" width="2" height="26" fill="#654321"/>
+  <rect x="709" y="338" width="2" height="22" fill="#654321"/>
+  
+  <!-- Baby shower subtitle -->
+  <text x="400" y="85" text-anchor="middle" fill="#87CEEB" font-family="Arial, sans-serif" font-size="20" font-weight="bold">CELEBRATING NEW LIFE WITH INTERACTIVE FAMILY DINING</text>
+</svg>

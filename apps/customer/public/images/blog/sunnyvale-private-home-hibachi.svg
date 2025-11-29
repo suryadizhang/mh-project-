@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sunnyvale private home dining atmosphere -->
+  <defs>
+    <linearGradient id="sunnyvaleSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB"/>
+      <stop offset="50%" style="stop-color:#E0F6FF"/>
+      <stop offset="100%" style="stop-color:#F0F8FF"/>
+    </linearGradient>
+    <linearGradient id="homeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F4A460"/>
+      <stop offset="100%" style="stop-color:#DEB887"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Beautiful Sunnyvale sky -->
+  <rect width="800" height="600" fill="url(#sunnyvaleSky)"/>
+  <circle cx="150" cy="100" r="40" fill="#FFD700" opacity="0.8"/>
+  
+  <!-- Sunnyvale residential hills -->
+  <ellipse cx="200" cy="480" rx="150" ry="60" fill="#9ACD32"/>
+  <ellipse cx="600" cy="500" rx="180" ry="50" fill="#8FBC8F"/>
+  
+  <!-- Beautiful residential neighborhood -->
+  <rect x="0" y="450" width="800" height="150" fill="#228B22"/>
+  
+  <!-- Elegant private home -->
+  <rect x="300" y="350" width="200" height="100" fill="url(#homeGradient)"/>
+  <polygon points="300,350 400,300 500,350" fill="#8B4513"/>
+  <rect x="320" y="380" width="15" height="20" fill="#8B4513"/>
+  <rect x="350" y="370" width="20" height="15" fill="#4169E1"/>
+  <rect x="430" y="370" width="20" height="15" fill="#4169E1"/>
+  <rect x="460" y="380" width="15" height="20" fill="#8B4513"/>
+  
+  <!-- Chimney -->
+  <rect x="390" y="290" width="20" height="30" fill="#8B4513"/>
+  
+  <!-- Beautiful landscaped backyard -->
+  <ellipse cx="400" cy="480" rx="100" ry="30" fill="#32CD32"/>
+  
+  <!-- Premium outdoor hibachi setup -->
+  <rect x="350" y="430" width="100" height="60" fill="#2F4F4F" rx="10"/>
+  <rect x="365" y="425" width="70" height="10" fill="#FF4500"/>
+  
+  <!-- Professional hibachi grills -->
+  <circle cx="375" r="5" cy="428" fill="#FFD700"/>
+  <circle cx="390" r="5" cy="428" fill="#FF6347"/>
+  <circle cx="405" r="5" cy="428" fill="#00CED1"/>
+  <circle cx="420" r="5" cy="428" fill="#FFD700"/>
+  <circle cx="435" r="5" cy="428" fill="#FF6347"/>
+  
+  <!-- Expert private hibachi chef -->
+  <circle cx="400" cy="390" r="15" fill="#FDBCB4"/>
+  <rect x="390" y="405" width="20" height="25" fill="white"/>
+  <rect x="387" y="430" width="26" height="30" fill="#000080"/>
+  <rect x="390" y="460" width="8" height="20" fill="#FDBCB4"/>
+  <rect x="402" y="460" width="8" height="20" fill="#FDBCB4"/>
+  
+  <!-- Professional chef hat -->
+  <rect x="395" y="380" width="10" height="8" fill="white"/>
+  <ellipse cx="400" cy="375" rx="8" ry="5" fill="white"/>
+  
+  <!-- Premium cooking utensils -->
+  <rect x="420" y="385" width="22" height="3" fill="#C0C0C0"/>
+  <rect x="440" y="382" width="12" height="9" fill="#C0C0C0"/>
+  
+  <!-- Elegant homeowners hosting -->
+  <circle cx="320" cy="460" r="12" fill="#FDBCB4"/>
+  <rect x="313" y="472" width="14" height="22" fill="#8B008B"/>
+  <rect x="315" y="494" width="10" height="18" fill="#000080"/>
+  <rect x="317" y="512" width="6" height="10" fill="#8B4513"/>
+  
+  <circle cx="480" cy="460" r="12" fill="#FDBCB4"/>
+  <rect x="473" y="472" width="14" height="22" fill="#4169E1"/>
+  <rect x="475" y="494" width="10" height="18" fill="#654321"/>
+  <rect x="477" y="512" width="6" height="10" fill="#8B4513"/>
+  
+  <!-- Children enjoying the experience -->
+  <circle cx="290" cy="480" r="9" fill="#FDBCB4"/>
+  <rect x="286" y="489" width="8" height="16" fill="#FF69B4"/>
+  <rect x="287" y="505" width="6" height="12" fill="#000080"/>
+  
+  <circle cx="510" cy="480" r="9" fill="#FDBCB4"/>
+  <rect x="506" y="489" width="8" height="16" fill="#32CD32"/>
+  <rect x="507" y="505" width="6" height="12" fill="#8B4513"/>
+  
+  <!-- Elegant outdoor dining setup -->
+  <rect x="320" y="500" width="160" height="25" fill="#8B4513" rx="8"/>
+  <rect x="315" y="515" width="8" height="25" fill="#654321"/>
+  <rect x="477" y="515" width="8" height="25" fill="#654321"/>
+  
+  <!-- Fine dining place settings -->
+  <circle cx="340" cy="498" r="7" fill="white"/>
+  <circle cx="370" cy="498" r="7" fill="white"/>
+  <circle cx="400" cy="498" r="7" fill="white"/>
+  <circle cx="430" cy="498" r="7" fill="white"/>
+  <circle cx="460" cy="498" r="7" fill="white"/>
+  
+  <!-- Premium silverware -->
+  <rect x="335" y="490" width="1" height="6" fill="#C0C0C0"/>
+  <rect x="345" y="490" width="1" height="6" fill="#C0C0C0"/>
+  <rect x="365" y="490" width="1" height="6" fill="#C0C0C0"/>
+  <rect x="375" y="490" width="1" height="6" fill="#C0C0C0"/>
+  <rect x="395" y="490" width="1" height="6" fill="#C0C0C0"/>
+  <rect x="405" y="490" width="1" height="6" fill="#C0C0C0"/>
+  <rect x="425" y="490" width="1" height="6" fill="#C0C0C0"/>
+  <rect x="435" y="490" width="1" height="6" fill="#C0C0C0"/>
+  <rect x="455" y="490" width="1" height="6" fill="#C0C0C0"/>
+  <rect x="465" y="490" width="1" height="6" fill="#C0C0C0"/>
+  
+  <!-- Wine glasses for adults -->
+  <polygon points="335,495 340,495 339,485 336,485" fill="white"/>
+  <ellipse cx="337.5" cy="482" rx="2" ry="1" fill="#8B0000"/>
+  <polygon points="465,495 470,495 469,485 466,485" fill="white"/>
+  <ellipse cx="467.5" cy="482" rx="2" ry="1" fill="#8B0000"/>
+  
+  <!-- Premium hibachi food -->
+  <ellipse cx="380" cy="425" rx="8" ry="5" fill="#FF69B4"/>
+  <ellipse cx="395" cy="425" rx="9" ry="5" fill="#FFA500"/>
+  <ellipse cx="410" cy="425" rx="8" ry="5" fill="#FF6347"/>
+  <ellipse cx="425" cy="425" rx="7" ry="4" fill="#32CD32"/>
+  
+  <!-- Sunnyvale title -->
+  <text x="400" y="250" text-anchor="middle" fill="#4B0082" font-family="Arial, sans-serif" font-size="22" font-weight="bold">SUNNYVALE</text>
+  <text x="400" y="275" text-anchor="middle" fill="#8B008B" font-family="Arial, sans-serif" font-size="16">PRIVATE HOME HIBACHI</text>
+  
+  <!-- Beautiful garden elements -->
+  <ellipse cx="200" cy="520" rx="40" ry="20" fill="#FF69B4"/>
+  <rect x="195" y="525" width="10" height="15" fill="#228B22"/>
+  <ellipse cx="600" cy="510" rx="35" ry="18" fill="#FFD700"/>
+  <rect x="597" y="515" width="6" height="12" fill="#228B22"/>
+  
+  <!-- Residential trees -->
+  <ellipse cx="150" cy="470" rx="25" ry="30" fill="#228B22"/>
+  <rect x="147" y="485" width="6" height="25" fill="#8B4513"/>
+  <ellipse cx="650" cy="480" rx="30" ry="35" fill="#32CD32"/>
+  <rect x="647" y="500" width="6" height="30" fill="#8B4513"/>
+  
+  <!-- Elegant outdoor lighting -->
+  <circle cx="270" cy="400" r="4" fill="#FFD700"/>
+  <rect x="268" y="404" width="4" height="15" fill="#8B4513"/>
+  <circle cx="530" cy="400" r="4" fill="#FFD700"/>
+  <rect x="528" y="404" width="4" height="15" fill="#8B4513"/>
+  
+  <!-- Restaurant-quality presentation -->
+  <rect x="250" y="380" width="80" height="60" fill="#8B008B" opacity="0.8" rx="10"/>
+  <text x="290" y="400" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="11" font-weight="bold">RESTAURANT</text>
+  <text x="290" y="415" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">QUALITY</text>
+  <text x="290" y="430" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">AT HOME</text>
+  
+  <!-- Premium service indicator -->
+  <rect x="470" y="380" width="80" height="60" fill="#00CED1" opacity="0.8" rx="10"/>
+  <text x="510" y="400" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11" font-weight="bold">PRIVATE</text>
+  <text x="510" y="415" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11" font-weight="bold">CHEF</text>
+  <text x="510" y="430" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="10">EXPERIENCE</text>
+  
+  <!-- Hibachi flames -->
+  <polygon points="380,425 384,418 376,418" fill="#FF4500" opacity="0.8"/>
+  <polygon points="395,425 399,418 391,418" fill="#FF6347" opacity="0.8"/>
+  <polygon points="410,425 414,418 406,418" fill="#FFD700" opacity="0.8"/>
+  <polygon points="425,425 429,418 421,418" fill="#FF4500" opacity="0.8"/>
+  
+  <!-- Smoke effects -->
+  <ellipse cx="400" cy="410" rx="12" ry="6" fill="#D3D3D3" opacity="0.4"/>
+  <ellipse cx="405" cy="405" rx="8" ry="4" fill="#D3D3D3" opacity="0.3"/>
+  
+  <!-- Neighborhood houses in background -->
+  <rect x="100" y="420" width="40" height="30" fill="#DEB887"/>
+  <polygon points="100,420 120,405 140,420" fill="#8B0000"/>
+  <rect x="110" y="435" width="6" height="8" fill="#8B4513"/>
+  <rect x="125" y="430" width="8" height="6" fill="#4169E1"/>
+  
+  <rect x="550" y="430" width="45" height="35" fill="#F4A460"/>
+  <polygon points="550,430 572.5,415 595,430" fill="#654321"/>
+  <rect x="560" y="445" width="7" height="9" fill="#8B4513"/>
+  <rect x="575" y="440" width="9" height="7" fill="#4169E1"/>
+  
+  <!-- Sidewalk and street -->
+  <rect x="0" y="530" width="800" height="20" fill="#696969"/>
+  <rect x="0" y="550" width="800" height="50" fill="#778899"/>
+  
+  <!-- Silicon Valley tech influence -->
+  <circle cx="400" cy="200" r="35" fill="#00CED1" opacity="0.3"/>
+  <text x="400" y="205" text-anchor="middle" fill="#4B0082" font-family="Arial, sans-serif" font-size="14" font-weight="bold">SILICON VALLEY</text>
+  <text x="400" y="220" text-anchor="middle" fill="#8B008B" font-family="Arial, sans-serif" font-size="10">HOME DINING</text>
+</svg>

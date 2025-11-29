@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import uuid4
 from datetime import datetime
 
-from models.customer import Customer
+from db.models.core import Customer
 
 
 @pytest.mark.asyncio

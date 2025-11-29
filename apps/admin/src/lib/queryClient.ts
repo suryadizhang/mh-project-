@@ -1,6 +1,6 @@
 /**
  * React Query Client Configuration - Performance Optimized
- * 
+ *
  * Optimizations:
  * - Stale-while-revalidate caching strategy
  * - Smart refetch policies
@@ -13,7 +13,7 @@ import { QueryClient } from '@tanstack/react-query';
 
 /**
  * Create optimized QueryClient instance
- * 
+ *
  * Configuration Philosophy:
  * - Minimize network requests (aggressive caching)
  * - Keep UI responsive (background refetch)
@@ -59,11 +59,11 @@ export const prefetchReviews = async (page: number = 1) => {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/api/customer-reviews/approved-reviews?page=${page}&per_page=20`
       );
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch reviews');
       }
-      
+
       return response.json();
     },
     staleTime: 5 * 60 * 1000,
@@ -80,11 +80,11 @@ export const prefetchPendingReviews = async () => {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'}/api/admin/review-moderation/pending-reviews`
       );
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch pending reviews');
       }
-      
+
       return response.json();
     },
     staleTime: 2 * 60 * 1000, // Admin data is fresher (2 minutes)

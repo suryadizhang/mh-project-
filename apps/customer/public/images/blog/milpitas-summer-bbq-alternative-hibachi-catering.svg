@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Milpitas summer BBQ alternative hibachi catering -->
+  <defs>
+    <linearGradient id="summerSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB"/>
+      <stop offset="50%" style="stop-color:#00BFFF"/>
+      <stop offset="100%" style="stop-color:#1E90FF"/>
+    </linearGradient>
+    <linearGradient id="milpitasBuilding" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F4A460"/>
+      <stop offset="100%" style="stop-color:#CD853F"/>
+    </linearGradient>
+    <radialGradient id="summerGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFD700; opacity:0.8"/>
+      <stop offset="100%" style="stop-color:transparent"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Bright summer sky -->
+  <rect width="800" height="600" fill="url(#summerSky)"/>
+  
+  <!-- Summer sun -->
+  <circle cx="700" cy="80" r="35" fill="#FFD700"/>
+  <path d="M700,30 L700,40 M730,50 L720,60 M750,80 L740,80 M730,110 L720,100 M700,130 L700,120 M670,110 L680,100 M650,80 L660,80 M670,50 L680,60" stroke="#FFD700" stroke-width="4"/>
+  
+  <!-- Summer clouds -->
+  <ellipse cx="150" cy="70" rx="30" ry="18" fill="white" opacity="0.8"/>
+  <ellipse cx="350" cy="60" rx="35" ry="20" fill="white" opacity="0.8"/>
+  <ellipse cx="550" cy="90" rx="28" ry="16" fill="white" opacity="0.8"/>
+  
+  <!-- Milpitas summer landscape -->
+  <rect x="60" y="170" width="100" height="120" fill="url(#milpitasBuilding)" rx="8"/>
+  <rect x="180" y="150" width="110" height="140" fill="url(#milpitasBuilding)" rx="8"/>
+  <rect x="310" y="180" width="90" height="110" fill="url(#milpitasBuilding)" rx="8"/>
+  <rect x="420" y="160" width="105" height="130" fill="url(#milpitasBuilding)" rx="8"/>
+  <rect x="545" y="175" width="95" height="115" fill="url(#milpitasBuilding)" rx="8"/>
+  <rect x="660" y="185" width="120" height="105" fill="url(#milpitasBuilding)" rx="8"/>
+  
+  <!-- Summer BBQ vs Hibachi comparison -->
+  <rect x="100" y="310" width="600" height="240" fill="#FFFACD" opacity="0.95" rx="45"/>
+  <text x="400" y="345" text-anchor="middle" fill="#FF6347" font-family="Arial, sans-serif" font-size="32" font-weight="bold">MILPITAS SUMMER BBQ ALTERNATIVE</text>
+  <text x="400" y="375" text-anchor="middle" fill="#1E90FF" font-family="Arial, sans-serif" font-size="26">HIBACHI CATERING BEATS THE GRILL</text>
+  <text x="400" y="405" text-anchor="middle" fill="#FF6347" font-family="Arial, sans-serif" font-size="18">FRESH SEAFOOD • INTERACTIVE ENTERTAINMENT • CHEF QUALITY</text>
+  
+  <!-- Hibachi setup (superior alternative) -->
+  <rect x="120" y="280" width="560" height="170" fill="#2F4F4F" rx="30"/>
+  <rect x="130" y="275" width="540" height="45" fill="#FF6347"/>
+  
+  <!-- Premium hibachi arrangement -->
+  <circle cx="150" cy="285" r="17" fill="#FFD700"/>
+  <circle cx="190" cy="285" r="17" fill="#FF6347"/>
+  <circle cx="230" cy="285" r="17" fill="#FFD700"/>
+  <circle cx="270" cy="285" r="17" fill="#FF6347"/>
+  <circle cx="310" cy="285" r="17" fill="#FFD700"/>
+  <circle cx="350" cy="285" r="17" fill="#FF6347"/>
+  <circle cx="390" cy="285" r="17" fill="#FFD700"/>
+  <circle cx="430" cy="285" r="17" fill="#FF6347"/>
+  <circle cx="470" cy="285" r="17" fill="#FFD700"/>
+  <circle cx="510" cy="285" r="17" fill="#FF6347"/>
+  <circle cx="550" cy="285" r="17" fill="#FFD700"/>
+  <circle cx="590" cy="285" r="17" fill="#FF6347"/>
+  <circle cx="630" cy="285" r="17" fill="#FFD700"/>
+  <circle cx="670" cy="285" r="17" fill="#FF6347"/>
+  
+  <!-- Professional hibachi chef -->
+  <circle cx="400" cy="210" r="25" fill="#FDBCB4"/>
+  <rect x="380" y="235" width="40" height="42" fill="white"/>
+  <rect x="375" y="277" width="50" height="50" fill="#FF6347"/> <!-- Vibrant summer outfit -->
+  <rect x="379" y="327" width="18" height="35" fill="#FDBCB4"/>
+  <rect x="403" y="327" width="18" height="35" fill="#FDBCB4"/>
+  
+  <!-- Summer hibachi chef hat -->
+  <rect x="385" y="192" width="30" height="17" fill="white"/>
+  <circle cx="400" cy="192" r="19" fill="white"/>
+  <text x="400" y="196" text-anchor="middle" fill="#FF6347" font-family="Arial, sans-serif" font-size="10" font-weight="bold">CHEF</text>
+  <circle cx="400" cy="186" r="3" fill="#FFD700"/> <!-- Summer sun accent -->
+  
+  <!-- Happy summer party guests -->
+  <!-- Guest 1 with drink -->
+  <circle cx="280" cy="430" r="22" fill="#FDBCB4"/>
+  <rect x="263" y="452" width="34" height="40" fill="#00BFFF"/> <!-- Summer blue outfit -->
+  <rect x="265" y="492" width="30" height="34" fill="#00BFFF"/>
+  <rect x="267" y="526" width="26" height="26" fill="#FFFF00"/> <!-- Bright summer shoes -->
+  <!-- Summer drink -->
+  <rect x="305" y="470" width="6" height="14" fill="#FFD700"/> <!-- Tropical drink -->
+  <circle cx="308" cy="470" r="3" fill="#FF6347"/> <!-- Fruit garnish -->
+  <!-- Sunglasses -->
+  <rect x="275" y="425" width="10" height="4" fill="#000000"/>
+  
+  <!-- Guest 2 with seafood plate -->
+  <circle cx="520" cy="430" r="22" fill="#FDBCB4"/>
+  <rect x="503" y="452" width="34" height="40" fill="#32CD32"/> <!-- Vibrant green outfit -->
+  <rect x="505" y="492" width="30" height="34" fill="#FFFFFF"/> <!-- White summer shorts -->
+  <rect x="507" y="526" width="26" height="26" fill="#FF6347"/> <!-- Coral sandals -->
+  <!-- Fresh seafood plate -->
+  <circle cx="545" cy="475" r="8" fill="white"/>
+  <ellipse cx="545" cy="475" rx="5" ry="3" fill="#FF69B4"/> <!-- Shrimp -->
+  <ellipse cx="540" cy="473" rx="3" ry="2" fill="#FFD700"/> <!-- Scallop -->
+  <ellipse cx="550" cy="477" rx="4" ry="2" fill="#FF6347"/> <!-- Salmon -->
+  <!-- Sun hat -->
+  <ellipse cx="520" cy="415" rx="15" ry="8" fill="#F4A460"/>
+  
+  <!-- Guest 3 enjoying entertainment -->
+  <circle cx="350" cy="450" r="20" fill="#FDBCB4"/>
+  <rect x="335" y="470" width="30" height="36" fill="#FF1493"/> <!-- Hot pink summer dress -->
+  <rect x="337" y="506" width="26" height="30" fill="#FF1493"/>
+  <rect x="339" y="536" width="22" height="22" fill="#FFD700"/>
+  <!-- Camera for memories -->
+  <rect x="320" y="485" width="8" height="6" fill="#2F4F4F"/>
+  <circle cx="323" cy="488" r="2" fill="#00BFFF"/>
+  <!-- Summer visor -->
+  <ellipse cx="350" cy="440" rx="12" ry="6" fill="#00BFFF"/>
+  
+  <!-- Guest 4 with chef interaction -->
+  <circle cx="450" cy="450" r="20" fill="#FDBCB4"/>
+  <rect x="435" y="470" width="30" height="36" fill="#FFFF00"/> <!-- Bright yellow outfit -->
+  <rect x="437" y="506" width="26" height="30" fill="#00BFFF"/>
+  <rect x="439" y="536" width="22" height="22" fill="#FFFFFF"/>
+  <!-- Applauding gesture -->
+  <circle cx="425" cy="485" r="3" fill="#FDBCB4"/> <!-- Left hand -->
+  <circle cx="475" cy="485" r="3" fill="#FDBCB4"/> <!-- Right hand -->
+  <!-- Summer cap -->
+  <ellipse cx="450" cy="440" rx="10" ry="8" fill="#FF6347"/>
+  
+  <!-- Premium summer dining table -->
+  <ellipse cx="400" cy="580" rx="220" ry="65" fill="#8B4513"/>
+  <ellipse cx="400" cy="575" rx="210" ry="60" fill="#00BFFF" opacity="0.3"/>
+  
+  <!-- Summer place settings -->
+  <circle cx="220" cy="575" r="19" fill="white"/>
+  <circle cx="220" cy="575" r="15" fill="#FFD700"/>
+  <circle cx="300" cy="575" r="19" fill="white"/>
+  <circle cx="300" cy="575" r="15" fill="#FF6347"/>
+  <circle cx="380" cy="575" r="19" fill="white"/>
+  <circle cx="380" cy="575" r="15" fill="#00BFFF"/>
+  <circle cx="460" cy="575" r="19" fill="white"/>
+  <circle cx="460" cy="575" r="15" fill="#FFD700"/>
+  <circle cx="540" cy="575" r="19" fill="white"/>
+  <circle cx="540" cy="575" r="15" fill="#FF6347"/>
+  <circle cx="620" cy="575" r="19" fill="white"/>
+  <circle cx="620" cy="575" r="15" fill="#00BFFF"/>
+  
+  <!-- Summer beverages -->
+  <rect x="213" y="561" width="7" height="18" fill="#FFD700"/> <!-- Tropical cocktail -->
+  <rect x="293" y="561" width="7" height="18" fill="#FF1493"/> <!-- Pink summer drink -->
+  <rect x="373" y="561" width="7" height="18" fill="#00BFFF"/> <!-- Blue refresher -->
+  <rect x="453" y="561" width="7" height="18" fill="#32CD32"/> <!-- Green smoothie -->
+  <rect x="533" y="561" width="7" height="18" fill="#FF6347"/> <!-- Coral punch -->
+  <rect x="613" y="561" width="7" height="18" fill="#FFFF00"/> <!-- Lemonade -->
+  
+  <!-- Summer title -->
+  <text x="400" y="90" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="36" font-weight="bold">MILPITAS SUMMER BBQ</text>
+  <text x="400" y="130" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="30">ALTERNATIVE</text>
+  
+  <!-- Comparison zones -->
+  <rect x="10" y="480" width="150" height="110" fill="#FF6347" opacity="0.8" rx="25"/>
+  <text x="85" y="510" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">HIBACHI</text>
+  <text x="85" y="530" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="16">BEATS BBQ</text>
+  <text x="85" y="545" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="15">FRESH</text>
+  <text x="85" y="560" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="14">SEAFOOD</text>
+  <text x="85" y="575" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="13">MILPITAS</text>
+  
+  <rect x="640" y="480" width="150" height="110" fill="#00BFFF" opacity="0.8" rx="25"/>
+  <text x="715" y="510" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">SUMMER</text>
+  <text x="715" y="530" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="16">INTERACTIVE</text>
+  <text x="715" y="545" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="15">CHEF</text>
+  <text x="715" y="560" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="14">QUALITY</text>
+  <text x="715" y="575" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="13">OUTDOOR</text>
+  
+  <!-- Premium hibachi specialties -->
+  <ellipse cx="160" cy="283" rx="22" ry="15" fill="#FFD700"/>
+  <ellipse cx="200" cy="283" rx="23" ry="15" fill="#FF6347"/>
+  <ellipse cx="240" cy="283" rx="22" ry="15" fill="#FFD700"/>
+  <ellipse cx="280" cy="283" rx="21" ry="14" fill="#FF6347"/>
+  <ellipse cx="320" cy="283" rx="22" ry="15" fill="#FFD700"/>
+  <ellipse cx="360" cy="283" rx="23" ry="15" fill="#FF6347"/>
+  <ellipse cx="400" cy="283" rx="22" ry="15" fill="#FFD700"/>
+  <ellipse cx="440" cy="283" rx="21" ry="14" fill="#FF6347"/>
+  <ellipse cx="480" cy="283" rx="22" ry="15" fill="#FFD700"/>
+  <ellipse cx="520" cy="283" rx="23" ry="15" fill="#FF6347"/>
+  <ellipse cx="560" cy="283" rx="22" ry="15" fill="#FFD700"/>
+  <ellipse cx="600" cy="283" rx="21" ry="14" fill="#FF6347"/>
+  <ellipse cx="640" cy="283" rx="22" ry="15" fill="#FFD700"/>
+  <ellipse cx="680" cy="283" rx="23" ry="15" fill="#FF6347"/>
+  
+  <!-- Vibrant summer flames -->
+  <polygon points="160,283 169,269 151,269" fill="#FFD700" opacity="0.9"/>
+  <polygon points="200,283 209,269 191,269" fill="#FF6347" opacity="0.9"/>
+  <polygon points="240,283 249,269 231,269" fill="#FFD700" opacity="0.9"/>
+  <polygon points="280,283 289,269 271,269" fill="#FF6347" opacity="0.9"/>
+  <polygon points="320,283 329,269 311,269" fill="#FFD700" opacity="0.9"/>
+  <polygon points="360,283 369,269 351,269" fill="#FF6347" opacity="0.9"/>
+  <polygon points="400,283 409,269 391,269" fill="#FFD700" opacity="0.9"/>
+  <polygon points="440,283 449,269 431,269" fill="#FF6347" opacity="0.9"/>
+  <polygon points="480,283 489,269 471,269" fill="#FFD700" opacity="0.9"/>
+  <polygon points="520,283 529,269 511,269" fill="#FF6347" opacity="0.9"/>
+  <polygon points="560,283 569,269 551,269" fill="#FFD700" opacity="0.9"/>
+  <polygon points="600,283 609,269 591,269" fill="#FF6347" opacity="0.9"/>
+  <polygon points="640,283 649,269 631,269" fill="#FFD700" opacity="0.9"/>
+  <polygon points="680,283 689,269 671,269" fill="#FF6347" opacity="0.9"/>
+  
+  <!-- Summer party atmosphere -->
+  <circle cx="400" cy="420" r="290" fill="url(#summerGlow)"/>
+  
+  <!-- Beach balls and summer fun -->
+  <circle cx="80" cy="380" r="15" fill="#FF6347"/>
+  <path d="M65,380 Q80,365 95,380 Q80,395 65,380" fill="#00BFFF"/>
+  <path d="M80,365 Q95,380 80,395 Q65,380 80,365" fill="#FFD700"/>
+  
+  <circle cx="720" cy="390" r="15" fill="#00BFFF"/>
+  <path d="M705,390 Q720,375 735,390 Q720,405 705,390" fill="#FF6347"/>
+  <path d="M720,375 Q735,390 720,405 Q705,390 720,375" fill="#FFFF00"/>
+  
+  <!-- Summer pool accessories -->
+  <ellipse cx="50" cy="420" rx="12" ry="8" fill="#FF1493"/> <!-- Pool float -->
+  <ellipse cx="750" cy="430" rx="12" ry="8" fill="#32CD32"/> <!-- Pool float -->
+  
+  <!-- Traditional BBQ (inferior comparison) -->
+  <rect x="30" y="350" width="40" height="20" fill="#8B4513" opacity="0.5"/>
+  <text x="50" y="345" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="10" opacity="0.5">OLD BBQ</text>
+  <line x1="25" y1="340" x2="75" y2="380" stroke="#FF0000" stroke-width="3"/> <!-- X mark -->
+  <line x1="75" y1="340" x2="25" y2="380" stroke="#FF0000" stroke-width="3"/>
+  
+  <!-- Summer subtitle -->
+  <text x="400" y="65" text-anchor="middle" fill="#FF6347" font-family="Arial, sans-serif" font-size="24" font-weight="bold">SKIP TRADITIONAL BBQ - CHOOSE INTERACTIVE HIBACHI EXCELLENCE</text>
+</svg>

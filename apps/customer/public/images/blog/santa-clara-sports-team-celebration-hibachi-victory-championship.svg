@@ -1,0 +1,181 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="victoryGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700"/>
+      <stop offset="50%" style="stop-color:#FFA500"/>
+      <stop offset="100%" style="stop-color:#FF8C00"/>
+    </linearGradient>
+    <linearGradient id="flameGradient" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF0000"/>
+      <stop offset="50%" style="stop-color:#FF4500"/>
+      <stop offset="100%" style="stop-color="#FFD700"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Victory Sky -->
+  <rect width="800" height="600" fill="url(#victoryGradient)"/>
+  
+  <!-- Santa Clara Stadium -->
+  <ellipse cx="400" cy="250" rx="300" ry="100" fill="#2F4F4F" stroke="#000" stroke-width="3"/>
+  <rect x="250" y="200" width="300" height="100" fill="#228B22"/>
+  
+  <!-- Stadium Lights -->
+  <rect x="200" y="180" width="8" height="30" fill="#C0C0C0"/>
+  <circle cx="204" cy="175" r="5" fill="#FFD700"/>
+  <rect x="592" y="180" width="8" height="30" fill="#C0C0C0"/>
+  <circle cx="596" cy="175" r="5" fill="#FFD700"/>
+
+  <!-- Victory Banner -->
+  <rect x="150" y="50" width="500" height="60" fill="#FF0000" stroke="#FFD700" stroke-width="4"/>
+  <text x="400" y="80" text-anchor="middle" font-family="serif" font-size="20" font-weight="bold" fill="#FFD700">SANTA CLARA SPORTS VICTORY</text>
+  <text x="400" y="100" text-anchor="middle" font-family="serif" font-size="14" fill="#FFFFFF">Championship Style Team Celebration</text>
+
+  <!-- Championship Scoreboard -->
+  <rect x="300" y="150" width="200" height="40" fill="#000" stroke="#FFD700" stroke-width="3"/>
+  <text x="400" y="170" text-anchor="middle" font-family="digital" font-size="18" font-weight="bold" fill="#00FF00">CHAMPIONS</text>
+  <text x="350" y="185" text-anchor="middle" font-family="digital" font-size="12" fill="#FFD700">FINAL: 28-14</text>
+  <text x="450" y="185" text-anchor="middle" font-family="digital" font-size="12" fill="#FFD700">SANTA CLARA</text>
+
+  <!-- Sports Ground -->
+  <rect x="0" y="350" width="800" height="250" fill="#228B22"/>
+
+  <!-- Victory Hibachi Setup -->
+  <rect x="350" y="520" width="100" height="30" fill="#2F4F4F" stroke="#000" stroke-width="2"/>
+  <circle cx="400" cy="535" r="25" fill="#1C1C1C" stroke="#000" stroke-width="2"/>
+  
+  <!-- Championship Flames -->
+  <ellipse cx="400" cy="525" rx="15" ry="20" fill="url(#flameGradient)" opacity="0.9"/>
+  <ellipse cx="395" cy="520" rx="10" ry="15" fill="#FF4500" opacity="0.8"/>
+  <ellipse cx="405" cy="520" rx="10" ry="15" fill="#FF0000" opacity="0.8"/>
+  <ellipse cx="400" cy="515" rx="8" ry="12" fill="#FFD700" opacity="0.7"/>
+
+  <!-- Victory Chef -->
+  <circle cx="420" cy="555" r="12" fill="#FDBCB4"/>
+  <rect x="415" y="567" width="10" height="25" fill="#FFFFFF"/>
+  <rect x="410" y="592" width="20" height="8" fill="#000"/>
+  <!-- Champion chef hat -->
+  <ellipse cx="420" cy="550" rx="10" ry="6" fill="#FFFFFF"/>
+  <rect x="415" y="538" width="10" height="12" fill="#FFFFFF"/>
+  <polygon points="420,535 425,530 415,530" fill="#FFD700"/>
+  <circle cx="420" cy="532" r="2" fill="#FF0000"/>
+  <!-- Chef with trophy and spatula -->
+  <polygon points="435,570 440,565 442,575 437,580" fill="#FFD700" stroke="#B8860B" stroke-width="1"/>
+  <circle cx="439" cy="570" r="2" fill="#FF0000"/>
+  <line x1="440" y1="580" x2="450" y2="570" stroke="#C0C0C0" stroke-width="2"/>
+
+  <!-- Winning Team Players -->
+  <!-- Team Captain -->
+  <circle cx="280" cy="555" r="12" fill="#FDBCB4"/>
+  <rect x="275" y="567" width="10" height="25" fill="#FF0000"/>
+  <rect x="273" y="592" width="14" height="8" fill="#000"/>
+  <ellipse cx="280" cy="550" rx="8" ry="4" fill="#8B4513"/>
+  <!-- Captain's armband -->
+  <rect x="270" y="570" width="20" height="5" fill="#FFD700"/>
+  <text x="280" y="574" text-anchor="middle" font-family="serif" font-size="4" font-weight="bold" fill="#000">C</text>
+  <!-- Championship trophy -->
+  <polygon points="295,560 300,555 302,570 297,575" fill="#FFD700" stroke="#B8860B" stroke-width="1"/>
+  <circle cx="299" cy="560" r="2" fill="#FF0000"/>
+
+  <!-- Star Player -->
+  <circle cx="320" cy="560" r="11" fill="#D2B48C"/>
+  <rect x="315" y="571" width="10" height="22" fill="#FF0000"/>
+  <rect x="313" y="593" width="14" height="8" fill="#000"/>
+  <ellipse cx="320" cy="555" rx="8" ry="4" fill="#000"/>
+  <!-- MVP medal -->
+  <circle cx="325" cy="575" r="4" fill="#FFD700" stroke="#B8860B" stroke-width="1"/>
+  <text x="325" y="578" text-anchor="middle" font-family="serif" font-size="4" font-weight="bold" fill="#000">MVP</text>
+
+  <!-- Team Players -->
+  <circle cx="520" cy="550" r="11" fill="#FDBCB4"/>
+  <rect x="515" y="561" width="10" height="22" fill="#FF0000"/>
+  <rect x="513" y="583" width="14" height="8" fill="#000"/>
+  <ellipse cx="520" cy="545" rx="8" ry="4" fill="#FFD700"/>
+  <!-- Victory medal -->
+  <circle cx="525" cy="570" r="3" fill="#C0C0C0" stroke="#696969" stroke-width="1"/>
+
+  <circle cx="480" cy="565" r="10" fill="#FDBCB4"/>
+  <rect x="475" y="575" width="10" height="20" fill="#FF0000"/>
+  <rect x="473" y="595" width="14" height="8" fill="#000"/>
+  <ellipse cx="480" cy="560" rx="7" ry="4" fill="#8B4513"/>
+  <!-- Team jersey number -->
+  <text x="480" y="582" text-anchor="middle" font-family="serif" font-size="8" font-weight="bold" fill="#FFFFFF">42</text>
+
+  <!-- Coach -->
+  <circle cx="220" cy="560" r="11" fill="#FDBCB4"/>
+  <rect x="215" y="571" width="10" height="22" fill="#000080"/>
+  <rect x="213" y="593" width="14" height="8" fill="#8B4513"/>
+  <ellipse cx="220" cy="555" rx="8" ry="4" fill="#C0C0C0"/>
+  <!-- Coach clipboard -->
+  <rect x="235" y="570" width="8" height="12" fill="#8B4513" stroke="#654321" stroke-width="1"/>
+  <rect x="236" y="571" width="6" height="8" fill="#FFFFFF"/>
+  <!-- Whistle -->
+  <circle cx="215" cy="575" r="2" fill="#C0C0C0"/>
+
+  <!-- Team Fans -->
+  <circle cx="180" cy="555" r="10" fill="#FDBCB4"/>
+  <rect x="175" y="565" width="10" height="20" fill="#FF0000"/>
+  <rect x="173" y="585" width="14" height="8" fill="#8B4513"/>
+  <ellipse cx="180" cy="550" rx="7" ry="4" fill="#8B4513"/>
+  <!-- Fan foam finger -->
+  <rect x="165" y="560" width="6" height="15" fill="#FFD700"/>
+  <text x="168" y="570" text-anchor="middle" font-family="serif" font-size="6" font-weight="bold" fill="#000">#1</text>
+
+  <circle cx="580" cy="560" r="9" fill="#D2B48C"/>
+  <rect x="576" y="569" width="8" height="18" fill="#FF0000"/>
+  <rect x="574" y="587" width="12" height="7" fill="#000"/>
+  <ellipse cx="580" cy="556" rx="6" ry="3" fill="#FFD700"/>
+  <!-- Team scarf -->
+  <rect x="570" y="575" width="20" height="3" fill="#FFD700"/>
+  <rect x="570" y="578" width="20" height="3" fill="#FF0000"/>
+
+  <!-- Victory Celebration Table -->
+  <ellipse cx="400" cy="580" rx="100" ry="25" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+  <ellipse cx="400" cy="578" rx="100" ry="25" fill="#A0522D"/>
+
+  <!-- Championship Items -->
+  <polygon points="350,575 360,565 365,575 360,580" fill="#FFD700" stroke="#B8860B" stroke-width="1"/>
+  <circle cx="360" cy="570" r="2" fill="#FF0000"/>
+  <text x="360" y="590" text-anchor="middle" font-family="serif" font-size="6" fill="#000">TROPHY</text>
+  
+  <polygon points="440,575 450,565 455,575 450,580" fill="#C0C0C0" stroke="#696969" stroke-width="1"/>
+  <circle cx="450" cy="570" r="2" fill="#4169E1"/>
+  <text x="450" y="590" text-anchor="middle" font-family="serif" font-size="6" fill="#000">AWARD</text>
+
+  <!-- Sports Equipment -->
+  <circle cx="380" cy="575" r="8" fill="#8B4513"/>
+  <text x="380" y="579" text-anchor="middle" font-family="serif" font-size="6" font-weight="bold" fill="#FFFFFF">FOOTBALL</text>
+
+  <circle cx="420" cy="575" r="6" fill="#FF8C00"/>
+  <line x1="416" y1="571" x2="424" y2="579" stroke="#000" stroke-width="1"/>
+  <line x1="416" y1="579" x2="424" y2="571" stroke="#000" stroke-width="1"/>
+
+  <!-- Victory Drinks -->
+  <polygon points="470,575 475,575 473,585 472,585" fill="#E6E6FA" stroke="#C0C0C0" stroke-width="1"/>
+  <ellipse cx="473" cy="573" rx="3" ry="1" fill="#FFD700"/>
+  
+  <polygon points="320,575 325,575 323,585 322,585" fill="#E6E6FA" stroke="#C0C0C0" stroke-width="1"/>
+  <ellipse cx="323" cy="573" rx="3" ry="1" fill="#FF0000"/>
+
+  <!-- Victory Confetti -->
+  <rect x="150" y="400" width="3" height="3" fill="#FFD700" transform="rotate(45 150 400)"/>
+  <rect x="200" y="380" width="3" height="3" fill="#FF0000" transform="rotate(30 200 380)"/>
+  <rect x="350" y="390" width="3" height="3" fill="#00FF00" transform="rotate(60 350 390)"/>
+  <rect x="550" y="370" width="3" height="3" fill="#FF4500" transform="rotate(45 550 370)"/>
+  <rect x="600" y="410" width="3" height="3" fill="#FFD700" transform="rotate(30 600 410)"/>
+  <circle cx="180" cy="420" r="2" fill="#FF0000"/>
+  <circle cx="620" cy="390" r="2" fill="#FFD700"/>
+
+  <!-- Team Banners -->
+  <rect x="100" y="450" width="80" height="30" fill="#FF0000" stroke="#FFD700" stroke-width="2"/>
+  <text x="140" y="468" text-anchor="middle" font-family="serif" font-size="10" font-weight="bold" fill="#FFFFFF">SANTA</text>
+  <text x="140" y="478" text-anchor="middle" font-family="serif" font-size="10" font-weight="bold" fill="#FFD700">CLARA</text>
+
+  <rect x="620" y="440" width="80" height="30" fill="#FFD700" stroke="#FF0000" stroke-width="2"/>
+  <text x="660" y="458" text-anchor="middle" font-family="serif" font-size="10" font-weight="bold" fill="#000">VICTORY</text>
+  <text x="660" y="468" text-anchor="middle" font-family="serif" font-size="10" font-weight="bold" fill="#FF0000">2025</text>
+
+  <!-- Victory Smoke -->
+  <ellipse cx="400" cy="505" rx="20" ry="8" fill="#FFD700" opacity="0.6"/>
+  <ellipse cx="405" cy="495" rx="25" ry="10" fill="#FFA500" opacity="0.4"/>
+  <ellipse cx="395" cy="485" rx="30" ry="12" fill="#FF8C00" opacity="0.3"/>
+</svg>

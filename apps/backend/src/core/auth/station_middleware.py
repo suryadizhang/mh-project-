@@ -9,16 +9,17 @@ import logging
 from typing import Any
 from uuid import UUID
 
-from core.auth.models import StationUser, UserSession  # Phase 2C: Updated from api.app.auth.models
+from db.models.identity import StationUser  # Junction table for station-user relationships
+from core.auth.models import UserSession  # Phase 2C: Updated from api.app.auth.models
 from core.auth.station_auth import (  # Phase 2C: Updated from api.app.auth.station_auth
     StationAuthenticationService,
     StationContext,
 )
-# Phase 1.1: Keep enums from station_models during transition (will migrate in Phase 2)
-# Fixed: StationPermission and StationRole don't exist in db.models.identity, use station_models
-from core.auth.station_models import (
+# Import enums from canonical identity models (migrated from deprecated station_models)
+from db.models.identity import (
     StationPermission,
     StationRole,
+    StationStatus,
 )
 from core.database import get_db_session  # Phase 2C: Updated from api.app.database
 from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption

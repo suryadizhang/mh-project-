@@ -359,12 +359,12 @@ path-based triggering for efficient deployments:
 
 ### 🎯 **Pipeline Overview**
 
-| Lane               | Trigger Path                   | Deployment Target           | Status    |
-| ------------------ | ------------------------------ | --------------------------- | --------- |
-| 🎨 **FE Customer** | `myhibachi-frontend/**`        | Vercel                      | ✅ Active |
-| ⚙️ **FE Admin**    | `myhibachi-admin-frontend/**`  | Vercel                      | ✅ Active |
-| 🚀 **API**         | `myhibachi-backend-fastapi/**` | VPS (api.myhibachichef.com) | ✅ Active |
-| 🤖 **AI API**      | `myhibachi-ai-backend/**`      | VPS (ai.myhibachichef.com)  | ✅ Active |
+| Lane               | Trigger Path                   | Deployment Target              | Status    |
+| ------------------ | ------------------------------ | ------------------------------ | --------- |
+| 🎨 **FE Customer** | `myhibachi-frontend/**`        | Vercel                         | ✅ Active |
+| ⚙️ **FE Admin**    | `myhibachi-admin-frontend/**`  | Vercel                         | ✅ Active |
+| 🚀 **API**         | `myhibachi-backend-fastapi/**` | VPS (mhapi.mysticdatanode.net) | ✅ Active |
+| 🤖 **AI API**      | `myhibachi-ai-backend/**`      | VPS (mhapi.mysticdatanode.net) | ✅ Active |
 
 ### 📋 **Pipeline Details**
 
@@ -379,14 +379,14 @@ path-based triggering for efficient deployments:
 
 - **Triggers**: Changes in `myhibachi-admin-frontend/`
 - **Steps**: Lint → Test → Build → E2E Tests → Vercel Deploy
-- **Target**: https://admin.myhibachichef.com
+- **Target**: https://admin.mysticdatanode.net
 - **Port**: 3001 (local development)
 
 #### 🚀 **Main API** (`.github/workflows/api.yml`)
 
 - **Triggers**: Changes in `myhibachi-backend-fastapi/`
 - **Steps**: Install → Test → Deploy via SSH → Restart Service
-- **Target**: https://api.myhibachichef.com
+- **Target**: https://mhapi.mysticdatanode.net
 - **Service**: `myhibachi-api.service`
 - **Port**: 8001 (production)
 
@@ -394,7 +394,7 @@ path-based triggering for efficient deployments:
 
 - **Triggers**: Changes in `myhibachi-ai-backend/`
 - **Steps**: Install → Test → Deploy via SSH → Restart Service
-- **Target**: https://ai.myhibachichef.com
+- **Target**: https://mhapi.mysticdatanode.net
 - **Service**: `myhibachi-ai.service`
 - **Port**: 8002 (production)
 
@@ -409,8 +409,8 @@ VPS_USER=deploy                        # SSH username
 VPS_SSH_KEY=-----BEGIN RSA PRIVATE---- # SSH private key
 
 # Frontend Environment Variables
-NEXT_PUBLIC_API_BASE_URL=https://api.myhibachichef.com      # API endpoint
-NEXT_PUBLIC_AI_API_BASE_URL=https://ai.myhibachichef.com    # AI API endpoint
+NEXT_PUBLIC_API_BASE_URL=https://mhapi.mysticdatanode.net      # API endpoint
+NEXT_PUBLIC_AI_API_BASE_URL=https://mhapi.mysticdatanode.net    # AI API endpoint
 ```
 
 ### 🏗️ **Deployment Architecture**
@@ -418,9 +418,9 @@ NEXT_PUBLIC_AI_API_BASE_URL=https://ai.myhibachichef.com    # AI API endpoint
 ```
 🌐 Production Environment
 ├── 🎨 Customer Frontend → Vercel (myhibachichef.com)
-├── ⚙️ Admin Frontend → Vercel (admin.myhibachichef.com)
-├── 🚀 Main API → VPS:8001 → Nginx → api.myhibachichef.com
-└── 🤖 AI API → VPS:8002 → Nginx → ai.myhibachichef.com
+├── ⚙️ Admin Frontend → Vercel (admin.mysticdatanode.net)
+├── 🚀 Main API → VPS:8001 → Nginx → mhapi.mysticdatanode.net
+└── 🤖 AI API → VPS:8002 → Nginx → mhapi.mysticdatanode.net
 ```
 
 ### ⚡ **Key Features**

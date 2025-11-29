@@ -10,6 +10,7 @@ import DatePicker from 'react-datepicker';
 import { Controller, useForm } from 'react-hook-form';
 
 import Assistant from '@/components/chat/Assistant';
+import BookingAgreementModal from '@/components/booking/BookingAgreementModal';
 import { apiFetch } from '@/lib/api';
 import { logger } from '@/lib/logger';
 
@@ -45,6 +46,11 @@ export default function BookUsPageClient() {
   >([]);
   const [loadingTimeSlots, setLoadingTimeSlots] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Allergen acknowledgment checkboxes
+  const [allergenAcknowledged, setAllergenAcknowledged] = useState(false);
+  const [riskAccepted, setRiskAccepted] = useState(false);
+  const [willCommunicate, setWillCommunicate] = useState(false);
 
   const {
     register,
@@ -317,6 +323,27 @@ export default function BookUsPageClient() {
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-lg-8">
+            {/* Deposit Warning Banner */}
+            <div className="alert alert-warning mb-4 shadow-sm border-warning" role="alert">
+              <div className="d-flex align-items-start">
+                <i className="bi bi-exclamation-triangle-fill text-warning fs-4 me-3 mt-1"></i>
+                <div className="flex-grow-1">
+                  <h5 className="alert-heading fw-bold mb-2">
+                    💳 Deposit Required to Secure Your Booking
+                  </h5>
+                  <p className="mb-2">
+                    A <strong>$100 refundable deposit</strong> is required to confirm and secure your booking date.
+                  </p>
+                  <p className="mb-0 small">
+                    <i className="bi bi-clock-fill me-1"></i>
+                    <strong>Important:</strong> Bookings submitted without deposit payment are subject to
+                    <strong className="text-danger"> automatic release without notice within 2 hours</strong>.
+                    Please complete your deposit payment promptly after booking to guarantee your reserved date and time.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="booking-form-container">
               <form onSubmit={handleSubmit(onSubmit)} className="booking-form">
                 {/* Contact Information */}
@@ -790,84 +817,18 @@ export default function BookUsPageClient() {
       )}
 
       {/* Agreement Modal */}
-      {showAgreementModal && (
-        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-dialog-centered modal-lg">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  <i className="bi bi-file-text text-primary me-2"></i>
-                  Booking Agreement & Terms
-                </h5>
-              </div>
-              <div className="modal-body">
-                <div className="agreement-content">
-                  <h6>Service Agreement:</h6>
-                  <ul>
-                    <li>Professional hibachi chef service with entertainment and cooking</li>
-                    <li>Fresh, high-quality ingredients prepared on-site</li>
-                    <li>All necessary cooking equipment and utensils provided</li>
-                    <li>2-hour service duration (additional time available upon request)</li>
-                  </ul>
-
-                  <h6 className="mt-3">Pricing & Payment:</h6>
-                  <ul>
-                    <li>Final pricing will be confirmed based on guest count and menu selection</li>
-                    <li>$100 refundable deposit required to secure booking</li>
-                    <li>
-                      Deposit is refundable if canceled 7+ days before event, non-refundable within
-                      7 days
-                    </li>
-                    <li>Remaining balance due on event day</li>
-                    <li>Travel fees may apply for locations outside our standard service area</li>
-                  </ul>
-
-                  <h6 className="mt-3">Cancellation Policy:</h6>
-                  <ul>
-                    <li>Full refund if cancelled 7+ days before event</li>
-                    <li>No refund if cancelled within 7 days of event</li>
-                    <li>
-                      One free reschedule within 48 hours of booking; additional reschedules cost
-                      $100
-                    </li>
-                  </ul>
-
-                  <h6 className="mt-3">Client Responsibilities:</h6>
-                  <ul>
-                    <li>Provide adequate outdoor space with access to power outlet</li>
-                    <li>Ensure safe and clean cooking environment</li>
-                    <li>Inform us of any food allergies or dietary restrictions</li>
-                  </ul>
-
-                  <p className="mt-3">
-                    <strong>
-                      By confirming this booking, you agree to these terms and conditions.
-                    </strong>
-                  </p>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary me-2"
-                  onClick={handleAgreementCancel}
-                >
-                  <i className="bi bi-x-lg me-2"></i>
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleAgreementConfirm}
-                  disabled={isSubmitting}
-                >
-                  <i className="bi bi-check-lg me-2"></i>I Agree - Submit Booking
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <BookingAgreementModal
+        isOpen={showAgreementModal}
+        onConfirm={handleAgreementConfirm}
+        onCancel={handleAgreementCancel}
+        isSubmitting={isSubmitting}
+        allergenAcknowledged={allergenAcknowledged}
+        setAllergenAcknowledged={setAllergenAcknowledged}
+        riskAccepted={riskAccepted}
+        setRiskAccepted={setRiskAccepted}
+        willCommunicate={willCommunicate}
+        setWillCommunicate={setWillCommunicate}
+      />
 
       <Assistant page="/BookUs" />
     </div>

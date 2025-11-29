@@ -13,13 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # MIGRATED: Imports moved from OLD models to NEW db.models system
-from db.models.newsletter import Subscriber
-
-# TODO: Manual migration needed for: SMSDeliveryEvent
-# from models import SMSDeliveryEvent
-# MIGRATED: Enum imports moved from models.enums to NEW db.models system
-# TODO: Manual migration needed for enums: SMSDeliveryStatus
-# from models.enums import SMSDeliveryStatus
+from db.models.newsletter import Subscriber, SMSDeliveryEvent, SMSDeliveryStatus
 from services.email.base import (
     EmailResult,
 )  # We'll reuse this structure for consistency

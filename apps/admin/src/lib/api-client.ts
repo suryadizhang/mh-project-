@@ -187,11 +187,11 @@ export const enhancedApi = {
 /**
  * Convenience hook for API calls with toast notifications
  * Usage:
- * 
+ *
  * const { execute, loading } = useApiCall(async () => {
  *   return api.post('/endpoint', data);
  * });
- * 
+ *
  * await execute({
  *   successMessage: 'Operation completed',
  *   errorMessage: 'Operation failed',

@@ -34,7 +34,11 @@ import {
 } from '@/hooks/useApi';
 import { smsService } from '@/services/api';
 import { emailService, labelService } from '@/services/email-api';
-import type { Email, EmailThread as EmailThreadType, Label } from '@/types/email';
+import type {
+  Email,
+  EmailThread as EmailThreadType,
+  Label,
+} from '@/types/email';
 
 // Channel types
 const CHANNELS = {
@@ -282,7 +286,11 @@ export default function UnifiedInboxPage() {
     const allCombined = [
       ...socialThreads.map((t: any) => ({ ...t, channel: t.platform })),
       ...smsThreads.map((t: any) => ({ ...t, channel: CHANNELS.SMS })),
-      ...emailThreads.map((e: Email) => ({ ...e, channel: CHANNELS.EMAIL, is_read: e.is_read })),
+      ...emailThreads.map((e: Email) => ({
+        ...e,
+        channel: CHANNELS.EMAIL,
+        is_read: e.is_read,
+      })),
     ];
 
     const unreadCount = allCombined.filter((t: any) => !t.is_read).length;
@@ -809,15 +817,19 @@ export default function UnifiedInboxPage() {
                       </p>
 
                       {/* Labels for Email Threads */}
-                      {thread.channel === CHANNELS.EMAIL && thread.labels && thread.labels.length > 0 && (
-                        <div className="mb-2">
-                          <LabelList
-                            labels={labels.filter((l) => thread.labels.includes(l.slug))}
-                            maxVisible={2}
-                            size="sm"
-                          />
-                        </div>
-                      )}
+                      {thread.channel === CHANNELS.EMAIL &&
+                        thread.labels &&
+                        thread.labels.length > 0 && (
+                          <div className="mb-2">
+                            <LabelList
+                              labels={labels.filter(l =>
+                                thread.labels.includes(l.slug)
+                              )}
+                              maxVisible={2}
+                              size="sm"
+                            />
+                          </div>
+                        )}
 
                       {/* Time and Channel */}
                       <div className="flex items-center justify-between text-xs text-gray-500">
@@ -881,21 +893,32 @@ export default function UnifiedInboxPage() {
                           {/* Email Labels */}
                           {selectedThread.channel === CHANNELS.EMAIL && (
                             <div className="mt-2 flex items-center gap-2">
-                              {selectedThread.labels && selectedThread.labels.length > 0 ? (
+                              {selectedThread.labels &&
+                              selectedThread.labels.length > 0 ? (
                                 <LabelList
-                                  labels={labels.filter((l) => selectedThread.labels.includes(l.slug))}
-                                  onRemove={async (labelSlug) => {
-                                    const updatedLabels = selectedThread.labels.filter((l: string) => l !== labelSlug);
-                                    await emailService.updateEmail(selectedThread.message_id, {
-                                      labels: updatedLabels,
-                                    });
+                                  labels={labels.filter(l =>
+                                    selectedThread.labels.includes(l.slug)
+                                  )}
+                                  onRemove={async labelSlug => {
+                                    const updatedLabels =
+                                      selectedThread.labels.filter(
+                                        (l: string) => l !== labelSlug
+                                      );
+                                    await emailService.updateEmail(
+                                      selectedThread.message_id,
+                                      {
+                                        labels: updatedLabels,
+                                      }
+                                    );
                                     await loadEmailThreads();
                                   }}
                                   maxVisible={5}
                                   size="sm"
                                 />
                               ) : (
-                                <span className="text-xs text-gray-400">No labels</span>
+                                <span className="text-xs text-gray-400">
+                                  No labels
+                                </span>
                               )}
                               <button
                                 onClick={() => setShowLabelPicker(true)}
@@ -1159,7 +1182,7 @@ export default function UnifiedInboxPage() {
           isOpen={showLabelPicker}
           onClose={() => setShowLabelPicker(false)}
           selectedLabels={selectedThread.labels || []}
-          onToggleLabel={async (labelSlug) => {
+          onToggleLabel={async labelSlug => {
             const currentLabels = selectedThread.labels || [];
             const updatedLabels = currentLabels.includes(labelSlug)
               ? currentLabels.filter((l: string) => l !== labelSlug)
@@ -1176,7 +1199,10 @@ export default function UnifiedInboxPage() {
               });
               // Reload email threads
               await loadEmailThreads();
-              toast.success('Labels updated', 'Email labels have been updated successfully');
+              toast.success(
+                'Labels updated',
+                'Email labels have been updated successfully'
+              );
             } catch (error) {
               toast.error('Failed to update labels', 'Please try again');
             }

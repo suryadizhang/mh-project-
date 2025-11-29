@@ -63,8 +63,8 @@ class SelfLearningAI:
         }
         """
         try:
-            from api.ai.endpoints.models import (
-                Message,
+            from db.models.ai.conversations import (
+                UnifiedMessage as Message,
                 MessageRole,
             )
 
@@ -115,7 +115,7 @@ class SelfLearningAI:
         }
         """
         try:
-            from api.ai.endpoints.models import AIMessage
+            from db.models.ai.conversations import UnifiedMessage as AIMessage
 
             # Fetch message
             query = select(AIMessage).where(AIMessage.id == message_id)
@@ -204,13 +204,13 @@ class SelfLearningAI:
         Identify common question patterns from recent interactions
         """
         try:
-            from api.ai.endpoints.models import AIMessage, MessageRole
+            from db.models.ai.conversations import UnifiedMessage as AIMessage, MessageRole
 
             # Get recent user messages
             since_date = datetime.now(timezone.utc) - timedelta(days=days)
 
-            query = select(Message).where(
-                and_(Message.role == MessageRole.USER.value, Message.created_at >= since_date)
+            query = select(AIMessage).where(
+                and_(AIMessage.role == MessageRole.USER.value, AIMessage.created_at >= since_date)
             )
 
             result = await db.execute(query)
@@ -288,7 +288,7 @@ class SelfLearningAI:
         Generate knowledge base updates based on successful interactions
         """
         try:
-            from api.ai.endpoints.models import AIMessage
+            from db.models.ai.conversations import UnifiedMessage as AIMessage
 
             # Find high-quality responses
             query = (
@@ -388,7 +388,7 @@ class SelfLearningAI:
     async def get_learning_metrics(self, db: AsyncSession) -> dict[str, Any]:
         """Get comprehensive learning metrics"""
         try:
-            from api.ai.endpoints.models import AIMessage
+            from db.models.ai.conversations import UnifiedMessage as AIMessage
 
             # Calculate various metrics
             total_messages = await db.execute(select(func.count(AIMessage.id)))

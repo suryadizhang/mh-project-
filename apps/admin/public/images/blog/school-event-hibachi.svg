@@ -1,0 +1,259 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#schoolGradient)"/>
+  
+  <!-- School Building -->
+  <rect x="50" y="80" width="120" height="80" fill="#B22222"/>
+  <rect x="52" y="82" width="116" height="76" fill="#DC143C"/>
+  <polygon points="50,80 110,40 170,80" fill="#8B0000"/>
+  <polygon points="52,80 110,45 168,80" fill="#A0522D"/>
+  
+  <!-- School Flag -->
+  <rect x="105" y="40" width="10" height="30" fill="#8B4513"/>
+  <rect x="115" y="45" width="20" height="12" fill="#FF0000"/>
+  <rect x="117" y="47" width="16" height="8" fill="#FFFFFF"/>
+  <text x="125" y="53" text-anchor="middle" fill="#FF0000" font-family="Arial" font-size="6" font-weight="bold">SCHOOL</text>
+  
+  <!-- School Windows -->
+  <g fill="#87CEEB">
+    <rect x="65" y="95" width="12" height="15"/>
+    <rect x="85" y="95" width="12" height="15"/>
+    <rect x="105" y="95" width="12" height="15"/>
+    <rect x="125" y="95" width="12" height="15"/>
+    <rect x="145" y="95" width="12" height="15"/>
+    
+    <rect x="65" y="125" width="12" height="15"/>
+    <rect x="85" y="125" width="12" height="15"/>
+    <rect x="105" y="125" width="12" height="15"/>
+    <rect x="125" y="125" width="12" height="15"/>
+    <rect x="145" y="125" width="12" height="15"/>
+  </g>
+  
+  <!-- School Doors -->
+  <rect x="100" y="140" width="20" height="20" fill="#8B4513"/>
+  <rect x="102" y="142" width="16" height="16" fill="#DEB887"/>
+  <circle cx="115" cy="150" r="1" fill="#FFD700"/>
+  
+  <!-- School Playground -->
+  <rect x="20" y="180" width="180" height="80" fill="#228B22"/>
+  <rect x="22" y="182" width="176" height="76" fill="#32CD32"/>
+  
+  <!-- Playground Equipment -->
+  <!-- Swing Set -->
+  <rect x="40" y="190" width="4" height="25" fill="#8B4513"/>
+  <rect x="60" y="190" width="4" height="25" fill="#8B4513"/>
+  <rect x="40" y="190" width="24" height="4" fill="#8B4513"/>
+  <g stroke="#000000" stroke-width="1">
+    <line x1="45" y1="194" x2="45" y2="210"/>
+    <line x1="55" y1="194" x2="55" y2="210"/>
+  </g>
+  <rect x="42" y="210" width="6" height="3" fill="#FF0000"/>
+  <rect x="52" y="210" width="6" height="3" fill="#0000FF"/>
+  
+  <!-- Slide -->
+  <rect x="80" y="200" width="25" height="4" fill="#FFFF00"/>
+  <rect x="100" y="190" width="4" height="14" fill="#8B4513"/>
+  <rect x="98" y="188" width="8" height="4" fill="#8B4513"/>
+  
+  <!-- Hibachi Event Setup -->
+  <rect x="220" y="160" width="140" height="60" rx="10" fill="#FF6347"/>
+  <rect x="225" y="165" width="130" height="50" rx="8" fill="#2F4F4F"/>
+  <rect x="230" y="170" width="120" height="40" rx="5" fill="#1C1C1C"/>
+  
+  <!-- School Tables -->
+  <ellipse cx="290" cy="190" rx="40" ry="15" fill="#8B4513"/>
+  <ellipse cx="290" cy="185" rx="35" ry="12" fill="#DEB887"/>
+  
+  <!-- Students Around Table -->
+  
+  <!-- Student 1 (excited) -->
+  <circle cx="250" cy="170" r="12" fill="#F4C2A1"/>
+  <rect x="242" y="180" width="16" height="20" fill="#4169E1"/>
+  <ellipse cx="250" cy="160" rx="8" ry="5" fill="#FFD700"/>
+  <circle cx="246" cy="168" r="1" fill="#000000"/>
+  <circle cx="254" cy="168" r="1" fill="#000000"/>
+  <ellipse cx="250" cy="174" rx="3" ry="2" fill="#FF69B4"/>
+  
+  <!-- Student 1 Backpack -->
+  <rect x="235" y="185" width="8" height="10" fill="#FF0000"/>
+  <rect x="236" y="186" width="6" height="8" fill="#FF6347"/>
+  
+  <!-- Student 2 (curious) -->
+  <circle cx="330" cy="175" r="12" fill="#F4C2A1"/>
+  <rect x="322" y="185" width="16" height="20" fill="#32CD32"/>
+  <ellipse cx="330" cy="165" rx="6" ry="4" fill="#8B4513"/>
+  <circle cx="326" cy="173" r="1" fill="#000000"/>
+  <circle cx="334" cy="173" r="1" fill="#000000"/>
+  <path d="M330 178 Q325 183 330 188" stroke="#000000" stroke-width="1" fill="none"/>
+  
+  <!-- Student 3 (amazed) -->
+  <circle cx="270" cy="205" r="10" fill="#F4C2A1"/>
+  <rect x="264" y="213" width="12" height="18" fill="#800080"/>
+  <ellipse cx="270" cy="198" rx="5" ry="3" fill="#FF1493"/>
+  <circle cx="267" cy="203" r="1" fill="#000000"/>
+  <circle cx="273" cy="203" r="1" fill="#000000"/>
+  <ellipse cx="270" cy="207" rx="2" ry="1" fill="#FF69B4"/>
+  
+  <!-- Student 4 (learning) -->
+  <circle cx="310" cy="200" r="11" fill="#F4C2A1"/>
+  <rect x="303" y="209" width="14" height="19" fill="#FF8C00"/>
+  <ellipse cx="310" cy="192" rx="6" ry="4" fill="#000000"/>
+  <circle cx="306" cy="198" r="1" fill="#000000"/>
+  <circle cx="314" cy="198" r="1" fill="#000000"/>
+  <path d="M310 203 Q305 208 310 213" stroke="#000000" stroke-width="1" fill="none"/>
+  
+  <!-- Educational Chef -->
+  <circle cx="290" cy="140" r="18" fill="#F4C2A1"/>
+  <rect x="277" y="156" width="26" height="30" fill="#FFFFFF"/>
+  <rect x="279" y="158" width="22" height="4" fill="#FF6347"/>
+  
+  <!-- Chef Hat -->
+  <ellipse cx="290" cy="125" rx="12" ry="8" fill="#FFFFFF"/>
+  <rect x="278" y="125" width="24" height="10" fill="#FFFFFF"/>
+  
+  <!-- Educational Tools -->
+  <!-- Pointer/Teaching Stick -->
+  <line x1="260" y1="155" x2="275" y2="145" stroke="#8B4513" stroke-width="3"/>
+  <circle cx="258" cy="157" r="2" fill="#FFD700"/>
+  
+  <!-- Educational Chart -->
+  <rect x="320" y="120" width="25" height="20" fill="#FFFFFF"/>
+  <rect x="322" y="122" width="21" height="16" fill="#F0F8FF"/>
+  <g fill="#000000" font-family="Arial" font-size="4">
+    <text x="325" y="127">HIBACHI</text>
+    <text x="325" y="132">SAFETY</text>
+    <text x="325" y="137">RULES</text>
+  </g>
+  
+  <!-- Student Excitement Bubbles -->
+  <ellipse cx="250" cy="145" rx="15" ry="10" fill="#FFFFFF" stroke="#4169E1" stroke-width="1"/>
+  <text x="250" y="148" text-anchor="middle" fill="#4169E1" font-family="Arial" font-size="6">
+    WOW!
+  </text>
+  
+  <ellipse cx="330" cy="150" rx="18" ry="12" fill="#FFFFFF" stroke="#32CD32" stroke-width="1"/>
+  <text x="330" y="153" text-anchor="middle" fill="#32CD32" font-family="Arial" font-size="5">
+    How do you
+  </text>
+  <text x="330" y="159" text-anchor="middle" fill="#32CD32" font-family="Arial" font-size="5">
+    do that?
+  </text>
+  
+  <!-- School Hibachi Flames -->
+  <g opacity="0.8">
+    <ellipse cx="280" cy="182" rx="4" ry="8" fill="#FFA500"/>
+    <ellipse cx="290" cy="180" rx="5" ry="10" fill="#FF6347"/>
+    <ellipse cx="300" cy="182" rx="4" ry="8" fill="#FFD700"/>
+  </g>
+  
+  <!-- Educational Food Items -->
+  <!-- Healthy Vegetables (learning) -->
+  <circle cx="285" cy="187" r="2" fill="#32CD32"/>
+  <text x="285" y="189" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="3">V</text>
+  
+  <!-- Protein (learning) -->
+  <ellipse cx="295" cy="188" rx="3" ry="2" fill="#8B4513"/>
+  <text x="295" y="190" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="3">P</text>
+  
+  <!-- School Bell -->
+  <circle cx="150" y="60" r="8" fill="#FFD700"/>
+  <circle cx="150" cy="60" r="6" fill="#FFA500"/>
+  <rect x="148" y="52" width="4" height="8" fill="#8B4513"/>
+  <circle cx="150" cy="60" r="2" fill="#8B4513"/>
+  
+  <!-- Bell Rings -->
+  <g stroke="#FFD700" stroke-width="2" fill="none" opacity="0.7">
+    <circle cx="150" cy="60" r="12"/>
+    <circle cx="150" cy="60" r="16"/>
+    <circle cx="150" cy="60" r="20"/>
+  </g>
+  
+  <!-- School Cafeteria Tables -->
+  <g fill="#8B4513">
+    <ellipse cx="120" cy="240" rx="25" ry="8"/>
+    <ellipse cx="170" cy="245" rx="25" ry="8"/>
+  </g>
+  
+  <!-- Lunch Trays -->
+  <g fill="#C0C0C0">
+    <rect x="105" y="235" width="12" height="8"/>
+    <rect x="125" y="237" width="12" height="8"/>
+    <rect x="155" y="240" width="12" height="8"/>
+    <rect x="175" y="242" width="12" height="8"/>
+  </g>
+  
+  <!-- Principal/Teacher Watching -->
+  <circle cx="380" cy="120" r="15" fill="#F4C2A1"/>
+  <rect x="370" y="133" width="20" height="25" fill="#000080"/>
+  <ellipse cx="380" cy="108" rx="8" ry="5" fill="#C0C0C0"/>
+  
+  <!-- Principal's Glasses -->
+  <circle cx="376" cy="118" r="3" stroke="#000000" stroke-width="1" fill="none"/>
+  <circle cx="384" cy="118" r="3" stroke="#000000" stroke-width="1" fill="none"/>
+  <line x1="379" y1="118" x2="381" y2="118" stroke="#000000" stroke-width="1"/>
+  
+  <!-- Approval Gesture -->
+  <ellipse cx="365" cy="140" rx="2" ry="1" fill="#F4C2A1"/>
+  <path d="M363 140 Q365 138 367 140" stroke="#F4C2A1" stroke-width="2" fill="none"/>
+  
+  <!-- Educational Steam -->
+  <g stroke="#87CEEB" stroke-width="2" fill="none" opacity="0.8">
+    <path d="M280 175 Q282 170 280 165 Q278 160 280 155"/>
+    <path d="M290 175 Q292 170 290 165 Q288 160 290 155"/>
+    <path d="M300 175 Q302 170 300 165 Q298 160 300 155"/>
+  </g>
+  
+  <!-- School Books -->
+  <rect x="30" y="240" width="8" height="12" fill="#FF0000"/>
+  <rect x="31" y="241" width="6" height="10" fill="#FF6347"/>
+  <text x="34" y="248" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="4">ABC</text>
+  
+  <rect x="40" y="242" width="8" height="12" fill="#0000FF"/>
+  <rect x="41" y="243" width="6" height="10" fill="#4169E1"/>
+  <text x="44" y="250" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="4">123</text>
+  
+  <!-- Apple for Teacher -->
+  <circle cx="360" cy="90" r="6" fill="#FF0000"/>
+  <circle cx="360" cy="90" r="4" fill="#FF6347"/>
+  <ellipse cx="362" cy="86" rx="1" ry="3" fill="#228B22"/>
+  
+  <!-- School Schedule -->
+  <rect x="200" y="50" width="30" height="40" fill="#FFFFFF"/>
+  <rect x="202" y="52" width="26" height="36" fill="#F0F8FF"/>
+  <g fill="#000000" font-family="Arial" font-size="5">
+    <text x="215" y="60" text-anchor="middle" font-weight="bold">LUNCH</text>
+    <text x="215" y="68" text-anchor="middle">12:00 PM</text>
+    <text x="215" y="76" text-anchor="middle">HIBACHI</text>
+    <text x="215" y="84" text-anchor="middle">SPECIAL!</text>
+  </g>
+  
+  <!-- Nutrition Education -->
+  <circle cx="350" cy="250" r="15" fill="#228B22"/>
+  <text x="350" y="250" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="8" font-weight="bold">HEALTHY</text>
+  <text x="350" y="260" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="6">CHOICE</text>
+  
+  <!-- Learning Stars -->
+  <g fill="#FFD700">
+    <polygon points="80,30 82,35 87,33 82,38 84,43 80,38 76,43 78,38 73,33 78,35"/>
+    <polygon points="320,30 322,35 327,33 322,38 324,43 320,38 316,43 318,38 313,33 318,35"/>
+    <polygon points="370,200 372,205 377,203 372,208 374,213 370,208 366,213 368,208 363,203 368,205"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="25" text-anchor="middle" fill="#B22222" font-family="Arial, sans-serif" font-size="22" font-weight="bold">
+    School Event Hibachi
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="285" text-anchor="middle" fill="#8B0000" font-family="Arial, sans-serif" font-size="14">
+    "Educational dining that students remember forever"
+  </text>
+  
+  <defs>
+    <linearGradient id="schoolGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0F8FF;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#F5F5DC;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFF8DC;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

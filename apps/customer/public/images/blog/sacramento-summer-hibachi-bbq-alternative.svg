@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Summer BBQ alternative background -->
+  <defs>
+    <linearGradient id="summerSkyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB"/>
+      <stop offset="70%" style="stop-color:#E0F6FF"/>
+      <stop offset="100%" style="stop-color:#F0F8FF"/>
+    </linearGradient>
+    <radialGradient id="hotSun" cx="80%" cy="15%" r="20%">
+      <stop offset="0%" style="stop-color:#FFD700"/>
+      <stop offset="70%" style="stop-color:#FFA500"/>
+      <stop offset="100%" style="stop-color:#FF6347"/>
+    </radialGradient>
+    <linearGradient id="heatShimmer" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:transparent"/>
+      <stop offset="50%" style="stop-color:#FFD700; opacity:0.1"/>
+      <stop offset="100%" style="stop-color:transparent"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Hot summer sky -->
+  <rect width="800" height="600" fill="url(#summerSkyGradient)"/>
+  <circle cx="640" cy="90" r="45" fill="url(#hotSun)"/>
+  
+  <!-- Heat waves -->
+  <path d="M 50 400 Q 70 390 90 400 Q 110 410 130 400" stroke="#FFD700" stroke-width="2" fill="none" opacity="0.3"/>
+  <path d="M 150 420 Q 170 410 190 420 Q 210 430 230 420" stroke="#FFD700" stroke-width="2" fill="none" opacity="0.3"/>
+  <path d="M 600 380 Q 620 370 640 380 Q 660 390 680 380" stroke="#FFD700" stroke-width="2" fill="none" opacity="0.3"/>
+  
+  <!-- Backyard setting -->
+  <rect x="0" y="450" width="800" height="150" fill="#228B22"/>
+  
+  <!-- Fancy hibachi setup vs traditional BBQ -->
+  <!-- Modern hibachi station -->
+  <rect x="300" y="320" width="80" height="50" fill="#2F4F4F" rx="8"/>
+  <rect x="315" y="315" width="50" height="10" fill="#FF4500"/>
+  <circle cx="325" r="4" cy="318" fill="#FFD700"/>
+  <circle cx="340" r="4" cy="318" fill="#FF6347"/>
+  <circle cx="355" r="4" cy="318" fill="#FFD700"/>
+  
+  <!-- Professional hibachi chef -->
+  <circle cx="340" cy="280" r="15" fill="#FDBCB4"/>
+  <rect x="332" y="295" width="16" height="25" fill="white"/>
+  <rect x="330" y="320" width="20" height="30" fill="#000080"/>
+  <rect x="332" y="350" width="6" height="20" fill="#FDBCB4"/>
+  <rect x="342" y="350" width="6" height="20" fill="#FDBCB4"/>
+  <rect x="350" y="275" width="20" height="4" fill="#C0C0C0"/>
+  <rect x="368" y="272" width="12" height="10" fill="#C0C0C0"/>
+  
+  <!-- Chef's hat -->
+  <rect x="335" y="270" width="10" height="8" fill="white"/>
+  <ellipse cx="340" cy="265" rx="8" ry="5" fill="white"/>
+  
+  <!-- Traditional BBQ (looking hot and uncomfortable) -->
+  <rect x="100" y="360" width="60" height="40" fill="#8B4513"/>
+  <rect x="110" y="350" width="40" height="15" fill="#FF4500"/>
+  <circle cx="120" cy="355" r="3" fill="#DC143C"/>
+  <circle cx="140" cy="355" r="3" fill="#DC143C"/>
+  
+  <!-- Sweating BBQ person -->
+  <circle cx="130" cy="320" r="12" fill="#FDBCB4"/>
+  <rect x="125" y="332" width="10" height="20" fill="#FF6347"/>
+  <rect x="123" y="352" width="14" height="25" fill="#8B4513"/>
+  <rect x="125" y="377" width="5" height="18" fill="#FDBCB4"/>
+  <rect x="132" y="377" width="5" height="18" fill="#FDBCB4"/>
+  
+  <!-- Sweat drops -->
+  <circle cx="125" cy="325" r="1" fill="#87CEEB"/>
+  <circle cx="135" cy="328" r="1" fill="#87CEEB"/>
+  <circle cx="128" cy="332" r="1" fill="#87CEEB"/>
+  
+  <!-- Fresh seafood on hibachi -->
+  <ellipse cx="320" cy="315" rx="8" ry="5" fill="#FF69B4"/>
+  <ellipse cx="335" cy="315" rx="10" ry="6" fill="#FFA500"/>
+  <ellipse cx="350" cy="315" rx="9" ry="5" fill="#FF6347"/>
+  <ellipse cx="365" cy="315" rx="7" ry="4" fill="#32CD32"/>
+  
+  <!-- Elegant outdoor dining setup -->
+  <rect x="450" y="380" width="120" height="25" fill="#8B4513" rx="5"/>
+  <rect x="445" y="395" width="10" height="30" fill="#654321"/>
+  <rect x="565" y="395" width="10" height="30" fill="#654321"/>
+  
+  <!-- Elegant place settings -->
+  <circle cx="480" cy="378" r="8" fill="white"/>
+  <circle cx="510" cy="378" r="8" fill="white"/>
+  <circle cx="540" cy="378" r="8" fill="white"/>
+  <rect x="475" y="370" width="2" height="8" fill="#C0C0C0"/>
+  <rect x="505" y="370" width="2" height="8" fill="#C0C0C0"/>
+  <rect x="535" y="370" width="2" height="8" fill="#C0C0C0"/>
+  
+  <!-- Comfortable guests enjoying hibachi -->
+  <circle cx="480" cy="350" r="10" fill="#FDBCB4"/>
+  <rect x="475" y="360" width="10" height="20" fill="#4169E1"/>
+  <rect x="477" y="380" width="6" height="15" fill="#000080"/>
+  
+  <circle cx="510" cy="350" r="10" fill="#FDBCB4"/>
+  <rect x="505" y="360" width="10" height="20" fill="#FF69B4"/>
+  <rect x="507" y="380" width="6" height="15" fill="#000080"/>
+  
+  <circle cx="540" cy="350" r="10" fill="#FDBCB4"/>
+  <rect x="535" y="360" width="10" height="20" fill="#32CD32"/>
+  <rect x="537" y="380" width="6" height="15" fill="#8B4513"/>
+  
+  <!-- Cooling elements -->
+  <rect x="200" y="300" width="60" height="80" fill="#E6E6FA" opacity="0.8" rx="10"/>
+  <text x="230" y="325" text-anchor="middle" fill="#4B0082" font-family="Arial, sans-serif" font-size="12">COOL</text>
+  <text x="230" y="340" text-anchor="middle" fill="#4B0082" font-family="Arial, sans-serif" font-size="12">SHADE</text>
+  <text x="230" y="355" text-anchor="middle" fill="#4B0082" font-family="Arial, sans-serif" font-size="12">TENT</text>
+  
+  <!-- Umbrellas providing shade -->
+  <ellipse cx="250" cy="250" rx="40" ry="15" fill="#FF69B4" opacity="0.7"/>
+  <rect x="248" y="250" width="4" height="50" fill="#8B4513"/>
+  <ellipse cx="550" cy="270" rx="35" ry="12" fill="#00CED1" opacity="0.7"/>
+  <rect x="548" y="270" width="4" height="45" fill="#8B4513"/>
+  
+  <!-- Temperature indicators -->
+  <text x="150" y="250" text-anchor="middle" fill="#FF0000" font-family="Arial, sans-serif" font-size="16" font-weight="bold">HOT!</text>
+  <text x="400" y="250" text-anchor="middle" fill="#32CD32" font-family="Arial, sans-serif" font-size="16" font-weight="bold">COOL!</text>
+  
+  <!-- Interactive entertainment -->
+  <rect x="600" y="320" width="80" height="60" fill="#FFD700" opacity="0.6" rx="10"/>
+  <text x="640" y="340" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="11">CHEF</text>
+  <text x="640" y="355" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="11">SHOW</text>
+  <text x="640" y="370" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="11">TIME!</text>
+  
+  <!-- Flames and cooking effects -->
+  <polygon points="325,315 330,305 320,305" fill="#FF4500" opacity="0.8"/>
+  <polygon points="340,315 345,305 335,305" fill="#FF6347" opacity="0.8"/>
+  <polygon points="355,315 360,305 350,305" fill="#FFD700" opacity="0.8"/>
+  
+  <!-- Smoke from traditional BBQ (excessive) -->
+  <ellipse cx="130" cy="340" rx="15" ry="8" fill="#696969" opacity="0.6"/>
+  <ellipse cx="135" cy="330" rx="20" ry="10" fill="#696969" opacity="0.5"/>
+  <ellipse cx="140" cy="320" rx="25" ry="12" fill="#696969" opacity="0.4"/>
+  
+  <!-- Pleasant hibachi smoke -->
+  <ellipse cx="340" cy="300" rx="8" ry="4" fill="#D3D3D3" opacity="0.3"/>
+  <ellipse cx="345" cy="295" rx="6" ry="3" fill="#D3D3D3" opacity="0.2"/>
+  
+  <!-- Fresh drink station -->
+  <rect x="650" y="400" width="40" height="60" fill="#E0F6FF" opacity="0.8" rx="5"/>
+  <circle cx="670" cy="420" r="5" fill="#FF1493"/>
+  <circle cx="670" cy="440" r="5" fill="#00CED1"/>
+  <circle cx="670" cy="460" r="5" fill="#32CD32"/>
+  <text x="670" y="480" text-anchor="middle" fill="#4B0082" font-family="Arial, sans-serif" font-size="10">DRINKS</text>
+  
+  <!-- Comparison arrows -->
+  <polygon points="250,340 270,340 265,335 280,350 265,365 270,360 250,360" fill="#FF6347" opacity="0.7"/>
+  <text x="265" y="380" text-anchor="middle" fill="#FF0000" font-family="Arial, sans-serif" font-size="12" font-weight="bold">VS</text>
+</svg>

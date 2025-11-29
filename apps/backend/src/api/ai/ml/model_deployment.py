@@ -185,13 +185,13 @@ class ModelDeployment:
     ) -> list[Any]:
         """Fetch messages from specific model"""
         try:
-            from api.ai.endpoints.models import AIMessage, MessageRole
+            from db.models.ai.conversations import UnifiedMessage as AIMessage, MessageRole
 
-            query = select(Message).where(
+            query = select(AIMessage).where(
                 and_(
-                    Message.model_used == model_id,
-                    Message.role == MessageRole.ASSISTANT.value,
-                    Message.created_at >= since,
+                    AIMessage.model_used == model_id,
+                    AIMessage.role == MessageRole.ASSISTANT.value,
+                    AIMessage.created_at >= since,
                 )
             )
 

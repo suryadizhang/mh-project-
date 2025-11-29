@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session
 
 from core.database import get_db
 from core.config import settings
-from monitoring.alert_rule_model import AlertRule, ThresholdOperator, RuleSeverity
+from monitoring.models import AlertRule, ThresholdOperator, RuleSeverity
 from monitoring import RuleEvaluator
 import redis
 
@@ -213,7 +213,7 @@ async def list_rules(
 ):
     """
     List all alert rules with optional filtering.
-    
+
     Query parameters:
     - enabled: Filter by enabled status (true/false)
     - severity: Filter by severity level
@@ -223,23 +223,23 @@ async def list_rules(
     """
     try:
         query = db.query(AlertRule)
-        
+
         # Apply filters
         if enabled is not None:
             query = query.filter(AlertRule.enabled == enabled)
-        
+
         if severity:
             query = query.filter(AlertRule.severity == severity)
-        
+
         if metric_name:
             query = query.filter(AlertRule.metric_name == metric_name)
-        
+
         # Apply pagination
         query = query.offset(skip).limit(limit)
-        
+
         rules = query.all()
         return [rule_to_response(rule) for rule in rules]
-    
+
     except Exception as e:
         logger.error(f"Error listing rules: {e}", exc_info=True)
         raise HTTPException(
@@ -258,15 +258,15 @@ async def get_rule(
     """
     try:
         rule = db.query(AlertRule).filter(AlertRule.id == rule_id).first()
-        
+
         if not rule:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Rule {rule_id} not found"
             )
-        
+
         return rule_to_response(rule)
-    
+
     except HTTPException:
         raise
     except Exception as e:
@@ -293,7 +293,7 @@ async def create_rule(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Rule with name '{rule_data.name}' already exists"
             )
-        
+
         # Create rule
         rule = AlertRule(
             name=rule_data.name,
@@ -311,15 +311,15 @@ async def create_rule(
             metadata=rule_data.metadata,
             created_at=datetime.utcnow()
         )
-        
+
         db.add(rule)
         db.commit()
         db.refresh(rule)
-        
+
         logger.info(f"Created rule: {rule.name} (ID: {rule.id})")
-        
+
         return rule_to_response(rule)
-    
+
     except HTTPException:
         raise
     except Exception as e:
@@ -342,16 +342,16 @@ async def update_rule(
     """
     try:
         rule = db.query(AlertRule).filter(AlertRule.id == rule_id).first()
-        
+
         if not rule:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Rule {rule_id} not found"
             )
-        
+
         # Update fields
         update_data = rule_data.model_dump(exclude_unset=True)
-        
+
         # Check for name conflict if name is being changed
         if "name" in update_data and update_data["name"] != rule.name:
             existing = db.query(AlertRule).filter(AlertRule.name == update_data["name"]).first()
@@ -360,19 +360,19 @@ async def update_rule(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"Rule with name '{update_data['name']}' already exists"
                 )
-        
+
         for key, value in update_data.items():
             setattr(rule, key, value)
-        
+
         rule.updated_at = datetime.utcnow()
-        
+
         db.commit()
         db.refresh(rule)
-        
+
         logger.info(f"Updated rule: {rule.name} (ID: {rule.id})")
-        
+
         return rule_to_response(rule)
-    
+
     except HTTPException:
         raise
     except Exception as e:
@@ -394,27 +394,27 @@ async def delete_rule(
     """
     try:
         rule = db.query(AlertRule).filter(AlertRule.id == rule_id).first()
-        
+
         if not rule:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Rule {rule_id} not found"
             )
-        
+
         rule_name = rule.name
-        
+
         # Clear any active violations and cooldowns in Redis
         redis_client = get_redis_client()
         redis_client.delete(f"rule:violation:{rule_id}")
         redis_client.delete(f"rule:cooldown:{rule_id}")
-        
+
         db.delete(rule)
         db.commit()
-        
+
         logger.info(f"Deleted rule: {rule_name} (ID: {rule_id})")
-        
+
         return None
-    
+
     except HTTPException:
         raise
     except Exception as e:
@@ -436,26 +436,26 @@ async def enable_rule(
     """
     try:
         rule = db.query(AlertRule).filter(AlertRule.id == rule_id).first()
-        
+
         if not rule:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Rule {rule_id} not found"
             )
-        
+
         if rule.enabled:
             return rule_to_response(rule)
-        
+
         rule.enabled = True
         rule.updated_at = datetime.utcnow()
-        
+
         db.commit()
         db.refresh(rule)
-        
+
         logger.info(f"Enabled rule: {rule.name} (ID: {rule.id})")
-        
+
         return rule_to_response(rule)
-    
+
     except HTTPException:
         raise
     except Exception as e:
@@ -477,31 +477,31 @@ async def disable_rule(
     """
     try:
         rule = db.query(AlertRule).filter(AlertRule.id == rule_id).first()
-        
+
         if not rule:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Rule {rule_id} not found"
             )
-        
+
         if not rule.enabled:
             return rule_to_response(rule)
-        
+
         rule.enabled = False
         rule.updated_at = datetime.utcnow()
-        
+
         # Clear any active violations and cooldowns
         redis_client = get_redis_client()
         redis_client.delete(f"rule:violation:{rule_id}")
         redis_client.delete(f"rule:cooldown:{rule_id}")
-        
+
         db.commit()
         db.refresh(rule)
-        
+
         logger.info(f"Disabled rule: {rule.name} (ID: {rule.id})")
-        
+
         return rule_to_response(rule)
-    
+
     except HTTPException:
         raise
     except Exception as e:
@@ -524,36 +524,36 @@ async def test_rule(
     """
     try:
         rule = db.query(AlertRule).filter(AlertRule.id == rule_id).first()
-        
+
         if not rule:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Rule {rule_id} not found"
             )
-        
+
         # Create evaluator
         redis_client = get_redis_client()
         evaluator = RuleEvaluator(db, redis_client)
-        
+
         # Evaluate metric
         violations = evaluator.evaluate_metric(
             rule.metric_name,
             test_data.test_value,
             datetime.utcnow().timestamp()
         )
-        
+
         # Find our rule's violation
         violation = None
         for v in violations:
             if v.rule_id == rule_id:
                 violation = v
                 break
-        
+
         if violation:
             # Check if in cooldown
             in_cooldown = redis_client.exists(f"rule:cooldown:{rule_id}")
             would_create_alert = violation.is_duration_met and not in_cooldown
-            
+
             message = f"VIOLATION: Value {test_data.test_value:.2f} {violation.operator} {violation.threshold_value:.2f}"
             if not violation.is_duration_met:
                 message += f" - Duration not met (need {violation.remaining_duration:.0f}s more)"
@@ -561,7 +561,7 @@ async def test_rule(
                 message += " - In cooldown, no alert would be created"
             else:
                 message += " - Would create alert!"
-            
+
             return RuleTestResponse(
                 rule_id=rule.id,
                 rule_name=rule.name,
@@ -591,7 +591,7 @@ async def test_rule(
                 would_create_alert=False,
                 message=f"NO VIOLATION: Value {test_data.test_value:.2f} is within threshold"
             )
-    
+
     except HTTPException:
         raise
     except Exception as e:
@@ -612,16 +612,16 @@ async def get_rule_stats(
     """
     try:
         rule = db.query(AlertRule).filter(AlertRule.id == rule_id).first()
-        
+
         if not rule:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Rule {rule_id} not found"
             )
-        
+
         redis_client = get_redis_client()
         evaluator = RuleEvaluator(db, redis_client)
-        
+
         # Get current violation status
         violations = evaluator.get_all_violations()
         current_violation = None
@@ -629,10 +629,10 @@ async def get_rule_stats(
             if v.rule_id == rule_id:
                 current_violation = v.to_dict()
                 break
-        
+
         # Check if in cooldown
         in_cooldown = redis_client.exists(f"rule:cooldown:{rule_id}") > 0
-        
+
         return RuleStatsResponse(
             rule_id=rule.id,
             rule_name=rule.name,
@@ -641,7 +641,7 @@ async def get_rule_stats(
             current_violation=current_violation,
             in_cooldown=in_cooldown
         )
-    
+
     except HTTPException:
         raise
     except Exception as e:
@@ -659,7 +659,7 @@ async def bulk_operation(
 ):
     """
     Perform bulk operations on multiple rules.
-    
+
     Operations:
     - enable: Enable selected rules
     - disable: Disable selected rules
@@ -671,18 +671,18 @@ async def bulk_operation(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid operation: {operation_data.operation}"
             )
-        
+
         total = len(operation_data.rule_ids)
         success = 0
         failed = 0
         errors = []
-        
+
         redis_client = get_redis_client()
-        
+
         for rule_id in operation_data.rule_ids:
             try:
                 rule = db.query(AlertRule).filter(AlertRule.id == rule_id).first()
-                
+
                 if not rule:
                     errors.append({
                         "rule_id": rule_id,
@@ -690,36 +690,36 @@ async def bulk_operation(
                     })
                     failed += 1
                     continue
-                
+
                 if operation_data.operation == "enable":
                     rule.enabled = True
                     rule.updated_at = datetime.utcnow()
                     success += 1
-                
+
                 elif operation_data.operation == "disable":
                     rule.enabled = False
                     rule.updated_at = datetime.utcnow()
                     redis_client.delete(f"rule:violation:{rule_id}")
                     redis_client.delete(f"rule:cooldown:{rule_id}")
                     success += 1
-                
+
                 elif operation_data.operation == "delete":
                     redis_client.delete(f"rule:violation:{rule_id}")
                     redis_client.delete(f"rule:cooldown:{rule_id}")
                     db.delete(rule)
                     success += 1
-            
+
             except Exception as e:
                 errors.append({
                     "rule_id": rule_id,
                     "error": str(e)
                 })
                 failed += 1
-        
+
         db.commit()
-        
+
         logger.info(f"Bulk operation '{operation_data.operation}': {success}/{total} success")
-        
+
         return BulkOperationResponse(
             operation=operation_data.operation,
             total=total,
@@ -727,7 +727,7 @@ async def bulk_operation(
             failed=failed,
             errors=errors
         )
-    
+
     except HTTPException:
         raise
     except Exception as e:

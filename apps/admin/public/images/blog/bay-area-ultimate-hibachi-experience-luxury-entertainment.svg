@@ -1,0 +1,228 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ultimateSkyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700"/>
+      <stop offset="25%" style="stop-color:#FF69B4"/>
+      <stop offset="50%" style="stop-color:#32CD32"/>
+      <stop offset="75%" style="stop-color:#FF4500"/>
+      <stop offset="100%" style="stop-color:#4169E1"/>
+    </linearGradient>
+    <linearGradient id="ultimateFlameGradient" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF4500"/>
+      <stop offset="20%" style="stop-color:#FFD700"/>
+      <stop offset="40%" style="stop-color:#32CD32"/>
+      <stop offset="60%" style="stop-color:#4169E1"/>
+      <stop offset="80%" style="stop-color:#FF69B4"/>
+      <stop offset="100%" style="stop-color:#FF6347"/>
+    </linearGradient>
+    <linearGradient id="premiumGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FFD700"/>
+      <stop offset="50%" style="stop-color:#FFFFFF"/>
+      <stop offset="100%" style="stop-color:#FFD700"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Ultimate Golden Sky -->
+  <rect width="800" height="600" fill="url(#ultimateSkyGradient)"/>
+
+  <!-- Bay Area Skyline Silhouette -->
+  <rect x="0" y="100" width="150" height="80" fill="#2F4F4F" opacity="0.8"/>
+  <text x="75" y="125" text-anchor="middle" font-family="serif" font-size="8" font-weight="bold" fill="#FFD700">SF</text>
+  
+  <rect x="200" y="120" width="100" height="60" fill="#2F4F4F" opacity="0.8"/>
+  <text x="250" y="140" text-anchor="middle" font-family="serif" font-size="8" font-weight="bold" fill="#32CD32">SILICON VALLEY</text>
+  
+  <rect x="350" y="110" width="120" height="70" fill="#2F4F4F" opacity="0.8"/>
+  <text x="410" y="130" text-anchor="middle" font-family="serif" font-size="8" font-weight="bold" fill="#FF69B4">PENINSULA</text>
+  
+  <rect x="500" y="130" width="100" height="50" fill="#2F4F4F" opacity="0.8"/>
+  <text x="550" y="145" text-anchor="middle" font-family="serif" font-size="8" font-weight="bold" fill="#FF6347">SOUTH BAY</text>
+  
+  <rect x="650" y="115" width="150" height="65" fill="#2F4F4F" opacity="0.8"/>
+  <text x="725" y="135" text-anchor="middle" font-family="serif" font-size="8" font-weight="bold" fill="#4169E1">EAST BAY</text>
+
+  <!-- Ultimate Experience Banner -->
+  <rect x="50" y="20" width="700" height="80" fill="url(#premiumGradient)" stroke="#FF4500" stroke-width="5"/>
+  <text x="400" y="45" text-anchor="middle" font-family="serif" font-size="24" font-weight="bold" fill="#FF4500">BAY AREA ULTIMATE</text>
+  <text x="400" y="65" text-anchor="middle" font-family="serif" font-size="20" font-weight="bold" fill="#4169E1">HIBACHI EXPERIENCE</text>
+  <text x="400" y="80" text-anchor="middle" font-family="serif" font-size="12" fill="#32CD32">The Pinnacle of Entertainment Dining</text>
+  <text x="400" y="92" text-anchor="middle" font-family="serif" font-size="10" fill="#FF69B4">Luxury • Premium • Exclusive</text>
+
+  <!-- Premium Ground -->
+  <rect x="0" y="400" width="800" height="200" fill="#228B22"/>
+
+  <!-- Ultimate Hibachi Master Station -->
+  <rect x="325" y="520" width="150" height="40" fill="#B8860B" stroke="#FFD700" stroke-width="3"/>
+  <ellipse cx="400" cy="540" rx="60" ry="20" fill="#1C1C1C" stroke="#FFD700" stroke-width="3"/>
+  
+  <!-- Ultimate Multi-Level Flames -->
+  <ellipse cx="400" cy="530" rx="25" ry="30" fill="url(#ultimateFlameGradient)" opacity="0.9"/>
+  <ellipse cx="390" cy="525" rx="15" ry="25" fill="#FFD700" opacity="0.8"/>
+  <ellipse cx="410" cy="525" rx="15" ry="25" fill="#32CD32" opacity="0.8"/>
+  <ellipse cx="385" cy="520" rx="10" ry="20" fill="#4169E1" opacity="0.7"/>
+  <ellipse cx="415" cy="520" rx="10" ry="20" fill="#FF69B4" opacity="0.7"/>
+  <ellipse cx="400" cy="515" rx="12" ry="18" fill="#FF6347" opacity="0.6"/>
+
+  <!-- Ultimate Hibachi Master Chef -->
+  <circle cx="430" cy="570" r="15" fill="#FDBCB4"/>
+  <rect x="422" y="585" width="16" height="30" fill="#FFFFFF"/>
+  <rect x="418" y="615" width="24" height="10" fill="#000"/>
+  <!-- Ultimate Master Chef Hat -->
+  <ellipse cx="430" cy="562" rx="12" ry="8" fill="#FFFFFF"/>
+  <rect x="422" y="545" width="16" height="17" fill="#FFFFFF"/>
+  <!-- Golden crown on chef hat -->
+  <polygon points="422,545 426,535 430,540 434,535 438,545" fill="#FFD700"/>
+  <circle cx="430" cy="540" r="2" fill="#FF4500"/>
+  <!-- Ultimate Master Badge -->
+  <circle cx="440" cy="590" r="3" fill="#FFD700"/>
+  <text x="440" y="592" text-anchor="middle" font-family="serif" font-size="4" font-weight="bold" fill="#FF4500">MASTER</text>
+  <!-- Premium spatula set -->
+  <line x1="445" y1="585" x2="460" y2="575" stroke="#C0C0C0" stroke-width="3"/>
+  <ellipse cx="460" cy="575" rx="4" ry="2" fill="#FFD700"/>
+  <line x1="445" y1="595" x2="460" y2="585" stroke="#C0C0C0" stroke-width="3"/>
+  <ellipse cx="460" cy="585" rx="4" ry="2" fill="#FF4500"/>
+
+  <!-- Ultimate VIP Guests -->
+  <!-- Tech Executive -->
+  <circle cx="250" cy="480" r="12" fill="#FDBCB4"/>
+  <rect x="244" y="492" width="12" height="25" fill="#000"/>
+  <rect x="242" y="517" width="16" height="9" fill="#8B4513"/>
+  <ellipse cx="250" cy="474" rx="8" ry="5" fill="#8B4513"/>
+  <!-- Luxury watch -->
+  <rect x="240" y="502" width="4" height="4" fill="#FFD700"/>
+  <!-- Gold tie pin -->
+  <circle cx="250" cy="500" r="2" fill="#FFD700"/>
+
+  <!-- Celebrity Guest -->
+  <circle cx="280" cy="485" r="11" fill="#FDBCB4"/>
+  <rect x="275" y="496" width="10" height="23" fill="#8B008B"/>
+  <rect x="273" y="519" width="14" height="8" fill="#000"/>
+  <ellipse cx="280" cy="479" rx="7" ry="4" fill="#FFD700"/>
+  <!-- Sunglasses -->
+  <ellipse cx="280" cy="485" rx="8" ry="3" fill="#000" opacity="0.7"/>
+  <!-- Diamond jewelry -->
+  <circle cx="275" cy="500" r="1" fill="#FFFFFF"/>
+  <circle cx="285" cy="500" r="1" fill="#FFFFFF"/>
+
+  <!-- Wine Connoisseur -->
+  <circle cx="550" cy="475" r="12" fill="#FDBCB4"/>
+  <rect x="544" y="487" width="12" height="25" fill="#8B0000"/>
+  <rect x="542" y="512" width="16" height="9" fill="#000"/>
+  <ellipse cx="550" cy="469" rx="8" ry="5" fill="#C0C0C0"/>
+  <!-- Wine glass -->
+  <line x1="565" y1="490" x2="565" y2="480" stroke="#FFFFFF" stroke-width="1"/>
+  <circle cx="565" cy="480" r="3" fill="none" stroke="#FFFFFF" stroke-width="1"/>
+  <ellipse cx="565" cy="480" rx="3" ry="1" fill="#8B0000"/>
+
+  <!-- Michelin Critic -->
+  <circle cx="580" cy="480" r="11" fill="#FDBCB4"/>
+  <rect x="575" y="491" width="10" height="23" fill="#2F4F4F"/>
+  <rect x="573" y="514" width="14" height="8" fill="#8B4513"/>
+  <ellipse cx="580" cy="474" rx="7" ry="4" fill="#000"/>
+  <!-- Notebook -->
+  <rect x="590" y="485" width="5" height="7" fill="#FFFFFF"/>
+  <line x1="592" y1="487" x2="594" y2="487" stroke="#000" stroke-width="0.5"/>
+  <line x1="592" y1="489" x2="594" y2="489" stroke="#000" stroke-width="0.5"/>
+
+  <!-- Ultimate Premium Dining Table -->
+  <ellipse cx="400" cy="600" rx="180" ry="35" fill="#8B4513" stroke="#FFD700" stroke-width="3"/>
+  <ellipse cx="400" cy="595" rx="180" ry="35" fill="#A0522D"/>
+
+  <!-- Premium Appetizer Display -->
+  <ellipse cx="280" cy="590" rx="20" ry="12" fill="#FFFFFF" stroke="#FFD700" stroke-width="2"/>
+  <circle cx="275" cy="586" r="4" fill="#FF4500"/>
+  <circle cx="280" cy="584" r="4" fill="#32CD32"/>
+  <circle cx="285" cy="586" r="4" fill="#FFD700"/>
+  <text x="280" y="610" text-anchor="middle" font-family="serif" font-size="8" font-weight="bold" fill="#FFD700">PREMIUM</text>
+
+  <!-- Ultimate Sushi Station -->
+  <ellipse cx="320" cy="590" rx="20" ry="12" fill="#FFFFFF" stroke="#FF69B4" stroke-width="2"/>
+  <rect x="315" y="585" width="10" height="4" fill="#FF6347"/>
+  <rect x="315" y="581" width="10" height="2" fill="#000"/>
+  <circle cx="325" cy="583" r="2" fill="#32CD32"/>
+  <text x="320" y="610" text-anchor="middle" font-family="serif" font-size="8" font-weight="bold" fill="#FF69B4">SUSHI</text>
+
+  <!-- Wagyu Beef Display -->
+  <ellipse cx="480" cy="590" rx="20" ry="12" fill="#FFFFFF" stroke="#8B0000" stroke-width="2"/>
+  <ellipse cx="475" cy="586" rx="6" ry="4" fill="#8B0000"/>
+  <ellipse cx="485" cy="586" rx="6" ry="4" fill="#8B0000"/>
+  <text x="480" y="610" text-anchor="middle" font-family="serif" font-size="8" font-weight="bold" fill="#8B0000">WAGYU</text>
+
+  <!-- Ultimate Seafood Tower -->
+  <ellipse cx="520" cy="590" rx="20" ry="12" fill="#FFFFFF" stroke="#4169E1" stroke-width="2"/>
+  <circle cx="515" cy="586" r="3" fill="#FF6347"/>
+  <circle cx="520" cy="584" r="3" fill="#32CD32"/>
+  <circle cx="525" cy="586" r="3" fill="#FFD700"/>
+  <circle cx="520" cy="588" r="2" fill="#4169E1"/>
+  <text x="520" y="610" text-anchor="middle" font-family="serif" font-size="8" font-weight="bold" fill="#4169E1">SEAFOOD</text>
+
+  <!-- Premium Wine Selection -->
+  <!-- Bordeaux -->
+  <rect x="200" y="570" width="4" height="20" fill="#228B22"/>
+  <ellipse cx="202" cy="568" rx="2" ry="3" fill="#228B22"/>
+  <text x="202" y="595" text-anchor="middle" font-family="serif" font-size="6" fill="#228B22">BORDEAUX</text>
+
+  <!-- Champagne -->
+  <rect x="210" y="565" width="4" height="25" fill="#FFD700"/>
+  <ellipse cx="212" cy="563" rx="2" ry="3" fill="#FFD700"/>
+  <line x1="212" y1="560" x2="212" y2="555" stroke="#FFD700" stroke-width="1"/>
+  <text x="212" y="595" text-anchor="middle" font-family="serif" font-size="6" fill="#FFD700">CHAMPAGNE</text>
+
+  <!-- Sake -->
+  <rect x="220" y="572" width="3" height="18" fill="#FFFFFF"/>
+  <rect x="220" y="570" width="3" height="2" fill="#FF0000"/>
+  <text x="222" y="595" text-anchor="middle" font-family="serif" font-size="6" fill="#FF0000">SAKE</text>
+
+  <!-- Ultimate Experience Elements -->
+  <!-- Fireworks -->
+  <circle cx="100" cy="200" r="3" fill="#FFD700"/>
+  <line x1="100" y1="200" x2="95" y2="190" stroke="#FFD700" stroke-width="2"/>
+  <line x1="100" y1="200" x2="105" y2="190" stroke="#FF4500" stroke-width="2"/>
+  <line x1="100" y1="200" x2="100" y2="185" stroke="#32CD32" stroke-width="2"/>
+
+  <circle cx="700" cy="220" r="3" fill="#FF69B4"/>
+  <line x1="700" y1="220" x2="695" y2="210" stroke="#FF69B4" stroke-width="2"/>
+  <line x1="700" y1="220" x2="705" y2="210" stroke="#4169E1" stroke-width="2"/>
+  <line x1="700" y1="220" x2="700" y2="205" stroke="#FF6347" stroke-width="2"/>
+
+  <!-- Live Entertainment -->
+  <circle cx="150" cy="380" r="8" fill="#FDBCB4"/>
+  <rect x="146" y="388" width="8" height="15" fill="#FF4500"/>
+  <ellipse cx="150" cy="376" rx="5" ry="3" fill="#000"/>
+  <!-- Microphone -->
+  <circle cx="160" cy="375" r="2" fill="#C0C0C0"/>
+  <line x1="160" y1="377" x2="160" y2="385" stroke="#000" stroke-width="1"/>
+
+  <!-- Orchestra -->
+  <circle cx="650" cy="350" r="6" fill="#FDBCB4"/>
+  <rect x="647" y="356" width="6" height="12" fill="#000"/>
+  <ellipse cx="650" cy="347" rx="4" ry="2" fill="#8B4513"/>
+  <!-- Violin -->
+  <ellipse cx="640" cy="355" rx="3" ry="8" fill="#8B4513"/>
+  <line x1="640" y1="347" x2="635" y2="342" stroke="#C0C0C0" stroke-width="1"/>
+
+  <!-- Ultimate Smoke Effects -->
+  <ellipse cx="400" cy="505" rx="30" ry="15" fill="#FFD700" opacity="0.4"/>
+  <ellipse cx="410" cy="490" rx="40" ry="20" fill="#FF69B4" opacity="0.3"/>
+  <ellipse cx="390" cy="475" rx="50" ry="25" fill="#32CD32" opacity="0.2"/>
+  <ellipse cx="400" cy="460" rx="60" ry="30" fill="#4169E1" opacity="0.1"/>
+
+  <!-- Premium Quality Seals -->
+  <circle cx="720" cy="300" r="25" fill="#FFD700" stroke="#FF4500" stroke-width="3"/>
+  <text x="720" y="295" text-anchor="middle" font-family="serif" font-size="8" font-weight="bold" fill="#FF4500">ULTIMATE</text>
+  <text x="720" y="305" text-anchor="middle" font-family="serif" font-size="6" fill="#FF4500">EXPERIENCE</text>
+  <polygon points="720,285 725,290 730,285 725,280" fill="#FF4500"/>
+
+  <circle cx="80" cy="320" r="25" fill="#32CD32" stroke="#228B22" stroke-width="3"/>
+  <text x="80" y="315" text-anchor="middle" font-family="serif" font-size="8" font-weight="bold" fill="#228B22">BAY AREA</text>
+  <text x="80" y="325" text-anchor="middle" font-family="serif" font-size="6" fill="#228B22">EXCLUSIVE</text>
+  <polygon points="80,305 85,310 90,305 85,300" fill="#228B22"/>
+
+  <!-- Ultimate Success Metrics -->
+  <rect x="600" y="400" width="80" height="60" fill="#FFFFFF" stroke="#FFD700" stroke-width="2" opacity="0.9"/>
+  <text x="640" y="415" text-anchor="middle" font-family="serif" font-size="8" font-weight="bold" fill="#FF4500">ULTIMATE STATS</text>
+  <text x="640" y="427" text-anchor="middle" font-family="serif" font-size="6" fill="#000">5⭐ Michelin Experience</text>
+  <text x="640" y="435" text-anchor="middle" font-family="serif" font-size="6" fill="#000">Celebrity Chef Approved</text>
+  <text x="640" y="443" text-anchor="middle" font-family="serif" font-size="6" fill="#000">100% Premium Ingredients</text>
+  <text x="640" y="451" text-anchor="middle" font-family="serif" font-size="6" fill="#000">Ultimate Bay Area</text>
+</svg>

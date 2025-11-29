@@ -24,7 +24,7 @@ from fastapi import HTTPException
 from core.base_service import BaseService, EventTrackingMixin
 
 # MIGRATED: Enum imports moved from OLD models.enums to NEW db.models system
-from db.models.lead import LeadSource
+from db.models.crm import LeadSource
 from db.models.core import (
     SocialThreadStatus as ThreadStatus,
     SocialThread,

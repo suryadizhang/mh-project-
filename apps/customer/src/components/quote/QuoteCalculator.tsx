@@ -4,6 +4,7 @@ import { useEffect, useRef,useState } from 'react';
 
 import { submitQuoteLead } from '@/lib/leadService';
 import { logger } from '@/lib/logger';
+import { usePricing } from '@/hooks/usePricing';
 
 
 // Google Maps Autocomplete types
@@ -45,6 +46,9 @@ interface QuoteResult {
 }
 
 export function QuoteCalculator() {
+  // Fetch dynamic pricing from database
+  const { adultPrice, childPrice, childFreeUnderAge } = usePricing()
+
   const [quoteData, setQuoteData] = useState<QuoteData>({
     adults: 10,
     children: 0,
@@ -308,7 +312,7 @@ export function QuoteCalculator() {
                 className="form-input"
                 required
               />
-              <span className="field-note">$55 each</span>
+              <span className="field-note">${adultPrice} each</span>
             </div>
 
             <div className="form-group">
@@ -324,7 +328,7 @@ export function QuoteCalculator() {
                 }
                 className="form-input"
               />
-              <span className="field-note">$30 each (5 & under free)</span>
+              <span className="field-note">${childPrice} each ({childFreeUnderAge} & under free)</span>
             </div>
           </div>
 

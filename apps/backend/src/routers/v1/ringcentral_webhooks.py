@@ -7,7 +7,8 @@ from uuid import UUID
 from core.database import get_db
 
 # FIXED: Import from db.models (NEW system) instead of models (OLD system)
-from db.models.lead import Lead, LeadContact, ContactChannel
+from db.models.crm import Lead, ContactChannel
+from db.models.lead import LeadContact
 from services.ai_lead_management import (
     get_ai_lead_manager,
     get_social_media_ai,

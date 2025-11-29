@@ -1,0 +1,98 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#summerGradient)"/>
+  
+  <!-- Pool Water -->
+  <ellipse cx="200" cy="250" rx="180" ry="40" fill="#87CEEB"/>
+  <ellipse cx="200" cy="245" rx="175" ry="35" fill="#87CEFA"/>
+  
+  <!-- Pool Deck -->
+  <rect x="20" y="220" width="360" height="30" fill="#D2B48C"/>
+  <rect x="20" y="215" width="360" height="5" fill="#DEB887"/>
+  
+  <!-- Pool Water Ripples -->
+  <ellipse cx="150" cy="245" rx="15" ry="3" fill="none" stroke="#4682B4" stroke-width="1" opacity="0.6"/>
+  <ellipse cx="250" cy="250" rx="20" ry="4" fill="none" stroke="#4682B4" stroke-width="1" opacity="0.6"/>
+  <ellipse cx="300" cy="240" rx="12" ry="2" fill="none" stroke="#4682B4" stroke-width="1" opacity="0.6"/>
+  
+  <!-- Poolside Table -->
+  <ellipse cx="200" cy="190" rx="70" ry="25" fill="#8B4513"/>
+  <ellipse cx="200" cy="185" rx="65" ry="20" fill="#A0522D"/>
+  
+  <!-- Umbrella -->
+  <rect x="150" y="80" width="3" height="100" fill="#8B4513"/>
+  <path d="M100 80 Q150 60 200 80 Q250 60 300 80 Q275 90 250 85 Q200 70 150 85 Q125 90 100 80" fill="#FF6347"/>
+  <path d="M110 82 Q130 75 150 82" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+  <path d="M170 78 Q190 72 210 78" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+  <path d="M230 78 Q250 72 270 78" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+  
+  <!-- Hibachi Grill on Poolside -->
+  <rect x="180" y="170" width="40" height="25" rx="5" fill="#1A1A1A"/>
+  <rect x="185" y="175" width="30" height="15" rx="3" fill="#2D1810"/>
+  
+  <!-- Summer Flames -->
+  <ellipse cx="195" cy="180" rx="5" ry="8" fill="#FF6347" opacity="0.8"/>
+  <ellipse cx="205" cy="178" rx="4" ry="6" fill="#FF4500" opacity="0.9"/>
+  <ellipse cx="215" cy="180" rx="3" ry="5" fill="#FFA500" opacity="0.7"/>
+  
+  <!-- Chef in Summer Attire -->
+  <circle cx="120" cy="130" r="15" fill="#F4C2A1"/>
+  <rect x="113" y="142" width="14" height="25" fill="#87CEEB"/>
+  <rect x="111" y="147" width="18" height="15" fill="#FFFFFF"/>
+  
+  <!-- Summer Hat -->
+  <ellipse cx="120" cy="118" rx="15" ry="8" fill="#F0E68C"/>
+  <rect x="105" y="115" width="30" height="6" fill="#F0E68C"/>
+  
+  <!-- Spatula -->
+  <rect x="140" y="145" width="2" height="15" fill="#8B4513" transform="rotate(10 140 145)"/>
+  <ellipse cx="148" cy="140" rx="5" ry="3" fill="#C0C0C0" transform="rotate(10 148 140)"/>
+  
+  <!-- Tropical Food -->
+  <circle cx="190" cy="175" r="3" fill="#FFA500"/>
+  <circle cx="205" cy="173" r="2" fill="#FF6347"/>
+  <rect x="210" y="172" width="4" height="3" rx="1" fill="#32CD32"/>
+  <circle cx="220" cy="175" r="3" fill="#FFD700"/>
+  
+  <!-- Pool Floaties -->
+  <circle cx="100" cy="240" r="12" fill="none" stroke="#FF69B4" stroke-width="3"/>
+  <circle cx="300" cy="245" r="10" fill="none" stroke="#00FF00" stroke-width="3"/>
+  
+  <!-- Beach Balls -->
+  <circle cx="70" cy="200" r="8" fill="#FF0000"/>
+  <path d="M70 192 Q70 200 70 208" stroke="#FFFFFF" stroke-width="2"/>
+  <path d="M62 200 Q70 200 78 200" stroke="#FFFFFF" stroke-width="2"/>
+  
+  <circle cx="330" cy="205" r="6" fill="#0000FF"/>
+  <path d="M330 199 Q330 205 330 211" stroke="#FFFFFF" stroke-width="1"/>
+  <path d="M324 205 Q330 205 336 205" stroke="#FFFFFF" stroke-width="1"/>
+  
+  <!-- Sun -->
+  <circle cx="350" cy="50" r="20" fill="#FFD700"/>
+  <path d="M350 20 L350 30" stroke="#FFD700" stroke-width="3"/>
+  <path d="M350 70 L350 80" stroke="#FFD700" stroke-width="3"/>
+  <path d="M320 50 L330 50" stroke="#FFD700" stroke-width="3"/>
+  <path d="M370 50 L380 50" stroke="#FFD700" stroke-width="3"/>
+  <path d="M330 30 L335 35" stroke="#FFD700" stroke-width="3"/>
+  <path d="M365 65 L370 70" stroke="#FFD700" stroke-width="3"/>
+  <path d="M370 30 L365 35" stroke="#FFD700" stroke-width="3"/>
+  <path d="M335 65 L330 70" stroke="#FFD700" stroke-width="3"/>
+  
+  <!-- Title -->
+  <text x="200" y="35" text-anchor="middle" fill="#FF6347" font-family="Arial, sans-serif" font-size="22" font-weight="bold">
+    Summer Pool Party Hibachi
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="55" text-anchor="middle" fill="#FF4500" font-family="Arial, sans-serif" font-size="14">
+    Beat The Heat In Style
+  </text>
+  
+  <defs>
+    <linearGradient id="summerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#87CEFA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E0F6FF;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>
