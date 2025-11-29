@@ -8,7 +8,7 @@ Provides cost analysis, trends, and budget management for OpenAI API usage
 from datetime import datetime, timezone, timedelta
 from typing import Any
 
-from api.ai.endpoints.models import AIUsage
+from db.models.ai.analytics import AIUsage
 from core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import and_, desc, func, select

@@ -82,7 +82,7 @@ Campaign models: From db.models.newsletter (schema: newsletter → crm)
 """
 
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, List, Optional
 from uuid import UUID
 from decimal import Decimal
 from enum import Enum
@@ -100,11 +100,15 @@ from sqlalchemy import (
     Enum as SQLEnum,
 )
 from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 # MIGRATED: from models.base → ..base_class (NEW unified architecture)
 from ..base_class import Base
+
+if TYPE_CHECKING:
+    from api.v1.inbox.models import InboxMessage, TCPAOptStatus, Thread
+    from db.models.lead import LeadContact, LeadContext, LeadEvent, LeadSocialThread
 
 
 # ============================================================================
@@ -237,6 +241,123 @@ class SegmentRuleOperator(str, Enum):
 # ============================================================================
 
 
+class Contact(Base):
+    """
+    CRM Contact model - unified contact record for all communication channels.
+
+    Links to Customer model for existing customers, but can exist independently
+    for leads and prospects who haven't booked yet.
+
+    Business Requirements:
+    - Track all contact information (email, phone, social media)
+    - Link to communication channels (InboxMessage, Thread)
+    - TCPA compliance tracking
+    - Contact source and metadata for lead attribution
+    - Status tracking (active, verified)
+
+    Use Cases:
+    - Lead capture from website, social media, phone calls
+    - Prospect nurturing before first booking
+    - Customer communication history
+    - TCPA opt-in/opt-out management
+    - Contact deduplication and merging
+
+    Access Control:
+    - Creation: Public (lead forms), Admin (manual entry)
+    - Update: Admin, Customer Support
+    - Delete: Admin only (soft delete via is_active)
+    - View: Admin, Customer Support, assigned sales reps
+
+    Note: This table exists in public schema (crm_contacts) not crm schema
+    for backward compatibility with existing unified inbox implementation.
+    """
+
+    __tablename__ = "crm_contacts"
+
+    # Primary identifier
+    id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    )
+
+    # Basic information
+    first_name: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    last_name: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, index=True)
+    phone_number: Mapped[Optional[str]] = mapped_column(String(20), nullable=True, index=True)
+
+    # Social media handles
+    facebook_handle: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    instagram_handle: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    twitter_handle: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+
+    # Contact metadata
+    contact_source: Mapped[Optional[str]] = mapped_column(
+        String(50), nullable=True
+    )  # web_form, phone_call, social_media, etc.
+    contact_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    contact_metadata: Mapped[dict] = mapped_column(
+        JSONB, nullable=False, server_default="{}"
+    )  # Flexible storage for additional data
+
+    # Status
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
+    is_verified: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default="false"
+    )  # Email/phone verified
+
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+    last_contacted_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    # Relationships (using TYPE_CHECKING to avoid circular imports)
+    messages: Mapped[List["InboxMessage"]] = relationship(
+        "InboxMessage", back_populates="contact", lazy="select"
+    )
+    threads: Mapped[List["Thread"]] = relationship(
+        "Thread", back_populates="contact", lazy="select"
+    )
+    tcpa_statuses: Mapped[List["TCPAOptStatus"]] = relationship(
+        "TCPAOptStatus", back_populates="contact", lazy="select"
+    )
+
+    # Indexes
+    __table_args__ = (
+        Index("idx_crm_contacts_email", "email"),
+        Index("idx_crm_contacts_phone", "phone_number"),
+        Index("idx_crm_contacts_active", "is_active"),
+        Index("idx_crm_contacts_created", "created_at"),
+    )
+
+    def __repr__(self) -> str:
+        name = f"{self.first_name} {self.last_name}".strip() or "Unknown"
+        return f"<Contact(id={self.id}, name={name}, email={self.email})>"
+
+    @property
+    def full_name(self) -> str:
+        """Return full name or fallback identifier."""
+        if self.first_name and self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        elif self.first_name:
+            return self.first_name
+        elif self.last_name:
+            return self.last_name
+        elif self.email:
+            return self.email
+        elif self.phone_number:
+            return self.phone_number
+        return "Unknown Contact"
+
+
 class Lead(Base):
     """
     Lead tracking entity - CRM schema
@@ -320,73 +441,18 @@ class Lead(Base):
     )
     deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
-
-# ============================================================================
-# CAMPAIGN MODELS (From db.models.newsletter)
-# ============================================================================
-
-
-class Campaign(Base):
-    """
-    Marketing campaign entity - CRM schema
-
-    Email/SMS campaigns with scheduling and analytics.
-
-    Schema: crm.campaigns (moved from newsletter.campaigns)
-
-    Business Logic:
-    - Multi-channel campaigns (email, SMS, both)
-    - Scheduled or immediate delivery
-    - Customer segmentation support
-    - Analytics tracking (sent, opened, clicked)
-    - Template-based content (JSONB)
-    """
-
-    __tablename__ = "campaigns"
-    __table_args__ = (
-        Index("idx_crm_campaigns_status", "status"),
-        Index("idx_crm_campaigns_sent", "sent_at"),
-        Index("idx_crm_campaigns_channel", "channel"),
-        {"schema": "crm"},
+    # Relationships to lead schema tables
+    contacts: Mapped[List["LeadContact"]] = relationship(
+        "LeadContact", back_populates="lead", cascade="all, delete-orphan"
     )
-
-    # Primary Key
-    id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    context: Mapped[Optional["LeadContext"]] = relationship(
+        "LeadContext", back_populates="lead", uselist=False, cascade="all, delete-orphan"
     )
-
-    # Campaign Details
-    name: Mapped[str] = mapped_column(String(200), nullable=False)
-    channel: Mapped[CampaignChannel] = mapped_column(
-        SQLEnum(CampaignChannel, name="campaign_channel", schema="public", create_type=False),
-        nullable=False,
+    events: Mapped[List["LeadEvent"]] = relationship(
+        "LeadEvent", back_populates="lead", cascade="all, delete-orphan"
     )
-    subject: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    content: Mapped[dict] = mapped_column(JSONB, nullable=False)
-
-    # Segmentation (JSONB filter for customer targeting)
-    segment_filter: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
-
-    # Scheduling
-    scheduled_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-
-    # Status
-    status: Mapped[CampaignStatus] = mapped_column(
-        SQLEnum(CampaignStatus, name="campaign_status", schema="public", create_type=False),
-        nullable=False,
-        default=CampaignStatus.DRAFT,
-    )
-
-    # Analytics
-    total_recipients: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-
-    # Audit
-    created_by: Mapped[str] = mapped_column(String(100), nullable=False)
-
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now()
+    social_threads: Mapped[List["LeadSocialThread"]] = relationship(
+        "LeadSocialThread", back_populates="lead"
     )
 
 
@@ -504,6 +570,8 @@ class SegmentRule(Base):
 # ============================================================================
 
 __all__ = [
+    # Contact Model
+    "Contact",
     # Lead Models
     "Lead",
     "LeadSource",

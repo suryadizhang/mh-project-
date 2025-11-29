@@ -1,0 +1,168 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#sushiGradient)"/>
+  
+  <!-- Japanese Traditional Elements -->
+  <rect x="0" y="220" width="400" height="80" fill="#8B4513" opacity="0.2"/>
+  
+  <!-- Sushi Bar Counter -->
+  <ellipse cx="200" cy="200" rx="120" ry="40" fill="#F5DEB3"/>
+  <ellipse cx="200" cy="195" rx="115" ry="35" fill="#FAEBD7"/>
+  
+  <!-- Bamboo Mat -->
+  <ellipse cx="200" cy="195" rx="110" ry="32" fill="#DEB887" opacity="0.8"/>
+  <g stroke="#CD853F" stroke-width="1" opacity="0.6">
+    <line x1="100" y1="185" x2="300" y2="185"/>
+    <line x1="100" y1="190" x2="300" y2="190"/>
+    <line x1="100" y1="195" x2="300" y2="195"/>
+    <line x1="100" y1="200" x2="300" y2="200"/>
+    <line x1="100" y1="205" x2="300" y2="205"/>
+  </g>
+  
+  <!-- Hibachi Grill with Sushi Elements -->
+  <rect x="175" y="175" width="50" height="28" rx="6" fill="#1A1A1A"/>
+  <rect x="182" y="182" width="36" height="16" rx="4" fill="#2D1810"/>
+  
+  <!-- Gentle Flames for Seared Items -->
+  <ellipse cx="190" cy="185" rx="3" ry="5" fill="#4169E1" opacity="0.7"/>
+  <ellipse cx="200" cy="183" rx="4" ry="6" fill="#1E90FF" opacity="0.8"/>
+  <ellipse cx="210" cy="185" rx="3" ry="5" fill="#00BFFF" opacity="0.7"/>
+  
+  <!-- Sushi Chef -->
+  <circle cx="130" cy="130" r="16" fill="#F4C2A1"/>
+  <rect x="120" y="144" width="20" height="30" fill="#FFFFFF"/>
+  <rect x="122" y="146" width="16" height="3" fill="#000000"/>
+  
+  <!-- Traditional Chef Hat -->
+  <ellipse cx="130" cy="120" rx="10" ry="14" fill="#FFFFFF"/>
+  <rect x="124" y="127" width="12" height="3" fill="#000000"/>
+  
+  <!-- Sushi Preparation Area -->
+  <!-- Nigiri Sushi -->
+  <ellipse cx="160" cy="188" rx="3" ry="2" fill="#FFFFFF"/>
+  <ellipse cx="160" cy="186" rx="3" ry="1.5" fill="#FF6347"/>
+  
+  <ellipse cx="170" cy="190" rx="3" ry="2" fill="#FFFFFF"/>
+  <ellipse cx="170" cy="188" rx="3" ry="1.5" fill="#FFA07A"/>
+  
+  <ellipse cx="180" cy="187" rx="3" ry="2" fill="#FFFFFF"/>
+  <ellipse cx="180" cy="185" rx="3" ry="1.5" fill="#FFB6C1"/>
+  
+  <!-- Maki Rolls -->
+  <circle cx="220" cy="188" r="3" fill="#000000"/>
+  <circle cx="220" cy="188" r="2" fill="#FFFFFF"/>
+  <circle cx="220" cy="188" r="1" fill="#FF6347"/>
+  
+  <circle cx="230" cy="190" r="3" fill="#006400"/>
+  <circle cx="230" cy="190" r="2" fill="#FFFFFF"/>
+  <circle cx="230" cy="190" r="1" fill="#FFA500"/>
+  
+  <circle cx="240" cy="187" r="3" fill="#000000"/>
+  <circle cx="240" cy="187" r="2" fill="#FFFFFF"/>
+  <circle cx="240" cy="187" r="1" fill="#FFB6C1"/>
+  
+  <!-- Sashimi -->
+  <ellipse cx="250" cy="185" rx="4" ry="2" fill="#FF6347"/>
+  <ellipse cx="250" cy="184" rx="3" ry="1.5" fill="#DC143C"/>
+  
+  <ellipse cx="260" cy="188" rx="4" ry="2" fill="#FFA07A"/>
+  <ellipse cx="260" cy="187" rx="3" ry="1.5" fill="#FF7F50"/>
+  
+  <!-- Wasabi and Ginger -->
+  <ellipse cx="150" cy="195" rx="2" ry="1" fill="#9ACD32"/>
+  <ellipse cx="145" cy="197" rx="2" ry="1" fill="#F5DEB3"/>
+  
+  <!-- Soy Sauce Bowl -->
+  <circle cx="280" cy="190" r="4" fill="#8B4513"/>
+  <circle cx="280" cy="189" r="3" fill="#654321"/>
+  
+  <!-- Chopsticks -->
+  <rect x="140" y="200" width="1" height="15" fill="#DEB887" transform="rotate(20 140 200)"/>
+  <rect x="142" y="200" width="1" height="15" fill="#DEB887" transform="rotate(20 142 200)"/>
+  
+  <rect x="270" y="195" width="1" height="15" fill="#DEB887" transform="rotate(-15 270 195)"/>
+  <rect x="272" y="195" width="1" height="15" fill="#DEB887" transform="rotate(-15 272 195)"/>
+  
+  <!-- Sushi Chef Tools -->
+  <!-- Sushi Knife -->
+  <rect x="150" y="155" width="2" height="12" fill="#8B4513" transform="rotate(25 150 155)"/>
+  <rect x="158" y="150" width="8" height="2" fill="#C0C0C0" transform="rotate(25 158 150)"/>
+  
+  <!-- Japanese Sake -->
+  <rect x="320" y="180" width="6" height="12" fill="#F5F5DC"/>
+  <rect x="321" y="178" width="4" height="3" fill="#F0F0F0"/>
+  <circle cx="323" cy="176" r="1" fill="#D3D3D3"/>
+  
+  <!-- Customer at Sushi Bar -->
+  <circle cx="270" cy="135" r="14" fill="#F4C2A1"/>
+  <rect x="262" y="147" width="16" height="26" fill="#4169E1"/>
+  <circle cx="268" cy="130" r="1" fill="#000000"/>
+  <circle cx="272" cy="130" r="1" fill="#000000"/>
+  
+  <!-- Japanese Lantern -->
+  <ellipse cx="350" cy="90" rx="12" ry="20" fill="#FF6347"/>
+  <rect x="348" y="70" width="4" height="8" fill="#8B4513"/>
+  <ellipse cx="350" cy="80" rx="8" ry="3" fill="#FFD700"/>
+  <text x="350" y="95" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="12">寿司</text>
+  
+  <!-- Rice Pattern -->
+  <g fill="#F5F5DC" opacity="0.4">
+    <circle cx="100" cy="180" r="1"/>
+    <circle cx="105" cy="185" r="1"/>
+    <circle cx="110" cy="180" r="1"/>
+    <circle cx="300" cy="185" r="1"/>
+    <circle cx="305" cy="180" r="1"/>
+    <circle cx="310" cy="185" r="1"/>
+  </g>
+  
+  <!-- Seaweed Sheets -->
+  <rect x="60" y="180" width="8" height="12" fill="#006400" opacity="0.8"/>
+  <rect x="332" y="175" width="8" height="12" fill="#006400" opacity="0.8"/>
+  
+  <!-- Steam from Warm Items -->
+  <g stroke="#F0F8FF" stroke-width="1" fill="none" opacity="0.6">
+    <path d="M190 178 Q192 173 190 168 Q188 163 190 158"/>
+    <path d="M200 178 Q202 173 200 168 Q198 163 200 158"/>
+    <path d="M210 178 Q212 173 210 168 Q208 163 210 158"/>
+  </g>
+  
+  <!-- Japanese Wave Pattern -->
+  <g stroke="#4169E1" stroke-width="2" fill="none" opacity="0.3">
+    <path d="M50 250 Q70 240 90 250 Q110 260 130 250"/>
+    <path d="M270 250 Q290 240 310 250 Q330 260 350 250"/>
+  </g>
+  
+  <!-- Cherry Blossom Petals -->
+  <g fill="#FFB6C1" opacity="0.6">
+    <path d="M80 60 Q85 55 90 60 Q85 65 80 60"/>
+    <path d="M85 58 Q90 53 95 58 Q90 63 85 58"/>
+    <path d="M82 62 Q87 57 92 62 Q87 67 82 62"/>
+    
+    <path d="M300 70 Q305 65 310 70 Q305 75 300 70"/>
+    <path d="M305 68 Q310 63 315 68 Q310 73 305 68"/>
+    <path d="M302 72 Q307 67 312 72 Q307 77 302 72"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="30" text-anchor="middle" fill="#8B0000" font-family="serif" font-size="24" font-weight="bold">
+    Sushi & Hibachi Fusion
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="50" text-anchor="middle" fill="#4169E1" font-family="serif" font-size="16">
+    Traditional Japanese Artistry Meets Modern Hibachi
+  </text>
+  
+  <!-- Japanese Characters -->
+  <text x="200" y="275" text-anchor="middle" fill="#8B4513" font-family="serif" font-size="14">
+    最高の寿司と鉄板焼き体験 (Premium Sushi & Hibachi Experience)
+  </text>
+  
+  <defs>
+    <linearGradient id="sushiGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0F8FF;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#E6E6FA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F5F5DC;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

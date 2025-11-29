@@ -1,0 +1,171 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="techSkyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2F4F4F"/>
+      <stop offset="50%" style="stop-color:#483D8B"/>
+      <stop offset="100%" style="stop-color:#4169E1"/>
+    </linearGradient>
+    <linearGradient id="buildingGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#C0C0C0"/>
+      <stop offset="100%" style="stop-color:#696969"/>
+    </linearGradient>
+    <linearGradient id="flameGradient" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#00FF00"/>
+      <stop offset="50%" style="stop-color:#32CD32"/>
+      <stop offset="100%" style="stop-color:#FFD700"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Silicon Valley Tech Sky -->
+  <rect width="800" height="600" fill="url(#techSkyGradient)"/>
+  
+  <!-- Tech Company Buildings -->
+  <rect x="50" y="150" width="100" height="200" fill="url(#buildingGradient)" stroke="#000" stroke-width="2"/>
+  <rect x="200" y="120" width="120" height="230" fill="url(#buildingGradient)" stroke="#000" stroke-width="2"/>
+  <rect x="480" y="140" width="110" height="210" fill="url(#buildingGradient)" stroke="#000" stroke-width="2"/>
+  <rect x="630" y="160" width="100" height="190" fill="url(#buildingGradient)" stroke="#000" stroke-width="2"/>
+  
+  <!-- Tech Building Windows -->
+  <rect x="70" y="180" width="15" height="20" fill="#00FF00"/>
+  <rect x="90" y="180" width="15" height="20" fill="#00FF00"/>
+  <rect x="220" y="150" width="15" height="20" fill="#00FFFF"/>
+  <rect x="240" y="150" width="15" height="20" fill="#00FFFF"/>
+  <rect x="500" y="170" width="15" height="20" fill="#FF00FF"/>
+  <rect x="520" y="170" width="15" height="20" fill="#FF00FF"/>
+  <rect x="650" y="190" width="15" height="20" fill="#FFFF00"/>
+  <rect x="670" y="190" width="15" height="20" fill="#FFFF00"/>
+
+  <!-- Silicon Valley Ground -->
+  <rect x="0" y="350" width="800" height="250" fill="#228B22"/>
+
+  <!-- VC Dinner Banner -->
+  <rect x="150" y="50" width="500" height="50" fill="#000080" stroke="#00FF00" stroke-width="3"/>
+  <text x="400" y="75" text-anchor="middle" font-family="serif" font-size="18" font-weight="bold" fill="#00FF00">MOUNTAIN VIEW VC DINNER</text>
+  <text x="400" y="92" text-anchor="middle" font-family="serif" font-size="12" fill="#FFFFFF">Silicon Valley Investment Entertainment</text>
+
+  <!-- Premium Hibachi Setup -->
+  <rect x="350" y="520" width="100" height="30" fill="#2F4F4F" stroke="#000" stroke-width="2"/>
+  <circle cx="400" cy="535" r="25" fill="#1C1C1C" stroke="#000" stroke-width="2"/>
+  
+  <!-- Investment Success Flames -->
+  <ellipse cx="400" cy="525" rx="15" ry="20" fill="url(#flameGradient)" opacity="0.9"/>
+  <ellipse cx="395" cy="520" rx="10" ry="15" fill="#32CD32" opacity="0.8"/>
+  <ellipse cx="405" cy="520" rx="10" ry="15" fill="#00FF00" opacity="0.8"/>
+  <ellipse cx="400" cy="515" rx="8" ry="12" fill="#FFD700" opacity="0.7"/>
+
+  <!-- Silicon Valley Hibachi Chef -->
+  <circle cx="420" cy="555" r="12" fill="#FDBCB4"/>
+  <rect x="415" y="567" width="10" height="25" fill="#FFFFFF"/>
+  <rect x="410" y="592" width="20" height="8" fill="#000"/>
+  <!-- Tech-savvy chef hat -->
+  <ellipse cx="420" cy="550" rx="10" ry="6" fill="#FFFFFF"/>
+  <rect x="415" y="538" width="10" height="12" fill="#FFFFFF"/>
+  <circle cx="420" cy="545" r="3" fill="#00FF00"/>
+  <circle cx="418" cy="543" r="1" fill="#00FFFF"/>
+  <!-- Chef with smartphone and spatula -->
+  <rect x="435" y="570" width="6" height="10" fill="#000" stroke="#C0C0C0" stroke-width="1"/>
+  <rect x="436" y="571" width="4" height="6" fill="#00FF00"/>
+  <line x1="440" y1="580" x2="450" y2="570" stroke="#C0C0C0" stroke-width="2"/>
+
+  <!-- Venture Capitalists -->
+  <!-- VC Partner 1 -->
+  <circle cx="280" cy="555" r="12" fill="#FDBCB4"/>
+  <rect x="275" y="567" width="10" height="25" fill="#000080"/>
+  <rect x="273" y="592" width="14" height="8" fill="#000"/>
+  <ellipse cx="280" cy="550" rx="8" ry="4" fill="#C0C0C0"/>
+  <!-- Expensive watch -->
+  <circle cx="285" cy="580" r="4" fill="#FFD700" stroke="#B8860B" stroke-width="1"/>
+  <circle cx="285" cy="580" r="2" fill="#00FF00"/>
+  <!-- Investment portfolio -->
+  <rect x="295" y="570" width="15" height="20" fill="#8B4513" stroke="#654321" stroke-width="1"/>
+  <text x="302" y="580" text-anchor="middle" font-family="serif" font-size="6" font-weight="bold" fill="#00FF00">$100M</text>
+
+  <!-- Startup Founder -->
+  <circle cx="320" cy="560" r="11" fill="#FDBCB4"/>
+  <rect x="315" y="571" width="10" height="22" fill="#4B0082"/>
+  <rect x="313" y="593" width="14" height="8" fill="#8B4513"/>
+  <ellipse cx="320" cy="555" rx="8" ry="4" fill="#8B4513"/>
+  <!-- Startup laptop -->
+  <rect x="335" y="575" width="12" height="8" fill="#2F4F4F" stroke="#000" stroke-width="1"/>
+  <circle cx="341" cy="579" r="1" fill="#00FF00"/>
+  <!-- Hoodie strings -->
+  <line x1="315" y1="572" x2="318" y2="575" stroke="#FFFFFF" stroke-width="1"/>
+  <line x1="325" y1="572" x2="322" y2="575" stroke="#FFFFFF" stroke-width="1"/>
+
+  <!-- Investment Banker -->
+  <circle cx="520" cy="550" r="12" fill="#D2B48C"/>
+  <rect x="515" y="562" width="10" height="25" fill="#8B0000"/>
+  <rect x="513" y="587" width="14" height="8" fill="#000"/>
+  <ellipse cx="520" cy="545" rx="8" ry="4" fill="#000"/>
+  <!-- Gold tie pin -->
+  <circle cx="520" cy="570" r="2" fill="#FFD700"/>
+  <!-- Financial calculator -->
+  <rect x="535" y="565" width="8" height="12" fill="#000"/>
+  <rect x="536" y="566" width="6" height="4" fill="#00FF00"/>
+
+  <!-- Tech Executive -->
+  <circle cx="480" cy="565" r="10" fill="#FDBCB4"/>
+  <rect x="475" y="575" width="10" height="20" fill="#2F4F4F"/>
+  <rect x="473" y="595" width="14" height="8" fill="#000"/>
+  <ellipse cx="480" cy="560" rx="7" ry="4" fill="#FFD700"/>
+  <!-- Smart watch -->
+  <rect x="465" y="578" width="6" height="4" fill="#000"/>
+  <circle cx="468" cy="580" r="1" fill="#00FFFF"/>
+
+  <!-- Investment Dinner Table -->
+  <ellipse cx="400" cy="580" rx="100" ry="25" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+  <ellipse cx="400" cy="578" rx="100" ry="25" fill="#A0522D"/>
+
+  <!-- Investment Documents -->
+  <rect x="320" y="575" width="30" height="15" fill="#FFFFFF" stroke="#000" stroke-width="1"/>
+  <text x="335" y="583" text-anchor="middle" font-family="serif" font-size="8" font-weight="bold" fill="#000">TERM SHEET</text>
+  
+  <rect x="360" y="575" width="30" height="15" fill="#FFFFFF" stroke="#000" stroke-width="1"/>
+  <text x="375" y="583" text-anchor="middle" font-family="serif" font-size="8" font-weight="bold" fill="#00FF00">SERIES A</text>
+  
+  <rect x="410" y="575" width="30" height="15" fill="#FFFFFF" stroke="#000" stroke-width="1"/>
+  <text x="425" y="583" text-anchor="middle" font-family="serif" font-size="8" font-weight="bold" fill="#FF0000">VALUATION</text>
+  
+  <rect x="450" y="575" width="30" height="15" fill="#FFFFFF" stroke="#000" stroke-width="1"/>
+  <text x="465" y="583" text-anchor="middle" font-family="serif" font-size="8" font-weight="bold" fill="#0000FF">DUE DILIGENCE</text>
+
+  <!-- Premium Business Beverages -->
+  <polygon points="340,575 345,575 343,585 342,585" fill="#E6E6FA" stroke="#C0C0C0" stroke-width="1"/>
+  <ellipse cx="343" cy="573" rx="3" ry="1" fill="#8B0000"/>
+  
+  <polygon points="490,575 495,575 493,585 492,585" fill="#E6E6FA" stroke="#C0C0C0" stroke-width="1"/>
+  <ellipse cx="493" cy="573" rx="3" ry="1" fill="#B8860B"/>
+
+  <!-- Tech Innovation Icons -->
+  <circle cx="150" cy="400" r="10" fill="#00FF00" opacity="0.7"/>
+  <text x="150" y="405" text-anchor="middle" font-family="serif" font-size="8" font-weight="bold" fill="#000">AI</text>
+  
+  <circle cx="200" cy="380" r="10" fill="#00FFFF" opacity="0.7"/>
+  <text x="200" y="385" text-anchor="middle" font-family="serif" font-size="6" font-weight="bold" fill="#000">BLOCKCHAIN</text>
+  
+  <circle cx="600" cy="390" r="10" fill="#FF00FF" opacity="0.7"/>
+  <text x="600" y="395" text-anchor="middle" font-family="serif" font-size="7" font-weight="bold" fill="#000">SAAS</text>
+  
+  <circle cx="650" cy="410" r="10" fill="#FFFF00" opacity="0.7"/>
+  <text x="650" y="415" text-anchor="middle" font-family="serif" font-size="6" font-weight="bold" fill="#000">FINTECH</text>
+
+  <!-- Dollar Signs -->
+  <text x="100" y="480" font-family="serif" font-size="24" font-weight="bold" fill="#00FF00" opacity="0.6">$</text>
+  <text x="700" y="460" font-family="serif" font-size="24" font-weight="bold" fill="#00FF00" opacity="0.6">$</text>
+  <text x="250" y="500" font-family="serif" font-size="16" font-weight="bold" fill="#FFD700" opacity="0.5">$$</text>
+  <text x="550" y="480" font-family="serif" font-size="16" font-weight="bold" fill="#FFD700" opacity="0.5">$$</text>
+
+  <!-- Stock Market Charts -->
+  <rect x="120" y="450" width="50" height="30" fill="#FFFFFF" stroke="#000" stroke-width="1"/>
+  <line x1="125" y1="475" x2="165" y2="455" stroke="#00FF00" stroke-width="3"/>
+  <text x="145" y="490" text-anchor="middle" font-family="serif" font-size="6" fill="#000">GROWTH</text>
+
+  <rect x="630" y="440" width="50" height="30" fill="#FFFFFF" stroke="#000" stroke-width="1"/>
+  <line x1="635" y1="465" x2="675" y2="445" stroke="#00FF00" stroke-width="3"/>
+  <text x="655" y="485" text-anchor="middle" font-family="serif" font-size="6" fill="#000">ROI</text>
+
+  <!-- Investment Success Smoke -->
+  <ellipse cx="400" cy="505" rx="20" ry="8" fill="#00FF00" opacity="0.6"/>
+  <ellipse cx="405" cy="495" rx="25" ry="10" fill="#32CD32" opacity="0.4"/>
+  <ellipse cx="395" cy="485" rx="30" ry="12" fill="#90EE90" opacity="0.3"/>
+</svg>

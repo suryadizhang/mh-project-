@@ -1,0 +1,254 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#dietGradient)"/>
+  
+  <!-- Health Certificate -->
+  <rect x="50" y="50" width="100" height="80" fill="#FFFFFF" stroke="#228B22" stroke-width="2"/>
+  <rect x="52" y="52" width="96" height="76" fill="#F0FFF0"/>
+  <text x="100" y="70" text-anchor="middle" fill="#228B22" font-family="Arial" font-size="12" font-weight="bold">
+    KETO FRIENDLY
+  </text>
+  <text x="100" y="85" text-anchor="middle" fill="#000000" font-family="Arial" font-size="8">
+    Low Carb Option
+  </text>
+  <text x="100" y="95" text-anchor="middle" fill="#000000" font-family="Arial" font-size="8">
+    High Protein
+  </text>
+  <text x="100" y="105" text-anchor="middle" fill="#000000" font-family="Arial" font-size="8">
+    Healthy Fats
+  </text>
+  <circle cx="100" cy="115" r="8" fill="#228B22"/>
+  <text x="100" y="120" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="8" font-weight="bold">✓</text>
+  
+  <!-- Diet-Friendly Hibachi Setup -->
+  <rect x="200" y="140" width="120" height="50" rx="8" fill="#228B22"/>
+  <rect x="205" y="145" width="110" height="40" rx="6" fill="#2F4F4F"/>
+  <rect x="210" y="150" width="100" height="30" rx="4" fill="#1C1C1C"/>
+  
+  <!-- Healthy Chef -->
+  <circle cx="170" cy="130" r="18" fill="#F4C2A1"/>
+  <rect x="157" y="146" width="26" height="32" fill="#FFFFFF"/>
+  <rect x="159" y="148" width="22" height="4" fill="#228B22"/>
+  
+  <!-- Chef Hat with Health Symbol -->
+  <ellipse cx="170" cy="115" rx="12" ry="8" fill="#FFFFFF"/>
+  <rect x="158" y="115" width="24" height="10" fill="#FFFFFF"/>
+  <path d="M170 110 L165 100 L175 100 Z" fill="#228B22"/>
+  <rect x="165" y="102" width="10" height="2" fill="#228B22"/>
+  
+  <!-- Stethoscope -->
+  <path d="M155 155 Q150 150 155 145 Q160 150 155 155" stroke="#000000" stroke-width="2" fill="none"/>
+  <circle cx="150" cy="147" r="2" fill="#C0C0C0"/>
+  <circle cx="160" cy="147" r="2" fill="#C0C0C0"/>
+  
+  <!-- Keto-Friendly Foods on Grill -->
+  
+  <!-- Avocado Halves -->
+  <ellipse cx="240" cy="165" rx="4" ry="6" fill="#228B22"/>
+  <ellipse cx="240" cy="164" rx="3" ry="5" fill="#32CD32"/>
+  <circle cx="240" cy="164" r="1" fill="#8B4513"/>
+  
+  <ellipse cx="260" cy="167" rx="4" ry="6" fill="#228B22"/>
+  <ellipse cx="260" cy="166" rx="3" ry="5" fill="#32CD32"/>
+  <circle cx="260" cy="166" r="1" fill="#8B4513"/>
+  
+  <!-- Cauliflower Steaks -->
+  <ellipse cx="280" cy="165" rx="5" ry="3" fill="#FFFACD"/>
+  <ellipse cx="280" cy="164" rx="4" ry="2" fill="#F5F5DC"/>
+  <g fill="#DDA0DD" opacity="0.5">
+    <circle cx="278" cy="164" r="0.5"/>
+    <circle cx="282" cy="164" r="0.5"/>
+    <circle cx="280" cy="166" r="0.5"/>
+  </g>
+  
+  <!-- Zucchini Noodles -->
+  <g stroke="#32CD32" stroke-width="2" fill="none" opacity="0.8">
+    <path d="M250 170 Q252 175 250 180 Q248 175 250 170"/>
+    <path d="M254 172 Q256 177 254 182 Q252 177 254 172"/>
+    <path d="M258 169 Q260 174 258 179 Q256 174 258 169"/>
+  </g>
+  
+  <!-- Grass-Fed Beef -->
+  <ellipse cx="270" cy="160" rx="6" ry="4" fill="#8B0000"/>
+  <ellipse cx="270" cy="159" rx="5" ry="3" fill="#B22222"/>
+  <text x="270" y="161" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="4">GRASS</text>
+  
+  <!-- Wild-Caught Salmon -->
+  <ellipse cx="290" cy="168" rx="7" ry="3" fill="#FFA07A"/>
+  <ellipse cx="290" cy="167" rx="6" ry="2" fill="#FFB6C1"/>
+  <g fill="#FF6347">
+    <ellipse cx="288" cy="167" rx="1" ry="0.5"/>
+    <ellipse cx="292" cy="167" rx="1" ry="0.5"/>
+  </g>
+  
+  <!-- Macro Counter -->
+  <rect x="330" y="80" width="60" height="80" fill="#FFFFFF" stroke="#228B22" stroke-width="2"/>
+  <rect x="332" y="82" width="56" height="76" fill="#F0FFF0"/>
+  
+  <text x="360" y="100" text-anchor="middle" fill="#000000" font-family="Arial" font-size="10" font-weight="bold">
+    MACROS
+  </text>
+  
+  <!-- Protein Bar -->
+  <rect x="338" y="110" width="44" height="8" fill="#E0E0E0"/>
+  <rect x="338" y="110" width="35" height="8" fill="#8B4513"/>
+  <text x="342" y="116" fill="#FFFFFF" font-family="Arial" font-size="6">Protein 80%</text>
+  
+  <!-- Fat Bar -->
+  <rect x="338" y="125" width="44" height="8" fill="#E0E0E0"/>
+  <rect x="338" y="125" width="22" height="8" fill="#FFD700"/>
+  <text x="342" y="131" fill="#000000" font-family="Arial" font-size="6">Fat 50%</text>
+  
+  <!-- Carb Bar -->
+  <rect x="338" y="140" width="44" height="8" fill="#E0E0E0"/>
+  <rect x="338" y="140" width="4" height="8" fill="#FF6347"/>
+  <text x="342" y="146" fill="#000000" font-family="Arial" font-size="6">Carbs 10%</text>
+  
+  <!-- Diet Types -->
+  
+  <!-- Keto Badge -->
+  <circle cx="50" cy="200" r="20" fill="#8B008B"/>
+  <circle cx="50" cy="200" r="15" fill="#9400D3"/>
+  <text x="50" y="197" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="8" font-weight="bold">KETO</text>
+  <text x="50" y="207" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="6">APPROVED</text>
+  
+  <!-- Paleo Badge -->
+  <circle cx="100" cy="200" r="20" fill="#8B4513"/>
+  <circle cx="100" cy="200" r="15" fill="#A0522D"/>
+  <text x="100" y="197" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="8" font-weight="bold">PALEO</text>
+  <text x="100" y="207" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="6">FRIENDLY</text>
+  
+  <!-- Whole30 Badge -->
+  <circle cx="150" cy="200" r="20" fill="#228B22"/>
+  <circle cx="150" cy="200" r="15" fill="#32CD32"/>
+  <text x="150" y="197" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="7" font-weight="bold">WHOLE</text>
+  <text x="150" y="207" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="7" font-weight="bold">30</text>
+  
+  <!-- Gluten-Free Badge -->
+  <circle cx="200" cy="200" r="20" fill="#FF6347"/>
+  <circle cx="200" cy="200" r="15" fill="#FF7F50"/>
+  <text x="200" y="197" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="6" font-weight="bold">GLUTEN</text>
+  <text x="200" y="207" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="6" font-weight="bold">FREE</text>
+  
+  <!-- Healthy Ingredients Display -->
+  <rect x="250" y="220" width="140" height="50" fill="#F0FFF0"/>
+  <rect x="252" y="222" width="136" height="46" fill="#F5FFFA"/>
+  
+  <!-- Organic Vegetables -->
+  <g>
+    <!-- Organic Broccoli -->
+    <ellipse cx="270" cy="240" rx="4" ry="5" fill="#228B22"/>
+    <ellipse cx="270" cy="239" rx="3" ry="4" fill="#32CD32"/>
+    <rect x="268" y="245" width="4" height="4" fill="#228B22"/>
+    <circle cx="270" cy="235" r="1" fill="#FFD700"/>
+    
+    <!-- Organic Bell Pepper -->
+    <ellipse cx="290" cy="242" rx="3" ry="5" fill="#FF6347"/>
+    <ellipse cx="290" cy="241" rx="2" ry="4" fill="#FF7F50"/>
+    <circle cx="290" cy="237" r="1" fill="#FFD700"/>
+    
+    <!-- Organic Spinach -->
+    <ellipse cx="310" cy="240" rx="5" ry="3" fill="#228B22"/>
+    <ellipse cx="310" cy="239" rx="4" ry="2" fill="#32CD32"/>
+    <circle cx="310" cy="235" r="1" fill="#FFD700"/>
+    
+    <!-- Organic Mushrooms -->
+    <ellipse cx="330" cy="242" rx="4" ry="6" fill="#DEB887"/>
+    <ellipse cx="330" cy="241" rx="3" ry="5" fill="#F5DEB3"/>
+    <rect x="328" y="247" width="4" height="3" fill="#DEB887"/>
+    <circle cx="330" cy="237" r="1" fill="#FFD700"/>
+    
+    <!-- Organic Asparagus -->
+    <g stroke="#228B22" stroke-width="2" fill="none">
+      <line x1="350" y1="245" x2="350" y2="235"/>
+      <line x1="355" y1="247" x2="355" y2="237"/>
+      <line x1="360" y1="246" x2="360" y2="236"/>
+    </g>
+    <g fill="#32CD32">
+      <ellipse cx="350" cy="233" rx="1" ry="2"/>
+      <ellipse cx="355" cy="235" rx="1" ry="2"/>
+      <ellipse cx="360" cy="234" rx="1" ry="2"/>
+    </g>
+    <g fill="#FFD700">
+      <circle cx="350" cy="230" r="1"/>
+      <circle cx="355" cy="232" r="1"/>
+      <circle cx="360" cy="231" r="1"/>
+    </g>
+  </g>
+  
+  <!-- Grass-Fed Label -->
+  <text x="320" y="235" text-anchor="middle" fill="#228B22" font-family="Arial" font-size="8" font-weight="bold">ORGANIC & GRASS-FED</text>
+  
+  <!-- Diet Flames -->
+  <g opacity="0.8">
+    <ellipse cx="240" cy="155" rx="3" ry="6" fill="#32CD32"/>
+    <ellipse cx="260" cy="153" rx="4" ry="8" fill="#228B22"/>
+    <ellipse cx="280" cy="155" rx="3" ry="6" fill="#9ACD32"/>
+  </g>
+  
+  <!-- Calorie Counter -->
+  <rect x="20" y="240" width="80" height="40" fill="#FFFFFF" stroke="#FF6347" stroke-width="2"/>
+  <rect x="22" y="242" width="76" height="36" fill="#FFF5F5"/>
+  
+  <text x="60" y="255" text-anchor="middle" fill="#FF6347" font-family="Arial" font-size="10" font-weight="bold">
+    CALORIES
+  </text>
+  <text x="60" y="268" text-anchor="middle" fill="#000000" font-family="Arial" font-size="16" font-weight="bold">
+    350
+  </text>
+  <text x="60" y="278" text-anchor="middle" fill="#228B22" font-family="Arial" font-size="8">
+    per serving
+  </text>
+  
+  <!-- Nutritionist Approved -->
+  <rect x="280" y="40" width="80" height="30" fill="#FFD700"/>
+  <rect x="282" y="42" width="76" height="26" fill="#FFFFE0"/>
+  <text x="320" y="55" text-anchor="middle" fill="#8B8B00" font-family="Arial" font-size="10" font-weight="bold">
+    NUTRITIONIST
+  </text>
+  <text x="320" y="65" text-anchor="middle" fill="#8B8B00" font-family="Arial" font-size="10" font-weight="bold">
+    APPROVED
+  </text>
+  
+  <!-- Health Benefits Icons -->
+  <g fill="#228B22">
+    <circle cx="380" cy="150" r="8"/>
+    <text x="380" y="155" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="8" font-weight="bold">♥</text>
+  </g>
+  <text x="380" y="170" text-anchor="middle" fill="#228B22" font-family="Arial" font-size="6">Heart Healthy</text>
+  
+  <g fill="#FF6347">
+    <circle cx="380" cy="190" r="8"/>
+    <text x="380" y="195" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="8" font-weight="bold">⚡</text>
+  </g>
+  <text x="380" y="210" text-anchor="middle" fill="#FF6347" font-family="Arial" font-size="6">Energy Boost</text>
+  
+  <!-- Steam (healthy cooking) -->
+  <g stroke="#9ACD32" stroke-width="2" fill="none" opacity="0.8">
+    <path d="M240 148 Q242 143 240 138 Q238 133 240 128"/>
+    <path d="M260 148 Q262 143 260 138 Q258 133 260 128"/>
+    <path d="M280 148 Q282 143 280 138 Q278 133 280 128"/>
+  </g>
+  
+  <!-- Healthy Choice Arrow -->
+  <path d="M150 150 L180 130 L175 135 L190 120 L180 130 L175 125 Z" fill="#228B22"/>
+  <text x="140" y="165" fill="#228B22" font-family="Arial" font-size="8" font-weight="bold">HEALTHY CHOICE!</text>
+  
+  <!-- Title -->
+  <text x="200" y="25" text-anchor="middle" fill="#228B22" font-family="Arial, sans-serif" font-size="20" font-weight="bold">
+    Diet-Friendly Hibachi Options
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="290" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="12">
+    "Delicious meals that fit your healthy lifestyle"
+  </text>
+  
+  <defs>
+    <linearGradient id="dietGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0FFF0;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#F5FFFA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F0F8FF;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

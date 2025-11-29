@@ -1,0 +1,74 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#romanticGradient)"/>
+  
+  <!-- Table -->
+  <ellipse cx="200" cy="220" rx="80" ry="40" fill="#8B4513"/>
+  <ellipse cx="200" cy="215" rx="75" ry="35" fill="#A0522D"/>
+  
+  <!-- Tablecloth -->
+  <ellipse cx="200" cy="215" rx="70" ry="30" fill="#DC143C" opacity="0.8"/>
+  
+  <!-- Plates -->
+  <circle cx="160" cy="210" r="18" fill="#FFFFFF"/>
+  <circle cx="240" cy="210" r="18" fill="#FFFFFF"/>
+  <circle cx="160" cy="210" r="15" fill="#F5F5F5"/>
+  <circle cx="240" cy="210" r="15" fill="#F5F5F5"/>
+  
+  <!-- Food -->
+  <rect x="155" y="205" width="10" height="6" rx="1" fill="#FF6347"/>
+  <circle cx="162" cy="208" r="2" fill="#32CD32"/>
+  <rect x="165" y="207" width="4" height="3" rx="1" fill="#FFD700"/>
+  
+  <rect x="235" y="205" width="10" height="6" rx="1" fill="#FF6347"/>
+  <circle cx="242" cy="208" r="2" fill="#32CD32"/>
+  <rect x="245" y="207" width="4" height="3" rx="1" fill="#FFD700"/>
+  
+  <!-- Candles -->
+  <rect x="190" y="180" width="4" height="20" fill="#FFFACD"/>
+  <rect x="206" y="180" width="4" height="20" fill="#FFFACD"/>
+  <ellipse cx="192" cy="178" rx="3" ry="4" fill="#FF4500"/>
+  <ellipse cx="208" cy="178" rx="3" ry="4" fill="#FF4500"/>
+  
+  <!-- Wine Glasses -->
+  <rect x="140" y="195" width="2" height="8" fill="#FFD700"/>
+  <circle cx="141" cy="192" r="4" fill="none" stroke="#FFD700" stroke-width="1"/>
+  <rect x="258" y="195" width="2" height="8" fill="#FFD700"/>
+  <circle cx="259" cy="192" r="4" fill="none" stroke="#FFD700" stroke-width="1"/>
+  
+  <!-- Hearts -->
+  <g transform="translate(150, 100)">
+    <path d="M12,21.35l-1.45-1.32C5.4,15.36,2,12.28,2,8.5 C2,5.42,4.42,3,7.5,3c1.74,0,3.41,0.81,4.5,2.09C13.09,3.81,14.76,3,16.5,3 C19.58,3,22,5.42,22,8.5c0,3.78-3.4,6.86-8.55,11.54L12,21.35z" fill="#FF69B4" opacity="0.7"/>
+  </g>
+  
+  <g transform="translate(230, 120)">
+    <path d="M12,21.35l-1.45-1.32C5.4,15.36,2,12.28,2,8.5 C2,5.42,4.42,3,7.5,3c1.74,0,3.41,0.81,4.5,2.09C13.09,3.81,14.76,3,16.5,3 C19.58,3,22,5.42,22,8.5c0,3.78-3.4,6.86-8.55,11.54L12,21.35z" fill="#FF1493" opacity="0.6"/>
+  </g>
+  
+  <!-- Chef Silhouette -->
+  <circle cx="100" cy="120" r="15" fill="#2C3E50" opacity="0.8"/>
+  <rect x="92" y="130" width="16" height="25" fill="#FFFFFF" opacity="0.8"/>
+  <ellipse cx="100" cy="110" rx="12" ry="8" fill="#FFFFFF" opacity="0.8"/>
+  
+  <!-- Spatula -->
+  <rect x="120" y="140" width="2" height="15" fill="#8B4513" transform="rotate(10 120 140)"/>
+  <ellipse cx="128" cy="135" rx="4" ry="2" fill="#C0C0C0" transform="rotate(10 128 135)"/>
+  
+  <!-- Title -->
+  <text x="200" y="40" text-anchor="middle" fill="#8B0000" font-family="Arial, sans-serif" font-size="22" font-weight="bold">
+    Romantic Hibachi Date Night
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="60" text-anchor="middle" fill="#B22222" font-family="Arial, sans-serif" font-size="14">
+    Perfect Valentine's Experience
+  </text>
+  
+  <defs>
+    <linearGradient id="romanticGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF0F5;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFE4E1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFCCCB;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

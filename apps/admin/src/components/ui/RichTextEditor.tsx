@@ -58,8 +58,7 @@ export function RichTextEditor({
     onBlur,
     editorProps: {
       attributes: {
-        class:
-          'prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4',
+        class: 'prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4',
       },
     },
   });

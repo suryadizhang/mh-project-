@@ -1,0 +1,278 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#familyGradient)"/>
+  
+  <!-- Family Table -->
+  <ellipse cx="200" cy="200" rx="120" ry="40" fill="#8B4513"/>
+  <ellipse cx="200" cy="195" rx="115" ry="35" fill="#D2691E"/>
+  <ellipse cx="200" cy="192" rx="110" ry="32" fill="#DEB887"/>
+  
+  <!-- Hibachi Grill Center -->
+  <rect x="175" y="175" width="50" height="35" rx="8" fill="#2F4F4F"/>
+  <rect x="180" y="180" width="40" height="25" rx="5" fill="#1C1C1C"/>
+  <rect x="185" y="185" width="30" height="15" rx="3" fill="#4A4A4A"/>
+  
+  <!-- Family Members Around Table -->
+  
+  <!-- Grandpa (wisdom) -->
+  <circle cx="120" cy="170" r="18" fill="#F4C2A1"/>
+  <rect x="108" y="186" width="24" height="30" fill="#4B0082"/>
+  <ellipse cx="120" cy="155" rx="12" ry="6" fill="#D3D3D3"/>
+  <circle cx="115" cy="165" r="1" fill="#000000"/>
+  <circle cx="125" cy="165" r="1" fill="#000000"/>
+  <path d="M120 175 Q115 180 120 185" stroke="#000000" stroke-width="1" fill="none"/>
+  
+  <!-- Grandpa's Glasses -->
+  <circle cx="115" cy="165" r="4" stroke="#000000" stroke-width="1" fill="none"/>
+  <circle cx="125" cy="165" r="4" stroke="#000000" stroke-width="1" fill="none"/>
+  <line x1="119" y1="165" x2="121" y2="165" stroke="#000000" stroke-width="1"/>
+  
+  <!-- Grandpa's Walking Cane -->
+  <line x1="105" y1="220" x2="105" y2="190" stroke="#8B4513" stroke-width="3"/>
+  <ellipse cx="105" cy="188" rx="3" ry="2" fill="#FFD700"/>
+  
+  <!-- Grandma (love) -->
+  <circle cx="280" cy="165" r="16" fill="#F4C2A1"/>
+  <rect x="270" y="179" width="20" height="28" fill="#800080"/>
+  <ellipse cx="280" cy="150" rx="10" ry="8" fill="#C0C0C0"/>
+  <path d="M280 158 Q275 160 280 165" stroke="#FF69B4" stroke-width="1" fill="none"/>
+  
+  <!-- Grandma's Apron -->
+  <rect x="272" y="185" width="16" height="20" fill="#FFB6C1"/>
+  <circle cx="280" cy="195" r="2" fill="#FF1493"/>
+  
+  <!-- Grandma's Pearls -->
+  <g fill="#FFFFFF">
+    <circle cx="276" cy="179" r="1"/>
+    <circle cx="278" cy="179" r="1"/>
+    <circle cx="280" cy="179" r="1"/>
+    <circle cx="282" cy="179" r="1"/>
+    <circle cx="284" cy="179" r="1"/>
+  </g>
+  
+  <!-- Dad (strength) -->
+  <circle cx="160" cy="140" r="20" fill="#F4C2A1"/>
+  <rect x="145" y="158" width="30" height="35" fill="#000080"/>
+  <rect x="147" y="160" width="26" height="3" fill="#FFFFFF"/>
+  <ellipse cx="160" cy="125" rx="8" ry="5" fill="#654321"/>
+  
+  <!-- Dad's Tie -->
+  <polygon points="160,170 165,175 160,200 155,175" fill="#8B0000"/>
+  <g fill="#FFD700">
+    <circle cx="160" cy="178" r="1"/>
+    <circle cx="160" cy="185" r="1"/>
+    <circle cx="160" cy="192" r="1"/>
+  </g>
+  
+  <!-- Dad's Watch -->
+  <rect x="140" y="165" width="6" height="4" fill="#C0C0C0"/>
+  <rect x="141" y="166" width="4" height="2" fill="#000000"/>
+  
+  <!-- Mom (nurturing) -->
+  <circle cx="240" cy="145" r="18" fill="#F4C2A1"/>
+  <rect x="227" y="161" width="26" height="32" fill="#9400D3"/>
+  <ellipse cx="240" cy="128" rx="12" ry="8" fill="#8B4513"/>
+  <path d="M240 152 Q235 155 240 160" stroke="#FF69B4" stroke-width="1" fill="none"/>
+  
+  <!-- Mom's Earrings -->
+  <circle cx="227" cy="145" r="2" fill="#FFD700"/>
+  <circle cx="253" cy="145" r="2" fill="#FFD700"/>
+  
+  <!-- Mom's Purse -->
+  <rect x="250" y="180" width="8" height="6" fill="#8B0000"/>
+  <line x1="254" y1="180" x2="254" y2="175" stroke="#8B0000" stroke-width="2"/>
+  
+  <!-- Teen Son (energy) -->
+  <circle cx="130" cy="230" r="16" fill="#F4C2A1"/>
+  <rect x="119" y="244" width="22" height="30" fill="#006400"/>
+  <ellipse cx="130" cy="217" rx="8" ry="5" fill="#000000"/>
+  
+  <!-- Teen's Baseball Cap -->
+  <ellipse cx="130" cy="215" rx="10" ry="6" fill="#FF0000"/>
+  <ellipse cx="130" cy="213" rx="8" ry="4" fill="#FFFFFF"/>
+  <ellipse cx="135" cy="215" rx="4" ry="2" fill="#FF0000"/>
+  
+  <!-- Teen's Phone -->
+  <rect x="145" y="250" width="3" height="6" fill="#000000"/>
+  <rect x="146" y="251" width="1" height="4" fill="#4169E1"/>
+  
+  <!-- Teen Daughter (creativity) -->
+  <circle cx="270" cy="225" r="15" fill="#F4C2A1"/>
+  <rect x="260" y="238" width="20" height="28" fill="#FF69B4"/>
+  <ellipse cx="270" cy="212" rx="10" ry="6" fill="#FF1493"/>
+  
+  <!-- Daughter's Hair Bow -->
+  <ellipse cx="275" cy="205" rx="5" ry="3" fill="#FF69B4"/>
+  <ellipse cx="265" cy="205" rx="5" ry="3" fill="#FF69B4"/>
+  
+  <!-- Daughter's Art Supplies -->
+  <rect x="285" y="240" width="2" height="8" fill="#FF0000"/>
+  <rect x="288" y="240" width="2" height="8" fill="#00FF00"/>
+  <rect x="291" y="240" width="2" height="8" fill="#0000FF"/>
+  
+  <!-- Little Brother (joy) -->
+  <circle cx="200" cy="240" r="12" fill="#F4C2A1"/>
+  <rect x="192" y="250" width="16" height="24" fill="#FF8C00"/>
+  <ellipse cx="200" cy="230" rx="6" ry="4" fill="#FFD700"/>
+  <circle cx="196" cy="238" r="1" fill="#000000"/>
+  <circle cx="204" cy="238" r="1" fill="#000000"/>
+  <ellipse cx="200" cy="242" rx="3" ry="2" fill="#FF69B4"/>
+  
+  <!-- Little Brother's Toy -->
+  <rect x="185" y="265" width="6" height="4" fill="#FF0000"/>
+  <circle cx="188" cy="267" r="1" fill="#FFFF00"/>
+  <rect x="189" y="266" width="2" height="2" fill="#00FF00"/>
+  
+  <!-- Family Dog -->
+  <ellipse cx="340" cy="240" rx="15" ry="8" fill="#8B4513"/>
+  <circle cx="340" cy="225" r="8" fill="#8B4513"/>
+  <ellipse cx="337" cy="223" rx="2" ry="1" fill="#000000"/>
+  <ellipse cx="343" cy="223" rx="2" ry="1" fill="#000000"/>
+  <ellipse cx="340" cy="227" rx="2" ry="1" fill="#000000"/>
+  <ellipse cx="348" cy="230" rx="4" ry="2" fill="#8B4513"/>
+  
+  <!-- Dog's Tail Wagging -->
+  <path d="M355 235 Q360 230 365 235 Q370 240 365 245" stroke="#8B4513" stroke-width="3" fill="none"/>
+  
+  <!-- Dog Bowl -->
+  <ellipse cx="365" cy="250" rx="8" ry="3" fill="#4169E1"/>
+  <ellipse cx="365" cy="248" rx="6" ry="2" fill="#87CEEB"/>
+  <text x="365" y="250" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="6">FIDO</text>
+  
+  <!-- Hibachi Flames -->
+  <g opacity="0.9">
+    <ellipse cx="190" cy="185" rx="3" ry="6" fill="#FF4500"/>
+    <ellipse cx="200" cy="183" rx="4" ry="8" fill="#FF6347"/>
+    <ellipse cx="210" cy="185" rx="3" ry="6" fill="#FF7F50"/>
+  </g>
+  
+  <!-- Food on Grill -->
+  <!-- Steak -->
+  <ellipse cx="195" cy="192" rx="4" ry="3" fill="#8B4513"/>
+  <ellipse cx="195" cy="191" rx="3" ry="2" fill="#A0522D"/>
+  
+  <!-- Chicken -->
+  <ellipse cx="205" cy="193" rx="3" ry="2" fill="#DEB887"/>
+  <ellipse cx="205" cy="192" rx="2" ry="1" fill="#F5DEB3"/>
+  
+  <!-- Vegetables -->
+  <circle cx="188" cy="195" r="1" fill="#32CD32"/>
+  <circle cx="212" cy="194" r="1" fill="#FF6347"/>
+  <circle cx="200" cy="196" r="1" fill="#FFD700"/>
+  
+  <!-- Steam from Food -->
+  <g stroke="#FFFFFF" stroke-width="1" fill="none" opacity="0.7">
+    <path d="M195 188 Q197 183 195 178 Q193 173 195 168"/>
+    <path d="M205 188 Q207 183 205 178 Q203 173 205 168"/>
+  </g>
+  
+  <!-- Chef (Family Friend/Hired Chef) -->
+  <circle cx="200" cy="130" r="18" fill="#F4C2A1"/>
+  <rect x="187" y="146" width="26" height="32" fill="#FFFFFF"/>
+  <rect x="189" y="148" width="22" height="3" fill="#FF0000"/>
+  
+  <!-- Chef Hat -->
+  <ellipse cx="200" cy="115" rx="12" ry="8" fill="#FFFFFF"/>
+  <rect x="188" y="115" width="24" height="10" fill="#FFFFFF"/>
+  
+  <!-- Chef Tools -->
+  <line x1="175" y1="150" x2="175" y2="140" stroke="#C0C0C0" stroke-width="2"/>
+  <ellipse cx="175" cy="138" rx="2" ry="1" fill="#C0C0C0"/>
+  
+  <line x1="225" y1="155" x2="235" y2="155" stroke="#8B4513" stroke-width="2"/>
+  <ellipse cx="237" cy="155" rx="1" ry="2" fill="#8B4513"/>
+  
+  <!-- Family Conversation Bubbles -->
+  <ellipse cx="120" cy="120" rx="20" ry="12" fill="#FFFFFF" stroke="#C0C0C0" stroke-width="1"/>
+  <text x="120" y="125" text-anchor="middle" fill="#4B0082" font-family="Arial" font-size="8">
+    "When I was
+  </text>
+  <text x="120" y="135" text-anchor="middle" fill="#4B0082" font-family="Arial" font-size="8">
+    young..."
+  </text>
+  
+  <ellipse cx="280" cy="110" rx="22" ry="15" fill="#FFFFFF" stroke="#FFB6C1" stroke-width="1"/>
+  <text x="280" y="112" text-anchor="middle" fill="#800080" font-family="Arial" font-size="7">
+    "Try some
+  </text>
+  <text x="280" y="122" text-anchor="middle" fill="#800080" font-family="Arial" font-size="7">
+    vegetables,
+  </text>
+  <text x="280" y="132" text-anchor="middle" fill="#800080" font-family="Arial" font-size="7">
+    dear!"
+  </text>
+  
+  <ellipse cx="130" cy="190" rx="18" ry="10" fill="#FFFFFF" stroke="#006400" stroke-width="1"/>
+  <text x="130" y="193" text-anchor="middle" fill="#006400" font-family="Arial" font-size="8">
+    "So cool!"
+  </text>
+  
+  <!-- Laughter Lines -->
+  <g stroke="#FFD700" stroke-width="2" fill="none" opacity="0.7">
+    <path d="M240 130 Q245 125 250 130"/>
+    <path d="M200 115 Q205 110 210 115"/>
+    <path d="M270 200 Q275 195 280 200"/>
+  </g>
+  
+  <!-- Heart Symbols (family love) -->
+  <g fill="#FF69B4">
+    <path d="M320 120 Q322 118 324 120 Q326 118 328 120 Q328 124 324 128 Q320 124 320 120"/>
+    <path d="M60 180 Q62 178 64 180 Q66 178 68 180 Q68 184 64 188 Q60 184 60 180"/>
+    <path d="M350 160 Q352 158 354 160 Q356 158 358 160 Q358 164 354 168 Q350 164 350 160"/>
+  </g>
+  
+  <!-- Family Photos on Wall -->
+  <rect x="50" y="50" width="15" height="12" fill="#8B4513"/>
+  <rect x="52" y="52" width="11" height="8" fill="#FFFFFF"/>
+  <circle cx="57" cy="56" r="1" fill="#FF69B4"/>
+  
+  <rect x="330" y="40" width="18" height="14" fill="#8B4513"/>
+  <rect x="332" y="42" width="14" height="10" fill="#FFFFFF"/>
+  <g fill="#4169E1">
+    <circle cx="337" cy="47" r="1"/>
+    <circle cx="341" cy="47" r="1"/>
+  </g>
+  
+  <!-- House Plants -->
+  <ellipse cx="80" cy="270" rx="8" ry="4" fill="#8B4513"/>
+  <g fill="#228B22">
+    <ellipse cx="75" cy="260" rx="3" ry="8"/>
+    <ellipse cx="80" cy="255" rx="4" ry="10"/>
+    <ellipse cx="85" cy="260" rx="3" ry="8"/>
+  </g>
+  
+  <!-- Window with Sunset -->
+  <rect x="20" y="80" width="40" height="30" fill="#87CEEB"/>
+  <rect x="22" y="82" width="36" height="26" fill="#FFE4B5"/>
+  <circle cx="45" cy="95" r="6" fill="#FF6347"/>
+  <line x1="40" y1="95" x2="60" y2="95" stroke="#8B4513" stroke-width="2"/>
+  <line x1="40" y1="82" x2="40" y2="108" stroke="#8B4513" stroke-width="2"/>
+  
+  <!-- Family Celebration Banner -->
+  <path d="M80 30 Q200 40 320 30" stroke="#FF69B4" stroke-width="3" fill="none"/>
+  <g fill="#FFD700">
+    <polygon points="90,25 95,35 85,35"/>
+    <polygon points="150,32 155,42 145,42"/>
+    <polygon points="210,32 215,42 205,42"/>
+    <polygon points="270,32 275,42 265,42"/>
+    <polygon points="310,25 315,35 305,35"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="25" text-anchor="middle" fill="#4B0082" font-family="Arial, sans-serif" font-size="20" font-weight="bold">
+    Family Hibachi Night
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="285" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="14">
+    "Where memories are made around the grill"
+  </text>
+  
+  <defs>
+    <linearGradient id="familyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF8DC;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFEBCD;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F5F5DC;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

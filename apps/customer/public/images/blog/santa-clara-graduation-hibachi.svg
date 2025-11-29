@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.svg/2000/svg">
+  <!-- Santa Clara graduation celebration -->
+  <defs>
+    <linearGradient id="graduationSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4169E1"/>
+      <stop offset="50%" style="stop-color:#6495ED"/>
+      <stop offset="100%" style="stop-color:#87CEEB"/>
+    </linearGradient>
+    <linearGradient id="academicBuilding" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F5F5DC"/>
+      <stop offset="100%" style="stop-color:#DEB887"/>
+    </linearGradient>
+    <radialGradient id="achievementGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFD700; opacity:0.6"/>
+      <stop offset="100%" style="stop-color:transparent"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Santa Clara academic sky -->
+  <rect width="800" height="600" fill="url(#graduationSky)"/>
+  
+  <!-- Achievement stars -->
+  <circle cx="120" cy="70" r="2" fill="#FFD700"/>
+  <circle cx="230" cy="50" r="1.5" fill="white"/>
+  <circle cx="380" cy="80" r="2" fill="#FFD700"/>
+  <circle cx="520" cy="60" r="1.5" fill="white"/>
+  <circle cx="680" cy="45" r="2" fill="#FFD700"/>
+  <circle cx="750" cy="75" r="1.5" fill="white"/>
+  
+  <!-- Santa Clara University campus -->
+  <rect x="100" y="200" width="120" height="180" fill="url(#academicBuilding)" rx="10"/>
+  <rect x="240" y="180" width="140" height="200" fill="url(#academicBuilding)" rx="10"/>
+  <rect x="400" y="220" width="100" height="160" fill="url(#academicBuilding)" rx="10"/>
+  <rect x="520" y="190" width="130" height="190" fill="url(#academicBuilding)" rx="10"/>
+  
+  <!-- University bell tower -->
+  <rect x="320" y="120" width="30" height="80" fill="#8B4513"/>
+  <polygon points="315,120 355,120 335,100" fill="#654321"/>
+  <circle cx="335" cy="110" r="3" fill="#FFD700"/>
+  
+  <!-- SCU Mission Church -->
+  <rect x="150" y="160" width="80" height="60" fill="url(#academicBuilding)" rx="5"/>
+  <polygon points="140,160 240,160 190,130" fill="#8B4513"/>
+  <rect x="185" y="140" width="10" height="20" fill="#654321"/>
+  <polygon points="185,140 195,140 190,130" fill="#FFD700"/>
+  
+  <!-- University logos -->
+  <circle cx="160" cy="240" r="12" fill="#8B0000"/>
+  <text x="160" y="246" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">SCU</text>
+  
+  <rect x="440" y="250" width="24" height="24" fill="#FF6347" rx="3"/>
+  <text x="452" y="265" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">SJSU</text>
+  
+  <circle cx="580" cy="240" r="12" fill="#8B008B"/>
+  <text x="580" y="246" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="8" font-weight="bold">STAN</text>
+  
+  <!-- Graduation celebration venue -->
+  <rect x="250" y="300" width="300" height="150" fill="#F0F8FF" opacity="0.95" rx="15"/>
+  <text x="400" y="330" text-anchor="middle" fill="#8B0000" font-family="Arial, sans-serif" font-size="16" font-weight="bold">GRADUATION CELEBRATION</text>
+  
+  <!-- Academic hibachi setup -->
+  <rect x="280" y="270" width="240" height="80" fill="#2F4F4F" rx="12"/>
+  <rect x="290" y="265" width="220" height="15" fill="#FF4500"/>
+  
+  <!-- Graduation hibachi grills -->
+  <circle cx="310" r="7" cy="270" fill="#FFD700"/>
+  <circle cx="330" r="7" cy="270" fill="#8B0000"/>
+  <circle cx="350" r="7" cy="270" fill="#4169E1"/>
+  <circle cx="370" r="7" cy="270" fill="#32CD32"/>
+  <circle cx="390" r="7" cy="270" fill="#FFD700"/>
+  <circle cx="410" r="7" cy="270" fill="#8B0000"/>
+  <circle cx="430" r="7" cy="270" fill="#4169E1"/>
+  <circle cx="450" r="7" cy="270" fill="#32CD32"/>
+  <circle cx="470" r="7" cy="270" fill="#FFD700"/>
+  <circle cx="490" r="7" cy="270" fill="#8B0000"/>
+  
+  <!-- Academic hibachi chef -->
+  <circle cx="400" cy="230" r="16" fill="#FDBCB4"/>
+  <rect x="389" y="246" width="22" height="26" fill="white"/>
+  <rect x="385" y="272" width="30" height="32" fill="#8B0000"/>
+  <rect x="389" y="304" width="9" height="22" fill="#FDBCB4"/>
+  <rect x="402" y="304" width="9" height="22" fill="#FDBCB4"/>
+  
+  <!-- Chef graduation cap -->
+  <rect x="393" y="217" width="14" height="8" fill="#000000"/>
+  <rect x="390" y="214" width="20" height="3" fill="#000000"/>
+  <rect x="409" y="210" width="6" height="6" fill="#FFD700"/>
+  
+  <!-- Graduates -->
+  <!-- Graduate 1 with cap and gown -->
+  <circle cx="320" cy="380" r="13" fill="#FDBCB4"/>
+  <rect x="311" y="393" width="18" height="26" fill="#000000"/>
+  <rect x="313" y="419" width="14" height="20" fill="#000000"/>
+  <rect x="315" y="439" width="10" height="16" fill="#8B4513"/>
+  <!-- Graduation cap -->
+  <rect x="315" y="372" width="10" height="6" fill="#000000"/>
+  <rect x="312" y="370" width="16" height="2" fill="#000000"/>
+  <rect x="319" y="367" width="4" height="4" fill="#FFD700"/>
+  
+  <!-- Graduate 2 -->
+  <circle cx="480" cy="380" r="13" fill="#FDBCB4"/>
+  <rect x="471" y="393" width="18" height="26" fill="#000000"/>
+  <rect x="473" y="419" width="14" height="20" fill="#000000"/>
+  <rect x="475" y="439" width="10" height="16" fill="#654321"/>
+  <!-- Graduation cap -->
+  <rect x="475" y="372" width="10" height="6" fill="#000000"/>
+  <rect x="472" y="370" width="16" height="2" fill="#000000"/>
+  <rect x="479" y="367" width="4" height="4" fill="#FFD700"/>
+  
+  <!-- Family and friends -->
+  <circle cx="350" cy="390" r="11" fill="#FDBCB4"/>
+  <rect x="344" y="401" width="12" height="20" fill="#FF69B4"/>
+  <rect x="346" y="421" width="8" height="16" fill="#8B4513"/>
+  
+  <circle cx="450" cy="390" r="11" fill="#FDBCB4"/>
+  <rect x="444" y="401" width="12" height="20" fill="#4169E1"/>
+  <rect x="446" y="421" width="8" height="16" fill="#000080"/>
+  
+  <!-- Proud parents -->
+  <circle cx="380" cy="400" r="12" fill="#FDBCB4"/>
+  <rect x="373" y="412" width="14" height="22" fill="#8B008B"/>
+  <rect x="375" y="434" width="10" height="18" fill="#654321"/>
+  
+  <circle cx="420" cy="400" r="12" fill="#FDBCB4"/>
+  <rect x="413" y="412" width="14" height="22" fill="#32CD32"/>
+  <rect x="415" y="434" width="10" height="18" fill="#8B4513"/>
+  
+  <!-- Graduation dining table -->
+  <ellipse cx="400" cy="470" rx="120" ry="30" fill="#8B4513"/>
+  
+  <!-- Academic place settings -->
+  <circle cx="320" cy="465" r="8" fill="white"/>
+  <circle cx="360" cy="465" r="8" fill="white"/>
+  <circle cx="400" cy="465" r="8" fill="white"/>
+  <circle cx="440" cy="465" r="8" fill="white"/>
+  <circle cx="480" cy="465" r="8" fill="white"/>
+  
+  <!-- Celebration champagne -->
+  <rect x="315" y="455" width="4" height="12" fill="#FFD700"/>
+  <polygon points="315,455 319,455 317,452" fill="#FFD700"/>
+  <rect x="355" y="455" width="4" height="12" fill="#FFD700"/>
+  <polygon points="355,455 359,455 357,452" fill="#FFD700"/>
+  <rect x="395" y="455" width="4" height="12" fill="#FFD700"/>
+  <polygon points="395,455 399,455 397,452" fill="#FFD700"/>
+  <rect x="435" y="455" width="4" height="12" fill="#FFD700"/>
+  <polygon points="435,455 439,455 437,452" fill="#FFD700"/>
+  <rect x="475" y="455" width="4" height="12" fill="#FFD700"/>
+  <polygon points="475,455 479,455 477,452" fill="#FFD700"/>
+  
+  <!-- Santa Clara graduation title -->
+  <text x="400" y="180" text-anchor="middle" fill="#8B0000" font-family="Arial, sans-serif" font-size="26" font-weight="bold">SANTA CLARA</text>
+  <text x="400" y="205" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="16">GRADUATION CELEBRATIONS</text>
+  
+  <!-- Silicon Valley success -->
+  <rect x="100" y="450" width="150" height="100" fill="#8B0000" opacity="0.8" rx="12"/>
+  <text x="175" y="475" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="14" font-weight="bold">SILICON</text>
+  <text x="175" y="490" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">VALLEY</text>
+  <text x="175" y="505" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">SUCCESS</text>
+  <text x="175" y="520" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">ACHIEVEMENTS</text>
+  <text x="175" y="535" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="10">SANTA CLARA</text>
+  
+  <!-- Academic excellence -->
+  <rect x="550" y="450" width="150" height="100" fill="#4169E1" opacity="0.8" rx="12"/>
+  <text x="625" y="475" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">ACADEMIC</text>
+  <text x="625" y="490" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="13">EXCELLENCE</text>
+  <text x="625" y="505" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">HIBACHI</text>
+  <text x="625" y="520" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">CELEBRATION</text>
+  <text x="625" y="535" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">GRADUATES</text>
+  
+  <!-- Academic hibachi specialties -->
+  <ellipse cx="315" cy="268" rx="10" ry="6" fill="#FFD700"/>
+  <ellipse cx="340" cy="268" rx="11" ry="6" fill="#8B0000"/>
+  <ellipse cx="365" cy="268" rx="10" ry="6" fill="#4169E1"/>
+  <ellipse cx="390" cy="268" rx="9" ry="5" fill="#32CD32"/>
+  <ellipse cx="415" cy="268" rx="10" ry="6" fill="#FFD700"/>
+  <ellipse cx="440" cy="268" rx="11" ry="6" fill="#8B0000"/>
+  <ellipse cx="465" cy="268" rx="10" ry="6" fill="#4169E1"/>
+  <ellipse cx="485" cy="268" rx="9" ry="5" fill="#32CD32"/>
+  
+  <!-- Success hibachi flames -->
+  <polygon points="315,268 320,258 310,258" fill="#FFD700" opacity="0.9"/>
+  <polygon points="340,268 345,258 335,258" fill="#8B0000" opacity="0.9"/>
+  <polygon points="365,268 370,258 360,258" fill="#4169E1" opacity="0.9"/>
+  <polygon points="390,268 395,258 385,258" fill="#32CD32" opacity="0.9"/>
+  <polygon points="415,268 420,258 410,258" fill="#FFD700" opacity="0.9"/>
+  <polygon points="440,268 445,258 435,258" fill="#8B0000" opacity="0.9"/>
+  <polygon points="465,268 470,258 460,258" fill="#4169E1" opacity="0.9"/>
+  <polygon points="485,268 490,258 480,258" fill="#32CD32" opacity="0.9"/>
+  
+  <!-- Graduation balloons -->
+  <circle cx="200" cy="320" r="14" fill="#FFD700"/>
+  <rect x="199" y="334" width="2" height="25" fill="#654321"/>
+  <circle cx="220" cy="305" r="12" fill="#8B0000"/>
+  <rect x="219" y="317" width="2" height="22" fill="#654321"/>
+  <circle cx="240" cy="315" r="13" fill="#4169E1"/>
+  <rect x="239" y="328" width="2" height="24" fill="#654321"/>
+  
+  <circle cx="560" cy="320" r="14" fill="#32CD32"/>
+  <rect x="559" y="334" width="2" height="25" fill="#654321"/>
+  <circle cx="580" cy="305" r="12" fill="#FF69B4"/>
+  <rect x="579" y="317" width="2" height="22" fill="#654321"/>
+  <circle cx="600" cy="315" r="13" fill="#9370DB"/>
+  <rect x="599" y="328" width="2" height="24" fill="#654321"/>
+  
+  <!-- Diploma -->
+  <rect x="150" y="380" width="40" height="25" fill="white" rx="2"/>
+  <rect x="152" y="382" width="36" height="21" fill="#FFD700" opacity="0.3"/>
+  <text x="170" y="395" text-anchor="middle" fill="#8B0000" font-family="Arial, sans-serif" font-size="8">DIPLOMA</text>
+  <circle cx="165" cy="390" r="3" fill="#FFD700"/>
+  
+  <!-- Academic books -->
+  <rect x="610" y="380" width="25" height="35" fill="#8B0000" rx="2"/>
+  <rect x="635" y="385" width="25" height="30" fill="#4169E1" rx="2"/>
+  <rect x="660" y="390" width="25" height="25" fill="#32CD32" rx="2"/>
+  <text x="622" y="400" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="6">ENGI</text>
+  <text x="647" y="403" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="6">BUS</text>
+  <text x="672" y="405" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="6">CS</text>
+  
+  <!-- Achievement glow -->
+  <circle cx="400" cy="350" r="130" fill="url(#achievementGlow)"/>
+  
+  <!-- University seal -->
+  <circle cx="400" cy="150" r="20" fill="#8B0000"/>
+  <circle cx="400" cy="150" r="15" fill="#FFD700"/>
+  <text x="400" y="156" text-anchor="middle" fill="#8B0000" font-family="Arial, sans-serif" font-size="10" font-weight="bold">SCU</text>
+  
+  <!-- Success celebration message -->
+  <text x="400" y="120" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="16" font-weight="bold">CELEBRATING ACADEMIC SUCCESS</text>
+</svg>

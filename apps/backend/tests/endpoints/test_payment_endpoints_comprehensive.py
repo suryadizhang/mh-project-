@@ -9,8 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import uuid4
 from datetime import date, time
 
-from models.booking import Booking, BookingStatus
-from models.customer import Customer
+from db.models.core import Booking, BookingStatus
+from db.models.core import Customer
 
 
 @pytest.mark.asyncio

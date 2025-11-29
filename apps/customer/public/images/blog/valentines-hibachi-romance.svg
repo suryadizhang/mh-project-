@@ -1,0 +1,230 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#valentinesGradient)"/>
+  
+  <!-- Heart-shaped Table -->
+  <path d="M200 220 Q160 180 120 200 Q120 160 160 160 Q200 120 240 160 Q280 160 280 200 Q240 180 200 220" fill="#8B0000"/>
+  <path d="M200 215 Q165 180 130 195 Q130 165 165 165 Q200 130 235 165 Q270 165 270 195 Q235 180 200 215" fill="#DC143C"/>
+  <path d="M200 210 Q170 180 140 190 Q140 170 170 170 Q200 140 230 170 Q260 170 260 190 Q230 180 200 210" fill="#FF1493"/>
+  
+  <!-- Romantic Hibachi Setup -->
+  <rect x="175" y="175" width="50" height="30" rx="8" fill="#8B0000"/>
+  <rect x="180" y="180" width="40" height="20" rx="5" fill="#2F4F4F"/>
+  <rect x="185" y="185" width="30" height="10" rx="3" fill="#4A4A4A"/>
+  
+  <!-- Rose Petals Around Grill -->
+  <g fill="#FF69B4" opacity="0.8">
+    <ellipse cx="165" cy="170" rx="3" ry="1" transform="rotate(45 165 170)"/>
+    <ellipse cx="235" cy="175" rx="3" ry="1" transform="rotate(-30 235 175)"/>
+    <ellipse cx="160" cy="190" rx="2" ry="1" transform="rotate(60 160 190)"/>
+    <ellipse cx="240" cy="190" rx="3" ry="1" transform="rotate(-45 240 190)"/>
+    <ellipse cx="170" cy="210" rx="2" ry="1" transform="rotate(15 170 210)"/>
+    <ellipse cx="230" cy="205" rx="3" ry="1" transform="rotate(-60 230 205)"/>
+  </g>
+  
+  <!-- Romantic Couple -->
+  
+  <!-- Male Partner -->
+  <circle cx="140" cy="150" r="18" fill="#F4C2A1"/>
+  <rect x="127" y="166" width="26" height="32" fill="#000080"/>
+  <rect x="129" y="168" width="22" height="3" fill="#FFFFFF"/>
+  <ellipse cx="140" cy="133" rx="10" ry="6" fill="#8B4513"/>
+  
+  <!-- Male's Tie (special occasion) -->
+  <polygon points="140,178 145,183 140,200 135,183" fill="#8B0000"/>
+  <circle cx="140" cy="185" r="1" fill="#FFD700"/>
+  
+  <!-- Male's Boutonniere -->
+  <circle cx="130" cy="175" r="2" fill="#FF69B4"/>
+  <ellipse cx="129" cy="174" rx="1" ry="2" fill="#228B22"/>
+  
+  <!-- Female Partner -->
+  <circle cx="260" cy="145" r="16" fill="#F4C2A1"/>
+  <rect x="249" y="159" width="22" height="30" fill="#8B008B"/>
+  <ellipse cx="260" cy="130" rx="8" ry="6" fill="#FFD700"/>
+  
+  <!-- Female's Dress Details -->
+  <path d="M249 175 Q260 170 271 175 Q271 185 260 190 Q249 185 249 175" fill="#FF1493"/>
+  
+  <!-- Female's Jewelry -->
+  <g fill="#FFD700">
+    <circle cx="256" cy="159" r="1"/>
+    <circle cx="258" cy="159" r="1"/>
+    <circle cx="260" cy="159" r="1"/>
+    <circle cx="262" cy="159" r="1"/>
+    <circle cx="264" cy="159" r="1"/>
+  </g>
+  
+  <!-- Corsage -->
+  <circle cx="245" cy="165" r="3" fill="#FF69B4"/>
+  <circle cx="245" cy="165" r="2" fill="#FFB6C1"/>
+  <ellipse cx="242" cy="164" rx="1" ry="3" fill="#228B22"/>
+  
+  <!-- Valentine's Flames -->
+  <g opacity="0.9">
+    <ellipse cx="190" cy="182" rx="4" ry="8" fill="#FF69B4"/>
+    <ellipse cx="200" cy="180" rx="5" ry="10" fill="#FF1493"/>
+    <ellipse cx="210" cy="182" rx="4" ry="8" fill="#FFB6C1"/>
+  </g>
+  
+  <!-- Heart-shaped Food -->
+  <!-- Heart Steak -->
+  <path d="M195 188 Q193 186 191 188 Q191 185 193 185 Q195 183 197 185 Q199 185 199 188 Q197 186 195 188" fill="#8B4513"/>
+  
+  <!-- Heart Shrimp -->
+  <path d="M205 189 Q203 187 201 189 Q201 186 203 186 Q205 184 207 186 Q209 186 209 189 Q207 187 205 189" fill="#FFB6C1"/>
+  
+  <!-- Champagne Setup -->
+  <rect x="100" y="120" width="6" height="20" fill="#228B22"/>
+  <ellipse cx="103" cy="115" rx="4" ry="8" fill="#228B22"/>
+  <rect x="101" y="110" width="4" height="5" fill="#FFD700"/>
+  
+  <!-- Champagne Glass 1 -->
+  <polygon points="110,140 115,140 113,155 112,155" fill="#FFFFFF" opacity="0.8"/>
+  <ellipse cx="112.5" cy="140" rx="2.5" ry="1" fill="#FFD700"/>
+  
+  <!-- Champagne Glass 2 -->
+  <polygon points="290,135 295,135 293,150 292,150" fill="#FFFFFF" opacity="0.8"/>
+  <ellipse cx="292.5" cy="135" rx="2.5" ry="1" fill="#FFD700"/>
+  
+  <!-- Bubbles -->
+  <g fill="#FFFFFF" opacity="0.7">
+    <circle cx="112" cy="145" r="0.5"/>
+    <circle cx="113" cy="148" r="0.5"/>
+    <circle cx="111" cy="151" r="0.5"/>
+    <circle cx="292" cy="140" r="0.5"/>
+    <circle cx="293" cy="143" r="0.5"/>
+    <circle cx="291" cy="146" r="0.5"/>
+  </g>
+  
+  <!-- Romantic Roses -->
+  <!-- Rose 1 -->
+  <circle cx="80" cy="180" r="8" fill="#FF0000"/>
+  <circle cx="80" cy="180" r="6" fill="#FF69B4"/>
+  <circle cx="80" cy="180" r="4" fill="#FFB6C1"/>
+  <rect x="78" y="188" width="4" height="15" fill="#228B22"/>
+  <ellipse cx="82" cy="195" rx="2" ry="3" fill="#228B22"/>
+  
+  <!-- Rose 2 -->
+  <circle cx="320" cy="175" r="6" fill="#FF0000"/>
+  <circle cx="320" cy="175" r="4" fill="#FF69B4"/>
+  <rect x="318" y="181" width="4" height="12" fill="#228B22"/>
+  <ellipse cx="321" cy="188" rx="2" ry="3" fill="#228B22"/>
+  
+  <!-- Romantic Candles -->
+  <!-- Candle 1 -->
+  <rect x="60" y="130" width="4" height="25" fill="#DC143C"/>
+  <ellipse cx="62" cy="125" rx="2" ry="4" fill="#FFD700"/>
+  <ellipse cx="62" cy="120" rx="1" ry="3" fill="#FF6347"/>
+  
+  <!-- Candle 2 -->
+  <rect x="335" y="125" width="4" height="20" fill="#8B008B"/>
+  <ellipse cx="337" cy="120" rx="2" ry="4" fill="#FFD700"/>
+  <ellipse cx="337" cy="115" rx="1" ry="3" fill="#FF6347"/>
+  
+  <!-- Floating Hearts -->
+  <g fill="#FF69B4" opacity="0.6">
+    <path d="M50 100 Q52 98 54 100 Q56 98 58 100 Q58 104 54 108 Q50 104 50 100"/>
+    <path d="M340 90 Q342 88 344 90 Q346 88 348 90 Q348 94 344 98 Q340 94 340 90"/>
+    <path d="M120 70 Q122 68 124 70 Q126 68 128 70 Q128 74 124 78 Q120 74 120 70"/>
+    <path d="M280 65 Q282 63 284 65 Q286 63 288 65 Q288 69 284 73 Q280 69 280 65"/>
+    <path d="M30 200 Q32 198 34 200 Q36 198 38 200 Q38 204 34 208 Q30 204 30 200"/>
+    <path d="M360 200 Q362 198 364 200 Q366 198 368 200 Q368 204 364 208 Q360 204 360 200"/>
+  </g>
+  
+  <!-- Love Messages -->
+  <ellipse cx="140" cy="100" rx="25" ry="15" fill="#FFFFFF" stroke="#FF69B4" stroke-width="2"/>
+  <text x="140" y="105" text-anchor="middle" fill="#8B008B" font-family="Arial" font-size="8">
+    "You're my
+  </text>
+  <text x="140" y="115" text-anchor="middle" fill="#8B008B" font-family="Arial" font-size="8">
+    everything!"
+  </text>
+  
+  <ellipse cx="260" cy="95" rx="22" ry="12" fill="#FFFFFF" stroke="#FF69B4" stroke-width="2"/>
+  <text x="260" y="100" text-anchor="middle" fill="#8B008B" font-family="Arial" font-size="8">
+    "I love you
+  </text>
+  <text x="260" y="110" text-anchor="middle" fill="#8B008B" font-family="Arial" font-size="8">
+    too!"
+  </text>
+  
+  <!-- Romantic Steam -->
+  <g stroke="#FFB6C1" stroke-width="2" fill="none" opacity="0.8">
+    <path d="M190 178 Q192 173 190 168 Q188 163 190 158"/>
+    <path d="M200 178 Q202 173 200 168 Q198 163 200 158"/>
+    <path d="M210 178 Q212 173 210 168 Q208 163 210 158"/>
+  </g>
+  
+  <!-- Valentine's Gift Box -->
+  <rect x="50" y="240" width="20" height="15" fill="#8B0000"/>
+  <rect x="52" y="242" width="16" height="11" fill="#FF1493"/>
+  <rect x="58" y="240" width="4" height="15" fill="#FFD700"/>
+  <rect x="50" y="247" width="20" height="4" fill="#FFD700"/>
+  
+  <!-- Gift Bow -->
+  <ellipse cx="55" cy="237" rx="3" ry="2" fill="#FFD700"/>
+  <ellipse cx="65" cy="237" rx="3" ry="2" fill="#FFD700"/>
+  <circle cx="60" cy="237" r="1" fill="#FF6347"/>
+  
+  <!-- Chocolate Box -->
+  <rect x="330" y="235" width="25" height="18" fill="#8B4513"/>
+  <rect x="332" y="237" width="21" height="14" fill="#D2691E"/>
+  
+  <!-- Chocolates -->
+  <g fill="#654321">
+    <circle cx="338" cy="242" r="2"/>
+    <circle cx="343" cy="242" r="2"/>
+    <circle cx="348" cy="242" r="2"/>
+    <circle cx="340" cy="247" r="2"/>
+    <circle cx="346" cy="247" r="2"/>
+  </g>
+  
+  <!-- Love Letter -->
+  <rect x="20" y="250" width="15" height="12" fill="#FFFACD"/>
+  <g fill="#8B008B" font-family="Arial" font-size="4">
+    <text x="22" y="255">My Love,</text>
+    <text x="22" y="260">Tonight...</text>
+  </g>
+  
+  <!-- Heart Seal -->
+  <path d="M32 265 Q33 264 34 265 Q35 264 36 265 Q36 267 34 269 Q32 267 32 265" fill="#FF0000"/>
+  
+  <!-- Romantic Lighting -->
+  <circle cx="70" cy="80" r="25" fill="#FFD700" opacity="0.3"/>
+  <circle cx="330" cy="75" r="20" fill="#FF69B4" opacity="0.3"/>
+  
+  <!-- Sparkles -->
+  <g fill="#FFD700">
+    <polygon points="160,60 162,65 167,63 162,68 164,73 160,68 156,73 158,68 153,63 158,65"/>
+    <polygon points="240,55 242,60 247,58 242,63 244,68 240,63 236,68 238,63 233,58 238,60"/>
+    <polygon points="90,160 92,165 97,163 92,168 94,173 90,168 86,173 88,168 83,163 88,165"/>
+    <polygon points="310,160 312,165 317,163 312,168 314,173 310,168 306,173 308,168 303,163 308,165"/>
+  </g>
+  
+  <!-- Anniversary Banner -->
+  <path d="M80 40 Q200 50 320 40" stroke="#FF69B4" stroke-width="3" fill="none"/>
+  <g fill="#FF1493">
+    <path d="M90 35 Q92 33 94 35 Q96 33 98 35 Q98 39 94 43 Q90 39 90 35"/>
+    <path d="M200 45 Q202 43 204 45 Q206 43 208 45 Q208 49 204 53 Q200 49 200 45"/>
+    <path d="M310 35 Q312 33 314 35 Q316 33 318 35 Q318 39 314 43 Q310 39 310 35"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="25" text-anchor="middle" fill="#8B008B" font-family="Arial, sans-serif" font-size="22" font-weight="bold">
+    Valentine's Day Hibachi
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="285" text-anchor="middle" fill="#8B0000" font-family="Arial, sans-serif" font-size="14">
+    "Romance sizzles with every bite"
+  </text>
+  
+  <defs>
+    <linearGradient id="valentinesGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFE4E1;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFF0F5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFEBEF;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

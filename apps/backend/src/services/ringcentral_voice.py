@@ -14,7 +14,7 @@ from services.speech_service import speech_service
 from services.ringcentral_service import RingCentralService
 
 # MIGRATED: from models.call_recording → db.models.call_recording
-from db.models.call_recording import CallRecording, CallStatus, CallDirection
+from db.models.support_communications import CallRecording, CallStatus, CallDirection
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 

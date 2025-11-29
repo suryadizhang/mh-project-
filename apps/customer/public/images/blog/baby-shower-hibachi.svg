@@ -1,0 +1,277 @@
+<svg width="400" height="250" viewBox="0 0 400 250" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <defs>
+    <linearGradient id="babyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffeaa7;stop-opacity:1" />
+      <stop offset="30%" style="stop-color:#fab1a0;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#74b9ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#fd79a8;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="grillGlow" cx="50%" cy="50%" r="40%">
+      <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:0.7" />
+      <stop offset="60%" style="stop-color:#d4422a;stop-opacity:0.4" />
+      <stop offset="100%" style="stop-color:#8b0000;stop-opacity:0.1" />
+    </radialGradient>
+    <linearGradient id="balloonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff7675;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#fd79a8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="400" height="250" fill="url(#babyGradient)"/>
+  
+  <!-- Baby shower balloons -->
+  <g opacity="0.8">
+    <circle cx="50" cy="60" r="12" fill="#74b9ff"/>
+    <line x1="50" y1="72" x2="50" y2="90" stroke="#000" stroke-width="1"/>
+    
+    <circle cx="70" cy="45" r="10" fill="#fd79a8"/>
+    <line x1="70" y1="55" x2="70" y2="90" stroke="#000" stroke-width="1"/>
+    
+    <circle cx="350" cy="50" r="14" fill="#ffeaa7"/>
+    <line x1="350" y1="64" x2="350" y2="85" stroke="#000" stroke-width="1"/>
+    
+    <circle cx="370" cy="65" r="11" fill="#55efc4"/>
+    <line x1="370" y1="76" x2="370" y2="85" stroke="#000" stroke-width="1"/>
+  </g>
+  
+  <!-- Baby shower decorative bunting -->
+  <g opacity="0.7">
+    <line x1="20" y1="30" x2="380" y2="30" stroke="#000" stroke-width="2"/>
+    <path d="M50 30 L45 40 L55 40 Z" fill="#74b9ff"/>
+    <path d="M100 30 L95 40 L105 40 Z" fill="#fd79a8"/>
+    <path d="M150 30 L145 40 L155 40 Z" fill="#ffeaa7"/>
+    <path d="M200 30 L195 40 L205 40 Z" fill="#55efc4"/>
+    <path d="M250 30 L245 40 L255 40 Z" fill="#74b9ff"/>
+    <path d="M300 30 L295 40 L305 40 Z" fill="#fd79a8"/>
+    <path d="M350 30 L345 40 L355 40 Z" fill="#ffeaa7"/>
+  </g>
+  
+  <!-- Elegant baby shower table -->
+  <ellipse cx="200" cy="180" rx="100" ry="20" fill="#f8f9fa" opacity="0.9"/>
+  
+  <!-- Tablecloth with baby pattern -->
+  <ellipse cx="200" cy="175" rx="95" ry="18" fill="#fff"/>
+  <g opacity="0.4">
+    <circle cx="150" cy="165" r="2" fill="#74b9ff"/>
+    <circle cx="180" cy="175" r="1.5" fill="#fd79a8"/>
+    <circle cx="220" cy="165" r="2" fill="#ffeaa7"/>
+    <circle cx="250" cy="175" r="1.5" fill="#55efc4"/>
+    <path d="M160 170 Q165 168 170 170" stroke="#74b9ff" stroke-width="1" fill="none"/>
+    <path d="M230 170 Q235 168 240 170" stroke="#fd79a8" stroke-width="1" fill="none"/>
+  </g>
+  
+  <!-- Hibachi grill (center) -->
+  <ellipse cx="200" cy="145" rx="35" ry="16" fill="#2c2c2c"/>
+  <ellipse cx="200" cy="143" rx="30" ry="14" fill="url(#grillGlow)"/>
+  
+  <!-- Grill grates -->
+  <g stroke="#666" stroke-width="2" opacity="0.8">
+    <line x1="180" y1="137" x2="220" y2="137"/>
+    <line x1="180" y1="145" x2="220" y2="145"/>
+    <line x1="180" y1="153" x2="220" y2="153"/>
+  </g>
+  
+  <!-- Baby-friendly hibachi foods -->
+  <circle cx="190" cy="142" r="4" fill="#ffa500"/> <!-- Sweet potato -->
+  <circle cx="200" cy="139" r="3" fill="#32cd32"/> <!-- Vegetables -->
+  <circle cx="210" cy="147" r="4" fill="#ff6347"/> <!-- Carrots -->
+  <rect x="185" y="150" width="6" height="3" fill="#8b4513" rx="1"/> <!-- Tofu -->
+  <rect x="205" y="150" width="6" height="3" fill="#228b22" rx="1"/> <!-- Asparagus -->
+  
+  <!-- Steam with baby-themed shapes -->
+  <g opacity="0.6">
+    <path d="M185 125 Q180 115 185 105 Q190 110 185 100" stroke="#e6e6e6" stroke-width="2" fill="none"/>
+    <path d="M200 123 Q195 113 200 103 Q205 108 200 98" stroke="#e6e6e6" stroke-width="2" fill="none"/>
+    <path d="M215 127 Q210 117 215 107 Q220 112 215 102" stroke="#e6e6e6" stroke-width="2" fill="none"/>
+    <!-- Baby bottle shape in steam -->
+    <rect x="198" y="95" width="4" height="8" fill="#e6e6e6" opacity="0.3" rx="2"/>
+    <circle cx="200" cy="93" r="2" fill="#e6e6e6" opacity="0.3"/>
+  </g>
+  
+  <!-- Pregnant mom-to-be (guest of honor) -->
+  <g transform="translate(130, 95)">
+    <circle cx="0" cy="0" r="10" fill="#f4c2a1"/>
+    <path d="M-8 -6 Q-2 -10 2 -10 Q8 -6 2 0" fill="#8b4513"/>
+    <circle cx="-3" cy="-2" r="1.2" fill="#000"/>
+    <circle cx="3" cy="-2" r="1.2" fill="#000"/>
+    <path d="M-3 3 Q0 5 3 3" stroke="#000" stroke-width="0.5" fill="none"/>
+    
+    <!-- Maternity dress -->
+    <path d="M0 10 L-12 50 Q-12 53 -8 53 L8 53 Q12 53 12 50 L0 10" fill="#fd79a8"/>
+    <circle cx="0" cy="30" r="8" fill="#fd79a8" opacity="0.6"/> <!-- Baby bump -->
+    <path d="M-10 25 Q0 22 10 25" stroke="#fff" stroke-width="1.5" fill="none"/>
+    
+    <!-- Arms -->
+    <circle cx="-12" cy="20" r="4" fill="#f4c2a1"/>
+    <circle cx="12" cy="20" r="4" fill="#f4c2a1"/>
+    <rect x="-14" y="17" width="6" height="15" fill="#f4c2a1" rx="3"/>
+    <rect x="8" y="17" width="6" height="15" fill="#f4c2a1" rx="3"/>
+    
+    <!-- Baby shower crown -->
+    <path d="M-8 -12 L-4 -18 L0 -15 L4 -18 L8 -12" stroke="#ffd700" stroke-width="2" fill="none"/>
+    <circle cx="-4" cy="-18" r="1.5" fill="#74b9ff"/>
+    <circle cx="0" cy="-15" r="2" fill="#fd79a8"/>
+    <circle cx="4" cy="-18" r="1.5" fill="#ffeaa7"/>
+  </g>
+  
+  <!-- Partner/spouse supporting -->
+  <g transform="translate(270, 100)">
+    <circle cx="0" cy="0" r="9" fill="#f4c2a1"/>
+    <path d="M-7 -5 Q0 -7 7 -5 Q7 0 0 0 Q-7 0 -7 -5" fill="#654321"/>
+    <circle cx="-2" cy="-2" r="1.1" fill="#000"/>
+    <circle cx="2" cy="-2" r="1.1" fill="#000"/>
+    <path d="M-2 2 Q0 4 2 2" stroke="#000" stroke-width="0.5" fill="none"/>
+    
+    <!-- Nice shirt -->
+    <rect x="-7" y="9" width="14" height="20" fill="#74b9ff" rx="2"/>
+    <rect x="-6" y="11" width="12" height="16" fill="#0984e3" rx="1"/>
+    
+    <!-- Arms -->
+    <circle cx="-9" cy="17" r="3.5" fill="#f4c2a1"/>
+    <circle cx="9" cy="17" r="3.5" fill="#f4c2a1"/>
+    <rect x="-11" y="14" width="5" height="12" fill="#f4c2a1" rx="2.5"/>
+    <rect x="6" y="14" width="5" height="12" fill="#f4c2a1" rx="2.5"/>
+    
+    <!-- Holding baby gift -->
+    <g transform="translate(13, 20)">
+      <rect x="0" y="0" width="8" height="6" fill="#74b9ff" rx="1"/>
+      <rect x="1" y="1" width="6" height="4" fill="#0984e3" rx="0.5"/>
+      <rect x="3.5" y="-1" width="1" height="8" fill="#ffd700"/>
+      <rect x="-1" y="2.5" width="10" height="1" fill="#ffd700"/>
+      <path d="M4 -1 Q2 -3 4 -5 Q6 -3 4 -1" fill="#ffd700"/>
+    </g>
+  </g>
+  
+  <!-- Chef preparing baby-friendly hibachi -->
+  <g transform="translate(200, 110)">
+    <circle cx="0" cy="0" r="8" fill="#f4c2a1"/>
+    <rect x="-1" y="-6" width="2" height="4" fill="#000"/>
+    <circle cx="-2" cy="-1.5" r="1" fill="#000"/>
+    <circle cx="2" cy="-1.5" r="1" fill="#000"/>
+    <path d="M-2 2 Q0 3.5 2 2" stroke="#000" stroke-width="0.5" fill="none"/>
+    
+    <!-- Chef hat -->
+    <ellipse cx="0" cy="-12" rx="10" ry="5" fill="#fff"/>
+    <rect x="-8" y="-14" width="16" height="5" fill="#fff" rx="2"/>
+    
+    <!-- Chef coat -->
+    <rect x="-7" y="8" width="14" height="22" fill="#fff" rx="2"/>
+    <line x1="-2" y1="10" x2="-2" y2="26" stroke="#ccc" stroke-width="0.5"/>
+    <line x1="2" y1="10" x2="2" y2="26" stroke="#ccc" stroke-width="0.5"/>
+    
+    <!-- Arms with gentle cooking tools -->
+    <rect x="-9" y="10" width="4" height="12" fill="#f4c2a1" rx="2"/>
+    <rect x="5" y="10" width="4" height="12" fill="#f4c2a1" rx="2"/>
+    
+    <!-- Gentle spatula -->
+    <rect x="9" y="18" width="8" height="1" fill="#c0c0c0" rx="0.5"/>
+    <rect x="15" y="16" width="3" height="4" fill="#c0c0c0" rx="1"/>
+  </g>
+  
+  <!-- Baby shower gifts table -->
+  <ellipse cx="90" cy="190" rx="25" ry="8" fill="#f8f9fa" opacity="0.8"/>
+  
+  <!-- Wrapped baby gifts -->
+  <g transform="translate(70, 175)">
+    <rect x="0" y="0" width="12" height="8" fill="#74b9ff" rx="1"/>
+    <rect x="1" y="1" width="10" height="6" fill="#0984e3" rx="0.5"/>
+    <rect x="5.5" y="-1" width="1" height="10" fill="#ffd700"/>
+    <rect x="-1" y="3.5" width="14" height="1" fill="#ffd700"/>
+  </g>
+  
+  <g transform="translate(85, 178)">
+    <rect x="0" y="0" width="10" height="6" fill="#fd79a8" rx="1"/>
+    <rect x="0.5" y="0.5" width="9" height="5" fill="#e84393" rx="0.5"/>
+    <rect x="4.5" y="-0.5" width="1" height="7" fill="#ffd700"/>
+    <rect x="-0.5" y="2.5" width="11" height="1" fill="#ffd700"/>
+  </g>
+  
+  <g transform="translate(100, 176)">
+    <rect x="0" y="0" width="8" height="10" fill="#ffeaa7" rx="1"/>
+    <rect x="0.5" y="0.5" width="7" height="9" fill="#fdcb6e" rx="0.5"/>
+    <rect x="3.5" y="-0.5" width="1" height="11" fill="#ffd700"/>
+    <rect x="-0.5" y="4.5" width="9" height="1" fill="#ffd700"/>
+  </g>
+  
+  <!-- Baby items on display table -->
+  <ellipse cx="310" cy="185" rx="30" ry="10" fill="#f8f9fa" opacity="0.8"/>
+  
+  <!-- Baby bottle -->
+  <g transform="translate(290, 170)">
+    <rect x="0" y="0" width="6" height="12" fill="#e6f3ff" rx="3"/>
+    <circle cx="3" cy="-2" r="2" fill="#74b9ff"/>
+    <circle cx="3" cy="6" r="1" fill="#74b9ff" opacity="0.6"/>
+    <line x1="3" y1="2" x2="3" y2="10" stroke="#74b9ff" stroke-width="0.5"/>
+  </g>
+  
+  <!-- Baby rattle -->
+  <g transform="translate(305, 172)">
+    <rect x="0" y="0" width="2" height="8" fill="#8b4513"/>
+    <circle cx="1" cy="-2" r="3" fill="#fd79a8"/>
+    <circle cx="1" cy="10" r="3" fill="#74b9ff"/>
+    <circle cx="1" cy="-2" r="1" fill="#fff"/>
+    <circle cx="1" cy="10" r="1" fill="#fff"/>
+  </g>
+  
+  <!-- Baby shoes -->
+  <g transform="translate(320, 175)">
+    <ellipse cx="0" cy="0" rx="4" ry="2" fill="#ffeaa7"/>
+    <ellipse cx="0" cy="0" rx="3" ry="1.5" fill="#fdcb6e"/>
+    <ellipse cx="6" cy="0" rx="4" ry="2" fill="#ffeaa7"/>
+    <ellipse cx="6" cy="0" rx="3" ry="1.5" fill="#fdcb6e"/>
+  </g>
+  
+  <!-- Baby shower guests mingling -->
+  <g transform="translate(50, 115)">
+    <circle cx="0" cy="0" r="7" fill="#f4c2a1"/>
+    <path d="M-5 -3 Q0 -5 5 -3 Q5 0 0 0 Q-5 0 -5 -3" fill="#d2691e"/>
+    <circle cx="-1.5" cy="-1" r="0.8" fill="#000"/>
+    <circle cx="1.5" cy="-1" r="0.8" fill="#000"/>
+    <path d="M-1.5 1.5 Q0 3 1.5 1.5" stroke="#000" stroke-width="0.4" fill="none"/>
+    
+    <!-- Nice dress -->
+    <rect x="-6" y="7" width="12" height="18" fill="#55efc4" rx="2"/>
+    <circle cx="-3" cy="12" r="1" fill="#fff"/>
+    <circle cx="3" cy="12" r="1" fill="#fff"/>
+    
+    <!-- Arms -->
+    <circle cx="-8" cy="15" r="2.5" fill="#f4c2a1"/>
+    <circle cx="8" cy="15" r="2.5" fill="#f4c2a1"/>
+    <rect x="-9" y="13" width="3" height="8" fill="#f4c2a1" rx="1.5"/>
+    <rect x="6" y="13" width="3" height="8" fill="#f4c2a1" rx="1.5"/>
+  </g>
+  
+  <!-- Gender reveal elements -->
+  <g transform="translate(150, 60)" opacity="0.7">
+    <circle cx="0" cy="0" r="15" fill="#fff"/>
+    <circle cx="0" cy="0" r="12" fill="#74b9ff" opacity="0.5"/>
+    <circle cx="5" cy="0" r="12" fill="#fd79a8" opacity="0.5"/>
+    <text x="0" y="2" text-anchor="middle" font-family="Arial" font-size="8" fill="#000">?</text>
+  </g>
+  
+  <!-- Baby shower decorative elements -->
+  <g opacity="0.5">
+    <circle cx="380" cy="120" r="2" fill="#74b9ff"/>
+    <circle cx="20" cy="140" r="1.5" fill="#fd79a8"/>
+    <circle cx="370" cy="200" r="2.5" fill="#ffeaa7"/>
+    <path d="M30 180 Q35 178 40 180" stroke="#55efc4" stroke-width="1" fill="none"/>
+    <path d="M360 180 Q365 178 370 180" stroke="#74b9ff" stroke-width="1" fill="none"/>
+  </g>
+  
+  <!-- "Baby Shower" banner -->
+  <g transform="translate(120, 15)" opacity="0.8">
+    <rect x="0" y="0" width="160" height="12" fill="#fd79a8" rx="2"/>
+    <text x="80" y="8" text-anchor="middle" font-family="serif" font-size="8" fill="#fff">Welcome Baby Hibachi Celebration</text>
+  </g>
+  
+  <!-- Cute baby-themed confetti -->
+  <g opacity="0.4">
+    <circle cx="100" cy="100" r="1" fill="#74b9ff"/>
+    <circle cx="300" cy="110" r="1.5" fill="#fd79a8"/>
+    <circle cx="80" cy="90" r="1" fill="#ffeaa7"/>
+    <circle cx="320" cy="95" r="1" fill="#55efc4"/>
+    <path d="M110 80 Q115 78 120 80" stroke="#74b9ff" stroke-width="0.5" fill="none"/>
+    <path d="M280 85 Q285 83 290 85" stroke="#fd79a8" stroke-width="0.5" fill="none"/>
+  </g>
+</svg>

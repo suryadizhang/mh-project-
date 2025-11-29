@@ -26,20 +26,20 @@ class TestNurtureCampaignService:
         # Arrange
         lead_id = test_lead.id
         campaign_type = CampaignType.WELCOME
-        
+
         # Act
         result = await mock_campaign_service.enroll_lead(
             lead_id=lead_id,
             campaign_type=campaign_type,
         )
-        
+
         # Assert
         assert result["lead_id"] == lead_id
         assert result["campaign_type"] == campaign_type.value
         assert result["status"] == CampaignStatus.ACTIVE.value
         assert result["total_steps"] == 3  # WELCOME campaign has 3 steps
         assert "enrolled_at" in result
-        
+
         # Verify event was tracked
         mock_event_service.log_event.assert_called_once()
         call_args = mock_event_service.log_event.call_args
@@ -55,7 +55,7 @@ class TestNurtureCampaignService:
             CampaignType.ABANDONED_QUOTE,
             CampaignType.POST_EVENT,
         ]
-        
+
         # Act & Assert
         for campaign_type in campaign_types:
             result = await mock_campaign_service.enroll_lead(
@@ -74,14 +74,14 @@ class TestNurtureCampaignService:
             "guest_count": 20,
             "event_date": "2025-12-25",
         }
-        
+
         # Act
         result = await mock_campaign_service.enroll_lead(
             lead_id=lead_id,
             campaign_type=CampaignType.WELCOME,
             personalization=personalization,
         )
-        
+
         # Assert
         assert result is not None
         # In real implementation, personalization would be stored
@@ -90,21 +90,21 @@ class TestNurtureCampaignService:
         """Test enrollment fails when lead doesn't exist."""
         # Arrange
         invalid_lead_id = 99999
-        
+
         # Act & Assert
         with pytest.raises(NotFoundException) as exc_info:
             await mock_campaign_service.enroll_lead(
                 lead_id=invalid_lead_id,
                 campaign_type=CampaignType.WELCOME,
             )
-        
+
         assert "not found" in str(exc_info.value).lower()
 
     async def test_enroll_lead_skip_if_enrolled(self, mock_campaign_service, test_lead):
         """Test skip_if_enrolled parameter prevents duplicate enrollments."""
         # Arrange
         lead_id = test_lead.id
-        
+
         # Act - enroll twice with skip_if_enrolled=True
         result1 = await mock_campaign_service.enroll_lead(
             lead_id=lead_id,
@@ -120,16 +120,16 @@ class TestNurtureCampaignService:
         # Arrange
         lead_id = test_lead.id
         campaign_type = CampaignType.WELCOME
-        
+
         # First enroll the lead
         await mock_campaign_service.enroll_lead(lead_id, campaign_type)
-        
+
         # Act
         result = await mock_campaign_service.send_next_message(
             lead_id=lead_id,
             campaign_type=campaign_type,
         )
-        
+
         # Assert
         # In real implementation with database, this would send actual message
         # For now, we verify the service structure
@@ -140,13 +140,13 @@ class TestNurtureCampaignService:
         # Arrange
         lead_id = test_lead.id
         campaign_type = CampaignType.WELCOME
-        
+
         # Enroll first
         await mock_campaign_service.enroll_lead(lead_id, campaign_type)
-        
+
         # Act
         await mock_campaign_service.send_next_message(lead_id, campaign_type)
-        
+
         # Assert - notification service should be called in real workflow
         # (Mock won't have enrollment data, so it will raise NotFoundException)
 
@@ -155,19 +155,19 @@ class TestNurtureCampaignService:
         # Arrange
         lead_id = test_lead.id
         response_data = {"message": "I'm interested!"}
-        
+
         # Act
         result = await mock_campaign_service.handle_response(
             lead_id=lead_id,
             response_type="reply",
             response_data=response_data,
         )
-        
+
         # Assert
         assert result["lead_id"] == lead_id
         assert result["response_type"] == "reply"
         assert result["status"] == "processed"
-        
+
         # Verify event was tracked
         mock_event_service.log_event.assert_called_once()
         call_args = mock_event_service.log_event.call_args
@@ -178,14 +178,14 @@ class TestNurtureCampaignService:
         # Arrange
         lead_id = test_lead.id
         response_data = {"link": "https://myhibachi.com/menu", "timestamp": datetime.utcnow().isoformat()}
-        
+
         # Act
         result = await mock_campaign_service.handle_response(
             lead_id=lead_id,
             response_type="click",
             response_data=response_data,
         )
-        
+
         # Assert
         assert result["response_type"] == "click"
         mock_event_service.log_event.assert_called_once()
@@ -194,17 +194,17 @@ class TestNurtureCampaignService:
         """Test handling opt-out from campaigns."""
         # Arrange
         lead_id = test_lead.id
-        
+
         # Act
         result = await mock_campaign_service.handle_response(
             lead_id=lead_id,
             response_type="opt_out",
         )
-        
+
         # Assert
         assert result["status"] == "opted_out"
         assert "All campaigns paused" in result["message"]
-        
+
         # Verify event was tracked
         mock_event_service.log_event.assert_called_once()
         call_args = mock_event_service.log_event.call_args
@@ -215,18 +215,18 @@ class TestNurtureCampaignService:
         # Arrange
         lead_id = test_lead.id
         response_data = {"booking_id": "BK-12345", "amount": 500.0}
-        
+
         # Act
         result = await mock_campaign_service.handle_response(
             lead_id=lead_id,
             response_type="booking",
             response_data=response_data,
         )
-        
+
         # Assert
         assert result["status"] == "converted"
         assert "completed" in result["message"].lower()
-        
+
         # Verify event tracked
         mock_event_service.log_event.assert_called_once()
 
@@ -234,7 +234,7 @@ class TestNurtureCampaignService:
         """Test getting campaign statistics."""
         # Act
         stats = await mock_campaign_service.get_campaign_stats()
-        
+
         # Assert
         assert "total_enrollments" in stats
         assert "active_enrollments" in stats
@@ -254,7 +254,7 @@ class TestNurtureCampaignService:
         stats = await mock_campaign_service.get_campaign_stats(
             campaign_type=CampaignType.WELCOME
         )
-        
+
         # Assert
         assert "campaign_type" in stats
         assert stats["campaign_type"] == CampaignType.WELCOME.value
@@ -263,10 +263,10 @@ class TestNurtureCampaignService:
         """Test that campaign templates have correct structure."""
         # Arrange
         templates = NurtureCampaignService.CAMPAIGN_TEMPLATES
-        
+
         # Assert
         assert len(templates) > 0
-        
+
         for campaign_type, steps in templates.items():
             assert len(steps) > 0
             for step in steps:
@@ -280,7 +280,7 @@ class TestNurtureCampaignService:
         """Test WELCOME campaign has correct structure."""
         # Arrange
         welcome = NurtureCampaignService.CAMPAIGN_TEMPLATES[CampaignType.WELCOME]
-        
+
         # Assert
         assert len(welcome) == 3  # 3 steps
         assert welcome[0]["delay_hours"] == 0  # Immediate
@@ -291,7 +291,7 @@ class TestNurtureCampaignService:
         """Test POST_INQUIRY campaign has correct structure."""
         # Arrange
         post_inquiry = NurtureCampaignService.CAMPAIGN_TEMPLATES[CampaignType.POST_INQUIRY]
-        
+
         # Assert
         assert len(post_inquiry) == 2  # 2 steps
         assert post_inquiry[0]["delay_hours"] == 2  # 2 hours after
@@ -301,7 +301,7 @@ class TestNurtureCampaignService:
         """Test ABANDONED_QUOTE campaign has correct structure."""
         # Arrange
         abandoned = NurtureCampaignService.CAMPAIGN_TEMPLATES[CampaignType.ABANDONED_QUOTE]
-        
+
         # Assert
         assert len(abandoned) == 2  # 2 steps
         assert abandoned[0]["delay_hours"] == 4  # 4 hours
@@ -311,7 +311,7 @@ class TestNurtureCampaignService:
         """Test POST_EVENT campaign has correct structure."""
         # Arrange
         post_event = NurtureCampaignService.CAMPAIGN_TEMPLATES[CampaignType.POST_EVENT]
-        
+
         # Assert
         assert len(post_event) == 2  # 2 steps
         assert post_event[0]["delay_hours"] == 24  # Next day
@@ -322,12 +322,12 @@ class TestNurtureCampaignService:
         # Arrange
         content = "Hello {name}, your email is {email}"
         personalization = {"custom_field": "custom_value"}
-        
+
         # Act
         personalized = mock_campaign_service._personalize_content(
             content, test_lead, personalization
         )
-        
+
         # Assert
         assert test_lead.name in personalized or "Test Lead" in personalized
         assert test_lead.email in personalized
@@ -335,7 +335,7 @@ class TestNurtureCampaignService:
     async def test_personalization_handles_missing_name(self, mock_campaign_service, db_session):
         """Test personalization uses 'there' when name is missing."""
         # Arrange
-        from models.legacy_lead_newsletter import Lead
+        from db.models.crm import Lead
         lead_no_name = Lead(
             email="noname@example.com",
             phone="+15551234567",
@@ -344,14 +344,14 @@ class TestNurtureCampaignService:
         db_session.add(lead_no_name)
         await db_session.commit()
         await db_session.refresh(lead_no_name)
-        
+
         content = "Hello {name}"
-        
+
         # Act
         personalized = mock_campaign_service._personalize_content(
             content, lead_no_name, {}
         )
-        
+
         # Assert
         assert "there" in personalized  # Default when name is None
 
@@ -368,29 +368,29 @@ class TestCampaignServiceIntegration:
             campaign_type=CampaignType.WELCOME,
             personalization={"event_type": "Wedding"},
         )
-        
+
         # Step 2: Handle various responses
         await mock_campaign_service.handle_response(
             lead_id=test_lead.id,
             response_type="click",
             response_data={"link": "menu"},
         )
-        
+
         await mock_campaign_service.handle_response(
             lead_id=test_lead.id,
             response_type="reply",
             response_data={"message": "Tell me more"},
         )
-        
+
         # Step 3: Get stats
         stats = await mock_campaign_service.get_campaign_stats(
             campaign_type=CampaignType.WELCOME
         )
-        
+
         # Assert
         assert enrollment["total_steps"] == 3
         assert stats is not None
-        
+
         # Verify events tracked (enroll + 2 responses + stats)
         assert mock_event_service.log_event.call_count >= 3
 
@@ -399,16 +399,16 @@ class TestCampaignServiceIntegration:
         # Arrange - enroll in multiple campaigns
         await mock_campaign_service.enroll_lead(test_lead.id, CampaignType.WELCOME)
         await mock_campaign_service.enroll_lead(test_lead.id, CampaignType.POST_INQUIRY)
-        
+
         # Act - opt out
         result = await mock_campaign_service.handle_response(
             lead_id=test_lead.id,
             response_type="opt_out",
         )
-        
+
         # Assert
         assert result["status"] == "opted_out"
-        
+
         # Verify opt-out event tracked
         opt_out_calls = [
             call for call in mock_event_service.log_event.call_args_list
@@ -420,13 +420,13 @@ class TestCampaignServiceIntegration:
         """Test that booking conversion marks campaigns as complete."""
         # Arrange - enroll in campaign
         await mock_campaign_service.enroll_lead(test_lead.id, CampaignType.ABANDONED_QUOTE)
-        
+
         # Act - convert with booking
         result = await mock_campaign_service.handle_response(
             lead_id=test_lead.id,
             response_type="booking",
             response_data={"booking_id": "BK-12345"},
         )
-        
+
         # Assert
         assert result["status"] == "converted"

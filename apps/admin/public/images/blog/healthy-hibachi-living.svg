@@ -1,0 +1,174 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#healthyGradient)"/>
+  
+  <!-- Fresh Herb Garden Background -->
+  <g opacity="0.3">
+    <ellipse cx="50" cy="250" rx="20" ry="10" fill="#228B22"/>
+    <ellipse cx="100" cy="260" rx="25" ry="12" fill="#32CD32"/>
+    <ellipse cx="300" cy="255" rx="22" ry="11" fill="#9ACD32"/>
+    <ellipse cx="350" cy="265" rx="18" ry="9" fill="#90EE90"/>
+  </g>
+  
+  <!-- Healthy Kitchen Setting -->
+  <rect x="0" y="180" width="400" height="120" fill="#F5F5DC" opacity="0.4"/>
+  
+  <!-- Clean Modern Table -->
+  <ellipse cx="200" cy="200" rx="110" ry="40" fill="#F8F8FF"/>
+  <ellipse cx="200" cy="195" rx="105" ry="35" fill="#FFFFFF"/>
+  
+  <!-- Bamboo Placemat -->
+  <ellipse cx="200" cy="195" rx="100" ry="32" fill="#DEB887" opacity="0.6"/>
+  <g stroke="#8B7D6B" stroke-width="1" opacity="0.8">
+    <line x1="110" y1="190" x2="290" y2="190"/>
+    <line x1="110" y1="195" x2="290" y2="195"/>
+    <line x1="110" y1="200" x2="290" y2="200"/>
+  </g>
+  
+  <!-- Healthy Hibachi Setup -->
+  <rect x="175" y="175" width="50" height="28" rx="6" fill="#2F4F4F"/>
+  <rect x="182" y="182" width="36" height="16" rx="4" fill="#708090"/>
+  <rect x="188" y="188" width="24" height="8" rx="2" fill="#B0C4DE"/>
+  
+  <!-- Clean Blue Flames -->
+  <ellipse cx="190" cy="190" rx="3" ry="6" fill="#00BFFF" opacity="0.8"/>
+  <ellipse cx="200" cy="188" rx="4" ry="8" fill="#1E90FF" opacity="0.9"/>
+  <ellipse cx="210" cy="190" rx="3" ry="6" fill="#4169E1" opacity="0.7"/>
+  
+  <!-- Health-Conscious Chef -->
+  <circle cx="130" cy="130" r="16" fill="#F4C2A1"/>
+  <rect x="120" y="144" width="20" height="30" fill="#FFFFFF"/>
+  <rect x="122" y="146" width="16" height="3" fill="#000000"/>
+  
+  <!-- Modern Chef Hat -->
+  <ellipse cx="130" cy="120" rx="10" ry="14" fill="#FFFFFF"/>
+  <rect x="124" y="127" width="12" height="3" fill="#000000"/>
+  <circle cx="130" cy="112" r="2" fill="#32CD32"/> <!-- healthy badge -->
+  
+  <!-- Nutritionist/Healthy Lifestyle Person -->
+  <circle cx="270" cy="135" r="14" fill="#F4C2A1"/>
+  <rect x="262" y="147" width="16" height="26" fill="#90EE90"/>
+  <circle cx="270" cy="125" r="1" fill="#000000"/> <!-- eyes -->
+  <circle cx="274" cy="125" r="1" fill="#000000"/>
+  <path d="M272 128 Q272 130 274 130" stroke="#000000" stroke-width="1" fill="none"/> <!-- smile -->
+  
+  <!-- Fresh Organic Vegetables -->
+  <!-- Colorful Bell Peppers -->
+  <path d="M185 185 Q190 180 195 185 Q190 190 185 185" fill="#FF0000"/>
+  <path d="M195 186 Q200 181 205 186 Q200 191 195 186" fill="#FFD700"/>
+  <path d="M205 185 Q210 180 215 185 Q210 190 205 185" fill="#32CD32"/>
+  
+  <!-- Broccoli -->
+  <circle cx="180" cy="188" r="2" fill="#228B22"/>
+  <circle cx="178" cy="186" r="1.5" fill="#32CD32"/>
+  <circle cx="182" cy="186" r="1.5" fill="#32CD32"/>
+  <rect x="179" y="190" width="2" height="4" fill="#90EE90"/>
+  
+  <!-- Cherry Tomatoes -->
+  <circle cx="220" cy="187" r="1.5" fill="#FF6347"/>
+  <circle cx="224" cy="189" r="1.5" fill="#FF4500"/>
+  <path d="M221 185 Q222 183 223 185" stroke="#228B22" stroke-width="0.5" fill="none"/>
+  
+  <!-- Lean Protein -->
+  <!-- Salmon Fillet -->
+  <ellipse cx="195" cy="190" rx="4" ry="2" fill="#FFA07A"/>
+  <ellipse cx="195" cy="189" rx="3" ry="1.5" fill="#FF7F50"/>
+  
+  <!-- Tofu -->
+  <rect x="206" y="187" width="4" height="3" rx="1" fill="#F5F5DC"/>
+  
+  <!-- Healthy Beverages -->
+  <!-- Green Smoothie -->
+  <rect x="120" y="180" width="5" height="12" fill="#32CD32" opacity="0.8"/>
+  <ellipse cx="122.5" cy="179" rx="3" ry="2" fill="#9ACD32"/>
+  <rect x="121" y="177" width="3" height="1" fill="#228B22"/> <!-- straw -->
+  
+  <!-- Herbal Tea -->
+  <ellipse cx="280" cy="185" rx="4" ry="2" fill="#FFFFFF"/>
+  <ellipse cx="280" cy="184" rx="3" ry="1.5" fill="#90EE90"/>
+  <path d="M285 183 Q288 180 291 183" stroke="#228B22" stroke-width="1" fill="none"/> <!-- steam -->
+  <path d="M287 183 Q290 180 293 183" stroke="#228B22" stroke-width="1" fill="none"/>
+  
+  <!-- Fresh Herbs -->
+  <!-- Basil -->
+  <ellipse cx="150" cy="180" rx="2" ry="4" fill="#228B22"/>
+  <path d="M148 178 Q150 175 152 178" stroke="#32CD32" stroke-width="1" fill="none"/>
+  <path d="M148 180 Q150 177 152 180" stroke="#32CD32" stroke-width="1" fill="none"/>
+  <path d="M148 182 Q150 179 152 182" stroke="#32CD32" stroke-width="1" fill="none"/>
+  
+  <!-- Cilantro -->
+  <ellipse cx="250" cy="180" rx="2" ry="4" fill="#90EE90"/>
+  <circle cx="249" cy="178" r="0.5" fill="#228B22"/>
+  <circle cx="251" cy="178" r="0.5" fill="#228B22"/>
+  <circle cx="248" cy="180" r="0.5" fill="#228B22"/>
+  <circle cx="252" cy="180" r="0.5" fill="#228B22"/>
+  
+  <!-- Nutrition Information Display -->
+  <rect x="320" y="120" width="60" height="40" fill="#F0F8FF" stroke="#4169E1" stroke-width="1"/>
+  <text x="350" y="135" text-anchor="middle" fill="#4169E1" font-family="Arial" font-size="10" font-weight="bold">NUTRITION</text>
+  <text x="325" y="148" fill="#228B22" font-family="Arial" font-size="8">Protein: 25g</text>
+  <text x="325" y="155" fill="#FF6347" font-family="Arial" font-size="8">Fiber: 8g</text>
+  
+  <!-- Healthy Cooking Utensils -->
+  <!-- Bamboo Spatula -->
+  <rect x="140" y="155" width="2" height="15" fill="#DEB887" transform="rotate(20 140 155)"/>
+  <ellipse cx="148" cy="150" rx="5" ry="2" fill="#F5DEB3" transform="rotate(20 148 150)"/>
+  
+  <!-- Stainless Steel Tongs -->
+  <path d="M260 155 Q262 150 264 155" stroke="#C0C0C0" stroke-width="2" fill="none"/>
+  <path d="M266 155 Q268 150 270 155" stroke="#C0C0C0" stroke-width="2" fill="none"/>
+  <ellipse cx="265" cy="157" rx="1" ry="2" fill="#C0C0C0"/>
+  <ellipse cx="269" cy="157" rx="1" ry="2" fill="#C0C0C0"/>
+  
+  <!-- Vitamin & Mineral Sparkles -->
+  <g fill="#FFD700" opacity="0.8">
+    <circle cx="100" cy="100" r="1"/>
+    <circle cx="300" cy="90" r="1"/>
+    <circle cx="150" cy="110" r="1"/>
+    <circle cx="250" cy="100" r="1"/>
+    <polygon points="80,120 82,125 87,125 83,128 85,133 80,130 75,133 77,128 73,125 78,125"/>
+    <polygon points="320,110 322,115 327,115 323,118 325,123 320,120 315,123 317,118 313,115 318,115"/>
+  </g>
+  
+  <!-- Fresh Air/Steam -->
+  <g stroke="#E0FFFF" stroke-width="1" fill="none" opacity="0.7">
+    <path d="M190 183 Q192 178 190 173 Q188 168 190 163"/>
+    <path d="M200 183 Q202 178 200 173 Q198 168 200 163"/>
+    <path d="M210 183 Q212 178 210 173 Q208 168 210 163"/>
+  </g>
+  
+  <!-- Healthy Food Icons -->
+  <!-- Avocado -->
+  <ellipse cx="60" cy="190" rx="4" ry="6" fill="#9ACD32"/>
+  <ellipse cx="60" cy="190" rx="2" ry="4" fill="#ADFF2F"/>
+  <circle cx="60" cy="188" r="1" fill="#8B4513"/>
+  
+  <!-- Quinoa Bowl -->
+  <ellipse cx="340" cy="190" rx="6" ry="3" fill="#FFFFFF"/>
+  <ellipse cx="340" cy="189" rx="5" ry="2" fill="#F5DEB3"/>
+  <circle cx="338" cy="188" r="0.5" fill="#228B22"/>
+  <circle cx="342" cy="188" r="0.5" fill="#FF6347"/>
+  
+  <!-- Title -->
+  <text x="200" y="30" text-anchor="middle" fill="#228B22" font-family="Arial, sans-serif" font-size="24" font-weight="bold">
+    Healthy Hibachi Living
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="50" text-anchor="middle" fill="#32CD32" font-family="Arial, sans-serif" font-size="16">
+    Nutritious • Delicious • Mindful Eating
+  </text>
+  
+  <!-- Health Message -->
+  <text x="200" y="275" text-anchor="middle" fill="#4169E1" font-family="Arial, sans-serif" font-size="12">
+    "Nourishing your body with every bite"
+  </text>
+  
+  <defs>
+    <linearGradient id="healthyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0FFF0;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#F5FFFA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F0F8FF;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

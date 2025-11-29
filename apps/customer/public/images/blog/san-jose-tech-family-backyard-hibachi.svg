@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.svg/2000/svg">
+  <!-- San Jose tech family backyard hibachi -->
+  <defs>
+    <linearGradient id="siliconValleySky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#00BFFF"/>
+      <stop offset="50%" style="stop-color:#87CEEB"/>
+      <stop offset="100%" style="stop-color:#E0F6FF"/>
+    </linearGradient>
+    <linearGradient id="techHome" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0F8FF"/>
+      <stop offset="100%" style="stop-color:#E6E6FA"/>
+    </linearGradient>
+    <radialGradient id="techGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#00BFFF; opacity:0.4"/>
+      <stop offset="100%" style="stop-color:transparent"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Silicon Valley clear sky -->
+  <rect width="800" height="600" fill="url(#siliconValleySky)"/>
+  
+  <!-- Tech innovation stars -->
+  <circle cx="140" cy="80" r="2" fill="#FFD700"/>
+  <circle cx="260" cy="60" r="1.5" fill="white"/>
+  <circle cx="420" cy="70" r="2" fill="#00BFFF"/>
+  <circle cx="560" cy="55" r="1.5" fill="white"/>
+  <circle cx="690" cy="85" r="2" fill="#FFD700"/>
+  
+  <!-- San Jose hills -->
+  <path d="M0,200 Q150,160 300,180 Q450,140 600,160 Q750,120 800,140 L800,250 L0,250 Z" fill="#9ACD32" opacity="0.7"/>
+  
+  <!-- Tech neighborhood houses -->
+  <rect x="50" y="220" width="80" height="80" fill="#8FBC8F" opacity="0.6" rx="5"/>
+  <polygon points="40,220 140,220 90,180" fill="#8B4513" opacity="0.8"/>
+  
+  <rect x="150" y="210" width="90" height="90" fill="#98FB98" opacity="0.6" rx="5"/>
+  <polygon points="140,210 250,210 195,170" fill="#654321" opacity="0.8"/>
+  
+  <rect x="660" y="215" width="85" height="85" fill="#90EE90" opacity="0.6" rx="5"/>
+  <polygon points="650,215 755,215 702.5,175" fill="#8B4513" opacity="0.8"/>
+  
+  <!-- Modern tech family home -->
+  <rect x="280" y="250" width="240" height="180" fill="url(#techHome)" rx="12"/>
+  <polygon points="270,250 530,250 400,190" fill="#C0C0C0"/>
+  <text x="400" y="280" text-anchor="middle" fill="#4169E1" font-family="Arial, sans-serif" font-size="16" font-weight="bold">SAN JOSE TECH FAMILY</text>
+  
+  <!-- Modern glass windows -->
+  <rect x="300" y="300" width="40" height="50" fill="#87CEEB" opacity="0.8" rx="3"/>
+  <rect x="360" y="300" width="40" height="50" fill="#87CEEB" opacity="0.8" rx="3"/>
+  <rect x="420" y="300" width="40" height="50" fill="#87CEEB" opacity="0.8" rx="3"/>
+  <rect x="480" y="300" width="40" height="50" fill="#87CEEB" opacity="0.8" rx="3"/>
+  
+  <!-- Smart home features -->
+  <circle cx="320" cy="325" r="3" fill="#00FF00"/>
+  <circle cx="380" cy="325" r="3" fill="#FF6347"/>
+  <circle cx="440" cy="325" r="3" fill="#00BFFF"/>
+  <circle cx="500" cy="325" r="3" fill="#FFD700"/>
+  
+  <!-- Backyard tech hibachi setup -->
+  <rect x="300" y="360" width="200" height="90" fill="#2F4F4F" rx="10"/>
+  <rect x="310" y="355" width="180" height="12" fill="#FF4500"/>
+  
+  <!-- High-tech hibachi grills -->
+  <circle cx="320" r="6" cy="358" fill="#00FF00"/>
+  <circle cx="340" r="6" cy="358" fill="#FF69B4"/>
+  <circle cx="360" r="6" cy="358" fill="#00BFFF"/>
+  <circle cx="380" r="6" cy="358" fill="#FFD700"/>
+  <circle cx="400" r="6" cy="358" fill="#9370DB"/>
+  <circle cx="420" r="6" cy="358" fill="#FF6347"/>
+  <circle cx="440" r="6" cy="358" fill="#32CD32"/>
+  <circle cx="460" r="6" cy="358" fill="#FF1493"/>
+  <circle cx="480" r="6" cy="358" fill="#00CED1"/>
+  
+  <!-- Tech hibachi chef -->
+  <circle cx="400" cy="320" r="15" fill="#FDBCB4"/>
+  <rect x="390" y="335" width="20" height="25" fill="white"/>
+  <rect x="386" y="360" width="28" height="30" fill="#4169E1"/>
+  <rect x="390" y="390" width="8" height="20" fill="#FDBCB4"/>
+  <rect x="402" y="390" width="8" height="20" fill="#FDBCB4"/>
+  
+  <!-- Modern chef hat with tech elements -->
+  <rect x="394" y="308" width="12" height="9" fill="white"/>
+  <ellipse cx="400" cy="302" rx="9" ry="6" fill="white"/>
+  <circle cx="400" cy="302" r="2" fill="#00BFFF"/>
+  
+  <!-- Tech family members -->
+  <!-- Tech dad -->
+  <circle cx="340" cy="460" r="12" fill="#FDBCB4"/>
+  <rect x="333" y="472" width="14" height="22" fill="#4169E1"/>
+  <rect x="335" y="494" width="10" height="18" fill="#654321"/>
+  <rect x="336" y="512" width="8" height="15" fill="#8B4513"/>
+  <!-- Smartwatch -->
+  <rect x="328" y="480" width="6" height="4" fill="#000000"/>
+  
+  <!-- Tech mom -->
+  <circle cx="460" cy="460" r="12" fill="#FDBCB4"/>
+  <rect x="453" y="472" width="14" height="22" fill="#FF69B4"/>
+  <rect x="455" y="494" width="10" height="18" fill="#8B4513"/>
+  <rect x="456" y="512" width="8" height="15" fill="#654321"/>
+  <!-- Tablet -->
+  <rect x="465" y="475" width="8" height="6" fill="#C0C0C0"/>
+  
+  <!-- Tech kids -->
+  <circle cx="370" cy="470" r="10" fill="#FDBCB4"/>
+  <rect x="365" y="480" width="10" height="18" fill="#32CD32"/>
+  <rect x="367" y="498" width="6" height="14" fill="#8B4513"/>
+  <!-- Gaming device -->
+  <rect x="358" y="485" width="6" height="4" fill="#9370DB"/>
+  
+  <circle cx="430" cy="470" r="10" fill="#FDBCB4"/>
+  <rect x="425" y="480" width="10" height="18" fill="#00BFFF"/>
+  <rect x="427" y="498" width="6" height="14" fill="#654321"/>
+  <!-- Smartphone -->
+  <rect x="435" y="485" width="4" height="6" fill="#000000"/>
+  
+  <!-- Modern outdoor dining -->
+  <ellipse cx="400" cy="520" rx="100" ry="25" fill="#C0C0C0"/>
+  
+  <!-- High-tech outdoor furniture -->
+  <rect x="340" y="530" width="12" height="25" fill="#2F4F4F"/>
+  <circle cx="346" cy="527" r="5" fill="#00BFFF"/>
+  <rect x="360" y="530" width="12" height="25" fill="#2F4F4F"/>
+  <circle cx="366" cy="527" r="5" fill="#FF69B4"/>
+  <rect x="390" y="530" width="12" height="25" fill="#2F4F4F"/>
+  <circle cx="396" cy="527" r="5" fill="#32CD32"/>
+  <rect x="410" y="530" width="12" height="25" fill="#2F4F4F"/>
+  <circle cx="416" cy="527" r="5" fill="#FFD700"/>
+  <rect x="430" y="530" width="12" height="25" fill="#2F4F4F"/>
+  <circle cx="436" cy="527" r="5" fill="#9370DB"/>
+  <rect x="450" y="530" width="12" height="25" fill="#2F4F4F"/>
+  <circle cx="456" cy="527" r="5" fill="#FF6347"/>
+  
+  <!-- Smart place settings -->
+  <circle cx="350" cy="515" r="7" fill="white"/>
+  <circle cx="370" cy="515" r="7" fill="white"/>
+  <circle cx="400" cy="515" r="7" fill="white"/>
+  <circle cx="430" cy="515" r="7" fill="white"/>
+  <circle cx="450" cy="515" r="7" fill="white"/>
+  
+  <!-- Tech drinks with LED -->
+  <rect x="345" y="505" width="4" height="10" fill="#00FF00"/>
+  <circle cx="347" cy="503" r="1" fill="#00FF00"/>
+  <rect x="365" y="505" width="4" height="10" fill="#FF69B4"/>
+  <circle cx="367" cy="503" r="1" fill="#FF69B4"/>
+  <rect x="395" y="505" width="4" height="10" fill="#00BFFF"/>
+  <circle cx="397" cy="503" r="1" fill="#00BFFF"/>
+  <rect x="425" y="505" width="4" height="10" fill="#FFD700"/>
+  <circle cx="427" cy="503" r="1" fill="#FFD700"/>
+  <rect x="445" y="505" width="4" height="10" fill="#9370DB"/>
+  <circle cx="447" cy="503" r="1" fill="#9370DB"/>
+  
+  <!-- San Jose tech title -->
+  <text x="400" y="160" text-anchor="middle" fill="#4169E1" font-family="Arial, sans-serif" font-size="26" font-weight="bold">SAN JOSE</text>
+  <text x="400" y="185" text-anchor="middle" fill="#00BFFF" font-family="Arial, sans-serif" font-size="16">TECH FAMILY HIBACHI</text>
+  
+  <!-- Silicon Valley innovation -->
+  <rect x="120" y="480" width="140" height="90" fill="#4169E1" opacity="0.8" rx="12"/>
+  <text x="190" y="505" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="13" font-weight="bold">SILICON</text>
+  <text x="190" y="520" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="13" font-weight="bold">VALLEY</text>
+  <text x="190" y="535" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="12">TECH FAMILIES</text>
+  <text x="190" y="550" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">INNOVATION</text>
+  <text x="190" y="565" text-anchor="middle" fill="#00BFFF" font-family="Arial, sans-serif" font-size="10">SAN JOSE</text>
+  
+  <!-- Backyard tech advantages -->
+  <rect x="540" y="480" width="140" height="90" fill="#00BFFF" opacity="0.8" rx="12"/>
+  <text x="610" y="505" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="13" font-weight="bold">BACKYARD</text>
+  <text x="610" y="520" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">TECH HIBACHI</text>
+  <text x="610" y="535" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="12">PRIVATE</text>
+  <text x="610" y="550" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">EXPERIENCE</text>
+  <text x="610" y="565" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">HOME DINING</text>
+  
+  <!-- Tech hibachi specialties -->
+  <ellipse cx="325" cy="356" rx="9" ry="5" fill="#00FF00"/>
+  <ellipse cx="345" cy="356" rx="10" ry="5" fill="#FF69B4"/>
+  <ellipse cx="365" cy="356" rx="9" ry="5" fill="#00BFFF"/>
+  <ellipse cx="385" cy="356" rx="8" ry="4" fill="#FFD700"/>
+  <ellipse cx="405" cy="356" rx="9" ry="5" fill="#9370DB"/>
+  <ellipse cx="425" cy="356" rx="10" ry="5" fill="#FF6347"/>
+  <ellipse cx="445" cy="356" rx="9" ry="5" fill="#32CD32"/>
+  <ellipse cx="465" cy="356" rx="8" ry="4" fill="#FF1493"/>
+  <ellipse cx="485" cy="356" rx="9" ry="5" fill="#00CED1"/>
+  
+  <!-- Digital hibachi flames -->
+  <polygon points="325,356 329,348 321,348" fill="#00FF00" opacity="0.8"/>
+  <polygon points="345,356 349,348 341,348" fill="#FF69B4" opacity="0.8"/>
+  <polygon points="365,356 369,348 361,348" fill="#00BFFF" opacity="0.8"/>
+  <polygon points="385,356 389,348 381,348" fill="#FFD700" opacity="0.8"/>
+  <polygon points="405,356 409,348 401,348" fill="#9370DB" opacity="0.8"/>
+  <polygon points="425,356 429,348 421,348" fill="#FF6347" opacity="0.8"/>
+  <polygon points="445,356 449,348 441,348" fill="#32CD32" opacity="0.8"/>
+  <polygon points="465,356 469,348 461,348" fill="#FF1493" opacity="0.8"/>
+  <polygon points="485,356 489,348 481,348" fill="#00CED1" opacity="0.8"/>
+  
+  <!-- Tech company logos in distance -->
+  <circle cx="150" cy="120" r="8" fill="#4285F4"/>
+  <text x="150" y="125" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="8" font-weight="bold">G</text>
+  
+  <rect x="640" y="115" width="16" height="16" fill="#FF9500" rx="2"/>
+  <text x="648" y="126" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="8" font-weight="bold">A</text>
+  
+  <!-- Solar panels on roof -->
+  <rect x="300" y="240" width="60" height="20" fill="#000080" opacity="0.8" rx="2"/>
+  <rect x="380" y="240" width="60" height="20" fill="#000080" opacity="0.8" rx="2"/>
+  <rect x="460" y="240" width="60" height="20" fill="#000080" opacity="0.8" rx="2"/>
+  
+  <!-- Tech garden -->
+  <circle cx="200" cy="400" r="12" fill="#32CD32"/>
+  <rect x="194" y="394" width="12" height="12" fill="#00FF00" opacity="0.5"/>
+  <text x="200" y="402" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="6">SMART</text>
+  
+  <circle cx="600" cy="410" r="12" fill="#32CD32"/>
+  <rect x="594" y="404" width="12" height="12" fill="#00BFFF" opacity="0.5"/>
+  <text x="600" y="412" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="6">AUTO</text>
+  
+  <!-- WiFi signals -->
+  <path d="M250,300 Q275,275 300,300" stroke="#00BFFF" stroke-width="2" fill="none"/>
+  <path d="M255,305 Q275,290 295,305" stroke="#00BFFF" stroke-width="2" fill="none"/>
+  <path d="M260,310 Q275,300 290,310" stroke="#00BFFF" stroke-width="2" fill="none"/>
+  <circle cx="275" cy="315" r="2" fill="#00BFFF"/>
+  
+  <path d="M500,300 Q525,275 550,300" stroke="#00FF00" stroke-width="2" fill="none"/>
+  <path d="M505,305 Q525,290 545,305" stroke="#00FF00" stroke-width="2" fill="none"/>
+  <path d="M510,310 Q525,300 540,310" stroke="#00FF00" stroke-width="2" fill="none"/>
+  <circle cx="525" cy="315" r="2" fill="#00FF00"/>
+  
+  <!-- Tesla in driveway -->
+  <rect x="50" y="540" width="60" height="20" fill="#C0C0C0" rx="8"/>
+  <text x="80" y="554" text-anchor="middle" fill="#4169E1" font-family="Arial, sans-serif" font-size="10">TESLA</text>
+  <circle cx="60" cy="555" r="4" fill="#2F4F4F"/>
+  <circle cx="100" cy="555" r="4" fill="#2F4F4F"/>
+  
+  <!-- Tech innovation glow -->
+  <circle cx="400" cy="400" r="110" fill="url(#techGlow)"/>
+  
+  <!-- Smart doorbell -->
+  <rect x="520" y="410" width="8" height="12" fill="#000000" rx="2"/>
+  <circle cx="524" cy="414" r="2" fill="#00FF00"/>
+  <circle cx="524" cy="418" r="1" fill="#FF6347"/>
+  
+  <!-- Innovation celebration -->
+  <text x="400" y="130" text-anchor="middle" fill="#00BFFF" font-family="Arial, sans-serif" font-size="14" font-weight="bold">SILICON VALLEY TECH FAMILY EXPERIENCES</text>
+</svg>

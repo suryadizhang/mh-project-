@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.svg/2000/svg">
+  <!-- Oakland wedding reception hibachi -->
+  <defs>
+    <linearGradient id="oaklandSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFB6C1"/>
+      <stop offset="50%" style="stop-color:#FFA07A"/>
+      <stop offset="100%" style="stop-color:#FF7F50"/>
+    </linearGradient>
+    <linearGradient id="weddingVenue" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F5F5DC"/>
+      <stop offset="100%" style="stop-color:#DEB887"/>
+    </linearGradient>
+    <radialGradient id="romanticGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFB6C1; opacity:0.6"/>
+      <stop offset="100%" style="stop-color:transparent"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Oakland sunset sky -->
+  <rect width="800" height="600" fill="url(#oaklandSky)"/>
+  
+  <!-- Romantic wedding stars -->
+  <circle cx="120" cy="60" r="2" fill="#FFD700"/>
+  <circle cx="220" cy="80" r="1.5" fill="white"/>
+  <circle cx="350" cy="50" r="2" fill="#FFD700"/>
+  <circle cx="550" cy="75" r="1.5" fill="white"/>
+  <circle cx="650" cy="55" r="2" fill="#FFD700"/>
+  <circle cx="720" cy="85" r="1.5" fill="white"/>
+  
+  <!-- Oakland hills backdrop -->
+  <path d="M0,250 Q100,200 200,220 Q300,180 400,200 Q500,160 600,180 Q700,140 800,160 L800,600 L0,600 Z" fill="#8FBC8F" opacity="0.8"/>
+  
+  <!-- Wedding venue -->
+  <rect x="250" y="280" width="300" height="200" fill="url(#weddingVenue)" rx="15"/>
+  <text x="400" y="310" text-anchor="middle" fill="#8B0000" font-family="Arial, sans-serif" font-size="16" font-weight="bold">OAKLAND WEDDING RECEPTION</text>
+  
+  <!-- Elegant venue entrance -->
+  <rect x="370" y="250" width="60" height="30" fill="#F5F5DC" rx="8"/>
+  <text x="400" y="270" text-anchor="middle" fill="#8B0000" font-family="Arial, sans-serif" font-size="12">ENTRANCE</text>
+  
+  <!-- Wedding hibachi station -->
+  <rect x="300" y="320" width="200" height="80" fill="#2F4F4F" rx="12"/>
+  <rect x="315" y="315" width="170" height="15" fill="#FF4500"/>
+  
+  <!-- Multiple hibachi grills for wedding -->
+  <circle cx="330" r="6" cy="320" fill="#FF6347"/>
+  <circle cx="350" r="6" cy="320" fill="#32CD32"/>
+  <circle cx="370" r="6" cy="320" fill="#FFD700"/>
+  <circle cx="390" r="6" cy="320" fill="#FF69B4"/>
+  <circle cx="410" r="6" cy="320" fill="#FF6347"/>
+  <circle cx="430" r="6" cy="320" fill="#32CD32"/>
+  <circle cx="450" r="6" cy="320" fill="#FFD700"/>
+  <circle cx="470" r="6" cy="320" fill="#FF69B4"/>
+  
+  <!-- Wedding hibachi chef -->
+  <circle cx="400" cy="260" r="16" fill="#FDBCB4"/>
+  <rect x="390" y="276" width="20" height="26" fill="white"/>
+  <rect x="386" y="302" width="28" height="32" fill="#000080"/>
+  <rect x="390" y="334" width="8" height="22" fill="#FDBCB4"/>
+  <rect x="402" y="334" width="8" height="22" fill="#FDBCB4"/>
+  
+  <!-- Chef's formal hat -->
+  <rect x="394" y="248" width="12" height="10" fill="white"/>
+  <ellipse cx="400" cy="242" rx="10" ry="6" fill="white"/>
+  
+  <!-- Wedding party table -->
+  <ellipse cx="400" cy="420" rx="120" ry="40" fill="#8B4513"/>
+  
+  <!-- Elegant wedding chairs -->
+  <rect x="300" y="440" width="12" height="30" fill="#654321"/>
+  <rect x="295" y="435" width="22" height="8" fill="#F5F5DC"/>
+  <rect x="340" y="440" width="12" height="30" fill="#654321"/>
+  <rect x="335" y="435" width="22" height="8" fill="#F5F5DC"/>
+  <rect x="380" y="440" width="12" height="30" fill="#654321"/>
+  <rect x="375" y="435" width="22" height="8" fill="#F5F5DC"/>
+  <rect x="420" y="440" width="12" height="30" fill="#654321"/>
+  <rect x="415" y="435" width="22" height="8" fill="#F5F5DC"/>
+  <rect x="460" y="440" width="12" height="30" fill="#654321"/>
+  <rect x="455" y="435" width="22" height="8" fill="#F5F5DC"/>
+  <rect x="500" y="440" width="12" height="30" fill="#654321"/>
+  <rect x="495" y="435" width="22" height="8" fill="#F5F5DC"/>
+  
+  <!-- Wedding party guests -->
+  <!-- Bride -->
+  <circle cx="320" cy="380" r="12" fill="#FDBCB4"/>
+  <rect x="313" y="392" width="14" height="22" fill="white"/>
+  <rect x="315" y="414" width="10" height="18" fill="white"/>
+  <rect x="316" y="432" width="8" height="16" fill="#F0E68C"/>
+  
+  <!-- Groom -->
+  <circle cx="480" cy="380" r="12" fill="#FDBCB4"/>
+  <rect x="473" y="392" width="14" height="22" fill="#000000"/>
+  <rect x="475" y="414" width="10" height="18" fill="#000000"/>
+  <rect x="476" y="432" width="8" height="16" fill="#654321"/>
+  
+  <!-- Wedding guests -->
+  <circle cx="350" cy="390" r="10" fill="#FDBCB4"/>
+  <rect x="345" y="400" width="10" height="18" fill="#8B008B"/>
+  <rect x="347" y="418" width="6" height="15" fill="#8B4513"/>
+  
+  <circle cx="420" cy="390" r="10" fill="#FDBCB4"/>
+  <rect x="415" y="400" width="10" height="18" fill="#4169E1"/>
+  <rect x="417" y="418" width="6" height="15" fill="#000080"/>
+  
+  <circle cx="450" cy="390" r="10" fill="#FDBCB4"/>
+  <rect x="445" y="400" width="10" height="18" fill="#FF69B4"/>
+  <rect x="447" y="418" width="6" height="15" fill="#8B4513"/>
+  
+  <!-- Wedding place settings -->
+  <circle cx="315" cy="415" r="8" fill="white"/>
+  <circle cx="355" cy="415" r="8" fill="white"/>
+  <circle cx="395" cy="415" r="8" fill="white"/>
+  <circle cx="435" cy="415" r="8" fill="white"/>
+  <circle cx="475" cy="415" r="8" fill="white"/>
+  <circle cx="515" cy="415" r="8" fill="white"/>
+  
+  <!-- Wedding champagne glasses -->
+  <rect x="310" y="405" width="3" height="10" fill="#FFD700"/>
+  <polygon points="310,405 313,405 312,402" fill="#FFD700"/>
+  <rect x="350" y="405" width="3" height="10" fill="#FFD700"/>
+  <polygon points="350,405 353,405 352,402" fill="#FFD700"/>
+  <rect x="390" y="405" width="3" height="10" fill="#FFD700"/>
+  <polygon points="390,405 393,405 392,402" fill="#FFD700"/>
+  <rect x="430" y="405" width="3" height="10" fill="#FFD700"/>
+  <polygon points="430,405 433,405 432,402" fill="#FFD700"/>
+  <rect x="470" y="405" width="3" height="10" fill="#FFD700"/>
+  <polygon points="470,405 473,405 472,402" fill="#FFD700"/>
+  <rect x="510" y="405" width="3" height="10" fill="#FFD700"/>
+  <polygon points="510,405 513,405 512,402" fill="#FFD700"/>
+  
+  <!-- Wedding decorations -->
+  <circle cx="280" cy="300" r="15" fill="#FFB6C1"/>
+  <circle cx="520" cy="300" r="15" fill="#FFB6C1"/>
+  <circle cx="300" cy="280" r="12" fill="white"/>
+  <circle cx="500" cy="280" r="12" fill="white"/>
+  
+  <!-- Wedding flowers -->
+  <circle cx="280" cy="300" r="8" fill="#FF69B4"/>
+  <circle cx="285" cy="295" r="4" fill="#FFD700"/>
+  <circle cx="275" cy="295" r="4" fill="#FFD700"/>
+  <circle cx="280" cy="305" r="4" fill="#FFD700"/>
+  <circle cx="280" cy="290" r="4" fill="#FFD700"/>
+  
+  <circle cx="520" cy="300" r="8" fill="#FF69B4"/>
+  <circle cx="525" cy="295" r="4" fill="#FFD700"/>
+  <circle cx="515" cy="295" r="4" fill="#FFD700"/>
+  <circle cx="520" cy="305" r="4" fill="#FFD700"/>
+  <circle cx="520" cy="290" r="4" fill="#FFD700"/>
+  
+  <!-- Oakland wedding title -->
+  <text x="400" y="200" text-anchor="middle" fill="#8B0000" font-family="Arial, sans-serif" font-size="24" font-weight="bold">OAKLAND WEDDING</text>
+  <text x="400" y="225" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="16">HIBACHI RECEPTION CATERING</text>
+  
+  <!-- East Bay elegance -->
+  <rect x="100" y="480" width="140" height="90" fill="#8B0000" opacity="0.8" rx="12"/>
+  <text x="170" y="505" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="13" font-weight="bold">EAST BAY</text>
+  <text x="170" y="520" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">WEDDING</text>
+  <text x="170" y="535" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">ELEGANCE</text>
+  <text x="170" y="550" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">INTIMATE CELEBRATIONS</text>
+  <text x="170" y="565" text-anchor="middle" fill="#FFB6C1" font-family="Arial, sans-serif" font-size="10">OAKLAND CHARM</text>
+  
+  <!-- Reception advantages -->
+  <rect x="560" y="480" width="140" height="90" fill="#FF69B4" opacity="0.8" rx="12"/>
+  <text x="630" y="505" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="13" font-weight="bold">RECEPTION</text>
+  <text x="630" y="520" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">HIBACHI</text>
+  <text x="630" y="535" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">EXPERIENCE</text>
+  <text x="630" y="550" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="11">MEMORABLE DINING</text>
+  <text x="630" y="565" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">LIVE COOKING</text>
+  
+  <!-- Wedding hibachi specialties -->
+  <ellipse cx="335" cy="318" rx="10" ry="6" fill="#FF6347"/>
+  <ellipse cx="355" cy="318" rx="11" ry="6" fill="#32CD32"/>
+  <ellipse cx="375" cy="318" rx="10" ry="6" fill="#FFD700"/>
+  <ellipse cx="395" cy="318" rx="9" ry="5" fill="#FF69B4"/>
+  <ellipse cx="415" cy="318" rx="10" ry="6" fill="#FF6347"/>
+  <ellipse cx="435" cy="318" rx="11" ry="6" fill="#32CD32"/>
+  <ellipse cx="455" cy="318" rx="10" ry="6" fill="#FFD700"/>
+  <ellipse cx="475" cy="318" rx="9" ry="5" fill="#FF69B4"/>
+  
+  <!-- Wedding hibachi flames -->
+  <polygon points="335,318 340,310 330,310" fill="#FF6347" opacity="0.9"/>
+  <polygon points="355,318 360,310 350,310" fill="#32CD32" opacity="0.9"/>
+  <polygon points="375,318 380,310 370,310" fill="#FFD700" opacity="0.9"/>
+  <polygon points="395,318 400,310 390,310" fill="#FF69B4" opacity="0.9"/>
+  <polygon points="415,318 420,310 410,310" fill="#FF6347" opacity="0.9"/>
+  <polygon points="435,318 440,310 430,310" fill="#32CD32" opacity="0.9"/>
+  <polygon points="455,318 460,310 450,310" fill="#FFD700" opacity="0.9"/>
+  <polygon points="475,318 480,310 470,310" fill="#FF69B4" opacity="0.9"/>
+  
+  <!-- Wedding string lights -->
+  <circle cx="280" cy="240" r="2" fill="#FFD700"/>
+  <circle cx="300" cy="235" r="2" fill="white"/>
+  <circle cx="320" cy="240" r="2" fill="#FFD700"/>
+  <circle cx="340" cy="235" r="2" fill="white"/>
+  <circle cx="360" cy="240" r="2" fill="#FFD700"/>
+  <circle cx="380" cy="235" r="2" fill="white"/>
+  <circle cx="400" cy="240" r="2" fill="#FFD700"/>
+  <circle cx="420" cy="235" r="2" fill="white"/>
+  <circle cx="440" cy="240" r="2" fill="#FFD700"/>
+  <circle cx="460" cy="235" r="2" fill="white"/>
+  <circle cx="480" cy="240" r="2" fill="#FFD700"/>
+  <circle cx="500" cy="235" r="2" fill="white"/>
+  <circle cx="520" cy="240" r="2" fill="#FFD700"/>
+  
+  <!-- String light connections -->
+  <line x1="280" y1="240" x2="520" y2="240" stroke="white" stroke-width="1" opacity="0.5"/>
+  
+  <!-- Wedding arch -->
+  <path d="M330,260 Q400,230 470,260" stroke="#FFB6C1" stroke-width="6" fill="none"/>
+  <circle cx="340" cy="255" r="3" fill="#FF69B4"/>
+  <circle cx="360" cy="245" r="3" fill="white"/>
+  <circle cx="380" cy="240" r="3" fill="#FF69B4"/>
+  <circle cx="400" cy="238" r="3" fill="white"/>
+  <circle cx="420" cy="240" r="3" fill="#FF69B4"/>
+  <circle cx="440" cy="245" r="3" fill="white"/>
+  <circle cx="460" cy="255" r="3" fill="#FF69B4"/>
+  
+  <!-- Oakland Bay views -->
+  <ellipse cx="100" cy="180" rx="40" ry="15" fill="#4682B4" opacity="0.6"/>
+  <ellipse cx="700" cy="190" rx="50" ry="18" fill="#4682B4" opacity="0.5"/>
+  
+  <!-- Romantic wedding glow -->
+  <circle cx="400" cy="350" r="120" fill="url(#romanticGlow)"/>
+  
+  <!-- Wedding cake table -->
+  <rect x="600" y="350" width="80" height="50" fill="#8B4513" rx="8"/>
+  <rect x="620" y="340" width="40" height="15" fill="white"/>
+  <rect x="625" y="335" width="30" height="10" fill="white"/>
+  <rect x="630" y="330" width="20" height="8" fill="white"/>
+  <circle cx="640" cy="328" r="2" fill="#FF69B4"/>
+  <circle cx="635" cy="328" r="1" fill="#FFD700"/>
+  <circle cx="645" cy="328" r="1" fill="#FFD700"/>
+  
+  <!-- Reception celebration -->
+  <text x="400" y="170" text-anchor="middle" fill="#FF69B4" font-family="Arial, sans-serif" font-size="14" font-weight="bold">MEMORABLE RECEPTION CELEBRATIONS</text>
+</svg>

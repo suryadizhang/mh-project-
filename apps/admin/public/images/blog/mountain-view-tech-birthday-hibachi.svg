@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.svg/2000/svg">
+  <!-- Mountain View tech birthday party -->
+  <defs>
+    <linearGradient id="mvTechSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1E90FF"/>
+      <stop offset="50%" style="stop-color:#00BFFF"/>
+      <stop offset="100%" style="stop-color:#87CEEB"/>
+    </linearGradient>
+    <linearGradient id="techBuilding" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#E6E6FA"/>
+      <stop offset="100%" style="stop-color:#C0C0C0"/>
+    </linearGradient>
+    <radialGradient id="birthdayGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FF69B4; opacity:0.5"/>
+      <stop offset="100%" style="stop-color:transparent"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Mountain View tech sky -->
+  <rect width="800" height="600" fill="url(#mvTechSky)"/>
+  
+  <!-- Tech celebration stars -->
+  <circle cx="150" cy="70" r="2" fill="#FFD700"/>
+  <circle cx="250" cy="50" r="1.5" fill="white"/>
+  <circle cx="400" cy="80" r="2" fill="#FF69B4"/>
+  <circle cx="550" cy="60" r="1.5" fill="white"/>
+  <circle cx="650" cy="45" r="2" fill="#FFD700"/>
+  <circle cx="720" cy="75" r="1.5" fill="white"/>
+  
+  <!-- Mountain View tech campus -->
+  <rect x="100" y="250" width="80" height="180" fill="url(#techBuilding)" rx="8"/>
+  <rect x="200" y="220" width="100" height="210" fill="url(#techBuilding)" rx="8"/>
+  <rect x="320" y="280" width="70" height="150" fill="url(#techBuilding)" rx="8"/>
+  <rect x="500" y="240" width="90" height="190" fill="url(#techBuilding)" rx="8"/>
+  <rect x="610" y="270" width="75" height="160" fill="url(#techBuilding)" rx="8"/>
+  
+  <!-- Tech company logos on buildings -->
+  <circle cx="140" cy="300" r="8" fill="#4285F4"/>
+  <text x="140" y="305" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="8" font-weight="bold">G</text>
+  <rect x="240" y="270" width="20" height="20" fill="#FF9500" rx="3"/>
+  <text x="250" y="283" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">A</text>
+  <circle cx="355" cy="330" r="8" fill="#1877F2"/>
+  <text x="355" y="335" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="8" font-weight="bold">M</text>
+  
+  <!-- Tech campus birthday venue -->
+  <rect x="300" y="350" width="200" height="120" fill="#F0F8FF" opacity="0.9" rx="12"/>
+  <text x="400" y="375" text-anchor="middle" fill="#4169E1" font-family="Arial, sans-serif" font-size="14" font-weight="bold">TECH BIRTHDAY CELEBRATION</text>
+  
+  <!-- Modern hibachi setup -->
+  <rect x="320" y="320" width="160" height="70" fill="#2F4F4F" rx="10"/>
+  <rect x="330" y="315" width="140" height="12" fill="#FF4500"/>
+  
+  <!-- High-tech hibachi grills -->
+  <circle cx="340" r="6" cy="318" fill="#00FF00"/>
+  <circle cx="360" r="6" cy="318" fill="#FF69B4"/>
+  <circle cx="380" r="6" cy="318" fill="#00BFFF"/>
+  <circle cx="400" r="6" cy="318" fill="#FFD700"/>
+  <circle cx="420" r="6" cy="318" fill="#00FF00"/>
+  <circle cx="440" r="6" cy="318" fill="#FF69B4"/>
+  <circle cx="460" r="6" cy="318" fill="#00BFFF"/>
+  
+  <!-- Tech hibachi chef -->
+  <circle cx="400" cy="280" r="15" fill="#FDBCB4"/>
+  <rect x="390" y="295" width="20" height="25" fill="white"/>
+  <rect x="386" y="320" width="28" height="30" fill="#4169E1"/>
+  <rect x="390" y="350" width="8" height="20" fill="#FDBCB4"/>
+  <rect x="402" y="350" width="8" height="20" fill="#FDBCB4"/>
+  
+  <!-- Modern chef hat -->
+  <rect x="394" y="268" width="12" height="9" fill="white"/>
+  <ellipse cx="400" cy="262" rx="9" ry="6" fill="white"/>
+  
+  <!-- Tech employees at birthday party -->
+  <circle cx="340" cy="390" r="11" fill="#FDBCB4"/>
+  <rect x="334" y="401" width="12" height="20" fill="#FF69B4"/>
+  <rect x="336" y="421" width="8" height="16" fill="#4169E1"/>
+  
+  <circle cx="460" cy="390" r="11" fill="#FDBCB4"/>
+  <rect x="454" y="401" width="12" height="20" fill="#00BFFF"/>
+  <rect x="456" y="421" width="8" height="16" fill="#654321"/>
+  
+  <!-- Young tech professionals -->
+  <circle cx="370" cy="400" r="10" fill="#FDBCB4"/>
+  <rect x="365" y="410" width="10" height="18" fill="#32CD32"/>
+  <rect x="367" y="428" width="6" height="14" fill="#8B4513"/>
+  
+  <circle cx="430" cy="400" r="10" fill="#FDBCB4"/>
+  <rect x="425" y="410" width="10" height="18" fill="#9370DB"/>
+  <rect x="427" y="428" width="6" height="14" fill="#000080"/>
+  
+  <!-- Modern tech dining -->
+  <ellipse cx="400" cy="440" rx="80" ry="25" fill="#8B4513"/>
+  
+  <!-- High-tech chairs -->
+  <rect x="340" y="450" width="10" height="25" fill="#C0C0C0"/>
+  <circle cx="345" cy="445" r="6" fill="#4169E1"/>
+  <rect x="370" y="450" width="10" height="25" fill="#C0C0C0"/>
+  <circle cx="375" cy="445" r="6" fill="#FF69B4"/>
+  <rect x="390" y="450" width="10" height="25" fill="#C0C0C0"/>
+  <circle cx="395" cy="445" r="6" fill="#00BFFF"/>
+  <rect x="410" y="450" width="10" height="25" fill="#C0C0C0"/>
+  <circle cx="415" cy="445" r="6" fill="#32CD32"/>
+  <rect x="430" y="450" width="10" height="25" fill="#C0C0C0"/>
+  <circle cx="435" cy="445" r="6" fill="#FF69B4"/>
+  <rect x="450" y="450" width="10" height="25" fill="#C0C0C0"/>
+  <circle cx="455" cy="445" r="6" fill="#4169E1"/>
+  
+  <!-- Birthday place settings -->
+  <circle cx="350" cy="435" r="7" fill="white"/>
+  <circle cx="375" cy="435" r="7" fill="white"/>
+  <circle cx="400" cy="435" r="7" fill="white"/>
+  <circle cx="425" cy="435" r="7" fill="white"/>
+  <circle cx="450" cy="435" r="7" fill="white"/>
+  
+  <!-- Tech-themed drinks -->
+  <rect x="345" y="425" width="4" height="10" fill="#00FF00"/>
+  <rect x="370" y="425" width="4" height="10" fill="#FF69B4"/>
+  <rect x="395" y="425" width="4" height="10" fill="#00BFFF"/>
+  <rect x="420" y="425" width="4" height="10" fill="#FFD700"/>
+  <rect x="445" y="425" width="4" height="10" fill="#9370DB"/>
+  
+  <!-- Mountain View title -->
+  <text x="400" y="200" text-anchor="middle" fill="#4169E1" font-family="Arial, sans-serif" font-size="24" font-weight="bold">MOUNTAIN VIEW</text>
+  <text x="400" y="225" text-anchor="middle" fill="#FF69B4" font-family="Arial, sans-serif" font-size="16">TECH BIRTHDAY PARTIES</text>
+  
+  <!-- Silicon Valley innovation -->
+  <rect x="120" y="480" width="140" height="90" fill="#4169E1" opacity="0.8" rx="12"/>
+  <text x="190" y="505" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="13" font-weight="bold">SILICON</text>
+  <text x="190" y="520" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="13" font-weight="bold">VALLEY</text>
+  <text x="190" y="535" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="12">INNOVATION</text>
+  <text x="190" y="550" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="11">TECH CELEBRATIONS</text>
+  <text x="190" y="565" text-anchor="middle" fill="#00BFFF" font-family="Arial, sans-serif" font-size="10">STARTUP CULTURE</text>
+  
+  <!-- Tech birthday advantages -->
+  <rect x="540" y="480" width="140" height="90" fill="#FF69B4" opacity="0.8" rx="12"/>
+  <text x="610" y="505" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="13" font-weight="bold">TECH</text>
+  <text x="610" y="520" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">BIRTHDAY</text>
+  <text x="610" y="535" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12">HIBACHI</text>
+  <text x="610" y="550" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="11">CORPORATE FUN</text>
+  <text x="610" y="565" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">TEAM BUILDING</text>
+  
+  <!-- High-tech hibachi specialties -->
+  <ellipse cx="345" cy="316" rx="9" ry="5" fill="#00FF00"/>
+  <ellipse cx="365" cy="316" rx="10" ry="5" fill="#FF69B4"/>
+  <ellipse cx="385" cy="316" rx="9" ry="5" fill="#00BFFF"/>
+  <ellipse cx="405" cy="316" rx="8" ry="4" fill="#FFD700"/>
+  <ellipse cx="425" cy="316" rx="9" ry="5" fill="#00FF00"/>
+  <ellipse cx="445" cy="316" rx="10" ry="5" fill="#FF69B4"/>
+  <ellipse cx="465" cy="316" rx="9" ry="5" fill="#00BFFF"/>
+  
+  <!-- Digital hibachi flames -->
+  <polygon points="345,316 349,308 341,308" fill="#00FF00" opacity="0.8"/>
+  <polygon points="365,316 369,308 361,308" fill="#FF69B4" opacity="0.8"/>
+  <polygon points="385,316 389,308 381,308" fill="#00BFFF" opacity="0.8"/>
+  <polygon points="405,316 409,308 401,308" fill="#FFD700" opacity="0.8"/>
+  <polygon points="425,316 429,308 421,308" fill="#00FF00" opacity="0.8"/>
+  <polygon points="445,316 449,308 441,308" fill="#FF69B4" opacity="0.8"/>
+  <polygon points="465,316 469,308 461,308" fill="#00BFFF" opacity="0.8"/>
+  
+  <!-- Birthday balloons -->
+  <circle cx="280" cy="300" r="12" fill="#FF69B4"/>
+  <rect x="279" y="312" width="2" height="20" fill="#654321"/>
+  <circle cx="300" cy="285" r="10" fill="#00BFFF"/>
+  <rect x="299" y="295" width="2" height="18" fill="#654321"/>
+  <circle cx="320" cy="295" r="11" fill="#FFD700"/>
+  <rect x="319" y="306" width="2" height="19" fill="#654321"/>
+  
+  <circle cx="480" cy="300" r="12" fill="#00FF00"/>
+  <rect x="479" y="312" width="2" height="20" fill="#654321"/>
+  <circle cx="500" cy="285" r="10" fill="#9370DB"/>
+  <rect x="499" y="295" width="2" height="18" fill="#654321"/>
+  <circle cx="520" cy="295" r="11" fill="#FF6347"/>
+  <rect x="519" y="306" width="2" height="19" fill="#654321"/>
+  
+  <!-- Birthday cake -->
+  <rect x="160" y="380" width="60" height="40" fill="#DEB887"/>
+  <rect x="170" y="370" width="40" height="15" fill="white"/>
+  <rect x="175" y="360" width="30" height="12" fill="#FF69B4"/>
+  <rect x="180" y="350" width="20" height="10" fill="white"/>
+  
+  <!-- Birthday candles -->
+  <rect x="185" y="345" width="2" height="8" fill="#FFD700"/>
+  <ellipse cx="186" cy="342" rx="1" ry="2" fill="#FF6347"/>
+  <rect x="195" y="345" width="2" height="8" fill="#FFD700"/>
+  <ellipse cx="196" cy="342" rx="1" ry="2" fill="#FF6347"/>
+  
+  <!-- Tech gadgets -->
+  <rect x="600" y="380" width="40" height="25" fill="#000000" rx="3"/>
+  <rect x="605" y="385" width="30" height="15" fill="#00BFFF"/>
+  <text x="620" y="396" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="8">TECH</text>
+  
+  <rect x="650" y="385" width="35" height="20" fill="#C0C0C0" rx="2"/>
+  <circle cx="667" cy="395" r="5" fill="#4169E1"/>
+  <text x="667" y="398" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="6">VR</text>
+  
+  <!-- WiFi signals -->
+  <path d="M150,150 Q175,125 200,150" stroke="#00BFFF" stroke-width="2" fill="none"/>
+  <path d="M155,155 Q175,140 195,155" stroke="#00BFFF" stroke-width="2" fill="none"/>
+  <path d="M160,160 Q175,150 190,160" stroke="#00BFFF" stroke-width="2" fill="none"/>
+  <circle cx="175" cy="165" r="2" fill="#00BFFF"/>
+  
+  <path d="M600,150 Q625,125 650,150" stroke="#00FF00" stroke-width="2" fill="none"/>
+  <path d="M605,155 Q625,140 645,155" stroke="#00FF00" stroke-width="2" fill="none"/>
+  <path d="M610,160 Q625,150 640,160" stroke="#00FF00" stroke-width="2" fill="none"/>
+  <circle cx="625" cy="165" r="2" fill="#00FF00"/>
+  
+  <!-- Tech birthday glow -->
+  <circle cx="400" cy="360" r="100" fill="url(#birthdayGlow)"/>
+  
+  <!-- Google shuttle -->
+  <rect x="50" y="510" width="80" height="25" fill="#4285F4" rx="8"/>
+  <text x="90" y="528" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">TECH SHUTTLE</text>
+  <circle cx="65" cy="530" r="5" fill="#2F4F4F"/>
+  <circle cx="125" cy="530" r="5" fill="#2F4F4F"/>
+  
+  <!-- Innovation celebration -->
+  <text x="400" y="170" text-anchor="middle" fill="#00BFFF" font-family="Arial, sans-serif" font-size="14" font-weight="bold">INNOVATIVE TECH BIRTHDAY CELEBRATIONS</text>
+</svg>

@@ -17,7 +17,7 @@ from sqlalchemy.future import select
 from core.database import get_db
 
 # MIGRATED: from models.call_recording → db.models.call_recording
-from db.models.call_recording import CallRecording, RecordingStatus
+from db.models.support_communications import CallRecording, RecordingStatus
 from services.ringcentral_service import get_ringcentral_service
 from api.deps import get_current_admin_user
 

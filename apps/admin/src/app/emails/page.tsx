@@ -86,7 +86,9 @@ export default function EmailsPage() {
     payments: EmailStatsType;
   } | null>(null);
   const [threads, setThreads] = useState<EmailThread[]>([]);
-  const [selectedThread, setSelectedThread] = useState<EmailThread | null>(null);
+  const [selectedThread, setSelectedThread] = useState<EmailThread | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -187,8 +189,10 @@ export default function EmailsPage() {
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       // Don't trigger shortcuts when typing in input fields
-      if ((e.target as HTMLElement).tagName === 'TEXTAREA' ||
-          (e.target as HTMLElement).tagName === 'INPUT') {
+      if (
+        (e.target as HTMLElement).tagName === 'TEXTAREA' ||
+        (e.target as HTMLElement).tagName === 'INPUT'
+      ) {
         // Allow Esc to close/unfocus
         if (e.key === 'Escape') {
           (e.target as HTMLElement).blur();
@@ -199,7 +203,9 @@ export default function EmailsPage() {
       // j/k navigation
       if (e.key === 'j' || e.key === 'k') {
         e.preventDefault();
-        const currentIndex = threads.findIndex(t => t.thread_id === selectedThread?.thread_id);
+        const currentIndex = threads.findIndex(
+          t => t.thread_id === selectedThread?.thread_id
+        );
         if (e.key === 'j' && currentIndex < threads.length - 1) {
           handleThreadClick(threads[currentIndex + 1]);
         } else if (e.key === 'k' && currentIndex > 0) {
@@ -238,9 +244,17 @@ export default function EmailsPage() {
       }
 
       // Ctrl+A or Cmd+A - Select all (when not in input field)
-      if ((e.ctrlKey || e.metaKey) && e.key === 'a' && activeTab === 'customer_support') {
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        e.key === 'a' &&
+        activeTab === 'customer_support'
+      ) {
         const target = e.target as HTMLElement;
-        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA' && !target.isContentEditable) {
+        if (
+          target.tagName !== 'INPUT' &&
+          target.tagName !== 'TEXTAREA' &&
+          !target.isContentEditable
+        ) {
           e.preventDefault();
           handleSelectAll();
         }
@@ -317,7 +331,7 @@ export default function EmailsPage() {
   };
 
   // Insert template into reply text
-  const insertTemplate = (template: typeof REPLY_TEMPLATES[0]) => {
+  const insertTemplate = (template: (typeof REPLY_TEMPLATES)[0]) => {
     const currentContent = replyText || '';
     const newContent = currentContent
       ? `${currentContent}<br/><br/>${template.text}`
@@ -390,7 +404,11 @@ export default function EmailsPage() {
     }
 
     // Confirm deletion
-    if (!confirm('Are you sure you want to permanently delete this email? This action cannot be undone.')) {
+    if (
+      !confirm(
+        'Are you sure you want to permanently delete this email? This action cannot be undone.'
+      )
+    ) {
       return;
     }
 
@@ -437,15 +455,28 @@ export default function EmailsPage() {
   };
 
   const handleBulkAction = async (
-    action: 'mark_read' | 'mark_unread' | 'star' | 'unstar' | 'archive' | 'unarchive' | 'delete'
+    action:
+      | 'mark_read'
+      | 'mark_unread'
+      | 'star'
+      | 'unstar'
+      | 'archive'
+      | 'unarchive'
+      | 'delete'
   ) => {
     if (selectedEmails.size === 0) {
-      toast.error('No emails selected', 'Please select emails to perform bulk actions');
+      toast.error(
+        'No emails selected',
+        'Please select emails to perform bulk actions'
+      );
       return;
     }
 
     if (activeTab !== 'customer_support') {
-      toast.error('Not supported', 'Bulk actions only available for customer support emails');
+      toast.error(
+        'Not supported',
+        'Bulk actions only available for customer support emails'
+      );
       return;
     }
 
@@ -455,7 +486,11 @@ export default function EmailsPage() {
         toast.error('Permission Denied', 'Only super admins can delete emails');
         return;
       }
-      if (!confirm(`Are you sure you want to permanently delete ${selectedEmails.size} email(s)? This action cannot be undone.`)) {
+      if (
+        !confirm(
+          `Are you sure you want to permanently delete ${selectedEmails.size} email(s)? This action cannot be undone.`
+        )
+      ) {
         return;
       }
     }
@@ -545,11 +580,12 @@ export default function EmailsPage() {
               <div className="flex items-center gap-2">
                 <Inbox className="w-4 h-4" />
                 Customer Support
-                {stats?.customer_support?.unread_emails !== undefined && stats.customer_support.unread_emails > 0 && (
-                  <span className="bg-red-600 text-white text-xs px-2 py-0.5 rounded-full">
-                    {stats.customer_support.unread_emails}
-                  </span>
-                )}
+                {stats?.customer_support?.unread_emails !== undefined &&
+                  stats.customer_support.unread_emails > 0 && (
+                    <span className="bg-red-600 text-white text-xs px-2 py-0.5 rounded-full">
+                      {stats.customer_support.unread_emails}
+                    </span>
+                  )}
               </div>
               <div className="text-xs text-gray-500 mt-0.5">
                 cs@myhibachichef.com
@@ -568,11 +604,12 @@ export default function EmailsPage() {
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4" />
                 Payment Monitoring
-                {stats?.payments?.unread_emails !== undefined && stats.payments.unread_emails > 0 && (
-                  <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
-                    {stats.payments.unread_emails}
-                  </span>
-                )}
+                {stats?.payments?.unread_emails !== undefined &&
+                  stats.payments.unread_emails > 0 && (
+                    <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
+                      {stats.payments.unread_emails}
+                    </span>
+                  )}
               </div>
               <div className="text-xs text-gray-500 mt-0.5">
                 myhibachichef@gmail.com (Read Only)
@@ -739,21 +776,27 @@ export default function EmailsPage() {
             )}
 
             {/* Select All Checkbox */}
-            {activeTab === 'customer_support' && threads.length > 0 && !loading && (
-              <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-3 flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={selectedEmails.size === threads.length && threads.length > 0}
-                  onChange={handleSelectAll}
-                  className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
-                />
-                <span className="text-sm text-gray-600">
-                  {selectedEmails.size === threads.length && threads.length > 0
-                    ? 'Deselect all'
-                    : 'Select all'}
-                </span>
-              </div>
-            )}
+            {activeTab === 'customer_support' &&
+              threads.length > 0 &&
+              !loading && (
+                <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-3 flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={
+                      selectedEmails.size === threads.length &&
+                      threads.length > 0
+                    }
+                    onChange={handleSelectAll}
+                    className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                  />
+                  <span className="text-sm text-gray-600">
+                    {selectedEmails.size === threads.length &&
+                    threads.length > 0
+                      ? 'Deselect all'
+                      : 'Select all'}
+                  </span>
+                </div>
+              )}
 
             {loading ? (
               <div className="p-8">
@@ -971,8 +1014,11 @@ export default function EmailsPage() {
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-6 space-y-4">
                 {selectedThread.messages.map((message, idx) => (
-                    <div key={message.message_id} className="bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
-                      <div className="p-4 space-y-3">
+                  <div
+                    key={message.message_id}
+                    className="bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow"
+                  >
+                    <div className="p-4 space-y-3">
                       {/* Message Header */}
                       <div className="flex items-start gap-3">
                         <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
@@ -1023,8 +1069,7 @@ export default function EmailsPage() {
                                   {attachment.filename}
                                 </span>
                                 <span className="text-gray-500">
-                                  (
-                                  {(attachment.size_bytes / 1024).toFixed(1)}{' '}
+                                  ({(attachment.size_bytes / 1024).toFixed(1)}{' '}
                                   KB)
                                 </span>
                               </div>
@@ -1033,43 +1078,44 @@ export default function EmailsPage() {
                         )}
 
                       {/* Reply/Forward Actions (Gmail-style) - Only on last message */}
-                      {activeTab === 'customer_support' && idx === selectedThread.messages.length - 1 && (
-                        <div className="flex items-center gap-1 pt-2 border-t border-gray-100">
-                          <Button
-                            onClick={() => setShowReplyBox(!showReplyBox)}
-                            variant="ghost"
-                            size="sm"
-                            className="text-gray-600 hover:bg-gray-100"
-                            type="button"
-                          >
-                            <Reply className="w-4 h-4 mr-1" />
-                            Reply
-                          </Button>
-                          <Button
-                            onClick={() => setShowReplyBox(!showReplyBox)}
-                            variant="ghost"
-                            size="sm"
-                            className="text-gray-600 hover:bg-gray-100"
-                            type="button"
-                          >
-                            <ReplyAll className="w-4 h-4 mr-1" />
-                            Reply All
-                          </Button>
-                          <Button
-                            onClick={() => setShowReplyBox(!showReplyBox)}
-                            variant="ghost"
-                            size="sm"
-                            className="text-gray-600 hover:bg-gray-100"
-                            type="button"
-                          >
-                            <Forward className="w-4 h-4 mr-1" />
-                            Forward
-                          </Button>
-                        </div>
-                      )}
-                      </div>
+                      {activeTab === 'customer_support' &&
+                        idx === selectedThread.messages.length - 1 && (
+                          <div className="flex items-center gap-1 pt-2 border-t border-gray-100">
+                            <Button
+                              onClick={() => setShowReplyBox(!showReplyBox)}
+                              variant="ghost"
+                              size="sm"
+                              className="text-gray-600 hover:bg-gray-100"
+                              type="button"
+                            >
+                              <Reply className="w-4 h-4 mr-1" />
+                              Reply
+                            </Button>
+                            <Button
+                              onClick={() => setShowReplyBox(!showReplyBox)}
+                              variant="ghost"
+                              size="sm"
+                              className="text-gray-600 hover:bg-gray-100"
+                              type="button"
+                            >
+                              <ReplyAll className="w-4 h-4 mr-1" />
+                              Reply All
+                            </Button>
+                            <Button
+                              onClick={() => setShowReplyBox(!showReplyBox)}
+                              variant="ghost"
+                              size="sm"
+                              className="text-gray-600 hover:bg-gray-100"
+                              type="button"
+                            >
+                              <Forward className="w-4 h-4 mr-1" />
+                              Forward
+                            </Button>
+                          </div>
+                        )}
                     </div>
-                  ))}
+                  </div>
+                ))}
               </div>
 
               {/* Reply Box (Customer Support Only - Collapsible) */}
@@ -1081,7 +1127,8 @@ export default function EmailsPage() {
                       <div className="flex items-center gap-2">
                         <Reply className="w-4 h-4 text-gray-500" />
                         <span className="text-sm font-medium text-gray-700">
-                          Reply to {selectedThread.messages[0]?.from_name || 'Customer'}
+                          Reply to{' '}
+                          {selectedThread.messages[0]?.from_name || 'Customer'}
                         </span>
                       </div>
                       <Button
@@ -1096,65 +1143,72 @@ export default function EmailsPage() {
                     </div>
 
                     <div className="p-4 space-y-3">
-                    {/* Template Dropdown */}
-                    <div className="relative">
-                      <Button
-                        onClick={() => setShowTemplateMenu(!showTemplateMenu)}
-                        variant="outline"
-                        size="sm"
-                        type="button"
-                      >
-                        <FileText className="w-4 h-4 mr-2" />
-                        Quick Templates
-                      </Button>
-                      {showTemplateMenu && (
-                        <div className="absolute z-10 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg">
-                          {REPLY_TEMPLATES.map(template => (
-                            <button
-                              key={template.id}
-                              onClick={() => insertTemplate(template)}
-                              className="w-full text-left px-4 py-2 hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg"
-                            >
-                              <div className="font-medium text-sm text-gray-900">
-                                {template.name}
-                              </div>
-                              <div className="text-xs text-gray-500 line-clamp-1">
-                                {template.text.substring(0, 50)}...
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    <RichTextEditor
-                      content={replyText}
-                      onChange={setReplyText}
-                      placeholder="Type your reply... (Signature will be appended automatically)"
-                    />
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-4">
-                        <span className="text-xs text-gray-500">
-                          Replying as cs@myhibachichef.com
-                        </span>
-                        {draftSaved && (
-                          <span className="text-xs text-green-600 flex items-center gap-1">
-                            <Save className="w-3 h-3" />
-                            Draft saved {formatRelativeTime(draftSaved.toISOString())}
-                          </span>
+                      {/* Template Dropdown */}
+                      <div className="relative">
+                        <Button
+                          onClick={() => setShowTemplateMenu(!showTemplateMenu)}
+                          variant="outline"
+                          size="sm"
+                          type="button"
+                        >
+                          <FileText className="w-4 h-4 mr-2" />
+                          Quick Templates
+                        </Button>
+                        {showTemplateMenu && (
+                          <div className="absolute z-10 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg">
+                            {REPLY_TEMPLATES.map(template => (
+                              <button
+                                key={template.id}
+                                onClick={() => insertTemplate(template)}
+                                className="w-full text-left px-4 py-2 hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg"
+                              >
+                                <div className="font-medium text-sm text-gray-900">
+                                  {template.name}
+                                </div>
+                                <div className="text-xs text-gray-500 line-clamp-1">
+                                  {template.text.substring(0, 50)}...
+                                </div>
+                              </button>
+                            ))}
+                          </div>
                         )}
                       </div>
-                      <Button
-                        onClick={handleSendReply}
-                        disabled={!replyText.trim() || sending}
-                      >
-                        <Send className="w-4 h-4 mr-2" />
-                        {sending ? 'Sending...' : 'Send Reply'}
-                      </Button>
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      💡 Keyboard shortcuts: <kbd className="px-1 bg-gray-200 rounded">r</kbd> reply, <kbd className="px-1 bg-gray-200 rounded">j/k</kbd> navigate, <kbd className="px-1 bg-gray-200 rounded">s</kbd> star, <kbd className="px-1 bg-gray-200 rounded">e</kbd> archive
-                    </div>
+
+                      <RichTextEditor
+                        content={replyText}
+                        onChange={setReplyText}
+                        placeholder="Type your reply... (Signature will be appended automatically)"
+                      />
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-4">
+                          <span className="text-xs text-gray-500">
+                            Replying as cs@myhibachichef.com
+                          </span>
+                          {draftSaved && (
+                            <span className="text-xs text-green-600 flex items-center gap-1">
+                              <Save className="w-3 h-3" />
+                              Draft saved{' '}
+                              {formatRelativeTime(draftSaved.toISOString())}
+                            </span>
+                          )}
+                        </div>
+                        <Button
+                          onClick={handleSendReply}
+                          disabled={!replyText.trim() || sending}
+                        >
+                          <Send className="w-4 h-4 mr-2" />
+                          {sending ? 'Sending...' : 'Send Reply'}
+                        </Button>
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        💡 Keyboard shortcuts:{' '}
+                        <kbd className="px-1 bg-gray-200 rounded">r</kbd> reply,{' '}
+                        <kbd className="px-1 bg-gray-200 rounded">j/k</kbd>{' '}
+                        navigate,{' '}
+                        <kbd className="px-1 bg-gray-200 rounded">s</kbd> star,{' '}
+                        <kbd className="px-1 bg-gray-200 rounded">e</kbd>{' '}
+                        archive
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1166,7 +1220,8 @@ export default function EmailsPage() {
                   <div className="text-center text-sm text-gray-700">
                     <p className="font-medium">Read-Only Inbox</p>
                     <p className="mt-1">
-                      This inbox is for manual payment verification only. Cannot reply from this address.
+                      This inbox is for manual payment verification only. Cannot
+                      reply from this address.
                     </p>
                   </div>
                 </div>

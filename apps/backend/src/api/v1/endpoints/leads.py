@@ -6,7 +6,7 @@ Admin users get 100-200 requests/minute vs 20 for public
 import logging
 
 # MIGRATED: Enum imports moved from OLD models.enums.lead_enums to NEW db.models.lead
-from db.models.lead import LeadSource, LeadStatus
+from db.models.crm import LeadSource, LeadStatus
 from api.deps import AdminUser, get_current_admin_user
 from core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -32,7 +32,7 @@ class LeadBase(BaseModel):
     event_location: str | None = Field(None, max_length=200)
     budget_range: str | None = Field(None, max_length=50)
     message: str | None = Field(None, max_length=1000)
-    source: LeadSource = LeadSource.WEBSITE
+    source: LeadSource = LeadSource.WEB_QUOTE
     status: LeadStatus = LeadStatus.NEW
     notes: str | None = Field(None, max_length=2000)
 

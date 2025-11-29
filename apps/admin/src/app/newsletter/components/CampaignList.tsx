@@ -111,19 +111,19 @@ export default function CampaignList({ onCreateNew }: { onCreateNew: () => void 
                   <TableCell>{getStatusBadge(campaign.status)}</TableCell>
                   <TableCell>{campaign.recipients.toLocaleString()}</TableCell>
                   <TableCell>
-                    {campaign.stats ? 
-                      `${((campaign.stats.opened / campaign.stats.sent) * 100).toFixed(1)}%` : 
+                    {campaign.stats ?
+                      `${((campaign.stats.opened / campaign.stats.sent) * 100).toFixed(1)}%` :
                       '-'
                     }
                   </TableCell>
                   <TableCell>
-                    {campaign.stats ? 
-                      `${((campaign.stats.clicked / campaign.stats.sent) * 100).toFixed(1)}%` : 
+                    {campaign.stats ?
+                      `${((campaign.stats.clicked / campaign.stats.sent) * 100).toFixed(1)}%` :
                       '-'
                     }
                   </TableCell>
                   <TableCell>
-                    {campaign.sentAt 
+                    {campaign.sentAt
                       ? formatDistanceToNow(new Date(campaign.sentAt), { addSuffix: true })
                       : campaign.scheduledFor
                       ? `Scheduled for ${formatDistanceToNow(new Date(campaign.scheduledFor), { addSuffix: true })}`

@@ -1,0 +1,141 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#familyGradient)"/>
+  
+  <!-- Kitchen Backdrop -->
+  <rect x="0" y="180" width="400" height="120" fill="#8B4513" opacity="0.3"/>
+  <rect x="50" y="150" width="300" height="30" fill="#CD853F"/>
+  
+  <!-- Large Family Table -->
+  <ellipse cx="200" cy="210" rx="120" ry="40" fill="#8B4513"/>
+  <ellipse cx="200" cy="205" rx="115" ry="35" fill="#A0522D"/>
+  
+  <!-- Family Tablecloth -->
+  <ellipse cx="200" cy="205" rx="110" ry="32" fill="#4169E1" opacity="0.8"/>
+  <ellipse cx="200" cy="202" rx="105" ry="28" fill="#6495ED" opacity="0.5"/>
+  
+  <!-- Multiple Hibachi Grills for Large Family -->
+  <!-- Grill 1 -->
+  <rect x="140" y="185" width="40" height="25" rx="5" fill="#1A1A1A"/>
+  <rect x="145" y="190" width="30" height="15" rx="3" fill="#2D1810"/>
+  <ellipse cx="155" cy="195" rx="4" ry="6" fill="#FF4500" opacity="0.8"/>
+  <ellipse cx="165" cy="193" rx="3" ry="5" fill="#FF6347" opacity="0.9"/>
+  
+  <!-- Grill 2 -->
+  <rect x="220" y="185" width="40" height="25" rx="5" fill="#1A1A1A"/>
+  <rect x="225" y="190" width="30" height="15" rx="3" fill="#2D1810"/>
+  <ellipse cx="235" cy="195" rx="4" ry="6" fill="#FF4500" opacity="0.8"/>
+  <ellipse cx="245" cy="193" rx="3" ry="5" fill="#FF6347" opacity="0.9"/>
+  
+  <!-- Family Members Around Table -->
+  <!-- Grandpa -->
+  <circle cx="120" cy="120" r="15" fill="#F4C2A1"/>
+  <rect x="112" y="133" width="16" height="25" fill="#4169E1"/>
+  <circle cx="115" cy="115" r="2" fill="#DCDCDC"/> <!-- glasses -->
+  <circle cx="125" cy="115" r="2" fill="#DCDCDC"/>
+  <rect x="113" y="113" width="14" height="2" fill="#DCDCDC"/>
+  
+  <!-- Grandma -->
+  <circle cx="280" cy="120" r="15" fill="#F4C2A1"/>
+  <rect x="272" y="133" width="16" height="25" fill="#FF69B4"/>
+  <path d="M280 110 Q275 105 285 105 Q285 108 280 110" fill="#DCDCDC"/> <!-- hair bun -->
+  
+  <!-- Dad -->
+  <circle cx="80" cy="160" r="18" fill="#F4C2A1"/>
+  <rect x="70" y="176" width="20" height="30" fill="#228B22"/>
+  <rect x="75" y="178" width="10" height="3" fill="#000000"/> <!-- apron tie -->
+  
+  <!-- Mom -->
+  <circle cx="320" cy="160" r="16" fill="#F4C2A1"/>
+  <rect x="310" y="174" width="20" height="28" fill="#FF1493"/>
+  <path d="M320 150 Q315 145 325 145 Q325 148 320 150" fill="#8B4513"/> <!-- hair -->
+  
+  <!-- Teenager -->
+  <circle cx="140" cy="180" r="12" fill="#F4C2A1"/>
+  <rect x="133" y="190" width="14" height="22" fill="#800080"/>
+  <path d="M140 170 Q135 165 145 165 Q145 168 140 170" fill="#654321"/>
+  
+  <!-- Young Child -->
+  <circle cx="260" cy="180" r="10" fill="#F4C2A1"/>
+  <rect x="255" y="188" width="10" height="18" fill="#FFD700"/>
+  <circle cx="258" cy="175" r="1" fill="#000000"/> <!-- eyes -->
+  <circle cx="262" cy="175" r="1" fill="#000000"/>
+  <path d="M260 178 Q258 180 262 180" stroke="#000000" stroke-width="1" fill="none"/> <!-- smile -->
+  
+  <!-- Toddler in High Chair -->
+  <rect x="190" y="140" width="20" height="30" fill="#8B4513"/>
+  <rect x="195" y="145" width="10" height="3" fill="#8B4513"/>
+  <circle cx="200" cy="135" r="8" fill="#F4C2A1"/>
+  <rect x="195" y="142" width="10" height="15" fill="#00BFFF"/>
+  
+  <!-- Family Food Items -->
+  <!-- Shared Dishes -->
+  <circle cx="155" cy="190" r="3" fill="#8B0000"/> <!-- meat -->
+  <circle cx="165" cy="188" r="2" fill="#32CD32"/> <!-- vegetables -->
+  <rect x="170" y="187" width="4" height="3" rx="1" fill="#FFD700"/> <!-- tofu -->
+  
+  <circle cx="235" cy="190" r="3" fill="#8B0000"/>
+  <circle cx="245" cy="188" r="2" fill="#FFA500"/> <!-- shrimp -->
+  <ellipse cx="250" cy="189" rx="2" ry="1" fill="#228B22"/> <!-- zucchini -->
+  
+  <!-- Rice Bowls -->
+  <ellipse cx="130" cy="195" rx="4" ry="2" fill="#FFFFFF"/>
+  <ellipse cx="130" cy="194" rx="3" ry="1.5" fill="#F5F5DC"/>
+  
+  <ellipse cx="270" cy="195" rx="4" ry="2" fill="#FFFFFF"/>
+  <ellipse cx="270" cy="194" rx="3" ry="1.5" fill="#F5F5DC"/>
+  
+  <!-- Family Drinks -->
+  <rect x="110" y="190" width="3" height="8" fill="#4169E1"/>
+  <ellipse cx="111.5" cy="189" rx="2" ry="1" fill="#87CEEB"/>
+  
+  <rect x="285" y="190" width="3" height="8" fill="#FF69B4"/>
+  <ellipse cx="286.5" cy="189" rx="2" ry="1" fill="#FFB6C1"/>
+  
+  <!-- Kids' Drinks -->
+  <rect x="185" y="195" width="2" height="6" fill="#FFD700"/>
+  <ellipse cx="186" cy="194" rx="1.5" ry="0.8" fill="#FFA500"/>
+  
+  <!-- Family Interaction Elements -->
+  <!-- Dad's Spatula -->
+  <rect x="100" y="170" width="2" height="12" fill="#8B4513" transform="rotate(20 100 170)"/>
+  <ellipse cx="108" cy="166" rx="4" ry="2" fill="#C0C0C0" transform="rotate(20 108 166)"/>
+  
+  <!-- Mom's Serving Spoon -->
+  <rect x="300" y="175" width="1.5" height="10" fill="#8B4513" transform="rotate(-15 300 175)"/>
+  <ellipse cx="305" cy="172" rx="3" ry="1.5" fill="#C0C0C0" transform="rotate(-15 305 172)"/>
+  
+  <!-- Family Connection Hearts -->
+  <path d="M200 100 C198 98, 196 98, 196 101 C196 98, 194 98, 192 100 C192 103, 196 107, 196 107 C196 107, 200 103, 200 100 Z" fill="#FF69B4" opacity="0.6"/>
+  
+  <!-- Steam from Food -->
+  <g stroke="#F5F5F5" stroke-width="1" fill="none" opacity="0.7">
+    <path d="M155 185 Q157 180 155 175 Q153 170 155 165"/>
+    <path d="M160 185 Q162 180 160 175 Q158 170 160 165"/>
+    <path d="M235 185 Q237 180 235 175 Q233 170 235 165"/>
+    <path d="M240 185 Q242 180 240 175 Q238 170 240 165"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="30" text-anchor="middle" fill="#4169E1" font-family="Arial, sans-serif" font-size="24" font-weight="bold">
+    Family Hibachi Night
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="50" text-anchor="middle" fill="#228B22" font-family="Arial, sans-serif" font-size="16">
+    Generations Together Around the Grill
+  </text>
+  
+  <!-- Family Message -->
+  <text x="200" y="280" text-anchor="middle" fill="#4169E1" font-family="Arial, sans-serif" font-size="12">
+    "Creating memories one meal at a time"
+  </text>
+  
+  <defs>
+    <linearGradient id="familyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0F8FF;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#E6F3FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F5F5DC;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

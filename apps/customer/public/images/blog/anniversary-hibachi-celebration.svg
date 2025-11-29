@@ -1,0 +1,120 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#anniversaryGradient)"/>
+  
+  <!-- Hearts Background -->
+  <g opacity="0.3">
+    <path d="M50 50 C45 45, 35 45, 35 55 C35 45, 25 45, 20 50 C20 60, 35 70, 35 70 C35 70, 50 60, 50 50 Z" fill="#FF69B4"/>
+    <path d="M350 40 C345 35, 335 35, 335 45 C335 35, 325 35, 320 40 C320 50, 335 60, 335 60 C335 60, 350 50, 350 40 Z" fill="#FFB6C1"/>
+    <path d="M70 200 C65 195, 55 195, 55 205 C55 195, 45 195, 40 200 C40 210, 55 220, 55 220 C55 220, 70 210, 70 200 Z" fill="#FF1493"/>
+    <path d="M330 180 C325 175, 315 175, 315 185 C315 175, 305 175, 300 180 C300 190, 315 200, 315 200 C315 200, 330 190, 330 180 Z" fill="#FFB6C1"/>
+  </g>
+  
+  <!-- Table Setting -->
+  <ellipse cx="200" cy="200" rx="100" ry="35" fill="#8B4513"/>
+  <ellipse cx="200" cy="195" rx="95" ry="30" fill="#A0522D"/>
+  
+  <!-- Elegant Tablecloth -->
+  <ellipse cx="200" cy="195" rx="90" ry="28" fill="#8B0000" opacity="0.9"/>
+  <ellipse cx="200" cy="192" rx="85" ry="25" fill="#B8860B" opacity="0.3"/>
+  
+  <!-- Candles -->
+  <rect x="150" y="170" width="4" height="15" fill="#F5DEB3"/>
+  <ellipse cx="152" cy="168" rx="2" ry="4" fill="#FF4500"/>
+  <rect x="245" y="170" width="4" height="15" fill="#F5DEB3"/>
+  <ellipse cx="247" cy="168" rx="2" ry="4" fill="#FF4500"/>
+  
+  <!-- Wine Glasses -->
+  <ellipse cx="170" cy="185" rx="3" ry="6" fill="none" stroke="#C0C0C0" stroke-width="1"/>
+  <rect x="169" y="191" width="2" height="8" fill="#C0C0C0"/>
+  <ellipse cx="170" cy="199" rx="4" ry="2" fill="#C0C0C0"/>
+  <ellipse cx="170" cy="182" rx="2" ry="3" fill="#8B0000" opacity="0.7"/>
+  
+  <ellipse cx="230" cy="185" rx="3" ry="6" fill="none" stroke="#C0C0C0" stroke-width="1"/>
+  <rect x="229" y="191" width="2" height="8" fill="#C0C0C0"/>
+  <ellipse cx="230" cy="199" rx="4" ry="2" fill="#C0C0C0"/>
+  <ellipse cx="230" cy="182" rx="2" ry="3" fill="#8B0000" opacity="0.7"/>
+  
+  <!-- Hibachi Grill - Premium -->
+  <rect x="175" y="175" width="50" height="30" rx="8" fill="#1A1A1A"/>
+  <rect x="180" y="180" width="40" height="20" rx="5" fill="#2D1810"/>
+  <rect x="185" y="185" width="30" height="10" rx="3" fill="#4A4A4A"/>
+  
+  <!-- Romantic Flames -->
+  <ellipse cx="190" cy="187" rx="3" ry="6" fill="#FF1493" opacity="0.8"/>
+  <ellipse cx="200" cy="185" rx="4" ry="8" fill="#FF0000" opacity="0.9"/>
+  <ellipse cx="210" cy="187" rx="3" ry="6" fill="#FF69B4" opacity="0.7"/>
+  
+  <!-- Chef Couple -->
+  <!-- Male Chef -->
+  <circle cx="120" cy="140" r="12" fill="#F4C2A1"/>
+  <rect x="115" y="150" width="10" height="20" fill="#FFFFFF"/>
+  <rect x="113" y="152" width="14" height="3" fill="#000000"/>
+  <!-- Chef Hat -->
+  <ellipse cx="120" cy="130" rx="8" ry="12" fill="#FFFFFF"/>
+  <rect x="115" y="135" width="10" height="3" fill="#000000"/>
+  
+  <!-- Female Chef -->
+  <circle cx="280" cy="140" r="12" fill="#F4C2A1"/>
+  <rect x="275" y="150" width="10" height="20" fill="#FFFFFF"/>
+  <rect x="273" y="152" width="14" height="3" fill="#000000"/>
+  <!-- Chef Hat with Bow -->
+  <ellipse cx="280" cy="130" rx="8" ry="12" fill="#FFFFFF"/>
+  <rect x="275" y="135" width="10" height="3" fill="#000000"/>
+  <path d="M285 128 L288 125 L285 122 L282 125 Z" fill="#FF69B4"/>
+  
+  <!-- Special Anniversary Food -->
+  <!-- Heart-shaped items -->
+  <path d="M195 182 C193 180, 189 180, 189 184 C189 180, 185 180, 183 182 C183 186, 189 190, 189 190 C189 190, 195 186, 195 182 Z" fill="#FF0000"/>
+  <path d="M205 183 C203 181, 199 181, 199 185 C199 181, 195 181, 193 183 C193 187, 199 191, 199 191 C199 191, 205 187, 205 183 Z" fill="#FFB6C1"/>
+  <path d="M215 182 C213 180, 209 180, 209 184 C209 180, 205 180, 203 182 C203 186, 209 190, 209 190 C209 190, 215 186, 215 182 Z" fill="#FF1493"/>
+  
+  <!-- Rose Petals -->
+  <ellipse cx="140" cy="180" rx="2" ry="3" fill="#FF0000" opacity="0.8" transform="rotate(30 140 180)"/>
+  <ellipse cx="145" cy="185" rx="1.5" ry="2" fill="#FF69B4" opacity="0.7" transform="rotate(45 145 185)"/>
+  <ellipse cx="255" cy="180" rx="2" ry="3" fill="#FF0000" opacity="0.8" transform="rotate(-30 255 180)"/>
+  <ellipse cx="260" cy="185" rx="1.5" ry="2" fill="#FF69B4" opacity="0.7" transform="rotate(-45 260 185)"/>
+  
+  <!-- Anniversary Ring Box -->
+  <rect x="320" y="190" width="15" height="8" fill="#8B0000"/>
+  <rect x="320" y="190" width="15" height="4" fill="#FFD700"/>
+  <circle cx="327" cy="187" r="1.5" fill="#FFFFFF"/>
+  <circle cx="327" cy="187" r="0.8" fill="#00BFFF"/>
+  
+  <!-- Champagne Bottle -->
+  <rect x="60" y="160" width="6" height="20" fill="#2E8B57"/>
+  <rect x="61" y="158" width="4" height="4" fill="#FFD700"/>
+  <circle cx="63" cy="156" r="1" fill="#FFD700"/>
+  <text x="63" y="175" text-anchor="middle" fill="#FFD700" font-family="Arial" font-size="8">🍾</text>
+  
+  <!-- Sparkles -->
+  <g fill="#FFD700" opacity="0.8">
+    <polygon points="100,80 102,85 107,85 103,88 105,93 100,90 95,93 97,88 93,85 98,85"/>
+    <polygon points="300,70 302,75 307,75 303,78 305,83 300,80 295,83 297,78 293,75 298,75"/>
+    <polygon points="150,120 152,125 157,125 153,128 155,133 150,130 145,133 147,128 143,125 148,125"/>
+    <polygon points="250,110 252,115 257,115 253,118 255,123 250,120 245,123 247,118 243,115 248,115"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="35" text-anchor="middle" fill="#8B0000" font-family="serif" font-size="24" font-weight="bold">
+    Anniversary Celebration
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="55" text-anchor="middle" fill="#FF1493" font-family="serif" font-size="16" font-style="italic">
+    Love • Food • Memories
+  </text>
+  
+  <!-- Anniversary Message -->
+  <text x="200" y="270" text-anchor="middle" fill="#8B0000" font-family="serif" font-size="12">
+    "Together we cook, together we celebrate"
+  </text>
+  
+  <defs>
+    <linearGradient id="anniversaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF0F5;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFE4E1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFCCCB;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

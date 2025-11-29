@@ -1,0 +1,58 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#backgroundGradient)"/>
+  
+  <!-- Grill Table -->
+  <rect x="50" y="200" width="300" height="80" rx="10" fill="#2D1810"/>
+  <rect x="60" y="210" width="280" height="60" rx="5" fill="#1A1A1A"/>
+  
+  <!-- Flames -->
+  <ellipse cx="120" cy="240" rx="15" ry="25" fill="#FF6B35" opacity="0.8"/>
+  <ellipse cx="140" cy="235" rx="12" ry="20" fill="#FF8C42" opacity="0.9"/>
+  <ellipse cx="160" cy="240" rx="10" ry="15" fill="#FFB14E" opacity="0.7"/>
+  <ellipse cx="200" cy="238" rx="13" ry="22" fill="#FF6B35" opacity="0.8"/>
+  <ellipse cx="220" cy="235" rx="11" ry="18" fill="#FF8C42" opacity="0.9"/>
+  <ellipse cx="240" cy="240" rx="9" ry="16" fill="#FFB14E" opacity="0.7"/>
+  <ellipse cx="280" cy="242" rx="12" ry="20" fill="#FF6B35" opacity="0.8"/>
+  
+  <!-- Chef Figure -->
+  <circle cx="200" cy="150" r="25" fill="#F4C2A1"/>
+  <rect x="190" y="170" width="20" height="40" fill="#FFFFFF"/>
+  <rect x="185" y="210" width="30" height="30" fill="#2C3E50"/>
+  
+  <!-- Chef Hat -->
+  <ellipse cx="200" cy="130" rx="20" ry="15" fill="#FFFFFF"/>
+  <rect x="185" y="120" width="30" height="25" rx="15" fill="#FFFFFF"/>
+  
+  <!-- Spatula -->
+  <rect x="225" y="180" width="3" height="30" fill="#8B4513" transform="rotate(15 225 180)"/>
+  <ellipse cx="237" cy="175" rx="8" ry="4" fill="#C0C0C0" transform="rotate(15 237 175)"/>
+  
+  <!-- Food Items -->
+  <circle cx="130" cy="220" r="8" fill="#D2691E"/>
+  <circle cx="170" cy="218" r="6" fill="#FF6347"/>
+  <rect x="210" y="215" width="12" height="8" rx="2" fill="#32CD32"/>
+  <circle cx="250" cy="220" r="7" fill="#FFD700"/>
+  <rect x="280" y="218" width="10" height="6" rx="1" fill="#FF69B4"/>
+  
+  <!-- Smoke/Steam -->
+  <circle cx="130" cy="200" r="3" fill="#E0E0E0" opacity="0.6"/>
+  <circle cx="135" cy="190" r="4" fill="#E0E0E0" opacity="0.5"/>
+  <circle cx="140" cy="180" r="3" fill="#E0E0E0" opacity="0.4"/>
+  <circle cx="170" cy="195" r="3" fill="#E0E0E0" opacity="0.6"/>
+  <circle cx="175" cy="185" r="4" fill="#E0E0E0" opacity="0.5"/>
+  <circle cx="250" cy="200" r="3" fill="#E0E0E0" opacity="0.6"/>
+  <circle cx="255" cy="190" r="4" fill="#E0E0E0" opacity="0.5"/>
+  
+  <!-- Title -->
+  <text x="200" y="50" text-anchor="middle" fill="#2C3E50" font-family="Arial, sans-serif" font-size="24" font-weight="bold">
+    Hibachi Chef Experience
+  </text>
+  
+  <defs>
+    <linearGradient id="backgroundGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF8DC;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F0E68C;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

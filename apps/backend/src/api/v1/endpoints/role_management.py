@@ -11,7 +11,7 @@ from core.database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
 
 # MIGRATED: from models.role → db.models.role
-from db.models.role import Permission, Role
+from db.models.identity import Permission, Role  # Use canonical identity package, not duplicate role.py
 from db.models.identity import User
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

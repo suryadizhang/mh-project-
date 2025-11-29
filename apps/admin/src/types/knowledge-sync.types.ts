@@ -16,7 +16,7 @@ export type SyncType = 'auto' | 'manual';
 /**
  * Sync status states
  */
-export type SyncStatus = 
+export type SyncStatus =
   | 'in_sync'           // Database matches TypeScript files
   | 'out_of_sync'       // Changes detected but not applied
   | 'syncing'           // Sync operation in progress

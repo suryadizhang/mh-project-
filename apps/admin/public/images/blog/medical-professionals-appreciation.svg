@@ -1,0 +1,299 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#medicalGradient)"/>
+  
+  <!-- Medical Appreciation Banner -->
+  <rect x="40" y="15" width="320" height="35" fill="#DC143C"/>
+  <rect x="42" y="17" width="316" height="31" fill="#FF6347"/>
+  <text x="200" y="28" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="14" font-weight="bold">MEDICAL PROFESSIONALS APPRECIATION</text>
+  <text x="200" y="40" text-anchor="middle" fill="#FFFF00" font-family="Arial" font-size="10">Healthcare Heroes Recognition</text>
+  
+  <!-- Professional Dining Setup -->
+  <rect x="120" y="220" width="160" height="60" fill="#8B4513"/>
+  <rect x="122" y="222" width="156" height="56" fill="#DEB887"/>
+  <rect x="125" y="225" width="150" height="50" fill="#F5DEB3"/>
+  
+  <!-- Hibachi Setup -->
+  <rect x="180" y="190" width="40" height="30" rx="6" fill="#2F4F4F"/>
+  <rect x="185" y="195" width="30" height="20" rx="4" fill="#1C1C1C"/>
+  
+  <!-- Medical Professionals -->
+  
+  <!-- Lead Doctor -->
+  <g>
+    <circle cx="200" cy="130" r="20" fill="#F4C2A1"/>
+    <rect x="185" y="148" width="30" height="35" fill="#FFFFFF"/>
+    <rect x="187" y="150" width="26" height="4" fill="#DC143C"/>
+    <ellipse cx="200" cy="117" rx="10" ry="5" fill="#8B4513"/>
+    <circle cx="195" cy="128" r="1" fill="#000000"/>
+    <circle cx="205" cy="128" r="1" fill="#000000"/>
+    <path d="M200 135 Q195 140 200 145" stroke="#000000" stroke-width="1" fill="none"/>
+    
+    <!-- Stethoscope -->
+    <circle cx="190" cy="155" r="2" fill="#C0C0C0"/>
+    <path d="M192 155 Q195 160 198 155" stroke="#C0C0C0" stroke-width="2" fill="none"/>
+    <path d="M198 155 Q200 158 202 155" stroke="#C0C0C0" stroke-width="2" fill="none"/>
+    
+    <!-- Name Badge -->
+    <rect x="170" y="160" width="12" height="8" fill="#FFFFFF"/>
+    <rect x="171" y="161" width="10" height="6" fill="#F0F8FF"/>
+    <g fill="#DC143C" font-family="Arial" font-size="2">
+      <text x="176" y="164" text-anchor="middle">DR. SMITH</text>
+      <text x="176" y="167" text-anchor="middle">MD CHIEF</text>
+    </g>
+  </g>
+  
+  <!-- Medical Team -->
+  
+  <!-- Nurse -->
+  <g>
+    <circle cx="150" cy="140" r="16" fill="#F4C2A1"/>
+    <rect x="137" y="154" width="26" height="30" fill="#4169E1"/>
+    <ellipse cx="150" cy="128" rx="8" ry="4" fill="#FFD700"/>
+    <circle cx="146" cy="138" r="1" fill="#000000"/>
+    <circle cx="154" cy="138" r="1" fill="#000000"/>
+    <path d="M150 145 Q145 150 150 155" stroke="#000000" stroke-width="1" fill="none"/>
+    
+    <!-- Nursing Badge -->
+    <rect x="140" y="158" width="6" height="4" fill="#FFFFFF"/>
+    <text x="143" y="161" text-anchor="middle" fill="#DC143C" font-family="Arial" font-size="2">RN</text>
+    
+    <!-- Medical Symbol -->
+    <circle cx="160" cy="165" r="2" fill="#DC143C"/>
+    <path d="M158 165 L162 165" stroke="#FFFFFF" stroke-width="1"/>
+    <path d="M160 163 L160 167" stroke="#FFFFFF" stroke-width="1"/>
+  </g>
+  
+  <!-- Surgeon -->
+  <g>
+    <circle cx="250" cy="145" r="16" fill="#F4C2A1"/>
+    <rect x="237" y="159" width="26" height="30" fill="#228B22"/>
+    <ellipse cx="250" cy="133" rx="8" ry="4" fill="#8B4513"/>
+    <circle cx="246" cy="143" r="1" fill="#000000"/>
+    <circle cx="254" cy="143" r="1" fill="#000000"/>
+    <path d="M250 150 Q245 155 250 160" stroke="#000000" stroke-width="1" fill="none"/>
+    
+    <!-- Surgical Mask -->
+    <rect x="245" y="140" width="10" height="5" fill="#87CEEB"/>
+    <rect x="246" y="141" width="8" height="3" fill="#E0F6FF"/>
+    
+    <!-- Surgeon Badge -->
+    <rect x="258" y="165" width="8" height="4" fill="#FFD700"/>
+    <text x="262" y="168" text-anchor="middle" fill="#000000" font-family="Arial" font-size="2">SURG</text>
+  </g>
+  
+  <!-- Medical Equipment & Tools -->
+  
+  <!-- Medical Chart -->
+  <rect x="120" y="195" width="15" height="20" fill="#FFFACD"/>
+  <rect x="122" y="197" width="11" height="16" fill="#FFF8DC"/>
+  <g fill="#000000" font-family="Arial" font-size="2">
+    <line x1="124" y1="200" x2="131" y2="200" stroke="#000000" stroke-width="0.3"/>
+    <line x1="124" y1="203" x2="131" y2="203" stroke="#000000" stroke-width="0.3"/>
+    <line x1="124" y1="206" x2="131" y2="206" stroke="#000000" stroke-width="0.3"/>
+    <line x1="124" y1="209" x2="131" y2="209" stroke="#000000" stroke-width="0.3"/>
+  </g>
+  <text x="127" y="217" text-anchor="middle" fill="#8B4513" font-family="Arial" font-size="3">CHART</text>
+  
+  <!-- Medical Bag -->
+  <rect x="265" y="195" width="20" height="12" fill="#8B0000"/>
+  <rect x="267" y="197" width="16" height="8" fill="#DC143C"/>
+  <circle cx="275" cy="201" r="1" fill="#FFD700"/>
+  <path d="M270 190 Q275 188 280 190" stroke="#8B0000" stroke-width="2" fill="none"/>
+  
+  <!-- Medical Achievements -->
+  
+  <!-- Years of Service Award -->
+  <rect x="30" y="100" width="50" height="40" fill="#FFD700"/>
+  <rect x="32" y="102" width="46" height="36" fill="#FFA500"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="5">
+    <text x="55" y="110" text-anchor="middle">20 YEARS</text>
+    <text x="55" y="117" text-anchor="middle">SERVICE</text>
+    <text x="55" y="124" text-anchor="middle">AWARD</text>
+    <text x="55" y="131" text-anchor="middle">MEDICAL</text>
+    <text x="55" y="138" text-anchor="middle">EXCELLENCE</text>
+  </g>
+  
+  <!-- Patient Satisfaction -->
+  <rect x="320" y="110" width="40" height="30" fill="#32CD32"/>
+  <rect x="322" y="112" width="36" height="26" fill="#90EE90"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="4">
+    <text x="340" y="120" text-anchor="middle">PATIENT</text>
+    <text x="340" y="126" text-anchor="middle">RATING</text>
+    <text x="340" y="132" text-anchor="middle">★★★★★</text>
+  </g>
+  
+  <!-- Medical Specialties -->
+  
+  <!-- Board Certification -->
+  <rect x="80" y="70" width="40" height="30" fill="#4169E1"/>
+  <rect x="82" y="72" width="36" height="26" fill="#6495ED"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="4">
+    <text x="100" y="79" text-anchor="middle">BOARD</text>
+    <text x="100" y="85" text-anchor="middle">CERTIFIED</text>
+    <text x="100" y="91" text-anchor="middle">MEDICINE</text>
+  </g>
+  
+  <!-- Research Excellence -->
+  <rect x="280" y="70" width="40" height="30" fill="#8B008B"/>
+  <rect x="282" y="72" width="36" height="26" fill="#9370DB"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="4">
+    <text x="300" y="79" text-anchor="middle">RESEARCH</text>
+    <text x="300" y="85" text-anchor="middle">AWARD</text>
+    <text x="300" y="91" text-anchor="middle">WINNER</text>
+  </g>
+  
+  <!-- Medical Recognition -->
+  
+  <!-- Life Saving Award -->
+  <rect x="150" y="70" width="50" height="25" fill="#DC143C"/>
+  <rect x="152" y="72" width="46" height="21" fill="#FF6347"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="5">
+    <text x="175" y="80" text-anchor="middle">LIFE</text>
+    <text x="175" y="87" text-anchor="middle">SAVING</text>
+    <text x="175" y="94" text-anchor="middle">HEROES</text>
+  </g>
+  
+  <!-- Medical Equipment on Table -->
+  
+  <!-- Prescription Pad -->
+  <rect x="160" y="200" width="12" height="10" fill="#FFFFFF"/>
+  <rect x="161" y="201" width="10" height="8" fill="#F0F8FF"/>
+  <g fill="#000000" font-family="Arial" font-size="2">
+    <line x1="162" y1="203" x2="170" y2="203" stroke="#000000" stroke-width="0.3"/>
+    <line x1="162" y1="205" x2="170" y2="205" stroke="#000000" stroke-width="0.3"/>
+    <line x1="162" y1="207" x2="170" y2="207" stroke="#000000" stroke-width="0.3"/>
+  </g>
+  <text x="166" y="213" text-anchor="middle" fill="#4169E1" font-family="Arial" font-size="3">RX</text>
+  
+  <!-- Medical Instruments -->
+  <g stroke="#C0C0C0" stroke-width="1" fill="#C0C0C0">
+    <!-- Reflex Hammer -->
+    <circle cx="230" cy="205" r="2"/>
+    <rect x="232" y="204" width="8" height="2"/>
+    
+    <!-- Otoscope -->
+    <circle cx="240" cy="202" r="1.5"/>
+    <rect x="241.5" y="201" width="6" height="2"/>
+    <circle cx="247.5" cy="202" r="1"/>
+  </g>
+  
+  <!-- Medical Beverages -->
+  
+  <!-- Coffee for Long Shifts -->
+  <rect x="300" y="200" width="6" height="10" fill="#8B4513"/>
+  <ellipse cx="303" cy="198" rx="3" ry="2" fill="#8B4513"/>
+  <rect cx="302" y="203" width="2" height="6" fill="#654321"/>
+  <g stroke="#8B4513" stroke-width="1" fill="none" opacity="0.8">
+    <path d="M301 198 Q303 195 305 198"/>
+    <path d="M302 196 Q303 194 304 196"/>
+  </g>
+  
+  <!-- Energy Drink -->
+  <rect x="340" y="200" width="6" height="12" fill="#FF6347"/>
+  <ellipse cx="343" cy="198" rx="3" ry="2" fill="#FF6347"/>
+  <rect x="342" y="205" width="2" height="6" fill="#DC143C"/>
+  <text x="343" y="215" text-anchor="middle" fill="#DC143C" font-family="Arial" font-size="3">ENERGY</text>
+  
+  <!-- Medical Success Metrics -->
+  
+  <!-- Lives Saved -->
+  <rect x="30" y="230" width="30" height="20" fill="#DC143C"/>
+  <rect x="32" y="232" width="26" height="16" fill="#FF6347"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="4">
+    <text x="45" y="238" text-anchor="middle">LIVES</text>
+    <text x="45" y="243" text-anchor="middle">SAVED</text>
+    <text x="45" y="248" text-anchor="middle">1,000+</text>
+  </g>
+  
+  <!-- Patient Care Hours -->
+  <rect x="340" y="230" width="30" height="20" fill="#4169E1"/>
+  <rect x="342" y="232" width="26" height="16" fill="#6495ED"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="4">
+    <text x="355" y="238" text-anchor="middle">CARE</text>
+    <text x="355" y="243" text-anchor="middle">HOURS</text>
+    <text x="355" y="248" text-anchor="middle">50,000+</text>
+  </g>
+  
+  <!-- Medical Innovation -->
+  <ellipse cx="200" cy="110" rx="70" ry="18" fill="#FFFFFF" stroke="#DC143C" stroke-width="2" opacity="0.9"/>
+  <text x="200" y="105" text-anchor="middle" fill="#DC143C" font-family="Arial" font-size="9" font-weight="bold">
+    "Dedicated to Healing & Excellence"
+  </text>
+  <text x="200" y="115" text-anchor="middle" fill="#8B4513" font-family="Arial" font-size="7">
+    Medical Excellence • Patient Care • Innovation
+  </text>
+  
+  <!-- Steam from Hibachi -->
+  <g stroke="#C0C0C0" stroke-width="2" fill="none" opacity="0.8">
+    <path d="M185 185 Q187 180 185 175 Q183 170 185 165"/>
+    <path d="M200 185 Q202 180 200 175 Q198 170 200 165"/>
+    <path d="M215 185 Q217 180 215 175 Q213 170 215 165"/>
+  </g>
+  
+  <!-- Medical Icons -->
+  <g fill="#DC143C" opacity="0.7">
+    <text x="70" y="160" text-anchor="middle" font-family="Arial" font-size="12">⚕️</text>
+    <text x="330" y="165" text-anchor="middle" font-family="Arial" font-size="12">💊</text>
+    <text x="40" y="60" text-anchor="middle" font-family="Arial" font-size="12">🩺</text>
+    <text x="360" y="65" text-anchor="middle" font-family="Arial" font-size="12">🏥</text>
+  </g>
+  
+  <!-- Medical Education -->
+  <rect x="220" y="80" width="35" height="20" fill="#228B22"/>
+  <rect x="222" y="82" width="31" height="16" fill="#32CD32"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="4">
+    <text x="237" y="88" text-anchor="middle">MEDICAL</text>
+    <text x="237" y="93" text-anchor="middle">SCHOOL</text>
+    <text x="237" y="98" text-anchor="middle">HONORS</text>
+  </g>
+  
+  <!-- Emergency Response -->
+  <rect x="300" y="150" width="25" height="15" fill="#FF6347"/>
+  <rect x="302" y="152" width="21" height="11" fill="#FFB6C1"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="3">
+    <text x="312" y="158" text-anchor="middle">EMERGENCY</text>
+    <text x="312" y="162" text-anchor="middle">RESPONSE</text>
+  </g>
+  
+  <!-- Professional Development -->
+  <rect x="75" y="180" width="30" height="15" fill="#8B008B"/>
+  <rect x="77" y="182" width="26" height="11" fill="#9370DB"/>
+  <g fill="#FFFFFF" font-family="Arial" font-size="3">
+    <text x="90" y="187" text-anchor="middle">CONTINUING</text>
+    <text x="90" y="191" text-anchor="middle">EDUCATION</text>
+  </g>
+  
+  <!-- Appreciation Feast -->
+  <g>
+    <!-- Premium Health-Conscious Meal -->
+    <ellipse cx="185" cy="200" rx="6" ry="4" fill="#228B22"/>
+    <ellipse cx="185" cy="199" rx="5" ry="3" fill="#32CD32"/>
+    
+    <!-- Lean Protein -->
+    <ellipse cx="200" cy="202" rx="5" ry="3" fill="#F5DEB3"/>
+    <ellipse cx="200" cy="201" rx="4" ry="2" fill="#FFFACD"/>
+    
+    <!-- Fresh Vegetables -->
+    <ellipse cx="215" cy="200" rx="4" ry="3" fill="#FF6347"/>
+    <ellipse cx="215" cy="199" rx="3" ry="2" fill="#FF7F50"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="12" text-anchor="middle" fill="#DC143C" font-family="Arial, sans-serif" font-size="16" font-weight="bold">
+    Medical Professionals Appreciation Hibachi
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="290" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="11">
+    "Honoring healthcare heroes with exceptional dining and recognition of service"
+  </text>
+  
+  <defs>
+    <linearGradient id="medicalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0F8FF;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFE4E1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFFACD;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

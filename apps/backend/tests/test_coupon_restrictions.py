@@ -19,7 +19,7 @@ import pytest
 from datetime import datetime, timedelta
 from uuid import uuid4
 
-from models.legacy_feedback import CustomerReview, DiscountCoupon
+from db.models.feedback_marketing import CustomerReview, DiscountCoupon
 from services.review_service import ReviewService
 
 
@@ -32,7 +32,7 @@ class TestCouponRestrictions:
         service = ReviewService(db_session)
         customer_id = uuid4()
         station_id = uuid4()
-        
+
         # Issue first coupon
         coupon1 = await service._issue_coupon(
             customer_id=customer_id,
@@ -41,16 +41,16 @@ class TestCouponRestrictions:
             reason="test_first_coupon",
             discount_percentage=10
         )
-        
+
         assert coupon1 is not None
         assert coupon1.status == "active"
         assert coupon1.times_used == 0
-        
+
         # Check for active coupon
         existing = await service._check_existing_active_coupon(customer_id)
         assert existing is not None
         assert existing.id == coupon1.id
-        
+
         # Try to issue second coupon - should be blocked
         review_id = uuid4()
         review = CustomerReview(
@@ -63,17 +63,17 @@ class TestCouponRestrictions:
         )
         db_session.add(review)
         await db_session.flush()
-        
+
         # Attempt to issue second coupon
         coupon2 = await service.issue_coupon_after_ai_interaction(
             review_id=review_id,
             ai_interaction_notes="Test second coupon",
             discount_percentage=10
         )
-        
+
         # Should be denied
         assert coupon2 is None
-        
+
         # Check metadata has denial reason
         await db_session.refresh(review)
         assert review.metadata is not None
@@ -87,7 +87,7 @@ class TestCouponRestrictions:
         customer_id = uuid4()
         station_id = uuid4()
         booking_id = uuid4()
-        
+
         # Create first review and issue coupon
         review1 = CustomerReview(
             id=uuid4(),
@@ -99,20 +99,20 @@ class TestCouponRestrictions:
         )
         db_session.add(review1)
         await db_session.flush()
-        
+
         coupon1 = await service.issue_coupon_after_ai_interaction(
             review_id=review1.id,
             ai_interaction_notes="First coupon for booking",
             discount_percentage=10
         )
-        
+
         assert coupon1 is not None
-        
+
         # Mark first coupon as used to bypass active coupon check
         coupon1.status = "used"
         coupon1.times_used = 1
         await db_session.commit()
-        
+
         # Create second review for SAME booking
         review2 = CustomerReview(
             id=uuid4(),
@@ -124,17 +124,17 @@ class TestCouponRestrictions:
         )
         db_session.add(review2)
         await db_session.flush()
-        
+
         # Try to issue second coupon for same booking
         coupon2 = await service.issue_coupon_after_ai_interaction(
             review_id=review2.id,
             ai_interaction_notes="Second coupon for same booking",
             discount_percentage=10
         )
-        
+
         # Should be denied
         assert coupon2 is None
-        
+
         # Check denial reason
         await db_session.refresh(review2)
         assert review2.metadata is not None
@@ -150,7 +150,7 @@ class TestDiscountCapLogic:
         """Test: $600 order → 10% = $60 discount (under $100 cap)."""
         service = ReviewService(db_session)
         customer_id = uuid4()
-        
+
         # Create coupon
         coupon = DiscountCoupon(
             id=uuid4(),
@@ -170,7 +170,7 @@ class TestDiscountCapLogic:
         )
         db_session.add(coupon)
         await db_session.commit()
-        
+
         # Validate coupon on $600 order
         order_total_cents = 60000  # $600
         result = await service.validate_coupon(
@@ -178,7 +178,7 @@ class TestDiscountCapLogic:
             customer_id=customer_id,
             order_total_cents=order_total_cents
         )
-        
+
         assert result["valid"] is True
         assert result["coupon"]["discount_cents"] == 6000  # $60 (10% of $600)
         assert result["coupon"]["max_discount_cents"] == 10000  # $100 cap
@@ -190,7 +190,7 @@ class TestDiscountCapLogic:
         """Test: $2000 order → 10% = $200, but capped at $100."""
         service = ReviewService(db_session)
         customer_id = uuid4()
-        
+
         # Create coupon
         coupon = DiscountCoupon(
             id=uuid4(),
@@ -210,7 +210,7 @@ class TestDiscountCapLogic:
         )
         db_session.add(coupon)
         await db_session.commit()
-        
+
         # Validate coupon on $2000 order
         order_total_cents = 200000  # $2000
         result = await service.validate_coupon(
@@ -218,7 +218,7 @@ class TestDiscountCapLogic:
             customer_id=customer_id,
             order_total_cents=order_total_cents
         )
-        
+
         assert result["valid"] is True
         # 10% of $2000 = $200, but should be capped at $100
         assert result["coupon"]["discount_cents"] == 10000  # $100 (capped)
@@ -230,7 +230,7 @@ class TestDiscountCapLogic:
         """Test: $1000 order → 10% = $100 (exactly at cap)."""
         service = ReviewService(db_session)
         customer_id = uuid4()
-        
+
         # Create coupon
         coupon = DiscountCoupon(
             id=uuid4(),
@@ -250,7 +250,7 @@ class TestDiscountCapLogic:
         )
         db_session.add(coupon)
         await db_session.commit()
-        
+
         # Validate coupon on $1000 order
         order_total_cents = 100000  # $1000
         result = await service.validate_coupon(
@@ -258,7 +258,7 @@ class TestDiscountCapLogic:
             customer_id=customer_id,
             order_total_cents=order_total_cents
         )
-        
+
         assert result["valid"] is True
         assert result["coupon"]["discount_cents"] == 10000  # $100 (10% of $1000)
         assert result["coupon"]["max_discount_cents"] == 10000  # $100 cap
@@ -269,7 +269,7 @@ class TestDiscountCapLogic:
         """Test: Orders under \$550 cannot use coupon."""
         service = ReviewService(db_session)
         customer_id = uuid4()
-        
+
         # Create coupon
         coupon = DiscountCoupon(
             id=uuid4(),
@@ -289,7 +289,7 @@ class TestDiscountCapLogic:
         )
         db_session.add(coupon)
         await db_session.commit()
-        
+
         # Try to use on $40 order (under minimum)
         order_total_cents = 4000  # $40
         result = await service.validate_coupon(
@@ -297,7 +297,7 @@ class TestDiscountCapLogic:
             customer_id=customer_id,
             order_total_cents=order_total_cents
         )
-        
+
         assert result["valid"] is False
         assert "Minimum order" in result["error"]
         print(f"✅ $40 order rejected: {result['error']}")
@@ -321,7 +321,7 @@ class TestCouponUsageFlow:
         service = ReviewService(db_session)
         customer_id = uuid4()
         station_id = uuid4()
-        
+
         # Step 1: Customer books Event A, leaves negative review
         booking_a_id = uuid4()
         review = CustomerReview(
@@ -334,56 +334,56 @@ class TestCouponUsageFlow:
         )
         db_session.add(review)
         await db_session.flush()
-        
+
         # Step 2: AI issues coupon
         coupon = await service.issue_coupon_after_ai_interaction(
             review_id=review.id,
             ai_interaction_notes="Resolved complaint, issued coupon",
             discount_percentage=10
         )
-        
+
         assert coupon is not None
         assert coupon.discount_value == 10  # 10%
         assert coupon.status == "active"
         assert coupon.times_used == 0
         print(f"✅ Step 1-2: Coupon {coupon.coupon_code} issued for Event A review")
-        
+
         # Step 3: Customer books Event B (next order) - $800
         booking_b_id = uuid4()
         next_order_total = 80000  # $800
-        
+
         # Step 4: Validate coupon at checkout
         validation = await service.validate_coupon(
             coupon_code=coupon.coupon_code,
             customer_id=customer_id,
             order_total_cents=next_order_total
         )
-        
+
         assert validation["valid"] is True
         discount_amount = validation["coupon"]["discount_cents"]
         assert discount_amount == 8000  # $80 (10% of $800, under $100 cap)
         print(f"✅ Step 3-4: $800 next order → ${discount_amount/100} discount applied")
-        
+
         # Step 5: Apply coupon to booking
         applied = await service.apply_coupon(
             coupon_code=coupon.coupon_code,
             booking_id=booking_b_id
         )
-        
+
         assert applied is True
         await db_session.refresh(coupon)
         assert coupon.status == "used"
         assert coupon.times_used == 1
         assert coupon.used_in_booking_id == booking_b_id
         print(f"✅ Step 5: Coupon applied to Event B (next order)")
-        
+
         # Step 6: Try to use coupon again - should fail
         validation2 = await service.validate_coupon(
             coupon_code=coupon.coupon_code,
             customer_id=customer_id,
             order_total_cents=50000
         )
-        
+
         assert validation2["valid"] is False
         assert "not valid or expired" in validation2["error"]
         print(f"✅ Step 6: Coupon cannot be reused: {validation2['error']}")
@@ -397,7 +397,7 @@ class TestDiscountExamples:
         """Test various order amounts to verify discount logic."""
         service = ReviewService(db_session)
         customer_id = uuid4()
-        
+
         test_cases = [
             # (order_amount, expected_discount, description)
             (100, 10, "$100 order → $10 discount (10%)"),
@@ -408,7 +408,7 @@ class TestDiscountExamples:
             (2000, 100, "$2000 order → $100 discount (capped, not $200)"),
             (5000, 100, "$5000 order → $100 discount (capped, not $500)"),
         ]
-        
+
         for order_dollars, expected_discount_dollars, description in test_cases:
             # Create unique coupon for each test
             coupon_code = f"TEST-{order_dollars}"
@@ -430,14 +430,14 @@ class TestDiscountExamples:
             )
             db_session.add(coupon)
             await db_session.flush()
-            
+
             # Validate
             result = await service.validate_coupon(
                 coupon_code=coupon_code,
                 customer_id=customer_id,
                 order_total_cents=order_dollars * 100
             )
-            
+
             actual_discount_dollars = result["coupon"]["discount_cents"] / 100
             assert result["valid"] is True
             assert actual_discount_dollars == expected_discount_dollars

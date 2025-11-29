@@ -9,7 +9,7 @@ from cqrs.registry import get_command_bus  # Phase 2C: Updated from api.app.cqrs
 
 # MIGRATED: Enum imports moved from models.enums to NEW db.models system
 from db.models.core import MessageKind
-from db.models.lead import SocialPlatform
+from db.models.crm import SocialPlatform
 
 # TODO: Manual migration needed for enums: MessageDirection
 # from models.enums import MessageDirection

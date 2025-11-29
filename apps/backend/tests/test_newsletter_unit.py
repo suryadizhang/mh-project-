@@ -11,7 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 # Phase 2C: Updated imports to current locations
 from services.newsletter_service import SubscriberService
-from models.legacy_lead_newsletter import LeadSource, Subscriber
+from db.models.newsletter import Subscriber
+from db.models.crm import LeadSource
 
 
 @pytest.mark.unit

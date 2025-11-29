@@ -1,0 +1,243 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#retirementGradient)"/>
+  
+  <!-- Retirement Banner -->
+  <path d="M50 40 Q200 50 350 40" stroke="#FFD700" stroke-width="4" fill="none"/>
+  <g fill="#FF6347">
+    <text x="200" y="30" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold">HAPPY RETIREMENT</text>
+  </g>
+  
+  <!-- Retirement Table Setup -->
+  <ellipse cx="200" cy="200" rx="100" ry="35" fill="#8B4513"/>
+  <ellipse cx="200" cy="195" rx="95" ry="30" fill="#DEB887"/>
+  <ellipse cx="200" cy="192" rx="90" ry="27" fill="#F5DEB3"/>
+  
+  <!-- Elegant Hibachi Setup -->
+  <rect x="170" y="170" width="60" height="35" rx="8" fill="#4B0082"/>
+  <rect x="175" y="175" width="50" height="25" rx="6" fill="#2F4F4F"/>
+  <rect x="180" y="180" width="40" height="15" rx="4" fill="#1C1C1C"/>
+  
+  <!-- Retiree (honored guest) -->
+  <circle cx="200" cy="140" r="20" fill="#F4C2A1"/>
+  <rect x="185" y="158" width="30" height="35" fill="#000080"/>
+  <rect x="187" y="160" width="26" height="4" fill="#FFD700"/>
+  <ellipse cx="200" cy="123" rx="12" ry="6" fill="#D3D3D3"/>
+  
+  <!-- Retiree's Glasses -->
+  <circle cx="195" cy="138" r="4" stroke="#000000" stroke-width="1" fill="none"/>
+  <circle cx="205" cy="138" r="4" stroke="#000000" stroke-width="1" fill="none"/>
+  <line x1="199" y1="138" x2="201" y2="138" stroke="#000000" stroke-width="1"/>
+  
+  <!-- Gold Watch (retirement gift) -->
+  <circle cx="180" cy="168" r="4" fill="#FFD700"/>
+  <circle cx="180" cy="168" r="3" fill="#FFA500"/>
+  <circle cx="180" cy="168" r="1" fill="#8B4513"/>
+  
+  <!-- Family Members Celebrating -->
+  
+  <!-- Adult Child 1 -->
+  <circle cx="120" cy="150" r="18" fill="#F4C2A1"/>
+  <rect x="107" y="166" width="26" height="32" fill="#8B008B"/>
+  <ellipse cx="120" cy="135" rx="10" ry="6" fill="#8B4513"/>
+  <circle cx="115" cy="148" r="1" fill="#000000"/>
+  <circle cx="125" cy="148" r="1" fill="#000000"/>
+  <path d="M120 155 Q115 160 120 165" stroke="#000000" stroke-width="1" fill="none"/>
+  
+  <!-- Adult Child 2 -->
+  <circle cx="280" cy="155" r="16" fill="#F4C2A1"/>
+  <rect x="269" y="169" width="22" height="28" fill="#006400"/>
+  <ellipse cx="280" cy="142" rx="8" ry="5" fill="#FFD700"/>
+  <circle cx="276" cy="153" r="1" fill="#000000"/>
+  <circle cx="284" cy="153" r="1" fill="#000000"/>
+  <path d="M280 160 Q275 165 280 170" stroke="#000000" stroke-width="1" fill="none"/>
+  
+  <!-- Grandchildren -->
+  <!-- Grandchild 1 -->
+  <circle cx="150" cy="230" r="12" fill="#F4C2A1"/>
+  <rect x="142" y="240" width="16" height="22" fill="#FF69B4"/>
+  <ellipse cx="150" cy="221" rx="6" ry="4" fill="#8B4513"/>
+  <circle cx="146" cy="228" r="1" fill="#000000"/>
+  <circle cx="154" cy="228" r="1" fill="#000000"/>
+  <ellipse cx="150" cy="232" rx="3" ry="2" fill="#FF69B4"/>
+  
+  <!-- Grandchild 2 -->
+  <circle cx="250" cy="225" r="10" fill="#F4C2A1"/>
+  <rect x="244" y="233" width="12" height="18" fill="#32CD32"/>
+  <ellipse cx="250" cy="218" rx="5" ry="3" fill="#000000"/>
+  <circle cx="246" cy="223" r="1" fill="#000000"/>
+  <circle cx="254" cy="223" r="1" fill="#000000"/>
+  <ellipse cx="250" cy="227" rx="2" ry="1" fill="#FF69B4"/>
+  
+  <!-- Retirement Gifts -->
+  <!-- Golf Clubs -->
+  <g stroke="#8B4513" stroke-width="3">
+    <line x1="320" y1="180" x2="320" y2="200"/>
+    <line x1="325" y1="175" x2="325" y2="195"/>
+    <line x1="330" y1="178" x2="330" y2="198"/>
+  </g>
+  <g fill="#C0C0C0">
+    <ellipse cx="320" cy="175" rx="2" ry="3"/>
+    <ellipse cx="325" cy="170" rx="2" ry="3"/>
+    <ellipse cx="330" cy="173" rx="2" ry="3"/>
+  </g>
+  
+  <!-- Golf Bag -->
+  <rect x="315" y="200" width="20" height="15" fill="#000080"/>
+  <rect x="317" y="202" width="16" height="11" fill="#4169E1"/>
+  
+  <!-- Fishing Rod -->
+  <line x1="80" y1="170" x2="80" y2="230" stroke="#8B4513" stroke-width="3"/>
+  <line x1="80" y1="170" x2="100" y2="160" stroke="#000000" stroke-width="1"/>
+  <circle cx="100" cy="160" r="1" fill="#FF0000"/>
+  
+  <!-- Travel Brochures -->
+  <rect x="50" y="240" width="15" height="20" fill="#87CEEB"/>
+  <rect x="52" y="242" width="11" height="16" fill="#B0E0E6"/>
+  <text x="57" y="250" text-anchor="middle" fill="#000080" font-family="Arial" font-size="6">HAWAII</text>
+  
+  <rect x="70" y="245" width="15" height="20" fill="#FFB6C1"/>
+  <rect x="72" y="247" width="11" height="16" fill="#FFC0CB"/>
+  <text x="77" y="255" text-anchor="middle" fill="#8B0000" font-family="Arial" font-size="5">EUROPE</text>
+  
+  <!-- Retirement Cake -->
+  <ellipse cx="320" cy="240" rx="25" ry="8" fill="#DEB887"/>
+  <ellipse cx="320" cy="237" rx="23" ry="6" fill="#F5DEB3"/>
+  <ellipse cx="320" cy="235" rx="20" ry="5" fill="#FFFFFF"/>
+  
+  <!-- Cake Decorations -->
+  <g fill="#FF69B4">
+    <circle cx="310" cy="235" r="1"/>
+    <circle cx="320" cy="233" r="1"/>
+    <circle cx="330" cy="235" r="1"/>
+  </g>
+  
+  <!-- Retirement Flames -->
+  <g opacity="0.9">
+    <ellipse cx="190" cy="177" rx="4" ry="8" fill="#4B0082"/>
+    <ellipse cx="200" cy="175" rx="5" ry="10" fill="#9400D3"/>
+    <ellipse cx="210" cy="177" rx="4" ry="8" fill="#8A2BE2"/>
+  </g>
+  
+  <!-- Celebration Food -->
+  <!-- Prime Steak -->
+  <ellipse cx="195" cy="185" rx="5" ry="3" fill="#8B0000"/>
+  <ellipse cx="195" cy="184" rx="4" ry="2" fill="#B22222"/>
+  
+  <!-- Lobster -->
+  <ellipse cx="205" cy="186" rx="4" ry="2" fill="#FF6347"/>
+  <ellipse cx="205" cy="185" rx="3" ry="1" fill="#FF7F50"/>
+  
+  <!-- Retirement Balloons -->
+  <g>
+    <!-- Gold Balloon -->
+    <ellipse cx="60" cy="100" rx="8" ry="12" fill="#FFD700"/>
+    <ellipse cx="60" cy="98" rx="6" ry="10" fill="#FFA500"/>
+    <line x1="60" y1="112" x2="60" y2="140" stroke="#000000" stroke-width="1"/>
+    
+    <!-- Silver Balloon -->
+    <ellipse cx="340" cy="90" rx="10" ry="15" fill="#C0C0C0"/>
+    <ellipse cx="340" cy="87" rx="8" ry="13" fill="#D3D3D3"/>
+    <line x1="340" y1="105" x2="340" y2="135" stroke="#000000" stroke-width="1"/>
+    
+    <!-- Purple Balloon -->
+    <ellipse cx="380" cy="110" rx="7" ry="11" fill="#8A2BE2"/>
+    <ellipse cx="380" cy="108" rx="5" ry="9" fill="#9932CC"/>
+    <line x1="380" y1="121" x2="380" y2="150" stroke="#000000" stroke-width="1"/>
+  </g>
+  
+  <!-- Retirement Speech Bubble -->
+  <ellipse cx="200" cy="100" rx="30" ry="20" fill="#FFFFFF" stroke="#FFD700" stroke-width="2"/>
+  <text x="200" y="95" text-anchor="middle" fill="#4B0082" font-family="Arial" font-size="8">
+    "Thank you for all
+  </text>
+  <text x="200" y="105" text-anchor="middle" fill="#4B0082" font-family="Arial" font-size="8">
+    the wonderful years!"
+  </text>
+  
+  <!-- Career Memories -->
+  <!-- Years of Service Badge -->
+  <circle cx="90" cy="180" r="12" fill="#FFD700"/>
+  <text x="90" y="178" text-anchor="middle" fill="#8B0000" font-family="Arial" font-size="8" font-weight="bold">30</text>
+  <text x="90" y="188" text-anchor="middle" fill="#8B0000" font-family="Arial" font-size="6">YEARS</text>
+  
+  <!-- Company Logo/Plaque -->
+  <rect x="300" y="100" width="30" height="20" fill="#8B4513"/>
+  <rect x="302" y="102" width="26" height="16" fill="#DEB887"/>
+  <text x="315" y="112" text-anchor="middle" fill="#000000" font-family="Arial" font-size="8" font-weight="bold">COMPANY</text>
+  <text x="315" y="120" text-anchor="middle" fill="#000000" font-family="Arial" font-size="6">HERO</text>
+  
+  <!-- Retirement Photo -->
+  <rect x="120" y="80" width="20" height="15" fill="#8B4513"/>
+  <rect x="122" y="82" width="16" height="11" fill="#FFFFFF"/>
+  <g fill="#4169E1">
+    <circle cx="127" cy="87" r="1"/>
+    <circle cx="132" cy="87" r="1"/>
+  </g>
+  <path d="M129.5 89 Q129.5 91 132 91" stroke="#000000" stroke-width="0.5" fill="none"/>
+  
+  <!-- Retirement Steam -->
+  <g stroke="#9400D3" stroke-width="2" fill="none" opacity="0.8">
+    <path d="M190 170 Q192 165 190 160 Q188 155 190 150"/>
+    <path d="M200 170 Q202 165 200 160 Q198 155 200 150"/>
+    <path d="M210 170 Q212 165 210 160 Q208 155 210 150"/>
+  </g>
+  
+  <!-- Gratitude Hearts -->
+  <g fill="#FF69B4" opacity="0.7">
+    <path d="M140 120 Q142 118 144 120 Q146 118 148 120 Q148 124 144 128 Q140 124 140 120"/>
+    <path d="M260 130 Q262 128 264 130 Q266 128 268 130 Q268 134 264 138 Q260 134 260 130"/>
+    <path d="M320 160 Q322 158 324 160 Q326 158 328 160 Q328 164 324 168 Q320 164 320 160"/>
+  </g>
+  
+  <!-- Retirement Countdown Calendar -->
+  <rect x="360" y="180" width="25" height="20" fill="#FFFFFF"/>
+  <rect x="362" y="182" width="21" height="16" fill="#F0F8FF"/>
+  <text x="372" y="190" text-anchor="middle" fill="#FF0000" font-family="Arial" font-size="8" font-weight="bold">DAY 1</text>
+  <text x="372" y="198" text-anchor="middle" fill="#000000" font-family="Arial" font-size="6">RETIREMENT</text>
+  
+  <!-- Golden Years Symbol -->
+  <circle cx="30" cy="120" r="15" fill="#FFD700"/>
+  <circle cx="30" cy="120" r="12" fill="#FFA500"/>
+  <text x="30" y="125" text-anchor="middle" fill="#8B4513" font-family="Arial" font-size="10" font-weight="bold">G</text>
+  <text x="30" y="110" text-anchor="middle" fill="#8B4513" font-family="Arial" font-size="6">Golden</text>
+  <text x="30" y="145" text-anchor="middle" fill="#8B4513" font-family="Arial" font-size="6">Years</text>
+  
+  <!-- Wisdom Scroll -->
+  <rect x="350" y="220" width="20" height="30" fill="#F5DEB3"/>
+  <rect x="352" y="222" width="16" height="26" fill="#FFFACD"/>
+  <g fill="#8B4513" font-family="Arial" font-size="4">
+    <text x="360" y="230" text-anchor="middle">Life</text>
+    <text x="360" y="235" text-anchor="middle">Wisdom</text>
+    <text x="360" y="240" text-anchor="middle">Stories</text>
+    <text x="360" y="245" text-anchor="middle">Legacy</text>
+  </g>
+  
+  <!-- Champagne Toast -->
+  <rect x="270" y="120" width="4" height="20" fill="#228B22"/>
+  <ellipse cx="272" cy="115" rx="3" ry="6" fill="#228B22"/>
+  <rect x="271" y="110" width="2" height="5" fill="#FFD700"/>
+  <g fill="#FFFFFF" opacity="0.7">
+    <circle cx="271" cy="118" r="0.5"/>
+    <circle cx="273" cy="120" r="0.5"/>
+    <circle cx="272" cy="122" r="0.5"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="200" y="20" text-anchor="middle" fill="#4B0082" font-family="Arial, sans-serif" font-size="22" font-weight="bold">
+    Retirement Celebration Hibachi
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="285" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="14">
+    "Celebrating a lifetime of achievements with family and friends"
+  </text>
+  
+  <defs>
+    <linearGradient id="retirementGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F5F5DC;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFF8DC;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFFACD;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

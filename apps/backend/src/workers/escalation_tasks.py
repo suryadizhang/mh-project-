@@ -11,7 +11,7 @@ from workers.celery_config import celery_app
 from core.database import get_sync_db
 
 # MIGRATED: from models.escalation → db.models.escalation
-from db.models.escalation import Escalation, EscalationStatus
+from db.models.support_communications import Escalation, EscalationStatus
 from services.ringcentral_service import get_ringcentral_service
 from datetime import datetime
 

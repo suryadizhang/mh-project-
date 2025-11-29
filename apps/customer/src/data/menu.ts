@@ -144,28 +144,6 @@ export const menuData = {
         'Fremont - South Bay hibachi artistry'
       ]
     }
-  },
-
-  additionalServices: {
-    title: 'Enhance Your Experience',
-    subtitle: 'Optional add-ons to make your event even more special',
-    items: [
-      {
-        name: 'Premium Sake Service',
-        price: '$25',
-        description: 'Traditional sake service with premium selection'
-      },
-      {
-        name: 'Extended Performance',
-        price: '$50',
-        description: 'Additional 30 minutes of entertainment and tricks'
-      },
-      {
-        name: 'Custom Menu Planning',
-        price: '$35',
-        description: 'Personalized menu consultation and planning'
-      }
-    ]
   }
 }
 

@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Mountain View tech party atmosphere -->
+  <defs>
+    <linearGradient id="mountainViewSky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB"/>
+      <stop offset="50%" style="stop-color:#B0E0E6"/>
+      <stop offset="100%" style="stop-color:#E0F6FF"/>
+    </linearGradient>
+    <linearGradient id="techCampus" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#D3D3D3"/>
+      <stop offset="100%" style="stop-color:#A9A9A9"/>
+    </linearGradient>
+    <radialGradient id="googlePlex" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#4285F4"/>
+      <stop offset="25%" style="stop-color:#34A853"/>
+      <stop offset="50%" style="stop-color:#FBBC05"/>
+      <stop offset="75%" style="stop-color:#EA4335"/>
+      <stop offset="100%" style="stop-color:#4285F4"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Mountain View sky with distant mountains -->
+  <rect width="800" height="600" fill="url(#mountainViewSky)"/>
+  
+  <!-- Mountain silhouettes in distance -->
+  <polygon points="0,400 100,350 200,380 300,340 400,370 500,330 600,360 700,320 800,350 800,600 0,600" fill="#8FBC8F" opacity="0.6"/>
+  
+  <!-- Tech campus buildings -->
+  <rect x="50" y="280" width="100" height="220" fill="url(#techCampus)" rx="8"/>
+  <rect x="170" y="260" width="120" height="240" fill="url(#techCampus)" rx="8"/>
+  <rect x="600" y="300" width="90" height="200" fill="url(#techCampus)" rx="8"/>
+  <rect x="710" y="320" width="80" height="180" fill="url(#techCampus)" rx="8"/>
+  
+  <!-- Google Headquarters influence -->
+  <rect x="60" y="300" width="80" height="20" fill="url(#googlePlex)" rx="5"/>
+  <text x="100" y="315" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">GOOGLE</text>
+  
+  <!-- Other tech companies -->
+  <rect x="180" y="280" width="100" height="20" fill="#FF6347" rx="5"/>
+  <text x="230" y="295" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">TECH CORP</text>
+  
+  <!-- Building windows with late night work lights -->
+  <rect x="65" y="320" width="6" height="8" fill="#FFD700"/>
+  <rect x="75" y="320" width="6" height="8" fill="#4285F4"/>
+  <rect x="85" y="320" width="6" height="8" fill="#34A853"/>
+  <rect x="95" y="320" width="6" height="8" fill="#FBBC05"/>
+  <rect x="105" y="320" width="6" height="8" fill="#EA4335"/>
+  <rect x="115" y="320" width="6" height="8" fill="#FFD700"/>
+  <rect x="125" y="320" width="6" height="8" fill="#4285F4"/>
+  
+  <!-- Corporate outdoor event space -->
+  <rect x="250" y="420" width="140" height="80" fill="#F5F5DC" opacity="0.9" rx="10"/>
+  <text x="320" y="440" text-anchor="middle" fill="#4B0082" font-family="Arial, sans-serif" font-size="13" font-weight="bold">TECH COMPANY PARTY</text>
+  
+  <!-- Corporate hibachi setup -->
+  <rect x="270" y="360" width="100" height="60" fill="#2F4F4F" rx="8"/>
+  <rect x="285" y="355" width="70" height="10" fill="#FF4500"/>
+  
+  <!-- High-tech hibachi grills -->
+  <circle cx="295" r="5" cy="358" fill="#4285F4"/>
+  <circle cx="310" r="5" cy="358" fill="#34A853"/>
+  <circle cx="325" r="5" cy="358" fill="#FBBC05"/>
+  <circle cx="340" r="5" cy="358" fill="#EA4335"/>
+  <circle cx="355" r="5" cy="358" fill="#FFD700"/>
+  
+  <!-- Tech-savvy hibachi chef -->
+  <circle cx="320" cy="320" r="14" fill="#FDBCB4"/>
+  <rect x="311" y="334" width="18" height="24" fill="white"/>
+  <rect x="308" y="358" width="24" height="28" fill="#000080"/>
+  <rect x="311" y="386" width="7" height="20" fill="#FDBCB4"/>
+  <rect x="322" y="386" width="7" height="20" fill="#FDBCB4"/>
+  
+  <!-- Professional chef hat -->
+  <rect x="315" y="310" width="10" height="8" fill="white"/>
+  <ellipse cx="320" cy="305" rx="8" ry="5" fill="white"/>
+  
+  <!-- Smart spatula with tech features -->
+  <rect x="340" y="315" width="22" height="3" fill="#C0C0C0"/>
+  <rect x="359" y="312" width="12" height="9" fill="#C0C0C0"/>
+  <circle cx="365" cy="316" r="2" fill="#4285F4"/>
+  
+  <!-- Backyard residential setting -->
+  <rect x="430" y="420" width="140" height="80" fill="#90EE90" opacity="0.8" rx="10"/>
+  <text x="500" y="440" text-anchor="middle" fill="#006400" font-family="Arial, sans-serif" font-size="13" font-weight="bold">BACKYARD EVENT</text>
+  
+  <!-- Modern Silicon Valley home -->
+  <rect x="580" y="460" width="80" height="60" fill="#F4A460"/>
+  <polygon points="580,460 620,440 660,460" fill="#8B4513"/>
+  <rect x="595" y="485" width="10" height="15" fill="#8B4513"/>
+  <rect x="625" y="480" width="12" height="12" fill="#4285F4"/>
+  <rect x="640" y="480" width="12" height="12" fill="#34A853"/>
+  <rect x="590" y="470" width="8" height="10" fill="#654321"/>
+  
+  <!-- Backyard hibachi station -->
+  <rect x="450" y="360" width="100" height="60" fill="#2F4F4F" rx="8"/>
+  <rect x="465" y="355" width="70" height="10" fill="#FF4500"/>
+  
+  <!-- Backyard hibachi grills -->
+  <circle cx="475" r="5" cy="358" fill="#FFD700"/>
+  <circle cx="490" r="5" cy="358" fill="#FF6347"/>
+  <circle cx="505" r="5" cy="358" fill="#00CED1"/>
+  <circle cx="520" r="5" cy="358" fill="#32CD32"/>
+  <circle cx="535" r="5" cy="358" fill="#FF69B4"/>
+  
+  <!-- Backyard hibachi chef -->
+  <circle cx="500" cy="320" r="14" fill="#FDBCB4"/>
+  <rect x="491" y="334" width="18" height="24" fill="white"/>
+  <rect x="488" y="358" width="24" height="28" fill="#000080"/>
+  <rect x="491" y="386" width="7" height="20" fill="#FDBCB4"/>
+  <rect x="502" y="386" width="7" height="20" fill="#FDBCB4"/>
+  
+  <!-- Chef hat -->
+  <rect x="495" y="310" width="10" height="8" fill="white"/>
+  <ellipse cx="500" cy="305" rx="8" ry="5" fill="white"/>
+  
+  <!-- Tech employees at corporate event -->
+  <circle cx="290" cy="390" r="10" fill="#FDBCB4"/>
+  <rect x="285" y="400" width="10" height="18" fill="#4285F4"/>
+  <rect x="287" y="418" width="6" height="15" fill="#654321"/>
+  
+  <circle cx="350" cy="390" r="10" fill="#FDBCB4"/>
+  <rect x="345" y="400" width="10" height="18" fill="#34A853"/>
+  <rect x="347" y="418" width="6" height="15" fill="#000080"/>
+  
+  <!-- Software engineer with glasses -->
+  <circle cx="320" cy="395" r="9" fill="#FDBCB4"/>
+  <rect x="316" y="404" width="8" height="16" fill="#000"/>
+  <rect x="317" y="420" width="6" height="13" fill="#8B4513"/>
+  <rect x="315" y="400" width="10" height="2" fill="#000"/>
+  
+  <!-- Family at backyard event -->
+  <circle cx="470" cy="390" r="10" fill="#FDBCB4"/>
+  <rect x="465" y="400" width="10" height="18" fill="#FF69B4"/>
+  <rect x="467" y="418" width="6" height="15" fill="#000080"/>
+  
+  <circle cx="530" cy="390" r="10" fill="#FDBCB4"/>
+  <rect x="525" y="400" width="10" height="18" fill="#8B008B"/>
+  <rect x="527" y="418" width="6" height="15" fill="#654321"/>
+  
+  <!-- Tech kid with tablet -->
+  <circle cx="500" cy="400" r="8" fill="#FDBCB4"/>
+  <rect x="496" y="408" width="8" height="14" fill="#32CD32"/>
+  <rect x="497" y="422" width="6" height="11" fill="#000080"/>
+  <rect x="493" y="403" width="14" height="8" fill="#C0C0C0"/>
+  
+  <!-- Mountain View title -->
+  <text x="400" y="240" text-anchor="middle" fill="#4B0082" font-family="Arial, sans-serif" font-size="20" font-weight="bold">MOUNTAIN VIEW</text>
+  <text x="400" y="260" text-anchor="middle" fill="#8B008B" font-family="Arial, sans-serif" font-size="14">TECH PARTY HIBACHI</text>
+  
+  <!-- Corporate dining table -->
+  <rect x="260" y="450" width="120" height="20" fill="#8B4513" rx="5"/>
+  <rect x="255" y="465" width="8" height="25" fill="#654321"/>
+  <rect x="377" y="465" width="8" height="25" fill="#654321"/>
+  
+  <!-- Backyard dining table -->
+  <rect x="440" y="450" width="120" height="20" fill="#8B4513" rx="5"/>
+  <rect x="435" y="465" width="8" height="25" fill="#654321"/>
+  <rect x="557" y="465" width="8" height="25" fill="#654321"/>
+  
+  <!-- Tech-themed beverages and snacks -->
+  <circle cx="280" cy="448" r="5" fill="#4285F4"/>
+  <circle cx="300" cy="448" r="5" fill="#34A853"/>
+  <circle cx="320" cy="448" r="5" fill="#FBBC05"/>
+  <circle cx="340" cy="448" r="5" fill="#EA4335"/>
+  <circle cx="360" cy="448" r="5" fill="#FFD700"/>
+  
+  <!-- Food on grills -->
+  <ellipse cx="305" cy="355" rx="7" ry="5" fill="#FF69B4"/>
+  <ellipse cx="320" cy="355" rx="8" ry="5" fill="#FFA500"/>
+  <ellipse cx="335" cy="355" rx="7" ry="5" fill="#FF6347"/>
+  <ellipse cx="350" cy="355" rx="6" ry="4" fill="#32CD32"/>
+  
+  <ellipse cx="485" cy="355" rx="7" ry="5" fill="#FF69B4"/>
+  <ellipse cx="500" cy="355" rx="8" ry="5" fill="#FFA500"/>
+  <ellipse cx="515" cy="355" rx="7" ry="5" fill="#32CD32"/>
+  <ellipse cx="530" cy="355" rx="6" ry="4" fill="#FFD700"/>
+  
+  <!-- Innovation symbols -->
+  <rect x="400" y="180" width="60" height="50" fill="#00CED1" opacity="0.7" rx="10"/>
+  <text x="430" y="200" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">SILICON</text>
+  <text x="430" y="215" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">VALLEY</text>
+  <text x="430" y="225" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="8">INNOVATION</text>
+  
+  <!-- Hibachi flames -->
+  <polygon points="305,355 309,348 301,348" fill="#FF4500" opacity="0.8"/>
+  <polygon points="320,355 324,348 316,348" fill="#34A853" opacity="0.8"/>
+  <polygon points="335,355 339,348 331,348" fill="#FBBC05" opacity="0.8"/>
+  <polygon points="350,355 354,348 346,348" fill="#EA4335" opacity="0.8"/>
+  
+  <polygon points="485,355 489,348 481,348" fill="#FF4500" opacity="0.8"/>
+  <polygon points="500,355 504,348 496,348" fill="#FF6347" opacity="0.8"/>
+  <polygon points="515,355 519,348 511,348" fill="#00CED1" opacity="0.8"/>
+  <polygon points="530,355 534,348 526,348" fill="#32CD32" opacity="0.8"/>
+  
+  <!-- Google campus bike path -->
+  <ellipse cx="100" cy="480" rx="20" ry="6" fill="#32CD32"/>
+  <circle cx="85" cy="480" r="2" fill="#000"/>
+  <circle cx="95" cy="480" r="2" fill="#000"/>
+  <circle cx="105" cy="480" r="2" fill="#000"/>
+  <circle cx="115" cy="480" r="2" fill="#000"/>
+  
+  <!-- Electric scooters -->
+  <rect x="150" y="475" width="12" height="3" fill="#000"/>
+  <circle cx="155" cy="480" r="2" fill="#C0C0C0"/>
+  <circle cx="165" cy="480" r="2" fill="#C0C0C0"/>
+  <rect x="158" y="470" width="2" height="8" fill="#000"/>
+  
+  <!-- Tech office perks -->
+  <circle cx="200" cy="450" r="15" fill="#FBBC05" opacity="0.6"/>
+  <text x="200" y="455" text-anchor="middle" fill="#8B4513" font-family="Arial, sans-serif" font-size="10">PERKS</text>
+  
+  <!-- Drone in background -->
+  <rect x="650" y="200" width="20" height="4" fill="#2F4F4F"/>
+  <circle cx="645" cy="202" r="3" fill="#C0C0C0"/>
+  <circle cx="675" cy="202" r="3" fill="#C0C0C0"/>
+  <circle cx="645" cy="206" r="3" fill="#C0C0C0"/>
+  <circle cx="675" cy="206" r="3" fill="#C0C0C0"/>
+</svg>

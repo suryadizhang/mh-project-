@@ -1,6 +1,6 @@
 /**
  * TypeScript Types for AI Readiness System
- * 
+ *
  * Defines all interfaces for shadow learning, intent readiness monitoring,
  * ML confidence prediction, and quality tracking.
  */
@@ -49,33 +49,33 @@ export interface IntentReadiness {
   intent: IntentType;
   readiness_score: number; // 0-100
   status: ReadinessStatus;
-  
+
   // Data Collection
   pairs_collected: number;
   min_pairs_required: number;
   pairs_progress: number; // 0-100
-  
+
   // Quality Metrics
   avg_similarity: number;
   min_similarity_required: number;
   similarity_trend: 'improving' | 'stable' | 'declining';
-  
+
   // ML Confidence (Option C)
   avg_confidence: number;
   min_confidence_required: number;
   confidence_trend: 'improving' | 'stable' | 'declining';
-  
+
   // Traffic Routing
   current_traffic_percent: number;
   recommended_traffic_percent: number;
   local_ai_requests: number;
   teacher_ai_requests: number;
-  
+
   // Activation
   can_activate: boolean;
   can_increase_traffic: boolean;
   blocking_reasons: string[];
-  
+
   // Recent Performance
   last_24h_pairs: number;
   last_24h_avg_similarity: number;
@@ -120,16 +120,16 @@ export interface RoutingStats {
   local_ai_requests: number;
   teacher_ai_requests: number;
   local_ai_percentage: number;
-  
+
   by_intent: Record<IntentType, IntentRoutingStats>;
-  
+
   cost_metrics: {
     teacher_total_cost: number;
     local_ai_total_cost: number;
     total_savings: number;
     savings_percentage: number;
   };
-  
+
   performance_metrics: {
     avg_teacher_response_time_ms: number;
     avg_local_response_time_ms: number;
@@ -157,21 +157,21 @@ export interface MLPredictorStatus {
   training_samples: number;
   model_accuracy: number;
   feature_importance: Record<string, number>;
-  
+
   performance_metrics: {
     precision: number;
     recall: number;
     f1_score: number;
     auc_roc: number;
   };
-  
+
   prediction_stats: {
     total_predictions: number;
     high_confidence_count: number;
     medium_confidence_count: number;
     low_confidence_count: number;
   };
-  
+
   needs_retraining: boolean;
   retrain_reason?: string;
 }
@@ -195,13 +195,13 @@ export interface Alert {
   intent: IntentType;
   message: string;
   created_at: string;
-  
+
   metrics?: {
     current_similarity?: number;
     threshold?: number;
     delta?: number;
   };
-  
+
   actions?: AlertAction[];
   auto_rollback_triggered?: boolean;
 }
@@ -223,19 +223,19 @@ export interface RollbackEvent {
   timestamp: string;
   trigger: 'manual' | 'auto' | 'quality_alert';
   reason: string;
-  
+
   before_state: {
     traffic_percent: number;
     avg_similarity: number;
     mode: AIMode;
   };
-  
+
   after_state: {
     traffic_percent: number;
     avg_similarity: number;
     mode: AIMode;
   };
-  
+
   triggered_by: string;
   notes?: string;
 }
@@ -249,21 +249,21 @@ export interface SystemConfig {
   local_ai_mode: AIMode;
   ollama_base_url: string;
   ollama_model_name: string;
-  
+
   thresholds: {
     min_similarity_score: number;
     min_confidence_score: number;
-    
+
     faq_min_pairs: number;
     faq_min_similarity: number;
-    
+
     quote_min_pairs: number;
     quote_min_similarity: number;
-    
+
     booking_min_pairs: number;
     booking_min_similarity: number;
   };
-  
+
   auto_rollback: {
     enabled: boolean;
     similarity_drop_threshold: number;

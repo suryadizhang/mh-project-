@@ -9,7 +9,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import uuid4
 
-from models.booking import Booking, BookingStatus
+from db.models.core import Booking, BookingStatus
 
 
 @pytest.mark.asyncio

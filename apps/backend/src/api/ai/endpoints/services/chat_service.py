@@ -5,10 +5,10 @@ Chat service for handling chat ingestion and processing
 import time
 from uuid import uuid4
 
-from api.ai.endpoints.models import (
-    Conversation,
+from db.models.ai.conversations import (
+    UnifiedConversation as Conversation,
     ConversationStatus,
-    AIMessage,  # FIXED: Was 'Message', should be 'AIMessage'
+    UnifiedMessage as AIMessage,
     MessageRole,
 )
 from api.ai.endpoints.schemas import ChatIngestRequest, ChatIngestResponse

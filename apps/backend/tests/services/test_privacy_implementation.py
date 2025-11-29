@@ -13,7 +13,10 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 from sqlalchemy import select
 
 # Phase 2B: Updated\nfrom core.database import  # OLD: from api.app.database import AsyncSessionLocal
-from models.review import CustomerReviewBlogPost
+# TODO: CustomerReviewBlogPost model doesn't exist yet - this is a planned/skipped feature
+# from db.models.feedback_marketing import CustomerReviewBlogPost
+# Temporarily using CustomerReview as a placeholder until the blog post model is implemented
+from db.models.feedback_marketing import CustomerReview as CustomerReviewBlogPost
 
 
 class PrivacyTestSuite:

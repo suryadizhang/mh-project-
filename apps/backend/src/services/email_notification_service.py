@@ -210,7 +210,7 @@ class EmailNotificationService:
             f"{preview[:150]}{'...' if len(preview) > 150 else ''}",
             "",
             f"🔗 View in Admin:",
-            f"https://admin.myhibachichef.com/emails?tab={inbox}&id={message_id}",
+            f"https://admin.mysticdatanode.net/emails?tab={inbox}&id={message_id}",
         ]
 
         notification_message = "\n".join(message_lines)

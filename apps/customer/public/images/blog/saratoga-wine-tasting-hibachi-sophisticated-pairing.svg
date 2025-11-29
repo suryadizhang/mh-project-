@@ -1,0 +1,213 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="vineyardSkyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#E6E6FA"/>
+      <stop offset="50%" style="stop-color:#DDA0DD"/>
+      <stop offset="100%" style="stop-color:#D8BFD8"/>
+    </linearGradient>
+    <linearGradient id="wineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#722F37"/>
+      <stop offset="100%" style="stop-color:#8B0000"/>
+    </linearGradient>
+    <linearGradient id="champagneGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#F7E7CE"/>
+      <stop offset="100%" style="stop-color:#DDD6C0"/>
+    </linearGradient>
+    <linearGradient id="flameGradient" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#8B0000"/>
+      <stop offset="50%" style="stop-color:#DC143C"/>
+      <stop offset="100%" style="stop-color:#FFD700"/>
+    </linearGradient>
+    <radialGradient id="sunGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FFD700"/>
+      <stop offset="100%" style="stop-color:#FFA500"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Vineyard Sky Background -->
+  <rect width="800" height="600" fill="url(#vineyardSkyGradient)"/>
+  
+  <!-- Golden Hour Sun -->
+  <circle cx="650" cy="120" r="35" fill="url(#sunGradient)" stroke="#FF8C00" stroke-width="2"/>
+  
+  <!-- Saratoga Hills Background -->
+  <path d="M 0 200 Q 200 150 400 180 T 800 200 L 800 350 L 0 350 Z" fill="#8FBC8F"/>
+  <path d="M 0 250 Q 300 200 600 230 T 800 250 L 800 350 L 0 350 Z" fill="#9ACD32"/>
+  
+  <!-- Vineyard Rows -->
+  <g stroke="#228B22" stroke-width="2" fill="none">
+    <path d="M 50 300 Q 150 290 250 300 Q 350 310 450 300"/>
+    <path d="M 80 320 Q 180 310 280 320 Q 380 330 480 320"/>
+    <path d="M 110 340 Q 210 330 310 340 Q 410 350 510 340"/>
+  </g>
+  
+  <!-- Grape Vines -->
+  <circle cx="120" cy="295" r="4" fill="#8B008B"/>
+  <circle cx="125" cy="300" r="3" fill="#9370DB"/>
+  <circle cx="180" cy="285" r="4" fill="#8B008B"/>
+  <circle cx="185" cy="290" r="3" fill="#9370DB"/>
+  <circle cx="240" cy="295" r="4" fill="#8B008B"/>
+  
+  <circle cx="150" cy="315" r="4" fill="#8B008B"/>
+  <circle cx="155" cy="320" r="3" fill="#9370DB"/>
+  <circle cx="210" cy="305" r="4" fill="#8B008B"/>
+  <circle cx="310" cy="315" r="4" fill="#8B008B"/>
+
+  <!-- Elegant Wine Tasting Pavilion -->
+  <rect x="300" y="350" width="200" height="150" fill="#F5F5DC" stroke="#8B4513" stroke-width="3"/>
+  <polygon points="280,350 320,300 480,300 520,350" fill="#8B0000"/>
+  
+  <!-- Pavilion Columns -->
+  <rect x="320" y="350" width="8" height="150" fill="#D2691E"/>
+  <rect x="370" y="350" width="8" height="150" fill="#D2691E"/>
+  <rect x="420" y="350" width="8" height="150" fill="#D2691E"/>
+  <rect x="470" y="350" width="8" height="150" fill="#D2691E"/>
+
+  <!-- Elegant Entrance -->
+  <rect x="385" y="420" width="30" height="80" fill="#8B4513"/>
+  <circle cx="408" cy="460" r="3" fill="#FFD700"/>
+
+  <!-- Premium Hibachi Setup -->
+  <rect x="350" y="520" width="100" height="30" fill="#2F4F4F" stroke="#000" stroke-width="2"/>
+  <circle cx="400" cy="535" r="25" fill="#1C1C1C" stroke="#000" stroke-width="2"/>
+  
+  <!-- Wine-Colored Hibachi Flames -->
+  <ellipse cx="400" cy="525" rx="15" ry="20" fill="url(#flameGradient)" opacity="0.9"/>
+  <ellipse cx="395" cy="520" rx="10" ry="15" fill="#DC143C" opacity="0.8"/>
+  <ellipse cx="405" cy="520" rx="10" ry="15" fill="#B22222" opacity="0.8"/>
+  <ellipse cx="400" cy="515" rx="8" ry="12" fill="#FFD700" opacity="0.7"/>
+
+  <!-- Master Hibachi Chef with Wine Knowledge -->
+  <circle cx="420" cy="555" r="12" fill="#FDBCB4"/>
+  <rect x="415" y="567" width="10" height="25" fill="#FFFFFF"/>
+  <rect x="410" y="592" width="20" height="8" fill="#000"/>
+  <!-- Sophisticated chef hat -->
+  <ellipse cx="420" cy="550" rx="10" ry="6" fill="#FFFFFF"/>
+  <rect x="415" y="538" width="10" height="12" fill="#FFFFFF"/>
+  <!-- Wine accent on hat -->
+  <ellipse cx="420" cy="545" rx="6" ry="3" fill="#8B0000"/>
+  <!-- Chef with wine glass and spatula -->
+  <line x1="435" y1="575" x2="445" y2="565" stroke="#C0C0C0" stroke-width="2"/>
+  <polygon points="440,565 445,565 442,575 441,575" fill="#E6E6FA" stroke="#C0C0C0" stroke-width="1"/>
+  <ellipse cx="442" cy="563" rx="3" ry="1" fill="url(#wineGradient)"/>
+
+  <!-- Wine Connoisseur Guests -->
+  <!-- Sophisticated Couple 1 -->
+  <circle cx="280" cy="560" r="11" fill="#FDBCB4"/>
+  <rect x="275" y="571" width="10" height="22" fill="#000080"/>
+  <rect x="273" y="593" width="14" height="8" fill="#8B4513"/>
+  <ellipse cx="280" cy="555" rx="8" ry="4" fill="#2F4F4F"/>
+  <!-- Wine glass in hand -->
+  <polygon points="295,575 300,575 298,585 297,585" fill="#E6E6FA" stroke="#C0C0C0" stroke-width="1"/>
+  <ellipse cx="298" cy="573" rx="3" ry="1" fill="url(#wineGradient)"/>
+
+  <circle cx="300" cy="565" r="10" fill="#FDBCB4"/>
+  <rect x="295" y="575" width="10" height="20" fill="#8B008B"/>
+  <rect x="293" y="595" width="14" height="8" fill="#000"/>
+  <ellipse cx="300" cy="560" rx="7" ry="4" fill="#FFD700"/>
+  <!-- Pearl necklace -->
+  <circle cx="295" cy="578" r="1" fill="#FFFFFF"/>
+  <circle cx="300" cy="578" r="1" fill="#FFFFFF"/>
+  <circle cx="305" cy="578" r="1" fill="#FFFFFF"/>
+
+  <!-- Wine Expert Group -->
+  <circle cx="520" cy="555" r="11" fill="#D2B48C"/>
+  <rect x="515" y="566" width="10" height="22" fill="#8B4513"/>
+  <rect x="513" y="588" width="14" height="8" fill="#000"/>
+  <ellipse cx="520" cy="550" rx="8" ry="4" fill="#C0C0C0"/>
+  <!-- Wine tasting notebook -->
+  <rect x="535" y="570" width="8" height="12" fill="#FFFFFF" stroke="#000" stroke-width="1"/>
+  <line x1="537" y1="572" x2="541" y2="572" stroke="#000" stroke-width="0.5"/>
+  <line x1="537" y1="574" x2="541" y2="574" stroke="#000" stroke-width="0.5"/>
+
+  <circle cx="540" cy="560" r="10" fill="#FDBCB4"/>
+  <rect x="535" y="570" width="10" height="20" fill="#4B0082"/>
+  <rect x="533" y="590" width="14" height="8" fill="#8B4513"/>
+  <ellipse cx="540" cy="555" rx="7" ry="4" fill="#8B0000"/>
+  <!-- Wine glass -->
+  <polygon points="555,575 560,575 558,585 557,585" fill="#E6E6FA" stroke="#C0C0C0" stroke-width="1"/>
+  <ellipse cx="558" cy="573" rx="3" ry="1" fill="url(#champagneGradient)"/>
+
+  <!-- Wine Tasting Table Setup -->
+  <ellipse cx="400" cy="580" rx="80" ry="20" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+  <ellipse cx="400" cy="578" rx="80" ry="20" fill="#A0522D"/>
+
+  <!-- Wine Bottles Display -->
+  <ellipse cx="360" cy="575" rx="4" ry="12" fill="#8B0000" stroke="#000" stroke-width="1"/>
+  <rect x="358" y="560" width="4" height="5" fill="#000"/>
+  <text x="360" y="550" text-anchor="middle" font-family="serif" font-size="6" fill="#8B0000">PINOT</text>
+
+  <ellipse cx="380" cy="575" rx="4" ry="12" fill="#2F4F4F" stroke="#000" stroke-width="1"/>
+  <rect x="378" y="560" width="4" height="5" fill="#000"/>
+  <text x="380" y="550" text-anchor="middle" font-family="serif" font-size="6" fill="#2F4F4F">CHARD</text>
+
+  <ellipse cx="420" cy="575" rx="4" ry="12" fill="#8B0000" stroke="#000" stroke-width="1"/>
+  <rect x="418" y="560" width="4" height="5" fill="#000"/>
+  <text x="420" y="550" text-anchor="middle" font-family="serif" font-size="6" fill="#8B0000">MERLOT</text>
+
+  <ellipse cx="440" cy="575" rx="4" ry="12" fill="#483D8B" stroke="#000" stroke-width="1"/>
+  <rect x="438" y="560" width="4" height="5" fill="#000"/>
+  <text x="440" y="550" text-anchor="middle" font-family="serif" font-size="6" fill="#483D8B">CABERNET</text>
+
+  <!-- Wine Glasses Array -->
+  <polygon points="350,575 355,575 353,585 352,585" fill="#E6E6FA" stroke="#C0C0C0" stroke-width="1"/>
+  <polygon points="370,575 375,575 373,585 372,585" fill="#E6E6FA" stroke="#C0C0C0" stroke-width="1"/>
+  <polygon points="410,575 415,575 413,585 412,585" fill="#E6E6FA" stroke="#C0C0C0" stroke-width="1"/>
+  <polygon points="430,575 435,575 433,585 432,585" fill="#E6E6FA" stroke="#C0C0C0" stroke-width="1"/>
+  <polygon points="450,575 455,575 453,585 452,585" fill="#E6E6FA" stroke="#C0C0C0" stroke-width="1"/>
+
+  <!-- Wine in glasses -->
+  <ellipse cx="353" cy="573" rx="3" ry="1" fill="url(#wineGradient)"/>
+  <ellipse cx="373" cy="573" rx="3" ry="1" fill="url(#champagneGradient)"/>
+  <ellipse cx="413" cy="573" rx="3" ry="1" fill="url(#wineGradient)"/>
+  <ellipse cx="433" cy="573" rx="3" ry="1" fill="#8B0000"/>
+  <ellipse cx="453" cy="573" rx="3" ry="1" fill="#483D8B"/>
+
+  <!-- Gourmet Food Pairings -->
+  <ellipse cx="330" cy="575" rx="10" ry="5" fill="#FFFFFF" stroke="#000" stroke-width="1"/>
+  <circle cx="330" cy="573" r="3" fill="#FF6347"/>
+  <circle cx="335" cy="575" r="2" fill="#32CD32"/>
+  <circle cx="325" cy="577" r="2" fill="#FFD700"/>
+
+  <ellipse cx="470" cy="575" rx="10" ry="5" fill="#FFFFFF" stroke="#000" stroke-width="1"/>
+  <circle cx="470" cy="573" r="3" fill="#8B4513"/>
+  <circle cx="475" cy="575" r="2" fill="#FF69B4"/>
+  <circle cx="465" cy="577" r="2" fill="#DDA0DD"/>
+
+  <!-- Elegant Banner -->
+  <rect x="150" y="250" width="500" height="40" fill="#8B0000" stroke="#FFD700" stroke-width="3"/>
+  <text x="400" y="270" text-anchor="middle" font-family="serif" font-size="16" font-weight="bold" fill="#FFD700">SARATOGA WINE TASTING</text>
+  <text x="400" y="285" text-anchor="middle" font-family="serif" font-size="12" fill="#FFFFFF">Hibachi & Wine Pairing Experience</text>
+
+  <!-- Vineyard Décor Elements -->
+  <polygon points="50,480 70,460 90,480 70,500" fill="#8B008B"/>
+  <polygon points="750,500 730,480 710,500 730,520" fill="#9370DB"/>
+  
+  <!-- Wine Barrel Decorations -->
+  <ellipse cx="150" cy="500" rx="15" ry="20" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+  <line x1="135" y1="500" x2="165" y2="500" stroke="#654321" stroke-width="2"/>
+  <line x1="135" y1="490" x2="165" y2="490" stroke="#654321" stroke-width="1"/>
+  <line x1="135" y1="510" x2="165" y2="510" stroke="#654321" stroke-width="1"/>
+
+  <ellipse cx="650" cy="520" rx="15" ry="20" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+  <line x1="635" y1="520" x2="665" y2="520" stroke="#654321" stroke-width="2"/>
+  <line x1="635" y1="510" x2="665" y2="510" stroke="#654321" stroke-width="1"/>
+  <line x1="635" y1="530" x2="665" y2="530" stroke="#654321" stroke-width="1"/>
+
+  <!-- Sophisticated Ambiance Lighting -->
+  <circle cx="250" cy="380" r="3" fill="#FFD700" opacity="0.8"/>
+  <line x1="250" y1="375" x2="250" y2="350" stroke="#8B4513" stroke-width="2"/>
+  
+  <circle cx="550" cy="380" r="3" fill="#FFD700" opacity="0.8"/>
+  <line x1="550" y1="375" x2="550" y2="350" stroke="#8B4513" stroke-width="2"/>
+
+  <!-- Wine Aromas Visualization -->
+  <ellipse cx="380" cy="510" rx="15" ry="5" fill="#DDA0DD" opacity="0.4"/>
+  <ellipse cx="385" cy="500" rx="20" ry="7" fill="#E6E6FA" opacity="0.3"/>
+  <ellipse cx="375" cy="490" rx="25" ry="9" fill="#F0E68C" opacity="0.2"/>
+
+  <!-- Hibachi Smoke with Wine Essence -->
+  <ellipse cx="400" cy="505" rx="20" ry="8" fill="#DDA0DD" opacity="0.6"/>
+  <ellipse cx="405" cy="495" rx="25" ry="10" fill="#E6E6FA" opacity="0.4"/>
+  <ellipse cx="395" cy="485" rx="30" ry="12" fill="#F5F5F5" opacity="0.3"/>
+</svg>

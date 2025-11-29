@@ -9,7 +9,7 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 # MIGRATED: from models.escalation → db.models.escalation
-from db.models.escalation import Escalation, EscalationStatus, EscalationMethod, EscalationPriority
+from db.models.support_communications import Escalation, EscalationStatus, EscalationMethod, EscalationPriority
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
 

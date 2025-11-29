@@ -13,7 +13,17 @@ Modular identity and access management models split into logical components:
 # Core models
 from .users import User, UserStatus, AuthProvider
 from .roles import Role, Permission, UserRole, RolePermission
-from .stations import Station, StationUser, StationAccessToken, StationAuditLog
+from .stations import (
+    Station,
+    StationUser,
+    StationAccessToken,
+    StationAuditLog,
+    # Enums
+    StationStatus,
+    StationRole,
+    StationPermission,
+    AuditAction,
+)
 from .oauth import OAuthAccount
 from .admin import (
     AdminInvitation,
@@ -41,6 +51,12 @@ __all__ = [
     "StationUser",
     "StationAccessToken",
     "StationAuditLog",
+
+    # Station Enums
+    "StationStatus",
+    "StationRole",
+    "StationPermission",
+    "AuditAction",
 
     # OAuth
     "OAuthAccount",

@@ -9,7 +9,7 @@ import logging
 from uuid import uuid4
 
 from api.ai.endpoints.database import get_db
-from api.ai.endpoints.models import Conversation, AIMessage
+from db.models.ai.conversations import UnifiedConversation as Conversation, UnifiedMessage as AIMessage
 from api.ai.endpoints.services.admin_management_ai import admin_management_ai
 from api.ai.endpoints.services.chat_service import ChatService
 from api.ai.endpoints.services.customer_booking_ai import customer_booking_ai

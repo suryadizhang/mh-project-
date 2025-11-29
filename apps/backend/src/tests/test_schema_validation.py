@@ -22,7 +22,8 @@ from datetime import date, time, datetime
 from sqlalchemy import inspect, Integer, String, Text, Boolean, Date, Time, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 
-from db.models.core import Booking, Customer, Chef, BookingStatus
+from db.models.core import Booking, Customer, BookingStatus
+from db.models.ops import Chef
 from db.models.identity import Station
 
 

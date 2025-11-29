@@ -8,7 +8,8 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import uuid4
 
-from models.customer import Customer, CustomerTonePreference
+from db.models.core import Customer
+from db.models.knowledge_base import CustomerTonePreference
 
 
 @pytest.mark.asyncio

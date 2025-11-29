@@ -7,7 +7,7 @@ from core.database import get_db
 from db.models.core import Booking, Customer
 
 # Fixed: Use unified lead schema instead of legacy models
-from db.models.lead import Lead, LeadQuality, LeadStatus
+from db.models.crm import Lead, LeadQuality, LeadStatus
 
 # TODO: Newsletter/Campaign models need migration to proper schema
 # Temporarily creating placeholder classes until newsletter schema is implemented

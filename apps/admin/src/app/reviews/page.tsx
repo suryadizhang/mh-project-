@@ -175,7 +175,7 @@ export default function ReviewsPage() {
 
   const handleConfirmCoupon = async () => {
     if (!selectedReviewForCoupon || isIssuingCoupon) return;
-    
+
     setIsIssuingCoupon(true);
     try {
       const response = await api.post('/api/v1/reviews/ai/issue-coupon', {
@@ -189,7 +189,7 @@ export default function ReviewsPage() {
       }
 
       toast.success('Coupon Issued', 'Discount coupon has been created successfully');
-      
+
       // Close modal and refresh
       setIsIssueCouponOpen(false);
       setSelectedReviewForCoupon(null);
@@ -207,7 +207,7 @@ export default function ReviewsPage() {
 
   const handleResolve = async (review: any) => {
     if (!review?.review_id || isResolvingReview) return;
-    
+
     setIsResolvingReview(true);
     try {
       const response = await api.post(`/api/v1/reviews/${review.review_id}/resolve`, {
@@ -220,7 +220,7 @@ export default function ReviewsPage() {
       }
 
       toast.success('Review Resolved', 'The review has been marked as resolved');
-      
+
       // Close modal if open and refresh
       setIsReviewModalOpen(false);
       refetch();

@@ -13,7 +13,7 @@ from workers.celery_config import celery_app
 from core.database import get_db_session, get_async_session
 
 # MIGRATED: from models.call_recording → db.models.call_recording
-from db.models.call_recording import CallRecording, RecordingStatus
+from db.models.support_communications import CallRecording, RecordingStatus
 from services.ringcentral_service import get_ringcentral_service
 from services.recording_linking_service import RecordingLinkingService
 

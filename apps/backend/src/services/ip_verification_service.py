@@ -110,7 +110,7 @@ class IPVerificationService:
             f"Time: {timestamp}\n"
             f"Device: {device_info}\n\n"
             f"If this wasn't you, secure your account immediately:\n"
-            f"https://admin.myhibachichef.com/security"
+            f"https://admin.mysticdatanode.net/security"
         )
 
         try:

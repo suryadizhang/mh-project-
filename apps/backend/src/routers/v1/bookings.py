@@ -282,7 +282,7 @@ async def get_bookings(
     """
     from uuid import UUID
 
-    from models.legacy_core import CoreBooking
+    from db.models.core import Booking as CoreBooking
     from sqlalchemy import select
     from sqlalchemy.orm import joinedload
     from utils.pagination import paginate_query
@@ -325,15 +325,16 @@ async def get_bookings(
             "id": str(booking.id),
             "user_id": str(booking.customer_id),
             "date": (booking.date.strftime("%Y-%m-%d") if booking.date else None),
-            "time": booking.slot,
-            "guests": booking.total_guests,
-            "status": booking.status,
+            "time": booking.slot.strftime("%H:%M") if booking.slot else None,
+            "guests": (booking.party_adults or 0) + (booking.party_kids or 0),
+            "status": booking.status.value if hasattr(booking.status, 'value') else str(booking.status),
             "total_amount": (booking.total_due_cents / 100.0 if booking.total_due_cents else 0.0),
-            "deposit_paid": booking.payment_status in ("deposit_paid", "paid"),
+            "deposit_paid": booking.status.value in ("deposit_paid", "confirmed", "completed") if hasattr(booking.status, 'value') else False,
             "balance_due": (
-                booking.balance_due_cents / 100.0 if booking.balance_due_cents else 0.0
+                (booking.total_due_cents - booking.deposit_due_cents) / 100.0
+                if booking.total_due_cents and booking.deposit_due_cents else 0.0
             ),
-            "payment_status": booking.payment_status,
+            "payment_status": booking.status.value if hasattr(booking.status, 'value') else str(booking.status),
             "created_at": (booking.created_at.isoformat() if booking.created_at else None),
         }
         for booking in page.items
@@ -448,7 +449,7 @@ async def get_booking(
     """
     from uuid import UUID
 
-    from models.legacy_core import CoreBooking
+    from db.models.core import Booking as CoreBooking
     from sqlalchemy import select
     from sqlalchemy.orm import joinedload, selectinload
 
@@ -496,13 +497,16 @@ async def get_booking(
         "id": str(booking.id),
         "user_id": str(booking.customer_id),
         "date": booking.date.strftime("%Y-%m-%d") if booking.date else None,
-        "time": booking.slot,
-        "guests": booking.total_guests,
-        "status": booking.status,
+        "time": booking.slot.strftime("%H:%M") if booking.slot else None,
+        "guests": (booking.party_adults or 0) + (booking.party_kids or 0),
+        "status": booking.status.value if hasattr(booking.status, 'value') else str(booking.status),
         "total_amount": (booking.total_due_cents / 100.0 if booking.total_due_cents else 0.0),
         "deposit_paid": deposit_paid,
-        "balance_due": (booking.balance_due_cents / 100.0 if booking.balance_due_cents else 0.0),
-        "payment_status": booking.payment_status,
+        "balance_due": (
+            (booking.total_due_cents - booking.deposit_due_cents) / 100.0
+            if booking.total_due_cents and booking.deposit_due_cents else 0.0
+        ),
+        "payment_status": booking.status.value if hasattr(booking.status, 'value') else str(booking.status),
         "menu_items": [],  # TODO: Add menu items relationship
         "addons": [],  # TODO: Add addons relationship
         "location": {  # TODO: Add location relationship
@@ -1004,7 +1008,7 @@ async def delete_booking(
     from datetime import timedelta
     from uuid import UUID
 
-    from models.legacy_core import CoreBooking
+    from db.models.core import Booking as CoreBooking
     from sqlalchemy import select
 
     # Fetch booking
@@ -1035,11 +1039,11 @@ async def delete_booking(
         "booking_id": str(booking.id),
         "customer_id": str(booking.customer_id),
         "date": str(booking.date),
-        "slot": booking.slot,
-        "total_guests": booking.total_guests,
-        "status": booking.status,
+        "slot": booking.slot.strftime("%H:%M") if booking.slot else None,
+        "total_guests": (booking.party_adults or 0) + (booking.party_kids or 0),
+        "status": booking.status.value if hasattr(booking.status, 'value') else str(booking.status),
         "total_due_cents": booking.total_due_cents,
-        "payment_status": booking.payment_status,
+        "payment_status": booking.status.value if hasattr(booking.status, 'value') else str(booking.status),
         "station_id": str(booking.station_id) if booking.station_id else None,
     }
 
@@ -1057,7 +1061,7 @@ async def delete_booking(
         user=current_user,
         resource_type="booking",
         resource_id=booking_id,
-        resource_name=f"Booking {booking_id[:8]}... ({booking.total_guests} guests)",
+        resource_name=f"Booking {booking_id[:8]}... ({(booking.party_adults or 0) + (booking.party_kids or 0)} guests)",
         delete_reason=delete_request.reason,
         old_values=old_values,
         ip_address=request.client.host if request.client else None,
@@ -1091,7 +1095,7 @@ async def delete_booking(
             cancellation_reason=delete_request.reason,
             refund_amount=(
                 booking.total_due_cents / 100.0
-                if booking.payment_status in ("deposit_paid", "paid")
+                if hasattr(booking.status, 'value') and booking.status.value in ("deposit_paid", "confirmed", "completed")
                 else None
             ),
         )
@@ -1219,7 +1223,7 @@ async def get_weekly_bookings(
     from datetime import datetime
     from uuid import UUID
 
-    from models.legacy_core import CoreBooking
+    from db.models.core import Booking as CoreBooking
     from core.security import decrypt_pii
     from sqlalchemy import and_, select
     from sqlalchemy.orm import joinedload
@@ -1291,12 +1295,12 @@ async def get_weekly_bookings(
                     "phone": customer_phone,
                 },
                 "date": booking.date.isoformat() if booking.date else None,
-                "slot": booking.slot,
-                "total_guests": booking.total_guests,
-                "status": booking.status,
-                "payment_status": booking.payment_status,
+                "slot": booking.slot.strftime("%H:%M") if booking.slot else None,
+                "total_guests": (booking.party_adults or 0) + (booking.party_kids or 0),
+                "status": booking.status.value if hasattr(booking.status, 'value') else str(booking.status),
+                "payment_status": booking.status.value if hasattr(booking.status, 'value') else str(booking.status),
                 "total_due_cents": booking.total_due_cents,
-                "balance_due_cents": booking.balance_due_cents,
+                "balance_due_cents": (booking.total_due_cents - booking.deposit_due_cents) if booking.total_due_cents and booking.deposit_due_cents else 0,
                 "special_requests": special_requests,
                 "source": booking.source,
                 "created_at": (booking.created_at.isoformat() if booking.created_at else None),
@@ -1510,7 +1514,7 @@ async def update_booking_datetime(
     import re
     from uuid import UUID
 
-    from models.legacy_core import CoreBooking
+    from db.models.core import Booking as CoreBooking
     from sqlalchemy import select
 
     # TODO: Add admin role check
@@ -1610,7 +1614,7 @@ async def get_booked_dates(
     current_user: dict[str, Any] | None = Depends(get_current_user),
 ) -> dict[str, Any]:
     """Get all dates that have bookings."""
-    from models.legacy_booking_models import Booking
+    from db.models.core import Booking
     from sqlalchemy import select, func
     from uuid import UUID
 
@@ -1667,7 +1671,7 @@ async def check_availability(
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Check availability for a specific date."""
-    from models.legacy_booking_models import Booking
+    from db.models.core import Booking
     from sqlalchemy import select, func
     from datetime import datetime
 

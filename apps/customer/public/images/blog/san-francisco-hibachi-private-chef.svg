@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- San Francisco city background -->
+  <defs>
+    <linearGradient id="sfSkyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB"/>
+      <stop offset="30%" style="stop-color:#B0E0E6"/>
+      <stop offset="100%" style="stop-color:#F0F8FF"/>
+    </linearGradient>
+    <linearGradient id="goldenGateBridge" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF6347"/>
+      <stop offset="100%" style="stop-color:#DC143C"/>
+    </linearGradient>
+    <radialGradient id="bayWater" cx="50%" cy="100%" r="60%">
+      <stop offset="0%" style="stop-color:#4682B4"/>
+      <stop offset="100%" style="stop-color:#191970"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- San Francisco sky -->
+  <rect width="800" height="600" fill="url(#sfSkyGradient)"/>
+  
+  <!-- San Francisco Bay -->
+  <ellipse cx="400" cy="400" rx="400" ry="80" fill="url(#bayWater)"/>
+  
+  <!-- Iconic SF hills -->
+  <ellipse cx="150" cy="480" rx="100" ry="60" fill="#8FBC8F"/>
+  <ellipse cx="400" cy="500" rx="150" ry="50" fill="#9ACD32"/>
+  <ellipse cx="650" cy="470" rx="120" ry="70" fill="#90EE90"/>
+  
+  <!-- Golden Gate Bridge silhouette -->
+  <rect x="50" y="300" width="300" height="8" fill="url(#goldenGateBridge)"/>
+  <rect x="70" y="200" width="8" height="108" fill="url(#goldenGateBridge)"/>
+  <rect x="320" y="180" width="8" height="128" fill="url(#goldenGateBridge)"/>
+  
+  <!-- Bridge cables -->
+  <path d="M 74 200 Q 174 250 324 180" stroke="#FF6347" stroke-width="2" fill="none"/>
+  <path d="M 74 210 Q 174 260 324 190" stroke="#FF6347" stroke-width="2" fill="none"/>
+  
+  <!-- SF Victorian houses in background -->
+  <rect x="400" y="420" width="25" height="40" fill="#FF69B4"/>
+  <polygon points="400,420 412.5,405 425,420" fill="#8B4513"/>
+  <rect x="405" y="430" width="4" height="6" fill="#8B4513"/>
+  <rect x="415" y="430" width="4" height="6" fill="#8B4513"/>
+  
+  <rect x="430" y="415" width="25" height="45" fill="#00CED1"/>
+  <polygon points="430,415 442.5,400 455,415" fill="#2F4F4F"/>
+  <rect x="435" y="425" width="4" height="6" fill="#8B4513"/>
+  <rect x="445" y="425" width="4" height="6" fill="#8B4513"/>
+  
+  <rect x="460" y="425" width="25" height="35" fill="#FFD700"/>
+  <polygon points="460,425 472.5,410 485,425" fill="#8B0000"/>
+  <rect x="465" y="435" width="4" height="6" fill="#8B4513"/>
+  <rect x="475" y="435" width="4" height="6" fill="#8B4513"/>
+  
+  <!-- Elegant SF apartment/private dining setting -->
+  <rect x="200" y="320" width="400" height="120" fill="#F5F5DC" opacity="0.9" rx="15"/>
+  <rect x="220" y="340" width="360" height="80" fill="#FFFAF0" rx="10"/>
+  
+  <!-- Large windows with city view -->
+  <rect x="230" y="350" width="80" height="60" fill="#E0F6FF" stroke="#8B4513" stroke-width="2"/>
+  <rect x="320" y="350" width="80" height="60" fill="#E0F6FF" stroke="#8B4513" stroke-width="2"/>
+  <rect x="490" y="350" width="80" height="60" fill="#E0F6FF" stroke="#8B4513" stroke-width="2"/>
+  
+  <!-- Window frames -->
+  <line x1="270" y1="350" x2="270" y2="410" stroke="#8B4513" stroke-width="1"/>
+  <line x1="230" y1="380" x2="310" y2="380" stroke="#8B4513" stroke-width="1"/>
+  <line x1="360" y1="350" x2="360" y2="410" stroke="#8B4513" stroke-width="1"/>
+  <line x1="320" y1="380" x2="400" y2="380" stroke="#8B4513" stroke-width="1"/>
+  <line x1="530" y1="350" x2="530" y2="410" stroke="#8B4513" stroke-width="1"/>
+  <line x1="490" y1="380" x2="570" y2="380" stroke="#8B4513" stroke-width="1"/>
+  
+  <!-- Premium hibachi setup in apartment -->
+  <rect x="420" y="380" width="60" height="40" fill="#2F4F4F" rx="8"/>
+  <rect x="435" y="375" width="30" height="8" fill="#FF4500"/>
+  <circle cx="440" r="4" cy="378" fill="#FFD700"/>
+  <circle cx="450" r="4" cy="378" fill="#FF6347"/>
+  <circle cx="460" r="4" cy="378" fill="#FFD700"/>
+  <circle cx="470" r="4" cy="378" fill="#FF6347"/>
+  
+  <!-- Professional private chef -->
+  <circle cx="450" cy="340" r="12" fill="#FDBCB4"/>
+  <rect x="442" y="352" width="16" height="20" fill="white"/>
+  <rect x="440" y="372" width="20" height="25" fill="#000080"/>
+  <rect x="442" y="397" width="6" height="18" fill="#FDBCB4"/>
+  <rect x="452" y="397" width="6" height="18" fill="#FDBCB4"/>
+  
+  <!-- Chef's professional hat -->
+  <rect x="446" y="332" width="8" height="6" fill="white"/>
+  <ellipse cx="450" cy="328" rx="6" ry="4" fill="white"/>
+  
+  <!-- Premium spatula and tools -->
+  <rect x="470" y="335" width="18" height="3" fill="#C0C0C0"/>
+  <rect x="485" y="332" width="8" height="9" fill="#C0C0C0"/>
+  
+  <!-- Elegant dining table -->
+  <rect x="250" y="390" width="120" height="20" fill="#8B4513" rx="5"/>
+  <rect x="245" y="405" width="8" height="25" fill="#654321"/>
+  <rect x="367" y="405" width="8" height="25" fill="#654321"/>
+  
+  <!-- Fine dining place settings -->
+  <circle cx="280" cy="388" r="6" fill="white"/>
+  <circle cx="310" cy="388" r="6" fill="white"/>
+  <circle cx="340" cy="388" r="6" fill="white"/>
+  
+  <!-- Elegant silverware -->
+  <rect x="275" y="380" width="1" height="6" fill="#C0C0C0"/>
+  <rect x="285" y="380" width="1" height="6" fill="#C0C0C0"/>
+  <rect x="305" y="380" width="1" height="6" fill="#C0C0C0"/>
+  <rect x="315" y="380" width="1" height="6" fill="#C0C0C0"/>
+  <rect x="335" y="380" width="1" height="6" fill="#C0C0C0"/>
+  <rect x="345" y="380" width="1" height="6" fill="#C0C0C0"/>
+  
+  <!-- Wine glasses -->
+  <polygon points="275,385 280,385 279,375 276,375" fill="white"/>
+  <ellipse cx="277.5" cy="372" rx="2" ry="1" fill="#8B0000"/>
+  <polygon points="305,385 310,385 309,375 306,375" fill="white"/>
+  <ellipse cx="307.5" cy="372" rx="2" ry="1" fill="#8B0000"/>
+  <polygon points="335,385 340,385 339,375 336,375" fill="white"/>
+  <ellipse cx="337.5" cy="372" rx="2" ry="1" fill="#8B0000"/>
+  
+  <!-- Sophisticated guests -->
+  <circle cx="280" cy="360" r="10" fill="#FDBCB4"/>
+  <rect x="275" y="370" width="10" height="18" fill="#8B008B"/>
+  <rect x="277" y="388" width="6" height="12" fill="#000080"/>
+  
+  <circle cx="310" cy="360" r="10" fill="#FDBCB4"/>
+  <rect x="305" y="370" width="10" height="18" fill="#4169E1"/>
+  <rect x="307" y="388" width="6" height="12" fill="#654321"/>
+  
+  <circle cx="340" cy="360" r="10" fill="#FDBCB4"/>
+  <rect x="335" y="370" width="10" height="18" fill="#FF69B4"/>
+  <rect x="337" y="388" width="6" height="12" fill="#000080"/>
+  
+  <!-- Upscale appetizers on hibachi -->
+  <ellipse cx="440" cy="375" rx="6" ry="4" fill="#FF69B4"/>
+  <ellipse cx="450" cy="375" rx="7" ry="4" fill="#FFA500"/>
+  <ellipse cx="460" cy="375" rx="6" ry="4" fill="#FF6347"/>
+  <ellipse cx="470" cy="375" rx="5" ry="3" fill="#32CD32"/>
+  
+  <!-- San Francisco city atmosphere -->
+  <text x="400" y="280" text-anchor="middle" fill="#4B0082" font-family="Arial, sans-serif" font-size="18" font-weight="bold">SAN FRANCISCO</text>
+  <text x="400" y="300" text-anchor="middle" fill="#8B008B" font-family="Arial, sans-serif" font-size="14">PRIVATE HIBACHI EXPERIENCE</text>
+  
+  <!-- Cable car in background -->
+  <rect x="100" y="480" width="40" height="20" fill="#8B4513" rx="5"/>
+  <rect x="105" y="475" width="30" height="8" fill="#FFD700"/>
+  <text x="120" y="490" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="8">SF</text>
+  <circle cx="110" cy="495" r="3" fill="#2F4F4F"/>
+  <circle cx="130" cy="495" r="3" fill="#2F4F4F"/>
+  
+  <!-- Elegant hibachi flames -->
+  <polygon points="440,375 444,368 436,368" fill="#FF4500" opacity="0.7"/>
+  <polygon points="450,375 454,368 446,368" fill="#FF6347" opacity="0.7"/>
+  <polygon points="460,375 464,368 456,368" fill="#FFD700" opacity="0.7"/>
+  <polygon points="470,375 474,368 466,368" fill="#FF4500" opacity="0.7"/>
+  
+  <!-- Premium service indicator -->
+  <rect x="500" y="320" width="70" height="50" fill="#8B008B" opacity="0.8" rx="8"/>
+  <text x="535" y="335" text-anchor="middle" fill="#FFD700" font-family="Arial, sans-serif" font-size="10" font-weight="bold">PREMIUM</text>
+  <text x="535" y="350" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">PRIVATE</text>
+  <text x="535" y="365" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="10">CHEF</text>
+  
+  <!-- SF fog effects -->
+  <ellipse cx="150" cy="250" rx="60" ry="20" fill="white" opacity="0.4"/>
+  <ellipse cx="650" cy="280" rx="80" ry="25" fill="white" opacity="0.3"/>
+  
+  <!-- City lights in windows -->
+  <circle cx="250" cy="370" r="2" fill="#FFD700"/>
+  <circle cx="340" cy="370" r="2" fill="#FFD700"/>
+  <circle cx="510" cy="370" r="2" fill="#FFD700"/>
+  
+  <!-- Alcatraz Island silhouette -->
+  <ellipse cx="600" cy="380" rx="30" ry="8" fill="#2F4F4F"/>
+  <rect x="595" y="375" width="5" height="8" fill="#696969"/>
+  <rect x="605" y="372" width="4" height="11" fill="#696969"/>
+</svg>

@@ -19,6 +19,7 @@ import type {
   DayColumn,
   MonthView,
 } from '../types/calendar.types';
+
 import { BookingCard } from './BookingCard';
 
 interface MonthlyCalendarProps {
