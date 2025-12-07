@@ -38,12 +38,47 @@ class Environment(str, Enum):
 
 
 class UserRole(str, Enum):
-    """User roles matching database schema - customers don't need login for frontend"""
+    """
+    User roles aligned with My Hibachi Business Model.
 
-    SUPER_ADMIN = "super_admin"  # Highest privilege - full system access
-    ADMIN = "admin"  # Administrative access
-    CUSTOMER_SUPPORT = "customer_support"  # Customer service team
-    STATION_MANAGER = "station_manager"  # Station-specific operations
+    Role Hierarchy (highest to lowest):
+
+    SUPER_ADMIN (Platform Owner):
+        - Full system access across ALL stations
+        - Manage all admins, stations, settings
+        - View all bookings, customers, financial data platform-wide
+        - Can approve/reject customer support requests
+
+    ADMIN (Station Owner/Manager):
+        - Manage THEIR assigned station only (station-scoped)
+        - Full CRUD for bookings in their station
+        - Manage staff and chefs for their station
+        - View financial reports for their station
+        - Can approve/reject customer support requests for their station
+
+    CUSTOMER_SUPPORT:
+        - Customer-facing operations only
+        - View bookings across all stations (for customer inquiries)
+        - Adjust/edit/cancel bookings WITH approval from ADMIN or SUPER_ADMIN
+        - Cannot delete customers, leads, or reviews
+        - No access to financial data or system settings
+
+    STATION_MANAGER:
+        - View-only access to their assigned station
+        - Schedule internal chefs for their station
+        - NO booking adjustments (handled by customer support + admin)
+        - Cannot manage staff, customers, or financial data
+
+    Note:
+        - STAFF role is NOT used (removed from active use)
+        - CHEF role is future improvement (view schedule + update availability)
+        - Regular customers don't have admin accounts - they book as guests
+    """
+
+    SUPER_ADMIN = "super_admin"  # Full system access - manage all stations, admins
+    ADMIN = "admin"  # Station owner - manage THEIR station only
+    CUSTOMER_SUPPORT = "customer_support"  # Customer needs - booking adjustments need approval
+    STATION_MANAGER = "station_manager"  # View only + schedule chefs - NO adjustments
     # Note: Regular customers don't have accounts - they book as guests
 
 

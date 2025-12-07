@@ -10,8 +10,6 @@ from core.database import get_db
 from schemas.booking_schemas import (
     BookingCreate,
     CancelBookingRequest,
-    WaitlistCreate,
-    WaitlistEntry,
 )
 from utils.auth import (
     admin_required,
@@ -89,7 +87,9 @@ async def get_current_user_info(current_user=Depends(get_current_user)):
 # ============ SUPERADMIN ENDPOINTS ============
 @router.post("/superadmin/create_admin")
 async def create_admin(
-    username: str = Form(...), password: str = Form(...), user=Depends(superadmin_required)
+    username: str = Form(...),
+    password: str = Form(...),
+    user=Depends(superadmin_required),
 ):
     """Create a new admin user (superadmin only)."""
     # Implementation for creating admin
@@ -110,7 +110,9 @@ async def delete_admin(admin_username: str, user=Depends(superadmin_required)):
 # ============ BOOKING ENDPOINTS ============
 @router.post("/book")
 @limiter.limit("5/minute")
-async def book_service(data: BookingCreate, background_tasks: BackgroundTasks, request: Request):
+async def book_service(
+    data: BookingCreate, background_tasks: BackgroundTasks, request: Request
+):
     """Create a new booking and send confirmation emails."""
     # Implementation for booking creation
 
@@ -127,24 +129,28 @@ async def get_bulk_availability(dates: list[str]):
     # Implementation for bulk availability
 
 
-# ============ WAITLIST ENDPOINTS ============
-@router.post("/waitlist")
-@limiter.limit("10/minute")
-async def join_waitlist(data: WaitlistCreate, background_tasks: BackgroundTasks, request: Request):
-    """Add a user to the waitlist, send confirmation and position email."""
-    # Implementation for waitlist joining
-
-
-@router.get("/admin/waitlist", response_model=list[WaitlistEntry])
-async def get_waitlist(user=Depends(admin_required)):
-    """Get all waitlist entries, sorted by preferred_date, preferred_time, and created_at (admin only)."""
-    # Implementation for getting waitlist
-
-
-@router.delete("/admin/waitlist/{waitlist_id}")
-async def remove_waitlist_user(waitlist_id: int, user=Depends(admin_required)):
-    """Admin removes a user from the waitlist by ID."""
-    # Implementation for removing from waitlist
+# ============ WAITLIST ENDPOINTS (DISABLED - Feature Not Implemented) ============
+# NOTE: Waitlist feature was never fully implemented. The 2-hour deposit requirement
+# effectively eliminates the need for a waitlist - customers who don't pay within
+# 2 hours automatically lose their slot, freeing it for others.
+#
+# These endpoints are commented out until a business decision to implement waitlist.
+#
+# @router.post("/waitlist")
+# @limiter.limit("10/minute")
+# async def join_waitlist(data: WaitlistCreate, background_tasks: BackgroundTasks, request: Request):
+#     """Add a user to the waitlist, send confirmation and position email."""
+#     # Implementation for waitlist joining
+#
+# @router.get("/admin/waitlist", response_model=list[WaitlistEntry])
+# async def get_waitlist(user=Depends(admin_required)):
+#     """Get all waitlist entries, sorted by preferred_date, preferred_time, and created_at (admin only)."""
+#     # Implementation for getting waitlist
+#
+# @router.delete("/admin/waitlist/{waitlist_id}")
+# async def remove_waitlist_user(waitlist_id: int, user=Depends(admin_required)):
+#     """Admin removes a user from the waitlist by ID."""
+#     # Implementation for removing from waitlist
 
 
 # ============ ADMIN BOOKING MANAGEMENT ============
@@ -168,7 +174,9 @@ async def admin_all_bookings(user=Depends(admin_required)):
 
 @router.delete("/admin/cancel_booking")
 async def cancel_booking(
-    booking_id: int, body: CancelBookingRequest = Body(...), user=Depends(admin_required)
+    booking_id: int,
+    body: CancelBookingRequest = Body(...),
+    user=Depends(admin_required),
 ):
     """Cancel a booking by ID, send cancellation email, and log the action (admin only)."""
     # Implementation for booking cancellation
@@ -176,7 +184,10 @@ async def cancel_booking(
 
 @router.post("/admin/confirm_deposit")
 async def confirm_deposit(
-    booking_id: int, date: str, reason: str = Body(..., embed=True), user=Depends(admin_required)
+    booking_id: int,
+    date: str,
+    reason: str = Body(..., embed=True),
+    user=Depends(admin_required),
 ):
     """Admin marks a booking as deposit received and sends notification."""
     # Implementation for deposit confirmation
@@ -186,7 +197,8 @@ async def confirm_deposit(
 @router.get("/admin/kpis")
 async def admin_kpis(
     station_timezone: str = Query(
-        "America/Los_Angeles", description="Station timezone for date calculations"
+        "America/Los_Angeles",
+        description="Station timezone for date calculations",
     ),
     db: AsyncSession = Depends(get_db),
     user=Depends(admin_required),
@@ -230,9 +242,15 @@ async def admin_kpis(
                 "upcoming_bookings": int(kpis.get("upcoming_bookings", 0)),
                 "revenue": {
                     "total": float(kpis.get("total_revenue", 0)),
-                    "deposits_collected": float(kpis.get("deposits_collected", 0)),
-                    "outstanding_balance": float(kpis.get("outstanding_balance", 0)),
-                    "average_booking_value": float(kpis.get("avg_booking_value", 0)),
+                    "deposits_collected": float(
+                        kpis.get("deposits_collected", 0)
+                    ),
+                    "outstanding_balance": float(
+                        kpis.get("outstanding_balance", 0)
+                    ),
+                    "average_booking_value": float(
+                        kpis.get("avg_booking_value", 0)
+                    ),
                 },
                 "timezone": station_timezone,
             },
@@ -241,7 +259,9 @@ async def admin_kpis(
 
     except Exception as e:
         logger.exception(f"Error fetching KPIs: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to fetch KPIs: {e!s}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to fetch KPIs: {e!s}"
+        )
 
 
 @router.get("/admin/customers")
@@ -260,7 +280,8 @@ async def get_customer_detail(email: str, user=Depends(admin_required)):
 async def get_customer_analytics(
     customer_email: str,
     station_timezone: str = Query(
-        "America/Los_Angeles", description="Station timezone for date formatting"
+        "America/Los_Angeles",
+        description="Station timezone for date formatting",
     ),
     db: AsyncSession = Depends(get_db),
     user=Depends(admin_required),
@@ -305,10 +326,16 @@ async def get_customer_analytics(
             "data": {
                 "customer_email": customer_email,
                 "total_bookings": int(analytics.get("total_bookings") or 0),
-                "completed_bookings": int(analytics.get("completed_bookings") or 0),
-                "cancelled_bookings": int(analytics.get("cancelled_bookings") or 0),
+                "completed_bookings": int(
+                    analytics.get("completed_bookings") or 0
+                ),
+                "cancelled_bookings": int(
+                    analytics.get("cancelled_bookings") or 0
+                ),
                 "total_spent": float(analytics.get("total_spent") or 0),
-                "average_booking_value": float(analytics.get("avg_booking_value") or 0),
+                "average_booking_value": float(
+                    analytics.get("avg_booking_value") or 0
+                ),
                 "last_booking_date": last_booking_utc,
                 "last_booking_date_local": (
                     format_for_display(last_booking_utc, station_timezone)
@@ -321,7 +348,9 @@ async def get_customer_analytics(
                     if first_booking_utc
                     else None
                 ),
-                "customer_lifetime_days": int(analytics.get("customer_lifetime_days") or 0),
+                "customer_lifetime_days": int(
+                    analytics.get("customer_lifetime_days") or 0
+                ),
                 "payment_methods": payment_methods,
                 "timezone": station_timezone,
             },
@@ -330,12 +359,17 @@ async def get_customer_analytics(
 
     except Exception as e:
         logger.exception(f"Error fetching customer analytics: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to fetch customer analytics: {e!s}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to fetch customer analytics: {e!s}",
+        )
 
 
 # ============ NEWSLETTER MANAGEMENT ============
 @router.get("/admin/newsletter/recipients")
-async def get_newsletter_recipients(city: str = "", name: str = "", user=Depends(admin_required)):
+async def get_newsletter_recipients(
+    city: str = "", name: str = "", user=Depends(admin_required)
+):
     """Get all newsletter recipients, optionally filtered by city and name."""
     # Implementation for newsletter recipients
 
@@ -372,7 +406,9 @@ async def get_activity_logs(
 
 
 @router.get("/superadmin/activity_logs")
-async def get_admin_activity_logs(limit: int = 100, user=Depends(superadmin_required)):
+async def get_admin_activity_logs(
+    limit: int = 100, user=Depends(superadmin_required)
+):
     """Get admin activity logs (superadmin only)."""
     # Implementation for admin activity logs
 
@@ -386,7 +422,9 @@ async def create_sample_data(user=Depends(admin_required)):
 
 @router.post("/admin/change_password")
 async def change_own_password(
-    current_password: str = Form(...), new_password: str = Form(...), user=Depends(admin_required)
+    current_password: str = Form(...),
+    new_password: str = Form(...),
+    user=Depends(admin_required),
 ):
     """Allow admin to change their own password."""
     # Implementation for password change
@@ -471,7 +509,11 @@ async def update_booking(
 ) -> dict[str, Any]:
     """Update a booking (legacy compatibility)."""
     # Placeholder implementation for legacy compatibility
-    return {"id": booking_id, "status": "updated", "message": "Booking updated successfully"}
+    return {
+        "id": booking_id,
+        "status": "updated",
+        "message": "Booking updated successfully",
+    }
 
 
 @router.delete("/{booking_id}")

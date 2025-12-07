@@ -34,6 +34,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    text,
 )
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import func
@@ -240,25 +241,25 @@ class Station(Base):
     )  # NEW: Public-facing name
 
     # Geographic and Contact (REQUIRED FIELDS)
-    country: Mapped[str] = mapped_column(String(100), nullable=False, server_default="'US'")
+    country: Mapped[str] = mapped_column(String(100), nullable=False, server_default=text("'US'"))
     timezone: Mapped[str] = mapped_column(
-        String(50), nullable=False, server_default="'America/New_York'"
+        String(50), nullable=False, server_default=text("'America/New_York'")
     )
 
     # Status (REQUIRED FIELD)
     status: Mapped[str] = mapped_column(
         String(20),
         nullable=False,
-        server_default="'active'",  # active, inactive, suspended, maintenance
+        server_default=text("'active'"),  # active, inactive, suspended, maintenance
     )
 
     # Business Configuration (REQUIRED FIELDS)
-    settings: Mapped[dict] = mapped_column(JSON, nullable=False, server_default="'{}'")
+    settings: Mapped[dict] = mapped_column(JSON, nullable=False, server_default=text("'{}'"))
     max_concurrent_bookings: Mapped[int] = mapped_column(
-        Integer, nullable=False, server_default="10"
+        Integer, nullable=False, server_default=text("10")
     )
     booking_lead_time_hours: Mapped[int] = mapped_column(
-        Integer, nullable=False, server_default="24"
+        Integer, nullable=False, server_default=text("24")
     )
 
     # Contact (OPTIONAL FIELDS)
@@ -384,12 +385,6 @@ class StationUser(Base):
     # Relationships
     station: Mapped["Station"] = relationship("Station", back_populates="station_users")
     user: Mapped["User"] = relationship("User", back_populates="station_users")
-    sessions: Mapped[List["UserSession"]] = relationship(
-        "UserSession", back_populates="user", cascade="all, delete-orphan"
-    )
-    audit_logs: Mapped[List["AuditLog"]] = relationship(
-        "AuditLog", back_populates="user", cascade="all, delete-orphan"
-    )
 
     def __repr__(self) -> str:
         return f"<StationUser(station_id={self.station_id}, user_id={self.user_id}, active={self.is_active})>"

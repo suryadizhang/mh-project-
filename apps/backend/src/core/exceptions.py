@@ -304,10 +304,20 @@ async def validation_exception_handler(
 
         field_errors[field_path].append(f"{error_msg} (type: {error_type})")
 
+    # Safely handle body - convert bytes to string if needed, or exclude if not serializable
+    raw_body = getattr(exc, "body", None)
+    if isinstance(raw_body, bytes):
+        try:
+            raw_body = raw_body.decode("utf-8", errors="replace")
+        except Exception:
+            raw_body = "<binary data>"
+    elif raw_body is not None and not isinstance(raw_body, (str, dict, list)):
+        raw_body = str(raw_body)
+
     validation_exc = ValidationException(
         message="Request validation failed",
         field_errors=field_errors,
-        details={"error_count": len(exc.errors()), "body": getattr(exc, "body", None)},
+        details={"error_count": len(exc.errors()), "body": raw_body},
     )
 
     return await app_exception_handler(request, validation_exc)

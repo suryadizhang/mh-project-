@@ -109,7 +109,9 @@ class InboxMessage(Base):
     read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    contact = relationship("Contact", back_populates="messages", lazy="select")
+    # NOTE: Contact.messages relationship was removed due to registry issues.
+    # Use contact_id for FK reference, query Contact separately if needed.
+    contact = relationship("Contact", lazy="select")  # Removed back_populates
     thread = relationship("Thread", back_populates="messages")
     parent_message = relationship("InboxMessage", remote_side=[id])
     replies = relationship("InboxMessage", back_populates="parent_message")
@@ -176,7 +178,9 @@ class Thread(Base):
     messages = relationship(
         "InboxMessage", back_populates="thread", order_by="InboxMessage.created_at"
     )
-    contact = relationship("Contact", back_populates="threads", lazy="select")
+    # NOTE: Contact.threads relationship was removed due to registry issues.
+    # Use contact_id for FK reference, query Contact separately if needed.
+    contact = relationship("Contact", lazy="select")  # Removed back_populates
     # booking = relationship("models.booking.Booking", back_populates="message_threads")
 
     # Indexes
@@ -226,7 +230,8 @@ class TCPAOptStatus(Base):
     )
 
     # Relationships
-    contact = relationship("Contact", back_populates="tcpa_statuses", lazy="select")
+    # NOTE: Contact.tcpa_statuses relationship was removed due to registry issues.
+    contact = relationship("Contact", lazy="select")  # Removed back_populates
 
     # Constraints
     __table_args__ = (

@@ -1,0 +1,496 @@
+"""
+Public Quote Calculation Endpoint (No Authentication Required)
+
+This module handles public quote calculations for the customer website.
+Uses BusinessConfig for dynamic pricing values.
+
+Endpoints:
+- POST /calculate - Calculate party quote with travel fee
+"""
+
+import logging
+from typing import Any
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.database import get_db
+from services.business_config_service import get_business_config
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter(tags=["public-quote"])
+
+
+# ============================================================================
+# PYDANTIC SCHEMAS
+# ============================================================================
+
+
+class QuoteRequest(BaseModel):
+    """Schema for quote calculation request."""
+
+    adults: int = Field(
+        ..., ge=0, le=100, description="Number of adults (13+)"
+    )
+    children: int = Field(
+        default=0, ge=0, le=50, description="Number of children (6-12)"
+    )
+
+    # Upgrade proteins (price per serving)
+    salmon: int = Field(
+        default=0, ge=0, description="Number of salmon upgrades"
+    )
+    scallops: int = Field(
+        default=0, ge=0, description="Number of scallop upgrades"
+    )
+    filet_mignon: int = Field(
+        default=0, ge=0, description="Number of filet mignon upgrades"
+    )
+    lobster_tail: int = Field(
+        default=0, ge=0, description="Number of lobster tail upgrades"
+    )
+    third_proteins: int = Field(
+        default=0, ge=0, description="Number of 3rd protein additions"
+    )
+
+    # Add-ons (per serving)
+    yakisoba_noodles: int = Field(
+        default=0, ge=0, description="Number of yakisoba noodle portions"
+    )
+    extra_fried_rice: int = Field(
+        default=0, ge=0, description="Number of extra fried rice portions"
+    )
+    extra_vegetables: int = Field(
+        default=0, ge=0, description="Number of extra vegetable portions"
+    )
+    edamame: int = Field(
+        default=0, ge=0, description="Number of edamame portions"
+    )
+    gyoza: int = Field(default=0, ge=0, description="Number of gyoza portions")
+
+    # Location for travel fee calculation
+    venue_address: str | None = Field(
+        default=None, description="Full venue address for travel calculation"
+    )
+    zip_code: str | None = Field(
+        default=None, description="ZIP code for fallback travel calculation"
+    )
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "adults": 10,
+                    "children": 2,
+                    "salmon": 2,
+                    "lobster_tail": 1,
+                    "venue_address": "123 Main St, San Jose, CA 95123",
+                }
+            ]
+        }
+    }
+
+
+class TravelInfo(BaseModel):
+    """Travel fee calculation details."""
+
+    distance_miles: float | None = None
+    travel_fee: float = 0.0
+    free_miles: int = 30
+    per_mile_rate: float = 2.0
+    station_name: str = "Fremont Station"
+
+
+class QuoteResponse(BaseModel):
+    """Schema for quote calculation response."""
+
+    # Breakdown
+    adults: int
+    children: int
+    adult_price: float
+    child_price: float
+    base_total: float
+    upgrade_total: float
+    addon_total: float
+    subtotal: float
+
+    # Travel
+    travel_info: TravelInfo | None = None
+
+    # Final
+    grand_total: float
+    deposit_required: float
+    balance_due: float
+
+    # Metadata
+    party_minimum: float
+    applied_minimum: bool = False
+
+
+# ============================================================================
+# UPGRADE AND ADDON PRICING (from menu)
+# ============================================================================
+
+# Upgrade prices (per serving)
+UPGRADE_PRICES = {
+    "salmon": 7.00,  # Premium seafood upgrade
+    "scallops": 9.00,  # Premium seafood upgrade
+    "filet_mignon": 10.00,  # Premium beef upgrade
+    "lobster_tail": 20.00,  # Luxury upgrade
+    "third_protein": 10.00,  # Add a third protein
+}
+
+# Addon prices (per serving)
+ADDON_PRICES = {
+    "yakisoba_noodles": 5.00,
+    "extra_fried_rice": 5.00,
+    "extra_vegetables": 5.00,
+    "edamame": 5.00,
+    "gyoza": 10.00,
+}
+
+
+# ============================================================================
+# PUBLIC ENDPOINTS
+# ============================================================================
+
+
+@router.post(
+    "/calculate",
+    response_model=QuoteResponse,
+    summary="Calculate party quote (PUBLIC)",
+    description="""
+    Calculate a hibachi party quote with dynamic pricing from BusinessConfig.
+    No authentication required - used by customer website.
+
+    ## Pricing (from BusinessConfig):
+    - Adult price: $55/person (13+)
+    - Child price: $30/person (6-12)
+    - Children under 5: FREE
+    - Party minimum: $550
+
+    ## Upgrades (per serving):
+    - Salmon: +$7
+    - Scallops: +$9
+    - Filet Mignon: +$10
+    - Lobster Tail: +$20
+    - 3rd Protein: +$10
+
+    ## Add-ons (per serving):
+    - Yakisoba Noodles: +$5
+    - Extra Fried Rice: +$5
+    - Extra Vegetables: +$5
+    - Edamame: +$5
+    - Gyoza: +$10
+
+    ## Travel Fee:
+    - First 30 miles: FREE
+    - After 30 miles: $2/mile
+
+    ## Deposit:
+    - Fixed $100 deposit required
+    """,
+)
+async def calculate_quote(
+    request: QuoteRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
+    """
+    Calculate party quote with travel fee.
+    Uses BusinessConfig for dynamic pricing values.
+    """
+    try:
+        # Get dynamic pricing from BusinessConfig
+        config = await get_business_config(db)
+
+        adult_price = config.adult_price_cents / 100  # $55.00
+        child_price = config.child_price_cents / 100  # $30.00
+        party_minimum = config.party_minimum_cents / 100  # $550.00
+        deposit_amount = config.deposit_amount_cents / 100  # $100.00
+        free_miles = config.travel_free_miles  # 30
+        per_mile_rate = config.travel_per_mile_cents / 100  # $2.00
+
+        logger.info(
+            f"📊 Quote calculation using {config.source} config: adult=${adult_price}, child=${child_price}"
+        )
+
+        # Calculate base total
+        base_total = (request.adults * adult_price) + (
+            request.children * child_price
+        )
+
+        # Calculate upgrade total
+        upgrade_total = 0.0
+        upgrade_total += request.salmon * UPGRADE_PRICES["salmon"]
+        upgrade_total += request.scallops * UPGRADE_PRICES["scallops"]
+        upgrade_total += request.filet_mignon * UPGRADE_PRICES["filet_mignon"]
+        upgrade_total += request.lobster_tail * UPGRADE_PRICES["lobster_tail"]
+        upgrade_total += (
+            request.third_proteins * UPGRADE_PRICES["third_protein"]
+        )
+
+        # Calculate addon total
+        addon_total = 0.0
+        addon_total += (
+            request.yakisoba_noodles * ADDON_PRICES["yakisoba_noodles"]
+        )
+        addon_total += (
+            request.extra_fried_rice * ADDON_PRICES["extra_fried_rice"]
+        )
+        addon_total += (
+            request.extra_vegetables * ADDON_PRICES["extra_vegetables"]
+        )
+        addon_total += request.edamame * ADDON_PRICES["edamame"]
+        addon_total += request.gyoza * ADDON_PRICES["gyoza"]
+
+        # Calculate subtotal (before minimum and travel)
+        subtotal = base_total + upgrade_total + addon_total
+
+        # Apply party minimum
+        applied_minimum = False
+        if subtotal < party_minimum:
+            subtotal = party_minimum
+            applied_minimum = True
+
+        # Calculate travel fee (simplified - would use Google Maps in production)
+        travel_info = TravelInfo(
+            free_miles=free_miles,
+            per_mile_rate=per_mile_rate,
+            station_name="Fremont Station (Bay Area)",
+        )
+
+        if request.venue_address or request.zip_code:
+            # In production, this would call Google Maps Distance Matrix API
+            # For now, estimate based on ZIP code (Bay Area ZIPs starting with 94xxx, 95xxx)
+            estimated_distance = _estimate_distance(
+                request.zip_code, request.venue_address
+            )
+            travel_info.distance_miles = estimated_distance
+
+            if estimated_distance and estimated_distance > free_miles:
+                travel_info.travel_fee = (
+                    estimated_distance - free_miles
+                ) * per_mile_rate
+
+        # Calculate grand total
+        grand_total = subtotal + travel_info.travel_fee
+
+        # Calculate balance
+        balance_due = grand_total - deposit_amount
+
+        response = {
+            "adults": request.adults,
+            "children": request.children,
+            "adult_price": adult_price,
+            "child_price": child_price,
+            "base_total": round(base_total, 2),
+            "upgrade_total": round(upgrade_total, 2),
+            "addon_total": round(addon_total, 2),
+            "subtotal": round(subtotal, 2),
+            "travel_info": {
+                "distance_miles": travel_info.distance_miles,
+                "travel_fee": round(travel_info.travel_fee, 2),
+                "free_miles": travel_info.free_miles,
+                "per_mile_rate": travel_info.per_mile_rate,
+                "station_name": travel_info.station_name,
+            },
+            "grand_total": round(grand_total, 2),
+            "deposit_required": deposit_amount,
+            "balance_due": round(max(0, balance_due), 2),
+            "party_minimum": party_minimum,
+            "applied_minimum": applied_minimum,
+        }
+
+        logger.info(
+            f"✅ Quote calculated: ${grand_total:.2f} for {request.adults} adults, {request.children} children"
+        )
+
+        return response
+
+    except Exception as e:
+        logger.exception(f"❌ Quote calculation failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to calculate quote. Please try again.",
+        )
+
+
+def _estimate_distance(
+    zip_code: str | None, address: str | None
+) -> float | None:
+    """
+    Estimate distance from Fremont station based on ZIP code.
+
+    In production, this would use Google Maps Distance Matrix API.
+    This is a simplified estimation for Bay Area ZIP codes.
+
+    Fremont Station: 47481 Towhee St, Fremont, CA 94539
+    """
+    if not zip_code and not address:
+        return None
+
+    # Extract ZIP from address if not provided
+    if not zip_code and address:
+        import re
+
+        zip_match = re.search(r"\b(\d{5})\b", address)
+        if zip_match:
+            zip_code = zip_match.group(1)
+
+    if not zip_code:
+        return None
+
+    # Estimated distances from Fremont (94539) based on ZIP code areas
+    # These are rough estimates for the Bay Area
+    bay_area_distances = {
+        # Fremont/Newark/Union City (local)
+        "94536": 3,
+        "94538": 2,
+        "94539": 0,
+        "94555": 4,
+        "94560": 5,
+        "94587": 6,
+        # San Jose area (15-25 miles)
+        "95110": 15,
+        "95111": 18,
+        "95112": 16,
+        "95113": 15,
+        "95116": 17,
+        "95117": 20,
+        "95118": 22,
+        "95119": 20,
+        "95120": 25,
+        "95121": 18,
+        "95122": 17,
+        "95123": 20,
+        "95124": 23,
+        "95125": 21,
+        "95126": 19,
+        "95127": 16,
+        "95128": 21,
+        "95129": 24,
+        "95130": 23,
+        "95131": 15,
+        "95132": 14,
+        "95133": 15,
+        "95134": 13,
+        "95135": 18,
+        "95136": 20,
+        # Milpitas/Santa Clara (10-15 miles)
+        "95035": 8,
+        "95050": 12,
+        "95051": 13,
+        "95054": 11,
+        # Hayward/Castro Valley (5-10 miles)
+        "94541": 7,
+        "94542": 8,
+        "94544": 6,
+        "94545": 5,
+        "94546": 10,
+        # Oakland/Berkeley (20-30 miles)
+        "94601": 25,
+        "94602": 26,
+        "94606": 24,
+        "94607": 28,
+        "94608": 30,
+        "94609": 28,
+        "94610": 27,
+        "94611": 28,
+        "94612": 26,
+        "94618": 30,
+        "94702": 32,
+        "94703": 33,
+        "94704": 32,
+        "94705": 31,
+        "94720": 33,
+        # San Francisco (40-45 miles)
+        "94102": 42,
+        "94103": 43,
+        "94104": 43,
+        "94105": 44,
+        "94107": 42,
+        "94108": 43,
+        "94109": 44,
+        "94110": 41,
+        "94111": 44,
+        "94112": 38,
+        "94114": 40,
+        "94115": 44,
+        "94116": 39,
+        "94117": 43,
+        "94118": 44,
+        "94121": 46,
+        "94122": 42,
+        "94123": 45,
+        "94124": 36,
+        "94127": 40,
+        "94131": 39,
+        "94132": 38,
+        "94133": 45,
+        "94134": 35,
+        # Palo Alto/Mountain View (20-25 miles)
+        "94301": 22,
+        "94303": 20,
+        "94304": 21,
+        "94306": 23,
+        "94040": 18,
+        "94041": 19,
+        "94043": 17,
+        # Sunnyvale/Cupertino (15-20 miles)
+        "94085": 14,
+        "94086": 15,
+        "94087": 16,
+        "94089": 13,
+        "95014": 20,
+        # Livermore/Pleasanton (15-20 miles)
+        "94550": 18,
+        "94551": 20,
+        "94566": 15,
+        "94568": 12,
+        "94588": 14,
+        # Walnut Creek/Concord (25-35 miles)
+        "94520": 28,
+        "94521": 30,
+        "94523": 32,
+        "94595": 25,
+        "94596": 26,
+        "94597": 27,
+        "94598": 28,
+        # Sacramento area (80+ miles)
+        "95814": 85,
+        "95816": 85,
+        "95818": 85,
+        "95819": 86,
+        "95820": 87,
+        "95821": 88,
+        "95822": 88,
+        "95823": 90,
+        "95824": 87,
+        "95825": 89,
+        "95826": 90,
+        "95828": 92,
+        "95829": 93,
+        "95830": 95,
+        "95831": 90,
+        "95832": 88,
+        "95833": 86,
+        "95834": 85,
+        "95835": 84,
+        "95838": 82,
+    }
+
+    # Look up distance or default estimate
+    distance = bay_area_distances.get(zip_code)
+
+    if distance is not None:
+        return float(distance)
+
+    # Default estimation based on ZIP code prefix
+    if zip_code.startswith("94"):
+        return 25.0  # East Bay average
+    elif zip_code.startswith("95"):
+        return 20.0  # South Bay average
+    else:
+        return 50.0  # Outside Bay Area

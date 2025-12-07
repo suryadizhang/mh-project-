@@ -1,16 +1,39 @@
+"""
+Booking Schemas - Legacy Compatibility Module
+
+This module contains legacy booking schemas for backward compatibility.
+For enterprise booking schemas with UUID references, use schemas.booking
+
+NOTE: The following schema files were cleaned up as unused:
+- schemas.waitlist - DELETED (waitlist feature never implemented)
+- schemas.admin - DELETED (endpoints use Form(...) directly)
+- schemas.newsletter - DELETED (duplicate of newsletters.py endpoint)
+
+Remaining modular schemas:
+- schemas.analytics (CustomerAnalytics) - Business analytics for admin dashboard
+- schemas.booking - Enterprise booking schemas with UUID references
+"""
+
 from datetime import datetime
 from enum import Enum
 
 from pydantic import BaseModel, EmailStr
 
+# Re-export analytics for backward compatibility
+from schemas.analytics import CustomerAnalytics
+
 
 class UserRole(str, Enum):
+    """User role enumeration."""
+
     CUSTOMER = "customer"
     ADMIN = "admin"
     SUPERADMIN = "superadmin"
 
 
 class BookingStatus(str, Enum):
+    """Booking status enumeration."""
+
     PENDING = "pending"
     CONFIRMED = "confirmed"
     CANCELLED = "cancelled"
@@ -18,7 +41,12 @@ class BookingStatus(str, Enum):
 
 
 class BookingCreate(BaseModel):
-    """Request body for creating a new booking."""
+    """
+    Request body for creating a new booking (legacy format).
+
+    Note: For enterprise booking with UUID customer references,
+    use schemas.booking.BookingCreate instead.
+    """
 
     name: str
     phone: str
@@ -31,36 +59,14 @@ class BookingCreate(BaseModel):
     contact_preference: str
 
 
-class WaitlistCreate(BaseModel):
-    """Request body for joining the waitlist."""
-
-    name: str
-    phone: str
-    email: EmailStr
-    preferred_date: str
-    preferred_time: str
-
-
 class CancelBookingRequest(BaseModel):
     """Request body for cancelling a booking (admin only)."""
 
     reason: str
 
 
-class WaitlistEntry(BaseModel):
-    """Waitlist entry model."""
-
-    id: int
-    name: str
-    phone: str
-    email: str
-    preferred_date: str
-    preferred_time: str
-    created_at: datetime | None = None
-
-
 class BookingResponse(BaseModel):
-    """Response model for booking operations."""
+    """Response model for booking operations (legacy format)."""
 
     id: int
     name: str
@@ -76,38 +82,14 @@ class BookingResponse(BaseModel):
     deposit_received: bool = False
 
 
-class AdminCreateRequest(BaseModel):
-    """Request body for creating admin user."""
-
-    username: str
-    password: str
-    full_name: str | None = None
-    email: EmailStr | None = None
-
-
-class PasswordChangeRequest(BaseModel):
-    """Request body for changing password."""
-
-    current_password: str
-    new_password: str
-
-
-class NewsletterSendRequest(BaseModel):
-    """Request body for sending newsletter."""
-
-    subject: str
-    message: str
-    city_filter: str | None = None
-    send_type: str = "email"
-
-
-class CustomerAnalytics(BaseModel):
-    """Customer analytics response model."""
-
-    total_customers: int
-    new_customers_this_month: int
-    returning_customers: int
-    customer_tiers: dict
-    top_customers: list
-    booking_patterns: dict
-    retention_rate: float
+# Explicit exports for documentation
+__all__ = [
+    # Legacy booking schemas
+    "UserRole",
+    "BookingStatus",
+    "BookingCreate",
+    "CancelBookingRequest",
+    "BookingResponse",
+    # Re-exported from modular files
+    "CustomerAnalytics",
+]
