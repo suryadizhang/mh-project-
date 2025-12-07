@@ -107,7 +107,6 @@ from sqlalchemy.sql import func
 from ..base_class import Base
 
 if TYPE_CHECKING:
-    from api.v1.inbox.models import InboxMessage, TCPAOptStatus, Thread
     from db.models.lead import LeadContact, LeadContext, LeadEvent, LeadSocialThread
 
 
@@ -319,16 +318,20 @@ class Contact(Base):
         DateTime(timezone=True), nullable=True
     )
 
-    # Relationships (using TYPE_CHECKING to avoid circular imports)
-    messages: Mapped[List["InboxMessage"]] = relationship(
-        "InboxMessage", back_populates="contact", lazy="select"
-    )
-    threads: Mapped[List["Thread"]] = relationship(
-        "Thread", back_populates="contact", lazy="select"
-    )
-    tcpa_statuses: Mapped[List["TCPAOptStatus"]] = relationship(
-        "TCPAOptStatus", back_populates="contact", lazy="select"
-    )
+    # NOTE: Relationships to InboxMessage, Thread, TCPAOptStatus are defined
+    # in api/v1/inbox/models.py which uses a different model registry.
+    # To avoid SQLAlchemy registry resolution errors, these are commented out.
+    # Access messages/threads via direct queries on InboxMessage/Thread tables.
+    #
+    # messages: Mapped[List["InboxMessage"]] = relationship(
+    #     "InboxMessage", back_populates="contact", lazy="select"
+    # )
+    # threads: Mapped[List["Thread"]] = relationship(
+    #     "Thread", back_populates="contact", lazy="select"
+    # )
+    # tcpa_statuses: Mapped[List["TCPAOptStatus"]] = relationship(
+    #     "TCPAOptStatus", back_populates="contact", lazy="select"
+    # )
 
     # Indexes
     __table_args__ = (

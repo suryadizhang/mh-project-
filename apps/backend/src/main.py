@@ -787,6 +787,26 @@ app.include_router(bookings.router, prefix="/api/bookings", tags=["bookings"])
 # Also register with /api/v1 prefix for frontend compatibility
 app.include_router(bookings.router, prefix="/api/v1/bookings", tags=["bookings-v1"])
 
+# Include PUBLIC booking endpoints (no auth required - for customer website)
+try:
+    from routers.v1.public_bookings import router as public_bookings_router
+
+    app.include_router(
+        public_bookings_router, prefix="/api/v1/public/bookings", tags=["public-bookings"]
+    )
+    logger.info("✅ Public booking endpoints included (no auth - customer website)")
+except ImportError as e:
+    logger.warning(f"Public booking endpoints not available: {e}")
+
+# Include PUBLIC quote endpoints (no auth required - for customer website)
+try:
+    from routers.v1.public_quote import router as public_quote_router
+
+    app.include_router(public_quote_router, prefix="/api/v1/public/quote", tags=["public-quote"])
+    logger.info("✅ Public quote endpoints included (no auth - customer website)")
+except ImportError as e:
+    logger.warning(f"Public quote endpoints not available: {e}")
+
 # Include v1 API router (pricing, menu items, addon items)
 try:
     from api.v1.api import api_router as v1_api_router
@@ -849,9 +869,14 @@ except ImportError as e:
 #     logger.error(f"❌ Stripe router not available: {e_stripe}")
 logger.info("⚠️  Stripe router temporarily disabled (StripeCustomer model not migrated)")
 
-# CRM router removed - functionality distributed across other routers
-# OLD: app.include_router(crm_router, prefix="/api/crm", tags=["crm"])
-# Note: CRM features now available through: leads, newsletter, bookings, station_admin routers
+# CRM Router - Admin Panel Integration Layer (re-enabled for admin frontend sync)
+try:
+    from routers.v1.crm import router as crm_router
+
+    app.include_router(crm_router, prefix="/api/crm", tags=["crm", "admin"])
+    logger.info("✅ CRM router included (Admin Panel Integration Layer)")
+except ImportError as e:
+    logger.error(f"❌ CRM router not available: {e}")
 
 # Station Management and Authentication (Multi-tenant RBAC) - NEW location
 try:
@@ -903,17 +928,9 @@ try:
 except ImportError as e:
     logger.error(f"❌ Real-time Voice endpoints not available: {e}")
 
-# QR Code Tracking System - NEW location
-# TODO: Temporarily disabled until QRCode and QRScan models are migrated
-# Legacy models in backups/pre-nuclear-cleanup-20251120_220938/legacy_qr_tracking.py
-# try:
-#     from routers.v1.qr_tracking import router as qr_tracking_router
-#
-#     app.include_router(qr_tracking_router, prefix="/api/qr", tags=["qr-tracking", "marketing"])
-#     logger.info("✅ QR Code Tracking System included from NEW location")
-# except ImportError as e:
-#     logger.error(f"❌ QR Tracking endpoints not available: {e}")
-logger.info("⚠️  QR Code Tracking System temporarily disabled (models not migrated)")
+# QR Code Tracking System - DELETED (Nov 22, 2025)
+# Not needed for hibachi catering business model
+# Files removed: routers/v1/qr_tracking.py, services/qr_tracking_service.py
 
 # Admin Error Logs (for monitoring and debugging) - NEW location
 try:

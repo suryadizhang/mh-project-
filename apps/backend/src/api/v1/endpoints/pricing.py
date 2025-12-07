@@ -1,6 +1,6 @@
 """
 Pricing API Endpoints
-Provides pricing data (temporarily hardcoded pending mapper conflict resolution)
+Provides pricing data using BusinessConfig for dynamic values (Single Source of Truth)
 """
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -9,6 +9,7 @@ from typing import Any
 import logging
 
 from core.database import get_db
+from services.business_config_service import get_business_config
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +23,24 @@ async def get_current_pricing(
     """
     Get current menu pricing and addon items
 
-    NOTE: Temporarily hardcoded pending database mapper conflict resolution
+    Uses BusinessConfig for dynamic pricing values (Single Source of Truth).
+    Menu items and addons are hardcoded as they rarely change.
     """
     try:
+        # Get dynamic pricing from BusinessConfig (Single Source of Truth)
+        config = await get_business_config(db)
+
+        adult_price = config.adult_price_cents / 100
+        child_price = config.child_price_cents / 100
+        party_minimum = config.party_minimum_cents / 100
+        child_free_under_age = config.child_free_under_age
+        free_miles = config.travel_free_miles
+        price_per_mile = config.travel_per_mile_cents / 100
+
+        logger.info(
+            f"📊 Pricing loaded from {config.source}: adult=${adult_price}, child=${child_price}"
+        )
+
         # Hardcoded menu items (REAL data from customer menu page)
         menu_items_data = [
             # FREE PROTEINS (Poultry - included in base price, choose any 2)
@@ -137,12 +153,12 @@ async def get_current_pricing(
 
         # Hardcoded addon items (REAL data from customer menu page - Additional Enhancements section)
         addon_items_data = [
-            # PREMIUM PROTEIN UPGRADES (+$5 per person - replace any base protein)
+            # PREMIUM PROTEIN UPGRADES (+$7 per person - replace any base protein)
             {
                 "id": 1,
                 "name": "Salmon",
                 "category": "protein_upgrade",
-                "price": 5.00,
+                "price": 7.00,
                 "description": "Wild-caught Atlantic salmon with teriyaki glaze",
                 "is_active": True,
                 "display_order": 1,
@@ -151,7 +167,7 @@ async def get_current_pricing(
                 "id": 2,
                 "name": "Scallops",
                 "category": "protein_upgrade",
-                "price": 5.00,
+                "price": 9.00,
                 "description": "Fresh sea scallops grilled to perfection",
                 "is_active": True,
                 "display_order": 2,
@@ -160,17 +176,17 @@ async def get_current_pricing(
                 "id": 3,
                 "name": "Filet Mignon",
                 "category": "protein_upgrade",
-                "price": 5.00,
+                "price": 10.00,
                 "description": "Premium tender beef filet",
                 "is_active": True,
                 "display_order": 3,
             },
-            # PREMIUM PROTEIN UPGRADES (+$15 per person)
+            # PREMIUM PROTEIN UPGRADES (+$20 per person)
             {
                 "id": 4,
                 "name": "Lobster Tail",
                 "category": "protein_upgrade",
-                "price": 15.00,
+                "price": 20.00,
                 "description": "Fresh lobster tail with garlic butter",
                 "is_active": True,
                 "display_order": 4,
@@ -232,8 +248,7 @@ async def get_current_pricing(
             },
         ]
 
-        # Hardcoded travel fee configurations (REAL data - station-based)
-        # NOTE: Will be replaced with database query once mapper conflict resolved
+        # Travel fee configuration from BusinessConfig
         travel_fee_stations_data = [
             {
                 "id": 1,
@@ -244,8 +259,8 @@ async def get_current_pricing(
                 "postal_code": "94539",
                 "latitude": None,  # Will be geocoded in production
                 "longitude": None,
-                "free_miles": 30.00,
-                "price_per_mile": 2.00,
+                "free_miles": float(free_miles),  # From BusinessConfig
+                "price_per_mile": price_per_mile,  # From BusinessConfig
                 "max_service_distance": None,  # Unlimited
                 "is_active": True,
                 "notes": "Main station covering Bay Area and Sacramento regions",
@@ -255,14 +270,20 @@ async def get_current_pricing(
 
         response = {
             "base_pricing": {
-                "adult_price": 55.00,
-                "child_price": 30.00,
-                "child_free_under_age": 5,
-                "party_minimum": 550.00,  # Updated to match menu page ($550 ≈ 10 adults)
+                "adult_price": adult_price,  # From BusinessConfig
+                "child_price": child_price,  # From BusinessConfig
+                "child_free_under_age": child_free_under_age,  # From BusinessConfig
+                "party_minimum": party_minimum,  # From BusinessConfig
+                "deposit_amount": config.deposit_amount_cents / 100,  # From BusinessConfig
+            },
+            "travel_fee_config": {
+                "free_miles": free_miles,
+                "price_per_mile": price_per_mile,
             },
             "travel_fee_stations": travel_fee_stations_data,
             "menu_items": menu_items_data,
             "addon_items": addon_items_data,
+            "config_source": config.source,  # Debug: shows where config came from
         }
 
         return response
@@ -285,35 +306,46 @@ async def calculate_quote(
 ) -> dict[str, Any]:
     """
     Calculate party quote with breakdown
-    NOTE: Temporarily simplified - full calculation coming soon
+    Uses BusinessConfig for dynamic pricing values.
+
+    NOTE: For public quote calculation without auth, use /api/v1/public/quote/calculate
     """
     try:
-        # Simple calculation without PricingService
-        base_total = (adults * 55.00) + (children * 30.00)
+        # Get dynamic pricing from BusinessConfig
+        config = await get_business_config(db)
+
+        adult_price = config.adult_price_cents / 100
+        child_price = config.child_price_cents / 100
+        party_minimum = config.party_minimum_cents / 100
+        deposit_amount = config.deposit_amount_cents / 100
+
+        # Calculate base total
+        base_total = (adults * adult_price) + (children * child_price)
+
+        # Apply party minimum
+        applied_minimum = False
+        if base_total < party_minimum:
+            base_total = party_minimum
+            applied_minimum = True
+
         return {
             "adults": adults,
             "children": children,
             "children_under_5": children_under_5,
-            "subtotal": base_total,
-            "travel_fee": 0.00,
-            "total": base_total,
+            "adult_price": adult_price,
+            "child_price": child_price,
+            "subtotal": round(base_total, 2),
+            "travel_fee": 0.00,  # TODO: Calculate based on address
+            "total": round(base_total, 2),
+            "deposit_required": deposit_amount,
+            "balance_due": round(max(0, base_total - deposit_amount), 2),
+            "party_minimum": party_minimum,
+            "applied_minimum": applied_minimum,
             "breakdown": {
-                "adult_meals": adults * 55.00,
-                "child_meals": children * 30.00,
+                "adult_meals": round(adults * adult_price, 2),
+                "child_meals": round(children * child_price, 2),
             },
         }
-
-        quote = pricing_service.calculate_party_quote(
-            adults=adults,
-            children=children,
-            children_under_5=children_under_5,
-            upgrades=upgrades or {},
-            addons=addons or [],
-            customer_address=customer_address,
-            customer_zipcode=customer_zipcode,
-        )
-
-        return quote
 
     except Exception as e:
         logger.exception(f"Error calculating quote: {e}")
@@ -326,10 +358,9 @@ async def get_pricing_summary(
 ) -> dict[str, Any]:
     """
     Get comprehensive pricing summary for display
-    NOTE: Temporarily simplified - delegates to /pricing/current
+    Delegates to /pricing/current
     """
     try:
-        # Redirect to current pricing endpoint
         return await get_current_pricing(db=db)
 
     except Exception as e:

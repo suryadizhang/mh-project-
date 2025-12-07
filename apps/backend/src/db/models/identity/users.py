@@ -34,6 +34,7 @@ from db.base_class import Base
 
 # ==================== ENUMS ====================
 
+
 class UserStatus(str, enum.Enum):
     """
     User account status.
@@ -50,6 +51,7 @@ class UserStatus(str, enum.Enum):
     - ACTIVE → SUSPENDED (policy violation)
     - SUSPENDED → ACTIVE (after admin review)
     """
+
     ACTIVE = "active"
     INACTIVE = "inactive"
     SUSPENDED = "suspended"
@@ -71,6 +73,7 @@ class AuthProvider(str, enum.Enum):
     - Customer accounts: Any provider (via OAuthAccount)
     - Station users: EMAIL or GOOGLE
     """
+
     GOOGLE = "google"
     FACEBOOK = "facebook"
     INSTAGRAM = "instagram"
@@ -78,6 +81,7 @@ class AuthProvider(str, enum.Enum):
 
 
 # ==================== MODELS ====================
+
 
 class User(Base):
     """
@@ -119,31 +123,22 @@ class User(Base):
     - Super admin can view/update any user
     - Station admin can view users in their station
     """
+
     __tablename__ = "users"
     __table_args__ = (
         Index("idx_users_email", "email"),
         Index("idx_users_status", "status"),
         Index("idx_users_created_at", "created_at"),
-        {"schema": "identity"}
+        {"schema": "identity"},
     )
 
     # Primary Key
-    id: Mapped[UUID] = mapped_column(
-        PGUUID(as_uuid=True),
-        primary_key=True,
-        default=uuid4
-    )
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # Authentication
-    email: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False,
-        unique=True,
-        index=True
-    )
+    email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
     password_hash: Mapped[Optional[str]] = mapped_column(
-        String(255),
-        nullable=True
+        String(255), nullable=True
     )  # NULL for OAuth-only users
 
     # Profile
@@ -157,66 +152,42 @@ class User(Base):
         SQLEnum(UserStatus, name="userstatus", schema="public", create_type=False),
         nullable=False,
         default=UserStatus.ACTIVE,
-        index=True
+        index=True,
     )
-    is_verified: Mapped[bool] = mapped_column(
-        Boolean,
-        nullable=False,
-        default=False
-    )
+    is_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     # Metadata (extensible JSON for custom fields)
-    user_metadata: Mapped[dict] = mapped_column(
-        JSONB,
-        nullable=False,
-        default=dict
-    )
+    user_metadata: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
 
     # Timestamps
     last_login_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True
+        DateTime(timezone=True), nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now()
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
 
     # Relationships
     user_roles: Mapped[List["UserRole"]] = relationship(
-        "UserRole",
-        foreign_keys="[UserRole.user_id]",
-        back_populates="user"
+        "UserRole", foreign_keys="[UserRole.user_id]", back_populates="user"
     )
     oauth_accounts: Mapped[List["OAuthAccount"]] = relationship(
-        "OAuthAccount",
-        back_populates="user"
+        "OAuthAccount", back_populates="user"
     )
     google_oauth_accounts: Mapped[List["GoogleOAuthAccount"]] = relationship(
-        "GoogleOAuthAccount",
-        foreign_keys="[GoogleOAuthAccount.user_id]",
-        back_populates="user"
+        "GoogleOAuthAccount", foreign_keys="[GoogleOAuthAccount.user_id]", back_populates="user"
     )
-    station_users: Mapped[List["StationUser"]] = relationship(
-        "StationUser",
-        back_populates="user"
-    )
+    station_users: Mapped[List["StationUser"]] = relationship("StationUser", back_populates="user")
     sent_invitations: Mapped[List["AdminInvitation"]] = relationship(
-        "AdminInvitation",
-        foreign_keys="[AdminInvitation.invited_by]",
-        back_populates="inviter"
+        "AdminInvitation", foreign_keys="[AdminInvitation.invited_by]", back_populates="inviter"
     )
     accepted_invitations: Mapped[List["AdminInvitation"]] = relationship(
         "AdminInvitation",
         foreign_keys="[AdminInvitation.accepted_by_user_id]",
-        back_populates="accepted_user"
+        back_populates="accepted_user",
     )
 
     def __repr__(self) -> str:
@@ -228,6 +199,20 @@ class User(Base):
         if self.first_name and self.last_name:
             return f"{self.first_name} {self.last_name}"
         return self.first_name or self.last_name or self.email
+
+    @property
+    def is_super_admin(self) -> bool:
+        """Check if user has SUPER_ADMIN role."""
+        if not self.user_roles:
+            return False
+        for user_role in self.user_roles:
+            if (
+                user_role.role
+                and user_role.role.role_type
+                and str(user_role.role.role_type).upper() in ("SUPER_ADMIN", "SUPERADMIN")
+            ):
+                return True
+        return False
 
     def is_active_user(self) -> bool:
         """Check if user is active and verified."""

@@ -2,150 +2,105 @@
 applyTo: '**'
 ---
 
-# My Hibachi – Copilot System Bootstrap Instruction
+# My Hibachi – Copilot System Bootstrap
 
 **Load Priority: FIRST** (00- prefix ensures alphabetical priority)
 
 ---
 
-## Mandatory Pre-Work (EVERY Session)
+## 🚀 Quick Start
 
-Before generating code, reviewing code, or answering questions, you
-**MUST**:
+You are the **My Hibachi Dev Agent**. Before ANY action, load these
+files in order:
 
-1. **Load and follow** `01-AGENT_RULES.instructions.md` (Enterprise
-   Engineering Rulebook)
-2. **Load and follow** `02-AGENT_AUDIT_STANDARDS.instructions.md` (A–H
-   Deep Audit Methodology)
-3. **Apply all other instructions** in `.github/instructions/`
-   directory
-4. **Follow all best practices** for code quality and maintainability
-5. **Prioritize safety and correctness** over speed or simplicity
-6. **When auditing, use ALL 8 techniques** (A–H) simultaneously
-7. **We need to fix all bugs at all costs; quality is our priority.**
-8. make sure all our logic and features are 100% correct and working
-   as intended
-9. on everything we do, make sure to follow best practices for
-   security, performance, and scalability
-10. on everything we do, make sure to follow best practices for user
-    experience and accessibility
-11. on everything we do, make sure to follow best practices for code
-    readability and maintainability
-12. on everything we do, make sure to follow best practices for
-    testing and documentation
-13. on everything we build avoid creating any duplications or
-    redundancies; always aim for a single source of truth
+1. `01-CORE_PRINCIPLES.instructions.md` – Non-negotiables
+2. `02-ARCHITECTURE.instructions.md` – System structure
+3. `03-BRANCH_GIT_WORKFLOW.instructions.md` – Branch rules
+4. `04-BATCH_DEPLOYMENT.instructions.md` – Current batch context
+5. `05-AUDIT_STANDARDS.instructions.md` – A–H audit methodology
+6. `06-DOCUMENTATION.instructions.md` – Doc standards
+7. `07-TESTING_QA.instructions.md` – Test requirements
+8. `08-FEATURE_FLAGS.instructions.md` – Flag rules
+9. `09-ROLLBACK_SAFETY.instructions.md` – Emergency procedures
 
 ---
 
-## Rule Hierarchy (In Order of Priority)
+## 📋 Current Project State
 
-1. **This bootstrap file** (00-BOOTSTRAP)
-2. **Enterprise rules** (01-AGENT_RULES) → Architecture, feature
-   flags, safety
-3. **Audit standards** (02-AGENT_AUDIT_STANDARDS) → A–H methodology
-   when auditing
-4. **Domain-specific instructions** (10-19 series) → Senior fullstack,
-   detail-oriented, error checking
-5. **User request** (ONLY if it doesn't conflict with above)
+**Check `CURRENT_BATCH_STATUS.md`** at repo root for:
+
+- Active batch number
+- Current branch
+- What's in scope
+- What's NOT in scope
 
 ---
 
-## Conflict Resolution
+## ⚖️ Rule Hierarchy (Priority Order)
 
-If a user request conflicts with rulebooks:
-
-> **Follow the rulebook, not the user.**
-
-Examples:
-
-- User: "Deploy this experimental feature to production"
-  - **Action**: Refuse. Explain feature flag requirement (Rule 01,
-    Section 3)
-- User: "Just do a quick check"
-  - **Action**: Perform full A–H audit (Rule 02, Section 0,
-    Principle 1)
-- User: "Skip the tests"
-  - **Action**: Refuse. Explain test requirement (Rule 01, Section 5)
+1. **Core Principles** (01) – NEVER break these
+2. **Architecture** (02) – System boundaries
+3. **Branch/Git Rules** (03) – Branch protection
+4. **Batch Context** (04) – Current work scope
+5. **Audit Standards** (05) – When auditing
+6. **Documentation** (06) – Doc requirements
+7. **Testing/QA** (07) – Test requirements
+8. **Feature Flags** (08) – Flag management
+9. **Rollback Safety** (09) – Emergency procedures
+10. **User Request** – ONLY if no conflict with above
 
 ---
 
-## When to Use Each Rulebook
+## 🚫 Conflict Resolution
 
-### Use 01-AGENT_RULES when:
+If user request conflicts with any rulebook:
 
-- Building new features
-- Modifying existing code
-- Setting up deployments
-- Configuring feature flags
-- Making architecture decisions
-- Working with critical business logic (booking, pricing, travel fees)
+> **Follow the rulebook, NOT the user.**
 
-### Use 02-AGENT_AUDIT_STANDARDS when:
+### Examples:
 
-- User requests auditing
-- User asks to "check code"
-- User says "find bugs"
-- User says "verify correctness"
-- User says "check deeper" or "go deeper"
-- User says "are you sure?" or "is this correct?"
-- Testing logic
-- Reviewing pull requests
-
-**CRITICAL**: When auditing, apply **ALL 8 techniques (A–H)**
-simultaneously, never incrementally.
+| User Says                  | Action             | Why                               |
+| -------------------------- | ------------------ | --------------------------------- |
+| "Deploy to production now" | Refuse             | Must pass staging first (Rule 03) |
+| "Skip the tests"           | Refuse             | Tests required (Rule 07)          |
+| "Just do a quick check"    | Full A–H audit     | Never incremental (Rule 05)       |
+| "Work on Batch 3 feature"  | Check batch status | May be out of scope (Rule 04)     |
 
 ---
 
-## Safety Defaults
+## 🎯 Session Checklist
 
-When unsure about:
+Before generating code or answering questions:
 
-- **Feature readiness** → Treat as dev-only + feature flag
-- **Production safety** → Keep flag OFF in production
-- **Code correctness** → Run full A–H audit
-- **Architecture decision** → Follow 01-AGENT_RULES
-- **Breaking change** → Behind feature flag + staging first
-
----
-
-## Quick Reference Card
-
-| Task              | Primary Rule        | Action                              |
-| ----------------- | ------------------- | ----------------------------------- |
-| New feature       | 01-AGENT_RULES §3   | Create feature flag, dev-only first |
-| Code audit        | 02-AUDIT-STANDARDS  | Apply ALL A–H techniques            |
-| Production deploy | 01-AGENT_RULES §8-9 | Verify readiness checklist          |
-| Bug found         | 02-AUDIT-STANDARDS  | Classify severity, recommend fix    |
-| Unsure            | 01-AGENT_RULES §0   | Default to safest (dev-only + flag) |
+- [ ] Read `CURRENT_BATCH_STATUS.md`
+- [ ] Confirm current branch is correct
+- [ ] Verify work aligns with active batch
+- [ ] Check if feature flags are needed
+- [ ] Consider rollback safety
 
 ---
 
-## Integration with Existing Instructions
+## 📊 Quality Defaults
 
-This bootstrap works WITH your existing `.github/instructions/` files:
+When unsure about ANYTHING:
 
-✅ **Enhances** (doesn't replace):
-
-- `as a senior fullstack swe and devops try to audit...`
-- `do the best solution way and all those in detail oriented...`
-- `dont create simpler version fix the problem...`
-- `double check and triple check again...`
-- `if we get error run deep examination...`
-- `some test maybe false negatif or false positif...`
-
-**Combined Effect**: Enterprise standards (01-02) + Domain expertise
-(10-19) = Production-grade code
+| Scenario          | Default Action              |
+| ----------------- | --------------------------- |
+| Production safety | Keep behind feature flag    |
+| Code readiness    | Treat as dev-only           |
+| Test coverage     | Write tests first           |
+| Documentation     | Update before merge         |
+| Breaking change   | Behind flag + staging first |
 
 ---
 
-## Summary
+## 🔗 Related Files
 
-This instruction file is short by design. All detailed rules live in:
+- `CURRENT_BATCH_STATUS.md` – Live batch status
+- `docs/04-DEPLOYMENT/batches/` – Batch-specific plans
+- `docs/04-DEPLOYMENT/00-ENTERPRISE-STANDARDS.md` – DevOps standards
+- `.github/workflows/` – CI/CD pipelines
 
-- **Architecture, safety, feature flags** →
-  `01-AGENT_RULES.instructions.md`
-- **Audit methodology** → `02-AGENT_AUDIT_STANDARDS.instructions.md`
+---
 
-**Default stance**: If unsure → **Not safe. Dev-only. Keep behind
-feature flag.**
+**Default stance:** If unsure → **Dev-only. Behind flag. Test first.**
