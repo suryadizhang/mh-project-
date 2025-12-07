@@ -13,8 +13,16 @@ All endpoints except /login and /register require JWT Bearer token authenticatio
 
 from typing import Any
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+from core.database import get_db
+from core.security import verify_password, create_access_token
+from core.config import settings
+from db.models.identity import User, UserStatus
 
 router = APIRouter(tags=["authentication"])
 
@@ -28,9 +36,7 @@ class LoginRequest(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "examples": [
-                {"email": "john@example.com", "password": "SecurePass123!"}
-            ]
+            "examples": [{"email": "john@example.com", "password": "SecurePass123!"}]
         }
     }
 
@@ -39,15 +45,9 @@ class TokenResponse(BaseModel):
     """Authentication token response."""
 
     access_token: str = Field(..., description="JWT access token")
-    token_type: str = Field(
-        default="bearer", description="Token type (always 'bearer')"
-    )
-    expires_in: int = Field(
-        ..., description="Token expiration time in seconds"
-    )
-    refresh_token: str = Field(
-        ..., description="Refresh token for obtaining new access tokens"
-    )
+    token_type: str = Field(default="bearer", description="Token type (always 'bearer')")
+    expires_in: int = Field(..., description="Token expiration time in seconds")
+    refresh_token: str = Field(..., description="Refresh token for obtaining new access tokens")
 
     model_config = {
         "json_schema_extra": {
@@ -69,12 +69,8 @@ class UserResponse(BaseModel):
     id: str = Field(..., description="Unique user identifier")
     email: EmailStr = Field(..., description="User email address")
     name: str = Field(..., description="User full name")
-    is_admin: bool = Field(
-        default=False, description="Whether user has admin privileges"
-    )
-    created_at: str = Field(
-        ..., description="Account creation timestamp (ISO 8601)"
-    )
+    is_admin: bool = Field(default=False, description="Whether user has admin privileges")
+    created_at: str = Field(..., description="Account creation timestamp (ISO 8601)")
 
     model_config = {
         "json_schema_extra": {
@@ -95,12 +91,8 @@ class RegisterRequest(BaseModel):
     """User registration request schema."""
 
     email: EmailStr = Field(..., description="User email address")
-    password: str = Field(
-        ..., min_length=8, description="User password (minimum 8 characters)"
-    )
-    full_name: str = Field(
-        ..., min_length=2, max_length=100, description="User's full name"
-    )
+    password: str = Field(..., min_length=8, description="User password (minimum 8 characters)")
+    full_name: str = Field(..., min_length=2, max_length=100, description="User's full name")
 
     model_config = {
         "json_schema_extra": {
@@ -165,19 +157,13 @@ class ErrorResponse(BaseModel):
         },
         400: {
             "description": "Invalid input or email already registered",
-            "content": {
-                "application/json": {
-                    "example": {"detail": "Email already registered"}
-                }
-            },
+            "content": {"application/json": {"example": {"detail": "Email already registered"}}},
         },
         422: {
             "description": "Validation error",
             "content": {
                 "application/json": {
-                    "example": {
-                        "detail": "Password must be at least 8 characters"
-                    }
+                    "example": {"detail": "Password must be at least 8 characters"}
                 }
             },
         },
@@ -245,11 +231,7 @@ async def register(request: RegisterRequest) -> dict[str, Any]:
         400: {
             "description": "Invalid request data",
             "model": ErrorResponse,
-            "content": {
-                "application/json": {
-                    "example": {"detail": "Invalid email format"}
-                }
-            },
+            "content": {"application/json": {"example": {"detail": "Invalid email format"}}},
         },
         401: {
             "description": "Invalid credentials",
@@ -284,7 +266,7 @@ async def register(request: RegisterRequest) -> dict[str, Any]:
         },
     },
 )
-async def login(credentials: LoginRequest) -> dict[str, Any]:
+async def login(credentials: LoginRequest, db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
     """
     Authenticate user and generate access tokens.
 
@@ -299,12 +281,78 @@ async def login(credentials: LoginRequest) -> dict[str, Any]:
         HTTPException(401): Invalid credentials or account locked
         HTTPException(429): Too many login attempts
     """
-    # Placeholder implementation
+    import logging
+
+    logger = logging.getLogger(__name__)
+
+    try:
+        # Find user by email (case-insensitive) with roles loaded
+        logger.info(f"Attempting login for email: {credentials.email.lower()}")
+        result = await db.execute(
+            select(User)
+            .where(User.email == credentials.email.lower())
+            .options(selectinload(User.user_roles))
+        )
+        user = result.scalar_one_or_none()
+        logger.info(f"User found: {user is not None}")
+    except Exception as e:
+        logger.error(f"Database error during login: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Database error: {str(e)}"
+        )
+
+    # User not found
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password"
+        )
+
+    # Check account status
+    if user.status != UserStatus.ACTIVE:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail=f"Account is {user.status.value.lower()}"
+        )
+
+    # Check password (password_hash may be NULL for OAuth-only users)
+    if not user.password_hash:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="This account uses Google OAuth. Please login with Google.",
+        )
+
+    if not verify_password(credentials.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password"
+        )
+
+    # Create access token with user info
+    access_token = create_access_token(
+        data={
+            "sub": str(user.id),
+            "email": user.email,
+            "is_super_admin": user.is_super_admin,
+        }
+    )
+
+    # Create refresh token (longer expiry)
+    refresh_token = create_access_token(
+        data={
+            "sub": str(user.id),
+            "type": "refresh",
+        }
+    )
+
     return {
-        "access_token": "dev-token-123",
+        "access_token": access_token,
         "token_type": "bearer",
-        "expires_in": 3600,
-        "refresh_token": "dev-refresh-token-123",
+        "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        "refresh_token": refresh_token,
+        "user": {
+            "id": str(user.id),
+            "email": user.email,
+            "full_name": user.full_name,
+            "is_super_admin": user.is_super_admin,
+        },
     }
 
 
@@ -354,9 +402,7 @@ async def login(credentials: LoginRequest) -> dict[str, Any]:
                         },
                         "invalid_token": {
                             "summary": "Invalid or expired token",
-                            "value": {
-                                "detail": "Invalid authentication credentials"
-                            },
+                            "value": {"detail": "Invalid authentication credentials"},
                         },
                     }
                 }
@@ -411,11 +457,7 @@ async def get_current_user_info() -> dict[str, Any]:
     responses={
         200: {
             "description": "Logout successful",
-            "content": {
-                "application/json": {
-                    "example": {"message": "Logged out successfully"}
-                }
-            },
+            "content": {"application/json": {"example": {"message": "Logged out successfully"}}},
         },
         401: {
             "description": "Authentication required",
@@ -477,9 +519,7 @@ async def logout() -> dict[str, str]:
                     "examples": {
                         "expired": {
                             "summary": "Refresh token expired",
-                            "value": {
-                                "detail": "Refresh token has expired. Please login again."
-                            },
+                            "value": {"detail": "Refresh token has expired. Please login again."},
                         },
                         "invalid": {
                             "summary": "Invalid token",
@@ -591,6 +631,4 @@ async def reset_password(email: EmailStr) -> dict[str, str]:
         HTTPException(429): Too many reset requests
     """
     # Placeholder implementation
-    return {
-        "message": "If an account with that email exists, a password reset link has been sent."
-    }
+    return {"message": "If an account with that email exists, a password reset link has been sent."}

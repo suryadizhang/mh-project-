@@ -24,6 +24,11 @@ dist/
 *.key
 gcp-key.json
 
+# Local Testing Files (contain credentials)
+TEST_CREDENTIALS.local.md
+*.local.md
+login_*.json
+
 # GSM Secrets Scripts (contain real credentials)
 **/create-gsm-secrets*.ps1
 **/create-gsm-secrets*.sh

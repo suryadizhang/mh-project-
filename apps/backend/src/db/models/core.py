@@ -157,7 +157,7 @@ class Booking(Base):
         CheckConstraint("party_kids >= 0", name="check_party_kids_non_negative"),
         CheckConstraint("total_due_cents >= deposit_due_cents", name="check_total_gte_deposit"),
         ForeignKeyConstraint(
-            ["chef_id"], ["core.chefs.id"], ondelete="SET NULL", name="bookings_chef_id_fkey"
+            ["chef_id"], ["ops.chefs.id"], ondelete="SET NULL", name="bookings_chef_id_fkey"
         ),
         ForeignKeyConstraint(
             ["customer_id"],
@@ -171,7 +171,16 @@ class Booking(Base):
             ondelete="RESTRICT",
             name="fk_bookings_station",
         ),
-        Index("idx_booking_date_slot_active", "date", "slot", "status", unique=True),
+        # DOUBLE BOOKING PREVENTION: Partial unique index on date+slot
+        # Excludes CANCELLED bookings so the same slot can be re-booked after cancellation
+        # This is PostgreSQL-specific (uses postgresql_where clause)
+        Index(
+            "idx_booking_date_slot_active",
+            "date",
+            "slot",
+            unique=True,
+            postgresql_where=text("status != 'cancelled' AND deleted_at IS NULL"),
+        ),
         Index("idx_booking_station_customer", "station_id", "customer_id"),
         Index("idx_booking_station_date", "station_id", "date", "slot"),
         Index("ix_bookings_customer_deposit_deadline", "customer_deposit_deadline", "status"),
@@ -219,6 +228,7 @@ class Booking(Base):
     total_due_cents: Mapped[int] = mapped_column(Integer, nullable=False)
 
     # Status
+    # NOTE: Explicit index ix_core_bookings_status defined in __table_args__
     status: Mapped[BookingStatus] = mapped_column(
         SQLEnum(
             BookingStatus,
@@ -228,7 +238,7 @@ class Booking(Base):
             values_callable=lambda x: [e.value for e in x],
         ),
         nullable=False,
-        index=True,
+        # index=True removed - explicit Index("ix_core_bookings_status") in __table_args__
     )
 
     # Source tracking

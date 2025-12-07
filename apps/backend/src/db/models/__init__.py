@@ -60,10 +60,18 @@ from .crm import (
     Lead,  # Lead tracking with scoring and qualification (moved from lead.py)
 )
 
-# Support & Communications schemas (2 tables)
+# Support & Communications schemas (2 tables + enums)
 from .support_communications import (
     CallRecording,
     Escalation,
+    # Enums for Voice AI
+    CallStatus,
+    CallDirection,
+    EscalationPriority,
+    EscalationMethod,
+    EscalationStatus,
+    RecordingType,
+    RecordingStatus,
 )
 
 # Feedback & Marketing schemas (5 tables)
@@ -111,14 +119,26 @@ from .integra import (
     SocialInbox,
 )
 
+# Stripe schema (5 tables + enums) - Payment processing
+from .stripe import (
+    Invoice,
+    Refund,
+    StripeCustomer,
+    StripePayment,
+    WebhookEvent,
+    # Enums
+    InvoiceStatus,
+    PaymentStatus,
+    RefundStatus,
+    WebhookEventStatus,
+)
+
 # All models for easy iteration
 __all__ = [
     # Base
     "Base",
-
     # CRM schema (1 model)
     "Contact",
-
     # Core schema (7 models - Chef moved to ops)
     "Booking",
     "Customer",
@@ -127,7 +147,6 @@ __all__ = [
     "PricingTier",
     "Review",
     "SocialThread",
-
     # Identity schema (10 models - added OAuthAccount)
     "OAuthAccount",
     "Permission",
@@ -139,23 +158,27 @@ __all__ = [
     "StationUser",
     "User",
     "UserRole",
-
-    # Support & Communications (2 models)
+    # Support & Communications (2 models + 7 enums)
     "CallRecording",
     "Escalation",
-
+    # Voice AI Enums
+    "CallStatus",
+    "CallDirection",
+    "EscalationPriority",
+    "EscalationMethod",
+    "EscalationStatus",
+    "RecordingType",
+    "RecordingStatus",
     # Feedback & Marketing (5 models)
     "CustomerReview",
     "DiscountCoupon",
     "QRCode",
     "QRScan",
     "ReviewEscalation",
-
     # Events (3 models)
     "DomainEvent",
     "Inbox",
     "Outbox",
-
     # Lead (7 models)
     "BusinessSocialAccount",
     "Lead",
@@ -164,7 +187,6 @@ __all__ = [
     "LeadEvent",
     "LeadSocialThread",
     "SocialIdentity",
-
     # Newsletter (7 models)
     "Campaign",
     "CampaignEvent",
@@ -173,12 +195,22 @@ __all__ = [
     "SMSSendQueue",
     "SMSTemplate",
     "Subscriber",
-
     # Integra (4 models)
     "CallSession",
     "PaymentEvent",
     "PaymentMatch",
     "SocialInbox",
+    # Stripe (5 models + 4 enums)
+    "Invoice",
+    "Refund",
+    "StripeCustomer",
+    "StripePayment",
+    "WebhookEvent",
+    # Stripe Enums
+    "InvoiceStatus",
+    "PaymentStatus",
+    "RefundStatus",
+    "WebhookEventStatus",
 ]
 
 # Model registry by schema (useful for reflection/introspection)
@@ -250,6 +282,13 @@ MODELS_BY_SCHEMA = {
         PaymentMatch,
         SocialInbox,
     ],
+    "stripe": [
+        Invoice,
+        Refund,
+        StripeCustomer,
+        StripePayment,
+        WebhookEvent,
+    ],
 }
 
 # Total model count (should match actual models created)
@@ -259,5 +298,7 @@ MODELS_BY_SCHEMA = {
 # Moved models to consolidate:
 # - Lead: from db.models.lead → db.models.crm (schema: lead → crm)
 # - Contact: added to db.models.crm (table: crm_contacts)
+# Added models:
+# - Stripe: Invoice, Refund, StripeCustomer, StripePayment, WebhookEvent (5 models)
 TOTAL_MODELS = sum(len(models) for models in MODELS_BY_SCHEMA.values())
-assert TOTAL_MODELS == 47, f"Expected 47 models, found {TOTAL_MODELS}"
+assert TOTAL_MODELS == 52, f"Expected 52 models, found {TOTAL_MODELS}"

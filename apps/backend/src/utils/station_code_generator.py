@@ -1,7 +1,17 @@
 """
 Station Code Generator Utility
-Auto-generates unique station codes in format: STATION-{STATE}-{CITY}-{###}
-Example: STATION-CA-BAY-001, STATION-TX-AUSTIN-002
+Auto-generates unique station codes in simplified human-readable format
+
+FORMAT: {STATE}-{CITY}-{###}
+Examples:
+  - CA-FREMONT-001 (Fremont, California - Station 1)
+  - TX-AUSTIN-001 (Austin, Texas - Station 1)
+  - NY-MANHATTAN-001 (Manhattan, New York - Station 1)
+
+The format is designed to be:
+  - Human readable (easy to understand at a glance)
+  - Sortable (alphabetically by state, then city)
+  - Unique (3-digit number suffix ensures uniqueness within city)
 """
 
 import re
@@ -12,7 +22,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-def normalize_location_part(text: str, max_length: int = 10) -> str:
+def normalize_location_part(text: str, max_length: int = 12) -> str:
     """
     Normalize city/state text for station code.
 
@@ -21,61 +31,49 @@ def normalize_location_part(text: str, max_length: int = 10) -> str:
         max_length: Maximum length for the normalized part
 
     Returns:
-        Uppercase normalized string (e.g., "Bay Area" -> "BAY", "Austin" -> "AUSTIN")
+        Uppercase normalized string (e.g., "Bay Area" -> "BAYAREA", "Fremont" -> "FREMONT")
     """
     if not text:
         return "UNK"
 
-    # Remove special characters, keep only alphanumeric and spaces
-    cleaned = re.sub(r"[^a-zA-Z0-9\s]", "", text)
+    # Remove special characters, keep only alphanumeric
+    cleaned = re.sub(r"[^a-zA-Z0-9]", "", text)
 
     # Convert to uppercase
     cleaned = cleaned.upper().strip()
 
-    # If it's a two-word city (like "Bay Area"), take first letters of each word
-    words = cleaned.split()
-    if len(words) > 1:
-        # Take first significant word or abbreviate
-        if len(words[0]) >= 3:
-            result = words[0][:max_length]
-        else:
-            # Concatenate first letters: "Bay Area" -> "BA" or full: "BAYAREA"
-            result = "".join(word[:3] for word in words if word)[:max_length]
-    else:
-        result = cleaned[:max_length]
-
-    return result if result else "UNK"
+    return cleaned[:max_length] if cleaned else "UNK"
 
 
 async def generate_station_code(
     db: AsyncSession, city: str, state: str, country: str = "US"
 ) -> str:
     """
-    Generate unique station code in format: STATION-{STATE}-{CITY}-{###}
+    Generate unique station code in simplified format: {STATE}-{CITY}-{###}
 
     Examples:
-        - California Bay Area -> STATION-CA-BAY-001
-        - Texas Austin -> STATION-TX-AUSTIN-002
-        - New York Manhattan -> STATION-NY-MANHATTAN-001
-        - Florida Miami -> STATION-FL-MIAMI-001
+        - Fremont, California -> CA-FREMONT-001
+        - Austin, Texas -> TX-AUSTIN-001
+        - Manhattan, New York -> NY-MANHATTAN-001
+        - Miami, Florida -> FL-MIAMI-001
 
     Args:
         db: Database session
-        city: City name (e.g., "Bay Area", "Austin", "Manhattan")
+        city: City name (e.g., "Fremont", "Austin", "Manhattan")
         state: State code (e.g., "CA", "TX", "NY") - should be 2-letter US state code
         country: Country code (default: "US")
 
     Returns:
-        Unique station code string
+        Unique station code string (e.g., "CA-FREMONT-001")
     """
     # Normalize state (should already be 2-letter code like "CA", "TX")
     state_code = state.upper().strip()[:2] if state else "XX"
 
-    # Normalize city name
-    city_part = normalize_location_part(city, max_length=10)
+    # Normalize city name (remove spaces and special chars)
+    city_part = normalize_location_part(city, max_length=12)
 
-    # Build prefix: STATION-{STATE}-{CITY}
-    prefix = f"STATION-{state_code}-{city_part}"
+    # Build prefix: {STATE}-{CITY}
+    prefix = f"{state_code}-{city_part}"
 
     # Find the highest existing number for this location
     result = await db.execute(
@@ -85,7 +83,7 @@ async def generate_station_code(
 
     # Extract the number from the last code, or start at 1
     if max_code:
-        # Extract last 3 digits from code like "STATION-CA-BAY-001"
+        # Extract last 3 digits from code like "CA-FREMONT-001"
         match = re.search(r"-(\d+)$", max_code)
         next_number = int(match.group(1)) + 1 if match else 1
     else:
@@ -98,7 +96,9 @@ async def generate_station_code(
     station_code = f"{prefix}-{number_part}"
 
     # Verify uniqueness (should always be unique, but double-check)
-    result = await db.execute(select(func.count(Station.id)).where(Station.code == station_code))
+    result = await db.execute(
+        select(func.count(Station.id)).where(Station.code == station_code)
+    )
     exists = result.scalar_one() > 0
 
     if exists:
@@ -114,8 +114,8 @@ async def validate_station_code_format(code: str) -> bool:
     """
     Validate that a station code follows the required format.
 
-    Format: STATION-{STATE}-{CITY}-{###}
-    Examples: STATION-CA-BAY-001, STATION-TX-AUSTIN-002
+    Format: {STATE}-{CITY}-{###}
+    Examples: CA-FREMONT-001, TX-AUSTIN-002, NY-MANHATTAN-001
 
     Args:
         code: Station code to validate
@@ -123,9 +123,32 @@ async def validate_station_code_format(code: str) -> bool:
     Returns:
         True if valid format, False otherwise
     """
-    # Pattern: STATION-{2 letters}-{1-10 letters}-{3 digits}
-    pattern = r"^STATION-[A-Z]{2}-[A-Z]{1,10}-\d{3}$"
+    # Pattern: {2 letters}-{1-12 letters}-{3 digits}
+    pattern = r"^[A-Z]{2}-[A-Z]{1,12}-\d{3}$"
     return bool(re.match(pattern, code))
+
+
+def parse_station_code(code: str) -> dict | None:
+    """
+    Parse a station code into its components.
+
+    Args:
+        code: Station code (e.g., "CA-FREMONT-001")
+
+    Returns:
+        Dict with state, city, number or None if invalid
+    """
+    pattern = r"^([A-Z]{2})-([A-Z]{1,12})-(\d{3})$"
+    match = re.match(pattern, code)
+
+    if match:
+        return {
+            "state": match.group(1),
+            "city": match.group(2),
+            "number": int(match.group(3)),
+            "display": f"{match.group(2).title()}, {match.group(1)} (#{match.group(3)})",
+        }
+    return None
 
 
 async def suggest_station_code(
@@ -154,30 +177,46 @@ async def suggest_station_code(
         match = re.search(r"-(\d+)$", max_code)
         if match:
             next_number = int(match.group(1)) + 1
-            return f"STATION-XX-NEW-{next_number:03d}"
+            return f"XX-NEW-{next_number:03d}"
 
-    return "STATION-XX-NEW-001"
+    return "XX-NEW-001"
+
+
+# Pre-defined station codes for common locations
+KNOWN_STATIONS = {
+    "CA-FREMONT-001": {
+        "name": "Fremont Station",
+        "display_name": "Fremont, CA (Main)",
+        "city": "Fremont",
+        "state": "CA",
+        "timezone": "America/Los_Angeles",
+        "address": "47481 Towhee St, Fremont, CA 94539",
+    },
+}
 
 
 # Example usage and test cases
 async def _test_code_generator(db: AsyncSession):
     """Test the station code generator."""
     test_cases = [
-        ("Bay Area", "CA", "STATION-CA-BAY-001"),
-        ("Austin", "TX", "STATION-TX-AUSTIN-001"),
-        ("Manhattan", "NY", "STATION-NY-MANHATTAN-001"),
-        ("Miami", "FL", "STATION-FL-MIAMI-001"),
-        ("San Francisco", "CA", "STATION-CA-SAN-001"),
+        ("Fremont", "CA", "CA-FREMONT-001"),
+        ("Austin", "TX", "TX-AUSTIN-001"),
+        ("Manhattan", "NY", "NY-MANHATTAN-001"),
+        ("Miami", "FL", "FL-MIAMI-001"),
+        ("San Francisco", "CA", "CA-SANFRANCISCO-001"),
     ]
 
-    for city, state, _expected_pattern in test_cases:
+    for city, state, expected_prefix in test_cases:
         code = await generate_station_code(db, city, state)
-        await validate_station_code_format(code)
+        is_valid = await validate_station_code_format(code)
+        print(f"Generated: {code} (valid: {is_valid})")
 
 
 __all__ = [
     "generate_station_code",
     "normalize_location_part",
+    "parse_station_code",
     "suggest_station_code",
     "validate_station_code_format",
+    "KNOWN_STATIONS",
 ]

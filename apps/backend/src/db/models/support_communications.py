@@ -91,6 +91,28 @@ class RecordingStatus(str, enum.Enum):
     ERROR = "error"
 
 
+class CallStatus(str, enum.Enum):
+    """Call status for Voice AI integration"""
+
+    INITIATED = "initiated"
+    RINGING = "ringing"
+    IN_PROGRESS = "in_progress"
+    ON_HOLD = "on_hold"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    MISSED = "missed"
+    VOICEMAIL = "voicemail"
+    BUSY = "busy"
+    NO_ANSWER = "no_answer"
+
+
+class CallDirection(str, enum.Enum):
+    """Call direction for RingCentral integration"""
+
+    INBOUND = "inbound"
+    OUTBOUND = "outbound"
+
+
 # ==================== SUPPORT SCHEMA ====================
 
 

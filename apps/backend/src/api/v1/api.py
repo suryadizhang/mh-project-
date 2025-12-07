@@ -13,15 +13,17 @@ from .endpoints import (
     ai_readiness,
     analytics_holidays,
     auth,
-    bookings,
+    # bookings,  # REMOVED: Was mock implementation, production uses routers/v1/bookings.py
     campaigns,
     customers,
     inbox,
     leads,
     menu_items,
+    mfa,
     newsletters,
     pricing,
     rate_limit_metrics,
+    security_dashboard,
     shadow_learning,
 )
 from .endpoints.ai import chat, orchestrator
@@ -34,7 +36,12 @@ api_router = APIRouter()
 
 # Operational endpoints (CRM functions)
 api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
-api_router.include_router(bookings.router, prefix="/bookings", tags=["Bookings"])
+api_router.include_router(mfa.router, prefix="/mfa", tags=["MFA", "Authentication"])
+api_router.include_router(
+    security_dashboard.router, prefix="/security", tags=["Security", "Super Admin"]
+)
+# NOTE: bookings.router removed - was mock implementation
+# Production booking endpoints are in routers/v1/bookings.py and routers/v1/public_bookings.py
 api_router.include_router(customers.router, prefix="/customers", tags=["Customers"])
 api_router.include_router(leads.router, prefix="/leads", tags=["Leads"])
 api_router.include_router(inbox.router, prefix="/inbox", tags=["Inbox"])
