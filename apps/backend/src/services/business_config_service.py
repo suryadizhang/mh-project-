@@ -29,16 +29,28 @@ Related Tables:
     - core.travel_fee_configurations: Station-based travel fees
     - pricing.menu_items: Menu item prices
     - pricing.addon_items: Addon prices
+
+Caching:
+    - Redis-cached for 15 minutes to reduce DB load
+    - Invalidate cache when admin updates business rules
 """
 
 import logging
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
+from typing import TYPE_CHECKING
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+if TYPE_CHECKING:
+    from core.cache import CacheService
+
 logger = logging.getLogger(__name__)
+
+# Cache settings
+BUSINESS_CONFIG_CACHE_KEY = "config:business"
+BUSINESS_CONFIG_CACHE_TTL = 900  # 15 minutes
 
 
 @dataclass
@@ -85,17 +97,23 @@ class BusinessConfig:
     source: str = "defaults"  # "database" | "environment" | "defaults"
 
 
-async def get_business_config(db: AsyncSession) -> BusinessConfig:
+async def get_business_config(
+    db: AsyncSession, cache: "CacheService | None" = None
+) -> BusinessConfig:
     """
     Fetch current business configuration from database with fallbacks.
 
+    Supports optional Redis caching for 15 minutes to reduce DB load.
+
     Priority:
-    1. Database (business_rules table) - Primary source
-    2. Environment variables - Fallback for dev/testing
-    3. Hardcoded defaults - Last resort
+    1. Redis cache (if available) - Fastest
+    2. Database (business_rules table) - Primary source
+    3. Environment variables - Fallback for dev/testing
+    4. Hardcoded defaults - Last resort
 
     Args:
         db: Database session
+        cache: Optional CacheService for Redis caching
 
     Returns:
         BusinessConfig with current values
@@ -103,7 +121,22 @@ async def get_business_config(db: AsyncSession) -> BusinessConfig:
     Example:
         config = await get_business_config(db)
         print(f"Deposit: ${config.deposit_amount_cents / 100}")
+
+        # With caching (recommended in hot paths)
+        config = await get_business_config(db, cache=app.state.cache)
     """
+    # Try cache first if available
+    if cache:
+        try:
+            cached_data = await cache.get(BUSINESS_CONFIG_CACHE_KEY)
+            if cached_data:
+                logger.debug("📦 Business config loaded from cache")
+                config = BusinessConfig(**cached_data)
+                config.source = "cache"
+                return config
+        except Exception as e:
+            logger.warning(f"Cache read failed: {e}, falling back to DB")
+
     config = BusinessConfig()
 
     try:
@@ -138,50 +171,68 @@ async def get_business_config(db: AsyncSession) -> BusinessConfig:
                 if rule_type == "PAYMENT" and "Deposit" in title:
                     if "deposit_amount" in rule_value:
                         # Convert dollars to cents
-                        config.deposit_amount_cents = int(
-                            rule_value["deposit_amount"] * 100
-                        )
+                        config.deposit_amount_cents = int(rule_value["deposit_amount"] * 100)
 
                 elif rule_type == "PRICING":
-                    if (
-                        "Party Minimum" in title
-                        or "minimum_amount" in rule_value
-                    ):
+                    if "Party Minimum" in title or "minimum_amount" in rule_value:
                         if "minimum_amount" in rule_value:
-                            config.party_minimum_cents = int(
-                                rule_value["minimum_amount"] * 100
-                            )
+                            config.party_minimum_cents = int(rule_value["minimum_amount"] * 100)
 
                     if "Travel Fee" in title:
                         if "free_miles" in rule_value:
-                            config.travel_free_miles = int(
-                                rule_value["free_miles"]
-                            )
+                            config.travel_free_miles = int(rule_value["free_miles"])
                         if "per_mile_rate" in rule_value:
-                            config.travel_per_mile_cents = int(
-                                rule_value["per_mile_rate"] * 100
-                            )
+                            config.travel_per_mile_cents = int(rule_value["per_mile_rate"] * 100)
 
                 elif rule_type == "BOOKING":
                     if "Advance" in title and "minimum_hours" in rule_value:
-                        config.min_advance_hours = int(
-                            rule_value["minimum_hours"]
-                        )
+                        config.min_advance_hours = int(rule_value["minimum_hours"])
 
             logger.info(
                 f"✅ Loaded business config from database: deposit=${config.deposit_amount_cents/100}"
             )
+
+            # Cache the result for future requests
+            if cache:
+                try:
+                    await cache.set(
+                        BUSINESS_CONFIG_CACHE_KEY,
+                        asdict(config),
+                        ttl=BUSINESS_CONFIG_CACHE_TTL,
+                    )
+                    logger.debug("📦 Business config cached for 15 minutes")
+                except Exception as e:
+                    logger.warning(f"Failed to cache business config: {e}")
         else:
             # Fall back to environment variables
             config = _load_from_environment()
 
     except Exception as e:
-        logger.warning(
-            f"⚠️ Failed to load business config from DB: {e}, using environment fallback"
-        )
+        logger.warning(f"⚠️ Failed to load business config from DB: {e}, using environment fallback")
         config = _load_from_environment()
 
     return config
+
+
+async def invalidate_business_config_cache(cache: "CacheService") -> bool:
+    """
+    Invalidate the business config cache.
+
+    Call this after admin updates business rules.
+
+    Args:
+        cache: CacheService instance
+
+    Returns:
+        True if invalidated, False on error
+    """
+    try:
+        await cache.delete(BUSINESS_CONFIG_CACHE_KEY)
+        logger.info("🗑️ Business config cache invalidated")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to invalidate business config cache: {e}")
+        return False
 
 
 def _load_from_environment() -> BusinessConfig:
@@ -233,9 +284,7 @@ def _load_from_environment() -> BusinessConfig:
         )
 
     except ValueError as e:
-        logger.error(
-            f"❌ Invalid environment variable value: {e}, using hardcoded defaults"
-        )
+        logger.error(f"❌ Invalid environment variable value: {e}, using hardcoded defaults")
         config = BusinessConfig()
         config.source = "defaults"
 
