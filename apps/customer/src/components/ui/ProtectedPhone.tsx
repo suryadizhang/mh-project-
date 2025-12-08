@@ -20,10 +20,7 @@ const ENCODED_TEL = 'KzE5MTY3NDA4NzY4'; // btoa('+19167408768')
  * - Users see: (916) 740-8768 after JS loads (~100ms)
  * - Accessibility: aria-label provides screen reader support
  */
-export function ProtectedPhone({
-  className,
-  showIcon = true,
-}: ProtectedPhoneProps) {
+export function ProtectedPhone({ className, showIcon = true }: ProtectedPhoneProps) {
   const [phone, setPhone] = useState<string | null>(null);
   const [tel, setTel] = useState<string | null>(null);
 
@@ -48,13 +45,8 @@ export function ProtectedPhone({
   }
 
   return (
-    <a
-      href={`tel:${tel}`}
-      className={className}
-      aria-label={`Call us at ${phone}`}
-    >
-      {showIcon && '📞 '}({phone.slice(0, 3)}) {phone.slice(4, 7)}-
-      {phone.slice(8)}
+    <a href={`tel:${tel}`} className={className} aria-label={`Call us at ${phone}`}>
+      {showIcon && '📞 '}({phone.slice(0, 3)}) {phone.slice(4, 7)}-{phone.slice(8)}
     </a>
   );
 }
@@ -78,9 +70,7 @@ export function useProtectedPhone() {
   return {
     phone, // "916-740-8768"
     tel, // "+19167408768"
-    formatted: phone
-      ? `(${phone.slice(0, 3)}) ${phone.slice(4, 7)}-${phone.slice(8)}`
-      : null,
+    formatted: phone ? `(${phone.slice(0, 3)}) ${phone.slice(4, 7)}-${phone.slice(8)}` : null,
     isLoaded: !!phone,
   };
 }
@@ -105,7 +95,8 @@ export function ProtectedEmail({
       className={className}
       aria-label="Send us an email via contact form"
     >
-      {showIcon && '✉️ '}{text}
+      {showIcon && '✉️ '}
+      {text}
     </a>
   );
 }
@@ -116,7 +107,7 @@ const ENCODED_PAYMENT_EMAIL = 'bXloaWJhY2hpY2hlZkBnbWFpbC5jb20=';
 
 /**
  * ProtectedPaymentEmail - Shows decoded email for Zelle/Venmo payments
- * 
+ *
  * Unlike ProtectedEmail (which links to contact form), this component
  * shows the actual email address because users need it for payments.
  * Still protected from scrapers via JS decode.
