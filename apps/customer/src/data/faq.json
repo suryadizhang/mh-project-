@@ -1,14 +1,14 @@
 [
   {
     "question": "How much does hibachi catering cost?",
-    "answer": "Our hibachi catering starts at $55 per person for adult portions and $30 per child (under 12). This includes professional chef service, premium ingredients, and entertaining teppanyaki-style cooking. There's a $550 minimum per party. Final pricing depends on menu selection and group size - contact us for a personalized quote!",
+    "answer": "Our hibachi catering starts at ${{ADULT_PRICE}} per person for adult portions and ${{CHILD_PRICE}} per child (under 12). This includes professional chef service, premium ingredients, and entertaining teppanyaki-style cooking. There's a ${{PARTY_MINIMUM}} minimum per party. Final pricing depends on menu selection and group size - contact us for a personalized quote!",
     "category": "pricing",
     "href": "/BookUs",
     "keywords": ["price", "cost", "expensive", "budget", "money", "quote"]
   },
   {
     "question": "What areas do you serve?",
-    "answer": "🚚 We serve the Bay Area & Sacramento region! First 30 miles are FREE, then $2/mile after that. We bring hibachi across Northern California with flexible options. Popular cities include San Francisco, Oakland, San Jose, Sacramento, Stockton, and surrounding areas.",
+    "answer": "🚚 We serve the Bay Area & Sacramento region! First {{FREE_TRAVEL_MILES}} miles are FREE, then ${{COST_PER_MILE}}/mile after that. We bring hibachi across Northern California with flexible options. Popular cities include San Francisco, Oakland, San Jose, Sacramento, Stockton, and surrounding areas.",
     "category": "service",
     "href": "/faqs",
     "keywords": ["location", "travel", "distance", "service area", "delivery", "where"]
