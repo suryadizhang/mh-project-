@@ -34,11 +34,7 @@ import {
 } from '@/hooks/useApi';
 import { smsService } from '@/services/api';
 import { emailService, labelService } from '@/services/email-api';
-import type {
-  Email,
-  EmailThread as EmailThreadType,
-  Label,
-} from '@/types/email';
+import type { Email, EmailThread, Label } from '@/types/email';
 
 // Channel types
 const CHANNELS = {
@@ -138,7 +134,7 @@ export default function UnifiedInboxPage() {
   const [showQuickReplies, setShowQuickReplies] = useState(false);
   const [smsThreads, setSmsThreads] = useState<any[]>([]);
   const [loadingSms, setLoadingSms] = useState(false);
-  const [emailThreads, setEmailThreads] = useState<Email[]>([]);
+  const [emailThreads, setEmailThreads] = useState<EmailThread[]>([]);
   const [loadingEmail, setLoadingEmail] = useState(false);
   const [labels, setLabels] = useState<Label[]>([]);
   const [showLabelPicker, setShowLabelPicker] = useState(false);
@@ -205,7 +201,7 @@ export default function UnifiedInboxPage() {
     setLoadingEmail(true);
     try {
       const response = await emailService.getEmails({ page: 1, limit: 50 });
-      setEmailThreads(response.emails || []);
+      setEmailThreads(response.threads || []);
     } catch (err) {
       console.error('Failed to load email threads:', err);
     } finally {
@@ -243,12 +239,15 @@ export default function UnifiedInboxPage() {
       combined = [
         ...socialThreads.map((t: any) => ({ ...t, channel: t.platform })),
         ...smsThreads.map((t: any) => ({ ...t, channel: CHANNELS.SMS })),
-        ...emailThreads.map((e: Email) => ({
+        ...emailThreads.map((e: EmailThread) => ({
           ...e,
           channel: CHANNELS.EMAIL,
           thread_id: e.thread_id,
-          customer_name: e.from_name || e.from_address.split('@')[0],
-          updated_at: e.received_at,
+          customer_name:
+            e.participants[0]?.name ||
+            e.participants[0]?.email?.split('@')[0] ||
+            'Unknown',
+          updated_at: e.last_message_at || e.updated_at,
           is_read: e.is_read,
         })),
       ];
@@ -257,12 +256,15 @@ export default function UnifiedInboxPage() {
       combined = smsThreads.map((t: any) => ({ ...t, channel: CHANNELS.SMS }));
     } else if (activeChannel === CHANNELS.EMAIL) {
       // Show only Email
-      combined = emailThreads.map((e: Email) => ({
+      combined = emailThreads.map((e: EmailThread) => ({
         ...e,
         channel: CHANNELS.EMAIL,
         thread_id: e.thread_id,
-        customer_name: e.from_name || e.from_address.split('@')[0],
-        updated_at: e.received_at,
+        customer_name:
+          e.participants[0]?.name ||
+          e.participants[0]?.email?.split('@')[0] ||
+          'Unknown',
+        updated_at: e.last_message_at || e.updated_at,
         is_read: e.is_read,
       }));
     } else {
@@ -286,7 +288,7 @@ export default function UnifiedInboxPage() {
     const allCombined = [
       ...socialThreads.map((t: any) => ({ ...t, channel: t.platform })),
       ...smsThreads.map((t: any) => ({ ...t, channel: CHANNELS.SMS })),
-      ...emailThreads.map((e: Email) => ({
+      ...emailThreads.map((e: EmailThread) => ({
         ...e,
         channel: CHANNELS.EMAIL,
         is_read: e.is_read,
