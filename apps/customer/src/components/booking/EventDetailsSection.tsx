@@ -1,12 +1,12 @@
-import 'react-datepicker/dist/react-datepicker.css';
 import '../../../app/BookUs/datepicker.css';
 import './styles/EventDetailsSection.module.css';
 
 import { addDays } from 'date-fns';
 import { CalendarDays } from 'lucide-react';
 import React from 'react';
-import DatePicker from 'react-datepicker';
 import { Controller } from 'react-hook-form';
+
+import { LazyDatePicker } from '@/components/ui/LazyDatePicker';
 
 import { EventDetailsSectionProps } from './types';
 
@@ -39,10 +39,10 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps & { className?: str
               control={control}
               rules={{ required: 'Event date is required' }}
               render={({ field }) => (
-                <DatePicker
+                <LazyDatePicker
                   selected={field.value}
-                  onChange={(date) => field.onChange(date)}
-                  filterDate={(date) => !isDateDisabled(date)}
+                  onChange={(date: Date | null) => field.onChange(date)}
+                  filterDate={(date: Date) => !isDateDisabled(date)}
                   minDate={new Date()}
                   maxDate={addDays(new Date(), 90)}
                   className={`form-control ${errors.eventDate ? 'is-invalid' : ''}`}

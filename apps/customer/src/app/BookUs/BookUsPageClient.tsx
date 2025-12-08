@@ -1,16 +1,15 @@
 'use client';
 
-import 'react-datepicker/dist/react-datepicker.css';
 import './datepicker.css';
 import '@/styles/booking/booking.css';
 
 import { addDays, format } from 'date-fns';
 import React, { useEffect, useState } from 'react';
-import DatePicker from 'react-datepicker';
 import { Controller, useForm } from 'react-hook-form';
 
 import Assistant from '@/components/chat/Assistant';
 import BookingAgreementModal from '@/components/booking/BookingAgreementModal';
+import { LazyDatePicker } from '@/components/ui/LazyDatePicker';
 import { apiFetch } from '@/lib/api';
 import { logger } from '@/lib/logger';
 
@@ -324,7 +323,7 @@ export default function BookUsPageClient() {
         <div className="row justify-content-center">
           <div className="col-lg-8">
             {/* Deposit Warning Banner */}
-            <div className="alert alert-warning mb-4 shadow-sm border-warning" role="alert">
+            <div className="alert alert-warning border-warning mb-4 shadow-sm" role="alert">
               <div className="d-flex align-items-start">
                 <i className="bi bi-exclamation-triangle-fill text-warning fs-4 me-3 mt-1"></i>
                 <div className="flex-grow-1">
@@ -332,13 +331,19 @@ export default function BookUsPageClient() {
                     💳 Deposit Required to Secure Your Booking
                   </h5>
                   <p className="mb-2">
-                    A <strong>$100 refundable deposit</strong> is required to confirm and secure your booking date.
+                    A <strong>$100 refundable deposit</strong> is required to confirm and secure
+                    your booking date.
                   </p>
-                  <p className="mb-0 small">
+                  <p className="small mb-0">
                     <i className="bi bi-clock-fill me-1"></i>
-                    <strong>Important:</strong> Bookings submitted without deposit payment are subject to
-                    <strong className="text-danger"> automatic release without notice within 2 hours</strong>.
-                    Please complete your deposit payment promptly after booking to guarantee your reserved date and time.
+                    <strong>Important:</strong> Bookings submitted without deposit payment are
+                    subject to
+                    <strong className="text-danger">
+                      {' '}
+                      automatic release without notice within 2 hours
+                    </strong>
+                    . Please complete your deposit payment promptly after booking to guarantee your
+                    reserved date and time.
                   </p>
                 </div>
               </div>
@@ -460,10 +465,10 @@ export default function BookUsPageClient() {
                           control={control}
                           rules={{ required: 'Event date is required' }}
                           render={({ field }) => (
-                            <DatePicker
+                            <LazyDatePicker
                               selected={field.value}
-                              onChange={(date) => field.onChange(date)}
-                              filterDate={(date) => !isDateDisabled(date)}
+                              onChange={(date: Date | null) => field.onChange(date)}
+                              filterDate={(date: Date) => !isDateDisabled(date)}
                               minDate={new Date()}
                               maxDate={addDays(new Date(), 90)}
                               className={`form-control ${errors.eventDate ? 'is-invalid' : ''}`}
