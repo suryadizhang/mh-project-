@@ -1,10 +1,14 @@
-'use client'
+'use client';
 
-import React from 'react'
+import React from 'react';
+
+import { usePricing } from '@/hooks/usePricing';
 
 export function BookingHero() {
+  const { adultPrice, childPrice, isLoading } = usePricing();
+
   return (
-    <div className="booking-hero page-hero-background text-center mb-5">
+    <div className="booking-hero page-hero-background mb-5 text-center">
       <div className="container">
         <div className="hero-content">
           <h1 className="hero-title mb-4">🎊 Book Your Hibachi Experience 🎊</h1>
@@ -33,17 +37,17 @@ export function BookingHero() {
           <div className="pricing-highlight">
             <div className="pricing-card">
               <span className="pricing-label">Starting at</span>
-              <span className="pricing-amount">$55</span>
+              <span className="pricing-amount">{isLoading ? '...' : `$${adultPrice}`}</span>
               <span className="pricing-unit">per adult</span>
             </div>
             <div className="pricing-card">
               <span className="pricing-label">Children</span>
-              <span className="pricing-amount">$30</span>
+              <span className="pricing-amount">{isLoading ? '...' : `$${childPrice}`}</span>
               <span className="pricing-unit">ages 6-12</span>
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
