@@ -1,4 +1,5 @@
 import {
+  Activity,
   AlertTriangle,
   Database,
   Key,
@@ -100,6 +101,12 @@ export default function SuperAdminPage() {
         <div className="p-6 border-b border-gray-200 flex justify-between items-center">
           <h2 className="text-xl font-semibold text-gray-900">Admin Users</h2>
           <div className="flex gap-2">
+            <Link href="/superadmin/scaling">
+              <Button variant="outline">
+                <Activity className="w-4 h-4 mr-2" />
+                Health Dashboard
+              </Button>
+            </Link>
             <Link href="/superadmin/users">
               <Button variant="outline">
                 <Users className="w-4 h-4 mr-2" />
