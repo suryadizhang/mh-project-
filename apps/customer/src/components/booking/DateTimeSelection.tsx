@@ -1,11 +1,9 @@
 'use client';
 
-import 'react-datepicker/dist/react-datepicker.css';
-
 import { format } from 'date-fns';
 import React from 'react';
-import DatePicker from 'react-datepicker';
 
+import { LazyDatePicker } from '@/components/ui/LazyDatePicker';
 import { usePricing } from '@/hooks/usePricing';
 
 import type { BookingFormData, TimeSlot } from '../../data/booking/types';
@@ -35,7 +33,7 @@ export function DateTimeSelection({
           <label htmlFor="eventDate" className="form-label">
             Event Date <span className="required">*</span>
           </label>
-          <DatePicker
+          <LazyDatePicker
             id="eventDate"
             selected={formData.eventDate}
             onChange={(date) => onChange('eventDate', date || new Date())}
