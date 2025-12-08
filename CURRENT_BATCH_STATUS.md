@@ -7,97 +7,103 @@ for current batch status
 
 ## 📊 ACTIVE BATCH
 
-| Field         | Value                                |
-| ------------- | ------------------------------------ |
-| **Batch**     | **BATCH 0**                          |
-| **Name**      | Repository Cleanup & Branch Strategy |
-| **Status**    | ✅ COMPLETE                          |
-| **Branch**    | `main` (updated), `dev` (created)    |
-| **Started**   | December 7, 2025                     |
-| **Completed** | December 7, 2025                     |
+| Field       | Value                                 |
+| ----------- | ------------------------------------- |
+| **Batch**   | **BATCH 1**                           |
+| **Name**    | Core Booking Engine + Security        |
+| **Status**  | 🔄 IN PROGRESS                        |
+| **Branch**  | `feature/batch-1-core-infrastructure` |
+| **Started** | December 7, 2025                      |
+| **ETA**     | December 21, 2025 (2 weeks)           |
 
 ---
 
-## ✅ Batch 0 Progress
+## ✅ Batch 1 Progress
 
-### Phase 0.1: Instruction Files Restructure ✅
+### Phase 1.1: Backend Core (Already Built ✅)
 
-- [x] Delete duplicate instruction files
-- [x] Delete empty placeholder files
-- [x] Create 00-BOOTSTRAP.instructions.md
-- [x] Create 01-CORE_PRINCIPLES.instructions.md
-- [x] Create 02-ARCHITECTURE.instructions.md
-- [x] Create 03-BRANCH_GIT_WORKFLOW.instructions.md
-- [x] Create 04-BATCH_DEPLOYMENT.instructions.md
-- [x] Create 05-AUDIT_STANDARDS.instructions.md
-- [x] Create 06-DOCUMENTATION.instructions.md
-- [x] Create 07-TESTING_QA.instructions.md
-- [x] Create 08-FEATURE_FLAGS.instructions.md
-- [x] Create 09-ROLLBACK_SAFETY.instructions.md
-- [x] Create CURRENT_BATCH_STATUS.md
+- [x] Customer CRUD (~20 routes)
+- [x] Chef CRUD (~15 routes)
+- [x] Booking CRUD (~30 routes)
+- [x] Quote/Pricing (~15 routes)
+- [x] Calendar/Scheduling (~10 routes)
+- [x] Authentication (JWT + API keys)
+- [x] Health endpoints (~5 routes)
+- [x] 4-Tier RBAC System
+- [x] Audit Trail System
 
-### Phase 0.2: Git Cleanup ✅
+### Phase 1.2: Security (TO BUILD 🔧)
 
-- [x] Review 229 uncommitted files
-- [x] Stage all changes
-- [x] Commit with meaningful message
-- [x] Push to remote
+- [ ] Cloudflare Tunnel setup (2 hrs)
+- [ ] Cloudflare Access for SSH (2 hrs)
+- [ ] WAF Rules configuration (3 hrs)
+- [ ] Admin Panel Protection (2 hrs)
+- [ ] SSL/TLS Full Strict (1 hr)
 
-### Phase 0.3: Branch Strategy ✅
+### Phase 1.3: Scaling Measurement (TO BUILD 🔧)
 
-- [x] Force update main with nuclear-refactor content
-- [x] Main branch now at commit e68da82
-- [x] Create `dev` branch from main
-- [x] Push dev branch to remote
-- [ ] Apply branch protection rules (manual step - see below)
+- [ ] Scaling Metrics API endpoint (3 hrs)
+- [ ] Database Pool Metrics (1 hr)
+- [ ] Redis Metrics Collector (1 hr)
+- [ ] WhatsApp Alert Service (2 hrs)
+- [ ] Cron Job (5-min check) (30 min)
+- [ ] Daily Summary (9 AM) (30 min)
 
-### Phase 0.4: Documentation Hierarchy ✅
+### Phase 1.4: Frontend Fixes (TO BUILD 🔧)
 
-- [x] Add Batch 0 to DEPLOYMENT_BATCH_STRATEGY.md
-- [x] Batch documentation complete
-- [x] 10 enterprise instruction files created
+- [ ] ProtectedPhone component (1 hr)
+- [ ] Remove hardcoded phone/email from 10 files (1.5 hrs)
+- [ ] Remove Yelp/Google from Footer (15 min)
+- [ ] RBAC UI in Admin Panel (6 hrs)
+- [ ] Audit Log Viewer (4 hrs)
+- [ ] Scaling Health Dashboard (4 hrs)
 
-### Phase 0.5: Repository Hygiene ✅
+### Phase 1.5: Performance (TO BUILD 🔧)
 
-- [x] 178 backup/temp files deleted
-- [x] Clean commit history
-- [x] All tests passing (24/24)
+- [ ] Lazy DatePicker (2 hrs)
+- [ ] API Caching Headers (2 hrs)
+- [ ] Client-Side Data Caching (4 hrs)
+- [ ] Query Result Caching (3 hrs)
+- [ ] N+1 Query Prevention (4 hrs)
+- [ ] Response Compression (1 hr)
+
+### Phase 1.6: UI/UX Polish (TO BUILD 🔧)
+
+- [ ] Global Skeleton Loaders (4 hrs)
+- [ ] Error Boundary System (3 hrs)
+- [ ] Toast Notification System (3 hrs)
+- [ ] Form Auto-Save (4 hrs)
+- [ ] Accessibility Audit (6 hrs)
+
+### Phase 1.7: Database Migrations
+
+- [ ] Run add_security_tables.sql
+- [ ] Run add_login_history_table.sql
+- [ ] Run 001_create_performance_indexes.sql
+- [ ] Run create_ai_tables.sql (AI foundation)
+
+### Phase 1.8: Testing & QA
+
+- [ ] Unit tests for new services
+- [ ] Integration tests for security endpoints
+- [ ] E2E tests for booking flow
+- [ ] Performance budget validation
+- [ ] Lighthouse audit >90
 
 ---
 
 ## 🚦 Batch Status Overview
 
-| Batch | Name                    | Status      | Branch             |
-| ----- | ----------------------- | ----------- | ------------------ |
-| **0** | Repo Cleanup            | ✅ COMPLETE | main, dev          |
-| 1     | Core Booking + Security | 🔜 NEXT     | feature/batch-1-\* |
-| 2     | Payment Processing      | ⏳ Pending  | feature/batch-2-\* |
-| 3     | Core AI                 | ⏳ Pending  | feature/batch-3-\* |
-| 4     | Communications          | ⏳ Pending  | feature/batch-4-\* |
-| 5     | Advanced AI + Marketing | ⏳ Pending  | feature/batch-5-\* |
-| 6     | AI Training & Scaling   | ⏳ Pending  | feature/batch-6-\* |
+| Batch | Name                    | Status         | Branch                              |
+| ----- | ----------------------- | -------------- | ----------------------------------- |
+| **0** | Repo Cleanup            | ✅ COMPLETE    | main, dev                           |
+| **1** | Core Booking + Security | 🔄 IN PROGRESS | feature/batch-1-core-infrastructure |
+| 2     | Payment Processing      | ⏳ Pending     | feature/batch-2-\*                  |
+| 3     | Core AI                 | ⏳ Pending     | feature/batch-3-\*                  |
+| 4     | Communications          | ⏳ Pending     | feature/batch-4-\*                  |
+| 5     | Advanced AI + Marketing | ⏳ Pending     | feature/batch-5-\*                  |
+| 6     | AI Training & Scaling   | ⏳ Pending     | feature/batch-6-\*                  |
 
----
-
-## 🔐 Branch Protection Setup (MANUAL STEP)
-
-**Go to:**
-https://github.com/suryadizhang/mh-project-/settings/branches
-
-### Main Branch Rules:
-
-1. Click "Add branch ruleset" or "Add rule"
-2. Branch name pattern: `main`
-3. Enable:
-   - ✅ Require a pull request before merging
-   - ✅ Require approvals (1)
-   - ✅ Require status checks to pass
-   - ✅ Require branches to be up to date
-   - ✅ Do not allow bypassing
-
-### Dev Branch Rules:
-
-1. Add another rule for `dev`
 2. Enable:
    - ✅ Require a pull request before merging
    - ✅ Require status checks to pass
