@@ -16,37 +16,15 @@ import { Controller, useForm } from 'react-hook-form';
 import type { z } from 'zod';
 
 import Assistant from '@/components/chat/Assistant';
+import { useProtectedPhone, ProtectedEmail } from '@/components/ui/ProtectedPhone';
 import { apiFetch } from '@/lib/api';
 import { logger } from '@/lib/logger';
 
-// Google Maps types
+// Google Maps types - extend Window interface
 declare global {
   interface Window {
-    google: {
-      maps: {
-        places: {
-          Autocomplete: new (
-            input: HTMLInputElement,
-            options?: {
-              types?: string[];
-              componentRestrictions?: { country: string };
-              fields?: string[];
-            },
-          ) => {
-            addListener: (event: string, handler: () => void) => void;
-            getPlace: () => {
-              formatted_address?: string;
-              address_components?: Array<{
-                long_name: string;
-                short_name: string;
-                types: string[];
-              }>;
-              geometry?: unknown;
-            };
-          };
-        };
-      };
-    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    google: any;
   }
 }
 
@@ -82,6 +60,9 @@ type BookingFormData = {
   venueZipcode?: string;
 };
 export default function BookingPage() {
+  // Anti-scraper protected contact info
+  const { formatted: protectedPhone, tel: protectedTel } = useProtectedPhone();
+
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [showAgreementModal, setShowAgreementModal] = useState(false);
@@ -184,7 +165,7 @@ export default function BookingPage() {
             let state = '';
             let zipCode = '';
 
-            place.address_components.forEach((component) => {
+            place.address_components.forEach((component: { types: string[]; long_name: string; short_name: string }) => {
               const types = component.types;
               if (types.includes('locality')) {
                 city = component.long_name;
@@ -1063,16 +1044,11 @@ export default function BookingPage() {
                       </p>
                       <p>
                         <strong>Contact:</strong>{' '}
-                        <a href="tel:+19167408768" className="text-blue-600 hover:underline">
-                          (916) 740-8768
+                        <a href={protectedTel ? `tel:${protectedTel}` : '#'} className="text-blue-600 hover:underline">
+                          {protectedPhone || 'Loading...'}
                         </a>{' '}
                         |{' '}
-                        <a
-                          href="mailto:cs@myhibachichef.com"
-                          className="text-blue-600 hover:underline"
-                        >
-                          cs@myhibachichef.com
-                        </a>
+                        <ProtectedEmail className="text-blue-600 hover:underline" />
                       </p>
                       <p>
                         <strong>Policies:</strong>{' '}
