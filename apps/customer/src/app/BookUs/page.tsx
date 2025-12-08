@@ -1,6 +1,5 @@
 'use client';
 
-import 'react-datepicker/dist/react-datepicker.css';
 import './datepicker.css';
 
 import {
@@ -10,12 +9,12 @@ import {
 } from '@myhibachi/types/schemas';
 import { addDays, format } from 'date-fns';
 import Link from 'next/link';
-import React, { useEffect, useRef,useState } from 'react';
-import DatePicker from 'react-datepicker';
+import React, { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import type { z } from 'zod';
 
 import Assistant from '@/components/chat/Assistant';
+import { LazyDatePicker } from '@/components/ui/LazyDatePicker';
 import { useProtectedPhone, ProtectedEmail } from '@/components/ui/ProtectedPhone';
 import { apiFetch } from '@/lib/api';
 import { logger } from '@/lib/logger';
@@ -165,16 +164,18 @@ export default function BookingPage() {
             let state = '';
             let zipCode = '';
 
-            place.address_components.forEach((component: { types: string[]; long_name: string; short_name: string }) => {
-              const types = component.types;
-              if (types.includes('locality')) {
-                city = component.long_name;
-              } else if (types.includes('administrative_area_level_1')) {
-                state = component.short_name;
-              } else if (types.includes('postal_code')) {
-                zipCode = component.long_name;
-              }
-            });
+            place.address_components.forEach(
+              (component: { types: string[]; long_name: string; short_name: string }) => {
+                const types = component.types;
+                if (types.includes('locality')) {
+                  city = component.long_name;
+                } else if (types.includes('administrative_area_level_1')) {
+                  state = component.short_name;
+                } else if (types.includes('postal_code')) {
+                  zipCode = component.long_name;
+                }
+              },
+            );
 
             // Auto-fill city, state, and ZIP
             if (city) setValue('venueCity', city);
@@ -1044,11 +1045,13 @@ export default function BookingPage() {
                       </p>
                       <p>
                         <strong>Contact:</strong>{' '}
-                        <a href={protectedTel ? `tel:${protectedTel}` : '#'} className="text-blue-600 hover:underline">
+                        <a
+                          href={protectedTel ? `tel:${protectedTel}` : '#'}
+                          className="text-blue-600 hover:underline"
+                        >
                           {protectedPhone || 'Loading...'}
                         </a>{' '}
-                        |{' '}
-                        <ProtectedEmail className="text-blue-600 hover:underline" />
+                        | <ProtectedEmail className="text-blue-600 hover:underline" />
                       </p>
                       <p>
                         <strong>Policies:</strong>{' '}
@@ -1079,7 +1082,7 @@ export default function BookingPage() {
                       control={control}
                       render={({ field }) => (
                         <div className="relative">
-                          <DatePicker
+                          <LazyDatePicker
                             selected={field.value}
                             onChange={(date: Date | null) => {
                               setDateError(null);
@@ -1100,7 +1103,7 @@ export default function BookingPage() {
                             dropdownMode="select"
                             yearDropdownItemNumber={3}
                             scrollableYearDropdown={false}
-                            dayClassName={(date) => {
+                            dayClassName={(date: Date) => {
                               // Highlight selected date
                               if (
                                 field.value &&
