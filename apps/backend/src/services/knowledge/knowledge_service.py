@@ -9,6 +9,7 @@ Architecture:
 - Each module handles a specific domain
 - Clean separation of concerns
 - Easy to test and maintain
+- Redis caching for frequently-accessed data
 
 Modules:
 - BusinessRulesService: Policies, terms, rules
@@ -19,12 +20,22 @@ Modules:
 - TrainingDataService: AI training examples
 - KnowledgeFormatters: Context formatters
 
+Caching:
+- Menu data: 30 minutes (rarely changes)
+- FAQ data: 30 minutes (rarely changes)
+- Business rules: 30 minutes (rarely changes)
+- Pricing tiers: 30 minutes (rarely changes)
+- Availability: 30 seconds (changes frequently)
+
 Created: 2025-11-12
+Updated: 2025-11-22 - Added Redis caching support
 """
 
+import hashlib
+import json
 import logging
 from datetime import date, time
-from typing import Dict, List, Optional, Any
+from typing import TYPE_CHECKING, Dict, List, Optional, Any
 from decimal import Decimal
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -45,7 +56,17 @@ from db.models.knowledge_base import (
     PricingTierLevel,
 )
 
+if TYPE_CHECKING:
+    from core.cache import CacheService
+
 logger = logging.getLogger(__name__)
+
+# Cache TTL settings (seconds)
+CACHE_TTL_MENU = 1800  # 30 minutes
+CACHE_TTL_FAQ = 1800  # 30 minutes
+CACHE_TTL_RULES = 1800  # 30 minutes
+CACHE_TTL_PRICING = 1800  # 30 minutes
+CACHE_TTL_AVAILABILITY = 30  # 30 seconds (changes frequently)
 
 
 class KnowledgeService:
@@ -54,18 +75,26 @@ class KnowledgeService:
 
     Provides AI agents with dynamic access to business knowledge.
     All methods are database-backed for real-time updates.
+    Supports optional Redis caching for performance.
     """
 
-    def __init__(self, db: AsyncSession, station_id: Optional[str] = None):
+    def __init__(
+        self,
+        db: AsyncSession,
+        station_id: Optional[str] = None,
+        cache: Optional["CacheService"] = None,
+    ):
         """
         Initialize knowledge service with all modules
 
         Args:
             db: Database session
             station_id: Optional station ID for multi-location support
+            cache: Optional CacheService for Redis caching
         """
         self.db = db
         self.station_id = station_id
+        self.cache = cache
 
         # Initialize all service modules
         self.business_rules = BusinessRulesService(db, station_id)
@@ -76,61 +105,158 @@ class KnowledgeService:
         self.training = TrainingDataService(db)
         self.formatters = KnowledgeFormatters()
 
+    def _make_cache_key(self, prefix: str, *args, **kwargs) -> str:
+        """Generate a cache key from method name and arguments"""
+        key_data = {
+            "args": [str(a) for a in args],
+            "kwargs": {k: str(v) for k, v in kwargs.items()},
+        }
+        key_hash = hashlib.md5(json.dumps(key_data, sort_keys=True).encode()).hexdigest()[:12]
+        station_part = f":{self.station_id}" if self.station_id else ""
+        return f"knowledge:{prefix}{station_part}:{key_hash}"
+
+    async def _get_cached(self, key: str) -> Optional[Any]:
+        """Get value from cache if available"""
+        if not self.cache:
+            return None
+        try:
+            return await self.cache.get(key)
+        except Exception as e:
+            logger.warning(f"Cache read failed for {key}: {e}")
+            return None
+
+    async def _set_cached(self, key: str, value: Any, ttl: int) -> None:
+        """Set value in cache if available"""
+        if not self.cache:
+            return
+        try:
+            await self.cache.set(key, value, ttl=ttl)
+        except Exception as e:
+            logger.warning(f"Cache write failed for {key}: {e}")
+
     # ============================================
-    # BUSINESS RULES & POLICIES
+    # BUSINESS RULES & POLICIES (with caching)
     # ============================================
 
     async def get_business_charter(self) -> Dict[str, Any]:
-        """Get comprehensive business charter for AI context"""
-        return await self.business_rules.get_business_charter()
+        """Get comprehensive business charter for AI context (cached 30 min)"""
+        cache_key = self._make_cache_key("charter")
+        cached = await self._get_cached(cache_key)
+        if cached is not None:
+            logger.debug(f"📦 Cache HIT: {cache_key}")
+            return cached
+
+        result = await self.business_rules.get_business_charter()
+        await self._set_cached(cache_key, result, CACHE_TTL_RULES)
+        return result
 
     async def get_rule_by_category(self, category: RuleCategory) -> List[Dict[str, Any]]:
-        """Get all rules for a specific category"""
-        return await self.business_rules.get_rule_by_category(category)
+        """Get all rules for a specific category (cached 30 min)"""
+        cache_key = self._make_cache_key(
+            "rules", category=category.value if hasattr(category, "value") else category
+        )
+        cached = await self._get_cached(cache_key)
+        if cached is not None:
+            logger.debug(f"📦 Cache HIT: {cache_key}")
+            return cached
+
+        result = await self.business_rules.get_rule_by_category(category)
+        await self._set_cached(cache_key, result, CACHE_TTL_RULES)
+        return result
 
     async def search_rules(self, keywords: List[str]) -> List[Dict[str, Any]]:
         """Search business rules by keywords"""
+        # Don't cache search results (too variable)
         return await self.business_rules.search_rules(keywords)
 
     # ============================================
-    # FAQ SYSTEM
+    # FAQ SYSTEM (with caching)
     # ============================================
 
     async def get_faq_answer(
         self, question: str, category: Optional[str] = None
     ) -> Optional[Dict[str, Any]]:
         """Search FAQ for an answer"""
+        # Don't cache search results (increments view count)
         return await self.faq.get_faq_answer(question, category)
 
     async def get_faqs_by_category(self, category: str) -> List[Dict[str, Any]]:
-        """Get all FAQs for a category"""
-        return await self.faq.get_faqs_by_category(category)
+        """Get all FAQs for a category (cached 30 min)"""
+        cache_key = self._make_cache_key("faqs", category=category)
+        cached = await self._get_cached(cache_key)
+        if cached is not None:
+            logger.debug(f"📦 Cache HIT: {cache_key}")
+            return cached
+
+        result = await self.faq.get_faqs_by_category(category)
+        await self._set_cached(cache_key, result, CACHE_TTL_FAQ)
+        return result
 
     async def get_top_faqs(self, limit: int = 10) -> List[Dict[str, Any]]:
-        """Get most popular FAQs"""
-        return await self.faq.get_top_faqs(limit)
+        """Get most popular FAQs (cached 30 min)"""
+        cache_key = self._make_cache_key("top_faqs", limit=limit)
+        cached = await self._get_cached(cache_key)
+        if cached is not None:
+            logger.debug(f"📦 Cache HIT: {cache_key}")
+            return cached
+
+        result = await self.faq.get_top_faqs(limit)
+        await self._set_cached(cache_key, result, CACHE_TTL_FAQ)
+        return result
 
     async def get_all_faq_categories(self) -> List[str]:
-        """Get all unique FAQ categories"""
-        return await self.faq.get_all_categories()
+        """Get all unique FAQ categories (cached 30 min)"""
+        cache_key = self._make_cache_key("faq_categories")
+        cached = await self._get_cached(cache_key)
+        if cached is not None:
+            logger.debug(f"📦 Cache HIT: {cache_key}")
+            return cached
+
+        result = await self.faq.get_all_categories()
+        await self._set_cached(cache_key, result, CACHE_TTL_FAQ)
+        return result
 
     # ============================================
-    # MENU & PRICING
+    # MENU & PRICING (with caching)
     # ============================================
 
     async def get_menu_by_category(
         self, category: Optional[MenuCategory] = None
     ) -> Dict[str, List[Dict[str, Any]]]:
-        """Get menu items organized by category"""
-        return await self.menu.get_menu_by_category(category)
+        """Get menu items organized by category (cached 30 min)"""
+        cache_key = self._make_cache_key("menu", category=category)
+        cached = await self._get_cached(cache_key)
+        if cached is not None:
+            logger.debug(f"📦 Cache HIT: {cache_key}")
+            return cached
+
+        result = await self.menu.get_menu_by_category(category)
+        await self._set_cached(cache_key, result, CACHE_TTL_MENU)
+        return result
 
     async def get_proteins(self, premium_only: bool = False) -> List[Dict[str, Any]]:
-        """Get available protein options"""
-        return await self.menu.get_proteins(premium_only)
+        """Get available protein options (cached 30 min)"""
+        cache_key = self._make_cache_key("proteins", premium_only=premium_only)
+        cached = await self._get_cached(cache_key)
+        if cached is not None:
+            logger.debug(f"📦 Cache HIT: {cache_key}")
+            return cached
+
+        result = await self.menu.get_proteins(premium_only)
+        await self._set_cached(cache_key, result, CACHE_TTL_MENU)
+        return result
 
     async def get_pricing_tiers(self, guest_count: Optional[int] = None) -> List[Dict[str, Any]]:
-        """Get available pricing tiers/packages"""
-        return await self.menu.get_pricing_tiers(guest_count)
+        """Get available pricing tiers/packages (cached 30 min)"""
+        cache_key = self._make_cache_key("pricing_tiers", guest_count=guest_count)
+        cached = await self._get_cached(cache_key)
+        if cached is not None:
+            logger.debug(f"📦 Cache HIT: {cache_key}")
+            return cached
+
+        result = await self.menu.get_pricing_tiers(guest_count)
+        await self._set_cached(cache_key, result, CACHE_TTL_PRICING)
+        return result
 
     async def calculate_total_price(
         self, guest_count: int, tier_level: PricingTierLevel, add_ons: Optional[List[str]] = None
@@ -264,3 +390,89 @@ class KnowledgeService:
                 context_parts.append(upsell_context)
 
         return "\n\n---\n\n".join(context_parts)
+
+    # ============================================
+    # CACHE INVALIDATION
+    # ============================================
+
+    async def invalidate_menu_cache(self) -> int:
+        """
+        Invalidate all menu-related caches.
+        Call after admin updates menu items or pricing.
+
+        Returns:
+            Number of keys deleted
+        """
+        if not self.cache:
+            return 0
+
+        deleted = 0
+        for pattern in ["knowledge:menu:*", "knowledge:proteins:*", "knowledge:pricing_tiers:*"]:
+            try:
+                deleted += await self.cache.delete_pattern(pattern)
+            except Exception as e:
+                logger.error(f"Failed to invalidate cache pattern {pattern}: {e}")
+
+        logger.info(f"🗑️ Invalidated {deleted} menu cache keys")
+        return deleted
+
+    async def invalidate_faq_cache(self) -> int:
+        """
+        Invalidate all FAQ-related caches.
+        Call after admin updates FAQ items.
+
+        Returns:
+            Number of keys deleted
+        """
+        if not self.cache:
+            return 0
+
+        deleted = 0
+        for pattern in ["knowledge:faqs:*", "knowledge:top_faqs:*", "knowledge:faq_categories:*"]:
+            try:
+                deleted += await self.cache.delete_pattern(pattern)
+            except Exception as e:
+                logger.error(f"Failed to invalidate cache pattern {pattern}: {e}")
+
+        logger.info(f"🗑️ Invalidated {deleted} FAQ cache keys")
+        return deleted
+
+    async def invalidate_rules_cache(self) -> int:
+        """
+        Invalidate all business rules caches.
+        Call after admin updates business rules.
+
+        Returns:
+            Number of keys deleted
+        """
+        if not self.cache:
+            return 0
+
+        deleted = 0
+        for pattern in ["knowledge:charter:*", "knowledge:rules:*"]:
+            try:
+                deleted += await self.cache.delete_pattern(pattern)
+            except Exception as e:
+                logger.error(f"Failed to invalidate cache pattern {pattern}: {e}")
+
+        logger.info(f"🗑️ Invalidated {deleted} rules cache keys")
+        return deleted
+
+    async def invalidate_all_caches(self) -> int:
+        """
+        Invalidate all knowledge caches.
+        Use sparingly - prefer targeted invalidation.
+
+        Returns:
+            Number of keys deleted
+        """
+        if not self.cache:
+            return 0
+
+        try:
+            deleted = await self.cache.delete_pattern("knowledge:*")
+            logger.info(f"🗑️ Invalidated ALL {deleted} knowledge cache keys")
+            return deleted
+        except Exception as e:
+            logger.error(f"Failed to invalidate all knowledge caches: {e}")
+            return 0
