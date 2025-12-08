@@ -4,12 +4,13 @@ import './datepicker.css';
 import '@/styles/booking/booking.css';
 
 import { addDays, format } from 'date-fns';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import Assistant from '@/components/chat/Assistant';
 import BookingAgreementModal from '@/components/booking/BookingAgreementModal';
 import { LazyDatePicker } from '@/components/ui/LazyDatePicker';
+import { useAutoSave, useAutoSaveIndicator } from '@/hooks/useAutoSave';
 import { apiFetch } from '@/lib/api';
 import { logger } from '@/lib/logger';
 
@@ -64,6 +65,36 @@ export default function BookUsPageClient() {
       guestCount: undefined,
     },
   });
+
+  // Watch all form values for auto-save
+  const formValues = watch();
+
+  // Auto-save callback to restore form data
+  const handleRestore = useCallback((savedData: Partial<BookingFormData>) => {
+    Object.entries(savedData).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        // Handle Date conversion for eventDate
+        if (key === 'eventDate' && typeof value === 'string') {
+          setValue(key as keyof BookingFormData, new Date(value) as unknown as never);
+        } else {
+          setValue(key as keyof BookingFormData, value as never);
+        }
+      }
+    });
+  }, [setValue]);
+
+  // Auto-save form data to localStorage
+  const { hasSavedData, lastSaved, clearSavedData, isSaving } = useAutoSave<BookingFormData>({
+    key: 'booking-form',
+    data: formValues as BookingFormData,
+    onRestore: handleRestore,
+    debounceMs: 1000,
+    expirationMs: 24 * 60 * 60 * 1000, // 24 hours
+    excludeFields: [], // No sensitive fields to exclude in booking form
+  });
+
+  // Auto-save status indicator
+  const autoSaveStatus = useAutoSaveIndicator(isSaving, lastSaved);
 
   // Watch form values
   const sameAsVenue = watch('sameAsVenue');
@@ -242,6 +273,8 @@ export default function BookUsPageClient() {
 
       if (response.success) {
         logger.info('Booking submitted successfully');
+        // Clear auto-saved form data on successful submission
+        clearSavedData();
         // Redirect to success page
         window.location.href = '/booking-success';
       } else {
@@ -350,6 +383,46 @@ export default function BookUsPageClient() {
             </div>
 
             <div className="booking-form-container">
+              {/* Auto-save status indicator */}
+              {autoSaveStatus !== 'idle' && (
+                <div className="auto-save-indicator mb-3 d-flex align-items-center justify-content-end">
+                  {autoSaveStatus === 'saving' && (
+                    <span className="text-muted small">
+                      <i className="bi bi-arrow-repeat spin me-1"></i>
+                      Saving...
+                    </span>
+                  )}
+                  {autoSaveStatus === 'saved' && (
+                    <span className="text-success small">
+                      <i className="bi bi-check-circle me-1"></i>
+                      Draft saved
+                    </span>
+                  )}
+                </div>
+              )}
+              
+              {/* Show restore notice if there's saved data */}
+              {hasSavedData && lastSaved && (
+                <div className="alert alert-info alert-dismissible fade show mb-3" role="alert">
+                  <i className="bi bi-info-circle me-2"></i>
+                  <strong>Draft restored!</strong> Your previous booking form was saved on{' '}
+                  {lastSaved.toLocaleDateString()} at {lastSaved.toLocaleTimeString()}.
+                  <button 
+                    type="button" 
+                    className="btn btn-sm btn-link text-info ms-2"
+                    onClick={clearSavedData}
+                  >
+                    Clear draft
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn-close" 
+                    aria-label="Close"
+                    onClick={() => {/* Just hides the alert */}}
+                  ></button>
+                </div>
+              )}
+              
               <form onSubmit={handleSubmit(onSubmit)} className="booking-form">
                 {/* Contact Information */}
                 <div className="form-section">

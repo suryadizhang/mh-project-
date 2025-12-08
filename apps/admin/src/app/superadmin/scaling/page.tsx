@@ -481,12 +481,12 @@ export default function ScalingDashboardPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <main className="container mx-auto p-6 space-y-6" role="main" aria-label="Scaling Health Dashboard">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <header className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Activity className="h-8 w-8 text-blue-600" />
+            <Activity className="h-8 w-8 text-blue-600" aria-hidden="true" />
             Scaling Health Dashboard
           </h1>
           <p className="text-gray-600 mt-1">
@@ -494,7 +494,7 @@ export default function ScalingDashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-500" aria-live="polite">
             Last updated: {lastRefresh.toLocaleTimeString()}
           </div>
           <div className="flex items-center gap-2">
@@ -503,11 +503,13 @@ export default function ScalingDashboardPage() {
               size="sm"
               onClick={() => setAutoRefresh(!autoRefresh)}
               className={autoRefresh ? 'bg-green-50' : ''}
+              aria-pressed={autoRefresh}
+              aria-label={`Auto-refresh is ${autoRefresh ? 'enabled' : 'disabled'}`}
             >
               {autoRefresh ? (
-                <Wifi className="h-4 w-4 mr-1 text-green-600" />
+                <Wifi className="h-4 w-4 mr-1 text-green-600" aria-hidden="true" />
               ) : (
-                <WifiOff className="h-4 w-4 mr-1" />
+                <WifiOff className="h-4 w-4 mr-1" aria-hidden="true" />
               )}
               Auto-refresh {autoRefresh ? 'On' : 'Off'}
             </Button>
@@ -516,15 +518,17 @@ export default function ScalingDashboardPage() {
               size="sm"
               onClick={() => fetchHealthData()}
               disabled={refreshing}
+              aria-label="Refresh health data"
             >
               <RefreshCw
                 className={`h-4 w-4 mr-1 ${refreshing ? 'animate-spin' : ''}`}
+                aria-hidden="true"
               />
               Refresh
             </Button>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Overall Status Banner */}
       {healthData && (
@@ -536,6 +540,8 @@ export default function ScalingDashboardPage() {
                 ? 'border-yellow-300 bg-yellow-50'
                 : 'border-red-300 bg-red-50'
           }`}
+          role="status"
+          aria-live="polite"
         >
           <CardContent className="py-4">
             <div className="flex items-center justify-between">
@@ -657,14 +663,14 @@ export default function ScalingDashboardPage() {
       )}
 
       {/* Footer with timestamp */}
-      <div className="text-center text-sm text-gray-400 pt-4">
+      <footer className="text-center text-sm text-gray-400 pt-4">
         Dashboard auto-refreshes every 30 seconds when enabled.
         <br />
         Data timestamp:{' '}
         {healthData?.timestamp
           ? new Date(healthData.timestamp).toLocaleString()
           : 'N/A'}
-      </div>
-    </div>
+      </footer>
+    </main>
   );
 }
