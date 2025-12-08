@@ -1,3 +1,5 @@
+'use client';
+
 import {
   ChevronRight,
   ExternalLink,
@@ -12,6 +14,8 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+
+import { ProtectedPhone } from '@/components/ui/ProtectedPhone';
 
 import styles from './Footer.module.css';
 
@@ -116,7 +120,7 @@ export default function Footer() {
             </li>
             <li>
               <Phone size={18} className={styles.contactIcon} />
-              <a href="tel:+19167408768">(916) 740-8768</a>
+              <ProtectedPhone showIcon={false} />
             </li>
             <li>
               <Mail size={18} className={styles.contactIcon} />

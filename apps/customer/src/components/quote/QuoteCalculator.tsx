@@ -2,6 +2,7 @@
 
 import { useEffect, useRef,useState } from 'react';
 
+import { ProtectedPhone } from '@/components/ui/ProtectedPhone';
 import { submitQuoteLead } from '@/lib/leadService';
 import { logger } from '@/lib/logger';
 import { usePricing } from '@/hooks/usePricing';
@@ -683,9 +684,7 @@ export function QuoteCalculator() {
             <a href="/BookUs" className="book-now-btn">
               🎉 Book Your Event Now
             </a>
-            <a href="tel:9167408768" className="call-btn">
-              📞 Call Us: (916) 740-8768
-            </a>
+            <ProtectedPhone className="call-btn" showIcon={true} />
           </div>
         </div>
       )}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 
 import type { FaqItem } from '@/data/faqsData';
 import { HibachiButton } from '@/components/ui/button';
@@ -73,8 +74,8 @@ export function FaqList({ items }: FaqListProps) {
           <h3>No FAQs found</h3>
           <p>If you can&apos;t find what you&apos;re looking for, we&apos;re here to help!</p>
           <div className="no-results-actions">
-            <HibachiButton href="/contact" variant="primary" size="md">
-              Contact us directly
+            <HibachiButton variant="primary" size="md" asChild>
+              <Link href="/contact">Contact us directly</Link>
             </HibachiButton>
           </div>
         </div>

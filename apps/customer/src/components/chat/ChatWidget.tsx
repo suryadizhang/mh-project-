@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useCallback,useEffect, useRef, useState } from 'react';
 
 import { ApiErrorBoundary } from '@/components/ErrorBoundary';
+import { useProtectedPhone, useProtectedPaymentEmail } from '@/components/ui/ProtectedPhone';
 import { logger, logWebSocket } from '@/lib/logger';
 
 import EscalationForm from './EscalationForm';
@@ -62,6 +63,10 @@ const WELCOME_SUGGESTIONS: Record<string, string[]> = {
 };
 
 function ChatWidgetComponent({ page }: ChatWidgetProps) {
+  // Anti-scraper protected contact info
+  const { tel: protectedTel } = useProtectedPhone();
+  const { email: protectedEmail } = useProtectedPaymentEmail();
+
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -474,10 +479,12 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
   };
 
   const handleEmailUs = () => {
-    window.open(
-      'mailto:cs@myhibachichef.com?subject=My%20Hibachi%20Inquiry&body=Hi%20My%20Hibachi!%20I%20need%20help%20with...',
-      '_blank',
-    );
+    if (protectedEmail) {
+      window.open(
+        `mailto:${protectedEmail}?subject=My%20Hibachi%20Inquiry&body=Hi%20My%20Hibachi!%20I%20need%20help%20with...`,
+        '_blank',
+      );
+    }
   };
 
   const handleInstagramDM = () => {
@@ -489,11 +496,15 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
   };
 
   const handleTextMessage = () => {
-    window.open('sms:+19167408768?body=Hi%20My%20Hibachi!%20I%20need%20help%20with...', '_blank');
+    if (protectedTel) {
+      window.open(`sms:${protectedTel}?body=Hi%20My%20Hibachi!%20I%20need%20help%20with...`, '_blank');
+    }
   };
 
   const handlePhoneCall = () => {
-    window.open('tel:+19167408768', '_blank');
+    if (protectedTel) {
+      window.open(`tel:${protectedTel}`, '_blank');
+    }
   };
 
   const getConfidenceColor = (confidence?: string) => {
@@ -928,7 +939,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
                 className="flex w-full items-center justify-center space-x-2 rounded-lg bg-orange-600 p-3 text-white transition-all hover:shadow-md"
               >
                 <span>📞</span>
-                <span className="text-sm font-medium">Call Us: (916) 740-8768</span>
+                <span className="text-sm font-medium">Call Us</span>
               </button>
             </div>
 
@@ -940,7 +951,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
                 className="inline-flex w-full items-center justify-center space-x-2 rounded-lg border border-gray-300 bg-gray-100 p-3 text-gray-800 transition-all hover:bg-gray-200"
               >
                 <span>📧</span>
-                <span className="text-sm font-medium">cs@myhibachichef.com</span>
+                <span className="text-sm font-medium">{protectedEmail || 'Contact Us'}</span>
               </button>
               <p className="mt-2 text-xs text-gray-500">Click to open your email app</p>
             </div>
