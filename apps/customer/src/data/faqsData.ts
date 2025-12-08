@@ -1,14 +1,29 @@
+/**
+ * FAQ Data with Dynamic Pricing Templates
+ *
+ * Uses {{PLACEHOLDER}} syntax for pricing values that will be
+ * interpolated at runtime from the database (single source of truth)
+ *
+ * Available placeholders:
+ * - {{ADULT_PRICE}} - Adult per-person price
+ * - {{CHILD_PRICE}} - Child (6-12) per-person price
+ * - {{CHILD_FREE_AGE}} - Age under which children are free
+ * - {{PARTY_MINIMUM}} - Minimum party total
+ * - {{FREE_TRAVEL_MILES}} - Free travel radius
+ * - {{COST_PER_MILE}} - Cost per mile after free radius
+ */
+
 export type FaqItem = {
-  id: string
-  question: string
-  answer: string
-  category: string
-  subcategory: string
-  tags: string[]
-  confidence: 'high' | 'medium' | 'low'
-  source_urls: string[]
-  review_needed?: boolean
-}
+  id: string;
+  question: string;
+  answer: string;
+  category: string;
+  subcategory: string;
+  tags: string[];
+  confidence: 'high' | 'medium' | 'low';
+  source_urls: string[];
+  review_needed?: boolean;
+};
 
 export const faqs: FaqItem[] = [
   // Pricing & Minimums
@@ -16,23 +31,23 @@ export const faqs: FaqItem[] = [
     id: 'base-pricing',
     question: 'How much does My Hibachi Chef cost?',
     answer:
-      '$55 per adult (13+), $30 per child (6-12), free for ages 5 & under. $550 party minimum (≈10 adults). This includes your choice of 2 proteins (Chicken, NY Strip Steak, Shrimp, Calamari, or Tofu), hibachi fried rice, fresh vegetables, side salad, signature sauces, and plenty of sake for adults 21+.',
+      '${{ADULT_PRICE}} per adult (13+), ${{CHILD_PRICE}} per child (6-12), free for ages {{CHILD_FREE_AGE}} & under. ${{PARTY_MINIMUM}} party minimum (≈10 adults). This includes your choice of 2 proteins (Chicken, NY Strip Steak, Shrimp, Calamari, or Tofu), hibachi fried rice, fresh vegetables, side salad, signature sauces, and plenty of sake for adults 21+.',
     category: 'Pricing & Minimums',
     subcategory: 'Per‑person Rates',
-    tags: ['pricing', '$55 adult', '$30 child', '$550 minimum'],
+    tags: ['pricing', 'adult price', 'child price', 'party minimum'],
     confidence: 'high',
-    source_urls: ['/menu']
+    source_urls: ['/menu'],
   },
   {
     id: 'party-minimum',
     question: 'Is there a minimum party size?',
     answer:
-      'Yes — $550 total minimum (approximately 10 adults). Smaller groups can reach the minimum through upgrades or additional proteins.',
+      'Yes — ${{PARTY_MINIMUM}} total minimum (approximately 10 adults). Smaller groups can reach the minimum through upgrades or additional proteins.',
     category: 'Pricing & Minimums',
     subcategory: 'Minimum Spend / Party Size',
-    tags: ['minimum', '$550', 'party size', 'upgrades'],
+    tags: ['minimum', 'party minimum', 'party size', 'upgrades'],
     confidence: 'high',
-    source_urls: ['/menu']
+    source_urls: ['/menu'],
   },
   {
     id: 'tipping',
@@ -43,18 +58,18 @@ export const faqs: FaqItem[] = [
     subcategory: 'Gratuity & Fees',
     tags: ['tipping', '20-35%', 'cash', 'venmo', 'zelle'],
     confidence: 'high',
-    source_urls: ['/BookUs']
+    source_urls: ['/BookUs'],
   },
   {
     id: 'travel-fees',
     question: 'Do you charge travel fees?',
     answer:
-      'First 30 miles from our location are free. After that, $2 per mile with flexible options for your area. Text (916) 740-8768 to calculate your travel fee.',
+      'First {{FREE_TRAVEL_MILES}} miles from our location are free. After that, ${{COST_PER_MILE}} per mile with flexible options for your area. Text (916) 740-8768 to calculate your travel fee.',
     category: 'Pricing & Minimums',
     subcategory: 'Travel Fees',
-    tags: ['travel', 'free 30 miles', '$2 per mile', 'flexible service'],
+    tags: ['travel', 'free miles', 'cost per mile', 'flexible service'],
     confidence: 'high',
-    source_urls: ['/menu', '/contact']
+    source_urls: ['/menu', '/contact'],
   },
 
   // Menu & Upgrades
@@ -65,9 +80,19 @@ export const faqs: FaqItem[] = [
       'Each guest chooses 2 proteins: Chicken, NY Strip Steak, Shrimp, Calamari, or Tofu. Plus fried rice, vegetables, salad, sauces, and sake for adults 21+.',
     category: 'Menu & Upgrades',
     subcategory: 'Included Items',
-    tags: ['2 proteins', 'chicken', 'steak', 'shrimp', 'calamari', 'tofu', 'rice', 'vegetables', 'sake'],
+    tags: [
+      '2 proteins',
+      'chicken',
+      'steak',
+      'shrimp',
+      'calamari',
+      'tofu',
+      'rice',
+      'vegetables',
+      'sake',
+    ],
     confidence: 'high',
-    source_urls: ['/menu']
+    source_urls: ['/menu'],
   },
   {
     id: 'premium-upgrades',
@@ -82,21 +107,21 @@ export const faqs: FaqItem[] = [
       'scallops +$5',
       'filet +$5',
       'lobster +$15',
-      'premium proteins'
+      'premium proteins',
     ],
     confidence: 'high',
-    source_urls: ['/menu']
+    source_urls: ['/menu'],
   },
   {
     id: 'kids-menu',
     question: "What are the kids' portions and pricing?",
     answer:
-      '$30 per child (6-12 years) — same 2-protein selection as adults. Ages 5 & under eat free with adult purchase (1 protein, small rice portion).',
+      '${{CHILD_PRICE}} per child (6-12 years) — same 2-protein selection as adults. Ages {{CHILD_FREE_AGE}} & under eat free with adult purchase (1 protein, small rice portion).',
     category: 'Menu & Upgrades',
     subcategory: "Kids' Portions",
-    tags: ['kids', '$30', '6-12 years', 'free under 5', '2 proteins'],
+    tags: ['kids', 'child price', '6-12 years', 'free under age', '2 proteins'],
     confidence: 'high',
-    source_urls: ['/menu']
+    source_urls: ['/menu'],
   },
   {
     id: 'sake-service',
@@ -107,7 +132,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Add‑ons & Sides',
     tags: ['sake', 'alcohol', '21+', 'byob', 'beer', 'wine'],
     confidence: 'high',
-    source_urls: ['/menu']
+    source_urls: ['/menu'],
   },
 
   // Booking & Payments
@@ -120,7 +145,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'How to Book',
     tags: ['booking', 'online', 'text', '48 hours', '$100 deposit', 'refundable'],
     confidence: 'high',
-    source_urls: ['/BookUs']
+    source_urls: ['/BookUs'],
   },
   {
     id: 'deposit-policy',
@@ -131,7 +156,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Deposits & Balance',
     tags: ['$100 deposit', 'refundable', '4 days', 'deducted', 'final bill'],
     confidence: 'high',
-    source_urls: ['/BookUs']
+    source_urls: ['/BookUs'],
   },
   {
     id: 'payment-methods',
@@ -142,7 +167,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Payment Methods',
     tags: ['venmo', 'zelle', 'cash', 'credit card', 'online deposit'],
     confidence: 'high',
-    source_urls: ['/BookUs']
+    source_urls: ['/BookUs'],
   },
   {
     id: 'advance-booking',
@@ -153,7 +178,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Scheduling & Availability',
     tags: ['48 hours minimum', 'weekends', 'holidays', '1-2 weeks'],
     confidence: 'high',
-    source_urls: ['/BookUs']
+    source_urls: ['/BookUs'],
   },
 
   // Travel & Service Area
@@ -161,12 +186,12 @@ export const faqs: FaqItem[] = [
     id: 'service-areas',
     question: 'Where do you serve?',
     answer:
-      'We come to you across the Bay Area, Sacramento, San Jose, and nearby communities—just ask! Free travel first 30 miles, then $2/mile.',
+      'We come to you across the Bay Area, Sacramento, San Jose, and nearby communities—just ask! Free travel first {{FREE_TRAVEL_MILES}} miles, then ${{COST_PER_MILE}}/mile.',
     category: 'Travel & Service Area',
     subcategory: 'Coverage Radius',
-    tags: ['bay area', 'sacramento', 'san jose', 'free 30 miles'],
+    tags: ['bay area', 'sacramento', 'san jose', 'free travel miles'],
     confidence: 'high',
-    source_urls: ['/contact', '/menu']
+    source_urls: ['/contact', '/menu'],
   },
   {
     id: 'travel-distance',
@@ -177,7 +202,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Coverage Radius',
     tags: ['bay area', 'sacramento', 'central valley', 'zip code', 'confirmation'],
     confidence: 'high',
-    source_urls: ['/contact']
+    source_urls: ['/contact'],
   },
 
   // On‑Site Setup & Requirements
@@ -190,7 +215,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Space & Ventilation',
     tags: ['68x27x41 inches', 'level ground', 'outdoor', 'ventilated', 'table access'],
     confidence: 'high',
-    source_urls: ['/BookUs']
+    source_urls: ['/BookUs'],
   },
   {
     id: 'table-setup',
@@ -201,7 +226,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Table Setup',
     tags: ['u-shape', '8-foot tables', '10 people', '6-foot tables', '12-15 guests'],
     confidence: 'high',
-    source_urls: []
+    source_urls: [],
   },
   {
     id: 'indoor-cooking',
@@ -212,7 +237,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Indoor vs Outdoor',
     tags: ['outdoor preferred', 'indoor possible', 'high ceilings', 'ventilation', 'smoke'],
     confidence: 'high',
-    source_urls: []
+    source_urls: [],
   },
   {
     id: 'what-to-provide',
@@ -223,7 +248,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Tableware & Setup',
     tags: ['tables', 'chairs', 'plates', 'utensils', 'glasses', 'napkins'],
     confidence: 'high',
-    source_urls: []
+    source_urls: [],
   },
 
   // Dietary & Allergens
@@ -234,9 +259,21 @@ export const faqs: FaqItem[] = [
       '✅ YES! We accommodate: Vegetarian, Vegan, Gluten-Free, Dairy-Free (we use dairy-free butter!), Nut-Free (100% nut-free facility!), Sesame-Free, Halal (Restaurant Depot certified), and Kosher-Friendly. 🏆 ALLERGEN ADVANTAGES: We are 100% nut-free, sesame-free, use dairy-free butter, and offer gluten-free soy sauce. Please notify us 48+ hours in advance. ⚠️ IMPORTANT: Shared cooking surfaces mean we cannot guarantee 100% allergen-free. View /allergens or email cs@myhibachichef.com for details.',
     category: 'Dietary & Allergens',
     subcategory: 'Dietary Accommodations',
-    tags: ['vegetarian', 'vegan', 'gluten-free', 'dairy-free', 'halal', 'kosher', 'nut-free', 'sesame-free', '48 hours', 'allergens', 'cross-contamination'],
+    tags: [
+      'vegetarian',
+      'vegan',
+      'gluten-free',
+      'dairy-free',
+      'halal',
+      'kosher',
+      'nut-free',
+      'sesame-free',
+      '48 hours',
+      'allergens',
+      'cross-contamination',
+    ],
     confidence: 'high',
-    source_urls: ['/BookUs', '/allergens']
+    source_urls: ['/BookUs', '/allergens'],
   },
   {
     id: 'allergen-list',
@@ -245,9 +282,20 @@ export const faqs: FaqItem[] = [
       'Our menu only contains 2 major allergens: Shellfish (shrimp, scallops, lobster) and Eggs (fried rice only). 🏆 ALLERGEN-FRIENDLY ADVANTAGES: We are 100% NUT-FREE (no peanuts, tree nuts), SESAME-FREE (no sesame oil/seeds), use DAIRY-FREE butter, and offer GLUTEN-FREE soy sauce. We use halal-certified ingredients from Restaurant Depot and do NOT use pork or cooking alcohol. ⚠️ Cross-contamination risk due to shared cooking surfaces. View full guide at /allergens.',
     category: 'Dietary & Allergens',
     subcategory: 'Shellfish & Sesame',
-    tags: ['allergens', 'shellfish', 'eggs', 'nut-free', 'sesame-free', 'dairy-free', 'gluten-free option', 'halal', 'fda major 9', 'cross-contamination'],
+    tags: [
+      'allergens',
+      'shellfish',
+      'eggs',
+      'nut-free',
+      'sesame-free',
+      'dairy-free',
+      'gluten-free option',
+      'halal',
+      'fda major 9',
+      'cross-contamination',
+    ],
     confidence: 'high',
-    source_urls: ['/allergens']
+    source_urls: ['/allergens'],
   },
   {
     id: 'allergen-friendly-facility',
@@ -256,9 +304,17 @@ export const faqs: FaqItem[] = [
       '🏆 YES! We are proudly: 100% NUT-FREE (no peanuts or tree nuts ever), SESAME-FREE (no sesame oil or seeds), DAIRY-FREE (we use dairy-free butter), and offer GLUTEN-FREE soy sauce option. Our only major allergens are: Shellfish (shrimp, scallops, lobster - which guests can avoid) and Eggs (only in fried rice). This makes us one of the MOST allergen-friendly hibachi services available!',
     category: 'Dietary & Allergens',
     subcategory: 'Dietary Accommodations',
-    tags: ['allergen-friendly', 'nut-free', 'sesame-free', 'dairy-free', 'gluten-free', '100% safe', 'competitive advantage'],
+    tags: [
+      'allergen-friendly',
+      'nut-free',
+      'sesame-free',
+      'dairy-free',
+      'gluten-free',
+      '100% safe',
+      'competitive advantage',
+    ],
     confidence: 'high',
-    source_urls: ['/allergens']
+    source_urls: ['/allergens'],
   },
   {
     id: 'halal-certification',
@@ -267,9 +323,17 @@ export const faqs: FaqItem[] = [
       '✅ YES! All our proteins (chicken, beef, seafood) are halal-certified through Restaurant Depot. We do NOT use pork products, and sake is served as a complementary DRINK only (never used in cooking). Our dairy-free butter and vegetable oil are halal-compliant. We are proud to serve our Muslim customers with confidence!',
     category: 'Dietary & Allergens',
     subcategory: 'Dietary Accommodations',
-    tags: ['halal', 'halal-certified', 'restaurant depot', 'muslim', 'islamic dietary', 'no pork', 'no cooking alcohol'],
+    tags: [
+      'halal',
+      'halal-certified',
+      'restaurant depot',
+      'muslim',
+      'islamic dietary',
+      'no pork',
+      'no cooking alcohol',
+    ],
     confidence: 'high',
-    source_urls: ['/menu', '/allergens']
+    source_urls: ['/menu', '/allergens'],
   },
   {
     id: 'kosher-friendly',
@@ -278,9 +342,18 @@ export const faqs: FaqItem[] = [
       '✅ KOSHER-FRIENDLY (not certified): We do NOT use pork, use dairy-free butter (no meat/dairy mixing), and offer salmon (fish with fins and scales = kosher). Our Jewish customers can choose: Chicken, Beef, Salmon, or Vegetables (avoiding shellfish). Most Conservative and Reform Jewish customers find our menu very accommodating. For strictly Orthodox kosher certification, we would need rabbi approval and cannot guarantee due to our shellfish offerings.',
     category: 'Dietary & Allergens',
     subcategory: 'Dietary Accommodations',
-    tags: ['kosher', 'kosher-friendly', 'jewish', 'no pork', 'dairy-free', 'salmon', 'fins and scales', 'accommodating'],
+    tags: [
+      'kosher',
+      'kosher-friendly',
+      'jewish',
+      'no pork',
+      'dairy-free',
+      'salmon',
+      'fins and scales',
+      'accommodating',
+    ],
     confidence: 'high',
-    source_urls: ['/menu', '/allergens']
+    source_urls: ['/menu', '/allergens'],
   },
   {
     id: 'dairy-free-menu',
@@ -289,9 +362,16 @@ export const faqs: FaqItem[] = [
       '✅ YES! We use DAIRY-FREE butter for all cooking. This means our chicken, steak, seafood, and vegetables are naturally dairy-free. Perfect for lactose intolerant guests, paleo diets, and vegan customers. Only our fried rice contains eggs (no dairy). This is a MAJOR advantage over typical hibachi restaurants that use regular butter.',
     category: 'Dietary & Allergens',
     subcategory: 'Dietary Accommodations',
-    tags: ['dairy-free', 'lactose intolerant', 'no dairy', 'dairy-free butter', 'vegan option', 'paleo'],
+    tags: [
+      'dairy-free',
+      'lactose intolerant',
+      'no dairy',
+      'dairy-free butter',
+      'vegan option',
+      'paleo',
+    ],
     confidence: 'high',
-    source_urls: ['/menu', '/allergens']
+    source_urls: ['/menu', '/allergens'],
   },
   {
     id: 'nut-free-facility',
@@ -300,9 +380,17 @@ export const faqs: FaqItem[] = [
       '✅ 100% NUT-FREE! We do NOT use peanuts, tree nuts, or any nut products in our cooking, sauces, or ingredients. This makes us SAFE for severe nut allergy customers. We use canola oil for cooking (nut-free). ⚠️ However, we still use shared cooking surfaces, so please contact us for severe allergy protocols: cs@myhibachichef.com or (916) 740-8768.',
     category: 'Dietary & Allergens',
     subcategory: 'Dietary Accommodations',
-    tags: ['nut-free', '100% nut-free', 'peanut-free', 'tree nut-free', 'severe allergies', 'safe', 'canola oil'],
+    tags: [
+      'nut-free',
+      '100% nut-free',
+      'peanut-free',
+      'tree nut-free',
+      'severe allergies',
+      'safe',
+      'canola oil',
+    ],
     confidence: 'high',
-    source_urls: ['/allergens']
+    source_urls: ['/allergens'],
   },
   {
     id: 'gluten-free-options',
@@ -313,7 +401,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Gluten-Free',
     tags: ['gluten-free', 'celiac', 'gluten-free soy sauce', 'wheat-free', 'gf options'],
     confidence: 'high',
-    source_urls: ['/menu', '/allergens']
+    source_urls: ['/menu', '/allergens'],
   },
   {
     id: 'cross-contamination',
@@ -322,9 +410,15 @@ export const faqs: FaqItem[] = [
       'No. We use shared cooking surfaces (hibachi grill), shared utensils, and shared oil for all cooking. While we take precautions to accommodate dietary restrictions, we CANNOT GUARANTEE a 100% allergen-free environment. Airborne particles from shellfish, fish, and soy sauce may be present. If you have severe allergies, please contact us before booking to discuss safety protocols: cs@myhibachichef.com or (916) 740-8768.',
     category: 'Dietary & Allergens',
     subcategory: 'Cross‑Contact',
-    tags: ['cross-contamination', 'shared surfaces', 'allergen-free', 'severe allergies', 'safety protocols'],
+    tags: [
+      'cross-contamination',
+      'shared surfaces',
+      'allergen-free',
+      'severe allergies',
+      'safety protocols',
+    ],
     confidence: 'high',
-    source_urls: ['/allergens']
+    source_urls: ['/allergens'],
   },
   {
     id: 'menu-change-deadline',
@@ -335,7 +429,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Modifying a Booking',
     tags: ['menu changes', '12 hours', 'deadline', 'fresh ingredients', 'finalize menu'],
     confidence: 'high',
-    source_urls: ['/BookUs']
+    source_urls: ['/BookUs'],
   },
   {
     id: 'food-refund-policy',
@@ -346,7 +440,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Refunds & Credits',
     tags: ['food refund', 'no refund', 'food safety', '4 hours', 'leftovers', 'uneaten food'],
     confidence: 'high',
-    source_urls: ['/BookUs']
+    source_urls: ['/BookUs'],
   },
   {
     id: 'reschedule-timing',
@@ -357,7 +451,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Cancellation & Changes',
     tags: ['reschedule', 'free reschedule', '24 hours', '$100 fee', 'chef schedule'],
     confidence: 'high',
-    source_urls: ['/BookUs']
+    source_urls: ['/BookUs'],
   },
 
   // Policies (Cancellation, Weather, Refunds)
@@ -368,9 +462,18 @@ export const faqs: FaqItem[] = [
       '$100 deposit is refundable if canceled 4+ days before event, non-refundable within 4 days. One free reschedule allowed if requested 24+ hours before event; additional reschedules cost $100. Menu changes not allowed within 12 hours of event. No refund for ordered food as we cannot keep food out of refrigeration for more than 4 hours.',
     category: 'Policies (Cancellation, Weather, Refunds)',
     subcategory: 'Cancellation & Changes',
-    tags: ['4 days', 'deposit refundable', 'free reschedule', '24 hours', '$100 fee', 'menu changes', '12 hours', 'food safety'],
+    tags: [
+      '4 days',
+      'deposit refundable',
+      'free reschedule',
+      '24 hours',
+      '$100 fee',
+      'menu changes',
+      '12 hours',
+      'food safety',
+    ],
     confidence: 'high',
-    source_urls: ['/BookUs']
+    source_urls: ['/BookUs'],
   },
   {
     id: 'weather-policy',
@@ -381,7 +484,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Weather / Backup Plan',
     tags: ['rain', 'overhead covering', 'tent', 'patio', 'garage', 'no refund'],
     confidence: 'high',
-    source_urls: ['/BookUs']
+    source_urls: ['/BookUs'],
   },
 
   // Kids & Special Occasions
@@ -394,7 +497,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Birthdays/Anniversaries',
     tags: ['birthday', 'special events', 'family-friendly', 'dietary needs', '48 hours'],
     confidence: 'high',
-    source_urls: []
+    source_urls: [],
   },
 
   // Contact & Response Times
@@ -407,7 +510,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Best Way to Reach',
     tags: ['text', '916-740-8768', 'email', 'instagram', 'facebook', '1-2 hours'],
     confidence: 'high',
-    source_urls: ['/contact']
+    source_urls: ['/contact'],
   },
 
   // Additional Popular Questions Based on Competitor Analysis
@@ -420,7 +523,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Add‑ons & Sides',
     tags: ['third protein', 'additional protein', 'add-on', '+$10', 'more food'],
     confidence: 'high',
-    source_urls: ['/menu']
+    source_urls: ['/menu'],
   },
   {
     id: 'additional-enhancements',
@@ -438,10 +541,10 @@ export const faqs: FaqItem[] = [
       'edamame +$5',
       'gyoza +$10',
       '3rd protein +$10',
-      'sides'
+      'sides',
     ],
     confidence: 'high',
-    source_urls: ['/menu']
+    source_urls: ['/menu'],
   },
   {
     id: 'chef-arrival-time',
@@ -452,7 +555,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'General',
     tags: ['arrival time', '15-30 minutes early', 'setup time'],
     confidence: 'high',
-    source_urls: ['/BookUs']
+    source_urls: ['/BookUs'],
   },
   {
     id: 'protein-choices-different',
@@ -463,7 +566,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Included Items',
     tags: ['individual choices', 'different proteins', 'personalized'],
     confidence: 'high',
-    source_urls: ['/menu']
+    source_urls: ['/menu'],
   },
   {
     id: 'why-deposit-required',
@@ -474,7 +577,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Deposits & Balance',
     tags: ['deposit explanation', 'reservation confirmation', 'preparation costs'],
     confidence: 'high',
-    source_urls: ['/BookUs']
+    source_urls: ['/BookUs'],
   },
   {
     id: 'safety-precautions',
@@ -485,7 +588,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'General',
     tags: ['safety', 'propane', 'fire extinguisher', 'leak checks', 'protocols'],
     confidence: 'high',
-    source_urls: []
+    source_urls: [],
   },
   {
     id: 'receipt-invoice',
@@ -496,9 +599,9 @@ export const faqs: FaqItem[] = [
     subcategory: 'Deposits & Balance',
     tags: ['receipt', 'invoice', 'business', 'expense reimbursement'],
     confidence: 'high',
-    source_urls: ['/BookUs']
-  }
-]
+    source_urls: ['/BookUs'],
+  },
+];
 
 export const categories = [
   'Pricing & Minimums',
@@ -510,8 +613,8 @@ export const categories = [
   'Policies (Cancellation, Weather, Refunds)',
   'Kids & Special Occasions',
   'Corporate & Insurance',
-  'Contact & Response Times'
-]
+  'Contact & Response Times',
+];
 
 // Subcategory mapping
 export const subcategories = {
@@ -520,53 +623,53 @@ export const subcategories = {
     'Minimum Spend / Party Size',
     'Gratuity & Fees',
     'Travel Fees',
-    'Discounts / Group Rates'
+    'Discounts / Group Rates',
   ],
   'Menu & Upgrades': [
     'Included Items',
     'Protein Choices',
     'Premium Upgrades',
     'Add‑ons & Sides',
-    "Kids' Portions"
+    "Kids' Portions",
   ],
   'Booking & Payments': [
     'How to Book',
     'Deposits & Balance',
     'Payment Methods',
     'Scheduling & Availability',
-    'Modifying a Booking'
+    'Modifying a Booking',
   ],
   'Travel & Service Area': ['Coverage Radius', 'Travel Fees', 'Multi‑stop / Venue Rules'],
   'On‑Site Setup & Requirements': [
     'Space & Ventilation',
     'Power/Propane & Safety',
     'Tableware & Setup',
-    'Indoor vs Outdoor'
+    'Indoor vs Outdoor',
   ],
   'Dietary & Allergens': [
     'Gluten‑Free',
     'Vegetarian/Vegan',
     'Shellfish & Sesame',
     'Cross‑Contact',
-    'Dietary Accommodations'
+    'Dietary Accommodations',
   ],
   'Policies (Cancellation, Weather, Refunds)': [
     'Cancellation & Changes',
     'Weather / Backup Plan',
     'Refunds & Credits',
-    'Late / No‑Show'
+    'Late / No‑Show',
   ],
   'Kids & Special Occasions': [
     'Children Pricing & Portions',
     'Birthdays/Anniversaries',
-    'Weddings / Corporate Milestones'
+    'Weddings / Corporate Milestones',
   ],
   'Corporate & Insurance': ['W‑9 / Vendor Setup', 'COI / Liability Coverage', 'Tax & Invoicing'],
-  'Contact & Response Times': ['Best Way to Reach', 'Response SLAs', 'After‑hours / Weekends']
-}
+  'Contact & Response Times': ['Best Way to Reach', 'Response SLAs', 'After‑hours / Weekends'],
+};
 
 // Generate all tags dynamically from the FAQ data
-export const getAllTags = () => Array.from(new Set(faqs.flatMap(faq => faq.tags || []))).sort()
+export const getAllTags = () => Array.from(new Set(faqs.flatMap((faq) => faq.tags || []))).sort();
 
 // Pre-computed tags for better performance
 export const allTags = [
@@ -652,5 +755,5 @@ export const allTags = [
   'contact',
   'phone',
   'email',
-  'social media'
-]
+  'social media',
+];
