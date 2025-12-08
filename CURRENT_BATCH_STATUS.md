@@ -1,6 +1,6 @@
 # 🎯 My Hibachi - Current Batch Status
 
-**Last Updated:** December 7, 2025 **Purpose:** Single source of truth
+**Last Updated:** December 8, 2025 **Purpose:** Single source of truth
 for current batch status
 
 ---
@@ -49,29 +49,34 @@ for current batch status
 - [ ] Cron Job (5-min check) (30 min)
 - [ ] Daily Summary (9 AM) (30 min)
 
-### Phase 1.4: Frontend Fixes (TO BUILD 🔧)
+### Phase 1.4: Frontend Fixes (COMPLETED ✅)
 
-- [ ] ProtectedPhone component (1 hr)
-- [ ] Remove hardcoded phone/email from 10 files (1.5 hrs)
+- [x] ProtectedPhone component (1 hr)
+- [x] ProtectedPaymentEmail component
+- [x] Remove hardcoded phone/email from 13+ files (1.5 hrs)
+- [x] ESLint root config for monorepo lint-staged
+- [x] Dynamic pricing audit - fix incorrect prices in JSON/AI files
 - [ ] Remove Yelp/Google from Footer (15 min)
 - [ ] RBAC UI in Admin Panel (6 hrs)
 - [ ] Audit Log Viewer (4 hrs)
 - [ ] Scaling Health Dashboard (4 hrs)
 
-### Phase 1.5: Performance (TO BUILD 🔧)
+### Phase 1.5: Performance (COMPLETED ✅)
 
+- [x] N+1 Query Prevention (lead_service.py)
+- [x] Redis caching for business_config_service.py (15min TTL)
+- [x] Redis caching for knowledge_service.py (30min TTL)
+- [x] Cache invalidation helpers
 - [ ] Lazy DatePicker (2 hrs)
 - [ ] API Caching Headers (2 hrs)
 - [ ] Client-Side Data Caching (4 hrs)
-- [ ] Query Result Caching (3 hrs)
-- [ ] N+1 Query Prevention (4 hrs)
 - [ ] Response Compression (1 hr)
 
-### Phase 1.6: UI/UX Polish (TO BUILD 🔧)
+### Phase 1.6: UI/UX Polish (IN PROGRESS 🔧)
 
 - [ ] Global Skeleton Loaders (4 hrs)
-- [ ] Error Boundary System (3 hrs)
-- [ ] Toast Notification System (3 hrs)
+- [x] Error Boundary System (already exists)
+- [x] Toast Notification System (sonner) (3 hrs)
 - [ ] Form Auto-Save (4 hrs)
 - [ ] Accessibility Audit (6 hrs)
 
