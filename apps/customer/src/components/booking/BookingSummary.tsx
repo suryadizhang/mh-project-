@@ -1,22 +1,23 @@
-'use client'
+'use client';
 
-import { format } from 'date-fns'
-import React from 'react'
+import { format } from 'date-fns';
+import React from 'react';
 
-import type { BookingFormData } from '../../data/booking/types'
-import { usePricing } from '@/hooks/usePricing'
+import { usePricing } from '@/hooks/usePricing';
+
+import type { BookingFormData } from '../../data/booking/types';
 
 interface BookingSummaryProps {
-  formData: BookingFormData
-  isSubmitting: boolean
-  onSubmit: () => void
+  formData: BookingFormData;
+  isSubmitting: boolean;
+  onSubmit: () => void;
 }
 
 export function BookingSummary({ formData, isSubmitting, onSubmit }: BookingSummaryProps) {
   // Fetch dynamic pricing from database
-  const { adultPrice, childPrice, isLoading: isPricingLoading } = usePricing()
+  const { adultPrice, childPrice, isLoading: isPricingLoading } = usePricing();
 
-  const estimatedTotal = formData.guestCount * adultPrice // Simplified calculation
+  const estimatedTotal = formData.guestCount * adultPrice; // Simplified calculation
 
   return (
     <div className="booking-summary">
@@ -104,9 +105,8 @@ export function BookingSummary({ formData, isSubmitting, onSubmit }: BookingSumm
                 </div>
                 <div className="pricing-note">
                   <small>
-                    * Final pricing may vary based on specific menu selections and add-ons.
-                    Children (6-12) are ${childPrice} each. Final quote will be provided after
-                    booking.
+                    * Final pricing may vary based on specific menu selections and add-ons. Children
+                    (6-12) are ${childPrice} each. Final quote will be provided after booking.
                   </small>
                 </div>
               </div>
@@ -147,5 +147,5 @@ export function BookingSummary({ formData, isSubmitting, onSubmit }: BookingSumm
         </button>
       </div>
     </div>
-  )
+  );
 }
