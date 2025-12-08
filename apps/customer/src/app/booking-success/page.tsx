@@ -7,6 +7,7 @@ import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
 
 import Assistant from '@/components/chat/Assistant';
+import { useProtectedPhone, useProtectedPaymentEmail } from '@/components/ui/ProtectedPhone';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -59,6 +60,10 @@ const REVIEW_PLATFORMS = [
 ];
 
 function BookingSuccessContent() {
+  // Anti-scraper protected contact info
+  const { formatted: protectedPhone, tel: protectedTel } = useProtectedPhone();
+  const { email: protectedEmail } = useProtectedPaymentEmail();
+
   const searchParams = useSearchParams();
   const [booking, setBooking] = useState<BookingDetails | null>(null);
   const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
@@ -444,18 +449,18 @@ END:VCALENDAR`;
               </p>
               <div className="flex flex-col justify-center gap-3 sm:flex-row">
                 <a
-                  href="mailto:bookings@myhibachi.com"
+                  href={protectedEmail ? `mailto:${protectedEmail}` : '/contact'}
                   className="inline-flex items-center justify-center space-x-2 rounded-lg bg-red-600 px-6 py-2 font-medium text-white transition-colors hover:bg-red-700"
                 >
                   <span>✉️</span>
-                  <span>bookings@myhibachi.com</span>
+                  <span>{protectedEmail || 'Contact Us'}</span>
                 </a>
                 <a
-                  href="tel:+15551234567"
+                  href={protectedTel ? `tel:${protectedTel}` : '/contact'}
                   className="inline-flex items-center justify-center space-x-2 rounded-lg bg-green-600 px-6 py-2 font-medium text-white transition-colors hover:bg-green-700"
                 >
                   <span>📞</span>
-                  <span>(555) 123-4567</span>
+                  <span>{protectedPhone || 'Call Us'}</span>
                 </a>
               </div>
             </div>

@@ -2,6 +2,8 @@
 import './privacy.css'
 import Link from 'next/link'
 
+import { ProtectedPhone, ProtectedEmail } from '@/components/ui/ProtectedPhone'
+
 export const metadata: Metadata = {
   title: 'Privacy Policy - My Hibachi Chef',
   description: 'Privacy Policy and SMS Terms for My Hibachi Chef catering services. Learn how we collect, use, and protect your personal information.',
@@ -186,7 +188,7 @@ export default function PrivacyPage() {
             </ul>
             <h3>5.2 Communication Preferences</h3>
             <ul>
-              <li><strong>Email Opt-Out:</strong> Unsubscribe from promotional emails at any time by clicking the {'"Unsubscribe"'} link in any marketing email, or contact us at cs@myhibachichef.com</li>
+              <li><strong>Email Opt-Out:</strong> Unsubscribe from promotional emails at any time by clicking the {'"Unsubscribe"'} link in any marketing email, or use our <Link href="/contact">contact form</Link></li>
               <li><strong>SMS Opt-Out:</strong> Text <code>STOP</code> to discontinue SMS messages</li>
               <li><strong>One-Click Unsubscribe:</strong> All marketing emails include a direct unsubscribe link for instant removal from our mailing list (CAN-SPAM compliant)</li>
               <li><strong>Marketing Controls:</strong> Choose which types of promotional content you receive</li>
@@ -275,8 +277,8 @@ export default function PrivacyPage() {
               <h3>Privacy Officer</h3>
               <p><strong>my Hibachi LLC</strong></p>
               <h4>For Privacy-Related Inquiries:</h4>
-              <p><strong>Email:</strong> <a href="mailto:privacy@myhibachichef.com">privacy@myhibachichef.com</a></p>
-              <p><strong>Phone:</strong> <a href="tel:+19167408768">(916) 740-8768</a></p>
+              <p><strong>Email:</strong> <ProtectedEmail showIcon={false} text="Privacy Contact Form" /></p>
+              <p><strong>Phone:</strong> <ProtectedPhone showIcon={false} /></p>
               <p><strong>Response Time:</strong> We respond to privacy requests within 30 days</p>
               <h4>Service Areas (Data Processing Locations):</h4>
               <ul>
