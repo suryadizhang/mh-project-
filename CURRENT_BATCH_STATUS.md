@@ -56,7 +56,9 @@ for current batch status
 - [x] Remove hardcoded phone/email from 13+ files (1.5 hrs)
 - [x] ESLint root config for monorepo lint-staged
 - [x] Dynamic pricing audit - fix incorrect prices in JSON/AI files
-- [ ] Remove Yelp/Google from Footer (15 min)
+- [x] Dynamic pricing templates for FAQ/policy content (single source
+      of truth)
+- [x] Remove Yelp from Footer (15 min)
 - [ ] RBAC UI in Admin Panel (6 hrs)
 - [ ] Audit Log Viewer (4 hrs)
 - [ ] Scaling Health Dashboard (4 hrs)
@@ -67,7 +69,7 @@ for current batch status
 - [x] Redis caching for business_config_service.py (15min TTL)
 - [x] Redis caching for knowledge_service.py (30min TTL)
 - [x] Cache invalidation helpers
-- [ ] Lazy DatePicker (2 hrs)
+- [x] Lazy DatePicker wrapper component (2 hrs)
 - [ ] API Caching Headers (2 hrs)
 - [ ] Client-Side Data Caching (4 hrs)
 - [ ] Response Compression (1 hr)
