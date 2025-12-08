@@ -2,7 +2,6 @@
 
 import {
   ChevronRight,
-  ExternalLink,
   Facebook,
   FileText,
   Instagram,
@@ -52,14 +51,6 @@ export default function Footer() {
               className={styles.socialIcon}
             >
               <Facebook size={24} />
-            </a>
-            <a
-              href="https://www.yelp.com/biz/my-hibachi-fremont"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.socialIcon}
-            >
-              <ExternalLink size={24} />
             </a>
           </div>
         </div>
