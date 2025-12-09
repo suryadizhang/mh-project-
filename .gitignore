@@ -62,8 +62,10 @@ celerybeat-schedule*
 Thumbs.db
 
 # ===== Logs & Cache =====
-logs/
-*.log
+# Log files (but not app directories named 'logs')
+/*.log
+**/*.log
+/logs/
 .cache/
 .eslintcache
 
