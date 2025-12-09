@@ -47,11 +47,15 @@ applyTo: '**'
 - Tested code > Quick code
 - Documented code > Shipped code
 
-### 7. Single Source of Truth
+### 7. Single Source of Truth – No Duplicates
 
 - One place for each piece of info
 - No duplicate documentation
 - No duplicate logic
+- **Fix existing files** instead of creating new duplicates
+- If duplicates are necessary, consolidate or delete extras
+  immediately
+- Before creating any file, check if similar exists
 
 ### 8. Monorepo = Unified Deployment
 
@@ -103,6 +107,7 @@ All code must be:
 | Use `any` type broadly  | Type safety required       |
 | Silent error swallowing | Debugging impossible       |
 | TODO in production code | Incomplete work            |
+| Create duplicate files  | Fix existing files instead |
 
 ---
 
