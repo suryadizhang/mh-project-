@@ -158,16 +158,32 @@ git push origin feature/batch-X-description
 # 6. Merge PR
 ```
 
-### Merging to Main (Production)
+### Merging to Main (Production) - STRICT BATCH PR
+
+**⚠️ ONE PR PER BATCH TO MAIN - NO EXCEPTIONS**
 
 ```bash
-# 1. Ensure dev is stable (48+ hours)
-# 2. Create PR: dev → main
-# 3. Wait for CI to pass
-# 4. Get review approval
-# 5. Merge PR
-# 6. Monitor production
+# 1. Ensure dev is stable (48+ hours minimum)
+# 2. Verify ALL batch features complete
+# 3. Verify ALL batch tests passing (100%)
+# 4. Create PR: dev → main (or feature/batch-X → main)
+#    Title: "Batch X: [Description]"
+#    Example: "Batch 1: Core Booking + Security"
+# 5. Wait for CI to pass
+# 6. Get review approval
+# 7. Merge PR (squash or merge commit)
+# 8. Monitor production for 24 hours
+# 9. Only THEN start Batch X+1 PR to main
 ```
+
+### Batch PR Checklist (Before Creating PR to Main):
+
+- [ ] All batch features implemented
+- [ ] All batch tests passing locally
+- [ ] Staged in `dev` for 48+ hours
+- [ ] No other batch files included
+- [ ] PR title follows: `Batch X: Description`
+- [ ] All commits use `feat(batch-X):` format
 
 ---
 
