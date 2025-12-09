@@ -14,6 +14,43 @@ applyTo: '**'
 2. **Test before merge** – All tests must pass before PR approval
 3. **Test the right things** – Business logic > UI pixel tests
 4. **Fast feedback** – Unit tests run in seconds, not minutes
+5. **Test LOCALLY before PR** – Always verify tests pass locally
+   before creating or updating PRs
+
+---
+
+## 🚀 Local Testing Before PR (MANDATORY)
+
+**Always run tests locally before creating or updating a PR:**
+
+### Frontend Tests:
+
+```bash
+cd apps/customer
+npm run test -- --run
+# All tests must pass (currently 208 tests)
+```
+
+### Backend Tests:
+
+```bash
+cd apps/backend
+pip install -r requirements.txt  # Ensure dependencies are current
+pytest tests/ -v --tb=short
+# Note: Some tests may fail due to auth/DB requirements - focus on unit tests
+```
+
+### Verify Dependencies:
+
+```bash
+# Backend - check for conflicts
+pip check
+
+# Frontend - check for issues
+npm audit
+```
+
+**DO NOT push code that fails local tests to a PR branch.**
 
 ---
 
