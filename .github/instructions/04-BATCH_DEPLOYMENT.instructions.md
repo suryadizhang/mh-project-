@@ -176,27 +176,58 @@ applyTo: '**'
 
 ---
 
-## 📦 Incremental Batch Deployment (CRITICAL)
+## 📦 Strict One-PR-Per-Batch Deployment (CRITICAL)
 
-**Main branch receives ONLY the files for each batch when that batch
-is ready.**
+**OPTION A: Industry-standard strict batch deployment.**
 
-### The Principle:
+Each batch = ONE Pull Request to main. No exceptions.
+
+### The Workflow:
 
 ```
-Feature Branch          →  Main Branch
-─────────────────────────────────────────
-Batch 1 PR merges       →  Gets ONLY Batch 1 files
-Batch 2 PR merges       →  Gets ONLY Batch 2 files (builds on 1)
-Batch 3 PR merges       →  Gets ONLY Batch 3 files (builds on 1+2)
+┌─────────────────────────────────────────────────────────────┐
+│                  STRICT BATCH PR WORKFLOW                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  feature/batch-1-*  ──PR──►  dev  ──PR──►  main             │
+│       (work)              (test)        (production)        │
+│                                                              │
+│  ⚠️  ONE PR per batch to main                               │
+│  ⚠️  Batch 2 PR cannot merge until Batch 1 is in main      │
+│  ⚠️  No mixing batch files in same PR                       │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+### Step-by-Step Process:
+
+| Step | Action                       | Branch                  | Target |
+| ---- | ---------------------------- | ----------------------- | ------ |
+| 1    | Create feature branch        | `feature/batch-X-*`     | -      |
+| 2    | Develop all batch X features | `feature/batch-X-*`     | -      |
+| 3    | PR to dev for staging        | `feature/batch-X-*`     | `dev`  |
+| 4    | Test in staging (48+ hours)  | `dev`                   | -      |
+| 5    | **Single PR to main**        | `dev` or `feature/*`    | `main` |
+| 6    | Monitor production           | `main`                  | -      |
+| 7    | Start Batch X+1              | `feature/batch-(X+1)-*` | -      |
+
+### The Golden Rules:
+
+| Rule                           | Description                       |
+| ------------------------------ | --------------------------------- |
+| **ONE batch = ONE PR to main** | Never combine batches             |
+| **Sequential only**            | Batch 2 waits for Batch 1 in main |
+| **Complete batches only**      | No partial batch merges           |
+| **All tests must pass**        | 100% batch tests before PR        |
+| **48-hour staging**            | Mandatory staging verification    |
 
 ### Why This Matters:
 
-1. **Traceability** – Each batch = traceable deployment
-2. **Rollback** – Can revert entire batch if issues
-3. **Bug hunting** – `git bisect` finds which batch broke things
-4. **Clean history** – Clear audit trail of what shipped when
+1. **Traceability** – Each batch = one identifiable deployment
+2. **Rollback** – Revert entire batch with one `git revert`
+3. **Bug hunting** – `git bisect` finds exact batch that broke
+4. **Clean history** – Clear audit trail per deployment
+5. **Accountability** – Know exactly what shipped when
 
 ### Batch File Manifests:
 
@@ -245,16 +276,35 @@ apps/backend/src/api/v1/inbox/*
 apps/admin/src/components/inbox/*
 ```
 
-### PR Scope Rules:
+### PR Scope Rules (STRICTLY ENFORCED):
 
-| Rule                               | Description                            |
-| ---------------------------------- | -------------------------------------- |
-| **One batch per PR to main**       | Don't combine batches                  |
-| **Only batch files in PR**         | No unrelated changes                   |
-| **Shared code allowed**            | Utils, types, configs that batch needs |
-| **Tests for batch features**       | Include relevant test files            |
-| **Docs for batch features**        | Include relevant documentation         |
-| **Feature flags for partial work** | Protect code that exists but not ready |
+| Rule                      | Description                           | Violation = |
+| ------------------------- | ------------------------------------- | ----------- |
+| **ONE batch per PR**      | Never combine Batch 1 + Batch 2 files | PR Rejected |
+| **Only batch files**      | No unrelated changes allowed          | PR Rejected |
+| **Complete batch only**   | All batch features or none            | PR Rejected |
+| **All tests passing**     | 100% of batch tests must pass         | PR Blocked  |
+| **48-hour staging**       | Must be stable in dev first           | PR Blocked  |
+| **Batch commit messages** | All commits: `feat(batch-X): ...`     | PR Rejected |
+
+### What CAN Be Included:
+
+| ✅ Allowed               | Example                                   |
+| ------------------------ | ----------------------------------------- |
+| Batch-specific code      | `booking_service.py` for Batch 1          |
+| Batch-specific tests     | `test_booking_service.py`                 |
+| Shared utils (first use) | `utils/validators.py` if Batch 1 needs it |
+| Config for batch         | Feature flags for this batch              |
+| Docs for batch features  | API docs for new endpoints                |
+
+### What CANNOT Be Included:
+
+| ❌ NOT Allowed      | Why                        |
+| ------------------- | -------------------------- |
+| Future batch code   | Batch 2 code in Batch 1 PR |
+| Unrelated fixes     | Random bug fixes           |
+| Planning docs       | `*_PLAN.md`, `*_STATUS.md` |
+| Incomplete features | Partial implementations    |
 
 ### What About Shared/Common Code?
 
