@@ -19,9 +19,6 @@ jobs:
   test-frontend:
     name: Frontend Tests
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/customer
 
     steps:
       - name: Checkout code
@@ -39,10 +36,12 @@ jobs:
 
       - name: Run TypeScript check
         run: npx tsc --noEmit
+        working-directory: apps/customer
         continue-on-error: true
 
       - name: Run tests
         run: npm run test -- --run --reporter=verbose
+        working-directory: apps/customer
 
       - name: Upload test results
         if: always()
