@@ -71,6 +71,61 @@ const CURRENT_VERSION = 1;
 const DEFAULT_DEBOUNCE_MS = 1000;
 const DEFAULT_EXPIRATION_MS = 24 * 60 * 60 * 1000; // 24 hours
 
+/**
+ * Default deny list for sensitive fields that should NEVER be saved to localStorage.
+ * These fields are automatically excluded unless explicitly overridden.
+ * This prevents accidental exposure of PII or sensitive data.
+ */
+const DEFAULT_SENSITIVE_FIELDS: string[] = [
+  // Payment/Financial
+  'cardNumber',
+  'card_number',
+  'creditCard',
+  'credit_card',
+  'cvv',
+  'cvc',
+  'securityCode',
+  'security_code',
+  'expiry',
+  'expiryDate',
+  'expiry_date',
+  'accountNumber',
+  'account_number',
+  'routingNumber',
+  'routing_number',
+  'bankAccount',
+  'bank_account',
+  // Authentication
+  'password',
+  'currentPassword',
+  'newPassword',
+  'confirmPassword',
+  'pin',
+  'token',
+  'accessToken',
+  'refreshToken',
+  'apiKey',
+  'api_key',
+  'secret',
+  'privateKey',
+  'private_key',
+  // Personal Identifiers
+  'ssn',
+  'socialSecurityNumber',
+  'social_security',
+  'taxId',
+  'tax_id',
+  'driverLicense',
+  'drivers_license',
+  'passportNumber',
+  'passport_number',
+  // Healthcare
+  'healthInfo',
+  'medicalRecord',
+  'diagnosis',
+  'prescription',
+];
+
 export function useAutoSave<T extends Record<string, unknown>>({
   key,
   data,
@@ -90,15 +145,30 @@ export function useAutoSave<T extends Record<string, unknown>>({
   const lastDataRef = useRef<string>('');
 
   /**
-   * Filter out excluded fields from data
+   * Filter out excluded fields from data.
+   * Automatically excludes sensitive fields from DEFAULT_SENSITIVE_FIELDS
+   * plus any additional fields specified in excludeFields.
    */
   const filterData = useCallback((inputData: T): Partial<T> => {
-    if (excludeFields.length === 0) return inputData;
-    
     const filtered = { ...inputData };
+    
+    // Always exclude default sensitive fields (case-insensitive check)
+    const inputKeys = Object.keys(filtered);
+    inputKeys.forEach((key) => {
+      const lowerKey = key.toLowerCase();
+      if (DEFAULT_SENSITIVE_FIELDS.some(sensitive => 
+        lowerKey === sensitive.toLowerCase() || 
+        lowerKey.includes(sensitive.toLowerCase())
+      )) {
+        delete filtered[key as keyof T];
+      }
+    });
+    
+    // Also exclude explicitly specified fields
     excludeFields.forEach((field) => {
       delete filtered[field];
     });
+    
     return filtered;
   }, [excludeFields]);
 
