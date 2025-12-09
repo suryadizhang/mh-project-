@@ -33,6 +33,59 @@ main (production)
 
 ---
 
+## 🧹 Clean Main Branch Policy
+
+**Main branch must ONLY contain production-ready, deployed code.**
+
+### What Goes in `main`:
+
+| ✅ Allowed                      | ❌ NOT Allowed                    |
+| ------------------------------- | --------------------------------- |
+| Working source code             | `*_PLAN.md` planning documents    |
+| `README.md`, `CONTRIBUTING.md`  | `*_ANALYSIS.md` development notes |
+| `.github/instructions/` prompts | `*_SUMMARY.md` batch tracking     |
+| CI/CD workflows                 | `*_STATUS.md` progress files      |
+| Deployment guides               | `BATCH_*.md` batch documentation  |
+| API documentation (`docs/`)     | Development/debug logs            |
+| Essential configuration         | Temporary files, WIP notes        |
+
+### Why Keep Main Clean:
+
+1. **Traceability** – Each merge = one batch = findable bugs
+2. **Rollback** – Clean history enables `git revert` by batch
+3. **Bisect** – `git bisect` works when commits are atomic
+4. **Audit** – Easy to see what changed per deployment
+
+### Where Planning Docs Go:
+
+```
+feature/batch-X-*     ← Planning docs stay HERE during development
+  └── BATCH_X_PLAN.md
+  └── BATCH_X_STATUS.md
+  └── Implementation notes
+
+archives/             ← Move completed batch docs here (gitignored)
+  └── batch-1/
+  └── batch-2/
+
+Local only            ← Keep development notes local
+```
+
+### Commit Message for Batches:
+
+```bash
+# Good - traceable to batch
+feat(batch-1): add Stripe payment integration
+fix(batch-1): resolve webhook signature validation
+docs(batch-1): update payment API documentation
+
+# Bad - not traceable
+feat: add payments
+fix: webhook bug
+```
+
+---
+
 ## 🚫 Branch Rules
 
 ### NEVER Do:
