@@ -70,18 +70,21 @@ export default function BookUsPageClient() {
   const formValues = watch();
 
   // Auto-save callback to restore form data
-  const handleRestore = useCallback((savedData: Partial<BookingFormData>) => {
-    Object.entries(savedData).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        // Handle Date conversion for eventDate
-        if (key === 'eventDate' && typeof value === 'string') {
-          setValue(key as keyof BookingFormData, new Date(value) as unknown as never);
-        } else {
-          setValue(key as keyof BookingFormData, value as never);
+  const handleRestore = useCallback(
+    (savedData: Partial<BookingFormData>) => {
+      Object.entries(savedData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          // Handle Date conversion for eventDate
+          if (key === 'eventDate' && typeof value === 'string') {
+            setValue(key as keyof BookingFormData, new Date(value) as unknown as never);
+          } else {
+            setValue(key as keyof BookingFormData, value as never);
+          }
         }
-      }
-    });
-  }, [setValue]);
+      });
+    },
+    [setValue],
+  );
 
   // Auto-save form data to localStorage
   const { hasSavedData, lastSaved, clearSavedData, isSaving } = useAutoSave<BookingFormData>({
@@ -385,7 +388,7 @@ export default function BookUsPageClient() {
             <div className="booking-form-container">
               {/* Auto-save status indicator */}
               {autoSaveStatus !== 'idle' && (
-                <div className="auto-save-indicator mb-3 d-flex align-items-center justify-content-end">
+                <div className="auto-save-indicator d-flex align-items-center justify-content-end mb-3">
                   {autoSaveStatus === 'saving' && (
                     <span className="text-muted small">
                       <i className="bi bi-arrow-repeat spin me-1"></i>
@@ -400,29 +403,31 @@ export default function BookUsPageClient() {
                   )}
                 </div>
               )}
-              
+
               {/* Show restore notice if there's saved data */}
               {hasSavedData && lastSaved && (
                 <div className="alert alert-info alert-dismissible fade show mb-3" role="alert">
                   <i className="bi bi-info-circle me-2"></i>
                   <strong>Draft restored!</strong> Your previous booking form was saved on{' '}
                   {lastSaved.toLocaleDateString()} at {lastSaved.toLocaleTimeString()}.
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="btn btn-sm btn-link text-info ms-2"
                     onClick={clearSavedData}
                   >
                     Clear draft
                   </button>
-                  <button 
-                    type="button" 
-                    className="btn-close" 
+                  <button
+                    type="button"
+                    className="btn-close"
                     aria-label="Close"
-                    onClick={() => {/* Just hides the alert */}}
+                    onClick={() => {
+                      /* Just hides the alert */
+                    }}
                   ></button>
                 </div>
               )}
-              
+
               <form onSubmit={handleSubmit(onSubmit)} className="booking-form">
                 {/* Contact Information */}
                 <div className="form-section">
