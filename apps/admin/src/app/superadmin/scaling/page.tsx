@@ -391,10 +391,19 @@ export default function ScalingDashboardPage() {
 
       if (readinessRes) {
         // Handle both success and 503 responses
-        const readinessData = await readinessRes.json();
-        setReadinessData(
-          readinessRes.ok ? readinessData : readinessData.detail
-        );
+        const readinessJson = await readinessRes.json();
+        if (readinessRes.ok) {
+          setReadinessData(readinessJson);
+        } else {
+          // Construct a valid ReadinessResponse object for non-OK statuses
+          setReadinessData({
+            status: 'not_ready',
+            timestamp: new Date().toISOString(),
+            checks: readinessJson.checks || {},
+            ready: false,
+            details: typeof readinessJson.detail === 'string' ? readinessJson.detail : 'Service not ready',
+          });
+        }
       }
 
       setLastRefresh(new Date());

@@ -113,7 +113,7 @@ class KnowledgeService:
 
     def _make_cache_key(self, prefix: str, *args, **kwargs) -> str:
         """Generate a sanitized cache key from method name and arguments.
-        
+
         Security: Excludes sensitive identifiers from cache keys to prevent
         exposure in Redis key listings or logs. Uses SHA256 for key hashing.
         """
@@ -124,7 +124,7 @@ class KnowledgeService:
         }
         # Normalize args to prevent injection
         safe_args = [str(a)[:100] for a in args]  # Truncate long values
-        
+
         key_data = {
             "args": safe_args,
             "kwargs": safe_kwargs,
@@ -140,7 +140,7 @@ class KnowledgeService:
 
     async def _get_cached(self, key: str) -> Optional[Any]:
         """Get value from cache if available.
-        
+
         Logs cache operations at debug level for audit trail.
         Does not log the actual key to prevent sensitive data exposure.
         """
@@ -168,7 +168,7 @@ class KnowledgeService:
 
     async def _set_cached(self, key: str, value: Any, ttl: int) -> None:
         """Set value in cache if available.
-        
+
         Logs cache operations at debug level for audit trail.
         Does not log the actual key or value to prevent sensitive data exposure.
         """
@@ -214,7 +214,6 @@ class KnowledgeService:
         )
         cached = await self._get_cached(cache_key)
         if cached is not None:
-            return cached
             return cached
 
         result = await self.business_rules.get_rule_by_category(category)
