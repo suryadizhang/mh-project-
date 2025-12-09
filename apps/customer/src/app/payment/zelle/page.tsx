@@ -31,7 +31,7 @@ export default function ZellePaymentPage() {
   const [copiedField, setCopiedField] = useState<string>('');
 
   // Use protected hooks for anti-scraping
-  const { formatted: zellePhone, tel: zelleTel } = useProtectedPhone();
+  const { formatted: zellePhone } = useProtectedPhone();
   const { email: zelleEmail } = useProtectedPaymentEmail();
 
   useEffect(() => {

@@ -13,8 +13,7 @@ Usage:
 import hashlib
 import logging
 import re
-import time
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware

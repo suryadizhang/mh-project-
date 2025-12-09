@@ -2,7 +2,7 @@
 
 import { Check, Copy, ExternalLink, Mail, Phone, QrCode, Smartphone } from 'lucide-react';
 import QRCodeGenerator from 'qrcode';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 import { ProtectedPhone, ProtectedEmail, useProtectedPhone, useProtectedPaymentEmail } from '@/components/ui/ProtectedPhone';
 import { apiFetch } from '@/lib/api';
@@ -48,7 +48,7 @@ export default function AlternativePaymentOptions({
   });
 
   // Use protected hooks for phone and email
-  const { formatted: protectedPhoneFormatted, tel: protectedTel } = useProtectedPhone();
+  const { formatted: protectedPhoneFormatted } = useProtectedPhone();
   const { email: paymentEmail } = useProtectedPaymentEmail();
 
   const paymentDetails = {
