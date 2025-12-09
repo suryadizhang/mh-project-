@@ -221,6 +221,78 @@ test.describe('Booking Flow', () => {
 
 ---
 
+## 🔧 Fixing Pre-Existing Test Failures
+
+**When you discover pre-existing test failures, you MUST fix them
+properly.**
+
+### Why This Matters
+
+Pre-existing broken tests indicate:
+
+- Tests don't match actual component behavior
+- Component API changed but tests weren't updated
+- Mocks are incorrect or outdated
+- Tests were written for planned features, not implemented ones
+
+### Mandatory Process
+
+1. **Never skip or disable tests** – Fix them to match reality
+2. **Understand the component first** – Read the actual implementation
+3. **Update tests to match behavior** – Tests should reflect what code
+   DOES, not what we wish it did
+4. **Verify the fix is correct** – Run tests multiple times to ensure
+   stability
+
+### Common Fix Patterns
+
+| Problem                          | Solution                                                                       |
+| -------------------------------- | ------------------------------------------------------------------------------ |
+| Wrong text/label in test         | Check actual component output, update test to match                            |
+| Mock not matching real API       | Check what function the component actually calls (e.g., `apiFetch` vs `fetch`) |
+| Multiple elements found          | Use more specific selectors (`getByRole`, `getByLabelText`, or `getAllBy*`)    |
+| HTML5 validation blocking submit | Use `fireEvent.submit(form)` instead of button click                           |
+| Missing import in component      | Add the import (e.g., `import React from 'react'`)                             |
+| Timeout waiting for element      | Component may not render expected text – verify actual output                  |
+
+### Test-to-Component Alignment Checklist
+
+Before marking tests as "fixed":
+
+- [ ] Test assertions match ACTUAL component output
+- [ ] Mocks target the ACTUAL functions called
+- [ ] Selectors are specific enough (no "multiple elements found")
+- [ ] Async operations properly awaited
+- [ ] Form submission bypasses HTML5 validation if needed
+- [ ] All imports present in component file
+
+### Example: Fixing a Misaligned Test
+
+**Before (broken):**
+
+```tsx
+// Test expects "Payment Summary" but component shows "Final Payment Summary"
+expect(screen.getByText('Payment Summary')).toBeInTheDocument();
+```
+
+**After (fixed):**
+
+```tsx
+// Match what the component ACTUALLY renders
+expect(screen.getByText('Final Payment Summary')).toBeInTheDocument();
+```
+
+### When Tests Reveal Actual Bugs
+
+If tests fail because the COMPONENT is wrong (not the test):
+
+1. Document the bug
+2. Fix the component
+3. Verify test passes with correct component behavior
+4. Never "fix" a test to accept wrong behavior
+
+---
+
 ## 🔄 Test Commands
 
 ### Backend:
