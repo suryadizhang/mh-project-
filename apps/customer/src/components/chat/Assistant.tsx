@@ -319,10 +319,17 @@ export default function Assistant({ page }: AssistantProps) {
           typeof window !== 'undefined' &&
           (window as unknown as { dataLayer?: unknown[] }).dataLayer
         ) {
+          // Sanitize user input - use keyword category instead of raw text (PII protection)
+          const getSanitizedIntent = (message: string): string => {
+            const lowerMessage = message.toLowerCase();
+            const foundKeyword = aiCanHandleKeywords.find(k => lowerMessage.includes(k));
+            return foundKeyword || 'general_inquiry';
+          };
+
           (window as unknown as { dataLayer: unknown[] }).dataLayer.push({
             event: 'ai_auto_resumed',
             previous_escalation: escalationReason,
-            user_intent: content.toLowerCase().substring(0, 50),
+            user_intent: getSanitizedIntent(content),
           });
         }
         // Continue to AI processing below
@@ -926,6 +933,15 @@ export default function Assistant({ page }: AssistantProps) {
               {/* Messenger Option */}
               <button
                 onClick={() => {
+                  // Helper for fallback to Facebook page (prevents tabnabbing)
+                  const openFacebookPage = () => {
+                    window.open(
+                      'https://www.facebook.com/people/My-hibachi/61577483702847/',
+                      '_blank',
+                      'noopener,noreferrer'
+                    );
+                  };
+
                   try {
                     if (window.FB?.CustomerChat?.show) {
                       window.FB.CustomerChat.show();
@@ -940,19 +956,11 @@ export default function Assistant({ page }: AssistantProps) {
                         });
                       }
                     } else {
-                      // Fallback to Facebook page
-                      window.open(
-                        'https://www.facebook.com/people/My-hibachi/61577483702847/',
-                        '_blank',
-                      );
+                      openFacebookPage();
                     }
                   } catch (error) {
                     console.warn('Error opening Messenger:', error);
-                    // Fallback to Facebook page
-                    window.open(
-                      'https://www.facebook.com/people/My-hibachi/61577483702847/',
-                      '_blank',
-                    );
+                    openFacebookPage();
                   }
                   setShowHandoff(false);
                 }}
