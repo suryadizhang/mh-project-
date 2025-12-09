@@ -105,34 +105,92 @@ class KnowledgeService:
         self.training = TrainingDataService(db)
         self.formatters = KnowledgeFormatters()
 
+    # Keys that should NOT be included in cache key generation (may contain sensitive data)
+    _SENSITIVE_CACHE_KEYS = frozenset([
+        'user_id', 'customer_id', 'email', 'phone', 'name', 'address',
+        'token', 'password', 'ssn', 'card', 'account', 'secret'
+    ])
+
     def _make_cache_key(self, prefix: str, *args, **kwargs) -> str:
-        """Generate a cache key from method name and arguments"""
-        key_data = {
-            "args": [str(a) for a in args],
-            "kwargs": {k: str(v) for k, v in kwargs.items()},
+        """Generate a sanitized cache key from method name and arguments.
+        
+        Security: Excludes sensitive identifiers from cache keys to prevent
+        exposure in Redis key listings or logs. Uses SHA256 for key hashing.
+        """
+        # Filter out sensitive kwargs
+        safe_kwargs = {
+            k: str(v) for k, v in kwargs.items()
+            if not any(sensitive in k.lower() for sensitive in self._SENSITIVE_CACHE_KEYS)
         }
-        key_hash = hashlib.md5(json.dumps(key_data, sort_keys=True).encode()).hexdigest()[:12]
-        station_part = f":{self.station_id}" if self.station_id else ""
+        # Normalize args to prevent injection
+        safe_args = [str(a)[:100] for a in args]  # Truncate long values
+        
+        key_data = {
+            "args": safe_args,
+            "kwargs": safe_kwargs,
+        }
+        # Use SHA256 instead of MD5 for security
+        key_hash = hashlib.sha256(json.dumps(key_data, sort_keys=True).encode()).hexdigest()[:16]
+        # Sanitize station_id to prevent injection
+        station_part = ""
+        if self.station_id:
+            sanitized_station = ''.join(c for c in str(self.station_id) if c.isalnum() or c in '-_')
+            station_part = f":{sanitized_station[:32]}"
         return f"knowledge:{prefix}{station_part}:{key_hash}"
 
     async def _get_cached(self, key: str) -> Optional[Any]:
-        """Get value from cache if available"""
+        """Get value from cache if available.
+        
+        Logs cache operations at debug level for audit trail.
+        Does not log the actual key to prevent sensitive data exposure.
+        """
         if not self.cache:
             return None
         try:
-            return await self.cache.get(key)
+            result = await self.cache.get(key)
+            # Structured audit log without exposing full key
+            key_prefix = key.split(':')[1] if ':' in key else 'unknown'
+            if result is not None:
+                logger.debug("Cache read: hit", extra={
+                    'action': 'cache_read',
+                    'outcome': 'hit',
+                    'key_prefix': key_prefix,
+                    'station_id': self.station_id,
+                })
+            return result
         except Exception as e:
-            logger.warning(f"Cache read failed for {key}: {e}")
+            logger.warning("Cache read failed", extra={
+                'action': 'cache_read',
+                'outcome': 'error',
+                'error_type': type(e).__name__,
+            })
             return None
 
     async def _set_cached(self, key: str, value: Any, ttl: int) -> None:
-        """Set value in cache if available"""
+        """Set value in cache if available.
+        
+        Logs cache operations at debug level for audit trail.
+        Does not log the actual key or value to prevent sensitive data exposure.
+        """
         if not self.cache:
             return
         try:
             await self.cache.set(key, value, ttl=ttl)
+            # Structured audit log without exposing full key or value
+            key_prefix = key.split(':')[1] if ':' in key else 'unknown'
+            logger.debug("Cache write: success", extra={
+                'action': 'cache_write',
+                'outcome': 'success',
+                'key_prefix': key_prefix,
+                'ttl': ttl,
+                'station_id': self.station_id,
+            })
         except Exception as e:
-            logger.warning(f"Cache write failed for {key}: {e}")
+            logger.warning("Cache write failed", extra={
+                'action': 'cache_write',
+                'outcome': 'error',
+                'error_type': type(e).__name__,
+            })
 
     # ============================================
     # BUSINESS RULES & POLICIES (with caching)
@@ -143,7 +201,6 @@ class KnowledgeService:
         cache_key = self._make_cache_key("charter")
         cached = await self._get_cached(cache_key)
         if cached is not None:
-            logger.debug(f"📦 Cache HIT: {cache_key}")
             return cached
 
         result = await self.business_rules.get_business_charter()
@@ -157,7 +214,7 @@ class KnowledgeService:
         )
         cached = await self._get_cached(cache_key)
         if cached is not None:
-            logger.debug(f"📦 Cache HIT: {cache_key}")
+            return cached
             return cached
 
         result = await self.business_rules.get_rule_by_category(category)
@@ -185,7 +242,6 @@ class KnowledgeService:
         cache_key = self._make_cache_key("faqs", category=category)
         cached = await self._get_cached(cache_key)
         if cached is not None:
-            logger.debug(f"📦 Cache HIT: {cache_key}")
             return cached
 
         result = await self.faq.get_faqs_by_category(category)
@@ -197,7 +253,6 @@ class KnowledgeService:
         cache_key = self._make_cache_key("top_faqs", limit=limit)
         cached = await self._get_cached(cache_key)
         if cached is not None:
-            logger.debug(f"📦 Cache HIT: {cache_key}")
             return cached
 
         result = await self.faq.get_top_faqs(limit)
@@ -209,7 +264,6 @@ class KnowledgeService:
         cache_key = self._make_cache_key("faq_categories")
         cached = await self._get_cached(cache_key)
         if cached is not None:
-            logger.debug(f"📦 Cache HIT: {cache_key}")
             return cached
 
         result = await self.faq.get_all_categories()
@@ -227,7 +281,6 @@ class KnowledgeService:
         cache_key = self._make_cache_key("menu", category=category)
         cached = await self._get_cached(cache_key)
         if cached is not None:
-            logger.debug(f"📦 Cache HIT: {cache_key}")
             return cached
 
         result = await self.menu.get_menu_by_category(category)
@@ -239,7 +292,6 @@ class KnowledgeService:
         cache_key = self._make_cache_key("proteins", premium_only=premium_only)
         cached = await self._get_cached(cache_key)
         if cached is not None:
-            logger.debug(f"📦 Cache HIT: {cache_key}")
             return cached
 
         result = await self.menu.get_proteins(premium_only)
@@ -251,7 +303,6 @@ class KnowledgeService:
         cache_key = self._make_cache_key("pricing_tiers", guest_count=guest_count)
         cached = await self._get_cached(cache_key)
         if cached is not None:
-            logger.debug(f"📦 Cache HIT: {cache_key}")
             return cached
 
         result = await self.menu.get_pricing_tiers(guest_count)

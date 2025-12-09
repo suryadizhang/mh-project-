@@ -92,9 +92,19 @@ class CachingMiddleware(BaseHTTPMiddleware):
                 return (max_age, is_private, stale)
         return CacheConfig.DEFAULT_CONFIG
 
-    def _generate_etag(self, content: bytes) -> str:
-        """Generate ETag from response content."""
-        return f'"{hashlib.md5(content).hexdigest()}"'
+    def _generate_etag(self, content: bytes) -> Optional[str]:
+        """Generate ETag from response content.
+        
+        Returns None if content is empty or cannot be hashed.
+        Uses SHA256 for stronger hashing than MD5.
+        """
+        if not content or len(content) == 0:
+            return None
+        try:
+            # Use SHA256 for stronger hashing
+            return f'"sha256-{hashlib.sha256(content).hexdigest()[:32]}"'
+        except Exception:
+            return None
 
     def _build_cache_control(
         self, max_age: int, is_private: bool, stale_while_revalidate: int
@@ -154,21 +164,34 @@ class CachingMiddleware(BaseHTTPMiddleware):
             max_age, is_private, stale
         )
 
-        # Add Vary header for proper caching with different Accept headers
-        response.headers["vary"] = "Accept, Accept-Encoding, Authorization"
+        # Add Vary header - exclude Authorization for public resources to prevent cache confusion
+        if is_private:
+            response.headers["vary"] = "Accept, Accept-Encoding, Authorization"
+        else:
+            response.headers["vary"] = "Accept, Accept-Encoding"
 
-        # Add ETag if enabled and we have content
-        if self.enable_etag and hasattr(response, "body"):
+        # Add ETag if enabled, response has body, and is not streaming
+        # Only process buffered responses (not StreamingResponse)
+        if (
+            self.enable_etag
+            and hasattr(response, "body")
+            and response.body is not None
+            and not hasattr(response, "body_iterator")  # Skip streaming responses
+        ):
             try:
-                etag = self._generate_etag(response.body)
-                response.headers["etag"] = etag
+                body_bytes = response.body
+                # Ensure we have actual bytes to hash
+                if isinstance(body_bytes, bytes) and len(body_bytes) > 0:
+                    etag = self._generate_etag(body_bytes)
+                    if etag:  # Only set if generation succeeded
+                        response.headers["etag"] = etag
 
-                # Handle conditional request
-                if if_none_match and if_none_match == etag:
-                    return Response(status_code=304, headers={"etag": etag})
-            except Exception:
-                # If we can't generate ETag, just skip it
-                pass
+                        # Handle conditional request
+                        if if_none_match and if_none_match == etag:
+                            return Response(status_code=304, headers={"etag": etag})
+            except (AttributeError, TypeError):
+                # Response body not accessible or not bytes, skip ETag
+                logger.debug("Skipping ETag generation for non-buffered response")
 
         return response
 
