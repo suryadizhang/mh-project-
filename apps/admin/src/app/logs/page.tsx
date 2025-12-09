@@ -207,11 +207,15 @@ export default function LogsPage() {
     }
   };
 
-  // Initial load
+  // Initial load & pagination
   useEffect(() => {
     fetchLogs();
+  }, [fetchLogs, currentPage]);
+
+  // Stats load (only on token change)
+  useEffect(() => {
     fetchStats();
-  }, [fetchLogs, fetchStats]);
+  }, [fetchStats]);
 
   // Get icon for log level
   const getLogIcon = (level: string) => {

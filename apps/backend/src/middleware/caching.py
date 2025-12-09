@@ -94,7 +94,7 @@ class CachingMiddleware(BaseHTTPMiddleware):
 
     def _generate_etag(self, content: bytes) -> Optional[str]:
         """Generate ETag from response content.
-        
+
         Returns None if content is empty or cannot be hashed.
         Uses SHA256 for stronger hashing than MD5.
         """

@@ -1,6 +1,6 @@
 /**
  * useAutoSave - Form auto-save hook
- * 
+ *
  * Automatically saves form data to localStorage with debouncing.
  * Features:
  * - Debounced saves (default 1 second)
@@ -8,7 +8,7 @@
  * - Clear saved data after successful submission
  * - Expiration support
  * - Type-safe form data
- * 
+ *
  * @example
  * ```tsx
  * const { register, setValue, watch } = useForm<FormData>();
@@ -138,7 +138,7 @@ export function useAutoSave<T extends Record<string, unknown>>({
   const [hasSavedData, setHasSavedData] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   const storageKey = `${STORAGE_PREFIX}${key}`;
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isInitialMount = useRef(true);
@@ -151,24 +151,28 @@ export function useAutoSave<T extends Record<string, unknown>>({
    */
   const filterData = useCallback((inputData: T): Partial<T> => {
     const filtered = { ...inputData };
-    
-    // Always exclude default sensitive fields (case-insensitive check)
+
+    // Always exclude default sensitive fields using precise word matching
+    // Split camelCase and snake_case keys into words to avoid false positives
     const inputKeys = Object.keys(filtered);
     inputKeys.forEach((key) => {
-      const lowerKey = key.toLowerCase();
-      if (DEFAULT_SENSITIVE_FIELDS.some(sensitive => 
-        lowerKey === sensitive.toLowerCase() || 
-        lowerKey.includes(sensitive.toLowerCase())
-      )) {
+      // Split camelCase (e.g., cardNumber -> card number) and snake_case (e.g., card_number -> card number)
+      const keyParts = key
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .toLowerCase()
+        .split(/[\s_]+/);
+
+      // Check if any part of the key matches a sensitive field
+      if (keyParts.some(part => DEFAULT_SENSITIVE_FIELDS.map(s => s.toLowerCase()).includes(part))) {
         delete filtered[key as keyof T];
       }
     });
-    
+
     // Also exclude explicitly specified fields
     excludeFields.forEach((field) => {
       delete filtered[field];
     });
-    
+
     return filtered;
   }, [excludeFields]);
 
@@ -177,7 +181,7 @@ export function useAutoSave<T extends Record<string, unknown>>({
    */
   const saveToStorage = useCallback((dataToSave: T) => {
     if (!enabled) return;
-    
+
     try {
       const filteredData = filterData(dataToSave);
       const savedData: SavedFormData<Partial<T>> = {
@@ -185,12 +189,12 @@ export function useAutoSave<T extends Record<string, unknown>>({
         timestamp: Date.now(),
         version: CURRENT_VERSION,
       };
-      
+
       localStorage.setItem(storageKey, JSON.stringify(savedData));
       setLastSaved(new Date(savedData.timestamp));
       setHasSavedData(true);
       setIsSaving(false);
-      
+
       logger.debug('[AutoSave] Saved form data', { key, timestamp: savedData.timestamp });
     } catch (error) {
       logger.error('[AutoSave] Failed to save form data', error instanceof Error ? error : undefined, { key });
@@ -205,20 +209,20 @@ export function useAutoSave<T extends Record<string, unknown>>({
     try {
       const stored = localStorage.getItem(storageKey);
       if (!stored) return null;
-      
+
       const parsed: SavedFormData<T> = JSON.parse(stored);
-      
+
       // Check version compatibility
       if (parsed.version !== CURRENT_VERSION) {
-        logger.debug('[AutoSave] Version mismatch, clearing saved data', { 
-          key, 
-          savedVersion: parsed.version, 
-          currentVersion: CURRENT_VERSION 
+        logger.debug('[AutoSave] Version mismatch, clearing saved data', {
+          key,
+          savedVersion: parsed.version,
+          currentVersion: CURRENT_VERSION
         });
         localStorage.removeItem(storageKey);
         return null;
       }
-      
+
       // Check expiration
       const age = Date.now() - parsed.timestamp;
       if (age > expirationMs) {
@@ -226,7 +230,7 @@ export function useAutoSave<T extends Record<string, unknown>>({
         localStorage.removeItem(storageKey);
         return null;
       }
-      
+
       setLastSaved(new Date(parsed.timestamp));
       return parsed.data;
     } catch (error) {
@@ -276,7 +280,7 @@ export function useAutoSave<T extends Record<string, unknown>>({
    */
   useEffect(() => {
     if (!enabled) return;
-    
+
     const savedData = loadFromStorage();
     if (savedData) {
       setHasSavedData(true);
@@ -294,31 +298,31 @@ export function useAutoSave<T extends Record<string, unknown>>({
    */
   useEffect(() => {
     if (!enabled) return;
-    
+
     // Skip initial mount
     if (isInitialMount.current) {
       isInitialMount.current = false;
       lastDataRef.current = JSON.stringify(data);
       return;
     }
-    
+
     // Check if data actually changed
     const dataString = JSON.stringify(data);
     if (dataString === lastDataRef.current) return;
     lastDataRef.current = dataString;
-    
+
     // Clear existing timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    
+
     setIsSaving(true);
-    
+
     // Set new debounced save
     timeoutRef.current = setTimeout(() => {
       saveToStorage(data);
     }, debounceMs);
-    
+
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -331,7 +335,7 @@ export function useAutoSave<T extends Record<string, unknown>>({
    */
   useEffect(() => {
     if (!enabled) return;
-    
+
     const handleBeforeUnload = () => {
       // Synchronous save on unload
       try {
@@ -346,7 +350,7 @@ export function useAutoSave<T extends Record<string, unknown>>({
         // Ignore errors on unload
       }
     };
-    
+
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [data, enabled, filterData, storageKey]);
@@ -367,7 +371,7 @@ export function useAutoSave<T extends Record<string, unknown>>({
  */
 export function useAutoSaveIndicator(isSaving: boolean, lastSaved: Date | null) {
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
-  
+
   useEffect(() => {
     if (isSaving) {
       setStatus('saving');
@@ -378,6 +382,6 @@ export function useAutoSaveIndicator(isSaving: boolean, lastSaved: Date | null) 
       return () => clearTimeout(timeout);
     }
   }, [isSaving, lastSaved]);
-  
+
   return status;
 }
