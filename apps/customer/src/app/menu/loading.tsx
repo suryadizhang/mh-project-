@@ -4,7 +4,7 @@
  * Displays while the menu is loading.
  */
 
-import { Skeleton, SkeletonMenuItem, SkeletonPageHeader } from '@/components/ui/Skeleton';
+import { Skeleton, SkeletonMenuItem } from '@/components/ui/Skeleton';
 
 export default function MenuLoading() {
   return (

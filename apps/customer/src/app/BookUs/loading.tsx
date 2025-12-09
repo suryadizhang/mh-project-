@@ -5,7 +5,7 @@
  * Uses Next.js App Router loading.tsx convention.
  */
 
-import { SkeletonBookingForm, SkeletonPageHeader } from '@/components/ui/Skeleton';
+import { SkeletonBookingForm } from '@/components/ui/Skeleton';
 
 export default function BookUsLoading() {
   return (
