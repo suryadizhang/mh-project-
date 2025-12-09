@@ -176,6 +176,121 @@ applyTo: '**'
 
 ---
 
+## 📦 Incremental Batch Deployment (CRITICAL)
+
+**Main branch receives ONLY the files for each batch when that batch
+is ready.**
+
+### The Principle:
+
+```
+Feature Branch          →  Main Branch
+─────────────────────────────────────────
+Batch 1 PR merges       →  Gets ONLY Batch 1 files
+Batch 2 PR merges       →  Gets ONLY Batch 2 files (builds on 1)
+Batch 3 PR merges       →  Gets ONLY Batch 3 files (builds on 1+2)
+```
+
+### Why This Matters:
+
+1. **Traceability** – Each batch = traceable deployment
+2. **Rollback** – Can revert entire batch if issues
+3. **Bug hunting** – `git bisect` finds which batch broke things
+4. **Clean history** – Clear audit trail of what shipped when
+
+### Batch File Manifests:
+
+**Batch 1 (Core Booking + Security) adds:**
+
+```
+apps/backend/src/routers/v1/bookings.py
+apps/backend/src/services/booking_service.py
+apps/backend/src/core/security.py
+apps/backend/src/core/rbac.py
+apps/backend/src/db/models/audit.py
+database/migrations/add_security_tables.sql
+apps/customer/src/components/booking/*
+apps/admin/src/components/booking/*
+```
+
+**Batch 2 (Payment Processing) adds:**
+
+```
+apps/backend/src/db/models/stripe.py
+apps/backend/src/services/payment_service.py
+apps/backend/src/routers/v1/stripe.py
+apps/backend/src/routers/v1/webhooks/stripe.py
+apps/customer/src/components/payment/*
+apps/admin/src/components/payments/*
+```
+
+**Batch 3 (Core AI) adds:**
+
+```
+apps/backend/src/api/ai/*
+apps/backend/src/services/ai_service.py
+apps/backend/src/db/models/ai.py
+database/migrations/create_ai_tables.sql
+apps/admin/src/components/ai/*
+```
+
+**Batch 4 (Communications) adds:**
+
+```
+apps/backend/src/routers/v1/webhooks/ringcentral.py
+apps/backend/src/routers/v1/webhooks/meta.py
+apps/backend/src/services/ringcentral_*.py
+apps/backend/src/services/deepgram_service.py
+apps/backend/src/api/v1/inbox/*
+apps/admin/src/components/inbox/*
+```
+
+### PR Scope Rules:
+
+| Rule                               | Description                            |
+| ---------------------------------- | -------------------------------------- |
+| **One batch per PR to main**       | Don't combine batches                  |
+| **Only batch files in PR**         | No unrelated changes                   |
+| **Shared code allowed**            | Utils, types, configs that batch needs |
+| **Tests for batch features**       | Include relevant test files            |
+| **Docs for batch features**        | Include relevant documentation         |
+| **Feature flags for partial work** | Protect code that exists but not ready |
+
+### What About Shared/Common Code?
+
+Some code is needed by multiple batches:
+
+| Code Type         | When to Add                         |
+| ----------------- | ----------------------------------- |
+| Core utils        | First batch that needs it           |
+| Shared types      | First batch that needs it           |
+| Base classes      | First batch that needs it           |
+| Config extensions | With batch that adds the feature    |
+| Shared components | With batch that introduces use case |
+
+### Feature Flags for Cross-Batch Code:
+
+If Batch 2 code must exist before Batch 2 is ready:
+
+```python
+# Code can exist, but is disabled by flag
+if settings.FEATURE_STRIPE_ENABLED:  # False until Batch 2
+    process_payment()
+else:
+    raise NotImplementedError("Payments not yet enabled")
+```
+
+### PR Review Checklist for Batch Deployment:
+
+- [ ] PR only contains files for THIS batch
+- [ ] No future batch code included (unless behind flag)
+- [ ] Tests only for THIS batch's features
+- [ ] Documentation only for THIS batch's features
+- [ ] Feature flags configured for THIS batch
+- [ ] Commit messages reference batch: `feat(batch-X): description`
+
+---
+
 ## 🔄 Batch Transition Checklist
 
 Before moving to next batch:
