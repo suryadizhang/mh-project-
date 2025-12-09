@@ -93,5 +93,40 @@ ops/
 .benchmarks/
 features/
 
+# ===== Development/Planning Documents (Keep main branch clean) =====
+# These files should stay in feature branches, not main
+*_PLAN.md
+*_ANALYSIS.md
+*_SUMMARY.md
+*_STATUS.md
+*_ROADMAP.md
+*_TODO.md
+*_IMPLEMENTATION.md
+*_DECISIONS.md
+*_NOTES.md
+
+# Batch tracking files (stay local until archived)
+BATCH_*.md
+*_BATCH_*.md
+CURRENT_BATCH*.md
+
+# Development notes
+DEV_*.md
+DEBUG_*.md
+TEMP_*.md
+WIP_*.md
+
+# Exception: Keep essential docs (use ! to un-ignore)
+!README.md
+!CONTRIBUTING.md
+!CHANGELOG.md
+!DEPLOYMENT_GUIDE.md
+!LOCAL_DEVELOPMENT_GUIDE.md
+!ONBOARDING.md
+!QUICK_START*.md
+!VPS_DEPLOYMENT_GUIDE.md
+!GSM_*_GUIDE.md
+!docs/**/*.md
+
 # ===== Vercel =====
 .vercel
