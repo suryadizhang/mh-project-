@@ -22,6 +22,7 @@ files in order:
 7. `07-TESTING_QA.instructions.md` – Test requirements
 8. `08-FEATURE_FLAGS.instructions.md` – Flag rules
 9. `09-ROLLBACK_SAFETY.instructions.md` – Emergency procedures
+10. `10-COPILOT_PERFORMANCE.instructions.md` – Agent efficiency
 
 ---
 
@@ -47,7 +48,8 @@ files in order:
 7. **Testing/QA** (07) – Test requirements
 8. **Feature Flags** (08) – Flag management
 9. **Rollback Safety** (09) – Emergency procedures
-10. **User Request** – ONLY if no conflict with above
+10. **Copilot Performance** (10) – Agent efficiency
+11. **User Request** – ONLY if no conflict with above
 
 ---
 
