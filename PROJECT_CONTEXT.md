@@ -12,14 +12,14 @@ services.
 
 ### Tech Stack
 
-| Layer             | Technology              | Location          |
-| ----------------- | ----------------------- | ----------------- |
-| Customer Frontend | Next.js 15 (App Router) | `apps/customer/`  |
-| Admin Frontend    | Next.js 15 (App Router) | `apps/admin/`     |
-| Backend API       | FastAPI (Python 3.11+)  | `apps/backend/`   |
-| Database          | PostgreSQL              | External          |
-| Cache             | Redis                   | External          |
-| Shared Types      | TypeScript              | `packages/types/` |
+| Layer             | Technology              | Location                                    |
+| ----------------- | ----------------------- | ------------------------------------------- |
+| Customer Frontend | Next.js 15 (App Router) | `apps/customer/`                            |
+| Admin Frontend    | Next.js 15 (App Router) | `apps/admin/`                               |
+| Backend API       | FastAPI (Python 3.11+)  | `apps/backend/`                             |
+| Database          | PostgreSQL              | External                                    |
+| Cache             | Redis                   | External                                    |
+| Shared Packages   | TypeScript              | `packages/*` (types, api-client, utils, ui) |
 
 ---
 
@@ -85,18 +85,21 @@ else:
     # Use old flow or return "not available"
 ```
 
-### Current Feature Flags:
+### Current Feature Flags (illustrative - check config.py for actual values):
 
-| Flag                                       | Purpose              | Default |
-| ------------------------------------------ | -------------------- | ------- |
-| `FEATURE_FLAG_V2_TRAVEL_FEE_CALCULATOR`    | New travel fee logic | False   |
-| `FEATURE_FLAG_BETA_DYNAMIC_PRICING`        | Demand-based pricing | False   |
-| `FEATURE_FLAG_NEW_BOOKING_VALIDATION`      | Enhanced validation  | False   |
-| `FEATURE_FLAG_V2_DEPOSIT_CALCULATION`      | New deposit logic    | False   |
-| `FEATURE_FLAG_BETA_STRIPE_CONNECT`         | Multi-chef payments  | False   |
-| `FEATURE_FLAG_NEW_RINGCENTRAL_INTEGRATION` | SMS integration      | False   |
-| `FEATURE_FLAG_ENABLE_RATE_LIMITING`        | API rate limits      | False   |
-| `FEATURE_FLAG_ENABLE_AUDIT_LOGGING`        | Compliance logging   | False   |
+> **Note:** Some flags check environment variables; defaults may vary
+> by environment.
+
+| Flag                                       | Purpose              | Safe Default |
+| ------------------------------------------ | -------------------- | ------------ |
+| `FEATURE_FLAG_V2_TRAVEL_FEE_CALCULATOR`    | New travel fee logic | env-based    |
+| `FEATURE_FLAG_BETA_DYNAMIC_PRICING`        | Demand-based pricing | False        |
+| `FEATURE_FLAG_NEW_BOOKING_VALIDATION`      | Enhanced validation  | env-based    |
+| `FEATURE_FLAG_V2_DEPOSIT_CALCULATION`      | New deposit logic    | False        |
+| `FEATURE_FLAG_BETA_STRIPE_CONNECT`         | Multi-chef payments  | False        |
+| `FEATURE_FLAG_NEW_RINGCENTRAL_INTEGRATION` | SMS integration      | False        |
+| `FEATURE_FLAG_ENABLE_RATE_LIMITING`        | API rate limits      | env-based    |
+| `FEATURE_FLAG_ENABLE_AUDIT_LOGGING`        | Compliance logging   | False        |
 
 ### Enabling a Flag:
 
@@ -110,15 +113,15 @@ else:
 
 Work is organized into batches. Each batch = one PR to main.
 
-| Batch | Focus                           | Status           |
-| ----- | ------------------------------- | ---------------- |
-| 0     | Repo cleanup, branch strategy   | ✅ Complete      |
-| 1     | Core booking + security + CI/CD | ✅ Merged to dev |
-| 2     | Payment processing (Stripe)     | 🔜 Next          |
-| 3     | Core AI                         | Planned          |
-| 4     | Communications (SMS, Voice)     | Planned          |
-| 5     | Advanced AI + Marketing         | Planned          |
-| 6     | AI Training + Scaling           | Planned          |
+| Batch | Focus                           | Status                             |
+| ----- | ------------------------------- | ---------------------------------- |
+| 0     | Repo cleanup, branch strategy   | ✅ Complete                        |
+| 1     | Core booking + security + CI/CD | ✅ In dev (pending deploy to main) |
+| 2     | Payment processing (Stripe)     | 🔜 Next                            |
+| 3     | Core AI                         | Planned                            |
+| 4     | Communications (SMS, Voice)     | Planned                            |
+| 5     | Advanced AI + Marketing         | Planned                            |
+| 6     | AI Training + Scaling           | Planned                            |
 
 ---
 
