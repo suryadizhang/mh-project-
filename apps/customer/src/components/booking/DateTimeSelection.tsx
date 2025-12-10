@@ -1,28 +1,29 @@
-'use client'
+'use client';
 
-import 'react-datepicker/dist/react-datepicker.css'
+import { format } from 'date-fns';
+import React from 'react';
 
-import { format } from 'date-fns'
-import React from 'react'
-import DatePicker from 'react-datepicker'
+import { LazyDatePicker } from '@/components/ui/LazyDatePicker';
+import { usePricing } from '@/hooks/usePricing';
 
-import type { BookingFormData, TimeSlot } from '../../data/booking/types'
+import type { BookingFormData, TimeSlot } from '../../data/booking/types';
 
 interface DateTimeSelectionProps {
-  formData: BookingFormData
-  onChange: (field: keyof BookingFormData, value: string | number | Date | boolean) => void
-  errors: Record<string, string>
-  timeSlots: TimeSlot[]
+  formData: BookingFormData;
+  onChange: (field: keyof BookingFormData, value: string | number | Date | boolean) => void;
+  errors: Record<string, string>;
+  timeSlots: TimeSlot[];
 }
 
 export function DateTimeSelection({
   formData,
   onChange,
   errors,
-  timeSlots
+  timeSlots,
 }: DateTimeSelectionProps) {
-  const today = new Date()
-  const oneYearFromNow = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate())
+  const { adultPrice, childPrice, childFreeUnderAge, isLoading } = usePricing();
+  const today = new Date();
+  const oneYearFromNow = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate());
 
   return (
     <div className="form-section">
@@ -32,10 +33,10 @@ export function DateTimeSelection({
           <label htmlFor="eventDate" className="form-label">
             Event Date <span className="required">*</span>
           </label>
-          <DatePicker
+          <LazyDatePicker
             id="eventDate"
             selected={formData.eventDate}
-            onChange={date => onChange('eventDate', date || new Date())}
+            onChange={(date) => onChange('eventDate', date || new Date())}
             minDate={today}
             maxDate={oneYearFromNow}
             placeholderText="Select event date"
@@ -59,7 +60,7 @@ export function DateTimeSelection({
             Event Time <span className="required">*</span>
           </label>
           <div className="time-slots">
-            {timeSlots.map(slot => (
+            {timeSlots.map((slot) => (
               <button
                 key={slot.time}
                 type="button"
@@ -92,7 +93,7 @@ export function DateTimeSelection({
               id="guestCount"
               name="guestCount"
               value={formData.guestCount}
-              onChange={e => onChange('guestCount', parseInt(e.target.value) || 0)}
+              onChange={(e) => onChange('guestCount', parseInt(e.target.value) || 0)}
               min="1"
               max="20"
               placeholder="Enter guest count"
@@ -121,11 +122,12 @@ export function DateTimeSelection({
           {errors.guestCount && <span className="error-message">{errors.guestCount}</span>}
           <div className="guest-info">
             <p className="pricing-note">
-              💡 <strong>Pricing:</strong> Adults $55 each • Children (6-12) $30 each
+              💡 <strong>Pricing:</strong> Adults {isLoading ? '...' : `$${adultPrice}`} each •
+              Children ({childFreeUnderAge}-12) {isLoading ? '...' : `$${childPrice}`} each
             </p>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

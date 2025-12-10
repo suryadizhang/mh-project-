@@ -1,114 +1,109 @@
-'use client'
+'use client';
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
+import { toast } from '@/components/ui/toaster';
 
 interface QuickNavigationProps {
-  showProgress?: boolean
-  showTableOfContents?: boolean
-  className?: string
+  showProgress?: boolean;
+  showTableOfContents?: boolean;
+  className?: string;
 }
 
 const QuickNavigation: React.FC<QuickNavigationProps> = ({
   showProgress = true,
   showTableOfContents = false,
-  className = ''
+  className = '',
 }) => {
-  const [scrollProgress, setScrollProgress] = useState(0)
-  const [isVisible, setIsVisible] = useState(false)
-  const [headings, setHeadings] = useState<Array<{ id: string; text: string; level: number }>>([])
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const [headings, setHeadings] = useState<Array<{ id: string; text: string; level: number }>>([]);
 
   // Track scroll progress and visibility
   useEffect(() => {
     const handleScroll = () => {
-      const scrollTop = window.pageYOffset
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight
-      const progress = (scrollTop / docHeight) * 100
+      const scrollTop = window.pageYOffset;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (scrollTop / docHeight) * 100;
 
-      setScrollProgress(Math.min(progress, 100))
-      setIsVisible(scrollTop > 300)
-    }
+      setScrollProgress(Math.min(progress, 100));
+      setIsVisible(scrollTop > 300);
+    };
 
     // Extract headings for table of contents
     if (showTableOfContents) {
       const extractHeadings = () => {
-        const headingElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6')
+        const headingElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
         const headingsArray = Array.from(headingElements).map((heading, index) => {
           // Create ID if it doesn't exist
           if (!heading.id) {
-            heading.id = `heading-${index}`
+            heading.id = `heading-${index}`;
           }
 
           return {
             id: heading.id,
             text: heading.textContent || '',
-            level: parseInt(heading.tagName.charAt(1))
-          }
-        })
+            level: parseInt(heading.tagName.charAt(1)),
+          };
+        });
 
-        setHeadings(headingsArray)
-      }
+        setHeadings(headingsArray);
+      };
 
       // Extract headings after a short delay to ensure content is loaded
-      const timeoutId = setTimeout(extractHeadings, 1000)
-      return () => clearTimeout(timeoutId)
+      const timeoutId = setTimeout(extractHeadings, 1000);
+      return () => clearTimeout(timeoutId);
     }
 
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    handleScroll() // Initial call
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Initial call
 
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [showTableOfContents])
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [showTableOfContents]);
 
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
-    })
-  }
+      behavior: 'smooth',
+    });
+  };
 
   const scrollToBottom = () => {
     window.scrollTo({
       top: document.documentElement.scrollHeight,
-      behavior: 'smooth'
-    })
-  }
+      behavior: 'smooth',
+    });
+  };
 
   const scrollToHeading = (headingId: string) => {
-    const element = document.getElementById(headingId)
+    const element = document.getElementById(headingId);
     if (element) {
       element.scrollIntoView({
         behavior: 'smooth',
-        block: 'start'
-      })
+        block: 'start',
+      });
     }
-  }
+  };
 
-  if (!isVisible) return null
+  if (!isVisible) return null;
 
   return (
     <div className={`fixed right-6 bottom-6 z-50 ${className}`}>
       <div className="flex flex-col items-end space-y-3">
         {/* Table of Contents (if enabled) */}
         {showTableOfContents && headings.length > 0 && (
-          <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-xs max-h-80 overflow-y-auto">
-            <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+          <div className="max-h-80 max-w-xs overflow-y-auto rounded-lg border border-gray-200 bg-white p-4 shadow-lg">
+            <h4 className="mb-3 flex items-center text-sm font-semibold text-gray-900">
               <span className="mr-2">📋</span>
               Table of Contents
             </h4>
             <nav className="space-y-1">
-              {headings.map(heading => (
+              {headings.map((heading) => (
                 <button
                   key={heading.id}
                   onClick={() => scrollToHeading(heading.id)}
-                  className={`
-                    block w-full text-left text-xs py-1 px-2 rounded hover:bg-gray-100 transition-colors
-                    ${heading.level === 1 ? 'font-semibold text-gray-900' : ''}
-                    ${heading.level === 2 ? 'font-medium text-gray-800 ml-2' : ''}
-                    ${heading.level === 3 ? 'text-gray-700 ml-4' : ''}
-                    ${heading.level >= 4 ? 'text-gray-600 ml-6' : ''}
-                  `}
+                  className={`block w-full rounded px-2 py-1 text-left text-xs transition-colors hover:bg-gray-100 ${heading.level === 1 ? 'font-semibold text-gray-900' : ''} ${heading.level === 2 ? 'ml-2 font-medium text-gray-800' : ''} ${heading.level === 3 ? 'ml-4 text-gray-700' : ''} ${heading.level >= 4 ? 'ml-6 text-gray-600' : ''} `}
                   style={{
-                    paddingLeft: `${(heading.level - 1) * 8 + 8}px`
+                    paddingLeft: `${(heading.level - 1) * 8 + 8}px`,
                   }}
                 >
                   {heading.text}
@@ -123,12 +118,12 @@ const QuickNavigation: React.FC<QuickNavigationProps> = ({
           {/* Scroll to Top */}
           <button
             onClick={scrollToTop}
-            className="group bg-white hover:bg-orange-50 border border-gray-200 hover:border-orange-300 rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110"
+            className="group rounded-full border border-gray-200 bg-white p-3 shadow-lg transition-all duration-200 hover:scale-110 hover:border-orange-300 hover:bg-orange-50 hover:shadow-xl"
             title="Scroll to top"
             aria-label="Scroll to top"
           >
             <svg
-              className="w-5 h-5 text-gray-600 group-hover:text-orange-600 transition-colors"
+              className="h-5 w-5 text-gray-600 transition-colors group-hover:text-orange-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -145,10 +140,10 @@ const QuickNavigation: React.FC<QuickNavigationProps> = ({
           {/* Reading Progress (if enabled) */}
           {showProgress && (
             <div className="relative">
-              <div className="bg-white border border-gray-200 rounded-full p-3 shadow-lg">
-                <div className="relative w-8 h-8">
+              <div className="rounded-full border border-gray-200 bg-white p-3 shadow-lg">
+                <div className="relative h-8 w-8">
                   {/* Background Circle */}
-                  <svg className="w-8 h-8 transform -rotate-90" viewBox="0 0 32 32">
+                  <svg className="h-8 w-8 -rotate-90 transform" viewBox="0 0 32 32">
                     <circle
                       cx="16"
                       cy="16"
@@ -183,9 +178,9 @@ const QuickNavigation: React.FC<QuickNavigationProps> = ({
               </div>
 
               {/* Progress Tooltip */}
-              <div className="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              <div className="pointer-events-none absolute top-1/2 right-full mr-3 -translate-y-1/2 transform rounded bg-gray-900 px-2 py-1 text-xs whitespace-nowrap text-white opacity-0 transition-opacity group-hover:opacity-100">
                 {Math.round(scrollProgress)}% complete
-                <div className="absolute left-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-l-gray-900"></div>
+                <div className="absolute top-1/2 left-full -translate-y-1/2 transform border-4 border-transparent border-l-gray-900"></div>
               </div>
             </div>
           )}
@@ -193,12 +188,12 @@ const QuickNavigation: React.FC<QuickNavigationProps> = ({
           {/* Scroll to Bottom */}
           <button
             onClick={scrollToBottom}
-            className="group bg-white hover:bg-orange-50 border border-gray-200 hover:border-orange-300 rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110"
+            className="group rounded-full border border-gray-200 bg-white p-3 shadow-lg transition-all duration-200 hover:scale-110 hover:border-orange-300 hover:bg-orange-50 hover:shadow-xl"
             title="Scroll to bottom"
             aria-label="Scroll to bottom"
           >
             <svg
-              className="w-5 h-5 text-gray-600 group-hover:text-orange-600 transition-colors"
+              className="h-5 w-5 text-gray-600 transition-colors group-hover:text-orange-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -218,12 +213,12 @@ const QuickNavigation: React.FC<QuickNavigationProps> = ({
           {/* Print Page */}
           <button
             onClick={() => window.print()}
-            className="group bg-white hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-full p-2 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110"
+            className="group rounded-full border border-gray-200 bg-white p-2 shadow-lg transition-all duration-200 hover:scale-110 hover:border-blue-300 hover:bg-blue-50 hover:shadow-xl"
             title="Print page"
             aria-label="Print page"
           >
             <svg
-              className="w-4 h-4 text-gray-600 group-hover:text-blue-600 transition-colors"
+              className="h-4 w-4 text-gray-600 transition-colors group-hover:text-blue-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -243,20 +238,20 @@ const QuickNavigation: React.FC<QuickNavigationProps> = ({
               if (navigator.share) {
                 navigator.share({
                   title: document.title,
-                  url: window.location.href
-                })
+                  url: window.location.href,
+                });
               } else {
                 // Fallback: copy to clipboard
-                navigator.clipboard.writeText(window.location.href)
-                // You could show a toast notification here
+                navigator.clipboard.writeText(window.location.href);
+                toast.success('Link copied to clipboard!');
               }
             }}
-            className="group bg-white hover:bg-green-50 border border-gray-200 hover:border-green-300 rounded-full p-2 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110"
+            className="group rounded-full border border-gray-200 bg-white p-2 shadow-lg transition-all duration-200 hover:scale-110 hover:border-green-300 hover:bg-green-50 hover:shadow-xl"
             title="Share page"
             aria-label="Share page"
           >
             <svg
-              className="w-4 h-4 text-gray-600 group-hover:text-green-600 transition-colors"
+              className="h-4 w-4 text-gray-600 transition-colors group-hover:text-green-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -272,7 +267,7 @@ const QuickNavigation: React.FC<QuickNavigationProps> = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default QuickNavigation
+export default QuickNavigation;

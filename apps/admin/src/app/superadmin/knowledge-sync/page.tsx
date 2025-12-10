@@ -349,8 +349,7 @@ export default function KnowledgeSyncDashboard() {
           {diff ? (
             <DiffViewer
               diff={diff}
-              onApplyChanges={handleAutoSync}
-              isLoading={!!syncingSource}
+              // TODO: onApplyChanges and isLoading will be added when DiffViewer supports them
             />
           ) : (
             <div className="text-center py-12 text-muted-foreground">

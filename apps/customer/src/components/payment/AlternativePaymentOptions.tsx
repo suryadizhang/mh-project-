@@ -4,6 +4,7 @@ import { Check, Copy, ExternalLink, Mail, Phone, QrCode, Smartphone } from 'luci
 import QRCodeGenerator from 'qrcode';
 import { useState } from 'react';
 
+import { ProtectedPhone, ProtectedEmail, useProtectedPhone, useProtectedPaymentEmail } from '@/components/ui/ProtectedPhone';
 import { apiFetch } from '@/lib/api';
 import { logger } from '@/lib/logger';
 
@@ -46,17 +47,18 @@ export default function AlternativePaymentOptions({
     phone: '',
   });
 
+  // Use protected hooks for phone and email
+  const { formatted: protectedPhoneFormatted } = useProtectedPhone();
+  const { email: paymentEmail } = useProtectedPaymentEmail();
+
   const paymentDetails = {
     zelle: {
-      email: 'myhibachichef@gmail.com',
-      phone: '(916) 740-8768',
       name: 'My Hibachi LLC',
       color: 'purple',
       icon: 'Z',
     },
     venmo: {
       username: '@myhibachichef',
-      phone: '(916) 740-8768',
       name: 'My Hibachi LLC',
       color: 'blue',
       icon: 'V',
@@ -115,9 +117,9 @@ export default function AlternativePaymentOptions({
       let qrData = '';
       if (method === 'venmo') {
         qrData = generateVenmoDeepLink();
-      } else if (method === 'zelle') {
+      } else if (method === 'zelle' && paymentEmail) {
         // For Zelle, we'll create a data string with payment info
-        qrData = `Zelle Payment\nEmail: myhibachichef@gmail.com\nAmount: $${amount.toFixed(
+        qrData = `Zelle Payment\nEmail: ${paymentEmail}\nAmount: $${amount.toFixed(
           2,
         )}\nMemo: ${generatePaymentMemo()}`;
       }
@@ -195,11 +197,11 @@ export default function AlternativePaymentOptions({
         <div className="flex items-center justify-center space-x-4 text-sm text-gray-600">
           <div className="flex items-center">
             <Phone className="mr-1 h-4 w-4" />
-            <span>(916) 740-8768</span>
+            <ProtectedPhone showIcon={false} />
           </div>
           <div className="flex items-center">
             <Mail className="mr-1 h-4 w-4" />
-            <span>info@myhibachi.com</span>
+            <ProtectedEmail showIcon={false} text="Contact Us" />
           </div>
         </div>
       </div>
@@ -233,10 +235,10 @@ export default function AlternativePaymentOptions({
               <div className="flex items-center justify-between rounded bg-white p-3">
                 <div>
                   <div className="text-sm font-medium text-gray-900">Email</div>
-                  <div className="font-mono text-purple-700">{paymentDetails.zelle.email}</div>
+                  <div className="font-mono text-purple-700">{paymentEmail || 'Loading...'}</div>
                 </div>
                 <button
-                  onClick={() => copyToClipboard(paymentDetails.zelle.email, 'email')}
+                  onClick={() => copyToClipboard(paymentEmail || '', 'email')}
                   className="rounded p-2 text-purple-600 transition-colors hover:bg-purple-100"
                 >
                   {copied === 'email' ? (
@@ -249,10 +251,10 @@ export default function AlternativePaymentOptions({
               <div className="flex items-center justify-between rounded bg-white p-3">
                 <div>
                   <div className="text-sm font-medium text-gray-900">Phone</div>
-                  <div className="font-mono text-purple-700">{details.phone}</div>
+                  <div className="font-mono text-purple-700">{protectedPhoneFormatted || 'Loading...'}</div>
                 </div>
                 <button
-                  onClick={() => copyToClipboard(details.phone, 'phone')}
+                  onClick={() => copyToClipboard(protectedPhoneFormatted || '', 'phone')}
                   className="rounded p-2 text-purple-600 transition-colors hover:bg-purple-100"
                 >
                   {copied === 'phone' ? (
@@ -337,7 +339,7 @@ export default function AlternativePaymentOptions({
                       <div className="mt-2 space-y-1">
                         <div>
                           Email:{' '}
-                          <span className="font-mono font-medium">myhibachichef@gmail.com</span>
+                          <span className="font-mono font-medium">{paymentEmail || 'Loading...'}</span>
                         </div>
                         <div>
                           Amount:{' '}
@@ -499,7 +501,7 @@ export default function AlternativePaymentOptions({
           <li>• Include the memo/note exactly as shown for faster processing</li>
           <li>• Payments are typically verified within 1-2 business hours</li>
           <li>• You&apos;ll receive email confirmation once payment is verified</li>
-          <li>• For questions, call (916) 740-8768 or email info@myhibachi.com</li>
+          <li>• For questions, use our <a href="/contact" className="underline">contact form</a></li>
         </ul>
       </div>
     </div>

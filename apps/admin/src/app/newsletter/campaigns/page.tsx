@@ -15,7 +15,7 @@ import {
   Users,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -70,7 +70,9 @@ export default function NewsletterCampaignsPage() {
     content: '',
     scheduled_at: '',
   });
-    const [campaigns, setCampaigns] = useState<Array<Record<string, unknown>>>([]);
+  const [campaigns, setCampaigns] = useState<{ campaigns: Campaign[] } | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [aiGenerating, setAiGenerating] = useState(false);
@@ -91,7 +93,9 @@ export default function NewsletterCampaignsPage() {
       const data = await response.json();
       setCampaigns(data);
     } catch (err: unknown) {
-      setError(err);
+      setError(
+        err instanceof Error ? err.message : 'Failed to fetch campaigns'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -415,13 +419,21 @@ export default function NewsletterCampaignsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        campaign.channel === 'SMS' ? 'bg-blue-100 text-blue-800' :
-                        campaign.channel === 'EMAIL' ? 'bg-purple-100 text-purple-800' :
-                        'bg-green-100 text-green-800'
-                      }`}>
-                        {campaign.channel === 'SMS' && <MessageSquare className="w-3 h-3 mr-1" />}
-                        {campaign.channel === 'EMAIL' && <Mail className="w-3 h-3 mr-1" />}
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          campaign.channel === 'SMS'
+                            ? 'bg-blue-100 text-blue-800'
+                            : campaign.channel === 'EMAIL'
+                              ? 'bg-purple-100 text-purple-800'
+                              : 'bg-green-100 text-green-800'
+                        }`}
+                      >
+                        {campaign.channel === 'SMS' && (
+                          <MessageSquare className="w-3 h-3 mr-1" />
+                        )}
+                        {campaign.channel === 'EMAIL' && (
+                          <Mail className="w-3 h-3 mr-1" />
+                        )}
                         {campaign.channel}
                       </span>
                     </td>
@@ -436,18 +448,24 @@ export default function NewsletterCampaignsPage() {
                       {campaign.total_recipients.toLocaleString()}
                     </td>
                     <td className="px-6 py-4">
-                      {campaign.channel === 'SMS' && campaign.status === 'sent' ? (
+                      {campaign.channel === 'SMS' &&
+                      campaign.status === 'sent' ? (
                         <div className="text-sm">
                           <div className="flex flex-col gap-1">
                             <span className="text-gray-600">
                               <Send className="w-4 h-4 inline mr-1" />
                               {campaign.total_sent || 0} sent
                             </span>
-                            <span className={`${
-                              (campaign.delivery_rate_cached || 0) >= 95 ? 'text-green-600' : 'text-yellow-600'
-                            }`}>
+                            <span
+                              className={`${
+                                (campaign.delivery_rate_cached || 0) >= 95
+                                  ? 'text-green-600'
+                                  : 'text-yellow-600'
+                              }`}
+                            >
                               <MessageSquare className="w-4 h-4 inline mr-1" />
-                              {(campaign.delivery_rate_cached || 0).toFixed(1)}% delivered
+                              {(campaign.delivery_rate_cached || 0).toFixed(1)}%
+                              delivered
                             </span>
                             {(campaign.total_failed || 0) > 0 && (
                               <span className="text-red-600 text-xs">
@@ -486,7 +504,8 @@ export default function NewsletterCampaignsPage() {
                       ) : null}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {campaign.channel === 'SMS' && campaign.cost_dollars !== undefined ? (
+                      {campaign.channel === 'SMS' &&
+                      campaign.cost_dollars !== undefined ? (
                         <span className="text-gray-900 font-medium">
                           <DollarSign className="w-4 h-4 inline" />
                           {campaign.cost_dollars.toFixed(2)}

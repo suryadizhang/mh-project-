@@ -2,6 +2,8 @@
 import './terms.css'
 import Link from 'next/link'
 
+import { ProtectedPhone, ProtectedEmail } from '@/components/ui/ProtectedPhone'
+
 export const metadata: Metadata = {
   title: 'Terms & Conditions - My Hibachi Chef',
   description: 'Terms & Conditions and SMS Terms of Service for My Hibachi Chef catering services. Read our complete terms of service and SMS communication policies.',
@@ -57,8 +59,8 @@ export default function TermsPage() {
                 <li><strong>Help:</strong> Reply <code>HELP</code> or contact us:</li>
               </ul>
               <div className="contact-methods">
-                <p><strong>Call:</strong> <a href="tel:+19167408768">(916) 740-8768</a></p>
-                <p><strong>Email:</strong> <a href="mailto:cs@myhibachichef.com">cs@myhibachichef.com</a></p>
+                <p><strong>Call:</strong> <ProtectedPhone showIcon={false} /></p>
+                <p><strong>Email:</strong> <ProtectedEmail showIcon={false} text="Contact Form" /></p>
                 <p><strong>Visit:</strong> <a href="https://myhibachichef.com">https://myhibachichef.com</a></p>
               </div>
               <div className="policy-resources">
@@ -273,8 +275,8 @@ export default function TermsPage() {
                 <li>San Francisco Bay Area</li>
                 <li>Central Valley Region</li>
               </ul>
-              <p><strong>Phone:</strong> <a href="tel:+19167408768">(916) 740-8768</a></p>
-              <p><strong>Email:</strong> <a href="mailto:cs@myhibachichef.com">cs@myhibachichef.com</a></p>
+              <p><strong>Phone:</strong> <ProtectedPhone showIcon={false} /></p>
+              <p><strong>Email:</strong> <ProtectedEmail showIcon={false} text="Contact Form" /></p>
               <p><strong>Website:</strong> <a href="https://myhibachichef.com">https://myhibachichef.com</a></p>
               <h4>Business Hours:</h4>
               <p>Monday - Sunday: 12:00 PM - 9:00 PM PST</p>

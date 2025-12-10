@@ -1,0 +1,213 @@
+{
+  "folders": [
+    {
+      "name": "🏠 Root Config",
+      "path": "."
+    },
+    {
+      "name": "🌐 Customer App",
+      "path": "apps/customer"
+    },
+    {
+      "name": "🔧 Admin App",
+      "path": "apps/admin"
+    },
+    {
+      "name": "⚙️ Backend API",
+      "path": "apps/backend"
+    },
+    {
+      "name": "📦 Shared Packages",
+      "path": "packages"
+    },
+    {
+      "name": "📚 Documentation",
+      "path": "docs"
+    },
+    {
+      "name": "🗄️ Database",
+      "path": "database"
+    },
+    {
+      "name": "🧪 E2E Tests",
+      "path": "e2e"
+    },
+    {
+      "name": "🚀 CI/CD",
+      "path": ".github"
+    }
+  ],
+  "settings": {
+    // ===== Copilot Agent Performance Optimizations =====
+    // Exclude large/generated folders from file tree and searches
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/.next": true,
+      "**/dist": true,
+      "**/__pycache__": true,
+      "**/.pytest_cache": true,
+      "**/.mypy_cache": true,
+      "**/.ruff_cache": true,
+      "**/.venv": true,
+      "**/coverage": true,
+      "**/playwright-report": true,
+      "**/test-results": true,
+      "**/.vercel": true,
+      "**/myhibachi-frontend": true,
+      "**/myhibachi-admin-frontend": true,
+      "**/package-lock.json": true,
+      "**/pnpm-lock.yaml": true,
+      "**/yarn.lock": true
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/.next": true,
+      "**/dist": true,
+      "**/build": true,
+      "**/__pycache__": true,
+      "**/.venv": true,
+      "**/.git": true,
+      "**/.pytest_cache": true,
+      "**/.mypy_cache": true,
+      "**/coverage": true,
+      "**/archives": true,
+      "**/milestones": true,
+      "**/package-lock.json": true,
+      "**/pnpm-lock.yaml": true,
+      "**/yarn.lock": true,
+      "**/*.min.js": true,
+      "**/*.min.css": true,
+      "**/*.map": true
+    },
+    "files.watcherExclude": {
+      "**/.git/objects/**": true,
+      "**/.git/subtree-cache/**": true,
+      "**/node_modules/**": true,
+      "**/.venv/**": true,
+      "**/__pycache__/**": true,
+      "**/.next/**": true,
+      "**/dist/**": true,
+      "**/coverage/**": true
+    },
+
+    // ===== Project-Specific Settings =====
+    // Python (Backend)
+    "python.defaultInterpreterPath": "${workspaceFolder:⚙️ Backend API}/.venv/bin/python",
+    "[python]": {
+      "editor.formatOnSave": true,
+      "editor.defaultFormatter": "charliermarsh.ruff"
+    },
+
+    // TypeScript/JavaScript (Frontend)
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "[typescript]": {
+      "editor.formatOnSave": true,
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescriptreact]": {
+      "editor.formatOnSave": true,
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+
+    // Editor Settings
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "editor.rulers": [80, 120],
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+
+    // Git
+    "git.ignoreLimitWarning": true
+  },
+  "extensions": {
+    "recommendations": [
+      "github.copilot",
+      "github.copilot-chat",
+      "ms-python.python",
+      "charliermarsh.ruff",
+      "ms-python.mypy-type-checker",
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint",
+      "bradlc.vscode-tailwindcss",
+      "ms-playwright.playwright",
+      "redhat.vscode-yaml"
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Backend: FastAPI",
+        "type": "debugpy",
+        "request": "launch",
+        "module": "uvicorn",
+        "args": ["src.main:app", "--reload", "--port", "8000"],
+        "cwd": "${workspaceFolder:⚙️ Backend API}",
+        "envFile": "${workspaceFolder:⚙️ Backend API}/.env"
+      },
+      {
+        "name": "Customer: Next.js",
+        "type": "node",
+        "request": "launch",
+        "runtimeExecutable": "npm",
+        "runtimeArgs": ["run", "dev"],
+        "cwd": "${workspaceFolder:🌐 Customer App}"
+      },
+      {
+        "name": "Admin: Next.js",
+        "type": "node",
+        "request": "launch",
+        "runtimeExecutable": "npm",
+        "runtimeArgs": ["run", "dev"],
+        "cwd": "${workspaceFolder:🔧 Admin App}"
+      }
+    ],
+    "compounds": [
+      {
+        "name": "Full Stack (Backend + Customer)",
+        "configurations": ["Backend: FastAPI", "Customer: Next.js"]
+      }
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Install All Dependencies",
+        "type": "shell",
+        "command": "npm ci",
+        "options": {
+          "cwd": "${workspaceFolder:🏠 Root Config}"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Test: Customer",
+        "type": "shell",
+        "command": "npm run test",
+        "options": {
+          "cwd": "${workspaceFolder:🌐 Customer App}"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Test: Backend",
+        "type": "shell",
+        "command": "pytest tests/ -v",
+        "options": {
+          "cwd": "${workspaceFolder:⚙️ Backend API}"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Lint: All",
+        "type": "shell",
+        "command": "npm run lint",
+        "options": {
+          "cwd": "${workspaceFolder:🏠 Root Config}"
+        },
+        "problemMatcher": ["$eslint-stylish"]
+      }
+    ]
+  }
+}

@@ -1,65 +1,70 @@
-'use client'
+'use client';
 
-import { CheckCircle, CreditCard, Download, Home, Mail, Phone } from 'lucide-react'
-import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
-import { Suspense, useEffect, useState } from 'react'
+import { CheckCircle, CreditCard, Download, Home, Mail, Phone } from 'lucide-react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
 
-import { logger } from '@/lib/logger'
+import { useProtectedPhone, useProtectedPaymentEmail } from '@/components/ui/ProtectedPhone';
+import { logger } from '@/lib/logger';
 
 interface PaymentDetails {
-  id: string
-  status: string
-  amount: number
-  currency: string
+  id: string;
+  status: string;
+  amount: number;
+  currency: string;
   metadata: {
-    bookingId?: string
-    customerName?: string
-    eventDate?: string
-    paymentType?: string
-  }
-  created: number
+    bookingId?: string;
+    customerName?: string;
+    eventDate?: string;
+    paymentType?: string;
+  };
+  created: number;
 }
 
 function PaymentSuccessContent() {
-  const searchParams = useSearchParams()
-  const paymentIntentId = searchParams?.get('payment_intent')
-  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  // Anti-scraper protected contact info
+  const { formatted: protectedPhone } = useProtectedPhone();
+  const { email: protectedEmail } = useProtectedPaymentEmail();
+
+  const searchParams = useSearchParams();
+  const paymentIntentId = searchParams?.get('payment_intent');
+  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPaymentDetails = async () => {
       if (!paymentIntentId) {
-        setError('No payment information found')
-        setIsLoading(false)
-        return
+        setError('No payment information found');
+        setIsLoading(false);
+        return;
       }
 
       try {
         const response = await fetch(
-          `/api/v1/payments/create-intent?payment_intent_id=${paymentIntentId}`
-        )
-        const data = await response.json()
+          `/api/v1/payments/create-intent?payment_intent_id=${paymentIntentId}`,
+        );
+        const data = await response.json();
 
         if (response.ok) {
-          setPaymentDetails(data)
+          setPaymentDetails(data);
         } else {
-          setError(data.error || 'Failed to retrieve payment details')
+          setError(data.error || 'Failed to retrieve payment details');
         }
       } catch (err) {
-        logger.error('Error fetching payment details', err as Error)
-        setError('Failed to load payment information')
+        logger.error('Error fetching payment details', err as Error);
+        setError('Failed to load payment information');
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchPaymentDetails()
-  }, [paymentIntentId])
+    fetchPaymentDetails();
+  }, [paymentIntentId]);
 
   const downloadReceipt = async () => {
-    if (!paymentDetails) return
+    if (!paymentDetails) return;
 
     try {
       // In production, you would generate and download a proper receipt
@@ -70,8 +75,8 @@ function PaymentSuccessContent() {
         date: new Date(paymentDetails.created * 1000).toLocaleDateString(),
         customer: paymentDetails.metadata.customerName,
         bookingId: paymentDetails.metadata.bookingId,
-        paymentType: paymentDetails.metadata.paymentType
-      }
+        paymentType: paymentDetails.metadata.paymentType,
+      };
 
       const receiptText = `
 MY HIBACHI PAYMENT RECEIPT
@@ -84,65 +89,65 @@ Booking ID: ${receiptData.bookingId || 'N/A'}
 Payment Type: ${receiptData.paymentType || 'Manual'}
 
 Thank you for your payment!
-Contact: (916) 740-8768 | info@myhibachi.com
-      `.trim()
+Contact: ${protectedPhone || 'myhibachichef.com/contact'} | ${protectedEmail || 'myhibachichef.com/contact'}
+      `.trim();
 
-      const blob = new Blob([receiptText], { type: 'text/plain' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `MyHibachi_Receipt_${receiptData.paymentId}.txt`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
+      const blob = new Blob([receiptText], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `MyHibachi_Receipt_${receiptData.paymentId}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     } catch (err) {
-      logger.error('Error downloading receipt', err as Error)
+      logger.error('Error downloading receipt', err as Error);
     }
-  }
+  };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
           <p className="text-gray-600">Loading payment details...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full mx-4 text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CreditCard className="w-8 h-8 text-red-600" />
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="mx-4 w-full max-w-md rounded-xl bg-white p-8 text-center shadow-lg">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+            <CreditCard className="h-8 w-8 text-red-600" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Payment Error</h1>
-          <p className="text-gray-600 mb-6">{error}</p>
+          <h1 className="mb-2 text-2xl font-bold text-gray-900">Payment Error</h1>
+          <p className="mb-6 text-gray-600">{error}</p>
           <Link
             href="/payment"
-            className="inline-flex items-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            className="inline-flex items-center rounded-lg bg-red-600 px-6 py-3 text-white transition-colors hover:bg-red-700"
           >
-            <Home className="w-5 h-5 mr-2" />
+            <Home className="mr-2 h-5 w-5" />
             Return to Payment Page
           </Link>
         </div>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gray-50 px-4 py-8">
+      <div className="mx-auto max-w-2xl">
         {/* Success Header */}
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-6 text-center">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-12 h-12 text-green-600" />
+        <div className="mb-6 rounded-xl bg-white p-8 text-center shadow-lg">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
+            <CheckCircle className="h-12 w-12 text-green-600" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Payment Successful!</h1>
-          <p className="text-xl text-green-600 font-semibold mb-4">
+          <h1 className="mb-2 text-3xl font-bold text-gray-900">Payment Successful!</h1>
+          <p className="mb-4 text-xl font-semibold text-green-600">
             ${paymentDetails ? (paymentDetails.amount / 100).toFixed(2) : '0.00'} USD
           </p>
           <p className="text-gray-600">
@@ -153,9 +158,9 @@ Contact: (916) 740-8768 | info@myhibachi.com
 
         {/* Payment Details */}
         {paymentDetails && (
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Payment Details</h2>
-            <div className="grid md:grid-cols-2 gap-4 text-sm">
+          <div className="mb-6 rounded-xl bg-white p-6 shadow-lg">
+            <h2 className="mb-4 text-lg font-semibold text-gray-900">Payment Details</h2>
+            <div className="grid gap-4 text-sm md:grid-cols-2">
               <div className="space-y-3">
                 <div>
                   <div className="text-gray-500">Payment ID</div>
@@ -170,7 +175,7 @@ Contact: (916) 740-8768 | info@myhibachi.com
                 </div>
                 <div>
                   <div className="text-gray-500">Status</div>
-                  <div className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">
+                  <div className="inline-flex items-center rounded bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
                     {paymentDetails.status === 'succeeded' ? 'Completed' : paymentDetails.status}
                   </div>
                 </div>
@@ -207,9 +212,9 @@ Contact: (916) 740-8768 | info@myhibachi.com
 
         {/* Booking Information */}
         {paymentDetails?.metadata.bookingId && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-3">Booking Information</h3>
-            <div className="text-sm text-blue-800 space-y-2">
+          <div className="mb-6 rounded-xl border border-blue-200 bg-blue-50 p-6">
+            <h3 className="mb-3 text-lg font-semibold text-blue-900">Booking Information</h3>
+            <div className="space-y-2 text-sm text-blue-800">
               <div className="flex justify-between">
                 <span>Booking ID:</span>
                 <span className="font-mono">{paymentDetails.metadata.bookingId}</span>
@@ -231,41 +236,41 @@ Contact: (916) 740-8768 | info@myhibachi.com
         )}
 
         {/* Action Buttons */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">What&apos;s Next?</h3>
-          <div className="grid md:grid-cols-2 gap-4">
+        <div className="mb-6 rounded-xl bg-white p-6 shadow-lg">
+          <h3 className="mb-4 text-lg font-semibold text-gray-900">What&apos;s Next?</h3>
+          <div className="grid gap-4 md:grid-cols-2">
             <button
               onClick={downloadReceipt}
-              className="flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-white transition-colors hover:bg-blue-700"
             >
-              <Download className="w-5 h-5 mr-2" />
+              <Download className="mr-2 h-5 w-5" />
               Download Receipt
             </button>
             <Link
               href="/"
-              className="flex items-center justify-center px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              className="flex items-center justify-center rounded-lg bg-gray-600 px-6 py-3 text-white transition-colors hover:bg-gray-700"
             >
-              <Home className="w-5 h-5 mr-2" />
+              <Home className="mr-2 h-5 w-5" />
               Return Home
             </Link>
           </div>
         </div>
 
         {/* Contact Information */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Need Help?</h3>
-          <p className="text-gray-600 mb-4">
+        <div className="rounded-xl bg-white p-6 shadow-lg">
+          <h3 className="mb-4 text-lg font-semibold text-gray-900">Need Help?</h3>
+          <p className="mb-4 text-gray-600">
             If you have any questions about your payment or booking, please don&apos;t hesitate to
             contact us:
           </p>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center space-y-2 sm:space-y-0 sm:space-x-6 text-sm">
+          <div className="flex flex-col space-y-2 text-sm sm:flex-row sm:items-center sm:justify-center sm:space-y-0 sm:space-x-6">
             <div className="flex items-center">
-              <Phone className="w-4 h-4 mr-2 text-gray-500" />
-              <span>(916) 740-8768</span>
+              <Phone className="mr-2 h-4 w-4 text-gray-500" />
+              <span>{protectedPhone || 'Loading...'}</span>
             </div>
             <div className="flex items-center">
-              <Mail className="w-4 h-4 mr-2 text-gray-500" />
-              <span>info@myhibachi.com</span>
+              <Mail className="mr-2 h-4 w-4 text-gray-500" />
+              <span>{protectedEmail || 'Loading...'}</span>
             </div>
           </div>
         </div>
@@ -279,18 +284,18 @@ Contact: (916) 740-8768 | info@myhibachi.com
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function PaymentSuccessLoading() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <div className="text-center">
-        <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
         <p className="text-gray-600">Loading payment details...</p>
       </div>
     </div>
-  )
+  );
 }
 
 export default function PaymentSuccessPage() {
@@ -298,5 +303,5 @@ export default function PaymentSuccessPage() {
     <Suspense fallback={<PaymentSuccessLoading />}>
       <PaymentSuccessContent />
     </Suspense>
-  )
+  );
 }

@@ -15,9 +15,18 @@ import {
 } from '@/components/ui/table';
 import { ActionButtons } from '@/components/pricing/ActionButtons';
 import { DeleteConfirmDialog } from '@/components/pricing/DeleteConfirmDialog';
-import { MenuItemDialog, type MenuItemFormData } from '@/components/pricing/MenuItemDialog';
-import { AddonItemDialog, type AddonItemFormData } from '@/components/pricing/AddonItemDialog';
-import { TravelFeeStationDialog, type TravelFeeStationFormData } from '@/components/pricing/TravelFeeStationDialog';
+import {
+  MenuItemDialog,
+  type MenuItemFormData,
+} from '@/components/pricing/MenuItemDialog';
+import {
+  AddonItemDialog,
+  type AddonItemFormData,
+} from '@/components/pricing/AddonItemDialog';
+import {
+  TravelFeeStationDialog,
+  type TravelFeeStationFormData,
+} from '@/components/pricing/TravelFeeStationDialog';
 
 interface MenuItem {
   id: string;
@@ -37,7 +46,12 @@ interface AddonItem {
   name: string;
   description: string | null;
   price: number;
-  category: 'protein_upgrades' | 'enhancements' | 'equipment' | 'entertainment' | 'beverages';
+  category:
+    | 'protein_upgrades'
+    | 'enhancements'
+    | 'equipment'
+    | 'entertainment'
+    | 'beverages';
   is_active: boolean;
   display_order: number;
   created_at: string;
@@ -67,17 +81,24 @@ type SortDirection = 'asc' | 'desc';
 export default function PricingManagementPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [addonItems, setAddonItems] = useState<AddonItem[]>([]);
-  const [travelFeeStations, setTravelFeeStations] = useState<TravelFeeStation[]>([]);
+  const [travelFeeStations, setTravelFeeStations] = useState<
+    TravelFeeStation[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   // Sorting states
   const [menuSortField, setMenuSortField] = useState<SortField>('name');
-  const [menuSortDirection, setMenuSortDirection] = useState<SortDirection>('asc');
+  const [menuSortDirection, setMenuSortDirection] =
+    useState<SortDirection>('asc');
   const [addonSortField, setAddonSortField] = useState<SortField>('name');
-  const [addonSortDirection, setAddonSortDirection] = useState<SortDirection>('asc');
-  const [stationSortField, setStationSortField] = useState<'name' | 'city' | 'price'>('name');
-  const [stationSortDirection, setStationSortDirection] = useState<SortDirection>('asc');
+  const [addonSortDirection, setAddonSortDirection] =
+    useState<SortDirection>('asc');
+  const [stationSortField, setStationSortField] = useState<
+    'name' | 'city' | 'price'
+  >('name');
+  const [stationSortDirection, setStationSortDirection] =
+    useState<SortDirection>('asc');
 
   // Modal states
   const [menuItemDialog, setMenuItemDialog] = useState(false);
@@ -85,10 +106,15 @@ export default function PricingManagementPage() {
   const [travelFeeDialog, setTravelFeeDialog] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState(false);
   const [editingMenuItem, setEditingMenuItem] = useState<MenuItem | null>(null);
-  const [editingAddonItem, setEditingAddonItem] = useState<AddonItem | null>(null);
-  const [editingTravelFee, setEditingTravelFee] = useState<TravelFeeStation | null>(null);
+  const [editingAddonItem, setEditingAddonItem] = useState<AddonItem | null>(
+    null
+  );
+  const [editingTravelFee, setEditingTravelFee] =
+    useState<TravelFeeStation | null>(null);
   const [deletingId, setDeletingId] = useState<string | number | null>(null);
-  const [deletingType, setDeletingType] = useState<'menu' | 'addon' | 'travel_fee'>('menu');
+  const [deletingType, setDeletingType] = useState<
+    'menu' | 'addon' | 'travel_fee'
+  >('menu');
 
   // Form states
   const [menuItemForm, setMenuItemForm] = useState<MenuItemFormData>({
@@ -121,20 +147,24 @@ export default function PricingManagementPage() {
     latitude: null,
     longitude: null,
     free_miles: 30,
-    price_per_mile: 2.00,
+    price_per_mile: 2.0,
     max_service_distance: null,
     is_active: true,
     notes: null,
     display_order: 0,
   });
 
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
   // Fetch pricing data
   const fetchPricingData = useCallback(async () => {
     try {
       setLoading(true);
-      console.log('🔍 Fetching pricing data from:', `${API_BASE_URL}/api/v1/pricing/current`);
+      console.log(
+        '🔍 Fetching pricing data from:',
+        `${API_BASE_URL}/api/v1/pricing/current`
+      );
 
       const response = await fetch(`${API_BASE_URL}/api/v1/pricing/current`);
       console.log('📡 Response status:', response.status, response.statusText);
@@ -142,7 +172,9 @@ export default function PricingManagementPage() {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ Response error:', errorText);
-        throw new Error(`Failed to fetch pricing data: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Failed to fetch pricing data: ${response.status} ${response.statusText}`
+        );
       }
 
       const data = await response.json();
@@ -158,7 +190,9 @@ export default function PricingManagementPage() {
     } catch (error) {
       console.error('❌ Error fetching pricing data:', error);
       // Show error to user
-      alert(`Failed to load pricing data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      alert(
+        `Failed to load pricing data: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     } finally {
       setLoading(false);
     }
@@ -176,6 +210,8 @@ export default function PricingManagementPage() {
       description: null,
       price: 0,
       category: 'base_pricing',
+      subcategory: null,
+      tags: [],
       is_included: false,
       is_active: true,
       display_order: menuItems.length,
@@ -288,7 +324,7 @@ export default function PricingManagementPage() {
       latitude: null,
       longitude: null,
       free_miles: 30,
-      price_per_mile: 2.00,
+      price_per_mile: 2.0,
       max_service_distance: null,
       is_active: true,
       notes: null,
@@ -322,7 +358,9 @@ export default function PricingManagementPage() {
       setSaving(true);
       // TODO: Replace with actual API endpoint once backend is ready
       console.log('Saving travel fee station:', travelFeeForm);
-      alert('Travel fee station CRUD not yet implemented in backend. This is a UI preview.');
+      alert(
+        'Travel fee station CRUD not yet implemented in backend. This is a UI preview.'
+      );
       setTravelFeeDialog(false);
     } catch (error) {
       console.error('Error saving travel fee station:', error);
@@ -346,7 +384,9 @@ export default function PricingManagementPage() {
       } else {
         // travel_fee
         console.log('Deleting travel fee station:', deletingId);
-        alert('Travel fee station CRUD not yet implemented in backend. This is a UI preview.');
+        alert(
+          'Travel fee station CRUD not yet implemented in backend. This is a UI preview.'
+        );
         setDeleteDialog(false);
         setDeletingId(null);
         setSaving(false);
@@ -366,7 +406,10 @@ export default function PricingManagementPage() {
     }
   };
 
-  const confirmDelete = (id: string | number, type: 'menu' | 'addon' | 'travel_fee') => {
+  const confirmDelete = (
+    id: string | number,
+    type: 'menu' | 'addon' | 'travel_fee'
+  ) => {
     setDeletingId(id);
     setDeletingType(type);
     setDeleteDialog(true);
@@ -388,7 +431,7 @@ export default function PricingManagementPage() {
           compareValue = a.price - b.price;
           break;
         case 'status':
-          compareValue = (a.is_active === b.is_active) ? 0 : a.is_active ? -1 : 1;
+          compareValue = a.is_active === b.is_active ? 0 : a.is_active ? -1 : 1;
           break;
       }
 
@@ -411,7 +454,7 @@ export default function PricingManagementPage() {
           compareValue = a.price - b.price;
           break;
         case 'status':
-          compareValue = (a.is_active === b.is_active) ? 0 : a.is_active ? -1 : 1;
+          compareValue = a.is_active === b.is_active ? 0 : a.is_active ? -1 : 1;
           break;
       }
 
@@ -466,7 +509,11 @@ export default function PricingManagementPage() {
     }
   };
 
-  const getSortIcon = (field: string, currentField: string, currentDirection: SortDirection) => {
+  const getSortIcon = (
+    field: string,
+    currentField: string,
+    currentDirection: SortDirection
+  ) => {
     if (field !== currentField) return '↕';
     return currentDirection === 'asc' ? '↑' : '↓';
   };
@@ -486,7 +533,9 @@ export default function PricingManagementPage() {
         <div className="flex items-center space-x-3">
           <DollarSign className="w-8 h-8 text-green-600" />
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Pricing Management</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Pricing Management
+            </h1>
             <p className="text-sm text-gray-500 mt-1">
               Manage menu items, addon items, and pricing structure
             </p>
@@ -534,69 +583,76 @@ export default function PricingManagementPage() {
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => toggleMenuSort('category')}
                   >
-                    Category {getSortIcon('category', menuSortField, menuSortDirection)}
+                    Category{' '}
+                    {getSortIcon('category', menuSortField, menuSortDirection)}
                   </TableHead>
                   <TableHead
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => toggleMenuSort('price')}
                   >
-                    Price {getSortIcon('price', menuSortField, menuSortDirection)}
+                    Price{' '}
+                    {getSortIcon('price', menuSortField, menuSortDirection)}
                   </TableHead>
                   <TableHead>Included</TableHead>
                   <TableHead
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => toggleMenuSort('status')}
                   >
-                    Status {getSortIcon('status', menuSortField, menuSortDirection)}
+                    Status{' '}
+                    {getSortIcon('status', menuSortField, menuSortDirection)}
                   </TableHead>
                   <TableHead>Order</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortMenuItems(menuItems).map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium">
-                        {item.name}
-                        {item.description && (
-                          <p className="text-xs text-gray-500">{item.description}</p>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                          {item.category.replace('_', ' ')}
+                {sortMenuItems(menuItems).map(item => (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium">
+                      {item.name}
+                      {item.description && (
+                        <p className="text-xs text-gray-500">
+                          {item.description}
+                        </p>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                        {item.category.replace('_', ' ')}
+                      </span>
+                    </TableCell>
+                    <TableCell className="font-semibold">
+                      ${item.price.toFixed(2)}
+                    </TableCell>
+                    <TableCell>
+                      {item.is_included ? (
+                        <span className="text-green-600 text-sm">
+                          ✓ Included
                         </span>
-                      </TableCell>
-                      <TableCell className="font-semibold">
-                        ${item.price.toFixed(2)}
-                      </TableCell>
-                      <TableCell>
-                        {item.is_included ? (
-                          <span className="text-green-600 text-sm">✓ Included</span>
-                        ) : (
-                          <span className="text-gray-400 text-sm">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {item.is_active ? (
-                          <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                            Active
-                          </span>
-                        ) : (
-                          <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
-                            Inactive
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>{item.display_order}</TableCell>
-                      <TableCell className="text-right">
-                        <ActionButtons
-                          onEdit={() => handleEditMenuItem(item)}
-                          onDelete={() => confirmDelete(item.id, 'menu')}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                      ) : (
+                        <span className="text-gray-400 text-sm">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {item.is_active ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                          Active
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
+                          Inactive
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>{item.display_order}</TableCell>
+                    <TableCell className="text-right">
+                      <ActionButtons
+                        onEdit={() => handleEditMenuItem(item)}
+                        onDelete={() => confirmDelete(item.id, 'menu')}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </div>
@@ -622,67 +678,77 @@ export default function PricingManagementPage() {
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => toggleAddonSort('name')}
                   >
-                    Name {getSortIcon('name', addonSortField, addonSortDirection)}
+                    Name{' '}
+                    {getSortIcon('name', addonSortField, addonSortDirection)}
                   </TableHead>
                   <TableHead
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => toggleAddonSort('category')}
                   >
-                    Category {getSortIcon('category', addonSortField, addonSortDirection)}
+                    Category{' '}
+                    {getSortIcon(
+                      'category',
+                      addonSortField,
+                      addonSortDirection
+                    )}
                   </TableHead>
                   <TableHead
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => toggleAddonSort('price')}
                   >
-                    Price {getSortIcon('price', addonSortField, addonSortDirection)}
+                    Price{' '}
+                    {getSortIcon('price', addonSortField, addonSortDirection)}
                   </TableHead>
                   <TableHead
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => toggleAddonSort('status')}
                   >
-                    Status {getSortIcon('status', addonSortField, addonSortDirection)}
+                    Status{' '}
+                    {getSortIcon('status', addonSortField, addonSortDirection)}
                   </TableHead>
                   <TableHead>Order</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortAddonItems(addonItems).map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium">
-                        {item.name}
-                        {item.description && (
-                          <p className="text-xs text-gray-500">{item.description}</p>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <span className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">
-                          {item.category.replace('_', ' ')}
+                {sortAddonItems(addonItems).map(item => (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium">
+                      {item.name}
+                      {item.description && (
+                        <p className="text-xs text-gray-500">
+                          {item.description}
+                        </p>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <span className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">
+                        {item.category.replace('_', ' ')}
+                      </span>
+                    </TableCell>
+                    <TableCell className="font-semibold">
+                      ${item.price.toFixed(2)}
+                    </TableCell>
+                    <TableCell>
+                      {item.is_active ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                          Active
                         </span>
-                      </TableCell>
-                      <TableCell className="font-semibold">
-                        ${item.price.toFixed(2)}
-                      </TableCell>
-                      <TableCell>
-                        {item.is_active ? (
-                          <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                            Active
-                          </span>
-                        ) : (
-                          <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
-                            Inactive
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>{item.display_order}</TableCell>
-                      <TableCell className="text-right">
-                        <ActionButtons
-                          onEdit={() => handleEditAddonItem(item)}
-                          onDelete={() => confirmDelete(item.id, 'addon')}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
+                          Inactive
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>{item.display_order}</TableCell>
+                    <TableCell className="text-right">
+                      <ActionButtons
+                        onEdit={() => handleEditAddonItem(item)}
+                        onDelete={() => confirmDelete(item.id, 'addon')}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </div>
@@ -708,20 +774,35 @@ export default function PricingManagementPage() {
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => toggleStationSort('name')}
                   >
-                    Station Name {getSortIcon('name', stationSortField, stationSortDirection)}
+                    Station Name{' '}
+                    {getSortIcon(
+                      'name',
+                      stationSortField,
+                      stationSortDirection
+                    )}
                   </TableHead>
                   <TableHead
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => toggleStationSort('city')}
                   >
-                    Location {getSortIcon('city', stationSortField, stationSortDirection)}
+                    Location{' '}
+                    {getSortIcon(
+                      'city',
+                      stationSortField,
+                      stationSortDirection
+                    )}
                   </TableHead>
                   <TableHead>Free Miles</TableHead>
                   <TableHead
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => toggleStationSort('price')}
                   >
-                    Per Mile {getSortIcon('price', stationSortField, stationSortDirection)}
+                    Per Mile{' '}
+                    {getSortIcon(
+                      'price',
+                      stationSortField,
+                      stationSortDirection
+                    )}
                   </TableHead>
                   <TableHead>Max Distance</TableHead>
                   <TableHead>Status</TableHead>
@@ -730,70 +811,75 @@ export default function PricingManagementPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortTravelFeeStations(travelFeeStations).map((station) => (
-                    <TableRow key={station.id}>
-                      <TableCell className="font-medium">
-                        {station.station_name}
-                        {station.notes && (
-                          <p className="text-xs text-gray-500">{station.notes}</p>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          <div>{station.station_address}</div>
-                          <div className="text-gray-500">
-                            {station.city}, {station.state} {station.postal_code}
-                          </div>
-                          {station.latitude && station.longitude && (
-                            <div className="text-xs text-gray-400 mt-1">
-                              📍 {station.latitude.toFixed(6)}, {station.longitude.toFixed(6)}
-                            </div>
-                          )}
+                {sortTravelFeeStations(travelFeeStations).map(station => (
+                  <TableRow key={station.id}>
+                    <TableCell className="font-medium">
+                      {station.station_name}
+                      {station.notes && (
+                        <p className="text-xs text-gray-500">{station.notes}</p>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        <div>{station.station_address}</div>
+                        <div className="text-gray-500">
+                          {station.city}, {station.state} {station.postal_code}
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="font-semibold text-green-700">
-                          {station.free_miles} mi
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="font-semibold text-blue-700">
-                          ${station.price_per_mile.toFixed(2)}/mi
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        {station.max_service_distance ? (
-                          <span className="text-gray-700">
-                            {station.max_service_distance} mi
-                          </span>
-                        ) : (
-                          <span className="text-gray-400 text-sm">Unlimited</span>
+                        {station.latitude && station.longitude && (
+                          <div className="text-xs text-gray-400 mt-1">
+                            📍 {station.latitude.toFixed(6)},{' '}
+                            {station.longitude.toFixed(6)}
+                          </div>
                         )}
-                      </TableCell>
-                      <TableCell>
-                        {station.is_active ? (
-                          <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                            Active
-                          </span>
-                        ) : (
-                          <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
-                            Inactive
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>{station.display_order}</TableCell>
-                      <TableCell className="text-right">
-                        <ActionButtons
-                          onEdit={() => handleEditTravelFeeStation(station)}
-                          onDelete={() => confirmDelete(station.id, 'travel_fee')}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="font-semibold text-green-700">
+                        {station.free_miles} mi
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="font-semibold text-blue-700">
+                        ${station.price_per_mile.toFixed(2)}/mi
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      {station.max_service_distance ? (
+                        <span className="text-gray-700">
+                          {station.max_service_distance} mi
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-sm">Unlimited</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {station.is_active ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                          Active
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">
+                          Inactive
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>{station.display_order}</TableCell>
+                    <TableCell className="text-right">
+                      <ActionButtons
+                        onEdit={() => handleEditTravelFeeStation(station)}
+                        onDelete={() => confirmDelete(station.id, 'travel_fee')}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
                 {travelFeeStations.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                      No travel fee stations configured. Run database migration to add Fremont station.
+                    <TableCell
+                      colSpan={8}
+                      className="text-center py-8 text-gray-500"
+                    >
+                      No travel fee stations configured. Run database migration
+                      to add Fremont station.
                     </TableCell>
                   </TableRow>
                 )}
@@ -841,7 +927,13 @@ export default function PricingManagementPage() {
         open={deleteDialog}
         onOpenChange={setDeleteDialog}
         onConfirm={handleDelete}
-        itemType={deletingType === 'menu' ? 'menu item' : deletingType === 'addon' ? 'addon item' : 'travel fee station'}
+        itemType={
+          deletingType === 'menu'
+            ? 'menu item'
+            : deletingType === 'addon'
+              ? 'addon item'
+              : 'travel fee station'
+        }
         isDeleting={saving}
       />
     </div>
