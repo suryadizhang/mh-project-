@@ -1,11 +1,11 @@
-import '@/styles/base.css'
-import '@/styles/faqs/faqs-base.css'
-import '@/styles/faqs/faqs-items.css'
+import '@/styles/base.css';
+import '@/styles/faqs/faqs-base.css';
+import '@/styles/faqs/faqs-items.css';
 
-import { Metadata } from 'next'
+import { Metadata } from 'next';
 
-import { FAQsPageContainer } from '@/components/faq'
-import { faqs } from '@/data/faqsData'
+import { FAQsPageContainer } from '@/components/faq';
+import { getFaqsWithPricing } from '@/lib/faqDataProvider';
 
 export const metadata: Metadata = {
   title: 'Hibachi Catering FAQs | Private Chef Questions | Bay Area & Sacramento',
@@ -17,10 +17,13 @@ export const metadata: Metadata = {
     title: 'Hibachi Catering FAQs | Private Chef Questions',
     description:
       'Get answers to common hibachi catering questions about pricing, booking, and service areas.',
-    type: 'website'
-  }
-}
+    type: 'website',
+  },
+};
 
-export default function FAQsPage() {
-  return <FAQsPageContainer faqs={faqs} />
+export default async function FAQsPage() {
+  // Fetch FAQs with dynamic pricing from database (server-side)
+  const { faqs } = await getFaqsWithPricing();
+
+  return <FAQsPageContainer faqs={faqs} />;
 }
