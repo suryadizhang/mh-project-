@@ -1,22 +1,16 @@
+'use client';
+
 import '@/styles/base.css';
 
-import { Metadata } from 'next';
+import { useProtectedPhone, ProtectedEmail } from '@/components/ui/ProtectedPhone';
 
-export const metadata: Metadata = {
-  title: 'Allergen Information & Safety Guide | My Hibachi Chef',
-  description:
-    'Comprehensive allergen information for My Hibachi Chef catering services. FDA Major 9 allergens, cross-contamination protocols, and dietary accommodations for Bay Area and Sacramento.',
-  keywords:
-    'allergen information, food allergies, cross-contamination, gluten-free hibachi, shellfish allergies, dietary restrictions, hibachi safety',
-  openGraph: {
-    title: 'Allergen Information & Safety Guide | My Hibachi Chef',
-    description:
-      'Comprehensive allergen information and safety protocols for our hibachi catering service.',
-    type: 'website',
-  },
-};
+// Metadata moved to layout.tsx for server component support
+// export const metadata: Metadata = {...}
 
 export default function AllergensPage() {
+  // Anti-scraper protected contact info
+  const { formatted: protectedPhone, tel: protectedTel } = useProtectedPhone();
+
   return (
     <div className="container py-5">
       <div className="row justify-content-center">
@@ -408,12 +402,10 @@ export default function AllergensPage() {
                 </ul>
                 <p className="mb-0">
                   <strong>Contact:</strong>{' '}
-                  <a href="mailto:cs@myhibachichef.com" className="text-white text-decoration-underline">
-                    cs@myhibachichef.com
-                  </a>{' '}
+                  <ProtectedEmail className="text-white text-decoration-underline" />{' '}
                   or text{' '}
-                  <a href="tel:9167408768" className="text-white text-decoration-underline">
-                    (916) 740-8768
+                  <a href={protectedTel ? `tel:${protectedTel}` : '#'} className="text-white text-decoration-underline">
+                    {protectedPhone || 'Loading...'}
                   </a>
                 </p>
               </div>
@@ -498,9 +490,9 @@ export default function AllergensPage() {
                 <i className="bi bi-envelope-fill me-2"></i>
                 Contact Us
               </a>
-              <a href="tel:9167408768" className="btn btn-outline-primary btn-lg">
+              <a href={protectedTel ? `tel:${protectedTel}` : '#'} className="btn btn-outline-primary btn-lg">
                 <i className="bi bi-telephone-fill me-2"></i>
-                Call (916) 740-8768
+                Call {protectedPhone || 'Loading...'}
               </a>
               <a href="/BookUs" className="btn btn-success btn-lg">
                 <i className="bi bi-calendar-check-fill me-2"></i>

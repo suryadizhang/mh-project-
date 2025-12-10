@@ -22,7 +22,7 @@
   },
   {
     "title": "Travel & Distance Policy",
-    "content": "🚚 First 30 miles from our location are FREE. Additional mileage charged at $2/mile each way. Flexible service area with transparent travel options. Popular service areas include Bay Area and Sacramento region.",
+    "content": "🚚 First {{FREE_TRAVEL_MILES}} miles from our location are FREE. Additional mileage charged at ${{COST_PER_MILE}}/mile each way. Flexible service area with transparent travel options. Popular service areas include Bay Area and Sacramento region.",
     "category": "policies",
     "href": "/faqs",
     "keywords": ["travel", "distance", "mileage", "free", "service area", "bay area", "sacramento"]
@@ -36,7 +36,7 @@
   },
   {
     "title": "Group Size & Pricing",
-    "content": "👥 Minimum group size: 6 people. Adult portions: $60+ per person. Children (under 12): $35+ per person. Final pricing based on menu selection and group size. Larger groups may receive volume discounts.",
+    "content": "👥 Minimum group size: 6 people (or ${{PARTY_MINIMUM}} minimum). Adult portions: ${{ADULT_PRICE}} per person. Children (under 12): ${{CHILD_PRICE}} per person. Final pricing based on menu selection and group size. Larger groups may receive volume discounts.",
     "category": "policies",
     "href": "/BookUs",
     "keywords": ["group size", "minimum", "adults", "children", "pricing", "volume discount"]

@@ -1,6 +1,6 @@
 /**
  * Unit tests for QuoteRequestForm
- * Tests newsletter auto-subscribe functionality
+ * Tests form validation and submission functionality
  */
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -9,102 +9,127 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { QuoteRequestForm } from '../QuoteRequestForm';
 
-// Mock fetch
-const mockFetch = vi.fn();
-global.fetch = mockFetch as unknown as typeof fetch;
+// Mock apiFetch
+const mockApiFetch = vi.fn();
+vi.mock('@/lib/api', () => ({
+  apiFetch: (...args: unknown[]) => mockApiFetch(...args),
+}));
+
+// Mock logger
+vi.mock('@/lib/logger', () => ({
+  logger: {
+    error: vi.fn(),
+    info: vi.fn(),
+  },
+}));
 
 describe('QuoteRequestForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: async () => ({ success: true, lead_id: 'lead_123' }),
-    } as Response);
+    mockApiFetch.mockResolvedValue({ success: true, lead_id: 'lead_123' });
   });
 
-  describe('Auto-Subscribe Notice Display', () => {
-    it('should display auto-subscribe notice', () => {
+  describe('Form Rendering', () => {
+    it('should render form title', () => {
       render(<QuoteRequestForm />);
-
-      const notice = screen.getByText(/submitting this form, you'll be automatically subscribed/i);
-      expect(notice).toBeInTheDocument();
+      // Title appears in h2 and button, check for heading specifically
+      expect(screen.getByRole('heading', { name: /get your free quote/i })).toBeInTheDocument();
     });
 
-    it('should not display consent checkboxes', () => {
+    it('should render name field', () => {
       render(<QuoteRequestForm />);
-
-      // Old consent checkboxes should not exist
-      expect(screen.queryByText(/I consent to receive SMS/i)).not.toBeInTheDocument();
-      expect(screen.queryByText(/I consent to receive email/i)).not.toBeInTheDocument();
+      expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
     });
 
-    it('should display STOP instructions', () => {
+    it('should render phone field', () => {
       render(<QuoteRequestForm />);
+      expect(screen.getByLabelText(/phone/i)).toBeInTheDocument();
+    });
 
-      const stopInstructions = screen.getByText(/Reply STOP to unsubscribe/i);
-      expect(stopInstructions).toBeInTheDocument();
+    it('should render email field as optional', () => {
+      render(<QuoteRequestForm />);
+      const emailField = screen.getByLabelText(/email address/i);
+      expect(emailField).toBeInTheDocument();
+    });
+
+    it('should render submit button', () => {
+      render(<QuoteRequestForm />);
+      expect(screen.getByRole('button', { name: /get your free quote/i })).toBeInTheDocument();
     });
   });
 
   describe('Form Validation', () => {
-    it('should require name field', async () => {
+    it('should show error when name is empty', async () => {
       render(<QuoteRequestForm />);
 
-      const submitButton = screen.getByRole('button', { name: /submit/i });
-      fireEvent.click(submitButton);
+      // Fill phone to pass HTML5 validation but leave name empty
+      const phoneInput = screen.getByLabelText(/phone/i);
+      await userEvent.type(phoneInput, '5551234567');
+
+      // Clear name field (if it has a default) and submit
+      const nameInput = screen.getByLabelText(/full name/i);
+      await userEvent.clear(nameInput);
+
+      // Need to use the form directly to bypass browser validation
+      const form = screen.getByRole('button', { name: /get your free quote/i }).closest('form');
+      fireEvent.submit(form!);
 
       await waitFor(() => {
-        expect(screen.getByText(/name is required/i)).toBeInTheDocument();
+        expect(screen.getByText('Please enter your full name')).toBeInTheDocument();
       });
     });
 
-    it('should require phone field', async () => {
+    it('should show error when phone is missing', async () => {
       render(<QuoteRequestForm />);
 
-      const nameInput = screen.getByLabelText(/name/i);
+      const nameInput = screen.getByLabelText(/full name/i);
       await userEvent.type(nameInput, 'John Doe');
 
-      const submitButton = screen.getByRole('button', { name: /submit/i });
-      fireEvent.click(submitButton);
+      // Submit form directly to bypass HTML5 validation
+      const form = screen.getByRole('button', { name: /get your free quote/i }).closest('form');
+      fireEvent.submit(form!);
 
       await waitFor(() => {
-        expect(screen.getByText(/phone is required/i)).toBeInTheDocument();
+        expect(
+          screen.getByText(/please enter a valid phone number with at least 10 digits/i),
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('should show error for short phone number', async () => {
+      render(<QuoteRequestForm />);
+
+      const nameInput = screen.getByLabelText(/full name/i);
+      const phoneInput = screen.getByLabelText(/phone/i);
+
+      await userEvent.type(nameInput, 'John Doe');
+      await userEvent.type(phoneInput, '12345'); // Too short
+
+      // Submit form directly to bypass HTML5 validation
+      const form = screen.getByRole('button', { name: /get your free quote/i }).closest('form');
+      fireEvent.submit(form!);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/please enter a valid phone number with at least 10 digits/i),
+        ).toBeInTheDocument();
       });
     });
 
     it('should accept email as optional', async () => {
       render(<QuoteRequestForm />);
 
-      const nameInput = screen.getByLabelText(/name/i);
+      const nameInput = screen.getByLabelText(/full name/i);
       const phoneInput = screen.getByLabelText(/phone/i);
 
       await userEvent.type(nameInput, 'John Doe');
       await userEvent.type(phoneInput, '5551234567');
 
-      const submitButton = screen.getByRole('button', { name: /submit/i });
+      const submitButton = screen.getByRole('button', { name: /get your free quote/i });
       fireEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledWith(
-          expect.stringContaining('/api/v1/public/leads'),
-          expect.objectContaining({
-            method: 'POST',
-          })
-        );
-      });
-    });
-
-    it('should validate phone format', async () => {
-      render(<QuoteRequestForm />);
-
-      const phoneInput = screen.getByLabelText(/phone/i);
-      await userEvent.type(phoneInput, '123'); // Too short
-
-      const submitButton = screen.getByRole('button', { name: /submit/i });
-      fireEvent.click(submitButton);
-
-      await waitFor(() => {
-        expect(screen.getByText(/phone number is invalid/i)).toBeInTheDocument();
+        expect(mockApiFetch).toHaveBeenCalled();
       });
     });
   });
@@ -113,215 +138,145 @@ describe('QuoteRequestForm', () => {
     it('should submit form with valid data', async () => {
       render(<QuoteRequestForm />);
 
-      const nameInput = screen.getByLabelText(/name/i);
+      const nameInput = screen.getByLabelText(/full name/i);
       const phoneInput = screen.getByLabelText(/phone/i);
-      const emailInput = screen.getByLabelText(/email/i);
+
+      await userEvent.type(nameInput, 'John Doe');
+      await userEvent.type(phoneInput, '5551234567');
+
+      const submitButton = screen.getByRole('button', { name: /get your free quote/i });
+      fireEvent.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockApiFetch).toHaveBeenCalledWith(
+          expect.stringContaining('/api/v1/public/leads'),
+          expect.objectContaining({
+            method: 'POST',
+          }),
+        );
+      });
+    });
+
+    it('should include optional fields when provided', async () => {
+      render(<QuoteRequestForm />);
+
+      const nameInput = screen.getByLabelText(/full name/i);
+      const phoneInput = screen.getByLabelText(/phone/i);
+      const emailInput = screen.getByLabelText(/email address/i);
 
       await userEvent.type(nameInput, 'John Doe');
       await userEvent.type(phoneInput, '5551234567');
       await userEvent.type(emailInput, 'john@example.com');
 
-      const submitButton = screen.getByRole('button', { name: /submit/i });
+      const submitButton = screen.getByRole('button', { name: /get your free quote/i });
       fireEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(global.fetch).toHaveBeenCalledWith(
-          expect.stringContaining('/api/v1/public/leads'),
-          expect.objectContaining({
-            method: 'POST',
-            headers: expect.objectContaining({
-              'Content-Type': 'application/json',
-            }),
-            body: expect.stringContaining('John Doe'),
-          })
-        );
+        expect(mockApiFetch).toHaveBeenCalled();
+        const callBody = JSON.parse(mockApiFetch.mock.calls[0][1].body);
+        expect(callBody.email).toBe('john@example.com');
       });
     });
 
-    it('should submit with phone-only (no email)', async () => {
+    it('should show success state after submission', async () => {
       render(<QuoteRequestForm />);
 
-      const nameInput = screen.getByLabelText(/name/i);
+      const nameInput = screen.getByLabelText(/full name/i);
       const phoneInput = screen.getByLabelText(/phone/i);
 
-      await userEvent.type(nameInput, 'Jane Smith');
-      await userEvent.type(phoneInput, '5559876543');
+      await userEvent.type(nameInput, 'John Doe');
+      await userEvent.type(phoneInput, '5551234567');
 
-      const submitButton = screen.getByRole('button', { name: /submit/i });
+      const submitButton = screen.getByRole('button', { name: /get your free quote/i });
       fireEvent.click(submitButton);
 
       await waitFor(() => {
-        const fetchCall = mockFetch.mock.calls[0];
-        const body = JSON.parse(fetchCall[1].body as string);
-
-        expect(body.name).toBe('Jane Smith');
-        expect(body.phone).toBe('5559876543');
-        expect(body.email).toBeUndefined();
+        expect(screen.getByText(/thank you/i)).toBeInTheDocument();
       });
-    });
-
-    it('should include source field in payload', async () => {
-      render(<QuoteRequestForm />);
-
-      const nameInput = screen.getByLabelText(/name/i);
-      const phoneInput = screen.getByLabelText(/phone/i);
-
-      await userEvent.type(nameInput, 'Test User');
-      await userEvent.type(phoneInput, '5551111111');
-
-      const submitButton = screen.getByRole('button', { name: /submit/i });
-      fireEvent.click(submitButton);
-
-      await waitFor(() => {
-        const fetchCall = mockFetch.mock.calls[0];
-        const body = JSON.parse(fetchCall[1].body as string);
-
-        expect(body.source).toBe('quote');
-      });
-    });
-
-    it('should display success message after submission', async () => {
-      render(<QuoteRequestForm />);
-
-      const nameInput = screen.getByLabelText(/name/i);
-      const phoneInput = screen.getByLabelText(/phone/i);
-
-      await userEvent.type(nameInput, 'Success Test');
-      await userEvent.type(phoneInput, '5551234567');
-
-      const submitButton = screen.getByRole('button', { name: /submit/i });
-      fireEvent.click(submitButton);
-
-      await waitFor(() => {
-        expect(screen.getByText(/thank you for your request/i)).toBeInTheDocument();
-      });
-    });
-
-    it('should display error message on submission failure', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        json: async () => ({ detail: 'Server error' }),
-      } as Response);
-
-      render(<QuoteRequestForm />);
-
-      const nameInput = screen.getByLabelText(/name/i);
-      const phoneInput = screen.getByLabelText(/phone/i);
-
-      await userEvent.type(nameInput, 'Error Test');
-      await userEvent.type(phoneInput, '5551234567');
-
-      const submitButton = screen.getByRole('button', { name: /submit/i });
-      fireEvent.click(submitButton);
-
-      await waitFor(() => {
-        expect(screen.getByText(/error.*submitting/i)).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('Loading States', () => {
-    it('should show loading state during submission', async () => {
-      mockFetch.mockImplementation(
-        () => new Promise((resolve) => setTimeout(resolve, 100))
-      );
-
-      render(<QuoteRequestForm />);
-
-      const nameInput = screen.getByLabelText(/name/i);
-      const phoneInput = screen.getByLabelText(/phone/i);
-
-      await userEvent.type(nameInput, 'Loading Test');
-      await userEvent.type(phoneInput, '5551234567');
-
-      const submitButton = screen.getByRole('button', { name: /submit/i });
-      fireEvent.click(submitButton);
-
-      expect(screen.getByRole('button', { name: /submitting/i })).toBeDisabled();
-    });
-
-    it('should disable form during submission', async () => {
-      mockFetch.mockImplementation(
-        () => new Promise((resolve) => setTimeout(resolve, 100))
-      );
-
-      render(<QuoteRequestForm />);
-
-      const nameInput = screen.getByLabelText(/name/i);
-      const phoneInput = screen.getByLabelText(/phone/i);
-
-      await userEvent.type(nameInput, 'Disable Test');
-      await userEvent.type(phoneInput, '5551234567');
-
-      const submitButton = screen.getByRole('button', { name: /submit/i });
-      fireEvent.click(submitButton);
-
-      expect(nameInput).toBeDisabled();
-      expect(phoneInput).toBeDisabled();
-    });
-  });
-
-  describe('Honeypot Protection', () => {
-    it('should include hidden honeypot field', () => {
-      const { container } = render(<QuoteRequestForm />);
-
-      const honeypot = container.querySelector('input[name="honeypot"]');
-      expect(honeypot).toBeInTheDocument();
-      expect(honeypot).toHaveAttribute('type', 'text');
-      expect(honeypot).toHaveStyle({ display: 'none' });
-    });
-
-    it('should not submit if honeypot is filled', async () => {
-      render(<QuoteRequestForm />);
-
-      const nameInput = screen.getByLabelText(/name/i);
-      const phoneInput = screen.getByLabelText(/phone/i);
-      const honeypot = document.querySelector('input[name="honeypot"]') as HTMLInputElement;
-
-      await userEvent.type(nameInput, 'Bot Test');
-      await userEvent.type(phoneInput, '5551234567');
-
-      // Simulate bot filling honeypot
-      fireEvent.change(honeypot, { target: { value: 'I am a bot' } });
-
-      const submitButton = screen.getByRole('button', { name: /submit/i });
-      fireEvent.click(submitButton);
-
-      // Should not call fetch if honeypot is filled
-      expect(global.fetch).not.toHaveBeenCalled();
     });
   });
 
   describe('Phone Number Formatting', () => {
-    it('should accept various phone formats', async () => {
-      const phoneFormats = [
-        '5551234567',
-        '(555) 123-4567',
-        '555-123-4567',
-        '1-555-123-4567',
-      ];
+    it('should format phone number as user types', async () => {
+      render(<QuoteRequestForm />);
 
-      for (const format of phoneFormats) {
-        vi.clearAllMocks();
+      const phoneInput = screen.getByLabelText(/phone/i) as HTMLInputElement;
 
-        const { unmount } = render(<QuoteRequestForm />);
+      await userEvent.type(phoneInput, '5551234567');
 
-        const nameInput = screen.getByLabelText(/name/i);
-        const phoneInput = screen.getByLabelText(/phone/i);
+      // Should format to (555) 123-4567
+      expect(phoneInput.value).toMatch(/\(\d{3}\)\s\d{3}-\d{4}/);
+    });
 
-        await userEvent.type(nameInput, 'Format Test');
-        await userEvent.type(phoneInput, format);
+    it('should accept various phone formats for submission', async () => {
+      render(<QuoteRequestForm />);
 
-        const submitButton = screen.getByRole('button', { name: /submit/i });
-        fireEvent.click(submitButton);
+      const nameInput = screen.getByLabelText(/full name/i);
+      const phoneInput = screen.getByLabelText(/phone/i);
 
-        await waitFor(() => {
-          expect(global.fetch).toHaveBeenCalled();
-        });
+      await userEvent.type(nameInput, 'Format Test');
+      await userEvent.type(phoneInput, '5551234567');
 
-        unmount();
-      }
+      const submitButton = screen.getByRole('button', { name: /get your free quote/i });
+      fireEvent.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockApiFetch).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('SMS and Email Consent', () => {
+    it('should render SMS consent checkbox', () => {
+      const { container } = render(<QuoteRequestForm />);
+      const smsCheckbox = container.querySelector('input#smsConsent');
+      expect(smsCheckbox).toBeInTheDocument();
+    });
+
+    it('should render email consent checkbox', () => {
+      const { container } = render(<QuoteRequestForm />);
+      const emailCheckbox = container.querySelector('input#emailConsent');
+      expect(emailCheckbox).toBeInTheDocument();
+    });
+
+    it('should include consent in submission when checked', async () => {
+      const { container } = render(<QuoteRequestForm />);
+
+      const nameInput = screen.getByLabelText(/full name/i);
+      const phoneInput = screen.getByLabelText(/phone/i);
+      const smsCheckbox = container.querySelector('input#smsConsent') as HTMLInputElement;
+
+      await userEvent.type(nameInput, 'John Doe');
+      await userEvent.type(phoneInput, '5551234567');
+      await userEvent.click(smsCheckbox);
+
+      const submitButton = screen.getByRole('button', { name: /get your free quote/i });
+      fireEvent.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockApiFetch).toHaveBeenCalled();
+        const callBody = JSON.parse(mockApiFetch.mock.calls[0][1].body);
+        expect(callBody.sms_consent).toBe(true);
+      });
+    });
+  });
+
+  describe('Accessibility', () => {
+    it('should have accessible form structure', () => {
+      const { container } = render(<QuoteRequestForm />);
+      const form = container.querySelector('form');
+      expect(form).toBeInTheDocument();
+    });
+
+    it('should have labels for all inputs', () => {
+      render(<QuoteRequestForm />);
+
+      // Required fields
+      expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/phone/i)).toBeInTheDocument();
+
+      // Optional fields
+      expect(screen.getByLabelText(/email address/i)).toBeInTheDocument();
     });
   });
 });

@@ -36,6 +36,7 @@ from core.service_registry import create_service_container
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -480,6 +481,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 logger.info(f"✅ CORS middleware registered for origins: {settings.cors_origins_list}")
+
+# GZip Compression Middleware (PERFORMANCE)
+app.add_middleware(GZipMiddleware, minimum_size=500)  # Compress responses > 500 bytes
+logger.info("✅ GZip compression middleware registered (min size: 500 bytes)")
+
+# Caching Middleware (PERFORMANCE - Cache-Control headers)
+try:
+    from middleware.caching import CachingMiddleware
+
+    app.add_middleware(CachingMiddleware, enable_etag=True)
+    logger.info("✅ Caching middleware registered (Cache-Control headers + ETag)")
+except ImportError:
+    logger.warning("⚠️ Caching middleware not available")
 
 
 # Rate Limiting Middleware
