@@ -32,6 +32,7 @@ from core.exceptions import (
 from services.event_service import EventService
 from sqlalchemy import String, and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload, selectinload
 from utils.validators import validate_email, validate_phone, ValidationError
 
 logger = logging.getLogger(__name__)
@@ -643,8 +644,16 @@ class LeadService(BaseService, EventTrackingMixin):
         return lead
 
     async def get_lead(self, lead_id: UUID) -> Lead:
-        """Get lead by ID with all relationships"""
-        result = await self.db.execute(select(Lead).where(Lead.id == lead_id))
+        """Get lead by ID with all relationships (eager loading to prevent N+1)"""
+        result = await self.db.execute(
+            select(Lead)
+            .options(
+                selectinload(Lead.contacts),
+                joinedload(Lead.context),
+                selectinload(Lead.events),
+            )
+            .where(Lead.id == lead_id)
+        )
         lead = result.scalar_one_or_none()
 
         if not lead:
@@ -736,11 +745,16 @@ class LeadService(BaseService, EventTrackingMixin):
         """
         List leads with filters and pagination
 
+        Uses eager loading to prevent N+1 queries when accessing relationships.
+
         Returns:
             Tuple of (leads list, total count)
         """
-        # Build query
-        query = select(Lead)
+        # Build query with eager loading to prevent N+1
+        query = select(Lead).options(
+            selectinload(Lead.contacts),
+            joinedload(Lead.context),
+        )
         count_query = select(func.count(Lead.id))
 
         filters = []

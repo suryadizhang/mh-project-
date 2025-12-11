@@ -4,6 +4,7 @@ import { ArrowLeft, CheckCircle2, Loader2, Copy, Check } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import QRCode from 'qrcode';
+import { useProtectedPhone, useProtectedPaymentEmail } from '@/components/ui/ProtectedPhone';
 
 interface PaymentData {
   baseAmount: number;
@@ -29,9 +30,9 @@ export default function ZellePaymentPage() {
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [copiedField, setCopiedField] = useState<string>('');
 
-  // Zelle payment info
-  const zelleEmail = 'myhibachichef@gmail.com';
-  const zellePhone = '+1 (916) 740-8768';
+  // Use protected hooks for anti-scraping
+  const { formatted: zellePhone } = useProtectedPhone();
+  const { email: zelleEmail } = useProtectedPaymentEmail();
 
   useEffect(() => {
     // Load payment data from sessionStorage
@@ -43,19 +44,23 @@ export default function ZellePaymentPage() {
 
     const data: PaymentData = JSON.parse(storedData);
     setPaymentData(data);
-
-    // Generate QR code
-    generateQRCode(data.subtotal);
   }, [router]);
 
+  // Generate QR code when email is loaded and paymentData is available
+  useEffect(() => {
+    if (zelleEmail && paymentData) {
+      generateQRCode(paymentData.subtotal, zelleEmail);
+    }
+  }, [zelleEmail, paymentData]);
+
   // Generate Zelle QR code
-  const generateQRCode = async (amount: number) => {
-    if (!canvasRef.current) return;
+  const generateQRCode = async (amount: number, email: string) => {
+    if (!canvasRef.current || !email) return;
 
     try {
       // Zelle QR code format (simplified - actual format may vary)
       // This creates a QR code with the email and amount
-      const zelleData = `mailto:${zelleEmail}?subject=Payment&body=Amount: $${amount.toFixed(2)}`;
+      const zelleData = `mailto:${email}?subject=Payment&body=Amount: $${amount.toFixed(2)}`;
 
       await QRCode.toCanvas(canvasRef.current, zelleData, {
         width: 256,
@@ -195,13 +200,14 @@ export default function ZellePaymentPage() {
                   <span className="text-2xl">📧</span>
                   <div>
                     <p className="text-xs text-gray-500">Email</p>
-                    <p className="font-mono font-medium text-gray-900">{zelleEmail}</p>
+                    <p className="font-mono font-medium text-gray-900">{zelleEmail || 'Loading...'}</p>
                   </div>
                 </div>
                 <button
-                  onClick={() => copyToClipboard(zelleEmail, 'email')}
+                  onClick={() => zelleEmail && copyToClipboard(zelleEmail, 'email')}
                   className="rounded-lg p-2 text-purple-600 transition-colors hover:bg-purple-100"
                   title="Copy email"
+                  disabled={!zelleEmail}
                 >
                   {copiedField === 'email' ? (
                     <Check className="h-5 w-5 text-green-600" />
@@ -217,13 +223,14 @@ export default function ZellePaymentPage() {
                   <span className="text-2xl">📱</span>
                   <div>
                     <p className="text-xs text-gray-500">Phone</p>
-                    <p className="font-mono font-medium text-gray-900">{zellePhone}</p>
+                    <p className="font-mono font-medium text-gray-900">{zellePhone || 'Loading...'}</p>
                   </div>
                 </div>
                 <button
-                  onClick={() => copyToClipboard(zellePhone, 'phone')}
+                  onClick={() => zellePhone && copyToClipboard(zellePhone, 'phone')}
                   className="rounded-lg p-2 text-purple-600 transition-colors hover:bg-purple-100"
                   title="Copy phone"
+                  disabled={!zellePhone}
                 >
                   {copiedField === 'phone' ? (
                     <Check className="h-5 w-5 text-green-600" />
