@@ -35,28 +35,26 @@ const CustomerAddressSection: React.FC<CustomerAddressSectionProps & { className
 
       {!sameAsVenue && (
         <>
-          <div className="row">
-            <div className="col-12">
-              <div className="form-group">
-                <label htmlFor="addressStreet" className="form-label required">
-                  Street Address
-                </label>
-                <input
-                  type="text"
-                  id="addressStreet"
-                  className={`form-control ${errors.addressStreet ? 'is-invalid' : ''}`}
-                  {...register('addressStreet', { required: 'Street address is required' })}
-                  placeholder="123 Main Street, Apt 2B"
-                />
-                {errors.addressStreet && (
-                  <div className="invalid-feedback">{errors.addressStreet.message}</div>
-                )}
-              </div>
+          <div className="mb-4">
+            <div className="form-group">
+              <label htmlFor="addressStreet" className="form-label required">
+                Street Address
+              </label>
+              <input
+                type="text"
+                id="addressStreet"
+                className={`form-control ${errors.addressStreet ? 'is-invalid' : ''}`}
+                {...register('addressStreet', { required: 'Street address is required' })}
+                placeholder="123 Main Street, Apt 2B"
+              />
+              {errors.addressStreet && (
+                <div className="invalid-feedback">{errors.addressStreet.message}</div>
+              )}
             </div>
           </div>
 
-          <div className="row">
-            <div className="col-md-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
+            <div className="md:col-span-3">
               <div className="form-group">
                 <label htmlFor="addressCity" className="form-label required">
                   City
@@ -74,7 +72,7 @@ const CustomerAddressSection: React.FC<CustomerAddressSectionProps & { className
               </div>
             </div>
 
-            <div className="col-md-3">
+            <div className="md:col-span-2">
               <div className="form-group">
                 <label htmlFor="addressState" className="form-label required">
                   State
@@ -96,7 +94,7 @@ const CustomerAddressSection: React.FC<CustomerAddressSectionProps & { className
               </div>
             </div>
 
-            <div className="col-md-3">
+            <div className="md:col-span-1">
               <div className="form-group">
                 <label htmlFor="addressZipcode" className="form-label required">
                   ZIP Code

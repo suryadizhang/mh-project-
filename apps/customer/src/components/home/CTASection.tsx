@@ -1,38 +1,38 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import React, { useEffect, useRef } from 'react'
+import Link from 'next/link';
+import React, { useEffect, useRef } from 'react';
 
-import { homeData } from '@/data/home'
-import styles from '@/styles/home/cta.module.css'
+import { homeData } from '@/data/home';
+import styles from '@/styles/home/cta.module.css';
 
 export function CTASection() {
-  const sectionRef = useRef<HTMLElement>(null)
+  const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
+      (entries) => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add(styles.animateIn)
+            entry.target.classList.add(styles.animateIn);
           }
-        })
+        });
       },
-      { threshold: 0.1 }
-    )
+      { threshold: 0.1 },
+    );
 
     if (sectionRef.current) {
-      observer.observe(sectionRef.current)
+      observer.observe(sectionRef.current);
     }
 
-    return () => observer.disconnect()
-  }, [])
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section className={styles.ctaSection} ref={sectionRef}>
-      <div className="container">
-        <div className="row justify-content-center">
-          <div className="col-lg-8 text-center">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-center">
+          <div className="w-full text-center lg:w-2/3">
             <div className={styles.ctaContent}>
               <h2 className={styles.ctaTitle}>{homeData.cta.title}</h2>
               <p className={styles.ctaSubtitle}>{homeData.cta.subtitle}</p>
@@ -61,5 +61,5 @@ export function CTASection() {
         </div>
       </div>
     </section>
-  )
+  );
 }

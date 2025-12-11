@@ -33,7 +33,7 @@ export default function Home() {
           </video>
         </div>
 
-        <div className="container">
+        <div className="mx-auto max-w-7xl px-4">
           {/* Animated Headline Section */}
           <div className="headline-section animate-on-scroll">
             <h1 className="main-title text-center">Experience the Art of Japanese Hibachi</h1>
@@ -48,8 +48,8 @@ export default function Home() {
           </div>
 
           {/* Experience Sections */}
-          <div className="row experience-sections animate-on-scroll mb-5">
-            <div className="col-lg-6 mb-4">
+          <div className="experience-sections animate-on-scroll mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="mb-4">
               <div className="experience-card left-card chef-card">
                 <div className="experience-icon-wrapper chef-wrapper">
                   <span className="experience-icon rotating-chef">👨‍🍳</span>
@@ -93,7 +93,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="col-lg-6 mb-4">
+            <div className="mb-4">
               <div className="experience-card right-card">
                 <div className="experience-icon-wrapper experience-wrapper">
                   <span className="experience-icon pulsing-flame">🔥</span>
@@ -242,16 +242,22 @@ export default function Home() {
               <span className="highlight-text">transparent travel options</span>.
             </p>
             <div className="mt-3 mb-4 text-center">
-              <a href="/BookUs" className="btn btn-primary me-3">
+              <a
+                href="/BookUs"
+                className="mr-3 inline-block rounded-lg bg-red-600 px-6 py-3 font-semibold text-white transition hover:bg-red-700"
+              >
                 📅 Check Your Date & Time
               </a>
-              <a href="/quote" className="btn btn-outline-primary">
+              <a
+                href="/quote"
+                className="inline-block rounded-lg border-2 border-red-600 px-6 py-3 font-semibold text-red-600 transition hover:bg-red-50"
+              >
                 💬 Get a Quick Quote
               </a>
             </div>
 
-            <div className="row mt-4">
-              <div className="col-md-6">
+            <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div>
                 <div className="service-area-card">
                   <h4 className="area-title">🏙️ Primary Bay Area Locations</h4>
                   <p className="area-subtitle">No additional travel fees within these areas!</p>
@@ -267,7 +273,7 @@ export default function Home() {
                   </ul>
                 </div>
               </div>
-              <div className="col-md-6">
+              <div>
                 <div className="service-area-card">
                   <h4 className="area-title">🏞️ Sacramento & Extended Regions</h4>
                   <p className="area-subtitle">
@@ -350,19 +356,17 @@ export default function Home() {
           {/* About Us Section */}
           <div className="about-us-section animate-on-scroll">
             <h3 className="section-title text-center">Our Story</h3>
-            <div className="row">
-              <div className="col-lg-8 offset-lg-2">
-                <p className="about-text">
-                  My Hibachi Chef was founded with a simple mission: to bring the excitement and
-                  flavors of hibachi cooking directly to our customers. What started as a small
-                  catering service has grown into a premier hibachi experience provider serving the
-                  entire region.
-                </p>
-                <p className="about-text">
-                  Our team of professionally trained chefs combines culinary expertise with
-                  entertainment to create memorable dining experiences for any occasion.
-                </p>
-              </div>
+            <div className="mx-auto max-w-4xl">
+              <p className="about-text">
+                My Hibachi Chef was founded with a simple mission: to bring the excitement and
+                flavors of hibachi cooking directly to our customers. What started as a small
+                catering service has grown into a premier hibachi experience provider serving the
+                entire region.
+              </p>
+              <p className="about-text">
+                Our team of professionally trained chefs combines culinary expertise with
+                entertainment to create memorable dining experiences for any occasion.
+              </p>
             </div>
           </div>
         </div>
@@ -376,8 +380,8 @@ export default function Home() {
             <span className="service-icon">🎪</span>
           </h2>
 
-          <div className="row services-grid">
-            <div className="col-md-4 mb-4">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            <div className="mb-4">
               <div className="service-card">
                 <div className="service-icon-wrapper">
                   <i className="bi bi-calendar-event service-icon-bi"></i>
@@ -402,7 +406,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="col-md-4 mb-4">
+            <div className="mb-4">
               <div className="service-card">
                 <div className="service-icon-wrapper">
                   <i className="bi bi-building service-icon-bi"></i>
@@ -427,7 +431,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="col-md-4 mb-4">
+            <div className="mb-4">
               <div className="service-card">
                 <div className="service-icon-wrapper">
                   <i className="bi bi-stars service-icon-bi"></i>
@@ -454,8 +458,11 @@ export default function Home() {
           </div>
 
           <div className="services-cta text-center">
-            <Link href="/BookUs" className="btn btn-primary btn-lg">
-              <i className="bi bi-calendar-check me-2"></i> Book Your Premium Experience
+            <Link
+              href="/BookUs"
+              className="btn-primary-custom inline-flex items-center gap-2 rounded-lg bg-red-600 px-6 py-3 text-lg font-semibold text-white transition-all hover:bg-red-700"
+            >
+              <i className="bi bi-calendar-check"></i> Book Your Premium Experience
             </Link>
           </div>
         </div>

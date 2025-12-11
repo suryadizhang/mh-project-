@@ -355,9 +355,9 @@ export default function BookUsPageClient() {
         </div>
       </section>
 
-      <div className="container">
-        <div className="row justify-content-center">
-          <div className="col-lg-8">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-center">
+          <div className="w-full lg:w-2/3">
             {/* Deposit Warning Banner */}
             <div className="alert alert-warning border-warning mb-4 shadow-sm" role="alert">
               <div className="d-flex align-items-start">
@@ -436,8 +436,8 @@ export default function BookUsPageClient() {
                     Contact Information
                   </h3>
 
-                  <div className="row">
-                    <div className="col-md-6">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
                       <div className="form-group">
                         <label htmlFor="name" className="form-label required">
                           Full Name
@@ -455,7 +455,7 @@ export default function BookUsPageClient() {
                       </div>
                     </div>
 
-                    <div className="col-md-6">
+                    <div>
                       <div className="form-group">
                         <label htmlFor="email" className="form-label required">
                           Email Address
@@ -480,8 +480,8 @@ export default function BookUsPageClient() {
                     </div>
                   </div>
 
-                  <div className="row">
-                    <div className="col-md-6">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
                       <div className="form-group">
                         <label htmlFor="phone" className="form-label required">
                           Phone Number
@@ -499,7 +499,7 @@ export default function BookUsPageClient() {
                       </div>
                     </div>
 
-                    <div className="col-md-6">
+                    <div>
                       <div className="form-group">
                         <label htmlFor="guestCount" className="form-label required">
                           Number of Guests
@@ -532,8 +532,8 @@ export default function BookUsPageClient() {
                     Event Details
                   </h3>
 
-                  <div className="row">
-                    <div className="col-md-6">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
                       <div className="form-group">
                         <label htmlFor="eventDate" className="form-label required">
                           Event Date
@@ -566,7 +566,7 @@ export default function BookUsPageClient() {
                       </div>
                     </div>
 
-                    <div className="col-md-6">
+                    <div>
                       <div className="form-group">
                         <label htmlFor="eventTime" className="form-label required">
                           Preferred Time
@@ -634,8 +634,8 @@ export default function BookUsPageClient() {
                     </div>
                   </div>
 
-                  <div className="row">
-                    <div className="col-md-6">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
+                    <div className="md:col-span-3">
                       <div className="form-group">
                         <label htmlFor="venueCity" className="form-label required">
                           City
@@ -653,7 +653,7 @@ export default function BookUsPageClient() {
                       </div>
                     </div>
 
-                    <div className="col-md-3">
+                    <div className="md:col-span-1">
                       <div className="form-group">
                         <label htmlFor="venueState" className="form-label required">
                           State
@@ -675,7 +675,7 @@ export default function BookUsPageClient() {
                       </div>
                     </div>
 
-                    <div className="col-md-3">
+                    <div className="md:col-span-2">
                       <div className="form-group">
                         <label htmlFor="venueZipcode" className="form-label required">
                           ZIP Code
@@ -741,8 +741,8 @@ export default function BookUsPageClient() {
                         </div>
                       </div>
 
-                      <div className="row">
-                        <div className="col-md-6">
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
+                        <div className="md:col-span-3">
                           <div className="form-group">
                             <label htmlFor="addressCity" className="form-label required">
                               City
@@ -760,7 +760,7 @@ export default function BookUsPageClient() {
                           </div>
                         </div>
 
-                        <div className="col-md-3">
+                        <div className="md:col-span-1">
                           <div className="form-group">
                             <label htmlFor="addressState" className="form-label required">
                               State
@@ -782,7 +782,7 @@ export default function BookUsPageClient() {
                           </div>
                         </div>
 
-                        <div className="col-md-3">
+                        <div className="md:col-span-2">
                           <div className="form-group">
                             <label htmlFor="addressZipcode" className="form-label required">
                               ZIP Code

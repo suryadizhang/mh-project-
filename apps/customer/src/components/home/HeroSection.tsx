@@ -1,34 +1,34 @@
-'use client'
+'use client';
 
-import Image from 'next/image'
-import React, { useEffect, useRef } from 'react'
+import Image from 'next/image';
+import React, { useEffect, useRef } from 'react';
 
-import { homeData } from '@/data/home'
-import styles from '@/styles/home/hero.module.css'
+import { homeData } from '@/data/home';
+import styles from '@/styles/home/hero.module.css';
 
-import HeroVideo from '../HeroVideo'
+import HeroVideo from '../HeroVideo';
 
 export function HeroSection() {
-  const heroRef = useRef<HTMLElement>(null)
+  const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
+      (entries) => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add(styles.animateIn)
+            entry.target.classList.add(styles.animateIn);
           }
-        })
+        });
       },
-      { threshold: 0.1 }
-    )
+      { threshold: 0.1 },
+    );
 
     if (heroRef.current) {
-      observer.observe(heroRef.current)
+      observer.observe(heroRef.current);
     }
 
-    return () => observer.disconnect()
-  }, [])
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section className={styles.aboutSection} ref={heroRef}>
@@ -43,16 +43,16 @@ export function HeroSection() {
       </div>
 
       {/* Hero Content */}
-      <div className={`container ${styles.heroContent}`}>
-        <div className="row justify-content-center">
-          <div className="col-lg-8 text-center">
+      <div className={`container mx-auto px-4 ${styles.heroContent}`}>
+        <div className="flex justify-center">
+          <div className="w-full text-center lg:w-2/3">
             <div className={styles.qualityBadge}>{homeData.hero.qualityBadge}</div>
           </div>
         </div>
 
         {/* Logo Section */}
-        <div className={`row justify-content-center mt-5 ${styles.logoSection}`}>
-          <div className="col-md-6 text-center">
+        <div className={`mt-8 flex justify-center ${styles.logoSection}`}>
+          <div className="w-full text-center md:w-1/2">
             <div className={styles.logoContainer}>
               <Image
                 src="/images/myhibachi-logo.png"
@@ -71,8 +71,8 @@ export function HeroSection() {
         </div>
 
         {/* About Content */}
-        <div className="row justify-content-center mt-5">
-          <div className="col-lg-10">
+        <div className="mt-8 flex justify-center">
+          <div className="w-full lg:w-5/6">
             <div className={styles.aboutContent}>
               <p className={styles.aboutParagraph}>
                 Welcome to My Hibachi, where we bring the authentic Japanese hibachi experience
@@ -96,5 +96,5 @@ export function HeroSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }

@@ -20,28 +20,26 @@ const VenueAddressSection: React.FC<VenueAddressSectionProps & { className?: str
         Please provide the address where the hibachi event will take place.
       </p>
 
-      <div className="row">
-        <div className="col-12">
-          <div className="form-group">
-            <label htmlFor="venueStreet" className="form-label required">
-              Street Address
-            </label>
-            <input
-              type="text"
-              id="venueStreet"
-              className={`form-control ${errors.venueStreet ? 'is-invalid' : ''}`}
-              {...register('venueStreet', { required: 'Venue street address is required' })}
-              placeholder="123 Main Street, Apt 2B"
-            />
-            {errors.venueStreet && (
-              <div className="invalid-feedback">{errors.venueStreet.message}</div>
-            )}
-          </div>
+      <div className="mb-4">
+        <div className="form-group">
+          <label htmlFor="venueStreet" className="form-label required">
+            Street Address
+          </label>
+          <input
+            type="text"
+            id="venueStreet"
+            className={`form-control ${errors.venueStreet ? 'is-invalid' : ''}`}
+            {...register('venueStreet', { required: 'Venue street address is required' })}
+            placeholder="123 Main Street, Apt 2B"
+          />
+          {errors.venueStreet && (
+            <div className="invalid-feedback">{errors.venueStreet.message}</div>
+          )}
         </div>
       </div>
 
-      <div className="row">
-        <div className="col-md-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
+        <div className="md:col-span-3">
           <div className="form-group">
             <label htmlFor="venueCity" className="form-label required">
               City
@@ -57,7 +55,7 @@ const VenueAddressSection: React.FC<VenueAddressSectionProps & { className?: str
           </div>
         </div>
 
-        <div className="col-md-3">
+        <div className="md:col-span-2">
           <div className="form-group">
             <label htmlFor="venueState" className="form-label required">
               State
@@ -79,7 +77,7 @@ const VenueAddressSection: React.FC<VenueAddressSectionProps & { className?: str
           </div>
         </div>
 
-        <div className="col-md-3">
+        <div className="md:col-span-1">
           <div className="form-group">
             <label htmlFor="venueZipcode" className="form-label required">
               ZIP Code
