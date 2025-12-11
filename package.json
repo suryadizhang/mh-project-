@@ -45,7 +45,7 @@
     "codegen:watch": "npm run codegen:api -- --watch",
     "setup": "npm install && npm run codegen",
     "postinstall:disabled": "npm run codegen:api",
-    "prepare": "husky install"
+    "prepare": "husky || true"
   },
   "devDependencies": {
     "@playwright/test": "^1.47.0",

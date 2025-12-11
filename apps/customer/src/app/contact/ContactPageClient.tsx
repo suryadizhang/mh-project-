@@ -1,6 +1,7 @@
 'use client';
 
 import { logger } from '@/lib/logger';
+import { useProtectedPhone } from '@/components/ui/ProtectedPhone';
 
 // Type definitions
 declare global {
@@ -121,6 +122,9 @@ function InlineInstagramButton() {
 }
 
 export default function ContactPageClient() {
+  // Use protected phone hook for anti-scraping
+  const { tel } = useProtectedPhone();
+
   return (
     <div className="contact-page">
       {/* Hero Section */}
@@ -347,7 +351,7 @@ export default function ContactPageClient() {
                   <i className="bi bi-chat-dots-fill me-2"></i>
                   Get a Custom Quote
                 </a>
-                <a href="tel:+19167408768" className="btn btn-outline-primary btn-lg">
+                <a href={tel ? `tel:${tel}` : '#'} className="btn btn-outline-primary btn-lg">
                   <i className="bi bi-telephone-fill me-2"></i>
                   Call Us Now
                 </a>

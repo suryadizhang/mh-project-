@@ -1,6 +1,5 @@
 'use client';
 
-import 'react-datepicker/dist/react-datepicker.css';
 import './datepicker.css';
 
 import {
@@ -10,43 +9,21 @@ import {
 } from '@myhibachi/types/schemas';
 import { addDays, format } from 'date-fns';
 import Link from 'next/link';
-import React, { useEffect, useRef,useState } from 'react';
-import DatePicker from 'react-datepicker';
+import React, { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import type { z } from 'zod';
 
 import Assistant from '@/components/chat/Assistant';
+import { LazyDatePicker } from '@/components/ui/LazyDatePicker';
+import { useProtectedPhone, ProtectedEmail } from '@/components/ui/ProtectedPhone';
 import { apiFetch } from '@/lib/api';
 import { logger } from '@/lib/logger';
 
-// Google Maps types
+// Google Maps types - extend Window interface
 declare global {
   interface Window {
-    google: {
-      maps: {
-        places: {
-          Autocomplete: new (
-            input: HTMLInputElement,
-            options?: {
-              types?: string[];
-              componentRestrictions?: { country: string };
-              fields?: string[];
-            },
-          ) => {
-            addListener: (event: string, handler: () => void) => void;
-            getPlace: () => {
-              formatted_address?: string;
-              address_components?: Array<{
-                long_name: string;
-                short_name: string;
-                types: string[];
-              }>;
-              geometry?: unknown;
-            };
-          };
-        };
-      };
-    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    google: any;
   }
 }
 
@@ -82,6 +59,9 @@ type BookingFormData = {
   venueZipcode?: string;
 };
 export default function BookingPage() {
+  // Anti-scraper protected contact info
+  const { formatted: protectedPhone, tel: protectedTel } = useProtectedPhone();
+
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
   const [showAgreementModal, setShowAgreementModal] = useState(false);
@@ -184,16 +164,18 @@ export default function BookingPage() {
             let state = '';
             let zipCode = '';
 
-            place.address_components.forEach((component) => {
-              const types = component.types;
-              if (types.includes('locality')) {
-                city = component.long_name;
-              } else if (types.includes('administrative_area_level_1')) {
-                state = component.short_name;
-              } else if (types.includes('postal_code')) {
-                zipCode = component.long_name;
-              }
-            });
+            place.address_components.forEach(
+              (component: { types: string[]; long_name: string; short_name: string }) => {
+                const types = component.types;
+                if (types.includes('locality')) {
+                  city = component.long_name;
+                } else if (types.includes('administrative_area_level_1')) {
+                  state = component.short_name;
+                } else if (types.includes('postal_code')) {
+                  zipCode = component.long_name;
+                }
+              },
+            );
 
             // Auto-fill city, state, and ZIP
             if (city) setValue('venueCity', city);
@@ -1063,16 +1045,13 @@ export default function BookingPage() {
                       </p>
                       <p>
                         <strong>Contact:</strong>{' '}
-                        <a href="tel:+19167408768" className="text-blue-600 hover:underline">
-                          (916) 740-8768
-                        </a>{' '}
-                        |{' '}
                         <a
-                          href="mailto:cs@myhibachichef.com"
+                          href={protectedTel ? `tel:${protectedTel}` : '#'}
                           className="text-blue-600 hover:underline"
                         >
-                          cs@myhibachichef.com
-                        </a>
+                          {protectedPhone || 'Loading...'}
+                        </a>{' '}
+                        | <ProtectedEmail className="text-blue-600 hover:underline" />
                       </p>
                       <p>
                         <strong>Policies:</strong>{' '}
@@ -1103,7 +1082,7 @@ export default function BookingPage() {
                       control={control}
                       render={({ field }) => (
                         <div className="relative">
-                          <DatePicker
+                          <LazyDatePicker
                             selected={field.value}
                             onChange={(date: Date | null) => {
                               setDateError(null);
@@ -1124,7 +1103,7 @@ export default function BookingPage() {
                             dropdownMode="select"
                             yearDropdownItemNumber={3}
                             scrollableYearDropdown={false}
-                            dayClassName={(date) => {
+                            dayClassName={(date: Date) => {
                               // Highlight selected date
                               if (
                                 field.value &&

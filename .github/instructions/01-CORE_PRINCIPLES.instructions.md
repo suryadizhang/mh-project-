@@ -47,25 +47,58 @@ applyTo: '**'
 - Tested code > Quick code
 - Documented code > Shipped code
 
-### 7. Single Source of Truth
+### 7. Single Source of Truth – No Duplicates
 
 - One place for each piece of info
 - No duplicate documentation
 - No duplicate logic
+- **Fix existing files** instead of creating new duplicates
+- If duplicates are necessary, consolidate or delete extras
+  immediately
+- Before creating any file, check if similar exists
 
-### 8. Monorepo = Unified Deployment
+### 8. Clean Main Branch – Production Only
+
+**Main branch must ONLY contain production-ready code:**
+
+| ✅ Allowed in `main`            | ❌ NOT Allowed in `main`          |
+| ------------------------------- | --------------------------------- |
+| Working source code             | `*_PLAN.md` planning documents    |
+| README.md, CONTRIBUTING.md      | `*_ANALYSIS.md` development notes |
+| `.github/instructions/` prompts | `*_SUMMARY.md` batch tracking     |
+| CI/CD workflows                 | `*_STATUS.md` progress files      |
+| Essential deployment guides     | Implementation roadmaps           |
+| API documentation               | Development/debug logs            |
+
+**Why this matters:**
+
+- Each batch merge to `main` = traceable deployment
+- When bugs occur, `git bisect` can identify the exact batch
+- Clean commit history enables proper rollback
+- Batch files stay in feature branches until batch completion
+
+**Process:**
+
+1. Planning docs stay in `feature/batch-X-*` branches
+2. Only merge working code to `dev`, then to `main`
+3. Archive batch planning docs locally or in `archives/` folder
+   (gitignored)
+4. Main branch commits should reference batch:
+   `feat(batch-1): description`
+
+### 9. Monorepo = Unified Deployment
 
 - All 3 apps deploy together
 - One branch = One state for all apps
 - API compatibility always maintained
 
-### 9. Fix Bugs at All Costs
+### 10. Fix Bugs at All Costs
 
 - Production bug = Drop everything
 - Never hide bugs with workarounds
 - Root cause > Band-aid
 
-### 10. Security is Non-Negotiable
+### 11. Security is Non-Negotiable
 
 - No secrets in code
 - No credentials in logs
@@ -103,6 +136,7 @@ All code must be:
 | Use `any` type broadly  | Type safety required       |
 | Silent error swallowing | Debugging impossible       |
 | TODO in production code | Incomplete work            |
+| Create duplicate files  | Fix existing files instead |
 
 ---
 
