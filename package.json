@@ -45,7 +45,7 @@
     "codegen:watch": "npm run codegen:api -- --watch",
     "setup": "npm install && npm run codegen",
     "postinstall:disabled": "npm run codegen:api",
-    "prepare": "[ -n \"$CI\" ] || [ -n \"$VERCEL\" ] || husky install || true",
+    "prepare": "node -e \"if (!process.env.VERCEL && !process.env.CI) { try { require('husky').install() } catch(e) {} }\"",
     "vercel-build": "npm run build"
   },
   "devDependencies": {
