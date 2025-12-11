@@ -32,7 +32,7 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
     <>
       {/* Validation Modal */}
       {showValidationModal && (
-        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div className="modal fade show block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-header">
@@ -65,7 +65,7 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
 
       {/* Agreement Modal */}
       {showAgreementModal && (
-        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div className="modal fade show block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-dialog-centered modal-lg">
             <div className="modal-content">
               <div className="modal-header">

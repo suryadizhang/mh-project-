@@ -55,7 +55,7 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps & { className?: str
             {loadingDates && <small className="text-muted">Loading available dates...</small>}
             {dateError && <small className="text-danger">{dateError}</small>}
             {errors.eventDate && (
-              <div className="invalid-feedback d-block">{errors.eventDate.message}</div>
+              <div className="invalid-feedback block">{errors.eventDate.message}</div>
             )}
           </div>
         </div>
