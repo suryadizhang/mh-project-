@@ -17,8 +17,8 @@ const ContactInfoSection: React.FC<FormSectionProps & { className?: string }> = 
         Contact Information
       </h3>
 
-      <div className="row">
-        <div className="col-md-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div>
           <div className="form-group">
             <label htmlFor="name" className="form-label required">
               Full Name
@@ -34,7 +34,7 @@ const ContactInfoSection: React.FC<FormSectionProps & { className?: string }> = 
           </div>
         </div>
 
-        <div className="col-md-6">
+        <div>
           <div className="form-group">
             <label htmlFor="email" className="form-label required">
               Email Address
@@ -57,8 +57,8 @@ const ContactInfoSection: React.FC<FormSectionProps & { className?: string }> = 
         </div>
       </div>
 
-      <div className="row">
-        <div className="col-md-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div>
           <div className="form-group">
             <label htmlFor="phone" className="form-label required">
               Phone Number
@@ -74,7 +74,7 @@ const ContactInfoSection: React.FC<FormSectionProps & { className?: string }> = 
           </div>
         </div>
 
-        <div className="col-md-6">
+        <div>
           <div className="form-group">
             <label htmlFor="guestCount" className="form-label required">
               Number of Guests

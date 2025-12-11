@@ -164,11 +164,11 @@ export default function ContactPageClient() {
         </div>
       </div>
 
-      <div className="contact-container container">
+      <div className="contact-container container mx-auto px-4">
         {/* Main Contact Section */}
-        <div className="row contact-main-section" id="contact-details">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2" id="contact-details">
           {/* Contact Information Card */}
-          <div className="col-lg-6 mb-4">
+          <div className="mb-4">
             <div className="card contact-card h-100">
               <div className="card-body">
                 <h3 className="card-title">
@@ -233,7 +233,7 @@ export default function ContactPageClient() {
           </div>
 
           {/* Reviews & Social Media Card */}
-          <div className="col-lg-6 mb-4">
+          <div className="mb-4">
             <div className="card contact-card h-100">
               <div className="card-body">
                 <h3 className="card-title">
@@ -366,8 +366,8 @@ export default function ContactPageClient() {
             <i className="bi bi-quote me-2"></i>
             What Our Clients Say
           </h3>
-          <div className="row">
-            <div className="col-md-4 mb-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="mb-4">
               <div className="testimonial-card">
                 <div className="testimonial-header">
                   <div className="testimonial-rating">⭐⭐⭐⭐⭐</div>
@@ -382,7 +382,7 @@ export default function ContactPageClient() {
                 <div className="testimonial-author">- Sarah J., San Francisco</div>
               </div>
             </div>
-            <div className="col-md-4 mb-4">
+            <div className="mb-4">
               <div className="testimonial-card">
                 <div className="testimonial-header">
                   <div className="testimonial-rating">⭐⭐⭐⭐⭐</div>
@@ -398,7 +398,7 @@ export default function ContactPageClient() {
                 <div className="testimonial-author">- Michael T., San Jose</div>
               </div>
             </div>
-            <div className="col-md-4 mb-4">
+            <div className="mb-4">
               <div className="testimonial-card">
                 <div className="testimonial-header">
                   <div className="testimonial-rating">⭐⭐⭐⭐⭐</div>
@@ -426,52 +426,52 @@ export default function ContactPageClient() {
           {/* Primary Bay Area Locations */}
           <h4 className="mb-4 text-center">🏙️ Primary Bay Area Locations</h4>
           <p className="mb-4 text-center">No additional travel fees within these areas!</p>
-          <div className="row mb-4">
-            <div className="col-md-3 mb-3">
-              <div className="d-flex align-items-center">
-                <i className="bi bi-geo-alt-fill text-primary me-2"></i>
+          <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+            <div className="mb-3">
+              <div className="flex items-center">
+                <i className="bi bi-geo-alt-fill mr-2 text-red-600"></i>
                 <span>San Francisco</span>
               </div>
             </div>
-            <div className="col-md-3 mb-3">
-              <div className="d-flex align-items-center">
-                <i className="bi bi-geo-alt-fill text-primary me-2"></i>
+            <div className="mb-3">
+              <div className="flex items-center">
+                <i className="bi bi-geo-alt-fill mr-2 text-red-600"></i>
                 <span>San Jose</span>
               </div>
             </div>
-            <div className="col-md-3 mb-3">
-              <div className="d-flex align-items-center">
-                <i className="bi bi-geo-alt-fill text-primary me-2"></i>
+            <div className="mb-3">
+              <div className="flex items-center">
+                <i className="bi bi-geo-alt-fill mr-2 text-red-600"></i>
                 <span>Oakland</span>
               </div>
             </div>
-            <div className="col-md-3 mb-3">
-              <div className="d-flex align-items-center">
-                <i className="bi bi-geo-alt-fill text-primary me-2"></i>
+            <div className="mb-3">
+              <div className="flex items-center">
+                <i className="bi bi-geo-alt-fill mr-2 text-red-600"></i>
                 <span>Northern California</span>
               </div>
             </div>
-            <div className="col-md-3 mb-3">
-              <div className="d-flex align-items-center">
-                <i className="bi bi-geo-alt-fill text-primary me-2"></i>
+            <div className="mb-3">
+              <div className="flex items-center">
+                <i className="bi bi-geo-alt-fill mr-2 text-red-600"></i>
                 <span>Santa Clara</span>
               </div>
             </div>
-            <div className="col-md-3 mb-3">
-              <div className="d-flex align-items-center">
-                <i className="bi bi-geo-alt-fill text-primary me-2"></i>
+            <div className="mb-3">
+              <div className="flex items-center">
+                <i className="bi bi-geo-alt-fill mr-2 text-red-600"></i>
                 <span>Sunnyvale</span>
               </div>
             </div>
-            <div className="col-md-3 mb-3">
-              <div className="d-flex align-items-center">
-                <i className="bi bi-geo-alt-fill text-primary me-2"></i>
+            <div className="mb-3">
+              <div className="flex items-center">
+                <i className="bi bi-geo-alt-fill mr-2 text-red-600"></i>
                 <span>Mountain View</span>
               </div>
             </div>
-            <div className="col-md-3 mb-3">
-              <div className="d-flex align-items-center">
-                <i className="bi bi-geo-alt-fill text-primary me-2"></i>
+            <div className="mb-3">
+              <div className="flex items-center">
+                <i className="bi bi-geo-alt-fill mr-2 text-red-600"></i>
                 <span>Palo Alto</span>
               </div>
             </div>
@@ -480,54 +480,38 @@ export default function ContactPageClient() {
           {/* Sacramento & Extended Regions */}
           <h4 className="mb-4 text-center">🏞️ Sacramento & Extended Regions</h4>
           <p className="mb-4 text-center">Minimal travel fees for these beautiful locations!</p>
-          <div className="row">
-            <div className="col-md-3 mb-3">
-              <div className="d-flex align-items-center">
-                <i className="bi bi-geo-alt-fill text-primary me-2"></i>
-                <span>Sacramento</span>
-              </div>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <div className="flex items-center">
+              <span className="mr-2 text-red-600">📍</span>
+              <span>Sacramento</span>
             </div>
-            <div className="col-md-3 mb-3">
-              <div className="d-flex align-items-center">
-                <i className="bi bi-geo-alt-fill text-primary me-2"></i>
-                <span>Elk Grove</span>
-              </div>
+            <div className="flex items-center">
+              <span className="mr-2 text-red-600">📍</span>
+              <span>Elk Grove</span>
             </div>
-            <div className="col-md-3 mb-3">
-              <div className="d-flex align-items-center">
-                <i className="bi bi-geo-alt-fill text-primary me-2"></i>
-                <span>Roseville</span>
-              </div>
+            <div className="flex items-center">
+              <span className="mr-2 text-red-600">📍</span>
+              <span>Roseville</span>
             </div>
-            <div className="col-md-3 mb-3">
-              <div className="d-flex align-items-center">
-                <i className="bi bi-geo-alt-fill text-primary me-2"></i>
-                <span>Folsom</span>
-              </div>
+            <div className="flex items-center">
+              <span className="mr-2 text-red-600">📍</span>
+              <span>Folsom</span>
             </div>
-            <div className="col-md-3 mb-3">
-              <div className="d-flex align-items-center">
-                <i className="bi bi-geo-alt-fill text-primary me-2"></i>
-                <span>Davis</span>
-              </div>
+            <div className="flex items-center">
+              <span className="mr-2 text-red-600">📍</span>
+              <span>Davis</span>
             </div>
-            <div className="col-md-3 mb-3">
-              <div className="d-flex align-items-center">
-                <i className="bi bi-geo-alt-fill text-primary me-2"></i>
-                <span>Stockton</span>
-              </div>
+            <div className="flex items-center">
+              <span className="mr-2 text-red-600">📍</span>
+              <span>Stockton</span>
             </div>
-            <div className="col-md-3 mb-3">
-              <div className="d-flex align-items-center">
-                <i className="bi bi-geo-alt-fill text-primary me-2"></i>
-                <span>Modesto</span>
-              </div>
+            <div className="flex items-center">
+              <span className="mr-2 text-red-600">📍</span>
+              <span>Modesto</span>
             </div>
-            <div className="col-md-3 mb-3">
-              <div className="d-flex align-items-center">
-                <i className="bi bi-geo-alt-fill text-primary me-2"></i>
-                <span>Livermore</span>
-              </div>
+            <div className="flex items-center">
+              <span className="mr-2 text-red-600">📍</span>
+              <span>Livermore</span>
             </div>
           </div>
 
