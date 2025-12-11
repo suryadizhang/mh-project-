@@ -1,10 +1,12 @@
-# GitHub Actions Workflow: Auto-Deploy Backend to STAGING
+# GitHub Actions Workflow: Auto-Deploy Backend to STAGING via Cloudflare Tunnel
 # This workflow deploys the FastAPI backend to staging when changes are pushed to dev branch
+# Uses Cloudflare Access for secure SSH without exposing VPS IP
 #
 # Required GitHub Secrets:
-#   - VPS_HOST: VPS IP or domain
+#   - CF_ACCESS_CLIENT_ID: Cloudflare Access Service Token Client ID
+#   - CF_ACCESS_CLIENT_SECRET: Cloudflare Access Service Token Client Secret
+#   - CF_SSH_HOSTNAME: SSH hostname via Cloudflare (e.g., ssh.mhapi.mysticdatanode.net)
 #   - VPS_USER: SSH user
-#   - VPS_SSH_KEY: Private SSH key for authentication
 #   - VPS_STAGING_PATH: Staging backend directory
 
 name: Deploy Backend to Staging
@@ -87,20 +89,36 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy to Staging VPS via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: 22
-          script_stop: true
-          script: |
-            set -e
+      - name: Install cloudflared
+        run: |
+          curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+          sudo dpkg -i cloudflared.deb
+          cloudflared --version
 
-            echo "========================================="
-            echo "🧪 Starting STAGING deployment..."
-            echo "========================================="
+      - name: Deploy to Staging VPS via Cloudflare Access
+        env:
+          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+        run: |
+          set -e
+
+          echo "========================================="
+          echo "🧪 Starting STAGING deployment via Cloudflare Tunnel..."
+          echo "========================================="
+
+          # Create SSH config for Cloudflare Access
+          mkdir -p ~/.ssh
+          cat > ~/.ssh/config << EOF
+          Host cfaccess-vps
+            HostName ${{ secrets.CF_SSH_HOSTNAME }}
+            User ${{ secrets.VPS_USER }}
+            ProxyCommand cloudflared access ssh --hostname %h
+            StrictHostKeyChecking no
+          EOF
+
+          # Deploy script to run on VPS
+          ssh cfaccess-vps << 'DEPLOY_SCRIPT'
+            set -e
 
             # Navigate to staging backend directory
             cd ${{ secrets.VPS_STAGING_PATH }}
@@ -151,6 +169,7 @@ jobs:
             echo "========================================="
             echo "✅ Staging deployment completed!"
             echo "========================================="
+          DEPLOY_SCRIPT
 
       - name: Verify staging deployment
         run: |
