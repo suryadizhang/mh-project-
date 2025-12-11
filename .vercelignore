@@ -1,0 +1,13 @@
+# Ignore files that aren't needed for Vercel builds
+.husky
+*.md
+!README.md
+.github
+docs
+database
+e2e
+scripts
+archives
+*.sql
+*.sh
+.vscode
