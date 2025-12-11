@@ -1,5 +1,8 @@
 {
   "version": 2,
+  "installCommand": "cd ../.. && npm install",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
   "git": {
     "deploymentEnabled": {
       "main": true
@@ -10,7 +13,7 @@
       "source": "/(.*)",
       "headers": [
         {
-          "key": "Cache-Control", 
+          "key": "Cache-Control",
           "value": "public, max-age=3600"
         }
       ]
