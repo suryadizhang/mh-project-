@@ -28,6 +28,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@my-hibachi/blog-types": "file:../../packages/blog-types",
+    "@myhibachi/types": "*",
     "@radix-ui/react-slot": "^1.2.3",
     "@stripe/react-stripe-js": "^3.10.0",
     "@stripe/stripe-js": "^7.9.0",
@@ -57,6 +58,7 @@
     "react-error-boundary": "^6.0.0",
     "react-hook-form": "^7.63.0",
     "resend": "^5.0.0",
+    "sonner": "^2.0.7",
     "stripe": "^18.5.0",
     "tailwind-merge": "^3.3.1",
     "use-debounce": "^10.0.6",
@@ -77,6 +79,7 @@
     "@types/react-dom": "^18.3.7",
     "@vitest/coverage-v8": "^1.6.0",
     "@vitest/ui": "^1.6.0",
+    "autoprefixer": "^10.4.21",
     "cross-env": "^10.0.0",
     "eslint": "^8.57.1",
     "eslint-config-next": "^15.5.4",

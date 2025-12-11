@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import Breadcrumb from '@/components/ui/Breadcrumb';
+import { ProtectedPhone } from '@/components/ui/ProtectedPhone';
 import { generatePageMetadata } from '@/lib/seo-config';
 
 export const metadata = generatePageMetadata({
@@ -98,13 +99,10 @@ export default function NotFound() {
           {/* Contact Info */}
           <div className="mt-8 text-center">
             <p className="mb-2 text-gray-400">Need immediate assistance?</p>
-            <a
-              href="tel:(916) 740-8768"
+            <ProtectedPhone
               className="text-lg font-semibold text-orange-400 hover:text-orange-300"
-            >
-              <i className="bi bi-telephone mr-2"></i>
-              (916) 740-8768
-            </a>
+              showIcon={true}
+            />
           </div>
         </div>
       </div>

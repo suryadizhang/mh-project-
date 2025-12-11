@@ -30,6 +30,7 @@ import RateLimitBanner from '@/components/RateLimitBanner';
 import { PerformanceMonitoring } from '@/components/seo/TechnicalSEO';
 import BackToTopButton from '@/components/ui/BackToTopButton';
 import StickyBookNowButton from '@/components/ui/StickyBookNowButton';
+import { Toaster } from '@/components/ui/toaster';
 import {
   generateLocalBusinessSchema,
   generateOrganizationSchema,
@@ -115,6 +116,9 @@ export default function RootLayout({
             <BackToTopButton />
             <StickyBookNowButton />
           </ClientLayout>
+
+          {/* Toast Notification System */}
+          <Toaster />
         </QueryProvider>
       </body>
     </html>

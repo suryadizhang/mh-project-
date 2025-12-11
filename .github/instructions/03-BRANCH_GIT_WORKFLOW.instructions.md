@@ -33,6 +33,59 @@ main (production)
 
 ---
 
+## 🧹 Clean Main Branch Policy
+
+**Main branch must ONLY contain production-ready, deployed code.**
+
+### What Goes in `main`:
+
+| ✅ Allowed                      | ❌ NOT Allowed                    |
+| ------------------------------- | --------------------------------- |
+| Working source code             | `*_PLAN.md` planning documents    |
+| `README.md`, `CONTRIBUTING.md`  | `*_ANALYSIS.md` development notes |
+| `.github/instructions/` prompts | `*_SUMMARY.md` batch tracking     |
+| CI/CD workflows                 | `*_STATUS.md` progress files      |
+| Deployment guides               | `BATCH_*.md` batch documentation  |
+| API documentation (`docs/`)     | Development/debug logs            |
+| Essential configuration         | Temporary files, WIP notes        |
+
+### Why Keep Main Clean:
+
+1. **Traceability** – Each merge = one batch = findable bugs
+2. **Rollback** – Clean history enables `git revert` by batch
+3. **Bisect** – `git bisect` works when commits are atomic
+4. **Audit** – Easy to see what changed per deployment
+
+### Where Planning Docs Go:
+
+```
+feature/batch-X-*     ← Planning docs stay HERE during development
+  └── BATCH_X_PLAN.md
+  └── BATCH_X_STATUS.md
+  └── Implementation notes
+
+archives/             ← Move completed batch docs here (gitignored)
+  └── batch-1/
+  └── batch-2/
+
+Local only            ← Keep development notes local
+```
+
+### Commit Message for Batches:
+
+```bash
+# Good - traceable to batch
+feat(batch-1): add Stripe payment integration
+fix(batch-1): resolve webhook signature validation
+docs(batch-1): update payment API documentation
+
+# Bad - not traceable
+feat: add payments
+fix: webhook bug
+```
+
+---
+
 ## 🚫 Branch Rules
 
 ### NEVER Do:
@@ -105,16 +158,32 @@ git push origin feature/batch-X-description
 # 6. Merge PR
 ```
 
-### Merging to Main (Production)
+### Merging to Main (Production) - STRICT BATCH PR
+
+**⚠️ ONE PR PER BATCH TO MAIN - NO EXCEPTIONS**
 
 ```bash
-# 1. Ensure dev is stable (48+ hours)
-# 2. Create PR: dev → main
-# 3. Wait for CI to pass
-# 4. Get review approval
-# 5. Merge PR
-# 6. Monitor production
+# 1. Ensure dev is stable (48+ hours minimum)
+# 2. Verify ALL batch features complete
+# 3. Verify ALL batch tests passing (100%)
+# 4. Create PR: dev → main (or feature/batch-X → main)
+#    Title: "Batch X: [Description]"
+#    Example: "Batch 1: Core Booking + Security"
+# 5. Wait for CI to pass
+# 6. Get review approval
+# 7. Merge PR (squash or merge commit)
+# 8. Monitor production for 24 hours
+# 9. Only THEN start Batch X+1 PR to main
 ```
+
+### Batch PR Checklist (Before Creating PR to Main):
+
+- [ ] All batch features implemented
+- [ ] All batch tests passing locally
+- [ ] Staged in `dev` for 48+ hours
+- [ ] No other batch files included
+- [ ] PR title follows: `Batch X: Description`
+- [ ] All commits use `feat(batch-X):` format
 
 ---
 

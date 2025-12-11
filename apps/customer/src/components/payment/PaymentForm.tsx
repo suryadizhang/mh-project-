@@ -1,32 +1,33 @@
-'use client'
+'use client';
 
-import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
-import { CheckCircle, CreditCard, Loader2, Lock, Shield } from 'lucide-react'
-import { FormEvent, useState } from 'react'
+import React from 'react';
+import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';
+import { CheckCircle, CreditCard, Loader2, Lock, Shield } from 'lucide-react';
+import { FormEvent, useState } from 'react';
 
-import { logger } from '@/lib/logger'
-import { FormErrorBoundary } from '@/components/ErrorBoundary'
+import { logger } from '@/lib/logger';
+import { FormErrorBoundary } from '@/components/ErrorBoundary';
 
 interface BookingData {
-  id: string
-  customerName: string
-  customerEmail: string
-  eventDate: string
-  eventTime: string
-  guestCount: number
-  venueAddress: string
-  totalAmount: number
-  depositPaid: boolean
-  depositAmount: number
-  remainingBalance: number
+  id: string;
+  customerName: string;
+  customerEmail: string;
+  eventDate: string;
+  eventTime: string;
+  guestCount: number;
+  venueAddress: string;
+  totalAmount: number;
+  depositPaid: boolean;
+  depositAmount: number;
+  remainingBalance: number;
 }
 
 interface PaymentFormProps {
-  amount: number
-  bookingData: BookingData | null
-  paymentType: 'deposit' | 'balance'
-  tipAmount: number
-  clientSecret: string
+  amount: number;
+  bookingData: BookingData | null;
+  paymentType: 'deposit' | 'balance';
+  tipAmount: number;
+  clientSecret: string;
 }
 
 function PaymentFormComponent({
@@ -34,14 +35,14 @@ function PaymentFormComponent({
   bookingData,
   paymentType,
   tipAmount,
-  clientSecret
+  clientSecret,
 }: PaymentFormProps) {
-  const stripe = useStripe()
-  const elements = useElements()
+  const stripe = useStripe();
+  const elements = useElements();
 
-  const [isLoading, setIsLoading] = useState(false)
-  const [paymentError, setPaymentError] = useState<string | null>(null)
-  const [paymentSuccess, setPaymentSuccess] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
     name: bookingData?.customerName || '',
     email: bookingData?.customerEmail || '',
@@ -49,24 +50,24 @@ function PaymentFormComponent({
     address: '',
     city: '',
     state: '',
-    zipCode: ''
-  })
+    zipCode: '',
+  });
 
   const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault()
+    event.preventDefault();
 
     if (!stripe || !elements || !clientSecret) {
-      return
+      return;
     }
 
-    setIsLoading(true)
-    setPaymentError(null)
+    setIsLoading(true);
+    setPaymentError(null);
 
     try {
       // Confirm payment with Stripe using the existing clientSecret
-      const { error: submitError } = await elements.submit()
+      const { error: submitError } = await elements.submit();
       if (submitError) {
-        throw new Error(submitError.message)
+        throw new Error(submitError.message);
       }
 
       const { error } = await stripe.confirmPayment({
@@ -84,43 +85,43 @@ function PaymentFormComponent({
                 city: customerInfo.city,
                 state: customerInfo.state,
                 postal_code: customerInfo.zipCode,
-                country: 'US'
-              }
-            }
-          }
-        }
-      })
+                country: 'US',
+              },
+            },
+          },
+        },
+      });
 
       if (error) {
         if (error.type === 'card_error' || error.type === 'validation_error') {
-          setPaymentError(error.message || 'Payment failed')
+          setPaymentError(error.message || 'Payment failed');
         } else {
-          setPaymentError('An unexpected error occurred.')
+          setPaymentError('An unexpected error occurred.');
         }
       } else {
-        setPaymentSuccess(true)
+        setPaymentSuccess(true);
       }
     } catch (error) {
-      logger.error('Payment error', error as Error)
-      setPaymentError(error instanceof Error ? error.message : 'Payment failed. Please try again.')
+      logger.error('Payment error', error as Error);
+      setPaymentError(error instanceof Error ? error.message : 'Payment failed. Please try again.');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   if (paymentSuccess) {
     return (
-      <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircle className="w-8 h-8 text-green-600" />
+      <div className="rounded-xl bg-white p-8 text-center shadow-lg">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+          <CheckCircle className="h-8 w-8 text-green-600" />
         </div>
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">Payment Successful!</h3>
-        <p className="text-gray-600 mb-6">
+        <h3 className="mb-2 text-2xl font-bold text-gray-900">Payment Successful!</h3>
+        <p className="mb-6 text-gray-600">
           Your payment of ${amount.toFixed(2)} has been processed successfully.
         </p>
-        <div className="bg-green-50 rounded-lg p-4 mb-6">
+        <div className="mb-6 rounded-lg bg-green-50 p-4">
           <div className="text-sm text-green-800">
-            <div className="font-medium mb-1">Payment Details:</div>
+            <div className="mb-1 font-medium">Payment Details:</div>
             <div>Amount: ${amount.toFixed(2)}</div>
             <div>Type: {paymentType === 'deposit' ? 'Deposit Payment' : 'Balance Payment'}</div>
             {tipAmount > 0 && <div>Tip: ${tipAmount.toFixed(2)}</div>}
@@ -131,18 +132,18 @@ function PaymentFormComponent({
           A confirmation email will be sent to {customerInfo.email}
         </p>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
+    <div className="rounded-xl bg-white p-6 shadow-lg">
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center">
-          <CreditCard className="w-5 h-5 mr-2 text-blue-600" />
+        <h3 className="mb-2 flex items-center text-lg font-semibold text-gray-900">
+          <CreditCard className="mr-2 h-5 w-5 text-blue-600" />
           Credit Card Payment
         </h3>
         <div className="flex items-center text-sm text-gray-600">
-          <Shield className="w-4 h-4 mr-1 text-green-600" />
+          <Shield className="mr-1 h-4 w-4 text-green-600" />
           <span>Secured by Stripe with 256-bit SSL encryption</span>
         </div>
       </div>
@@ -150,77 +151,81 @@ function PaymentFormComponent({
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Customer Information */}
         {!bookingData && (
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h4 className="font-medium text-gray-900 mb-3">Customer Information</h4>
-            <div className="grid md:grid-cols-2 gap-4">
+          <div className="rounded-lg bg-gray-50 p-4">
+            <h4 className="mb-3 font-medium text-gray-900">Customer Information</h4>
+            <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                <label className="mb-1 block text-sm font-medium text-gray-700">Full Name *</label>
                 <input
                   type="text"
                   required
                   value={customerInfo.name}
-                  onChange={e => setCustomerInfo(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  onChange={(e) => setCustomerInfo((prev) => ({ ...prev, name: e.target.value }))}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="mb-1 block text-sm font-medium text-gray-700">
                   Email Address *
                 </label>
                 <input
                   type="email"
                   required
                   value={customerInfo.email}
-                  onChange={e => setCustomerInfo(prev => ({ ...prev, email: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  onChange={(e) => setCustomerInfo((prev) => ({ ...prev, email: e.target.value }))}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="mb-1 block text-sm font-medium text-gray-700">
                   Phone Number *
                 </label>
                 <input
                   type="tel"
                   required
                   value={customerInfo.phone}
-                  onChange={e => setCustomerInfo(prev => ({ ...prev, phone: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  onChange={(e) => setCustomerInfo((prev) => ({ ...prev, phone: e.target.value }))}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <label className="mb-1 block text-sm font-medium text-gray-700">Address</label>
                 <input
                   type="text"
                   value={customerInfo.address}
-                  onChange={e => setCustomerInfo(prev => ({ ...prev, address: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  onChange={(e) =>
+                    setCustomerInfo((prev) => ({ ...prev, address: e.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                <label className="mb-1 block text-sm font-medium text-gray-700">City</label>
                 <input
                   type="text"
                   value={customerInfo.city}
-                  onChange={e => setCustomerInfo(prev => ({ ...prev, city: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  onChange={(e) => setCustomerInfo((prev) => ({ ...prev, city: e.target.value }))}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                <label className="mb-1 block text-sm font-medium text-gray-700">State</label>
                 <input
                   type="text"
                   value={customerInfo.state}
-                  onChange={e => setCustomerInfo(prev => ({ ...prev, state: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  onChange={(e) => setCustomerInfo((prev) => ({ ...prev, state: e.target.value }))}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                <label className="mb-1 block text-sm font-medium text-gray-700">ZIP Code</label>
                 <input
                   type="text"
                   value={customerInfo.zipCode}
-                  onChange={e => setCustomerInfo(prev => ({ ...prev, zipCode: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  onChange={(e) =>
+                    setCustomerInfo((prev) => ({ ...prev, zipCode: e.target.value }))
+                  }
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -228,30 +233,30 @@ function PaymentFormComponent({
         )}
 
         {/* Stripe Payment Element */}
-        <div className="bg-gray-50 rounded-lg p-4">
-          <h4 className="font-medium text-gray-900 mb-3 flex items-center">
-            <Lock className="w-4 h-4 mr-2 text-blue-600" />
+        <div className="rounded-lg bg-gray-50 p-4">
+          <h4 className="mb-3 flex items-center font-medium text-gray-900">
+            <Lock className="mr-2 h-4 w-4 text-blue-600" />
             Payment Details
           </h4>
           <PaymentElement
             options={{
               layout: 'tabs',
-              paymentMethodOrder: ['card', 'apple_pay', 'google_pay']
+              paymentMethodOrder: ['card', 'apple_pay', 'google_pay'],
             }}
           />
         </div>
 
         {/* Error Display */}
         {paymentError && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-red-600 text-sm">{paymentError}</p>
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+            <p className="text-sm text-red-600">{paymentError}</p>
           </div>
         )}
 
         {/* Payment Summary */}
-        <div className="bg-blue-50 rounded-lg p-4">
-          <h4 className="font-medium text-blue-900 mb-2">Final Payment Summary</h4>
-          <div className="text-sm text-blue-800 space-y-1">
+        <div className="rounded-lg bg-blue-50 p-4">
+          <h4 className="mb-2 font-medium text-blue-900">Final Payment Summary</h4>
+          <div className="space-y-1 text-sm text-blue-800">
             <div className="flex justify-between">
               <span>Payment Type:</span>
               <span className="font-medium">
@@ -260,9 +265,9 @@ function PaymentFormComponent({
             </div>
             <div className="flex justify-between">
               <span>Total Amount:</span>
-              <span className="font-bold text-lg">${amount.toFixed(2)}</span>
+              <span className="text-lg font-bold">${amount.toFixed(2)}</span>
             </div>
-            <div className="text-xs text-blue-600 mt-2">
+            <div className="mt-2 text-xs text-blue-600">
               * Includes 8% processing fee for card payments
             </div>
           </div>
@@ -272,16 +277,16 @@ function PaymentFormComponent({
         <button
           type="submit"
           disabled={!stripe || isLoading || amount <= 0}
-          className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+          className="flex w-full items-center justify-center rounded-lg bg-blue-600 px-6 py-4 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isLoading ? (
             <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
               Processing Payment...
             </>
           ) : (
             <>
-              <Lock className="w-5 h-5 mr-2" />
+              <Lock className="mr-2 h-5 w-5" />
               Pay ${amount.toFixed(2)} Securely
             </>
           )}
@@ -289,15 +294,15 @@ function PaymentFormComponent({
 
         {/* Security Notice */}
         <div className="text-center text-xs text-gray-500">
-          <div className="flex items-center justify-center mb-1">
-            <Shield className="w-3 h-3 mr-1" />
+          <div className="mb-1 flex items-center justify-center">
+            <Shield className="mr-1 h-3 w-3" />
             <span>Your payment is secured by Stripe</span>
           </div>
           <div>256-bit SSL encryption • PCI DSS compliant • 2-Factor Authentication</div>
         </div>
       </form>
     </div>
-  )
+  );
 }
 
 // Wrap component with error boundary
@@ -306,5 +311,5 @@ export default function PaymentForm(props: PaymentFormProps) {
     <FormErrorBoundary formName="PaymentForm">
       <PaymentFormComponent {...props} />
     </FormErrorBoundary>
-  )
+  );
 }
