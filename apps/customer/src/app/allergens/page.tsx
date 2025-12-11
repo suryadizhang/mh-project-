@@ -12,11 +12,11 @@ export default function AllergensPage() {
   const { formatted: protectedPhone, tel: protectedTel } = useProtectedPhone();
 
   return (
-    <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-lg-10">
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-center">
+        <div className="w-full lg:w-5/6">
           {/* Header */}
-          <div className="text-center mb-5">
+          <div className="mb-5 text-center">
             <h1 className="display-4 mb-3">
               <i className="bi bi-shield-check text-primary me-3"></i>
               Allergen Information & Safety Guide
@@ -61,10 +61,10 @@ export default function AllergensPage() {
               hibachi menu:
             </p>
 
-            <div className="row g-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {/* Shellfish */}
-              <div className="col-md-6">
-                <div className="card h-100 border-danger">
+              <div>
+                <div className="card border-danger h-100">
                   <div className="card-body">
                     <h5 className="card-title text-danger">
                       <i className="bi bi-1-circle-fill me-2"></i>
@@ -84,8 +84,8 @@ export default function AllergensPage() {
               </div>
 
               {/* Fish */}
-              <div className="col-md-6">
-                <div className="card h-100 border-danger">
+              <div className="">
+                <div className="card border-danger h-100">
                   <div className="card-body">
                     <h5 className="card-title text-danger">
                       <i className="bi bi-2-circle-fill me-2"></i>
@@ -105,8 +105,8 @@ export default function AllergensPage() {
               </div>
 
               {/* Gluten */}
-              <div className="col-md-6">
-                <div className="card h-100 border-warning">
+              <div className="">
+                <div className="card border-warning h-100">
                   <div className="card-body">
                     <h5 className="card-title text-warning">
                       <i className="bi bi-3-circle-fill me-2"></i>
@@ -128,8 +128,8 @@ export default function AllergensPage() {
               </div>
 
               {/* Soy */}
-              <div className="col-md-6">
-                <div className="card h-100 border-warning">
+              <div className="">
+                <div className="card border-warning h-100">
                   <div className="card-body">
                     <h5 className="card-title text-warning">
                       <i className="bi bi-4-circle-fill me-2"></i>
@@ -149,8 +149,8 @@ export default function AllergensPage() {
               </div>
 
               {/* Eggs */}
-              <div className="col-md-6">
-                <div className="card h-100 border-info">
+              <div className="">
+                <div className="card border-info h-100">
                   <div className="card-body">
                     <h5 className="card-title text-info">
                       <i className="bi bi-5-circle-fill me-2"></i>
@@ -181,10 +181,10 @@ export default function AllergensPage() {
               Beyond the FDA Major 9, we also track these allergens used in our menu:
             </p>
 
-            <div className="row g-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {/* Celery */}
-              <div className="col-md-4">
-                <div className="card h-100 border-secondary">
+              <div className="">
+                <div className="card border-secondary h-100">
                   <div className="card-body">
                     <h5 className="card-title">Celery 🥬</h5>
                     <p>
@@ -199,8 +199,8 @@ export default function AllergensPage() {
               </div>
 
               {/* Corn */}
-              <div className="col-md-4">
-                <div className="card h-100 border-secondary">
+              <div className="">
+                <div className="card border-secondary h-100">
                   <div className="card-body">
                     <h5 className="card-title">Corn 🌽</h5>
                     <p>
@@ -212,8 +212,8 @@ export default function AllergensPage() {
               </div>
 
               {/* Sulfites */}
-              <div className="col-md-4">
-                <div className="card h-100 border-secondary">
+              <div className="">
+                <div className="card border-secondary h-100">
                   <div className="card-body">
                     <h5 className="card-title">Sulfites 🍶</h5>
                     <p>
@@ -238,7 +238,7 @@ export default function AllergensPage() {
               The following common allergens are <strong>NOT</strong> present in our standard menu:
             </p>
             <div className="row">
-              <div className="col-md-6">
+              <div className="">
                 <ul className="list-group">
                   <li className="list-group-item">
                     <i className="bi bi-check-circle-fill text-success me-2"></i>
@@ -258,7 +258,7 @@ export default function AllergensPage() {
                   </li>
                 </ul>
               </div>
-              <div className="col-md-6">
+              <div className="">
                 <ul className="list-group">
                   <li className="list-group-item">
                     <i className="bi bi-check-circle-fill text-success me-2"></i>
@@ -319,8 +319,7 @@ export default function AllergensPage() {
                 <h5 className="card-title text-danger">⚠️ Limitations:</h5>
                 <ul className="mb-0">
                   <li>
-                    We use <strong>shared cooking surfaces</strong> (hibachi grill) for all
-                    proteins
+                    We use <strong>shared cooking surfaces</strong> (hibachi grill) for all proteins
                   </li>
                   <li>
                     We use <strong>shared oil</strong> (canola) for all cooking
@@ -342,23 +341,29 @@ export default function AllergensPage() {
               <i className="bi bi-chat-dots text-primary me-2"></i>
               How to Communicate Your Allergies
             </h2>
-            <div className="row g-3">
-              <div className="col-md-4">
-                <div className="card h-100 bg-light">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="">
+                <div className="card bg-light h-100">
                   <div className="card-body text-center">
-                    <i className="bi bi-1-circle-fill text-primary" style={{ fontSize: '2rem' }}></i>
+                    <i
+                      className="bi bi-1-circle-fill text-primary"
+                      style={{ fontSize: '2rem' }}
+                    ></i>
                     <h5 className="mt-3">At Booking</h5>
                     <p className="mb-0">
-                      Include all allergies in the &ldquo;Special Requests&rdquo; field when booking online or
-                      mention them via text/phone
+                      Include all allergies in the &ldquo;Special Requests&rdquo; field when booking
+                      online or mention them via text/phone
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="col-md-4">
-                <div className="card h-100 bg-light">
+              <div className="">
+                <div className="card bg-light h-100">
                   <div className="card-body text-center">
-                    <i className="bi bi-2-circle-fill text-primary" style={{ fontSize: '2rem' }}></i>
+                    <i
+                      className="bi bi-2-circle-fill text-primary"
+                      style={{ fontSize: '2rem' }}
+                    ></i>
                     <h5 className="mt-3">SMS Confirmation</h5>
                     <p className="mb-0">
                       When you receive booking confirmation via SMS, we will ask you to confirm
@@ -367,10 +372,13 @@ export default function AllergensPage() {
                   </div>
                 </div>
               </div>
-              <div className="col-md-4">
-                <div className="card h-100 bg-light">
+              <div className="">
+                <div className="card bg-light h-100">
                   <div className="card-body text-center">
-                    <i className="bi bi-3-circle-fill text-primary" style={{ fontSize: '2rem' }}></i>
+                    <i
+                      className="bi bi-3-circle-fill text-primary"
+                      style={{ fontSize: '2rem' }}
+                    ></i>
                     <h5 className="mt-3">Before Event</h5>
                     <p className="mb-0">
                       Speak directly with your chef upon arrival to review allergies and safe menu
@@ -402,9 +410,11 @@ export default function AllergensPage() {
                 </ul>
                 <p className="mb-0">
                   <strong>Contact:</strong>{' '}
-                  <ProtectedEmail className="text-white text-decoration-underline" />{' '}
-                  or text{' '}
-                  <a href={protectedTel ? `tel:${protectedTel}` : '#'} className="text-white text-decoration-underline">
+                  <ProtectedEmail className="text-decoration-underline text-white" /> or text{' '}
+                  <a
+                    href={protectedTel ? `tel:${protectedTel}` : '#'}
+                    className="text-decoration-underline text-white"
+                  >
                     {protectedPhone || 'Loading...'}
                   </a>
                 </p>
@@ -421,8 +431,8 @@ export default function AllergensPage() {
             <p className="mb-3">
               We can accommodate many dietary needs with advance notice (48+ hours):
             </p>
-            <div className="row g-3">
-              <div className="col-md-6">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="">
                 <div className="card">
                   <div className="card-body">
                     <h5 className="card-title">
@@ -435,7 +445,7 @@ export default function AllergensPage() {
                   </div>
                 </div>
               </div>
-              <div className="col-md-6">
+              <div className="">
                 <div className="card">
                   <div className="card-body">
                     <h5 className="card-title">
@@ -449,7 +459,7 @@ export default function AllergensPage() {
                   </div>
                 </div>
               </div>
-              <div className="col-md-6">
+              <div className="">
                 <div className="card">
                   <div className="card-body">
                     <h5 className="card-title">
@@ -462,7 +472,7 @@ export default function AllergensPage() {
                   </div>
                 </div>
               </div>
-              <div className="col-md-6">
+              <div className="">
                 <div className="card">
                   <div className="card-body">
                     <h5 className="card-title">
@@ -480,17 +490,20 @@ export default function AllergensPage() {
           </section>
 
           {/* Footer CTA */}
-          <div className="text-center mt-5 pt-5 border-top">
+          <div className="border-top mt-5 pt-5 text-center">
             <h3 className="mb-3">Questions About Allergens?</h3>
             <p className="lead mb-4">
               We&apos;re here to help ensure your event is safe and enjoyable for all guests.
             </p>
-            <div className="d-flex gap-3 justify-content-center flex-wrap">
+            <div className="d-flex justify-content-center flex-wrap gap-3">
               <a href="/contact" className="btn btn-primary btn-lg">
                 <i className="bi bi-envelope-fill me-2"></i>
                 Contact Us
               </a>
-              <a href={protectedTel ? `tel:${protectedTel}` : '#'} className="btn btn-outline-primary btn-lg">
+              <a
+                href={protectedTel ? `tel:${protectedTel}` : '#'}
+                className="btn btn-outline-primary btn-lg"
+              >
                 <i className="bi bi-telephone-fill me-2"></i>
                 Call {protectedPhone || 'Loading...'}
               </a>

@@ -115,8 +115,8 @@ export default function MenuPage() {
               </div>
 
               {/* Enhanced pricing cards */}
-              <div className="row justify-content-center mb-5">
-                <div className="col-lg-12">
+              <div className="mb-8 flex justify-center">
+                <div className="w-full">
                   <div className="pricing-cards-container">
                     <div className="pricing-card modern-card adult-price" data-price="adult">
                       <div className="card-glow"></div>
@@ -374,8 +374,8 @@ export default function MenuPage() {
                 </div>
               </div>
 
-              <div className="row mb-5">
-                <div className="col-lg-6 mb-4">
+              <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <div className="mb-4">
                   <div className="protein-card modern-card enhanced-protein-card">
                     <div className="card-glow"></div>
                     <div className="card-header enhanced-header">
@@ -511,7 +511,7 @@ export default function MenuPage() {
                   </div>
                 </div>
 
-                <div className="col-lg-6 mb-4">
+                <div className="mb-4">
                   <div className="upgrade-card modern-card featured-upgrade enhanced-upgrade-card">
                     <div className="card-glow premium-glow"></div>
                     <div className="card-header enhanced-header premium-header">
@@ -777,8 +777,8 @@ export default function MenuPage() {
               </a>
             </div>
 
-            <div className="row mt-4">
-              <div className="col-md-6">
+            <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div>
                 <div className="service-area-card">
                   <h4 className="area-title">🌉 Bay Area & Peninsula</h4>
                   <p className="area-subtitle">Our primary service area with premium coverage!</p>
@@ -793,7 +793,7 @@ export default function MenuPage() {
                   </ul>
                 </div>
               </div>
-              <div className="col-md-6">
+              <div>
                 <div className="service-area-card">
                   <h4 className="area-title">🏞️ Sacramento & Extended Regions</h4>
                   <p className="area-subtitle">

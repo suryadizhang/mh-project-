@@ -28,8 +28,8 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps & { className?: str
         Event Details
       </h3>
 
-      <div className="row">
-        <div className="col-md-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div>
           <div className="form-group">
             <label htmlFor="eventDate" className="form-label required">
               Event Date
@@ -60,7 +60,7 @@ const EventDetailsSection: React.FC<EventDetailsSectionProps & { className?: str
           </div>
         </div>
 
-        <div className="col-md-6">
+        <div>
           <div className="form-group">
             <label htmlFor="eventTime" className="form-label required">
               Preferred Time
