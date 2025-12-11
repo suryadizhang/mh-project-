@@ -51,7 +51,7 @@ export const MathCaptcha: React.FC<MathCaptchaProps> = ({ onVerify, className = 
       <label className="form-label mb-2">
         <strong>🤖 Verify you&apos;re human:</strong>
       </label>
-      <div className="d-flex align-items-center gap-2">
+      <div className="flex items-center gap-2">
         <div className="flex-grow-1">
           <div className="input-group">
             <span className="input-group-text bg-white">
@@ -72,10 +72,10 @@ export const MathCaptcha: React.FC<MathCaptchaProps> = ({ onVerify, className = 
             />
           </div>
           {isCorrect && (
-            <div className="valid-feedback d-block">✓ Correct! You&apos;re verified.</div>
+            <div className="valid-feedback block">✓ Correct! You&apos;re verified.</div>
           )}
           {isIncorrect && (
-            <div className="invalid-feedback d-block">✗ Incorrect answer. Please try again.</div>
+            <div className="invalid-feedback block">✗ Incorrect answer. Please try again.</div>
           )}
         </div>
         <button
@@ -88,7 +88,7 @@ export const MathCaptcha: React.FC<MathCaptchaProps> = ({ onVerify, className = 
           🔄
         </button>
       </div>
-      <small className="text-muted d-block mt-1">
+      <small className="text-muted block mt-1">
         This helps us prevent automated spam bookings.
       </small>
     </div>

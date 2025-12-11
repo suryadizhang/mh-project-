@@ -8,7 +8,7 @@ export default function ServiceAreas() {
     <div className={styles.serviceAreas}>
       <h3 className={styles.sectionTitle}>
         🌟 Bringing Hibachi Experience
-        <br className="d-none d-lg-block" />
+        <br className="hidden lg:block" />
         to Your Neighborhood! 🌟
       </h3>
       <p className={styles.serviceIntro}>{serviceAreas.subtitle}</p>

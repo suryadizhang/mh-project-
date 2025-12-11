@@ -20,7 +20,7 @@ export default function LiveChatButton({
   };
 
   const getButtonClasses = () => {
-    const baseClasses = 'btn d-flex align-items-center gap-2 fw-bold transition-all';
+    const baseClasses = 'btn flex items-center gap-2 font-bold transition-all';
 
     const variantClasses = {
       primary: 'btn-primary',

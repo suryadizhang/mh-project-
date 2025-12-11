@@ -360,7 +360,7 @@ export default function BookUsPageClient() {
           <div className="w-full lg:w-2/3">
             {/* Deposit Warning Banner */}
             <div className="alert alert-warning border-warning mb-4 shadow-sm" role="alert">
-              <div className="d-flex align-items-start">
+              <div className="flex items-start">
                 <i className="bi bi-exclamation-triangle-fill text-warning fs-4 me-3 mt-1"></i>
                 <div className="flex-grow-1">
                   <h5 className="alert-heading fw-bold mb-2">
@@ -388,7 +388,7 @@ export default function BookUsPageClient() {
             <div className="booking-form-container">
               {/* Auto-save status indicator */}
               {autoSaveStatus !== 'idle' && (
-                <div className="auto-save-indicator d-flex align-items-center justify-content-end mb-3">
+                <div className="auto-save-indicator flex items-center justify-end mb-3">
                   {autoSaveStatus === 'saving' && (
                     <span className="text-muted small">
                       <i className="bi bi-arrow-repeat spin me-1"></i>
@@ -561,7 +561,7 @@ export default function BookUsPageClient() {
                         )}
                         {dateError && <small className="text-danger">{dateError}</small>}
                         {errors.eventDate && (
-                          <div className="invalid-feedback d-block">{errors.eventDate.message}</div>
+                          <div className="invalid-feedback block">{errors.eventDate.message}</div>
                         )}
                       </div>
                     </div>
@@ -864,7 +864,7 @@ export default function BookUsPageClient() {
 
       {/* Validation Modal */}
       {showValidationModal && (
-        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div className="modal fade show block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-header">

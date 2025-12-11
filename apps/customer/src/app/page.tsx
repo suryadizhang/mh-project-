@@ -232,7 +232,7 @@ export default function Home() {
           <div className="service-areas animate-on-scroll">
             <h3 className="section-title text-center">
               🌟 Bringing Hibachi Experience
-              <br className="d-none d-lg-block" />
+              <br className="hidden lg:block" />
               to Your Neighborhood! 🌟
             </h3>
             <p className="service-intro text-center">
