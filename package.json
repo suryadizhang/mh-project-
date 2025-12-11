@@ -45,7 +45,8 @@
     "codegen:watch": "npm run codegen:api -- --watch",
     "setup": "npm install && npm run codegen",
     "postinstall:disabled": "npm run codegen:api",
-    "prepare": "husky || true"
+    "prepare": "[ -n \"$CI\" ] || [ -n \"$VERCEL\" ] || husky install || true",
+    "vercel-build": "npm run build"
   },
   "devDependencies": {
     "@playwright/test": "^1.47.0",
