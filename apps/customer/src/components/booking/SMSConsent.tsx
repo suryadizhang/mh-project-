@@ -51,7 +51,7 @@ export const SMSConsent: React.FC<SMSConsentProps> = ({
             .
           </p>
         </label>
-        {error && <div className="invalid-feedback d-block">{error}</div>}
+        {error && <div className="invalid-feedback block">{error}</div>}
       </div>
       <div className="alert alert-info small mt-2 mb-0">
         <strong>Why required?</strong> We need your permission to send you booking confirmation and

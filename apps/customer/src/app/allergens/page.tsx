@@ -495,7 +495,7 @@ export default function AllergensPage() {
             <p className="lead mb-4">
               We&apos;re here to help ensure your event is safe and enjoyable for all guests.
             </p>
-            <div className="d-flex justify-content-center flex-wrap gap-3">
+            <div className="flex justify-center flex-wrap gap-3">
               <a href="/contact" className="btn btn-primary btn-lg">
                 <i className="bi bi-envelope-fill me-2"></i>
                 Contact Us
