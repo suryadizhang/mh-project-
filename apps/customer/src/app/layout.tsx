@@ -1,17 +1,9 @@
 import './globals.css';
-// Import global styles
+// Import truly global styles only - page-specific CSS loaded at page level
 import '@/styles/base.css';
 import '@/styles/utilities.css';
 import '@/styles/accessibility.css';
-import '@/styles/menu.css';
-import '@/styles/menu/menu-features.css';
-import '@/styles/menu/menu-pricing.css';
-import '@/styles/menu/menu-base.css';
-import '@/styles/menu/base.css';
-import '@/styles/pages/menu.page.css';
 import '@/styles/footer.css';
-import '@/styles/free-quote-button.css';
-import '@/styles/quote-calculator.css';
 import '@/styles/back-to-top.css';
 import '@/styles/breadcrumb.css';
 import '@/styles/optimized-image.css';
@@ -71,9 +63,7 @@ export default function RootLayout({
         {/* Performance optimization hints */}
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="preconnect" href="//fonts.gstatic.com" crossOrigin="anonymous" />
-
-        {/* Video preload hint for hero video */}
-        <link rel="preload" href="/videos/hero_video.mp4" as="video" type="video/mp4" />
+        {/* Video loads lazily via HeroVideo component - no preload to avoid blocking paint */}
 
         {/* Google Search Console Verification - Add your verification code here when you get it */}
         {/* <meta name="google-site-verification" content="YOUR_VERIFICATION_CODE_HERE" /> */}

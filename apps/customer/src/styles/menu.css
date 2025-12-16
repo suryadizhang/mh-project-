@@ -178,6 +178,26 @@
   position: relative;
 }
 
+/* Ultra-compact hero for simple pages like Service Areas */
+[data-page='menu'] .hero-section.hero-compact {
+  padding: 0.5rem 1rem;
+}
+
+[data-page='menu'] .hero-section.hero-compact .hero-icon {
+  font-size: 3rem;
+  margin-bottom: 0.25rem;
+}
+
+[data-page='menu'] .hero-section.hero-compact h1 {
+  font-size: 1.5rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+[data-page='menu'] .hero-section.hero-compact .hero-subtitle {
+  font-size: 0.9rem;
+  margin-bottom: 0 !important;
+}
+
 /* Hero section with background image */
 [data-page='menu'] .hero-section.page-hero-background {
   background-image: url('/images/background.jpg');

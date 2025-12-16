@@ -560,15 +560,15 @@ export default function Assistant({ page }: AssistantProps) {
           >
             <div
               className={`max-w-[80%] rounded-2xl p-2 ${message.type === 'user'
-                  ? 'bg-gradient-to-r from-[#ffb800] to-[#db2b28] text-white'
-                  : 'bg-gray-100 text-gray-800'
+                ? 'bg-gradient-to-r from-[#ffb800] to-[#db2b28] text-white'
+                : 'bg-gray-100 text-gray-800'
                 }`}
             >
               <div className="flex items-start space-x-2">
                 {message.type === 'assistant' && (
                   <div className="mt-1 flex-shrink-0">
                     <Image
-                      src="/My Hibachi logo.png"
+                      src="/My Hibachi logo.webp"
                       alt="Assistant"
                       width={16}
                       height={16}

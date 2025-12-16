@@ -146,7 +146,7 @@ export default function AdminLayoutNew({ children }: AdminLayoutProps) {
                     src={
                       imageError
                         ? '/images/myhibachi-logo.svg'
-                        : '/images/myhibachi-logo.png'
+                        : '/images/myhibachi-logo.webp'
                     }
                     alt="MyHibachi Logo"
                     fill
@@ -245,10 +245,9 @@ export default function AdminLayoutNew({ children }: AdminLayoutProps) {
                             href={item.href}
                             className={`
                               flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-all
-                              ${
-                                isActive
-                                  ? 'bg-red-50 text-red-700 border-l-4 border-red-600 pl-3'
-                                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                              ${isActive
+                                ? 'bg-red-50 text-red-700 border-l-4 border-red-600 pl-3'
+                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                               }
                             `}
                             title={item.description}
@@ -328,10 +327,9 @@ export default function AdminLayoutNew({ children }: AdminLayoutProps) {
                                 href={item.href}
                                 className={`
                                   flex items-center justify-between px-4 py-4 text-base font-medium rounded-lg transition-all
-                                  ${
-                                    isActive
-                                      ? 'bg-red-50 text-red-700 border-l-4 border-red-600 pl-3'
-                                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100'
+                                  ${isActive
+                                    ? 'bg-red-50 text-red-700 border-l-4 border-red-600 pl-3'
+                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100'
                                   }
                                 `}
                                 title={item.description}
@@ -384,10 +382,9 @@ export default function AdminLayoutNew({ children }: AdminLayoutProps) {
                   href={item.href}
                   className={`
                     relative flex flex-col items-center justify-center min-w-[60px] p-2 rounded-lg transition-all
-                    ${
-                      isActive
-                        ? 'bg-red-50 text-red-700'
-                        : 'text-gray-600 hover:text-gray-900 active:bg-gray-100'
+                    ${isActive
+                      ? 'bg-red-50 text-red-700'
+                      : 'text-gray-600 hover:text-gray-900 active:bg-gray-100'
                     }
                   `}
                 >

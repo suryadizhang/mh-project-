@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import {
   ExternalLink,
   Maximize2,
@@ -11,13 +12,21 @@ import {
   X,
 } from 'lucide-react';
 import Image from 'next/image';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { ApiErrorBoundary } from '@/components/ErrorBoundary';
 import { useProtectedPhone, useProtectedPaymentEmail } from '@/components/ui/ProtectedPhone';
 import { logger, logWebSocket } from '@/lib/logger';
 
-import EscalationForm from './EscalationForm';
+// Lazy load EscalationForm - only 5% of users escalate
+const EscalationForm = dynamic(() => import('./EscalationForm'), {
+  ssr: false,
+  loading: () => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="rounded-lg bg-white p-8">Loading...</div>
+    </div>
+  ),
+});
 
 interface Citation {
   href: string;
@@ -86,7 +95,6 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
   const [isConnected, setIsConnected] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [connectionFailed, setConnectionFailed] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
   const [soundEnabled, setSoundEnabled] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('mh_chat_sound');
@@ -98,6 +106,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const retryCountRef = useRef(0); // Use ref to avoid re-render loops
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const userIdRef = useRef<string>(
     typeof window !== 'undefined'
@@ -259,15 +268,15 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
         setIsConnected(false);
         setIsLoading(false);
         setIsTyping(false);
-        setRetryCount((prev) => prev + 1);
+        retryCountRef.current += 1;
 
         // Stop retrying after 3 attempts
-        if (retryCount < 3 && !reconnectTimeoutRef.current) {
+        if (retryCountRef.current < 3 && !reconnectTimeoutRef.current) {
           reconnectTimeoutRef.current = setTimeout(() => {
             reconnectTimeoutRef.current = null;
             connectWebSocket();
           }, 3000);
-        } else if (retryCount >= 3) {
+        } else if (retryCountRef.current >= 3) {
           setConnectionFailed(true);
         }
       };
@@ -291,12 +300,14 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
       setIsConnected(false);
       setConnectionFailed(true);
     }
-  }, [retryCount]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- uses refs intentionally to prevent re-render loops
+  }, [playNotificationSound]);
 
   // Initialize WebSocket connection
   useEffect(() => {
     if (isOpen) {
       connectWebSocket();
+      retryCountRef.current = 0; // Reset retry count when opening
     }
 
     return () => {
@@ -614,11 +625,10 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
 
   return (
     <div
-      className={`fixed z-50 flex flex-col rounded-2xl border border-gray-200 bg-white shadow-2xl transition-all duration-300 ${
-        isExpanded
-          ? 'right-2 bottom-4 left-2 max-h-[85vh] sm:right-4 sm:left-auto sm:h-[540px] sm:w-[720px] md:h-[560px] md:w-[840px] lg:h-[580px] lg:w-[960px]'
-          : 'right-2 bottom-20 h-[70vh] max-h-[570px] w-[calc(100vw-1rem)] max-w-[380px] sm:right-4 sm:h-[540px] sm:w-[360px] md:h-[570px] md:w-[380px]'
-      }`}
+      className={`fixed z-50 flex flex-col rounded-2xl border border-gray-200 bg-white shadow-2xl transition-all duration-300 ${isExpanded
+        ? 'right-2 bottom-4 left-2 max-h-[85vh] sm:right-4 sm:left-auto sm:h-[540px] sm:w-[720px] md:h-[560px] md:w-[840px] lg:h-[580px] lg:w-[960px]'
+        : 'right-2 bottom-20 h-[70vh] max-h-[570px] w-[calc(100vw-1rem)] max-w-[380px] sm:right-4 sm:h-[540px] sm:w-[360px] md:h-[570px] md:w-[380px]'
+        }`}
     >
       {/* Header */}
       <div className="flex items-center justify-between rounded-t-2xl bg-gradient-to-r from-[#ffb800] to-[#db2b28] p-3 text-white">
@@ -739,7 +749,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
             <button
               onClick={() => {
                 setConnectionFailed(false);
-                setRetryCount(0);
+                retryCountRef.current = 0;
                 connectWebSocket();
               }}
               className="text-sm text-orange-600 underline hover:text-orange-700"
@@ -777,17 +787,16 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
             className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[85%] rounded-2xl p-3 ${
-                message.type === 'user'
-                  ? 'bg-gradient-to-r from-[#ffb800] to-[#db2b28] text-white'
-                  : 'bg-gray-100 text-gray-800'
-              }`}
+              className={`max-w-[85%] rounded-2xl p-3 ${message.type === 'user'
+                ? 'bg-gradient-to-r from-[#ffb800] to-[#db2b28] text-white'
+                : 'bg-gray-100 text-gray-800'
+                }`}
             >
               <div className="flex items-start space-x-2">
                 {message.type === 'assistant' && (
                   <div className="mt-1 flex-shrink-0">
                     <Image
-                      src="/My Hibachi logo.png"
+                      src="/My Hibachi logo.webp"
                       alt="Assistant"
                       width={20}
                       height={20}
@@ -849,7 +858,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
             <div className="rounded-2xl bg-gray-100 p-3">
               <div className="flex items-center space-x-2">
                 <Image
-                  src="/My Hibachi logo.png"
+                  src="/My Hibachi logo.webp"
                   alt="Assistant"
                   width={16}
                   height={16}
