@@ -3,10 +3,16 @@
 import '@/styles/menu.css';
 import '@/styles/pages/menu.page.css';
 
-import { Calculator, Calendar, MessageCircle } from 'lucide-react';
+import { Calculator, Calendar, ChevronDown, ChevronUp, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
+
+import { CenteredFlexGrid } from '@/components/ui/CenteredFlexGrid';
 
 export default function MenuPage() {
+  const [isProteinsOpen, setIsProteinsOpen] = useState(false);
+  const [isAdditionsOpen, setIsAdditionsOpen] = useState(false);
+
   return (
     <main>
       {/* Menu Container */}
@@ -16,20 +22,8 @@ export default function MenuPage() {
           <div className="hero-section page-hero-background mb-5 text-center">
             <div className="hero-content">
               <div className="hero-icon-wrapper mb-4">
-                <div className="floating-icons">
-                  <span className="hero-main-icon emoji-visible">🍱</span>
-                  <span className="floating-icon emoji-visible" style={{ animationDelay: '0s' }}>
-                    🔥
-                  </span>
-                  <span className="floating-icon emoji-visible" style={{ animationDelay: '1s' }}>
-                    🥢
-                  </span>
-                  <span className="floating-icon emoji-visible" style={{ animationDelay: '2s' }}>
-                    🍤
-                  </span>
-                  <span className="floating-icon emoji-visible" style={{ animationDelay: '3s' }}>
-                    🥩
-                  </span>
+                <div className="glow-icon-container">
+                  <span className="hero-main-icon glow-icon emoji-visible">🍱</span>
                 </div>
               </div>
 
@@ -97,7 +91,7 @@ export default function MenuPage() {
 
           {/* Modernized Pricing Section */}
           <div className="card menu-card mb-5 overflow-hidden border-0 p-0">
-            <div className="pricing-section mb-0 p-5">
+            <div className="pricing-section compact-pricing mb-0 p-5">
               <div className="mb-5 text-center">
                 <div className="section-header animated-section">
                   <div className="section-icon-wrapper mb-3">
@@ -138,10 +132,6 @@ export default function MenuPage() {
                           <span className="feature-check">✓</span>
                           <span>All sides included</span>
                         </div>
-                        <div className="feature">
-                          <span className="feature-check">✓</span>
-                          <span>Chef entertainment</span>
-                        </div>
                       </div>
                     </div>
 
@@ -167,10 +157,6 @@ export default function MenuPage() {
                           <span className="feature-check">✓</span>
                           <span>All sides included</span>
                         </div>
-                        <div className="feature">
-                          <span className="feature-check">✓</span>
-                          <span>Chef entertainment</span>
-                        </div>
                       </div>
                     </div>
 
@@ -195,10 +181,6 @@ export default function MenuPage() {
                         <div className="feature">
                           <span className="feature-check">✓</span>
                           <span>Kid-friendly options</span>
-                        </div>
-                        <div className="feature">
-                          <span className="feature-check">✓</span>
-                          <span>Fun experience</span>
                         </div>
                       </div>
                     </div>
@@ -249,7 +231,7 @@ export default function MenuPage() {
 
           {/* What's Included Section */}
           <div className="card menu-card mb-5 overflow-hidden border-0 p-0">
-            <div className="included-section p-5">
+            <div className="included-section compact-included p-5">
               <div className="mb-5 text-center">
                 <div className="section-header animated-section">
                   <div className="section-icon-wrapper mb-3">
@@ -262,7 +244,7 @@ export default function MenuPage() {
                 </div>
               </div>
 
-              <div className="included-items-grid mb-5">
+              <CenteredFlexGrid className="included-items-grid mb-4" itemMinWidth={280} gap={12}>
                 <div className="included-item modern-item enhanced-item">
                   <div className="item-icon-wrapper">
                     <span className="included-icon emoji-visible">🍚</span>
@@ -336,7 +318,7 @@ export default function MenuPage() {
                     <div className="included-badge">Unforgettable</div>
                   </div>
                 </div>
-              </div>
+              </CenteredFlexGrid>
 
               <div className="protein-selection-banner modern-banner enhanced-banner">
                 <div className="banner-content">
@@ -357,267 +339,287 @@ export default function MenuPage() {
             </div>
           </div>
 
-          {/* Enhanced Protein Options and Premium Upgrades */}
+          {/* Enhanced Protein Options and Premium Upgrades - Collapsible */}
           <div className="card menu-card mb-5 overflow-hidden border-0 p-0">
             <div className="proteins-section p-5">
-              <div className="mb-5 text-center">
-                <div className="section-header animated-section">
-                  <div className="section-icon-wrapper mb-3">
-                    <span className="section-icon emoji-visible">🥩</span>
+              {/* Collapsible Header with Toggle */}
+              <button
+                onClick={() => setIsProteinsOpen(!isProteinsOpen)}
+                className="collapsible-header w-full"
+                aria-expanded={isProteinsOpen}
+              >
+                <div className="collapsible-header-content">
+                  <div className="collapsible-icons">
+                    <span className="emoji-visible">🥩</span>
+                    <span className="emoji-visible">🍤</span>
                   </div>
-                  <h2 className="section-title mb-4">Protein Selection</h2>
-                  <p className="section-subtitle">
-                    Choose your perfect combination from our premium selection
-                  </p>
-                </div>
-              </div>
-
-              <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <div className="mb-4">
-                  <div className="protein-card modern-card enhanced-protein-card">
-                    <div className="card-glow"></div>
-                    <div className="card-header enhanced-header">
-                      <div className="card-icon-wrapper">
-                        <span className="card-icon emoji-visible">✅</span>
-                      </div>
-                      <div className="header-content">
-                        <h3 className="card-title">Base Protein Options</h3>
-                        <p className="card-subtitle">Choose any 2 - Included in every meal</p>
-                      </div>
-                      <div className="included-badge pulse-badge">
-                        <span className="emoji-visible">🆓</span>
-                        Included
-                      </div>
-                    </div>
-                    <div className="card-body enhanced-body">
-                      <div className="protein-item modern-protein-item enhanced-protein-item">
-                        <div className="protein-content">
-                          <div className="protein-header">
-                            <h5 className="protein-name">Chicken</h5>
-                            <div className="protein-sparkle">
-                              <span className="emoji-visible">✨</span>
-                            </div>
-                          </div>
-                          <p className="protein-desc">
-                            Tender grilled chicken breast with signature hibachi seasonings and
-                            teriyaki glaze
-                          </p>
-                          <div className="protein-features">
-                            <span className="feature-tag">Fresh Daily</span>
-                            <span className="feature-tag">Chef&apos;s Choice</span>
-                          </div>
-                        </div>
-                        <div className="protein-check">
-                          <div className="check-circle">
-                            <span className="check-icon">✓</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="protein-item modern-protein-item enhanced-protein-item">
-                        <div className="protein-content">
-                          <div className="protein-header">
-                            <h5 className="protein-name">NY Strip Steak</h5>
-                            <div className="protein-sparkle">
-                              <span className="emoji-visible">✨</span>
-                            </div>
-                          </div>
-                          <p className="protein-desc">
-                            Premium NY strip steak cooked to your preferred temperature
-                          </p>
-                          <div className="protein-features">
-                            <span className="feature-tag">Fresh Daily</span>
-                            <span className="feature-tag">Chef&apos;s Choice</span>
-                          </div>
-                        </div>
-                        <div className="protein-check">
-                          <div className="check-circle">
-                            <span className="check-icon">✓</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="protein-item modern-protein-item enhanced-protein-item">
-                        <div className="protein-content">
-                          <div className="protein-header">
-                            <h5 className="protein-name">Shrimp</h5>
-                            <div className="protein-sparkle">
-                              <span className="emoji-visible">✨</span>
-                            </div>
-                          </div>
-                          <p className="protein-desc">
-                            Fresh jumbo shrimp with garlic butter and hibachi spices
-                          </p>
-                          <div className="protein-features">
-                            <span className="feature-tag">Fresh Daily</span>
-                            <span className="feature-tag">Chef&apos;s Choice</span>
-                          </div>
-                        </div>
-                        <div className="protein-check">
-                          <div className="check-circle">
-                            <span className="check-icon">✓</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="protein-item modern-protein-item enhanced-protein-item">
-                        <div className="protein-content">
-                          <div className="protein-header">
-                            <h5 className="protein-name">Calamari</h5>
-                            <div className="protein-sparkle">
-                              <span className="emoji-visible">✨</span>
-                            </div>
-                          </div>
-                          <p className="protein-desc">
-                            Fresh tender calamari grilled with garlic and hibachi spices
-                          </p>
-                          <div className="protein-features">
-                            <span className="feature-tag">Fresh Daily</span>
-                            <span className="feature-tag">Chef&apos;s Choice</span>
-                          </div>
-                        </div>
-                        <div className="protein-check">
-                          <div className="check-circle">
-                            <span className="check-icon">✓</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="protein-item modern-protein-item enhanced-protein-item">
-                        <div className="protein-content">
-                          <div className="protein-header">
-                            <h5 className="protein-name">Tofu</h5>
-                            <div className="protein-sparkle">
-                              <span className="emoji-visible">✨</span>
-                            </div>
-                          </div>
-                          <p className="protein-desc">
-                            Fried tofu with our house special seasoning - perfect vegetarian option
-                          </p>
-                          <div className="protein-features">
-                            <span className="feature-tag">Fresh Daily</span>
-                            <span className="feature-tag">Chef&apos;s Choice</span>
-                          </div>
-                        </div>
-                        <div className="protein-check">
-                          <div className="check-circle">
-                            <span className="check-icon">✓</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="collapsible-text">
+                    <h2 className="collapsible-title">Protein Selection</h2>
+                    <p className="collapsible-subtitle">
+                      Choose your perfect combination from our premium selection
+                    </p>
+                  </div>
+                  <div className="collapsible-toggle">
+                    <span className="toggle-text">{isProteinsOpen ? 'Hide' : 'View Options'}</span>
+                    {isProteinsOpen ? (
+                      <ChevronUp className="toggle-icon" />
+                    ) : (
+                      <ChevronDown className="toggle-icon" />
+                    )}
                   </div>
                 </div>
+              </button>
 
-                <div className="mb-4">
-                  <div className="upgrade-card modern-card featured-upgrade enhanced-upgrade-card">
-                    <div className="card-glow premium-glow"></div>
-                    <div className="card-header enhanced-header premium-header">
-                      <div className="card-icon-wrapper premium-icon">
-                        <span className="card-icon emoji-visible">⭐</span>
+              {/* Collapsible Content */}
+              <div className={`collapsible-content ${isProteinsOpen ? 'open' : ''}`}>
+                <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+                  <div className="mb-4">
+                    <div className="protein-card modern-card enhanced-protein-card">
+                      <div className="card-glow"></div>
+                      <div className="card-header enhanced-header">
+                        <div className="card-icon-wrapper">
+                          <span className="card-icon emoji-visible">✅</span>
+                        </div>
+                        <div className="header-content">
+                          <h3 className="card-title">Base Protein Options</h3>
+                          <p className="card-subtitle">Choose any 2 - Included in every meal</p>
+                        </div>
+                        <div className="included-badge pulse-badge">
+                          <span className="emoji-visible">🆓</span>
+                          Included
+                        </div>
                       </div>
-                      <div className="header-content">
-                        <h3 className="card-title">Premium Upgrades</h3>
-                        <p className="card-subtitle">
-                          Replace any protein with these premium options
-                        </p>
-                      </div>
-                      <div className="upgrade-badge premium-badge">
-                        <span className="emoji-visible">💎</span>
-                        Premium
+                      <div className="card-body enhanced-body">
+                        <div className="protein-item modern-protein-item enhanced-protein-item">
+                          <div className="protein-content">
+                            <div className="protein-header">
+                              <h5 className="protein-name">Chicken</h5>
+                              <div className="protein-sparkle">
+                                <span className="emoji-visible">✨</span>
+                              </div>
+                            </div>
+                            <p className="protein-desc">
+                              Tender grilled chicken breast with signature hibachi seasonings and
+                              teriyaki glaze
+                            </p>
+                            <div className="protein-features">
+                              <span className="feature-tag">Fresh Daily</span>
+                              <span className="feature-tag">Chef&apos;s Choice</span>
+                            </div>
+                          </div>
+                          <div className="protein-check">
+                            <div className="check-circle">
+                              <span className="check-icon">✓</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="protein-item modern-protein-item enhanced-protein-item">
+                          <div className="protein-content">
+                            <div className="protein-header">
+                              <h5 className="protein-name">NY Strip Steak</h5>
+                              <div className="protein-sparkle">
+                                <span className="emoji-visible">✨</span>
+                              </div>
+                            </div>
+                            <p className="protein-desc">
+                              Premium NY strip steak cooked to your preferred temperature
+                            </p>
+                            <div className="protein-features">
+                              <span className="feature-tag">Fresh Daily</span>
+                              <span className="feature-tag">Chef&apos;s Choice</span>
+                            </div>
+                          </div>
+                          <div className="protein-check">
+                            <div className="check-circle">
+                              <span className="check-icon">✓</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="protein-item modern-protein-item enhanced-protein-item">
+                          <div className="protein-content">
+                            <div className="protein-header">
+                              <h5 className="protein-name">Shrimp</h5>
+                              <div className="protein-sparkle">
+                                <span className="emoji-visible">✨</span>
+                              </div>
+                            </div>
+                            <p className="protein-desc">
+                              Fresh jumbo shrimp with garlic butter and hibachi spices
+                            </p>
+                            <div className="protein-features">
+                              <span className="feature-tag">Fresh Daily</span>
+                              <span className="feature-tag">Chef&apos;s Choice</span>
+                            </div>
+                          </div>
+                          <div className="protein-check">
+                            <div className="check-circle">
+                              <span className="check-icon">✓</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="protein-item modern-protein-item enhanced-protein-item">
+                          <div className="protein-content">
+                            <div className="protein-header">
+                              <h5 className="protein-name">Calamari</h5>
+                              <div className="protein-sparkle">
+                                <span className="emoji-visible">✨</span>
+                              </div>
+                            </div>
+                            <p className="protein-desc">
+                              Fresh tender calamari grilled with garlic and hibachi spices
+                            </p>
+                            <div className="protein-features">
+                              <span className="feature-tag">Fresh Daily</span>
+                              <span className="feature-tag">Chef&apos;s Choice</span>
+                            </div>
+                          </div>
+                          <div className="protein-check">
+                            <div className="check-circle">
+                              <span className="check-icon">✓</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="protein-item modern-protein-item enhanced-protein-item">
+                          <div className="protein-content">
+                            <div className="protein-header">
+                              <h5 className="protein-name">Tofu</h5>
+                              <div className="protein-sparkle">
+                                <span className="emoji-visible">✨</span>
+                              </div>
+                            </div>
+                            <p className="protein-desc">
+                              Fried tofu with our house special seasoning - perfect vegetarian
+                              option
+                            </p>
+                            <div className="protein-features">
+                              <span className="feature-tag">Fresh Daily</span>
+                              <span className="feature-tag">Chef&apos;s Choice</span>
+                            </div>
+                          </div>
+                          <div className="protein-check">
+                            <div className="check-circle">
+                              <span className="check-icon">✓</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="card-body enhanced-body">
-                      <div className="upgrade-item modern-upgrade-item enhanced-upgrade-item">
-                        <div className="upgrade-content">
-                          <div className="upgrade-header">
-                            <h5 className="upgrade-name">Salmon</h5>
-                            <div className="popular-badge">
-                              <span className="emoji-visible">🔥</span>
-                              <span>Popular</span>
-                            </div>
-                          </div>
-                          <p className="upgrade-desc">
-                            Wild-caught Atlantic salmon with teriyaki glaze
+                  </div>
+
+                  <div className="mb-4">
+                    <div className="upgrade-card modern-card featured-upgrade enhanced-upgrade-card">
+                      <div className="card-glow premium-glow"></div>
+                      <div className="card-header enhanced-header premium-header">
+                        <div className="card-icon-wrapper premium-icon">
+                          <span className="card-icon emoji-visible">⭐</span>
+                        </div>
+                        <div className="header-content">
+                          <h3 className="card-title">Premium Upgrades</h3>
+                          <p className="card-subtitle">
+                            Replace any protein with these premium options
                           </p>
-                          <div className="upgrade-features">
-                            <span className="feature-tag premium-tag">Premium Quality</span>
-                            <span className="feature-tag premium-tag">Fresh Daily</span>
-                          </div>
                         </div>
-                        <div className="upgrade-price">
-                          <div className="price-circle enhanced-price-circle">
-                            <span className="price-tag">+$5</span>
-                            <span className="price-label">per person</span>
-                          </div>
+                        <div className="upgrade-badge premium-badge">
+                          <span className="emoji-visible">💎</span>
+                          Premium
                         </div>
                       </div>
-
-                      <div className="upgrade-item modern-upgrade-item enhanced-upgrade-item">
-                        <div className="upgrade-content">
-                          <div className="upgrade-header">
-                            <h5 className="upgrade-name">Scallops</h5>
-                            <div className="popular-badge">
-                              <span className="emoji-visible">🔥</span>
-                              <span>Popular</span>
+                      <div className="card-body enhanced-body">
+                        <div className="upgrade-item modern-upgrade-item enhanced-upgrade-item">
+                          <div className="upgrade-content">
+                            <div className="upgrade-header">
+                              <h5 className="upgrade-name">Salmon</h5>
+                              <div className="popular-badge">
+                                <span className="emoji-visible">🔥</span>
+                                <span>Popular</span>
+                              </div>
+                            </div>
+                            <p className="upgrade-desc">
+                              Wild-caught Atlantic salmon with teriyaki glaze
+                            </p>
+                            <div className="upgrade-features">
+                              <span className="feature-tag premium-tag">Premium Quality</span>
+                              <span className="feature-tag premium-tag">Fresh Daily</span>
                             </div>
                           </div>
-                          <p className="upgrade-desc">Fresh sea scallops grilled to perfection</p>
-                          <div className="upgrade-features">
-                            <span className="feature-tag premium-tag">Premium Quality</span>
-                            <span className="feature-tag premium-tag">Fresh Daily</span>
-                          </div>
-                        </div>
-                        <div className="upgrade-price">
-                          <div className="price-circle enhanced-price-circle">
-                            <span className="price-tag">+$5</span>
-                            <span className="price-label">per person</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="upgrade-item modern-upgrade-item enhanced-upgrade-item">
-                        <div className="upgrade-content">
-                          <div className="upgrade-header">
-                            <h5 className="upgrade-name">Filet Mignon</h5>
-                            <div className="popular-badge">
-                              <span className="emoji-visible">🔥</span>
-                              <span>Popular</span>
+                          <div className="upgrade-price">
+                            <div className="price-circle enhanced-price-circle">
+                              <span className="price-tag">+$5</span>
+                              <span className="price-label">per person</span>
                             </div>
                           </div>
-                          <p className="upgrade-desc">Premium tender beef filet</p>
-                          <div className="upgrade-features">
-                            <span className="feature-tag premium-tag">Premium Quality</span>
-                            <span className="feature-tag premium-tag">Fresh Daily</span>
-                          </div>
                         </div>
-                        <div className="upgrade-price">
-                          <div className="price-circle enhanced-price-circle">
-                            <span className="price-tag">+$5</span>
-                            <span className="price-label">per person</span>
-                          </div>
-                        </div>
-                      </div>
 
-                      <div className="upgrade-item modern-upgrade-item enhanced-upgrade-item">
-                        <div className="upgrade-content">
-                          <div className="upgrade-header">
-                            <h5 className="upgrade-name">Lobster Tail</h5>
-                            <div className="luxury-badge">
-                              <span className="emoji-visible">👑</span>
-                              <span>Luxury</span>
+                        <div className="upgrade-item modern-upgrade-item enhanced-upgrade-item">
+                          <div className="upgrade-content">
+                            <div className="upgrade-header">
+                              <h5 className="upgrade-name">Scallops</h5>
+                              <div className="popular-badge">
+                                <span className="emoji-visible">🔥</span>
+                                <span>Popular</span>
+                              </div>
+                            </div>
+                            <p className="upgrade-desc">Fresh sea scallops grilled to perfection</p>
+                            <div className="upgrade-features">
+                              <span className="feature-tag premium-tag">Premium Quality</span>
+                              <span className="feature-tag premium-tag">Fresh Daily</span>
                             </div>
                           </div>
-                          <p className="upgrade-desc">Fresh lobster tail with garlic butter</p>
-                          <div className="upgrade-features">
-                            <span className="feature-tag premium-tag">Premium Quality</span>
-                            <span className="feature-tag premium-tag">Fresh Daily</span>
+                          <div className="upgrade-price">
+                            <div className="price-circle enhanced-price-circle">
+                              <span className="price-tag">+$5</span>
+                              <span className="price-label">per person</span>
+                            </div>
                           </div>
                         </div>
-                        <div className="upgrade-price">
-                          <div className="price-circle enhanced-price-circle">
-                            <span className="price-tag">+$15</span>
-                            <span className="price-label">per person</span>
+
+                        <div className="upgrade-item modern-upgrade-item enhanced-upgrade-item">
+                          <div className="upgrade-content">
+                            <div className="upgrade-header">
+                              <h5 className="upgrade-name">Filet Mignon</h5>
+                              <div className="popular-badge">
+                                <span className="emoji-visible">🔥</span>
+                                <span>Popular</span>
+                              </div>
+                            </div>
+                            <p className="upgrade-desc">Premium tender beef filet</p>
+                            <div className="upgrade-features">
+                              <span className="feature-tag premium-tag">Premium Quality</span>
+                              <span className="feature-tag premium-tag">Fresh Daily</span>
+                            </div>
+                          </div>
+                          <div className="upgrade-price">
+                            <div className="price-circle enhanced-price-circle">
+                              <span className="price-tag">+$5</span>
+                              <span className="price-label">per person</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="upgrade-item modern-upgrade-item enhanced-upgrade-item">
+                          <div className="upgrade-content">
+                            <div className="upgrade-header">
+                              <h5 className="upgrade-name">Lobster Tail</h5>
+                              <div className="luxury-badge">
+                                <span className="emoji-visible">👑</span>
+                                <span>Luxury</span>
+                              </div>
+                            </div>
+                            <p className="upgrade-desc">Fresh lobster tail with garlic butter</p>
+                            <div className="upgrade-features">
+                              <span className="feature-tag premium-tag">Premium Quality</span>
+                              <span className="feature-tag premium-tag">Fresh Daily</span>
+                            </div>
+                          </div>
+                          <div className="upgrade-price">
+                            <div className="price-circle enhanced-price-circle">
+                              <span className="price-tag">+$15</span>
+                              <span className="price-label">per person</span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -628,108 +630,129 @@ export default function MenuPage() {
             </div>
           </div>
 
-          {/* Modern Additional Options */}
+          {/* Modern Additional Options - Collapsible */}
           <div className="card menu-card mb-5 overflow-hidden border-0 p-0">
             <div className="additional-section p-5">
-              <div className="mb-5 text-center">
-                <div className="section-header animated-section">
-                  <div className="section-icon-wrapper mb-3">
-                    <span className="section-icon emoji-visible">🍜</span>
+              {/* Collapsible Header with Toggle */}
+              <button
+                onClick={() => setIsAdditionsOpen(!isAdditionsOpen)}
+                className="collapsible-header w-full"
+                aria-expanded={isAdditionsOpen}
+              >
+                <div className="collapsible-header-content">
+                  <div className="collapsible-icons">
+                    <span className="emoji-visible">🍜</span>
+                    <span className="emoji-visible">✨</span>
                   </div>
-                  <h2 className="section-title mb-4">Additional Enhancements</h2>
-                  <p className="section-subtitle">Take your hibachi experience to the next level</p>
-                </div>
-              </div>
-
-              <div className="additional-items-grid">
-                <div className="additional-item-card modern-additional-card">
-                  <div className="additional-content">
-                    <div className="additional-icon-wrapper">
-                      <span className="additional-icon emoji-visible">🍜</span>
-                    </div>
-                    <h5 className="additional-name">Yakisoba Noodles</h5>
-                    <p className="additional-desc">Japanese style lo mein noodles</p>
-                  </div>
-                  <div className="additional-price">
-                    <div className="add-price-circle">
-                      <span className="add-price-tag">+$5</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="additional-item-card modern-additional-card">
-                  <div className="additional-content">
-                    <div className="additional-icon-wrapper">
-                      <span className="additional-icon emoji-visible">🍚</span>
-                    </div>
-                    <h5 className="additional-name">Extra Fried Rice</h5>
-                    <p className="additional-desc">Additional portion of hibachi fried rice</p>
-                  </div>
-                  <div className="additional-price">
-                    <div className="add-price-circle">
-                      <span className="add-price-tag">+$5</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="additional-item-card modern-additional-card">
-                  <div className="additional-content">
-                    <div className="additional-icon-wrapper">
-                      <span className="additional-icon emoji-visible">🥬</span>
-                    </div>
-                    <h5 className="additional-name">Extra Vegetables</h5>
-                    <p className="additional-desc">
-                      Additional portion of mixed seasonal vegetables
+                  <div className="collapsible-text">
+                    <h2 className="collapsible-title">Additional Enhancements</h2>
+                    <p className="collapsible-subtitle">
+                      Take your hibachi experience to the next level
                     </p>
                   </div>
-                  <div className="additional-price">
-                    <div className="add-price-circle">
-                      <span className="add-price-tag">+$5</span>
-                    </div>
+                  <div className="collapsible-toggle">
+                    <span className="toggle-text">{isAdditionsOpen ? 'Hide' : 'View Options'}</span>
+                    {isAdditionsOpen ? (
+                      <ChevronUp className="toggle-icon" />
+                    ) : (
+                      <ChevronDown className="toggle-icon" />
+                    )}
                   </div>
                 </div>
+              </button>
 
-                <div className="additional-item-card modern-additional-card">
-                  <div className="additional-content">
-                    <div className="additional-icon-wrapper">
-                      <span className="additional-icon emoji-visible">🫛</span>
+              {/* Collapsible Content */}
+              <div className={`collapsible-content ${isAdditionsOpen ? 'open' : ''}`}>
+                <div className="additional-items-grid">
+                  <div className="additional-item-card modern-additional-card">
+                    <div className="additional-content">
+                      <div className="additional-icon-wrapper">
+                        <span className="additional-icon emoji-visible">🍜</span>
+                      </div>
+                      <h5 className="additional-name">Yakisoba Noodles</h5>
+                      <p className="additional-desc">Japanese style lo mein noodles</p>
                     </div>
-                    <h5 className="additional-name">Edamame</h5>
-                    <p className="additional-desc">Fresh steamed soybeans with sea salt</p>
-                  </div>
-                  <div className="additional-price">
-                    <div className="add-price-circle">
-                      <span className="add-price-tag">+$5</span>
+                    <div className="additional-price">
+                      <div className="add-price-circle">
+                        <span className="add-price-tag">+$5</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="additional-item-card modern-additional-card">
-                  <div className="additional-content">
-                    <div className="additional-icon-wrapper">
-                      <span className="additional-icon emoji-visible">🥟</span>
+                  <div className="additional-item-card modern-additional-card">
+                    <div className="additional-content">
+                      <div className="additional-icon-wrapper">
+                        <span className="additional-icon emoji-visible">🍚</span>
+                      </div>
+                      <h5 className="additional-name">Extra Fried Rice</h5>
+                      <p className="additional-desc">Additional portion of hibachi fried rice</p>
                     </div>
-                    <h5 className="additional-name">Gyoza</h5>
-                    <p className="additional-desc">Pan-fried Japanese dumplings</p>
-                  </div>
-                  <div className="additional-price">
-                    <div className="add-price-circle">
-                      <span className="add-price-tag">+$10</span>
+                    <div className="additional-price">
+                      <div className="add-price-circle">
+                        <span className="add-price-tag">+$5</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="additional-item-card modern-additional-card">
-                  <div className="additional-content">
-                    <div className="additional-icon-wrapper">
-                      <span className="additional-icon emoji-visible">🥩</span>
+                  <div className="additional-item-card modern-additional-card">
+                    <div className="additional-content">
+                      <div className="additional-icon-wrapper">
+                        <span className="additional-icon emoji-visible">🥬</span>
+                      </div>
+                      <h5 className="additional-name">Extra Vegetables</h5>
+                      <p className="additional-desc">
+                        Additional portion of mixed seasonal vegetables
+                      </p>
                     </div>
-                    <h5 className="additional-name">3rd Protein</h5>
-                    <p className="additional-desc">Add a third protein to your meal</p>
+                    <div className="additional-price">
+                      <div className="add-price-circle">
+                        <span className="add-price-tag">+$5</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="additional-price">
-                    <div className="add-price-circle">
-                      <span className="add-price-tag">+$10</span>
+
+                  <div className="additional-item-card modern-additional-card">
+                    <div className="additional-content">
+                      <div className="additional-icon-wrapper">
+                        <span className="additional-icon emoji-visible">🫛</span>
+                      </div>
+                      <h5 className="additional-name">Edamame</h5>
+                      <p className="additional-desc">Fresh steamed soybeans with sea salt</p>
+                    </div>
+                    <div className="additional-price">
+                      <div className="add-price-circle">
+                        <span className="add-price-tag">+$5</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="additional-item-card modern-additional-card">
+                    <div className="additional-content">
+                      <div className="additional-icon-wrapper">
+                        <span className="additional-icon emoji-visible">🥟</span>
+                      </div>
+                      <h5 className="additional-name">Gyoza</h5>
+                      <p className="additional-desc">Pan-fried Japanese dumplings</p>
+                    </div>
+                    <div className="additional-price">
+                      <div className="add-price-circle">
+                        <span className="add-price-tag">+$10</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="additional-item-card modern-additional-card">
+                    <div className="additional-content">
+                      <div className="additional-icon-wrapper">
+                        <span className="additional-icon emoji-visible">🥩</span>
+                      </div>
+                      <h5 className="additional-name">3rd Protein</h5>
+                      <p className="additional-desc">Add a third protein to your meal</p>
+                    </div>
+                    <div className="additional-price">
+                      <div className="add-price-circle">
+                        <span className="add-price-tag">+$10</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -740,15 +763,15 @@ export default function MenuPage() {
       </div>
 
       {/* Enhanced Call to Action */}
-      <div className="container-fluid px-lg-5 mb-5">
+      <div className="container-fluid px-lg-5 mb-4">
         <div className="card menu-card overflow-hidden border-0 p-0">
-          <div className="cta-section p-5 text-center">
+          <div className="cta-section compact-cta p-4 text-center">
             <div className="cta-content-wrapper">
               <div className="cta-background-pattern"></div>
 
               {/* CTA Header */}
-              <div className="cta-header mb-5">
-                <div className="cta-icon-group mb-4">
+              <div className="cta-header mb-3">
+                <div className="cta-icon-group mb-3">
                   <span className="cta-icon emoji-visible floating-cta-icon">🍽️</span>
                   <span className="cta-icon emoji-visible floating-cta-icon">🎉</span>
                   <span className="cta-icon emoji-visible floating-cta-icon">👨‍🍳</span>
@@ -761,7 +784,7 @@ export default function MenuPage() {
               </div>
 
               {/* Main CTA Button */}
-              <div className="cta-button-wrapper mb-5">
+              <div className="cta-button-wrapper mb-3">
                 <Link
                   href="/BookUs"
                   aria-label="Order your hibachi experience now"
@@ -776,7 +799,7 @@ export default function MenuPage() {
                 </Link>
 
                 {/* Secondary actions */}
-                <div className="secondary-actions mt-4">
+                <div className="secondary-actions mt-3">
                   <div className="action-item">
                     <span className="emoji-visible">📞</span>
                     <span>Call for custom packages</span>
@@ -791,7 +814,7 @@ export default function MenuPage() {
 
               {/* Enhanced Feature Highlights */}
               <div className="cta-features-section">
-                <h3 className="features-title mb-4">Why Choose My Hibachi?</h3>
+                <h3 className="features-title mb-3">Why Choose My Hibachi?</h3>
                 <div className="cta-features-grid">
                   <div className="cta-feature-card modern-feature-card">
                     <div className="feature-icon-wrapper">

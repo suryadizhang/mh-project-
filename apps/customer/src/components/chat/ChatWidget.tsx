@@ -1,6 +1,15 @@
 'use client';
 
-import { ExternalLink, Maximize2, Minimize2, Send, Trash2, Volume2, VolumeX, X } from 'lucide-react';
+import {
+  ExternalLink,
+  Maximize2,
+  Minimize2,
+  Send,
+  Trash2,
+  Volume2,
+  VolumeX,
+  X,
+} from 'lucide-react';
 import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -131,7 +140,9 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // Create a simple notification sound using Web Audio API
-      audioRef.current = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleogWQb3NvJFhF05ltNvXroc7I1GDr9DfvJlWLT10osbXspZCKUVyo8jftYxGJUlvocLYsIpLKE5yocTYsYpNKlF0oc');
+      audioRef.current = new Audio(
+        'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleogWQb3NvJFhF05ltNvXroc7I1GDr9DfvJlWLT10osbXspZCKUVyo8jftYxGJUlvocLYsIpLKE5yocTYsYpNKlF0oc',
+      );
     }
   }, []);
 
@@ -147,7 +158,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
 
   // Toggle sound setting
   const toggleSound = useCallback(() => {
-    setSoundEnabled(prev => {
+    setSoundEnabled((prev) => {
       const newValue = !prev;
       if (typeof window !== 'undefined') {
         localStorage.setItem('mh_chat_sound', String(newValue));
@@ -248,7 +259,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
         setIsConnected(false);
         setIsLoading(false);
         setIsTyping(false);
-        setRetryCount(prev => prev + 1);
+        setRetryCount((prev) => prev + 1);
 
         // Stop retrying after 3 attempts
         if (retryCount < 3 && !reconnectTimeoutRef.current) {
@@ -551,7 +562,10 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
 
   const handleTextMessage = () => {
     if (protectedTel) {
-      window.open(`sms:${protectedTel}?body=Hi%20My%20Hibachi!%20I%20need%20help%20with...`, '_blank');
+      window.open(
+        `sms:${protectedTel}?body=Hi%20My%20Hibachi!%20I%20need%20help%20with...`,
+        '_blank',
+      );
     }
   };
 
@@ -599,10 +613,13 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
   }
 
   return (
-    <div className={`fixed z-50 flex flex-col rounded-2xl border border-gray-200 bg-white shadow-2xl transition-all duration-300 ${isExpanded
-        ? 'right-2 bottom-4 left-2 max-h-[85vh] sm:right-4 sm:left-auto sm:w-[720px] sm:h-[540px] md:w-[840px] md:h-[560px] lg:w-[960px] lg:h-[580px]'
-        : 'right-2 bottom-20 h-[70vh] max-h-[570px] w-[calc(100vw-1rem)] max-w-[380px] sm:right-4 sm:w-[360px] sm:h-[540px] md:w-[380px] md:h-[570px]'
-      }`}>
+    <div
+      className={`fixed z-50 flex flex-col rounded-2xl border border-gray-200 bg-white shadow-2xl transition-all duration-300 ${
+        isExpanded
+          ? 'right-2 bottom-4 left-2 max-h-[85vh] sm:right-4 sm:left-auto sm:h-[540px] sm:w-[720px] md:h-[560px] md:w-[840px] lg:h-[580px] lg:w-[960px]'
+          : 'right-2 bottom-20 h-[70vh] max-h-[570px] w-[calc(100vw-1rem)] max-w-[380px] sm:right-4 sm:h-[540px] sm:w-[360px] md:h-[570px] md:w-[380px]'
+      }`}
+    >
       {/* Header */}
       <div className="flex items-center justify-between rounded-t-2xl bg-gradient-to-r from-[#ffb800] to-[#db2b28] p-3 text-white">
         <div className="flex items-center space-x-3">
@@ -617,9 +634,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
             />
           </div>
           <div className="flex-1">
-            <h3 className="text-base font-medium">
-              My Hibachi Assistant
-            </h3>
+            <h3 className="text-base font-medium">My Hibachi Assistant</h3>
             <div className="flex items-center space-x-1.5">
               <div
                 className={`h-2.5 w-2.5 rounded-full ${isConnected ? 'bg-green-300 shadow-[0_0_6px_rgba(134,239,172,0.8)]' : connectionFailed ? 'bg-red-400 shadow-[0_0_6px_rgba(248,113,113,0.8)]' : 'bg-yellow-300 shadow-[0_0_6px_rgba(253,224,71,0.8)]'}`}
@@ -691,32 +706,32 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
         {/* Offline Fallback UI */}
         {connectionFailed && messages.length === 0 && (
-          <div className="text-center space-y-4">
+          <div className="space-y-4 text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-100">
               <span className="text-3xl">📱</span>
             </div>
             <div>
-              <h4 className="font-semibold text-gray-800 mb-2">Chat Temporarily Unavailable</h4>
-              <p className="text-sm text-gray-600 mb-4">
+              <h4 className="mb-2 font-semibold text-gray-800">Chat Temporarily Unavailable</h4>
+              <p className="mb-4 text-sm text-gray-600">
                 Our AI assistant is currently offline, but we&apos;re still here to help!
               </p>
             </div>
             <div className="space-y-2">
               <a
                 href={protectedTel || 'tel:+19167408768'}
-                className="flex items-center justify-center gap-2 w-full rounded-lg bg-green-500 px-4 py-3 text-white font-medium hover:bg-green-600 transition-colors"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-green-500 px-4 py-3 font-medium text-white transition-colors hover:bg-green-600"
               >
                 <span>📞</span> Call Us Now
               </a>
               <a
                 href={`mailto:${protectedEmail || 'cs@myhibachichef.com'}`}
-                className="flex items-center justify-center gap-2 w-full rounded-lg bg-blue-500 px-4 py-3 text-white font-medium hover:bg-blue-600 transition-colors"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-3 font-medium text-white transition-colors hover:bg-blue-600"
               >
                 <span>✉️</span> Email Us
               </a>
               <a
                 href="/contact"
-                className="flex items-center justify-center gap-2 w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-50"
               >
                 <span>💬</span> Contact Page
               </a>
@@ -727,7 +742,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
                 setRetryCount(0);
                 connectWebSocket();
               }}
-              className="text-sm text-orange-600 hover:text-orange-700 underline"
+              className="text-sm text-orange-600 underline hover:text-orange-700"
             >
               Try reconnecting
             </button>
@@ -746,7 +761,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
                   <button
                     key={i}
                     onClick={() => handleSuggestionClick(suggestion)}
-                    className="rounded-full border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-700 transition-colors hover:bg-orange-100 min-h-[44px]"
+                    className="min-h-[44px] rounded-full border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-700 transition-colors hover:bg-orange-100"
                   >
                     {suggestion}
                   </button>
@@ -762,10 +777,11 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
             className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[85%] rounded-2xl p-3 ${message.type === 'user'
-                ? 'bg-gradient-to-r from-[#ffb800] to-[#db2b28] text-white'
-                : 'bg-gray-100 text-gray-800'
-                }`}
+              className={`max-w-[85%] rounded-2xl p-3 ${
+                message.type === 'user'
+                  ? 'bg-gradient-to-r from-[#ffb800] to-[#db2b28] text-white'
+                  : 'bg-gray-100 text-gray-800'
+              }`}
             >
               <div className="flex items-start space-x-2">
                 {message.type === 'assistant' && (
@@ -780,11 +796,14 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
                   </div>
                 )}
                 <div className="flex-1">
-                  <p className="whitespace-pre-wrap text-base leading-relaxed">
-                    {message.content}
-                  </p>
-                  <p className={`mt-1 text-xs ${message.type === 'user' ? 'text-white/70' : 'text-gray-500'}`}>
-                    {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  <p className="text-base leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                  <p
+                    className={`mt-1 text-xs ${message.type === 'user' ? 'text-white/70' : 'text-gray-500'}`}
+                  >
+                    {new Date(message.timestamp).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
                   </p>
 
                   {message.citations && message.citations.length > 0 && (
