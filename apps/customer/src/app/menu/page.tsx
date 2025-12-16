@@ -1,6 +1,11 @@
 ﻿'use client';
 
+// Menu page-specific CSS
 import '@/styles/menu.css';
+import '@/styles/menu/menu-features.css';
+import '@/styles/menu/menu-pricing.css';
+import '@/styles/menu/menu-base.css';
+import '@/styles/menu/base.css';
 import '@/styles/pages/menu.page.css';
 
 import { Calculator, Calendar, ChevronDown, ChevronUp, MessageCircle } from 'lucide-react';

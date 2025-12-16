@@ -1,6 +1,11 @@
 'use client';
 
+// Service areas uses menu styling
 import '@/styles/menu.css';
+import '@/styles/menu/menu-features.css';
+import '@/styles/menu/menu-pricing.css';
+import '@/styles/menu/menu-base.css';
+import '@/styles/menu/base.css';
 import '@/styles/pages/menu.page.css';
 
 import { Calculator, Calendar, MessageCircle } from 'lucide-react';
@@ -11,35 +16,17 @@ export default function ServiceAreasPage() {
     <main data-page="menu">
       <div className="menu-container">
         <div className="container-fluid px-lg-5">
-          {/* Hero Section */}
-          <div className="hero-section page-hero-background mb-3 text-center">
+          {/* Hero Section - Ultra Compact */}
+          <div className="hero-section hero-compact page-hero-background mb-3 text-center">
             <div className="hero-content">
-              <div className="hero-icon-wrapper mb-2">
-                <div className="floating-icons">
-                  <span className="hero-main-icon emoji-visible">🏠</span>
-                  <span className="floating-icon emoji-visible" style={{ animationDelay: '0s' }}>
-                    🌉
-                  </span>
-                  <span className="floating-icon emoji-visible" style={{ animationDelay: '1s' }}>
-                    🚗
-                  </span>
-                  <span className="floating-icon emoji-visible" style={{ animationDelay: '2s' }}>
-                    🏞️
-                  </span>
-                  <span className="floating-icon emoji-visible" style={{ animationDelay: '3s' }}>
-                    👨‍🍳
-                  </span>
-                </div>
-              </div>
+              <div className="hero-icon">🗺️</div>
 
-              <h1 className="display-4 fw-bold mb-2">
+              <h1 className="fw-bold">
                 <span className="gradient-text">Our Service Areas</span>
               </h1>
 
-              <p className="hero-subtitle mb-2">
-                <span className="emoji-visible">✨</span>
+              <p className="hero-subtitle">
                 We bring the hibachi experience directly to your location
-                <span className="emoji-visible">✨</span>
               </p>
             </div>
           </div>

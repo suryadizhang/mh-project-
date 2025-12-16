@@ -11,7 +11,7 @@ export default function BlogStructuredData({ post }: BlogStructuredDataProps) {
     '@type': 'BlogPosting',
     headline: post.title,
     description: post.metaDescription,
-    image: 'https://myhibachi.com/images/myhibachi-logo.png', // Update with your actual domain
+    image: 'https://myhibachi.com/images/myhibachi-logo.webp', // Update with your actual domain
     author: {
       '@type': 'Person',
       name: post.author
@@ -21,7 +21,7 @@ export default function BlogStructuredData({ post }: BlogStructuredDataProps) {
       name: 'My Hibachi',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://myhibachi.com/images/myhibachi-logo.png'
+        url: 'https://myhibachi.com/images/myhibachi-logo.webp'
       }
     },
     datePublished: new Date(post.date).toISOString(),

@@ -46,7 +46,7 @@ export default function Navbar() {
         {/* Brand Logo */}
         <Link href="/" className={styles.brand}>
           <Image
-            src="/My Hibachi logo.png"
+            src="/My Hibachi logo.webp"
             alt="MyHibachi Private Hibachi Chef Bay Area Sacramento San Jose Catering Logo"
             width={238}
             height={238}
