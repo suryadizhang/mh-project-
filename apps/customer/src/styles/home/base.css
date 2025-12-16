@@ -75,6 +75,7 @@
   height: var(--home-hero-height);
   overflow: hidden;
   margin-bottom: 3rem;
+  z-index: 0;
 }
 
 .hero-media-overlay {

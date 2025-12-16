@@ -26,14 +26,16 @@ const LocationSection: React.FC<LocationSectionProps> = ({
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Street Address *</label>
+          <label htmlFor="venueStreet" className="block text-sm font-medium text-gray-700 mb-2">Street Address *</label>
           <Controller
             name="venueStreet"
             control={control}
             render={({ field }) => (
               <input
                 {...field}
+                id="venueStreet"
                 type="text"
+                autoComplete="off"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                 placeholder="Enter venue street address"
               />
@@ -46,14 +48,16 @@ const LocationSection: React.FC<LocationSectionProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">City *</label>
+            <label htmlFor="venueCity" className="block text-sm font-medium text-gray-700 mb-2">City *</label>
             <Controller
               name="venueCity"
               control={control}
               render={({ field }) => (
                 <input
                   {...field}
+                  id="venueCity"
                   type="text"
+                  autoComplete="off"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                   placeholder="City"
                 />
@@ -65,13 +69,15 @@ const LocationSection: React.FC<LocationSectionProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">State *</label>
+            <label htmlFor="venueState" className="block text-sm font-medium text-gray-700 mb-2">State *</label>
             <Controller
               name="venueState"
               control={control}
               render={({ field }) => (
                 <select
                   {...field}
+                  id="venueState"
+                  autoComplete="off"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                 >
                   <option value="">Select State</option>
@@ -89,14 +95,16 @@ const LocationSection: React.FC<LocationSectionProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Zip Code *</label>
+            <label htmlFor="venueZipcode" className="block text-sm font-medium text-gray-700 mb-2">Zip Code *</label>
             <Controller
               name="venueZipcode"
               control={control}
               render={({ field }) => (
                 <input
                   {...field}
+                  id="venueZipcode"
                   type="text"
+                  autoComplete="off"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                   placeholder="Zip Code"
                 />
@@ -133,7 +141,7 @@ const LocationSection: React.FC<LocationSectionProps> = ({
               <h4 className="text-lg font-medium text-gray-900">Billing Address</h4>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="addressStreet" className="block text-sm font-medium text-gray-700 mb-2">
                   Street Address *
                 </label>
                 <Controller
@@ -142,7 +150,9 @@ const LocationSection: React.FC<LocationSectionProps> = ({
                   render={({ field }) => (
                     <input
                       {...field}
+                      id="addressStreet"
                       type="text"
+                      autoComplete="billing street-address"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                       placeholder="Enter billing street address"
                     />
@@ -155,14 +165,16 @@ const LocationSection: React.FC<LocationSectionProps> = ({
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">City *</label>
+                  <label htmlFor="addressCity" className="block text-sm font-medium text-gray-700 mb-2">City *</label>
                   <Controller
                     name="addressCity"
                     control={control}
                     render={({ field }) => (
                       <input
                         {...field}
+                        id="addressCity"
                         type="text"
+                        autoComplete="billing address-level2"
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                         placeholder="City"
                       />
@@ -174,13 +186,15 @@ const LocationSection: React.FC<LocationSectionProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">State *</label>
+                  <label htmlFor="addressState" className="block text-sm font-medium text-gray-700 mb-2">State *</label>
                   <Controller
                     name="addressState"
                     control={control}
                     render={({ field }) => (
                       <select
                         {...field}
+                        id="addressState"
+                        autoComplete="billing address-level1"
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                       >
                         <option value="">Select State</option>
@@ -198,14 +212,16 @@ const LocationSection: React.FC<LocationSectionProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Zip Code *</label>
+                  <label htmlFor="addressZipcode" className="block text-sm font-medium text-gray-700 mb-2">Zip Code *</label>
                   <Controller
                     name="addressZipcode"
                     control={control}
                     render={({ field }) => (
                       <input
                         {...field}
+                        id="addressZipcode"
                         type="text"
+                        autoComplete="billing postal-code"
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                         placeholder="Zip Code"
                       />

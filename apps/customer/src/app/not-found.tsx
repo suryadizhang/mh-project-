@@ -1,3 +1,12 @@
+import {
+  AlertTriangle,
+  BookText,
+  Calculator,
+  CalendarCheck,
+  Home,
+  Menu,
+  Phone,
+} from 'lucide-react';
 import Link from 'next/link';
 
 import Breadcrumb from '@/components/ui/Breadcrumb';
@@ -29,7 +38,7 @@ export default function NotFound() {
               404
             </div>
             <div className="mb-6 flex justify-center">
-              <i className="bi bi-exclamation-triangle text-6xl text-orange-400"></i>
+              <AlertTriangle className="h-16 w-16 text-orange-400" />
             </div>
           </div>
 
@@ -46,17 +55,17 @@ export default function NotFound() {
           <div className="mb-8 flex flex-col gap-4 sm:flex-row">
             <Link
               href="/"
-              className="transform rounded-lg bg-gradient-to-r from-orange-500 to-red-500 px-8 py-4 font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-orange-600 hover:to-red-600 hover:shadow-lg"
+              className="inline-flex transform items-center rounded-lg bg-gradient-to-r from-orange-500 to-red-500 px-8 py-4 font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-orange-600 hover:to-red-600 hover:shadow-lg"
             >
-              <i className="bi bi-house-door mr-2"></i>
+              <Home className="mr-2 h-5 w-5" />
               Back to Home
             </Link>
 
             <Link
               href="/BookUs"
-              className="transform rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 px-8 py-4 font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-blue-600 hover:to-purple-600 hover:shadow-lg"
+              className="inline-flex transform items-center rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 px-8 py-4 font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-blue-600 hover:to-purple-600 hover:shadow-lg"
             >
-              <i className="bi bi-calendar-check mr-2"></i>
+              <CalendarCheck className="mr-2 h-5 w-5" />
               Book Hibachi
             </Link>
           </div>
@@ -67,7 +76,7 @@ export default function NotFound() {
               href="/menu"
               className="group rounded-lg bg-slate-800/50 p-4 text-center transition-colors hover:bg-slate-700/50"
             >
-              <i className="bi bi-menu-button-wide mb-2 block text-2xl text-orange-400 group-hover:text-orange-300"></i>
+              <Menu className="mx-auto mb-2 h-8 w-8 text-orange-400 group-hover:text-orange-300" />
               <span className="text-sm text-white">Menu</span>
             </Link>
 
@@ -75,7 +84,7 @@ export default function NotFound() {
               href="/quote"
               className="group rounded-lg bg-slate-800/50 p-4 text-center transition-colors hover:bg-slate-700/50"
             >
-              <i className="bi bi-calculator mb-2 block text-2xl text-orange-400 group-hover:text-orange-300"></i>
+              <Calculator className="mx-auto mb-2 h-8 w-8 text-orange-400 group-hover:text-orange-300" />
               <span className="text-sm text-white">Get Quote</span>
             </Link>
 
@@ -83,7 +92,7 @@ export default function NotFound() {
               href="/blog"
               className="group rounded-lg bg-slate-800/50 p-4 text-center transition-colors hover:bg-slate-700/50"
             >
-              <i className="bi bi-journal-text mb-2 block text-2xl text-orange-400 group-hover:text-orange-300"></i>
+              <BookText className="mx-auto mb-2 h-8 w-8 text-orange-400 group-hover:text-orange-300" />
               <span className="text-sm text-white">Blog</span>
             </Link>
 
@@ -91,7 +100,7 @@ export default function NotFound() {
               href="/contact"
               className="group rounded-lg bg-slate-800/50 p-4 text-center transition-colors hover:bg-slate-700/50"
             >
-              <i className="bi bi-telephone mb-2 block text-2xl text-orange-400 group-hover:text-orange-300"></i>
+              <Phone className="mx-auto mb-2 h-8 w-8 text-orange-400 group-hover:text-orange-300" />
               <span className="text-sm text-white">Contact</span>
             </Link>
           </div>

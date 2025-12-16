@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from 'react'
 
 import { homeData } from '@/data/home'
 import styles from '@/styles/home/features.module.css'
+import type { HomeFeature } from '@/types/data'
 
 export function FeaturesGrid() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -49,7 +50,7 @@ export function FeaturesGrid() {
         <div className="row">
           <div className="col-12">
             <div className={styles.featuresGrid}>
-              {homeData.features.map((feature: any, index: number) => (
+              {homeData.features.map((feature: HomeFeature, index: number) => (
                 <div key={index} className={styles.featureCard}>
                   <div className={styles.cardContent}>
                     <div className={styles.featureIcon}>{feature.icon}</div>

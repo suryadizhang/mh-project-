@@ -3,10 +3,10 @@
 import '@/styles/home.css';
 import '@/styles/pages/home.page.css';
 
+import { Building, CalendarCheck, CalendarDays, CheckCircle, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
-import Assistant from '@/components/chat/Assistant';
-import TestimonialsSection from '@/components/sections/TestimonialsSection';
+import ValuePropositionSection from '@/components/sections/ValuePropositionSection';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 export default function Home() {
@@ -241,18 +241,20 @@ export default function Home() {
               location—we&apos;ll make it work with{' '}
               <span className="highlight-text">transparent travel options</span>.
             </p>
-            <div className="mt-3 mb-4 text-center">
+            <div className="mt-3 mb-4 flex flex-wrap gap-4 justify-center">
               <a
                 href="/BookUs"
-                className="mr-3 inline-block rounded-lg bg-red-600 px-6 py-3 font-semibold text-white transition hover:bg-red-700"
+                className="btn-cta-primary btn-cta-shimmer"
               >
-                📅 Check Your Date & Time
+                <span>📅</span>
+                <span>Check Your Date & Time</span>
               </a>
               <a
                 href="/quote"
-                className="inline-block rounded-lg border-2 border-red-600 px-6 py-3 font-semibold text-red-600 transition hover:bg-red-50"
+                className="btn-cta-secondary"
               >
-                💬 Get a Quick Quote
+                <span>💬</span>
+                <span>Get a Quick Quote</span>
               </a>
             </div>
 
@@ -337,12 +339,20 @@ export default function Home() {
                 Book now and let us create memories that will last a lifetime!
               </p>
             </div>
-            <div className="cta-buttons">
-              <Link href="/menu" className="btn btn-primary btn-lg me-3">
-                🔥 View Our Menu
+            <div className="cta-buttons flex flex-wrap gap-4 justify-center">
+              <Link
+                href="/menu"
+                className="btn-cta-primary btn-cta-shimmer btn-cta-pulse"
+              >
+                <span>🔥</span>
+                <span>View Our Menu</span>
               </Link>
-              <Link href="/quote" className="btn btn-outline-primary btn-lg">
-                💬 Get Your Free Quote
+              <Link
+                href="/quote"
+                className="btn-cta-secondary"
+              >
+                <span>💬</span>
+                <span>Get Your Free Quote</span>
               </Link>
             </div>
             <p className="cta-footer">
@@ -384,7 +394,7 @@ export default function Home() {
             <div className="mb-4">
               <div className="service-card">
                 <div className="service-icon-wrapper">
-                  <i className="bi bi-calendar-event service-icon-bi"></i>
+                  <CalendarDays className="h-10 w-10 text-white" />
                 </div>
                 <h3 className="service-title">Private Events</h3>
                 <p className="service-description">
@@ -394,13 +404,13 @@ export default function Home() {
                 </p>
                 <div className="service-features">
                   <span className="service-feature">
-                    <i className="bi bi-check-circle"></i> Professional chef service
+                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Professional chef service
                   </span>
                   <span className="service-feature">
-                    <i className="bi bi-check-circle"></i> Custom menu options
+                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Custom menu options
                   </span>
                   <span className="service-feature">
-                    <i className="bi bi-check-circle"></i> Personalized entertainment
+                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Personalized entertainment
                   </span>
                 </div>
               </div>
@@ -409,7 +419,7 @@ export default function Home() {
             <div className="mb-4">
               <div className="service-card">
                 <div className="service-icon-wrapper">
-                  <i className="bi bi-building service-icon-bi"></i>
+                  <Building className="h-10 w-10 text-white" />
                 </div>
                 <h3 className="service-title">Corporate Events</h3>
                 <p className="service-description">
@@ -419,13 +429,13 @@ export default function Home() {
                 </p>
                 <div className="service-features">
                   <span className="service-feature">
-                    <i className="bi bi-check-circle"></i> Professional presentation
+                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Professional presentation
                   </span>
                   <span className="service-feature">
-                    <i className="bi bi-check-circle"></i> Flexible scheduling
+                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Flexible scheduling
                   </span>
                   <span className="service-feature">
-                    <i className="bi bi-check-circle"></i> Volume discounts available
+                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Volume discounts available
                   </span>
                 </div>
               </div>
@@ -434,7 +444,7 @@ export default function Home() {
             <div className="mb-4">
               <div className="service-card">
                 <div className="service-icon-wrapper">
-                  <i className="bi bi-stars service-icon-bi"></i>
+                  <Sparkles className="h-10 w-10 text-white" />
                 </div>
                 <h3 className="service-title">Premium Experience</h3>
                 <p className="service-description">
@@ -444,34 +454,33 @@ export default function Home() {
                 </p>
                 <div className="service-features">
                   <span className="service-feature">
-                    <i className="bi bi-check-circle"></i> Dietary accommodations
+                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Dietary accommodations
                   </span>
                   <span className="service-feature">
-                    <i className="bi bi-check-circle"></i> Premium ingredient options
+                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Premium ingredient options
                   </span>
                   <span className="service-feature">
-                    <i className="bi bi-check-circle"></i> Signature entertainment
+                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Signature entertainment
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="services-cta text-center">
+          <div className="services-cta text-center mt-8">
             <Link
               href="/BookUs"
-              className="btn-primary-custom inline-flex items-center gap-2 rounded-lg bg-red-600 px-6 py-3 text-lg font-semibold text-white transition-all hover:bg-red-700"
+              className="btn-cta-primary btn-cta-shimmer"
             >
-              <i className="bi bi-calendar-check"></i> Book Your Premium Experience
+              <CalendarCheck className="h-5 w-5" />
+              <span>Book Your Premium Experience</span>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <TestimonialsSection />
-
-      <Assistant page="/" />
+      {/* Value Proposition + Urgency Section */}
+      <ValuePropositionSection />
     </main>
   );
 }

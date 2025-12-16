@@ -4,10 +4,25 @@ import './datepicker.css';
 import '@/styles/booking/booking.css';
 
 import { addDays, format } from 'date-fns';
+import {
+  AlertTriangle,
+  ArrowRight,
+  CalendarCheck,
+  CalendarDays,
+  Check,
+  CheckCircle,
+  Clock,
+  Home,
+  Hourglass,
+  Info,
+  MapPin,
+  RefreshCw,
+  ShieldCheck,
+  User,
+} from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
-import Assistant from '@/components/chat/Assistant';
 import BookingAgreementModal from '@/components/booking/BookingAgreementModal';
 import { LazyDatePicker } from '@/components/ui/LazyDatePicker';
 import { useAutoSave, useAutoSaveIndicator } from '@/hooks/useAutoSave';
@@ -329,8 +344,8 @@ export default function BookUsPageClient() {
       <section className="booking-hero">
         <div className="container">
           <div className="hero-content text-center">
-            <h1 className="hero-title">
-              <i className="bi bi-calendar-check-fill me-3"></i>
+            <h1 className="hero-title inline-flex items-center gap-3">
+              <CalendarCheck className="h-10 w-10" />
               Book Your Hibachi Experience
             </h1>
             <p className="hero-subtitle">
@@ -339,15 +354,15 @@ export default function BookUsPageClient() {
             </p>
             <div className="hero-features">
               <div className="feature-item">
-                <i className="bi bi-shield-check feature-icon"></i>
+                <ShieldCheck className="mr-2 h-5 w-5" />
                 <span>100% Satisfaction Guaranteed</span>
               </div>
               <div className="feature-item">
-                <i className="bi bi-clock feature-icon"></i>
+                <Clock className="mr-2 h-5 w-5" />
                 <span>Flexible Scheduling</span>
               </div>
               <div className="feature-item">
-                <i className="bi bi-geo-alt feature-icon"></i>
+                <MapPin className="mr-2 h-5 w-5" />
                 <span>We Come To You</span>
               </div>
             </div>
@@ -361,17 +376,17 @@ export default function BookUsPageClient() {
             {/* Deposit Warning Banner */}
             <div className="alert alert-warning border-warning mb-4 shadow-sm" role="alert">
               <div className="flex items-start">
-                <i className="bi bi-exclamation-triangle-fill text-warning fs-4 me-3 mt-1"></i>
-                <div className="flex-grow-1">
-                  <h5 className="alert-heading fw-bold mb-2">
+                <AlertTriangle className="mt-1 mr-3 h-6 w-6 flex-shrink-0 text-yellow-500" />
+                <div className="flex-1">
+                  <h5 className="mb-2 font-bold">
                     💳 Deposit Required to Secure Your Booking
                   </h5>
                   <p className="mb-2">
                     A <strong>$100 refundable deposit</strong> is required to confirm and secure
                     your booking date.
                   </p>
-                  <p className="small mb-0">
-                    <i className="bi bi-clock-fill me-1"></i>
+                  <p className="mb-0 text-sm">
+                    <Clock className="mr-1 inline-block h-4 w-4" />
                     <strong>Important:</strong> Bookings submitted without deposit payment are
                     subject to
                     <strong className="text-danger">
@@ -388,16 +403,16 @@ export default function BookUsPageClient() {
             <div className="booking-form-container">
               {/* Auto-save status indicator */}
               {autoSaveStatus !== 'idle' && (
-                <div className="auto-save-indicator flex items-center justify-end mb-3">
+                <div className="auto-save-indicator mb-3 flex items-center justify-end">
                   {autoSaveStatus === 'saving' && (
-                    <span className="text-muted small">
-                      <i className="bi bi-arrow-repeat spin me-1"></i>
+                    <span className="text-sm text-gray-500">
+                      <RefreshCw className="mr-1 inline-block h-4 w-4 animate-spin" />
                       Saving...
                     </span>
                   )}
                   {autoSaveStatus === 'saved' && (
-                    <span className="text-success small">
-                      <i className="bi bi-check-circle me-1"></i>
+                    <span className="text-sm text-green-600">
+                      <CheckCircle className="mr-1 inline-block h-4 w-4" />
                       Draft saved
                     </span>
                   )}
@@ -406,33 +421,39 @@ export default function BookUsPageClient() {
 
               {/* Show restore notice if there's saved data */}
               {hasSavedData && lastSaved && (
-                <div className="alert alert-info alert-dismissible fade show mb-3" role="alert">
-                  <i className="bi bi-info-circle me-2"></i>
-                  <strong>Draft restored!</strong> Your previous booking form was saved on{' '}
-                  {lastSaved.toLocaleDateString()} at {lastSaved.toLocaleTimeString()}.
+                <div className="relative bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 flex items-start gap-3" role="alert">
+                  <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-blue-800">
+                      <strong>Draft restored!</strong> Your previous booking form was saved on{' '}
+                      {lastSaved.toLocaleDateString()} at {lastSaved.toLocaleTimeString()}.
+                    </p>
+                    <button
+                      type="button"
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium underline mt-1"
+                      onClick={clearSavedData}
+                    >
+                      Clear draft
+                    </button>
+                  </div>
                   <button
                     type="button"
-                    className="btn btn-sm btn-link text-info ms-2"
-                    onClick={clearSavedData}
-                  >
-                    Clear draft
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-close"
+                    className="text-blue-400 hover:text-blue-600 transition-colors"
                     aria-label="Close"
                     onClick={() => {
                       /* Just hides the alert */
                     }}
-                  ></button>
+                  >
+                    <span className="text-xl leading-none">&times;</span>
+                  </button>
                 </div>
               )}
 
               <form onSubmit={handleSubmit(onSubmit)} className="booking-form">
                 {/* Contact Information */}
                 <div className="form-section">
-                  <h3 className="section-title">
-                    <i className="bi bi-person-fill me-2"></i>
+                  <h3 className="section-title inline-flex items-center">
+                    <User className="mr-2 h-5 w-5" />
                     Contact Information
                   </h3>
 
@@ -527,8 +548,8 @@ export default function BookUsPageClient() {
 
                 {/* Event Details */}
                 <div className="form-section">
-                  <h3 className="section-title">
-                    <i className="bi bi-calendar-event me-2"></i>
+                  <h3 className="section-title inline-flex items-center">
+                    <CalendarDays className="mr-2 h-5 w-5" />
                     Event Details
                   </h3>
 
@@ -604,8 +625,8 @@ export default function BookUsPageClient() {
 
                 {/* Venue Address */}
                 <div className="form-section">
-                  <h3 className="section-title">
-                    <i className="bi bi-geo-alt me-2"></i>
+                  <h3 className="section-title inline-flex items-center">
+                    <MapPin className="mr-2 h-5 w-5" />
                     Event Venue Address
                   </h3>
                   <p className="section-description">
@@ -697,8 +718,8 @@ export default function BookUsPageClient() {
 
                 {/* Customer Address */}
                 <div className="form-section">
-                  <h3 className="section-title">
-                    <i className="bi bi-house me-2"></i>
+                  <h3 className="section-title inline-flex items-center">
+                    <Home className="mr-2 h-5 w-5" />
                     Your Contact Address
                   </h3>
                   <p className="section-description">
@@ -790,9 +811,8 @@ export default function BookUsPageClient() {
                             <input
                               type="text"
                               id="addressZipcode"
-                              className={`form-control ${
-                                errors.addressZipcode ? 'is-invalid' : ''
-                              }`}
+                              className={`form-control ${errors.addressZipcode ? 'is-invalid' : ''
+                                }`}
                               {...register('addressZipcode', { required: 'ZIP code is required' })}
                               placeholder="94102"
                             />
@@ -831,29 +851,27 @@ export default function BookUsPageClient() {
                 </div>
 
                 {/* Submit Button */}
-                <div className="form-section text-center">
+                <div className="text-center py-6">
                   <button
                     type="submit"
-                    className="btn btn-primary btn-lg booking-submit-btn"
+                    className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-10 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white text-lg font-bold rounded-xl shadow-lg hover:from-red-700 hover:to-red-800 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
                       <>
-                        <i className="bi bi-hourglass-split me-2"></i>
+                        <Hourglass className="h-5 w-5 animate-pulse" />
                         Processing Booking...
                       </>
                     ) : (
                       <>
-                        <i className="bi bi-calendar-check me-2"></i>
+                        <CalendarCheck className="h-5 w-5" />
                         Submit Booking Request
                       </>
                     )}
                   </button>
-                  <p className="text-muted mt-3">
-                    <small>
-                      <i className="bi bi-shield-check me-1"></i>
-                      Your information is secure and will only be used to process your booking.
-                    </small>
+                  <p className="mt-4 text-gray-500 text-sm">
+                    <ShieldCheck className="inline-block mr-1 h-4 w-4" />
+                    Your information is secure and will only be used to process your booking.
                   </p>
                 </div>
               </form>
@@ -864,33 +882,33 @@ export default function BookUsPageClient() {
 
       {/* Validation Modal */}
       {showValidationModal && (
-        <div className="modal fade show block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  <i className="bi bi-exclamation-triangle text-warning me-2"></i>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md mx-4 animate-in zoom-in-95 duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+              <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-4">
+                <h5 className="text-xl font-bold text-white flex items-center gap-2">
+                  <AlertTriangle className="w-6 h-6" />
                   Missing Information
                 </h5>
               </div>
-              <div className="modal-body">
-                <p>Please fill in the following required fields:</p>
-                <ul className="list-unstyled">
+              <div className="p-6">
+                <p className="text-gray-600 mb-4">Please fill in the following required fields:</p>
+                <ul className="space-y-2">
                   {missingFields.map((field, index) => (
-                    <li key={index} className="mb-1">
-                      <i className="bi bi-arrow-right text-primary me-2"></i>
+                    <li key={index} className="flex items-center gap-2 text-gray-700 bg-gray-50 px-4 py-2 rounded-lg">
+                      <ArrowRight className="w-4 h-4 text-red-500 flex-shrink-0" />
                       {field}
                     </li>
                   ))}
                 </ul>
               </div>
-              <div className="modal-footer">
+              <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
                 <button
                   type="button"
-                  className="btn btn-primary"
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-md hover:shadow-lg"
                   onClick={() => setShowValidationModal(false)}
                 >
-                  <i className="bi bi-check-lg me-2"></i>
+                  <Check className="w-5 h-5" />
                   Got It
                 </button>
               </div>
@@ -912,8 +930,6 @@ export default function BookUsPageClient() {
         willCommunicate={willCommunicate}
         setWillCommunicate={setWillCommunicate}
       />
-
-      <Assistant page="/BookUs" />
     </div>
   );
 }

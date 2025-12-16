@@ -31,7 +31,7 @@ export const faqs: FaqItem[] = [
     id: 'base-pricing',
     question: 'How much does My Hibachi Chef cost?',
     answer:
-      '${{ADULT_PRICE}} per adult (13+), ${{CHILD_PRICE}} per child (6-12), free for ages {{CHILD_FREE_AGE}} & under. ${{PARTY_MINIMUM}} party minimum (≈10 adults). This includes your choice of 2 proteins (Chicken, NY Strip Steak, Shrimp, Calamari, or Tofu), hibachi fried rice, fresh vegetables, side salad, signature sauces, and plenty of sake for adults 21+.',
+      '${{ADULT_PRICE}} per adult (13+), ${{CHILD_PRICE}} per child (6-12), free for ages {{CHILD_FREE_AGE}} & under. ${{PARTY_MINIMUM}} party minimum (≈10 adults). This includes your choice of 2 proteins (Chicken, NY Strip Steak, Shrimp, Calamari, or Tofu), hibachi fried rice, fresh vegetables, side salad, signature sauces, and complimentary sake for adults 21+.',
     category: 'Pricing & Minimums',
     subcategory: 'Per‑person Rates',
     tags: ['pricing', 'adult price', 'child price', 'party minimum'],

@@ -1,5 +1,6 @@
 import { menuData } from '@/data/menu'
 import styles from '@/styles/menu/pricing.module.css'
+import type { PricingTier } from '@/types/data'
 
 export default function PricingSection() {
   const { pricing } = menuData
@@ -18,7 +19,7 @@ export default function PricingSection() {
         </div>
 
         <div className={styles.pricingGrid}>
-          {pricing.tiers.map((tier: any) => (
+          {pricing.tiers.map((tier: PricingTier) => (
             <div
               key={tier.id}
               className={`${styles.pricingTier} ${tier.popular ? styles.popularTier : ''}`}
@@ -40,7 +41,7 @@ export default function PricingSection() {
               </div>
 
               <div className={styles.tierFeatures}>
-                {tier.features.map((feature: any, index: number) => (
+                {tier.features.map((feature: string, index: number) => (
                   <div key={index} className={styles.feature}>
                     <span className={`${styles.featureIcon} emoji-visible`}>✓</span>
                     <span>{feature}</span>

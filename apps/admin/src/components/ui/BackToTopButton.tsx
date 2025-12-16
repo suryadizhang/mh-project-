@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { ArrowUp } from 'lucide-react';
 
 export default function BackToTopButton() {
   const [isVisible, setIsVisible] = useState(false);
@@ -37,7 +38,7 @@ export default function BackToTopButton() {
           aria-label="Back to top"
           type="button"
         >
-          <i className="bi bi-arrow-up"></i>
+          <ArrowUp className="h-5 w-5" />
         </button>
       )}
     </>

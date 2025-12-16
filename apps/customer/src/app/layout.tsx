@@ -29,7 +29,6 @@ import { QueryProvider } from '@/components/providers/QueryProvider';
 import RateLimitBanner from '@/components/RateLimitBanner';
 import { PerformanceMonitoring } from '@/components/seo/TechnicalSEO';
 import BackToTopButton from '@/components/ui/BackToTopButton';
-import StickyBookNowButton from '@/components/ui/StickyBookNowButton';
 import { Toaster } from '@/components/ui/toaster';
 import {
   generateLocalBusinessSchema,
@@ -99,6 +98,14 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} ${poppins.variable} company-background flex min-h-screen flex-col antialiased`}
       >
+        {/* Skip link for accessibility - WCAG 2.1 AA compliance */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:bg-brand-red focus:text-white focus:px-4 focus:py-2 focus:rounded-md focus:font-semibold focus:outline-none focus:ring-2 focus:ring-white"
+        >
+          Skip to main content
+        </a>
+
         <QueryProvider>
           {/* Google Analytics 4 */}
           <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || ''} />
@@ -111,10 +118,9 @@ export default function RootLayout({
 
           <ClientLayout>
             <Navbar />
-            <main className="flex-1">{children}</main>
+            <main id="main-content" className="flex-1 w-full">{children}</main>
             <Footer />
             <BackToTopButton />
-            <StickyBookNowButton />
           </ClientLayout>
 
           {/* Toast Notification System */}

@@ -6,6 +6,7 @@ import {
   Calendar,
   HelpCircle,
   Home,
+  MapPin,
   Menu,
   MessageCircle,
   UtensilsCrossed,
@@ -31,6 +32,7 @@ export default function Navbar() {
   const navLinks = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/menu', label: 'Menu', icon: UtensilsCrossed },
+    { href: '/service-areas', label: 'Service Areas', icon: MapPin },
     { href: '/quote', label: 'Get Quote', icon: Calculator },
     { href: '/BookUs', label: 'Book Us', icon: Calendar },
     { href: '/faqs', label: 'FAQs', icon: HelpCircle },

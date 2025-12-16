@@ -60,7 +60,7 @@
   background-position: center;
   background-blend-mode: multiply;
   color: white;
-  padding: 4rem 2rem 3rem;
+  padding: 3rem 1.5rem 2rem;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -84,9 +84,9 @@
 
 [data-page='faqs'] .faqs-hero h1 {
   font-family: var(--font-primary);
-  font-size: 2.5rem;
+  font-size: 2.25rem;
   font-weight: 800;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   color: var(--color-secondary);
   text-shadow: 2px 2px 4px rgb(0 0 0 / 70%);
   line-height: 1.1;
@@ -103,13 +103,13 @@
 }
 
 [data-page='faqs'] .faqs-content {
-  padding: 2rem 0 4rem;
+  padding: 1.5rem 0 2.5rem;
 }
 
 [data-page='faqs'] .faqs-categories {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 0.75rem;
 }
 
 [data-page='faqs'] .faq-category {
@@ -137,7 +137,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 1.5rem 2rem;
+  padding: 0.875rem 1rem;
   background: none;
   border: none;
   cursor: pointer;
@@ -166,7 +166,7 @@
 
 [data-page='faqs'] .category-title {
   font-family: var(--font-primary);
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: var(--color-primary);
   margin: 0;
@@ -186,13 +186,13 @@
 
 [data-page='faqs'] .category-count {
   position: absolute;
-  top: 1rem;
-  right: 4rem;
+  top: 0.75rem;
+  right: 3rem;
   background: var(--color-primary);
   color: white;
   font-size: 0.75rem;
   font-weight: 500;
-  padding: 0.25rem 0.75rem;
+  padding: 0.15rem 0.5rem;
   border-radius: 20px;
   font-family: var(--font-secondary);
 }
@@ -380,7 +380,7 @@
 [data-page='faqs'] .category-tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.65rem;
   margin-bottom: 1rem;
 }
 
@@ -416,7 +416,7 @@
 [data-page='faqs'] .tag-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.65rem;
 }
 
 [data-page='faqs'] .tag-chip {
@@ -541,7 +541,7 @@
 
   [data-page='faqs'] .category-tabs {
     flex-direction: column;
-    gap: 0.3rem;
+    gap: 0.5rem;
   }
 
   [data-page='faqs'] .category-tab {

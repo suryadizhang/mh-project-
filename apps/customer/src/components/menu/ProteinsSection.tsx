@@ -1,5 +1,6 @@
 import { menuData } from '@/data/menu'
 import styles from '@/styles/menu/proteins.module.css'
+import type { ProteinCategory, ProteinItem } from '@/types/data'
 
 export default function ProteinsSection() {
   const { proteins } = menuData
@@ -16,11 +17,11 @@ export default function ProteinsSection() {
         </div>
 
         <div className={styles.proteinsGrid}>
-          {proteins.categories.map((category: any, index: number) => (
+          {proteins.categories.map((category: ProteinCategory, index: number) => (
             <div key={index} className={styles.proteinCategory}>
               <h3 className={styles.categoryTitle}>{category.name}</h3>
               <div className={styles.proteinItems}>
-                {category.items.map((item: any, itemIndex: number) => (
+                {category.items.map((item: ProteinItem, itemIndex: number) => (
                   <div key={itemIndex} className={styles.proteinItem}>
                     <div className={styles.proteinName}>{item.name}</div>
                     <div className={styles.proteinDescription}>{item.description}</div>

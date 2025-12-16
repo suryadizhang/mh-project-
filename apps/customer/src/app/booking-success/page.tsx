@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
 
-import Assistant from '@/components/chat/Assistant';
 import { useProtectedPhone, useProtectedPaymentEmail } from '@/components/ui/ProtectedPhone';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -134,14 +133,13 @@ function BookingSuccessContent() {
     if (!booking) return '';
 
     const startDate = new Date(
-      `${booking.eventDate}T${
-        booking.eventTime === '12PM'
-          ? '12:00'
-          : booking.eventTime === '3PM'
-            ? '15:00'
-            : booking.eventTime === '6PM'
-              ? '18:00'
-              : '21:00'
+      `${booking.eventDate}T${booking.eventTime === '12PM'
+        ? '12:00'
+        : booking.eventTime === '3PM'
+          ? '15:00'
+          : booking.eventTime === '6PM'
+            ? '18:00'
+            : '21:00'
       }:00`,
     );
     const endDate = new Date(startDate.getTime() + 3 * 60 * 60 * 1000); // 3 hours later
@@ -162,14 +160,13 @@ function BookingSuccessContent() {
     if (!booking) return;
 
     const startDate = new Date(
-      `${booking.eventDate}T${
-        booking.eventTime === '12PM'
-          ? '12:00'
-          : booking.eventTime === '3PM'
-            ? '15:00'
-            : booking.eventTime === '6PM'
-              ? '18:00'
-              : '21:00'
+      `${booking.eventDate}T${booking.eventTime === '12PM'
+        ? '12:00'
+        : booking.eventTime === '3PM'
+          ? '15:00'
+          : booking.eventTime === '6PM'
+            ? '18:00'
+            : '21:00'
       }:00`,
     );
     const endDate = new Date(startDate.getTime() + 3 * 60 * 60 * 1000);
@@ -182,9 +179,8 @@ UID:${booking.bookingId}@myhibachi.com
 DTSTART:${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
 DTEND:${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
 SUMMARY:MyHibachi Private Chef Experience
-DESCRIPTION:Private hibachi chef experience for ${booking.guestCount} guests.\\n\\nBooking ID: ${
-      booking.bookingId
-    }
+DESCRIPTION:Private hibachi chef experience for ${booking.guestCount} guests.\\n\\nBooking ID: ${booking.bookingId
+      }
 LOCATION:${booking.venueAddress}
 STATUS:CONFIRMED
 END:VEVENT
@@ -477,7 +473,6 @@ END:VCALENDAR`;
           </div>
         </div>
       </div>
-      <Assistant page="/booking-success" />
     </>
   );
 }
