@@ -12,9 +12,9 @@ export default function ServiceAreasPage() {
       <div className="menu-container">
         <div className="container-fluid px-lg-5">
           {/* Hero Section */}
-          <div className="hero-section page-hero-background mb-5 text-center">
+          <div className="hero-section page-hero-background mb-3 text-center">
             <div className="hero-content">
-              <div className="hero-icon-wrapper mb-4">
+              <div className="hero-icon-wrapper mb-2">
                 <div className="floating-icons">
                   <span className="hero-main-icon emoji-visible">🏠</span>
                   <span className="floating-icon emoji-visible" style={{ animationDelay: '0s' }}>
@@ -32,11 +32,11 @@ export default function ServiceAreasPage() {
                 </div>
               </div>
 
-              <h1 className="display-1 fw-bold mb-4">
+              <h1 className="display-4 fw-bold mb-2">
                 <span className="gradient-text">Our Service Areas</span>
               </h1>
 
-              <p className="hero-subtitle mb-4">
+              <p className="hero-subtitle mb-2">
                 <span className="emoji-visible">✨</span>
                 We bring the hibachi experience directly to your location
                 <span className="emoji-visible">✨</span>
@@ -45,30 +45,30 @@ export default function ServiceAreasPage() {
           </div>
 
           {/* Service Areas Content */}
-          <div className="card menu-card overflow-hidden border-0 p-0 mb-5">
-            <div className="service-areas p-5">
-              <p className="service-intro text-center">
+          <div className="card menu-card mb-3 overflow-hidden border-0 p-0">
+            <div className="service-areas p-3">
+              <p className="service-intro text-center text-sm">
                 We bring authentic hibachi dining to homes and venues across the Bay Area,
                 Sacramento, San Jose & surrounding regions. Not sure we cover you? Reach
                 out—we&apos;ll do our best!
               </p>
 
-              <div className="mt-3 mb-4 text-center">
-                <Link href="/BookUs" className="btn btn-primary me-3">
-                  <Calendar className="me-2 inline h-4 w-4" />
-                  Ready to Plan Your Date?
+              <div className="mt-2 mb-3 text-center">
+                <Link href="/BookUs" className="btn btn-primary btn-sm me-2">
+                  <Calendar className="me-1 inline h-4 w-4" />
+                  Plan Your Date
                 </Link>
-                <Link href="/quote" className="btn btn-outline-primary me-3">
-                  <Calculator className="me-2 inline h-4 w-4" />
-                  Get Your Quote
+                <Link href="/quote" className="btn btn-outline-primary btn-sm me-2">
+                  <Calculator className="me-1 inline h-4 w-4" />
+                  Get Quote
                 </Link>
-                <Link href="/contact" className="btn btn-outline-secondary">
-                  <MessageCircle className="me-2 inline h-4 w-4" />
-                  Questions? Contact Us
+                <Link href="/contact" className="btn btn-outline-secondary btn-sm">
+                  <MessageCircle className="me-1 inline h-4 w-4" />
+                  Contact Us
                 </Link>
               </div>
 
-              <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <div className="service-area-card">
                     <h4 className="area-title">🌉 Bay Area & Peninsula</h4>
@@ -104,26 +104,21 @@ export default function ServiceAreasPage() {
                 </div>
               </div>
 
-              <div className="service-radius-info mt-4 text-center">
+              <div className="service-radius-info mt-3 text-center">
                 <div className="radius-card">
                   <span className="radius-icon"> 🚗 </span>
                   <h4 className="radius-title">We Come to You!</h4>
-                  <p className="radius-description">
-                    Serving the Bay Area, Sacramento, San Jose & surrounding regions. Not sure we
-                    cover you? Reach out—we&apos;ll do our best!
+                  <p className="radius-description text-sm">
+                    Serving the Bay Area, Sacramento, San Jose & surrounding regions.
                   </p>
-                  <p className="travel-fee-info" style={{ color: 'white' }}>
+                  <p className="travel-fee-info text-sm" style={{ color: 'white' }}>
                     <span className="travel-highlight">💰 Transparent Pricing:</span>
-                    Flexible service area with transparent travel options—get your quote instantly
-                    above!
-                    <br />
-                    <strong>Call us for a custom quote - we make it affordable for everyone!</strong>
+                    Flexible service area with transparent travel options!
                   </p>
                   <div className="service-promise">
                     <span className="promise-icon">🎯</span>
-                    <span className="promise-text">
-                      <strong>Our Promise:</strong> No hidden fees, just honest pricing and
-                      exceptional service!
+                    <span className="promise-text text-sm">
+                      <strong>Our Promise:</strong> No hidden fees, just honest pricing!
                     </span>
                   </div>
                 </div>
@@ -131,31 +126,35 @@ export default function ServiceAreasPage() {
             </div>
           </div>
 
-          {/* CTA Section */}
-          <div className="card menu-card overflow-hidden border-0 p-0 mb-5">
-            <div className="cta-section p-5 text-center">
+          {/* CTA Section - Compact */}
+          <div className="card menu-card mb-3 overflow-hidden border-0 p-0">
+            <div className="cta-section p-3 text-center">
               <div className="cta-content-wrapper">
                 <div className="cta-background-pattern"></div>
-                <div className="cta-header mb-5">
-                  <div className="cta-icon-group mb-4">
+                <div className="cta-header mb-3">
+                  <div className="cta-icon-group mb-2">
                     <span className="cta-icon emoji-visible floating-cta-icon">🍽️</span>
                     <span className="cta-icon emoji-visible floating-cta-icon">🎉</span>
                     <span className="cta-icon emoji-visible floating-cta-icon">👨‍🍳</span>
                   </div>
-                  <h2 className="cta-main-title">Ready for an Unforgettable Experience?</h2>
-                  <p className="cta-main-subtitle">
-                    Book your premium hibachi experience today and create memories that will last a
-                    lifetime
+                  <h2 className="cta-main-title" style={{ fontSize: '1.5rem' }}>
+                    Ready for an Unforgettable Experience?
+                  </h2>
+                  <p className="cta-main-subtitle text-sm">
+                    Book your premium hibachi experience today
                   </p>
                 </div>
 
-                <div className="cta-button-wrapper mb-5">
+                <div className="cta-button-wrapper mb-3">
                   <Link
                     href="/BookUs"
                     aria-label="Order your hibachi experience now"
                     className="cta-link"
                   >
-                    <button className="cta-main-button modern-cta-button">
+                    <button
+                      className="cta-main-button modern-cta-button"
+                      style={{ padding: '0.75rem 1.5rem' }}
+                    >
                       <span className="button-icon emoji-visible">🍽️</span>
                       <span className="button-text">Order Your Hibachi Experience</span>
                       <span className="button-icon emoji-visible">🍽️</span>

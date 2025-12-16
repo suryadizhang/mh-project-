@@ -139,8 +139,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Features Grid */}
-          <div className="features-section">
+          {/* Features Grid - Compact */}
+          <div className="features-section compact-features">
             <h2 className="features-heading">
               <span className="heading-emoji">✨</span>
               What Makes Us Special
@@ -152,12 +152,10 @@ export default function Home() {
                   <span className="feature-icon feature-icon-premium">🥩</span>
                 </div>
                 <div className="feature-content">
-                  <h4 className="feature-title">Premium Quality Ingredients</h4>
+                  <h4 className="feature-title">Premium Ingredients</h4>
                   <p className="feature-description">
-                    Fresh, high-quality meats, vegetables, and authentic Japanese seasonings sourced
-                    from trusted suppliers.
+                    Fresh, high-quality meats and authentic Japanese seasonings.
                   </p>
-                  <div className="feature-tag">Quality First</div>
                 </div>
               </div>
               <div className="feature-item feature-pricing">
@@ -165,12 +163,10 @@ export default function Home() {
                   <span className="feature-icon feature-icon-pricing">💰</span>
                 </div>
                 <div className="feature-content">
-                  <h4 className="feature-title">Reasonable Pricing</h4>
+                  <h4 className="feature-title">Great Value</h4>
                   <p className="feature-description">
-                    Competitive rates that deliver exceptional value without compromising on quality
-                    or service excellence.
+                    Competitive rates with exceptional quality and service.
                   </p>
-                  <div className="feature-tag">Great Value</div>
                 </div>
               </div>
               <div className="feature-item feature-entertainment">
@@ -178,12 +174,10 @@ export default function Home() {
                   <span className="feature-icon feature-icon-entertainment">🎭</span>
                 </div>
                 <div className="feature-content">
-                  <h4 className="feature-title">Interactive Entertainment</h4>
+                  <h4 className="feature-title">Live Entertainment</h4>
                   <p className="feature-description">
-                    Skilled chefs who combine culinary expertise with entertaining performances for
-                    an unforgettable experience.
+                    Skilled chefs with entertaining performances.
                   </p>
-                  <div className="feature-tag">Fun & Engaging</div>
                 </div>
               </div>
               <div className="feature-item feature-location">
@@ -191,132 +185,40 @@ export default function Home() {
                   <span className="feature-icon feature-icon-location">📍</span>
                 </div>
                 <div className="feature-content">
-                  <h4 className="feature-title">Mobile Service</h4>
+                  <h4 className="feature-title">We Come To You</h4>
                   <p className="feature-description">
-                    We bring the complete hibachi experience to your location across the Bay Area
-                    and Sacramento region.
+                    Mobile service across Bay Area & Sacramento.
                   </p>
-                  <div className="feature-tag">Convenient</div>
-                </div>
-              </div>
-              <div className="feature-item feature-excellence">
-                <div className="feature-icon-container">
-                  <span className="feature-icon feature-icon-excellence">🏆</span>
-                </div>
-                <div className="feature-content">
-                  <h4 className="feature-title">Excellence Guarantee</h4>
-                  <p className="feature-description">
-                    Our commitment to quality is our priority, ensuring every event exceeds your
-                    expectations.
-                  </p>
-                  <div className="feature-tag">Guaranteed</div>
-                </div>
-              </div>
-              <div className="feature-item feature-occasions">
-                <div className="feature-icon-container">
-                  <span className="feature-icon feature-icon-occasions">*</span>
-                </div>
-                <div className="feature-content">
-                  <h4 className="feature-title">All Occasions</h4>
-                  <p className="feature-description">
-                    Perfect for weddings, birthdays, corporate events, and any celebration that
-                    deserves something special.
-                  </p>
-                  <div className="feature-tag">Versatile</div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Service Areas */}
-          <div className="service-areas animate-on-scroll">
-            <h3 className="section-title text-center">
-              🌟 Bringing Hibachi Experience
-              <br className="hidden lg:block" />
-              to Your Neighborhood! 🌟
-            </h3>
-            <p className="service-intro text-center">
-              We bring the hibachi experience to homes and venues across the Bay Area, Sacramento,
-              San Jose and nearby communities. Need us a bit farther? Tell us your
-              location—we&apos;ll make it work with{' '}
-              <span className="highlight-text">transparent travel options</span>.
-            </p>
-            <div className="mt-3 mb-4 flex flex-wrap gap-4 justify-center">
-              <a
-                href="/BookUs"
-                className="btn-cta-primary btn-cta-shimmer"
-              >
+          {/* Service Areas - Compact Link */}
+          <div className="service-areas-compact animate-on-scroll">
+            <div className="service-areas-banner">
+              <div className="banner-content-wrapper">
+                <span className="banner-icon">📍</span>
+                <div className="banner-text-content">
+                  <h3 className="banner-title">
+                    Serving Bay Area, Sacramento & Northern California
+                  </h3>
+                  <p className="banner-subtitle">No travel fee for most Bay Area locations!</p>
+                </div>
+                <Link href="/service-areas" className="banner-link">
+                  View All Areas →
+                </Link>
+              </div>
+            </div>
+            <div className="mt-3 flex flex-wrap justify-center gap-3">
+              <Link href="/BookUs" className="btn-cta-primary btn-cta-shimmer">
                 <span>📅</span>
-                <span>Check Your Date & Time</span>
-              </a>
-              <a
-                href="/quote"
-                className="btn-cta-secondary"
-              >
+                <span>Check Your Date</span>
+              </Link>
+              <Link href="/quote" className="btn-cta-secondary">
                 <span>💬</span>
-                <span>Get a Quick Quote</span>
-              </a>
-            </div>
-
-            <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div>
-                <div className="service-area-card">
-                  <h4 className="area-title">🏙️ Primary Bay Area Locations</h4>
-                  <p className="area-subtitle">No additional travel fees within these areas!</p>
-                  <ul className="area-list">
-                    <li>San Francisco - The heart of culinary excellence</li>
-                    <li>San Jose - Silicon Valley&apos;s finest hibachi</li>
-                    <li>Oakland - East Bay entertainment at its best</li>
-                    <li>Bay Area - Our home base with premium service</li>
-                    <li>Santa Clara - Tech meets traditional Japanese cuisine</li>
-                    <li>Sunnyvale - Where innovation meets flavor</li>
-                    <li>Mountain View - Bringing mountains of flavor</li>
-                    <li>Palo Alto - Stanford-level culinary performance</li>
-                  </ul>
-                </div>
-              </div>
-              <div>
-                <div className="service-area-card">
-                  <h4 className="area-title">🏞️ Sacramento & Extended Regions</h4>
-                  <p className="area-subtitle">
-                    Minimal travel fees for these beautiful locations!
-                  </p>
-                  <ul className="area-list">
-                    <li>Sacramento - Capital city hibachi experiences</li>
-                    <li>Elk Grove - Family-friendly neighborhood service</li>
-                    <li>Roseville - Elegant dining in wine country vicinity</li>
-                    <li>Folsom - Historic charm meets modern hibachi</li>
-                    <li>Davis - University town celebrations</li>
-                    <li>Stockton - Central Valley&apos;s premier hibachi</li>
-                    <li>Modesto - Agricultural heart, culinary soul</li>
-                    <li>Livermore - Wine country hibachi perfection</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div className="service-radius-info mt-4 text-center">
-              <div className="radius-card">
-                <span className="radius-icon"> 🚗</span>
-                <h4 className="radius-title">We Come to You!</h4>
-                <p className="radius-description">
-                  Hibachi brought to your home or venue—tell us your location and we&apos;ll make it
-                  happen.
-                </p>
-                <p className="travel-fee-info">
-                  <span className="travel-highlight">💰 Transparent Pricing:</span>
-                  Flexible service area with reasonable travel options for all locations.
-                  <br />
-                  <strong>Call us for a custom quote - we make it affordable for everyone!</strong>
-                </p>
-                <div className="service-promise">
-                  <span className="promise-icon">🎯</span>
-                  <span className="promise-text">
-                    <strong>Our Promise:</strong> No hidden fees, just honest pricing and
-                    exceptional service!
-                  </span>
-                </div>
-              </div>
+                <span>Get a Quote</span>
+              </Link>
             </div>
           </div>
 
@@ -339,18 +241,12 @@ export default function Home() {
                 Book now and let us create memories that will last a lifetime!
               </p>
             </div>
-            <div className="cta-buttons flex flex-wrap gap-4 justify-center">
-              <Link
-                href="/menu"
-                className="btn-cta-primary btn-cta-shimmer btn-cta-pulse"
-              >
+            <div className="cta-buttons flex flex-wrap justify-center gap-4">
+              <Link href="/menu" className="btn-cta-primary btn-cta-shimmer btn-cta-pulse">
                 <span>🔥</span>
                 <span>View Our Menu</span>
               </Link>
-              <Link
-                href="/quote"
-                className="btn-cta-secondary"
-              >
+              <Link href="/quote" className="btn-cta-secondary">
                 <span>💬</span>
                 <span>Get Your Free Quote</span>
               </Link>
@@ -404,13 +300,16 @@ export default function Home() {
                 </p>
                 <div className="service-features">
                   <span className="service-feature">
-                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Professional chef service
+                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Professional
+                    chef service
                   </span>
                   <span className="service-feature">
-                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Custom menu options
+                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Custom menu
+                    options
                   </span>
                   <span className="service-feature">
-                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Personalized entertainment
+                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Personalized
+                    entertainment
                   </span>
                 </div>
               </div>
@@ -429,13 +328,16 @@ export default function Home() {
                 </p>
                 <div className="service-features">
                   <span className="service-feature">
-                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Professional presentation
+                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Professional
+                    presentation
                   </span>
                   <span className="service-feature">
-                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Flexible scheduling
+                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Flexible
+                    scheduling
                   </span>
                   <span className="service-feature">
-                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Volume discounts available
+                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Volume
+                    discounts available
                   </span>
                 </div>
               </div>
@@ -454,24 +356,24 @@ export default function Home() {
                 </p>
                 <div className="service-features">
                   <span className="service-feature">
-                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Dietary accommodations
+                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Dietary
+                    accommodations
                   </span>
                   <span className="service-feature">
-                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Premium ingredient options
+                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Premium
+                    ingredient options
                   </span>
                   <span className="service-feature">
-                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Signature entertainment
+                    <CheckCircle className="mr-1 inline-block h-4 w-4 text-red-600" /> Signature
+                    entertainment
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="services-cta text-center mt-8">
-            <Link
-              href="/BookUs"
-              className="btn-cta-primary btn-cta-shimmer"
-            >
+          <div className="services-cta mt-8 text-center">
+            <Link href="/BookUs" className="btn-cta-primary btn-cta-shimmer">
               <CalendarCheck className="h-5 w-5" />
               <span>Book Your Premium Experience</span>
             </Link>
