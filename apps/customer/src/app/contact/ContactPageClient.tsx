@@ -18,8 +18,6 @@ import {
   Star,
   CalendarCheck,
   Phone,
-  Quote,
-  Info,
   Facebook,
   Send,
   ChevronDown,
@@ -364,7 +362,9 @@ export default function ContactPageClient() {
                 </div>
                 <div className="text-left">
                   <h3>Send Us a Message</h3>
-                  <p className="text-sm text-gray-500 mt-0.5">Click to {isFormExpanded ? 'close' : 'open'} the contact form</p>
+                  <p className="mt-0.5 text-sm text-gray-500">
+                    Click to {isFormExpanded ? 'close' : 'open'} the contact form
+                  </p>
                 </div>
               </div>
               <div className={`collapsible-form-toggle ${isFormExpanded ? 'expanded' : ''}`}>
@@ -376,7 +376,7 @@ export default function ContactPageClient() {
               className={`collapsible-form-content ${isFormExpanded ? 'expanded' : ''}`}
             >
               <div className="collapsible-form-inner">
-                <p className="text-gray-600 mb-4 text-center">
+                <p className="mb-4 text-center text-gray-600">
                   Have a question or need a custom quote? Fill out the form below and we&apos;ll get
                   back to you quickly.
                 </p>
@@ -387,29 +387,28 @@ export default function ContactPageClient() {
         </div>
 
         {/* Booking Call-to-Action Section */}
-        <div className="booking-cta-section">
+        <div className="booking-cta-section compact-cta">
           <div className="card booking-cta-card">
             <div className="card-body text-center">
               <div className="cta-icon-container">
-                <CalendarCheck className="cta-icon h-10 w-10" />
+                <CalendarCheck className="cta-icon h-8 w-8" />
               </div>
               <h2 className="cta-title">Ready to Experience Hibachi Excellence?</h2>
               <p className="cta-text">
                 Turn your next gathering into an unforgettable culinary event with our professional
-                hibachi chefs. From intimate dinners to large celebrations, we create personalized
-                experiences that delight all your guests.
+                hibachi chefs.
               </p>
-              <div className="cta-buttons flex flex-wrap gap-4 justify-center">
+              <div className="cta-buttons flex flex-wrap justify-center gap-3">
                 <a
                   href="#contact-details"
-                  className="cta-btn-primary inline-flex items-center gap-2 px-8 py-4 font-bold text-lg rounded-full shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+                  className="cta-btn-primary inline-flex transform items-center gap-2 rounded-full px-6 py-3 text-base font-bold shadow-lg transition-all duration-300 hover:-translate-y-1"
                 >
                   <MessageSquare className="h-5 w-5" />
                   Get a Custom Quote
                 </a>
                 <a
                   href={tel ? `tel:${tel}` : '#'}
-                  className="cta-btn-secondary inline-flex items-center gap-2 px-8 py-4 font-bold text-lg rounded-full transition-all duration-300 transform hover:-translate-y-1"
+                  className="cta-btn-secondary inline-flex transform items-center gap-2 rounded-full px-6 py-3 text-base font-bold transition-all duration-300 hover:-translate-y-1"
                 >
                   <Phone className="h-5 w-5" />
                   Call Us Now
@@ -419,102 +418,35 @@ export default function ContactPageClient() {
           </div>
         </div>
 
-        {/* Testimonials Section */}
-        <div className="testimonials-section">
-          <h3 className="mb-5 text-center">
-            <Quote className="mr-2 inline-block h-6 w-6" />
-            What Our Clients Say
-          </h3>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div className="mb-4">
-              <div className="testimonial-card">
-                <div className="testimonial-header">
-                  <div className="testimonial-rating">⭐⭐⭐⭐⭐</div>
-                  <div className="testimonial-source">Google Review</div>
-                </div>
-                <div className="testimonial-content">
-                  <p>
-                    &ldquo;Absolutely amazing experience! The chef was entertaining, professional
-                    and the food was delicious. Perfect for our anniversary celebration!&rdquo;
-                  </p>
-                </div>
-                <div className="testimonial-author">- Sarah J., San Francisco</div>
-              </div>
-            </div>
-            <div className="mb-4">
-              <div className="testimonial-card">
-                <div className="testimonial-header">
-                  <div className="testimonial-rating">⭐⭐⭐⭐⭐</div>
-                  <div className="testimonial-source">Yelp Review</div>
-                </div>
-                <div className="testimonial-content">
-                  <p>
-                    &ldquo;We booked My Hibachi for our company party and it was a huge hit! Great
-                    entertainment, delicious food, and excellent service from start to
-                    finish.&rdquo;
-                  </p>
-                </div>
-                <div className="testimonial-author">- Michael T., San Jose</div>
-              </div>
-            </div>
-            <div className="mb-4">
-              <div className="testimonial-card">
-                <div className="testimonial-header">
-                  <div className="testimonial-rating">⭐⭐⭐⭐⭐</div>
-                  <div className="testimonial-source">Facebook Review</div>
-                </div>
-                <div className="testimonial-content">
-                  <p>
-                    &ldquo;The convenience of having a hibachi chef come to our home for my
-                    daughter&apos;s birthday was incredible. The food was outstanding and the
-                    experience unforgettable!&rdquo;
-                  </p>
-                </div>
-                <div className="testimonial-author">- Jennifer P., Sacramento</div>
-              </div>
-            </div>
-          </div>
+        {/* Reviews Link - Points to dedicated reviews page */}
+        <div className="reviews-link-section py-4 text-center">
+          <a
+            href="/reviews"
+            className="inline-flex items-center gap-2 font-semibold text-red-600 transition-colors hover:text-red-700"
+          >
+            <Star className="h-5 w-5 fill-current text-yellow-500" />
+            <span>See What Our Clients Say</span>
+            <span className="text-gray-400">→</span>
+          </a>
         </div>
       </div>
 
-      {/* Service Areas - Compact Version */}
-      <section className="service-areas-section">
+      {/* Service Areas Link - Points to dedicated page */}
+      <section className="service-areas-link-section bg-gray-50 py-4 text-center">
         <div className="container mx-auto px-4">
-          <h2 className="text-center">🗺️ Our Service Areas</h2>
-
-          {/* Bay Area + Sacramento in compact layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-            {/* Bay Area */}
-            <div className="text-center">
-              <h4 className="mb-2">🏙️ Bay Area <span className="text-green-600 text-sm">(No Travel Fee)</span></h4>
-              <div className="flex flex-wrap justify-center gap-2">
-                {['San Francisco', 'San Jose', 'Oakland', 'Santa Clara', 'Sunnyvale', 'Mountain View', 'Palo Alto', 'Fremont'].map((city) => (
-                  <span key={city} className="location-badge">
-                    <MapPin className="h-3 w-3 text-red-600" />
-                    {city}
-                  </span>
-                ))}
-              </div>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <div className="flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-red-600" />
+              <span className="text-gray-700">
+                Serving Bay Area, Sacramento & Northern California
+              </span>
             </div>
-
-            {/* Sacramento Region */}
-            <div className="text-center">
-              <h4 className="mb-2">🏞️ Sacramento Region <span className="text-amber-600 text-sm">(Minimal Fee)</span></h4>
-              <div className="flex flex-wrap justify-center gap-2">
-                {['Sacramento', 'Elk Grove', 'Roseville', 'Folsom', 'Davis', 'Stockton', 'Modesto', 'Livermore'].map((city) => (
-                  <span key={city} className="location-badge">
-                    📍 {city}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="text-center">
-            <p className="text-gray-600 text-sm">
-              <Info className="inline-block h-4 w-4 mr-1" />
-              Serving all of Northern California — <strong>contact us</strong> for locations not listed!
-            </p>
+            <a
+              href="/service-areas"
+              className="inline-flex items-center gap-1 font-semibold text-red-600 transition-colors hover:text-red-700"
+            >
+              View All Service Areas →
+            </a>
           </div>
         </div>
       </section>
