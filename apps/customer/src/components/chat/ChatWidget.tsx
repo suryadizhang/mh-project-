@@ -12,7 +12,7 @@ import {
   X,
 } from 'lucide-react';
 import Image from 'next/image';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { ApiErrorBoundary } from '@/components/ErrorBoundary';
 import { useProtectedPhone, useProtectedPaymentEmail } from '@/components/ui/ProtectedPhone';
