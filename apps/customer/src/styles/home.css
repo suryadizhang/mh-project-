@@ -457,6 +457,112 @@
   font-size: 0.9rem;
 }
 
+/* Compact Features Section */
+.compact-features {
+  padding: 2rem 0;
+}
+
+.compact-features .features-heading {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.compact-features .heading-emoji {
+  font-size: 1.5rem;
+}
+
+.compact-features .features-grid {
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.compact-features .feature-item {
+  padding: 1.25rem;
+}
+
+.compact-features .feature-icon-container {
+  margin-bottom: 0.75rem;
+}
+
+.compact-features .feature-icon {
+  font-size: 2rem;
+}
+
+.compact-features .feature-title {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.compact-features .feature-description {
+  font-size: 0.9rem;
+  margin-bottom: 0;
+  line-height: 1.4;
+}
+
+/* Compact Service Areas Banner */
+.service-areas-compact {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.service-areas-banner {
+  background: linear-gradient(135deg, #db2b28 0%, #ff7b00 100%);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 10px 30px rgb(219 43 40 / 20%);
+}
+
+.banner-content-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: white;
+}
+
+.service-areas-banner .banner-icon {
+  font-size: 2rem;
+}
+
+.banner-text-content {
+  text-align: center;
+  flex: 1;
+  min-width: 200px;
+}
+
+.banner-text-content .banner-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  color: white;
+}
+
+.banner-text-content .banner-subtitle {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin: 0.25rem 0 0;
+  color: white;
+}
+
+.service-areas-banner .banner-link {
+  background: rgba(255, 255, 255, 0.95);
+  color: #db2b28;
+  padding: 0.5rem 1.25rem;
+  border-radius: 30px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.service-areas-banner .banner-link:hover {
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
 /* Service Areas */
 .service-areas {
   max-width: 1200px;

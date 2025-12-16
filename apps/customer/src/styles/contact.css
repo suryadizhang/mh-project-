@@ -589,7 +589,30 @@
 
 /* Booking CTA Section */
 .booking-cta-section {
-  margin: 4rem 0;
+  margin: 2rem 0;
+}
+
+/* Compact CTA variant */
+.booking-cta-section.compact-cta {
+  margin: 1.5rem 0;
+}
+
+.compact-cta .booking-cta-card .card-body {
+  padding: 1.5rem 1.25rem;
+}
+
+.compact-cta .cta-icon-container {
+  margin-bottom: 0.75rem;
+}
+
+.compact-cta .cta-title {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.compact-cta .cta-text {
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
 }
 
 .booking-cta-card {

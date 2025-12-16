@@ -45,7 +45,7 @@ declare global {
         places: {
           Autocomplete: new (
             input: HTMLInputElement,
-            options?: AutocompleteOptions
+            options?: AutocompleteOptions,
           ) => GoogleMapsAutocomplete;
         };
         event: {
@@ -394,11 +394,11 @@ export default function BookingPage() {
           billingAddress: formData.sameAsVenue
             ? null
             : {
-              street: formData.addressStreet,
-              city: formData.addressCity,
-              state: formData.addressState,
-              zipcode: formData.addressZipcode,
-            },
+                street: formData.addressStreet,
+                city: formData.addressCity,
+                state: formData.addressState,
+                zipcode: formData.addressZipcode,
+              },
         },
       };
       const response = await apiFetch<BookingSubmitResponse>('/api/v1/bookings/availability', {
@@ -429,7 +429,8 @@ export default function BookingPage() {
           }
         } else {
           alert(
-            `❌ Booking Failed\n\n${response.error || 'Please try again or contact support.'
+            `❌ Booking Failed\n\n${
+              response.error || 'Please try again or contact support.'
             }\n\nYour information has been preserved.`,
           );
         }
@@ -712,181 +713,127 @@ export default function BookingPage() {
       <ValidationModal />
       <AgreementModal />
       {/* Hero Section with Company Background */}
-      <section className="page-hero-background py-20 text-center text-white">
+      <section className="page-hero-background py-10 text-center text-white">
         <div className="mx-auto max-w-4xl px-4">
-          <div className="mb-6 text-6xl">🍽️</div>
-          <h1 className="mb-6 text-5xl font-bold">Book Your Hibachi Experience</h1>
-          <p className="mb-8 text-xl text-gray-200">
+          <div className="mb-3 text-4xl">🍽️</div>
+          <h1 className="mb-3 text-3xl font-bold">Book Your Hibachi Experience</h1>
+          <p className="mb-4 text-base text-gray-200">
             Premium Japanese hibachi dining at your location
           </p>
-          <div className="mb-12 text-lg">
-            <span className="rounded-full bg-red-600 px-4 py-2 text-white">
+          <div className="mb-6 text-sm">
+            <span className="rounded-full bg-red-600 px-3 py-1.5 text-white">
               Professional Catering Service
             </span>
           </div>
         </div>
       </section>
       {/* Booking Form Section */}
-      <div className="section-background py-16">
+      <div className="section-background py-8">
         <div className="mx-auto max-w-4xl px-4">
-          <div className="overflow-hidden rounded-2xl bg-white shadow-xl">
+          <div className="overflow-hidden rounded-xl bg-white shadow-xl">
             {/* Form */}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 p-8">
-              {/* Form Progress Indicator */}
-              <div className="mt-4 mb-8 rounded-xl border border-gray-200 bg-gradient-to-r from-blue-50 to-red-50 p-6">
-                <h3 className="mb-4 text-center text-lg font-semibold text-gray-900">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 p-5">
+              {/* Form Progress Indicator - Compact */}
+              <div className="mt-2 mb-4 rounded-lg border border-gray-200 bg-gradient-to-r from-blue-50 to-red-50 p-4">
+                <h3 className="mb-3 text-center text-base font-semibold text-gray-900">
                   📋 Booking Progress
                 </h3>
-                <div className="grid grid-cols-2 gap-2 text-center md:grid-cols-4 md:gap-4">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-4 gap-2 text-center">
+                  <div className="space-y-1">
                     <div
-                      className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold ${watch('eventDate') && watch('eventTime')
+                      className={`mx-auto flex h-9 w-9 items-center justify-center rounded-full text-base font-bold ${
+                        watch('eventDate') && watch('eventTime')
                           ? 'bg-green-500 text-white'
                           : 'bg-gray-200 text-gray-500'
-                        }`}
+                      }`}
                     >
                       📅
                     </div>
-                    <div className="text-sm">
-                      <div className="font-medium">Date & Time</div>
-                      <div
-                        className={`text-xs ${watch('eventDate') && watch('eventTime')
-                            ? 'text-green-600'
-                            : 'text-gray-500'
-                          }`}
-                      >
-                        {watch('eventDate') && watch('eventTime') ? 'Complete' : 'Pending'}
-                      </div>
+                    <div className="text-xs">
+                      <div className="font-medium">Date/Time</div>
                     </div>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <div
-                      className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold ${watch('name') &&
-                          watch('email') &&
-                          watch('phone') &&
-                          watch('preferredCommunication')
+                      className={`mx-auto flex h-9 w-9 items-center justify-center rounded-full text-base font-bold ${
+                        watch('name') &&
+                        watch('email') &&
+                        watch('phone') &&
+                        watch('preferredCommunication')
                           ? 'bg-green-500 text-white'
                           : 'bg-gray-200 text-gray-500'
-                        }`}
+                      }`}
                     >
                       👤
                     </div>
-                    <div className="text-sm">
-                      <div className="font-medium">Customer Info</div>
-                      <div
-                        className={`text-xs ${watch('name') &&
-                            watch('email') &&
-                            watch('phone') &&
-                            watch('preferredCommunication')
-                            ? 'text-green-600'
-                            : 'text-gray-500'
-                          }`}
-                      >
-                        {watch('name') &&
-                          watch('email') &&
-                          watch('phone') &&
-                          watch('preferredCommunication')
-                          ? 'Complete'
-                          : 'Pending'}
-                      </div>
+                    <div className="text-xs">
+                      <div className="font-medium">Info</div>
                     </div>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <div
-                      className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold ${watch('venueStreet') &&
-                          watch('venueCity') &&
-                          watch('venueState') &&
-                          watch('venueZipcode')
+                      className={`mx-auto flex h-9 w-9 items-center justify-center rounded-full text-base font-bold ${
+                        watch('venueStreet') &&
+                        watch('venueCity') &&
+                        watch('venueState') &&
+                        watch('venueZipcode')
                           ? 'bg-green-500 text-white'
                           : 'bg-gray-200 text-gray-500'
-                        }`}
+                      }`}
                     >
                       🎪
                     </div>
-                    <div className="text-sm">
-                      <div className="font-medium">Event Venue</div>
-                      <div
-                        className={`text-xs ${watch('venueStreet') &&
-                            watch('venueCity') &&
-                            watch('venueState') &&
-                            watch('venueZipcode')
-                            ? 'text-green-600'
-                            : 'text-gray-500'
-                          }`}
-                      >
-                        {watch('venueStreet') &&
-                          watch('venueCity') &&
-                          watch('venueState') &&
-                          watch('venueZipcode')
-                          ? 'Complete'
-                          : 'Pending'}
-                      </div>
+                    <div className="text-xs">
+                      <div className="font-medium">Venue</div>
                     </div>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <div
-                      className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold ${watch('sameAsVenue') ||
-                          (watch('addressStreet') &&
-                            watch('addressCity') &&
-                            watch('addressState') &&
-                            watch('addressZipcode'))
+                      className={`mx-auto flex h-9 w-9 items-center justify-center rounded-full text-base font-bold ${
+                        watch('sameAsVenue') ||
+                        (watch('addressStreet') &&
+                          watch('addressCity') &&
+                          watch('addressState') &&
+                          watch('addressZipcode'))
                           ? 'bg-green-500 text-white'
                           : 'bg-gray-200 text-gray-500'
-                        }`}
+                      }`}
                     >
                       💳
                     </div>
-                    <div className="text-sm">
-                      <div className="font-medium">Billing Address</div>
-                      <div
-                        className={`text-xs ${watch('sameAsVenue') ||
-                            (watch('addressStreet') &&
-                              watch('addressCity') &&
-                              watch('addressState') &&
-                              watch('addressZipcode'))
-                            ? 'text-green-600'
-                            : 'text-gray-500'
-                          }`}
-                      >
-                        {watch('sameAsVenue') ||
-                          (watch('addressStreet') &&
-                            watch('addressCity') &&
-                            watch('addressState') &&
-                            watch('addressZipcode'))
-                          ? 'Complete'
-                          : 'Pending'}
-                      </div>
+                    <div className="text-xs">
+                      <div className="font-medium">Billing</div>
                     </div>
                   </div>
                 </div>
                 {/* Overall Progress Bar */}
-                <div className="mt-6">
-                  <div className="mb-2 flex justify-between text-sm text-gray-600">
-                    <span>Form Completion</span>
+                <div className="mt-4">
+                  <div className="mb-1 flex justify-between text-xs text-gray-600">
+                    <span>Completion</span>
                     <span>
                       {Math.round(
                         (((watch('eventDate') && watch('eventTime') ? 1 : 0) +
                           (watch('name') &&
-                            watch('email') &&
-                            watch('phone') &&
-                            watch('preferredCommunication')
+                          watch('email') &&
+                          watch('phone') &&
+                          watch('preferredCommunication')
                             ? 1
                             : 0) +
                           (watch('venueStreet') &&
-                            watch('venueCity') &&
-                            watch('venueState') &&
-                            watch('venueZipcode')
+                          watch('venueCity') &&
+                          watch('venueState') &&
+                          watch('venueZipcode')
                             ? 1
                             : 0) +
                           (watch('sameAsVenue') ||
-                            (watch('addressStreet') &&
-                              watch('addressCity') &&
-                              watch('addressState') &&
-                              watch('addressZipcode'))
+                          (watch('addressStreet') &&
+                            watch('addressCity') &&
+                            watch('addressState') &&
+                            watch('addressZipcode'))
                             ? 1
                             : 0)) /
                           4) *
-                        100,
+                          100,
                       )}
                       %
                     </span>
@@ -895,75 +842,76 @@ export default function BookingPage() {
                     <div
                       className="h-3 rounded-full bg-gradient-to-r from-blue-500 to-red-500 transition-all duration-300"
                       style={{
-                        width: `${(((watch('eventDate') && watch('eventTime') ? 1 : 0) +
+                        width: `${
+                          (((watch('eventDate') && watch('eventTime') ? 1 : 0) +
                             (watch('name') &&
-                              watch('email') &&
-                              watch('phone') &&
-                              watch('preferredCommunication')
+                            watch('email') &&
+                            watch('phone') &&
+                            watch('preferredCommunication')
                               ? 1
                               : 0) +
                             (watch('venueStreet') &&
-                              watch('venueCity') &&
-                              watch('venueState') &&
-                              watch('venueZipcode')
+                            watch('venueCity') &&
+                            watch('venueState') &&
+                            watch('venueZipcode')
                               ? 1
                               : 0) +
                             (watch('sameAsVenue') ||
-                              (watch('addressStreet') &&
-                                watch('addressCity') &&
-                                watch('addressState') &&
-                                watch('addressZipcode'))
+                            (watch('addressStreet') &&
+                              watch('addressCity') &&
+                              watch('addressState') &&
+                              watch('addressZipcode'))
                               ? 1
                               : 0)) /
                             4) *
                           100
-                          }%`,
+                        }%`,
                       }}
                     ></div>
                   </div>
                 </div>
               </div>
               {/* Customer Information */}
-              <div className="border-b pb-6">
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="text-2xl font-semibold text-gray-900">👤 Customer Information</h2>
-                  <div className="text-sm">
+              <div className="border-b pb-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-gray-900">👤 Customer Information</h2>
+                  <div className="text-xs">
                     {watch('name') &&
-                      watch('email') &&
-                      watch('phone') &&
-                      watch('preferredCommunication') ? (
-                      <span className="rounded-full bg-green-100 px-3 py-1 font-semibold text-green-800">
+                    watch('email') &&
+                    watch('phone') &&
+                    watch('preferredCommunication') ? (
+                      <span className="rounded-full bg-green-100 px-2 py-0.5 font-semibold text-green-800">
                         ✅ Complete
                       </span>
                     ) : (
-                      <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-800">
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-800">
                         ⏳ Pending
                       </span>
                     )}
                   </div>
                 </div>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                    <label className="mb-1 block text-sm font-medium text-gray-700">
                       Full Name *
                     </label>
                     <input
                       {...register('name')}
-                      className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-500"
                       placeholder="John Smith"
                     />
                     {errors.name && (
-                      <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
+                      <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>
                     )}
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                    <label className="mb-1 block text-sm font-medium text-gray-700">
                       Email Address *
                     </label>
                     <input
                       {...register('email')}
                       type="email"
-                      className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-500"
                       placeholder="john@example.com"
                     />
                     {errors.email && (
@@ -1085,11 +1033,11 @@ export default function BookingPage() {
                 </div>
               </div>
               {/* Date & Time Selection */}
-              <div className="border-b pb-6">
-                <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+              <div className="border-b pb-4">
+                <h2 className="mb-3 text-lg font-semibold text-gray-900">
                   📅 Date & Time Selection
                 </h2>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
                       Event Date *
@@ -1214,8 +1162,9 @@ export default function BookingPage() {
                       render={({ field }) => (
                         <select
                           {...field}
-                          className={`w-full rounded-lg border border-gray-300 px-4 py-3 transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500 ${loadingTimeSlots ? 'animate-pulse bg-gray-100' : ''
-                            } ${field.value ? 'border-green-300 bg-green-50' : ''}`}
+                          className={`w-full rounded-lg border border-gray-300 px-4 py-3 transition-all duration-200 focus:border-red-500 focus:ring-2 focus:ring-red-500 ${
+                            loadingTimeSlots ? 'animate-pulse bg-gray-100' : ''
+                          } ${field.value ? 'border-green-300 bg-green-50' : ''}`}
                           disabled={loadingTimeSlots}
                         >
                           <option value="">
@@ -1232,8 +1181,9 @@ export default function BookingPage() {
                               }}
                             >
                               {slot.isAvailable
-                                ? `✅ ${slot.label} (${slot.available} slot${slot.available !== 1 ? 's' : ''
-                                } available)`
+                                ? `✅ ${slot.label} (${slot.available} slot${
+                                    slot.available !== 1 ? 's' : ''
+                                  } available)`
                                 : `❌ ${slot.label} – Fully Booked`}
                             </option>
                           ))}
@@ -1274,25 +1224,25 @@ export default function BookingPage() {
                 </div>
               </div>
               {/* Event Venue - Now above Billing Address */}
-              <div className="border-b pb-6">
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="text-2xl font-semibold text-gray-900">🎪 Event Venue</h2>
-                  <div className="text-sm">
+              <div className="border-b pb-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-gray-900">🎪 Event Venue</h2>
+                  <div className="text-xs">
                     {watch('venueStreet') &&
-                      watch('venueCity') &&
-                      watch('venueState') &&
-                      watch('venueZipcode') ? (
-                      <span className="rounded-full bg-green-100 px-3 py-1 font-semibold text-green-800">
+                    watch('venueCity') &&
+                    watch('venueState') &&
+                    watch('venueZipcode') ? (
+                      <span className="rounded-full bg-green-100 px-2 py-0.5 font-semibold text-green-800">
                         ✅ Complete
                       </span>
                     ) : (
-                      <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-800">
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-800">
                         ⏳ Pending
                       </span>
                     )}
                   </div>
                 </div>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <div className="md:col-span-2">
                     <label className="mb-2 block text-sm font-medium text-gray-700">
                       Venue Street Address *
@@ -1351,30 +1301,31 @@ export default function BookingPage() {
                 </div>
               </div>
               {/* Billing Address - Changed from Customer Address */}
-              <div className="border-b pb-6">
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="text-2xl font-semibold text-gray-900">💳 Billing Address</h2>
-                  <div className="text-sm">
+              <div className="border-b pb-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-gray-900">💳 Billing Address</h2>
+                  <div className="text-xs">
                     {watch('sameAsVenue') ||
-                      (watch('addressStreet') &&
-                        watch('addressCity') &&
-                        watch('addressState') &&
-                        watch('addressZipcode')) ? (
-                      <span className="rounded-full bg-green-100 px-3 py-1 font-semibold text-green-800">
+                    (watch('addressStreet') &&
+                      watch('addressCity') &&
+                      watch('addressState') &&
+                      watch('addressZipcode')) ? (
+                      <span className="rounded-full bg-green-100 px-2 py-0.5 font-semibold text-green-800">
                         ✅ Complete
                       </span>
                     ) : (
-                      <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-800">
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-800">
                         ⏳ Pending
                       </span>
                     )}
                   </div>
                 </div>
                 {/* Checkbox - Disabled until venue address is complete */}
-                <div className="mb-4">
+                <div className="mb-3">
                   <label
-                    className={`flex items-center space-x-3 ${isVenueAddressComplete ? 'cursor-pointer' : 'cursor-not-allowed'
-                      }`}
+                    className={`flex items-center space-x-3 ${
+                      isVenueAddressComplete ? 'cursor-pointer' : 'cursor-not-allowed'
+                    }`}
                   >
                     <Controller
                       name="sameAsVenue"
@@ -1385,14 +1336,16 @@ export default function BookingPage() {
                           checked={field.value}
                           onChange={field.onChange}
                           disabled={!isVenueAddressComplete}
-                          className={`h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-2 focus:ring-red-500 ${!isVenueAddressComplete ? 'cursor-not-allowed opacity-50' : ''
-                            }`}
+                          className={`h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-2 focus:ring-red-500 ${
+                            !isVenueAddressComplete ? 'cursor-not-allowed opacity-50' : ''
+                          }`}
                         />
                       )}
                     />
                     <span
-                      className={`text-sm font-medium ${isVenueAddressComplete ? 'text-gray-700' : 'text-gray-400'
-                        }`}
+                      className={`text-sm font-medium ${
+                        isVenueAddressComplete ? 'text-gray-700' : 'text-gray-400'
+                      }`}
                     >
                       Billing address is the same as Event Venue address
                     </span>
@@ -1486,215 +1439,216 @@ export default function BookingPage() {
                 {/* Form completion status */}
                 {(watch('eventDate') && watch('eventTime') ? 1 : 0) +
                   (watch('name') &&
-                    watch('email') &&
-                    watch('phone') &&
-                    watch('preferredCommunication')
+                  watch('email') &&
+                  watch('phone') &&
+                  watch('preferredCommunication')
                     ? 1
                     : 0) +
                   (watch('venueStreet') &&
-                    watch('venueCity') &&
-                    watch('venueState') &&
-                    watch('venueZipcode')
+                  watch('venueCity') &&
+                  watch('venueState') &&
+                  watch('venueZipcode')
                     ? 1
                     : 0) +
                   (watch('sameAsVenue') ||
-                    (watch('addressStreet') &&
-                      watch('addressCity') &&
-                      watch('addressState') &&
-                      watch('addressZipcode'))
+                  (watch('addressStreet') &&
+                    watch('addressCity') &&
+                    watch('addressState') &&
+                    watch('addressZipcode'))
                     ? 1
                     : 0) <
                   4 && (
-                    <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
-                      <div className="text-sm text-amber-800">
-                        <div className="mb-3 flex items-center justify-center">
-                          <span className="mr-2">⚠️</span>
-                          <span className="font-semibold">
-                            Please complete the following sections to submit your booking (
-                            {(watch('eventDate') && watch('eventTime') ? 1 : 0) +
-                              (watch('name') &&
-                                watch('email') &&
-                                watch('phone') &&
-                                watch('preferredCommunication')
-                                ? 1
-                                : 0) +
-                              (watch('venueStreet') &&
-                                watch('venueCity') &&
-                                watch('venueState') &&
-                                watch('venueZipcode')
-                                ? 1
-                                : 0) +
-                              (watch('sameAsVenue') ||
-                                (watch('addressStreet') &&
-                                  watch('addressCity') &&
-                                  watch('addressState') &&
-                                  watch('addressZipcode'))
-                                ? 1
-                                : 0)}
-                            /4 sections complete):
-                          </span>
-                        </div>
-                        <div className="space-y-2">
-                          {/* Date & Time Section */}
-                          {!(watch('eventDate') && watch('eventTime')) && (
-                            <div className="flex items-center justify-center space-x-2 rounded bg-amber-100 px-3 py-2 text-amber-700">
-                              <span>📅</span>
-                              <span className="font-medium">Date & Time Selection</span>
-                              <span className="text-xs">
-                                (
-                                {!watch('eventDate') && !watch('eventTime')
-                                  ? 'Select date and time'
-                                  : !watch('eventDate')
-                                    ? 'Select event date'
-                                    : 'Select event time'}
-                                )
-                              </span>
-                            </div>
-                          )}
-                          {/* Customer Information Section */}
-                          {!(
-                            watch('name') &&
+                  <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                    <div className="text-sm text-amber-800">
+                      <div className="mb-3 flex items-center justify-center">
+                        <span className="mr-2">⚠️</span>
+                        <span className="font-semibold">
+                          Please complete the following sections to submit your booking (
+                          {(watch('eventDate') && watch('eventTime') ? 1 : 0) +
+                            (watch('name') &&
                             watch('email') &&
                             watch('phone') &&
                             watch('preferredCommunication')
-                          ) && (
-                              <div className="flex items-center justify-center space-x-2 rounded bg-amber-100 px-3 py-2 text-amber-700">
-                                <span>👤</span>
-                                <span className="font-medium">Customer Information</span>
-                                <span className="text-xs">
-                                  (
-                                  {[
-                                    !watch('name') && 'name',
-                                    !watch('email') && 'email',
-                                    !watch('phone') && 'phone',
-                                    !watch('preferredCommunication') && 'communication method',
-                                  ]
-                                    .filter(Boolean)
-                                    .join(', ')}
-                                  )
-                                </span>
-                              </div>
-                            )}
-                          {/* Event Venue Section */}
-                          {!(
-                            watch('venueStreet') &&
+                              ? 1
+                              : 0) +
+                            (watch('venueStreet') &&
                             watch('venueCity') &&
                             watch('venueState') &&
                             watch('venueZipcode')
-                          ) && (
-                              <div className="flex items-center justify-center space-x-2 rounded bg-amber-100 px-3 py-2 text-amber-700">
-                                <span>🎪</span>
-                                <span className="font-medium">Event Venue Address</span>
-                                <span className="text-xs">
-                                  (
-                                  {[
-                                    !watch('venueStreet') && 'street',
-                                    !watch('venueCity') && 'city',
-                                    !watch('venueState') && 'state',
-                                    !watch('venueZipcode') && 'zip code',
-                                  ]
-                                    .filter(Boolean)
-                                    .join(', ')}
-                                  )
-                                </span>
-                              </div>
-                            )}
-                          {/* Billing Address Section */}
-                          {!(
-                            watch('sameAsVenue') ||
+                              ? 1
+                              : 0) +
+                            (watch('sameAsVenue') ||
                             (watch('addressStreet') &&
                               watch('addressCity') &&
                               watch('addressState') &&
                               watch('addressZipcode'))
-                          ) && (
-                              <div className="flex items-center justify-center space-x-2 rounded bg-amber-100 px-3 py-2 text-amber-700">
-                                <span>💳</span>
-                                <span className="font-medium">Billing Address</span>
-                                <span className="text-xs">
-                                  (Complete billing address or check &quot;same as venue&quot;)
-                                </span>
-                              </div>
-                            )}
-                        </div>
+                              ? 1
+                              : 0)}
+                          /4 sections complete):
+                        </span>
+                      </div>
+                      <div className="space-y-2">
+                        {/* Date & Time Section */}
+                        {!(watch('eventDate') && watch('eventTime')) && (
+                          <div className="flex items-center justify-center space-x-2 rounded bg-amber-100 px-3 py-2 text-amber-700">
+                            <span>📅</span>
+                            <span className="font-medium">Date & Time Selection</span>
+                            <span className="text-xs">
+                              (
+                              {!watch('eventDate') && !watch('eventTime')
+                                ? 'Select date and time'
+                                : !watch('eventDate')
+                                  ? 'Select event date'
+                                  : 'Select event time'}
+                              )
+                            </span>
+                          </div>
+                        )}
+                        {/* Customer Information Section */}
+                        {!(
+                          watch('name') &&
+                          watch('email') &&
+                          watch('phone') &&
+                          watch('preferredCommunication')
+                        ) && (
+                          <div className="flex items-center justify-center space-x-2 rounded bg-amber-100 px-3 py-2 text-amber-700">
+                            <span>👤</span>
+                            <span className="font-medium">Customer Information</span>
+                            <span className="text-xs">
+                              (
+                              {[
+                                !watch('name') && 'name',
+                                !watch('email') && 'email',
+                                !watch('phone') && 'phone',
+                                !watch('preferredCommunication') && 'communication method',
+                              ]
+                                .filter(Boolean)
+                                .join(', ')}
+                              )
+                            </span>
+                          </div>
+                        )}
+                        {/* Event Venue Section */}
+                        {!(
+                          watch('venueStreet') &&
+                          watch('venueCity') &&
+                          watch('venueState') &&
+                          watch('venueZipcode')
+                        ) && (
+                          <div className="flex items-center justify-center space-x-2 rounded bg-amber-100 px-3 py-2 text-amber-700">
+                            <span>🎪</span>
+                            <span className="font-medium">Event Venue Address</span>
+                            <span className="text-xs">
+                              (
+                              {[
+                                !watch('venueStreet') && 'street',
+                                !watch('venueCity') && 'city',
+                                !watch('venueState') && 'state',
+                                !watch('venueZipcode') && 'zip code',
+                              ]
+                                .filter(Boolean)
+                                .join(', ')}
+                              )
+                            </span>
+                          </div>
+                        )}
+                        {/* Billing Address Section */}
+                        {!(
+                          watch('sameAsVenue') ||
+                          (watch('addressStreet') &&
+                            watch('addressCity') &&
+                            watch('addressState') &&
+                            watch('addressZipcode'))
+                        ) && (
+                          <div className="flex items-center justify-center space-x-2 rounded bg-amber-100 px-3 py-2 text-amber-700">
+                            <span>💳</span>
+                            <span className="font-medium">Billing Address</span>
+                            <span className="text-xs">
+                              (Complete billing address or check &quot;same as venue&quot;)
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  )}
+                  </div>
+                )}
                 <button
                   type="submit"
                   disabled={
                     (watch('eventDate') && watch('eventTime') ? 1 : 0) +
-                    (watch('name') &&
+                      (watch('name') &&
                       watch('email') &&
                       watch('phone') &&
                       watch('preferredCommunication')
-                      ? 1
-                      : 0) +
-                    (watch('venueStreet') &&
+                        ? 1
+                        : 0) +
+                      (watch('venueStreet') &&
                       watch('venueCity') &&
                       watch('venueState') &&
                       watch('venueZipcode')
-                      ? 1
-                      : 0) +
-                    (watch('sameAsVenue') ||
+                        ? 1
+                        : 0) +
+                      (watch('sameAsVenue') ||
                       (watch('addressStreet') &&
                         watch('addressCity') &&
                         watch('addressState') &&
                         watch('addressZipcode'))
-                      ? 1
-                      : 0) <
-                    4 || isSubmitting
+                        ? 1
+                        : 0) <
+                      4 || isSubmitting
                   }
-                  className={`position-relative inline-flex items-center gap-4 overflow-hidden border-none text-lg font-bold transition-all duration-300 ${(watch('eventDate') && watch('eventTime') ? 1 : 0) +
+                  className={`position-relative inline-flex items-center gap-3 overflow-hidden border-none text-base font-bold transition-all duration-300 ${
+                    (watch('eventDate') && watch('eventTime') ? 1 : 0) +
                       (watch('name') &&
-                        watch('email') &&
-                        watch('phone') &&
-                        watch('preferredCommunication')
+                      watch('email') &&
+                      watch('phone') &&
+                      watch('preferredCommunication')
                         ? 1
                         : 0) +
                       (watch('venueStreet') &&
-                        watch('venueCity') &&
-                        watch('venueState') &&
-                        watch('venueZipcode')
+                      watch('venueCity') &&
+                      watch('venueState') &&
+                      watch('venueZipcode')
                         ? 1
                         : 0) +
                       (watch('sameAsVenue') ||
-                        (watch('addressStreet') &&
-                          watch('addressCity') &&
-                          watch('addressState') &&
-                          watch('addressZipcode'))
+                      (watch('addressStreet') &&
+                        watch('addressCity') &&
+                        watch('addressState') &&
+                        watch('addressZipcode'))
                         ? 1
                         : 0) ===
                       4 && !isSubmitting
                       ? 'cursor-pointer bg-gradient-to-r from-red-500 to-red-400 text-white hover:scale-105 hover:shadow-2xl'
                       : 'cursor-not-allowed bg-gradient-to-r from-gray-400 to-gray-500 text-white'
-                    }`}
+                  }`}
                   style={{
                     borderRadius: '50px',
-                    paddingLeft: '3rem',
-                    paddingRight: '3rem',
-                    paddingTop: '0.75rem',
-                    paddingBottom: '0.75rem',
-                    minWidth: '280px',
+                    paddingLeft: '2rem',
+                    paddingRight: '2rem',
+                    paddingTop: '0.6rem',
+                    paddingBottom: '0.6rem',
+                    minWidth: '240px',
                     textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
                     boxShadow:
                       (watch('eventDate') && watch('eventTime') ? 1 : 0) +
                         (watch('name') &&
-                          watch('email') &&
-                          watch('phone') &&
-                          watch('preferredCommunication')
+                        watch('email') &&
+                        watch('phone') &&
+                        watch('preferredCommunication')
                           ? 1
                           : 0) +
                         (watch('venueStreet') &&
-                          watch('venueCity') &&
-                          watch('venueState') &&
-                          watch('venueZipcode')
+                        watch('venueCity') &&
+                        watch('venueState') &&
+                        watch('venueZipcode')
                           ? 1
                           : 0) +
                         (watch('sameAsVenue') ||
-                          (watch('addressStreet') &&
-                            watch('addressCity') &&
-                            watch('addressState') &&
-                            watch('addressZipcode'))
+                        (watch('addressStreet') &&
+                          watch('addressCity') &&
+                          watch('addressState') &&
+                          watch('addressZipcode'))
                           ? 1
                           : 0) ===
                         4 && !isSubmitting
@@ -1727,25 +1681,25 @@ export default function BookingPage() {
                       Processing Booking...
                     </span>
                   ) : (watch('eventDate') && watch('eventTime') ? 1 : 0) +
-                    (watch('name') &&
+                      (watch('name') &&
                       watch('email') &&
                       watch('phone') &&
                       watch('preferredCommunication')
-                      ? 1
-                      : 0) +
-                    (watch('venueStreet') &&
+                        ? 1
+                        : 0) +
+                      (watch('venueStreet') &&
                       watch('venueCity') &&
                       watch('venueState') &&
                       watch('venueZipcode')
-                      ? 1
-                      : 0) +
-                    (watch('sameAsVenue') ||
+                        ? 1
+                        : 0) +
+                      (watch('sameAsVenue') ||
                       (watch('addressStreet') &&
                         watch('addressCity') &&
                         watch('addressState') &&
                         watch('addressZipcode'))
-                      ? 1
-                      : 0) ===
+                        ? 1
+                        : 0) ===
                     4 ? (
                     '🔥 Book Your Hibachi Experience'
                   ) : (
@@ -1756,44 +1710,48 @@ export default function BookingPage() {
                 <div className="mt-4 text-sm text-gray-600">
                   <div className="flex flex-wrap items-center justify-center gap-2">
                     <span
-                      className={`rounded px-2 py-1 text-xs ${watch('eventDate') && watch('eventTime')
+                      className={`rounded px-2 py-1 text-xs ${
+                        watch('eventDate') && watch('eventTime')
                           ? 'bg-green-100 text-green-800'
                           : 'bg-gray-100 text-gray-500'
-                        }`}
+                      }`}
                     >
                       📅 Date & Time
                     </span>
                     <span
-                      className={`rounded px-2 py-1 text-xs ${watch('name') &&
-                          watch('email') &&
-                          watch('phone') &&
-                          watch('preferredCommunication')
+                      className={`rounded px-2 py-1 text-xs ${
+                        watch('name') &&
+                        watch('email') &&
+                        watch('phone') &&
+                        watch('preferredCommunication')
                           ? 'bg-green-100 text-green-800'
                           : 'bg-gray-100 text-gray-500'
-                        }`}
+                      }`}
                     >
                       👤 Customer Info
                     </span>
                     <span
-                      className={`rounded px-2 py-1 text-xs ${watch('venueStreet') &&
-                          watch('venueCity') &&
-                          watch('venueState') &&
-                          watch('venueZipcode')
+                      className={`rounded px-2 py-1 text-xs ${
+                        watch('venueStreet') &&
+                        watch('venueCity') &&
+                        watch('venueState') &&
+                        watch('venueZipcode')
                           ? 'bg-green-100 text-green-800'
                           : 'bg-gray-100 text-gray-500'
-                        }`}
+                      }`}
                     >
                       🎪 Venue
                     </span>
                     <span
-                      className={`rounded px-2 py-1 text-xs ${watch('sameAsVenue') ||
-                          (watch('addressStreet') &&
-                            watch('addressCity') &&
-                            watch('addressState') &&
-                            watch('addressZipcode'))
+                      className={`rounded px-2 py-1 text-xs ${
+                        watch('sameAsVenue') ||
+                        (watch('addressStreet') &&
+                          watch('addressCity') &&
+                          watch('addressState') &&
+                          watch('addressZipcode'))
                           ? 'bg-green-100 text-green-800'
                           : 'bg-gray-100 text-gray-500'
-                        }`}
+                      }`}
                     >
                       💳 Billing
                     </span>
