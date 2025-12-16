@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from 'react'
 
 import { homeData } from '@/data/home'
 import styles from '@/styles/home/services.module.css'
+import type { HomeService } from '@/types/data'
 
 export function ServicesSection() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -50,7 +51,7 @@ export function ServicesSection() {
         <div className="row">
           <div className="col-12">
             <div className={styles.servicesGrid}>
-              {homeData.services.items.map((service: any, index: number) => (
+              {homeData.services.items.map((service: HomeService, index: number) => (
                 <div key={index} className={styles.serviceCard}>
                   <div className={styles.cardContent}>
                     <div className={styles.serviceIcon}>{service.icon}</div>

@@ -559,11 +559,10 @@ export default function Assistant({ page }: AssistantProps) {
             className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[80%] rounded-2xl p-2 ${
-                message.type === 'user'
+              className={`max-w-[80%] rounded-2xl p-2 ${message.type === 'user'
                   ? 'bg-gradient-to-r from-[#ffb800] to-[#db2b28] text-white'
                   : 'bg-gray-100 text-gray-800'
-              }`}
+                }`}
             >
               <div className="flex items-start space-x-2">
                 {message.type === 'assistant' && (
@@ -769,7 +768,7 @@ export default function Assistant({ page }: AssistantProps) {
                   type="tel"
                   value={leadPhone}
                   onChange={(e) => setLeadPhone(e.target.value)}
-                  placeholder="(555) 123-4567"
+                  placeholder="Enter your phone number"
                   maxLength={20}
                   className="w-full rounded-lg border border-gray-300 p-2 focus:border-transparent focus:ring-2 focus:ring-orange-500 focus:outline-none"
                   style={{ fontSize: '14px' }}

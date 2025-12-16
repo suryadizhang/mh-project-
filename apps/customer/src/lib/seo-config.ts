@@ -1,5 +1,7 @@
 // Global SEO Configuration for MyHibachi
 // =====================================
+// SINGLE SOURCE OF TRUTH for contact info, social links, and branding
+// Do NOT hardcode these values elsewhere - import from here
 
 import type { Metadata } from 'next'
 
@@ -28,11 +30,17 @@ export const SITE_CONFIG = {
   author: 'My Hibachi Chef Team',
   social: {
     instagram: 'https://www.instagram.com/my_hibachi_chef/',
+    instagramHandle: 'my_hibachi_chef',
+    instagramDm: 'https://ig.me/m/my_hibachi_chef',
     facebook: 'https://www.facebook.com/people/My-hibachi/61577483702847/',
-    yelp: 'https://www.yelp.com/biz/my-hibachi-fremont'
+    facebookPageId: '61577483702847',
+    facebookMessenger: 'https://m.me/61577483702847',
+    yelp: 'https://www.yelp.com/biz/my-hibachi-fremont',
+    google: 'https://www.google.com/maps/place/My+hibachi/@37.8543835,-122.0808034,8z'
   },
   contact: {
     phone: '(916) 740-8768',
+    phoneTel: '+19167408768',
     email: 'cs@myhibachichef.com',
     serviceArea: 'Bay Area & Sacramento Region'
   }

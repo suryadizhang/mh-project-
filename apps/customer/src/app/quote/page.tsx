@@ -2,7 +2,6 @@
 
 import '@/styles/quote-calculator.css'
 
-import Assistant from '@/components/chat/Assistant'
 import { QuoteCalculator } from '@/components/quote/QuoteCalculator'
 
 export default function QuotePage() {
@@ -101,7 +100,7 @@ export default function QuotePage() {
                 </div>
                 <div className="included-item">
                   <span className="included-icon">🍶</span>
-                  <span>Plenty of sake for adults 21+</span>
+                  <span>Complimentary sake for adults 21+</span>
                 </div>
                 <div className="included-item">
                   <span className="included-icon">👨‍🍳</span>
@@ -111,7 +110,6 @@ export default function QuotePage() {
             </div>
           </div>
         </section>
-        <Assistant page="/quote" />
       </main>
     </>
   )

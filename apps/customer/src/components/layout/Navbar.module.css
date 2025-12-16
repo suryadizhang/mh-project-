@@ -99,10 +99,6 @@
   .navList {
     flex-direction: row;
   }
-
-  .toggler {
-    display: none;
-  }
 }
 
 .navLink {
@@ -155,11 +151,18 @@
   min-height: 48px;
   border-radius: 0.5rem;
   background-color: rgba(220, 38, 38, 0.1);
-  display: flex;
+  display: none; /* Hidden by default on desktop */
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+/* Show toggler only on mobile */
+@media (max-width: 991px) {
+  .toggler {
+    display: flex;
+  }
 }
 
 .toggler:hover {

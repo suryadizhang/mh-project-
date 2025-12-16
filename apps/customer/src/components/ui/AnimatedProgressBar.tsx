@@ -1,0 +1,93 @@
+'use client';
+
+import React from 'react';
+
+interface ProgressStep {
+  icon: string;
+  completedIcon?: string;
+  label: string;
+  isComplete: boolean;
+}
+
+interface AnimatedProgressBarProps {
+  steps: ProgressStep[];
+  className?: string;
+}
+
+export function AnimatedProgressBar({ steps, className = '' }: AnimatedProgressBarProps) {
+  const completedCount = steps.filter((s) => s.isComplete).length;
+  const percentage = Math.round((completedCount / steps.length) * 100);
+
+  const getMessage = () => {
+    if (percentage === 100) return '🎉 All sections complete! Ready to submit.';
+    if (percentage >= 75) return '💪 Almost there! Just a few more fields.';
+    if (percentage >= 50) return '👍 Great progress! Keep going.';
+    return '✨ Fill in the sections below to complete your booking.';
+  };
+
+  return (
+    <div className={`rounded-2xl border border-gray-200 bg-white p-6 shadow-lg ${className}`}>
+      <h3 className="mb-6 text-center text-lg font-bold text-gray-900">📋 Booking Progress</h3>
+
+      {/* Progress Steps with Connecting Lines */}
+      <div className="relative">
+        {/* Connecting Line Background */}
+        <div className="absolute top-7 left-0 right-0 h-1 bg-gray-200 mx-8 hidden md:block" />
+        {/* Animated Progress Line */}
+        <div
+          className="absolute top-7 left-0 h-1 bg-gradient-to-r from-red-500 via-orange-500 to-green-500 mx-8 hidden md:block transition-all duration-700 ease-out"
+          style={{
+            width: `calc(${percentage}% - 4rem)`,
+          }}
+        />
+
+        <div className="grid grid-cols-2 gap-4 text-center md:grid-cols-4 relative z-10">
+          {steps.map((step, index) => (
+            <div key={index} className="space-y-3 group">
+              <div
+                className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full text-2xl transition-all duration-500 transform ${step.isComplete
+                    ? 'bg-gradient-to-br from-green-400 to-green-600 text-white scale-110 shadow-lg shadow-green-200'
+                    : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200'
+                  }`}
+              >
+                {step.isComplete ? step.completedIcon || '✓' : step.icon}
+              </div>
+              <div>
+                <div className="font-semibold text-gray-800">{step.label}</div>
+                <div
+                  className={`text-xs font-medium transition-colors duration-300 ${step.isComplete ? 'text-green-600' : 'text-gray-400'
+                    }`}
+                >
+                  {step.isComplete ? '✓ Complete' : '○ Pending'}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Enhanced Overall Progress Bar */}
+      <div className="mt-8">
+        <div className="mb-3 flex justify-between items-center">
+          <span className="text-sm font-medium text-gray-600">Form Completion</span>
+          <span className="text-lg font-bold bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">
+            {percentage}%
+          </span>
+        </div>
+        <div className="h-4 w-full rounded-full bg-gray-100 overflow-hidden shadow-inner">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-red-500 via-orange-500 to-green-500 transition-all duration-700 ease-out relative"
+            style={{ width: `${percentage}%` }}
+          >
+            {/* Animated shine effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
+          </div>
+        </div>
+        {/* Progress message */}
+        <p className="mt-3 text-center text-sm text-gray-500">{getMessage()}</p>
+      </div>
+    </div>
+  );
+}
+
+export default AnimatedProgressBar;

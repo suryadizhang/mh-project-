@@ -166,6 +166,57 @@ When working on tasks:
 
 ---
 
+## 🔍 Code Quality & Syntax Verification
+
+**CRITICAL: Be detail-oriented when writing code to prevent syntax errors.**
+
+### Before Submitting Code Changes:
+
+| Check                      | Action                                          |
+| -------------------------- | ----------------------------------------------- |
+| **Matching brackets**      | Every `{` has `}`, every `(` has `)`            |
+| **Matching tags**          | Every `<tag>` has `</tag>`, no duplicates       |
+| **Complete statements**    | No missing semicolons, commas, or terminators   |
+| **Proper nesting**         | JSX elements properly nested and closed         |
+| **String literals**        | All quotes and backticks properly closed        |
+| **Import statements**      | All imports syntactically correct               |
+| **Arrow functions**        | Proper `=>` syntax with correct parentheses     |
+| **Template literals**      | Backticks closed, `${}` expressions valid       |
+| **Object/Array literals**  | Proper comma separation, no trailing issues     |
+
+### Common Syntax Errors to Avoid:
+
+```tsx
+// ❌ BAD - Duplicate closing tag
+<button>Click</button>
+</button>
+
+// ✅ GOOD - Single closing tag
+<button>Click</button>
+
+// ❌ BAD - Missing closing bracket
+const obj = { key: value
+
+// ✅ GOOD - Complete object
+const obj = { key: value };
+
+// ❌ BAD - Unclosed string
+const msg = "Hello world
+
+// ✅ GOOD - Closed string
+const msg = "Hello world";
+```
+
+### Multi-Edit Verification:
+
+When making multiple edits in one operation:
+1. **Review each edit independently** before submitting
+2. **Count opening/closing tags** to ensure they match
+3. **Check edit boundaries** don't cut off in middle of statements
+4. **Verify context lines** are accurate and unique
+
+---
+
 ## 📋 Common Paths Quick Reference
 
 | Resource             | Path                                       |

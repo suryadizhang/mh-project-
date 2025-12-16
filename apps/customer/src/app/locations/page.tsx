@@ -1,7 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 
-import Assistant from '@/components/chat/Assistant'
 import { LocalBusinessSchema } from '@/components/seo/TechnicalSEO'
 
 export const metadata: Metadata = {
@@ -270,8 +269,6 @@ export default function LocationsPage() {
           </div>
         </div>
       </section>
-
-      <Assistant page="/locations" />
     </div>
   )
 }

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ChevronRight } from 'lucide-react';
 
 interface BreadcrumbItem {
   label: string;
@@ -41,7 +42,7 @@ export default function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
                     {item.label}
                   </Link>
                   <span className="breadcrumb-separator" aria-hidden="true">
-                    <i className="bi bi-chevron-right"></i>
+                    <ChevronRight className="h-4 w-4" />
                   </span>
                 </>
               )}
