@@ -55,7 +55,7 @@ export function HeroSection() {
           <div className="w-full text-center md:w-1/2">
             <div className={styles.logoContainer}>
               <Image
-                src="/images/myhibachi-logo.png"
+                src="/images/myhibachi-logo.webp"
                 alt="My Hibachi Logo"
                 width={200}
                 height={100}

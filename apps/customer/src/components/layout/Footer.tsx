@@ -16,7 +16,7 @@ export default function Footer() {
         {/* Brand Section */}
         <div className={styles.brand}>
           <Image
-            src="/My Hibachi logo.png"
+            src="/My Hibachi logo.webp"
             alt="MyHibachi Private Chef Logo"
             width={80}
             height={80}

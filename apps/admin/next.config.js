@@ -10,6 +10,15 @@ const nextConfig = {
   },
   experimental: {
     optimizeCss: true,
+    optimizePackageImports: [
+      'lucide-react',
+      'date-fns',
+      '@radix-ui/react-slot',
+      'framer-motion',
+      'react-hook-form',
+      '@hookform/resolvers',
+      '@hello-pangea/dnd',
+    ],
   },
   // Security headers with WebSocket support
   async headers() {

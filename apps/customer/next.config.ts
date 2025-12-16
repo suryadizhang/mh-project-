@@ -6,7 +6,7 @@ import type { NextConfig } from 'next';
 const withBundleAnalyzer =
   process.env.ANALYZE === 'true'
     ? // eslint-disable-next-line @typescript-eslint/no-require-imports
-      require('@next/bundle-analyzer')({ enabled: true })
+    require('@next/bundle-analyzer')({ enabled: true })
     : (config: NextConfig) => config;
 
 const nextConfig: NextConfig = {
@@ -14,7 +14,14 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname, '../../'),
   compress: true, // Enable gzip compression
   experimental: {
-    optimizePackageImports: ['lucide-react'],
+    optimizePackageImports: [
+      'lucide-react',
+      'date-fns',
+      '@radix-ui/react-slot',
+      'framer-motion',
+      'react-hook-form',
+      '@hookform/resolvers',
+    ],
     optimizeCss: true,
   },
   images: {
@@ -74,11 +81,11 @@ const nextConfig: NextConfig = {
           // Only enable HSTS in production
           ...(isProduction
             ? [
-                {
-                  key: 'Strict-Transport-Security',
-                  value: 'max-age=31536000; includeSubDomains; preload',
-                },
-              ]
+              {
+                key: 'Strict-Transport-Security',
+                value: 'max-age=31536000; includeSubDomains; preload',
+              },
+            ]
             : []),
           {
             key: 'X-DNS-Prefetch-Control',

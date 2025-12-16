@@ -3,12 +3,21 @@
    ========================================================================== */
 
 @import url('tailwindcss');
+
+/* Define --spacing BEFORE tw-animate-css to fix the --spacing() function error */
+@theme inline {
+  --spacing: 0.25rem;
+}
+
 @import url('tw-animate-css');
 @import '../styles/responsive-images.css';
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* ===== Base Spacing (Required for Tailwind v4 spacing() function) ===== */
+  --spacing: 0.25rem;
+
   /* ===== Brand Colors (My Hibachi Design System) ===== */
   --color-primary: #dc2626;
   --color-primary-hover: #b91c1c;

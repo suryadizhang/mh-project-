@@ -3,6 +3,12 @@
    ========================================================================== */
 
 @import url('tailwindcss');
+
+/* Define --spacing BEFORE tw-animate-css to fix the --spacing() function error */
+@theme inline {
+  --spacing: 0.25rem;
+}
+
 @import url('tw-animate-css');
 @import '../styles/base.css';
 @import '../styles/responsive-images.css';

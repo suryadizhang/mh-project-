@@ -1,8 +1,15 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 
-import ChatWidget from '@/components/chat/ChatWidget';
+import { ChatWidgetSkeleton } from '@/components/loading';
+
+// Lazy load ChatWidget - it's 1186 lines and not needed for initial render
+const ChatWidget = dynamic(() => import('@/components/chat/ChatWidget'), {
+  ssr: false,
+  loading: () => <ChatWidgetSkeleton />,
+});
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

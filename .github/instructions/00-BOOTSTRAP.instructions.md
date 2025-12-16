@@ -23,6 +23,9 @@ files in order:
 8. `08-FEATURE_FLAGS.instructions.md` – Flag rules
 9. `09-ROLLBACK_SAFETY.instructions.md` – Emergency procedures
 10. `10-COPILOT_PERFORMANCE.instructions.md` – Agent efficiency
+11. `11-REACT_PERFORMANCE.instructions.md` – React re-rendering rules
+12. `12-CSS_ARCHITECTURE.instructions.md` – Tailwind v4 & CSS organization
+13. `13-PYTHON_PERFORMANCE.instructions.md` – FastAPI & SQLAlchemy patterns
 
 ---
 
