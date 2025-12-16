@@ -1,7 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 
-import Assistant from '@/components/chat/Assistant'
 import { FAQSchema, LocalBusinessSchema } from '@/components/seo/TechnicalSEO'
 import { generateLocationPage, locationContentBlocks } from '@/lib/locationPageGenerator'
 
@@ -173,8 +172,6 @@ export default function SanFranciscoHibachiPage() {
           </div>
         </div>
       </section>
-
-      <Assistant page="/locations/san-francisco" />
     </div>
   )
 }

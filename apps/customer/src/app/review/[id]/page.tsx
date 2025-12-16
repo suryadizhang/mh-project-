@@ -106,8 +106,9 @@ export default function ReviewPage() {
         // "Could be better" - Redirect to AI chat for immediate assistance
         router.push(`/review/${reviewId}/ai-assistance`);
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to submit review");
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to submit review";
+      setError(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -251,10 +252,9 @@ export default function ReviewPage() {
             disabled={!selectedRating || submitting}
             className={`
               w-full mt-6 py-4 rounded-xl font-semibold text-lg transition-all
-              ${
-                selectedRating && !submitting
-                  ? "bg-red-600 text-white hover:bg-red-700 shadow-lg"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              ${selectedRating && !submitting
+                ? "bg-red-600 text-white hover:bg-red-700 shadow-lg"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }
             `}
           >

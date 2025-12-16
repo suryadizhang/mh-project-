@@ -5,6 +5,7 @@ import React, { useEffect, useRef } from 'react';
 
 import { homeData } from '@/data/home';
 import styles from '@/styles/home/cta.module.css';
+import type { CTAButton } from '@/types/data';
 
 export function CTASection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -38,13 +39,12 @@ export function CTASection() {
               <p className={styles.ctaSubtitle}>{homeData.cta.subtitle}</p>
 
               <div className={styles.ctaButtons}>
-                {homeData.cta.buttons.map((button: any, index: number) => (
+                {homeData.cta.buttons.map((button: CTAButton, index: number) => (
                   <Link
                     key={index}
                     href={button.href}
-                    className={`${styles.ctaButton} ${
-                      button.primary ? styles.primaryButton : styles.secondaryButton
-                    }`}
+                    className={`${styles.ctaButton} ${button.primary ? styles.primaryButton : styles.secondaryButton
+                      }`}
                   >
                     {button.text}
                   </Link>

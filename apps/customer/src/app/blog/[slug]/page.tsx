@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import BlogStructuredData from '@/components/blog/BlogStructuredData';
-import Assistant from '@/components/chat/Assistant';
 import { blogService } from '@/lib/blog/blogService';
 import { BreadcrumbSchema, LocalBusinessSchema } from '@/components/seo/TechnicalSEO';
 
@@ -237,8 +236,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </div>
         )}
       </article>
-
-      <Assistant page={`/blog/${post.slug}`} />
     </div>
   );
 }

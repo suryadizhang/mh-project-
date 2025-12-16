@@ -1,5 +1,6 @@
 import { menuData } from '@/data/menu'
 import styles from '@/styles/menu/hero.module.css'
+import type { MenuHeroFeature } from '@/types/data'
 
 export default function MenuHero() {
   const { hero } = menuData
@@ -64,7 +65,7 @@ export default function MenuHero() {
 
         {/* Feature badges */}
         <div className={styles.heroFeaturesGrid}>
-          {hero.features.map((feature: any, index: number) => (
+          {hero.features.map((feature: MenuHeroFeature, index: number) => (
             <div key={index} className={styles.featureBadge}>
               <div className={styles.featureIconBg}>
                 <span className={`${styles.featureIcon} emoji-visible`}>{feature.icon}</span>

@@ -5,6 +5,7 @@ import React, { useEffect, useRef } from 'react';
 
 import { homeData } from '@/data/home';
 import styles from '@/styles/home/service-areas.module.css';
+import type { CTAButton } from '@/types/data';
 
 export function ServiceAreas() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -42,13 +43,12 @@ export function ServiceAreas() {
         <div className="mb-8 flex justify-center">
           <div className="w-full text-center md:w-2/3">
             <div className={styles.ctaButtons}>
-              {homeData.serviceAreas.ctaButtons.map((button: any, index: number) => (
+              {homeData.serviceAreas.ctaButtons.map((button: CTAButton, index: number) => (
                 <Link
                   key={index}
                   href={button.href}
-                  className={`${styles.ctaButton} ${
-                    button.primary ? styles.primaryButton : styles.secondaryButton
-                  }`}
+                  className={`${styles.ctaButton} ${button.primary ? styles.primaryButton : styles.secondaryButton
+                    }`}
                 >
                   {button.text}
                 </Link>

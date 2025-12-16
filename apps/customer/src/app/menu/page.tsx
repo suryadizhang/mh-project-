@@ -6,8 +6,6 @@ import '@/styles/pages/menu.page.css';
 import { Calculator, Calendar, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 
-import Assistant from '@/components/chat/Assistant';
-
 export default function MenuPage() {
   return (
     <main>
@@ -741,106 +739,6 @@ export default function MenuPage() {
         </div>
       </div>
 
-      {/* Service Areas */}
-      <div className="container-fluid px-lg-5 mb-5">
-        <div className="card menu-card overflow-hidden border-0 p-0">
-          <div className="service-areas p-5">
-            <div className="mb-5 text-center">
-              <div className="section-header animated-section">
-                <div className="section-icon-wrapper mb-3">
-                  <span className="section-icon emoji-visible">🏠</span>
-                </div>
-                <h2 className="section-title mb-4">Our Service Areas</h2>
-                <p className="section-subtitle">
-                  We bring the hibachi experience directly to your location!
-                </p>
-              </div>
-            </div>
-
-            <p className="service-intro text-center">
-              We bring authentic hibachi dining to homes and venues across the Bay Area, Sacramento,
-              San Jose & surrounding regions. Not sure we cover you? Reach out—we&apos;ll do our
-              best!
-            </p>
-            <div className="mt-3 mb-4 text-center">
-              <a href="/BookUs" className="btn btn-primary me-3">
-                <Calendar className="me-2 inline h-4 w-4" />
-                Ready to Plan Your Date?
-              </a>
-              <a href="/quote" className="btn btn-outline-primary me-3">
-                <Calculator className="me-2 inline h-4 w-4" />
-                Get Your Quote
-              </a>
-              <a href="/contact" className="btn btn-outline-secondary">
-                <MessageCircle className="me-2 inline h-4 w-4" />
-                Questions? Contact Us
-              </a>
-            </div>
-
-            <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div>
-                <div className="service-area-card">
-                  <h4 className="area-title">🌉 Bay Area & Peninsula</h4>
-                  <p className="area-subtitle">Our primary service area with premium coverage!</p>
-                  <ul className="area-list">
-                    <li>San Francisco - The heart of culinary excellence</li>
-                    <li>San Jose - Silicon Valley&apos;s finest hibachi</li>
-                    <li>Oakland - East Bay entertainment at its best</li>
-                    <li>Santa Clara - Tech meets traditional Japanese cuisine</li>
-                    <li>Sunnyvale - Where innovation meets flavor</li>
-                    <li>Mountain View - Bringing mountains of flavor</li>
-                    <li>Palo Alto - Stanford-level culinary performance</li>
-                  </ul>
-                </div>
-              </div>
-              <div>
-                <div className="service-area-card">
-                  <h4 className="area-title">🏞️ Sacramento & Extended Regions</h4>
-                  <p className="area-subtitle">
-                    Minimal travel fees for these beautiful locations!
-                  </p>
-                  <ul className="area-list">
-                    <li>Sacramento - Capital city hibachi experiences</li>
-                    <li>Elk Grove - Family-friendly neighborhood service</li>
-                    <li>Roseville - Elegant dining in wine country vicinity</li>
-                    <li>Folsom - Historic charm meets modern hibachi</li>
-                    <li>Davis - University town celebrations</li>
-                    <li>Stockton - Central Valley&apos;s premier hibachi</li>
-                    <li>Modesto - Agricultural heart, culinary soul</li>
-                    <li>Livermore - Wine country hibachi perfection</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div className="service-radius-info mt-4 text-center">
-              <div className="radius-card">
-                <span className="radius-icon"> 🚗 </span>
-                <h4 className="radius-title">We Come to You!</h4>
-                <p className="radius-description">
-                  Serving the Bay Area, Sacramento, San Jose & surrounding regions. Not sure we
-                  cover you? Reach out—we&apos;ll do our best!
-                </p>
-                <p className="travel-fee-info" style={{ color: 'white' }}>
-                  <span className="travel-highlight">💰 Transparent Pricing:</span>
-                  Flexible service area with transparent travel options—get your quote instantly
-                  above!
-                  <br />
-                  <strong>Call us for a custom quote - we make it affordable for everyone!</strong>
-                </p>
-                <div className="service-promise">
-                  <span className="promise-icon">🎯</span>
-                  <span className="promise-text">
-                    <strong>Our Promise:</strong> No hidden fees, just honest pricing and
-                    exceptional service!
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Enhanced Call to Action */}
       <div className="container-fluid px-lg-5 mb-5">
         <div className="card menu-card overflow-hidden border-0 p-0">
@@ -937,7 +835,6 @@ export default function MenuPage() {
           </div>
         </div>
       </div>
-      <Assistant page="/menu" />
     </main>
   );
 }

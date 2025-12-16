@@ -7,7 +7,7 @@ import ChatWidget from '@/components/chat/ChatWidget';
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  // Don't show ChatWidget on any excluded pages
+  // Don't show ChatWidget on test pages
   const shouldShowChat = pathname && !pathname.startsWith('/test');
 
   return (

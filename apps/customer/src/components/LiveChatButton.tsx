@@ -19,31 +19,27 @@ export default function LiveChatButton({
     initiateCall(); // Opens phone dialer with MyHibachi business number
   };
 
-  const getButtonClasses = () => {
-    const baseClasses = 'btn flex items-center gap-2 font-bold transition-all';
+  const baseClasses = 'inline-flex items-center justify-center gap-2 font-bold rounded-xl transition-all duration-200';
 
-    const variantClasses = {
-      primary: 'btn-primary',
-      outline: 'btn-outline-primary',
-      secondary: 'btn-secondary',
-    };
+  const variantClasses = {
+    primary: 'bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg hover:from-red-700 hover:to-red-800 hover:shadow-xl hover:-translate-y-0.5',
+    outline: 'border-2 border-red-600 text-red-600 bg-transparent hover:bg-red-600 hover:text-white',
+    secondary: 'bg-white text-red-600 border-2 border-red-600 hover:bg-red-600 hover:text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5',
+  };
 
-    const sizeClasses = {
-      sm: 'btn-sm',
-      md: '',
-      lg: 'btn-lg',
-    };
-
-    return `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;
+  const sizeClasses = {
+    sm: 'px-4 py-2 text-sm',
+    md: 'px-6 py-3 text-base',
+    lg: 'px-8 py-4 text-lg',
   };
 
   return (
     <button
       onClick={handleCallClick}
-      className={getButtonClasses()}
+      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       title="Call MyHibachi - Click to dial (916) 740-8768"
     >
-      <Phone size={18} className="inline-block" />
+      <Phone size={size === 'sm' ? 16 : size === 'lg' ? 20 : 18} />
       <span>Call Us</span>
     </button>
   );

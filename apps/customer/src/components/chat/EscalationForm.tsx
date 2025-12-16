@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertCircle, Check, Loader2,Mail, MessageSquare, Phone, X } from 'lucide-react';
+import { AlertCircle, Check, Loader2, Mail, MessageSquare, Phone, X } from 'lucide-react';
 import { useState } from 'react';
 
 interface EscalationFormProps {
@@ -247,7 +247,7 @@ export default function EscalationForm({
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="John Doe"
+              placeholder="Enter your full name"
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
               required
             />
@@ -264,12 +264,11 @@ export default function EscalationForm({
               value={phone}
               onChange={(e) => handlePhoneChange(e.target.value)}
               onBlur={() => validatePhone(phone)}
-              placeholder="(916) 740-8768"
-              className={`w-full rounded-lg border px-3 py-2 text-sm focus:ring-1 focus:outline-none ${
-                phoneError
+              placeholder="Enter your phone number"
+              className={`w-full rounded-lg border px-3 py-2 text-sm focus:ring-1 focus:outline-none ${phoneError
                   ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
                   : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
-              }`}
+                }`}
               required
             />
             {phoneError && <p className="mt-1 text-xs text-red-600">{phoneError}</p>}
@@ -286,12 +285,11 @@ export default function EscalationForm({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onBlur={() => validateEmail(email)}
-              placeholder="john@example.com"
-              className={`w-full rounded-lg border px-3 py-2 text-sm focus:ring-1 focus:outline-none ${
-                emailError
+              placeholder="Enter your email (optional)"
+              className={`w-full rounded-lg border px-3 py-2 text-sm focus:ring-1 focus:outline-none ${emailError
                   ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
                   : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
-              }`}
+                }`}
             />
             {emailError && <p className="mt-1 text-xs text-red-600">{emailError}</p>}
           </div>

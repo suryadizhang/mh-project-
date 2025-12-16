@@ -11,16 +11,31 @@ import { DEFAULT_PRICING, interpolatePricing, type PricingValues } from './prici
 
 /**
  * Fetch current pricing from API (server-side)
+ * In development without backend, returns defaults immediately
  */
 async function fetchPricingServer(): Promise<PricingValues> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  // Skip API call entirely in development when pointing to localhost
+  // (backend likely not running during frontend development)
+  if (!apiUrl || (process.env.NODE_ENV === 'development' && apiUrl.includes('localhost'))) {
+    return DEFAULT_PRICING;
+  }
+
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    // Use AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+
     const response = await fetch(`${apiUrl}/api/v1/pricing/current`, {
       next: { revalidate: 300 }, // Cache for 5 minutes
+      signal: controller.signal,
+      cache: 'force-cache', // Prefer cached response
     });
 
+    clearTimeout(timeoutId);
+
     if (!response.ok) {
-      console.warn('Failed to fetch pricing, using defaults');
       return DEFAULT_PRICING;
     }
 
@@ -36,8 +51,8 @@ async function fetchPricingServer(): Promise<PricingValues> {
         data.travel_policy?.free_travel_radius_miles ?? DEFAULT_PRICING.freeTravelMiles,
       costPerMileAfter: data.travel_policy?.cost_per_mile_after ?? DEFAULT_PRICING.costPerMileAfter,
     };
-  } catch (error) {
-    console.error('Error fetching pricing:', error);
+  } catch {
+    // Silently fall back to defaults - this is expected when backend is not running
     return DEFAULT_PRICING;
   }
 }

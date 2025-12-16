@@ -1,8 +1,8 @@
 'use client';
 
-import { ExternalLink, Send, X } from 'lucide-react';
+import { ExternalLink, Maximize2, Minimize2, Send, Trash2, Volume2, VolumeX, X } from 'lucide-react';
 import Image from 'next/image';
-import { useCallback,useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { ApiErrorBoundary } from '@/components/ErrorBoundary';
 import { useProtectedPhone, useProtectedPaymentEmail } from '@/components/ui/ProtectedPhone';
@@ -68,6 +68,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
   const { email: protectedEmail } = useProtectedPaymentEmail();
 
   const [isOpen, setIsOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -75,10 +76,20 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
   const [showEscalationForm, setShowEscalationForm] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [connectionFailed, setConnectionFailed] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('mh_chat_sound');
+      return saved !== 'false'; // Default to enabled
+    }
+    return true;
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const userIdRef = useRef<string>(
     typeof window !== 'undefined'
       ? localStorage.getItem('mh_user_id') || Math.random().toString(36).substring(7)
@@ -115,6 +126,35 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
       localStorage.setItem(`mh_thread_${page}`, threadIdRef.current);
     }
   }, [page]);
+
+  // Initialize audio for notification sound
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Create a simple notification sound using Web Audio API
+      audioRef.current = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleogWQb3NvJFhF05ltNvXroc7I1GDr9DfvJlWLT10osbXspZCKUVyo8jftYxGJUlvocLYsIpLKE5yocTYsYpNKlF0oc');
+    }
+  }, []);
+
+  // Play notification sound
+  const playNotificationSound = useCallback(() => {
+    if (soundEnabled && audioRef.current) {
+      audioRef.current.volume = 0.3;
+      audioRef.current.play().catch(() => {
+        // Ignore autoplay errors
+      });
+    }
+  }, [soundEnabled]);
+
+  // Toggle sound setting
+  const toggleSound = useCallback(() => {
+    setSoundEnabled(prev => {
+      const newValue = !prev;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('mh_chat_sound', String(newValue));
+      }
+      return newValue;
+    });
+  }, []);
 
   // Store user contact information when it changes
   useEffect(() => {
@@ -172,6 +212,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
                     : 'low',
             };
             setMessages((prev) => [...prev, assistantMessage]);
+            playNotificationSound();
             setIsLoading(false);
             setIsTyping(false);
           } else if (data.type === 'typing') {
@@ -207,26 +248,39 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
         setIsConnected(false);
         setIsLoading(false);
         setIsTyping(false);
+        setRetryCount(prev => prev + 1);
 
-        // Attempt to reconnect after a delay
-        if (!reconnectTimeoutRef.current) {
+        // Stop retrying after 3 attempts
+        if (retryCount < 3 && !reconnectTimeoutRef.current) {
           reconnectTimeoutRef.current = setTimeout(() => {
+            reconnectTimeoutRef.current = null;
             connectWebSocket();
           }, 3000);
+        } else if (retryCount >= 3) {
+          setConnectionFailed(true);
         }
       };
 
-      ws.onerror = (error) => {
-        logWebSocket('error', { error });
+      ws.onerror = () => {
+        // Suppress error logging in development when backend is down
+        if (process.env.NODE_ENV === 'development') {
+          console.debug('[ChatWidget] WebSocket connection failed - backend may be offline');
+        } else {
+          logWebSocket('error', {});
+        }
         setIsConnected(false);
         setIsLoading(false);
         setIsTyping(false);
       };
     } catch (error) {
-      logger.error('Failed to create WebSocket connection', error as Error);
+      // Suppress error logging in development
+      if (process.env.NODE_ENV !== 'development') {
+        logger.error('Failed to create WebSocket connection', error as Error);
+      }
       setIsConnected(false);
+      setConnectionFailed(true);
     }
-  }, []);
+  }, [retryCount]);
 
   // Initialize WebSocket connection
   useEffect(() => {
@@ -522,10 +576,10 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
 
   if (!isOpen) {
     return (
-      <div className="fixed right-4 bottom-4 z-50">
+      <div className="fixed right-4 bottom-20 z-40">
         <button
           onClick={toggleChat}
-          className="relative h-16 w-16 overflow-hidden rounded-full shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+          className="relative h-14 w-14 overflow-hidden rounded-full shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl sm:h-16 sm:w-16"
           aria-label="Open My Hibachi Assistant"
         >
           <Image
@@ -545,48 +599,145 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
   }
 
   return (
-    <div className="fixed right-4 bottom-4 z-40 flex max-h-[400px] w-72 flex-col rounded-2xl border border-gray-200 bg-white shadow-2xl sm:w-80">
+    <div className={`fixed z-50 flex flex-col rounded-2xl border border-gray-200 bg-white shadow-2xl transition-all duration-300 ${isExpanded
+        ? 'right-2 bottom-4 left-2 max-h-[85vh] sm:right-4 sm:left-auto sm:w-[720px] sm:h-[540px] md:w-[840px] md:h-[560px] lg:w-[960px] lg:h-[580px]'
+        : 'right-2 bottom-20 h-[70vh] max-h-[570px] w-[calc(100vw-1rem)] max-w-[380px] sm:right-4 sm:w-[360px] sm:h-[540px] md:w-[380px] md:h-[570px]'
+      }`}>
       {/* Header */}
-      <div className="flex items-center justify-between rounded-t-2xl bg-gradient-to-r from-[#ffb800] to-[#db2b28] p-2 text-white">
-        <div className="flex items-center space-x-2">
-          <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full">
+      <div className="flex items-center justify-between rounded-t-2xl bg-gradient-to-r from-[#ffb800] to-[#db2b28] p-3 text-white">
+        <div className="flex items-center space-x-3">
+          <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full">
             <Image
               src="/My Hibachi logo.svg"
               alt="My Hibachi"
-              width={24}
-              height={24}
+              width={32}
+              height={32}
               className="h-full w-full rounded-full object-cover"
               style={{ objectFit: 'cover' }}
             />
           </div>
           <div className="flex-1">
-            <h3 className="font-medium" style={{ fontSize: '14px' }}>
+            <h3 className="text-base font-medium">
               My Hibachi Assistant
             </h3>
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-1.5">
               <div
-                className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-yellow-400'}`}
+                className={`h-2.5 w-2.5 rounded-full ${isConnected ? 'bg-green-300 shadow-[0_0_6px_rgba(134,239,172,0.8)]' : connectionFailed ? 'bg-red-400 shadow-[0_0_6px_rgba(248,113,113,0.8)]' : 'bg-yellow-300 shadow-[0_0_6px_rgba(253,224,71,0.8)]'}`}
               />
-              <span className="text-xs text-white/80">
-                {isConnected ? 'Connected' : 'Connecting...'}
+              <span className="text-sm text-white/90">
+                {isConnected ? 'Connected' : connectionFailed ? 'Offline Mode' : 'Connecting...'}
               </span>
             </div>
           </div>
         </div>
-        <button
-          onClick={toggleChat}
-          className="flex items-center justify-center rounded-full p-1 transition-colors hover:bg-white/20"
-          aria-label="Close chat"
-        >
-          <X size={16} className="text-white" />
-        </button>
+        <div className="flex items-center space-x-1">
+          {/* Clear chat button */}
+          {messages.length > 0 && (
+            <button
+              onClick={() => {
+                if (window.confirm('Clear chat history?')) {
+                  setMessages([]);
+                  if (typeof window !== 'undefined') {
+                    localStorage.removeItem(storageKey);
+                  }
+                }
+              }}
+              className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/20"
+              aria-label="Clear chat"
+              title="Clear chat"
+            >
+              <Trash2 size={18} className="text-white" />
+            </button>
+          )}
+          {/* Sound toggle button */}
+          <button
+            onClick={toggleSound}
+            className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/20"
+            aria-label={soundEnabled ? 'Mute notifications' : 'Enable notifications'}
+            title={soundEnabled ? 'Mute' : 'Unmute'}
+          >
+            {soundEnabled ? (
+              <Volume2 size={18} className="text-white" />
+            ) : (
+              <VolumeX size={18} className="text-white" />
+            )}
+          </button>
+          {/* Expand/Minimize button */}
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/20"
+            aria-label={isExpanded ? 'Minimize chat' : 'Expand chat'}
+            title={isExpanded ? 'Minimize' : 'Expand'}
+          >
+            {isExpanded ? (
+              <Minimize2 size={18} className="text-white" />
+            ) : (
+              <Maximize2 size={18} className="text-white" />
+            )}
+          </button>
+          {/* Close button */}
+          <button
+            onClick={toggleChat}
+            className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-white/20"
+            aria-label="Close chat"
+            title="Close"
+          >
+            <X size={20} className="text-white" />
+          </button>
+        </div>
       </div>
 
       {/* Messages */}
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
-        {messages.length === 0 && (
+        {/* Offline Fallback UI */}
+        {connectionFailed && messages.length === 0 && (
+          <div className="text-center space-y-4">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-100">
+              <span className="text-3xl">📱</span>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-2">Chat Temporarily Unavailable</h4>
+              <p className="text-sm text-gray-600 mb-4">
+                Our AI assistant is currently offline, but we&apos;re still here to help!
+              </p>
+            </div>
+            <div className="space-y-2">
+              <a
+                href={protectedTel || 'tel:+19167408768'}
+                className="flex items-center justify-center gap-2 w-full rounded-lg bg-green-500 px-4 py-3 text-white font-medium hover:bg-green-600 transition-colors"
+              >
+                <span>📞</span> Call Us Now
+              </a>
+              <a
+                href={`mailto:${protectedEmail || 'cs@myhibachichef.com'}`}
+                className="flex items-center justify-center gap-2 w-full rounded-lg bg-blue-500 px-4 py-3 text-white font-medium hover:bg-blue-600 transition-colors"
+              >
+                <span>✉️</span> Email Us
+              </a>
+              <a
+                href="/contact"
+                className="flex items-center justify-center gap-2 w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+              >
+                <span>💬</span> Contact Page
+              </a>
+            </div>
+            <button
+              onClick={() => {
+                setConnectionFailed(false);
+                setRetryCount(0);
+                connectWebSocket();
+              }}
+              className="text-sm text-orange-600 hover:text-orange-700 underline"
+            >
+              Try reconnecting
+            </button>
+          </div>
+        )}
+
+        {/* Normal welcome message when connected or still connecting */}
+        {!connectionFailed && messages.length === 0 && (
           <div className="text-center">
-            <p className="mb-4 text-gray-600" style={{ fontSize: '14px' }}>
+            <p className="mb-4 text-sm text-gray-600">
               👋 Hi! I can help you with booking reservations:
             </p>
             <div className="flex flex-wrap justify-center gap-2">
@@ -595,8 +746,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
                   <button
                     key={i}
                     onClick={() => handleSuggestionClick(suggestion)}
-                    className="rounded-full border border-orange-200 bg-orange-50 px-2 py-1 text-orange-700 transition-colors hover:bg-orange-100"
-                    style={{ fontSize: '13px' }}
+                    className="rounded-full border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-700 transition-colors hover:bg-orange-100 min-h-[44px]"
                   >
                     {suggestion}
                   </button>
@@ -612,11 +762,10 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
             className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[80%] rounded-2xl p-2 ${
-                message.type === 'user'
-                  ? 'bg-gradient-to-r from-[#ffb800] to-[#db2b28] text-white'
-                  : 'bg-gray-100 text-gray-800'
-              }`}
+              className={`max-w-[85%] rounded-2xl p-3 ${message.type === 'user'
+                ? 'bg-gradient-to-r from-[#ffb800] to-[#db2b28] text-white'
+                : 'bg-gray-100 text-gray-800'
+                }`}
             >
               <div className="flex items-start space-x-2">
                 {message.type === 'assistant' && (
@@ -624,15 +773,18 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
                     <Image
                       src="/My Hibachi logo.png"
                       alt="Assistant"
-                      width={16}
-                      height={16}
+                      width={20}
+                      height={20}
                       className="opacity-70"
                     />
                   </div>
                 )}
                 <div className="flex-1">
-                  <p className="whitespace-pre-wrap" style={{ fontSize: '14px' }}>
+                  <p className="whitespace-pre-wrap text-base leading-relaxed">
                     {message.content}
+                  </p>
+                  <p className={`mt-1 text-xs ${message.type === 'user' ? 'text-white/70' : 'text-gray-500'}`}>
+                    {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
 
                   {message.citations && message.citations.length > 0 && (
@@ -720,16 +872,15 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
                 ? 'Ask about bookings, reservations, or menu options...'
                 : 'Connecting to booking assistant...'
             }
-            className="flex-1 rounded-lg border border-gray-300 p-1.5 focus:border-transparent focus:ring-2 focus:ring-orange-500 focus:outline-none"
-            style={{ fontSize: '14px' }}
+            className="flex-1 rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-transparent focus:ring-2 focus:ring-orange-500 focus:outline-none"
             disabled={isLoading}
           />
           <button
             onClick={() => sendMessage()}
             disabled={!inputValue.trim() || isLoading}
-            className="rounded-lg bg-gradient-to-r from-[#ffb800] to-[#db2b28] p-1.5 text-white transition-all duration-200 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-r from-[#ffb800] to-[#db2b28] text-white transition-all duration-200 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Send size={16} />
+            <Send size={20} />
           </button>
         </div>
 
@@ -749,6 +900,16 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
       {showContactPrompt && (
         <div className="absolute inset-0 z-50 flex items-center justify-center rounded-2xl bg-black/50 p-4">
           <div className="relative w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowContactPrompt(false)}
+              className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700"
+              aria-label="Close"
+              title="Skip for now"
+            >
+              <X size={18} />
+            </button>
+
             {/* Welcome Header */}
             <div className="mb-4 text-center">
               <div className="mb-2 text-4xl">👋</div>
@@ -774,7 +935,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
               <input
                 id="chat-name"
                 type="text"
-                placeholder="John Doe"
+                placeholder="Enter your full name"
                 value={tempName}
                 onChange={(e) => {
                   setTempName(e.target.value);
@@ -805,7 +966,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
               <input
                 id="chat-phone"
                 type="tel"
-                placeholder="(555) 123-4567"
+                placeholder="Enter your phone number"
                 value={formatPhoneForDisplay(tempPhone)}
                 onChange={(e) => {
                   const value = e.target.value.replace(/\D/g, '');
@@ -839,7 +1000,7 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
               <input
                 id="chat-email"
                 type="email"
-                placeholder="john@example.com"
+                placeholder="Enter your email (optional)"
                 value={tempEmail}
                 onChange={(e) => {
                   setTempEmail(e.target.value);

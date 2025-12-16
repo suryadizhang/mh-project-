@@ -3,7 +3,6 @@ import '@/styles/base.css'
 
 import { Metadata } from 'next'
 
-import Assistant from '@/components/chat/Assistant'
 import MetaMessenger from '@/components/chat/MetaMessenger'
 import ConsentBar from '@/components/consent/ConsentBar'
 
@@ -30,7 +29,6 @@ export default function ContactPage() {
   return (
     <>
       <ContactPageClient />
-      <Assistant page="/contact" />
       <ConsentBar />
       <MetaMessenger />
     </>

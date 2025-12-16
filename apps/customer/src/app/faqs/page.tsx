@@ -1,4 +1,5 @@
 import '@/styles/base.css';
+import '@/styles/faqs.css';
 import '@/styles/faqs/faqs-base.css';
 import '@/styles/faqs/faqs-items.css';
 

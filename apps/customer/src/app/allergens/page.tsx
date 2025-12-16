@@ -3,6 +3,22 @@
 import '@/styles/base.css';
 
 import { useProtectedPhone, ProtectedEmail } from '@/components/ui/ProtectedPhone';
+import {
+  ShieldCheck,
+  AlertTriangle,
+  ClipboardList,
+  PlusCircle,
+  XCircle,
+  CheckCircle,
+  Info,
+  ShieldAlert,
+  MessageSquare,
+  AlertOctagon,
+  Heart,
+  Mail,
+  Phone,
+  CalendarCheck,
+} from 'lucide-react';
 
 // Metadata moved to layout.tsx for server component support
 // export const metadata: Metadata = {...}
@@ -18,7 +34,7 @@ export default function AllergensPage() {
           {/* Header */}
           <div className="mb-5 text-center">
             <h1 className="display-4 mb-3">
-              <i className="bi bi-shield-check text-primary me-3"></i>
+              <ShieldCheck className="mr-3 inline-block h-10 w-10 text-blue-500" />
               Allergen Information & Safety Guide
             </h1>
             <p className="lead text-muted">
@@ -29,8 +45,8 @@ export default function AllergensPage() {
 
           {/* Critical Warning */}
           <div className="alert alert-danger mb-5" role="alert">
-            <h4 className="alert-heading">
-              <i className="bi bi-exclamation-triangle-fill me-2"></i>
+            <h4 className="alert-heading flex items-center">
+              <AlertTriangle className="mr-2 h-6 w-6" />
               Critical Information - Please Read
             </h4>
             <p className="mb-2">
@@ -52,8 +68,8 @@ export default function AllergensPage() {
 
           {/* FDA Major 9 Allergens */}
           <section className="mb-5">
-            <h2 className="mb-4">
-              <i className="bi bi-clipboard-data text-primary me-2"></i>
+            <h2 className="mb-4 flex items-center">
+              <ClipboardList className="mr-2 h-6 w-6 text-blue-500" />
               FDA Major 9 Allergens in Our Kitchen
             </h2>
             <p className="mb-4">
@@ -66,8 +82,8 @@ export default function AllergensPage() {
               <div>
                 <div className="card border-danger h-100">
                   <div className="card-body">
-                    <h5 className="card-title text-danger">
-                      <i className="bi bi-1-circle-fill me-2"></i>
+                    <h5 className="card-title text-danger flex items-center">
+                      <span className="mr-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-sm font-bold text-white">1</span>
                       Shellfish 🦞
                     </h5>
                     <p>
@@ -87,8 +103,8 @@ export default function AllergensPage() {
               <div className="">
                 <div className="card border-danger h-100">
                   <div className="card-body">
-                    <h5 className="card-title text-danger">
-                      <i className="bi bi-2-circle-fill me-2"></i>
+                    <h5 className="card-title text-danger flex items-center">
+                      <span className="mr-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-sm font-bold text-white">2</span>
                       Fish 🐟
                     </h5>
                     <p>
@@ -108,8 +124,8 @@ export default function AllergensPage() {
               <div className="">
                 <div className="card border-warning h-100">
                   <div className="card-body">
-                    <h5 className="card-title text-warning">
-                      <i className="bi bi-3-circle-fill me-2"></i>
+                    <h5 className="card-title text-warning flex items-center">
+                      <span className="mr-2 flex h-6 w-6 items-center justify-center rounded-full bg-yellow-500 text-sm font-bold text-white">3</span>
                       Gluten (Wheat) 🌾
                     </h5>
                     <p>
@@ -131,8 +147,8 @@ export default function AllergensPage() {
               <div className="">
                 <div className="card border-warning h-100">
                   <div className="card-body">
-                    <h5 className="card-title text-warning">
-                      <i className="bi bi-4-circle-fill me-2"></i>
+                    <h5 className="card-title text-warning flex items-center">
+                      <span className="mr-2 flex h-6 w-6 items-center justify-center rounded-full bg-yellow-500 text-sm font-bold text-white">4</span>
                       Soy 🫘
                     </h5>
                     <p>
@@ -152,8 +168,8 @@ export default function AllergensPage() {
               <div className="">
                 <div className="card border-info h-100">
                   <div className="card-body">
-                    <h5 className="card-title text-info">
-                      <i className="bi bi-5-circle-fill me-2"></i>
+                    <h5 className="card-title text-info flex items-center">
+                      <span className="mr-2 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-sm font-bold text-white">5</span>
                       Eggs 🥚
                     </h5>
                     <p>
@@ -173,8 +189,8 @@ export default function AllergensPage() {
 
           {/* Additional Allergens */}
           <section className="mb-5">
-            <h2 className="mb-4">
-              <i className="bi bi-plus-circle text-primary me-2"></i>
+            <h2 className="mb-4 flex items-center">
+              <PlusCircle className="mr-2 h-6 w-6 text-blue-500" />
               Additional Allergens We Track
             </h2>
             <p className="mb-4">
@@ -230,8 +246,8 @@ export default function AllergensPage() {
 
           {/* What We DON'T Use */}
           <section className="mb-5">
-            <h2 className="mb-4">
-              <i className="bi bi-x-circle text-success me-2"></i>
+            <h2 className="mb-4 flex items-center">
+              <XCircle className="mr-2 h-6 w-6 text-green-500" />
               Allergens We DO NOT Use
             </h2>
             <p className="mb-3">
@@ -240,56 +256,56 @@ export default function AllergensPage() {
             <div className="row">
               <div className="">
                 <ul className="list-group">
-                  <li className="list-group-item">
-                    <i className="bi bi-check-circle-fill text-success me-2"></i>
+                  <li className="list-group-item flex items-center">
+                    <CheckCircle className="mr-2 h-5 w-5 text-green-500" />
                     <strong>Peanuts</strong> - NOT used
                   </li>
-                  <li className="list-group-item">
-                    <i className="bi bi-check-circle-fill text-success me-2"></i>
+                  <li className="list-group-item flex items-center">
+                    <CheckCircle className="mr-2 h-5 w-5 text-green-500" />
                     <strong>Tree Nuts</strong> - NOT used
                   </li>
-                  <li className="list-group-item">
-                    <i className="bi bi-check-circle-fill text-success me-2"></i>
+                  <li className="list-group-item flex items-center">
+                    <CheckCircle className="mr-2 h-5 w-5 text-green-500" />
                     <strong>Dairy/Milk</strong> - NOT used (butter substitute only)
                   </li>
-                  <li className="list-group-item">
-                    <i className="bi bi-check-circle-fill text-success me-2"></i>
+                  <li className="list-group-item flex items-center">
+                    <CheckCircle className="mr-2 h-5 w-5 text-green-500" />
                     <strong>Sesame Oil</strong> - NOT used
                   </li>
                 </ul>
               </div>
               <div className="">
                 <ul className="list-group">
-                  <li className="list-group-item">
-                    <i className="bi bi-check-circle-fill text-success me-2"></i>
+                  <li className="list-group-item flex items-center">
+                    <CheckCircle className="mr-2 h-5 w-5 text-green-500" />
                     <strong>MSG</strong> - NOT used
                   </li>
-                  <li className="list-group-item">
-                    <i className="bi bi-check-circle-fill text-success me-2"></i>
+                  <li className="list-group-item flex items-center">
+                    <CheckCircle className="mr-2 h-5 w-5 text-green-500" />
                     <strong>Mustard</strong> - NOT used
                   </li>
-                  <li className="list-group-item">
-                    <i className="bi bi-check-circle-fill text-success me-2"></i>
+                  <li className="list-group-item flex items-center">
+                    <CheckCircle className="mr-2 h-5 w-5 text-green-500" />
                     <strong>Bell Peppers</strong> - NOT used
                   </li>
-                  <li className="list-group-item">
-                    <i className="bi bi-check-circle-fill text-success me-2"></i>
+                  <li className="list-group-item flex items-center">
+                    <CheckCircle className="mr-2 h-5 w-5 text-green-500" />
                     <strong>Vinegar</strong> - NOT used
                   </li>
                 </ul>
               </div>
             </div>
-            <div className="alert alert-info mt-3" role="alert">
-              <i className="bi bi-info-circle-fill me-2"></i>
-              <strong>Our cooking oil:</strong> We use <strong>canola oil</strong>, which is
-              allergen-free and does NOT contain soy.
+            <div className="alert alert-info mt-3 flex items-center" role="alert">
+              <Info className="mr-2 h-5 w-5" />
+              <span><strong>Our cooking oil:</strong> We use <strong>canola oil</strong>, which is
+                allergen-free and does NOT contain soy.</span>
             </div>
           </section>
 
           {/* Cross-Contamination Protocols */}
           <section className="mb-5">
-            <h2 className="mb-4">
-              <i className="bi bi-shield-fill-exclamation text-warning me-2"></i>
+            <h2 className="mb-4 flex items-center">
+              <ShieldAlert className="mr-2 h-6 w-6 text-yellow-500" />
               Cross-Contamination Protocols
             </h2>
             <div className="card border-warning mb-3">
@@ -337,18 +353,15 @@ export default function AllergensPage() {
 
           {/* How to Communicate Allergies */}
           <section className="mb-5">
-            <h2 className="mb-4">
-              <i className="bi bi-chat-dots text-primary me-2"></i>
+            <h2 className="mb-4 flex items-center">
+              <MessageSquare className="mr-2 h-6 w-6 text-blue-500" />
               How to Communicate Your Allergies
             </h2>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="">
                 <div className="card bg-light h-100">
                   <div className="card-body text-center">
-                    <i
-                      className="bi bi-1-circle-fill text-primary"
-                      style={{ fontSize: '2rem' }}
-                    ></i>
+                    <span className="flex h-12 w-12 mx-auto items-center justify-center rounded-full bg-blue-500 text-xl font-bold text-white">1</span>
                     <h5 className="mt-3">At Booking</h5>
                     <p className="mb-0">
                       Include all allergies in the &ldquo;Special Requests&rdquo; field when booking
@@ -360,10 +373,7 @@ export default function AllergensPage() {
               <div className="">
                 <div className="card bg-light h-100">
                   <div className="card-body text-center">
-                    <i
-                      className="bi bi-2-circle-fill text-primary"
-                      style={{ fontSize: '2rem' }}
-                    ></i>
+                    <span className="flex h-12 w-12 mx-auto items-center justify-center rounded-full bg-blue-500 text-xl font-bold text-white">2</span>
                     <h5 className="mt-3">SMS Confirmation</h5>
                     <p className="mb-0">
                       When you receive booking confirmation via SMS, we will ask you to confirm
@@ -375,10 +385,7 @@ export default function AllergensPage() {
               <div className="">
                 <div className="card bg-light h-100">
                   <div className="card-body text-center">
-                    <i
-                      className="bi bi-3-circle-fill text-primary"
-                      style={{ fontSize: '2rem' }}
-                    ></i>
+                    <span className="flex h-12 w-12 mx-auto items-center justify-center rounded-full bg-blue-500 text-xl font-bold text-white">3</span>
                     <h5 className="mt-3">Before Event</h5>
                     <p className="mb-0">
                       Speak directly with your chef upon arrival to review allergies and safe menu
@@ -394,8 +401,8 @@ export default function AllergensPage() {
           <section className="mb-5">
             <div className="card bg-danger text-white">
               <div className="card-body">
-                <h3 className="card-title">
-                  <i className="bi bi-exclamation-octagon-fill me-2"></i>
+                <h3 className="card-title flex items-center">
+                  <AlertOctagon className="mr-2 h-7 w-7" />
                   Emergency / Severe Allergies
                 </h3>
                 <p className="mb-3">
@@ -424,8 +431,8 @@ export default function AllergensPage() {
 
           {/* Dietary Accommodations */}
           <section className="mb-5">
-            <h2 className="mb-4">
-              <i className="bi bi-heart text-danger me-2"></i>
+            <h2 className="mb-4 flex items-center">
+              <Heart className="mr-2 h-6 w-6 text-red-500" />
               Dietary Accommodations We Offer
             </h2>
             <p className="mb-3">
@@ -435,8 +442,8 @@ export default function AllergensPage() {
               <div className="">
                 <div className="card">
                   <div className="card-body">
-                    <h5 className="card-title">
-                      <i className="bi bi-check-circle-fill text-success me-2"></i>
+                    <h5 className="card-title flex items-center">
+                      <CheckCircle className="mr-2 h-5 w-5 text-green-500" />
                       Vegetarian / Vegan
                     </h5>
                     <p className="mb-0">
@@ -448,8 +455,8 @@ export default function AllergensPage() {
               <div className="">
                 <div className="card">
                   <div className="card-body">
-                    <h5 className="card-title">
-                      <i className="bi bi-check-circle-fill text-success me-2"></i>
+                    <h5 className="card-title flex items-center">
+                      <CheckCircle className="mr-2 h-5 w-5 text-green-500" />
                       Gluten-Free
                     </h5>
                     <p className="mb-0">
@@ -462,8 +469,8 @@ export default function AllergensPage() {
               <div className="">
                 <div className="card">
                   <div className="card-body">
-                    <h5 className="card-title">
-                      <i className="bi bi-check-circle-fill text-success me-2"></i>
+                    <h5 className="card-title flex items-center">
+                      <CheckCircle className="mr-2 h-5 w-5 text-green-500" />
                       Dairy-Free
                     </h5>
                     <p className="mb-0">
@@ -475,8 +482,8 @@ export default function AllergensPage() {
               <div className="">
                 <div className="card">
                   <div className="card-body">
-                    <h5 className="card-title">
-                      <i className="bi bi-check-circle-fill text-success me-2"></i>
+                    <h5 className="card-title flex items-center">
+                      <CheckCircle className="mr-2 h-5 w-5 text-green-500" />
                       Halal / Kosher
                     </h5>
                     <p className="mb-0">
@@ -490,25 +497,31 @@ export default function AllergensPage() {
           </section>
 
           {/* Footer CTA */}
-          <div className="border-top mt-5 pt-5 text-center">
-            <h3 className="mb-3">Questions About Allergens?</h3>
-            <p className="lead mb-4">
+          <div className="border-t border-gray-200 mt-8 pt-8 text-center">
+            <h3 className="text-2xl font-bold text-gray-800 mb-3">Questions About Allergens?</h3>
+            <p className="text-lg text-gray-600 mb-6">
               We&apos;re here to help ensure your event is safe and enjoyable for all guests.
             </p>
-            <div className="flex justify-center flex-wrap gap-3">
-              <a href="/contact" className="btn btn-primary btn-lg">
-                <i className="bi bi-envelope-fill me-2"></i>
+            <div className="flex justify-center flex-wrap gap-4">
+              <a
+                href="/contact"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-xl shadow-md hover:from-red-700 hover:to-red-800 hover:shadow-lg transition-all duration-300"
+              >
+                <Mail className="h-5 w-5" />
                 Contact Us
               </a>
               <a
                 href={protectedTel ? `tel:${protectedTel}` : '#'}
-                className="btn btn-outline-primary btn-lg"
+                className="inline-flex items-center gap-2 px-6 py-3 border-2 border-red-600 text-red-600 font-semibold rounded-xl hover:bg-red-50 hover:border-red-700 hover:text-red-700 transition-all duration-300"
               >
-                <i className="bi bi-telephone-fill me-2"></i>
+                <Phone className="h-5 w-5" />
                 Call {protectedPhone || 'Loading...'}
               </a>
-              <a href="/BookUs" className="btn btn-success btn-lg">
-                <i className="bi bi-calendar-check-fill me-2"></i>
+              <a
+                href="/BookUs"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl shadow-md hover:from-green-700 hover:to-green-800 hover:shadow-lg transition-all duration-300"
+              >
+                <CalendarCheck className="h-5 w-5" />
                 Book Your Event
               </a>
             </div>

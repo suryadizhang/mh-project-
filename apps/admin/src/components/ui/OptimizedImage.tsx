@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
+import { ImageIcon } from 'lucide-react';
 
 interface OptimizedImageProps {
   src: string;
@@ -55,10 +56,7 @@ export default function OptimizedImage({
   if (hasError) {
     return (
       <div className={`image-error-fallback ${className}`}>
-        <i
-          className="bi bi-image"
-          style={{ fontSize: '2rem', color: '#ccc' }}
-        ></i>
+        <ImageIcon className="h-8 w-8 text-gray-400" />
         <span className="sr-only">{alt}</span>
       </div>
     );
@@ -67,9 +65,8 @@ export default function OptimizedImage({
   const imageProps = {
     src,
     alt,
-    className: `optimized-image ${
-      isLoading ? 'loading' : 'loaded'
-    } ${className}`,
+    className: `optimized-image ${isLoading ? 'loading' : 'loaded'
+      } ${className}`,
     onLoad: handleLoad,
     onError: handleError,
     quality,

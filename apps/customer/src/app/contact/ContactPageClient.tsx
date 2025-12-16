@@ -1,7 +1,29 @@
 'use client';
 
+import { useState } from 'react';
 import { logger } from '@/lib/logger';
 import { useProtectedPhone } from '@/components/ui/ProtectedPhone';
+import { SITE_CONFIG } from '@/lib/seo-config';
+import ContactForm from '@/components/contact/ContactForm';
+import {
+  MessageCircle,
+  Instagram,
+  Heart,
+  Trophy,
+  Sparkles,
+  MapPin,
+  Mail,
+  MessageSquare,
+  Clock,
+  Star,
+  CalendarCheck,
+  Phone,
+  Quote,
+  Info,
+  Facebook,
+  Send,
+  ChevronDown,
+} from 'lucide-react';
 
 // Type definitions
 declare global {
@@ -32,19 +54,14 @@ function InlineMessengerButton() {
         window.FB.CustomerChat.show();
         logger.debug('Facebook Customer Chat opened');
       } else {
-        // Fallback: Open Messenger directly
-        const pageId = '61577483702847'; // My-hibachi page ID
-        const messengerUrl = `https://m.me/${pageId}`;
-
-        logger.debug('Opening Messenger directly', { url: messengerUrl });
-        window.open(messengerUrl, '_blank', 'noopener,noreferrer');
+        // Fallback: Open Messenger directly using centralized config
+        logger.debug('Opening Messenger directly', { url: SITE_CONFIG.social.facebookMessenger });
+        window.open(SITE_CONFIG.social.facebookMessenger, '_blank', 'noopener,noreferrer');
       }
     } catch (error) {
       logger.warn('Error opening Messenger', { error });
-      // Final fallback: Open Messenger directly
-      const pageId = '61577483702847';
-      const messengerUrl = `https://m.me/${pageId}`;
-      window.open(messengerUrl, '_blank', 'noopener,noreferrer');
+      // Final fallback
+      window.open(SITE_CONFIG.social.facebookMessenger, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -54,7 +71,7 @@ function InlineMessengerButton() {
       className="social-link facebook-link messenger-chat-button"
       style={{ cursor: 'pointer', border: 'none', background: 'none', padding: 0, width: '100%' }}
     >
-      <i className="bi bi-messenger social-icon"></i>
+      <MessageCircle className="social-icon h-6 w-6" />
       <div>
         <strong>💬 Chat on Messenger</strong>
         <small>Instant messaging with our team</small>
@@ -79,30 +96,28 @@ function InlineInstagramButton() {
 
       if (isMobile) {
         // Try to open Instagram app first with the ig.me URL (works best on mobile)
-        const igMeUrl = 'https://ig.me/m/my_hibachi_chef';
-        logger.debug('Opening Instagram DM (mobile)', { url: igMeUrl });
+        logger.debug('Opening Instagram DM (mobile)', { url: SITE_CONFIG.social.instagramDm });
 
         // Try Instagram app deep link first
         const iframe = document.createElement('iframe');
         iframe.style.display = 'none';
-        iframe.src = 'instagram://user?username=my_hibachi_chef';
+        iframe.src = `instagram://user?username=${SITE_CONFIG.social.instagramHandle}`;
         document.body.appendChild(iframe);
 
         setTimeout(() => {
           document.body.removeChild(iframe);
           // Fallback to ig.me which works on both app and web
-          window.open(igMeUrl, '_blank', 'noopener,noreferrer');
+          window.open(SITE_CONFIG.social.instagramDm, '_blank', 'noopener,noreferrer');
         }, 1000);
       } else {
         // Desktop - use ig.me URL which redirects properly
-        const igMeUrl = 'https://ig.me/m/my_hibachi_chef';
-        logger.debug('Opening Instagram DM (desktop)', { url: igMeUrl });
-        window.open(igMeUrl, '_blank', 'noopener,noreferrer');
+        logger.debug('Opening Instagram DM (desktop)', { url: SITE_CONFIG.social.instagramDm });
+        window.open(SITE_CONFIG.social.instagramDm, '_blank', 'noopener,noreferrer');
       }
     } catch (error) {
       logger.warn('Error opening Instagram', { error });
       // Ultimate fallback to profile page
-      window.open('https://www.instagram.com/my_hibachi_chef/', '_blank', 'noopener,noreferrer');
+      window.open(SITE_CONFIG.social.instagram, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -112,10 +127,10 @@ function InlineInstagramButton() {
       className="social-link instagram-link instagram-chat-button"
       style={{ cursor: 'pointer', border: 'none', background: 'none', padding: 0, width: '100%' }}
     >
-      <i className="bi bi-instagram social-icon"></i>
+      <Instagram className="social-icon h-6 w-6" />
       <div>
         <strong>📸 DM on Instagram</strong>
-        <small>Message @my_hibachi_chef directly</small>
+        <small>Message @{SITE_CONFIG.social.instagramHandle} directly</small>
       </div>
     </button>
   );
@@ -124,6 +139,7 @@ function InlineInstagramButton() {
 export default function ContactPageClient() {
   // Use protected phone hook for anti-scraping
   const { tel } = useProtectedPhone();
+  const [isFormExpanded, setIsFormExpanded] = useState(false);
 
   return (
     <div className="contact-page">
@@ -137,7 +153,7 @@ export default function ContactPageClient() {
             <span className="hero-icon-floating">🍽️</span>
           </div>
           <h1 className="hero-title">
-            <i className="bi bi-heart-fill heart-icon pulse-animation"></i>
+            <Heart className="heart-icon pulse-animation mr-2 inline-block h-8 w-8 fill-current text-red-500" />
             <span className="gradient-text">Book Your Hibachi Experience</span>
           </h1>
           <p className="hero-subtitle">
@@ -149,15 +165,15 @@ export default function ContactPageClient() {
           </p>
           <div className="hero-features">
             <div className="feature-badge">
-              <i className="bi bi-trophy-fill feature-icon"></i>
+              <Trophy className="feature-icon h-5 w-5" />
               <span>Premium Experience</span>
             </div>
             <div className="feature-badge">
-              <i className="bi bi-stars feature-icon"></i>
+              <Sparkles className="feature-icon h-5 w-5" />
               <span>Master Chefs</span>
             </div>
             <div className="feature-badge">
-              <i className="bi bi-geo-alt-fill feature-icon"></i>
+              <MapPin className="feature-icon h-5 w-5" />
               <span>We Come To You</span>
             </div>
           </div>
@@ -172,17 +188,17 @@ export default function ContactPageClient() {
             <div className="card contact-card h-100">
               <div className="card-body">
                 <h3 className="card-title">
-                  <i className="bi bi-envelope-fill title-icon"></i>
+                  <Mail className="title-icon mr-2 inline-block h-6 w-6" />
                   Professional Booking Services
                 </h3>
 
                 <div className="contact-info-list">
                   <div className="contact-item">
-                    <i className="bi bi-envelope-fill contact-icon"></i>
+                    <Mail className="contact-icon h-5 w-5" />
                     <div className="contact-details">
                       <h5>Professional Booking</h5>
-                      <a href="mailto:cs@myhibachichef.com" className="contact-link">
-                        cs@myhibachichef.com
+                      <a href={`mailto:${SITE_CONFIG.contact.email}`} className="contact-link">
+                        {SITE_CONFIG.contact.email}
                       </a>
                       <p className="contact-note">
                         Premium service bookings, custom quotes, and expert consultation
@@ -191,11 +207,11 @@ export default function ContactPageClient() {
                   </div>
 
                   <div className="contact-item">
-                    <i className="bi bi-chat-dots-fill contact-icon"></i>
+                    <MessageSquare className="contact-icon h-5 w-5" />
                     <div className="contact-details">
                       <h5>Instant Response</h5>
-                      <a href="sms:+19167408768" className="contact-link">
-                        +1 (916) 740-8768
+                      <a href={`sms:${SITE_CONFIG.contact.phoneTel}`} className="contact-link">
+                        {SITE_CONFIG.contact.phone}
                       </a>
                       <p className="contact-note">
                         Text for immediate assistance, scheduled calls available
@@ -204,7 +220,7 @@ export default function ContactPageClient() {
                   </div>
 
                   <div className="contact-item">
-                    <i className="bi bi-clock-fill contact-icon"></i>
+                    <Clock className="contact-icon h-5 w-5" />
                     <div className="contact-details">
                       <h5>Rapid Response Guarantee</h5>
                       <p className="contact-link">Within 1-2 hours</p>
@@ -215,7 +231,7 @@ export default function ContactPageClient() {
                   </div>
 
                   <div className="contact-item">
-                    <i className="bi bi-geo-alt-fill contact-icon"></i>
+                    <MapPin className="contact-icon h-5 w-5" />
                     <div className="contact-details">
                       <h5>Service Coverage</h5>
                       <p className="contact-link">
@@ -237,7 +253,7 @@ export default function ContactPageClient() {
             <div className="card contact-card h-100">
               <div className="card-body">
                 <h3 className="card-title">
-                  <i className="bi bi-star-fill title-icon"></i>
+                  <Star className="title-icon mr-2 inline-block h-6 w-6 fill-current text-yellow-500" />
                   Client Reviews & Community
                 </h3>
 
@@ -252,12 +268,12 @@ export default function ContactPageClient() {
                   </p>
                   <div className="review-buttons">
                     <a
-                      href="https://www.yelp.com/biz/my-hibachi-fremont"
+                      href={SITE_CONFIG.social.yelp}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="review-button yelp-button"
                     >
-                      <i className="bi bi-yelp review-icon"></i>
+                      <span className="review-icon text-xl font-bold text-red-500">Y!</span>
                       <div className="review-content">
                         <strong>Share Your Hibachi Experience</strong>
                         <small>Help others discover our service!</small>
@@ -266,12 +282,12 @@ export default function ContactPageClient() {
                     </a>
 
                     <a
-                      href="https://www.google.com/maps/place/My+hibachi/@37.8543835,-122.0808034,8z/data=!3m1!4b1!4m6!3m5!1s0x808fc75b1c21cf49:0x152b61e9f0a0f93d!8m2!3d37.8543835!4d-122.0808034!16s%2Fg%2F11xkvw5_hv?entry=ttu&g_ep=EgoyMDI1MDcxNi4wIKXMDSoASAFQAw%3D%3D"
+                      href={SITE_CONFIG.social.google}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="review-button google-button"
                     >
-                      <i className="bi bi-google review-icon"></i>
+                      <span className="review-icon text-xl font-bold text-blue-500">G</span>
                       <div className="review-content">
                         <strong>Google Business Review</strong>
                         <small>Boost our visibility to new clients!</small>
@@ -293,25 +309,25 @@ export default function ContactPageClient() {
                   <h5 className="section-subtitle">🔗 Connect With Our Community</h5>
                   <div className="social-links">
                     <a
-                      href="https://www.instagram.com/my_hibachi_chef/"
+                      href={SITE_CONFIG.social.instagram}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="social-link instagram-link"
                     >
-                      <i className="bi bi-instagram social-icon"></i>
+                      <Instagram className="social-icon h-6 w-6" />
                       <div>
-                        <strong>@my_hibachi_chef</strong>
+                        <strong>@{SITE_CONFIG.social.instagramHandle}</strong>
                         <small>Exclusive content & culinary inspiration</small>
                       </div>
                     </a>
 
                     <a
-                      href="https://www.facebook.com/people/My-hibachi/61577483702847/"
+                      href={SITE_CONFIG.social.facebook}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="social-link facebook-link"
                     >
-                      <i className="bi bi-facebook social-icon"></i>
+                      <Facebook className="social-icon h-6 w-6" />
                       <div>
                         <strong>My Hibachi</strong>
                         <small>Event galleries & client testimonials</small>
@@ -333,12 +349,49 @@ export default function ContactPageClient() {
           </div>
         </div>
 
+        {/* Email Contact Form Section - Collapsible */}
+        <div className="collapsible-form-section" id="business-inquiries">
+          <div className="mx-auto max-w-2xl">
+            <button
+              onClick={() => setIsFormExpanded(!isFormExpanded)}
+              className={`collapsible-form-header w-full ${isFormExpanded ? 'expanded' : ''}`}
+              aria-expanded={isFormExpanded}
+              aria-controls="contact-form-content"
+            >
+              <div className="collapsible-form-title">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-red-100 to-orange-100">
+                  <Send className="h-6 w-6 text-red-600" />
+                </div>
+                <div className="text-left">
+                  <h3>Send Us a Message</h3>
+                  <p className="text-sm text-gray-500 mt-0.5">Click to {isFormExpanded ? 'close' : 'open'} the contact form</p>
+                </div>
+              </div>
+              <div className={`collapsible-form-toggle ${isFormExpanded ? 'expanded' : ''}`}>
+                <ChevronDown className="h-5 w-5" />
+              </div>
+            </button>
+            <div
+              id="contact-form-content"
+              className={`collapsible-form-content ${isFormExpanded ? 'expanded' : ''}`}
+            >
+              <div className="collapsible-form-inner">
+                <p className="text-gray-600 mb-4 text-center">
+                  Have a question or need a custom quote? Fill out the form below and we&apos;ll get
+                  back to you quickly.
+                </p>
+                <ContactForm />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Booking Call-to-Action Section */}
         <div className="booking-cta-section">
           <div className="card booking-cta-card">
             <div className="card-body text-center">
               <div className="cta-icon-container">
-                <i className="bi bi-calendar-check-fill cta-icon"></i>
+                <CalendarCheck className="cta-icon h-10 w-10" />
               </div>
               <h2 className="cta-title">Ready to Experience Hibachi Excellence?</h2>
               <p className="cta-text">
@@ -346,13 +399,19 @@ export default function ContactPageClient() {
                 hibachi chefs. From intimate dinners to large celebrations, we create personalized
                 experiences that delight all your guests.
               </p>
-              <div className="cta-buttons">
-                <a href="#contact-details" className="btn btn-primary btn-lg me-3">
-                  <i className="bi bi-chat-dots-fill me-2"></i>
+              <div className="cta-buttons flex flex-wrap gap-4 justify-center">
+                <a
+                  href="#contact-details"
+                  className="cta-btn-primary inline-flex items-center gap-2 px-8 py-4 font-bold text-lg rounded-full shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <MessageSquare className="h-5 w-5" />
                   Get a Custom Quote
                 </a>
-                <a href={tel ? `tel:${tel}` : '#'} className="btn btn-outline-primary btn-lg">
-                  <i className="bi bi-telephone-fill me-2"></i>
+                <a
+                  href={tel ? `tel:${tel}` : '#'}
+                  className="cta-btn-secondary inline-flex items-center gap-2 px-8 py-4 font-bold text-lg rounded-full transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <Phone className="h-5 w-5" />
                   Call Us Now
                 </a>
               </div>
@@ -363,7 +422,7 @@ export default function ContactPageClient() {
         {/* Testimonials Section */}
         <div className="testimonials-section">
           <h3 className="mb-5 text-center">
-            <i className="bi bi-quote me-2"></i>
+            <Quote className="mr-2 inline-block h-6 w-6" />
             What Our Clients Say
           </h3>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -418,110 +477,44 @@ export default function ContactPageClient() {
         </div>
       </div>
 
-      {/* Service Areas */}
-      <section className="service-areas-section py-5">
-        <div className="container">
-          <h2 className="mb-5 text-center">Our Service Areas</h2>
+      {/* Service Areas - Compact Version */}
+      <section className="service-areas-section">
+        <div className="container mx-auto px-4">
+          <h2 className="text-center">🗺️ Our Service Areas</h2>
 
-          {/* Primary Bay Area Locations */}
-          <h4 className="mb-4 text-center">🏙️ Primary Bay Area Locations</h4>
-          <p className="mb-4 text-center">No additional travel fees within these areas!</p>
-          <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-            <div className="mb-3">
-              <div className="flex items-center">
-                <i className="bi bi-geo-alt-fill mr-2 text-red-600"></i>
-                <span>San Francisco</span>
+          {/* Bay Area + Sacramento in compact layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+            {/* Bay Area */}
+            <div className="text-center">
+              <h4 className="mb-2">🏙️ Bay Area <span className="text-green-600 text-sm">(No Travel Fee)</span></h4>
+              <div className="flex flex-wrap justify-center gap-2">
+                {['San Francisco', 'San Jose', 'Oakland', 'Santa Clara', 'Sunnyvale', 'Mountain View', 'Palo Alto', 'Fremont'].map((city) => (
+                  <span key={city} className="location-badge">
+                    <MapPin className="h-3 w-3 text-red-600" />
+                    {city}
+                  </span>
+                ))}
               </div>
             </div>
-            <div className="mb-3">
-              <div className="flex items-center">
-                <i className="bi bi-geo-alt-fill mr-2 text-red-600"></i>
-                <span>San Jose</span>
-              </div>
-            </div>
-            <div className="mb-3">
-              <div className="flex items-center">
-                <i className="bi bi-geo-alt-fill mr-2 text-red-600"></i>
-                <span>Oakland</span>
-              </div>
-            </div>
-            <div className="mb-3">
-              <div className="flex items-center">
-                <i className="bi bi-geo-alt-fill mr-2 text-red-600"></i>
-                <span>Northern California</span>
-              </div>
-            </div>
-            <div className="mb-3">
-              <div className="flex items-center">
-                <i className="bi bi-geo-alt-fill mr-2 text-red-600"></i>
-                <span>Santa Clara</span>
-              </div>
-            </div>
-            <div className="mb-3">
-              <div className="flex items-center">
-                <i className="bi bi-geo-alt-fill mr-2 text-red-600"></i>
-                <span>Sunnyvale</span>
-              </div>
-            </div>
-            <div className="mb-3">
-              <div className="flex items-center">
-                <i className="bi bi-geo-alt-fill mr-2 text-red-600"></i>
-                <span>Mountain View</span>
-              </div>
-            </div>
-            <div className="mb-3">
-              <div className="flex items-center">
-                <i className="bi bi-geo-alt-fill mr-2 text-red-600"></i>
-                <span>Palo Alto</span>
+
+            {/* Sacramento Region */}
+            <div className="text-center">
+              <h4 className="mb-2">🏞️ Sacramento Region <span className="text-amber-600 text-sm">(Minimal Fee)</span></h4>
+              <div className="flex flex-wrap justify-center gap-2">
+                {['Sacramento', 'Elk Grove', 'Roseville', 'Folsom', 'Davis', 'Stockton', 'Modesto', 'Livermore'].map((city) => (
+                  <span key={city} className="location-badge">
+                    📍 {city}
+                  </span>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* Sacramento & Extended Regions */}
-          <h4 className="mb-4 text-center">🏞️ Sacramento & Extended Regions</h4>
-          <p className="mb-4 text-center">Minimal travel fees for these beautiful locations!</p>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <div className="flex items-center">
-              <span className="mr-2 text-red-600">📍</span>
-              <span>Sacramento</span>
-            </div>
-            <div className="flex items-center">
-              <span className="mr-2 text-red-600">📍</span>
-              <span>Elk Grove</span>
-            </div>
-            <div className="flex items-center">
-              <span className="mr-2 text-red-600">📍</span>
-              <span>Roseville</span>
-            </div>
-            <div className="flex items-center">
-              <span className="mr-2 text-red-600">📍</span>
-              <span>Folsom</span>
-            </div>
-            <div className="flex items-center">
-              <span className="mr-2 text-red-600">📍</span>
-              <span>Davis</span>
-            </div>
-            <div className="flex items-center">
-              <span className="mr-2 text-red-600">📍</span>
-              <span>Stockton</span>
-            </div>
-            <div className="flex items-center">
-              <span className="mr-2 text-red-600">📍</span>
-              <span>Modesto</span>
-            </div>
-            <div className="flex items-center">
-              <span className="mr-2 text-red-600">📍</span>
-              <span>Livermore</span>
-            </div>
-          </div>
-
-          <div className="mt-4 text-center">
-            <div className="alert alert-info d-inline-block">
-              <i className="bi bi-info-circle-fill me-2"></i>
-              We bring hibachi to your home or venue across Northern California—
-              <strong>contact us to see if we can reach you</strong> with our flexible service area
-              and transparent travel options.
-            </div>
+          <div className="text-center">
+            <p className="text-gray-600 text-sm">
+              <Info className="inline-block h-4 w-4 mr-1" />
+              Serving all of Northern California — <strong>contact us</strong> for locations not listed!
+            </p>
           </div>
         </div>
       </section>
