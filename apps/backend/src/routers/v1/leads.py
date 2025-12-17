@@ -126,6 +126,25 @@ class SocialThreadResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class LeadEventCreate(BaseModel):
+    """Request model for adding an event to a lead's funnel tracking."""
+
+    event_type: str
+    payload: dict[str, Any] | None = None
+
+
+class LeadEventResponse(BaseModel):
+    """Response model for lead events."""
+
+    id: UUID
+    lead_id: UUID
+    event_type: str
+    payload: dict[str, Any] | None
+    occurred_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 @router.post("/", response_model=LeadResponse)
 async def create_lead(
     lead_data: LeadCreate,
@@ -271,9 +290,7 @@ async def get_lead(lead_id: UUID, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Lead).where(Lead.id == lead_id))
     lead = result.scalar_one_or_none()
     if not lead:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")
 
     # Convert to response model with nested data
     lead_dict = {
@@ -284,6 +301,45 @@ async def get_lead(lead_id: UUID, db: AsyncSession = Depends(get_db)):
     }
 
     return lead_dict
+
+
+@router.post(
+    "/{lead_id}/events", response_model=LeadEventResponse, status_code=status.HTTP_201_CREATED
+)
+async def add_lead_event(
+    lead_id: UUID,
+    event_data: LeadEventCreate,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Add a funnel event to a lead for tracking customer journey.
+
+    This endpoint tracks lead progression through the conversion funnel:
+    - funnel_checked_availability: User checked chef availability
+    - funnel_started_booking: User navigated to booking page
+    - funnel_completed_booking: User completed booking
+    - funnel_dropped: User abandoned the funnel
+
+    The events are stored with timestamps for analytics and follow-up automation.
+    """
+    # Fetch the lead
+    result = await db.execute(select(Lead).where(Lead.id == lead_id))
+    lead = result.scalar_one_or_none()
+    if not lead:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")
+
+    # Add the event using the model method
+    event = lead.add_event(event_data.event_type, event_data.payload)
+
+    await db.commit()
+    await db.refresh(event)
+
+    logger.info(
+        f"Added event '{event_data.event_type}' to lead {lead_id}",
+        extra={"lead_id": str(lead_id), "event_type": event_data.event_type},
+    )
+
+    return event
 
 
 @router.put("/{lead_id}", response_model=LeadResponse)
@@ -298,9 +354,7 @@ async def update_lead(
     result = await db.execute(select(Lead).where(Lead.id == lead_id))
     lead = result.scalar_one_or_none()
     if not lead:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")
 
     # Track changes for events
     changes = {}
@@ -331,9 +385,7 @@ async def update_lead(
         lead.assigned_to = lead_update.assigned_to
 
     if lead_update.follow_up_date:
-        changes["follow_up_date"] = {
-            "to": lead_update.follow_up_date.isoformat()
-        }
+        changes["follow_up_date"] = {"to": lead_update.follow_up_date.isoformat()}
         lead.follow_up_date = lead_update.follow_up_date
 
     if lead_update.lost_reason:
@@ -365,9 +417,7 @@ async def add_lead_event(
     result = await db.execute(select(Lead).where(Lead.id == lead_id))
     lead = result.scalar_one_or_none()
     if not lead:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")
 
     lead.add_event(event_type, payload)
     lead.last_contact_date = datetime.now(timezone.utc)
@@ -389,9 +439,7 @@ async def analyze_lead_with_ai(
     result = await db.execute(select(Lead).where(Lead.id == lead_id))
     lead = result.scalar_one_or_none()
     if not lead:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")
 
     # Schedule AI analysis
     background_tasks.add_task(_ai_analyze_lead, lead_id, conversation_data)
@@ -400,17 +448,13 @@ async def analyze_lead_with_ai(
 
 
 @router.get("/{lead_id}/nurture-sequence")
-async def get_nurture_sequence(
-    lead_id: UUID, db: AsyncSession = Depends(get_db)
-):
+async def get_nurture_sequence(lead_id: UUID, db: AsyncSession = Depends(get_db)):
     """Get AI-generated nurture sequence for lead."""
 
     result = await db.execute(select(Lead).where(Lead.id == lead_id))
     lead = result.scalar_one_or_none()
     if not lead:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")
 
     from services.ai_lead_management import get_lead_nurture_ai
 
@@ -422,9 +466,7 @@ async def get_nurture_sequence(
 
 # Social Media Thread endpoints
 @router.post("/social-threads", response_model=SocialThreadResponse)
-async def create_social_thread(
-    thread_data: SocialThreadCreate, db: AsyncSession = Depends(get_db)
-):
+async def create_social_thread(thread_data: SocialThreadCreate, db: AsyncSession = Depends(get_db)):
     """Create or link a social media thread."""
 
     # Check if thread already exists
@@ -487,9 +529,7 @@ async def respond_to_social_thread(
 
     if context is None:
         context = {}
-    result = await db.execute(
-        select(SocialThread).where(SocialThread.id == thread_id)
-    )
+    result = await db.execute(select(SocialThread).where(SocialThread.id == thread_id))
     thread = result.scalar_one_or_none()
     if not thread:
         raise HTTPException(
@@ -560,20 +600,14 @@ async def _ai_analyze_lead(lead_id: UUID, conversation_data: list[dict]):
                 ai_manager = await get_ai_lead_manager()
 
                 # Get AI insights
-                insights = await ai_manager.analyze_conversation(
-                    conversation_data
-                )
+                insights = await ai_manager.analyze_conversation(conversation_data)
 
                 # Update lead with AI insights
-                ai_score = await ai_manager.score_lead_with_ai(
-                    lead, conversation_data
-                )
+                ai_score = await ai_manager.score_lead_with_ai(lead, conversation_data)
                 lead.score = ai_score
 
                 # Update quality based on AI score
-                lead.quality = await ai_manager.determine_lead_quality(
-                    lead, ai_score
-                )
+                lead.quality = await ai_manager.determine_lead_quality(lead, ai_score)
 
                 # Add AI analysis event
                 lead.add_event(

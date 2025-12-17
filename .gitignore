@@ -130,3 +130,9 @@ WIP_*.md
 
 # ===== Vercel =====
 .vercel
+
+# Local server scripts
+scripts/*.sh
+
+# Local server scripts
+scripts/*.sh
