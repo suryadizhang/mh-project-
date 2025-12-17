@@ -8,7 +8,8 @@
  * - Failed Bookings (BOOKING_FAILED)
  */
 
-import { logger } from '@/lib/logger'
+import { apiFetch } from '@/lib/api';
+import { logger } from '@/lib/logger';
 
 // TypeScript Types
 export type LeadSource =
@@ -21,61 +22,54 @@ export type LeadSource =
   | 'SMS'
   | 'PHONE'
   | 'REFERRAL'
-  | 'EVENT'
+  | 'EVENT';
 
-export type ContactChannel =
-  | 'EMAIL'
-  | 'SMS'
-  | 'INSTAGRAM'
-  | 'FACEBOOK'
-  | 'GOOGLE'
-  | 'YELP'
-  | 'WEB'
+export type ContactChannel = 'EMAIL' | 'SMS' | 'INSTAGRAM' | 'FACEBOOK' | 'GOOGLE' | 'YELP' | 'WEB';
 
 export interface LeadContact {
-  channel: ContactChannel
-  handle_or_address: string
-  verified?: boolean
+  channel: ContactChannel;
+  handle_or_address: string;
+  verified?: boolean;
 }
 
 export interface LeadContext {
-  party_size_adults?: number
-  party_size_kids?: number
-  estimated_budget_dollars?: number
-  event_date_pref?: string  // ISO date string
-  event_date_range_start?: string  // ISO date string
-  event_date_range_end?: string  // ISO date string
-  zip_code?: string
-  service_type?: string
-  preferred_date?: string  // For failed bookings
-  preferred_time?: string  // For failed bookings
-  notes?: string
+  party_size_adults?: number;
+  party_size_kids?: number;
+  estimated_budget_dollars?: number;
+  event_date_pref?: string; // ISO date string
+  event_date_range_start?: string; // ISO date string
+  event_date_range_end?: string; // ISO date string
+  zip_code?: string;
+  service_type?: string;
+  preferred_date?: string; // For failed bookings
+  preferred_time?: string; // For failed bookings
+  notes?: string;
 }
 
 export interface LeadSubmission {
-  source: LeadSource
-  contacts: LeadContact[]
-  context?: LeadContext
-  utm_source?: string
-  utm_medium?: string
-  utm_campaign?: string
+  source: LeadSource;
+  contacts: LeadContact[];
+  context?: LeadContext;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
 }
 
 export interface LeadResponse {
-  id: string
-  source: LeadSource
-  status: string
-  quality: string | null
-  score: number
-  created_at: string
-  utm_source?: string
-  utm_medium?: string
-  utm_campaign?: string
+  id: string;
+  source: LeadSource;
+  status: string;
+  quality: string | null;
+  score: number;
+  created_at: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
 }
 
 export interface LeadError {
-  error: string
-  details?: unknown
+  error: string;
+  details?: unknown;
 }
 
 /**
@@ -85,72 +79,131 @@ export interface LeadError {
  * @returns Promise with lead response or error
  */
 export async function submitLead(
-  lead: LeadSubmission
+  lead: LeadSubmission,
 ): Promise<{ success: true; data: LeadResponse } | { success: false; error: string }> {
   try {
     // Validate lead data
     if (!lead.source) {
-      throw new Error('Lead source is required')
+      throw new Error('Lead source is required');
     }
 
     if (!lead.contacts || lead.contacts.length === 0) {
-      throw new Error('At least one contact is required')
+      throw new Error('At least one contact is required');
     }
 
     // Validate contacts
     for (const contact of lead.contacts) {
       if (!contact.channel || !contact.handle_or_address) {
-        throw new Error('Each contact must have channel and handle_or_address')
+        throw new Error('Each contact must have channel and handle_or_address');
       }
     }
 
     logger.debug('Submitting lead', {
       source: lead.source,
       contactCount: lead.contacts.length,
-      campaign: lead.utm_campaign
-    })
+      campaign: lead.utm_campaign,
+    });
 
     // Submit to API
     const response = await fetch('/api/leads', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(lead)
-    })
+      body: JSON.stringify(lead),
+    });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
       logger.error('Lead submission failed', undefined, {
         status: response.status,
-        error: errorData
-      })
+        error: errorData,
+      });
 
       return {
         success: false,
-        error: errorData.error || `Failed to submit lead (${response.status})`
-      }
+        error: errorData.error || `Failed to submit lead (${response.status})`,
+      };
     }
 
-    const data = await response.json()
+    const data = await response.json();
 
     logger.info('Lead submitted successfully', {
       leadId: data.id,
       source: lead.source,
-      campaign: lead.utm_campaign
-    })
+      campaign: lead.utm_campaign,
+    });
 
     return {
       success: true,
-      data
-    }
+      data,
+    };
   } catch (error) {
-    logger.error('Lead submission error', error as Error)
+    logger.error('Lead submission error', error as Error);
 
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to submit lead'
+      error: error instanceof Error ? error.message : 'Failed to submit lead',
+    };
+  }
+}
+
+/**
+ * Submit a funnel event for an existing lead
+ * Used to track progressive funnel stages (checked availability, started booking, etc.)
+ *
+ * @param leadId - The ID of the existing lead
+ * @param eventType - Type of funnel event
+ * @param payload - Additional event data
+ * @returns Promise with success status
+ */
+export async function submitLeadEvent(
+  leadId: string,
+  eventType:
+    | 'funnel_checked_availability'
+    | 'funnel_started_booking'
+    | 'funnel_completed_booking'
+    | 'funnel_dropped',
+  payload?: Record<string, unknown>,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    logger.debug('Submitting lead event', {
+      leadId,
+      eventType,
+      payload,
+    });
+
+    const response = await apiFetch<{ id: string }>(`/api/leads/${leadId}/events`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event_type: eventType, payload }),
+    });
+
+    if (!response.success) {
+      // Log but don't fail - funnel tracking shouldn't block user flow
+      logger.warn('Lead event submission failed', {
+        leadId,
+        eventType,
+        error: response.error,
+      });
+      return { success: false, error: response.error || 'Failed to submit lead event' };
     }
+
+    logger.info('Lead funnel event tracked', {
+      leadId,
+      eventType,
+      eventId: response.data?.id,
+      timestamp: new Date().toISOString(),
+    });
+
+    return { success: true };
+  } catch (error) {
+    // Silent failure - funnel tracking shouldn't block user flow
+    logger.error('Lead event submission error', error as Error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to submit lead event',
+    };
   }
 }
 
@@ -161,13 +214,13 @@ export async function submitLead(
  * @returns Promise with lead response or error
  */
 export async function submitQuoteLead(quoteData: {
-  name: string
-  phone: string
-  adults: number
-  children: number
-  location?: string
-  zipCode?: string
-  grandTotal: number
+  name: string;
+  phone: string;
+  adults: number;
+  children: number;
+  location?: string;
+  zipCode?: string;
+  grandTotal: number;
 }): Promise<{ success: true; data: LeadResponse } | { success: false; error: string }> {
   const lead: LeadSubmission = {
     source: 'WEB_QUOTE',
@@ -175,8 +228,8 @@ export async function submitQuoteLead(quoteData: {
       {
         channel: 'SMS',
         handle_or_address: quoteData.phone,
-        verified: false
-      }
+        verified: false,
+      },
     ],
     context: {
       party_size_adults: quoteData.adults,
@@ -184,14 +237,14 @@ export async function submitQuoteLead(quoteData: {
       estimated_budget_dollars: quoteData.grandTotal,
       zip_code: quoteData.zipCode,
       service_type: 'hibachi_catering',
-      notes: `Quote requested via calculator. Location: ${quoteData.location || 'Not specified'}. Name: ${quoteData.name}`
+      notes: `Quote requested via calculator. Location: ${quoteData.location || 'Not specified'}. Name: ${quoteData.name}`,
     },
     utm_source: 'website',
     utm_medium: 'quote_calculator',
-    utm_campaign: 'quote_page'
-  }
+    utm_campaign: 'quote_page',
+  };
 
-  return await submitLead(lead)
+  return await submitLead(lead);
 }
 
 /**
@@ -201,8 +254,8 @@ export async function submitQuoteLead(quoteData: {
  * @returns Promise with lead response or error
  */
 export async function submitChatLead(chatData: {
-  name: string
-  phone: string
+  name: string;
+  phone: string;
 }): Promise<{ success: true; data: LeadResponse } | { success: false; error: string }> {
   const lead: LeadSubmission = {
     source: 'CHAT',
@@ -210,19 +263,19 @@ export async function submitChatLead(chatData: {
       {
         channel: 'SMS',
         handle_or_address: chatData.phone,
-        verified: false
-      }
+        verified: false,
+      },
     ],
     context: {
       service_type: 'hibachi_catering',
-      notes: `Chat lead captured. Name: ${chatData.name}`
+      notes: `Chat lead captured. Name: ${chatData.name}`,
     },
     utm_source: 'website',
     utm_medium: 'chat_widget',
-    utm_campaign: 'chat_page'
-  }
+    utm_campaign: 'chat_page',
+  };
 
-  return await submitLead(lead)
+  return await submitLead(lead);
 }
 
 /**
@@ -233,30 +286,34 @@ export async function submitChatLead(chatData: {
  * @param errorDetails - Optional error details
  * @returns Promise with lead response or error
  */
-export async function submitFailedBookingLead(bookingData: {
-  name: string
-  email: string
-  phone: string
-  eventDate: Date
-  eventTime: '12PM' | '3PM' | '6PM' | '9PM'
-  guestCount: number
-  addressZipcode?: string
-  venueZipcode?: string
-  fullAddress: string
-}, failureReason: string, errorDetails?: unknown): Promise<{ success: true; data: LeadResponse } | { success: false; error: string }> {
+export async function submitFailedBookingLead(
+  bookingData: {
+    name: string;
+    email: string;
+    phone: string;
+    eventDate: Date;
+    eventTime: '12PM' | '3PM' | '6PM' | '9PM';
+    guestCount: number;
+    addressZipcode?: string;
+    venueZipcode?: string;
+    fullAddress: string;
+  },
+  failureReason: string,
+  errorDetails?: unknown,
+): Promise<{ success: true; data: LeadResponse } | { success: false; error: string }> {
   const lead: LeadSubmission = {
     source: 'BOOKING_FAILED',
     contacts: [
       {
         channel: 'SMS',
         handle_or_address: bookingData.phone,
-        verified: false
+        verified: false,
       },
       {
         channel: 'EMAIL',
         handle_or_address: bookingData.email,
-        verified: false
-      }
+        verified: false,
+      },
     ],
     context: {
       party_size_adults: bookingData.guestCount,
@@ -266,14 +323,14 @@ export async function submitFailedBookingLead(bookingData: {
       service_type: 'hibachi_catering',
       preferred_date: bookingData.eventDate.toISOString().split('T')[0],
       preferred_time: bookingData.eventTime,
-      notes: `Failed booking attempt. Name: ${bookingData.name}. Reason: ${failureReason}. Date: ${bookingData.eventDate.toISOString().split('T')[0]} at ${bookingData.eventTime}. Location: ${bookingData.fullAddress}. ${errorDetails ? `Error: ${JSON.stringify(errorDetails)}` : ''}`
+      notes: `Failed booking attempt. Name: ${bookingData.name}. Reason: ${failureReason}. Date: ${bookingData.eventDate.toISOString().split('T')[0]} at ${bookingData.eventTime}. Location: ${bookingData.fullAddress}. ${errorDetails ? `Error: ${JSON.stringify(errorDetails)}` : ''}`,
     },
     utm_source: 'website',
     utm_medium: 'booking_form',
-    utm_campaign: 'failed_booking_recovery'
-  }
+    utm_campaign: 'failed_booking_recovery',
+  };
 
-  return await submitLead(lead)
+  return await submitLead(lead);
 }
 
 /**
@@ -284,10 +341,10 @@ export async function submitFailedBookingLead(bookingData: {
  */
 export function validatePhoneNumber(phone: string): boolean {
   // Remove all non-digit characters
-  const digitsOnly = phone.replace(/\D/g, '')
+  const digitsOnly = phone.replace(/\D/g, '');
 
   // Must have at least 10 digits
-  return digitsOnly.length >= 10
+  return digitsOnly.length >= 10;
 }
 
 /**
@@ -298,7 +355,7 @@ export function validatePhoneNumber(phone: string): boolean {
  */
 export function validateZipCode(zipCode: string): boolean {
   // US ZIP code format: 12345 or 12345-6789
-  return /^\d{5}(-\d{4})?$/.test(zipCode)
+  return /^\d{5}(-\d{4})?$/.test(zipCode);
 }
 
 /**
@@ -309,5 +366,5 @@ export function validateZipCode(zipCode: string): boolean {
  */
 export function validateEmail(email: string): boolean {
   // Basic email validation
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }

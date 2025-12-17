@@ -22,17 +22,17 @@ This repository contains the **complete web platform** that powers:
 
 ## 🏗️ Tech Stack
 
-| Layer        | Technology                       | Notes                  |
-| ------------ | -------------------------------- | ---------------------- |
-| **Frontend** | Next.js 15, React 19, TypeScript | App Router, RSC        |
-| **Styling**  | Tailwind CSS v4                  | Custom design system   |
-| **Backend**  | FastAPI, Python 3.11+            | Async, type-safe       |
-| **Database** | PostgreSQL 15                    | Multi-schema design    |
-| **Cache**    | Redis                            | Session, rate limiting |
-| **Payments** | Stripe                           | Intents, webhooks      |
-| **AI**       | OpenAI GPT-4                     | Chat, voice processing |
-| **Voice**    | RingCentral                      | SMS, phone calls       |
-| **Hosting**  | Vercel (frontend), VPS (backend) | Cloudflare DNS         |
+| Layer        | Technology                             | Notes                    |
+| ------------ | -------------------------------------- | ------------------------ |
+| **Frontend** | Next.js 15, React 19, TypeScript       | App Router, RSC          |
+| **Styling**  | Tailwind CSS v4                        | Custom design system     |
+| **Backend**  | FastAPI, Python 3.11+                  | mhapi.mysticdatanode.net |
+| **Database** | PostgreSQL 15 (Plesk VPS)              | Multi-schema design      |
+| **Cache**    | Redis                                  | Session, rate limiting   |
+| **Payments** | Stripe                                 | Intents, webhooks        |
+| **AI**       | OpenAI GPT-4                           | Chat, voice processing   |
+| **Voice**    | RingCentral                            | SMS, phone calls         |
+| **Hosting**  | Vercel (frontend), Plesk VPS (backend) | Cloudflare DNS           |
 
 ---
 

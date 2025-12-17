@@ -390,9 +390,30 @@ npx playwright test
 
 ---
 
+## � Pre-Commit Code Review (CROSS-REFERENCE)
+
+**For comprehensive pre-commit review standards, see:**
+`10-COPILOT_PERFORMANCE.instructions.md` → "Pre-Commit Code Review"
+section
+
+**Quick Summary - Before Every Commit:**
+
+1. ✅ Run `npm run build` (both apps)
+2. ✅ Run `npm test -- --run` (all tests pass)
+3. ✅ Review `git diff --staged` line-by-line
+4. ✅ Verify all imports resolve
+5. ✅ Check error handling is complete
+6. ✅ Remove console.log/print statements
+7. ✅ Verify no hardcoded secrets
+
+**This is enterprise-standard practice that senior SWEs follow.**
+
+---
+
 ## 🔗 Related Docs
 
 - `docs/05-TESTING/` – Detailed test guides
 - `e2e/README.md` – E2E setup guide
 - `pytest.ini` – Pytest configuration
 - `playwright.config.ts` – Playwright configuration
+- `10-COPILOT_PERFORMANCE.instructions.md` – Pre-commit review details
