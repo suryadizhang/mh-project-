@@ -458,6 +458,34 @@ class Lead(Base):
         "LeadSocialThread", back_populates="lead"
     )
 
+    def add_event(self, event_type: str, payload: Optional[dict] = None) -> "LeadEvent":
+        """
+        Add an event to this lead's event history.
+
+        This method creates a LeadEvent and appends it to the events relationship.
+        The event will be persisted when the session is committed.
+
+        Args:
+            event_type: Type of event (e.g., 'lead_created', 'status_changed',
+                       'funnel_checked_availability', 'funnel_started_booking')
+            payload: Optional JSON-serializable dict with event details
+
+        Returns:
+            The created LeadEvent instance
+
+        Example:
+            lead.add_event("funnel_checked_availability", {"date": "2025-06-15"})
+        """
+        from db.models.lead import LeadEvent  # Import here to avoid circular imports
+
+        event = LeadEvent(
+            lead_id=self.id,
+            event_type=event_type,
+            payload=payload,
+        )
+        self.events.append(event)
+        return event
+
 
 # ============================================================================
 # CUSTOMER SEGMENTATION MODELS (NEW for Phase 1B)

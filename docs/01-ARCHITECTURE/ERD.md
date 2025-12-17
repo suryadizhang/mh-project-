@@ -5,7 +5,20 @@ structure and relationships
 
 ---
 
-## 📊 Database Schema Overview
+## �️ Infrastructure
+
+| Component         | Service            | Domain/Location          |
+| ----------------- | ------------------ | ------------------------ |
+| **Customer Site** | Vercel             | myhibachichef.com        |
+| **Admin Panel**   | Vercel             | admin.myhibachichef.com  |
+| **Backend API**   | Plesk VPS          | mhapi.mysticdatanode.net |
+| **Database**      | PostgreSQL (Plesk) | localhost:5432 on VPS    |
+| **Cache**         | Redis (Plesk)      | localhost:6379 on VPS    |
+| **DNS**           | Cloudflare         | All domains              |
+
+---
+
+## �📊 Database Schema Overview
 
 The My Hibachi database uses **PostgreSQL** with multiple schemas for
 logical separation:
