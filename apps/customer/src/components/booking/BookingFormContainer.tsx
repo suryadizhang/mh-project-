@@ -1,4 +1,5 @@
 import './styles/BookingFormContainer.module.css';
+import './styles/form-inputs-global.css';
 
 import { addDays, format } from 'date-fns';
 import React, { useEffect, useState } from 'react';
@@ -259,25 +260,31 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ className =
         window.location.href = '/booking-success';
       } else {
         const errorData = response.data || response;
-        const errorMessage = typeof errorData === 'object' && errorData !== null && 'detail' in errorData
-          ? String(errorData.detail)
-          : 'Unknown error';
+        const errorMessage =
+          typeof errorData === 'object' && errorData !== null && 'detail' in errorData
+            ? String(errorData.detail)
+            : 'Unknown error';
 
         logger.error('Booking submission failed', undefined, { error: errorData });
 
         // Determine failure reason based on error message
         let failureReason = 'booking_failed';
-        let userMessage = 'Sorry, there was an error submitting your booking. Please try again or contact us directly.';
+        let userMessage =
+          'Sorry, there was an error submitting your booking. Please try again or contact us directly.';
 
-        if (errorMessage.toLowerCase().includes('slot') ||
-            errorMessage.toLowerCase().includes('booked') ||
-            errorMessage.toLowerCase().includes('unavailable') ||
-            errorMessage.toLowerCase().includes('time')) {
+        if (
+          errorMessage.toLowerCase().includes('slot') ||
+          errorMessage.toLowerCase().includes('booked') ||
+          errorMessage.toLowerCase().includes('unavailable') ||
+          errorMessage.toLowerCase().includes('time')
+        ) {
           failureReason = 'slot_unavailable';
-          userMessage = 'Sorry, this time slot is no longer available. We\'ve saved your information and will contact you with alternative times.';
+          userMessage =
+            "Sorry, this time slot is no longer available. We've saved your information and will contact you with alternative times.";
         } else if (errorMessage.toLowerCase().includes('date')) {
           failureReason = 'date_unavailable';
-          userMessage = 'Sorry, this date is no longer available. We\'ve saved your information and will contact you with alternative dates.';
+          userMessage =
+            "Sorry, this date is no longer available. We've saved your information and will contact you with alternative dates.";
         }
 
         // Capture lead for failed booking using centralized service
@@ -285,17 +292,21 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ className =
           ? `${formData.addressStreet}, ${formData.addressCity}, ${formData.addressState} ${formData.addressZipcode}`
           : `${formData.venueStreet}, ${formData.venueCity}, ${formData.venueState} ${formData.venueZipcode}`;
 
-        await submitFailedBookingLead({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          eventDate: formData.eventDate,
-          eventTime: formData.eventTime,
-          guestCount: formData.guestCount,
-          addressZipcode: formData.addressZipcode,
-          venueZipcode: formData.venueZipcode,
-          fullAddress
-        }, failureReason, errorData).catch(err => {
+        await submitFailedBookingLead(
+          {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            eventDate: formData.eventDate,
+            eventTime: formData.eventTime,
+            guestCount: formData.guestCount,
+            addressZipcode: formData.addressZipcode,
+            venueZipcode: formData.venueZipcode,
+            fullAddress,
+          },
+          failureReason,
+          errorData,
+        ).catch((err) => {
           logger.error('Failed to capture booking failure lead', err as Error);
           // Don't throw - we don't want to disrupt user experience
         });
@@ -310,17 +321,21 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ className =
         ? `${formData.addressStreet}, ${formData.addressCity}, ${formData.addressState} ${formData.addressZipcode}`
         : `${formData.venueStreet}, ${formData.venueCity}, ${formData.venueState} ${formData.venueZipcode}`;
 
-      await submitFailedBookingLead({
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        eventDate: formData.eventDate,
-        eventTime: formData.eventTime,
-        guestCount: formData.guestCount,
-        addressZipcode: formData.addressZipcode,
-        venueZipcode: formData.venueZipcode,
-        fullAddress
-      }, 'booking_error', error).catch(err => {
+      await submitFailedBookingLead(
+        {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          eventDate: formData.eventDate,
+          eventTime: formData.eventTime,
+          guestCount: formData.guestCount,
+          addressZipcode: formData.addressZipcode,
+          venueZipcode: formData.venueZipcode,
+          fullAddress,
+        },
+        'booking_error',
+        error,
+      ).catch((err) => {
         logger.error('Failed to capture booking failure lead', err as Error);
         // Don't throw - we don't want to disrupt user experience
       });
@@ -331,7 +346,8 @@ const BookingFormContainer: React.FC<BookingFormContainerProps> = ({ className =
     } finally {
       setIsSubmitting(false);
     }
-  };  const handleAgreementCancel = () => {
+  };
+  const handleAgreementCancel = () => {
     setShowAgreementModal(false);
     setFormData(null);
   };

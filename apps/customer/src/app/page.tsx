@@ -6,7 +6,7 @@ import '@/styles/pages/home.page.css';
 import { Building, CalendarCheck, CalendarDays, CheckCircle, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
-import ValuePropositionSection from '@/components/sections/ValuePropositionSection';
+import { LazyValuePropositionSection } from '@/lib/performance/lazyComponents';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 export default function Home() {
@@ -14,7 +14,7 @@ export default function Home() {
   return (
     <main data-page="home">
       {/* Hero Video Section */}
-      <section className="about-section">
+      <section className="about-section" aria-label="Hero section with video background">
         {/* Hero Media Container */}
         <div className="hero-media-container">
           <div className="hero-media-overlay"></div>
@@ -26,10 +26,14 @@ export default function Home() {
             muted
             loop
             playsInline
+            preload="metadata"
+            poster="/images/hero-poster.jpg"
             style={{ backgroundColor: '#000' }}
+            aria-hidden="true"
           >
             <source src="/videos/hero_video.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
+            {/* Accessibility: Video is decorative, content is in text below */}
+            <track kind="captions" src="/videos/hero_video.vtt" srcLang="en" label="English" />
           </video>
         </div>
 
@@ -48,7 +52,13 @@ export default function Home() {
           </div>
 
           {/* Experience Sections */}
-          <div className="experience-sections animate-on-scroll mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <section
+            aria-labelledby="experience-heading"
+            className="experience-sections animate-on-scroll mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2"
+          >
+            <h2 id="experience-heading" className="sr-only">
+              Our Hibachi Experience
+            </h2>
             <div className="mb-4">
               <div className="experience-card left-card chef-card">
                 <div className="experience-icon-wrapper chef-wrapper">
@@ -137,11 +147,11 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </div>
+          </section>
 
           {/* Features Grid - Compact */}
-          <div className="features-section compact-features">
-            <h2 className="features-heading">
+          <section className="features-section compact-features" aria-labelledby="features-heading">
+            <h2 id="features-heading" className="features-heading">
               <span className="heading-emoji">✨</span>
               What Makes Us Special
               <span className="heading-emoji">✨</span>
@@ -152,7 +162,7 @@ export default function Home() {
                   <span className="feature-icon feature-icon-premium">🥩</span>
                 </div>
                 <div className="feature-content">
-                  <h4 className="feature-title">Premium Ingredients</h4>
+                  <h3 className="feature-title">Premium Ingredients</h3>
                   <p className="feature-description">
                     Fresh, high-quality meats and authentic Japanese seasonings.
                   </p>
@@ -163,7 +173,7 @@ export default function Home() {
                   <span className="feature-icon feature-icon-pricing">💰</span>
                 </div>
                 <div className="feature-content">
-                  <h4 className="feature-title">Great Value</h4>
+                  <h3 className="feature-title">Great Value</h3>
                   <p className="feature-description">
                     Competitive rates with exceptional quality and service.
                   </p>
@@ -174,7 +184,7 @@ export default function Home() {
                   <span className="feature-icon feature-icon-entertainment">🎭</span>
                 </div>
                 <div className="feature-content">
-                  <h4 className="feature-title">Live Entertainment</h4>
+                  <h3 className="feature-title">Live Entertainment</h3>
                   <p className="feature-description">
                     Skilled chefs with entertaining performances.
                   </p>
@@ -185,14 +195,14 @@ export default function Home() {
                   <span className="feature-icon feature-icon-location">📍</span>
                 </div>
                 <div className="feature-content">
-                  <h4 className="feature-title">We Come To You</h4>
+                  <h3 className="feature-title">We Come To You</h3>
                   <p className="feature-description">
                     Mobile service across Bay Area & Sacramento.
                   </p>
                 </div>
               </div>
             </div>
-          </div>
+          </section>
 
           {/* Service Areas - Compact Link */}
           <div className="service-areas-compact animate-on-scroll">
@@ -200,9 +210,9 @@ export default function Home() {
               <div className="banner-content-wrapper">
                 <span className="banner-icon">📍</span>
                 <div className="banner-text-content">
-                  <h3 className="banner-title">
+                  <p className="banner-title" role="heading" aria-level={3}>
                     Serving Bay Area, Sacramento & Northern California
-                  </h3>
+                  </p>
                   <p className="banner-subtitle">No travel fee for most Bay Area locations!</p>
                 </div>
                 <Link href="/service-areas" className="banner-link">
@@ -381,8 +391,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Value Proposition + Urgency Section */}
-      <ValuePropositionSection />
+      {/* Value Proposition + Urgency Section - Lazy loaded for performance */}
+      <LazyValuePropositionSection />
     </main>
   );
 }
