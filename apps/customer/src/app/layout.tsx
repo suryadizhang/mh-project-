@@ -61,8 +61,14 @@ export default function RootLayout({
         {/* Critical CSS inlined for instant first paint - eliminates render-blocking */}
         <style id="critical-css" dangerouslySetInnerHTML={{ __html: criticalCSS }} />
 
-        {/* LCP optimization: Preload hero poster image for instant display */}
-        <link rel="preload" as="image" href="/images/hero-poster.jpg" fetchPriority="high" />
+        {/* LCP optimization: Preload hero poster image (WebP for modern browsers) */}
+        <link
+          rel="preload"
+          as="image"
+          href="/images/hero-poster.webp"
+          type="image/webp"
+          fetchPriority="high"
+        />
 
         {/* Performance optimization hints */}
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
