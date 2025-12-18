@@ -1,9 +1,9 @@
 'use client';
 
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { Building,Eye, EyeOff, LogIn } from 'lucide-react';
+import { Building, Eye, EyeOff, LogIn } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import {useState } from 'react';
+import { useState } from 'react';
 
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 import { Button } from '@/components/ui/button';
@@ -164,11 +164,12 @@ export default function LoginPage() {
             type="button"
             className="absolute inset-y-0 right-0 pr-3 flex items-center"
             onClick={() => setShowPassword(!showPassword)}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             {showPassword ? (
-              <EyeOff className="h-4 w-4 text-gray-400" />
+              <EyeOff className="h-4 w-4 text-gray-400" aria-hidden="true" />
             ) : (
-              <Eye className="h-4 w-4 text-gray-400" />
+              <Eye className="h-4 w-4 text-gray-400" aria-hidden="true" />
             )}
           </button>
         </div>

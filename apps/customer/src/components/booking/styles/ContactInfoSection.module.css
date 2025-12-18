@@ -21,17 +21,6 @@
   box-shadow: 0 0 0 3px rgb(16 185 129 / 10%);
 }
 
-/* Guest Count Specific Styling */
-input[type='number'] {
-  appearance: textfield;
-}
-
-input[type='number']::-webkit-outer-spin-button,
-input[type='number']::-webkit-inner-spin-button {
-  appearance: none;
-  margin: 0;
-}
-
 /* Enhanced Input Focus States */
 .form-group input:focus + .form-label,
 .form-group input:valid + .form-label {

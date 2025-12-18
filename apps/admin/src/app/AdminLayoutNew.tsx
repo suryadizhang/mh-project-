@@ -120,6 +120,14 @@ export default function AdminLayoutNew({ children }: AdminLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Skip link for accessibility - WCAG 2.1 AA compliance */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:bg-red-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-md focus:font-semibold focus:outline-none focus:ring-2 focus:ring-white"
+      >
+        Skip to main content
+      </a>
+
       {/* Top Header - Always Visible */}
       <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
         <div className="px-4 sm:px-6 lg:px-8">
@@ -192,8 +200,9 @@ export default function AdminLayoutNew({ children }: AdminLayoutProps) {
                   onClick={logout}
                   className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
                   title="Logout"
+                  aria-label="Logout from admin panel"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-4 h-4" aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -245,9 +254,10 @@ export default function AdminLayoutNew({ children }: AdminLayoutProps) {
                             href={item.href}
                             className={`
                               flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-all
-                              ${isActive
-                                ? 'bg-red-50 text-red-700 border-l-4 border-red-600 pl-3'
-                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                              ${
+                                isActive
+                                  ? 'bg-red-50 text-red-700 border-l-4 border-red-600 pl-3'
+                                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                               }
                             `}
                             title={item.description}
@@ -327,9 +337,10 @@ export default function AdminLayoutNew({ children }: AdminLayoutProps) {
                                 href={item.href}
                                 className={`
                                   flex items-center justify-between px-4 py-4 text-base font-medium rounded-lg transition-all
-                                  ${isActive
-                                    ? 'bg-red-50 text-red-700 border-l-4 border-red-600 pl-3'
-                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100'
+                                  ${
+                                    isActive
+                                      ? 'bg-red-50 text-red-700 border-l-4 border-red-600 pl-3'
+                                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100'
                                   }
                                 `}
                                 title={item.description}
@@ -361,7 +372,13 @@ export default function AdminLayoutNew({ children }: AdminLayoutProps) {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto pb-20 lg:pb-0">{children}</main>
+        <main
+          id="main-content"
+          role="main"
+          className="flex-1 overflow-auto pb-20 lg:pb-0"
+        >
+          {children}
+        </main>
       </div>
 
       {/* Quick Action Bar - Bottom (Mobile & Tablet) */}
@@ -382,9 +399,10 @@ export default function AdminLayoutNew({ children }: AdminLayoutProps) {
                   href={item.href}
                   className={`
                     relative flex flex-col items-center justify-center min-w-[60px] p-2 rounded-lg transition-all
-                    ${isActive
-                      ? 'bg-red-50 text-red-700'
-                      : 'text-gray-600 hover:text-gray-900 active:bg-gray-100'
+                    ${
+                      isActive
+                        ? 'bg-red-50 text-red-700'
+                        : 'text-gray-600 hover:text-gray-900 active:bg-gray-100'
                     }
                   `}
                 >

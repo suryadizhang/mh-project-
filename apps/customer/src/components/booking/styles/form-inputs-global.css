@@ -1,0 +1,54 @@
+/**
+ * Global Form Input Styles for Booking Components
+ * 
+ * These styles target specific input elements by attribute selectors.
+ * They must be in a regular CSS file (not .module.css) because CSS Modules 
+ * require at least one local class in each selector.
+ * 
+ * Import this file in components that need these global input styles.
+ */
+
+/* ====================================
+   Number Input Styles (Guest Count)
+   ==================================== */
+
+/* Remove spinner buttons from number inputs */
+input[type='number'] {
+  appearance: textfield;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+/* ====================================
+   Text Input Styles (Address Fields)
+   ==================================== */
+
+/* Smooth transitions for text inputs */
+.booking-form-container input[type='text'] {
+  transition: all 0.3s ease;
+}
+
+.booking-form-container input[type='text']:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgb(245 158 11 / 10%);
+}
+
+/* ====================================
+   ZIP Code Field Styles
+   ==================================== */
+
+/* Venue address ZIP code field */
+input[id='venueZipcode'] {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Customer address ZIP code field */
+input[id='addressZipcode'] {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
