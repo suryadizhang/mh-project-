@@ -160,8 +160,7 @@
    ORIGINAL FAQ STYLES (Updated for new structure)
    ============================================ */
 
-/* Font imports and base variables */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+/* Font imports handled by next/font in layout.tsx */
 
 :root {
   --color-primary: #db2b28;
