@@ -142,6 +142,13 @@ export const LazyValuePropositionSection = dynamic(
   },
 );
 
+// ServicesSection - Uses lucide-react icons, below the fold
+// Lazy loading this removes ~50KB of lucide-react from initial bundle
+export const LazyServicesSection = dynamic(() => import('@/components/sections/ServicesSection'), {
+  loading: () => React.createElement(SectionSkeleton),
+  ssr: true, // SEO important for services content
+});
+
 // QuoteCalculator - Complex form with calculations (named export)
 export const LazyQuoteCalculator = dynamic(
   () =>
