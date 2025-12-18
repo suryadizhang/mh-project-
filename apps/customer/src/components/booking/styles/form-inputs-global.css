@@ -1,10 +1,10 @@
 /**
  * Global Form Input Styles for Booking Components
- * 
+ *
  * These styles target specific input elements by attribute selectors.
- * They must be in a regular CSS file (not .module.css) because CSS Modules 
+ * They must be in a regular CSS file (not .module.css) because CSS Modules
  * require at least one local class in each selector.
- * 
+ *
  * Import this file in components that need these global input styles.
  */
 
