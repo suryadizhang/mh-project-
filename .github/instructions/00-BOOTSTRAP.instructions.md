@@ -30,6 +30,8 @@ files in order:
     patterns
 14. `14-MEDIA_OPTIMIZATION.instructions.md` – FFmpeg video/image
     optimization
+15. `15-LIGHTHOUSE_WEB_VITALS.instructions.md` – Core Web Vitals &
+    Lighthouse standards
 
 ---
 
