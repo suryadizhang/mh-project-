@@ -6,7 +6,7 @@ import type { NextConfig } from 'next';
 const withBundleAnalyzer =
   process.env.ANALYZE === 'true'
     ? // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require('@next/bundle-analyzer')({ enabled: true })
+      require('@next/bundle-analyzer')({ enabled: true })
     : (config: NextConfig) => config;
 
 const nextConfig: NextConfig = {
@@ -81,11 +81,11 @@ const nextConfig: NextConfig = {
           // Only enable HSTS in production
           ...(isProduction
             ? [
-              {
-                key: 'Strict-Transport-Security',
-                value: 'max-age=31536000; includeSubDomains; preload',
-              },
-            ]
+                {
+                  key: 'Strict-Transport-Security',
+                  value: 'max-age=31536000; includeSubDomains; preload',
+                },
+              ]
             : []),
           {
             key: 'X-DNS-Prefetch-Control',
@@ -124,6 +124,46 @@ const nextConfig: NextConfig = {
               // Only upgrade to HTTPS in production
               ...(isProduction ? ['upgrade-insecure-requests'] : []),
             ].join('; '),
+          },
+        ],
+      },
+      // Static asset cache headers - improves LCP by 674 KiB (Lighthouse recommendation)
+      {
+        source: '/:all*(svg|jpg|jpeg|png|gif|webp|avif|ico)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Font cache headers
+      {
+        source: '/:all*(woff|woff2|ttf|otf|eot)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Video cache headers
+      {
+        source: '/:all*(mp4|webm|ogg)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // JS/CSS cache headers (Next.js handles versioning)
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
           },
         ],
       },

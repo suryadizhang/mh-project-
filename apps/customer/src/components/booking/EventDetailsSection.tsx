@@ -1,4 +1,4 @@
-import '../../../app/BookUs/datepicker.css';
+import '@/app/BookUs/datepicker.css';
 import './styles/EventDetailsSection.module.css';
 
 import { addDays } from 'date-fns';

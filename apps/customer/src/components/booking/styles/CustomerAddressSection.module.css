@@ -62,12 +62,6 @@ select.form-control {
   padding-right: 2.5rem;
 }
 
-/* ZIP code field specific styling */
-input[id='addressZipcode'] {
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
 /* Conditional display animations */
 .form-section > div {
   opacity: 1;
