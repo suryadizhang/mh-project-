@@ -2,7 +2,7 @@ import type { BlogPost } from '@my-hibachi/blog-types';
 import Script from 'next/script';
 
 interface BlogStructuredDataProps {
-  post: BlogPost
+  post: BlogPost;
 }
 
 export default function BlogStructuredData({ post }: BlogStructuredDataProps) {
@@ -11,24 +11,24 @@ export default function BlogStructuredData({ post }: BlogStructuredDataProps) {
     '@type': 'BlogPosting',
     headline: post.title,
     description: post.metaDescription,
-    image: 'https://myhibachi.com/images/myhibachi-logo.webp', // Update with your actual domain
+    image: 'https://myhibachi.com/images/myhibachi-logo-small.webp', // Optimized logo
     author: {
       '@type': 'Person',
-      name: post.author
+      name: post.author,
     },
     publisher: {
       '@type': 'Organization',
       name: 'My Hibachi',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://myhibachi.com/images/myhibachi-logo.webp'
-      }
+        url: 'https://myhibachi.com/images/myhibachi-logo-small.webp',
+      },
     },
     datePublished: new Date(post.date).toISOString(),
     dateModified: new Date(post.date).toISOString(),
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `https://myhibachi.com/blog/${post.slug}`
+      '@id': `https://myhibachi.com/blog/${post.slug}`,
     },
     keywords: post.keywords.join(', '),
     articleSection: post.category,
@@ -42,18 +42,18 @@ export default function BlogStructuredData({ post }: BlogStructuredDataProps) {
           : [post.serviceArea],
       provider: {
         '@type': 'Organization',
-        name: 'My Hibachi'
-      }
-    }
-  }
+        name: 'My Hibachi',
+      },
+    },
+  };
 
   return (
     <Script
       id={`blog-structured-data-${post.id}`}
       type="application/ld+json"
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(structuredData)
+        __html: JSON.stringify(structuredData),
       }}
     />
-  )
+  );
 }

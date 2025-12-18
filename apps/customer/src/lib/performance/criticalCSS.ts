@@ -10,7 +10,7 @@ export const criticalCSS = `
 /* ========== Base Resets ========== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { line-height: 1.5; -webkit-text-size-adjust: 100%; }
-body { 
+body {
   font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   background-color: #f9e8d0;
   min-height: 100vh;

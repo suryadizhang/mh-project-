@@ -58,7 +58,7 @@ export const asyncCSSScript = `
 (function() {
   // Mark that critical CSS is loaded
   document.documentElement.classList.add('css-critical-loaded');
-  
+
   // After first paint, mark as fully loaded
   if (typeof requestIdleCallback !== 'undefined') {
     requestIdleCallback(function() {

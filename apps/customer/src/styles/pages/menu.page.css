@@ -5,7 +5,7 @@
 
 [data-page='menu'] {
   /* Page-level variables */
-  --menu-hero-bg: url('/images/background.jpg');
+  --menu-hero-bg: url('/images/background.webp');
   --menu-overlay: rgb(0 0 0 / 50%);
   --menu-card-shadow: 0 8px 32px rgb(0 0 0 / 12%);
   --menu-card-hover-shadow: 0 16px 48px rgb(0 0 0 / 20%);
