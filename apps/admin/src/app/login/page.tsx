@@ -288,7 +288,7 @@ export default function LoginPage() {
   );
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
           <div className="mx-auto h-12 w-12 bg-blue-600 rounded-lg flex items-center justify-center">
@@ -298,9 +298,9 @@ export default function LoginPage() {
               <Building className="h-6 w-6 text-white" />
             )}
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h1 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             MyHibachi Admin
-          </h2>
+          </h1>
           <p className="mt-2 text-center text-sm text-gray-600">
             {step === 'login'
               ? 'Sign in to your admin account'
@@ -310,6 +310,6 @@ export default function LoginPage() {
 
         {step === 'login' ? renderLoginForm() : renderStationSelection()}
       </div>
-    </div>
+    </main>
   );
 }

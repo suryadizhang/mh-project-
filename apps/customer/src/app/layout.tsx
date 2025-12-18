@@ -32,18 +32,23 @@ import {
 const inter = Inter({
   variable: '--font-inter',
   subsets: ['latin'],
+  display: 'swap',
+  preload: true,
 });
 
 const jetbrainsMono = JetBrains_Mono({
   variable: '--font-jetbrains-mono',
   subsets: ['latin'],
+  display: 'swap',
+  preload: false, // Non-critical font
 });
 
 const poppins = Poppins({
   variable: '--font-poppins',
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['400', '600', '700'], // Reduced from 5 to 3 weights
   display: 'swap',
+  preload: true,
 });
 
 export const metadata: Metadata = generatePageMetadata({
@@ -91,7 +96,7 @@ export default function RootLayout({
         {/* Skip link for accessibility - WCAG 2.1 AA compliance */}
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:bg-brand-red focus:text-white focus:px-4 focus:py-2 focus:rounded-md focus:font-semibold focus:outline-none focus:ring-2 focus:ring-white"
+          className="focus:bg-brand-red sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:rounded-md focus:px-4 focus:py-2 focus:font-semibold focus:text-white focus:ring-2 focus:ring-white focus:outline-none"
         >
           Skip to main content
         </a>
@@ -108,7 +113,9 @@ export default function RootLayout({
 
           <ClientLayout>
             <Navbar />
-            <main id="main-content" className="flex-1 w-full">{children}</main>
+            <main id="main-content" className="w-full flex-1">
+              {children}
+            </main>
             <Footer />
             <BackToTopButton />
           </ClientLayout>
