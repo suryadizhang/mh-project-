@@ -147,38 +147,6 @@
   box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
 }
 
-/* Statistics Section */
-.statistics-section {
-  background: rgb(255 255 255 / 95%);
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 8px 24px rgb(0 0 0 / 8%);
-  max-width: 950px;
-  margin: 0 auto 2.5rem;
-}
-
-.stat-item {
-  padding: 1rem;
-  transition: all 0.3s ease;
-}
-
-.stat-item:hover {
-  transform: translateY(-5px);
-}
-
-.stat-number {
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: #db2b28;
-  display: block;
-}
-
-.stat-label {
-  font-size: 1.1rem;
-  color: #4a2c0a;
-  font-weight: 500;
-}
-
 /* Experience Cards */
 .experience-sections {
   max-width: 1200px;
@@ -599,130 +567,6 @@
   }
 }
 
-.service-intro {
-  max-width: 800px;
-  margin: 0 auto 3rem;
-  font-size: 1.1rem;
-  color: #666;
-}
-
-.service-area-card {
-  background: white;
-  border-radius: 15px;
-  padding: 2rem;
-  box-shadow: 0 10px 30px rgb(0 0 0 / 5%);
-  height: 100%;
-}
-
-.area-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.area-subtitle {
-  color: #db2b28;
-  font-weight: 500;
-  margin-bottom: 1.5rem;
-}
-
-.area-list {
-  list-style-type: none;
-  padding-left: 0;
-}
-
-.area-list li {
-  padding: 0.75rem 0;
-  border-bottom: 1px solid rgb(0 0 0 / 5%);
-  position: relative;
-  padding-left: 2rem;
-}
-
-.area-list li::before {
-  content: '•';
-  color: #db2b28;
-  position: absolute;
-  left: 0.5rem;
-  font-weight: bold;
-  font-size: 1.2rem;
-}
-
-.area-list li:last-child {
-  border-bottom: none;
-}
-
-.service-radius-info {
-  margin-top: 4rem;
-}
-
-/* DEPRECATED: Global radius-card styling moved to scoped home-service-areas.css */
-
-/*
-.radius-card {
-  background: white;
-  border-radius: 15px;
-  padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-  display: inline-block;
-}
-
-.radius-icon {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  display: block;
-}
-
-.radius-title {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #333;
-  margin-bottom: 1rem;
-}
-
-.radius-description {
-  font-size: 1.1rem;
-  color: #666;
-  margin-bottom: 1.5rem;
-}
-
-.travel-fee-info {
-  background: #f9f4ec;
-  padding: 1.25rem;
-  border-radius: 10px;
-  margin-bottom: 1.5rem;
-  color: #333;
-  border: 1px solid #e6ddd1;
-}
-*/
-
-.travel-highlight {
-  color: #db2b28;
-  font-weight: 600;
-}
-
-.service-promise {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  background: rgb(219 43 40 / 10%);
-  padding: 1rem;
-  border-radius: 10px;
-}
-
-.promise-icon {
-  font-size: 1.5rem;
-}
-
-.promise-text {
-  font-size: 1rem;
-  color: #333;
-}
-
 /* Call-to-Action Section */
 .cta-section {
   background: linear-gradient(to right, #ffb800, #db2b28) !important;
@@ -959,20 +803,6 @@
   background: linear-gradient(135deg, #c41e1a 0%, #b01e1a 100%) !important;
 }
 
-.btn-outline-primary {
-  background: white !important;
-  color: #db2b28 !important;
-  border: 2px solid #db2b28;
-}
-
-.btn-outline-primary:hover {
-  background: #db2b28 !important;
-  color: white !important;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgb(219 43 40 / 20%);
-  text-decoration: none;
-}
-
 /* Specific CTA section button overrides */
 .cta-section .btn-primary {
   background: linear-gradient(135deg, #db2b28 0%, #c41e1a 100%) !important;
@@ -984,19 +814,6 @@
   color: white !important;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgb(219 43 40 / 30%);
-}
-
-.cta-section .btn-outline-primary {
-  background: white !important;
-  color: #db2b28 !important;
-  border: 2px solid white;
-}
-
-.cta-section .btn-outline-primary:hover {
-  background: rgb(255 255 255 / 90%) !important;
-  color: #db2b28 !important;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgb(255 255 255 / 30%);
 }
 
 /* Modern CTA Section with white/light background */
@@ -1174,44 +991,6 @@
   .service-description {
     font-size: 0.9rem;
   }
-}
-
-.home-feature-card:hover {
-  transform: translateY(-5px);
-}
-
-.home-stats {
-  background-color: #f8fafc;
-  padding: 3rem 0;
-}
-
-.home-stat-item {
-  text-align: center;
-}
-
-.home-stat-number {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #4f46e5;
-}
-
-.home-testimonials {
-  padding: 4rem 0;
-  background-color: #f9fafb;
-}
-
-.home-testimonial-card {
-  background: white;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 4px rgb(0 0 0 / 5%);
-}
-
-.home-cta {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 4rem 0;
-  text-align: center;
 }
 
 /* ============================================
