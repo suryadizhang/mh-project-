@@ -462,7 +462,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: url('/images/background.jpg') center/cover;
+  background: url('/images/background.webp') center/cover;
   opacity: 0.1;
   z-index: 0;
 }

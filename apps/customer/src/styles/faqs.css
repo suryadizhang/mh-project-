@@ -218,7 +218,7 @@
 
 .faqs-hero {
   background: linear-gradient(135deg, var(--color-dark) 0%, var(--color-brown) 100%);
-  background-image: url('/images/background.jpg');
+  background-image: url('/images/background.webp');
   background-size: cover;
   background-position: center;
   background-blend-mode: multiply;
