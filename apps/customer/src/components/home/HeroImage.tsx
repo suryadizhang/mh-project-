@@ -1,21 +1,23 @@
-import Image from 'next/image';
-
 /**
  * Server-rendered hero image for instant LCP
- * This is a SERVER COMPONENT - renders immediately in HTML
- * No JavaScript required for the image to appear
+ * CRITICAL: Uses native <img> tag, NOT next/image
+ *
+ * Why native img instead of next/image?
+ * - next/image requires JavaScript for srcset selection
+ * - next/image has hydration overhead
+ * - For LCP element, raw <img> with preload is faster
+ * - The image is already optimized via FFmpeg (1.2MB, 720p)
  */
 export function HeroImage() {
   return (
-    <Image
+    <img
       className="hero-media"
       src="/images/hero-poster.jpg"
       alt=""
       width={1920}
       height={533}
-      priority
-      quality={75}
-      sizes="100vw"
+      decoding="sync"
+      fetchPriority="high"
       style={{
         backgroundColor: '#000',
         objectFit: 'cover',
