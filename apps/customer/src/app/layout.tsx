@@ -56,10 +56,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="css-critical-loaded">
       <head>
         {/* Critical CSS inlined for instant first paint - eliminates render-blocking */}
         <style id="critical-css" dangerouslySetInnerHTML={{ __html: criticalCSS }} />
+
+        {/* Mark page as having critical CSS loaded for smooth transitions */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `document.documentElement.classList.add('css-critical-loaded');`,
+          }}
+        />
 
         {/* LCP optimization: Preload hero poster image (WebP for modern browsers) */}
         <link

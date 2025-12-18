@@ -17,6 +17,88 @@ scores.
 
 ---
 
+## �️ Available Tools
+
+We have two CLI tools available for media optimization:
+
+| Tool            | Best For                        | Installed |
+| --------------- | ------------------------------- | --------- |
+| **FFmpeg**      | Video transcoding, format conv. | ✅        |
+| **ImageMagick** | Image optimization, WebP/AVIF   | ✅ v7.1.2 |
+
+---
+
+## 🖼️ Image Optimization (ImageMagick) - PREFERRED
+
+ImageMagick is our primary tool for image optimization. It's faster
+and more specialized for images than FFmpeg.
+
+### Quick Reference Commands:
+
+```powershell
+# Convert to WebP (52% smaller than JPEG typically)
+magick input.jpg -quality 80 output.webp
+
+# Convert to AVIF (even smaller, modern browsers)
+magick input.jpg -quality 50 output.avif
+
+# Resize and convert (maintain aspect ratio)
+magick input.jpg -resize 1920x1080 -quality 80 output.webp
+
+# Resize to specific width (height auto-calculated)
+magick input.jpg -resize 800x -quality 80 output.webp
+
+# Batch convert all JPGs in folder to WebP
+Get-ChildItem *.jpg | ForEach-Object { magick $_.Name -quality 80 ($_.BaseName + ".webp") }
+```
+
+### Recommended Quality Settings:
+
+| Format | Quality | Use Case                      |
+| ------ | ------- | ----------------------------- |
+| WebP   | 75-85   | General use, good balance     |
+| WebP   | 60-70   | Thumbnails, non-critical      |
+| AVIF   | 50-60   | Modern browsers, best savings |
+| JPEG   | 80-85   | Fallback only                 |
+
+### Hero/LCP Image Optimization:
+
+```powershell
+# Optimize hero image for LCP (critical path)
+cd apps/customer/public/images
+
+# Create WebP version (primary)
+magick hero-poster.jpg -quality 80 hero-poster.webp
+
+# Create AVIF version (best compression, optional)
+magick hero-poster.jpg -quality 50 hero-poster.avif
+
+# Verify sizes
+Get-ChildItem hero-poster.* | Select-Object Name, @{N='SizeKB';E={[math]::Round($_.Length/1KB,1)}}
+```
+
+### Creating Responsive Images:
+
+```powershell
+# Create multiple sizes for srcset
+magick input.jpg -resize 480x -quality 80 image-480w.webp
+magick input.jpg -resize 768x -quality 80 image-768w.webp
+magick input.jpg -resize 1200x -quality 80 image-1200w.webp
+magick input.jpg -resize 1920x -quality 80 image-1920w.webp
+```
+
+### Image Info and Analysis:
+
+```powershell
+# Get image dimensions and format
+magick identify input.jpg
+
+# Get detailed info
+magick identify -verbose input.jpg | Select-String -Pattern "Geometry|Filesize|Format"
+```
+
+---
+
 ## 📹 Video Optimization (FFmpeg)
 
 ### When to Use:
@@ -55,6 +137,8 @@ ffmpeg -i input.mp4 \
 
 ```bash
 ffmpeg -i input.mp4 -vframes 1 -q:v 2 poster.jpg
+# Then optimize with ImageMagick
+magick poster.jpg -quality 80 poster.webp
 ```
 
 #### Convert to WebM (smaller, modern browsers):
@@ -71,52 +155,55 @@ ffmpeg -i input.mp4 \
 
 ---
 
-## 🖼️ Image Optimization
+## 🎯 Target Sizes and Formats
 
-### Target Sizes:
+| Image Type     | Max Width | Max File Size | Format          |
+| -------------- | --------- | ------------- | --------------- |
+| Hero/Banner    | 1920px    | 100 KB        | WebP + fallback |
+| Content images | 800px     | 80 KB         | WebP            |
+| Thumbnails     | 400px     | 30 KB         | WebP            |
+| Icons/logos    | As needed | 20 KB         | SVG preferred   |
 
-| Image Type     | Max Width | Max File Size | Format    |
-| -------------- | --------- | ------------- | --------- |
-| Hero/Banner    | 1920px    | 200 KB        | WebP/AVIF |
-| Content images | 800px     | 100 KB        | WebP      |
-| Thumbnails     | 400px     | 50 KB         | WebP      |
-| Icons/logos    | As needed | 20 KB         | SVG/WebP  |
+---
 
-### Using `next/image` (Preferred):
+## 🔧 Using in Next.js Components
+
+### For LCP Images (Hero) - Use Native `<picture>`:
+
+```tsx
+// Server component for instant LCP - NO JavaScript dependency
+export function HeroImage() {
+  return (
+    <picture>
+      <source srcSet="/images/hero.webp" type="image/webp" />
+      <source srcSet="/images/hero.avif" type="image/avif" />
+      <img
+        src="/images/hero.jpg"
+        alt="Hero"
+        width={1920}
+        height={1080}
+        decoding="sync"
+        fetchPriority="high"
+      />
+    </picture>
+  );
+}
+```
+
+### For Non-LCP Images - Use `next/image`:
 
 ```tsx
 import Image from 'next/image';
 
-// For LCP images (above the fold)
-<Image
-  src="/images/hero.jpg"
-  alt="Description"
-  width={1920}
-  height={1080}
-  priority  // Preloads the image
-  quality={75}
-  sizes="100vw"
-/>
-
-// For below-the-fold images
+// Below-the-fold, let Next.js handle optimization
 <Image
   src="/images/content.jpg"
   alt="Description"
   width={800}
   height={600}
-  loading="lazy"  // Default behavior
+  loading="lazy"
   quality={75}
-/>
-```
-
-### Manual Image Optimization (FFmpeg):
-
-```bash
-# Convert to WebP
-ffmpeg -i input.jpg -quality 80 output.webp
-
-# Resize and convert
-ffmpeg -i input.jpg -vf "scale=800:-1" -quality 80 output.webp
+/>;
 ```
 
 ---
@@ -125,34 +212,44 @@ ffmpeg -i input.jpg -vf "scale=800:-1" -quality 80 output.webp
 
 Before committing media files:
 
+- [ ] Images converted to WebP (use ImageMagick)
+- [ ] Images < 100 KB for hero, < 80 KB for content
 - [ ] Video < 2 MB (or lazy loaded)
-- [ ] Images < 200 KB for hero, < 100 KB for content
-- [ ] All videos have poster frames
-- [ ] LCP images use `priority` prop
+- [ ] All videos have WebP poster frames
+- [ ] LCP images use native `<picture>` with `fetchPriority="high"`
 - [ ] Decorative videos have no audio track
 - [ ] Videos use `+faststart` for progressive loading
 
 ---
 
-## 🔧 Installing FFmpeg
+## 🔧 Installing Tools
 
-### Windows (winget):
+### ImageMagick (Windows):
+
+```powershell
+winget install ImageMagick.ImageMagick
+# Restart terminal after install
+# Verify: magick --version
+```
+
+### FFmpeg (Windows):
 
 ```powershell
 winget install Gyan.FFmpeg
 # Restart terminal after install
+# Verify: ffmpeg -version
 ```
 
 ### macOS (Homebrew):
 
 ```bash
-brew install ffmpeg
+brew install imagemagick ffmpeg
 ```
 
 ### Linux (apt):
 
 ```bash
-sudo apt install ffmpeg
+sudo apt install imagemagick ffmpeg
 ```
 
 ---
@@ -162,8 +259,9 @@ sudo apt install ffmpeg
 ```
 apps/customer/public/
 ├── images/
-│   ├── hero-poster.jpg    # Hero video poster frame
-│   ├── background.jpg     # Background images
+│   ├── hero-poster.webp   # Hero image (WebP primary)
+│   ├── hero-poster.jpg    # Hero image (JPEG fallback)
+│   ├── background.webp    # Background images
 │   └── blog/              # Blog post images
 └── videos/
     ├── hero_video.mp4     # Hero background video
@@ -174,30 +272,46 @@ apps/customer/public/
 
 ## 🎯 Performance Targets
 
-| Metric            | Target   | Critical Threshold |
-| ----------------- | -------- | ------------------ |
-| Total page weight | < 3 MB   | < 5 MB             |
-| LCP image size    | < 100 KB | < 200 KB           |
-| Video size        | < 2 MB   | < 5 MB             |
-| Image load time   | < 1s     | < 2s               |
+| Metric            | Target  | Critical Threshold |
+| ----------------- | ------- | ------------------ |
+| Total page weight | < 3 MB  | < 5 MB             |
+| LCP image size    | < 50 KB | < 100 KB           |
+| Video size        | < 2 MB  | < 5 MB             |
+| Image load time   | < 500ms | < 1s               |
 
 ---
 
-## 📝 Real Example: Hero Video Optimization
+## 📝 Real Examples
 
-**Before optimization:**
+### Hero Image Optimization:
+
+**Before:**
+
+- hero-poster.jpg: 91 KB
+
+**After:**
+
+- hero-poster.webp: 43 KB (52% smaller!)
+
+**Command:**
+
+```powershell
+magick hero-poster.jpg -quality 80 hero-poster.webp
+```
+
+### Hero Video Optimization:
+
+**Before:**
 
 - hero_video.mp4: 15.79 MB
 - 1920x1080, 14.6 Mbps bitrate
-- Mobile LCP: 10.6s ❌
 
-**After optimization:**
+**After:**
 
 - hero_video.mp4: 1.21 MB (92% smaller!)
 - 1280x720, 1.1 Mbps bitrate
-- Mobile LCP: ~2-3s ✅
 
-**Command used:**
+**Command:**
 
 ```bash
 ffmpeg -i hero_video.mp4 \
@@ -218,3 +332,5 @@ ffmpeg -i hero_video.mp4 \
 - `apps/customer/src/lib/performance/` – Performance utilities
 - Next.js Image Optimization:
   https://nextjs.org/docs/app/building-your-application/optimizing/images
+- ImageMagick Docs:
+  https://imagemagick.org/script/command-line-processing.php
