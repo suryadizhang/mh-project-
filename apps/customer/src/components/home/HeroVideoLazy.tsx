@@ -43,7 +43,7 @@ export function HeroVideoLazy() {
         </video>
       ) : (
         // Show poster as static image until video loads
-        // eslint-disable-next-line @next/next/no-img-element
+        /* eslint-disable-next-line jsx-a11y/alt-text */
         <img
           className="hero-media hero-video"
           src="/images/hero-poster.jpg"
