@@ -10,8 +10,17 @@
 }
 
 @import url('tw-animate-css');
+
+/* Core styles - bundled together to reduce HTTP requests */
 @import '../styles/base.css';
 @import '../styles/responsive-images.css';
+@import '../styles/utilities.css';
+@import '../styles/accessibility.css';
+@import '../styles/footer.css';
+@import '../styles/back-to-top.css';
+@import '../styles/breadcrumb.css';
+@import '../styles/optimized-image.css';
+@import '../styles/components/buttons-cross-browser.css';
 
 @custom-variant dark (&:is(.dark *));
 

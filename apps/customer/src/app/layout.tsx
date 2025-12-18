@@ -1,14 +1,6 @@
 import './globals.css';
-// Import truly global styles only - page-specific CSS loaded at page level
-import '@/styles/base.css';
-import '@/styles/utilities.css';
-import '@/styles/accessibility.css';
-import '@/styles/footer.css';
-import '@/styles/back-to-top.css';
-import '@/styles/breadcrumb.css';
-import '@/styles/optimized-image.css';
-// PHASE 5 FIX: Cross-browser button standardization - MUST LOAD LAST
-import '@/styles/components/buttons-cross-browser.css';
+// NOTE: Additional CSS imports moved to globals.css to reduce render-blocking requests
+// page-specific CSS loaded at page level via imports in page.tsx files
 
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono, Poppins } from 'next/font/google';
