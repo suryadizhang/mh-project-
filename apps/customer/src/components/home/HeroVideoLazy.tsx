@@ -1,22 +1,22 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
 /**
- * Lazy-loaded hero video component
- * Shows poster immediately (for fast LCP), loads video after hydration
+ * Hero video component with progressive enhancement
+ * - Server renders the poster image immediately (for instant LCP)
+ * - Client hydrates and swaps to video after idle
  */
 export function HeroVideoLazy() {
   const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
 
   useEffect(() => {
-    // Delay video loading until after LCP (poster shows first)
-    // Use requestIdleCallback if available, otherwise setTimeout
+    // Delay video loading until after LCP and idle time
     if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(() => setShouldLoadVideo(true), { timeout: 2000 });
+      window.requestIdleCallback(() => setShouldLoadVideo(true), { timeout: 3000 });
     } else {
-      // Delay video loading to prioritize LCP
-      const timer = setTimeout(() => setShouldLoadVideo(true), 1000);
+      const timer = setTimeout(() => setShouldLoadVideo(true), 2000);
       return () => clearTimeout(timer);
     }
   }, []);
@@ -42,17 +42,18 @@ export function HeroVideoLazy() {
           <track kind="captions" src="/videos/hero_video.vtt" srcLang="en" label="English" />
         </video>
       ) : (
-        // Show poster as static image until video loads
-        /* eslint-disable-next-line jsx-a11y/alt-text */
-        <img
+        // This renders on server AND client initially - instant LCP
+        <Image
           className="hero-media hero-video"
           src="/images/hero-poster.jpg"
           alt=""
-          width="1920"
-          height="533"
+          width={1920}
+          height={533}
+          priority
+          quality={75}
+          sizes="100vw"
           style={{ backgroundColor: '#000', objectFit: 'cover' }}
           aria-hidden="true"
-          fetchPriority="high"
         />
       )}
     </div>
