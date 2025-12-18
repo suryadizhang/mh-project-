@@ -1,41 +1,22 @@
-'use client';
-
+// Server Component - NO 'use client' for faster initial render
 import '@/styles/home.css';
 import '@/styles/pages/home.page.css';
 
 import { Building, CalendarCheck, CalendarDays, CheckCircle, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
+import { HeroVideoLazy } from '@/components/home/HeroVideoLazy';
+import { ScrollAnimationProvider } from '@/components/home/ScrollAnimationProvider';
 import { LazyValuePropositionSection } from '@/lib/performance/lazyComponents';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 export default function Home() {
-  useScrollAnimation();
   return (
-    <main data-page="home">
-      {/* Hero Video Section */}
-      <section className="about-section" aria-label="Hero section with video background">
-        {/* Hero Media Container */}
-        <div className="hero-media-container">
-          <div className="hero-media-overlay"></div>
-          <video
-            className="hero-media hero-video"
-            width="1920"
-            height="533"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            poster="/images/hero-poster.jpg"
-            style={{ backgroundColor: '#000' }}
-            aria-hidden="true"
-          >
-            <source src="/videos/hero_video.mp4" type="video/mp4" />
-            {/* Accessibility: Video is decorative, content is in text below */}
-            <track kind="captions" src="/videos/hero_video.vtt" srcLang="en" label="English" />
-          </video>
-        </div>
+    <ScrollAnimationProvider>
+      <main data-page="home">
+        {/* Hero Video Section */}
+        <section className="about-section" aria-label="Hero section with video background">
+          {/* Hero Media Container - Lazy loads video after LCP */}
+          <HeroVideoLazy />
 
         <div className="mx-auto max-w-7xl px-4">
           {/* Animated Headline Section */}
@@ -394,5 +375,6 @@ export default function Home() {
       {/* Value Proposition + Urgency Section - Lazy loaded for performance */}
       <LazyValuePropositionSection />
     </main>
+    </ScrollAnimationProvider>
   );
 }

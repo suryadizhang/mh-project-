@@ -65,10 +65,18 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* LCP optimization: Preload hero poster image for instant display */}
+        <link
+          rel="preload"
+          as="image"
+          href="/images/hero-poster.jpg"
+          fetchPriority="high"
+        />
+        
         {/* Performance optimization hints */}
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="preconnect" href="//fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* Video loads lazily via HeroVideo component - no preload to avoid blocking paint */}
+        {/* Video loads lazily via HeroVideoLazy component - after LCP */}
 
         {/* Google Search Console Verification - Add your verification code here when you get it */}
         {/* <meta name="google-site-verification" content="YOUR_VERIFICATION_CODE_HERE" /> */}
