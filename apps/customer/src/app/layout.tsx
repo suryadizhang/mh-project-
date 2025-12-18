@@ -28,6 +28,7 @@ import {
   generatePageMetadata,
   SITE_CONFIG,
 } from '@/lib/seo-config';
+import { criticalCSS } from '@/lib/performance/criticalCSS';
 
 const inter = Inter({
   variable: '--font-inter',
@@ -65,14 +66,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Critical CSS inlined for instant first paint - eliminates render-blocking */}
+        <style id="critical-css" dangerouslySetInnerHTML={{ __html: criticalCSS }} />
+
         {/* LCP optimization: Preload hero poster image for instant display */}
-        <link
-          rel="preload"
-          as="image"
-          href="/images/hero-poster.jpg"
-          fetchPriority="high"
-        />
-        
+        <link rel="preload" as="image" href="/images/hero-poster.jpg" fetchPriority="high" />
+
         {/* Performance optimization hints */}
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="preconnect" href="//fonts.gstatic.com" crossOrigin="anonymous" />

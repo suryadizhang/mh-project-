@@ -1,5 +1,5 @@
 /* Base CSS - Global resets and animations */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+/* NOTE: Fonts loaded via next/font in layout.tsx - no @import needed */
 
 /* CSS Custom Properties (Variables) */
 :root {
@@ -20,17 +20,17 @@
   /* Spacing (Golden Values - Optimized for compact layouts) */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.375rem;
-  --spacing-md: 0.65rem;  /* Item gaps */
-  --spacing-lg: 1rem;     /* Section gaps */
-  --spacing-xl: 1.25rem;  /* Card padding */
+  --spacing-md: 0.65rem; /* Item gaps */
+  --spacing-lg: 1rem; /* Section gaps */
+  --spacing-xl: 1.25rem; /* Card padding */
   --spacing-2xl: 1.5rem;
   --spacing-3xl: 2rem;
 
   /* Gap tokens */
-  --gap-tight: 0.375rem;  /* Icons next to text */
-  --gap-item: 0.65rem;    /* Between list items */
-  --gap-section: 1rem;    /* Between sections */
-  --gap-card: 1.25rem;    /* Between cards */
+  --gap-tight: 0.375rem; /* Icons next to text */
+  --gap-item: 0.65rem; /* Between list items */
+  --gap-section: 1rem; /* Between sections */
+  --gap-card: 1.25rem; /* Between cards */
 
   /* Padding tokens */
   --padding-item: 0.625rem 0.875rem;
@@ -38,16 +38,16 @@
   --padding-card: 1.25rem;
 
   /* Font size tokens */
-  --text-xs: 0.75rem;     /* Tags only (minimum) */
-  --text-sm: 0.8125rem;   /* Notes, captions */
-  --text-body: 0.9rem;    /* Default body */
-  --text-md: 0.95rem;     /* Emphasized body */
+  --text-xs: 0.75rem; /* Tags only (minimum) */
+  --text-sm: 0.8125rem; /* Notes, captions */
+  --text-body: 0.9rem; /* Default body */
+  --text-md: 0.95rem; /* Emphasized body */
 
   /* Border Radius */
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 1rem;
-  --radius-item: 10px;    /* For list items */
+  --radius-item: 10px; /* For list items */
   --radius-md-custom: 15px;
   --radius-lg-custom: 20px;
 
@@ -645,7 +645,8 @@ a:focus {
 
 /* Pulse animation for attention */
 @keyframes pulse-glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow:
       0 4px 14px 0 rgba(220, 38, 38, 0.35),
       0 0 0 0 rgba(220, 38, 38, 0.4);
@@ -664,4 +665,3 @@ a:focus {
 .btn-cta-pulse:hover {
   animation: none;
 }
-
