@@ -77,7 +77,7 @@ const upgradeItems = [
       { name: 'Salmon', price: '+$5' },
       { name: 'Scallops', price: '+$5' },
       { name: 'Filet Mignon', price: '+$5' },
-      { name: '3rd Protein', price: '+$10' },
+      { name: 'Extra Protein', price: '+$10' },
     ],
     note: 'per order',
     icon: <Crown className="h-5 w-5" />,
@@ -285,9 +285,9 @@ export default function ValuePropositionSection() {
             Private Hibachi vs. Restaurant Dining
           </h3>
           <div className="overflow-hidden rounded-xl bg-white shadow-lg">
-            <div className="hidden md:grid md:grid-cols-3 bg-gray-800 text-white">
+            <div className="hidden bg-gray-800 text-white md:grid md:grid-cols-3">
               <div className="p-4 font-semibold">Feature</div>
-              <div className="p-4 text-center font-semibold bg-gradient-to-r from-red-600 to-orange-600">
+              <div className="bg-gradient-to-r from-red-600 to-orange-600 p-4 text-center font-semibold">
                 🔥 My Hibachi Chef
               </div>
               <div className="p-4 text-center font-semibold">Restaurant</div>
@@ -297,21 +297,21 @@ export default function ValuePropositionSection() {
                 key={index}
                 className={`grid md:grid-cols-3 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
               >
-                <div className="p-4 font-medium text-gray-700 border-b md:border-b-0">
-                  <span className="md:hidden font-semibold text-gray-500">Feature: </span>
+                <div className="border-b p-4 font-medium text-gray-700 md:border-b-0">
+                  <span className="font-semibold text-gray-500 md:hidden">Feature: </span>
                   {item.feature}
                 </div>
-                <div className="p-4 text-center border-b md:border-b-0">
-                  <span className="md:hidden font-semibold text-gray-500 block mb-1">
+                <div className="border-b p-4 text-center md:border-b-0">
+                  <span className="mb-1 block font-semibold text-gray-500 md:hidden">
                     My Hibachi:
                   </span>
-                  <span className="inline-flex items-center gap-2 text-green-700 font-medium">
+                  <span className="inline-flex items-center gap-2 font-medium text-green-700">
                     <Check className="h-5 w-5 text-green-600" />
                     {item.hibachi}
                   </span>
                 </div>
-                <div className="p-4 text-center text-gray-500 border-b md:border-b-0">
-                  <span className="md:hidden font-semibold text-gray-500 block mb-1">
+                <div className="border-b p-4 text-center text-gray-500 md:border-b-0">
+                  <span className="mb-1 block font-semibold text-gray-500 md:hidden">
                     Restaurant:
                   </span>
                   {item.restaurant}
@@ -327,9 +327,9 @@ export default function ValuePropositionSection() {
             Why Choose Us Over Other Hibachi Caterers?
           </h3>
           <div className="overflow-hidden rounded-xl bg-white shadow-lg">
-            <div className="hidden md:grid md:grid-cols-3 bg-gray-800 text-white">
+            <div className="hidden bg-gray-800 text-white md:grid md:grid-cols-3">
               <div className="p-4 font-semibold">What Matters</div>
-              <div className="p-4 text-center font-semibold bg-gradient-to-r from-red-600 to-orange-600">
+              <div className="bg-gradient-to-r from-red-600 to-orange-600 p-4 text-center font-semibold">
                 ⭐ My Hibachi Chef
               </div>
               <div className="p-4 text-center font-semibold">Other Caterers</div>
@@ -339,25 +339,23 @@ export default function ValuePropositionSection() {
                 key={index}
                 className={`grid md:grid-cols-3 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
               >
-                <div className="p-4 font-medium text-gray-700 border-b md:border-b-0">
-                  <span className="md:hidden font-semibold text-gray-500">Feature: </span>
+                <div className="border-b p-4 font-medium text-gray-700 md:border-b-0">
+                  <span className="font-semibold text-gray-500 md:hidden">Feature: </span>
                   {item.feature}
                 </div>
-                <div className="p-4 text-center border-b md:border-b-0">
-                  <span className="md:hidden font-semibold text-gray-500 block mb-1">
+                <div className="border-b p-4 text-center md:border-b-0">
+                  <span className="mb-1 block font-semibold text-gray-500 md:hidden">
                     My Hibachi:
                   </span>
-                  <span className="inline-flex items-center gap-2 text-green-700 font-medium">
-                    <Check className="h-5 w-5 text-green-600 flex-shrink-0" />
+                  <span className="inline-flex items-center gap-2 font-medium text-green-700">
+                    <Check className="h-5 w-5 flex-shrink-0 text-green-600" />
                     <span className="text-left">{item.us}</span>
                   </span>
                 </div>
-                <div className="p-4 text-center text-gray-500 border-b md:border-b-0">
-                  <span className="md:hidden font-semibold text-gray-500 block mb-1">
-                    Others:
-                  </span>
+                <div className="border-b p-4 text-center text-gray-500 md:border-b-0">
+                  <span className="mb-1 block font-semibold text-gray-500 md:hidden">Others:</span>
                   <span className="inline-flex items-center gap-2">
-                    <X className="h-5 w-5 text-red-400 flex-shrink-0" />
+                    <X className="h-5 w-5 flex-shrink-0 text-red-400" />
                     <span className="text-left">{item.others}</span>
                   </span>
                 </div>
@@ -390,15 +388,13 @@ export default function ValuePropositionSection() {
 
         {/* Chef Quality Callout */}
         <div className="mb-16 rounded-2xl bg-gradient-to-r from-gray-800 to-gray-900 p-8 text-white md:p-12">
-          <div className="grid gap-8 md:grid-cols-2 items-center">
+          <div className="grid items-center gap-8 md:grid-cols-2">
             <div>
-              <h3 className="mb-4 text-3xl font-bold">
-                Professionally Trained Hibachi Chefs
-              </h3>
-              <p className="mb-6 text-gray-300 text-lg">
+              <h3 className="mb-4 text-3xl font-bold">Professionally Trained Hibachi Chefs</h3>
+              <p className="mb-6 text-lg text-gray-300">
                 Our chefs are experienced professionals — not random cooks. Each chef is trained in
-                authentic hibachi techniques, food safety, and entertainment. You get restaurant-quality
-                cooking with a personal touch.
+                authentic hibachi techniques, food safety, and entertainment. You get
+                restaurant-quality cooking with a personal touch.
               </p>
               <ul className="space-y-3">
                 <li className="flex items-center gap-3">
@@ -420,7 +416,7 @@ export default function ValuePropositionSection() {
                 <div className="flex h-48 w-48 items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-orange-500">
                   <ChefHat className="h-24 w-24 text-white" />
                 </div>
-                <div className="absolute -bottom-2 -right-2 rounded-full bg-green-500 px-4 py-2 text-sm font-bold text-white shadow-lg">
+                <div className="absolute -right-2 -bottom-2 rounded-full bg-green-500 px-4 py-2 text-sm font-bold text-white shadow-lg">
                   Expert Chefs
                 </div>
               </div>
@@ -431,9 +427,7 @@ export default function ValuePropositionSection() {
         {/* Urgency Section */}
         <div className="mb-12 rounded-2xl bg-gradient-to-r from-red-600 to-orange-600 p-8 text-white md:p-12">
           <div className="text-center">
-            <h3 className="mb-4 text-3xl font-bold md:text-4xl">
-              🔥 Limited Chef Availability
-            </h3>
+            <h3 className="mb-4 text-3xl font-bold md:text-4xl">🔥 Limited Chef Availability</h3>
             <p className="mx-auto mb-8 max-w-2xl text-lg text-red-100">
               We have a limited number of experienced chefs, and weekends book out fast! Secure your
               date early to avoid disappointment.
@@ -505,10 +499,8 @@ export default function ValuePropositionSection() {
 
         {/* Pricing Transparency */}
         <div className="mt-12 rounded-xl bg-white p-8 shadow-lg">
-          <h3 className="mb-6 text-center text-2xl font-bold text-gray-800">
-            Transparent Pricing
-          </h3>
-          <div className="grid gap-6 md:grid-cols-3 text-center">
+          <h3 className="mb-6 text-center text-2xl font-bold text-gray-800">Transparent Pricing</h3>
+          <div className="grid gap-6 text-center md:grid-cols-3">
             <div className="p-4">
               <div className="mb-2 text-4xl font-bold text-red-600">$55</div>
               <div className="text-gray-600">Per Adult (13+)</div>
@@ -527,9 +519,7 @@ export default function ValuePropositionSection() {
               <span className="font-semibold">$550 minimum</span> (approximately 10 adults) •
               <span className="font-semibold"> $100 refundable deposit</span> secures your date
             </p>
-            <p className="mt-2 text-sm text-gray-500">
-              First 30 miles free travel • $2/mile after
-            </p>
+            <p className="mt-2 text-sm text-gray-500">First 30 miles free travel • $2/mile after</p>
           </div>
         </div>
       </div>

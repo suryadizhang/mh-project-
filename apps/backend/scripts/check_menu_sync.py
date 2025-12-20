@@ -25,7 +25,7 @@ EXPECTED_ADDONS = {
     "Extra Fried Rice": 5.00,
     "Edamame": 5.00,
     "Extra Vegetables": 5.00,
-    "Third Protein Add-on": 10.00,
+    "Extra Protein Add-on": 10.00,
     "Gyoza": 10.00,
 }
 

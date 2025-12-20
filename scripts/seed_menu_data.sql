@@ -335,10 +335,10 @@ INSERT INTO public.menu_items (
 ) VALUES
     (
         gen_random_uuid()::text,
-        '3rd Protein',
-        'Add a third protein to your meal',
+        'Extra Protein',
+        'Add an extra protein to your meal',
         'desserts',
-        10.00,  -- VERIFIED: +$10 per person (menu page)
+        10.00,  -- VERIFIED: +$10 per protein (menu page)
         true,
         true,
         1
@@ -351,7 +351,7 @@ COMMIT;
 -- ============================================
 
 -- Check pricing tiers
-SELECT 
+SELECT
     tier_level,
     name,
     price_per_person,
@@ -361,7 +361,7 @@ FROM public.pricing_tiers
 ORDER BY display_order;
 
 -- Check menu items by category
-SELECT 
+SELECT
     category,
     COUNT(*) as item_count,
     COUNT(*) FILTER (WHERE is_premium = true) as premium_count
@@ -370,23 +370,23 @@ GROUP BY category
 ORDER BY category;
 
 -- Show all menu items
-SELECT 
+SELECT
     category,
     name,
-    CASE 
+    CASE
         WHEN is_premium THEN CONCAT('$', base_price::text, ' (premium)')
         ELSE 'Included'
     END as pricing,
     description
 FROM public.menu_items
-ORDER BY 
+ORDER BY
     category,
     is_premium DESC,
     display_order,
     name;
 
 -- Show formatted pricing tiers for AI
-SELECT 
+SELECT
     tier_level,
     name,
     CONCAT('$', price_per_person::text, '/person') as price,

@@ -315,7 +315,7 @@ Example AI Queries and Logic:
    AI Response: "Vegan & gluten-free options: Edamame, House Salad, Extra Vegetables"
 
 
-5. Customer asks: "Can I get a 3rd protein?"
+5. Customer asks: "Can I get an extra protein?"
 
    AI Query:
    SELECT * FROM menu_items
@@ -324,5 +324,5 @@ Example AI Queries and Logic:
    ORDER BY is_premium, base_price
 
    Result: All proteins (base + premium)
-   AI Response: "3rd protein is an add-on. Choose from: [list proteins with prices]"
+   AI Response: "Extra protein is an add-on (+$10 each). Choose from: [list proteins with prices]"
 """

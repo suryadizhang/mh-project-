@@ -65,7 +65,7 @@ Key Features:
 - Base pricing: $55/adult (13+), $30/child (6-12), FREE under 5
 - Protein upgrades: Filet/Salmon/Scallops (+$5), Lobster (+$15)
 - FREE proteins: Chicken, NY Strip Steak, Shrimp, Tofu, Vegetables (2 per guest)
-- 3rd protein rule: +$10 per extra protein beyond 2 per guest
+- Extra protein: +$10 per extra protein beyond 2 per guest
 - Travel fees: FREE within 30 miles, $2/mile after
 - Party minimum: $550 total
 - Addon services: Premium sake, extended performance, custom menu
@@ -104,7 +104,7 @@ Valid protein names:
 - UPGRADE: filet_mignon, salmon, scallops (+$5 each)
 - PREMIUM: lobster_tail (+$15 each)
 
-Note: First 2 proteins per guest are FREE (if from FREE list). 3rd protein adds +$10.""",
+Note: First 2 proteins per guest are FREE (if from FREE list). Extra protein adds +$10.""",
                 required=False,
             ),
             ToolParameter(
@@ -221,7 +221,7 @@ Use customer_address for more accurate calculation when possible.""",
                 protein_cost = quote.get("upgrade_total", 0)
                 if protein_cost > 0:
                     notes.append(
-                        f"Protein upgrades: ${protein_cost:.2f} (includes premium selections and 3rd protein charges)"
+                        f"Protein upgrades: ${protein_cost:.2f} (includes premium selections and extra protein charges)"
                     )
                 else:
                     notes.append(

@@ -31,43 +31,23 @@ router = APIRouter(tags=["public-quote"])
 class QuoteRequest(BaseModel):
     """Schema for quote calculation request."""
 
-    adults: int = Field(
-        ..., ge=0, le=100, description="Number of adults (13+)"
-    )
-    children: int = Field(
-        default=0, ge=0, le=50, description="Number of children (6-12)"
-    )
+    adults: int = Field(..., ge=0, le=100, description="Number of adults (13+)")
+    children: int = Field(default=0, ge=0, le=50, description="Number of children (6-12)")
 
     # Upgrade proteins (price per serving)
-    salmon: int = Field(
-        default=0, ge=0, description="Number of salmon upgrades"
-    )
-    scallops: int = Field(
-        default=0, ge=0, description="Number of scallop upgrades"
-    )
-    filet_mignon: int = Field(
-        default=0, ge=0, description="Number of filet mignon upgrades"
-    )
-    lobster_tail: int = Field(
-        default=0, ge=0, description="Number of lobster tail upgrades"
-    )
-    third_proteins: int = Field(
-        default=0, ge=0, description="Number of 3rd protein additions"
-    )
+    salmon: int = Field(default=0, ge=0, description="Number of salmon upgrades")
+    scallops: int = Field(default=0, ge=0, description="Number of scallop upgrades")
+    filet_mignon: int = Field(default=0, ge=0, description="Number of filet mignon upgrades")
+    lobster_tail: int = Field(default=0, ge=0, description="Number of lobster tail upgrades")
+    third_proteins: int = Field(default=0, ge=0, description="Number of extra protein additions")
 
     # Add-ons (per serving)
-    yakisoba_noodles: int = Field(
-        default=0, ge=0, description="Number of yakisoba noodle portions"
-    )
+    yakisoba_noodles: int = Field(default=0, ge=0, description="Number of yakisoba noodle portions")
     extra_fried_rice: int = Field(
         default=0, ge=0, description="Number of extra fried rice portions"
     )
-    extra_vegetables: int = Field(
-        default=0, ge=0, description="Number of extra vegetable portions"
-    )
-    edamame: int = Field(
-        default=0, ge=0, description="Number of edamame portions"
-    )
+    extra_vegetables: int = Field(default=0, ge=0, description="Number of extra vegetable portions")
+    edamame: int = Field(default=0, ge=0, description="Number of edamame portions")
     gyoza: int = Field(default=0, ge=0, description="Number of gyoza portions")
 
     # Location for travel fee calculation
@@ -139,7 +119,7 @@ UPGRADE_PRICES = {
     "scallops": 9.00,  # Premium seafood upgrade
     "filet_mignon": 10.00,  # Premium beef upgrade
     "lobster_tail": 20.00,  # Luxury upgrade
-    "third_protein": 10.00,  # Add a third protein
+    "extra_protein": 10.00,  # Add an extra protein (+$10, premium adds upgrade price)
 }
 
 # Addon prices (per serving)
@@ -176,7 +156,7 @@ ADDON_PRICES = {
     - Scallops: +$9
     - Filet Mignon: +$10
     - Lobster Tail: +$20
-    - 3rd Protein: +$10
+    - Extra Protein: +$10 (premium adds upgrade price)
 
     ## Add-ons (per serving):
     - Yakisoba Noodles: +$5
@@ -217,9 +197,7 @@ async def calculate_quote(
         )
 
         # Calculate base total
-        base_total = (request.adults * adult_price) + (
-            request.children * child_price
-        )
+        base_total = (request.adults * adult_price) + (request.children * child_price)
 
         # Calculate upgrade total
         upgrade_total = 0.0
@@ -227,21 +205,13 @@ async def calculate_quote(
         upgrade_total += request.scallops * UPGRADE_PRICES["scallops"]
         upgrade_total += request.filet_mignon * UPGRADE_PRICES["filet_mignon"]
         upgrade_total += request.lobster_tail * UPGRADE_PRICES["lobster_tail"]
-        upgrade_total += (
-            request.third_proteins * UPGRADE_PRICES["third_protein"]
-        )
+        upgrade_total += request.third_proteins * UPGRADE_PRICES["third_protein"]
 
         # Calculate addon total
         addon_total = 0.0
-        addon_total += (
-            request.yakisoba_noodles * ADDON_PRICES["yakisoba_noodles"]
-        )
-        addon_total += (
-            request.extra_fried_rice * ADDON_PRICES["extra_fried_rice"]
-        )
-        addon_total += (
-            request.extra_vegetables * ADDON_PRICES["extra_vegetables"]
-        )
+        addon_total += request.yakisoba_noodles * ADDON_PRICES["yakisoba_noodles"]
+        addon_total += request.extra_fried_rice * ADDON_PRICES["extra_fried_rice"]
+        addon_total += request.extra_vegetables * ADDON_PRICES["extra_vegetables"]
         addon_total += request.edamame * ADDON_PRICES["edamame"]
         addon_total += request.gyoza * ADDON_PRICES["gyoza"]
 
@@ -264,15 +234,11 @@ async def calculate_quote(
         if request.venue_address or request.zip_code:
             # In production, this would call Google Maps Distance Matrix API
             # For now, estimate based on ZIP code (Bay Area ZIPs starting with 94xxx, 95xxx)
-            estimated_distance = _estimate_distance(
-                request.zip_code, request.venue_address
-            )
+            estimated_distance = _estimate_distance(request.zip_code, request.venue_address)
             travel_info.distance_miles = estimated_distance
 
             if estimated_distance and estimated_distance > free_miles:
-                travel_info.travel_fee = (
-                    estimated_distance - free_miles
-                ) * per_mile_rate
+                travel_info.travel_fee = (estimated_distance - free_miles) * per_mile_rate
 
         # Calculate grand total
         grand_total = subtotal + travel_info.travel_fee
@@ -317,9 +283,7 @@ async def calculate_quote(
         )
 
 
-def _estimate_distance(
-    zip_code: str | None, address: str | None
-) -> float | None:
+def _estimate_distance(zip_code: str | None, address: str | None) -> float | None:
     """
     Estimate distance from Fremont station based on ZIP code.
 

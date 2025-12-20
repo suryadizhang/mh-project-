@@ -237,7 +237,7 @@ PRICING: PricingConfig = {
         "extra_fried_rice": 5,  # Extra fried rice +$5/person
         "edamame": 5,  # Steamed soybeans +$5/person
         "extra_vegetables": 5,  # Mixed vegetables +$5/person
-        "third_protein": 10,  # 3rd protein choice +$10/person
+        "extra_protein": 10,  # Extra protein +$10 each (premium = +$10 + upgrade price)
         "gyoza": 10,  # Pan-fried dumplings +$10/person
     },
     # ========================================
@@ -616,7 +616,7 @@ AI_REASONING_RULES = """
      * Scallops: +$5 per person
      * Filet Mignon: +$5 per person
      * Lobster Tail: +$15 per person
-   - 3rd protein (beyond 2 per guest): +$10 per person
+   - Extra protein (beyond 2 per guest): +$10 each (premium adds upgrade price)
 
 5. TRAVEL FEE RULES:
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -747,7 +747,7 @@ SALES_OPTIMIZATION = """
    extended performance (+$50) to really impress your guests. Interested?"
 
    🍴 Food Lovers:
-   "A lot of our guests love adding the 3rd protein option (+$10/person) to try
+   "A lot of our guests love adding the extra protein option (+$10 each) to try
    more variety. Popular combo is chicken + steak + lobster!"
 
    📍 Location-Based:
@@ -1257,9 +1257,9 @@ FAQS_KNOWLEDGE = {
             "understanding": "Kids eat great too! Under 5 free means families save money. Ages 6-12 get full experience.",
         },
         "additional_options": {
-            "third_protein": {
+            "extra_protein": {
                 "cost": 10,
-                "explanation": "Add a 3rd protein to your plate (+$10/person)",
+                "explanation": "Add an extra protein to your plate (+$10 each, premium adds upgrade price)",
             },
             "enhancements": {
                 "yakisoba_noodles": 5,

@@ -357,14 +357,14 @@ export const faqs: FaqItem[] = [
 
   // Additional Popular Questions Based on Competitor Analysis
   {
-    id: 'third-protein',
-    question: 'Can I add a third protein or more?',
+    id: 'extra-protein',
+    question: 'Can I add an extra protein or more?',
     answer:
-      'Yes! Each guest normally gets 2 proteins, but you can add a 3rd protein for +$10 per person. This is an additional option that gives you more food, not an upgrade. If you want the 3rd protein to be a premium option (Filet Mignon or Lobster Tail), that would be the +$10 for the additional protein plus the premium upgrade cost. Contact us at cs@myhibachichef.com to customize your menu.',
+      'Yes! Each guest normally gets 2 proteins, but you can add an extra protein for +$10 each. Premium proteins (Salmon, Scallops, Filet Mignon) are +$10 + $5 = $15, and Lobster Tail is +$10 + $15 = $25. Contact us at cs@myhibachichef.com to customize your menu.',
     category: 'Menu & Upgrades',
     subcategory: 'Add‑ons & Sides',
     tags: [
-      'third protein',
+      'extra protein',
       'additional protein',
       'add-on',
       '+$10',
@@ -377,7 +377,7 @@ export const faqs: FaqItem[] = [
     id: 'additional-enhancements',
     question: 'What additional enhancements can I add to my menu?',
     answer:
-      'We offer several delicious add-on options: Yakisoba Noodles (Japanese-style lo mein), Extra Fried Rice, Extra Vegetables (mixed seasonal vegetables), and Edamame (steamed soybeans with sea salt) are all +$5 each. Gyoza (pan-fried Japanese dumplings) and 3rd Protein (add a third protein to your meal) are +$10 each. These can be ordered per person or shared family-style.',
+      'We offer several delicious add-on options: Yakisoba Noodles (Japanese-style lo mein), Extra Fried Rice, Extra Vegetables (mixed seasonal vegetables), and Edamame (steamed soybeans with sea salt) are all +$5 each. Gyoza (pan-fried Japanese dumplings) and Extra Protein are +$10 each (premium proteins add upgrade price). These can be ordered per person or shared family-style.',
     category: 'Menu & Upgrades',
     subcategory: 'Add‑ons & Sides',
     tags: [
@@ -388,7 +388,7 @@ export const faqs: FaqItem[] = [
       'extra vegetables +$5',
       'edamame +$5',
       'gyoza +$10',
-      '3rd protein +$10',
+      'extra protein +$10',
       'sides',
     ],
     confidence: 'high',

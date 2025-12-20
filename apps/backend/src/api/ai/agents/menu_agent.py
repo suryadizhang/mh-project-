@@ -337,16 +337,16 @@ class MenuAgent(BaseAgent):
 **Premium Upgrades:**
 {upgrade_proteins}
 
-**3rd Protein Rule (CRITICAL BUSINESS LOGIC):**
+**Extra Protein Rule (CRITICAL BUSINESS LOGIC):**
 - Each guest gets **2 FREE protein portions** (from FREE list)
 - If total protein portions exceed 2 per guest → **+$10 per extra portion**
-- This applies REGARDLESS of protein type (even FREE proteins become +$10 if they're the 3rd/4th/5th choice)
+- This applies REGARDLESS of protein type (even FREE proteins become +$10 if they're the extra choice)
 
-**How 3rd Protein Charging Works:**
+**How Extra Protein Charging Works:**
 1. **Calculate free allowance**: Guest count × 2 = FREE portions
 2. **Count total portions**: Sum all protein quantities
-3. **Extra portions**: Total portions - Free allowance = 3rd protein portions
-4. **3rd protein charge**: Extra portions × $10
+3. **Extra portions**: Total portions - Free allowance = extra protein portions
+4. **Extra protein charge**: Extra portions × $10
 
 **Example Calculations:**
 
@@ -354,7 +354,7 @@ class MenuAgent(BaseAgent):
 - Free allowance: 10 × 2 = 20 FREE portions
 - Selection: 15 Chicken + 10 Shrimp = 25 total portions
 - Extra portions: 25 - 20 = 5 portions
-- 3rd protein charge: 5 × $10 = **$50**
+- Extra protein charge: 5 × $10 = **$50**
 - Premium upgrade charge: **$0** (all FREE proteins)
 - **Total protein cost: $50**
 
@@ -362,15 +362,15 @@ class MenuAgent(BaseAgent):
 - Free allowance: 10 × 2 = 20 FREE portions
 - Selection: 10 Chicken + 10 Filet Mignon = 20 total portions
 - Extra portions: 20 - 20 = 0 portions
-- 3rd protein charge: **$0** (within allowance)
+- Extra protein charge: **$0** (within allowance)
 - Premium upgrade charge: 10 Filet × $5 = **$50**
 - **Total protein cost: $50**
 
-**Example 3: 10 guests, premium + 3rd protein**
+**Example 3: 10 guests, premium + extra protein**
 - Free allowance: 10 × 2 = 20 FREE portions
 - Selection: 10 Chicken + 10 Filet + 5 Lobster = 25 total portions
 - Extra portions: 25 - 20 = 5 portions
-- 3rd protein charge: 5 × $10 = **$50**
+- Extra protein charge: 5 × $10 = **$50**
 - Premium upgrade charge: (10 Filet × $5) + (5 Lobster × $15) = $50 + $75 = **$125**
 - **Total protein cost: $50 + $125 = $175**
 
@@ -378,7 +378,7 @@ class MenuAgent(BaseAgent):
 - Free allowance: 5 × 2 = 10 FREE portions
 - Selection: 5 Filet + 5 Lobster = 10 total portions
 - Extra portions: 10 - 10 = 0 portions
-- 3rd protein charge: **$0**
+- Extra protein charge: **$0**
 - Premium upgrade charge: (5 Filet × $5) + (5 Lobster × $15) = $25 + $75 = **$100**
 - **Total protein cost: $100**
 
@@ -407,7 +407,7 @@ Customers can add these extras to their meal:
 - **Extra Vegetables**: +$5 per person (Additional portion of mixed seasonal vegetables)
 - **Edamame**: +$5 per person (Fresh steamed soybeans with sea salt)
 - **Gyoza**: +$10 per person (Pan-fried Japanese dumplings)
-- **3rd Protein**: +$10 per person (Add a third protein beyond the 2 FREE proteins)
+- **Extra Protein**: +$10 each (Add an extra protein beyond the 2 FREE proteins)
 
 These are food add-ons, NOT service upgrades.
 Mention these when customer asks about "sides" or "extras" or "more food".
@@ -418,7 +418,7 @@ Mention these when customer asks about "sides" or "extras" or "more food".
 - Helpful with suggestions but not pushy
 - Clear about pricing to avoid surprises (ALWAYS break down costs)
 - Encouraging when customers ask good questions
-- Transparent about 3rd protein rule (educate, don't surprise)
+- Transparent about extra protein rule (educate, don't surprise)
 
 **Example Responses:**
 
@@ -1053,8 +1053,8 @@ Bad Response:
             "FREE": list(self.protein_service.FREE_PROTEINS.values()),
             "UPGRADE (+$5)": sorted(upgrade_5),
             "PREMIUM (+$15)": sorted(premium_15),
-            "3rd_protein_rule": f"Any protein beyond 2 per guest: +$10 per portion (applies after {free_proteins_count} proteins for {guest_count} guests)",
-            "business_logic_note": "3rd protein charge applies to ALL proteins (even FREE ones) when exceeding 2 per guest. Premium upgrades are charged separately.",
+            "extra_protein_rule": f"Any protein beyond 2 per guest: +$10 each (applies after {free_proteins_count} proteins for {guest_count} guests)",
+            "business_logic_note": "Extra protein charge applies to ALL proteins (even FREE ones) when exceeding 2 per guest. Premium upgrades are charged separately.",
         }
 
         return recommendations
