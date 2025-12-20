@@ -239,10 +239,10 @@ async def get_current_pricing(
             },
             {
                 "id": 10,
-                "name": "3rd Protein",
+                "name": "Extra Protein",
                 "category": "enhancement",
                 "price": 10.00,
-                "description": "Add a third protein to your meal",
+                "description": "Add an extra protein to your meal (+$10, premium adds upgrade price)",
                 "is_active": True,
                 "display_order": 6,
             },

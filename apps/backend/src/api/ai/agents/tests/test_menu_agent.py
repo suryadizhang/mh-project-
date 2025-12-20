@@ -407,11 +407,11 @@ class TestMenuAgent:
         assert "FREE" in pricing
         assert "UPGRADE (+$5)" in pricing
         assert "PREMIUM (+$15)" in pricing
-        assert "3rd_protein_rule" in pricing
+        assert "extra_protein_rule" in pricing
 
-        # Verify 3rd protein rule calculation
+        # Verify extra protein rule calculation
         # 15 guests × 2 = 30 FREE proteins
-        assert "30 proteins" in pricing["3rd_protein_rule"]
+        assert "30 proteins" in pricing["extra_protein_rule"]
 
         print("✅ Protein recommendations include pricing reference")
 
@@ -463,8 +463,8 @@ class TestMenuAgent:
         assert "+$5" in prompt
         assert "+$15" in prompt
 
-        # Should mention 3rd protein rule
-        assert "3rd Protein Rule" in prompt
+        # Should mention Extra Protein Rule
+        assert "Extra Protein Rule" in prompt
         assert "+$10" in prompt
 
         print("✅ System prompt includes protein pricing details")

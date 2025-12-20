@@ -21,7 +21,7 @@ async def check_terminology():
         """
         SELECT upsell_item, pitch_template 
         FROM upsell_rules 
-        WHERE upsell_item IN ('Third Protein Add-on', 'Gyoza', 'Yakisoba Noodles', 'Add-on Offer - General')
+        WHERE upsell_item IN ('Extra Protein Add-on', 'Gyoza', 'Yakisoba Noodles', 'Add-on Offer - General')
         ORDER BY success_rate DESC
     """
     )

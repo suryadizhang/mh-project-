@@ -211,8 +211,8 @@ class KnowledgeService:
                 "category": "enhancement",
             },
             {
-                "name": "3rd Protein",
-                "description": "Add a third protein selection",
+                "name": "Extra Protein",
+                "description": "Add an extra protein selection (+$10, premium adds upgrade price)",
                 "price": 10.00,
                 "category": "extra",
             },

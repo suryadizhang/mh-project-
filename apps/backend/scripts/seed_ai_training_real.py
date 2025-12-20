@@ -13,7 +13,7 @@ This script populates the database with:
 3. Tone-matched training examples (24+ examples)
 4. Real upsell rules prioritizing ADD-ONS over premium upgrades:
    - Priority: Noodles $5, Extra Rice $5, Edamame $5, Vegetables $5
-   - Medium: 3rd Protein $10, Gyoza $10
+   - Medium: Extra Protein $10, Gyoza $10
    - Premium: Lobster $15, Filet/Salmon/Scallops $5
 5. Seasonal offers
 
@@ -274,13 +274,13 @@ async def seed_faqs(conn):
         ),
         (
             "Can I add a third protein or more?",
-            "Yes! Each guest normally gets 2 proteins, but you can add a 3rd protein for +$10 per person.",
+            "Yes! Each guest normally gets 2 proteins, but you can add an extra protein for +$10 each. Premium proteins (Salmon, Scallops, Filet Mignon) are +$10 + $5 upgrade, and Lobster Tail is +$10 + $15 upgrade.",
             "Menu & Upgrades",
         ),
         # Add-on Options (Dynamic data from website)
         (
             "What add-on options do you offer?",
-            "We offer several delicious add-on options to enhance your event:\n\n**$10 per person add-ons:**\n• Third Protein - Add an extra protein selection\n• Gyoza - Pan-fried Japanese dumplings\n\n**$5 per person add-ons:**\n• Yakisoba Noodles - Japanese-style lo mein\n• Extra Fried Rice\n• Extra Vegetables\n• Edamame - Steamed soybeans\n\nThese prices are subject to change. Please check our menu page for current pricing.",
+            "We offer several delicious add-on options to enhance your event:\n\n**$10 each add-ons:**\n• Extra Protein - Add an extra protein selection (premium adds upgrade price)\n• Gyoza - Pan-fried Japanese dumplings\n\n**$5 per person add-ons:**\n• Yakisoba Noodles - Japanese-style lo mein\n• Extra Fried Rice\n• Extra Vegetables\n• Edamame - Steamed soybeans\n\nThese prices are subject to change. Please check our menu page for current pricing.",
             "Menu & Add-ons",
         ),
         # Booking & Payments
@@ -438,7 +438,7 @@ async def seed_training_data(conn):
         ),
         (
             "Extras? What add-on options do you have?",
-            "Great question! Our add-on options are:\n\n**Appetizers:** Gyoza (dumplings) $10/person or Edamame $5/person\n**Extra protein:** 3rd protein add-on for $10/person\n**Sides:** Yakisoba noodles add-on, extra veggies, etc.\n\nAny of these add-ons sound good? Or you're all set with the standard package - it's already amazing! 😊",
+            "Great question! Our add-on options are:\n\n**Appetizers:** Gyoza (dumplings) $10/person or Edamame $5/person\n**Extra protein:** Extra protein add-on for $10 each (premium adds upgrade price)\n**Sides:** Yakisoba noodles add-on, extra veggies, etc.\n\nAny of these add-ons sound good? Or you're all set with the standard package - it's already amazing! 😊",
             "casual",
             "upsell",
             json.dumps({"stage": "detailed_options"}),
@@ -452,7 +452,7 @@ async def seed_training_data(conn):
         ),
         (
             "For the corporate event, what add-on options are available?",
-            "Certainly! We offer several add-on options:\n\n**Premium Proteins:** Lobster tail add-on, filet mignon, or premium seafood\n**Appetizers:** Gyoza or edamame add-ons as starters\n**Additional Protein:** Third protein add-on\n\nWould any of these add-ons interest you, or shall we proceed with the standard package?",
+            "Certainly! We offer several add-on options:\n\n**Premium Proteins:** Lobster tail add-on, filet mignon, or premium seafood\n**Appetizers:** Gyoza or edamame add-ons as starters\n**Additional Protein:** Extra protein add-on (+$10 each)\n\nWould any of these add-ons interest you, or shall we proceed with the standard package?",
             "formal",
             "upsell",
             json.dumps({"event_type": "corporate"}),
@@ -484,7 +484,7 @@ async def seed_upsell_rules(conn):
     # Source: apps/customer/src/data/faqsData.ts (id: 'add-on-options')
     #
     # CONVERSATIONAL APPROACH:
-    # 1. First mention: "Would you like to add any extras like appetizers or a 3rd protein?"
+    # 1. First mention: "Would you like to add any extras like appetizers or extra protein?"
     # 2. If customer asks "what options?": Then list specific items
     # 3. Natural flow, not pushy listing
 
@@ -503,8 +503,8 @@ async def seed_upsell_rules(conn):
         # Top value items - using "add-on" terminology from website
         (
             "guest_count >= 10",
-            "Third Protein Add-on",
-            "3rd protein add-on: +$10 per person. Gives your guests more variety!",
+            "Extra Protein Add-on",
+            "Extra protein add-on: +$10 each (premium adds upgrade price). Gives your guests more variety!",
             10.00,
             "casual",
             10,
@@ -592,10 +592,10 @@ async def seed_upsell_rules(conn):
         await conn.execute(
             """
             INSERT INTO upsell_rules (
-                trigger_condition, 
-                upsell_item, 
-                pitch_template, 
-                tone_adaptation, 
+                trigger_condition,
+                upsell_item,
+                pitch_template,
+                tone_adaptation,
                 is_active,
                 min_party_size,
                 success_rate
@@ -613,7 +613,7 @@ async def seed_upsell_rules(conn):
 
     print(f"   ✅ Added {len(rules)} REAL upsell rules (conversational approach):")
     print("      - Start: 'Would you like to add any extras?'")
-    print("      - If interested: Mention 3rd protein $10, gyoza $10")
+    print("      - If interested: Mention extra protein $10, gyoza $10")
     print("      - If asks details: Noodles, edamame, rice, veggies ($5 each)")
     print("      - Natural flow, not pushy listing!")
 

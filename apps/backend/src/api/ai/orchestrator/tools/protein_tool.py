@@ -2,7 +2,7 @@
 Protein Tool for AI Orchestrator
 
 This tool calculates protein upgrade costs using the smart protein calculator.
-Handles FREE proteins, premium upgrades, and 3rd protein rule.
+Handles FREE proteins, premium upgrades, and extra protein charges.
 
 Author: MyHibachi Development Team
 Created: October 31, 2025
@@ -26,7 +26,7 @@ class ProteinTool(BaseTool):
     Protein Pricing Rules:
     1. First 2 proteins per guest: FREE (if from FREE list)
     2. Premium upgrades: Filet/Salmon/Scallops (+$5), Lobster (+$15)
-    3. 3rd protein per guest: +$10 additional charge
+    3. Extra protein (beyond 2 per guest): +$10 additional charge
 
     FREE Proteins:
     - Chicken
@@ -68,7 +68,7 @@ Use this tool when customer asks specifically about:
 Protein Rules:
 - Each guest gets 2 FREE proteins (from FREE list)
 - Premium upgrades: Filet/Salmon/Scallops (+$5 each), Lobster (+$15 each)
-- 3rd protein per guest: +$10 extra charge
+- Extra protein (beyond 2 per guest): +$10 each charge
 - Proteins are per portion, not per guest
 
 FREE Proteins (no charge):
@@ -92,7 +92,7 @@ Note: For complete quote with proteins, use calculate_party_quote tool instead."
             ToolParameter(
                 name="guest_count",
                 type="integer",
-                description="Total number of guests (adults + children). Required for 3rd protein calculation.",
+                description="Total number of guests (adults + children). Required for extra protein calculation.",
                 required=True,
             ),
             ToolParameter(
@@ -188,13 +188,13 @@ Note: Quantities are per portion, not per guest. Each guest gets 2 proteins.""",
             if upgrade_proteins and result["upgrade_cost"] > 0:
                 notes.append(f"Premium upgrades: ${result['upgrade_cost']:.2f}")
 
-            # 3rd protein note
+            # Extra protein note
             if result["third_protein_cost"] > 0:
                 total_portions = sum(protein_selections.values())
                 allowed_free = guest_count * 2
                 extra_portions = total_portions - allowed_free
                 notes.append(
-                    f"3rd protein charge: ${result['third_protein_cost']:.2f} (+$10 per portion beyond 2 per guest, {extra_portions} extra portions)"
+                    f"Extra protein charge: ${result['third_protein_cost']:.2f} (+$10 per portion beyond 2 per guest, {extra_portions} extra portions)"
                 )
 
             # Educational note
@@ -203,7 +203,7 @@ Note: Quantities are per portion, not per guest. Each guest gets 2 proteins.""",
                     1 for p in result["breakdown"] if p["is_free"] and p["upgrade_price"] == 0
                 )
                 if free_count > 0:
-                    notes.append("Within the 2 proteins per guest limit - no 3rd protein charges")
+                    notes.append("Within the 2 proteins per guest limit - no extra protein charges")
 
             response_data["pricing_notes"] = notes
             response_data["proteins_summary"] = result["proteins_summary"]

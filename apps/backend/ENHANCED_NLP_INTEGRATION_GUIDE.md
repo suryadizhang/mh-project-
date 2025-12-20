@@ -229,7 +229,7 @@ async def parse_booking(message: str):
     # Add-on pricing
     addon_price = 0
     for addon in details['add_ons']:
-        if addon in ['Gyoza', 'Third Protein']:
+        if addon in ['Gyoza', 'Extra Protein']:
             addon_price += guest_count * 10
         else:
             addon_price += guest_count * 5
@@ -628,7 +628,5 @@ Before deploying enhanced NLP to production:
 
 ---
 
-**Version**: 1.0  
-**Last Updated**: November 2025  
-**Dependencies**: spacy==3.8.8, sentence-transformers==5.1.2,
-scikit-learn==1.3.2
+**Version**: 1.0 **Last Updated**: November 2025 **Dependencies**:
+spacy==3.8.8, sentence-transformers==5.1.2, scikit-learn==1.3.2

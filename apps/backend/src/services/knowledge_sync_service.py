@@ -569,7 +569,7 @@ class KnowledgeSyncService:
         elif any(x in name_lower for x in ["edamame", "gyoza", "salad"]):
             return "appetizers"
         elif "protein" in name_lower:
-            return "desserts"  # Using desserts category for "3rd Protein" add-on
+            return "desserts"  # Using desserts category for "Extra Protein" add-on
         return "other"
 
     def _parse_faqs_from_ts(self) -> List[Dict]:

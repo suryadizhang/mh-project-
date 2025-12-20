@@ -10,6 +10,7 @@ This script populates the database with:
 
 Run: python scripts/seed_ai_training_data.py
 """
+
 import asyncio
 from datetime import datetime
 import os
@@ -19,7 +20,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 # Import knowledge base models
 import sys
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from models.knowledge_base import (
     BusinessRule,
@@ -28,8 +30,6 @@ from models.knowledge_base import (
     UpsellRule,
     SeasonalOffer,
     KnowledgeCache,
-    MenuItem,
-    PricingTier,
 )
 
 load_dotenv()
@@ -322,10 +322,10 @@ async def seed_faqs(session: AsyncSession):
         ),
         FAQItem(
             question="Can I add a third protein or more?",
-            answer="Yes! Each guest normally gets 2 proteins, but you can add a 3rd protein for +$10 per person. This is an additional option that gives you more food, not an upgrade. If you want the 3rd protein to be a premium option (Filet Mignon or Lobster Tail), that would be the +$10 for the additional protein plus the premium upgrade cost.",
+            answer="Yes! Each guest normally gets 2 proteins, but you can add an extra protein for +$10 each. This is an additional option that gives you more food, not an upgrade. If you want the extra protein to be a premium option (Salmon, Scallops, Filet Mignon: +$10 + $5 = $15, or Lobster Tail: +$10 + $15 = $25).",
             category="Menu & Upgrades",
             subcategory="Add-ons & Sides",
-            tags=["third protein", "additional protein", "add-on", "+$10", "more food"],
+            tags=["extra protein", "additional protein", "add-on", "+$10", "more food"],
             source_urls=["/menu"],
             is_active=True,
         ),
@@ -705,8 +705,8 @@ async def seed_upsell_rules(session: AsyncSession):
         ),
         UpsellRule(
             trigger_context="True",
-            upsell_item="Third Protein Add-on",
-            description="Add a third protein choice for +$10/person",
+            upsell_item="Extra Protein Add-on",
+            description="Add an extra protein for +$10 each (premium adds upgrade price)",
             price_modifier=10.00,
             suggested_tone="casual",
             priority=5,

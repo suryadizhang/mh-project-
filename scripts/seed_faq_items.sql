@@ -5,7 +5,7 @@
 -- Source of Truth: apps/customer/src/data/faqsData.ts
 -- Last Verified: 2025-11-12
 -- Total FAQs: 35 items across 8 categories
--- 
+--
 -- IMPORTANT: This data is DYNAMIC and subject to change!
 -- - FAQs can be added, modified, or removed
 -- - Answers may be updated based on policy changes
@@ -109,12 +109,12 @@ INSERT INTO faq_items (question, answer, category, view_count, helpful_count, is
     (
         gen_random_uuid(),
         main_station_id,
-        'Can I add a third protein or more?',
-        'Yes! Each guest normally gets 2 proteins, but you can add a 3rd protein for +$10 per person. This is an additional option that gives you more food, not an upgrade. If you want the 3rd protein to be a premium option (Filet Mignon or Lobster Tail), that would be the +$10 for the additional protein plus the premium upgrade cost. Contact us at cs@myhibachichef.com to customize your menu.',
+        'Can I add an extra protein or more?',
+        'Yes! Each guest normally gets 2 proteins, but you can add an extra protein for +$10 each. This is an additional option that gives you more food, not an upgrade. If you want the extra protein to be a premium option (Salmon, Scallops, Filet Mignon, or Lobster Tail), that would be the +$10 for the additional protein plus the premium upgrade cost (+$5 for Salmon/Scallops/Filet Mignon, +$15 for Lobster Tail). Contact us at cs@myhibachichef.com to customize your menu.',
         'Menu & Upgrades',
         'Add‑ons & Sides',
-        ARRAY['third protein', 'additional protein', 'add-on', '+$10', 'more food'],
-        ARRAY['third', '3rd', 'protein', 'additional', 'more', 'extra', '$10', 'customize', 'menu'],
+        ARRAY['extra protein', 'additional protein', 'add-on', '+$10', 'more food'],
+        ARRAY['extra', 'protein', 'additional', 'more', '$10', 'customize', 'menu'],
         'high',
         ARRAY['/menu'],
         0, 0, true,
@@ -124,10 +124,10 @@ INSERT INTO faq_items (question, answer, category, view_count, helpful_count, is
         gen_random_uuid(),
         main_station_id,
         'What additional enhancements can I add to my menu?',
-        'We offer several delicious add-on options: Yakisoba Noodles (Japanese-style lo mein), Extra Fried Rice, Extra Vegetables (mixed seasonal vegetables), and Edamame (steamed soybeans with sea salt) are all +$5 each. Gyoza (pan-fried Japanese dumplings) and 3rd Protein (add a third protein to your meal) are +$10 each. These can be ordered per person or shared family-style.',
+        'We offer several delicious add-on options: Yakisoba Noodles (Japanese-style lo mein), Extra Fried Rice, Extra Vegetables (mixed seasonal vegetables), and Edamame (steamed soybeans with sea salt) are all +$5 each. Gyoza (pan-fried Japanese dumplings) and Extra Protein (add additional proteins to your meal) are +$10 each. These can be ordered per person or shared family-style.',
         'Menu & Upgrades',
         'Add‑ons & Sides',
-        ARRAY['enhancements', 'add-ons', 'yakisoba noodles +$5', 'extra rice +$5', 'extra vegetables +$5', 'edamame +$5', 'gyoza +$10', '3rd protein +$10', 'sides'],
+        ARRAY['enhancements', 'add-ons', 'yakisoba noodles +$5', 'extra rice +$5', 'extra vegetables +$5', 'edamame +$5', 'gyoza +$10', 'extra protein +$10', 'sides'],
         ARRAY['enhancements', 'add-ons', 'extras', 'yakisoba', 'noodles', 'rice', 'vegetables', 'edamame', 'gyoza', 'dumplings', 'sides', '$5', '$10'],
         'high',
         ARRAY['/menu'],
@@ -501,7 +501,7 @@ END $$;
 -- VERIFICATION QUERY
 -- ============================================================================
 -- Run this to verify FAQs were seeded correctly:
-SELECT 
+SELECT
     category,
     COUNT(*) as faq_count,
     STRING_AGG(DISTINCT subcategory, ', ' ORDER BY subcategory) as subcategories
@@ -511,5 +511,5 @@ GROUP BY category
 ORDER BY category;
 
 -- Total count should be 35
-SELECT COUNT(*) as total_faqs FROM faq_items 
+SELECT COUNT(*) as total_faqs FROM faq_items
 WHERE station_id IN (SELECT id FROM stations WHERE name = 'Main Location');
