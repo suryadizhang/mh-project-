@@ -409,8 +409,53 @@ Before committing, mentally answer:
 
 ---
 
+## � Configuration Documentation Rule
+
+**MANDATORY: After ANY configuration or setting change, update
+documentation.**
+
+When completing infrastructure, security, or service configuration:
+
+1. **Update the relevant instruction file** with:
+   - What was configured
+   - Current values/settings
+   - Date of last update
+   - Any credentials/IDs (non-sensitive)
+
+2. **Key files to update:**
+
+| Configuration Type               | Update File                                    |
+| -------------------------------- | ---------------------------------------------- |
+| Server/VPS/SSH                   | `16-INFRASTRUCTURE_DEPLOYMENT.instructions.md` |
+| Cloudflare (Tunnel, Access, WAF) | `16-INFRASTRUCTURE_DEPLOYMENT.instructions.md` |
+| Database                         | `16-INFRASTRUCTURE_DEPLOYMENT.instructions.md` |
+| Feature Flags                    | `08-FEATURE_FLAGS.instructions.md`             |
+| Environment Variables            | `16-INFRASTRUCTURE_DEPLOYMENT.instructions.md` |
+| CI/CD Workflows                  | `16-INFRASTRUCTURE_DEPLOYMENT.instructions.md` |
+| Testing Config                   | `07-TESTING_QA.instructions.md`                |
+
+3. **What to document:**
+   - Setting name and value
+   - Why it was configured
+   - How to verify it's working
+   - How to change/rollback if needed
+
+**Example:**
+
+```markdown
+### Cloudflare Access
+
+**Last Updated:** 2024-12-18 | Setting | Value | |---------|-------| |
+Application | MyHibachi Admin Panel | | Protected Paths | /superadmin,
+/docs, /redoc | | Policy | Allow specific emails |
+```
+
+---
+
 ## 🔗 Related Docs
 
 - `00-BOOTSTRAP.instructions.md` – System bootstrap
 - `02-ARCHITECTURE.instructions.md` – System structure
+- `16-INFRASTRUCTURE_DEPLOYMENT.instructions.md` – Infrastructure &
+  security settings
 - `myhibachi.code-workspace` – Multi-root workspace file
