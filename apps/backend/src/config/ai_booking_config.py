@@ -409,7 +409,7 @@ UPSELL_RULES = {
         {"item": "edamame", "price": 5, "description": "Fresh edamame appetizer"},
         {"item": "vegetables", "price": 5, "description": "Extra grilled vegetables"},
         # Medium: Protein add-ons
-        {"item": "third_protein", "price": 10, "description": "Add a 3rd protein choice"},
+        {"item": "extra_protein", "price": 10, "description": "Add an extra protein to your meal"},
         {"item": "gyoza", "price": 10, "description": "Pan-fried gyoza dumplings"},
         # Premium: Special upgrades
         {"item": "lobster_tail", "price": 15, "description": "Upgrade to lobster tail"},

@@ -53,7 +53,7 @@ class DataAudit:
                     "Extra Fried Rice": 5,
                     "Extra Vegetables": 5,
                     "Edamame": 5,
-                    "Third Protein": 10,  # Database uses "Third Protein Add-on"
+                    "Extra Protein": 10,  # Database uses "Extra Protein Add-on"
                     "Gyoza": 10,
                 },
                 "premium_upgrades": {
@@ -77,7 +77,7 @@ class DataAudit:
                 "Extra Fried Rice": 5,
                 "Extra Vegetables": 5,
                 "Edamame": 5,
-                "Third Protein": 10,  # Database uses "Third Protein Add-on"
+                "Extra Protein": 10,  # Database uses "Extra Protein Add-on"
                 "Gyoza": 10,
             },
             "premium_upgrades": {

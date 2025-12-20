@@ -263,7 +263,7 @@ class E2EFlowTester:
         )
 
         # Check if top suggestions are add-ons (not premium upgrades)
-        addon_keywords = ["noodles", "rice", "gyoza", "edamame", "third protein"]
+        addon_keywords = ["noodles", "rice", "gyoza", "edamame", "extra protein"]
         premium_keywords = ["lobster", "filet"]
 
         has_addons = False

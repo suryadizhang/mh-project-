@@ -357,7 +357,7 @@ Premium Upgrade Options (optional):
 • Filet Mignon: +$5 per protein selection
 • Lobster Tail: +$15 per protein selection
 
-3rd Protein Rule:
+Extra Protein Rule:
 • If total proteins selected > (number of guests × 2), then charge +$10 per extra protein
 • Example: 10 guests = 20 FREE protein selections included
   - If they select 25 proteins total → 5 extra proteins × $10 = $50 additional charge

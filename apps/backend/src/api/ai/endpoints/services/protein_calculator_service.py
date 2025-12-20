@@ -6,8 +6,8 @@ PRICING VERIFIED FROM WEBSITE (apps/customer/src/data/faqsData.ts):
 - Each guest gets 2 FREE protein choices
 - FREE proteins: Chicken, NY Strip Steak, Shrimp, Tofu
 - UPGRADE proteins: Salmon (+$5), Scallops (+$5), Filet Mignon (+$5), Lobster Tail (+$15)
-- 3rd protein: +$10 per person (any protein)
-- If 3rd protein is premium: +$10 (3rd) + premium price (+$5 or +$15)
+- Extra Protein: +$10 each (any protein beyond 2 per guest)
+- If extra protein is premium: +$10 (extra) + premium price (+$5 or +$15)
 """
 
 from dataclasses import dataclass
@@ -37,8 +37,8 @@ class ProteinCalculatorService:
     1. Each guest gets 2 FREE protein choices
     2. FREE proteins: Chicken, NY Strip Steak, Shrimp, Tofu
     3. UPGRADE proteins: Salmon (+$5), Scallops (+$5), Filet Mignon (+$5), Lobster Tail (+$15)
-    4. If total proteins > (guests × 2): Extra proteins are charged as "3rd protein" (+$10 each)
-    5. If a 3rd protein is premium: +$10 (3rd) + premium price
+    4. If total proteins > (guests × 2): Extra proteins are charged as "Extra Protein" (+$10 each)
+    5. If an extra protein is premium: +$10 (extra) + premium price
     """
 
     # FREE base proteins (included in base price)
@@ -61,7 +61,7 @@ class ProteinCalculatorService:
         "lobster": {"name": "Lobster Tail", "price": Decimal("15.00")},  # Alias
     }
 
-    # 3rd protein pricing
+    # Extra protein pricing (+$10 per protein beyond 2 per guest)
     THIRD_PROTEIN_PRICE = Decimal("10.00")
 
     def __init__(self):
@@ -85,7 +85,7 @@ class ProteinCalculatorService:
         Returns:
             Dict with:
                 - upgrade_cost: Total cost for premium upgrades
-                - third_protein_cost: Total cost for 3rd proteins
+                - third_protein_cost: Total cost for extra proteins (beyond 2 per guest)
                 - total_protein_cost: Combined total
                 - breakdown: List of ProteinBreakdown objects
                 - explanation: Human-readable explanation
@@ -157,7 +157,7 @@ class ProteinCalculatorService:
                     f"Free protein: {self.FREE_PROTEINS[protein_lower]} × {quantity} (FREE)"
                 )
 
-        # Second pass: Check if we have 3rd proteins
+        # Second pass: Check if we have extra proteins beyond 2 per guest
         if total_proteins > free_protein_allowance:
             extra_proteins = total_proteins - free_protein_allowance
             third_protein_cost = self.THIRD_PROTEIN_PRICE * extra_proteins
@@ -166,8 +166,8 @@ class ProteinCalculatorService:
                 f"Extra proteins detected: {extra_proteins} × ${self.THIRD_PROTEIN_PRICE} = ${third_protein_cost}"
             )
 
-            # Update breakdown to mark 3rd proteins
-            # Note: The last proteins in the order are considered "3rd proteins"
+            # Update breakdown to mark extra proteins
+            # Note: The last proteins in the order are considered extra proteins
             proteins_marked = 0
             for item in reversed(breakdown):
                 if proteins_marked >= extra_proteins:
@@ -252,15 +252,15 @@ class ProteinCalculatorService:
                     )
             lines.append("")
 
-        # Show 3rd protein charge if applicable
+        # Show extra protein charge if applicable
         if third_protein_cost > 0:
             extra_count = total_proteins - free_allowance
-            lines.append("🔢 **3rd Protein Charges:**")
+            lines.append("🔢 **Extra Protein Charges:**")
             lines.append(
                 f"   • {extra_count} extra protein(s) beyond your {free_allowance} free allowance"
             )
             lines.append(
-                f"   • 3rd protein fee: {extra_count} × ${self.THIRD_PROTEIN_PRICE} = ${third_protein_cost}"
+                f"   • Extra protein fee: {extra_count} × ${self.THIRD_PROTEIN_PRICE} = ${third_protein_cost}"
             )
             lines.append("")
 
@@ -269,7 +269,7 @@ class ProteinCalculatorService:
         if upgrade_cost > 0:
             lines.append(f"   • Premium upgrades: ${upgrade_cost}")
         if third_protein_cost > 0:
-            lines.append(f"   • 3rd protein charges: ${third_protein_cost}")
+            lines.append(f"   • Extra protein charges: ${third_protein_cost}")
 
         total = upgrade_cost + third_protein_cost
         if total > 0:

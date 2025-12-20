@@ -442,8 +442,8 @@ Your appreciation means the world to our chefs! 🙏✨
             },
             # Additional items (+$10 each from your menu)
             {
-                "name": "3rd Protein",
-                "price": self.get_addon_price("third_protein"),
+                "name": "Extra Protein",
+                "price": self.get_addon_price("extra_protein"),
                 "category": "protein",
                 "per_person": False,
             },

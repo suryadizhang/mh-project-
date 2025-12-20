@@ -78,7 +78,7 @@ def test_semantic_search():
         },
         {
             "question": "What add-on options do you offer?",
-            "answer": "$10 add-ons: Third Protein, Gyoza. $5 add-ons: Yakisoba Noodles, Extra Fried Rice, Extra Vegetables, Edamame.",
+            "answer": "$10 add-ons: Extra Protein, Gyoza. $5 add-ons: Yakisoba Noodles, Extra Fried Rice, Extra Vegetables, Edamame.",
             "category": "Menu",
         },
         {
@@ -163,30 +163,30 @@ def test_performance_monitoring():
     print("=" * 60)
 
     nlp = get_nlp_service()
-    
+
     # Reset metrics to start fresh
     nlp.reset_metrics()
     print("\n🔄 Metrics reset")
-    
+
     # Run multiple operations to generate metrics
     print("\n⚡ Running test operations...")
-    
+
     for i in range(10):
         nlp.extract_entities(f"I need hibachi for {20 + i} people on December {i+1}th")
         nlp.detect_tone_enhanced("Hey! Super excited about this event! 🎉")
         nlp.extract_booking_details("50 guests, chicken and steak, plus noodles")
-    
+
     print("✅ Completed 30 operations (10 of each type)")
-    
+
     # Get overall metrics
     print("\n📈 Overall Performance Metrics:")
     metrics = nlp.get_performance_metrics()
     print(f"   • Uptime: {metrics['uptime_seconds']:.2f}s")
     print(f"   • Total methods tracked: {len(metrics['methods'])}")
-    
+
     # Get metrics for each method
     print("\n📊 Per-Method Performance:")
-    for method_name in ['extract_entities', 'detect_tone_enhanced', 'extract_booking_details']:
+    for method_name in ["extract_entities", "detect_tone_enhanced", "extract_booking_details"]:
         method_metrics = nlp.get_performance_metrics(method_name)
         if method_metrics:
             print(f"\n   🔧 {method_name}:")
@@ -196,7 +196,7 @@ def test_performance_monitoring():
             print(f"      • Max time: {method_metrics['max_time_ms']}ms")
             print(f"      • Errors: {method_metrics['errors']}")
             print(f"      • Error rate: {method_metrics['error_rate']}%")
-    
+
     # Health check
     print("\n🏥 Health Check:")
     health = nlp.health_check()
@@ -228,8 +228,8 @@ def test_comprehensive_booking_extraction():
                 "has_time": True,
                 "has_location": True,
                 "protein_count": 3,
-                "has_contact": True
-            }
+                "has_contact": True,
+            },
         },
         {
             "text": "Birthday party for 30 guests tomorrow at 5pm. Need vegetarian options, we have someone with nut allergies. Email: party@example.com",
@@ -239,8 +239,8 @@ def test_comprehensive_booking_extraction():
                 "has_time": True,
                 "has_special_request": True,
                 "has_dietary": True,
-                "has_contact": True
-            }
+                "has_contact": True,
+            },
         },
         {
             "text": "Corporate event, 75 people, outdoor setup preferred. Steak and salmon. Need it for next Saturday.",
@@ -248,9 +248,9 @@ def test_comprehensive_booking_extraction():
                 "guest_count": 75,
                 "has_date": True,
                 "has_special_request": True,
-                "protein_count": 2
-            }
-        }
+                "protein_count": 2,
+            },
+        },
     ]
 
     for i, test_case in enumerate(test_cases, 1):
@@ -258,9 +258,9 @@ def test_comprehensive_booking_extraction():
         print(f"Test Case {i}")
         print(f"{'='*60}")
         print(f"📝 Input: '{test_case['text']}'")
-        
-        details = nlp.extract_booking_details(test_case['text'])
-        
+
+        details = nlp.extract_booking_details(test_case["text"])
+
         print("\n✅ Extracted Details:")
         print(f"   • Guest count: {details.get('guest_count', 'Not found')}")
         print(f"   • Date: {details.get('date', 'Not found')}")
@@ -274,60 +274,64 @@ def test_comprehensive_booking_extraction():
         print(f"   • Dietary restrictions: {details.get('dietary_restrictions', [])}")
         print(f"   • Overall confidence: {details.get('confidence', 0)}")
         print(f"   • Entities found: {details.get('entities_found', 0)}")
-        
+
         # Validate against expectations
-        expected = test_case['expected']
+        expected = test_case["expected"]
         validation_results = []
-        
-        if 'guest_count' in expected:
-            if details.get('guest_count') == expected['guest_count']:
+
+        if "guest_count" in expected:
+            if details.get("guest_count") == expected["guest_count"]:
                 validation_results.append("✅ Guest count: MATCH")
             else:
-                validation_results.append(f"⚠️  Guest count: Expected {expected['guest_count']}, got {details.get('guest_count')}")
-        
-        if expected.get('has_date'):
-            if details.get('date'):
+                validation_results.append(
+                    f"⚠️  Guest count: Expected {expected['guest_count']}, got {details.get('guest_count')}"
+                )
+
+        if expected.get("has_date"):
+            if details.get("date"):
                 validation_results.append("✅ Date: FOUND")
             else:
                 validation_results.append("⚠️  Date: NOT FOUND")
-        
-        if expected.get('has_time'):
-            if details.get('time'):
+
+        if expected.get("has_time"):
+            if details.get("time"):
                 validation_results.append("✅ Time: FOUND")
             else:
                 validation_results.append("⚠️  Time: NOT FOUND")
-        
-        if expected.get('has_location'):
-            if details.get('locations'):
+
+        if expected.get("has_location"):
+            if details.get("locations"):
                 validation_results.append("✅ Location: FOUND")
             else:
                 validation_results.append("⚠️  Location: NOT FOUND")
-        
-        if 'protein_count' in expected:
-            actual_count = len(details.get('proteins', []))
-            if actual_count == expected['protein_count']:
+
+        if "protein_count" in expected:
+            actual_count = len(details.get("proteins", []))
+            if actual_count == expected["protein_count"]:
                 validation_results.append(f"✅ Proteins: MATCH ({actual_count})")
             else:
-                validation_results.append(f"⚠️  Proteins: Expected {expected['protein_count']}, got {actual_count}")
-        
-        if expected.get('has_contact'):
-            if details.get('contact_phone') or details.get('contact_email'):
+                validation_results.append(
+                    f"⚠️  Proteins: Expected {expected['protein_count']}, got {actual_count}"
+                )
+
+        if expected.get("has_contact"):
+            if details.get("contact_phone") or details.get("contact_email"):
                 validation_results.append("✅ Contact: FOUND")
             else:
                 validation_results.append("⚠️  Contact: NOT FOUND")
-        
-        if expected.get('has_special_request'):
-            if details.get('special_requests'):
+
+        if expected.get("has_special_request"):
+            if details.get("special_requests"):
                 validation_results.append("✅ Special request: FOUND")
             else:
                 validation_results.append("⚠️  Special request: NOT FOUND")
-        
-        if expected.get('has_dietary'):
-            if details.get('dietary_restrictions'):
+
+        if expected.get("has_dietary"):
+            if details.get("dietary_restrictions"):
                 validation_results.append("✅ Dietary restrictions: FOUND")
             else:
                 validation_results.append("⚠️  Dietary restrictions: NOT FOUND")
-        
+
         print("\n🔍 Validation Results:")
         for result in validation_results:
             print(f"   {result}")

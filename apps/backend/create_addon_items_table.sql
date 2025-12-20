@@ -41,7 +41,7 @@ INSERT INTO public.addon_items (id, name, description, category, price, is_activ
 ('addon_002', 'Salmon', 'Premium upgrade - fresh Atlantic salmon (+$5 per person)', 'protein_upgrades', 5.00, TRUE, 2),
 ('addon_003', 'Scallops', 'Premium upgrade - seared scallops (+$5 per person)', 'protein_upgrades', 5.00, TRUE, 3),
 ('addon_004', 'Lobster Tail', 'Premium upgrade - succulent lobster tail (+$15 per person)', 'protein_upgrades', 15.00, TRUE, 4),
-('addon_005', '3rd Protein Selection', 'Add a third protein to your meal (+$10 per person)', 'protein_upgrades', 10.00, TRUE, 5),
+('addon_005', 'Extra Protein', 'Add an extra protein to your meal (+$10 each, premium adds upgrade price)', 'protein_upgrades', 10.00, TRUE, 5),
 ('addon_006', 'Yakisoba Noodles', 'Substitute fried rice with yakisoba noodles (+$5 per person)', 'enhancements', 5.00, TRUE, 6),
 ('addon_007', 'Extra Fried Rice', 'Additional portion of hibachi fried rice (+$5 per person)', 'enhancements', 5.00, TRUE, 7),
 ('addon_008', 'Extra Vegetables', 'Additional grilled vegetables (+$5 per person)', 'enhancements', 5.00, TRUE, 8),

@@ -32,6 +32,8 @@ files in order:
     optimization
 15. `15-LIGHTHOUSE_WEB_VITALS.instructions.md` – Core Web Vitals &
     Lighthouse standards
+16. `16-INFRASTRUCTURE_DEPLOYMENT.instructions.md` – Servers, DB, SSH,
+    deployment
 
 ---
 

@@ -5,7 +5,7 @@
 -- Source of Truth: apps/customer/src/data/faqsData.ts
 -- Last Verified: 2025-11-12
 -- Total FAQs: 35 items across 8 categories
--- 
+--
 -- IMPORTANT: This data is DYNAMIC and subject to change!
 -- - FAQs can be added, modified, or removed at any time
 -- - Answers may be updated based on policy changes
@@ -59,12 +59,12 @@ INSERT INTO faq_items (question, answer, category, view_count, helpful_count, is
  'Yes! We provide sake for guests 21+ as part of the standard experience. We don''t provide other alcohol — you''re welcome to supply your own beer, wine, or cocktails.',
  'Menu & Upgrades', 0, 0, true),
 
-('Can I add a third protein or more?',
- 'Yes! Each guest normally gets 2 proteins, but you can add a 3rd protein for +$10 per person. This is an additional option that gives you more food, not an upgrade. If you want the 3rd protein to be a premium option (Filet Mignon or Lobster Tail), that would be the +$10 for the additional protein plus the premium upgrade cost.',
+('Can I add an extra protein or more?',
+ 'Yes! Each guest normally gets 2 proteins, but you can add an extra protein for +$10 each. This is an additional option that gives you more food, not an upgrade. If you want the extra protein to be a premium option (Salmon, Scallops, Filet Mignon, or Lobster Tail), that would be the +$10 for the additional protein plus the premium upgrade cost (+$5 for Salmon/Scallops/Filet Mignon, +$15 for Lobster Tail).',
  'Menu & Upgrades', 0, 0, true),
 
 ('What additional enhancements can I add to my menu?',
- 'We offer several delicious add-on options: Yakisoba Noodles, Extra Fried Rice, Extra Vegetables, and Edamame are all +$5 each. Gyoza and 3rd Protein are +$10 each. These can be ordered per person or shared family-style.',
+ 'We offer several delicious add-on options: Yakisoba Noodles, Extra Fried Rice, Extra Vegetables, and Edamame are all +$5 each. Gyoza and Extra Protein are +$10 each. These can be ordered per person or shared family-style.',
  'Menu & Upgrades', 0, 0, true),
 
 ('Can guests choose different proteins?',
@@ -186,7 +186,7 @@ INSERT INTO faq_items (question, answer, category, view_count, helpful_count, is
 -- VERIFICATION QUERIES
 -- ============================================================================
 
-SELECT 
+SELECT
     category,
     COUNT(*) as faq_count
 FROM faq_items
