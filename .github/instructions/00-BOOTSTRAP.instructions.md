@@ -104,16 +104,37 @@ If user request conflicts with any rulebook:
 | **Environment vars**  | `YOUR_VALUE_HERE`, `REPLACE_THIS`         |
 | **Numeric constants** | Random prices, distances, timeouts        |
 
+### Business Data Sources (USE THESE!):
+
+**All business model data MUST come from these sources:**
+
+| Data Type                | Source of Truth                                   |
+| ------------------------ | ------------------------------------------------- |
+| **Pricing**              | Dynamic Variables System → `pricing_config` table |
+| **Menu Items**           | Menu page data → `menu_items` table               |
+| **Add-ons**              | Menu page data → `addon_items` table              |
+| **FAQs**                 | FAQ page → `faqs` table or knowledge base         |
+| **Service Areas**        | Station config → `stations` table                 |
+| **Travel Fees**          | Dynamic Variables → `travel_fee_config`           |
+| **Business Hours**       | Station config → `stations.business_hours`        |
+| **Contact Info**         | Dynamic Variables or station config               |
+| **Terms & Policies**     | Terms page / knowledge base                       |
+| **Deposit %**            | Dynamic Variables → `deposit_percentage`          |
+| **Min/Max Guest Counts** | Dynamic Variables → `min_guests`, `max_guests`    |
+
 ### What To Do Instead:
 
-| Situation                | Action                                      |
-| ------------------------ | ------------------------------------------- |
-| Need an ID/UUID          | **ASK USER** for actual value               |
-| Need API credentials     | **ASK USER** or reference GSM               |
-| Need example data        | Use **existing data** from codebase         |
-| Need configuration value | Check **existing config files** first       |
-| Need database record     | Query actual DB or ask for real record      |
-| Documentation example    | Mark clearly as `<PLACEHOLDER>` and explain |
+| Situation                | Action                                            |
+| ------------------------ | ------------------------------------------------- |
+| Need an ID/UUID          | **ASK USER** for actual value                     |
+| Need API credentials     | **ASK USER** or reference GSM                     |
+| Need example data        | Use **existing data** from codebase               |
+| Need configuration value | Check **existing config files** first             |
+| Need database record     | Query actual DB or ask for real record            |
+| Need pricing/menu data   | Check **Dynamic Variables** or **menu/FAQ pages** |
+| Need business rules      | Check **Dynamic Variables** or **terms page**     |
+| Can't find the data      | **ASK USER** - never guess!                       |
+| Documentation example    | Mark clearly as `<PLACEHOLDER>` and explain       |
 
 ### When Placeholders Are Allowed:
 
@@ -131,6 +152,13 @@ station_id = "CA-FREMONT-001"  # Where did this come from?
 # ✅ CORRECT - Ask user or use existing
 station_id = existing_station.id  # From database
 # OR: "What station ID should I use?"
+
+# ❌ FORBIDDEN - Made up pricing
+price_per_person = 59.99  # Where did this come from?
+
+# ✅ CORRECT - Use dynamic variables
+price_per_person = settings.PRICE_PER_PERSON  # From config
+# OR: Check the pricing page / dynamic variables table
 ```
 
 ```typescript
@@ -139,6 +167,12 @@ const API_URL = 'https://api.myhibachi.com/v1';
 
 // ✅ CORRECT - Use actual config
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+// ❌ FORBIDDEN - Made up menu item
+const menuItem = { name: 'Hibachi Chicken', price: 25 };
+
+// ✅ CORRECT - Fetch from API or use existing data
+const menuItem = await fetchMenuItem(itemId);
 ```
 
 > **When in doubt: ASK, don't invent.**
