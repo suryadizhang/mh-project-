@@ -3,12 +3,14 @@ Public Quote Calculation Endpoint (No Authentication Required)
 
 This module handles public quote calculations for the customer website.
 Uses BusinessConfig for dynamic pricing values.
+Uses TravelTimeService for accurate Google Maps distance calculations.
 
 Endpoints:
 - POST /calculate - Calculate party quote with travel fee
 """
 
 import logging
+from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -16,7 +18,9 @@ from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
+from core.config import settings
 from services.business_config_service import get_business_config
+from services.scheduling import TravelTimeService, GeocodingService
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +61,13 @@ class QuoteRequest(BaseModel):
     zip_code: str | None = Field(
         default=None, description="ZIP code for fallback travel calculation"
     )
+    # Pre-geocoded coordinates (from frontend Google Places)
+    venue_lat: float | None = Field(
+        default=None, description="Venue latitude (if already geocoded)"
+    )
+    venue_lng: float | None = Field(
+        default=None, description="Venue longitude (if already geocoded)"
+    )
 
     model_config = {
         "json_schema_extra": {
@@ -77,10 +88,12 @@ class TravelInfo(BaseModel):
     """Travel fee calculation details."""
 
     distance_miles: float | None = None
+    duration_minutes: int | None = None
     travel_fee: float = 0.0
     free_miles: int = 30
     per_mile_rate: float = 2.0
     station_name: str = "Fremont Station"
+    source: str = "estimate"  # 'google_maps', 'cache', 'estimate'
 
 
 class QuoteResponse(BaseModel):
@@ -224,18 +237,69 @@ async def calculate_quote(
             subtotal = party_minimum
             applied_minimum = True
 
-        # Calculate travel fee (simplified - would use Google Maps in production)
+        # Calculate travel fee using TravelTimeService (Google Maps) or fallback
         travel_info = TravelInfo(
             free_miles=free_miles,
             per_mile_rate=per_mile_rate,
             station_name="Fremont Station (Bay Area)",
+            source="estimate",
         )
 
-        if request.venue_address or request.zip_code:
-            # In production, this would call Google Maps Distance Matrix API
-            # For now, estimate based on ZIP code (Bay Area ZIPs starting with 94xxx, 95xxx)
+        # Station location (Fremont) - would come from travel_fee_configurations table
+        station_lat = 37.5485  # Fremont, CA
+        station_lng = -121.9886
+
+        venue_lat = request.venue_lat
+        venue_lng = request.venue_lng
+
+        # If coordinates not provided, try to geocode the address
+        if (venue_lat is None or venue_lng is None) and request.venue_address:
+            try:
+                geocoding_service = GeocodingService(db)
+                geocode_result = await geocoding_service.geocode(request.venue_address)
+                if geocode_result and geocode_result.is_valid:
+                    venue_lat = geocode_result.lat
+                    venue_lng = geocode_result.lng
+                    logger.debug(f"Geocoded venue: {venue_lat}, {venue_lng}")
+            except Exception as e:
+                logger.warning(f"Geocoding failed, using ZIP fallback: {e}")
+
+        # If we have coordinates, use Google Maps Distance Matrix for accurate distance
+        if venue_lat is not None and venue_lng is not None:
+            try:
+                travel_service = TravelTimeService(
+                    google_maps_api_key=getattr(settings, "GOOGLE_MAPS_API_KEY", None),
+                    db_session=db,
+                )
+                travel_result = await travel_service.get_travel_time(
+                    origin_lat=station_lat,
+                    origin_lng=station_lng,
+                    dest_lat=venue_lat,
+                    dest_lng=venue_lng,
+                    departure_time=datetime.now(),
+                )
+                travel_info.distance_miles = travel_result.distance_miles
+                travel_info.duration_minutes = travel_result.travel_time_minutes
+                travel_info.source = travel_result.source
+
+                if travel_result.distance_miles > free_miles:
+                    travel_info.travel_fee = (
+                        travel_result.distance_miles - free_miles
+                    ) * per_mile_rate
+
+                logger.info(
+                    f"📍 Travel calculated via {travel_result.source}: "
+                    f"{travel_result.distance_miles:.1f} miles, {travel_result.travel_time_minutes} min"
+                )
+            except Exception as e:
+                logger.warning(f"TravelTimeService failed, using ZIP fallback: {e}")
+                # Fall through to ZIP estimation
+
+        # Fallback: ZIP code estimation if Google Maps didn't work
+        if travel_info.distance_miles is None and (request.venue_address or request.zip_code):
             estimated_distance = _estimate_distance(request.zip_code, request.venue_address)
             travel_info.distance_miles = estimated_distance
+            travel_info.source = "zip_estimate"
 
             if estimated_distance and estimated_distance > free_miles:
                 travel_info.travel_fee = (estimated_distance - free_miles) * per_mile_rate
@@ -257,10 +321,12 @@ async def calculate_quote(
             "subtotal": round(subtotal, 2),
             "travel_info": {
                 "distance_miles": travel_info.distance_miles,
+                "duration_minutes": travel_info.duration_minutes,
                 "travel_fee": round(travel_info.travel_fee, 2),
                 "free_miles": travel_info.free_miles,
                 "per_mile_rate": travel_info.per_mile_rate,
                 "station_name": travel_info.station_name,
+                "source": travel_info.source,
             },
             "grand_total": round(grand_total, 2),
             "deposit_required": deposit_amount,
