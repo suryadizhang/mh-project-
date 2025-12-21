@@ -87,6 +87,64 @@ If user request conflicts with any rulebook:
 
 ---
 
+## 🚨 NEVER Invent Data (CRITICAL)
+
+**NEVER create imaginary, placeholder, or made-up values.**
+
+### This Rule Applies To:
+
+| Category              | Examples of FORBIDDEN made-up values      |
+| --------------------- | ----------------------------------------- |
+| **IDs/UUIDs**         | `123`, `abc-123`, `user_1`, `station_001` |
+| **API Keys/Secrets**  | `sk_test_xxx`, `your-api-key-here`        |
+| **URLs/Endpoints**    | `https://example.com`, `api.placeholder`  |
+| **Email/Phone**       | `test@test.com`, `555-1234`               |
+| **Addresses**         | `123 Main St`, `Anytown, USA`             |
+| **Database values**   | Made-up records, fake foreign keys        |
+| **Environment vars**  | `YOUR_VALUE_HERE`, `REPLACE_THIS`         |
+| **Numeric constants** | Random prices, distances, timeouts        |
+
+### What To Do Instead:
+
+| Situation                | Action                                      |
+| ------------------------ | ------------------------------------------- |
+| Need an ID/UUID          | **ASK USER** for actual value               |
+| Need API credentials     | **ASK USER** or reference GSM               |
+| Need example data        | Use **existing data** from codebase         |
+| Need configuration value | Check **existing config files** first       |
+| Need database record     | Query actual DB or ask for real record      |
+| Documentation example    | Mark clearly as `<PLACEHOLDER>` and explain |
+
+### When Placeholders Are Allowed:
+
+1. **Documentation only** – Clearly marked as `<YOUR_VALUE_HERE>`
+2. **Type definitions** – Generic types without values
+3. **User explicitly requests** – "Give me a template with
+   placeholders"
+
+### Example Violations:
+
+```python
+# ❌ FORBIDDEN - Made up station ID
+station_id = "CA-FREMONT-001"  # Where did this come from?
+
+# ✅ CORRECT - Ask user or use existing
+station_id = existing_station.id  # From database
+# OR: "What station ID should I use?"
+```
+
+```typescript
+// ❌ FORBIDDEN - Invented API endpoint
+const API_URL = 'https://api.myhibachi.com/v1';
+
+// ✅ CORRECT - Use actual config
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+```
+
+> **When in doubt: ASK, don't invent.**
+
+---
+
 ## 🎯 Session Checklist
 
 Before generating code or answering questions:
