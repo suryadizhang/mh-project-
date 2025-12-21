@@ -35,6 +35,9 @@ from .core import (
     SocialThread,
 )
 
+# Address model (Enterprise address management - Smart Scheduling Phase 1)
+from .address import Address
+
 # Identity schema (9 tables) - Using modular identity/ package
 from .identity import (
     OAuthAccount,
@@ -52,6 +55,8 @@ from .identity import (
 # Operations schema (Chef + operational models)
 from .ops import (
     Chef,  # Moved from core to ops for operations management
+    NegotiationIncentive,  # Smart Scheduling - food incentive tiers
+    FoodIncentiveType,  # Enum: none, free_noodles, free_appetizer
 )
 
 # CRM schema (Contact, Lead, Campaign models)
@@ -140,6 +145,7 @@ __all__ = [
     # CRM schema (1 model)
     "Contact",
     # Core schema (7 models - Chef moved to ops)
+    "Address",  # Enterprise address management
     "Booking",
     "Customer",
     "CoreMessage",  # Renamed from Message to avoid conflicts
@@ -220,6 +226,7 @@ MODELS_BY_SCHEMA = {
         Lead,  # Lead tracking (moved from lead schema to crm schema)
     ],
     "core": [
+        Address,  # Enterprise address management (Smart Scheduling Phase 1)
         Booking,
         Customer,
         CoreMessage,  # Renamed from Message
@@ -230,6 +237,8 @@ MODELS_BY_SCHEMA = {
     ],
     "ops": [
         Chef,  # Moved from core to ops
+        NegotiationIncentive,  # Smart Scheduling food incentives
+        FoodIncentiveType,  # Enum: none, free_noodles, free_appetizer
     ],
     "identity": [
         OAuthAccount,
@@ -300,5 +309,6 @@ MODELS_BY_SCHEMA = {
 # - Contact: added to db.models.crm (table: crm_contacts)
 # Added models:
 # - Stripe: Invoice, Refund, StripeCustomer, StripePayment, WebhookEvent (5 models)
+# - Smart Scheduling Phase 1: Address, NegotiationIncentive (2 models)
 TOTAL_MODELS = sum(len(models) for models in MODELS_BY_SCHEMA.values())
-assert TOTAL_MODELS == 52, f"Expected 52 models, found {TOTAL_MODELS}"
+assert TOTAL_MODELS == 55, f"Expected 55 models, found {TOTAL_MODELS}"

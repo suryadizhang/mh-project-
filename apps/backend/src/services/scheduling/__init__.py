@@ -1,58 +1,42 @@
 """
-Smart Scheduling System Services
+Smart Scheduling System - Service Layer
 
-This module provides intelligent booking and chef scheduling optimization:
-- Travel time calculation (Google Maps integration)
-- Slot management with flexible adjustment
-- Smart availability suggestions
-- Chef assignment optimization
-- Booking negotiation system
-- Geocoding (address to coordinates)
-
-Business Rules:
-- Event duration: min(60 + (guests × 3), 120) minutes
-- 4 time slots per day: 12PM, 3PM, 6PM, 9PM
-- Slots adjustable: 12PM (0,+60), 3PM (-30,+60), 6PM (-60,+60), 9PM (-60,+30)
-- Rush hour (Mon-Fri 3-7 PM) = travel time × 1.5
-- Buffer time: 15 minutes between events
-- Customer chef preference takes priority over optimization
-- Last booked party adjusts when conflicts arise
+This package contains all scheduling-related services for:
+- Travel time calculation
+- Slot management
+- Availability checking
+- Chef optimization
+- Booking negotiations
+- Address geocoding (with caching)
 """
 
-from .slot_manager import SlotManagerService, SlotConfig
-from .suggestion_engine import SuggestionEngine, SlotAvailability, SuggestionResult
-from .travel_time_service import TravelTimeService, TravelTimeResult
-from .geocoding_service import GeocodingService, GeocodedAddress
-from .chef_optimizer_service import ChefOptimizerService, ChefScore, AssignmentRecommendation
-from .negotiation_service import (
-    NegotiationService,
-    NegotiationRequest,
-    NegotiationResult,
-    NegotiationStatus,
-    NegotiationReason,
-    ShiftProposal,
-)
+from .travel_time_service import TravelTimeService
+from .slot_manager import SlotManager, SlotManagerService
+from .suggestion_engine import SuggestionEngine
+from .negotiation_service import NegotiationService, NegotiationReason
+from .geocoding_service import GeocodingService
+
+# Optional imports (may not exist yet)
+try:
+    from .availability_engine import AvailabilityEngine
+except ImportError:
+    AvailabilityEngine = None  # type: ignore
+
+try:
+    from .chef_optimizer import ChefOptimizer, ChefOptimizerService
+except ImportError:
+    ChefOptimizer = None  # type: ignore
+    ChefOptimizerService = None  # type: ignore
 
 __all__ = [
-    # Core Services
-    "SlotManagerService",
-    "SuggestionEngine",
     "TravelTimeService",
-    "GeocodingService",
+    "SlotManager",
+    "SlotManagerService",
+    "AvailabilityEngine",
+    "ChefOptimizer",
     "ChefOptimizerService",
+    "SuggestionEngine",
     "NegotiationService",
-    # Data Classes
-    "SlotConfig",
-    "SlotAvailability",
-    "SuggestionResult",
-    "TravelTimeResult",
-    "GeocodedAddress",
-    "ChefScore",
-    "AssignmentRecommendation",
-    "NegotiationRequest",
-    "NegotiationResult",
-    "ShiftProposal",
-    # Enums
-    "NegotiationStatus",
     "NegotiationReason",
+    "GeocodingService",
 ]

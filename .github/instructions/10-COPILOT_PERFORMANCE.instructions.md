@@ -213,6 +213,108 @@ When working on tasks:
 
 ---
 
+## 📝 Feature Planning & Documentation Protocol (MANDATORY)
+
+**CRITICAL: Document ALL features during implementation, not after.**
+
+### When Adding New Features:
+
+1. **Before coding, determine the batch:** | Feature Type | Likely
+   Batch | |--------------|--------------| | Booking, CRUD, Auth, RBAC
+   | Batch 1 | | Payments, Stripe, Deposits | Batch 2 | | AI, Chat,
+   Escalation | Batch 3 | | Communications (SMS, Email, Voice) | Batch
+   4 | | Advanced AI, Marketing | Batch 5 | | Training, Scaling,
+   Loyalty | Batch 6 | | Smart Scheduling, Chef Assignment | Smart
+   Scheduling (cross-batch) |
+
+2. **Update the relevant spec file** BEFORE implementing:
+   - Add feature to appropriate `.instructions.md` file
+   - Mark status as `⏳ IN PROGRESS`
+   - Document expected implementation files
+
+3. **During implementation, track progress:**
+   - Mark sub-tasks as `✅ DONE` when complete
+   - Add `**Implementation:**` notes with file paths
+   - Update `BATCH_CHECKLISTS.md` with new items
+
+4. **After implementation:**
+   - Update phase/feature status to `✅ COMPLETE`
+   - Add API endpoints to documentation
+   - Update any affected instruction files
+
+### Batch Suitability Check (Before Any Feature):
+
+Ask these questions to determine the right batch:
+
+```
+1. Does this feature depend on other incomplete features?
+   → If yes, it belongs in a LATER batch
+
+2. Is this a core system feature (auth, CRUD, security)?
+   → Batch 1
+
+3. Does this involve money/payments?
+   → Batch 2
+
+4. Does this involve AI/LLM/machine learning?
+   → Batch 3 (core) or Batch 5 (advanced)
+
+5. Does this involve external communications?
+   → Batch 4
+
+6. Is this a cross-cutting feature (scheduling, optimization)?
+   → Create/update dedicated spec file (e.g., 17-SMART_SCHEDULING)
+```
+
+### Feature Documentation Template:
+
+When adding a new feature, document with this format:
+
+```markdown
+### Feature Name
+
+**Batch:** X | **Status:** ⏳ IN PROGRESS | ✅ COMPLETE | ⚠️ STUB
+**Added:** YYYY-MM-DD
+
+| Task   | Status         | Notes               |
+| ------ | -------------- | ------------------- |
+| Task 1 | ✅ DONE        | Implementation file |
+| Task 2 | ⏳ IN PROGRESS | Current work        |
+| Task 3 | ⬜ TODO        | Pending             |
+
+**Implementation Files:**
+
+- `path/to/service.py` - Description
+- `path/to/router.py` - API endpoints
+
+**API Endpoints:**
+
+- `POST /api/v1/feature` - Description
+- `GET /api/v1/feature/{id}` - Description
+```
+
+### Key Documentation Files to Update:
+
+| When You...       | Update These Files                                   |
+| ----------------- | ---------------------------------------------------- |
+| Add new feature   | `BATCH_CHECKLISTS.md`, relevant `.instructions.md`   |
+| Complete a phase  | Spec file (mark COMPLETE), `CURRENT_BATCH_STATUS.md` |
+| Add new endpoints | Spec file, `BATCH_CHECKLISTS.md`                     |
+| Add new service   | Spec file (Implementation section)                   |
+| Finish a batch    | `BATCH_CHECKLISTS.md`, `CURRENT_BATCH_STATUS.md`     |
+
+### Auto-Check Rule:
+
+**Before starting ANY new feature, verify:**
+
+- [ ] Which batch does this belong to?
+- [ ] Is there an existing spec file for this feature area?
+- [ ] Have I added it to `BATCH_CHECKLISTS.md`?
+- [ ] Is the feature behind a feature flag?
+- [ ] Will I update documentation as I implement?
+
+---
+
 ## 🔍 Code Quality & Syntax Verification
 
 **CRITICAL: Be detail-oriented when writing code to prevent syntax

@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 # Import enhanced NLP service
 try:
     from services.enhanced_nlp_service import get_nlp_service
+
     ENHANCED_NLP_AVAILABLE = True
 except ImportError:
     ENHANCED_NLP_AVAILABLE = False
@@ -55,7 +56,7 @@ class CustomerBookingAI:
             "20:00",
             "21:00",
         ]
-        
+
         # Initialize enhanced NLP service if available
         if ENHANCED_NLP_AVAILABLE:
             self.nlp_service = get_nlp_service()
@@ -162,8 +163,8 @@ class CustomerBookingAI:
 🥢 **Our Service**: Private hibachi chef experiences at customers' homes
 📅 **Booking**: Schedule hibachi chef visits for parties (2-12 people)
 💰 **Pricing**: $75 per person, 2-hour experience with entertainment
-📍 **Service Area**: Greater Sacramento area and Bay Area
-📧 **Contact**: myhibachichef@gmail.com | 📱 (916) 740-8768
+📍 **Service Area**: California - Bay Area, Sacramento, Central Valley (HQ: Fremont, CA)
+📧 **Contact**: cs@myhibachichef.com | 📱 (916) 740-8768
 
 💳 **Payment Methods** (4 secure options):
 1. **Credit/Debit Cards** - via Stripe payment portal (instant confirmation)
@@ -517,54 +518,58 @@ Would you like to:
     def _extract_booking_details(self, message: str) -> dict[str, Any]:
         """
         Extract booking details from customer message using Enhanced NLP
-        
+
         Falls back to regex-based extraction if enhanced NLP is unavailable.
         """
         # Try enhanced NLP first (more accurate and comprehensive)
         if self.nlp_service:
             try:
                 nlp_details = self.nlp_service.extract_booking_details(message)
-                
+
                 # Convert to format expected by the rest of the code
                 details = {}
-                
-                if nlp_details.get('guest_count'):
-                    details['party_size'] = nlp_details['guest_count']
-                
-                if nlp_details.get('date'):
-                    details['date'] = nlp_details['date']
-                
-                if nlp_details.get('time'):
-                    details['time'] = nlp_details['time']
-                
+
+                if nlp_details.get("guest_count"):
+                    details["party_size"] = nlp_details["guest_count"]
+
+                if nlp_details.get("date"):
+                    details["date"] = nlp_details["date"]
+
+                if nlp_details.get("time"):
+                    details["time"] = nlp_details["time"]
+
                 # Use first available contact method
-                if nlp_details.get('contact_phone'):
-                    details['contact'] = nlp_details['contact_phone']
-                elif nlp_details.get('contact_email'):
-                    details['contact'] = nlp_details['contact_email']
-                
+                if nlp_details.get("contact_phone"):
+                    details["contact"] = nlp_details["contact_phone"]
+                elif nlp_details.get("contact_email"):
+                    details["contact"] = nlp_details["contact_email"]
+
                 # Add additional fields from enhanced extraction
-                if nlp_details.get('proteins'):
-                    details['proteins'] = nlp_details['proteins']
-                
-                if nlp_details.get('add_ons'):
-                    details['add_ons'] = nlp_details['add_ons']
-                
-                if nlp_details.get('dietary_restrictions'):
-                    details['dietary_restrictions'] = nlp_details['dietary_restrictions']
-                
-                if nlp_details.get('special_requests'):
-                    details['special_requests'] = nlp_details['special_requests']
-                
-                if nlp_details.get('locations'):
-                    details['location'] = nlp_details['locations'][0] if nlp_details['locations'] else None
-                
-                logger.info(f"📊 Enhanced NLP extraction: {len(details)} fields extracted (confidence: {nlp_details.get('confidence', 0)})")
+                if nlp_details.get("proteins"):
+                    details["proteins"] = nlp_details["proteins"]
+
+                if nlp_details.get("add_ons"):
+                    details["add_ons"] = nlp_details["add_ons"]
+
+                if nlp_details.get("dietary_restrictions"):
+                    details["dietary_restrictions"] = nlp_details["dietary_restrictions"]
+
+                if nlp_details.get("special_requests"):
+                    details["special_requests"] = nlp_details["special_requests"]
+
+                if nlp_details.get("locations"):
+                    details["location"] = (
+                        nlp_details["locations"][0] if nlp_details["locations"] else None
+                    )
+
+                logger.info(
+                    f"📊 Enhanced NLP extraction: {len(details)} fields extracted (confidence: {nlp_details.get('confidence', 0)})"
+                )
                 return details
-                
+
             except Exception as e:
                 logger.warning(f"⚠️ Enhanced NLP extraction failed, falling back to regex: {e}")
-        
+
         # Fallback to regex-based extraction
         details = {}
         message_lower = message.lower()
@@ -728,17 +733,21 @@ Would you like to schedule your hibachi chef?"""
         """Provide catering service coverage area"""
         return """📍 **MyHibachi Catering Service Area**
 
-**Primary Coverage**: Greater Sacramento Area
+**Headquarters**: Fremont, California
 **Phone**: (916) 740-8768
-**Email**: info@myhibachi.com
+**Email**: cs@myhibachichef.com
 
-**Service Locations**:
+**Service Coverage**:
+• Bay Area (San Francisco, Oakland, San Jose, Fremont)
+• Sacramento Region
+• Central Valley
+
+**Venue Types**:
 • Your home, backyard, or patio
 • Private venues and event spaces
 • Corporate offices (with proper kitchen access)
 • Parks with grill facilities (permit required)
 
-**Travel Range**: Up to 50 miles from Sacramento
 **Setup Requirements**: Outdoor space with power access
 
 Would you like to book our hibachi chef?"""

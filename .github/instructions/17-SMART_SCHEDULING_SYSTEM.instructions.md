@@ -4,884 +4,820 @@ applyTo: '**'
 
 # My Hibachi – Smart Scheduling System Technical Specification
 
-**Version:** 1.0 **Created:** 2024-12-20 **Status:** Implementation
-Ready
+**Version:** 1.0.0 **Created:** 2024-12-20 **Priority:** REFERENCE –
+Use for all booking, scheduling, and chef assignment operations.
 
 ---
 
 ## 📋 Executive Summary
 
-This document specifies the Smart Scheduling System for My Hibachi
-Chef booking platform. The system optimizes chef assignments, manages
-travel time between parties, handles slot adjustments, and provides
-intelligent booking suggestions.
+The Smart Scheduling System is an intelligent booking management
+solution that optimizes:
+
+1. **Slot availability** with travel time awareness
+2. **Chef assignments** based on location efficiency
+3. **Dynamic time adjustments** to maximize bookings
+4. **Customer negotiations** for optimal scheduling
 
 ---
 
-## 🎯 Core Requirements
+## 🏗️ System Architecture
 
-### Business Rules
-
-| Rule                    | Value                               | Notes                                   |
-| ----------------------- | ----------------------------------- | --------------------------------------- |
-| **Event Duration**      | 90-120 minutes                      | Based on party size                     |
-| **Duration Formula**    | `60 + (guests × 3)` min, max 120    | 10 guests = 90 min, 20 guests = 120 min |
-| **Time Slots**          | 12:00 PM, 3:00 PM, 6:00 PM, 9:00 PM | 4 slots per day                         |
-| **Slot Adjustment**     | ±60 minutes                         | Can shift earlier or later              |
-| **Buffer Time**         | 15 minutes                          | Between event end and travel start      |
-| **Rush Hour**           | Mon-Fri 3:00 PM - 7:00 PM           | Travel time × 1.5                       |
-| **Min Advance Booking** | 48 hours                            | Existing rule                           |
-| **Max Future Booking**  | 90 days                             | Existing rule                           |
-
-### Priority Order for Adjustments
-
-1. **Customer-requested chef** takes priority over optimization
-2. **Newer booking adjusts first** when conflicts arise
-3. **Earlier slots have less flexibility** (12 PM can only shift
-   later)
-4. **Later slots have more flexibility** (6 PM can shift either way)
-
----
-
-## 🏗️ Implementation Phases
-
-### Phase 0: Core Foundation (PRIORITY 1) ⭐
-
-**Focus:** Complete core Batch 1 features that everything else depends
-on.
-
-| Task                              | Status                  | Dependencies  |
-| --------------------------------- | ----------------------- | ------------- |
-| **0.1 JWT Authentication**        | 🔄 Exists, verify       | None          |
-| **0.2 API Key Auth**              | 🔄 Check implementation | None          |
-| **0.3 4-Tier RBAC**               | ⏳ Needs implementation | Auth complete |
-| **0.4 Audit Trail**               | 🔄 Basic exists         | RBAC complete |
-| **0.5 Booking CRUD Enhancements** | ⏳ Add chef assignment  | RBAC complete |
-
-### Phase 1: Database Schema & Address-First Flow (PRIORITY 2) ⭐
-
-**Focus:** Restructure booking flow to collect address first, add
-location fields.
-
-| Task                                     | Status | Dependencies         |
-| ---------------------------------------- | ------ | -------------------- |
-| **1.1 Database Schema Updates**          | ⏳     | Phase 0 complete     |
-| **1.2 Frontend Address-First (Quote)**   | ⏳     | Schema ready         |
-| **1.3 Frontend Address-First (Booking)** | ⏳     | Schema ready         |
-| **1.4 Geocoding Service**                | ⏳     | Address fields exist |
-| **1.5 Travel Time Cache Table**          | ⏳     | Geocoding works      |
-
-### Phase 2: Smart Availability & Suggestions (PRIORITY 3)
-
-**Focus:** When slot unavailable, suggest alternatives.
-
-| Task                           | Status | Dependencies        |
-| ------------------------------ | ------ | ------------------- |
-| **2.1 Availability Engine**    | ⏳     | Phase 1 complete    |
-| **2.2 Suggestion Algorithm**   | ⏳     | Availability engine |
-| **2.3 Frontend Suggestion UI** | ⏳     | Algorithm ready     |
-
-### Phase 3: Travel Time Integration (PRIORITY 4)
-
-**Focus:** Google Maps API for travel estimates.
-
-| Task                        | Status | Dependencies         |
-| --------------------------- | ------ | -------------------- |
-| **3.1 Google Maps Service** | ⏳     | Address geocoded     |
-| **3.2 Rush Hour Logic**     | ⏳     | Travel service works |
-| **3.3 Travel Time Caching** | ⏳     | API integrated       |
-
-### Phase 4: Dynamic Slot Adjustment (PRIORITY 5)
-
-**Focus:** Auto-adjust booking times for travel feasibility.
-
-| Task                              | Status | Dependencies           |
-| --------------------------------- | ------ | ---------------------- |
-| **4.1 Slot Adjustment Engine**    | ⏳     | Travel times available |
-| **4.2 Conflict Resolution Logic** | ⏳     | Adjustment engine      |
-| **4.3 Booking Chain Validation**  | ⏳     | Conflict resolution    |
-
-### Phase 5: Chef Assignment Optimization (PRIORITY 6)
-
-**Focus:** Suggest optimal chef based on location, skills,
-preferences.
-
-| Task                             | Status | Dependencies     |
-| -------------------------------- | ------ | ---------------- |
-| **5.1 Chef Availability Matrix** | ⏳     | Phase 4 complete |
-| **5.2 Optimization Algorithm**   | ⏳     | Matrix available |
-| **5.3 Station Manager UI**       | ⏳     | Algorithm ready  |
-
-### Phase 6: Negotiation System (PRIORITY 7)
-
-**Focus:** Politely ask existing customers to shift times.
-
-| Task                              | Status | Dependencies       |
-| --------------------------------- | ------ | ------------------ |
-| **6.1 Negotiation Request Model** | ⏳     | Phase 5 complete   |
-| **6.2 Notification Templates**    | ⏳     | Model exists       |
-| **6.3 Response Tracking**         | ⏳     | Notifications work |
-| **6.4 Auto-Adjustment on Accept** | ⏳     | Response tracked   |
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    SMART SCHEDULING SYSTEM                               │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│   FRONTEND (Address First Flow)                                         │
+│   ┌─────────────────────────────────────────────────────────────────┐   │
+│   │ Step 1: Venue Address → Step 2: Date/Time → Step 3: Contact     │   │
+│   │         (With Google Places Autocomplete + Geocoding)           │   │
+│   └─────────────────────────────────────────────────────────────────┘   │
+│                              │                                          │
+│                              ▼                                          │
+│   ┌─────────────────────────────────────────────────────────────────┐   │
+│   │                    BOOKING API                                   │   │
+│   │  POST /api/v1/bookings/check-availability                       │   │
+│   │  • Receives: venue_lat, venue_lng, date, guest_count            │   │
+│   │  • Returns: available_slots[], suggestions[], travel_info       │   │
+│   └─────────────────────────────────────────────────────────────────┘   │
+│                              │                                          │
+│       ┌──────────────────────┼──────────────────────┐                  │
+│       ▼                      ▼                      ▼                  │
+│   ┌───────────┐    ┌─────────────────┐    ┌─────────────────┐         │
+│   │  SLOT     │    │   TRAVEL TIME   │    │    CHEF         │         │
+│   │  MANAGER  │    │   CALCULATOR    │    │   OPTIMIZER     │         │
+│   │           │    │                 │    │                 │         │
+│   │ • 4 slots │    │ • Google Maps   │    │ • Availability  │         │
+│   │ • ±60 min │    │ • Rush hour x1.5│    │ • Skills match  │         │
+│   │ • Duration│    │ • Cache 24h     │    │ • Preferences   │         │
+│   └───────────┘    └─────────────────┘    └─────────────────┘         │
+│                              │                                          │
+│                              ▼                                          │
+│   ┌─────────────────────────────────────────────────────────────────┐   │
+│   │                 SUGGESTION ENGINE                                │   │
+│   │  When requested slot unavailable:                                │   │
+│   │  • Find closest available times (same day)                       │   │
+│   │  • Suggest next available day                                    │   │
+│   │  • Suggest same slot next week                                   │   │
+│   │  • Score by travel efficiency                                    │   │
+│   └─────────────────────────────────────────────────────────────────┘   │
+│                              │                                          │
+│                              ▼                                          │
+│   ┌─────────────────────────────────────────────────────────────────┐   │
+│   │                 NEGOTIATION SYSTEM                               │   │
+│   │  When new booking conflicts with existing:                       │   │
+│   │  • Identify which booking can shift                              │   │
+│   │  • Send polite request (SMS/Email)                               │   │
+│   │  • Track response and auto-adjust                                │   │
+│   └─────────────────────────────────────────────────────────────────┘   │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 📊 Database Schema
+## 📅 Implementation Phases (Priority Order)
 
-### New Tables
+### Phase 1: Foundation ✅ COMPLETE
+
+| Task                              | Priority | Dependencies | Status  |
+| --------------------------------- | -------- | ------------ | ------- |
+| 1A. Database schema for locations | 🔴 HIGH  | None         | ✅ DONE |
+| 1B. Frontend address-first flow   | 🔴 HIGH  | 1A           | ✅ DONE |
+| 1C. Google Maps geocoding service | 🔴 HIGH  | 1A           | ✅ DONE |
+| 1D. Slot configuration table      | 🟡 MED   | 1A           | ✅ DONE |
+
+**Implementation:** `geocoding_service.py` - Full Google Maps API
+integration with caching
+
+### Phase 2: Core Auth & RBAC ✅ COMPLETE
+
+| Task                           | Priority | Dependencies | Status  |
+| ------------------------------ | -------- | ------------ | ------- |
+| 2A. Verify JWT authentication  | 🔴 HIGH  | None         | ✅ DONE |
+| 2B. API key authentication     | 🔴 HIGH  | 2A           | ✅ DONE |
+| 2C. 4-tier RBAC implementation | 🔴 HIGH  | 2A           | ✅ DONE |
+| 2D. Permission decorators      | 🟡 MED   | 2C           | ✅ DONE |
+
+**Implementation:** 4-tier RBAC (Super Admin → Admin → Staff →
+Customer) in `core/security.py`
+
+### Phase 3: Chef Management ✅ COMPLETE
+
+| Task                        | Priority | Dependencies | Status  |
+| --------------------------- | -------- | ------------ | ------- |
+| 3A. Chef locations table    | 🔴 HIGH  | 1A           | ✅ DONE |
+| 3B. Chef availability API   | 🔴 HIGH  | 3A           | ✅ DONE |
+| 3C. Chef assignment API     | 🔴 HIGH  | 3B           | ✅ DONE |
+| 3D. Preferred chef handling | 🟡 MED   | 3C           | ✅ DONE |
+
+**Implementation:** `chef_optimizer.py` - Full scoring algorithm with:
+
+- Travel Score (40%): Distance/time to venue
+- Skill Score (20%): Match specialty to party size
+- Workload Score (15%): Balance bookings across chefs
+- Rating Score (15%): Chef's average rating
+- Preference Score (10% + 50 bonus): Customer requested chef
+
+### Phase 4: Travel Time Integration ✅ COMPLETE
+
+| Task                            | Priority | Dependencies | Status  |
+| ------------------------------- | -------- | ------------ | ------- |
+| 4A. Google Maps Distance Matrix | 🔴 HIGH  | 1C           | ✅ DONE |
+| 4B. Travel time cache table     | 🟡 MED   | 4A           | ✅ DONE |
+| 4C. Rush hour multiplier logic  | 🟡 MED   | 4A           | ✅ DONE |
+| 4D. Travel-aware slot checker   | 🟡 MED   | 4C           | ✅ DONE |
+
+**Implementation:** `travel_time_service.py` - Google Maps API, 7-day
+cache, rush hour 1.5x (Mon-Fri 3-7PM)
+
+### Phase 5: Smart Suggestions ✅ COMPLETE
+
+| Task                            | Priority | Dependencies | Status  |
+| ------------------------------- | -------- | ------------ | ------- |
+| 5A. Suggestion engine service   | 🟡 MED   | 4D           | ✅ DONE |
+| 5B. Alternative time finder     | 🟡 MED   | 5A           | ✅ DONE |
+| 5C. Next day/week suggestions   | 🟡 MED   | 5A           | ✅ DONE |
+| 5D. Frontend suggestion display | 🟡 MED   | 5C           | ✅ DONE |
+
+**Implementation:** `suggestion_engine.py` - Same-day alternatives,
+next-day, next-week suggestions
+
+### Phase 6: Dynamic Slot Adjustment ✅ COMPLETE
+
+| Task                          | Priority | Dependencies | Status  |
+| ----------------------------- | -------- | ------------ | ------- |
+| 6A. Slot flexibility config   | 🟡 MED   | 1D           | ✅ DONE |
+| 6B. Auto-adjust algorithm     | 🟡 MED   | 6A, 4D       | ✅ DONE |
+| 6C. Last-booked-adjusts rule  | 🟡 MED   | 6B           | ✅ DONE |
+| 6D. Conflict resolution logic | 🟡 MED   | 6C           | ✅ DONE |
+
+**Implementation:** `slot_manager.py` - 4 slots (12PM, 3PM, 6PM, 9PM)
+with ±30min preferred / ±60min max adjustment
+
+### Phase 7: Chef Optimizer ✅ COMPLETE
+
+| Task                               | Priority | Dependencies | Status     |
+| ---------------------------------- | -------- | ------------ | ---------- |
+| 7A. Optimizer service              | 🔴 HIGH  | 3C, 4D       | ✅ DONE    |
+| 7B. Guest count skill matching     | 🔴 HIGH  | 7A           | ✅ DONE    |
+| 7C. Efficiency scoring             | 🔴 HIGH  | 7B           | ✅ DONE    |
+| 7D. Station manager suggestions UI | 🟡 MED   | 7C           | ⏳ PENDING |
+
+**Implementation:** `chef_optimizer.py` fully implemented with scoring
+algorithm. **Next:** Station Manager UI for viewing and overriding
+chef suggestions.
+
+### Phase 8: Negotiation System ✅ COMPLETE
+
+| Task                              | Priority | Dependencies | Status  |
+| --------------------------------- | -------- | ------------ | ------- |
+| 8A. Negotiation request table     | 🟢 LOW   | None         | ✅ DONE |
+| 8B. Polite notification templates | 🟢 LOW   | 8A           | ✅ DONE |
+| 8C. Response tracking             | 🟢 LOW   | 8B           | ✅ DONE |
+| 8D. Auto-adjustment on acceptance | 🟢 LOW   | 8C           | ✅ DONE |
+
+**Implementation:** `negotiation_service.py` - Full workflow with
+SMS/email notifications, incentives, auto-update on acceptance
+
+---
+
+## 🗄️ Database Schema
+
+### Phase 1: Location Schema
 
 ```sql
--- ============================================
--- PHASE 1: Location & Configuration Tables
--- ============================================
+-- =====================================================
+-- PHASE 1A: Add location fields to existing bookings
+-- =====================================================
 
--- Chef home locations for travel optimization
-CREATE TABLE ops.chef_locations (
+-- Add geocoding columns to bookings
+ALTER TABLE core.bookings
+ADD COLUMN IF NOT EXISTS venue_lat DECIMAL(10,8),
+ADD COLUMN IF NOT EXISTS venue_lng DECIMAL(11,8),
+ADD COLUMN IF NOT EXISTS venue_address_normalized TEXT,
+ADD COLUMN IF NOT EXISTS venue_geocoded_at TIMESTAMPTZ,
+ADD COLUMN IF NOT EXISTS estimated_duration_minutes INT DEFAULT 90;
+
+-- Comment for context
+COMMENT ON COLUMN core.bookings.venue_lat IS 'Latitude from Google Geocoding API';
+COMMENT ON COLUMN core.bookings.venue_lng IS 'Longitude from Google Geocoding API';
+COMMENT ON COLUMN core.bookings.venue_address_normalized IS 'Standardized address from Google';
+COMMENT ON COLUMN core.bookings.estimated_duration_minutes IS 'Event duration: 90-120 min based on party size';
+
+-- Index for geospatial queries
+CREATE INDEX IF NOT EXISTS idx_bookings_geo
+ON core.bookings (venue_lat, venue_lng)
+WHERE venue_lat IS NOT NULL;
+```
+
+### Phase 1D: Slot Configuration
+
+```sql
+-- =====================================================
+-- PHASE 1D: Slot configuration table
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS ops.slot_configurations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    slot_name VARCHAR(20) NOT NULL,        -- '12PM', '3PM', '6PM', '9PM'
+    slot_time TIME NOT NULL,               -- 12:00, 15:00, 18:00, 21:00
+    min_adjust_minutes INT DEFAULT -60,    -- Can start up to 60 min earlier
+    max_adjust_minutes INT DEFAULT 60,     -- Can start up to 60 min later
+    min_event_duration INT DEFAULT 90,     -- Minimum event length
+    max_event_duration INT DEFAULT 120,    -- Maximum event length
+    buffer_before_minutes INT DEFAULT 30,  -- Travel/setup buffer
+    buffer_after_minutes INT DEFAULT 15,   -- Cleanup buffer
+    max_bookings_per_slot INT DEFAULT 10,  -- Per slot across all chefs
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Insert default slots
+INSERT INTO ops.slot_configurations
+    (slot_name, slot_time, min_event_duration, max_event_duration)
+VALUES
+    ('12PM', '12:00:00', 90, 120),
+    ('3PM', '15:00:00', 90, 120),
+    ('6PM', '18:00:00', 90, 120),
+    ('9PM', '21:00:00', 90, 120)
+ON CONFLICT DO NOTHING;
+```
+
+### Phase 3A: Chef Locations
+
+```sql
+-- =====================================================
+-- PHASE 3A: Chef locations table
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS ops.chef_locations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     chef_id UUID NOT NULL REFERENCES ops.chefs(id) ON DELETE CASCADE,
-    home_address TEXT,                    -- Full address (encrypted in app)
-    home_lat DECIMAL(10, 8),              -- Latitude
-    home_lng DECIMAL(11, 8),              -- Longitude
-    preferred_radius_km DECIMAL(6, 2) DEFAULT 50,  -- Max travel preference
+    home_address_encrypted BYTEA,          -- Encrypted for PII protection
+    home_lat DECIMAL(10,8) NOT NULL,
+    home_lng DECIMAL(11,8) NOT NULL,
+    service_radius_km DECIMAL(5,2) DEFAULT 50.0,
+    is_primary BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE(chef_id)
+
+    UNIQUE(chef_id, is_primary)
 );
 
--- Booking venue geocoded location
--- (Added as columns to existing core.bookings table)
-ALTER TABLE core.bookings ADD COLUMN IF NOT EXISTS venue_lat DECIMAL(10, 8);
-ALTER TABLE core.bookings ADD COLUMN IF NOT EXISTS venue_lng DECIMAL(11, 8);
-ALTER TABLE core.bookings ADD COLUMN IF NOT EXISTS venue_address_normalized TEXT;
-ALTER TABLE core.bookings ADD COLUMN IF NOT EXISTS event_duration_minutes INT DEFAULT 90;
-ALTER TABLE core.bookings ADD COLUMN IF NOT EXISTS preferred_chef_id UUID REFERENCES ops.chefs(id);
-ALTER TABLE core.bookings ADD COLUMN IF NOT EXISTS is_chef_preference_required BOOLEAN DEFAULT FALSE;
+-- Index for location lookups
+CREATE INDEX IF NOT EXISTS idx_chef_locations_geo
+ON ops.chef_locations (home_lat, home_lng);
+```
 
--- Slot configuration (adjustable time windows)
-CREATE TABLE ops.slot_configurations (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    slot_name VARCHAR(10) NOT NULL,       -- '12PM', '3PM', '6PM', '9PM'
-    base_time TIME NOT NULL,              -- 12:00, 15:00, 18:00, 21:00
-    min_adjust_minutes INT DEFAULT -30,   -- Can start 30 min earlier
-    max_adjust_minutes INT DEFAULT 60,    -- Can start 60 min later
-    min_event_duration INT DEFAULT 90,    -- Minimum event length
-    max_event_duration INT DEFAULT 120,   -- Maximum event length
-    is_active BOOLEAN DEFAULT TRUE,
-    station_id UUID REFERENCES identity.stations(id),  -- Per-station config
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE(slot_name, station_id)
-);
+### Phase 3C: Chef Assignments
 
--- Insert default slot configurations
-INSERT INTO ops.slot_configurations (slot_name, base_time, min_adjust_minutes, max_adjust_minutes) VALUES
-    ('12PM', '12:00', 0, 60),      -- 12PM can only shift later (not before noon)
-    ('3PM', '15:00', -30, 60),     -- 3PM can shift 2:30-4:00
-    ('6PM', '18:00', -60, 60),     -- 6PM can shift 5:00-7:00
-    ('9PM', '21:00', -60, 30);     -- 9PM can shift earlier, limited later
+```sql
+-- =====================================================
+-- PHASE 3C: Chef assignment tracking
+-- =====================================================
 
--- ============================================
--- PHASE 3: Travel Time Cache
--- ============================================
-
-CREATE TABLE ops.travel_time_cache (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    origin_lat DECIMAL(10, 8) NOT NULL,
-    origin_lng DECIMAL(11, 8) NOT NULL,
-    dest_lat DECIMAL(10, 8) NOT NULL,
-    dest_lng DECIMAL(11, 8) NOT NULL,
-    departure_hour INT,                   -- 0-23
-    day_of_week INT,                      -- 0=Sun, 6=Sat
-    is_rush_hour BOOLEAN DEFAULT FALSE,
-    base_duration_minutes INT NOT NULL,   -- Without traffic
-    traffic_duration_minutes INT,         -- With traffic
-    distance_km DECIMAL(8, 2),
-    route_summary TEXT,                   -- "via I-95 N"
-    cached_at TIMESTAMPTZ DEFAULT NOW(),
-    expires_at TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '7 days'),
-
-    -- Index for lookups (rounded to ~1km precision)
-    UNIQUE(
-        ROUND(origin_lat::numeric, 2),
-        ROUND(origin_lng::numeric, 2),
-        ROUND(dest_lat::numeric, 2),
-        ROUND(dest_lng::numeric, 2),
-        departure_hour,
-        day_of_week
-    )
-);
-
--- ============================================
--- PHASE 5: Chef Assignment Tracking
--- ============================================
-
-CREATE TABLE ops.chef_assignments (
+CREATE TABLE IF NOT EXISTS ops.chef_assignments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     booking_id UUID NOT NULL REFERENCES core.bookings(id) ON DELETE CASCADE,
     chef_id UUID NOT NULL REFERENCES ops.chefs(id),
     assigned_at TIMESTAMPTZ DEFAULT NOW(),
     assigned_by UUID REFERENCES identity.users(id),
-    assignment_type VARCHAR(20) NOT NULL DEFAULT 'manual',
-        -- 'customer_requested', 'auto_optimized', 'manual'
-
-    -- Travel chain tracking
-    previous_booking_id UUID REFERENCES core.bookings(id),
+    assignment_type VARCHAR(20) NOT NULL CHECK (
+        assignment_type IN ('auto', 'manual', 'customer_requested')
+    ),
     travel_time_minutes INT,
-    travel_distance_km DECIMAL(8, 2),
-
-    -- Optimization metadata
-    optimization_score DECIMAL(5, 2),     -- 0-100 efficiency score
-    alternatives_considered INT,           -- How many chefs were evaluated
-
-    notes TEXT,
+    travel_distance_km DECIMAL(8,2),
+    previous_booking_id UUID REFERENCES core.bookings(id),
+    is_customer_requested BOOLEAN DEFAULT FALSE,
+    customer_request_notes TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW(),
 
     UNIQUE(booking_id)  -- One chef per booking
 );
 
--- ============================================
--- PHASE 6: Negotiation System
--- ============================================
+CREATE INDEX IF NOT EXISTS idx_chef_assignments_chef_date
+ON ops.chef_assignments (chef_id, assigned_at);
+```
 
-CREATE TABLE core.booking_negotiations (
+### Phase 4B: Travel Time Cache
+
+```sql
+-- =====================================================
+-- PHASE 4B: Travel time cache (Google Maps results)
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS ops.travel_time_cache (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-
-    -- The existing booking we're asking to move
-    existing_booking_id UUID NOT NULL REFERENCES core.bookings(id),
-
-    -- The new booking that needs the slot
-    requesting_booking_id UUID REFERENCES core.bookings(id),
-
-    -- Time shift proposal
-    original_time TIME NOT NULL,
-    proposed_time TIME NOT NULL,
-    shift_minutes INT NOT NULL,           -- +30 = 30 min later, -30 = earlier
-
-    -- Reason and status
-    reason TEXT,
-    status VARCHAR(20) NOT NULL DEFAULT 'pending',
-        -- 'pending', 'sent', 'accepted', 'declined', 'expired', 'cancelled'
-
-    -- Communication tracking
-    notification_method VARCHAR(20),      -- 'sms', 'email', 'both'
-    notification_sent_at TIMESTAMPTZ,
-    reminder_sent_at TIMESTAMPTZ,
-    customer_response_at TIMESTAMPTZ,
-    expires_at TIMESTAMPTZ,               -- Auto-expire if no response
-
-    -- Incentive offered (if any)
-    incentive_offered TEXT,               -- "10% discount on next booking"
-    incentive_accepted BOOLEAN,
-
-    created_by UUID REFERENCES identity.users(id),
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    origin_lat DECIMAL(10,8) NOT NULL,
+    origin_lng DECIMAL(11,8) NOT NULL,
+    dest_lat DECIMAL(10,8) NOT NULL,
+    dest_lng DECIMAL(11,8) NOT NULL,
+    departure_hour INT NOT NULL CHECK (departure_hour BETWEEN 0 AND 23),
+    day_of_week INT NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
+    is_rush_hour BOOLEAN DEFAULT FALSE,
+    base_duration_minutes INT NOT NULL,
+    traffic_duration_minutes INT,
+    distance_km DECIMAL(8,2) NOT NULL,
+    cached_at TIMESTAMPTZ DEFAULT NOW(),
+    expires_at TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '24 hours')
 );
 
--- ============================================
--- INDEXES FOR PERFORMANCE
--- ============================================
+-- Unique constraint for cache lookups
+CREATE UNIQUE INDEX IF NOT EXISTS idx_travel_cache_lookup
+ON ops.travel_time_cache (
+    ROUND(origin_lat::numeric, 3),
+    ROUND(origin_lng::numeric, 3),
+    ROUND(dest_lat::numeric, 3),
+    ROUND(dest_lng::numeric, 3),
+    departure_hour,
+    day_of_week
+);
 
-CREATE INDEX idx_bookings_venue_location ON core.bookings(venue_lat, venue_lng)
-    WHERE venue_lat IS NOT NULL;
+-- Auto-cleanup expired cache entries
+CREATE INDEX IF NOT EXISTS idx_travel_cache_expires
+ON ops.travel_time_cache (expires_at);
+```
 
-CREATE INDEX idx_chef_assignments_chef_date ON ops.chef_assignments(chef_id, assigned_at);
+### Phase 8A: Negotiation Requests
 
-CREATE INDEX idx_travel_cache_lookup ON ops.travel_time_cache(
-    ROUND(origin_lat::numeric, 2),
-    ROUND(origin_lng::numeric, 2),
-    departure_hour
-) WHERE expires_at > NOW();
+```sql
+-- =====================================================
+-- PHASE 8A: Booking negotiation requests
+-- =====================================================
 
-CREATE INDEX idx_negotiations_status ON core.booking_negotiations(status, expires_at)
-    WHERE status IN ('pending', 'sent');
+CREATE TABLE IF NOT EXISTS core.booking_negotiations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    existing_booking_id UUID NOT NULL REFERENCES core.bookings(id),
+    new_booking_request_id UUID,  -- Pending booking that needs the slot
+    original_time TIME NOT NULL,
+    proposed_time TIME NOT NULL,
+    shift_direction VARCHAR(10) CHECK (shift_direction IN ('earlier', 'later')),
+    shift_minutes INT NOT NULL,
+    reason TEXT,
+    status VARCHAR(20) DEFAULT 'pending' CHECK (
+        status IN ('pending', 'sent', 'accepted', 'declined', 'expired')
+    ),
+    notification_method VARCHAR(20),  -- 'sms', 'email', 'both'
+    notification_sent_at TIMESTAMPTZ,
+    customer_response TEXT,
+    responded_at TIMESTAMPTZ,
+    expires_at TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '24 hours'),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    created_by UUID REFERENCES identity.users(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_negotiations_booking
+ON core.booking_negotiations (existing_booking_id, status);
 ```
 
 ---
 
-## 🔧 Service Layer Architecture
+## 🔧 Business Rules
 
-### Directory Structure
+### Event Duration Calculation
+
+```python
+def calculate_event_duration(guest_count: int) -> int:
+    """
+    Calculate event duration based on party size.
+
+    Rules:
+    - 1-10 guests: 90 minutes
+    - 11-20 guests: 100 minutes
+    - 21-30 guests: 110 minutes
+    - 31+ guests: 120 minutes
+    """
+    if guest_count <= 10:
+        return 90
+    elif guest_count <= 20:
+        return 100
+    elif guest_count <= 30:
+        return 110
+    else:
+        return 120
+```
+
+### Rush Hour Traffic Multiplier
+
+```python
+def get_traffic_multiplier(departure_time: datetime) -> float:
+    """
+    Apply traffic multiplier for rush hour.
+
+    Rules:
+    - Monday-Friday 3PM-7PM (15:00-19:00): 1.5x
+    - All other times: 1.0x
+    """
+    weekday = departure_time.weekday()  # 0=Mon, 6=Sun
+    hour = departure_time.hour
+
+    is_weekday = weekday < 5  # Mon-Fri
+    is_rush_hour = 15 <= hour < 19  # 3PM-7PM
+
+    if is_weekday and is_rush_hour:
+        return 1.5
+    return 1.0
+```
+
+### Slot Adjustment Priority
+
+```python
+def determine_adjustment_priority(booking1: Booking, booking2: Booking) -> Booking:
+    """
+    Determine which booking should adjust when there's a travel conflict.
+
+    Rules:
+    1. Newer booking adjusts (last booked = first to adjust)
+    2. Customer-requested chef takes priority (don't adjust)
+    3. Smaller party adjusts over larger party
+    """
+    # Customer request takes priority
+    if booking1.is_chef_requested and not booking2.is_chef_requested:
+        return booking2  # booking2 adjusts
+    if booking2.is_chef_requested and not booking1.is_chef_requested:
+        return booking1  # booking1 adjusts
+
+    # Newer booking adjusts
+    if booking1.created_at > booking2.created_at:
+        return booking1
+    return booking2
+```
+
+### Chef Assignment Scoring
+
+```python
+def score_chef_assignment(
+    chef: Chef,
+    booking: Booking,
+    existing_assignments: List[Assignment]
+) -> float:
+    """
+    Score a chef for a booking assignment (higher = better).
+
+    Factors:
+    - Travel time from previous location (40% weight)
+    - Chef rating (30% weight)
+    - Experience with party size (20% weight)
+    - Customer preference match (10% weight + 50 bonus if requested)
+    """
+    score = 0.0
+
+    # Travel time score (inverse - shorter is better)
+    travel_time = calculate_travel_time(chef, booking)
+    max_travel = 90  # minutes
+    travel_score = max(0, (max_travel - travel_time) / max_travel) * 40
+    score += travel_score
+
+    # Rating score
+    rating_score = (chef.average_rating / 5.0) * 30
+    score += rating_score
+
+    # Experience score
+    if booking.guest_count <= 15 and chef.specialty == 'intimate':
+        score += 20
+    elif booking.guest_count > 30 and chef.specialty == 'large_party':
+        score += 20
+    else:
+        score += 10
+
+    # Customer preference
+    if booking.preferred_chef_id == chef.id:
+        score += 60  # Major bonus for customer request
+
+    return score
+```
+
+---
+
+## 🖥️ Frontend Flow Change
+
+### Current Flow:
+
+```
+Contact Info → Date/Time → Venue Address → Billing → Submit
+```
+
+### New Flow (Address First):
+
+```
+Venue Address (with geocoding) → Date/Time (with availability) → Contact Info → Billing → Submit
+```
+
+### Reason for Change:
+
+Collecting the venue address FIRST allows us to:
+
+1. Check chef availability based on location
+2. Calculate travel times before showing available slots
+3. Show slots that are actually feasible (not blocked by travel)
+4. Pre-validate service area coverage
+
+### Implementation:
+
+```typescript
+// apps/customer/src/app/BookUs/page.tsx
+
+// Step indicator component
+const BookingSteps = () => (
+  <div className="booking-steps">
+    <Step number={1} label="Event Venue" active={step === 1} />
+    <Step number={2} label="Date & Time" active={step === 2} />
+    <Step number={3} label="Your Details" active={step === 3} />
+    <Step number={4} label="Confirm" active={step === 4} />
+  </div>
+);
+
+// New state for step-based flow
+const [step, setStep] = useState(1);
+const [venueGeocoded, setVenueGeocoded] = useState(false);
+const [venueCoordinates, setVenueCoordinates] = useState<{lat: number, lng: number} | null>(null);
+
+// Geocode venue address before allowing date selection
+const handleVenueSubmit = async () => {
+  const address = `${venueStreet}, ${venueCity}, ${venueState} ${venueZipcode}`;
+
+  try {
+    const geocodeResult = await geocodeAddress(address);
+    setVenueCoordinates(geocodeResult);
+    setVenueGeocoded(true);
+    setStep(2); // Move to date/time selection
+
+    // Fetch availability with location context
+    await fetchAvailabilityWithLocation(geocodeResult.lat, geocodeResult.lng);
+  } catch (error) {
+    setGeocodingError('Unable to verify address. Please check and try again.');
+  }
+};
+```
+
+---
+
+## 🔌 API Endpoints
+
+### New Endpoints to Create
+
+```yaml
+# Phase 1: Location-aware availability
+POST /api/v1/bookings/check-availability-v2:
+  description: Check availability with location context
+  request:
+    venue_lat: number
+    venue_lng: number
+    date: string (YYYY-MM-DD)
+    guest_count: number
+    preferred_chef_id?: UUID
+  response:
+    available_slots:
+      - slot_time: "12PM"
+        is_available: true
+        available_chefs: 3
+        estimated_duration: 90
+    suggestions:
+      - slot_date: "2025-01-15"
+        slot_time: "3PM"
+        reason: "Next available same-day slot"
+    service_area:
+      is_covered: true
+      nearest_chef_distance_km: 15.2
+
+# Phase 3: Chef Management
+GET /api/v1/chefs/available:
+  description: Get available chefs for a date/time/location
+  query:
+    date: string
+    time_slot: string
+    venue_lat: number
+    venue_lng: number
+  response:
+    chefs:
+      - id: UUID
+        name: string
+        rating: number
+        travel_time_minutes: number
+        is_customer_preferred: boolean
+
+POST /api/v1/bookings/{id}/assign-chef:
+  description: Assign a chef to a booking
+  request:
+    chef_id: UUID
+    assignment_type: "auto" | "manual" | "customer_requested"
+  response:
+    assignment:
+      id: UUID
+      chef_id: UUID
+      travel_time_minutes: number
+
+# Phase 4: Travel Time
+GET /api/v1/travel-time:
+  description: Calculate travel time between two locations
+  query:
+    origin_lat: number
+    origin_lng: number
+    dest_lat: number
+    dest_lng: number
+    departure_time: datetime
+  response:
+    duration_minutes: number
+    duration_with_traffic: number
+    distance_km: number
+    is_rush_hour: boolean
+
+# Phase 7: Chef Optimizer
+GET /api/v1/bookings/{date}/chef-suggestions:
+  description: Get optimized chef assignments for a day
+  response:
+    assignments:
+      - booking_id: UUID
+        suggested_chef_id: UUID
+        score: number
+        travel_time: number
+        reasoning: string
+
+# Phase 8: Negotiation
+POST /api/v1/negotiations/request-shift:
+  description: Request an existing customer to shift their time
+  request:
+    existing_booking_id: UUID
+    proposed_time: string
+    reason: string
+  response:
+    negotiation_id: UUID
+    notification_sent: boolean
+```
+
+---
+
+## 📁 Service Layer Structure
 
 ```
 apps/backend/src/services/
 ├── scheduling/
 │   ├── __init__.py
-│   ├── travel_time_service.py      # Google Maps integration
-│   ├── slot_manager_service.py     # Slot configuration & adjustment
+│   ├── geocoding_service.py        # Google Geocoding API
+│   ├── travel_time_service.py      # Google Distance Matrix API
+│   ├── slot_manager_service.py     # 4 slots/day management
 │   ├── suggestion_engine.py        # Alternative time suggestions
-│   ├── chef_optimizer_service.py   # Chef assignment optimization
-│   ├── negotiation_service.py      # Customer time shift requests
+│   ├── chef_optimizer_service.py   # Best chef assignment
+│   ├── negotiation_service.py      # Ask customers to shift
 │   └── scheduling_orchestrator.py  # Coordinates all services
-├── geocoding/
+│
+├── auth/
 │   ├── __init__.py
-│   └── geocoding_service.py        # Address → lat/lng conversion
-└── booking_service.py              # Enhanced with scheduling integration
-```
-
-### Service Contracts
-
-#### 1. TravelTimeService
-
-```python
-class TravelTimeService:
-    """Calculate travel time between locations using Google Maps API."""
-
-    async def get_travel_time(
-        self,
-        origin: Coordinates,
-        destination: Coordinates,
-        departure_time: datetime,
-    ) -> TravelTimeResult:
-        """
-        Returns travel time considering:
-        - Base duration (no traffic)
-        - Traffic duration (with traffic)
-        - Rush hour multiplier (Mon-Fri 3-7 PM = ×1.5)
-        - Distance in km
-        """
-        pass
-
-    def is_rush_hour(self, dt: datetime) -> bool:
-        """Check if datetime falls in rush hour (Mon-Fri 3-7 PM)."""
-        pass
-
-    async def get_cached_or_fetch(
-        self,
-        origin: Coordinates,
-        destination: Coordinates,
-        departure_time: datetime,
-    ) -> TravelTimeResult:
-        """Use cache if available, otherwise fetch from Google Maps."""
-        pass
-```
-
-#### 2. SlotManagerService
-
-```python
-class SlotManagerService:
-    """Manage time slots and their adjustability."""
-
-    def calculate_event_duration(self, guest_count: int) -> int:
-        """
-        Calculate event duration based on party size.
-        Formula: min(60 + (guests × 3), 120)
-        Examples:
-        - 10 guests = 90 min
-        - 15 guests = 105 min
-        - 20+ guests = 120 min
-        """
-        pass
-
-    async def get_adjusted_slot_time(
-        self,
-        base_slot: str,  # '12PM', '3PM', '6PM', '9PM'
-        required_start_after: datetime,
-        station_id: UUID,
-    ) -> Optional[datetime]:
-        """
-        Find adjusted slot time that starts after required time.
-        Returns None if adjustment not possible within limits.
-        """
-        pass
-
-    async def get_slot_flexibility(
-        self,
-        slot: str,
-        station_id: UUID,
-    ) -> SlotFlexibility:
-        """Get min/max adjustment allowed for a slot."""
-        pass
-```
-
-#### 3. SuggestionEngine
-
-```python
-class SuggestionEngine:
-    """Generate alternative booking suggestions when requested slot unavailable."""
-
-    async def get_suggestions(
-        self,
-        requested_date: date,
-        requested_slot: str,
-        venue_location: Coordinates,
-        preferred_chef_id: Optional[UUID],
-        guest_count: int,
-        max_suggestions: int = 5,
-    ) -> List[BookingSuggestion]:
-        """
-        Returns suggestions in priority order:
-        1. Same day, different slot
-        2. Same slot, next available day
-        3. Same slot, next week same day
-        4. Any available slot within ±3 days
-        """
-        pass
-
-    async def check_availability_with_travel(
-        self,
-        date: date,
-        slot: str,
-        venue_location: Coordinates,
-        chef_id: Optional[UUID],
-    ) -> AvailabilityResult:
-        """
-        Check if slot is available considering:
-        - Chef has no conflicting booking
-        - Travel time from previous booking is feasible
-        - Slot adjustment can accommodate travel if needed
-        """
-        pass
-```
-
-#### 4. ChefOptimizerService
-
-```python
-class ChefOptimizerService:
-    """Optimize chef assignments for efficiency."""
-
-    async def get_optimal_chef(
-        self,
-        booking: Booking,
-        available_chefs: List[Chef],
-    ) -> ChefAssignmentSuggestion:
-        """
-        Score and rank chefs based on:
-        1. Customer preference (highest priority)
-        2. Travel distance from previous booking
-        3. Chef experience for party size
-        4. Chef rating
-        5. Workload balance
-        """
-        pass
-
-    async def get_chef_suggestions(
-        self,
-        date: date,
-        slot: str,
-        venue_location: Coordinates,
-        guest_count: int,
-        preferred_chef_id: Optional[UUID],
-    ) -> List[ChefAssignmentSuggestion]:
-        """
-        Returns ranked list of available chefs with:
-        - Travel time from previous booking
-        - Efficiency score
-        - Whether customer requested
-        """
-        pass
-
-    async def validate_chef_chain(
-        self,
-        chef_id: UUID,
-        date: date,
-    ) -> ChainValidationResult:
-        """
-        Validate that chef's booking chain for the day is feasible.
-        Returns any conflicts or required adjustments.
-        """
-        pass
-```
-
-#### 5. NegotiationService
-
-```python
-class NegotiationService:
-    """Manage polite requests to shift existing bookings."""
-
-    async def create_shift_request(
-        self,
-        existing_booking_id: UUID,
-        requesting_booking_id: UUID,
-        proposed_shift_minutes: int,
-        reason: str,
-        incentive: Optional[str] = None,
-    ) -> BookingNegotiation:
-        """Create a time shift request."""
-        pass
-
-    async def send_notification(
-        self,
-        negotiation_id: UUID,
-        method: str = 'both',  # 'sms', 'email', 'both'
-    ) -> NotificationResult:
-        """Send polite request to customer."""
-        pass
-
-    async def process_response(
-        self,
-        negotiation_id: UUID,
-        accepted: bool,
-    ) -> NegotiationResult:
-        """
-        Handle customer response:
-        - If accepted: Auto-adjust booking time
-        - If declined: Mark and consider alternatives
-        """
-        pass
-
-    def get_notification_template(
-        self,
-        shift_minutes: int,
-        incentive: Optional[str],
-    ) -> NotificationTemplate:
-        """Get polite SMS/email template."""
-        pass
+│   ├── jwt_service.py              # JWT token handling (exists)
+│   ├── api_key_service.py          # API key validation (NEW)
+│   └── rbac_service.py             # 4-tier permissions (NEW)
 ```
 
 ---
 
-## 🖥️ Frontend Changes
+## 🔐 4-Tier RBAC System
 
-### Address-First Flow Redesign
-
-#### Current Flow:
+### Role Hierarchy
 
 ```
-1. Customer Info → 2. Date/Time → 3. Venue Address → 4. Submit
+Super Admin (Level 1)
+    ├── Full system access
+    ├── Manage all stations
+    ├── View all data
+    └── System configuration
+        │
+        ▼
+Admin (Level 2)
+    ├── Manage own station
+    ├── Manage staff and chefs
+    ├── View station reports
+    └── Cannot access other stations
+        │
+        ▼
+Staff (Level 3)
+    ├── Create/modify bookings
+    ├── Assign chefs
+    ├── View station bookings
+    └── Cannot manage users
+        │
+        ▼
+Customer (Level 4)
+    ├── Create own bookings
+    ├── View own bookings
+    ├── Modify own profile
+    └── Request specific chef
 ```
 
-#### New Flow:
+### Permission Decorators
 
-```
-1. Venue Address → 2. Customer Info → 3. Date/Time (with suggestions) → 4. Submit
-```
+```python
+# apps/backend/src/core/auth/rbac.py
 
-### Quote Calculator Changes (QuoteCalculator.tsx)
+from functools import wraps
+from enum import Enum
 
-```tsx
-// BEFORE: Steps order
-const steps = [
-  'Contact Information', // Step 1
-  'Event Details', // Step 2
-  'Location', // Step 3
-  'Venue Address', // Step 4
-  'Premium Upgrades', // Step 5
-];
+class Role(Enum):
+    SUPER_ADMIN = 1
+    ADMIN = 2
+    STAFF = 3
+    CUSTOMER = 4
 
-// AFTER: Reordered steps
-const steps = [
-  'Venue Address', // Step 1 - MOVED FIRST
-  'Contact Information', // Step 2
-  'Event Details', // Step 3
-  'Premium Upgrades', // Step 4
-];
-```
+class Permission(Enum):
+    # Booking permissions
+    BOOKING_CREATE = "booking:create"
+    BOOKING_READ_OWN = "booking:read:own"
+    BOOKING_READ_STATION = "booking:read:station"
+    BOOKING_READ_ALL = "booking:read:all"
+    BOOKING_UPDATE_OWN = "booking:update:own"
+    BOOKING_UPDATE_STATION = "booking:update:station"
+    BOOKING_UPDATE_ALL = "booking:update:all"
+    BOOKING_DELETE = "booking:delete"
 
-### Booking Form Changes (BookUs/page.tsx)
+    # Chef permissions
+    CHEF_ASSIGN = "chef:assign"
+    CHEF_MANAGE = "chef:manage"
 
-```tsx
-// BEFORE: Form sections order
-<CustomerInfoSection />
-<DateTimeSection />
-<VenueAddressSection />
-<BillingAddressSection />
+    # User permissions
+    USER_MANAGE_STATION = "user:manage:station"
+    USER_MANAGE_ALL = "user:manage:all"
 
-// AFTER: Reordered sections
-<VenueAddressSection />       {/* MOVED FIRST */}
-<CustomerInfoSection />
-<DateTimeSection
-  venueLocation={venueCoordinates}  // NEW: Pass location for suggestions
-  onSlotUnavailable={handleSuggestions}  // NEW: Handle suggestions
-/>
-<BillingAddressSection />
-```
+    # System permissions
+    SYSTEM_CONFIG = "system:config"
 
-### New Suggestion UI Component
-
-```tsx
-// src/components/booking/SlotSuggestions.tsx
-
-interface SlotSuggestion {
-  date: string;
-  slot: string;
-  adjustedTime?: string; // If slot is adjusted
-  availableChefs: number;
-  travelNote?: string; // "Chef arriving from nearby location"
+ROLE_PERMISSIONS = {
+    Role.SUPER_ADMIN: [Permission.ALL],  # Wildcard
+    Role.ADMIN: [
+        Permission.BOOKING_READ_STATION,
+        Permission.BOOKING_UPDATE_STATION,
+        Permission.CHEF_ASSIGN,
+        Permission.CHEF_MANAGE,
+        Permission.USER_MANAGE_STATION,
+    ],
+    Role.STAFF: [
+        Permission.BOOKING_CREATE,
+        Permission.BOOKING_READ_STATION,
+        Permission.BOOKING_UPDATE_STATION,
+        Permission.CHEF_ASSIGN,
+    ],
+    Role.CUSTOMER: [
+        Permission.BOOKING_CREATE,
+        Permission.BOOKING_READ_OWN,
+        Permission.BOOKING_UPDATE_OWN,
+    ],
 }
 
-export function SlotSuggestions({
-  suggestions,
-  onSelect,
-}: {
-  suggestions: SlotSuggestion[];
-  onSelect: (suggestion: SlotSuggestion) => void;
-}) {
-  return (
-    <div className="slot-suggestions">
-      <h3>That time isn't available, but we have these options:</h3>
-      <div className="suggestions-grid">
-        {suggestions.map(suggestion => (
-          <SuggestionCard
-            key={`${suggestion.date}-${suggestion.slot}`}
-            suggestion={suggestion}
-            onSelect={() => onSelect(suggestion)}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
+def require_permission(permission: Permission):
+    """Decorator to check user has required permission."""
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            current_user = kwargs.get('current_user')
+            if not has_permission(current_user, permission):
+                raise HTTPException(403, "Insufficient permissions")
+            return await func(*args, **kwargs)
+        return wrapper
+    return decorator
 ```
 
 ---
 
-## 📡 API Endpoints
+## ✅ Implementation Checklist
 
-### New Endpoints
+### Today's Focus: Phase 1A (Database Schema)
 
-```yaml
-# Availability with suggestions
-GET /api/v1/bookings/availability/smart
-  Query:
-    - date: string (YYYY-MM-DD)
-    - slot: string (12PM, 3PM, 6PM, 9PM)
-    - venue_lat: number
-    - venue_lng: number
-    - guest_count: number
-    - preferred_chef_id?: UUID
-  Response:
-    - available: boolean
-    - suggestions?: BookingSuggestion[]
-    - adjusted_time?: string  # If slot needs adjustment
+- [ ] Create migration file for booking location fields
+- [ ] Add venue_lat, venue_lng columns
+- [ ] Add estimated_duration_minutes column
+- [ ] Create slot_configurations table
+- [ ] Create indexes for geospatial queries
 
-# Chef assignment suggestions
-GET /api/v1/admin/bookings/{id}/chef-suggestions
-  Response:
-    - suggestions: ChefAssignmentSuggestion[]
-    - customer_requested?: Chef  # If customer requested specific chef
+### Next: Phase 1B (Frontend Address First)
 
-# Assign chef to booking
-POST /api/v1/admin/bookings/{id}/assign-chef
-  Body:
-    - chef_id: UUID
-    - override_customer_preference?: boolean
-  Response:
-    - assignment: ChefAssignment
-    - travel_info: TravelInfo
+- [ ] Refactor BookingPage to step-based flow
+- [ ] Move venue address to Step 1
+- [ ] Add geocoding on venue complete
+- [ ] Pass coordinates to availability API
 
-# Request time shift
-POST /api/v1/admin/bookings/{id}/request-shift
-  Body:
-    - shift_minutes: number  # +30, -30, +60, -60
-    - reason: string
-    - incentive?: string
-    - requesting_booking_id?: UUID
-  Response:
-    - negotiation: BookingNegotiation
-    - notification_preview: string
+### Following: Phase 2 (Auth & RBAC)
 
-# Respond to shift request (public link)
-POST /api/v1/public/booking-shift/{token}
-  Body:
-    - accepted: boolean
-    - decline_reason?: string
-  Response:
-    - success: boolean
-    - new_time?: string
-
-# Validate chef's day schedule
-GET /api/v1/admin/chefs/{id}/schedule/{date}/validate
-  Response:
-    - valid: boolean
-    - bookings: BookingWithTravel[]
-    - conflicts?: ScheduleConflict[]
-    - suggested_adjustments?: SlotAdjustment[]
-```
+- [ ] Verify existing JWT implementation
+- [ ] Add API key authentication
+- [ ] Implement 4-tier RBAC
+- [ ] Add permission decorators
 
 ---
 
-## 🔐 RBAC Permissions
-
-### New Permissions for Scheduling Features
-
-| Permission                        | Super Admin | Admin | Staff | Customer |
-| --------------------------------- | :---------: | :---: | :---: | :------: |
-| View chef assignments             |     ✅      |  ✅   |  ✅   |    ❌    |
-| Assign chef to booking            |     ✅      |  ✅   |  ✅   |    ❌    |
-| Override customer chef preference |     ✅      |  ✅   |  ❌   |    ❌    |
-| Request booking time shift        |     ✅      |  ✅   |  ✅   |    ❌    |
-| View travel time data             |     ✅      |  ✅   |  ✅   |    ❌    |
-| Configure slot settings           |     ✅      |  ✅   |  ❌   |    ❌    |
-| View optimization scores          |     ✅      |  ✅   |  ❌   |    ❌    |
-| Request preferred chef            |     ❌      |  ❌   |  ❌   |    ✅    |
-| Respond to shift request          |     ❌      |  ❌   |  ❌   |    ✅    |
-
----
-
-## 📋 Implementation Checklist
-
-### Phase 0: Core Foundation ⭐ (Do First)
-
-- [ ] **0.1** Verify JWT authentication implementation
-- [ ] **0.2** Verify API key authentication for services
-- [ ] **0.3** Implement 4-tier RBAC system
-  - [ ] Create permission definitions
-  - [ ] Add permission checking middleware
-  - [ ] Update all protected endpoints
-- [ ] **0.4** Enhance audit trail
-  - [ ] Log all booking changes
-  - [ ] Log chef assignments
-  - [ ] Log negotiation actions
-- [ ] **0.5** Booking CRUD enhancements
-  - [ ] Add chef assignment endpoint
-  - [ ] Add preferred chef field to booking form
-  - [ ] Add event duration calculation
-
-### Phase 1: Address-First & Location
-
-- [ ] **1.1** Run database migration for new columns
-- [ ] **1.2** Update QuoteCalculator.tsx - reorder steps
-- [ ] **1.3** Update BookUs/page.tsx - reorder sections
-- [ ] **1.4** Create GeocodingService for address → coordinates
-- [ ] **1.5** Auto-geocode on booking creation
-- [ ] **1.6** Create slot_configurations table and defaults
-
-### Phase 2: Smart Availability
-
-- [ ] **2.1** Create SuggestionEngine service
-- [ ] **2.2** Implement `/availability/smart` endpoint
-- [ ] **2.3** Create SlotSuggestions UI component
-- [ ] **2.4** Integrate suggestions into booking flow
-
-### Phase 3: Travel Time
-
-- [ ] **3.1** Set up Google Maps API credentials
-- [ ] **3.2** Create TravelTimeService
-- [ ] **3.3** Implement travel time caching
-- [ ] **3.4** Add rush hour logic
-- [ ] **3.5** Store travel time in chef_assignments
-
-### Phase 4: Slot Adjustment
-
-- [ ] **4.1** Create SlotManagerService
-- [ ] **4.2** Implement event duration calculation
-- [ ] **4.3** Build slot adjustment algorithm
-- [ ] **4.4** Add adjustment validation to booking flow
-
-### Phase 5: Chef Optimization
-
-- [ ] **5.1** Create ChefOptimizerService
-- [ ] **5.2** Implement scoring algorithm
-- [ ] **5.3** Build chef suggestion API
-- [ ] **5.4** Create Station Manager UI for suggestions
-- [ ] **5.5** Handle customer chef preferences
-
-### Phase 6: Negotiation System
-
-- [ ] **6.1** Create booking_negotiations table
-- [ ] **6.2** Create NegotiationService
-- [ ] **6.3** Build notification templates (polite language)
-- [ ] **6.4** Create public response endpoint
-- [ ] **6.5** Implement auto-adjustment on acceptance
-- [ ] **6.6** Add negotiation tracking UI
-
----
-
-## 🧪 Testing Strategy
-
-### Unit Tests
-
-```python
-# tests/services/test_travel_time_service.py
-def test_rush_hour_detection():
-    """Mon-Fri 3-7 PM should be rush hour."""
-
-def test_rush_hour_multiplier():
-    """Rush hour travel time should be 1.5x base."""
-
-def test_weekend_no_rush_hour():
-    """Weekends should not have rush hour multiplier."""
-
-# tests/services/test_slot_manager_service.py
-def test_event_duration_small_party():
-    """10 guests should be 90 minutes."""
-
-def test_event_duration_large_party():
-    """25 guests should cap at 120 minutes."""
-
-def test_slot_adjustment_limits():
-    """12 PM slot cannot adjust earlier than noon."""
-
-# tests/services/test_suggestion_engine.py
-def test_same_day_suggestions():
-    """Should suggest other slots on same day first."""
-
-def test_next_day_suggestions():
-    """Should suggest next available day for same slot."""
-```
-
-### Integration Tests
-
-```python
-# tests/integration/test_booking_flow.py
-def test_address_first_booking():
-    """Booking should accept address before date selection."""
-
-def test_chef_assignment_with_travel():
-    """Chef assignment should consider travel time."""
-
-def test_slot_adjustment_for_travel():
-    """System should adjust slot when travel requires it."""
-```
-
----
-
-## 📊 Metrics & Monitoring
-
-### Key Metrics to Track
-
-| Metric                     | Target  | Alert Threshold |
-| -------------------------- | ------- | --------------- |
-| Booking completion rate    | >80%    | <60%            |
-| Suggestion acceptance rate | >40%    | <20%            |
-| Chef utilization           | >70%    | <50%            |
-| Average travel time        | <45 min | >60 min         |
-| Negotiation success rate   | >50%    | <30%            |
-| Slot adjustment frequency  | <20%    | >40%            |
-
----
-
-## 🚀 Deployment Notes
-
-### Environment Variables Needed
-
-```env
-# Google Maps
-GOOGLE_MAPS_API_KEY=your_key_here
-GOOGLE_MAPS_RATE_LIMIT=50  # requests per second
-
-# Scheduling defaults
-DEFAULT_EVENT_DURATION=90
-MAX_EVENT_DURATION=120
-RUSH_HOUR_START=15  # 3 PM
-RUSH_HOUR_END=19    # 7 PM
-RUSH_HOUR_MULTIPLIER=1.5
-TRAVEL_BUFFER_MINUTES=15
-```
-
-### Feature Flags
-
-```python
-FEATURE_FLAGS = {
-    'smart_scheduling': True,
-    'travel_time_calculation': True,
-    'auto_slot_adjustment': False,  # Enable after testing
-    'negotiation_system': False,    # Enable after Phase 5
-}
-```
-
----
-
-## 📚 Related Documents
+## 🔗 Related Documentation
 
 - [16-INFRASTRUCTURE_DEPLOYMENT.instructions.md](./16-INFRASTRUCTURE_DEPLOYMENT.instructions.md) -
   Server setup
-- [08-BACKEND_DATABASE.instructions.md](./08-BACKEND_DATABASE.instructions.md) -
-  Database patterns
-- [06-CUSTOMER_APP.instructions.md](./06-CUSTOMER_APP.instructions.md) -
-  Frontend patterns
+- [02-DATABASE_ARCHITECTURE.instructions.md](./02-DATABASE_ARCHITECTURE.instructions.md) -
+  Database design
+- [03-CODING_STYLE.instructions.md](./03-CODING_STYLE.instructions.md) -
+  Coding standards
 
 ---
 
-_Last Updated: 2024-12-20_
+## 📝 Change Log
+
+| Date       | Version | Changes                       |
+| ---------- | ------- | ----------------------------- |
+| 2024-12-20 | 1.0.0   | Initial specification created |

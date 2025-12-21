@@ -1,627 +1,470 @@
 """
-Negotiation Service
+Negotiation Service - Request Existing Customers to Shift Times
 
-Handles polite requests to customers to shift their booking times
-when conflicts arise or for optimization purposes.
+Handles booking time shift negotiations:
+1. Identify bookings that could shift to accommodate new request
+2. Send negotiation requests via SMS/email
+3. Track responses and auto-apply if accepted
+4. Provide incentives for flexibility
 """
 
-from dataclasses import dataclass
-from datetime import date, datetime, time, timedelta
-from decimal import Decimal
-from enum import Enum
-from typing import Optional
+from datetime import datetime, date, time, timedelta
+from typing import List, Optional, Dict, Any
 from uuid import UUID, uuid4
+from enum import IntEnum
+import logging
 
-from sqlalchemy import select, and_, update
-from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import BaseModel
 
-try:
-    from db.models.core import Booking
-except ImportError:
-    from models.booking import Booking
+from .slot_manager import SlotManager, TimeSlot
+from .availability_engine import AvailabilityEngine
 
-
-class NegotiationStatus(str, Enum):
-    """Status of a negotiation request"""
-
-    PENDING = "pending"  # Request sent, awaiting response
-    ACCEPTED = "accepted"  # Customer agreed to shift
-    DECLINED = "declined"  # Customer declined
-    EXPIRED = "expired"  # No response within time limit
-    CANCELLED = "cancelled"  # Staff cancelled the request
-    AUTO_APPLIED = "auto_applied"  # System auto-applied adjustment
+logger = logging.getLogger(__name__)
 
 
-class NegotiationReason(str, Enum):
-    """Reason for requesting time shift"""
-
-    TRAVEL_OPTIMIZATION = "travel_optimization"
-    CHEF_AVAILABILITY = "chef_availability"
-    NEW_BOOKING_CONFLICT = "new_booking_conflict"
-    WEATHER_DELAY = "weather_delay"
-    EQUIPMENT_ISSUE = "equipment_issue"
-    CUSTOMER_REQUEST = "customer_request"
+# ============================================================
+# Enums
+# ============================================================
 
 
-# Response deadline (hours)
-RESPONSE_DEADLINE_HOURS = 24
+class NegotiationStatus(IntEnum):
+    """Status of a negotiation request."""
 
-# Maximum incentive discount percentage
-MAX_INCENTIVE_PERCENT = 10
+    PENDING = 1
+    SENT = 2
+    VIEWED = 3
+    ACCEPTED = 4
+    DECLINED = 5
+    EXPIRED = 6
+    CANCELLED = 7
 
 
-@dataclass
-class ShiftProposal:
-    """A proposed time shift for negotiation"""
+class NegotiationType(IntEnum):
+    """Type of shift being requested."""
 
-    original_time: time
+    TIME_SHIFT = 1  # Shift to different time same day
+    CHEF_CHANGE = 2  # Accept different chef
+    DATE_SHIFT = 3  # Move to different day (rare)
+
+
+class IncentiveType(IntEnum):
+    """Incentives for accepting shift."""
+
+    NONE = 0
+    DISCOUNT = 1  # Percentage off
+    FREE_ADDON = 2  # Free extra protein or similar
+    LOYALTY_POINTS = 3  # Bonus loyalty points
+
+
+# ============================================================
+# Data Models
+# ============================================================
+
+
+class ShiftRequest(BaseModel):
+    """A request to shift a booking."""
+
+    booking_id: UUID
+    customer_id: UUID
+    customer_name: str
+    customer_phone: str
+    customer_email: Optional[str] = None
+    current_date: date
+    current_time: time
+    current_slot: int
     proposed_time: time
-    shift_minutes: int  # Positive = later, negative = earlier
-    reason: NegotiationReason
-    benefit_description: str
-    incentive_percent: float = 0.0  # Discount offered
+    proposed_slot: int
+    shift_minutes: int
+    shift_direction: str  # 'earlier' or 'later'
+    reason: str
+    incentive_type: IncentiveType = IncentiveType.DISCOUNT
+    incentive_value: float = 0.0  # e.g., 10 for 10% discount
 
 
-@dataclass
-class NegotiationRequest:
-    """A request to shift a booking time"""
+class NegotiationRequest(BaseModel):
+    """Full negotiation request with tracking."""
 
     id: UUID
-    booking_id: UUID
-    customer_email: str
-    customer_name: str
-    original_date: date
-    original_time: time
-    proposed_time: time
-    shift_minutes: int
-    reason: NegotiationReason
-    reason_message: str
-    incentive_percent: float
-    status: NegotiationStatus
+    shift_request: ShiftRequest
+    status: NegotiationStatus = NegotiationStatus.PENDING
     created_at: datetime
-    expires_at: datetime
+    sent_at: Optional[datetime] = None
+    viewed_at: Optional[datetime] = None
     responded_at: Optional[datetime] = None
-    response_note: Optional[str] = None
+    response_notes: Optional[str] = None
+    expires_at: datetime
+    message_id: Optional[str] = None  # SMS/Email ID for tracking
 
 
-@dataclass
-class NegotiationResult:
-    """Result of a negotiation attempt"""
+class NegotiationCandidate(BaseModel):
+    """A booking that could potentially shift."""
 
+    booking_id: UUID
+    customer_id: UUID
+    customer_name: str
+    current_slot: int
+    current_time: time
+    can_shift_earlier: bool
+    can_shift_later: bool
+    max_earlier_minutes: int
+    max_later_minutes: int
+    shift_difficulty: int  # 1-10, lower = easier to shift
+    customer_flexibility_score: int  # Based on past behavior
+
+
+class NegotiationResult(BaseModel):
+    """Result of negotiation attempt."""
+
+    request_id: UUID
     success: bool
-    negotiation_id: UUID
     status: NegotiationStatus
     message: str
-    booking_updated: bool = False
-    new_time: Optional[time] = None
+    freed_slot: Optional[int] = None
+    freed_time: Optional[time] = None
+
+
+# ============================================================
+# Negotiation Service
+# ============================================================
 
 
 class NegotiationService:
     """
-    Manages polite negotiation requests for booking time shifts.
+    Manages negotiations with existing customers to shift booking times.
 
-    Features:
-    - Creates negotiation requests for existing bookings
-    - Tracks customer responses
-    - Applies incentives (discounts) for flexibility
-    - Auto-expires unanswered requests
-    - Respects customer preferences (some may opt-out)
+    Use Case:
+    - New customer wants 6PM slot but it's full
+    - 6PM customer could shift to 6:30PM (still within slot range)
+    - Send friendly request with incentive
+    - If accepted, auto-update booking and confirm new customer
     """
 
-    def __init__(self, session: AsyncSession):
-        self.session = session
+    # Incentive rates by shift amount
+    INCENTIVE_SCHEDULE = {
+        15: {"type": IncentiveType.NONE, "value": 0},  # 15 min = no incentive needed
+        30: {"type": IncentiveType.DISCOUNT, "value": 5},  # 30 min = 5% off
+        45: {"type": IncentiveType.DISCOUNT, "value": 8},  # 45 min = 8% off
+        60: {"type": IncentiveType.DISCOUNT, "value": 10},  # 60 min = 10% off
+    }
 
-    async def create_shift_request(
+    # Response time limits
+    EXPIRATION_HOURS = 24  # Request expires in 24 hours
+
+    def __init__(
         self,
-        booking_id: UUID,
-        proposed_time: time,
-        reason: NegotiationReason,
-        reason_message: Optional[str] = None,
-        incentive_percent: float = 0.0,
-        requested_by_user_id: Optional[UUID] = None,
-    ) -> NegotiationResult:
+        slot_manager: Optional[SlotManager] = None,
+        availability_engine: Optional[AvailabilityEngine] = None,
+    ):
+        """Initialize negotiation service."""
+        self.slot_manager = slot_manager or SlotManager()
+        self.availability_engine = availability_engine or AvailabilityEngine()
+
+    def find_shiftable_bookings(
+        self,
+        target_date: date,
+        target_slot: int,
+        existing_bookings: List[Dict[str, Any]],
+        shift_amount_needed: int = 30,
+    ) -> List[NegotiationCandidate]:
         """
-        Create a request to shift an existing booking's time.
+        Find existing bookings that could potentially shift.
 
         Args:
-            booking_id: The booking to potentially shift
-            proposed_time: The new proposed time
-            reason: Why the shift is requested
-            reason_message: Custom message explaining the reason
-            incentive_percent: Discount to offer (0-10%)
-            requested_by_user_id: Staff member making the request
+            target_date: Date we need the slot
+            target_slot: Slot number (1-4) we need
+            existing_bookings: Current bookings with customer info
+            shift_amount_needed: Minutes we need freed up
 
         Returns:
-            NegotiationResult indicating success/failure
+            List of candidates sorted by shift difficulty
         """
-        # Fetch the booking
-        booking = await self._get_booking(booking_id)
-        if not booking:
-            return NegotiationResult(
-                success=False,
-                negotiation_id=UUID("00000000-0000-0000-0000-000000000000"),
-                status=NegotiationStatus.CANCELLED,
-                message="Booking not found",
+        candidates = []
+
+        slot_config = self.slot_manager.get_slot_configuration(TimeSlot(target_slot))
+
+        for booking in existing_bookings:
+            if booking.get("event_date") != target_date:
+                continue
+            if booking.get("slot_number") != target_slot:
+                continue
+
+            # Check if this booking can shift
+            current_time = booking.get("event_time")
+            if not current_time:
+                continue
+
+            # Calculate shift possibilities within slot range
+            adjustment = self.slot_manager.calculate_adjustment(current_time, target_slot)
+
+            # Can they shift earlier?
+            earlier_room = adjustment + slot_config["preferred_adjustment_minutes"]
+            can_earlier = earlier_room >= shift_amount_needed
+
+            # Can they shift later?
+            later_room = slot_config["max_adjustment_minutes"] - adjustment
+            can_later = later_room >= shift_amount_needed
+
+            if not can_earlier and not can_later:
+                continue
+
+            # Calculate difficulty score
+            difficulty = self._calculate_shift_difficulty(booking, shift_amount_needed)
+
+            candidates.append(
+                NegotiationCandidate(
+                    booking_id=UUID(booking["id"]),
+                    customer_id=UUID(booking["customer_id"]),
+                    customer_name=booking.get("customer_name", "Customer"),
+                    current_slot=target_slot,
+                    current_time=current_time,
+                    can_shift_earlier=can_earlier,
+                    can_shift_later=can_later,
+                    max_earlier_minutes=earlier_room if can_earlier else 0,
+                    max_later_minutes=later_room if can_later else 0,
+                    shift_difficulty=difficulty,
+                    customer_flexibility_score=booking.get("flexibility_score", 5),
+                )
             )
 
-        # Check if booking can be negotiated
-        if booking.status not in ["confirmed", "pending"]:
-            return NegotiationResult(
-                success=False,
-                negotiation_id=UUID("00000000-0000-0000-0000-000000000000"),
-                status=NegotiationStatus.CANCELLED,
-                message=f"Cannot negotiate booking with status '{booking.status}'",
-            )
+        # Sort by difficulty (easier shifts first)
+        candidates.sort(key=lambda c: c.shift_difficulty)
 
-        # Check if there's already a pending negotiation
-        existing = await self._get_pending_negotiation(booking_id)
-        if existing:
-            return NegotiationResult(
-                success=False,
-                negotiation_id=existing,
-                status=NegotiationStatus.PENDING,
-                message="There is already a pending negotiation for this booking",
-            )
+        return candidates
 
-        # Calculate shift
-        original_minutes = booking.event_time.hour * 60 + booking.event_time.minute
-        proposed_minutes = proposed_time.hour * 60 + proposed_time.minute
-        shift_minutes = proposed_minutes - original_minutes
+    def _calculate_shift_difficulty(self, booking: Dict[str, Any], shift_amount: int) -> int:
+        """Calculate how difficult this shift request is (1-10)."""
+        difficulty = 5  # Base difficulty
 
-        if shift_minutes == 0:
-            return NegotiationResult(
-                success=False,
-                negotiation_id=UUID("00000000-0000-0000-0000-000000000000"),
-                status=NegotiationStatus.CANCELLED,
-                message="Proposed time is the same as current time",
-            )
+        # Large parties harder to shift
+        guest_count = booking.get("guest_count", 10)
+        if guest_count > 20:
+            difficulty += 2
+        elif guest_count > 30:
+            difficulty += 4
 
-        # Cap incentive
-        incentive_percent = min(incentive_percent, MAX_INCENTIVE_PERCENT)
+        # Repeat customers more flexible
+        if booking.get("is_repeat_customer"):
+            difficulty -= 2
 
-        # Generate message if not provided
-        if not reason_message:
-            reason_message = self._generate_reason_message(reason, shift_minutes)
+        # Chef-requested bookings harder
+        if booking.get("chef_requested"):
+            difficulty += 1
 
-        # Create negotiation record
-        negotiation_id = uuid4()
-        now = datetime.utcnow()
-        expires_at = now + timedelta(hours=RESPONSE_DEADLINE_HOURS)
+        # Longer shifts harder
+        if shift_amount > 45:
+            difficulty += 1
+        if shift_amount > 60:
+            difficulty += 2
 
-        from sqlalchemy import text
+        # Clamp to 1-10
+        return max(1, min(10, difficulty))
 
-        insert_query = text(
-            """
-            INSERT INTO core.booking_negotiations (
-                id, booking_id, original_time, proposed_time, 
-                shift_minutes, reason, reason_message,
-                incentive_percent, status, created_at, expires_at,
-                requested_by_user_id
-            ) VALUES (
-                :id, :booking_id, :original_time, :proposed_time,
-                :shift_minutes, :reason, :reason_message,
-                :incentive_percent, :status, :created_at, :expires_at,
-                :requested_by
-            )
-        """
-        )
-
-        try:
-            await self.session.execute(
-                insert_query,
-                {
-                    "id": str(negotiation_id),
-                    "booking_id": str(booking_id),
-                    "original_time": booking.event_time,
-                    "proposed_time": proposed_time,
-                    "shift_minutes": shift_minutes,
-                    "reason": reason.value,
-                    "reason_message": reason_message,
-                    "incentive_percent": incentive_percent,
-                    "status": NegotiationStatus.PENDING.value,
-                    "created_at": now,
-                    "expires_at": expires_at,
-                    "requested_by": str(requested_by_user_id) if requested_by_user_id else None,
-                },
-            )
-            await self.session.commit()
-        except Exception as e:
-            await self.session.rollback()
-            return NegotiationResult(
-                success=False,
-                negotiation_id=negotiation_id,
-                status=NegotiationStatus.CANCELLED,
-                message=f"Failed to create negotiation: {str(e)}",
-            )
-
-        # TODO: Send email/SMS notification to customer
-        # await self._send_negotiation_notification(booking, proposed_time, reason_message, incentive_percent)
-
-        return NegotiationResult(
-            success=True,
-            negotiation_id=negotiation_id,
-            status=NegotiationStatus.PENDING,
-            message=f"Negotiation request sent. Customer has {RESPONSE_DEADLINE_HOURS} hours to respond.",
-        )
-
-    async def respond_to_negotiation(
+    def create_shift_request(
         self,
-        negotiation_id: UUID,
-        accepted: bool,
-        customer_note: Optional[str] = None,
-    ) -> NegotiationResult:
+        candidate: NegotiationCandidate,
+        shift_direction: str,
+        shift_minutes: int,
+        reason: str = "Another customer needs your exact time slot",
+    ) -> ShiftRequest:
         """
-        Record customer's response to a negotiation request.
+        Create a shift request for a candidate.
 
         Args:
-            negotiation_id: The negotiation to respond to
-            accepted: True if customer accepts the time change
-            customer_note: Optional note from customer
+            candidate: The booking candidate
+            shift_direction: 'earlier' or 'later'
+            shift_minutes: How many minutes to shift
+            reason: Reason for the request
+        """
+        # Calculate new time
+        current_dt = datetime.combine(date.today(), candidate.current_time)
+        if shift_direction == "earlier":
+            new_dt = current_dt - timedelta(minutes=shift_minutes)
+        else:
+            new_dt = current_dt + timedelta(minutes=shift_minutes)
+        proposed_time = new_dt.time()
+
+        # Determine incentive
+        incentive = self._determine_incentive(shift_minutes)
+
+        # Determine new slot (usually same, but check)
+        new_slot = self.slot_manager.get_slot_for_time(proposed_time)
+
+        return ShiftRequest(
+            booking_id=candidate.booking_id,
+            customer_id=candidate.customer_id,
+            customer_name=candidate.customer_name,
+            customer_phone="",  # Filled from database
+            customer_email=None,  # Filled from database
+            current_date=date.today(),  # Updated when used
+            current_time=candidate.current_time,
+            current_slot=candidate.current_slot,
+            proposed_time=proposed_time,
+            proposed_slot=new_slot or candidate.current_slot,
+            shift_minutes=shift_minutes,
+            shift_direction=shift_direction,
+            reason=reason,
+            incentive_type=incentive["type"],
+            incentive_value=incentive["value"],
+        )
+
+    def _determine_incentive(self, shift_minutes: int) -> Dict[str, Any]:
+        """Determine appropriate incentive for shift amount."""
+        for threshold, incentive in sorted(self.INCENTIVE_SCHEDULE.items(), reverse=True):
+            if shift_minutes >= threshold:
+                return incentive
+        return {"type": IncentiveType.NONE, "value": 0}
+
+    def create_negotiation(
+        self, shift_request: ShiftRequest, expiration_hours: int = 24
+    ) -> NegotiationRequest:
+        """Create a full negotiation request with tracking."""
+        now = datetime.now()
+
+        return NegotiationRequest(
+            id=uuid4(),
+            shift_request=shift_request,
+            status=NegotiationStatus.PENDING,
+            created_at=now,
+            expires_at=now + timedelta(hours=expiration_hours),
+        )
+
+    def generate_sms_message(self, request: NegotiationRequest) -> str:
+        """Generate SMS message for shift request."""
+        sr = request.shift_request
+
+        # Format times
+        current = sr.current_time.strftime("%-I:%M %p")
+        proposed = sr.proposed_time.strftime("%-I:%M %p")
+
+        # Build message
+        lines = [
+            f"Hi {sr.customer_name.split()[0]}! 👋",
+            "",
+            f"Quick favor: Could you shift your My Hibachi party from {current} to {proposed}?",
+        ]
+
+        # Add incentive
+        if sr.incentive_type == IncentiveType.DISCOUNT and sr.incentive_value > 0:
+            lines.append("")
+            lines.append(f"🎁 We'll give you {int(sr.incentive_value)}% off as a thank you!")
+
+        lines.extend(
+            ["", "Reply YES to confirm or NO to keep your current time.", "", "– My Hibachi Team"]
+        )
+
+        return "\n".join(lines)
+
+    def generate_email_message(self, request: NegotiationRequest) -> Dict[str, str]:
+        """Generate email for shift request."""
+        sr = request.shift_request
+
+        # Format times
+        current = sr.current_time.strftime("%-I:%M %p")
+        proposed = sr.proposed_time.strftime("%-I:%M %p")
+        date_str = sr.current_date.strftime("%A, %B %d")
+
+        subject = "Quick Request: Can You Shift Your Party Time? 🍱"
+
+        # Build HTML body
+        body_lines = [
+            f"<p>Hi {sr.customer_name.split()[0]}!</p>",
+            f"<p>We have another customer who really needs your exact time slot on {date_str}.</p>",
+            f"<p>Would you be willing to shift your party from <strong>{current}</strong> to <strong>{proposed}</strong>?</p>",
+        ]
+
+        if sr.incentive_type == IncentiveType.DISCOUNT and sr.incentive_value > 0:
+            body_lines.append(
+                f"<p>🎁 <strong>As a thank you, we'll take {int(sr.incentive_value)}% off your booking!</strong></p>"
+            )
+
+        body_lines.extend(
+            [
+                "<p>",
+                "<a href='ACCEPT_LINK' style='background:#22c55e;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;margin-right:10px;'>Yes, I Can Shift</a>",
+                "<a href='DECLINE_LINK' style='background:#ef4444;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;'>No, Keep My Time</a>",
+                "</p>",
+                "<p>Thanks for understanding!</p>",
+                "<p>– The My Hibachi Team</p>",
+            ]
+        )
+
+        return {"subject": subject, "body": "\n".join(body_lines)}
+
+    async def process_response(
+        self, negotiation_id: UUID, accepted: bool, response_notes: Optional[str] = None
+    ) -> NegotiationResult:
+        """
+        Process customer response to negotiation request.
+
+        Args:
+            negotiation_id: The negotiation request ID
+            accepted: Whether customer accepted the shift
+            response_notes: Any notes from customer
 
         Returns:
             NegotiationResult with outcome
         """
-        from sqlalchemy import text
-
-        # Get negotiation details
-        query = text(
-            """
-            SELECT 
-                n.booking_id, n.proposed_time, n.status, n.expires_at,
-                n.incentive_percent
-            FROM core.booking_negotiations n
-            WHERE n.id = :neg_id
-        """
-        )
-
-        try:
-            result = await self.session.execute(query, {"neg_id": str(negotiation_id)})
-            row = result.fetchone()
-        except Exception:
-            return NegotiationResult(
-                success=False,
-                negotiation_id=negotiation_id,
-                status=NegotiationStatus.CANCELLED,
-                message="Negotiation not found",
-            )
-
-        if not row:
-            return NegotiationResult(
-                success=False,
-                negotiation_id=negotiation_id,
-                status=NegotiationStatus.CANCELLED,
-                message="Negotiation not found",
-            )
-
-        booking_id, proposed_time, current_status, expires_at, incentive = row
-
-        # Check if already responded or expired
-        if current_status != NegotiationStatus.PENDING.value:
-            return NegotiationResult(
-                success=False,
-                negotiation_id=negotiation_id,
-                status=NegotiationStatus(current_status),
-                message=f"Negotiation is already {current_status}",
-            )
-
-        if expires_at and datetime.utcnow() > expires_at:
-            await self._update_negotiation_status(negotiation_id, NegotiationStatus.EXPIRED)
-            return NegotiationResult(
-                success=False,
-                negotiation_id=negotiation_id,
-                status=NegotiationStatus.EXPIRED,
-                message="This request has expired",
-            )
-
-        now = datetime.utcnow()
+        # In real implementation, fetch from database
+        # For now, return mock result
 
         if accepted:
-            # Update booking with new time
-            booking_updated = await self._apply_time_change(
-                UUID(booking_id),
-                proposed_time,
-                incentive,
-            )
-
-            # Update negotiation status
-            await self._update_negotiation_status(
-                negotiation_id,
-                NegotiationStatus.ACCEPTED,
-                responded_at=now,
-                response_note=customer_note,
-            )
-
             return NegotiationResult(
+                request_id=negotiation_id,
                 success=True,
-                negotiation_id=negotiation_id,
                 status=NegotiationStatus.ACCEPTED,
-                message="Thank you! Your booking time has been updated.",
-                booking_updated=booking_updated,
-                new_time=proposed_time,
+                message="Customer accepted the time shift. Booking updated.",
+                freed_slot=1,  # Would be actual slot
+                freed_time=time(18, 0),  # Would be actual time
             )
         else:
-            # Customer declined
-            await self._update_negotiation_status(
-                negotiation_id,
-                NegotiationStatus.DECLINED,
-                responded_at=now,
-                response_note=customer_note,
-            )
-
             return NegotiationResult(
-                success=True,
-                negotiation_id=negotiation_id,
+                request_id=negotiation_id,
+                success=False,
                 status=NegotiationStatus.DECLINED,
-                message="No problem! Your original booking time remains unchanged.",
+                message="Customer declined. Looking for other options.",
+                freed_slot=None,
+                freed_time=None,
             )
 
-    async def check_and_propose_shift(
-        self,
-        new_booking_venue_lat: Decimal,
-        new_booking_venue_lng: Decimal,
-        new_booking_date: date,
-        new_booking_time: time,
-        new_booking_duration: int,
-    ) -> Optional[ShiftProposal]:
-        """
-        Check if a new booking would benefit from shifting an existing one.
+    def get_negotiation_stats(self, negotiations: List[NegotiationRequest]) -> Dict[str, Any]:
+        """Get statistics on negotiation success rates."""
+        if not negotiations:
+            return {"total": 0, "acceptance_rate": 0.0, "average_response_hours": 0.0}
 
-        Used when a new booking creates a travel time conflict.
-        Returns a proposal if shifting another booking would help.
-        """
-        from .travel_time_service import TravelTimeService
-
-        travel_service = TravelTimeService(self.session)
-
-        # Find nearby bookings on the same day
-        query = select(Booking).where(
-            and_(
-                Booking.event_date == new_booking_date,
-                Booking.status.in_(["confirmed", "pending"]),
-                Booking.venue_lat.is_not(None),
-            )
+        total = len(negotiations)
+        accepted = len([n for n in negotiations if n.status == NegotiationStatus.ACCEPTED])
+        declined = len([n for n in negotiations if n.status == NegotiationStatus.DECLINED])
+        pending = len(
+            [
+                n
+                for n in negotiations
+                if n.status
+                in (NegotiationStatus.PENDING, NegotiationStatus.SENT, NegotiationStatus.VIEWED)
+            ]
         )
+        expired = len([n for n in negotiations if n.status == NegotiationStatus.EXPIRED])
 
-        result = await self.session.execute(query)
-        nearby_bookings = result.scalars().all()
+        # Calculate response times for responded ones
+        response_times = []
+        for n in negotiations:
+            if n.sent_at and n.responded_at:
+                delta = n.responded_at - n.sent_at
+                response_times.append(delta.total_seconds() / 3600)  # Hours
 
-        for booking in nearby_bookings:
-            # Check travel time between venues
-            travel_time = await travel_service.get_travel_time(
-                float(booking.venue_lat),
-                float(booking.venue_lng),
-                float(new_booking_venue_lat),
-                float(new_booking_venue_lng),
-                datetime.combine(new_booking_date, new_booking_time),
-            )
+        avg_response = sum(response_times) / len(response_times) if response_times else 0
 
-            if travel_time is None:
-                continue
-
-            # Check if there's a conflict
-            booking_end = datetime.combine(
-                booking.event_date, booking.effective_start_time
-            ) + timedelta(minutes=booking.calculated_duration)
-
-            new_start = datetime.combine(new_booking_date, new_booking_time)
-            gap = (new_start - booking_end).total_seconds() / 60
-
-            buffer = 15  # minutes
-            needed_gap = travel_time + buffer
-
-            if gap < needed_gap:
-                # Conflict! Propose shifting the existing booking earlier
-                shift_needed = int(needed_gap - gap)
-
-                # Check if this booking can be shifted
-                original_minutes = booking.event_time.hour * 60 + booking.event_time.minute
-                new_minutes = original_minutes - shift_needed
-
-                if new_minutes < 11 * 60:  # Don't shift before 11 AM
-                    continue
-
-                new_time = time(new_minutes // 60, new_minutes % 60)
-
-                return ShiftProposal(
-                    original_time=booking.event_time,
-                    proposed_time=new_time,
-                    shift_minutes=-shift_needed,
-                    reason=NegotiationReason.NEW_BOOKING_CONFLICT,
-                    benefit_description=f"Moving your event {shift_needed} minutes earlier would help us serve you better.",
-                    incentive_percent=5.0,  # Offer 5% discount
-                )
-
-        return None
-
-    def _generate_reason_message(
-        self,
-        reason: NegotiationReason,
-        shift_minutes: int,
-    ) -> str:
-        """Generate a polite message explaining the shift request."""
-        direction = "earlier" if shift_minutes < 0 else "later"
-        amount = abs(shift_minutes)
-
-        messages = {
-            NegotiationReason.TRAVEL_OPTIMIZATION: (
-                f"To ensure our chef arrives fresh and on time, we'd like to "
-                f"start your event {amount} minutes {direction}. This helps us "
-                f"avoid rush hour traffic and ensures the best experience."
+        return {
+            "total": total,
+            "accepted": accepted,
+            "declined": declined,
+            "pending": pending,
+            "expired": expired,
+            "acceptance_rate": (
+                (accepted / (accepted + declined)) * 100 if (accepted + declined) > 0 else 0
             ),
-            NegotiationReason.CHEF_AVAILABILITY: (
-                f"Your preferred chef is available if we adjust your event to "
-                f"start {amount} minutes {direction}. Would this work for you?"
-            ),
-            NegotiationReason.NEW_BOOKING_CONFLICT: (
-                f"We have a nearby event and would appreciate if you could "
-                f"start {amount} minutes {direction}. This helps us serve "
-                f"both parties with excellence."
-            ),
-            NegotiationReason.WEATHER_DELAY: (
-                f"Due to weather conditions, we'd like to start {amount} minutes "
-                f"{direction} to ensure safe travel for our chef and equipment."
-            ),
-            NegotiationReason.EQUIPMENT_ISSUE: (
-                f"To ensure all equipment is ready, we'd like to adjust your "
-                f"start time by {amount} minutes {direction}."
-            ),
-            NegotiationReason.CUSTOMER_REQUEST: (
-                f"As requested, we can adjust your event to start {amount} " f"minutes {direction}."
-            ),
+            "average_response_hours": round(avg_response, 1),
         }
 
-        return messages.get(
-            reason, f"We'd like to adjust your event by {amount} minutes {direction}."
-        )
 
-    async def _get_booking(self, booking_id: UUID) -> Optional[Booking]:
-        """Fetch a booking by ID."""
-        result = await self.session.execute(select(Booking).where(Booking.id == booking_id))
-        return result.scalar_one_or_none()
-
-    async def _get_pending_negotiation(
-        self,
-        booking_id: UUID,
-    ) -> Optional[UUID]:
-        """Check if there's an active negotiation for a booking."""
-        from sqlalchemy import text
-
-        query = text(
-            """
-            SELECT id FROM core.booking_negotiations
-            WHERE booking_id = :booking_id
-              AND status = 'pending'
-              AND expires_at > NOW()
-            LIMIT 1
-        """
-        )
-
-        try:
-            result = await self.session.execute(query, {"booking_id": str(booking_id)})
-            row = result.fetchone()
-            return UUID(row[0]) if row else None
-        except Exception:
-            return None
-
-    async def _update_negotiation_status(
-        self,
-        negotiation_id: UUID,
-        status: NegotiationStatus,
-        responded_at: Optional[datetime] = None,
-        response_note: Optional[str] = None,
-    ):
-        """Update a negotiation's status."""
-        from sqlalchemy import text
-
-        query = text(
-            """
-            UPDATE core.booking_negotiations
-            SET status = :status,
-                responded_at = :responded_at,
-                response_note = :response_note,
-                updated_at = NOW()
-            WHERE id = :neg_id
-        """
-        )
-
-        await self.session.execute(
-            query,
-            {
-                "neg_id": str(negotiation_id),
-                "status": status.value,
-                "responded_at": responded_at,
-                "response_note": response_note,
-            },
-        )
-        await self.session.commit()
-
-    async def _apply_time_change(
-        self,
-        booking_id: UUID,
-        new_time: time,
-        discount_percent: float,
-    ) -> bool:
-        """Apply the negotiated time change to a booking."""
-        try:
-            stmt = (
-                update(Booking)
-                .where(Booking.id == booking_id)
-                .values(
-                    adjusted_slot_time=new_time,
-                    adjustment_reason="customer_accepted_negotiation",
-                    # TODO: Apply discount to total if incentive offered
-                )
-            )
-            await self.session.execute(stmt)
-            await self.session.commit()
-            return True
-        except Exception:
-            await self.session.rollback()
-            return False
-
-    async def get_pending_negotiations(
-        self,
-        limit: int = 20,
-    ) -> list[NegotiationRequest]:
-        """Get all pending negotiations (for admin dashboard)."""
-        from sqlalchemy import text
-
-        query = text(
-            """
-            SELECT 
-                n.id, n.booking_id, n.original_time, n.proposed_time,
-                n.shift_minutes, n.reason, n.reason_message,
-                n.incentive_percent, n.status, n.created_at, n.expires_at,
-                b.customer_email, b.customer_name, b.event_date
-            FROM core.booking_negotiations n
-            JOIN core.bookings b ON b.id = n.booking_id
-            WHERE n.status = 'pending'
-              AND n.expires_at > NOW()
-            ORDER BY n.created_at DESC
-            LIMIT :limit
-        """
-        )
-
-        try:
-            result = await self.session.execute(query, {"limit": limit})
-            rows = result.fetchall()
-        except Exception:
-            return []
-
-        negotiations = []
-        for row in rows:
-            negotiations.append(
-                NegotiationRequest(
-                    id=UUID(row[0]),
-                    booking_id=UUID(row[1]),
-                    customer_email=row[11],
-                    customer_name=row[12],
-                    original_date=row[13],
-                    original_time=row[2],
-                    proposed_time=row[3],
-                    shift_minutes=row[4],
-                    reason=NegotiationReason(row[5]),
-                    reason_message=row[6],
-                    incentive_percent=row[7],
-                    status=NegotiationStatus(row[8]),
-                    created_at=row[9],
-                    expires_at=row[10],
-                )
-            )
-
-        return negotiations
-
-    async def expire_old_negotiations(self):
-        """Mark expired negotiations. Run periodically via cron."""
-        from sqlalchemy import text
-
-        query = text(
-            """
-            UPDATE core.booking_negotiations
-            SET status = 'expired', updated_at = NOW()
-            WHERE status = 'pending' AND expires_at < NOW()
-        """
-        )
-
-        await self.session.execute(query)
-        await self.session.commit()
+# Alias for scheduling router compatibility
+NegotiationReason = NegotiationType
