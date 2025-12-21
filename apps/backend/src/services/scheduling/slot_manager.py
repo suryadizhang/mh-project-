@@ -5,9 +5,23 @@ Manages time slot configuration, adjustment logic, and event duration calculatio
 
 Business Rules:
 - 4 standard slots: 12PM, 3PM, 6PM, 9PM
-- Each slot adjustable within configured limits
+- Slot adjustments in 30-minute increments (-30, -60, +30, +60)
 - Event duration: 60 + (guests × 3) minutes, max 120
-- 15 minute buffer between event end and next booking start
+- 15 minute buffer between event end and travel start
+- Chef must arrive 30 minutes BEFORE event for setup
+- Rush hour (Mon-Fri 3PM-7PM): travel time × 1.5
+
+Slot Adjustment Limits:
+- 12PM: -30 to +60 min (11:30 AM - 1:00 PM)
+- 3PM: -30 to +60 min (2:30 PM - 4:00 PM)
+- 6PM: -60 to +60 min (5:00 PM - 7:00 PM)
+- 9PM: -60 to +30 min (8:00 PM - 9:30 PM)
+
+Travel Chain Logic:
+1. Previous event ends
+2. Chef has 15 min buffer to pack up
+3. Chef travels (×1.5 during rush hour on weekdays)
+4. Chef arrives 30 min before event for setup
 """
 
 from dataclasses import dataclass
@@ -58,10 +72,15 @@ class SlotAdjustment:
 
 
 # Default slot configurations (fallback if DB not available)
+# Adjustments are in 30-minute increments: -30, -60 or +30, +60
 DEFAULT_SLOT_CONFIGS = {
-    "12PM": SlotConfig("12PM", time(12, 0), 0, 60, 90, 120),
+    # 12PM: Can shift 30 min earlier (11:30 AM) to 60 min later (1:00 PM)
+    "12PM": SlotConfig("12PM", time(12, 0), -30, 60, 90, 120),
+    # 3PM: Can shift 30 min earlier (2:30 PM) to 60 min later (4:00 PM)
     "3PM": SlotConfig("3PM", time(15, 0), -30, 60, 90, 120),
+    # 6PM: Can shift 60 min earlier (5:00 PM) to 60 min later (7:00 PM)
     "6PM": SlotConfig("6PM", time(18, 0), -60, 60, 90, 120),
+    # 9PM: Can shift 60 min earlier (8:00 PM) to 30 min later (9:30 PM)
     "9PM": SlotConfig("9PM", time(21, 0), -60, 30, 90, 120),
 }
 
@@ -73,7 +92,52 @@ SLOT_TIMES = {
     "9PM": time(21, 0),
 }
 
-BUFFER_MINUTES = 15  # Buffer between events
+# Time constants
+BUFFER_MINUTES = 15  # Buffer between event end and travel start
+CHEF_SETUP_MINUTES = 30  # Chef must arrive 30 min before event for setup
+
+# Rush hour configuration (Mon-Fri 3PM-7PM = 50% slower travel)
+RUSH_HOUR_START = 15  # 3 PM
+RUSH_HOUR_END = 19  # 7 PM
+RUSH_HOUR_MULTIPLIER = 1.5  # 50% slower during rush hour
+
+
+def is_rush_hour(dt: datetime) -> bool:
+    """
+    Check if a datetime falls within rush hour (Mon-Fri 3PM-7PM).
+
+    Rush hour only applies on weekdays (Monday=0 to Friday=4).
+
+    Args:
+        dt: Datetime to check
+
+    Returns:
+        True if rush hour, False otherwise
+    """
+    # Check weekday (Monday=0, Sunday=6)
+    if dt.weekday() > 4:  # Saturday=5, Sunday=6
+        return False
+
+    hour = dt.hour
+    return RUSH_HOUR_START <= hour < RUSH_HOUR_END
+
+
+def adjust_travel_time_for_traffic(base_travel_minutes: int, departure_time: datetime) -> int:
+    """
+    Adjust travel time based on traffic conditions.
+
+    During rush hour (Mon-Fri 3PM-7PM), travel takes 50% longer.
+
+    Args:
+        base_travel_minutes: Normal travel time without traffic
+        departure_time: When the chef will be leaving
+
+    Returns:
+        Adjusted travel time in minutes
+    """
+    if is_rush_hour(departure_time):
+        return int(base_travel_minutes * RUSH_HOUR_MULTIPLIER)
+    return base_travel_minutes
 
 
 class SlotManagerService:
@@ -260,17 +324,27 @@ class SlotManagerService:
         """
         Check if a slot can accommodate travel time from previous booking.
 
+        Travel Chain Logic:
+        1. Previous event ends
+        2. Chef has BUFFER_MINUTES (15 min) to pack up
+        3. Chef travels (travel_time_minutes, adjusted for rush hour)
+        4. Chef must arrive CHEF_SETUP_MINUTES (30 min) before next event
+
+        Timeline:
+        previous_end → +15 min buffer → travel → arrive 30 min before event
+
         Args:
             previous_booking_end: When previous booking ends
-            travel_time_minutes: Expected travel time
+            travel_time_minutes: Expected travel time (already adjusted for rush hour)
             target_slot: Slot to book
             station_id: Optional station
 
         Returns:
             Tuple of (can_accommodate, adjustment if needed)
         """
-        # Add buffer to travel time
-        total_gap_needed = travel_time_minutes + BUFFER_MINUTES
+        # Chef needs: cleanup buffer + travel + setup time before event
+        # Event start must be at least: previous_end + buffer + travel + setup
+        total_gap_needed = BUFFER_MINUTES + travel_time_minutes + CHEF_SETUP_MINUTES
         required_start = previous_booking_end + timedelta(minutes=total_gap_needed)
 
         adjustment = await self.calculate_adjusted_time(target_slot, required_start, station_id)
