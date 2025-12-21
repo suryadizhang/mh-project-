@@ -57,6 +57,7 @@ from services.scheduling import (
     NegotiationService,
     NegotiationReason,
 )
+from services.scheduling.travel_time_service import Coordinates
 
 router = APIRouter(prefix="/scheduling", tags=["Scheduling"])
 
@@ -193,39 +194,38 @@ async def calculate_travel_time(
 
     departure = request.departure_time or datetime.now()
 
-    travel_minutes = await travel_service.get_travel_time(
-        origin_lat=float(request.origin_lat),
-        origin_lng=float(request.origin_lng),
-        dest_lat=float(request.destination_lat),
-        dest_lng=float(request.destination_lng),
+    # Create Coordinates objects for the service
+    origin = Coordinates(
+        lat=request.origin_lat,
+        lng=request.origin_lng,
+    )
+    destination = Coordinates(
+        lat=request.destination_lat,
+        lng=request.destination_lng,
+    )
+
+    travel_result = await travel_service.get_travel_time(
+        origin=origin,
+        destination=destination,
         departure_time=departure,
     )
 
-    if travel_minutes is None:
+    if travel_result is None:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Unable to calculate travel time. Please try again.",
         )
-
-    is_rush = TravelTimeService.is_rush_hour(departure)
-    base_time = travel_minutes
-    multiplier = 1.0
-
-    if is_rush:
-        # Reverse calculate base time
-        base_time = int(travel_minutes / 1.5)
-        multiplier = 1.5
 
     return TravelTimeResponse(
         origin_lat=request.origin_lat,
         origin_lng=request.origin_lng,
         destination_lat=request.destination_lat,
         destination_lng=request.destination_lng,
-        travel_time_minutes=travel_minutes,
-        is_rush_hour=is_rush,
-        base_time_minutes=base_time,
-        multiplier_applied=multiplier,
-        from_cache=False,  # TODO: Track cache hits
+        travel_time_minutes=travel_result.traffic_duration_minutes,
+        is_rush_hour=travel_result.is_rush_hour,
+        base_time_minutes=travel_result.base_duration_minutes,
+        multiplier_applied=1.5 if travel_result.is_rush_hour else 1.0,
+        from_cache=travel_result.from_cache,
     )
 
 
