@@ -15,7 +15,10 @@ from uuid import UUID, uuid4
 from sqlalchemy import select, and_, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.booking import Booking
+try:
+    from db.models.core import Booking
+except ImportError:
+    from models.booking import Booking
 
 
 class NegotiationStatus(str, Enum):
