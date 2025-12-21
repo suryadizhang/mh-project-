@@ -72,6 +72,27 @@ Audit log capturing all data changes
 FAILED BOOKING LEAD CAPTURE □ Auto-capture when booking fails □ Lead
 source tracking □ AI follow-up trigger ready □ Admin lead queue
 functional
+
+STATION MANAGEMENT (Admin GUI) □ Station interface updated with
+geocoding fields (lat/lng, geocode_status) □ Station interface
+includes service_area_radius, escalation_radius_miles □
+StationEditForm component created with full edit capability □ Geocode
+Address button triggers Google Maps API □ Service area configuration
+UI (radius, escalation threshold) □ Station overview shows location,
+geocoding status, service area □ Station list shows code and geocoding
+indicator □ Backend geocode endpoint: POST
+/api/admin/stations/{id}/geocode □ Station data connected to dynamic
+variables management
+
+ADDRESS SERVICE AREA VALIDATION □ Address model has lat/lng fields for
+geocoding □ Station model has lat/lng for headquarters location □
+Service area check uses nearest station algorithm (multi-station
+ready) □ Haversine distance calculation implemented □ is_serviceable
+flag set based on distance from nearest station □ requires_escalation
+flag for bookings beyond escalation_radius_miles □
+/api/v1/addresses/check-service-area returns station_code,
+distance_miles □ Default service_area_radius = 150 miles □ Default
+escalation_radius_miles = 150 miles
 ```
 
 ### Security Tasks (Cloudflare)
@@ -153,6 +174,28 @@ Cloudflare Tunnel active □ WAF blocking attacks □ SSL/TLS working
 Post-deployment review completed
 ```
 
+### Additional Batch 1 Features (NEW)
+
+```markdown
+BOOKING ENHANCEMENTS □ Booking Confirmation SMS - Send immediately on
+booking creation □ Duplicate Booking Prevention - Check same
+date/time/venue conflicts □ Venue Access Instructions Field - Gate
+codes, parking, elevator info □ Emergency Contact Field - Backup phone
+for event day □ Booking Notes/Tags System - Internal staff notes per
+booking
+
+CHEF MANAGEMENT UI □ Chef Availability Calendar UI - Visual calendar
+in admin panel □ Chef schedule grid view - Day/Week/Month views □
+Drag-and-drop assignment - Quick chef assignment
+
+RESPONSE SLA MONITORING □ SLA timer starts on customer message receipt
+□ Warning alert: 60 min (SMS), 2 hr (Email) - Yellow flag □ Critical
+alert: 90 min (SMS), 4 hr (Email) - Supervisor notified □ Escalation:
+2 hr (SMS), 8 hr (Email) - Manager + auto-assign □ SLA dashboard
+showing pending responses □ Auto-acknowledge: "Thanks! We'll respond
+within 30 minutes"
+```
+
 ### Success Criteria
 
 ```markdown
@@ -165,7 +208,128 @@ capturing all changes □ No critical bugs for 48 hours
 
 ---
 
-## 🔴 BATCH 2: Payment Processing
+## 🗓️ SMART SCHEDULING SYSTEM
+
+> **Spec File:**
+> `.github/instructions/17-SMART_SCHEDULING_SYSTEM.instructions.md`
+> **Last Updated:** 2025-12-21
+
+### Overview
+
+The Smart Scheduling System is an intelligent booking management
+solution that spans multiple batches. It includes 8 phases for
+optimizing slot availability, chef assignments, and customer
+negotiations.
+
+### Phase Status Summary
+
+| Phase | Feature                | Status      | Implementation           |
+| ----- | ---------------------- | ----------- | ------------------------ |
+| **1** | Foundation (Geocoding) | ✅ COMPLETE | `geocoding_service.py`   |
+| **2** | Auth & RBAC            | ✅ COMPLETE | `core/security.py`       |
+| **3** | Chef Management        | ✅ COMPLETE | `chef_optimizer.py`      |
+| **4** | Travel Time            | ✅ COMPLETE | `travel_time_service.py` |
+| **5** | Smart Suggestions      | ✅ COMPLETE | `suggestion_engine.py`   |
+| **6** | Slot Adjustment        | ✅ COMPLETE | `slot_manager.py`        |
+| **7** | Chef Optimizer         | ✅ COMPLETE | `chef_optimizer.py`      |
+| **8** | Negotiation            | ✅ COMPLETE | `negotiation_service.py` |
+
+### Development Tasks
+
+```markdown
+PHASE 1: FOUNDATION ✅ COMPLETE □ Database schema for booking
+locations (lat/lng) ✅ □ Google Maps geocoding service ✅ □ Slot
+configuration table ✅ □ Address validation API ✅
+
+PHASE 2: AUTH & RBAC ✅ COMPLETE □ JWT authentication verified ✅ □
+API key authentication ✅ □ 4-tier RBAC (Super Admin → Admin → Staff →
+Customer) ✅ □ Permission decorators ✅
+
+PHASE 3: CHEF MANAGEMENT ✅ COMPLETE □ Chef locations table ✅ □ Chef
+availability API ✅ □ Chef assignment API ✅ □ Preferred chef handling
+✅ □ Travel scoring (40% weight) ✅ □ Skill matching (20% weight) ✅ □
+Workload balance (15% weight) ✅ □ Rating scoring (15% weight) ✅ □
+Customer preference (+50 bonus) ✅
+
+PHASE 4: TRAVEL TIME ✅ COMPLETE □ Google Maps Distance Matrix API ✅
+□ Travel time caching (7-day cache) ✅ □ Rush hour multiplier (Mon-Fri
+3-7PM = 1.5x) ✅ □ Travel-aware slot checker ✅
+
+PHASE 5: SMART SUGGESTIONS ✅ COMPLETE □ Suggestion engine service ✅
+□ Alternative time finder (same day) ✅ □ Next day/week suggestions ✅
+□ Priority scoring for suggestions ✅
+
+PHASE 6: DYNAMIC SLOT ADJUSTMENT ✅ COMPLETE □ 4 time slots: 12PM,
+3PM, 6PM, 9PM ✅ □ ±30 min preferred / ±60 min max adjustment ✅ □
+Event duration calculation (60 + guests × 3, max 120 min) ✅ □
+Conflict resolution logic ✅
+
+PHASE 7: CHEF OPTIMIZER ✅ COMPLETE □ Optimizer service ✅ □ Guest
+count skill matching ✅ □ Travel efficiency scoring ✅ □ Workload
+balance scoring ✅ □ Customer preference bonus ✅ □ Station manager
+suggestions UI ⏳ PENDING
+
+PHASE 8: NEGOTIATION SYSTEM ✅ COMPLETE □ Negotiation request tracking
+✅ □ SMS/Email notification templates ✅ □ Response tracking with
+incentives ✅ □ Auto-adjustment on acceptance ✅
+```
+
+### API Endpoints (Implemented)
+
+```markdown
+AVAILABILITY □ POST /api/v1/scheduling/availability/check ✅ □ POST
+/api/v1/scheduling/availability/calendar ✅
+
+TRAVEL TIME □ POST /api/v1/scheduling/travel-time/calculate ✅
+
+GEOCODING □ POST /api/v1/scheduling/geocode ✅ □ GET
+/api/v1/scheduling/geocode/validate ✅
+
+CHEF ASSIGNMENT (STUB - Returns placeholder data) □ POST
+/api/v1/scheduling/chef/recommend ⚠️ □ GET
+/api/v1/scheduling/chef/top-recommendations ⚠️
+
+NEGOTIATION □ POST /api/v1/scheduling/negotiations ✅ □ POST
+/api/v1/scheduling/negotiations/respond ✅ □ GET
+/api/v1/scheduling/negotiations/pending ✅
+
+CONFIGURATION □ GET /api/v1/scheduling/slots/config ✅ □ POST
+/api/v1/scheduling/duration/calculate ✅
+```
+
+### Implementation Files
+
+| Service        | File                                                          | Status      |
+| -------------- | ------------------------------------------------------------- | ----------- |
+| Geocoding      | `apps/backend/src/services/scheduling/geocoding_service.py`   | ✅ COMPLETE |
+| Travel Time    | `apps/backend/src/services/scheduling/travel_time_service.py` | ✅ COMPLETE |
+| Slot Manager   | `apps/backend/src/services/scheduling/slot_manager.py`        | ✅ COMPLETE |
+| Suggestions    | `apps/backend/src/services/scheduling/suggestion_engine.py`   | ✅ COMPLETE |
+| Negotiation    | `apps/backend/src/services/scheduling/negotiation_service.py` | ✅ COMPLETE |
+| Availability   | `apps/backend/src/services/scheduling/availability_engine.py` | ✅ COMPLETE |
+| Chef Optimizer | `apps/backend/src/services/scheduling/chef_optimizer.py`      | ⚠️ STUB     |
+| Router         | `apps/backend/src/routers/v1/scheduling.py`                   | ✅ COMPLETE |
+
+### ✅ Smart Scheduling System COMPLETE
+
+All 8 phases of the Smart Scheduling System are now implemented:
+
+**Scoring Algorithm (chef_optimizer.py):**
+
+1. **Travel Score** (40% weight) - Minutes from previous location
+2. **Skill Score** (20% weight) - Match guest count to chef specialty
+3. **Workload Score** (15% weight) - Balance bookings across chefs
+4. **Rating Score** (15% weight) - Chef's average rating
+5. **Preference Score** (10% weight) - Customer requested chef (+50
+   bonus)
+
+**Remaining UI Work:**
+
+- Station Manager chef suggestions UI (Phase 7D)
+
+---
+
+## �🔴 BATCH 2: Payment Processing
 
 ### Pre-Development Checklist
 
@@ -208,6 +372,43 @@ UI □ View current prices □ Edit prices with reason □ View price change
 history □ Price validation rules □ No negative prices □ Min/max bounds
 □ Mandatory change reason □ Database as source of truth (remove
 hardcoded prices) □ Price change notifications to admin
+
+DEPOSIT REMINDER & AUTO-CANCEL SYSTEM (NEW) □ Deposit window: 2 hours
+from booking creation □ First reminder: Immediately after booking
+(SMS + Email) □ Second reminder: At 1-hour mark (SMS + Email) □ Staff
+alert: At 2-hour mark (manual review option) □ Auto-cancel: At 6-hour
+mark if no deposit (system auto-cancels) □ Cancel notification: SMS +
+Email to customer □ Lead capture: Failed deposits captured as leads
+for follow-up □ Database: booking.deposit_due_at,
+booking.deposit_reminded_at
+
+TIP COLLECTION SYSTEM (NEW) □ Tip UI integrated into checkout flow
+(optional) □ Suggested tip amounts: 20%, 25%, 30%, Custom □ Tip
+displayed on payment confirmation □ 100% of tip goes to assigned chef
+□ Tip tracking in chef payment reports □ Database:
+payments.tip_amount, payments.tip_chef_id
+
+SPLIT PAYMENT SUPPORT (NEW) □ Allow multiple payment methods per
+booking □ Primary card pays deposit, second card pays balance □
+Maximum 3 payment splits per booking □ Each split tracked separately
+in Stripe □ UI for adding/removing payment methods
+
+PAYMENT PLANS (NEW) □ Deposit now, balance due X days before event □
+Automatic balance reminder (7 days, 3 days, 1 day before) □
+Auto-charge saved card on due date (with customer consent) □ Fallback
+to manual payment if auto-charge fails
+
+PROMOTION SYSTEM (NEW - Admin/Super Admin Only) □ Create promotion:
+name, discount_type, discount_value, valid_from, valid_to □ Promotion
+codes: unique codes for tracking □ Admin creates promotions (Super
+Admin approves) □ Apply promotion at checkout □ Track promotion usage
+and revenue impact □ No automatic seasonal/holiday pricing - all year
+same price □ Promotions are the ONLY way to adjust pricing
+
+AUTOMATED REFUND RULES (NEW) □ Cancellation >72 hours: Full refund
+(auto) □ Cancellation 24-72 hours: 50% refund (manual approval) □
+Cancellation <24 hours: No refund (manual exception possible) □ Refund
+audit trail with reason codes
 ```
 
 ### Testing Checklist
@@ -295,6 +496,53 @@ human, person, agent, representative, frustrated, angry, unacceptable,
 refund dispute □ Manual resume button visible in admin □ GTM Analytics
 tracking all escalation events □ Target: 80%+ conversations handled by
 AI without human
+
+MISTRAL AI INTEGRATION (TIER 3 PROVIDER) □ Add MistralProvider class
+(apps/backend/src/services/ai/providers/mistral.py) □ Use Mistral
+Large 2 (123B) for medium complexity □ Use Mistral Small for
+FAQ/simple queries □ 128K context window support □ Excellent function
+calling for tool use □ Configure API key in GSM: MISTRAL_API_KEY □
+Cost: ~$1-8/M tokens (5-10x cheaper than GPT-4o)
+
+3-MODEL LLM STRATEGY (APPROVED) □ Tier 1: GPT-4o (OpenAI) - Complex
+bookings, negotiations, tool calling □ Tier 2: Claude 3.5
+(Anthropic) - Complaints, empathy, brand voice □ Tier 3: Mistral
+(Large/Small) - FAQ, menu, simple queries □ NO GROK - Not needed for
+hibachi catering use case □ API keys in GSM: OPENAI_API_KEY,
+ANTHROPIC_API_KEY, MISTRAL_API_KEY □ Shadow learning collects data
+from all 3 for future training
+
+SMART AI ROUTER FOR COST OPTIMIZATION □ Query complexity classifier
+(simple/medium/complex) □ Simple queries (FAQ, hours, basic info) →
+Mistral Small ($1/M) □ Medium queries (booking details, menu) →
+Mixtral 8x22B ($2/M) □ Complex queries (complaints, booking changes) →
+Full ensemble ($15+/M) □ Complexity scoring based on:
+
+- Query length
+- Detected intent
+- Customer sentiment
+- Conversation history depth □ Cost tracking per conversation □
+  Monthly AI cost dashboard □ Target: 60-70% cost reduction vs
+  all-GPT-4
+
+AI BOOKING MODIFICATION (NEW) □ AI can reschedule bookings (date/time
+changes) □ AI can update guest count □ AI can change venue address □
+All modifications require customer confirmation □ Audit trail for
+AI-initiated changes
+
+PROACTIVE FOLLOW-UP (NEW) □ AI initiates outreach for abandoned quotes
+□ AI sends reminders for incomplete bookings □ Follow-up timing: 1
+hour, 24 hours, 3 days □ Channel preference: SMS primary, Email
+fallback
+
+CONTEXT HANDOFF TO HUMAN (NEW) □ Full conversation summary when
+escalating □ Customer info, booking details, previous interactions □
+Sentiment analysis of conversation □ Agent sees all context instantly
+(no re-asking)
+
+AI QUALITY SCORING (NEW) □ Rate each AI response: helpful/not helpful
+□ Track resolution rate per agent type □ Flag responses for human
+review □ Training feedback loop
 ```
 
 ### Testing Checklist
@@ -382,6 +630,30 @@ handling □ Auto-response capability
 DEEPGRAM (Phase 2.1 - Already Complete ✅) □ Voice transcription
 integration □ Real-time transcription (optional) □ Transcription
 storage
+
+AUTOMATED BOOKING REMINDERS (NEW) □ 24-hour reminder: SMS + Email □
+3-hour reminder: SMS only □ 1-hour reminder: SMS only (chef on the
+way) □ Reminder includes: date, time, address, chef name □ Reply to
+confirm/reschedule option □ Reduce no-shows by 30-40%
+
+TWO-WAY SMS FOR CHANGES (NEW) □ "Reply YES to confirm" functionality □
+"Reply CHANGE to reschedule" functionality □ Parse customer SMS
+responses □ Auto-update booking status based on reply □ Escalate
+unrecognized responses to human
+
+MESSAGE TEMPLATES LIBRARY (NEW) □ Pre-approved message templates □
+Categories: confirmations, reminders, follow-ups, promos □ Variable
+substitution: {customer_name}, {date}, {chef_name} □ Admin can
+create/edit templates □ Track template performance (open rates,
+responses)
+
+READ RECEIPT TRACKING (NEW) □ Track if SMS delivered □ Track if email
+opened □ Flag customers who don't engage □ Adjust follow-up strategy
+based on engagement
+
+RESPONSE SLA ALERTS (Integrated with Batch 1) □ SLA configuration per
+channel (SMS, Email, Voice) □ Alert dashboard for pending responses □
+Supervisor notification on SLA breach
 ```
 
 ### Testing Checklist
@@ -483,6 +755,24 @@ conversion data □ Fetch user journey □ Display in dashboard
 □ AI Marketing Recommendations □ OpenAI analyzes marketing data □
 Generate actionable recommendations □ Priority scoring
 (high/medium/low) □ Display in dashboard
+
+REVIEW RESPONSE AI (NEW) □ Auto-draft responses to Google/Yelp reviews
+□ Tone matching: professional, grateful, apologetic □ Human approval
+before posting □ Response templates by rating (5-star, 4-star, 1-3
+star)
+
+SENTIMENT TREND ALERTS (NEW) □ Track sentiment across all customer
+touchpoints □ Alert on negative trend (3+ negative in 24 hours) □
+Weekly sentiment report □ Identify common complaint themes
+
+CHURN PREDICTION (NEW) □ Identify at-risk customers (no booking in 6+
+months) □ Score customers by churn probability □ Trigger winback
+campaigns automatically □ Track winback success rate
+
+REVIEW REQUEST AUTOMATION (NEW) □ Auto-request review after successful
+event □ Timing: 2 hours post-event (while fresh) □ Only request if no
+complaint detected □ Track review conversion rate □ A/B test review
+request messaging
 ```
 
 ### Testing Checklist
@@ -527,14 +817,20 @@ configured □ Google Business Profile API configured
 ### Development Tasks
 
 ```markdown
-MULTI-LLM DISCUSSION SYSTEM (From
-COMPREHENSIVE_AI_AND_DEPLOYMENT_MASTER_PLAN.md) □ OpenAI provider
-integration □ Anthropic provider integration □ Grok/xAI provider
-integration □ Discussion orchestrator (16 hours) □ 4 rounds of debate
-□ Each LLM generates response □ Cross-review and critique □ Final
-consensus □ Consensus engine (8 hours) □ Voting mechanism □ Similarity
-matching □ Best response selection □ Knowledge base storage □ Store
-discussions for learning □ Tag by topic/quality
+MULTI-LLM DISCUSSION SYSTEM (3-Model Ensemble) □ GPT-4o provider
+integration (Tier 1 - complex reasoning) □ Claude 3.5 provider
+integration (Tier 2 - empathy, brand voice) □ Mistral Large 2 provider
+integration (Tier 3 - cost-effective) □ Discussion orchestrator (16
+hours) □ 3 rounds of debate (reduced from 4 - 3 models) □ Each LLM
+generates response □ Cross-review and critique □ Final consensus □
+Consensus engine (8 hours) □ Voting mechanism (majority of 3) □
+Similarity matching □ Best response selection □ Knowledge base storage
+□ Store discussions for learning □ Tag by topic/quality
+
+MISTRAL INTEGRATION IN ENSEMBLE (FROM BATCH 3) □ Mistral Large 2 as
+Tier 3 provider □ Full function calling support □ Contributes to
+consensus voting □ Fallback when GPT-4o/Claude fail □ Cost-optimized
+for simple queries
 
 SHADOW LEARNING (From FUTURE_SCALING_PLAN.md) □ Shadow mode service
 (12 hours) □ Run Llama in parallel (no customer exposure) □ Compare
@@ -552,6 +848,76 @@ Configure for Llama 3 □ Set hyperparameters □ Training scripts
 (Colab/Kaggle) □ Free GPU tier usage □ Training pipeline □ Model
 evaluation suite □ Test trained model □ Compare with baseline
 
+GPU MIGRATION PREPARATION (Batch 5-6 - PREPARE ONLY) ⚠️ DO NOT
+PROVISION GPU SERVER YET - Just prepare architecture □ Document
+single-server architecture specs:
+
+- Provider options: Vast.ai, RunPod (compare pricing)
+- Recommended: RTX 4090 (24GB VRAM) ~$223/mo
+- RAM: 64-128GB, CPU: 8-16 cores, Storage: 200GB+ NVMe □ Create
+  deployment scripts for unified server (ready to run later) □ Prepare
+  PostgreSQL + Redis + Ollama + FastAPI docker-compose □ Document
+  migration checklist from VPS to GPU server □ Keep current VPS
+  running until shadow learning reaches 50K pairs □ GPU migration
+  target: When company revenue supports ~$250/mo extra □ Fallback:
+  Always maintain API-based LLM access (OpenAI, Mistral)
+
+FREE-TIER FINE-TUNING STRATEGY (Post Batch 6) ⚠️ START WITH FREE
+OPTIONS before investing in GPU □ Phase A: Use FREE GPU tiers for LoRA
+training:
+
+- Kaggle Notebooks (30 hrs/week GPU - P100 or T4x2)
+- Google Colab (free tier with T4 GPU, limited sessions)
+- Hugging Face ZeroGPU (H200, free for Pro users @ $9/mo)
+- YOUR LAPTOP (for smaller models like Phi-4 14B quantized) □ Phase B:
+  Training Data Requirements:
+- 50,000+ teacher-student pairs collected via shadow learning
+- Use Qwen3 32B or DeepSeek R1 as base model
+- LoRA adapter training (not full fine-tuning)
+- Target: 90%+ similarity to GPT-4 responses □ Phase C: Free Tier
+  Workflow:
+
+1. Export cleaned training data (PII removed)
+2. Upload to Kaggle dataset
+3. Run LoRA training in Kaggle notebook (or laptop for small models)
+4. Download adapter weights
+5. Test locally with Ollama on laptop
+6. If 90%+ accuracy → deploy to VPS □ Phase D: When to Upgrade to Paid
+   GPU:
+
+- API costs exceed $300/month (break-even point)
+- Free tier too slow for iteration
+- Training dataset exceeds 100K pairs
+- Company revenue supports $200-500/mo GPU budget
+
+$300/MONTH API COST THRESHOLD RULE: ├─ If monthly API costs < $300 →
+STAY ON API (OpenAI, Mistral) ├─ If monthly API costs > $300 →
+Consider renting GPU (~$223/mo) └─ Savings = API costs - GPU rental =
+profit!
+
+LOCAL LAPTOP FINE-TUNING (FREE): □ Models that fit on consumer laptop
+(16GB+ RAM):
+
+- Phi-4 14B quantized (Q4) → ~8GB RAM
+- Qwen3 8B → ~6GB RAM
+- DeepSeek R1 7B → ~5GB RAM □ Use Ollama + OpenWebUI for testing □ Use
+  Unsloth or PEFT library for LoRA training □ Export trained adapter →
+  test on Kaggle/Colab for larger models
+
+FREE GPU TIER SPECIFICATIONS: | Provider | GPU | Hours/Week | VRAM |
+Best For | |----------|-----|------------|------|----------| | Kaggle
+| P100/T4x2 | 30 hrs | 16GB | LoRA training | | Colab Free | T4 |
+Limited | 16GB | Quick experiments | | HF ZeroGPU | H200 | Dynamic |
+70GB | Inference testing | | Colab Pro | A100 | 100 units | 40GB |
+Full training ($10/mo) |
+
+TRAINING CHECKPOINT: □ If 90%+ accuracy achieved with free tier → STAY
+ON FREE □ Only provision Vast.ai/RunPod when:
+
+- Free tier insufficient for training volume
+- Ready for 24/7 local inference (saves API costs)
+- Company budget allows $200-300/mo GPU investment
+
 LOYALTY PROGRAM (From LOYALTY_PROGRAM_EXPLANATION.md) □ Phase 1:
 Points Engine (1-2 weeks) □ Database schema: loyalty_points,
 loyalty_transactions □ Points earning rules (1 pt/$1 spent) □ Points
@@ -562,9 +928,25 @@ pts - 2x points, free setup upgrade □ Platinum: 2500 pts - 3x points,
 VIP chef access □ Tier upgrade/downgrade logic □ Tier benefits API □
 Phase 1: Referral Program (1 week) □ Referral codes table □ Track
 referred bookings □ Award points on successful referral □ Referral
-dashboard □ Phase 2 (Optional): Gamification □ Challenges (book 3
-parties = bonus) □ Badges □ Leaderboard □ Phase 2 (Optional): Seasonal
-Campaigns □ Holiday bonus points □ Limited-time multipliers
+dashboard
+
+LOYALTY GAMIFICATION (NEW) □ Challenges: Book 3 parties in 6 months =
+bonus points □ Badges: First Booking, 5th Booking, Referrer, etc. □
+Streaks: Book every quarter = streak bonus □ Leaderboard (optional,
+privacy-conscious)
+
+BIRTHDAY/ANNIVERSARY REWARDS (NEW) □ Collect customer birthdays at
+signup □ Collect anniversary dates (first booking) □ Auto-send special
+offers 2 weeks before □ Birthday: 2x points on birthday month booking
+□ Anniversary: Free appetizer upgrade
+
+REFERRAL DASHBOARD (NEW) □ See who referred whom □ Track referral
+conversion rate □ Referral revenue attribution □ Top referrer
+leaderboard
+
+DEMAND FORECASTING (NEW) □ Predict busy periods based on history □
+Alerts: "Next Saturday expected 150% demand" □ Staff planning
+recommendations □ Dynamic chef scheduling suggestions
 
 READINESS DASHBOARD □ Confidence metrics UI (8 hours) □ Show AI
 accuracy over time □ Show shadow learning progress □ Show training

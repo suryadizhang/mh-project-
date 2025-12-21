@@ -1,20 +1,21 @@
 """
-Pydantic Schemas for Smart Scheduling System
+Smart Scheduling System Schemas
 
-Request/Response models for:
+Pydantic models for:
 - Availability checking
-- Alternative suggestions
+- Travel time calculation
 - Chef assignment
+- Address geocoding
 - Booking negotiations
 """
 
-from datetime import date, datetime, time
+from datetime import date, time
 from decimal import Decimal
 from enum import Enum
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, field_validator
 
 
 # ============================================================================
@@ -23,305 +24,314 @@ from pydantic import BaseModel, Field, ConfigDict
 
 
 class NegotiationStatusEnum(str, Enum):
-    """Status of a negotiation request"""
+    """Status of a booking negotiation request."""
 
-    pending = "pending"
-    accepted = "accepted"
-    declined = "declined"
-    expired = "expired"
-    cancelled = "cancelled"
+    PENDING = "pending"
+    SENT = "sent"
+    ACCEPTED = "accepted"
+    DECLINED = "declined"
+    EXPIRED = "expired"
 
 
 class NegotiationReasonEnum(str, Enum):
-    """Reason for requesting time shift"""
+    """Reason for requesting a time shift."""
 
-    travel_optimization = "travel_optimization"
-    chef_availability = "chef_availability"
-    new_booking_conflict = "new_booking_conflict"
-    weather_delay = "weather_delay"
-    equipment_issue = "equipment_issue"
-    customer_request = "customer_request"
+    TRAVEL_CONFLICT = "travel_conflict"
+    CHEF_AVAILABILITY = "chef_availability"
+    DOUBLE_BOOKING = "double_booking"
+    CUSTOMER_PREFERENCE = "customer_preference"
 
 
 # ============================================================================
-# Address & Geocoding
+# Address Schemas
 # ============================================================================
 
 
 class AddressInput(BaseModel):
-    """Address input for geocoding"""
+    """Input for geocoding an address."""
 
-    street_address: str = Field(..., min_length=5, max_length=200)
-    city: str = Field(..., min_length=2, max_length=100)
-    state: str = Field(..., min_length=2, max_length=50)
-    zip_code: str = Field(..., pattern=r"^\d{5}(-\d{4})?$")
+    full_address: str = Field(..., min_length=10, max_length=500)
 
-    @property
-    def full_address(self) -> str:
-        return f"{self.street_address}, {self.city}, {self.state} {self.zip_code}"
+    @field_validator("full_address")
+    @classmethod
+    def validate_address(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("Address cannot be empty")
+        return v.strip()
+
+
+class AddressCreateRequest(BaseModel):
+    """Request to create/cache an address with geocoding."""
+
+    raw_address: str = Field(..., min_length=10, max_length=500, description="Full street address")
+    customer_id: Optional[UUID] = Field(None, description="Link to customer for saved addresses")
+    label: Optional[str] = Field(None, max_length=50, description="Label like 'Home', 'Work'")
+    is_default: bool = Field(False, description="Set as customer's default address")
+
+
+class AddressResponse(BaseModel):
+    """Response after creating/finding an address."""
+
+    id: UUID
+    raw_address: str
+    formatted_address: Optional[str]
+    lat: Optional[Decimal]
+    lng: Optional[Decimal]
+    city: Optional[str]
+    state: Optional[str]
+    zip_code: Optional[str]
+    geocode_status: str  # pending, success, failed, partial
+    is_cached: bool = Field(False, description="True if address was already in cache")
+    is_serviceable: bool = Field(True, description="True if within service area")
+
+    class Config:
+        from_attributes = True
 
 
 class GeocodedAddressResponse(BaseModel):
-    """Response from geocoding an address"""
-
-    model_config = ConfigDict(from_attributes=True)
+    """Response from geocoding endpoint."""
 
     original_address: str
-    normalized_address: str
-    lat: Decimal
-    lng: Decimal
-    city: Optional[str] = None
-    state: Optional[str] = None
-    zip_code: Optional[str] = None
+    normalized_address: Optional[str]
+    lat: Optional[Decimal]
+    lng: Optional[Decimal]
+    city: Optional[str]
+    state: Optional[str]
+    zip_code: Optional[str]
     is_valid: bool
-    confidence: float
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0)
+
+
+class CustomerAddressListResponse(BaseModel):
+    """List of customer's saved addresses."""
+
+    addresses: list[AddressResponse]
+    count: int
 
 
 # ============================================================================
-# Availability & Suggestions
+# Availability Schemas
 # ============================================================================
 
 
 class AvailabilityCheckRequest(BaseModel):
-    """Request to check slot availability"""
+    """Request to check slot availability."""
 
     event_date: date
     event_time: time
-    guest_count: int = Field(..., ge=1, le=200)
-    venue_address: Optional[str] = None
+    guest_count: int = Field(..., ge=1, le=100)
     venue_lat: Optional[Decimal] = None
     venue_lng: Optional[Decimal] = None
     preferred_chef_id: Optional[UUID] = None
 
 
 class SlotAvailabilityResponse(BaseModel):
-    """Availability status for a single slot"""
-
-    model_config = ConfigDict(from_attributes=True)
+    """Single time slot availability info."""
 
     slot_time: time
-    slot_date: date
+    slot_label: str = ""  # "12PM", "3PM", "6PM", "9PM"
     is_available: bool
+    available_chefs: int = 0
     conflict_reason: Optional[str] = None
-    adjusted_time: Optional[time] = None
-    travel_time_from_prev: Optional[int] = None
-    travel_time_to_next: Optional[int] = None
-    score: float = 0.0
+    can_adjust: bool = False  # If slot can be shifted ±30/60 min
+    adjustment_options: list[int] = []  # [-60, -30, 30, 60] minutes
 
 
 class SuggestionResponse(BaseModel):
-    """Response with availability and alternative suggestions"""
+    """Response with availability and suggestions."""
 
     requested_date: date
     requested_time: time
     is_requested_available: bool
     conflict_reason: Optional[str] = None
     suggestions: list[SlotAvailabilityResponse] = []
-    message: str
-
-
-class CalendarAvailabilityRequest(BaseModel):
-    """Request for calendar view of availability"""
-
-    start_date: date
-    end_date: date
-    guest_count: int = Field(..., ge=1, le=200)
-    venue_lat: Optional[Decimal] = None
-    venue_lng: Optional[Decimal] = None
-    preferred_chef_id: Optional[UUID] = None
 
 
 class CalendarDayAvailability(BaseModel):
-    """Availability for a single day"""
+    """Availability for a single day."""
 
     date: date
-    slots: list[SlotAvailabilityResponse]
+    has_availability: bool
+    available_slots: list[str] = []  # ["12PM", "3PM"]
+    fully_booked: bool = False
 
 
-class CalendarAvailabilityResponse(BaseModel):
-    """Calendar view of availability across date range"""
+class CalendarAvailabilityRequest(BaseModel):
+    """Request for calendar view availability."""
 
     start_date: date
     end_date: date
+    venue_lat: Optional[Decimal] = None
+    venue_lng: Optional[Decimal] = None
+
+
+class CalendarAvailabilityResponse(BaseModel):
+    """Calendar view of availability."""
+
     days: list[CalendarDayAvailability]
+    start_date: date
+    end_date: date
 
 
 # ============================================================================
-# Travel Time
+# Travel Time Schemas
 # ============================================================================
 
 
 class TravelTimeRequest(BaseModel):
-    """Request to calculate travel time between two points"""
-
-    origin_lat: Decimal = Field(..., ge=-90, le=90)
-    origin_lng: Decimal = Field(..., ge=-180, le=180)
-    destination_lat: Decimal = Field(..., ge=-90, le=90)
-    destination_lng: Decimal = Field(..., ge=-180, le=180)
-    departure_time: Optional[datetime] = None
-
-
-class TravelTimeResponse(BaseModel):
-    """Response with travel time calculation"""
+    """Request for travel time calculation."""
 
     origin_lat: Decimal
     origin_lng: Decimal
-    destination_lat: Decimal
-    destination_lng: Decimal
-    travel_time_minutes: int
-    is_rush_hour: bool
-    base_time_minutes: int
-    multiplier_applied: float
-    distance_km: Optional[float] = None
-    from_cache: bool = False
+    dest_lat: Decimal
+    dest_lng: Decimal
+    departure_time: Optional[time] = None  # For rush hour calculation
+
+
+class TravelTimeResponse(BaseModel):
+    """Response with travel time info."""
+
+    duration_minutes: int
+    duration_with_traffic: int
+    distance_km: Decimal
+    is_rush_hour: bool = False
+    traffic_multiplier: float = 1.0
 
 
 # ============================================================================
-# Chef Assignment
+# Chef Assignment Schemas
 # ============================================================================
-
-
-class ChefScoreResponse(BaseModel):
-    """Scoring result for a chef-booking match"""
-
-    model_config = ConfigDict(from_attributes=True)
-
-    chef_id: UUID
-    chef_name: str
-    total_score: float
-    travel_score: float
-    skill_score: float
-    workload_score: float
-    history_score: float
-    travel_time_minutes: Optional[int] = None
-    is_preferred: bool = False
-    notes: list[str] = []
 
 
 class ChefAssignmentRequest(BaseModel):
-    """Request for chef assignment recommendation"""
+    """Request for chef recommendation."""
 
-    booking_id: UUID
+    booking_id: Optional[UUID] = None
     event_date: date
     event_time: time
+    guest_count: int
     venue_lat: Decimal
     venue_lng: Decimal
-    guest_count: int = Field(..., ge=1, le=200)
     customer_id: Optional[UUID] = None
     preferred_chef_id: Optional[UUID] = None
     is_preference_required: bool = False
+    skill_requirements: list[str] = []
+
+
+class ChefScoreResponse(BaseModel):
+    """Scored chef for assignment with detailed breakdown."""
+
+    chef_id: UUID
+    chef_name: str
+    total_score: float = Field(ge=0.0, le=150.0)  # Max 100 + 50 bonus
+    travel_score: float = Field(ge=0.0, le=100.0)
+    skill_score: float = Field(ge=0.0, le=100.0)
+    workload_score: float = Field(ge=0.0, le=100.0)
+    history_score: float = Field(ge=0.0, le=100.0, default=0.0)  # For future customer history
+    travel_time_minutes: int
+    is_preferred: bool = False
+    notes: str = ""
 
 
 class ChefAssignmentResponse(BaseModel):
-    """Response with chef assignment recommendation"""
+    """Response with recommended chef and alternatives."""
 
-    booking_id: UUID
-    recommended_chef_id: UUID
-    recommended_chef_name: str
-    confidence_score: float
+    booking_id: Optional[UUID] = None
+    recommended_chef_id: Optional[UUID] = None
+    recommended_chef_name: Optional[str] = None
+    confidence_score: float = Field(ge=0.0, le=100.0)
     reason: str
-    is_optimal: bool
+    is_optimal: bool = True
     all_scores: list[ChefScoreResponse] = []
 
 
 # ============================================================================
-# Negotiations
+# Negotiation Schemas
 # ============================================================================
 
 
 class CreateNegotiationRequest(BaseModel):
-    """Request to create a negotiation for time shift"""
+    """Request to create a negotiation for time shift."""
 
-    booking_id: UUID
+    existing_booking_id: UUID
     proposed_time: time
+    shift_minutes: int = Field(..., description="Positive = later, negative = earlier")
     reason: NegotiationReasonEnum
-    reason_message: Optional[str] = None
-    incentive_percent: float = Field(default=0.0, ge=0, le=10)
+    new_booking_request_id: Optional[UUID] = None
 
 
 class NegotiationResponse(BaseModel):
-    """Response after creating or updating negotiation"""
+    """Response after creating negotiation."""
 
     negotiation_id: UUID
     status: NegotiationStatusEnum
-    message: str
-    booking_updated: bool = False
-    new_time: Optional[time] = None
+    notification_sent: bool = False
+    incentive_offered: Optional[str] = None  # "free_noodles", "free_appetizer"
 
 
 class RespondToNegotiationRequest(BaseModel):
-    """Customer response to a negotiation request"""
+    """Customer response to negotiation."""
 
     negotiation_id: UUID
     accepted: bool
-    customer_note: Optional[str] = Field(None, max_length=500)
+    customer_notes: Optional[str] = None
+    selected_incentive: Optional[str] = None  # If choosing between options
 
 
 class NegotiationDetailResponse(BaseModel):
-    """Full details of a negotiation request"""
-
-    model_config = ConfigDict(from_attributes=True)
+    """Detailed negotiation info."""
 
     id: UUID
-    booking_id: UUID
-    customer_email: str
-    customer_name: str
-    original_date: date
+    existing_booking_id: UUID
     original_time: time
     proposed_time: time
     shift_minutes: int
-    reason: NegotiationReasonEnum
-    reason_message: str
-    incentive_percent: float
     status: NegotiationStatusEnum
-    created_at: datetime
-    expires_at: datetime
-    responded_at: Optional[datetime] = None
-    response_note: Optional[str] = None
+    incentive_type: Optional[str]
+    incentive_description: Optional[str]
+    reason: str
+    expires_at: Optional[str]
 
 
 class PendingNegotiationsResponse(BaseModel):
-    """List of pending negotiations"""
+    """List of pending negotiations."""
 
-    count: int
     negotiations: list[NegotiationDetailResponse]
+    count: int
 
 
 # ============================================================================
-# Slot Configuration
+# Config Schemas
 # ============================================================================
 
 
 class SlotConfigResponse(BaseModel):
-    """Configuration for a time slot"""
+    """Time slot configuration."""
 
+    slot_name: str  # "12PM"
     slot_time: time
-    slot_name: str
-    adjust_earlier_minutes: int
-    adjust_later_minutes: int
+    min_adjust_minutes: int = -60
+    max_adjust_minutes: int = 60
+    min_event_duration: int = 90
+    max_event_duration: int = 120
     is_active: bool = True
 
 
 class AllSlotsConfigResponse(BaseModel):
-    """All available slot configurations"""
+    """All slot configurations."""
 
     slots: list[SlotConfigResponse]
 
 
-# ============================================================================
-# Event Duration
-# ============================================================================
-
-
 class EventDurationRequest(BaseModel):
-    """Request to calculate event duration"""
+    """Request to calculate event duration."""
 
-    guest_count: int = Field(..., ge=1, le=200)
+    guest_count: int = Field(..., ge=1, le=100)
 
 
 class EventDurationResponse(BaseModel):
-    """Calculated event duration"""
+    """Response with calculated duration."""
 
     guest_count: int
     duration_minutes: int
-    formula: str = "min(60 + (guests × 3), 120)"
+    duration_formula: str = ""  # "1-10 guests = 90 min"

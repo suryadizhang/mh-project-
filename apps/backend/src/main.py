@@ -847,6 +847,15 @@ try:
 except ImportError as e:
     logger.warning(f"Smart Scheduling endpoints not available: {e}")
 
+# Include Address Management endpoints (Enterprise geocoding with caching)
+try:
+    from routers.v1.addresses import router as addresses_router
+
+    app.include_router(addresses_router, prefix="/api/v1", tags=["addresses"])
+    logger.info("✅ Address Management endpoints included (geocoding, saved addresses)")
+except ImportError as e:
+    logger.warning(f"Address Management endpoints not available: {e}")
+
 # Include Knowledge Sync endpoints (Admin/Superadmin)
 try:
     from routers.v1.knowledge_sync import router as knowledge_sync_router

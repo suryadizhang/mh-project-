@@ -707,7 +707,128 @@ sudo systemctl restart myhibachi-backend@8001
 
 ---
 
-## 📝 Quick Commands Cheat Sheet
+## � Future: GPU Server Migration (PREPARATION ONLY)
+
+**Status:** ⏳ PREPARING (NOT provisioned yet) **Target:** When shadow
+learning reaches 50K+ pairs AND company revenue supports
+
+### Why GPU Server?
+
+Current VPS (IONOS VPS Linux M):
+
+- 2 vCPU, 4GB RAM, 120GB NVMe
+- ❌ NO GPU - Cannot run local LLMs efficiently
+- ✅ Fine for API + Database workloads
+
+GPU Server Benefits:
+
+- Run DeepSeek R1 32B, Qwen3 32B locally (no API costs!)
+- Fine-tune custom models with collected data
+- Single server for everything (API, DB, AI)
+- Save $500+/month on API calls after 50K+ conversations
+
+### GPU Cloud Provider Comparison
+
+**Last Updated:** 2024-12-21
+
+| Provider         | RTX 3090 | RTX 4090 | A100 80GB | Notes                  |
+| ---------------- | -------- | -------- | --------- | ---------------------- |
+| **Vast.ai**      | $0.13/hr | $0.31/hr | $0.65/hr  | Cheapest, peer-to-peer |
+| **RunPod**       | $0.22/hr | $0.34/hr | $1.19/hr  | More reliable          |
+| **Paperspace**   | N/A      | N/A      | ~$3.00/hr | Enterprise features    |
+| **Google Cloud** | N/A      | N/A      | ~$3.50/hr | Per-second billing     |
+
+**Recommended for My Hibachi:**
+
+- **Vast.ai RTX 4090** - $0.31/hr × 24hr × 30 days = **~$223/month**
+- Can run: DeepSeek R1 32B, Qwen3 32B, PostgreSQL, Redis, FastAPI
+- 24GB VRAM sufficient for inference + light training
+
+### Unified GPU Server Architecture (FUTURE)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│              FUTURE: UNIFIED GPU SERVER                          │
+│              (When ready to migrate)                             │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌─────────────────────────────────────────────┐               │
+│  │        Vast.ai RTX 4090 GPU Server           │               │
+│  │  ┌─────────────────────────────────────┐    │               │
+│  │  │           LOCAL AI MODELS            │    │               │
+│  │  │  • DeepSeek R1 32B (reasoning)       │    │               │
+│  │  │  • Qwen3 32B (function calling)      │    │               │
+│  │  │  • Phi-4 14B (fast FAQ)              │    │               │
+│  │  │  • Custom LoRA adapters              │    │               │
+│  │  └─────────────────────────────────────┘    │               │
+│  │                                              │               │
+│  │  ┌───────────┬───────────┬───────────┐     │               │
+│  │  │  FastAPI  │PostgreSQL │   Redis   │     │               │
+│  │  │  Port 8000│  Port 5432│ Port 6379 │     │               │
+│  │  └───────────┴───────────┴───────────┘     │               │
+│  │                                              │               │
+│  │  Specs: RTX 4090 24GB | 64GB RAM | 16 cores │               │
+│  └─────────────────────────────────────────────┘               │
+│           │                                                     │
+│           │  Cloudflare Tunnel (keep existing)                  │
+│           ▼                                                     │
+│  ┌─────────────────────────────────────────────┐               │
+│  │    Same Cloudflare setup (no change)         │               │
+│  └─────────────────────────────────────────────┘               │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Migration Checklist (FOR FUTURE - DO NOT DO YET)
+
+```markdown
+PRE-MIGRATION REQUIREMENTS □ Shadow learning has collected 50,000+
+training pairs □ Local model achieves 90%+ similarity to GPT-4 □
+Monthly API costs exceed $300 (break-even threshold) OR company
+revenue supports ~$250/month extra server cost □ Current VPS contract
+can be cancelled or downgraded
+
+$300/MONTH API COST THRESHOLD RULE: ├─ If API costs < $300/mo → STAY
+ON API (OpenAI, Mistral, Claude) ├─ If API costs > $300/mo → Consider
+GPU server (~$223/mo) └─ Break-even: $300 API - $223 GPU = $77/mo
+savings + unlimited usage
+
+MIGRATION STEPS (WHEN READY) □ Step 1: Provision GPU server (Vast.ai
+or RunPod) □ Step 2: Install Docker + docker-compose □ Step 3: Set up
+PostgreSQL + Redis + Ollama + FastAPI □ Step 4: Migrate database from
+VPS to GPU server □ Step 5: Update Cloudflare Tunnel to point to new
+server □ Step 6: Pull AI models: ollama pull deepseek-r1:32b □ Step 7:
+Test all endpoints □ Step 8: Update DNS records □ Step 9: Monitor for
+48 hours □ Step 10: Terminate old VPS
+
+KEEP CURRENT VPS UNTIL □ Shadow learning data collection complete (50K
+pairs) □ Free-tier training proves model quality (90%+ accuracy) □ GPU
+server stable for 1+ week □ All endpoints tested in production
+```
+
+### Free-Tier Training Platforms
+
+**Use these FIRST before investing in GPU server:**
+
+| Platform         | GPU       | Free Hours       | VRAM | Use For                |
+| ---------------- | --------- | ---------------- | ---- | ---------------------- |
+| **Kaggle**       | P100/T4x2 | 30 hrs/week      | 16GB | LoRA training          |
+| **Google Colab** | T4        | Limited sessions | 16GB | Experiments            |
+| **HF ZeroGPU**   | H200      | Dynamic          | 70GB | Inference testing      |
+| **Colab Pro**    | A100      | 100 units        | 40GB | Full training ($10/mo) |
+
+**Training Workflow (Free Tier):**
+
+1. Export cleaned training data (50K+ pairs)
+2. Upload to Kaggle dataset
+3. Run LoRA training in Kaggle notebook
+4. Download LoRA adapter weights
+5. Test with Ollama locally
+6. If 90%+ accuracy → deploy to production
+
+---
+
+## �📝 Quick Commands Cheat Sheet
 
 ```bash
 # SSH to production

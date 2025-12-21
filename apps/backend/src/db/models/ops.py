@@ -884,6 +884,90 @@ class PricingRule(Base):
 
 
 # ============================================================================
+# ENUMS - Negotiation Incentives (Smart Scheduling Phase 1)
+# ============================================================================
+
+
+class FoodIncentiveType(str, Enum):
+    """
+    Food-based incentives for time negotiations.
+
+    Strategy: Start with cheapest first (noodles ~$3), then appetizer (~$5).
+    NO protein upgrades for negotiation incentives.
+    """
+
+    NONE = "none"  # 0-15 min shift - no incentive needed
+    FREE_NOODLES = "free_noodles"  # 16-30 min shift - yakisoba noodles for party
+    FREE_APPETIZER = "free_appetizer"  # 31+ min shift - edamame or gyoza (customer choice)
+
+
+# ============================================================================
+# MODELS - Negotiation Incentives (Smart Scheduling Phase 1)
+# ============================================================================
+
+
+class NegotiationIncentive(Base):
+    """
+    Configurable food incentive tiers for time negotiation.
+
+    Business Logic:
+    - When asking customer to shift their booking time
+    - Offer food incentives proportional to inconvenience
+    - NO cash discounts, only food items
+
+    Shift Options & Incentives:
+    - ±30 min: Free yakisoba noodles for entire party
+    - ±60 min: Free appetizer (edamame or gyoza, customer choice)
+
+    ⚠️ NOTE: actual_cost_usd is per-party estimate for P&L tracking.
+    """
+
+    __tablename__ = "negotiation_incentives"
+    __table_args__ = {"schema": "ops"}
+
+    # Primary Key
+    id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    )
+
+    # Time shift range (in minutes)
+    min_shift_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
+    max_shift_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    # Incentive type (enum)
+    incentive_type: Mapped[FoodIncentiveType] = mapped_column(
+        SQLEnum(
+            FoodIncentiveType,
+            name="food_incentive_type",
+            schema="public",
+            create_type=False,  # Already created in database
+            values_callable=lambda x: [e.value for e in x],
+        ),
+        nullable=False,
+    )
+
+    # Customer-facing description
+    incentive_description: Mapped[str] = mapped_column(Text, nullable=False)
+
+    # Cost tracking for P&L
+    actual_cost_usd: Mapped[Decimal] = mapped_column(
+        Numeric(8, 2), nullable=False, default=0
+    )  # What it costs us per party
+    perceived_value_usd: Mapped[Decimal] = mapped_column(
+        Numeric(8, 2), nullable=False, default=0
+    )  # What customer thinks it's worth
+
+    # Status and priority
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    priority: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+# ============================================================================
 # EXPORTS
 # ============================================================================
 
@@ -914,6 +998,9 @@ __all__ = [
     "TravelZone",
     "MenuItem",
     "PricingRule",
+    # Smart Scheduling Phase 1 (Negotiation Incentives)
+    "NegotiationIncentive",
+    "FoodIncentiveType",
 ]
 
 # Schema metadata for Phase 1B validation

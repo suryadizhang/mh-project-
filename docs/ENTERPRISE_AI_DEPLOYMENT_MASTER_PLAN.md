@@ -29,8 +29,8 @@ Implementation
 MyHibachi is building an enterprise-grade AI-powered booking and
 customer management platform with:
 
-- **Multi-LLM Discussion System**: 3 AI models (OpenAI, Anthropic,
-  Grok) debate to produce optimal responses
+- **Multi-LLM Discussion System**: 3 AI models (OpenAI GPT-4o,
+  Anthropic Claude, Mistral) for optimal responses
 - **Shadow Learning**: Local LLM trained to eventually take over from
   OpenAI
 - **15 AI Agents**: Specialized agents including hospitality
@@ -69,9 +69,9 @@ HOSTING & INFRASTRUCTURE
 └── Google Secret Manager (Secrets)
 
 AI & MACHINE LEARNING
-├── OpenAI GPT-4 (Production AI)
-├── Anthropic Claude (Multi-LLM Discussion)
-├── Grok/xAI (Multi-LLM Discussion)
+├── OpenAI GPT-4o (Tier 1 - Complex Reasoning)
+├── Anthropic Claude 3.5 (Tier 2 - Empathy, Brand Voice)
+├── Mistral Large/Small (Tier 3 - Cost-Effective)
 ├── Ollama/Llama-3 (Future Local Model)
 └── Google Vertex AI (Future ML Services)
 
@@ -139,7 +139,7 @@ AI CLASSROOM DISCUSSION MODEL
 ├─────────────────────────────────────────────────────────────────┤
 │  Similar Query Found (>0.85)?                                   │
 │  ├── YES → Use cached best response (FAST + FREE)               │
-│  └── NO → Run Multi-LLM Discussion (4 rounds)                   │
+│  └── NO → Run Multi-LLM Discussion (3 rounds)                   │
 └───────────────────────────┬─────────────────────────────────────┘
                             │
                             ▼ (New Pattern)
@@ -149,20 +149,16 @@ AI CLASSROOM DISCUSSION MODEL
 │                                                                 │
 │  ROUND 1: INITIAL PROPOSALS                                     │
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐               │
-│  │ 🤖 OPENAI   │ │ 🧠 ANTHROPIC│ │ ⚡ GROK     │               │
-│  │ (GPT-4)     │ │ (Claude)    │ │ (xAI)       │               │
-│  │ Answer A    │ │ Answer B    │ │ Answer C    │               │
+│  │ 🤖 OPENAI   │ │ 🧠 ANTHROPIC│ │ ⚡ MISTRAL  │               │
+│  │ (GPT-4o)    │ │ (Claude)    │ │ (Large 2) │               │
+│  │ Answer A    │ │ Answer B    │ │ Answer C  │               │
 │  └─────────────┘ └─────────────┘ └─────────────┘               │
 │                                                                 │
 │  ROUND 2: CRITIQUE & DEBATE                                     │
 │  Each AI reviews and critiques the other two answers            │
 │  Identifies gaps, errors, improvements                          │
 │                                                                 │
-│  ROUND 3: CONSENSUS BUILDING                                    │
-│  System identifies agreement points and resolves disputes       │
-│  Uses factual verification against knowledge base               │
-│                                                                 │
-│  ROUND 4: FINAL SYNTHESIS                                       │
+│  ROUND 3: FINAL SYNTHESIS                                       │
 │  Best parts combined into optimal response                      │
 │  Confidence score calculated                                    │
 │                                                                 │

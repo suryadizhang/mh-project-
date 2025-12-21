@@ -38,20 +38,55 @@ export interface StationLoginResponse {
 }
 
 export interface Station {
-  id: number;
+  id: number | string; // UUID as string from backend
+  code: string; // Station code e.g. "CA-FREMONT-001"
   name: string;
+  display_name: string;
   description?: string;
-  location?: string;
+
+  // Address fields
+  address?: string;
+  city?: string;
+  state?: string;
+  postal_code?: string;
+  country?: string;
+  location?: string; // Legacy - use address fields instead
+
+  // Geocoding (from Google Maps API)
+  lat?: number; // Latitude (DECIMAL 10,8)
+  lng?: number; // Longitude (DECIMAL 11,8)
+  geocode_status?: 'pending' | 'success' | 'failed';
+  geocoded_at?: string;
+
+  // Service area configuration
+  service_area_radius?: number; // Miles - default 150
+  escalation_radius_miles?: number; // When to require human approval - default 150
+
+  // Contact info
   phone?: string;
   email?: string;
-  manager_name?: string;
+  timezone?: string; // IANA timezone e.g. "America/Los_Angeles"
+
+  // Business settings
+  status?: 'active' | 'inactive' | 'suspended' | 'maintenance';
   settings: Record<string, any>;
+  business_hours?: Record<string, { open: string; close: string }>;
+  max_concurrent_bookings?: number;
+  booking_lead_time_hours?: number;
+  branding_config?: Record<string, any>;
+
+  // Metadata
   is_active: boolean;
   created_at: string;
   updated_at: string;
+
+  // Statistics (optional)
   user_count?: number;
   booking_count?: number;
+  active_booking_count?: number;
+  total_booking_count?: number;
   last_activity?: string;
+  manager_name?: string; // Primary manager/owner name
 }
 
 export interface StationUser {
@@ -66,6 +101,17 @@ export interface StationUser {
   user_email?: string;
   user_name?: string;
   last_login?: string;
+}
+
+export interface GeocodeStationResponse {
+  success: boolean;
+  station_id: string;
+  lat?: number;
+  lng?: number;
+  geocode_status: 'pending' | 'success' | 'failed';
+  geocoded_at?: string;
+  full_address?: string;
+  message: string;
 }
 
 export interface AuditLog {
@@ -119,7 +165,7 @@ export const authService = {
       {
         username: email, // FastAPI uses 'username' field
         password,
-        grant_type: 'password'
+        grant_type: 'password',
       }
     );
   },
@@ -128,21 +174,20 @@ export const authService = {
    * Station-aware login
    */
   async stationLogin(email: string, password: string, stationId?: number) {
-    return api.post<StationLoginResponse>(
-      ENDPOINTS.stationAuth,
-      {
-        email,
-        password,
-        station_id: stationId
-      }
-    );
+    return api.post<StationLoginResponse>(ENDPOINTS.stationAuth, {
+      email,
+      password,
+      station_id: stationId,
+    });
   },
 
   /**
    * Get available stations for user
    */
   async getUserStations(email: string) {
-    return api.get<Station[]>(`/api/station/user-stations?email=${encodeURIComponent(email)}`);
+    return api.get<Station[]>(
+      `/api/station/user-stations?email=${encodeURIComponent(email)}`
+    );
   },
 
   /**
@@ -193,10 +238,12 @@ export const bookingService = {
     if (filters.sort_by) params.append('sort_by', filters.sort_by);
     if (filters.sort_order) params.append('sort_order', filters.sort_order);
     if (filters.status) params.append('status', filters.status);
-    if (filters.payment_status) params.append('payment_status', filters.payment_status);
+    if (filters.payment_status)
+      params.append('payment_status', filters.payment_status);
     if (filters.date_from) params.append('date_from', filters.date_from);
     if (filters.date_to) params.append('date_to', filters.date_to);
-    if (filters.customer_search) params.append('customer_search', filters.customer_search);
+    if (filters.customer_search)
+      params.append('customer_search', filters.customer_search);
 
     const query = params.toString();
     const url = query ? `${ENDPOINTS.bookings}?${query}` : ENDPOINTS.bookings;
@@ -222,13 +269,20 @@ export const bookingService = {
    * Update a booking
    */
   async updateBooking(bookingId: string, updates: Partial<Booking>) {
-    return api.put<ApiResponse<Booking>>(`${ENDPOINTS.bookings}/${bookingId}`, updates);
+    return api.put<ApiResponse<Booking>>(
+      `${ENDPOINTS.bookings}/${bookingId}`,
+      updates
+    );
   },
 
   /**
    * Cancel a booking
    */
-  async cancelBooking(bookingId: string, reason: string, refundAmount: number = 0) {
+  async cancelBooking(
+    bookingId: string,
+    reason: string,
+    refundAmount: number = 0
+  ) {
     return api.delete<ApiResponse<void>>(`${ENDPOINTS.bookings}/${bookingId}`, {
       body: JSON.stringify({
         cancellation_reason: reason,
@@ -275,14 +329,18 @@ export const customerService = {
    * Get customer by ID
    */
   async getCustomer(customerId: string) {
-    return api.get<ApiResponse<Customer>>(`${ENDPOINTS.customers}/${customerId}`);
+    return api.get<ApiResponse<Customer>>(
+      `${ENDPOINTS.customers}/${customerId}`
+    );
   },
 
   /**
    * Get customer bookings
    */
   async getCustomerBookings(customerId: string) {
-    return api.get<ApiResponse<Booking[]>>(`${ENDPOINTS.customers}/${customerId}/bookings`);
+    return api.get<ApiResponse<Booking[]>>(
+      `${ENDPOINTS.customers}/${customerId}/bookings`
+    );
   },
 };
 
@@ -301,7 +359,9 @@ export const dashboardService = {
    * Get availability data
    */
   async getAvailability(date?: string) {
-    const url = date ? `${ENDPOINTS.availability}?date=${date}` : ENDPOINTS.availability;
+    const url = date
+      ? `${ENDPOINTS.availability}?date=${date}`
+      : ENDPOINTS.availability;
     return api.get<ApiResponse<any>>(url);
   },
 };
@@ -406,7 +466,9 @@ export const stationService = {
     if (includeStats) params.append('include_stats', 'true');
 
     const query = params.toString();
-    const url = query ? `${ENDPOINTS.stations}/${stationId}?${query}` : `${ENDPOINTS.stations}/${stationId}`;
+    const url = query
+      ? `${ENDPOINTS.stations}/${stationId}?${query}`
+      : `${ENDPOINTS.stations}/${stationId}`;
 
     return api.get<Station>(url);
   },
@@ -421,19 +483,34 @@ export const stationService = {
   /**
    * Update station
    */
-  async updateStation(stationId: number, updates: Partial<Station>) {
+  async updateStation(stationId: number | string, updates: Partial<Station>) {
     return api.put<Station>(`${ENDPOINTS.stations}/${stationId}`, updates);
+  },
+
+  /**
+   * Geocode station address using Google Maps API
+   */
+  async geocodeStation(stationId: number | string) {
+    return api.post<GeocodeStationResponse>(
+      `${ENDPOINTS.stations}/${stationId}/geocode`,
+      {}
+    );
   },
 
   /**
    * Get station users
    */
-  async getStationUsers(stationId: number, includeUserDetails: boolean = false) {
+  async getStationUsers(
+    stationId: number | string,
+    includeUserDetails: boolean = false
+  ) {
     const params = new URLSearchParams();
     if (includeUserDetails) params.append('include_user_details', 'true');
 
     const query = params.toString();
-    const url = query ? `${ENDPOINTS.stations}/${stationId}/users?${query}` : `${ENDPOINTS.stations}/${stationId}/users`;
+    const url = query
+      ? `${ENDPOINTS.stations}/${stationId}/users?${query}`
+      : `${ENDPOINTS.stations}/${stationId}/users`;
 
     return api.get<StationUser[]>(url);
   },
@@ -441,54 +518,78 @@ export const stationService = {
   /**
    * Assign user to station
    */
-  async assignUserToStation(stationId: number, assignment: {
-    user_id: number;
-    role: string;
-    permissions?: string[];
-  }) {
-    return api.post<StationUser>(`${ENDPOINTS.stations}/${stationId}/users`, assignment);
+  async assignUserToStation(
+    stationId: number | string,
+    assignment: {
+      user_id: number;
+      role: string;
+      permissions?: string[];
+    }
+  ) {
+    return api.post<StationUser>(
+      `${ENDPOINTS.stations}/${stationId}/users`,
+      assignment
+    );
   },
 
   /**
    * Update user station assignment
    */
-  async updateUserStationAssignment(stationId: number, userId: number, updates: {
-    role?: string;
-    permissions?: string[];
-    is_active?: boolean;
-  }) {
-    return api.put<StationUser>(`${ENDPOINTS.stations}/${stationId}/users/${userId}`, updates);
+  async updateUserStationAssignment(
+    stationId: number | string,
+    userId: number | string,
+    updates: {
+      role?: string;
+      permissions?: string[];
+      is_active?: boolean;
+    }
+  ) {
+    return api.put<StationUser>(
+      `${ENDPOINTS.stations}/${stationId}/users/${userId}`,
+      updates
+    );
   },
 
   /**
    * Remove user from station
    */
-  async removeUserFromStation(stationId: number, userId: number) {
-    return api.delete<void>(`${ENDPOINTS.stations}/${stationId}/users/${userId}`);
+  async removeUserFromStation(
+    stationId: number | string,
+    userId: number | string
+  ) {
+    return api.delete<void>(
+      `${ENDPOINTS.stations}/${stationId}/users/${userId}`
+    );
   },
 
   /**
    * Get station audit logs
    */
-  async getStationAuditLogs(stationId: number, filters: {
-    action?: string;
-    resource_type?: string;
-    user_id?: number;
-    days?: number;
-    skip?: number;
-    limit?: number;
-  } = {}) {
+  async getStationAuditLogs(
+    stationId: number | string,
+    filters: {
+      action?: string;
+      resource_type?: string;
+      user_id?: number;
+      days?: number;
+      skip?: number;
+      limit?: number;
+    } = {}
+  ) {
     const params = new URLSearchParams();
 
     if (filters.action) params.append('action', filters.action);
-    if (filters.resource_type) params.append('resource_type', filters.resource_type);
+    if (filters.resource_type)
+      params.append('resource_type', filters.resource_type);
     if (filters.user_id) params.append('user_id', filters.user_id.toString());
     if (filters.days) params.append('days', filters.days.toString());
     if (filters.skip) params.append('skip', filters.skip.toString());
     if (filters.limit) params.append('limit', filters.limit.toString());
 
     const query = params.toString();
-    const url = query ? `${ENDPOINTS.stations}/${stationId}/audit?${query}` : `${ENDPOINTS.stations}/${stationId}/audit`;
+    const url = query
+      ? `${ENDPOINTS.stations}/${stationId}/audit?${query}`
+      : `${ENDPOINTS.stations}/${stationId}/audit`;
 
     return api.get<AuditLog[]>(url);
   },
@@ -682,14 +783,14 @@ export const socialService = {
     return api.post(`/api/v1/inbox/threads/${threadId}/messages`, {
       content: message,
       direction: 'outbound',
-      message_type: 'text'
+      message_type: 'text',
     });
   },
 
   async convertThreadToLead(threadId: string, leadData?: Partial<any>) {
     return api.post(`/api/leads/social-threads`, {
       thread_id: threadId,
-      ...leadData
+      ...leadData,
     });
   },
 };
@@ -796,7 +897,9 @@ export const analyticsService = {
     Object.keys(filters).forEach(key => {
       if (filters[key]) params.append(key, filters[key]);
     });
-    return api.get(`/api/admin/analytics/engagement-trends?${params.toString()}`);
+    return api.get(
+      `/api/admin/analytics/engagement-trends?${params.toString()}`
+    );
   },
 
   async getPaymentAnalytics(filters: any = {}) {
@@ -853,10 +956,13 @@ export const smsService = {
     const params = new URLSearchParams();
     if (filters.channel) params.append('channel', filters.channel);
     if (filters.status) params.append('status', filters.status);
-    if (filters.phone_number) params.append('phone_number', filters.phone_number);
+    if (filters.phone_number)
+      params.append('phone_number', filters.phone_number);
 
     const query = params.toString();
-    const url = query ? `/api/v1/inbox/messages?${query}` : '/api/v1/inbox/messages';
+    const url = query
+      ? `/api/v1/inbox/messages?${query}`
+      : '/api/v1/inbox/messages';
     return api.get(url);
   },
 };

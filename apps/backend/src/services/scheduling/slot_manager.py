@@ -1,435 +1,392 @@
 """
-Slot Manager Service
+Slot Manager - 4-Slot Daily Time Management
 
-Manages time slot configuration, adjustment logic, and event duration calculation.
-
-Business Rules:
-- 4 standard slots: 12PM, 3PM, 6PM, 9PM
-- Slot adjustments in 30-minute increments (-30, -60, +30, +60)
-- Event duration: 60 + (guests × 3) minutes, max 120
-- 15 minute buffer between event end and travel start
-- Chef must arrive 30 minutes BEFORE event for setup
-- Rush hour (Mon-Fri 3PM-7PM): travel time × 1.5
-
-Slot Adjustment Limits:
-- 12PM: -30 to +60 min (11:30 AM - 1:00 PM)
-- 3PM: -30 to +60 min (2:30 PM - 4:00 PM)
-- 6PM: -60 to +60 min (5:00 PM - 7:00 PM)
-- 9PM: -60 to +30 min (8:00 PM - 9:30 PM)
-
-Travel Chain Logic:
-1. Previous event ends
-2. Chef has 15 min buffer to pack up
-3. Chef travels (×1.5 during rush hour on weekdays)
-4. Chef arrives 30 min before event for setup
+Manages the 4 daily time slots for hibachi bookings:
+- Slot 1: Lunch (12:00 PM, adjustable 11:00 AM - 1:00 PM)
+- Slot 2: Afternoon (3:00 PM, adjustable 2:00 PM - 4:00 PM)
+- Slot 3: Early Evening (6:00 PM, adjustable 5:00 PM - 7:00 PM)
+- Slot 4: Prime Time (9:00 PM, adjustable 8:00 PM - 10:00 PM)
 """
 
-from dataclasses import dataclass
-from datetime import date, datetime, time, timedelta
-from typing import Optional
+from datetime import date, time
+from typing import List, Optional, Dict
 from uuid import UUID
+from enum import IntEnum
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import BaseModel
 
 
-@dataclass
-class SlotConfig:
-    """Configuration for a time slot"""
+# ============================================================
+# Constants & Enums
+# ============================================================
 
+
+class TimeSlot(IntEnum):
+    """4 daily time slots."""
+
+    LUNCH = 1  # 12:00 PM
+    AFTERNOON = 2  # 3:00 PM
+    EARLY_EVENING = 3  # 6:00 PM
+    PRIME_TIME = 4  # 9:00 PM
+
+
+# ============================================================
+# Data Models
+# ============================================================
+
+
+class SlotConfiguration(BaseModel):
+    """Configuration for a single time slot."""
+
+    slot_number: int
     slot_name: str
-    base_time: time
-    min_adjust_minutes: int  # Negative = can start earlier
-    max_adjust_minutes: int  # Positive = can start later
-    min_event_duration: int
-    max_event_duration: int
+    standard_time: time
+    # ±30 minute adjustment range (preferred)
+    min_time_30: time
+    max_time_30: time
+    # ±60 minute adjustment range (maximum)
+    min_time_60: time
+    max_time_60: time
+    # Buffer times
+    setup_minutes: int = 30
+    cleanup_minutes: int = 15
     is_active: bool = True
 
-    @property
-    def slot_time(self) -> time:
-        """Alias for base_time for API compatibility"""
-        return self.base_time
 
-    @property
-    def adjust_earlier_minutes(self) -> int:
-        """How many minutes earlier slot can start (positive value)"""
-        return abs(self.min_adjust_minutes)
+class SlotStatus(BaseModel):
+    """Status of a slot for a specific date."""
 
-    @property
-    def adjust_later_minutes(self) -> int:
-        """How many minutes later slot can start"""
-        return self.max_adjust_minutes
+    slot_number: int
+    slot_name: str
+    date: date
+    standard_time: time
+    adjusted_time: Optional[time] = None
+    is_available: bool = True
+    is_booked: bool = False
+    booking_id: Optional[UUID] = None
+    chef_id: Optional[UUID] = None
+    adjustment_reason: Optional[str] = None
 
 
-@dataclass
-class SlotAdjustment:
-    """Proposed slot adjustment"""
+class SlotAdjustment(BaseModel):
+    """Proposed slot time adjustment."""
 
+    slot_number: int
     original_time: time
-    adjusted_time: time
-    shift_minutes: int
+    proposed_time: time
+    shift_minutes: int  # Positive = later, negative = earlier
     reason: str
+    is_within_30_min: bool  # Preferred adjustment
+    is_within_60_min: bool  # Maximum adjustment
 
 
-# Default slot configurations (fallback if DB not available)
-# Adjustments are in 30-minute increments: -30, -60 or +30, +60
-DEFAULT_SLOT_CONFIGS = {
-    # 12PM: Can shift 30 min earlier (11:30 AM) to 60 min later (1:00 PM)
-    "12PM": SlotConfig("12PM", time(12, 0), -30, 60, 90, 120),
-    # 3PM: Can shift 30 min earlier (2:30 PM) to 60 min later (4:00 PM)
-    "3PM": SlotConfig("3PM", time(15, 0), -30, 60, 90, 120),
-    # 6PM: Can shift 60 min earlier (5:00 PM) to 60 min later (7:00 PM)
-    "6PM": SlotConfig("6PM", time(18, 0), -60, 60, 90, 120),
-    # 9PM: Can shift 60 min earlier (8:00 PM) to 30 min later (9:30 PM)
-    "9PM": SlotConfig("9PM", time(21, 0), -60, 30, 90, 120),
+# ============================================================
+# Default Slot Configurations
+# ============================================================
+
+DEFAULT_SLOTS: Dict[int, SlotConfiguration] = {
+    TimeSlot.LUNCH: SlotConfiguration(
+        slot_number=TimeSlot.LUNCH,
+        slot_name="Lunch",
+        standard_time=time(12, 0),
+        min_time_30=time(11, 30),
+        max_time_30=time(12, 30),
+        min_time_60=time(11, 0),
+        max_time_60=time(13, 0),
+    ),
+    TimeSlot.AFTERNOON: SlotConfiguration(
+        slot_number=TimeSlot.AFTERNOON,
+        slot_name="Afternoon",
+        standard_time=time(15, 0),
+        min_time_30=time(14, 30),
+        max_time_30=time(15, 30),
+        min_time_60=time(14, 0),
+        max_time_60=time(16, 0),
+    ),
+    TimeSlot.EARLY_EVENING: SlotConfiguration(
+        slot_number=TimeSlot.EARLY_EVENING,
+        slot_name="Early Evening",
+        standard_time=time(18, 0),
+        min_time_30=time(17, 30),
+        max_time_30=time(18, 30),
+        min_time_60=time(17, 0),
+        max_time_60=time(19, 0),
+    ),
+    TimeSlot.PRIME_TIME: SlotConfiguration(
+        slot_number=TimeSlot.PRIME_TIME,
+        slot_name="Prime Time",
+        standard_time=time(21, 0),
+        min_time_30=time(20, 30),
+        max_time_30=time(21, 30),
+        min_time_60=time(20, 0),
+        max_time_60=time(22, 0),
+    ),
 }
 
-# Standard slot times for quick lookup
-SLOT_TIMES = {
-    "12PM": time(12, 0),
-    "3PM": time(15, 0),
-    "6PM": time(18, 0),
-    "9PM": time(21, 0),
-}
 
-# Time constants
-BUFFER_MINUTES = 15  # Buffer between event end and travel start
-CHEF_SETUP_MINUTES = 30  # Chef must arrive 30 min before event for setup
-
-# Rush hour configuration (Mon-Fri 3PM-7PM = 50% slower travel)
-RUSH_HOUR_START = 15  # 3 PM
-RUSH_HOUR_END = 19  # 7 PM
-RUSH_HOUR_MULTIPLIER = 1.5  # 50% slower during rush hour
+# ============================================================
+# Slot Manager Service
+# ============================================================
 
 
-def is_rush_hour(dt: datetime) -> bool:
+class SlotManager:
     """
-    Check if a datetime falls within rush hour (Mon-Fri 3PM-7PM).
+    Manages 4-slot daily scheduling system.
 
-    Rush hour only applies on weekdays (Monday=0 to Friday=4).
-
-    Args:
-        dt: Datetime to check
-
-    Returns:
-        True if rush hour, False otherwise
-    """
-    # Check weekday (Monday=0, Sunday=6)
-    if dt.weekday() > 4:  # Saturday=5, Sunday=6
-        return False
-
-    hour = dt.hour
-    return RUSH_HOUR_START <= hour < RUSH_HOUR_END
-
-
-def adjust_travel_time_for_traffic(base_travel_minutes: int, departure_time: datetime) -> int:
-    """
-    Adjust travel time based on traffic conditions.
-
-    During rush hour (Mon-Fri 3PM-7PM), travel takes 50% longer.
-
-    Args:
-        base_travel_minutes: Normal travel time without traffic
-        departure_time: When the chef will be leaving
-
-    Returns:
-        Adjusted travel time in minutes
-    """
-    if is_rush_hour(departure_time):
-        return int(base_travel_minutes * RUSH_HOUR_MULTIPLIER)
-    return base_travel_minutes
-
-
-class SlotManagerService:
-    """
-    Manages time slots, adjustments, and event duration calculations.
+    Features:
+    - Standard slot times with ±30/60 min adjustment ranges
+    - Slot availability checking
+    - Time adjustment suggestions
+    - Conflict detection
     """
 
-    def __init__(self, session: Optional[AsyncSession] = None):
-        self.session = session
-
-    # =========================================================================
-    # EVENT DURATION
-    # =========================================================================
-
-    @staticmethod
-    def calculate_event_duration(guest_count: int) -> int:
+    def __init__(self, custom_slots: Optional[Dict[int, SlotConfiguration]] = None):
         """
-        Calculate event duration based on party size.
-
-        Formula: min(60 + (guests × 3), 120)
-
-        Examples:
-        - 10 guests = 90 minutes
-        - 15 guests = 105 minutes
-        - 20+ guests = 120 minutes (capped)
+        Initialize slot manager with default or custom slot configurations.
 
         Args:
-            guest_count: Total number of guests (adults + children)
-
-        Returns:
-            Event duration in minutes (90-120)
+            custom_slots: Override default slot configurations
         """
-        if guest_count <= 0:
-            return 90  # Minimum duration
+        self.slots = custom_slots or DEFAULT_SLOTS
 
-        calculated = 60 + (guest_count * 3)
-        return min(max(calculated, 90), 120)  # Clamp to 90-120
+    def get_slot_config(self, slot_number: int) -> SlotConfiguration:
+        """Get configuration for a specific slot."""
+        if slot_number not in self.slots:
+            raise ValueError(f"Invalid slot number: {slot_number}. Must be 1-4.")
+        return self.slots[slot_number]
 
-    # =========================================================================
-    # SLOT CONFIGURATION
-    # =========================================================================
+    def get_all_slots(self) -> List[SlotConfiguration]:
+        """Get all slot configurations."""
+        return [self.slots[i] for i in sorted(self.slots.keys())]
 
-    async def get_slot_config(
-        self,
-        slot_name: str,
-        station_id: Optional[UUID] = None,
-    ) -> SlotConfig:
+    def get_slot_for_time(self, requested_time: time) -> Optional[int]:
         """
-        Get slot configuration from database or use defaults.
+        Determine which slot a requested time falls into.
 
         Args:
-            slot_name: Slot identifier ('12PM', '3PM', '6PM', '9PM')
-            station_id: Optional station for per-station overrides
+            requested_time: Time customer wants
 
         Returns:
-            SlotConfig with adjustment limits
+            Slot number (1-4) or None if outside all slot ranges
         """
-        # If no database session, use defaults
-        if not self.session:
-            return DEFAULT_SLOT_CONFIGS.get(slot_name, DEFAULT_SLOT_CONFIGS["3PM"])
-
-        try:
-            # Query database for configuration
-            query = """
-                SELECT slot_name, base_time, min_adjust_minutes, max_adjust_minutes,
-                       min_event_duration, max_event_duration
-                FROM ops.slot_configurations
-                WHERE slot_name = :slot_name
-                  AND (station_id = :station_id OR station_id IS NULL)
-                ORDER BY station_id NULLS LAST
-                LIMIT 1
-            """
-            result = await self.session.execute(
-                select("*").from_statement(query),
-                {"slot_name": slot_name, "station_id": str(station_id) if station_id else None},
-            )
-            row = result.fetchone()
-
-            if row:
-                return SlotConfig(
-                    slot_name=row.slot_name,
-                    base_time=row.base_time,
-                    min_adjust_minutes=row.min_adjust_minutes,
-                    max_adjust_minutes=row.max_adjust_minutes,
-                    min_event_duration=row.min_event_duration,
-                    max_event_duration=row.max_event_duration,
-                )
-        except Exception:
-            pass  # Fall through to defaults
-
-        return DEFAULT_SLOT_CONFIGS.get(slot_name, DEFAULT_SLOT_CONFIGS["3PM"])
-
-    def get_all_slot_configs(self) -> list[SlotConfig]:
-        """
-        Get all available slot configurations.
-
-        Returns list of SlotConfig ordered by time.
-        """
-        return [
-            DEFAULT_SLOT_CONFIGS["12PM"],
-            DEFAULT_SLOT_CONFIGS["3PM"],
-            DEFAULT_SLOT_CONFIGS["6PM"],
-            DEFAULT_SLOT_CONFIGS["9PM"],
-        ]
-
-    def get_slot_name(self, t: time) -> Optional[str]:
-        """
-        Get slot name for a given time.
-
-        Args:
-            t: Time to find slot for
-
-        Returns:
-            Slot name or None if not a standard slot
-        """
-        for name, slot_time in SLOT_TIMES.items():
-            if slot_time == t:
-                return name
+        for slot_num, config in self.slots.items():
+            if config.min_time_60 <= requested_time <= config.max_time_60:
+                return slot_num
         return None
 
-    def get_base_time(self, slot_name: str) -> Optional[time]:
-        """Get base time for a slot name."""
-        return SLOT_TIMES.get(slot_name)
+    def get_standard_time(self, slot_number: int) -> time:
+        """Get the standard (default) time for a slot."""
+        return self.get_slot_config(slot_number).standard_time
 
-    # =========================================================================
-    # SLOT ADJUSTMENT
-    # =========================================================================
-
-    async def calculate_adjusted_time(
-        self,
-        slot_name: str,
-        required_start_after: datetime,
-        station_id: Optional[UUID] = None,
-    ) -> Optional[SlotAdjustment]:
+    def is_time_in_slot_range(
+        self, requested_time: time, slot_number: int, allow_60_min_range: bool = False
+    ) -> bool:
         """
-        Calculate adjusted slot time to start after a required time.
-
-        Used when chef has a previous booking and needs travel time.
+        Check if a time falls within a slot's adjustment range.
 
         Args:
-            slot_name: Target slot ('12PM', '3PM', '6PM', '9PM')
-            required_start_after: Earliest possible start time
-            station_id: Optional station for config lookup
+            requested_time: Time to check
+            slot_number: Slot to check against
+            allow_60_min_range: If True, use ±60 min range; otherwise ±30 min
 
         Returns:
-            SlotAdjustment if adjustment possible, None if not feasible
+            True if time is within the slot's range
         """
-        config = await self.get_slot_config(slot_name, station_id)
-        base_datetime = datetime.combine(required_start_after.date(), config.base_time)
+        config = self.get_slot_config(slot_number)
 
-        # Calculate required shift
-        if required_start_after <= base_datetime:
-            # No adjustment needed - can start at base time
-            return SlotAdjustment(
-                original_time=config.base_time,
-                adjusted_time=config.base_time,
-                shift_minutes=0,
-                reason="No adjustment needed",
-            )
+        if allow_60_min_range:
+            return config.min_time_60 <= requested_time <= config.max_time_60
+        else:
+            return config.min_time_30 <= requested_time <= config.max_time_30
 
-        shift_needed = int((required_start_after - base_datetime).total_seconds() / 60)
+    def calculate_adjustment(self, slot_number: int, requested_time: time) -> SlotAdjustment:
+        """
+        Calculate adjustment needed from standard time.
 
-        # Check if shift is within limits
-        if shift_needed > config.max_adjust_minutes:
-            return None  # Cannot adjust enough
+        Args:
+            slot_number: Target slot
+            requested_time: Requested booking time
 
-        # Calculate adjusted time
-        adjusted_datetime = base_datetime + timedelta(minutes=shift_needed)
+        Returns:
+            SlotAdjustment with shift details
+        """
+        config = self.get_slot_config(slot_number)
+
+        # Calculate minutes from midnight for comparison
+        standard_minutes = config.standard_time.hour * 60 + config.standard_time.minute
+        requested_minutes = requested_time.hour * 60 + requested_time.minute
+        shift_minutes = requested_minutes - standard_minutes
+
+        # Check ranges
+        is_within_30 = config.min_time_30 <= requested_time <= config.max_time_30
+        is_within_60 = config.min_time_60 <= requested_time <= config.max_time_60
 
         return SlotAdjustment(
-            original_time=config.base_time,
-            adjusted_time=adjusted_datetime.time(),
-            shift_minutes=shift_needed,
-            reason=f"Shifted +{shift_needed}min for travel time",
+            slot_number=slot_number,
+            original_time=config.standard_time,
+            proposed_time=requested_time,
+            shift_minutes=shift_minutes,
+            reason=self._get_adjustment_reason(shift_minutes),
+            is_within_30_min=is_within_30,
+            is_within_60_min=is_within_60,
         )
 
-    async def can_accommodate_travel(
-        self,
-        previous_booking_end: datetime,
-        travel_time_minutes: int,
-        target_slot: str,
-        station_id: Optional[UUID] = None,
-    ) -> tuple[bool, Optional[SlotAdjustment]]:
+    def suggest_adjustment(
+        self, slot_number: int, required_shift_minutes: int, prefer_earlier: bool = True
+    ) -> Optional[SlotAdjustment]:
         """
-        Check if a slot can accommodate travel time from previous booking.
-
-        Travel Chain Logic:
-        1. Previous event ends
-        2. Chef has BUFFER_MINUTES (15 min) to pack up
-        3. Chef travels (travel_time_minutes, adjusted for rush hour)
-        4. Chef must arrive CHEF_SETUP_MINUTES (30 min) before next event
-
-        Timeline:
-        previous_end → +15 min buffer → travel → arrive 30 min before event
+        Suggest a slot time adjustment.
 
         Args:
-            previous_booking_end: When previous booking ends
-            travel_time_minutes: Expected travel time (already adjusted for rush hour)
-            target_slot: Slot to book
-            station_id: Optional station
+            slot_number: Slot to adjust
+            required_shift_minutes: How many minutes to shift (negative = earlier)
+            prefer_earlier: If True, prefer earlier times when possible
 
         Returns:
-            Tuple of (can_accommodate, adjustment if needed)
+            SlotAdjustment if valid adjustment exists, None otherwise
         """
-        # Chef needs: cleanup buffer + travel + setup time before event
-        # Event start must be at least: previous_end + buffer + travel + setup
-        total_gap_needed = BUFFER_MINUTES + travel_time_minutes + CHEF_SETUP_MINUTES
-        required_start = previous_booking_end + timedelta(minutes=total_gap_needed)
+        config = self.get_slot_config(slot_number)
 
-        adjustment = await self.calculate_adjusted_time(target_slot, required_start, station_id)
+        # Calculate proposed time
+        standard_minutes = config.standard_time.hour * 60 + config.standard_time.minute
+        proposed_minutes = standard_minutes + required_shift_minutes
 
-        if adjustment is None:
-            return False, None
+        # Convert back to time
+        proposed_hour = proposed_minutes // 60
+        proposed_minute = proposed_minutes % 60
 
-        return True, adjustment
+        # Validate hour range
+        if proposed_hour < 0 or proposed_hour >= 24:
+            return None
 
-    # =========================================================================
-    # TIME WINDOW CALCULATION
-    # =========================================================================
+        proposed_time = time(proposed_hour, proposed_minute)
 
-    def get_booking_time_window(
-        self,
-        booking_date: date,
-        slot_time: time,
-        duration_minutes: int,
-    ) -> tuple[datetime, datetime]:
+        # Check if within allowed range
+        if not (config.min_time_60 <= proposed_time <= config.max_time_60):
+            return None
+
+        adjustment = self.calculate_adjustment(slot_number, proposed_time)
+        return adjustment
+
+    def get_available_adjustments(
+        self, slot_number: int, increment_minutes: int = 30
+    ) -> List[SlotAdjustment]:
         """
-        Get start and end datetime for a booking.
+        Get all valid adjustment options for a slot.
 
         Args:
-            booking_date: Date of booking
-            slot_time: Start time (may be adjusted)
-            duration_minutes: Event duration
+            slot_number: Target slot
+            increment_minutes: Time increments (default 30 min)
 
         Returns:
-            Tuple of (start_datetime, end_datetime)
+            List of valid adjustments (e.g., -60, -30, 0, +30, +60)
         """
-        start = datetime.combine(booking_date, slot_time)
-        end = start + timedelta(minutes=duration_minutes)
-        return start, end
+        adjustments = []
 
-    def get_chef_availability_window(
-        self,
-        booking_date: date,
-        slot_time: time,
-        duration_minutes: int,
-        travel_buffer: int = BUFFER_MINUTES,
-    ) -> tuple[datetime, datetime]:
+        for shift in range(-60, 61, increment_minutes):
+            adjustment = self.suggest_adjustment(slot_number, shift)
+            if adjustment and adjustment.is_within_60_min:
+                adjustments.append(adjustment)
+
+        return adjustments
+
+    def can_slots_conflict(self, slot1: int, slot2: int, event_duration_minutes: int = 120) -> bool:
         """
-        Get the time window a chef is unavailable due to a booking.
+        Check if two slots could potentially conflict.
 
-        Includes buffer time after event for cleanup/travel prep.
+        Slots conflict if even with maximum adjustments and event duration,
+        they might overlap.
 
         Args:
-            booking_date: Date of booking
-            slot_time: Event start time
-            duration_minutes: Event duration
-            travel_buffer: Buffer time after event
+            slot1: First slot number
+            slot2: Second slot number
+            event_duration_minutes: Duration of events
 
         Returns:
-            Tuple of (busy_from, busy_until)
+            True if slots could conflict
         """
-        start = datetime.combine(booking_date, slot_time)
-        end = start + timedelta(minutes=duration_minutes + travel_buffer)
-        return start, end
+        if slot1 == slot2:
+            return True
 
-    # =========================================================================
-    # SLOT AVAILABILITY
-    # =========================================================================
+        config1 = self.get_slot_config(slot1)
+        config2 = self.get_slot_config(slot2)
 
-    def get_all_slots(self) -> list[str]:
-        """Get list of all slot names in order."""
-        return ["12PM", "3PM", "6PM", "9PM"]
+        # Get the latest possible end time for slot1
+        latest_start1 = config1.max_time_60
+        latest_start1_minutes = latest_start1.hour * 60 + latest_start1.minute
+        latest_end1_minutes = (
+            latest_start1_minutes + event_duration_minutes + config1.cleanup_minutes
+        )
 
-    def get_next_slot(self, current_slot: str) -> Optional[str]:
-        """Get the next slot after the current one."""
-        slots = self.get_all_slots()
-        try:
-            idx = slots.index(current_slot)
-            if idx < len(slots) - 1:
-                return slots[idx + 1]
-        except ValueError:
-            pass
-        return None
+        # Get the earliest possible start time for slot2
+        earliest_start2 = config2.min_time_60
+        earliest_start2_minutes = earliest_start2.hour * 60 + earliest_start2.minute
+        # Account for setup time
+        earliest_arrival2_minutes = earliest_start2_minutes - config2.setup_minutes
 
-    def get_previous_slot(self, current_slot: str) -> Optional[str]:
-        """Get the previous slot before the current one."""
-        slots = self.get_all_slots()
-        try:
-            idx = slots.index(current_slot)
-            if idx > 0:
-                return slots[idx - 1]
-        except ValueError:
-            pass
-        return None
+        # They conflict if slot1's latest end overlaps with slot2's earliest arrival
+        return latest_end1_minutes > earliest_arrival2_minutes
+
+    def get_minimum_gap_minutes(
+        self, from_slot: int, to_slot: int, event_duration_minutes: int = 90
+    ) -> int:
+        """
+        Calculate minimum time gap between two consecutive bookings.
+
+        Args:
+            from_slot: First booking's slot
+            to_slot: Second booking's slot
+            event_duration_minutes: Duration of first event
+
+        Returns:
+            Minimum minutes between events (for travel calculation)
+        """
+        config1 = self.get_slot_config(from_slot)
+        config2 = self.get_slot_config(to_slot)
+
+        # Standard times
+        start1_minutes = config1.standard_time.hour * 60 + config1.standard_time.minute
+        start2_minutes = config2.standard_time.hour * 60 + config2.standard_time.minute
+
+        # End of first event + cleanup
+        end1_minutes = start1_minutes + event_duration_minutes + config1.cleanup_minutes
+
+        # Arrival time for second event (start - setup)
+        arrival2_minutes = start2_minutes - config2.setup_minutes
+
+        # Gap available for travel
+        gap = arrival2_minutes - end1_minutes
+
+        return max(0, gap)
+
+    def _get_adjustment_reason(self, shift_minutes: int) -> str:
+        """Generate a human-readable reason for the adjustment."""
+        if shift_minutes == 0:
+            return "Standard time"
+        elif shift_minutes > 0:
+            return f"Shifted {shift_minutes} minutes later for travel logistics"
+        else:
+            return f"Shifted {abs(shift_minutes)} minutes earlier for travel logistics"
+
+    def format_slot_display(self, slot_number: int) -> str:
+        """Format slot for display to customers."""
+        config = self.get_slot_config(slot_number)
+        formatted_time = config.standard_time.strftime("%-I:%M %p")
+        return f"{config.slot_name} ({formatted_time})"
+
+    def get_slot_options_for_display(self) -> List[Dict]:
+        """Get all slots formatted for frontend dropdown."""
+        return [
+            {
+                "value": slot.slot_number,
+                "label": self.format_slot_display(slot.slot_number),
+                "time": slot.standard_time.strftime("%H:%M"),
+                "name": slot.slot_name,
+            }
+            for slot in self.get_all_slots()
+            if slot.is_active
+        ]
+
+
+# Alias for backward compatibility with scheduling router
+SlotManagerService = SlotManager

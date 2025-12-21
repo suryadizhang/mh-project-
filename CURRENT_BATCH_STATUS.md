@@ -1,6 +1,6 @@
 # 🎯 My Hibachi - Current Batch Status
 
-**Last Updated:** December 16, 2025 **Purpose:** Single source of truth
+**Last Updated:** December 21, 2025 **Purpose:** Single source of truth
 for current batch status
 
 ---
@@ -15,6 +15,27 @@ for current batch status
 | **Branch**  | `feature/batch-1-core-infrastructure` |
 | **Started** | December 7, 2025                      |
 | **ETA**     | December 21, 2025 (2 weeks)           |
+
+---
+
+## 🧠 KEY STRATEGIC DECISIONS (December 21, 2025)
+
+**⚠️ IMPORTANT: These decisions apply to future batches. Don't forget!**
+
+| Decision | Details | Impact |
+|----------|---------|--------|
+| **3-Model LLM Strategy** | GPT-4o + Claude 3.5 + Mistral (NO GROK) | Batch 3, 6 |
+| **$300/mo Threshold** | Rent GPU only when API costs > $300/mo | Batch 6 |
+| **Laptop Fine-Tuning** | Phi-4 14B, Qwen3 8B, DeepSeek 7B fit on laptop | Batch 6 |
+| **Shadow Learning** | Collect 50K pairs from API LLMs before training | Batch 3-6 |
+| **Free-Tier Training** | Use Kaggle (30hrs/wk), Colab before renting GPU | Batch 6 |
+
+### API Keys Needed (Batch 3):
+```
+OPENAI_API_KEY=xxx       # Tier 1 - Complex reasoning
+ANTHROPIC_API_KEY=xxx    # Tier 2 - Empathy, brand voice
+MISTRAL_API_KEY=xxx      # Tier 3 - Cost-effective, FAQ
+```
 
 ---
 

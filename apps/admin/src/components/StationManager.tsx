@@ -18,6 +18,7 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { StationEditForm } from '@/components/StationEditForm';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 import type { AuditLog, Station, StationUser } from '@/services/api';
@@ -37,9 +38,9 @@ export const StationManager: React.FC<StationManagerProps> = ({
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'audit'>(
-    'overview'
-  );
+  const [activeTab, setActiveTab] = useState<
+    'overview' | 'users' | 'audit' | 'edit'
+  >('overview');
 
   // Check permissions
   const canManageStations = isSuperAdmin() || hasPermission('manage_stations');
@@ -70,7 +71,7 @@ export const StationManager: React.FC<StationManagerProps> = ({
     }
   };
 
-  const loadStationUsers = async (stationId: number) => {
+  const loadStationUsers = async (stationId: number | string) => {
     try {
       const response = await stationService.getStationUsers(stationId, true);
       if (response.data) {
@@ -84,7 +85,7 @@ export const StationManager: React.FC<StationManagerProps> = ({
     }
   };
 
-  const loadAuditLogs = async (stationId: number) => {
+  const loadAuditLogs = async (stationId: number | string) => {
     try {
       const response = await stationService.getStationAuditLogs(stationId, {
         limit: 50,
@@ -143,7 +144,8 @@ export const StationManager: React.FC<StationManagerProps> = ({
 
   const renderStationOverview = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Basic Info Card */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -157,9 +159,17 @@ export const StationManager: React.FC<StationManagerProps> = ({
                 <p className="text-sm font-medium text-gray-600">Name</p>
                 <p className="text-lg font-semibold">{selectedStation?.name}</p>
               </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Code</p>
+                <p className="text-sm font-mono bg-gray-100 px-2 py-1 rounded inline-block">
+                  {selectedStation?.code || 'N/A'}
+                </p>
+              </div>
               <div className="flex items-center text-sm text-gray-600">
                 <MapPin className="h-4 w-4 mr-2" />
-                {selectedStation?.location}
+                {selectedStation?.address && selectedStation?.city
+                  ? `${selectedStation.address}, ${selectedStation.city}, ${selectedStation.state} ${selectedStation.postal_code}`
+                  : selectedStation?.location || 'No address'}
               </div>
               {selectedStation?.phone && (
                 <div className="flex items-center text-sm text-gray-600">
@@ -177,6 +187,94 @@ export const StationManager: React.FC<StationManagerProps> = ({
           </CardContent>
         </Card>
 
+        {/* Geocoding & Location Card */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Location & Geocoding
+            </CardTitle>
+            <span
+              className={`px-2 py-1 text-xs rounded-full ${
+                selectedStation?.geocode_status === 'success'
+                  ? 'bg-green-100 text-green-800'
+                  : selectedStation?.geocode_status === 'failed'
+                    ? 'bg-red-100 text-red-800'
+                    : 'bg-yellow-100 text-yellow-800'
+              }`}
+            >
+              {selectedStation?.geocode_status || 'pending'}
+            </span>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <p className="text-xs text-gray-500">Latitude</p>
+                  <p className="text-sm font-mono">
+                    {selectedStation?.lat?.toFixed(6) || 'Not set'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Longitude</p>
+                  <p className="text-sm font-mono">
+                    {selectedStation?.lng?.toFixed(6) || 'Not set'}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Timezone</p>
+                <p className="text-sm">
+                  {selectedStation?.timezone || 'Not set'}
+                </p>
+              </div>
+              {selectedStation?.geocoded_at && (
+                <div>
+                  <p className="text-xs text-gray-500">Last Geocoded</p>
+                  <p className="text-xs text-gray-600">
+                    {new Date(selectedStation.geocoded_at).toLocaleString()}
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Service Area Card */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Service Area</CardTitle>
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs text-gray-500">Service Radius</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {selectedStation?.service_area_radius || 150}
+                  <span className="text-sm font-normal text-gray-500 ml-1">
+                    miles
+                  </span>
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Escalation Threshold</p>
+                <p className="text-lg font-semibold text-orange-600">
+                  {selectedStation?.escalation_radius_miles || 150}
+                  <span className="text-sm font-normal text-gray-500 ml-1">
+                    miles
+                  </span>
+                </p>
+                <p className="text-xs text-gray-500">
+                  Bookings beyond this require human approval
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Status & Booking Settings */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Status</CardTitle>
@@ -191,7 +289,8 @@ export const StationManager: React.FC<StationManagerProps> = ({
                 <p
                   className={`text-lg font-semibold ${selectedStation?.is_active ? 'text-green-600' : 'text-red-600'}`}
                 >
-                  {selectedStation?.is_active ? 'Active' : 'Inactive'}
+                  {selectedStation?.status ||
+                    (selectedStation?.is_active ? 'Active' : 'Inactive')}
                 </p>
               </div>
               <div>
@@ -205,11 +304,39 @@ export const StationManager: React.FC<StationManagerProps> = ({
             </div>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Booking Settings
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <p className="text-sm text-gray-600">Max Concurrent Bookings</p>
+                <p className="text-sm font-semibold">
+                  {selectedStation?.max_concurrent_bookings || 10}
+                </p>
+              </div>
+              <div className="flex justify-between">
+                <p className="text-sm text-gray-600">Minimum Lead Time</p>
+                <p className="text-sm font-semibold">
+                  {selectedStation?.booking_lead_time_hours || 24} hours
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {canManageStations && (
         <div className="flex space-x-3">
-          <Button variant="outline" className="flex items-center">
+          <Button
+            variant="outline"
+            className="flex items-center"
+            onClick={() => setActiveTab('edit')}
+          >
             <Edit className="h-4 w-4 mr-2" />
             Edit Station
           </Button>
@@ -338,12 +465,24 @@ export const StationManager: React.FC<StationManagerProps> = ({
                     <div>
                       <p className="font-medium">{station.name}</p>
                       <p className="text-sm text-gray-600">
-                        {station.location}
+                        {station.city && station.state
+                          ? `${station.city}, ${station.state}`
+                          : station.location || 'No location'}
                       </p>
+                      {station.code && (
+                        <p className="text-xs text-gray-400 font-mono">
+                          {station.code}
+                        </p>
+                      )}
                     </div>
-                    <div
-                      className={`h-2 w-2 rounded-full ${station.is_active ? 'bg-green-500' : 'bg-red-500'}`}
-                    />
+                    <div className="flex flex-col items-end space-y-1">
+                      <div
+                        className={`h-2 w-2 rounded-full ${station.is_active ? 'bg-green-500' : 'bg-red-500'}`}
+                      />
+                      {station.geocode_status === 'success' && (
+                        <MapPin className="h-3 w-3 text-green-500" />
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -356,7 +495,14 @@ export const StationManager: React.FC<StationManagerProps> = ({
           {selectedStation ? (
             <>
               <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-bold">{selectedStation.name}</h1>
+                <div>
+                  <h1 className="text-2xl font-bold">{selectedStation.name}</h1>
+                  {selectedStation.code && (
+                    <p className="text-sm text-gray-500 font-mono">
+                      {selectedStation.code}
+                    </p>
+                  )}
+                </div>
                 <div className="flex space-x-2">
                   <Button
                     variant={activeTab === 'overview' ? 'default' : 'outline'}
@@ -366,6 +512,16 @@ export const StationManager: React.FC<StationManagerProps> = ({
                     <Eye className="h-4 w-4 mr-2" />
                     Overview
                   </Button>
+                  {canManageStations && (
+                    <Button
+                      variant={activeTab === 'edit' ? 'default' : 'outline'}
+                      onClick={() => setActiveTab('edit')}
+                      className="flex items-center"
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                  )}
                   {canManageUsers && (
                     <Button
                       variant={activeTab === 'users' ? 'default' : 'outline'}
@@ -388,6 +544,22 @@ export const StationManager: React.FC<StationManagerProps> = ({
               </div>
 
               {activeTab === 'overview' && renderStationOverview()}
+              {activeTab === 'edit' && selectedStation && (
+                <StationEditForm
+                  station={selectedStation}
+                  onSave={updatedStation => {
+                    // Update the station in the list
+                    setStations(prev =>
+                      prev.map(s =>
+                        s.id === updatedStation.id ? updatedStation : s
+                      )
+                    );
+                    setSelectedStation(updatedStation);
+                    setActiveTab('overview');
+                  }}
+                  onCancel={() => setActiveTab('overview')}
+                />
+              )}
               {activeTab === 'users' && renderStationUsers()}
               {activeTab === 'audit' && renderAuditLogs()}
             </>
