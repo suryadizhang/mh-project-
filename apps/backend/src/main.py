@@ -838,6 +838,15 @@ try:
 except ImportError:
     pass
 
+# Include Smart Scheduling endpoints (Phase 1 - Travel-optimized chef assignment)
+try:
+    from routers.v1.scheduling import router as scheduling_router
+
+    app.include_router(scheduling_router, prefix="/api/v1", tags=["scheduling"])
+    logger.info("✅ Smart Scheduling endpoints included (availability, chef assignment)")
+except ImportError as e:
+    logger.warning(f"Smart Scheduling endpoints not available: {e}")
+
 # Include Knowledge Sync endpoints (Admin/Superadmin)
 try:
     from routers.v1.knowledge_sync import router as knowledge_sync_router

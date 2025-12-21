@@ -16,7 +16,7 @@ load_dotenv()
 async def get_upsell_suggestions(conn, party_size: int, current_selections: list):
     """Query upsell rules directly from database"""
     query = """
-        SELECT 
+        SELECT
             upsell_item,
             pitch_template,
             tone_adaptation,

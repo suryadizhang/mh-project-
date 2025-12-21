@@ -751,8 +751,8 @@ export default function MenuPage() {
                       <div className="additional-icon-wrapper">
                         <span className="additional-icon emoji-visible">🥩</span>
                       </div>
-                      <h5 className="additional-name">Extra Protein</h5>
-                      <p className="additional-desc">Add an extra protein to your meal</p>
+                      <h5 className="additional-name">3rd Protein</h5>
+                      <p className="additional-desc">Add a third protein to your meal</p>
                     </div>
                     <div className="additional-price">
                       <div className="add-price-circle">

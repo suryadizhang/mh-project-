@@ -795,7 +795,7 @@ export function QuoteCalculator() {
                 onChange={(v) => handleInputChange('lobsterTail', v)}
               />
               <UpgradeInput
-                label="Extra Protein"
+                label="3rd Protein"
                 price="+$10 each"
                 value={quoteData.thirdProteins}
                 onChange={(v) => handleInputChange('thirdProteins', v)}

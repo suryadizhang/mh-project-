@@ -60,8 +60,8 @@ async def check_sync():
     print("💰 Checking Base Pricing...")
     base_pricing = await conn.fetchrow(
         """
-        SELECT value 
-        FROM business_rules 
+        SELECT value
+        FROM business_rules
         WHERE rule_type = 'pricing' AND title LIKE '%Adult%'
     """
     )

@@ -97,11 +97,31 @@ class Booking(Base, UUIDPKMixin, TimestampMixin, SoftDeleteTimestampMixin, Optim
         UUID(as_uuid=True), nullable=False
     )  # Multi-station support (CRITICAL - 50+ usages)
 
+    # Geocoded venue location (for travel time calculation)
+    venue_lat = Column(Numeric(10, 8), nullable=True)  # Latitude
+    venue_lng = Column(Numeric(11, 8), nullable=True)  # Longitude
+    venue_address_normalized = Column(Text, nullable=True)  # From Google Places API
+
     # ═══════════════════════════════════════════════════════════════════
     # PARTY COMPOSITION
     # ═══════════════════════════════════════════════════════════════════
     party_adults = Column(Integer, nullable=False, default=0)
     party_kids = Column(Integer, nullable=False, default=0)
+
+    # Event duration (calculated: 60 + guests*3, max 120 minutes)
+    event_duration_minutes = Column(Integer, nullable=True, default=90)
+
+    # ═══════════════════════════════════════════════════════════════════
+    # CHEF PREFERENCE (Customer can request specific chef)
+    # ═══════════════════════════════════════════════════════════════════
+    preferred_chef_id = Column(UUID(as_uuid=True), nullable=True)  # Customer's preferred chef
+    is_chef_preference_required = Column(Boolean, default=False)  # Must honor preference?
+
+    # ═══════════════════════════════════════════════════════════════════
+    # SLOT ADJUSTMENT (If time shifted from standard slot)
+    # ═══════════════════════════════════════════════════════════════════
+    adjusted_slot_time = Column(sa.Time, nullable=True)  # Actual start if adjusted
+    adjustment_reason = Column(Text, nullable=True)  # Why slot was adjusted
 
     # ═══════════════════════════════════════════════════════════════════
     # STATUS (PostgreSQL ENUM type - native database enum for type safety)
@@ -225,6 +245,27 @@ class Booking(Base, UUIDPKMixin, TimestampMixin, SoftDeleteTimestampMixin, Optim
     def party_size(self) -> int:
         """Total party size (adults + kids) for backward compatibility"""
         return (self.party_adults or 0) + (self.party_kids or 0)
+
+    @property
+    def calculated_duration(self) -> int:
+        """Calculate event duration based on party size (90-120 min)
+
+        Formula: min(60 + (guests × 3), 120)
+        - 10 guests = 90 min
+        - 15 guests = 105 min
+        - 20+ guests = 120 min (capped)
+        """
+        return min(60 + (self.party_size * 3), 120)
+
+    @property
+    def effective_start_time(self):
+        """Get the effective start time (adjusted or standard slot)"""
+        return self.adjusted_slot_time if self.adjusted_slot_time else self.slot
+
+    @property
+    def has_location(self) -> bool:
+        """Check if venue has geocoded location"""
+        return self.venue_lat is not None and self.venue_lng is not None
 
     def get_time_until_booking(self) -> int | None:
         """Get hours until booking (None if past)"""
