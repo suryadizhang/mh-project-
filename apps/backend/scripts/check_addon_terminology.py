@@ -19,8 +19,8 @@ async def check_terminology():
 
     rows = await conn.fetch(
         """
-        SELECT upsell_item, pitch_template 
-        FROM upsell_rules 
+        SELECT upsell_item, pitch_template
+        FROM upsell_rules
         WHERE upsell_item IN ('Extra Protein Add-on', 'Gyoza', 'Yakisoba Noodles', 'Add-on Offer - General')
         ORDER BY success_rate DESC
     """

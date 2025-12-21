@@ -77,7 +77,7 @@ const upgradeItems = [
       { name: 'Salmon', price: '+$5' },
       { name: 'Scallops', price: '+$5' },
       { name: 'Filet Mignon', price: '+$5' },
-      { name: 'Extra Protein', price: '+$10' },
+      { name: '3rd Protein', price: '+$10' },
     ],
     note: 'per order',
     icon: <Crown className="h-5 w-5" />,

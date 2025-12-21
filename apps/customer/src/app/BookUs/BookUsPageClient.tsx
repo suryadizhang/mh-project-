@@ -62,6 +62,17 @@ export default function BookUsPageClient() {
   const [loadingTimeSlots, setLoadingTimeSlots] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Smart Scheduling States
+  const [venueCoordinates, setVenueCoordinates] = useState<{ lat: number; lng: number } | null>(
+    null,
+  );
+  const [geocodingError, setGeocodingError] = useState<string | null>(null);
+  const [isGeocodingVenue, setIsGeocodingVenue] = useState(false);
+  const [unavailabilityMessage, setUnavailabilityMessage] = useState<string | null>(null);
+  const [alternativeSuggestions, setAlternativeSuggestions] = useState<
+    Array<{ slot_date: string; slot_time: string; score: number }>
+  >([]);
+
   // Allergen acknowledgment checkboxes
   const [allergenAcknowledged, setAllergenAcknowledged] = useState(false);
   const [riskAccepted, setRiskAccepted] = useState(false);
@@ -189,6 +200,105 @@ export default function BookUsPageClient() {
       setLoadingTimeSlots(false);
     }
   };
+
+  // Geocode venue address for smart scheduling
+  const geocodeVenueAddress = useCallback(async () => {
+    if (!venueStreet || !venueCity || !venueState || !venueZipcode) {
+      return;
+    }
+
+    setIsGeocodingVenue(true);
+    setGeocodingError(null);
+
+    try {
+      const response = await apiFetch('/api/v1/scheduling/geocode', {
+        method: 'POST',
+        body: JSON.stringify({
+          street_address: venueStreet,
+          city: venueCity,
+          state: venueState,
+          zip_code: venueZipcode,
+        }),
+      });
+
+      if (response.success && response.data) {
+        const data = response.data as {
+          lat: number;
+          lng: number;
+          is_valid: boolean;
+          normalized_address: string;
+        };
+        if (data.is_valid) {
+          setVenueCoordinates({ lat: data.lat, lng: data.lng });
+          logger.debug('Venue geocoded successfully');
+        } else {
+          setGeocodingError('We could not verify this address. Please check and try again.');
+        }
+      }
+    } catch (error) {
+      logger.warn('Error geocoding venue', { error });
+      // Continue without geocoding - scheduling will work with address only
+    } finally {
+      setIsGeocodingVenue(false);
+    }
+  }, [venueStreet, venueCity, venueState, venueZipcode]);
+
+  // Check availability with smart suggestions
+  const checkAvailabilityWithSuggestions = useCallback(
+    async (date: Date, time: string, guestCount: number) => {
+      setUnavailabilityMessage(null);
+      setAlternativeSuggestions([]);
+
+      // Convert time slot to 24h format for API
+      const timeMap: Record<string, string> = {
+        '12PM': '12:00:00',
+        '3PM': '15:00:00',
+        '6PM': '18:00:00',
+        '9PM': '21:00:00',
+      };
+
+      try {
+        const response = await apiFetch('/api/v1/scheduling/availability/check', {
+          method: 'POST',
+          body: JSON.stringify({
+            event_date: format(date, 'yyyy-MM-dd'),
+            event_time: timeMap[time] || '18:00:00',
+            guest_count: guestCount || 10,
+            venue_lat: venueCoordinates?.lat,
+            venue_lng: venueCoordinates?.lng,
+          }),
+        });
+
+        if (response.success && response.data) {
+          const data = response.data as {
+            is_requested_available: boolean;
+            message: string;
+            suggestions: Array<{ slot_date: string; slot_time: string; score: number }>;
+          };
+
+          if (!data.is_requested_available) {
+            setUnavailabilityMessage(data.message);
+            setAlternativeSuggestions(data.suggestions || []);
+          }
+        }
+      } catch (error) {
+        logger.warn('Error checking availability', { error });
+        // Continue without smart suggestions
+      }
+    },
+    [venueCoordinates],
+  );
+
+  // Auto-geocode when venue address is complete
+  useEffect(() => {
+    if (venueStreet && venueCity && venueState && venueZipcode) {
+      const debounceTimer = setTimeout(() => {
+        geocodeVenueAddress();
+      }, 1000); // Debounce 1 second
+
+      return () => clearTimeout(debounceTimer);
+    }
+  }, [venueStreet, venueCity, venueState, venueZipcode, geocodeVenueAddress]);
 
   // Load booked dates on component mount
   useEffect(() => {
@@ -378,9 +488,7 @@ export default function BookUsPageClient() {
               <div className="flex items-start">
                 <AlertTriangle className="mt-1 mr-3 h-6 w-6 flex-shrink-0 text-yellow-500" />
                 <div className="flex-1">
-                  <h5 className="mb-2 font-bold">
-                    💳 Deposit Required to Secure Your Booking
-                  </h5>
+                  <h5 className="mb-2 font-bold">💳 Deposit Required to Secure Your Booking</h5>
                   <p className="mb-2">
                     A <strong>$100 refundable deposit</strong> is required to confirm and secure
                     your booking date.
@@ -421,8 +529,11 @@ export default function BookUsPageClient() {
 
               {/* Show restore notice if there's saved data */}
               {hasSavedData && lastSaved && (
-                <div className="relative bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 flex items-start gap-3" role="alert">
-                  <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                <div
+                  className="relative mb-6 flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4"
+                  role="alert"
+                >
+                  <Info className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-500" />
                   <div className="flex-1">
                     <p className="text-blue-800">
                       <strong>Draft restored!</strong> Your previous booking form was saved on{' '}
@@ -430,7 +541,7 @@ export default function BookUsPageClient() {
                     </p>
                     <button
                       type="button"
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium underline mt-1"
+                      className="mt-1 text-sm font-medium text-blue-600 underline hover:text-blue-800"
                       onClick={clearSavedData}
                     >
                       Clear draft
@@ -438,7 +549,7 @@ export default function BookUsPageClient() {
                   </div>
                   <button
                     type="button"
-                    className="text-blue-400 hover:text-blue-600 transition-colors"
+                    className="text-blue-400 transition-colors hover:text-blue-600"
                     aria-label="Close"
                     onClick={() => {
                       /* Just hides the alert */
@@ -618,6 +729,70 @@ export default function BookUsPageClient() {
                         {errors.eventTime && (
                           <div className="invalid-feedback">{errors.eventTime.message}</div>
                         )}
+
+                        {/* Smart Availability Suggestions */}
+                        {unavailabilityMessage && (
+                          <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                            <div className="flex items-start gap-2">
+                              <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-amber-800">
+                                  {unavailabilityMessage}
+                                </p>
+                                {alternativeSuggestions.length > 0 && (
+                                  <div className="mt-2">
+                                    <p className="mb-2 text-sm text-amber-700">
+                                      Available alternatives:
+                                    </p>
+                                    <div className="flex flex-wrap gap-2">
+                                      {alternativeSuggestions.slice(0, 3).map((suggestion, idx) => (
+                                        <button
+                                          key={idx}
+                                          type="button"
+                                          className="rounded-md border border-amber-300 bg-white px-3 py-1.5 text-sm text-amber-800 transition-colors hover:bg-amber-100"
+                                          onClick={() => {
+                                            // Parse and set the suggested date/time
+                                            const suggestedDate = new Date(suggestion.slot_date);
+                                            setValue('eventDate', suggestedDate);
+                                            // Convert 24h time to 12h slot
+                                            const hour = parseInt(
+                                              suggestion.slot_time.split(':')[0],
+                                              10,
+                                            );
+                                            const slotMap: Record<
+                                              number,
+                                              '12PM' | '3PM' | '6PM' | '9PM'
+                                            > = {
+                                              12: '12PM',
+                                              15: '3PM',
+                                              18: '6PM',
+                                              21: '9PM',
+                                            };
+                                            if (slotMap[hour]) {
+                                              setValue('eventTime', slotMap[hour]);
+                                            }
+                                            setUnavailabilityMessage(null);
+                                            setAlternativeSuggestions([]);
+                                          }}
+                                        >
+                                          {new Date(suggestion.slot_date).toLocaleDateString(
+                                            'en-US',
+                                            {
+                                              weekday: 'short',
+                                              month: 'short',
+                                              day: 'numeric',
+                                            },
+                                          )}{' '}
+                                          at {suggestion.slot_time.slice(0, 5)}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -628,10 +803,33 @@ export default function BookUsPageClient() {
                   <h3 className="section-title inline-flex items-center">
                     <MapPin className="mr-2 h-5 w-5" />
                     Event Venue Address
+                    {isGeocodingVenue && (
+                      <span className="ml-2 animate-pulse text-sm text-gray-500">
+                        <RefreshCw className="mr-1 inline h-4 w-4 animate-spin" />
+                        Verifying...
+                      </span>
+                    )}
+                    {venueCoordinates && !isGeocodingVenue && (
+                      <span className="ml-2 text-sm text-green-600">
+                        <CheckCircle className="mr-1 inline h-4 w-4" />
+                        Verified
+                      </span>
+                    )}
                   </h3>
                   <p className="section-description">
                     Please provide the address where the hibachi event will take place.
+                    {venueCoordinates && (
+                      <span className="ml-2 text-green-600">
+                        ✓ We&apos;ll use this to check chef availability in your area.
+                      </span>
+                    )}
                   </p>
+                  {geocodingError && (
+                    <div className="mt-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                      <AlertTriangle className="mr-1 inline h-4 w-4" />
+                      {geocodingError}
+                    </div>
+                  )}
 
                   <div className="row">
                     <div className="col-12">
@@ -811,8 +1009,9 @@ export default function BookUsPageClient() {
                             <input
                               type="text"
                               id="addressZipcode"
-                              className={`form-control ${errors.addressZipcode ? 'is-invalid' : ''
-                                }`}
+                              className={`form-control ${
+                                errors.addressZipcode ? 'is-invalid' : ''
+                              }`}
                               {...register('addressZipcode', { required: 'ZIP code is required' })}
                               placeholder="94102"
                             />
@@ -851,10 +1050,10 @@ export default function BookUsPageClient() {
                 </div>
 
                 {/* Submit Button */}
-                <div className="text-center py-6">
+                <div className="py-6 text-center">
                   <button
                     type="submit"
-                    className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-10 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white text-lg font-bold rounded-xl shadow-lg hover:from-red-700 hover:to-red-800 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    className="inline-flex w-full transform items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-red-700 px-10 py-4 text-lg font-bold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:from-red-700 hover:to-red-800 hover:shadow-xl disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50 md:w-auto"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
@@ -869,8 +1068,8 @@ export default function BookUsPageClient() {
                       </>
                     )}
                   </button>
-                  <p className="mt-4 text-gray-500 text-sm">
-                    <ShieldCheck className="inline-block mr-1 h-4 w-4" />
+                  <p className="mt-4 text-sm text-gray-500">
+                    <ShieldCheck className="mr-1 inline-block h-4 w-4" />
                     Your information is secure and will only be used to process your booking.
                   </p>
                 </div>
@@ -882,33 +1081,36 @@ export default function BookUsPageClient() {
 
       {/* Validation Modal */}
       {showValidationModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md mx-4 animate-in zoom-in-95 duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div className="animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm duration-200">
+          <div className="animate-in zoom-in-95 mx-4 w-full max-w-md duration-200">
+            <div className="overflow-hidden rounded-2xl bg-white shadow-2xl">
               <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-4">
-                <h5 className="text-xl font-bold text-white flex items-center gap-2">
-                  <AlertTriangle className="w-6 h-6" />
+                <h5 className="flex items-center gap-2 text-xl font-bold text-white">
+                  <AlertTriangle className="h-6 w-6" />
                   Missing Information
                 </h5>
               </div>
               <div className="p-6">
-                <p className="text-gray-600 mb-4">Please fill in the following required fields:</p>
+                <p className="mb-4 text-gray-600">Please fill in the following required fields:</p>
                 <ul className="space-y-2">
                   {missingFields.map((field, index) => (
-                    <li key={index} className="flex items-center gap-2 text-gray-700 bg-gray-50 px-4 py-2 rounded-lg">
-                      <ArrowRight className="w-4 h-4 text-red-500 flex-shrink-0" />
+                    <li
+                      key={index}
+                      className="flex items-center gap-2 rounded-lg bg-gray-50 px-4 py-2 text-gray-700"
+                    >
+                      <ArrowRight className="h-4 w-4 flex-shrink-0 text-red-500" />
                       {field}
                     </li>
                   ))}
                 </ul>
               </div>
-              <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+              <div className="border-t border-gray-100 bg-gray-50 px-6 py-4">
                 <button
                   type="button"
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-md hover:shadow-lg"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-red-700 px-6 py-3 font-semibold text-white shadow-md transition-all duration-200 hover:from-red-700 hover:to-red-800 hover:shadow-lg"
                   onClick={() => setShowValidationModal(false)}
                 >
-                  <Check className="w-5 h-5" />
+                  <Check className="h-5 w-5" />
                   Got It
                 </button>
               </div>
