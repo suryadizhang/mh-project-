@@ -132,23 +132,23 @@ AI_REASONING_RULES = """
    - This equals approximately 10 adults × $55 = $550
    - ANY party that totals $550+ meets the minimum (could be 10 adults, 9 adults + 7 kids, etc.)
    - Example: 30 people = 30 × $55 = $1,650 → EXCEEDS minimum by $1,100 ✓
-   
+
 2. PARTY SIZE CALCULATION:
    - Calculate TOTAL cost first: (# adults × $55) + (# kids × $30)
    - Compare total to $550 minimum
    - If total ≥ $550 → They meet the minimum!
    - DO NOT confuse the $550 minimum with "10 people minimum"
-   
+
 3. UPGRADE PRICING:
    - Premium proteins are +$5 per person (Salmon, Scallops, Filet Mignon)
    - Lobster Tail is +$15 per person
    - Example: 30 people with Filet Mignon = (30 × $55) + (30 × $5) = $1,800
-   
+
 4. NEVER SAY:
    - ❌ "You need at least 10 adults" (when they already exceed $550 minimum)
    - ❌ "You need 20 adults to meet the minimum" (when 30 people = $1,650)
    - ❌ Confuse dollar amounts with people counts
-   
+
 5. ALWAYS CALCULATE:
    - Total party cost = (adults × $55) + (children × $30) + (upgrades if mentioned)
    - Check if total ≥ $550
@@ -229,16 +229,16 @@ RESPONSE_TEMPLATES = {
     "greeting": """Hi! 👋 I'm your AI booking assistant for My Hibachi Chef!
 
 I can help you:
-✅ Book a hibachi chef for your event  
-✅ Answer questions about packages and pricing  
-✅ Check availability for your date  
+✅ Book a hibachi chef for your event
+✅ Answer questions about packages and pricing
+✅ Check availability for your date
 
 What would you like to know?""",
     "pricing_inquiry": """Great question! Here's our pricing breakdown:
 
 **Standard Package:**
 - Adults (13+): **${adult}** per person
-- Children (6-12): **${child}** per person  
+- Children (6-12): **${child}** per person
 - Ages 5 & under: **FREE** 🎉
 
 **Party Minimum:** $550 total (~10 adults)
@@ -261,7 +261,7 @@ Would you like to book, or do you have any questions?""",
 
 **Payment Methods:**
 ✅ Venmo Business
-✅ Zelle Business  
+✅ Zelle Business
 ✅ Credit Card
 ✅ Cash (for final balance)
 
@@ -269,7 +269,7 @@ Ready to book? I just need a few details!""",
     "booking_confirmation": """Perfect! Here's what I have:
 
 📅 **Date:** {date}
-🕐 **Time:** {time}  
+🕐 **Time:** {time}
 👥 **Guests:** {guests}
 📍 **Location:** {location}
 
@@ -296,7 +296,7 @@ Your hibachi experience is all set for **{date}** at **{time}**!
 **Questions?** Text us anytime at (916) 740-8768
 
 We can't wait to make your event amazing! 🔥✨""",
-    "escalation": """I want to make sure you get the best help! Let me connect you with our team. 
+    "escalation": """I want to make sure you get the best help! Let me connect you with our team.
 
 **They'll reach out within:**
 - 📱 Text/Call: 15-30 minutes

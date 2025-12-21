@@ -242,7 +242,7 @@ class DataAudit:
 
         # Check for real pricing examples
         real_pricing_count = await self.conn.fetchval(
-            """SELECT COUNT(*) FROM training_data 
+            """SELECT COUNT(*) FROM training_data
                WHERE (ai_response LIKE '%$2,750%' OR ai_response LIKE '%2750%')
                AND is_active = true"""
         )
@@ -308,8 +308,8 @@ class DataAudit:
                 # Check for any test/fake bookings
                 try:
                     fake_bookings = await self.conn.fetch(
-                        """SELECT id, customer_name, event_date FROM bookings 
-                           WHERE customer_name ILIKE '%test%' 
+                        """SELECT id, customer_name, event_date FROM bookings
+                           WHERE customer_name ILIKE '%test%'
                            OR customer_name ILIKE '%fake%'
                            OR customer_name ILIKE '%sample%'
                            LIMIT 5"""
