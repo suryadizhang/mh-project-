@@ -357,6 +357,57 @@ Before moving to next batch:
 
 ---
 
+## � LIVE PROGRESS TRACKER (Quick Reference)
+
+**⚠️ COPILOT: Check this section + CURRENT_BATCH_STATUS.md before ANY
+work!**
+
+### Batch Status Summary (Last Updated: December 21, 2025)
+
+| Batch | Name                    | Status           | Key Milestone               |
+| ----- | ----------------------- | ---------------- | --------------------------- |
+| **0** | Repo Cleanup            | ✅ COMPLETE      | Branch strategy done        |
+| **1** | Core Booking + Security | 🟡 CODE COMPLETE | Pending DevOps (Cloudflare) |
+| **2** | Payment Processing      | ⬜ NOT STARTED   | Waiting for Batch 1         |
+| **3** | Core AI (3-Model LLM)   | ⬜ NOT STARTED   | GPT-4o + Claude + Mistral   |
+| **4** | Communications          | ⬜ NOT STARTED   | RingCentral, Meta           |
+| **5** | Advanced AI + Marketing | ⬜ NOT STARTED   | Google Ads, Reviews         |
+| **6** | AI Training & Scaling   | ⬜ NOT STARTED   | Shadow Learning, Local AI   |
+
+### Key Decisions Made (Don't Forget!)
+
+| Decision                  | Details                                                         | Date         |
+| ------------------------- | --------------------------------------------------------------- | ------------ |
+| **3-Model LLM Strategy**  | GPT-4o (complex) + Claude (empathy) + Mistral (cheap) - NO GROK | Dec 21, 2025 |
+| **$300/mo API Threshold** | Rent GPU only when API costs exceed $300/month                  | Dec 21, 2025 |
+| **Laptop Fine-Tuning**    | Can train Phi-4 14B, Qwen3 8B, DeepSeek 7B on laptop            | Dec 21, 2025 |
+| **Shadow Learning First** | Collect 50K pairs before investing in GPU                       | Dec 21, 2025 |
+
+### Cross-Batch Features (Reference Other Instruction Files)
+
+| Feature          | Instruction File                               | Status            |
+| ---------------- | ---------------------------------------------- | ----------------- |
+| Smart Scheduling | `17-SMART_SCHEDULING_SYSTEM.instructions.md`   | Phases 1-8 spec'd |
+| Multi-LLM AI     | `18-AI_MULTI_LLM_ARCHITECTURE.instructions.md` | 3-model strategy  |
+| Infrastructure   | `16-INFRASTRUCTURE_DEPLOYMENT.instructions.md` | VPS + Cloudflare  |
+
+### When Adding NEW Plans:
+
+1. ✅ Update `CURRENT_BATCH_STATUS.md` (live status)
+2. ✅ Update `docs/04-DEPLOYMENT/BATCH_CHECKLISTS.md` (detailed tasks)
+3. ✅ Update relevant `.github/instructions/*.md` file if cross-batch
+4. ✅ Update this "Key Decisions" table if it's a major strategy
+   change
+
+### When COMPLETING Work:
+
+1. ✅ Mark checkbox in `CURRENT_BATCH_STATUS.md`
+2. ✅ Mark checkbox in `BATCH_CHECKLISTS.md`
+3. ✅ Update batch status in table above
+4. ✅ Run tests before claiming complete
+
+---
+
 ## 📁 Batch Documentation
 
 Each batch has dedicated docs:
@@ -372,15 +423,13 @@ docs/04-DEPLOYMENT/
 │   ├── BATCH-5-MARKETING-AI.md
 │   └── BATCH-6-TRAINING-SCALING.md
 └── checklists/
-    ├── BATCH-1-CHECKLIST.md
-    ├── BATCH-2-CHECKLIST.md
-    └── ...
+    └── BATCH_CHECKLISTS.md (MAIN FILE - detailed tasks)
 ```
 
 ---
 
 ## 🔗 Related Docs
 
-- `CURRENT_BATCH_STATUS.md` – Live status
-- `docs/04-DEPLOYMENT/DEPLOYMENT_BATCH_STRATEGY.md` – Master plan
+- `CURRENT_BATCH_STATUS.md` – Live status (UPDATE FIRST!)
+- `docs/04-DEPLOYMENT/BATCH_CHECKLISTS.md` – Detailed checklists
 - `docs/04-DEPLOYMENT/batches/` – Per-batch details

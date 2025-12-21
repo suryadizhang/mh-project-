@@ -31,6 +31,7 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    Numeric,
     String,
     Text,
     UniqueConstraint,
@@ -272,11 +273,22 @@ class Station(Base):
     state: Mapped[Optional[str]] = mapped_column(String(50))
     postal_code: Mapped[Optional[str]] = mapped_column(String(20))  # RENAMED: was zip_code
 
+    # Geocoding (for distance-based service area calculations)
+    lat: Mapped[Optional[float]] = mapped_column(Numeric(10, 8), nullable=True)
+    lng: Mapped[Optional[float]] = mapped_column(Numeric(11, 8), nullable=True)
+    geocoded_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    geocode_status: Mapped[Optional[str]] = mapped_column(
+        String(20), server_default=text("'pending'")
+    )
+
     # Business Operations (OPTIONAL FIELDS)
     business_hours: Mapped[Optional[dict]] = mapped_column(JSON)  # NEW: Operating hours config
     service_area_radius: Mapped[Optional[int]] = mapped_column(
-        Integer
-    )  # NEW: Service radius in miles
+        Integer, server_default=text("150")
+    )  # Service radius in miles (default 150)
+    escalation_radius_miles: Mapped[Optional[int]] = mapped_column(
+        Integer, server_default=text("150")
+    )  # Miles beyond which bookings require human escalation
     branding_config: Mapped[Optional[dict]] = mapped_column(JSON)  # NEW: Custom branding settings
 
     # Timestamps
@@ -317,6 +329,84 @@ class Station(Base):
 
     def __repr__(self) -> str:
         return f"<Station(id={self.id}, name={self.name}, code={self.code}, status={self.status})>"
+
+    # ==================== GEOCODING HELPERS ====================
+
+    @property
+    def is_geocoded(self) -> bool:
+        """Check if station has been successfully geocoded."""
+        return self.geocode_status == "success" and self.lat is not None and self.lng is not None
+
+    @property
+    def coordinates(self) -> tuple[float, float] | None:
+        """Get lat/lng tuple if geocoded."""
+        if self.lat is not None and self.lng is not None:
+            return (float(self.lat), float(self.lng))
+        return None
+
+    @property
+    def full_address(self) -> str:
+        """Get full formatted address."""
+        parts = []
+        if self.address:
+            parts.append(self.address)
+        if self.city:
+            parts.append(self.city)
+        if self.state:
+            parts.append(self.state)
+        if self.postal_code:
+            parts.append(self.postal_code)
+        return ", ".join(parts) if parts else ""
+
+    def distance_to_km(self, lat: float, lng: float) -> float | None:
+        """
+        Calculate distance from this station to given coordinates.
+        Uses Haversine formula. Returns distance in kilometers.
+        Returns None if station is not geocoded.
+        """
+        import math
+
+        if not self.is_geocoded:
+            return None
+
+        R = 6371  # Earth radius in km
+
+        lat1_rad = math.radians(float(self.lat))
+        lat2_rad = math.radians(lat)
+        dlat = math.radians(lat - float(self.lat))
+        dlng = math.radians(lng - float(self.lng))
+
+        a = (
+            math.sin(dlat / 2) ** 2
+            + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlng / 2) ** 2
+        )
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+        return R * c
+
+    def distance_to_miles(self, lat: float, lng: float) -> float | None:
+        """Calculate distance in miles."""
+        km = self.distance_to_km(lat, lng)
+        return km * 0.621371 if km is not None else None
+
+    def is_within_service_area(self, lat: float, lng: float) -> bool:
+        """Check if coordinates are within this station's service area."""
+        miles = self.distance_to_miles(lat, lng)
+        if miles is None:
+            return False
+        radius = self.service_area_radius or 150
+        return miles <= radius
+
+    def requires_escalation(self, lat: float, lng: float) -> bool:
+        """
+        Check if distance requires human escalation.
+        Returns True if distance > escalation_radius_miles (default 150).
+        """
+        miles = self.distance_to_miles(lat, lng)
+        if miles is None:
+            return True  # Unknown = escalate
+        threshold = self.escalation_radius_miles or 150
+        return miles > threshold
 
 
 class StationUser(Base):

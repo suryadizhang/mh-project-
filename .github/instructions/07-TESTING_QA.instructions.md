@@ -365,6 +365,113 @@ npx playwright test
 
 ---
 
+## 🗄️ Database Migration Safety (MANDATORY)
+
+### Pre-Migration Checklist:
+
+| Check                      | Action                                                   | Why                            |
+| -------------------------- | -------------------------------------------------------- | ------------------------------ |
+| **Backup taken**           | `pg_dump myhibachi_staging > backup_$(date +%Y%m%d).sql` | Recovery if migration fails    |
+| **Migration reviewed**     | Read every line of SQL                                   | Catch destructive operations   |
+| **No DROP without backup** | Never drop columns/tables without data export            | Data loss prevention           |
+| **Staging first**          | Run on staging for 48+ hours                             | Catch issues before production |
+| **Rollback script ready**  | Have reverse migration prepared                          | Quick recovery                 |
+
+### Migration Safety Rules:
+
+```sql
+-- ❌ DANGEROUS - Direct DROP
+ALTER TABLE bookings DROP COLUMN legacy_data;
+
+-- ✅ SAFE - Rename first, drop later (after verification)
+-- Step 1: Rename (deploy, verify app works)
+ALTER TABLE bookings RENAME COLUMN legacy_data TO _legacy_data_deprecated;
+
+-- Step 2: Drop in NEXT release (after 1+ week in production)
+ALTER TABLE bookings DROP COLUMN _legacy_data_deprecated;
+```
+
+```sql
+-- ❌ DANGEROUS - Add NOT NULL without default
+ALTER TABLE bookings ADD COLUMN status VARCHAR(20) NOT NULL;
+
+-- ✅ SAFE - Add nullable first, then backfill, then add constraint
+ALTER TABLE bookings ADD COLUMN status VARCHAR(20);
+UPDATE bookings SET status = 'pending' WHERE status IS NULL;
+ALTER TABLE bookings ALTER COLUMN status SET NOT NULL;
+```
+
+### Post-Migration Verification:
+
+```bash
+# Verify schema matches expectations
+psql -d myhibachi_staging -c "\d bookings"
+
+# Verify row counts didn't change unexpectedly
+psql -d myhibachi_staging -c "SELECT COUNT(*) FROM bookings"
+
+# Verify application health
+curl https://staging-api.myhibachi.com/health
+
+# Run integration tests against staging
+pytest tests/integration/ --base-url=https://staging-api.myhibachi.com
+```
+
+---
+
+## 📋 PR Review Checklist (Industry Standard)
+
+### Before Approving ANY PR:
+
+**Code Quality:**
+
+- [ ] Code follows SOLID principles (01-CORE_PRINCIPLES)
+- [ ] No `any` types in TypeScript
+- [ ] Error handling is comprehensive
+- [ ] No hardcoded values (use config/env)
+- [ ] No console.log/print statements left
+- [ ] Comments explain "why", not "what"
+
+**Testing:**
+
+- [ ] Unit tests for new logic
+- [ ] Integration tests for new endpoints
+- [ ] Tests actually test the behavior (not mocks)
+- [ ] Edge cases covered (null, empty, boundary)
+
+**Security:**
+
+- [ ] Input validation on all user data
+- [ ] No secrets in code
+- [ ] SQL injection prevention (parameterized queries)
+- [ ] XSS prevention (escaped output)
+- [ ] Authorization checks on endpoints
+
+**Performance:**
+
+- [ ] No N+1 queries (eager loading used)
+- [ ] Pagination for list endpoints
+- [ ] Heavy operations are async/background
+- [ ] No unnecessary re-renders (React)
+
+**Documentation:**
+
+- [ ] Public APIs documented
+- [ ] Complex logic commented
+- [ ] CHANGELOG updated if user-facing
+- [ ] Feature flag documented if used
+
+### PR Size Guidelines:
+
+| PR Size   | Lines Changed | Review Time | Action            |
+| --------- | ------------- | ----------- | ----------------- |
+| 🟢 Small  | < 100         | 15 min      | Quick review      |
+| 🟡 Medium | 100-300       | 30 min      | Standard review   |
+| 🟠 Large  | 300-500       | 1 hour      | Split if possible |
+| 🔴 Huge   | > 500         | 2+ hours    | MUST split        |
+
+---
+
 ## ⚠️ Test Anti-Patterns
 
 | Don't                       | Do Instead                     |

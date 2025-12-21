@@ -56,8 +56,11 @@ Use this tool when customer asks:
 - "Do you service my area?"
 - Any question about location-based fees
 
+Service Area: California - Bay Area, Sacramento, Central Valley
+Headquarters: Fremont, CA
+
 Pricing:
-- FREE within 30 miles of Sacramento
+- FREE within 30 miles of Fremont, CA
 - $2.00 per mile after the first 30 miles
 - Calculated using Google Maps for accuracy
 
@@ -71,9 +74,9 @@ Returns exact distance and fee amount."""
                 type="string",
                 description="""Customer location for travel fee calculation.
 Can be:
-- Full address: "123 Main St, Sacramento, CA 95814"
-- City: "Roseville, CA"
-- ZIP code: "95630"
+- Full address: "123 Main St, Fremont, CA 94536"
+- City: "San Jose, CA"
+- ZIP code: "94536"
 
 More specific addresses give more accurate results.""",
                 required=False,
@@ -82,7 +85,7 @@ More specific addresses give more accurate results.""",
                 name="customer_zipcode",
                 type="string",
                 description="""Customer ZIP code (if full address not available).
-Example: "95630"
+Example: "94536"
 
 Use customer_address for better accuracy when possible.""",
                 required=False,

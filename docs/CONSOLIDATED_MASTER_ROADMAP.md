@@ -398,12 +398,12 @@ FEATURE_CUSTOMER_REVIEWS=true
 
 ### Multi-LLM System (From `COMPREHENSIVE_AI_AND_DEPLOYMENT_MASTER_PLAN.md`)
 
-| Feature                 | Purpose                          | Effort   |
-| ----------------------- | -------------------------------- | -------- |
-| Multi-LLM Discussion    | OpenAI + Anthropic + Grok debate | 16 hours |
-| Classroom Voting System | Best response selection          | 8 hours  |
-| Teacher-Student Pattern | GPT-4 teaches, Llama learns      | 12 hours |
-| Confidence Router       | 75%/40% thresholds               | 4 hours  |
+| Feature                 | Purpose                              | Effort   |
+| ----------------------- | ------------------------------------ | -------- |
+| Multi-LLM Discussion    | GPT-4o + Claude + Mistral (3 models) | 16 hours |
+| Classroom Voting System | Best response selection (majority)   | 8 hours  |
+| Teacher-Student Pattern | API LLMs teach, local model learns   | 12 hours |
+| Confidence Router       | 75%/40% thresholds                   | 4 hours  |
 
 ### Shadow Learning (From `FUTURE_SCALING_PLAN.md`)
 
@@ -449,8 +449,10 @@ FEATURE_GOOGLE_CALENDAR=true
 FEATURE_GOOGLE_BUSINESS_PROFILE=true
 FEATURE_LOYALTY_PROGRAM=true
 
+# 3-Model LLM Strategy (GPT-4o + Claude + Mistral)
+OPENAI_API_KEY=xxx
 ANTHROPIC_API_KEY=xxx
-XAI_API_KEY=xxx  # Grok
+MISTRAL_API_KEY=xxx
 ```
 
 ---

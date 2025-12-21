@@ -14,6 +14,7 @@ from core.auth.station_middleware import (
 from core.auth.station_middleware import (
     audit_log_action as log_station_activity,
 )
+
 # Phase 1.1: Use canonical db.models.identity instead of deprecated station_models
 from db.models.identity import (
     Station,
@@ -143,7 +144,10 @@ class StationUpdateRequest(BaseModel):
     )
     settings: dict[str, Any] | None = Field(None)
     business_hours: dict[str, Any] | None = Field(None)
-    service_area_radius: int | None = Field(None, ge=0)
+    service_area_radius: int | None = Field(None, ge=0, description="Service radius in miles")
+    escalation_radius_miles: int | None = Field(
+        None, ge=0, description="Distance beyond which bookings require human escalation"
+    )
     max_concurrent_bookings: int | None = Field(None, ge=1)
     booking_lead_time_hours: int | None = Field(None, ge=0)
     branding_config: dict[str, Any] | None = Field(None)
@@ -168,11 +172,20 @@ class StationResponse(BaseModel):
     settings: dict[str, Any]
     business_hours: dict[str, Any] | None
     service_area_radius: int | None
+    escalation_radius_miles: int | None
     max_concurrent_bookings: int
     booking_lead_time_hours: int
     branding_config: dict[str, Any] | None
     created_at: datetime
     updated_at: datetime
+
+    # Geocoding fields
+    lat: float | None = None
+    lng: float | None = None
+    geocoded_at: datetime | None = None
+    geocode_status: str | None = None
+    is_geocoded: bool = False
+    full_address: str | None = None
 
     # Statistics (populated optionally)
     user_count: int | None = None
@@ -249,6 +262,41 @@ class AuditLogResponse(BaseModel):
 # Station management endpoints
 
 
+def _build_station_response(station: Station) -> StationResponse:
+    """Build StationResponse with computed properties from Station model."""
+    return StationResponse(
+        id=str(station.id),
+        code=station.code,
+        name=station.name,
+        display_name=station.display_name,
+        email=station.email,
+        phone=station.phone,
+        address=station.address,
+        city=station.city,
+        state=station.state,
+        postal_code=station.postal_code,
+        country=station.country,
+        timezone=station.timezone,
+        status=station.status,
+        settings=station.settings or {},
+        business_hours=station.business_hours,
+        service_area_radius=station.service_area_radius,
+        escalation_radius_miles=station.escalation_radius_miles,
+        max_concurrent_bookings=station.max_concurrent_bookings,
+        booking_lead_time_hours=station.booking_lead_time_hours,
+        branding_config=station.branding_config,
+        created_at=station.created_at,
+        updated_at=station.updated_at,
+        # Geocoding fields
+        lat=float(station.lat) if station.lat is not None else None,
+        lng=float(station.lng) if station.lng is not None else None,
+        geocoded_at=station.geocoded_at,
+        geocode_status=station.geocode_status,
+        is_geocoded=station.is_geocoded,  # Property
+        full_address=station.full_address,  # Property
+    )
+
+
 # NO-AUTH TESTING ENDPOINT (Remove in production)
 @router.get("/list-no-auth")
 async def list_stations_no_auth(
@@ -263,7 +311,7 @@ async def list_stations_no_auth(
         result = await db.execute(query)
         stations = result.scalars().all()
 
-        # Build simple response
+        # Build simple response with geocoding fields
         response = []
         for station in stations:
             response.append(
@@ -275,6 +323,13 @@ async def list_stations_no_auth(
                     "city": station.city,
                     "state": station.state,
                     "status": station.status,
+                    # Geocoding fields
+                    "lat": float(station.lat) if station.lat is not None else None,
+                    "lng": float(station.lng) if station.lng is not None else None,
+                    "geocode_status": station.geocode_status,
+                    "is_geocoded": station.is_geocoded,
+                    "service_area_radius": station.service_area_radius,
+                    "escalation_radius_miles": station.escalation_radius_miles,
                 }
             )
 
@@ -323,7 +378,8 @@ async def list_stations(
         # Build response with optional statistics
         response = []
         for station in stations:
-            station_data = StationResponse.model_validate(station)
+            # Use helper function to include computed properties
+            station_data = _build_station_response(station)
 
             if include_stats:
                 # Count users (async)
@@ -480,7 +536,7 @@ async def create_station(
 
 @router.get("/{station_id}", response_model=StationResponse)
 async def get_station(
-    station_id: int,
+    station_id: str,
     include_stats: bool = Query(False, description="Include detailed statistics"),
     current_user: AuthenticatedUser = Depends(require_station_permission("view_stations")),
     db: AsyncSession = Depends(get_db_session),
@@ -491,45 +547,60 @@ async def get_station(
     Requires 'view_stations' permission.
     Users can only view their assigned station unless they're super admin.
     """
+    from uuid import UUID as PyUUID
+
     try:
+        # Parse station_id (can be UUID string)
+        try:
+            uuid_station_id = PyUUID(station_id)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid station ID format",
+            )
+
         # Check station access
-        if not current_user.is_super_admin and station_id != current_user.station_id:
+        if not current_user.is_super_admin and uuid_station_id != current_user.station_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Access denied to this station",
             )
 
-        station = db.query(Station).filter(Station.id == station_id).first()
+        # Async query
+        result = await db.execute(select(Station).where(Station.id == uuid_station_id))
+        station = result.scalar_one_or_none()
+
         if not station:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Station not found",
             )
 
-        response = StationResponse.from_orm(station)
+        # Use helper function to include computed properties
+        response = _build_station_response(station)
 
         if include_stats:
-            # Detailed statistics
-            user_count = (
-                db.query(StationUser)
-                .filter(
+            # Detailed statistics (async)
+            user_count_result = await db.execute(
+                select(func.count(StationUser.id)).where(
                     and_(
-                        StationUser.station_id == station_id,
+                        StationUser.station_id == uuid_station_id,
                         StationUser.is_active,
                     )
                 )
-                .count()
             )
+            user_count = user_count_result.scalar_one()
 
-            last_activity = (
-                db.query(StationAuditLog.timestamp)
-                .filter(StationAuditLog.station_id == station_id)
+            last_activity_result = await db.execute(
+                select(StationAuditLog.timestamp)
+                .where(StationAuditLog.station_id == uuid_station_id)
                 .order_by(desc(StationAuditLog.timestamp))
-                .first()
+                .limit(1)
             )
+            last_activity = last_activity_result.scalar_one_or_none()
 
             response.user_count = user_count
-            response.last_activity = last_activity[0] if last_activity else None
+            response.last_activity = last_activity
 
         await log_station_activity(
             action="view_station",
@@ -667,6 +738,13 @@ async def update_station(
             }
             station.service_area_radius = request.service_area_radius
 
+        if request.escalation_radius_miles is not None:
+            changes["escalation_radius_miles"] = {
+                "old": station.escalation_radius_miles,
+                "new": request.escalation_radius_miles,
+            }
+            station.escalation_radius_miles = request.escalation_radius_miles
+
         if request.max_concurrent_bookings is not None:
             changes["max_concurrent_bookings"] = {
                 "old": station.max_concurrent_bookings,
@@ -731,7 +809,8 @@ async def update_station(
             f"Updated station: {station.code} (ID: {station_id}) - {len(changes)} field(s) changed"
         )
 
-        return StationResponse.model_validate(station)
+        # Use helper function to include computed properties (geocoding)
+        return _build_station_response(station)
 
     except HTTPException:
         raise
@@ -1138,6 +1217,147 @@ async def get_station_audit_log(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Unable to retrieve audit logs",
+        )
+
+
+# ==================== STATION GEOCODING ====================
+
+
+class GeocodeStationResponse(BaseModel):
+    """Response model for geocoding a station."""
+
+    success: bool
+    station_id: str
+    lat: float | None = None
+    lng: float | None = None
+    geocode_status: str
+    geocoded_at: datetime | None = None
+    full_address: str | None = None
+    message: str
+
+
+@router.post("/{station_id}/geocode", response_model=GeocodeStationResponse)
+async def geocode_station(
+    station_id: str,
+    db: AsyncSession = Depends(get_db_session),
+    current_user: AuthenticatedUser = Depends(require_station_permission("manage_stations")),
+) -> GeocodeStationResponse:
+    """
+    Geocode a station's address using Google Maps API.
+
+    This endpoint:
+    - Builds full address from station's address, city, state, postal_code
+    - Calls Google Maps Geocoding API
+    - Updates station's lat, lng, geocode_status, geocoded_at
+    - Returns the geocoding result
+
+    Requires manage_stations permission.
+    """
+    from uuid import UUID as PyUUID
+
+    from services.scheduling.geocoding_service import GeocodingService
+
+    try:
+        # Parse station_id
+        try:
+            uuid_station_id = PyUUID(station_id)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid station ID format",
+            )
+
+        # Find station
+        result = await db.execute(select(Station).where(Station.id == uuid_station_id))
+        station = result.scalar_one_or_none()
+
+        if not station:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Station {station_id} not found",
+            )
+
+        # Build full address
+        address_parts = []
+        if station.address:
+            address_parts.append(station.address)
+        if station.city:
+            address_parts.append(station.city)
+        if station.state:
+            address_parts.append(station.state)
+        if station.postal_code:
+            address_parts.append(station.postal_code)
+        if station.country:
+            address_parts.append(station.country)
+
+        if not address_parts:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Station has no address to geocode",
+            )
+
+        full_address = ", ".join(address_parts)
+
+        # Geocode
+        geocoding_service = GeocodingService(db)
+        geocode_result = await geocoding_service.geocode(full_address)
+
+        if geocode_result and geocode_result.is_valid:
+            # Update station with geocoding data
+            station.lat = geocode_result.lat
+            station.lng = geocode_result.lng
+            station.geocode_status = "success"
+            station.geocoded_at = datetime.now(timezone.utc)
+            await db.commit()
+
+            # Log the action
+            await log_station_activity(
+                action="geocode_station",
+                auth_user=current_user,
+                db=db,
+                resource_type="station",
+                resource_id=station_id,
+                details={
+                    "lat": geocode_result.lat,
+                    "lng": geocode_result.lng,
+                    "full_address": full_address,
+                },
+            )
+
+            return GeocodeStationResponse(
+                success=True,
+                station_id=station_id,
+                lat=geocode_result.lat,
+                lng=geocode_result.lng,
+                geocode_status="success",
+                geocoded_at=station.geocoded_at,
+                full_address=geocode_result.normalized_address or full_address,
+                message="Station geocoded successfully",
+            )
+        else:
+            # Geocoding failed
+            station.geocode_status = "failed"
+            station.geocoded_at = datetime.now(timezone.utc)
+            await db.commit()
+
+            return GeocodeStationResponse(
+                success=False,
+                station_id=station_id,
+                lat=None,
+                lng=None,
+                geocode_status="failed",
+                geocoded_at=station.geocoded_at,
+                full_address=full_address,
+                message="Could not geocode address. Please verify the address is correct.",
+            )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Error geocoding station: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to geocode station",
         )
 
 

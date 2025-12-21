@@ -34,6 +34,10 @@ files in order:
     Lighthouse standards
 16. `16-INFRASTRUCTURE_DEPLOYMENT.instructions.md` – Servers, DB, SSH,
     deployment
+17. `17-SMART_SCHEDULING_SYSTEM.instructions.md` – Booking, slots,
+    chef optimization
+18. `18-AI_MULTI_LLM_ARCHITECTURE.instructions.md` – Multi-LLM
+    ensemble, Smart Router, Mistral integration
 
 ---
 
@@ -78,6 +82,8 @@ If user request conflicts with any rulebook:
 | "Skip the tests"           | Refuse             | Tests required (Rule 07)          |
 | "Just do a quick check"    | Full A–H audit     | Never incremental (Rule 05)       |
 | "Work on Batch 3 feature"  | Check batch status | May be out of scope (Rule 04)     |
+| "Just commit it quickly"   | Refuse             | Pre-commit review MANDATORY       |
+| "Skip the build check"     | Refuse             | Build must pass before commit     |
 
 ---
 
@@ -93,7 +99,154 @@ Before generating code or answering questions:
 
 ---
 
-## 📊 Quality Defaults
+## 🤖 Auto-Execute Mode (IMPORTANT)
+
+**When user gives a clear signal/instruction, execute automatically.**
+
+### DO Automatically (No Confirmation Needed):
+
+| Signal/Instruction           | Auto-Execute Action                    |
+| ---------------------------- | -------------------------------------- |
+| "Commit this" / "Commit all" | Run pre-commit checks → Stage → Commit |
+| "Fix this" / "Fix the error" | Apply fix immediately                  |
+| "Run tests"                  | Execute test commands                  |
+| "Build it"                   | Run build commands                     |
+| "Deploy to staging"          | Execute staging deployment             |
+| "Create the file"            | Create file with proper content        |
+| "Update the code"            | Apply code changes                     |
+| "Delete temp files"          | Remove identified temp files           |
+| "Stage changes"              | Git add the changes                    |
+| "Push it"                    | Git push to remote                     |
+
+### DO Ask Before (Requires Confirmation):
+
+| Situation                            | Why Ask                |
+| ------------------------------------ | ---------------------- |
+| Destructive operations on production | Safety critical        |
+| Unclear requirements                 | Need clarification     |
+| Multiple valid approaches            | User preference needed |
+| Operations I cannot reverse          | User must be aware     |
+| External API calls with cost         | Budget confirmation    |
+| Database migrations on production    | Data safety            |
+
+### Auto-Execute Rules:
+
+1. **Trust user intent** – If instruction is clear, execute it
+2. **Report results** – Always show what was done
+3. **Handle errors gracefully** – If something fails, fix it or
+   explain
+4. **Chain related tasks** – If committing, auto-run pre-commit checks
+   first
+5. **Stay efficient** – Don't ask permission for routine operations
+
+### Example Workflow (Auto-Execute):
+
+```
+User: "commit all changes"
+
+Agent Actions (automatic):
+1. ✅ Delete temp files
+2. ✅ Run npm build (both apps)
+3. ✅ Run tests
+4. ✅ Check Python imports
+5. ✅ Stage all changes
+6. ✅ Commit with proper message
+7. 📊 Report: "Committed X files with message: ..."
+```
+
+---
+
+## � MANDATORY PRE-COMMIT REVIEW (NEVER SKIP!)
+
+**Before EVERY commit, perform a full manual code review.**
+
+This is a **NON-NEGOTIABLE** quality gate. Broken code in commits =
+broken production later.
+
+### Quick Pre-Commit Checklist:
+
+```bash
+# 1. Build ALL apps (catches compile errors)
+cd apps/customer && npm run build
+cd apps/admin && npm run build
+
+# 2. Run ALL tests (catches regressions)
+cd apps/customer && npm test -- --run
+
+# 3. Backend import check (catches Python errors)
+cd apps/backend/src && python -c "from main import app; print('✅ OK')"
+
+# 4. Review EVERY changed line
+git diff --staged
+```
+
+### Before Typing `git commit`:
+
+| Check                 | Command                            | Must Pass? |
+| --------------------- | ---------------------------------- | ---------- |
+| TypeScript builds     | `npm run build`                    | ✅ YES     |
+| All tests pass        | `npm test -- --run`                | ✅ YES     |
+| Python imports work   | `python -c "from main import app"` | ✅ YES     |
+| No console.log/print  | Manual review                      | ✅ YES     |
+| No hardcoded secrets  | Manual review                      | ✅ YES     |
+| No TODO in production | Manual review                      | ✅ YES     |
+
+### 🧹 Clean Code Verification (MANDATORY):
+
+**Before committing, verify code follows best practices:**
+
+| Clean Code Check          | What to Look For                      | Action                               |
+| ------------------------- | ------------------------------------- | ------------------------------------ |
+| **No Duplicate Code**     | Same logic in 2+ places               | Extract to shared function/component |
+| **Single Responsibility** | Function doing multiple things        | Split into focused functions         |
+| **DRY Principle**         | Repeated strings/values               | Use constants or config              |
+| **No Magic Numbers**      | Hardcoded `100`, `3600`, etc.         | Use named constants                  |
+| **Proper Naming**         | `x`, `data`, `temp`, `foo`            | Use descriptive names                |
+| **No Dead Code**          | Commented-out code, unused imports    | Delete it                            |
+| **Error Handling**        | Missing try/catch, unhandled promises | Add proper error handling            |
+| **Type Safety**           | `any` types in TypeScript             | Use proper types                     |
+
+### Code Smell Detection:
+
+```bash
+# Check for console.log/print statements
+grep -r "console.log" apps/customer/src apps/admin/src --include="*.ts" --include="*.tsx"
+grep -r "print(" apps/backend/src --include="*.py" | grep -v "__pycache__"
+
+# Check for TODO/FIXME in production code
+grep -r "TODO\|FIXME\|HACK\|XXX" apps/ --include="*.ts" --include="*.tsx" --include="*.py"
+
+# Check for hardcoded secrets patterns
+grep -r "password\|secret\|api_key\|apikey" apps/ --include="*.ts" --include="*.tsx" --include="*.py" -i
+
+# Check for duplicate function names (potential copy-paste)
+grep -r "function \|const .* = \|def " apps/ --include="*.ts" --include="*.tsx" --include="*.py" | sort | uniq -d
+```
+
+### Best Practices Checklist:
+
+- [ ] **Functions are < 50 lines** (split if longer)
+- [ ] **Files are < 300 lines** (split if longer)
+- [ ] **No nested callbacks > 3 levels** (flatten with async/await)
+- [ ] **All async operations have error handling**
+- [ ] **No hardcoded URLs/ports** (use env vars)
+- [ ] **Imports are organized** (stdlib → external → internal)
+- [ ] **Comments explain WHY, not WHAT**
+- [ ] **Variable names are self-documenting**
+
+### If ANY Check Fails:
+
+1. **STOP** – Do NOT commit
+2. **FIX** – Resolve the issue
+3. **RE-RUN** – All checks again
+4. **THEN COMMIT** – Only when all green
+
+> **See `10-COPILOT_PERFORMANCE.instructions.md` for full pre-commit
+> review details.**
+
+---
+
+## �📊 Quality Defaults
 
 When unsure about ANYTHING:
 

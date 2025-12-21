@@ -210,6 +210,10 @@ class Booking(Base):
     # NOTE: chef_id references ops.chefs (not core.chefs) - see ops.Chef model
     chef_id: Mapped[Optional[UUID]] = mapped_column(PGUUID(as_uuid=True), nullable=True)
     station_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False)
+    # Enterprise address FK (NEW - Smart Scheduling Phase 1)
+    venue_address_id: Mapped[Optional[UUID]] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("core.addresses.id", ondelete="SET NULL"), nullable=True
+    )
 
     # Event Details (UPDATED - match database)
     date: Mapped[date] = mapped_column(Date, nullable=False)
@@ -294,11 +298,20 @@ class Booking(Base):
     # Relationships
     customer: Mapped["Customer"] = relationship("Customer", back_populates="bookings")
     # NOTE: chef relationship removed - use ops.Chef directly via chef_id FK to ops.chefs
+    venue_address: Mapped[Optional["Address"]] = relationship("Address", back_populates="bookings")
     reminders: Mapped[List["BookingReminder"]] = relationship(
         "BookingReminder", back_populates="booking", lazy="select", cascade="all, delete-orphan"
     )
     payments: Mapped[List["Payment"]] = relationship(
         "Payment", back_populates="booking", lazy="select", cascade="all, delete-orphan"
+    )
+    # Stripe payments relationship (for StripePayment model)
+    stripe_payments: Mapped[List["StripePayment"]] = relationship(
+        "StripePayment", back_populates="booking", lazy="select"
+    )
+    # Invoices relationship (for Invoice model)
+    invoices: Mapped[List["Invoice"]] = relationship(
+        "Invoice", back_populates="booking", lazy="select"
     )
     # reminders: Mapped[list["BookingReminder"]] = relationship("BookingReminder", back_populates="booking", lazy="select", cascade="all, delete-orphan")  # Commented: BookingReminder not in db.models yet
 
@@ -352,6 +365,23 @@ class Customer(Base):
     tags: Mapped[Optional[List[str]]] = mapped_column(ARRAY(String(50)))
     notes: Mapped[Optional[str]] = mapped_column(Text)
 
+    # Smart Scheduling Preferences (NEW - Phase 1)
+    contact_preference: Mapped[Optional[str]] = mapped_column(
+        String(10), nullable=True, server_default=text("'sms'")
+    )  # 'sms', 'email', 'both', 'none'
+    ai_contact_ok: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("true")
+    )  # Can AI-powered system contact them?
+    flexibility_score: Mapped[int] = mapped_column(
+        Integer, nullable=False, server_default=text("50")
+    )  # 0-100, how flexible is this customer?
+    negotiation_requests_count: Mapped[int] = mapped_column(
+        Integer, nullable=False, server_default=text("0")
+    )  # Total negotiation requests received
+    negotiations_accepted_count: Mapped[int] = mapped_column(
+        Integer, nullable=False, server_default=text("0")
+    )  # Total negotiations they accepted
+
     # Soft delete
     deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
 
@@ -367,6 +397,13 @@ class Customer(Base):
     bookings: Mapped[List["Booking"]] = relationship("Booking", back_populates="customer")
     message_threads: Mapped[List["MessageThread"]] = relationship(
         "MessageThread", back_populates="customer"
+    )
+    addresses: Mapped[List["Address"]] = relationship(
+        "Address", back_populates="customer", lazy="select"
+    )
+    # StripeCustomer relationship (1:1 mapping to Stripe)
+    stripe_customer: Mapped[Optional["StripeCustomer"]] = relationship(
+        "StripeCustomer", back_populates="customer", uselist=False, lazy="select"
     )
 
     # ==================== BACKWARD COMPATIBILITY HELPERS ====================

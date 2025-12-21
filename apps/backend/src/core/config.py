@@ -292,6 +292,9 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_SECRET: str | None = "test-google-client-secret"
     GOOGLE_REDIRECT_URI: str | None = "http://localhost:3001/auth/google/callback"
 
+    # Google Maps API - For geocoding and travel time calculations
+    GOOGLE_MAPS_API_KEY: str | None = None  # Required for Smart Scheduling
+
     # Frontend URLs
     FRONTEND_URL: str = "http://localhost:3001"
     ADMIN_URL: str = "http://localhost:3001"
