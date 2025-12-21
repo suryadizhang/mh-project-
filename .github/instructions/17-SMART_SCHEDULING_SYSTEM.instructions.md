@@ -4,8 +4,9 @@ applyTo: '**'
 
 # My Hibachi – Smart Scheduling System Technical Specification
 
-**Version:** 1.0.0 **Created:** 2024-12-20 **Priority:** REFERENCE –
-Use for all booking, scheduling, and chef assignment operations.
+**Version:** 2.0.0 **Created:** 2024-12-20 **Updated:** 2024-12-21
+**Priority:** REFERENCE – Use for all booking, scheduling, and chef
+assignment operations.
 
 ---
 
@@ -18,6 +19,48 @@ solution that optimizes:
 2. **Chef assignments** based on location efficiency
 3. **Dynamic time adjustments** to maximize bookings
 4. **Customer negotiations** for optimal scheduling
+
+---
+
+## 🎯 What Already Exists (Leverage These!)
+
+### Frontend (QuoteCalculator.tsx):
+
+- ✅ Google Places Autocomplete for venue address
+- ✅ Auto-extract city/ZIP from address components
+- ✅ Date picker with availability fetch
+- ✅ Time slot selection (12PM, 3PM, 6PM, 9PM)
+- ✅ SessionStorage pass to BookUs page
+- ✅ Lead capture on quote calculation
+
+### Frontend (BookUsPageClient.tsx):
+
+- ✅ Geocoding API call stub (`/api/v1/scheduling/geocode`)
+- ✅ Smart availability check stub
+  (`/api/v1/scheduling/availability/check`)
+- ✅ Alternative suggestions state (`alternativeSuggestions`)
+- ✅ Venue coordinates state (`venueCoordinates`)
+- ✅ Auto-geocode on venue address complete
+
+### Backend (public_quote.py):
+
+- ✅ Quote calculation with travel fee
+- ✅ Uses `travel_fee_configurations` table
+- ✅ ZIP code distance estimation (to be replaced with Google Maps)
+
+### Backend (bookings.py & booking_service.py):
+
+- ✅ Full CRUD for bookings
+- ✅ Status workflow (PENDING → DEPOSIT_PAID → CONFIRMED → COMPLETED)
+- ✅ Lead capture on failed bookings
+- ✅ Date availability check
+
+### Database (travel_fee_configurations):
+
+- ✅ Station-based travel fees
+- ✅ Station lat/lng columns
+- ✅ Free miles, per-mile rate
+- ✅ Max service distance
 
 ---
 
@@ -79,111 +122,397 @@ solution that optimizes:
 
 ## 📅 Implementation Phases (Priority Order)
 
-### Phase 1: Foundation ✅ COMPLETE
+### Phase 1: Foundation ✅ MOSTLY COMPLETE
 
-| Task                              | Priority | Dependencies | Status  |
-| --------------------------------- | -------- | ------------ | ------- |
-| 1A. Database schema for locations | 🔴 HIGH  | None         | ✅ DONE |
-| 1B. Frontend address-first flow   | 🔴 HIGH  | 1A           | ✅ DONE |
-| 1C. Google Maps geocoding service | 🔴 HIGH  | 1A           | ✅ DONE |
-| 1D. Slot configuration table      | 🟡 MED   | 1A           | ✅ DONE |
+| Task                              | Priority | Dependencies | Status    |
+| --------------------------------- | -------- | ------------ | --------- |
+| 1A. Database schema for locations | 🔴 HIGH  | None         | ✅ DONE   |
+| 1B. Frontend address-first flow   | 🔴 HIGH  | 1A           | ⚠️ STUB   |
+| 1C. Google Maps geocoding service | 🔴 HIGH  | 1A           | ✅ EXISTS |
+| 1D. Slot configuration table      | 🟡 MED   | 1A           | ✅ DONE   |
 
-**Implementation:** `geocoding_service.py` - Full Google Maps API
-integration with caching
+**What Exists (Backend Services):**
 
-### Phase 2: Core Auth & RBAC ✅ COMPLETE
+- `services/scheduling/geocoding_service.py` - Full geocoding with
+  caching via AddressService
+- `services/scheduling/travel_time_service.py` - Google Maps Distance
+  Matrix integration
+- `services/scheduling/slot_manager.py` - 4 slots/day management
+- `services/scheduling/suggestion_engine.py` - Alternative time
+  suggestions
+- `services/scheduling/chef_optimizer.py` - Best chef assignment
+- `services/scheduling/negotiation_service.py` - Shift request
+  workflow
+- `routers/v1/scheduling.py` - Full API endpoints (561 lines)
+- Router registered in `main.py` at line 841-846
 
-| Task                           | Priority | Dependencies | Status  |
-| ------------------------------ | -------- | ------------ | ------- |
-| 2A. Verify JWT authentication  | 🔴 HIGH  | None         | ✅ DONE |
-| 2B. API key authentication     | 🔴 HIGH  | 2A           | ✅ DONE |
-| 2C. 4-tier RBAC implementation | 🔴 HIGH  | 2A           | ✅ DONE |
-| 2D. Permission decorators      | 🟡 MED   | 2C           | ✅ DONE |
+**What Exists (Frontend Stubs):**
 
-**Implementation:** 4-tier RBAC (Super Admin → Admin → Staff →
-Customer) in `core/security.py`
+- Frontend has geocoding API call to `/api/v1/scheduling/geocode` ✅
+  WORKS
+- Frontend has availability check to
+  `/api/v1/scheduling/availability/check` ✅ WORKS
+- `travel_fee_configurations` table has station lat/lng columns
 
-### Phase 3: Chef Management ✅ COMPLETE
+**What Needs Implementation:**
 
-| Task                        | Priority | Dependencies | Status  |
-| --------------------------- | -------- | ------------ | ------- |
-| 3A. Chef locations table    | 🔴 HIGH  | 1A           | ✅ DONE |
-| 3B. Chef availability API   | 🔴 HIGH  | 3A           | ✅ DONE |
-| 3C. Chef assignment API     | 🔴 HIGH  | 3B           | ✅ DONE |
-| 3D. Preferred chef handling | 🟡 MED   | 3C           | ✅ DONE |
+- Database migration: Add `venue_lat`, `venue_lng` columns to bookings
+  table
+- Database migration: Create `slot_configurations` table
+- Frontend: Change to address-first flow in BookUsPageClient.tsx
 
-**Implementation:** `chef_optimizer.py` - Full scoring algorithm with:
+### Phase 2: Core Auth & RBAC ⚠️ PARTIAL
 
-- Travel Score (40%): Distance/time to venue
-- Skill Score (20%): Match specialty to party size
-- Workload Score (15%): Balance bookings across chefs
-- Rating Score (15%): Chef's average rating
-- Preference Score (10% + 50 bonus): Customer requested chef
+| Task                           | Priority | Dependencies | Status     |
+| ------------------------------ | -------- | ------------ | ---------- |
+| 2A. Verify JWT authentication  | 🔴 HIGH  | None         | ✅ EXISTS  |
+| 2B. API key authentication     | 🔴 HIGH  | 2A           | ⏳ PENDING |
+| 2C. 4-tier RBAC implementation | 🔴 HIGH  | 2A           | ⚠️ PARTIAL |
+| 2D. Permission decorators      | 🟡 MED   | 2C           | ⏳ PENDING |
+
+**What Exists:**
+
+- JWT authentication in `core/security.py`
+- Basic role checking (admin, customer)
+- `identity.users` table with roles
+
+**What Needs Implementation:**
+
+- API key authentication for external integrations
+- 4-tier RBAC (Super Admin → Admin → Staff → Customer)
+- `require_permission()` decorator
+
+### Phase 3: Chef Management ⚠️ PARTIAL
+
+| Task                        | Priority | Dependencies | Status     |
+| --------------------------- | -------- | ------------ | ---------- |
+| 3A. Chef locations table    | 🔴 HIGH  | 1A           | ⏳ PENDING |
+| 3B. Chef availability API   | 🔴 HIGH  | 3A           | ⚠️ STUB    |
+| 3C. Chef assignment API     | 🔴 HIGH  | 3B           | ⏳ PENDING |
+| 3D. Preferred chef handling | 🟡 MED   | 3C           | ⏳ PENDING |
+
+**What Exists:**
+
+- `ops.chefs` table with basic profile
+- `ops.chef_availability` calendar
+- Chef time-off requests
+
+**What Needs Implementation:**
+
+- `ops.chef_locations` table (home base coordinates)
+- `ops.chef_assignments` table (track who's assigned)
+- Chef availability with location context
+- Customer preferred chef handling
 
 ### Phase 4: Travel Time Integration ✅ COMPLETE
 
-| Task                            | Priority | Dependencies | Status  |
-| ------------------------------- | -------- | ------------ | ------- |
-| 4A. Google Maps Distance Matrix | 🔴 HIGH  | 1C           | ✅ DONE |
-| 4B. Travel time cache table     | 🟡 MED   | 4A           | ✅ DONE |
-| 4C. Rush hour multiplier logic  | 🟡 MED   | 4A           | ✅ DONE |
-| 4D. Travel-aware slot checker   | 🟡 MED   | 4C           | ✅ DONE |
+| Task                            | Priority | Dependencies | Status    |
+| ------------------------------- | -------- | ------------ | --------- |
+| 4A. Google Maps Distance Matrix | 🔴 HIGH  | 1C           | ✅ EXISTS |
+| 4B. Travel time cache table     | 🟡 MED   | 4A           | ✅ DONE   |
+| 4C. Rush hour multiplier logic  | 🟡 MED   | 4A           | ✅ EXISTS |
+| 4D. Travel-aware slot checker   | 🟡 MED   | 4C           | ✅ EXISTS |
 
-**Implementation:** `travel_time_service.py` - Google Maps API, 7-day
-cache, rush hour 1.5x (Mon-Fri 3-7PM)
+**Existing Implementation:**
+`services/scheduling/travel_time_service.py`
 
-### Phase 5: Smart Suggestions ✅ COMPLETE
+- Google Maps Distance Matrix API integration (lines 342-399)
+- `is_rush_hour()` - Mon-Fri 3PM-7PM detection (lines 152-169)
+- `apply_rush_hour_multiplier()` - 1.5x during rush hour (lines
+  171-186)
+- `calculate_distance_miles()` - Haversine formula fallback (lines
+  188-213)
+- `can_chef_make_it()` - Travel feasibility check (lines 243-277)
+- Caching with 7-day expiry (CACHE_EXPIRY_HOURS = 168)
 
-| Task                            | Priority | Dependencies | Status  |
-| ------------------------------- | -------- | ------------ | ------- |
-| 5A. Suggestion engine service   | 🟡 MED   | 4D           | ✅ DONE |
-| 5B. Alternative time finder     | 🟡 MED   | 5A           | ✅ DONE |
-| 5C. Next day/week suggestions   | 🟡 MED   | 5A           | ✅ DONE |
-| 5D. Frontend suggestion display | 🟡 MED   | 5C           | ✅ DONE |
+---
 
-**Implementation:** `suggestion_engine.py` - Same-day alternatives,
-next-day, next-week suggestions
+## 🗺️ Google Maps Distance Matrix API Integration
 
-### Phase 6: Dynamic Slot Adjustment ✅ COMPLETE
+**Cost:** $5 per 1,000 requests (acceptable for accurate data)
 
-| Task                          | Priority | Dependencies | Status  |
-| ----------------------------- | -------- | ------------ | ------- |
-| 6A. Slot flexibility config   | 🟡 MED   | 1D           | ✅ DONE |
-| 6B. Auto-adjust algorithm     | 🟡 MED   | 6A, 4D       | ✅ DONE |
-| 6C. Last-booked-adjusts rule  | 🟡 MED   | 6B           | ✅ DONE |
-| 6D. Conflict resolution logic | 🟡 MED   | 6C           | ✅ DONE |
+### One API Call = Dual Purpose
+
+The Distance Matrix API returns **both** values we need in a single
+call:
+
+| Value             | Purpose                              | Field                  |
+| ----------------- | ------------------------------------ | ---------------------- |
+| **Distance**      | Travel fee calculation ($2/mile)     | `distance.value` (m)   |
+| **Duration**      | Scheduling optimization              | `duration.value` (sec) |
+| **Traffic-aware** | Rush hour scheduling (3-7PM weekday) | `duration_in_traffic`  |
+
+### API Request Format
+
+```python
+# Single request gets distance + duration + traffic
+import aiohttp
+from datetime import datetime
+
+async def get_travel_data(
+    origin_lat: float,
+    origin_lng: float,
+    dest_lat: float,
+    dest_lng: float,
+    departure_time: datetime | None = None,
+) -> dict:
+    """
+    Get travel data from Google Maps Distance Matrix API.
+    Returns both distance (for fee) and duration (for scheduling).
+
+    Cost: $5 per 1,000 requests
+    """
+    base_url = "https://maps.googleapis.com/maps/api/distancematrix/json"
+
+    params = {
+        "origins": f"{origin_lat},{origin_lng}",
+        "destinations": f"{dest_lat},{dest_lng}",
+        "key": settings.GOOGLE_MAPS_API_KEY,
+        "units": "imperial",  # Get miles
+    }
+
+    # Add traffic-aware timing if departure time specified
+    if departure_time:
+        params["departure_time"] = int(departure_time.timestamp())
+        params["traffic_model"] = "pessimistic"  # Safety buffer
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(base_url, params=params) as response:
+            data = await response.json()
+
+    if data["status"] != "OK":
+        raise GoogleMapsError(f"API error: {data['status']}")
+
+    element = data["rows"][0]["elements"][0]
+
+    if element["status"] != "OK":
+        raise RouteNotFoundError("No route found between locations")
+
+    # Extract values
+    distance_meters = element["distance"]["value"]
+    distance_miles = distance_meters / 1609.34
+
+    duration_seconds = element["duration"]["value"]
+    duration_minutes = duration_seconds / 60
+
+    # Traffic-aware duration (if available)
+    traffic_duration_minutes = None
+    if "duration_in_traffic" in element:
+        traffic_duration_minutes = element["duration_in_traffic"]["value"] / 60
+
+    return {
+        "distance_miles": round(distance_miles, 2),
+        "duration_minutes": round(duration_minutes, 0),
+        "duration_in_traffic_minutes": round(traffic_duration_minutes, 0) if traffic_duration_minutes else None,
+        "departure_time": departure_time.isoformat() if departure_time else None,
+    }
+```
+
+### Travel Fee Calculation (from Distance)
+
+```python
+async def calculate_travel_fee(
+    station_lat: float,
+    station_lng: float,
+    venue_lat: float,
+    venue_lng: float,
+    free_miles: float = 30.0,
+    per_mile_rate: float = 2.0,
+) -> dict:
+    """
+    Calculate travel fee based on actual Google Maps distance.
+
+    Replaces the ZIP code estimation in public_quote.py
+    """
+    travel_data = await get_travel_data(
+        origin_lat=station_lat,
+        origin_lng=station_lng,
+        dest_lat=venue_lat,
+        dest_lng=venue_lng,
+    )
+
+    distance = travel_data["distance_miles"]
+    travel_fee = 0.0
+
+    if distance > free_miles:
+        travel_fee = (distance - free_miles) * per_mile_rate
+
+    return {
+        "distance_miles": distance,
+        "duration_minutes": travel_data["duration_minutes"],
+        "free_miles": free_miles,
+        "billable_miles": max(0, distance - free_miles),
+        "per_mile_rate": per_mile_rate,
+        "travel_fee": round(travel_fee, 2),
+    }
+```
+
+### Traffic-Aware Scheduling (from Duration)
+
+```python
+async def check_chef_can_make_it(
+    chef_location: tuple[float, float],  # (lat, lng)
+    venue_location: tuple[float, float],
+    event_start_time: datetime,
+    buffer_minutes: int = 30,  # Setup buffer
+) -> dict:
+    """
+    Check if chef can arrive in time considering traffic.
+    Uses departure_time for rush hour awareness.
+    """
+    travel_data = await get_travel_data(
+        origin_lat=chef_location[0],
+        origin_lng=chef_location[1],
+        dest_lat=venue_location[0],
+        dest_lng=venue_location[1],
+        departure_time=event_start_time,  # Traffic at this time!
+    )
+
+    # Use traffic-aware duration if available
+    duration = travel_data["duration_in_traffic_minutes"] or travel_data["duration_minutes"]
+
+    # Chef needs to leave this many minutes before event
+    total_lead_time = duration + buffer_minutes
+
+    return {
+        "travel_minutes": duration,
+        "buffer_minutes": buffer_minutes,
+        "total_lead_time": total_lead_time,
+        "must_leave_by": event_start_time - timedelta(minutes=total_lead_time),
+        "is_feasible": True,  # For validation against previous booking
+    }
+```
+
+### Caching Strategy (Cost Optimization)
+
+```python
+# Cache travel data to minimize API calls
+# Cache duration: 7 days for distance (rarely changes)
+# Cache duration: 1 day for traffic patterns (refresh daily)
+
+CACHE_DURATION_DAYS = 7
+
+async def get_cached_travel_data(
+    origin: tuple[float, float],
+    dest: tuple[float, float],
+    departure_hour: int | None = None,
+) -> dict | None:
+    """
+    Check cache before calling API.
+    Cache key includes hour for traffic-specific caching.
+    """
+    # Round coordinates to ~100m precision for cache matching
+    cache_key = (
+        round(origin[0], 3),
+        round(origin[1], 3),
+        round(dest[0], 3),
+        round(dest[1], 3),
+        departure_hour,
+    )
+
+    # Check Redis/DB cache
+    cached = await cache.get(f"travel:{cache_key}")
+    if cached and not cached.is_expired():
+        return cached.data
+
+    # Call API and cache result
+    data = await get_travel_data(
+        origin[0], origin[1],
+        dest[0], dest[1],
+        # ... departure_time if hour specified
+    )
+
+    await cache.set(
+        f"travel:{cache_key}",
+        data,
+        ttl=CACHE_DURATION_DAYS * 86400
+    )
+
+    return data
+```
+
+### Integration with Existing Quote System
+
+The existing `/api/v1/public/quote/calculate` endpoint currently uses
+ZIP code estimation. Upgrade path:
+
+```python
+# Current (apps/backend/src/routers/v1/public_quote.py)
+# estimated_distance = _estimate_distance(zip_code, venue_address)
+
+# New - Use Google Maps API
+async def calculate_quote(...):
+    # ... existing code ...
+
+    if request.venue_address and venue_geocoded:
+        # Get actual distance from Google Maps
+        travel_data = await get_cached_travel_data(
+            origin=(station_lat, station_lng),
+            dest=(venue_lat, venue_lng),
+        )
+        travel_info.distance_miles = travel_data["distance_miles"]
+        travel_info.duration_minutes = travel_data["duration_minutes"]
+
+        if travel_info.distance_miles > free_miles:
+            travel_info.travel_fee = (
+                travel_info.distance_miles - free_miles
+            ) * per_mile_rate
+```
+
+---
+
+### Phase 5: Smart Suggestions ⏳ PENDING
+
+| Task                            | Priority | Dependencies | Status     |
+| ------------------------------- | -------- | ------------ | ---------- |
+| 5A. Suggestion engine service   | 🟡 MED   | 4D           | ⏳ PENDING |
+| 5B. Alternative time finder     | 🟡 MED   | 5A           | ⏳ PENDING |
+| 5C. Next day/week suggestions   | 🟡 MED   | 5A           | ⏳ PENDING |
+| 5D. Frontend suggestion display | 🟡 MED   | 5C           | ⚠️ STUB    |
+
+**What Exists (STUBS):**
+
+- Frontend `alternativeSuggestions` state in BookUsPageClient.tsx
+- UI placeholder for displaying suggestions
+
+**What Needs Implementation:**
+
+- `suggestion_engine.py` - Same-day alternatives, next-day, next-week
+
+### Phase 6: Dynamic Slot Adjustment ⏳ PENDING
+
+| Task                          | Priority | Dependencies | Status     |
+| ----------------------------- | -------- | ------------ | ---------- |
+| 6A. Slot flexibility config   | 🟡 MED   | 1D           | ⏳ PENDING |
+| 6B. Auto-adjust algorithm     | 🟡 MED   | 6A, 4D       | ⏳ PENDING |
+| 6C. Last-booked-adjusts rule  | 🟡 MED   | 6B           | ⏳ PENDING |
+| 6D. Conflict resolution logic | 🟡 MED   | 6C           | ⏳ PENDING |
 
 **Implementation:** `slot_manager.py` - 4 slots (12PM, 3PM, 6PM, 9PM)
 with ±30min preferred / ±60min max adjustment
 
-### Phase 7: Chef Optimizer ✅ COMPLETE
+### Phase 7: Chef Optimizer ⏳ PENDING
 
 | Task                               | Priority | Dependencies | Status     |
 | ---------------------------------- | -------- | ------------ | ---------- |
-| 7A. Optimizer service              | 🔴 HIGH  | 3C, 4D       | ✅ DONE    |
-| 7B. Guest count skill matching     | 🔴 HIGH  | 7A           | ✅ DONE    |
-| 7C. Efficiency scoring             | 🔴 HIGH  | 7B           | ✅ DONE    |
+| 7A. Optimizer service              | 🔴 HIGH  | 3C, 4D       | ⏳ PENDING |
+| 7B. Guest count skill matching     | 🔴 HIGH  | 7A           | ⏳ PENDING |
+| 7C. Efficiency scoring             | 🔴 HIGH  | 7B           | ⏳ PENDING |
 | 7D. Station manager suggestions UI | 🟡 MED   | 7C           | ⏳ PENDING |
 
-**Implementation:** `chef_optimizer.py` fully implemented with scoring
-algorithm. **Next:** Station Manager UI for viewing and overriding
-chef suggestions.
+**Implementation:** `chef_optimizer.py` - Full scoring algorithm
 
-### Phase 8: Negotiation System ✅ COMPLETE
+### Phase 8: Negotiation System ⏳ PENDING
 
-| Task                              | Priority | Dependencies | Status  |
-| --------------------------------- | -------- | ------------ | ------- |
-| 8A. Negotiation request table     | 🟢 LOW   | None         | ✅ DONE |
-| 8B. Polite notification templates | 🟢 LOW   | 8A           | ✅ DONE |
-| 8C. Response tracking             | 🟢 LOW   | 8B           | ✅ DONE |
-| 8D. Auto-adjustment on acceptance | 🟢 LOW   | 8C           | ✅ DONE |
+| Task                              | Priority | Dependencies | Status     |
+| --------------------------------- | -------- | ------------ | ---------- |
+| 8A. Negotiation request table     | 🟢 LOW   | None         | ⏳ PENDING |
+| 8B. Polite notification templates | 🟢 LOW   | 8A           | ⏳ PENDING |
+| 8C. Response tracking             | 🟢 LOW   | 8B           | ⏳ PENDING |
+| 8D. Auto-adjustment on acceptance | 🟢 LOW   | 8C           | ⏳ PENDING |
 
 **Implementation:** `negotiation_service.py` - Full workflow with
 SMS/email notifications, incentives, auto-update on acceptance
-
----
-
-## 🗄️ Database Schema
 
 ### Phase 1: Location Schema
 

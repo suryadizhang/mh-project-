@@ -78,6 +78,10 @@ export default function BookUsPageClient() {
   const [riskAccepted, setRiskAccepted] = useState(false);
   const [willCommunicate, setWillCommunicate] = useState(false);
 
+  // Step-based booking flow state (Address First)
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 3;
+
   const {
     register,
     handleSubmit,
@@ -132,6 +136,9 @@ export default function BookUsPageClient() {
   const venueState = watch('venueState');
   const venueZipcode = watch('venueZipcode');
   const selectedDate = watch('eventDate');
+
+  // Check if venue address is complete for step progression
+  const isVenueAddressComplete = Boolean(venueStreet && venueCity && venueState && venueZipcode);
 
   // Fetch booked dates from API
   const fetchBookedDates = async () => {
@@ -560,60 +567,520 @@ export default function BookUsPageClient() {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit(onSubmit)} className="booking-form">
-                {/* Contact Information */}
-                <div className="form-section">
-                  <h3 className="section-title inline-flex items-center">
-                    <User className="mr-2 h-5 w-5" />
-                    Contact Information
-                  </h3>
-
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
-                      <div className="form-group">
-                        <label htmlFor="name" className="form-label required">
-                          Full Name
-                        </label>
-                        <input
-                          type="text"
-                          id="name"
-                          className={`form-control ${errors.name ? 'is-invalid' : ''}`}
-                          {...register('name', { required: 'Name is required' })}
-                          placeholder="Enter your full name"
+              {/* Step Indicator - Address First Flow */}
+              <div className="mb-8">
+                <div className="flex items-center justify-between">
+                  {[
+                    { step: 1, label: 'Event Venue', icon: MapPin },
+                    { step: 2, label: 'Date & Time', icon: CalendarDays },
+                    { step: 3, label: 'Your Details', icon: User },
+                  ].map(({ step, label, icon: Icon }, index) => (
+                    <div key={step} className="flex flex-1 items-center">
+                      <div className="flex flex-col items-center">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            // Only allow going back or to completed steps
+                            if (step < currentStep || (step === 2 && isVenueAddressComplete)) {
+                              setCurrentStep(step);
+                            }
+                          }}
+                          disabled={step > currentStep && !(step === 2 && isVenueAddressComplete)}
+                          className={`flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300 ${
+                            currentStep === step
+                              ? 'bg-red-600 text-white shadow-lg'
+                              : currentStep > step
+                                ? 'bg-green-500 text-white'
+                                : 'bg-gray-200 text-gray-500'
+                          } ${step <= currentStep || (step === 2 && isVenueAddressComplete) ? 'cursor-pointer hover:scale-105' : 'cursor-not-allowed'}`}
+                        >
+                          {currentStep > step ? (
+                            <Check className="h-5 w-5" />
+                          ) : (
+                            <Icon className="h-5 w-5" />
+                          )}
+                        </button>
+                        <span
+                          className={`mt-2 text-xs font-medium ${
+                            currentStep === step ? 'text-red-600' : 'text-gray-500'
+                          }`}
+                        >
+                          {label}
+                        </span>
+                      </div>
+                      {index < 2 && (
+                        <div
+                          className={`mx-2 h-1 flex-1 rounded ${
+                            currentStep > step ? 'bg-green-500' : 'bg-gray-200'
+                          }`}
                         />
-                        {errors.name && (
-                          <div className="invalid-feedback">{errors.name.message}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <form onSubmit={handleSubmit(onSubmit)} className="booking-form">
+                {/* ============================================ */}
+                {/* STEP 1: Event Venue Address (ADDRESS FIRST!) */}
+                {/* ============================================ */}
+                {currentStep === 1 && (
+                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                    <div className="form-section">
+                      <h3 className="section-title inline-flex items-center">
+                        <MapPin className="mr-2 h-5 w-5" />
+                        Event Venue Address
+                        {isGeocodingVenue && (
+                          <span className="ml-2 animate-pulse text-sm text-gray-500">
+                            <RefreshCw className="mr-1 inline h-4 w-4 animate-spin" />
+                            Verifying...
+                          </span>
                         )}
+                        {venueCoordinates && !isGeocodingVenue && (
+                          <span className="ml-2 text-sm text-green-600">
+                            <CheckCircle className="mr-1 inline h-4 w-4" />
+                            Verified
+                          </span>
+                        )}
+                      </h3>
+                      <p className="section-description">
+                        <strong>Start here!</strong> Tell us where your hibachi event will be held.
+                        {venueCoordinates && (
+                          <span className="ml-2 text-green-600">
+                            ✓ We&apos;ll check chef availability in your area.
+                          </span>
+                        )}
+                      </p>
+                      {geocodingError && (
+                        <div className="mt-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                          <AlertTriangle className="mr-1 inline h-4 w-4" />
+                          {geocodingError}
+                        </div>
+                      )}
+
+                      <div className="row">
+                        <div className="col-12">
+                          <div className="form-group">
+                            <label htmlFor="venueStreet" className="form-label required">
+                              Street Address
+                            </label>
+                            <input
+                              type="text"
+                              id="venueStreet"
+                              className={`form-control ${errors.venueStreet ? 'is-invalid' : ''}`}
+                              {...register('venueStreet', {
+                                required: 'Venue street address is required',
+                              })}
+                              placeholder="123 Main Street, Apt 2B"
+                            />
+                            {errors.venueStreet && (
+                              <div className="invalid-feedback">{errors.venueStreet.message}</div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
+                        <div className="md:col-span-3">
+                          <div className="form-group">
+                            <label htmlFor="venueCity" className="form-label required">
+                              City
+                            </label>
+                            <input
+                              type="text"
+                              id="venueCity"
+                              className={`form-control ${errors.venueCity ? 'is-invalid' : ''}`}
+                              {...register('venueCity', { required: 'Venue city is required' })}
+                              placeholder="San Francisco"
+                            />
+                            {errors.venueCity && (
+                              <div className="invalid-feedback">{errors.venueCity.message}</div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="md:col-span-1">
+                          <div className="form-group">
+                            <label htmlFor="venueState" className="form-label required">
+                              State
+                            </label>
+                            <select
+                              id="venueState"
+                              className={`form-control ${errors.venueState ? 'is-invalid' : ''}`}
+                              {...register('venueState', { required: 'Venue state is required' })}
+                            >
+                              <option value="">Select State</option>
+                              <option value="CA">California</option>
+                              <option value="NV">Nevada</option>
+                              <option value="OR">Oregon</option>
+                              <option value="WA">Washington</option>
+                            </select>
+                            {errors.venueState && (
+                              <div className="invalid-feedback">{errors.venueState.message}</div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <div className="form-group">
+                            <label htmlFor="venueZipcode" className="form-label required">
+                              ZIP Code
+                            </label>
+                            <input
+                              type="text"
+                              id="venueZipcode"
+                              className={`form-control ${errors.venueZipcode ? 'is-invalid' : ''}`}
+                              {...register('venueZipcode', {
+                                required: 'Venue ZIP code is required',
+                              })}
+                              placeholder="94102"
+                            />
+                            {errors.venueZipcode && (
+                              <div className="invalid-feedback">{errors.venueZipcode.message}</div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Guest count in Step 1 for availability check */}
+                      <div className="mt-4">
+                        <div className="form-group">
+                          <label htmlFor="guestCountStep1" className="form-label required">
+                            Estimated Number of Guests
+                          </label>
+                          <input
+                            type="number"
+                            id="guestCountStep1"
+                            min="1"
+                            max="50"
+                            className={`form-control ${errors.guestCount ? 'is-invalid' : ''}`}
+                            {...register('guestCount', {
+                              required: 'Guest count is required',
+                              min: { value: 1, message: 'At least 1 guest required' },
+                              max: { value: 50, message: 'Maximum 50 guests allowed' },
+                            })}
+                            placeholder="e.g., 10"
+                          />
+                          {errors.guestCount && (
+                            <div className="invalid-feedback">{errors.guestCount.message}</div>
+                          )}
+                          <small className="text-muted">
+                            This helps us check chef availability and calculate your quote.
+                          </small>
+                        </div>
                       </div>
                     </div>
 
-                    <div>
-                      <div className="form-group">
-                        <label htmlFor="email" className="form-label required">
-                          Email Address
-                        </label>
-                        <input
-                          type="email"
-                          id="email"
-                          className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                          {...register('email', {
-                            required: 'Email is required',
-                            pattern: {
-                              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                              message: 'Invalid email address',
-                            },
-                          })}
-                          placeholder="your.email@example.com"
-                        />
-                        {errors.email && (
-                          <div className="invalid-feedback">{errors.email.message}</div>
-                        )}
-                      </div>
+                    {/* Step 1 Navigation */}
+                    <div className="mt-6 flex justify-end">
+                      <button
+                        type="button"
+                        disabled={!isVenueAddressComplete}
+                        onClick={() => {
+                          if (isVenueAddressComplete) {
+                            setCurrentStep(2);
+                          }
+                        }}
+                        className={`inline-flex items-center gap-2 rounded-xl px-8 py-3 font-semibold text-white transition-all duration-300 ${
+                          isVenueAddressComplete
+                            ? 'bg-gradient-to-r from-red-600 to-red-700 hover:-translate-y-1 hover:from-red-700 hover:to-red-800 hover:shadow-lg'
+                            : 'cursor-not-allowed bg-gray-400'
+                        }`}
+                      >
+                        Continue to Date & Time
+                        <ArrowRight className="h-5 w-5" />
+                      </button>
                     </div>
                   </div>
+                )}
 
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
+                {/* ============================================ */}
+                {/* STEP 2: Date & Time Selection */}
+                {/* ============================================ */}
+                {currentStep === 2 && (
+                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                    {/* Show venue summary */}
+                    <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-3">
+                      <div className="flex items-center gap-2 text-green-800">
+                        <CheckCircle className="h-5 w-5" />
+                        <span className="font-medium">Venue:</span>
+                        <span>
+                          {venueStreet}, {venueCity}, {venueState} {venueZipcode}
+                        </span>
+                        <button
+                          type="button"
+                          className="ml-auto text-sm text-green-600 hover:underline"
+                          onClick={() => setCurrentStep(1)}
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="form-section">
+                      <h3 className="section-title inline-flex items-center">
+                        <CalendarDays className="mr-2 h-5 w-5" />
+                        Event Date & Time
+                      </h3>
+                      <p className="section-description">
+                        Choose when you&apos;d like your hibachi event. We&apos;ll show you
+                        available slots based on your location.
+                      </p>
+
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
+                          <div className="form-group">
+                            <label htmlFor="eventDate" className="form-label required">
+                              Event Date
+                            </label>
+                            <Controller
+                              name="eventDate"
+                              control={control}
+                              rules={{ required: 'Event date is required' }}
+                              render={({ field }) => (
+                                <LazyDatePicker
+                                  selected={field.value}
+                                  onChange={(date: Date | null) => field.onChange(date)}
+                                  filterDate={(date: Date) => !isDateDisabled(date)}
+                                  minDate={new Date()}
+                                  maxDate={addDays(new Date(), 90)}
+                                  className={`form-control ${errors.eventDate ? 'is-invalid' : ''}`}
+                                  placeholderText="Select event date"
+                                  dateFormat="MMMM d, yyyy"
+                                  id="eventDate"
+                                />
+                              )}
+                            />
+                            {loadingDates && (
+                              <small className="text-muted">Loading available dates...</small>
+                            )}
+                            {dateError && <small className="text-danger">{dateError}</small>}
+                            {errors.eventDate && (
+                              <div className="invalid-feedback block">
+                                {errors.eventDate.message}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="form-group">
+                            <label htmlFor="eventTime" className="form-label required">
+                              Preferred Time
+                            </label>
+                            {loadingTimeSlots ? (
+                              <div className="form-control">Loading available times...</div>
+                            ) : (
+                              <select
+                                id="eventTime"
+                                className={`form-control ${errors.eventTime ? 'is-invalid' : ''}`}
+                                {...register('eventTime', { required: 'Event time is required' })}
+                              >
+                                <option value="">Select a time</option>
+                                {availableTimeSlots.map((slot) => (
+                                  <option
+                                    key={slot.time}
+                                    value={slot.time}
+                                    disabled={!slot.isAvailable}
+                                  >
+                                    {slot.label}{' '}
+                                    {slot.isAvailable
+                                      ? `(${slot.available} available)`
+                                      : '(Fully Booked)'}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
+                            {errors.eventTime && (
+                              <div className="invalid-feedback">{errors.eventTime.message}</div>
+                            )}
+
+                            {/* Smart Availability Suggestions */}
+                            {unavailabilityMessage && (
+                              <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                                <div className="flex items-start gap-2">
+                                  <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
+                                  <div className="flex-1">
+                                    <p className="text-sm font-medium text-amber-800">
+                                      {unavailabilityMessage}
+                                    </p>
+                                    {alternativeSuggestions.length > 0 && (
+                                      <div className="mt-2">
+                                        <p className="mb-2 text-sm text-amber-700">
+                                          Available alternatives:
+                                        </p>
+                                        <div className="flex flex-wrap gap-2">
+                                          {alternativeSuggestions
+                                            .slice(0, 3)
+                                            .map((suggestion, idx) => (
+                                              <button
+                                                key={idx}
+                                                type="button"
+                                                className="rounded-md border border-amber-300 bg-white px-3 py-1.5 text-sm text-amber-800 transition-colors hover:bg-amber-100"
+                                                onClick={() => {
+                                                  const suggestedDate = new Date(
+                                                    suggestion.slot_date,
+                                                  );
+                                                  setValue('eventDate', suggestedDate);
+                                                  const hour = parseInt(
+                                                    suggestion.slot_time.split(':')[0],
+                                                    10,
+                                                  );
+                                                  const slotMap: Record<
+                                                    number,
+                                                    '12PM' | '3PM' | '6PM' | '9PM'
+                                                  > = {
+                                                    12: '12PM',
+                                                    15: '3PM',
+                                                    18: '6PM',
+                                                    21: '9PM',
+                                                  };
+                                                  if (slotMap[hour]) {
+                                                    setValue('eventTime', slotMap[hour]);
+                                                  }
+                                                  setUnavailabilityMessage(null);
+                                                  setAlternativeSuggestions([]);
+                                                }}
+                                              >
+                                                {new Date(suggestion.slot_date).toLocaleDateString(
+                                                  'en-US',
+                                                  {
+                                                    weekday: 'short',
+                                                    month: 'short',
+                                                    day: 'numeric',
+                                                  },
+                                                )}{' '}
+                                                at {suggestion.slot_time.slice(0, 5)}
+                                              </button>
+                                            ))}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Step 2 Navigation */}
+                    <div className="mt-6 flex justify-between">
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(1)}
+                        className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-50"
+                      >
+                        Back
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(3)}
+                        className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-red-700 px-8 py-3 font-semibold text-white transition-all duration-300 hover:-translate-y-1 hover:from-red-700 hover:to-red-800 hover:shadow-lg"
+                      >
+                        Continue to Your Details
+                        <ArrowRight className="h-5 w-5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* ============================================ */}
+                {/* STEP 3: Contact & Billing Information */}
+                {/* ============================================ */}
+                {currentStep === 3 && (
+                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                    {/* Show venue and date summary */}
+                    <div className="mb-4 space-y-2">
+                      <div className="rounded-lg border border-green-200 bg-green-50 p-3">
+                        <div className="flex items-center gap-2 text-green-800">
+                          <MapPin className="h-5 w-5" />
+                          <span className="font-medium">Venue:</span>
+                          <span>
+                            {venueStreet}, {venueCity}, {venueState} {venueZipcode}
+                          </span>
+                          <button
+                            type="button"
+                            className="ml-auto text-sm text-green-600 hover:underline"
+                            onClick={() => setCurrentStep(1)}
+                          >
+                            Edit
+                          </button>
+                        </div>
+                      </div>
+                      {selectedDate && (
+                        <div className="rounded-lg border border-green-200 bg-green-50 p-3">
+                          <div className="flex items-center gap-2 text-green-800">
+                            <CalendarCheck className="h-5 w-5" />
+                            <span className="font-medium">Date:</span>
+                            <span>
+                              {format(selectedDate, 'MMMM d, yyyy')} at{' '}
+                              {watch('eventTime') || 'TBD'}
+                            </span>
+                            <button
+                              type="button"
+                              className="ml-auto text-sm text-green-600 hover:underline"
+                              onClick={() => setCurrentStep(2)}
+                            >
+                              Edit
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Contact Information */}
+                    <div className="form-section">
+                      <h3 className="section-title inline-flex items-center">
+                        <User className="mr-2 h-5 w-5" />
+                        Contact Information
+                      </h3>
+
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
+                          <div className="form-group">
+                            <label htmlFor="name" className="form-label required">
+                              Full Name
+                            </label>
+                            <input
+                              type="text"
+                              id="name"
+                              className={`form-control ${errors.name ? 'is-invalid' : ''}`}
+                              {...register('name', { required: 'Name is required' })}
+                              placeholder="Enter your full name"
+                            />
+                            {errors.name && (
+                              <div className="invalid-feedback">{errors.name.message}</div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="form-group">
+                            <label htmlFor="email" className="form-label required">
+                              Email Address
+                            </label>
+                            <input
+                              type="email"
+                              id="email"
+                              className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                              {...register('email', {
+                                required: 'Email is required',
+                                pattern: {
+                                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                  message: 'Invalid email address',
+                                },
+                              })}
+                              placeholder="your.email@example.com"
+                            />
+                            {errors.email && (
+                              <div className="invalid-feedback">{errors.email.message}</div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
                       <div className="form-group">
                         <label htmlFor="phone" className="form-label required">
                           Phone Number
@@ -631,448 +1098,180 @@ export default function BookUsPageClient() {
                       </div>
                     </div>
 
-                    <div>
-                      <div className="form-group">
-                        <label htmlFor="guestCount" className="form-label required">
-                          Number of Guests
-                        </label>
+                    {/* Customer/Billing Address */}
+                    <div className="form-section">
+                      <h3 className="section-title inline-flex items-center">
+                        <Home className="mr-2 h-5 w-5" />
+                        Your Billing Address
+                      </h3>
+                      <p className="section-description">
+                        This address will be used for billing and communication purposes.
+                      </p>
+
+                      <div className="form-check mb-3">
                         <input
-                          type="number"
-                          id="guestCount"
-                          min="1"
-                          max="50"
-                          className={`form-control ${errors.guestCount ? 'is-invalid' : ''}`}
-                          {...register('guestCount', {
-                            required: 'Guest count is required',
-                            min: { value: 1, message: 'At least 1 guest required' },
-                            max: { value: 50, message: 'Maximum 50 guests allowed' },
-                          })}
-                          placeholder="e.g., 8"
+                          type="checkbox"
+                          id="sameAsVenue"
+                          className="form-check-input"
+                          {...register('sameAsVenue')}
                         />
-                        {errors.guestCount && (
-                          <div className="invalid-feedback">{errors.guestCount.message}</div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Event Details */}
-                <div className="form-section">
-                  <h3 className="section-title inline-flex items-center">
-                    <CalendarDays className="mr-2 h-5 w-5" />
-                    Event Details
-                  </h3>
-
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
-                      <div className="form-group">
-                        <label htmlFor="eventDate" className="form-label required">
-                          Event Date
+                        <label htmlFor="sameAsVenue" className="form-check-label">
+                          Same as venue address
                         </label>
-                        <Controller
-                          name="eventDate"
-                          control={control}
-                          rules={{ required: 'Event date is required' }}
-                          render={({ field }) => (
-                            <LazyDatePicker
-                              selected={field.value}
-                              onChange={(date: Date | null) => field.onChange(date)}
-                              filterDate={(date: Date) => !isDateDisabled(date)}
-                              minDate={new Date()}
-                              maxDate={addDays(new Date(), 90)}
-                              className={`form-control ${errors.eventDate ? 'is-invalid' : ''}`}
-                              placeholderText="Select event date"
-                              dateFormat="MMMM d, yyyy"
-                              id="eventDate"
-                            />
-                          )}
-                        />
-                        {loadingDates && (
-                          <small className="text-muted">Loading available dates...</small>
-                        )}
-                        {dateError && <small className="text-danger">{dateError}</small>}
-                        {errors.eventDate && (
-                          <div className="invalid-feedback block">{errors.eventDate.message}</div>
-                        )}
                       </div>
-                    </div>
 
-                    <div>
-                      <div className="form-group">
-                        <label htmlFor="eventTime" className="form-label required">
-                          Preferred Time
-                        </label>
-                        {loadingTimeSlots ? (
-                          <div className="form-control">Loading available times...</div>
-                        ) : (
-                          <select
-                            id="eventTime"
-                            className={`form-control ${errors.eventTime ? 'is-invalid' : ''}`}
-                            {...register('eventTime', { required: 'Event time is required' })}
-                          >
-                            <option value="">Select a time</option>
-                            {availableTimeSlots.map((slot) => (
-                              <option
-                                key={slot.time}
-                                value={slot.time}
-                                disabled={!slot.isAvailable}
-                              >
-                                {slot.label}{' '}
-                                {slot.isAvailable
-                                  ? `(${slot.available} available)`
-                                  : '(Fully Booked)'}
-                              </option>
-                            ))}
-                          </select>
-                        )}
-                        {errors.eventTime && (
-                          <div className="invalid-feedback">{errors.eventTime.message}</div>
-                        )}
-
-                        {/* Smart Availability Suggestions */}
-                        {unavailabilityMessage && (
-                          <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
-                            <div className="flex items-start gap-2">
-                              <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
-                              <div className="flex-1">
-                                <p className="text-sm font-medium text-amber-800">
-                                  {unavailabilityMessage}
-                                </p>
-                                {alternativeSuggestions.length > 0 && (
-                                  <div className="mt-2">
-                                    <p className="mb-2 text-sm text-amber-700">
-                                      Available alternatives:
-                                    </p>
-                                    <div className="flex flex-wrap gap-2">
-                                      {alternativeSuggestions.slice(0, 3).map((suggestion, idx) => (
-                                        <button
-                                          key={idx}
-                                          type="button"
-                                          className="rounded-md border border-amber-300 bg-white px-3 py-1.5 text-sm text-amber-800 transition-colors hover:bg-amber-100"
-                                          onClick={() => {
-                                            // Parse and set the suggested date/time
-                                            const suggestedDate = new Date(suggestion.slot_date);
-                                            setValue('eventDate', suggestedDate);
-                                            // Convert 24h time to 12h slot
-                                            const hour = parseInt(
-                                              suggestion.slot_time.split(':')[0],
-                                              10,
-                                            );
-                                            const slotMap: Record<
-                                              number,
-                                              '12PM' | '3PM' | '6PM' | '9PM'
-                                            > = {
-                                              12: '12PM',
-                                              15: '3PM',
-                                              18: '6PM',
-                                              21: '9PM',
-                                            };
-                                            if (slotMap[hour]) {
-                                              setValue('eventTime', slotMap[hour]);
-                                            }
-                                            setUnavailabilityMessage(null);
-                                            setAlternativeSuggestions([]);
-                                          }}
-                                        >
-                                          {new Date(suggestion.slot_date).toLocaleDateString(
-                                            'en-US',
-                                            {
-                                              weekday: 'short',
-                                              month: 'short',
-                                              day: 'numeric',
-                                            },
-                                          )}{' '}
-                                          at {suggestion.slot_time.slice(0, 5)}
-                                        </button>
-                                      ))}
-                                    </div>
+                      {!sameAsVenue && (
+                        <>
+                          <div className="row">
+                            <div className="col-12">
+                              <div className="form-group">
+                                <label htmlFor="addressStreet" className="form-label required">
+                                  Street Address
+                                </label>
+                                <input
+                                  type="text"
+                                  id="addressStreet"
+                                  className={`form-control ${errors.addressStreet ? 'is-invalid' : ''}`}
+                                  {...register('addressStreet', {
+                                    required: 'Street address is required',
+                                  })}
+                                  placeholder="123 Main Street, Apt 2B"
+                                />
+                                {errors.addressStreet && (
+                                  <div className="invalid-feedback">
+                                    {errors.addressStreet.message}
                                   </div>
                                 )}
                               </div>
                             </div>
                           </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Venue Address */}
-                <div className="form-section">
-                  <h3 className="section-title inline-flex items-center">
-                    <MapPin className="mr-2 h-5 w-5" />
-                    Event Venue Address
-                    {isGeocodingVenue && (
-                      <span className="ml-2 animate-pulse text-sm text-gray-500">
-                        <RefreshCw className="mr-1 inline h-4 w-4 animate-spin" />
-                        Verifying...
-                      </span>
-                    )}
-                    {venueCoordinates && !isGeocodingVenue && (
-                      <span className="ml-2 text-sm text-green-600">
-                        <CheckCircle className="mr-1 inline h-4 w-4" />
-                        Verified
-                      </span>
-                    )}
-                  </h3>
-                  <p className="section-description">
-                    Please provide the address where the hibachi event will take place.
-                    {venueCoordinates && (
-                      <span className="ml-2 text-green-600">
-                        ✓ We&apos;ll use this to check chef availability in your area.
-                      </span>
-                    )}
-                  </p>
-                  {geocodingError && (
-                    <div className="mt-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-                      <AlertTriangle className="mr-1 inline h-4 w-4" />
-                      {geocodingError}
-                    </div>
-                  )}
-
-                  <div className="row">
-                    <div className="col-12">
-                      <div className="form-group">
-                        <label htmlFor="venueStreet" className="form-label required">
-                          Street Address
-                        </label>
-                        <input
-                          type="text"
-                          id="venueStreet"
-                          className={`form-control ${errors.venueStreet ? 'is-invalid' : ''}`}
-                          {...register('venueStreet', {
-                            required: 'Venue street address is required',
-                          })}
-                          placeholder="123 Main Street, Apt 2B"
-                        />
-                        {errors.venueStreet && (
-                          <div className="invalid-feedback">{errors.venueStreet.message}</div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
-                    <div className="md:col-span-3">
-                      <div className="form-group">
-                        <label htmlFor="venueCity" className="form-label required">
-                          City
-                        </label>
-                        <input
-                          type="text"
-                          id="venueCity"
-                          className={`form-control ${errors.venueCity ? 'is-invalid' : ''}`}
-                          {...register('venueCity', { required: 'Venue city is required' })}
-                          placeholder="San Francisco"
-                        />
-                        {errors.venueCity && (
-                          <div className="invalid-feedback">{errors.venueCity.message}</div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="md:col-span-1">
-                      <div className="form-group">
-                        <label htmlFor="venueState" className="form-label required">
-                          State
-                        </label>
-                        <select
-                          id="venueState"
-                          className={`form-control ${errors.venueState ? 'is-invalid' : ''}`}
-                          {...register('venueState', { required: 'Venue state is required' })}
-                        >
-                          <option value="">Select State</option>
-                          <option value="CA">California</option>
-                          <option value="NV">Nevada</option>
-                          <option value="OR">Oregon</option>
-                          <option value="WA">Washington</option>
-                        </select>
-                        {errors.venueState && (
-                          <div className="invalid-feedback">{errors.venueState.message}</div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <div className="form-group">
-                        <label htmlFor="venueZipcode" className="form-label required">
-                          ZIP Code
-                        </label>
-                        <input
-                          type="text"
-                          id="venueZipcode"
-                          className={`form-control ${errors.venueZipcode ? 'is-invalid' : ''}`}
-                          {...register('venueZipcode', { required: 'Venue ZIP code is required' })}
-                          placeholder="94102"
-                        />
-                        {errors.venueZipcode && (
-                          <div className="invalid-feedback">{errors.venueZipcode.message}</div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Customer Address */}
-                <div className="form-section">
-                  <h3 className="section-title inline-flex items-center">
-                    <Home className="mr-2 h-5 w-5" />
-                    Your Contact Address
-                  </h3>
-                  <p className="section-description">
-                    This address will be used for billing and communication purposes.
-                  </p>
-
-                  <div className="form-check mb-3">
-                    <input
-                      type="checkbox"
-                      id="sameAsVenue"
-                      className="form-check-input"
-                      {...register('sameAsVenue')}
-                    />
-                    <label htmlFor="sameAsVenue" className="form-check-label">
-                      Same as venue address
-                    </label>
-                  </div>
-
-                  {!sameAsVenue && (
-                    <>
-                      <div className="row">
-                        <div className="col-12">
-                          <div className="form-group">
-                            <label htmlFor="addressStreet" className="form-label required">
-                              Street Address
-                            </label>
-                            <input
-                              type="text"
-                              id="addressStreet"
-                              className={`form-control ${errors.addressStreet ? 'is-invalid' : ''}`}
-                              {...register('addressStreet', {
-                                required: 'Street address is required',
-                              })}
-                              placeholder="123 Main Street, Apt 2B"
-                            />
-                            {errors.addressStreet && (
-                              <div className="invalid-feedback">{errors.addressStreet.message}</div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
-                        <div className="md:col-span-3">
-                          <div className="form-group">
-                            <label htmlFor="addressCity" className="form-label required">
-                              City
-                            </label>
-                            <input
-                              type="text"
-                              id="addressCity"
-                              className={`form-control ${errors.addressCity ? 'is-invalid' : ''}`}
-                              {...register('addressCity', { required: 'City is required' })}
-                              placeholder="San Francisco"
-                            />
-                            {errors.addressCity && (
-                              <div className="invalid-feedback">{errors.addressCity.message}</div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="md:col-span-1">
-                          <div className="form-group">
-                            <label htmlFor="addressState" className="form-label required">
-                              State
-                            </label>
-                            <select
-                              id="addressState"
-                              className={`form-control ${errors.addressState ? 'is-invalid' : ''}`}
-                              {...register('addressState', { required: 'State is required' })}
-                            >
-                              <option value="">Select State</option>
-                              <option value="CA">California</option>
-                              <option value="NV">Nevada</option>
-                              <option value="OR">Oregon</option>
-                              <option value="WA">Washington</option>
-                            </select>
-                            {errors.addressState && (
-                              <div className="invalid-feedback">{errors.addressState.message}</div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="md:col-span-2">
-                          <div className="form-group">
-                            <label htmlFor="addressZipcode" className="form-label required">
-                              ZIP Code
-                            </label>
-                            <input
-                              type="text"
-                              id="addressZipcode"
-                              className={`form-control ${
-                                errors.addressZipcode ? 'is-invalid' : ''
-                              }`}
-                              {...register('addressZipcode', { required: 'ZIP code is required' })}
-                              placeholder="94102"
-                            />
-                            {errors.addressZipcode && (
-                              <div className="invalid-feedback">
-                                {errors.addressZipcode.message}
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
+                            <div className="md:col-span-3">
+                              <div className="form-group">
+                                <label htmlFor="addressCity" className="form-label required">
+                                  City
+                                </label>
+                                <input
+                                  type="text"
+                                  id="addressCity"
+                                  className={`form-control ${errors.addressCity ? 'is-invalid' : ''}`}
+                                  {...register('addressCity', { required: 'City is required' })}
+                                  placeholder="San Francisco"
+                                />
+                                {errors.addressCity && (
+                                  <div className="invalid-feedback">
+                                    {errors.addressCity.message}
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
+                            </div>
 
-                {/* Newsletter Auto-Subscribe Notice */}
-                <div className="form-section">
-                  <div
-                    className="mb-4 p-3"
-                    style={{
-                      backgroundColor: '#fff7ed',
-                      border: '1px solid #fed7aa',
-                      borderRadius: '0.5rem',
-                    }}
-                  >
-                    <p className="text-xs" style={{ color: '#374151', margin: 0 }}>
-                      📧 <strong>You&apos;ll automatically receive our newsletter</strong> with
-                      exclusive offers and hibachi tips.
-                      <br />
-                      <span style={{ color: '#6b7280' }}>
-                        Don&apos;t want updates? Simply reply <strong>&quot;STOP&quot;</strong>{' '}
-                        anytime to unsubscribe.
-                      </span>
+                            <div className="md:col-span-1">
+                              <div className="form-group">
+                                <label htmlFor="addressState" className="form-label required">
+                                  State
+                                </label>
+                                <select
+                                  id="addressState"
+                                  className={`form-control ${errors.addressState ? 'is-invalid' : ''}`}
+                                  {...register('addressState', { required: 'State is required' })}
+                                >
+                                  <option value="">Select State</option>
+                                  <option value="CA">California</option>
+                                  <option value="NV">Nevada</option>
+                                  <option value="OR">Oregon</option>
+                                  <option value="WA">Washington</option>
+                                </select>
+                                {errors.addressState && (
+                                  <div className="invalid-feedback">
+                                    {errors.addressState.message}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="md:col-span-2">
+                              <div className="form-group">
+                                <label htmlFor="addressZipcode" className="form-label required">
+                                  ZIP Code
+                                </label>
+                                <input
+                                  type="text"
+                                  id="addressZipcode"
+                                  className={`form-control ${errors.addressZipcode ? 'is-invalid' : ''}`}
+                                  {...register('addressZipcode', {
+                                    required: 'ZIP code is required',
+                                  })}
+                                  placeholder="94102"
+                                />
+                                {errors.addressZipcode && (
+                                  <div className="invalid-feedback">
+                                    {errors.addressZipcode.message}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Newsletter Auto-Subscribe Notice */}
+                    <div className="form-section">
+                      <div
+                        className="mb-4 p-3"
+                        style={{
+                          backgroundColor: '#fff7ed',
+                          border: '1px solid #fed7aa',
+                          borderRadius: '0.5rem',
+                        }}
+                      >
+                        <p className="text-xs" style={{ color: '#374151', margin: 0 }}>
+                          📧 <strong>You&apos;ll automatically receive our newsletter</strong> with
+                          exclusive offers and hibachi tips.
+                          <br />
+                          <span style={{ color: '#6b7280' }}>
+                            Don&apos;t want updates? Simply reply <strong>&quot;STOP&quot;</strong>{' '}
+                            anytime to unsubscribe.
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Step 3 Navigation + Submit */}
+                    <div className="mt-6 flex justify-between">
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(2)}
+                        className="inline-flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-50"
+                      >
+                        Back
+                      </button>
+                      <button
+                        type="submit"
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-red-700 px-10 py-4 text-lg font-bold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:from-red-700 hover:to-red-800 hover:shadow-xl disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Hourglass className="h-5 w-5 animate-pulse" />
+                            Processing Booking...
+                          </>
+                        ) : (
+                          <>
+                            <CalendarCheck className="h-5 w-5" />
+                            Submit Booking Request
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    <p className="mt-4 text-center text-sm text-gray-500">
+                      <ShieldCheck className="mr-1 inline-block h-4 w-4" />
+                      Your information is secure and will only be used to process your booking.
                     </p>
                   </div>
-                </div>
-
-                {/* Submit Button */}
-                <div className="py-6 text-center">
-                  <button
-                    type="submit"
-                    className="inline-flex w-full transform items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-red-700 px-10 py-4 text-lg font-bold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:from-red-700 hover:to-red-800 hover:shadow-xl disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50 md:w-auto"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Hourglass className="h-5 w-5 animate-pulse" />
-                        Processing Booking...
-                      </>
-                    ) : (
-                      <>
-                        <CalendarCheck className="h-5 w-5" />
-                        Submit Booking Request
-                      </>
-                    )}
-                  </button>
-                  <p className="mt-4 text-sm text-gray-500">
-                    <ShieldCheck className="mr-1 inline-block h-4 w-4" />
-                    Your information is secure and will only be used to process your booking.
-                  </p>
-                </div>
+                )}
               </form>
             </div>
           </div>
