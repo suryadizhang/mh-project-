@@ -14,9 +14,43 @@ from uuid import UUID
 from sqlalchemy import select, and_, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.booking import Booking
+try:
+    from db.models.core import Booking
+except ImportError:
+    from models.booking import Booking
 from .slot_manager import SlotManagerService
 from .travel_time_service import TravelTimeService
+
+
+# Compatibility helper for different Booking model schemas
+# Production uses: date, slot
+# Legacy uses: event_date, event_time
+def get_booking_date_column():
+    """Get the date column from Booking model (handles different schemas)."""
+    if hasattr(Booking, "date"):
+        return Booking.date
+    return Booking.event_date
+
+
+def get_booking_time_column():
+    """Get the time/slot column from Booking model (handles different schemas)."""
+    if hasattr(Booking, "slot"):
+        return Booking.slot
+    return Booking.event_time
+
+
+def get_booking_date(booking) -> date:
+    """Get the date from a booking instance (handles different schemas)."""
+    if hasattr(booking, "date"):
+        return booking.date
+    return booking.event_date
+
+
+def get_booking_time(booking) -> time:
+    """Get the time/slot from a booking instance (handles different schemas)."""
+    if hasattr(booking, "slot"):
+        return booking.slot
+    return booking.event_time
 
 
 # Standard time slots
@@ -176,10 +210,11 @@ class SuggestionEngine:
         window_start = start_dt - timedelta(minutes=buffer_minutes)
         window_end = end_dt + timedelta(minutes=buffer_minutes)
 
-        # Query for conflicting bookings
+        # Query for conflicting bookings - use compatibility helpers
+        date_col = get_booking_date_column()
         query = select(Booking).where(
             and_(
-                Booking.event_date == check_date,
+                date_col == check_date,
                 Booking.status.in_(["confirmed", "pending"]),
             )
         )
@@ -198,8 +233,29 @@ class SuggestionEngine:
         existing_bookings = result.scalars().all()
 
         for booking in existing_bookings:
-            booking_start = datetime.combine(booking.event_date, booking.effective_start_time)
-            booking_end = booking_start + timedelta(minutes=booking.calculated_duration)
+            # Use compatibility helpers for date/time access
+            booking_date = get_booking_date(booking)
+            booking_time = get_booking_time(booking)
+
+            # Get start time - use effective_start_time if available, else slot/event_time
+            if hasattr(booking, "effective_start_time") and booking.effective_start_time:
+                start_time = booking.effective_start_time
+            else:
+                start_time = booking_time
+
+            booking_start = datetime.combine(booking_date, start_time)
+
+            # Calculate duration - use calculated_duration if available, else estimate
+            if hasattr(booking, "calculated_duration") and booking.calculated_duration:
+                duration = booking.calculated_duration
+            elif hasattr(booking, "party_adults") and hasattr(booking, "party_kids"):
+                # Estimate from guest count
+                guest_count = (booking.party_adults or 0) + (booking.party_kids or 0)
+                duration = min(60 + (guest_count * 3), 120)
+            else:
+                duration = 90  # Default duration
+
+            booking_end = booking_start + timedelta(minutes=duration)
 
             # Check for time overlap
             if not (end_dt <= booking_start or start_dt >= booking_end):
@@ -209,11 +265,12 @@ class SuggestionEngine:
                     return True, None
                 return (
                     False,
-                    f"Conflicts with existing booking at {booking.event_time.strftime('%I:%M %p')}",
+                    f"Conflicts with existing booking at {booking_time.strftime('%I:%M %p')}",
                 )
 
             # Check travel time feasibility
-            if venue_lat and venue_lng and booking.has_location:
+            has_location = hasattr(booking, "venue_lat") and booking.venue_lat is not None
+            if venue_lat and venue_lng and has_location:
                 travel_time = await self.travel_service.get_travel_time(
                     float(booking.venue_lat),
                     float(booking.venue_lng),
