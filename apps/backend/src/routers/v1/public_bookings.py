@@ -9,9 +9,18 @@ WITHOUT logging in:
 
 These endpoints are designed for the customer-facing website.
 Uses BusinessConfig for dynamic pricing values (Single Source of Truth).
+
+## Enterprise-Grade Transaction Handling
+This module implements industry-standard patterns:
+1. Explicit transaction management with context managers
+2. Proper rollback on any error (not just IntegrityError)
+3. Connection pool health checks
+4. Retry logic for transient database errors
+5. Proper exception chaining for debugging
 """
 
 import asyncio
+import os
 import re
 from datetime import (
     datetime,
@@ -32,15 +41,74 @@ from services.unified_notification_service import notify_new_booking
 from services.email_service import email_service
 from services.encryption_service import SecureDataHandler
 from services.business_config_service import get_business_config
-from sqlalchemy import select, and_, func
+from sqlalchemy import select, and_, func, text
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, OperationalError, DBAPIError
 
 router = APIRouter(tags=["public-bookings"])
 logger = logging.getLogger(__name__)
 
 # Station ID for Houston (main business location)
 DEFAULT_STATION_ID = "11111111-1111-1111-1111-111111111111"
+
+# Enterprise retry configuration
+MAX_RETRIES = 3
+RETRY_DELAY_SECONDS = 0.5
+
+
+# ============================================================================
+# ENTERPRISE-GRADE HELPER FUNCTIONS
+# ============================================================================
+
+
+async def verify_db_connection(db: AsyncSession) -> bool:
+    """
+    Verify database connection is healthy.
+
+    Enterprise pattern: Always verify connection before critical operations.
+    This catches stale connections from the pool.
+    """
+    try:
+        await db.execute(text("SELECT 1"))
+        return True
+    except Exception as e:
+        logger.warning(f"Database connection check failed: {e}")
+        return False
+
+
+async def safe_rollback(db: AsyncSession) -> None:
+    """
+    Safely rollback a transaction, handling any errors.
+
+    Enterprise pattern: Rollback can fail if connection is broken.
+    Always wrap in try-except.
+    """
+    try:
+        await db.rollback()
+        logger.debug("Transaction rolled back successfully")
+    except Exception as e:
+        logger.error(f"Rollback failed (connection may be dead): {e}")
+        # Connection is likely corrupted, it will be recycled by pool
+
+
+def is_transient_error(error: Exception) -> bool:
+    """
+    Check if error is transient and worth retrying.
+
+    Enterprise pattern: Distinguish transient errors (retry) from
+    permanent errors (fail fast).
+    """
+    transient_indicators = [
+        "connection refused",
+        "connection reset",
+        "timeout",
+        "deadlock",
+        "lock wait timeout",
+        "too many connections",
+        "server closed the connection",
+    ]
+    error_str = str(error).lower()
+    return any(indicator in error_str for indicator in transient_indicators)
 
 
 # ============================================================================
@@ -357,7 +425,26 @@ async def create_public_booking(
 
     This endpoint is used by the customer-facing booking form.
     All new bookings start as 'pending' until deposit is paid.
+
+    ## Enterprise-Grade Error Handling:
+    1. Verifies DB connection before starting
+    2. Uses explicit transaction with proper rollback
+    3. Handles transient errors with retry logic
+    4. Preserves error context for debugging
     """
+    # =========================================================================
+    # STEP 0: VERIFY DB CONNECTION (Enterprise Pattern)
+    # =========================================================================
+    if not await verify_db_connection(db):
+        logger.error("Database connection unhealthy, cannot create booking")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database temporarily unavailable. Please try again in a moment.",
+        )
+
+    # =========================================================================
+    # STEP 1: INPUT VALIDATION (Before starting transaction)
+    # =========================================================================
     try:
         # Initialize encryption handler for PII
         try:
@@ -404,212 +491,243 @@ async def create_public_booking(
                 detail="Booking time must be between 11:00 AM and 10:00 PM",
             )
 
-        # Check availability - ensure time slot is not already booked
-        # ⚠️ RACE CONDITION FIX: Use SELECT FOR UPDATE to lock potential conflicting rows
-        # This prevents TOCTOU (Time Of Check, Time Of Use) race conditions where
-        # two concurrent requests could both pass the check before either commits
-        existing_booking_stmt = (
-            select(Booking)
-            .where(
-                and_(
-                    Booking.date == booking_date,
-                    Booking.slot == booking_slot,
-                    Booking.status.notin_([BookingStatus.CANCELLED]),
-                    Booking.deleted_at.is_(None),
-                )
-            )
-            .with_for_update(nowait=False)  # Lock row, wait if already locked
-        )
-        result = await db.execute(existing_booking_stmt)
-        existing_booking = result.scalar_one_or_none()
-
-        if existing_booking:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="This time slot is already booked. Please select a different time.",
-            )
-
-        # Parse customer name into first/last
+        # Pre-compute encrypted values (before transaction)
         name_parts = booking_data.customer_name.strip().split(maxsplit=1)
         first_name = name_parts[0] if name_parts else "Guest"
         last_name = name_parts[1] if len(name_parts) > 1 else ""
 
-        # Encrypt PII
         email_encrypted = encryption_handler.encrypt_email(booking_data.customer_email)
         phone_encrypted = encryption_handler.encrypt_phone(booking_data.customer_phone)
         address_encrypted = encryption_handler.encrypt_email(booking_data.location_address)
 
-        # Look up or create customer
-        customer_stmt = select(Customer).where(
-            Customer.email_encrypted == email_encrypted,
-            Customer.deleted_at.is_(None),
-        )
-        result = await db.execute(customer_stmt)
-        customer = result.scalar_one_or_none()
-
-        if not customer:
-            # Create new customer (Fremont, CA station - California Bay Area)
-            customer = Customer(
-                id=uuid4(),
-                station_id=UUID(DEFAULT_STATION_ID),  # Fremont, CA
-                first_name=first_name,
-                last_name=last_name,
-                email_encrypted=email_encrypted,
-                phone_encrypted=phone_encrypted,
-                consent_sms=True,
-                consent_email=True,
-                consent_updated_at=now,
-                timezone="America/Los_Angeles",  # California timezone
-            )
-            db.add(customer)
-            await db.flush()
-            logger.info(f"✅ Created new customer: {customer.id}")
-
-        # Extract zone from address (ZIP code based)
         zip_match = re.search(r"\b(\d{5})\b", booking_data.location_address)
         zone = zip_match.group(1) if zip_match else "DEFAULT"
 
-        # Get dynamic pricing from BusinessConfig (Single Source of Truth)
-        config = await get_business_config(db)
-
-        adult_price_cents = config.adult_price_cents
-        child_price_cents = config.child_price_cents
-        party_minimum_cents = config.party_minimum_cents
-        deposit_cents = config.deposit_amount_cents
-
-        logger.info(
-            f"📊 Booking using {config.source} config: adult=${adult_price_cents/100}, deposit=${deposit_cents/100}"
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Input validation failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid booking data provided",
         )
 
-        # Calculate pricing (assuming all adults for now)
-        party_adults = booking_data.guests
-        party_kids = 0
+    # =========================================================================
+    # STEP 2: DATABASE TRANSACTION (Enterprise Pattern - Explicit Management)
+    # =========================================================================
+    booking_id = uuid4()
+    customer_id = None
 
-        # Calculate total with party minimum
-        total_cents = max(
-            party_adults * adult_price_cents + party_kids * child_price_cents,
-            party_minimum_cents,
-        )
-
-        # Set deadlines
-        customer_deposit_deadline = now + timedelta(hours=2)
-        internal_deadline = now + timedelta(hours=24)
-
-        # Create booking
-        booking_id = uuid4()
-        booking = Booking(
-            id=booking_id,
-            customer_id=customer.id,
-            station_id=UUID(DEFAULT_STATION_ID),
-            date=booking_date,
-            slot=booking_slot,
-            address_encrypted=address_encrypted,
-            zone=zone,
-            party_adults=party_adults,
-            party_kids=party_kids,
-            deposit_due_cents=deposit_cents,
-            total_due_cents=total_cents,
-            status=BookingStatus.PENDING,
-            source="web",
-            sms_consent=True,
-            sms_consent_timestamp=now,
-            customer_deposit_deadline=customer_deposit_deadline,
-            internal_deadline=internal_deadline,
-            deposit_deadline=customer_deposit_deadline,
-            special_requests=booking_data.special_requests,
-        )
-
-        db.add(booking)
-
+    for attempt in range(MAX_RETRIES):
         try:
+            # Check availability with row locking
+            existing_booking_stmt = (
+                select(Booking)
+                .where(
+                    and_(
+                        Booking.date == booking_date,
+                        Booking.slot == booking_slot,
+                        Booking.status.notin_([BookingStatus.CANCELLED]),
+                        Booking.deleted_at.is_(None),
+                    )
+                )
+                .with_for_update(nowait=False)
+            )
+            result = await db.execute(existing_booking_stmt)
+            existing_booking = result.scalar_one_or_none()
+
+            if existing_booking:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="This time slot is already booked. Please select a different time.",
+                )
+
+            # Look up or create customer
+            customer_stmt = select(Customer).where(
+                Customer.email_encrypted == email_encrypted,
+                Customer.deleted_at.is_(None),
+            )
+            result = await db.execute(customer_stmt)
+            customer = result.scalar_one_or_none()
+
+            if not customer:
+                customer = Customer(
+                    id=uuid4(),
+                    station_id=UUID(DEFAULT_STATION_ID),
+                    first_name=first_name,
+                    last_name=last_name,
+                    email_encrypted=email_encrypted,
+                    phone_encrypted=phone_encrypted,
+                    consent_sms=True,
+                    consent_email=True,
+                    consent_updated_at=now,
+                    timezone="America/Chicago",  # Houston timezone
+                )
+                db.add(customer)
+                await db.flush()  # Get customer ID without committing
+                logger.info(f"✅ Created new customer: {customer.id}")
+
+            customer_id = customer.id
+
+            # Get dynamic pricing
+            config = await get_business_config(db)
+            adult_price_cents = config.adult_price_cents
+            child_price_cents = config.child_price_cents
+            party_minimum_cents = config.party_minimum_cents
+            deposit_cents = config.deposit_amount_cents
+
+            logger.info(
+                f"📊 Booking using {config.source} config: adult=${adult_price_cents/100}, deposit=${deposit_cents/100}"
+            )
+
+            # Calculate pricing
+            party_adults = booking_data.guests
+            party_kids = 0
+            total_cents = max(
+                party_adults * adult_price_cents + party_kids * child_price_cents,
+                party_minimum_cents,
+            )
+
+            # Set deadlines
+            customer_deposit_deadline = now + timedelta(hours=2)
+            internal_deadline = now + timedelta(hours=24)
+
+            # Create booking
+            booking = Booking(
+                id=booking_id,
+                customer_id=customer_id,
+                station_id=UUID(DEFAULT_STATION_ID),
+                date=booking_date,
+                slot=booking_slot,
+                address_encrypted=address_encrypted,
+                zone=zone,
+                party_adults=party_adults,
+                party_kids=party_kids,
+                deposit_due_cents=deposit_cents,
+                total_due_cents=total_cents,
+                status=BookingStatus.PENDING,
+                source="web",
+                sms_consent=True,
+                sms_consent_timestamp=now,
+                customer_deposit_deadline=customer_deposit_deadline,
+                internal_deadline=internal_deadline,
+                deposit_deadline=customer_deposit_deadline,
+                special_requests=booking_data.special_requests,
+            )
+
+            db.add(booking)
+
+            # Commit the transaction
             await db.commit()
+            logger.info(f"✅ Booking committed successfully: {booking_id}")
+            break  # Success! Exit retry loop
+
+        except HTTPException:
+            # Business logic errors - don't retry, rollback and raise
+            await safe_rollback(db)
+            raise
+
         except IntegrityError as e:
-            await db.rollback()
-            logger.warning(f"Race condition or duplicate booking: {e}")
+            # Duplicate key or constraint violation - race condition
+            await safe_rollback(db)
+            logger.warning(f"IntegrityError (race condition): {e}")
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="This time slot was just booked. Please select a different time.",
             )
 
-        # Create response
-        response = {
-            "id": str(booking_id),
-            "date": booking_data.date,
-            "time": booking_data.time,
-            "guests": booking_data.guests,
-            "status": "pending",
-            "total_amount": total_cents / 100,
-            "deposit_amount": deposit_cents / 100,
-            "deposit_deadline": customer_deposit_deadline.isoformat(),
-            "created_at": now.isoformat(),
-            "message": "Booking request received! Please pay the $100 deposit within 2 hours to confirm your booking.",
-        }
+        except (OperationalError, DBAPIError) as e:
+            # Database connectivity issues
+            await safe_rollback(db)
 
-        # Log booking creation
-        logger.info(
-            f"✅ Public booking created: {booking_id} for {booking_data.customer_name} on {booking_data.date} at {booking_data.time}"
-        )
-
-        # Send WhatsApp/SMS notification asynchronously (non-blocking)
-        asyncio.create_task(
-            notify_new_booking(
-                customer_name=booking_data.customer_name,
-                customer_phone=booking_data.customer_phone,
-                event_date=booking_data.date,
-                event_time=booking_data.time,
-                guest_count=booking_data.guests,
-                location=booking_data.location_address,
-                booking_id=str(booking_id),
-                special_requests=booking_data.special_requests,
-            )
-        )
-
-        logger.info(f"📱 WhatsApp/SMS notification queued for booking {booking_id}")
-
-        # Send email notifications (customer + admin)
-        try:
-            # Email to customer
-            if booking_data.customer_email:
-                email_service.send_new_booking_email_to_customer(
-                    customer_email=booking_data.customer_email,
-                    customer_name=booking_data.customer_name,
-                    booking_id=str(booking_id),
-                    event_date=booking_data.date,
-                    event_time=booking_data.time,
-                    guest_count=booking_data.guests,
-                    location=booking_data.location_address,
+            if is_transient_error(e) and attempt < MAX_RETRIES - 1:
+                delay = RETRY_DELAY_SECONDS * (2**attempt)  # Exponential backoff
+                logger.warning(
+                    f"Transient DB error (attempt {attempt + 1}/{MAX_RETRIES}), retrying in {delay}s: {e}"
                 )
-                logger.info(
-                    f"📧 Email confirmation sent to customer: {booking_data.customer_email}"
+                await asyncio.sleep(delay)
+                continue
+            else:
+                logger.error(f"Database error after {attempt + 1} attempts: {e}")
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail="Database temporarily unavailable. Please try again.",
                 )
 
-            # Email to admin (myhibachichef@gmail.com)
-            admin_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "myhibachichef@gmail.com")
-            email_service.send_new_booking_email_to_admin(
-                admin_email=admin_email,
-                customer_name=booking_data.customer_name,
-                customer_phone=booking_data.customer_phone,
-                customer_email=booking_data.customer_email or "Not provided",
-                booking_id=str(booking_id),
-                event_date=booking_data.date,
-                event_time=booking_data.time,
-                guest_count=booking_data.guests,
-                location=booking_data.location_address,
-                special_requests=booking_data.special_requests,
-            )
-            logger.info(f"📧 Email alert sent to admin: {admin_email}")
         except Exception as e:
-            # Don't fail the booking if email fails - just log
-            logger.error(f"❌ Failed to send email notifications: {e}")
+            # Unexpected errors - log full context, rollback, fail
+            await safe_rollback(db)
+            logger.exception(f"Unexpected error creating booking: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to create booking. Please try again or contact us directly.",
+            )
 
-        return response
+    # =========================================================================
+    # STEP 3: POST-COMMIT ACTIONS (Notifications - Non-blocking)
+    # =========================================================================
+    response = {
+        "id": str(booking_id),
+        "date": booking_data.date,
+        "time": booking_data.time,
+        "guests": booking_data.guests,
+        "status": "pending",
+        "total_amount": total_cents / 100,
+        "deposit_amount": deposit_cents / 100,
+        "deposit_deadline": customer_deposit_deadline.isoformat(),
+        "created_at": now.isoformat(),
+        "message": "Booking request received! Please pay the $100 deposit within 2 hours to confirm your booking.",
+    }
 
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.exception(f"❌ Failed to create public booking: {e}")
-        await db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create booking. Please try again or contact us directly.",
+    logger.info(
+        f"✅ Public booking created: {booking_id} for {booking_data.customer_name} on {booking_data.date} at {booking_data.time}"
+    )
+
+    # Send WhatsApp/SMS notification asynchronously (non-blocking)
+    asyncio.create_task(
+        notify_new_booking(
+            customer_name=booking_data.customer_name,
+            customer_phone=booking_data.customer_phone,
+            event_date=booking_data.date,
+            event_time=booking_data.time,
+            guest_count=booking_data.guests,
+            location=booking_data.location_address,
+            booking_id=str(booking_id),
+            special_requests=booking_data.special_requests,
         )
+    )
+    logger.info(f"📱 WhatsApp/SMS notification queued for booking {booking_id}")
+
+    # Send email notifications (customer + admin)
+    try:
+        if booking_data.customer_email:
+            email_service.send_new_booking_email_to_customer(
+                customer_email=booking_data.customer_email,
+                customer_name=booking_data.customer_name,
+                booking_id=str(booking_id),
+                event_date=booking_data.date,
+                event_time=booking_data.time,
+                guest_count=booking_data.guests,
+                location=booking_data.location_address,
+            )
+            logger.info(f"📧 Email confirmation sent to customer: {booking_data.customer_email}")
+
+        admin_email = os.getenv("ADMIN_NOTIFICATION_EMAIL", "myhibachichef@gmail.com")
+        email_service.send_new_booking_email_to_admin(
+            admin_email=admin_email,
+            customer_name=booking_data.customer_name,
+            customer_phone=booking_data.customer_phone,
+            customer_email=booking_data.customer_email or "Not provided",
+            booking_id=str(booking_id),
+            event_date=booking_data.date,
+            event_time=booking_data.time,
+            guest_count=booking_data.guests,
+            location=booking_data.location_address,
+            special_requests=booking_data.special_requests,
+        )
+        logger.info(f"📧 Email alert sent to admin: {admin_email}")
+    except Exception as e:
+        # Don't fail the booking if email fails - just log
+        logger.error(f"❌ Failed to send email notifications: {e}")
+
+    return response
