@@ -40,7 +40,7 @@ from pydantic import BaseModel, EmailStr, Field
 from services.unified_notification_service import notify_new_booking
 from services.email_service import email_service
 from services.encryption_service import SecureDataHandler
-from services.business_config_service import get_business_config
+from services.business_config_service import get_business_config_sync
 from sqlalchemy import select, and_, func, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, OperationalError, DBAPIError
@@ -569,8 +569,9 @@ async def create_public_booking(
 
             customer_id = customer.id
 
-            # Get dynamic pricing
-            config = await get_business_config(db)
+            # Get dynamic pricing (use sync version to avoid DB query that could abort transaction)
+            # This uses environment variables only - safe from DB transaction issues
+            config = get_business_config_sync()
             adult_price_cents = config.adult_price_cents
             child_price_cents = config.child_price_cents
             party_minimum_cents = config.party_minimum_cents
