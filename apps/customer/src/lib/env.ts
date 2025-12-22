@@ -96,10 +96,41 @@ export type CustomerEnv = z.infer<typeof CustomerEnvSchema>;
 
 // Validate and export environment
 function createEnv(): CustomerEnv {
+  // On client-side, process.env only has NEXT_PUBLIC_* vars that were inlined at build time
+  // We need to be more lenient to avoid crashing the entire app
   const parsed = CustomerEnvSchema.safeParse(process.env);
 
   if (!parsed.success) {
-    console.error('❌ Invalid environment variables:', parsed.error.flatten().fieldErrors);
+    // In development, log the error for debugging
+    if (typeof window === 'undefined' || process.env.NODE_ENV === 'development') {
+      console.error('❌ Invalid environment variables:', parsed.error.flatten().fieldErrors);
+    }
+
+    // Instead of throwing, return safe defaults for client-side
+    // This prevents the entire app from crashing
+    if (typeof window !== 'undefined') {
+      console.warn('⚠️ Some environment variables are missing. Using defaults.');
+      // Return a partial object with safe defaults for client-side
+      return {
+        NODE_ENV: (process.env.NODE_ENV as 'development' | 'production' | 'test') || 'production',
+        NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'https://myhibachichef.com',
+        NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || 'MyHibachi',
+        NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://mhapi.mysticdatanode.net',
+        NEXT_PUBLIC_MAINTENANCE_MODE: false,
+        NEXT_PUBLIC_BOOKING_ENABLED: true,
+        NEXT_PUBLIC_AI_CHAT_ENABLED: process.env.NEXT_PUBLIC_AI_CHAT_ENABLED === 'true',
+        NEXT_PUBLIC_ZELLE_ENABLED: false,
+        NEXT_PUBLIC_VENMO_ENABLED: false,
+        NEXT_PUBLIC_FEATURE_NEW_BOOKING_CALENDAR: false,
+        NEXT_PUBLIC_FEATURE_V2_PRICING_ENGINE: false,
+        NEXT_PUBLIC_FEATURE_CUSTOMER_PORTAL_BETA: false,
+        NEXT_PUBLIC_FEATURE_NEW_MENU_SELECTOR: false,
+        NEXT_PUBLIC_FEATURE_BETA_PAYMENT_FLOW: false,
+        NEXT_PUBLIC_FEATURE_SHARED_MULTI_CHEF_SCHEDULING: false,
+      } as CustomerEnv;
+    }
+
+    // On server-side during build, still throw to catch config errors early
     throw new Error('Invalid environment variables');
   }
 
