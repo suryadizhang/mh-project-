@@ -1,27 +1,31 @@
 """
-Email Notification Service using Resend API
-Sends emails for user approval, rejection, and other events
-Migrated from SMTP (IONOS + Gmail) to Resend API on November 24, 2025
+Email Notification Service with SMTP and Resend API support
+Sends emails for user approval, rejection, booking confirmations, and other events
 
-Benefits:
-- Better deliverability (99%+ inbox rate vs 95% SMTP)
-- Email analytics (opens, clicks, bounces)
-- Webhook events for tracking
-- Simpler code (no SMTP complexity)
-- FREE tier (3,000 emails/month)
-- Same email addresses (cs@myhibachichef.com, myhibachichef@gmail.com)
+Supports two providers:
+1. SMTP (IONOS webmail) - Default, uses cs@myhibachichef.com
+2. Resend API - Optional, higher deliverability
+
+Configuration:
+- EMAIL_ENABLED=true to enable email sending
+- EMAIL_PROVIDER=smtp|resend (default: smtp)
+- SMTP_HOST, SMTP_PORT, SMTP_FROM_EMAIL, SMTP_PASSWORD for SMTP
+- RESEND_API_KEY, RESEND_FROM_EMAIL for Resend
 """
 
 from datetime import datetime, timezone
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import logging
 import os
+import smtplib
+import ssl
 from typing import Optional
 
 try:
     import resend
 except ImportError:
     resend = None
-    logging.warning("Resend library not installed. Install with: pip install resend")
 
 logger = logging.getLogger(__name__)
 
@@ -403,25 +407,53 @@ This is an automated notification from My Hibachi Chef booking system.
 
 
 class EmailService:
-    """Service for sending email notifications using Resend API"""
+    """Service for sending email notifications using SMTP or Resend API"""
 
     def __init__(self):
         self.enabled = os.getenv("EMAIL_ENABLED", "false").lower() == "true"
-        self.api_key = os.getenv("RESEND_API_KEY")
-        self.from_email = os.getenv("RESEND_FROM_EMAIL", "cs@myhibachichef.com")
-        self.from_name = os.getenv("RESEND_FROM_NAME", "My Hibachi Chef")
+        self.provider = os.getenv("EMAIL_PROVIDER", "smtp").lower()  # smtp or resend
+        self.from_name = os.getenv("EMAIL_FROM_NAME", "My Hibachi Chef")
         self.frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3001")
 
-        # Initialize Resend client
-        if self.enabled and self.api_key and resend:
-            resend.api_key = self.api_key
-            logger.info(f"✅ Resend email service initialized (from: {self.from_email})")
-        elif self.enabled and not self.api_key:
-            logger.error("❌ EMAIL_ENABLED=true but RESEND_API_KEY not found in environment")
-        elif self.enabled and not resend:
-            logger.error("❌ EMAIL_ENABLED=true but resend library not installed")
+        # SMTP Configuration (IONOS)
+        self.smtp_host = os.getenv("SMTP_HOST", "smtp.ionos.com")
+        self.smtp_port = int(os.getenv("SMTP_PORT", "587"))
+        self.smtp_from_email = os.getenv("SMTP_FROM_EMAIL", "cs@myhibachichef.com")
+        self.smtp_password = os.getenv("SMTP_PASSWORD", "")
+
+        # Resend Configuration (fallback)
+        self.resend_api_key = os.getenv("RESEND_API_KEY")
+        self.resend_from_email = os.getenv("RESEND_FROM_EMAIL", "cs@myhibachichef.com")
+
+        # Determine active from_email based on provider
+        if self.provider == "resend":
+            self.from_email = self.resend_from_email
         else:
+            self.from_email = self.smtp_from_email
+
+        # Initialize based on provider
+        if not self.enabled:
             logger.info("📧 Email service disabled (EMAIL_ENABLED=false)")
+        elif self.provider == "smtp":
+            if self.smtp_host and self.smtp_password:
+                logger.info(
+                    f"✅ SMTP email service initialized (host: {self.smtp_host}, from: {self.from_email})"
+                )
+            else:
+                logger.error(
+                    "❌ EMAIL_ENABLED=true with SMTP but missing SMTP_HOST or SMTP_PASSWORD"
+                )
+        elif self.provider == "resend":
+            if self.resend_api_key and resend:
+                resend.api_key = self.resend_api_key
+                logger.info(f"✅ Resend email service initialized (from: {self.from_email})")
+            elif not self.resend_api_key:
+                logger.error("❌ EMAIL_PROVIDER=resend but RESEND_API_KEY not found")
+            elif not resend:
+                logger.error("❌ EMAIL_PROVIDER=resend but resend library not installed")
+        else:
+            logger.warning(f"⚠️ Unknown EMAIL_PROVIDER={self.provider}, defaulting to smtp")
+            self.provider = "smtp"
 
     def _format_sender(self) -> str:
         """Format sender email with name"""
@@ -626,13 +658,75 @@ class EmailService:
         text_body: str,
         tags: Optional[list] = None,
     ) -> bool:
-        """Internal method to send email via Resend API"""
+        """Internal method to send email via SMTP or Resend API"""
         if not self.enabled:
             logger.info(f"📧 Email disabled. Would send to {to_email}: {subject}")
             logger.debug(f"Email preview:\n{text_body[:200]}...")
             return True
 
-        if not self.api_key or not resend:
+        # Route to appropriate provider
+        if self.provider == "smtp":
+            return self._send_via_smtp(to_email, subject, html_body, text_body)
+        else:
+            return self._send_via_resend(to_email, subject, html_body, text_body, tags)
+
+    def _send_via_smtp(
+        self,
+        to_email: str,
+        subject: str,
+        html_body: str,
+        text_body: str,
+    ) -> bool:
+        """Send email via SMTP (IONOS)"""
+        if not self.smtp_host or not self.smtp_password:
+            logger.error("❌ Cannot send email: SMTP not configured properly")
+            return False
+
+        try:
+            # Create multipart message
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = subject
+            msg["From"] = self._format_sender()
+            msg["To"] = to_email
+
+            # Attach both text and HTML versions
+            part1 = MIMEText(text_body, "plain", "utf-8")
+            part2 = MIMEText(html_body, "html", "utf-8")
+            msg.attach(part1)
+            msg.attach(part2)
+
+            # Create secure SSL/TLS context
+            context = ssl.create_default_context()
+
+            # Connect and send
+            with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
+                server.starttls(context=context)
+                server.login(self.smtp_from_email, self.smtp_password)
+                server.sendmail(self.smtp_from_email, to_email, msg.as_string())
+
+            logger.info(f"✅ Email sent via SMTP to {to_email} | Subject: {subject}")
+            return True
+
+        except smtplib.SMTPAuthenticationError as e:
+            logger.error(f"❌ SMTP authentication failed for {self.smtp_from_email}: {e}")
+            return False
+        except smtplib.SMTPException as e:
+            logger.exception(f"❌ SMTP error sending to {to_email}: {e}")
+            return False
+        except Exception as e:
+            logger.exception(f"❌ Failed to send email via SMTP to {to_email}: {e}")
+            return False
+
+    def _send_via_resend(
+        self,
+        to_email: str,
+        subject: str,
+        html_body: str,
+        text_body: str,
+        tags: Optional[list] = None,
+    ) -> bool:
+        """Send email via Resend API"""
+        if not self.resend_api_key or not resend:
             logger.error("❌ Cannot send email: Resend not configured properly")
             return False
 
