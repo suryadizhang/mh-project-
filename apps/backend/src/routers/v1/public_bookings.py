@@ -589,9 +589,10 @@ async def create_public_booking(
                 party_minimum_cents,
             )
 
-            # Set deadlines
-            customer_deposit_deadline = now + timedelta(hours=2)
-            internal_deadline = now + timedelta(hours=24)
+            # Set deadlines (strip timezone for TIMESTAMP WITHOUT TIME ZONE columns)
+            now_naive = now.replace(tzinfo=None)
+            customer_deposit_deadline = now_naive + timedelta(hours=2)
+            internal_deadline = now_naive + timedelta(hours=24)
 
             # Create booking
             booking = Booking(
@@ -609,10 +610,10 @@ async def create_public_booking(
                 status=BookingStatus.PENDING,
                 source="web",
                 sms_consent=True,
-                sms_consent_timestamp=now,
-                customer_deposit_deadline=customer_deposit_deadline,
-                internal_deadline=internal_deadline,
-                deposit_deadline=customer_deposit_deadline,
+                sms_consent_timestamp=now,  # This column is TIMESTAMP WITH TIME ZONE
+                customer_deposit_deadline=customer_deposit_deadline,  # Naive datetime
+                internal_deadline=internal_deadline,  # Naive datetime
+                deposit_deadline=customer_deposit_deadline,  # Naive datetime
                 special_requests=booking_data.special_requests,
             )
 
