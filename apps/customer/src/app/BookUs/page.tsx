@@ -102,8 +102,8 @@ export default function BookingPage() {
   const [loadingTimeSlots, setLoadingTimeSlots] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Google Places Autocomplete refs
-  const venueAddressInputRef = useRef<HTMLInputElement>(null);
+  // Google Places Autocomplete refs - use mutable ref for callback ref pattern
+  const venueAddressInputRef = useRef<HTMLInputElement | null>(null);
   const autocompleteRef = useRef<GoogleMapsAutocomplete | null>(null);
 
   const {
@@ -121,6 +121,10 @@ export default function BookingPage() {
       smsConsent: false,
     },
   });
+
+  // Extract venueStreet register to merge with autocomplete ref
+  const { ref: venueStreetFormRef, ...venueStreetRegister } = register('venueStreet');
+
   // Watch form values
   const sameAsVenue = watch('sameAsVenue');
   const venueStreet = watch('venueStreet');
@@ -1283,8 +1287,13 @@ export default function BookingPage() {
                       Venue Street Address *
                     </label>
                     <input
-                      {...register('venueStreet')}
-                      ref={venueAddressInputRef}
+                      {...venueStreetRegister}
+                      ref={(element) => {
+                        // Set React Hook Form ref for form validation
+                        venueStreetFormRef(element);
+                        // Set our custom ref for Google Places Autocomplete
+                        venueAddressInputRef.current = element;
+                      }}
                       className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-red-500 focus:ring-2 focus:ring-red-500"
                       placeholder="Start typing your venue address..."
                       autoComplete="off"
