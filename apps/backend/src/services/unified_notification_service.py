@@ -27,6 +27,8 @@ import logging
 import os
 from typing import Any, Literal
 
+import httpx  # For Meta WhatsApp API calls
+
 logger = logging.getLogger(__name__)
 
 # Try to import Twilio (optional dependency)
@@ -75,6 +77,9 @@ class UnifiedNotificationService:
     - TWILIO_AUTH_TOKEN: Twilio auth token
     - TWILIO_WHATSAPP_NUMBER: whatsapp:+14155238886
     - TWILIO_SMS_NUMBER: +19167408768
+    - META_WHATSAPP_TOKEN: Meta WhatsApp Cloud API access token
+    - META_WHATSAPP_PHONE_ID: Meta phone number ID (not the phone number itself)
+    - META_WHATSAPP_BUSINESS_ACCOUNT_ID: WhatsApp Business Account ID
     - ADMIN_NOTIFICATION_PHONE: Admin phone for all alerts
     - NOTIFICATION_QUIET_START: 22 (10 PM)
     - NOTIFICATION_QUIET_END: 8 (8 AM)
@@ -89,13 +94,17 @@ class UnifiedNotificationService:
         self.quiet_start = int(os.getenv("NOTIFICATION_QUIET_START", "22"))
         self.quiet_end = int(os.getenv("NOTIFICATION_QUIET_END", "8"))
 
-        # Initialize Twilio if available
+        # Initialize Twilio if selected
+        self.twilio_client = None
+        self.meta_token = None
+        self.meta_phone_id = None
+
         if self.provider == "twilio" and TWILIO_AVAILABLE:
             try:
                 account_sid = os.getenv("TWILIO_ACCOUNT_SID")
                 auth_token = os.getenv("TWILIO_AUTH_TOKEN")
 
-                if account_sid and auth_token:
+                if account_sid and auth_token and account_sid != "placeholder":
                     self.twilio_client = Client(account_sid, auth_token)
                     self.whatsapp_from = os.getenv(
                         "TWILIO_WHATSAPP_NUMBER", "whatsapp:+14155238886"
@@ -103,18 +112,28 @@ class UnifiedNotificationService:
                     self.sms_from = os.getenv("TWILIO_SMS_NUMBER", "+19167408768")
                     logger.info("✅ Twilio WhatsApp service initialized")
                 else:
-                    logger.warning("⚠️ Twilio credentials missing - using mock mode")
+                    logger.warning("⚠️ Twilio credentials missing or placeholder - using mock mode")
                     self.provider = "mock"
-                    self.twilio_client = None
             except Exception as e:
                 logger.exception(f"❌ Twilio initialization failed: {e} - using mock mode")
                 self.provider = "mock"
-                self.twilio_client = None
-        else:
-            self.twilio_client = None
-            if self.provider != "mock":
-                logger.warning(f"⚠️ Provider '{self.provider}' not supported yet - using mock mode")
+
+        # Initialize Meta WhatsApp Cloud API if selected
+        elif self.provider == "meta":
+            self.meta_token = os.getenv("META_WHATSAPP_TOKEN")
+            self.meta_phone_id = os.getenv("META_WHATSAPP_PHONE_ID")
+
+            if self.meta_token and self.meta_phone_id and self.meta_token != "placeholder":
+                logger.info("✅ Meta WhatsApp Cloud API initialized")
+            else:
+                logger.warning(
+                    "⚠️ Meta WhatsApp credentials missing or placeholder - using mock mode"
+                )
                 self.provider = "mock"
+
+        elif self.provider != "mock":
+            logger.warning(f"⚠️ Provider '{self.provider}' not supported - using mock mode")
+            self.provider = "mock"
 
         logger.info(f"📱 Notification Service: Provider={self.provider}, Admin={self.admin_phone}")
 
@@ -618,6 +637,10 @@ Check admin portal for details."""
         if self.provider == "mock":
             return await self._send_mock(to_phone, message, notification_type)
 
+        # Meta WhatsApp Cloud API
+        if self.provider == "meta" and self.meta_token:
+            return await self._send_via_meta_whatsapp(to_phone, message)
+
         # Twilio WhatsApp/SMS
         if self.provider == "twilio" and self.twilio_client:
             # Try WhatsApp first
@@ -700,6 +723,66 @@ Check admin portal for details."""
         except Exception as e:
             logger.exception(f"❌ SMS send failed: {e}")
             return {"success": False, "channel": NotificationChannel.SMS, "error": str(e)}
+
+    async def _send_via_meta_whatsapp(self, to_phone: str, message: str) -> dict[str, Any]:
+        """
+        Send message via Meta WhatsApp Cloud API.
+
+        Uses the free-form text message endpoint.
+        For production, consider using template messages for reliability.
+
+        API Docs: https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-messages
+        """
+        # Remove + prefix for Meta API (expects format like 12103884155)
+        phone_number = to_phone.lstrip("+")
+
+        url = f"https://graph.facebook.com/v18.0/{self.meta_phone_id}/messages"
+        headers = {
+            "Authorization": f"Bearer {self.meta_token}",
+            "Content-Type": "application/json",
+        }
+
+        # Free-form text message payload
+        payload = {
+            "messaging_product": "whatsapp",
+            "recipient_type": "individual",
+            "to": phone_number,
+            "type": "text",
+            "text": {"preview_url": False, "body": message},
+        }
+
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(url, json=payload, headers=headers)
+
+                if response.status_code == 200:
+                    data = response.json()
+                    message_id = data.get("messages", [{}])[0].get("id", "unknown")
+                    logger.info(f"✅ Meta WhatsApp sent to {to_phone} - ID: {message_id}")
+                    return {
+                        "success": True,
+                        "channel": NotificationChannel.WHATSAPP,
+                        "message_id": message_id,
+                        "to": to_phone,
+                        "provider": "meta",
+                    }
+                else:
+                    error_data = response.json()
+                    error_msg = error_data.get("error", {}).get("message", "Unknown error")
+                    logger.error(f"❌ Meta WhatsApp failed: {response.status_code} - {error_msg}")
+                    return {
+                        "success": False,
+                        "channel": NotificationChannel.WHATSAPP,
+                        "error": error_msg,
+                        "status_code": response.status_code,
+                    }
+
+        except httpx.TimeoutException:
+            logger.error(f"❌ Meta WhatsApp timeout sending to {to_phone}")
+            return {"success": False, "channel": NotificationChannel.WHATSAPP, "error": "Timeout"}
+        except Exception as e:
+            logger.exception(f"❌ Meta WhatsApp send failed: {e}")
+            return {"success": False, "channel": NotificationChannel.WHATSAPP, "error": str(e)}
 
 
 # ==========================================
