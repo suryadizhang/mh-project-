@@ -117,7 +117,7 @@ export default function ExitIntentPopup({ isVisible, onClose }: ExitIntentPopupP
           sms_consent: formData.smsConsent,
           email_consent: formData.emailConsent,
           consent_text: formData.smsConsent
-            ? 'By providing your phone number and checking this box, you consent to receive SMS messages from my Hibachi LLC. Message frequency varies. Message and data rates may apply. Reply STOP to opt out, HELP for assistance.'
+            ? 'I consent to receive SMS messages from my Hibachi LLC including: booking confirmations, event reminders, chef notifications, booking updates, customer support responses, and promotional offers. Message frequency varies. Message and data rates may apply. Reply STOP to opt out, HELP for assistance. View SMS Terms at https://myhibachichef.com/terms#sms and Privacy Policy at https://myhibachichef.com/privacy.'
             : undefined,
         }),
       });
@@ -317,9 +317,17 @@ export default function ExitIntentPopup({ isVisible, onClose }: ExitIntentPopupP
                     className="mt-1 h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
                   />
                   <label htmlFor="popup-smsConsent" className="ml-3 text-sm text-gray-700">
-                    Send me SMS updates (message rates may apply)
+                    I consent to receive SMS messages (booking confirmations, reminders, promotions)
                     <span className="mt-1 block text-xs text-gray-500">
-                      Reply STOP to opt out, HELP for assistance
+                      Message frequency varies. Rates may apply. Reply STOP to opt out, HELP for
+                      help.
+                      <a
+                        href="/terms#sms"
+                        target="_blank"
+                        className="ml-1 text-blue-600 hover:underline"
+                      >
+                        SMS Terms
+                      </a>
                     </span>
                   </label>
                 </div>

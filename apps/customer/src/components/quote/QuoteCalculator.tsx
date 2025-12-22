@@ -72,6 +72,7 @@ interface QuoteData {
   venueAddress: string;
   name: string;
   phone: string;
+  smsConsent: boolean;
   salmon: number;
   scallops: number;
   filetMignon: number;
@@ -214,6 +215,7 @@ export function QuoteCalculator() {
     venueAddress: '', // NEW: Full venue address
     name: '',
     phone: '',
+    smsConsent: false,
     salmon: 0,
     scallops: 0,
     filetMignon: 0,
@@ -279,19 +281,21 @@ export function QuoteCalculator() {
   const handleBlur = useCallback(
     (field: keyof QuoteData) => {
       setTouched((prev) => ({ ...prev, [field]: true }));
-      const error = validateField(field, quoteData[field]);
+      // Skip validation for boolean fields
+      if (field === 'smsConsent') return;
+      const error = validateField(field, quoteData[field] as string | number);
       setValidationErrors((prev) => ({ ...prev, [field]: error }));
     },
     [quoteData, validateField],
   );
 
-  const handleInputChange = (field: keyof QuoteData, value: number | string) => {
+  const handleInputChange = (field: keyof QuoteData, value: number | string | boolean) => {
     setQuoteData((prev) => ({ ...prev, [field]: value }));
     setQuoteResult(null);
     setCalculationError('');
 
-    // Real-time validation for touched fields
-    if (touched[field]) {
+    // Real-time validation for touched fields (skip boolean fields)
+    if (touched[field] && typeof value !== 'boolean') {
       const error = validateField(field, value);
       setValidationErrors((prev) => ({ ...prev, [field]: error }));
     }
@@ -547,6 +551,10 @@ export function QuoteCalculator() {
         location: quoteData.location,
         zipCode: quoteData.zipCode,
         grandTotal: result.grandTotal,
+        smsConsent: quoteData.smsConsent,
+        consentText: quoteData.smsConsent
+          ? 'I consent to receive SMS messages from my Hibachi LLC including: booking confirmations, event reminders, chef notifications, booking updates, customer support responses, and promotional offers. Message frequency varies. Message and data rates may apply. Reply STOP to opt-out, HELP for assistance.'
+          : undefined,
       })
         .then((leadResult) => {
           if (leadResult.success && leadResult.data?.id) {
@@ -870,6 +878,45 @@ export function QuoteCalculator() {
                   address
                 </p>
               </div>
+            </div>
+          </div>
+
+          {/* SMS Consent - Required for RingCentral TCR Compliance */}
+          <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="smsConsent"
+                checked={quoteData.smsConsent}
+                onChange={(e) => handleInputChange('smsConsent', e.target.checked)}
+                className="mt-1 h-5 w-5 rounded border-gray-300 text-red-600 focus:ring-red-500"
+              />
+              <label htmlFor="smsConsent" className="text-sm text-gray-700">
+                <strong>I consent to receive text messages from My Hibachi Chef</strong>
+                <p className="mt-1 text-xs text-gray-600">
+                  I agree to receive the following types of SMS messages from my Hibachi LLC:
+                  <strong>booking confirmations</strong>, <strong>event reminders</strong>,
+                  <strong>chef notifications</strong>, <strong>booking updates</strong>,
+                  <strong>customer support responses</strong>, and{' '}
+                  <strong>promotional offers</strong>.
+                </p>
+                <p className="mt-1 text-xs text-gray-600">
+                  Message frequency varies. Message and data rates may apply. Reply{' '}
+                  <strong>STOP</strong> to opt-out at any time. Reply <strong>HELP</strong> for
+                  assistance.
+                </p>
+                <p className="mt-1 text-xs text-gray-500">
+                  View our{' '}
+                  <a href="/terms#sms" target="_blank" className="text-blue-600 hover:underline">
+                    SMS Terms
+                  </a>{' '}
+                  and{' '}
+                  <a href="/privacy" target="_blank" className="text-blue-600 hover:underline">
+                    Privacy Policy
+                  </a>
+                  . SMS consent is not shared with third parties.
+                </p>
+              </label>
             </div>
           </div>
 

@@ -244,6 +244,161 @@ If you need immediate access, please contact us at support@myhibachi.com.
 © 2025 MyHibachi Chef. All rights reserved.
         """,
     },
+    "new_booking_customer": {
+        "subject": "🎉 Your Hibachi Booking Confirmed! - My Hibachi Chef",
+        "html": """
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #16a34a; color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }}
+        .content {{ background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+        .details {{ background-color: #ffffff; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e5e7eb; }}
+        .detail-row {{ display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6; }}
+        .button {{ background-color: #16a34a; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0; }}
+        .footer {{ text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }}
+        .warning {{ background-color: #fef3c7; border: 1px solid #f59e0b; padding: 15px; border-radius: 6px; margin: 20px 0; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Booking Confirmed!</h1>
+        </div>
+        <div class="content">
+            <h2>Hello {customer_name},</h2>
+            <p>Thank you for choosing My Hibachi Chef! Your hibachi party is booked and we can't wait to cook for you!</p>
+            
+            <div class="details">
+                <h3>📋 Booking Details</h3>
+                <div class="detail-row"><span><strong>Booking #:</strong></span><span>{booking_id}</span></div>
+                <div class="detail-row"><span><strong>Date:</strong></span><span>{event_date}</span></div>
+                <div class="detail-row"><span><strong>Time:</strong></span><span>{event_time}</span></div>
+                <div class="detail-row"><span><strong>Guests:</strong></span><span>~{guest_count} people</span></div>
+                <div class="detail-row"><span><strong>Location:</strong></span><span>{location}</span></div>
+            </div>
+            
+            <div class="warning">
+                <strong>⚠️ Allergen Notice:</strong> We use shared cooking surfaces and cannot guarantee 100% allergen-free meals. 
+                Please reply to this email with any allergies or dietary restrictions.
+            </div>
+            
+            <p><strong>What's Next?</strong></p>
+            <ul>
+                <li>Pay your $100 deposit within 2 hours to confirm</li>
+                <li>We'll send a reminder before your event</li>
+                <li>Our chef will arrive 30 mins early to set up</li>
+            </ul>
+            
+            <p>Questions? Reply to this email or call us at <strong>(916) 740-8768</strong></p>
+        </div>
+        <div class="footer">
+            <p>© 2025 My Hibachi Chef. All rights reserved.</p>
+            <p>Northern California's Premier Hibachi Catering</p>
+        </div>
+    </div>
+</body>
+</html>
+        """,
+        "text": """
+Hello {customer_name},
+
+🎉 BOOKING CONFIRMED!
+
+Thank you for choosing My Hibachi Chef! Your hibachi party is booked.
+
+BOOKING DETAILS:
+- Booking #: {booking_id}
+- Date: {event_date}
+- Time: {event_time}
+- Guests: ~{guest_count} people
+- Location: {location}
+
+⚠️ ALLERGEN NOTICE: We use shared cooking surfaces and cannot guarantee 100% allergen-free. 
+Please reply with any allergies or dietary restrictions.
+
+WHAT'S NEXT:
+1. Pay your $100 deposit within 2 hours to confirm
+2. We'll send a reminder before your event
+3. Our chef will arrive 30 mins early to set up
+
+Questions? Reply to this email or call (916) 740-8768
+
+© 2025 My Hibachi Chef. Northern California's Premier Hibachi Catering.
+        """,
+    },
+    "new_booking_admin": {
+        "subject": "🆕 New Booking Alert! - {customer_name} on {event_date}",
+        "html": """
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #2563eb; color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }}
+        .content {{ background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+        .details {{ background-color: #ffffff; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e5e7eb; }}
+        .button {{ background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0; }}
+        .footer {{ text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }}
+        .urgent {{ color: #dc2626; font-weight: bold; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🆕 New Booking Received!</h1>
+        </div>
+        <div class="content">
+            <p class="urgent">Action Required: Assign chef and confirm booking</p>
+            
+            <div class="details">
+                <h3>📋 Booking Details</h3>
+                <p><strong>Booking #:</strong> {booking_id}</p>
+                <p><strong>Customer:</strong> {customer_name}</p>
+                <p><strong>Phone:</strong> {customer_phone}</p>
+                <p><strong>Email:</strong> {customer_email}</p>
+                <p><strong>Date:</strong> {event_date}</p>
+                <p><strong>Time:</strong> {event_time}</p>
+                <p><strong>Guests:</strong> ~{guest_count} people</p>
+                <p><strong>Location:</strong> {location}</p>
+                <p><strong>Special Requests:</strong> {special_requests}</p>
+            </div>
+            
+            <p style="text-align: center;">
+                <a href="{admin_url}/bookings/{booking_id}" class="button">View in Admin Portal</a>
+            </p>
+        </div>
+        <div class="footer">
+            <p>This is an automated notification from My Hibachi Chef booking system.</p>
+        </div>
+    </div>
+</body>
+</html>
+        """,
+        "text": """
+🆕 NEW BOOKING RECEIVED!
+
+Action Required: Assign chef and confirm booking
+
+BOOKING DETAILS:
+- Booking #: {booking_id}
+- Customer: {customer_name}
+- Phone: {customer_phone}
+- Email: {customer_email}
+- Date: {event_date}
+- Time: {event_time}
+- Guests: ~{guest_count} people
+- Location: {location}
+- Special Requests: {special_requests}
+
+View in admin portal: {admin_url}/bookings/{booking_id}
+
+This is an automated notification from My Hibachi Chef booking system.
+        """,
+    },
 }
 
 
@@ -364,7 +519,113 @@ class EmailService:
             logger.exception(f"Failed to send welcome email to {email}: {e}")
             return False
 
-    def _send_email(self, to_email: str, subject: str, html_body: str, text_body: str, tags: Optional[list] = None) -> bool:
+    def send_new_booking_email_to_customer(
+        self,
+        customer_email: str,
+        customer_name: str,
+        booking_id: str,
+        event_date: str,
+        event_time: str,
+        guest_count: int,
+        location: str,
+    ) -> bool:
+        """Send booking confirmation email to customer"""
+        try:
+            template = EMAIL_TEMPLATES["new_booking_customer"]
+            html_body = template["html"].format(
+                customer_name=customer_name,
+                booking_id=booking_id,
+                event_date=event_date,
+                event_time=event_time,
+                guest_count=guest_count,
+                location=location,
+            )
+            text_body = template["text"].format(
+                customer_name=customer_name,
+                booking_id=booking_id,
+                event_date=event_date,
+                event_time=event_time,
+                guest_count=guest_count,
+                location=location,
+            )
+
+            return self._send_email(
+                to_email=customer_email,
+                subject=template["subject"],
+                html_body=html_body,
+                text_body=text_body,
+                tags=[{"name": "type", "value": "booking_confirmation"}],
+            )
+        except Exception as e:
+            logger.exception(f"Failed to send booking confirmation email to {customer_email}: {e}")
+            return False
+
+    def send_new_booking_email_to_admin(
+        self,
+        admin_email: str,
+        customer_name: str,
+        customer_phone: str,
+        customer_email: str,
+        booking_id: str,
+        event_date: str,
+        event_time: str,
+        guest_count: int,
+        location: str,
+        special_requests: str | None = None,
+    ) -> bool:
+        """Send new booking alert email to admin"""
+        try:
+            template = EMAIL_TEMPLATES["new_booking_admin"]
+            admin_url = os.getenv("ADMIN_URL", "https://admin.mysticdatanode.net")
+
+            subject = template["subject"].format(
+                customer_name=customer_name,
+                event_date=event_date,
+            )
+            html_body = template["html"].format(
+                customer_name=customer_name,
+                customer_phone=customer_phone,
+                customer_email=customer_email,
+                booking_id=booking_id,
+                event_date=event_date,
+                event_time=event_time,
+                guest_count=guest_count,
+                location=location,
+                special_requests=special_requests or "None",
+                admin_url=admin_url,
+            )
+            text_body = template["text"].format(
+                customer_name=customer_name,
+                customer_phone=customer_phone,
+                customer_email=customer_email,
+                booking_id=booking_id,
+                event_date=event_date,
+                event_time=event_time,
+                guest_count=guest_count,
+                location=location,
+                special_requests=special_requests or "None",
+                admin_url=admin_url,
+            )
+
+            return self._send_email(
+                to_email=admin_email,
+                subject=subject,
+                html_body=html_body,
+                text_body=text_body,
+                tags=[{"name": "type", "value": "booking_admin_alert"}],
+            )
+        except Exception as e:
+            logger.exception(f"Failed to send booking alert email to admin {admin_email}: {e}")
+            return False
+
+    def _send_email(
+        self,
+        to_email: str,
+        subject: str,
+        html_body: str,
+        text_body: str,
+        tags: Optional[list] = None,
+    ) -> bool:
         """Internal method to send email via Resend API"""
         if not self.enabled:
             logger.info(f"📧 Email disabled. Would send to {to_email}: {subject}")
@@ -372,7 +633,7 @@ class EmailService:
             return True
 
         if not self.api_key or not resend:
-            logger.error(f"❌ Cannot send email: Resend not configured properly")
+            logger.error("❌ Cannot send email: Resend not configured properly")
             return False
 
         try:
@@ -392,14 +653,14 @@ class EmailService:
             # Send via Resend API
             response = resend.Emails.send(params)
 
-            logger.info(f"✅ Email sent via Resend to {to_email} | Subject: {subject} | ID: {response.get('id', 'N/A')}")
+            logger.info(
+                f"✅ Email sent via Resend to {to_email} | Subject: {subject} | ID: {response.get('id', 'N/A')}"
+            )
             return True
 
         except Exception as e:
             logger.exception(f"❌ Failed to send email via Resend to {to_email}: {e}")
             return False
-
-
 
 
 # Global email service instance
