@@ -44,6 +44,9 @@ export interface LeadContext {
   preferred_date?: string; // For failed bookings
   preferred_time?: string; // For failed bookings
   notes?: string;
+  // RingCentral TCR Compliance
+  sms_consent?: boolean; // User opted in to SMS notifications
+  consent_text?: string; // Full consent text shown to user at opt-in
 }
 
 export interface LeadSubmission {
@@ -221,6 +224,8 @@ export async function submitQuoteLead(quoteData: {
   location?: string;
   zipCode?: string;
   grandTotal: number;
+  smsConsent?: boolean;
+  consentText?: string;
 }): Promise<{ success: true; data: LeadResponse } | { success: false; error: string }> {
   const lead: LeadSubmission = {
     source: 'WEB_QUOTE',
@@ -238,6 +243,8 @@ export async function submitQuoteLead(quoteData: {
       zip_code: quoteData.zipCode,
       service_type: 'hibachi_catering',
       notes: `Quote requested via calculator. Location: ${quoteData.location || 'Not specified'}. Name: ${quoteData.name}`,
+      sms_consent: quoteData.smsConsent ?? false,
+      consent_text: quoteData.consentText,
     },
     utm_source: 'website',
     utm_medium: 'quote_calculator',
