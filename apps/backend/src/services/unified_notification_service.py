@@ -153,8 +153,9 @@ class UnifiedNotificationService:
         event_time: str,
         guest_count: int,
         location: str,
-        booking_id: int,
+        booking_id: int | str,
         send_to_admin: bool = True,
+        special_requests: str | None = None,
     ) -> dict[str, Any]:
         """
         Send notification when new booking is created.
@@ -163,6 +164,7 @@ class UnifiedNotificationService:
             customer_name: Customer's full name
             customer_phone: Customer's phone number
             event_date: Event date (e.g., "2025-11-15")
+            special_requests: Any special requests from the customer
             event_time: Event time (e.g., "6:00 PM")
             guest_count: Number of guests
             location: Event location
