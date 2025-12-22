@@ -354,12 +354,21 @@ export function QuoteRequestForm({ className = '', onSuccess }: QuoteRequestForm
               className="mt-1 h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
             />
             <label htmlFor="smsConsent" className="ml-3 text-sm text-gray-700">
-              <strong>Yes, send me SMS updates</strong> about my booking, event reminders, and
-              exclusive offers.
+              <strong>I consent to receive text messages from My Hibachi Chef</strong>
               <span className="mt-1 block text-xs text-gray-600">
-                By checking this box, you consent to receive SMS messages from my Hibachi LLC.
-                Message frequency varies. Message and data rates may apply. Reply{' '}
-                <strong>STOP</strong> to opt out, <strong>HELP</strong> for assistance.
+                I agree to receive the following types of SMS messages: booking confirmations, event
+                reminders, chef notifications, booking updates, customer support responses, and
+                promotional offers. Message frequency varies. Message and data rates may apply.
+                Reply <strong>STOP</strong> to opt out, <strong>HELP</strong> for assistance. View
+                our{' '}
+                <a href="/terms#sms" target="_blank" className="text-blue-600 hover:underline">
+                  SMS Terms
+                </a>{' '}
+                and{' '}
+                <a href="/privacy" target="_blank" className="text-blue-600 hover:underline">
+                  Privacy Policy
+                </a>
+                .
               </span>
             </label>
           </div>
