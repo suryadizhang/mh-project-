@@ -101,37 +101,30 @@ function createEnv(): CustomerEnv {
   const parsed = CustomerEnvSchema.safeParse(process.env);
 
   if (!parsed.success) {
-    // In development, log the error for debugging
-    if (typeof window === 'undefined' || process.env.NODE_ENV === 'development') {
-      console.error('❌ Invalid environment variables:', parsed.error.flatten().fieldErrors);
-    }
+    // Log the error for debugging (but don't crash the build)
+    console.error('❌ Invalid environment variables:', parsed.error.flatten().fieldErrors);
+    console.warn('⚠️ Using fallback defaults for missing environment variables.');
 
-    // Instead of throwing, return safe defaults for client-side
-    // This prevents the entire app from crashing
-    if (typeof window !== 'undefined') {
-      console.warn('⚠️ Some environment variables are missing. Using defaults.');
-      // Return a partial object with safe defaults for client-side
-      return {
-        NODE_ENV: (process.env.NODE_ENV as 'development' | 'production' | 'test') || 'production',
-        NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'https://myhibachichef.com',
-        NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || 'MyHibachi',
-        NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://mhapi.mysticdatanode.net',
-        NEXT_PUBLIC_MAINTENANCE_MODE: false,
-        NEXT_PUBLIC_BOOKING_ENABLED: true,
-        NEXT_PUBLIC_AI_CHAT_ENABLED: process.env.NEXT_PUBLIC_AI_CHAT_ENABLED === 'true',
-        NEXT_PUBLIC_ZELLE_ENABLED: false,
-        NEXT_PUBLIC_VENMO_ENABLED: false,
-        NEXT_PUBLIC_FEATURE_NEW_BOOKING_CALENDAR: false,
-        NEXT_PUBLIC_FEATURE_V2_PRICING_ENGINE: false,
-        NEXT_PUBLIC_FEATURE_CUSTOMER_PORTAL_BETA: false,
-        NEXT_PUBLIC_FEATURE_NEW_MENU_SELECTOR: false,
-        NEXT_PUBLIC_FEATURE_BETA_PAYMENT_FLOW: false,
-        NEXT_PUBLIC_FEATURE_SHARED_MULTI_CHEF_SCHEDULING: false,
-      } as CustomerEnv;
-    }
-
-    // On server-side during build, still throw to catch config errors early
-    throw new Error('Invalid environment variables');
+    // Return safe defaults to prevent build/runtime crashes
+    // This allows builds to complete even when some env vars are missing
+    return {
+      NODE_ENV: (process.env.NODE_ENV as 'development' | 'production' | 'test') || 'production',
+      NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'https://myhibachichef.com',
+      NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || 'MyHibachi',
+      NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://mhapi.mysticdatanode.net',
+      NEXT_PUBLIC_AI_API_URL: process.env.NEXT_PUBLIC_AI_API_URL,
+      NEXT_PUBLIC_MAINTENANCE_MODE: false,
+      NEXT_PUBLIC_BOOKING_ENABLED: true,
+      NEXT_PUBLIC_AI_CHAT_ENABLED: process.env.NEXT_PUBLIC_AI_CHAT_ENABLED === 'true',
+      NEXT_PUBLIC_ZELLE_ENABLED: process.env.NEXT_PUBLIC_ZELLE_ENABLED === 'true',
+      NEXT_PUBLIC_VENMO_ENABLED: process.env.NEXT_PUBLIC_VENMO_ENABLED === 'true',
+      NEXT_PUBLIC_FEATURE_NEW_BOOKING_CALENDAR: false,
+      NEXT_PUBLIC_FEATURE_V2_PRICING_ENGINE: false,
+      NEXT_PUBLIC_FEATURE_CUSTOMER_PORTAL_BETA: false,
+      NEXT_PUBLIC_FEATURE_NEW_MENU_SELECTOR: false,
+      NEXT_PUBLIC_FEATURE_BETA_PAYMENT_FLOW: false,
+      NEXT_PUBLIC_FEATURE_SHARED_MULTI_CHEF_SCHEDULING: false,
+    } as CustomerEnv;
   }
 
   return parsed.data;

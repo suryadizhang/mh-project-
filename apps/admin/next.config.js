@@ -4,6 +4,11 @@ const nextConfig = {
   output: 'standalone',
   outputFileTracingRoot: '../../',
   compress: true, // Enable gzip compression
+  eslint: {
+    // Skip linting during builds - we run ESLint separately in CI
+    // ESLint 9 is installed to match Vercel's Next.js 15 requirements
+    ignoreDuringBuilds: true,
+  },
   images: {
     unoptimized: false,
     formats: ['image/webp', 'image/avif'],
