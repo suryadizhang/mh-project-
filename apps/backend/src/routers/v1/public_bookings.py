@@ -167,10 +167,11 @@ async def get_booked_dates_public(
             for row in rows
         ]
 
-        # Return in flat format expected by frontend: { bookedDates: [...] }
-        # The API client wrapper adds { success: true, data: ... } automatically
+        # Return format matching BookedDatesResponse schema
         return {
-            "bookedDates": booked_dates,
+            "success": True,
+            "data": booked_dates,
+            "count": len(booked_dates),
         }
 
     except Exception as e:
@@ -296,9 +297,10 @@ async def get_available_times(
                 }
             )
 
-        # Return in flat format expected by frontend: { timeSlots: [...] }
-        # The API client wrapper adds { success: true, data: ... } automatically
+        # Return format matching AvailableTimeSlotsResponse schema
         return {
+            "success": True,
+            "date": date,
             "timeSlots": time_slots,
         }
 
