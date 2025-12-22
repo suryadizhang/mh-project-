@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS accounting.company_mappings (
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
-    
+
     UNIQUE(station_id),
     UNIQUE(akaunting_company_id)
 );
@@ -59,11 +59,11 @@ CREATE TABLE IF NOT EXISTS accounting.customer_mappings (
     last_synced_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
-    
+
     UNIQUE(customer_id, akaunting_company_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_customer_mappings_akaunting 
+CREATE INDEX IF NOT EXISTS idx_customer_mappings_akaunting
 ON accounting.customer_mappings(akaunting_company_id, akaunting_contact_id);
 
 COMMENT ON TABLE accounting.customer_mappings IS 'Maps MyHibachi customers to Akaunting contacts for invoicing';
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS accounting.chef_vendor_mappings (
     last_synced_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
-    
+
     UNIQUE(chef_id, akaunting_company_id)
 );
 
@@ -117,12 +117,12 @@ CREATE TABLE IF NOT EXISTS accounting.invoice_mappings (
     last_synced_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
-    
+
     UNIQUE(booking_id),
     UNIQUE(akaunting_company_id, akaunting_invoice_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_invoice_mappings_status 
+CREATE INDEX IF NOT EXISTS idx_invoice_mappings_status
 ON accounting.invoice_mappings(invoice_status) WHERE invoice_status NOT IN ('paid', 'cancelled');
 
 COMMENT ON TABLE accounting.invoice_mappings IS 'Maps bookings to Akaunting invoices for revenue tracking';
@@ -146,7 +146,7 @@ CREATE TABLE IF NOT EXISTS accounting.payment_mappings (
     last_synced_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
-    
+
     UNIQUE(payment_id),
     UNIQUE(akaunting_company_id, akaunting_transaction_id)
 );
@@ -164,30 +164,30 @@ CREATE TABLE IF NOT EXISTS accounting.chef_payment_mappings (
     akaunting_company_id INTEGER NOT NULL,
     akaunting_bill_id INTEGER,  -- Bill in Akaunting (optional)
     akaunting_payment_id INTEGER,  -- Payment record in Akaunting
-    
+
     -- Payment Details
     payment_date DATE NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
     payment_method VARCHAR(20) NOT NULL CHECK (
         payment_method IN ('cash', 'zelle', 'check', 'direct_deposit')
     ),
-    
+
     -- For Zelle payments
     zelle_confirmation_number VARCHAR(100),
-    
+
     -- For cash payments
     cash_receipt_signed BOOLEAN DEFAULT FALSE,
-    
+
     -- 1099 Tracking
     year_to_date_total DECIMAL(12,2),  -- Calculated field, updated by trigger
     is_1099_eligible BOOLEAN DEFAULT TRUE,
-    
+
     -- Status
     status VARCHAR(20) DEFAULT 'paid' CHECK (
         status IN ('pending', 'paid', 'cancelled', 'refunded')
     ),
     notes TEXT,
-    
+
     -- Audit
     paid_by UUID REFERENCES identity.users(id),
     sync_status VARCHAR(20) DEFAULT 'pending' CHECK (
@@ -198,10 +198,10 @@ CREATE TABLE IF NOT EXISTS accounting.chef_payment_mappings (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_chef_payments_chef_date 
+CREATE INDEX IF NOT EXISTS idx_chef_payments_chef_date
 ON accounting.chef_payment_mappings(chef_vendor_mapping_id, payment_date);
 
-CREATE INDEX IF NOT EXISTS idx_chef_payments_year 
+CREATE INDEX IF NOT EXISTS idx_chef_payments_year
 ON accounting.chef_payment_mappings(EXTRACT(YEAR FROM payment_date), chef_vendor_mapping_id);
 
 COMMENT ON TABLE accounting.chef_payment_mappings IS 'Tracks chef payments (Cash/Zelle) for payroll and 1099 reporting';
@@ -228,10 +228,10 @@ CREATE TABLE IF NOT EXISTS accounting.sync_history (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_sync_history_entity 
+CREATE INDEX IF NOT EXISTS idx_sync_history_entity
 ON accounting.sync_history(entity_type, entity_id, created_at DESC);
 
-CREATE INDEX IF NOT EXISTS idx_sync_history_failed 
+CREATE INDEX IF NOT EXISTS idx_sync_history_failed
 ON accounting.sync_history(status, created_at DESC) WHERE status = 'failed';
 
 COMMENT ON TABLE accounting.sync_history IS 'Audit log for all Akaunting sync operations';
@@ -276,24 +276,24 @@ CREATE TRIGGER trg_update_chef_ytd
 -- View: Chef 1099 Summary
 -- =============================================================================
 CREATE OR REPLACE VIEW accounting.chef_1099_summary AS
-SELECT 
+SELECT
     cvm.chef_id,
     c.full_name AS chef_name,
     EXTRACT(YEAR FROM cpm.payment_date)::INTEGER AS tax_year,
     SUM(cpm.amount) AS total_payments,
     COUNT(*) AS payment_count,
     cvm.payment_method AS primary_payment_method,
-    CASE 
-        WHEN SUM(cpm.amount) >= 600 THEN TRUE 
-        ELSE FALSE 
+    CASE
+        WHEN SUM(cpm.amount) >= 600 THEN TRUE
+        ELSE FALSE
     END AS requires_1099,
     cvm.tax_id_encrypted IS NOT NULL AS has_tax_id_on_file
 FROM accounting.chef_payment_mappings cpm
 JOIN accounting.chef_vendor_mappings cvm ON cvm.id = cpm.chef_vendor_mapping_id
 JOIN ops.chefs c ON c.id = cvm.chef_id
 WHERE cpm.status = 'paid'
-GROUP BY 
-    cvm.chef_id, 
+GROUP BY
+    cvm.chef_id,
     c.full_name,
     EXTRACT(YEAR FROM cpm.payment_date),
     cvm.payment_method,
@@ -305,7 +305,7 @@ COMMENT ON VIEW accounting.chef_1099_summary IS 'Summary of chef payments for 10
 -- View: Sync Status Dashboard
 -- =============================================================================
 CREATE OR REPLACE VIEW accounting.sync_status_dashboard AS
-SELECT 
+SELECT
     'Customers' AS entity_type,
     COUNT(*) FILTER (WHERE sync_status = 'synced') AS synced,
     COUNT(*) FILTER (WHERE sync_status = 'pending') AS pending,
@@ -313,7 +313,7 @@ SELECT
     COUNT(*) AS total
 FROM accounting.customer_mappings
 UNION ALL
-SELECT 
+SELECT
     'Invoices',
     COUNT(*) FILTER (WHERE sync_status = 'synced'),
     COUNT(*) FILTER (WHERE sync_status = 'pending'),
@@ -321,7 +321,7 @@ SELECT
     COUNT(*)
 FROM accounting.invoice_mappings
 UNION ALL
-SELECT 
+SELECT
     'Payments',
     COUNT(*) FILTER (WHERE sync_status = 'synced'),
     COUNT(*) FILTER (WHERE sync_status = 'pending'),
@@ -329,7 +329,7 @@ SELECT
     COUNT(*)
 FROM accounting.payment_mappings
 UNION ALL
-SELECT 
+SELECT
     'Chef Payments',
     COUNT(*) FILTER (WHERE sync_status = 'synced'),
     COUNT(*) FILTER (WHERE sync_status = 'pending'),

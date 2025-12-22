@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   outputFileTracingRoot: path.join(__dirname, '../../'),
   compress: true, // Enable gzip compression
+  eslint: {
+    // Skip linting during builds - we run ESLint separately in CI
+    // ESLint 9 is installed to match Vercel's Next.js 15 requirements
+    ignoreDuringBuilds: true,
+  },
   experimental: {
     optimizePackageImports: [
       'lucide-react',
@@ -176,6 +181,38 @@ const nextConfig: NextConfig = {
             value: 'public, max-age=31536000, immutable',
           },
         ],
+      },
+    ];
+  },
+  // URL redirects for legacy/shortened paths
+  async redirects() {
+    return [
+      // Redirect /booking and /book to /BookUs
+      {
+        source: '/booking',
+        destination: '/BookUs/',
+        permanent: true,
+      },
+      {
+        source: '/booking/',
+        destination: '/BookUs/',
+        permanent: true,
+      },
+      {
+        source: '/book',
+        destination: '/BookUs/',
+        permanent: true,
+      },
+      {
+        source: '/book/',
+        destination: '/BookUs/',
+        permanent: true,
+      },
+      // Case-insensitive redirects for bookus variations
+      {
+        source: '/bookus',
+        destination: '/BookUs/',
+        permanent: true,
       },
     ];
   },
