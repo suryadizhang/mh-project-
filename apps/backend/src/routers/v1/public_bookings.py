@@ -39,8 +39,8 @@ from sqlalchemy.exc import IntegrityError
 router = APIRouter(tags=["public-bookings"])
 logger = logging.getLogger(__name__)
 
-# Station ID for Fremont, CA (main business location - California Bay Area)
-DEFAULT_STATION_ID = "22222222-2222-2222-2222-222222222222"
+# Station ID for Houston (main business location)
+DEFAULT_STATION_ID = "11111111-1111-1111-1111-111111111111"
 
 
 # ============================================================================
