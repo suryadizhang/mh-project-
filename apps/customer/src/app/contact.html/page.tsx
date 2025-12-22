@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 // Force dynamic rendering to prevent static export conflicts
 export const dynamic = 'force-dynamic';
@@ -15,19 +15,19 @@ export default function ContactHtmlRedirect() {
       try {
         // Get session cookie (backend will create if needed)
         const _sessionId = document.cookie
-          .split("; ")
-          .find((row) => row.startsWith("qr_session="))
-          ?.split("=")[1];
+          .split('; ')
+          .find((row) => row.startsWith('qr_session='))
+          ?.split('=')[1];
 
         // Track via backend API
-        await fetch("/api/qr/scan/BC001", {
-          method: "GET",
+        await fetch('/api/qr/scan/BC001', {
+          method: 'GET',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
         });
       } catch (error) {
-        console.error("Failed to track QR scan:", error);
+        console.error('Failed to track QR scan:', error);
       }
     };
 
@@ -36,26 +36,22 @@ export default function ContactHtmlRedirect() {
 
     // Redirect to booking page after brief delay
     const timer = setTimeout(() => {
-      router.push("/booking");
+      router.push('/BookUs/');
     }, 500);
 
     return () => clearTimeout(timer);
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-red-50 to-orange-50">
       <div className="text-center">
         {/* Loading Animation */}
         <div className="mb-6">
-          <div className="inline-block w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+          <div className="inline-block h-16 w-16 animate-spin rounded-full border-4 border-red-600 border-t-transparent"></div>
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">
-          Welcome to My Hibachi Chef!
-        </h1>
-        <p className="text-gray-600">
-          Redirecting you to our contact page...
-        </p>
+        <h1 className="mb-2 text-2xl font-bold text-gray-800">Welcome to My Hibachi Chef!</h1>
+        <p className="text-gray-600">Redirecting you to our booking page...</p>
       </div>
     </div>
   );

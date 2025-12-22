@@ -274,7 +274,7 @@ If you need immediate access, please contact us at support@myhibachi.com.
         <div class="content">
             <h2>Hello {customer_name},</h2>
             <p>Thank you for choosing My Hibachi Chef! Your hibachi party is booked and we can't wait to cook for you!</p>
-            
+
             <div class="details">
                 <h3>📋 Booking Details</h3>
                 <div class="detail-row"><span><strong>Booking #:</strong></span><span>{booking_id}</span></div>
@@ -283,19 +283,19 @@ If you need immediate access, please contact us at support@myhibachi.com.
                 <div class="detail-row"><span><strong>Guests:</strong></span><span>~{guest_count} people</span></div>
                 <div class="detail-row"><span><strong>Location:</strong></span><span>{location}</span></div>
             </div>
-            
+
             <div class="warning">
-                <strong>⚠️ Allergen Notice:</strong> We use shared cooking surfaces and cannot guarantee 100% allergen-free meals. 
+                <strong>⚠️ Allergen Notice:</strong> We use shared cooking surfaces and cannot guarantee 100% allergen-free meals.
                 Please reply to this email with any allergies or dietary restrictions.
             </div>
-            
+
             <p><strong>What's Next?</strong></p>
             <ul>
                 <li>Pay your $100 deposit within 2 hours to confirm</li>
                 <li>We'll send a reminder before your event</li>
                 <li>Our chef will arrive 30 mins early to set up</li>
             </ul>
-            
+
             <p>Questions? Reply to this email or call us at <strong>(916) 740-8768</strong></p>
         </div>
         <div class="footer">
@@ -320,7 +320,7 @@ BOOKING DETAILS:
 - Guests: ~{guest_count} people
 - Location: {location}
 
-⚠️ ALLERGEN NOTICE: We use shared cooking surfaces and cannot guarantee 100% allergen-free. 
+⚠️ ALLERGEN NOTICE: We use shared cooking surfaces and cannot guarantee 100% allergen-free.
 Please reply with any allergies or dietary restrictions.
 
 WHAT'S NEXT:
@@ -357,7 +357,7 @@ Questions? Reply to this email or call (916) 740-8768
         </div>
         <div class="content">
             <p class="urgent">Action Required: Assign chef and confirm booking</p>
-            
+
             <div class="details">
                 <h3>📋 Booking Details</h3>
                 <p><strong>Booking #:</strong> {booking_id}</p>
@@ -370,7 +370,7 @@ Questions? Reply to this email or call (916) 740-8768
                 <p><strong>Location:</strong> {location}</p>
                 <p><strong>Special Requests:</strong> {special_requests}</p>
             </div>
-            
+
             <p style="text-align: center;">
                 <a href="{admin_url}/bookings/{booking_id}" class="button">View in Admin Portal</a>
             </p>

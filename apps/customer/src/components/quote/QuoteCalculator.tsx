@@ -758,10 +758,15 @@ export function QuoteCalculator() {
                 required
                 autoComplete="off"
               />
-              <p className="flex items-center gap-1 text-xs text-gray-500">
-                📍 <strong>Smart Address Search:</strong> Start typing and select from suggestions
-                for automatic travel fee calculation via Google Maps
-              </p>
+              {quoteData.venueAddress && quoteData.location && quoteData.zipCode ? (
+                <p className="flex items-center gap-1 text-xs text-green-600">
+                  ✓ Address verified: {quoteData.location}, {quoteData.zipCode}
+                </p>
+              ) : (
+                <p className="text-xs text-gray-500">
+                  Start typing and select your address from the dropdown for accurate travel fee
+                </p>
+              )}
             </div>
           </div>
 
