@@ -1,0 +1,180 @@
+# =============================================================================
+# Akaunting - Open Source Accounting for MyHibachi
+# =============================================================================
+# Deployment: Single server alongside existing FastAPI stack
+# Access: accounting.mysticdatanode.net via Cloudflare Tunnel
+#
+# Usage:
+#   cd /opt/akaunting
+#   docker-compose up -d
+#
+# First Run:
+#   1. Access https://accounting.mysticdatanode.net
+#   2. Complete setup wizard
+#   3. Create companies for each station (AUS, DFW, HOU, CA-FREMONT-001)
+
+version: '3.8'
+
+services:
+  # =============================================================================
+  # Akaunting Application
+  # =============================================================================
+  akaunting:
+    image: akaunting/akaunting:3.1.3
+    container_name: akaunting-app
+    restart: unless-stopped
+    ports:
+      - '9000:80' # Internal port, Cloudflare tunnel handles external
+    environment:
+      # Application Settings
+      - APP_URL=https://accounting.mysticdatanode.net
+      - APP_DEBUG=false
+      - APP_ENV=production
+      - APP_LOCALE=en-US
+
+      # Database Connection (using existing PostgreSQL)
+      - DB_CONNECTION=pgsql
+      - DB_HOST=${DB_HOST:-host.docker.internal}
+      - DB_PORT=5432
+      - DB_DATABASE=akaunting
+      - DB_USERNAME=${AKAUNTING_DB_USER:-akaunting_user}
+      - DB_PASSWORD=${AKAUNTING_DB_PASSWORD}
+
+      # Company Settings (set during wizard, documented here)
+      - COMPANY_NAME=My Hibachi
+      - COMPANY_EMAIL=accounting@myhibachichef.com
+
+      # Cache & Session
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+      # Queue (for background jobs)
+      - QUEUE_CONNECTION=redis
+
+      # Locale & Currency
+      - LOCALE=en-US
+      - DEFAULT_CURRENCY=USD
+      - DEFAULT_LOCALE=en-US
+
+      # Security
+      - SESSION_SECURE_COOKIE=true
+      - SESSION_LIFETIME=120
+
+    volumes:
+      # Persistent data
+      - akaunting_data:/var/www/html/storage
+      - akaunting_uploads:/var/www/html/storage/app/uploads
+      # Custom modules (for MyHibachi integration)
+      - ./modules:/var/www/html/modules
+      # Company logos
+      - ./logos:/var/www/html/storage/app/uploads/logos
+    depends_on:
+      - redis
+    networks:
+      - akaunting-network
+      - myhibachi-network # Shared network for API communication
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:80/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # =============================================================================
+  # Redis for Akaunting (shared with main stack if on same network)
+  # =============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: akaunting-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    volumes:
+      - akaunting_redis:/data
+    networks:
+      - akaunting-network
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # =============================================================================
+  # Scheduler (Cron jobs for recurring invoices, reports)
+  # =============================================================================
+  scheduler:
+    image: akaunting/akaunting:3.1.3
+    container_name: akaunting-scheduler
+    restart: unless-stopped
+    command: ['php', 'artisan', 'schedule:work']
+    environment:
+      - APP_URL=https://accounting.mysticdatanode.net
+      - DB_CONNECTION=pgsql
+      - DB_HOST=${DB_HOST:-host.docker.internal}
+      - DB_PORT=5432
+      - DB_DATABASE=akaunting
+      - DB_USERNAME=${AKAUNTING_DB_USER:-akaunting_user}
+      - DB_PASSWORD=${AKAUNTING_DB_PASSWORD}
+      - CACHE_DRIVER=redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QUEUE_CONNECTION=redis
+    volumes:
+      - akaunting_data:/var/www/html/storage
+    depends_on:
+      - akaunting
+      - redis
+    networks:
+      - akaunting-network
+
+  # =============================================================================
+  # Queue Worker (Background job processing)
+  # =============================================================================
+  queue-worker:
+    image: akaunting/akaunting:3.1.3
+    container_name: akaunting-queue
+    restart: unless-stopped
+    command:
+      [
+        'php',
+        'artisan',
+        'queue:work',
+        '--sleep=3',
+        '--tries=3',
+        '--max-time=3600',
+      ]
+    environment:
+      - APP_URL=https://accounting.mysticdatanode.net
+      - DB_CONNECTION=pgsql
+      - DB_HOST=${DB_HOST:-host.docker.internal}
+      - DB_PORT=5432
+      - DB_DATABASE=akaunting
+      - DB_USERNAME=${AKAUNTING_DB_USER:-akaunting_user}
+      - DB_PASSWORD=${AKAUNTING_DB_PASSWORD}
+      - CACHE_DRIVER=redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QUEUE_CONNECTION=redis
+    volumes:
+      - akaunting_data:/var/www/html/storage
+    depends_on:
+      - akaunting
+      - redis
+    networks:
+      - akaunting-network
+
+volumes:
+  akaunting_data:
+    driver: local
+  akaunting_uploads:
+    driver: local
+  akaunting_redis:
+    driver: local
+
+networks:
+  akaunting-network:
+    driver: bridge
+  myhibachi-network:
+    external: true
+    name: myhibachi-network

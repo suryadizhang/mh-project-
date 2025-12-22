@@ -1,0 +1,48 @@
+# =============================================================================
+# Cloudflare Tunnel Configuration - Updated for Akaunting
+# =============================================================================
+# Location on VPS: /etc/cloudflared/config.yml
+# Backup current: sudo cp /etc/cloudflared/config.yml /etc/cloudflared/config.yml.backup
+# Apply: sudo systemctl restart cloudflared
+#
+# Tunnel ID: 82034f96-98f7-41a8-b5bf-6976e383113d (existing)
+
+tunnel: 82034f96-98f7-41a8-b5bf-6976e383113d
+credentials-file: /etc/cloudflared/.credentials.json
+
+ingress:
+  # =============================================================================
+  # API Backend (existing)
+  # =============================================================================
+  - hostname: mhapi.mysticdatanode.net
+    service: http://localhost:8000
+    originRequest:
+      noTLSVerify: true
+
+  # =============================================================================
+  # Staging API (existing)
+  # =============================================================================
+  - hostname: staging-api.mysticdatanode.net
+    service: http://localhost:8002
+    originRequest:
+      noTLSVerify: true
+
+  # =============================================================================
+  # Accounting (NEW - Akaunting)
+  # =============================================================================
+  - hostname: accounting.mysticdatanode.net
+    service: http://localhost:9000
+    originRequest:
+      noTLSVerify: true
+      # Increase timeouts for large invoice PDFs
+      connectTimeout: 30s
+      noHappyEyeballs: false
+
+  # =============================================================================
+  # SSH Access (existing)
+  # =============================================================================
+  - hostname: ssh.mhapi.mysticdatanode.net
+    service: ssh://localhost:22
+
+  # Catch-all
+  - service: http_status:404
