@@ -31,7 +31,8 @@ const nextConfig: NextConfig = {
       'clsx',
       'class-variance-authority',
     ],
-    optimizeCss: true,
+    // optimizeCss disabled - causes critters module resolution issues in Vercel monorepo
+    // optimizeCss: true,
   },
   images: {
     unoptimized: false,
