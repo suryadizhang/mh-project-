@@ -18,9 +18,12 @@ import {
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, useCallback } from 'react';
 
+import { Minus, Plus } from 'lucide-react';
+
 import { LazyDatePicker } from '@/components/ui/LazyDatePicker';
 import { ProtectedPhone } from '@/components/ui/ProtectedPhone';
 import { apiFetch } from '@/lib/api';
+import { getApiUrl } from '@/lib/env';
 import { submitQuoteLead, submitLeadEvent } from '@/lib/leadService';
 import { logger } from '@/lib/logger';
 import { usePricing } from '@/hooks/usePricing';
@@ -178,27 +181,55 @@ const FormInput = ({
   </div>
 );
 
-// Number input for upgrades
+// Number input with +/- stepper buttons for upgrades (touch-friendly)
 interface UpgradeInputProps {
   label: string;
   price: string;
   value: number;
   onChange: (value: number) => void;
   hint?: string;
+  max?: number;
 }
 
-const UpgradeInput = ({ label, price, value, onChange, hint }: UpgradeInputProps) => (
+const UpgradeInput = ({ label, price, value, onChange, hint, max = 99 }: UpgradeInputProps) => (
   <div className="flex flex-col space-y-1.5">
     <label className="text-sm font-medium text-gray-700">
       {label} <span className="font-semibold text-red-600">({price})</span>
     </label>
-    <input
-      type="number"
-      min="0"
-      value={value}
-      onChange={(e) => onChange(Math.max(0, parseInt(e.target.value) || 0))}
-      className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:ring-offset-1 focus:outline-none"
-    />
+    <div className="flex items-center gap-2">
+      {/* Minus Button - Large touch target */}
+      <button
+        type="button"
+        onClick={() => onChange(Math.max(0, value - 1))}
+        disabled={value <= 0}
+        className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-gray-200 bg-white text-gray-600 transition-all duration-200 hover:border-red-300 hover:bg-red-50 hover:text-red-600 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:outline-none active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-gray-200 disabled:hover:bg-white"
+        aria-label={`Decrease ${label}`}
+      >
+        <Minus className="h-5 w-5" />
+      </button>
+
+      {/* Value Display */}
+      <input
+        type="number"
+        min="0"
+        max={max}
+        value={value}
+        onChange={(e) => onChange(Math.min(max, Math.max(0, parseInt(e.target.value) || 0)))}
+        className="h-12 w-16 rounded-lg border-2 border-gray-200 text-center text-lg font-semibold transition-all duration-200 hover:border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:outline-none"
+        aria-label={`${label} quantity`}
+      />
+
+      {/* Plus Button - Large touch target */}
+      <button
+        type="button"
+        onClick={() => onChange(Math.min(max, value + 1))}
+        disabled={value >= max}
+        className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-gray-200 bg-white text-gray-600 transition-all duration-200 hover:border-green-300 hover:bg-green-50 hover:text-green-600 focus:border-green-500 focus:ring-2 focus:ring-green-200 focus:outline-none active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-gray-200 disabled:hover:bg-white"
+        aria-label={`Increase ${label}`}
+      >
+        <Plus className="h-5 w-5" />
+      </button>
+    </div>
     {hint && <p className="text-xs text-gray-500">{hint}</p>}
   </div>
 );
@@ -500,7 +531,7 @@ export function QuoteCalculator() {
       }
 
       // Call backend API to calculate quote with travel fee
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const API_BASE = getApiUrl();
       const response = await fetch(`${API_BASE}/api/v1/public/quote/calculate`, {
         method: 'POST',
         headers: {
@@ -808,10 +839,11 @@ export function QuoteCalculator() {
                 onChange={(v) => handleInputChange('lobsterTail', v)}
               />
               <UpgradeInput
-                label="3rd Protein"
+                label="Extra Protein"
                 price="+$10 each"
                 value={quoteData.thirdProteins}
                 onChange={(v) => handleInputChange('thirdProteins', v)}
+                hint="Add a third protein to your meal"
               />
             </div>
           </div>
