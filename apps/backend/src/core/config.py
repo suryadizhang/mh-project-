@@ -275,11 +275,14 @@ class Settings(BaseSettings):
     STRIPE_PUBLISHABLE_KEY: str
     STRIPE_WEBHOOK_SECRET: str
 
-    # Meta (Facebook/Instagram) - REQUIRED: Must come from .env
-    META_APP_ID: str
-    META_APP_SECRET: str
-    META_VERIFY_TOKEN: str
-    META_PAGE_ACCESS_TOKEN: str
+    # Meta (WhatsApp/Facebook/Instagram) - Loaded from GSM in production
+    META_APP_ID: str = ""  # Meta App ID from Developer Console
+    META_APP_SECRET: str = ""  # Meta App Secret from Developer Console
+    META_VERIFY_TOKEN: str = ""  # Webhook verification token (we generate this)
+    META_PAGE_ACCESS_TOKEN: str = ""  # Deprecated: Use META_WHATSAPP_ACCESS_TOKEN
+    META_PHONE_NUMBER_ID: str = ""  # WhatsApp Cloud API phone number ID
+    META_WHATSAPP_ACCESS_TOKEN: str = ""  # WhatsApp Cloud API access token
+    META_WHATSAPP_BUSINESS_ACCOUNT_ID: str = ""  # WhatsApp Business Account ID
 
     # Google Business - REQUIRED: Must come from .env
     GOOGLE_CLOUD_PROJECT: str

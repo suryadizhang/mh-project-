@@ -46,7 +46,7 @@ async def get_meta_webhook_handler(
 ) -> MetaWebhookHandler:
     """
     Dependency injection provider for MetaWebhookHandler.
-    
+
     Returns:
         MetaWebhookHandler with all dependencies injected
     """
@@ -57,7 +57,7 @@ async def get_meta_webhook_handler(
     )
 
 
-@router.get("/verify")
+@router.get("")
 async def verify_webhook(
     hub_mode: str = Query(alias="hub.mode"),
     hub_verify_token: str = Query(alias="hub.verify_token"),
@@ -65,30 +65,43 @@ async def verify_webhook(
 ):
     """
     Verify Meta webhook during setup.
-    
+
     Meta sends a GET request with these parameters during webhook registration.
     We must return the challenge value if the verify token matches.
-    
+
+    IMPORTANT: Meta sends verification to the SAME URL as webhook posts.
+    This must be at the root of the router prefix (e.g., /api/v1/webhooks/meta)
+
     Args:
         hub_mode: Should be 'subscribe'
         hub_verify_token: Token to verify against our configured token
         hub_challenge: Challenge string to echo back
-    
+
     Returns:
-        Challenge as integer if verification succeeds
-    
+        Challenge as plain text (Meta expects this format)
+
     Raises:
         HTTPException: If verification fails
     """
-    if hub_mode == "subscribe" and hub_verify_token == settings.meta_verify_token:
-        logger.info("Meta webhook verification successful")
-        return int(hub_challenge)
+    logger.info(f"Meta webhook verification request: mode={hub_mode}")
+
+    # Get verify token from settings (supports GSM)
+    expected_token = settings.META_VERIFY_TOKEN
+
+    if hub_mode == "subscribe" and hub_verify_token == expected_token:
+        logger.info("✅ Meta webhook verification successful")
+        # Meta expects the challenge as plain text response
+        from fastapi.responses import PlainTextResponse
+
+        return PlainTextResponse(content=hub_challenge)
     else:
-        logger.warning(f"Meta webhook verification failed: mode={hub_mode}")
+        logger.warning(
+            f"❌ Meta webhook verification failed: mode={hub_mode}, token_match={hub_verify_token == expected_token}"
+        )
         raise HTTPException(status_code=403, detail="Verification failed")
 
 
-@router.post("/webhook")
+@router.post("")
 async def meta_webhook(
     request: Request,
     background_tasks: BackgroundTasks,
@@ -97,34 +110,34 @@ async def meta_webhook(
 ):
     """
     Handle Meta (Facebook/Instagram) webhooks.
-    
+
     Processes:
     - Instagram direct messages
     - Facebook Messenger messages
     - Lead generation ad submissions
     - Page messaging events
-    
+
     All business logic is in MetaWebhookHandler for testability.
-    
+
     Args:
         request: FastAPI request object (for raw body)
         background_tasks: FastAPI background tasks (for async processing)
         webhook_handler: Injected MetaWebhookHandler
         x_hub_signature_256: Meta webhook signature header
-    
+
     Returns:
         Processing result from webhook handler
-    
+
     Raises:
         HTTPException: If signature is invalid or processing fails
     """
     try:
         # Get raw body for signature verification
         payload = await request.body()
-        
+
         # Parse webhook data
         webhook_data = json.loads(payload.decode())
-        
+
         # Delegate all processing to service layer
         result = await webhook_handler.handle_webhook(
             payload=payload,
@@ -132,24 +145,21 @@ async def meta_webhook(
             secret=settings.meta_app_secret,
             data=webhook_data,
         )
-        
+
         logger.info(
             f"Processed Meta webhook: {result.get('event_type')} "
             f"({result.get('processed', 0)} events)"
         )
-        
+
         return result
-        
+
     except HTTPException:
         # Re-raise HTTP exceptions (signature failures, etc.)
         raise
     except Exception as e:
         # Log and return 500 for unexpected errors
         logger.error(f"Unexpected error in Meta webhook: {str(e)}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail="Internal server error processing webhook"
-        )
+        raise HTTPException(status_code=500, detail="Internal server error processing webhook")
 
 
 # Optional: Health check endpoint
@@ -157,7 +167,7 @@ async def meta_webhook(
 async def webhook_health():
     """
     Health check endpoint for Meta webhooks.
-    
+
     Returns:
         Simple status dict
     """
