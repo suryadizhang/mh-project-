@@ -49,6 +49,15 @@ from slowapi.util import get_remote_address
 from prometheus_client import make_wsgi_app
 from starlette.middleware.wsgi import WSGIMiddleware
 
+# Import sd-notify for enterprise systemd integration
+# This enables proper watchdog support and service readiness signaling
+try:
+    import sdnotify
+
+    SDNOTIFY_AVAILABLE = True
+except ImportError:
+    SDNOTIFY_AVAILABLE = False
+
 # Configure settings
 settings = get_settings()
 
@@ -282,10 +291,51 @@ async def lifespan(app: FastAPI):
 
     logger.info("🚀 Application startup complete - ready to accept requests")
 
+    # Notify systemd that service is ready (enterprise-standard)
+    # This enables proper watchdog support and prevents premature service kills
+    if SDNOTIFY_AVAILABLE:
+        try:
+            notifier = sdnotify.SystemdNotifier()
+            notifier.notify("READY=1")
+            notifier.notify("STATUS=Application ready and accepting requests")
+            logger.info("✅ Notified systemd: service ready")
+
+            # Start watchdog ping task if WatchdogSec is configured
+            # This keeps the service alive by sending periodic WATCHDOG=1 signals
+            watchdog_usec = os.environ.get("WATCHDOG_USEC")
+            if watchdog_usec:
+                watchdog_interval = int(watchdog_usec) / 1_000_000 / 2  # Half the timeout
+
+                async def watchdog_ping():
+                    """Send periodic watchdog pings to systemd."""
+                    while True:
+                        try:
+                            notifier.notify("WATCHDOG=1")
+                            await asyncio.sleep(watchdog_interval)
+                        except Exception:
+                            break
+
+                # Start watchdog task in background
+                asyncio.create_task(watchdog_ping())
+                logger.info(
+                    f"✅ Systemd watchdog ping enabled (interval: {watchdog_interval:.1f}s)"
+                )
+        except Exception as e:
+            logger.warning(f"⚠️ sd-notify failed: {e} (non-fatal, continuing)")
+
     yield
 
     # Shutdown
     logger.info("🛑 Starting graceful shutdown...")
+
+    # Notify systemd of stopping state
+    if SDNOTIFY_AVAILABLE:
+        try:
+            notifier = sdnotify.SystemdNotifier()
+            notifier.notify("STOPPING=1")
+            notifier.notify("STATUS=Graceful shutdown in progress")
+        except Exception:
+            pass  # Non-fatal during shutdown
 
     # Stop real-time voice call sessions
     try:
@@ -1108,6 +1158,19 @@ try:
 except ImportError as e:
     logger.warning(f"Escalation endpoints not available: {e}")
 
+# Meta Webhooks - WhatsApp, Instagram, Facebook Messenger
+try:
+    from routers.v1.webhooks.meta_webhook_refactored import router as meta_webhook_router
+
+    app.include_router(
+        meta_webhook_router,
+        prefix="/api/v1",  # Router has /webhooks/meta prefix
+        tags=["webhooks", "meta", "whatsapp"],
+    )
+    logger.info("✅ Meta webhook receiver included (WhatsApp, Instagram, FB Messenger)")
+except ImportError as e:
+    logger.warning(f"Meta webhook endpoints not available: {e}")
+
 # RingCentral Webhooks - SMS, Call, Recording Events
 try:
     from api.v1.webhooks.ringcentral import router as rc_webhook_router
@@ -1146,19 +1209,6 @@ try:
     logger.info("✅ Call recordings API included (RingCentral AI transcripts)")
 except ImportError as e:
     logger.warning(f"Recordings API not available: {e}")
-
-# Twilio Webhooks - WhatsApp and SMS Status Callbacks
-try:
-    from api.v1.webhooks.twilio import router as twilio_webhook_router
-
-    app.include_router(
-        twilio_webhook_router,
-        prefix="/api/v1",  # Already has /webhooks/twilio in router definition
-        tags=["webhooks"],
-    )
-    logger.info("✅ Twilio webhook receiver included (WhatsApp/SMS status)")
-except ImportError as e:
-    logger.warning(f"Twilio webhook endpoints not available: {e}")
 
 # Escalation WebSocket - Real-time Updates
 try:
