@@ -307,6 +307,14 @@ async def test_booking_confirmation(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# Debug endpoint to test webhook reception (bypasses signature for testing)
+@router.post("/test/receive")
+async def test_receive_webhook(
+    request: Request,
+    webhook_handler: MetaWebhookHandler = Depends(get_meta_webhook_handler),
+):
+    """
+    Test endpoint that bypasses signature verification.
 
     USE ONLY FOR DEBUGGING. Does not verify Meta signature.
 
