@@ -182,17 +182,25 @@ async def webhook_health():
 @router.post("/test/send")
 async def test_send_whatsapp(
     to: str = Query(..., description="Phone number in format 1XXXXXXXXXX"),
-    message: str = Query(..., description="Message to send"),
+    message: str = Query(default=None, description="Message to send (only works in 24hr window)"),
+    use_template: bool = Query(default=True, description="Use template instead of freeform text"),
+    template_name: str = Query(
+        default="hello_world", description="Template name (default: hello_world)"
+    ),
 ):
     """
     Test endpoint to send WhatsApp message.
 
-    IMPORTANT: Only works within 24-hour window after user messages first,
-    OR using approved templates for proactive outreach.
+    IMPORTANT:
+    - Freeform text only works within 24-hour window after user messages first
+    - For proactive outreach, use templates (use_template=true)
+    - The 'hello_world' template is pre-approved by Meta
 
     Args:
         to: Phone number (format: 1XXXXXXXXXX, no + sign)
-        message: Message text
+        message: Message text (ignored if use_template=true)
+        use_template: Use approved template instead of freeform text (default: true)
+        template_name: Template name to use (default: hello_world)
 
     Returns:
         API response from Meta
@@ -208,10 +216,23 @@ async def test_send_whatsapp(
         )
 
     try:
-        result = await service._send_whatsapp(to, message)
+        if use_template:
+            # Use template message (works for proactive outreach)
+            result = await service.send_template_message(
+                to=to, template_name=template_name, language_code="en_US"
+            )
+        else:
+            # Use freeform text (only works in 24hr window)
+            if not message:
+                raise HTTPException(
+                    status_code=400, detail="message parameter required when use_template=false"
+                )
+            result = await service._send_whatsapp(to, message)
+
         return {
             "success": result.get("success", False),
             "message_id": result.get("message_id"),
+            "template_used": template_name if use_template else None,
             "details": result,
         }
     except Exception as e:
