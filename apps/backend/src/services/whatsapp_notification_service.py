@@ -294,6 +294,84 @@ class WhatsAppNotificationService:
             logger.exception(f"Template message failed: {e}")
             return {"success": False, "error": str(e)}
 
+    async def send_booking_confirmation(
+        self,
+        phone_number: str,
+        customer_name: str,
+        event_date: str,
+        event_time: str,
+        guest_count: int | str,
+        venue_address: str,
+        total_amount: float,
+        deposit_paid: float,
+        balance_due: float,
+    ) -> dict[str, Any]:
+        """
+        Send booking confirmation via WhatsApp template.
+
+        Uses the 'booking_confirmation' template with 8 variables.
+
+        Args:
+            phone_number: Customer phone (+1234567890)
+            customer_name: Customer first name
+            event_date: Formatted date (e.g., "Saturday, January 15, 2025")
+            event_time: Formatted time (e.g., "6:00 PM")
+            guest_count: Number of guests
+            venue_address: Full venue address
+            total_amount: Total booking amount
+            deposit_paid: Deposit amount paid
+            balance_due: Remaining balance
+
+        Returns:
+            Dict with delivery status
+        """
+        try:
+            # Format phone number
+            formatted_phone = self._format_phone_number(phone_number)
+
+            # Build template components with variables
+            # Variables: {{1}}=name, {{2}}=date, {{3}}=time, {{4}}=guests,
+            # {{5}}=address, {{6}}=total, {{7}}=deposit, {{8}}=balance
+            components = [
+                {
+                    "type": "body",
+                    "parameters": [
+                        {"type": "text", "text": customer_name},
+                        {"type": "text", "text": event_date},
+                        {"type": "text", "text": event_time},
+                        {"type": "text", "text": str(guest_count)},
+                        {"type": "text", "text": venue_address},
+                        {"type": "text", "text": f"{total_amount:.2f}"},
+                        {"type": "text", "text": f"{deposit_paid:.2f}"},
+                        {"type": "text", "text": f"{balance_due:.2f}"},
+                    ],
+                }
+            ]
+
+            result = await self.send_template_message(
+                to=formatted_phone,
+                template_name="booking_confirmation",
+                language_code="en",
+                components=components,
+            )
+
+            if result.get("success"):
+                logger.info(
+                    f"Booking confirmation sent to {formatted_phone}: "
+                    f"{result.get('message_id')}"
+                )
+            else:
+                logger.warning(
+                    f"Failed to send booking confirmation to {formatted_phone}: "
+                    f"{result.get('error')}"
+                )
+
+            return result
+
+        except Exception as e:
+            logger.exception(f"Booking confirmation failed: {e}")
+            return {"success": False, "error": str(e)}
+
     async def _send_ringcentral_sms(self, to: str, message: str) -> dict[str, Any]:
         """Fallback to RingCentral SMS"""
         try:
