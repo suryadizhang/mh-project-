@@ -218,7 +218,7 @@ async def calculate_quote(
         upgrade_total += request.scallops * UPGRADE_PRICES["scallops"]
         upgrade_total += request.filet_mignon * UPGRADE_PRICES["filet_mignon"]
         upgrade_total += request.lobster_tail * UPGRADE_PRICES["lobster_tail"]
-        upgrade_total += request.third_proteins * UPGRADE_PRICES["third_protein"]
+        upgrade_total += request.third_proteins * UPGRADE_PRICES["extra_protein"]
 
         # Calculate addon total
         addon_total = 0.0
