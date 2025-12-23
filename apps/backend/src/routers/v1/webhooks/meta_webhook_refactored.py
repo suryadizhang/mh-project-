@@ -240,14 +240,73 @@ async def test_send_whatsapp(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Debug endpoint to test webhook reception (bypasses signature for testing)
-@router.post("/test/receive")
-async def test_receive_webhook(
-    request: Request,
-    webhook_handler: MetaWebhookHandler = Depends(get_meta_webhook_handler),
+# Test endpoint for booking confirmation template
+@router.post("/test/booking-confirmation")
+async def test_booking_confirmation(
+    to: str = Query(..., description="Phone number in format 1XXXXXXXXXX"),
+    name: str = Query(default="John", description="Customer name"),
+    date: str = Query(default="Saturday, January 15, 2025", description="Event date"),
+    time: str = Query(default="6:00 PM", description="Event time"),
+    guests: int = Query(default=12, description="Number of guests"),
+    address: str = Query(default="123 Main St, Sacramento, CA 95814", description="Venue address"),
+    total: float = Query(default=850.00, description="Total amount"),
+    deposit: float = Query(default=100.00, description="Deposit paid"),
+    balance: float = Query(default=750.00, description="Balance due"),
 ):
     """
-    Test endpoint that bypasses signature verification.
+    Test the booking_confirmation WhatsApp template.
+
+    NOTE: Template must be approved by Meta before this works.
+    Check template status at: https://business.facebook.com/wa/manage/message-templates/
+
+    Args:
+        to: Phone number (format: 1XXXXXXXXXX, no + sign)
+        name: Customer first name
+        date: Event date string
+        time: Event time string
+        guests: Number of guests
+        address: Venue address
+        total: Total booking amount
+        deposit: Deposit paid
+        balance: Balance due
+
+    Returns:
+        API response from Meta
+    """
+    from services.whatsapp_notification_service import get_whatsapp_service
+
+    service = get_whatsapp_service()
+
+    if not service.client:
+        raise HTTPException(
+            status_code=503,
+            detail="WhatsApp service not configured (missing credentials)",
+        )
+
+    try:
+        result = await service.send_booking_confirmation(
+            phone_number=to,
+            customer_name=name,
+            event_date=date,
+            event_time=time,
+            guest_count=guests,
+            venue_address=address,
+            total_amount=total,
+            deposit_paid=deposit,
+            balance_due=balance,
+        )
+
+        return {
+            "success": result.get("success", False),
+            "message_id": result.get("message_id"),
+            "template": "booking_confirmation",
+            "details": result,
+        }
+    except Exception as e:
+        logger.error(f"Failed to send booking confirmation: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 
     USE ONLY FOR DEBUGGING. Does not verify Meta signature.
 
