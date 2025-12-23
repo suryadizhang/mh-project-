@@ -1,32 +1,27 @@
 """
-WhatsApp Notification Service
+Meta WhatsApp Business API Notification Service
 
-Implements WhatsApp Business API integration for payment notifications.
-Fallback to SMS if WhatsApp fails or customer doesn't have WhatsApp.
+Implements WhatsApp Business API integration for payment notifications
+using the official Meta Cloud API.
 
-WhatsApp Options Evaluated:
-1. WhatsApp Business API (Official) - RECOMMENDED
-   - Requires: Business verification, phone number
-   - Setup: 1-2 days approval
-   - Cost: Free for first 1000 conversations/month
-   - Features: Templates, webhooks, groups, media
-
-2. Twilio WhatsApp API - ALTERNATIVE
-   - Setup: 30 minutes
-   - Cost: $0.005/message
-   - Features: Easy integration, reliable
-
-3. WhatsApp Web Automation - NOT RECOMMENDED
-   - Risk: Violates ToS, account ban risk
-   - Not suitable for production
-
-Implementation Strategy:
-1. Start with Twilio WhatsApp (quick setup)
-2. Fallback to SMS if WhatsApp unavailable
-3. Migrate to official API when business verified
+Features:
+- WhatsApp Business API (Official Meta Cloud API)
+- Fallback to RingCentral SMS if WhatsApp fails
+- Template message support
+- Delivery tracking
+- Group notifications
+- Messenger and Instagram DM support
 
 Message Flow:
-Payment Detected → Try WhatsApp → If fail, send SMS → Log result
+Payment Detected → Try WhatsApp → If fail, send SMS via RingCentral → Log result
+
+Environment Variables Required:
+- META_APP_ID: Meta App ID
+- META_APP_SECRET: Meta App Secret
+- META_PAGE_ACCESS_TOKEN: Permanent Page Access Token
+- META_VERIFY_TOKEN: Webhook verification token
+- META_PHONE_NUMBER_ID: WhatsApp Business Phone Number ID
+- RC_SMS_FROM: RingCentral fallback SMS number
 """
 
 from datetime import datetime, timezone
@@ -36,8 +31,6 @@ import os
 from typing import Any
 
 import httpx
-from twilio.base.exceptions import TwilioRestException
-from twilio.rest import Client
 
 logger = logging.getLogger(__name__)
 
@@ -48,50 +41,53 @@ class NotificationChannel(str, Enum):
     WHATSAPP = "whatsapp"
     SMS = "sms"
     EMAIL = "email"
+    MESSENGER = "messenger"
+    INSTAGRAM = "instagram"
     FAILED = "failed"
 
 
 class WhatsAppNotificationService:
     """
-    Handles WhatsApp and SMS notifications for payment alerts.
+    Handles WhatsApp notifications via Meta Cloud API.
 
     Features:
-    - WhatsApp via Twilio (official provider)
-    - Automatic fallback to SMS
+    - WhatsApp via Meta Cloud API (official)
+    - Automatic fallback to RingCentral SMS
     - Template support
     - Delivery tracking
     - Group notifications
 
     Environment Variables Required:
-    - TWILIO_ACCOUNT_SID
-    - TWILIO_AUTH_TOKEN
-    - TWILIO_WHATSAPP_NUMBER (format: whatsapp:+14155238886)
-    - TWILIO_SMS_NUMBER (format: +19167408768)
-    - WHATSAPP_GROUP_WEBHOOK (optional, for group notifications)
+    - META_PAGE_ACCESS_TOKEN: Long-lived page access token
+    - META_PHONE_NUMBER_ID: WhatsApp Business phone number ID
+    - RC_SMS_FROM: RingCentral fallback SMS number
     """
 
-    def __init__(self):
-        """Initialize WhatsApp/SMS notification service"""
-        try:
-            # Get Twilio credentials
-            account_sid = os.getenv("TWILIO_ACCOUNT_SID")
-            auth_token = os.getenv("TWILIO_AUTH_TOKEN")
+    # Meta WhatsApp Cloud API base URL
+    META_API_BASE = "https://graph.facebook.com/v21.0"
 
-            if not account_sid or not auth_token:
-                logger.warning("Twilio credentials not found - notifications will use SMS only")
+    def __init__(self):
+        """Initialize Meta WhatsApp notification service"""
+        try:
+            # Get Meta credentials
+            self.access_token = os.getenv("META_PAGE_ACCESS_TOKEN")
+            self.phone_number_id = os.getenv("META_PHONE_NUMBER_ID")
+            self.app_id = os.getenv("META_APP_ID")
+
+            if not self.access_token or not self.phone_number_id:
+                logger.warning(
+                    "Meta WhatsApp credentials not found - "
+                    "notifications will use RingCentral SMS only"
+                )
                 self.client = None
             else:
-                self.client = Client(account_sid, auth_token)
-                logger.info("Twilio client initialized successfully")
+                self.client = httpx.AsyncClient(timeout=30.0)
+                logger.info("Meta WhatsApp client initialized successfully")
 
-            # Get phone numbers
-            self.whatsapp_from = os.getenv("TWILIO_WHATSAPP_NUMBER", "whatsapp:+14155238886")
-            self.sms_from = os.getenv("TWILIO_SMS_NUMBER") or os.getenv(
-                "RC_SMS_FROM", "+19167408768"
-            )
-            self.group_webhook = os.getenv("WHATSAPP_GROUP_WEBHOOK")
+            # RingCentral fallback
+            self.sms_from = os.getenv("RC_SMS_FROM", "+19167408768")
 
-            logger.info(f"WhatsApp from: {self.whatsapp_from}")
+            logger.info(f"WhatsApp Phone Number ID: {self.phone_number_id}")
             logger.info(f"SMS fallback from: {self.sms_from}")
 
         except Exception as e:
@@ -128,7 +124,7 @@ class WhatsAppNotificationService:
         result = {
             "success": False,
             "channel": NotificationChannel.FAILED,
-            "message_sid": None,
+            "message_id": None,
             "error": None,
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
@@ -148,33 +144,33 @@ class WhatsAppNotificationService:
             )
 
             # Try WhatsApp first
-            if self.client:
+            if self.client and self.access_token and self.phone_number_id:
                 whatsapp_result = await self._send_whatsapp(formatted_phone, message)
 
                 if whatsapp_result["success"]:
                     result.update(whatsapp_result)
                     logger.info(
-                        f"WhatsApp sent to {formatted_phone}: {whatsapp_result['message_sid']}"
+                        f"WhatsApp sent to {formatted_phone}: {whatsapp_result['message_id']}"
                     )
                 else:
-                    # Fallback to SMS
+                    # Fallback to RingCentral SMS
                     logger.warning(
-                        f"WhatsApp failed, falling back to SMS: {whatsapp_result['error']}"
+                        f"WhatsApp failed, falling back to RingCentral SMS: "
+                        f"{whatsapp_result['error']}"
                     )
-                    sms_result = await self._send_sms(formatted_phone, message)
+                    sms_result = await self._send_ringcentral_sms(formatted_phone, message)
                     result.update(sms_result)
             else:
-                # No Twilio client, use SMS directly
-                sms_result = await self._send_sms(formatted_phone, message)
+                # No Meta client, use RingCentral SMS directly
+                sms_result = await self._send_ringcentral_sms(formatted_phone, message)
                 result.update(sms_result)
 
-            # Send to admin group if enabled
-            if admin_group and self.group_webhook:
-                await self._send_to_admin_group(message)
-            elif admin_group and self.client:
-                # Send to admin phone as fallback
-                admin_phone = os.getenv("BUSINESS_PHONE", "+19167408768")
-                await self._send_sms(admin_phone, f"[ADMIN] {message}")
+            # Send to admin if enabled
+            if admin_group:
+                admin_phone = os.getenv("ON_CALL_ADMIN_PHONE") or os.getenv(
+                    "BUSINESS_PHONE", "+19167408768"
+                )
+                await self._send_ringcentral_sms(admin_phone, f"[ADMIN] {message}")
 
             return result
 
@@ -184,100 +180,145 @@ class WhatsAppNotificationService:
             return result
 
     async def _send_whatsapp(self, to: str, message: str) -> dict[str, Any]:
-        """Send WhatsApp message via Twilio"""
+        """Send WhatsApp message via Meta Cloud API"""
         try:
             if not self.client:
-                return {"success": False, "error": "Twilio client not initialized"}
+                return {"success": False, "error": "Meta WhatsApp client not initialized"}
 
-            # Format number for WhatsApp
-            whatsapp_to = f"whatsapp:{to}"
+            # Remove + from phone number for Meta API
+            phone_number = to.lstrip("+")
 
-            # Send message
-            twilio_message = self.client.messages.create(
-                from_=self.whatsapp_from, to=whatsapp_to, body=message
-            )
+            # Meta Cloud API endpoint
+            url = f"{self.META_API_BASE}/{self.phone_number_id}/messages"
 
-            return {
-                "success": True,
-                "channel": NotificationChannel.WHATSAPP,
-                "message_sid": twilio_message.sid,
-                "status": twilio_message.status,
+            headers = {
+                "Authorization": f"Bearer {self.access_token}",
+                "Content-Type": "application/json",
             }
 
-        except TwilioRestException as e:
-            logger.exception(f"Twilio WhatsApp error: {e.msg}")
-            return {"success": False, "error": e.msg}
+            # Send text message
+            payload = {
+                "messaging_product": "whatsapp",
+                "recipient_type": "individual",
+                "to": phone_number,
+                "type": "text",
+                "text": {"preview_url": True, "body": message},
+            }
+
+            response = await self.client.post(url, headers=headers, json=payload)
+
+            if response.status_code == 200:
+                data = response.json()
+                message_id = data.get("messages", [{}])[0].get("id")
+                return {
+                    "success": True,
+                    "channel": NotificationChannel.WHATSAPP,
+                    "message_id": message_id,
+                    "status": "sent",
+                }
+            else:
+                error_data = response.json()
+                error_msg = error_data.get("error", {}).get("message", "Unknown error")
+                logger.warning(f"Meta WhatsApp API error: {error_msg}")
+                return {"success": False, "error": error_msg}
+
         except Exception as e:
             logger.exception(f"WhatsApp send failed: {e}")
             return {"success": False, "error": str(e)}
 
-    async def _send_sms(self, to: str, message: str) -> dict[str, Any]:
-        """Send SMS via Twilio (fallback)"""
+    async def send_template_message(
+        self,
+        to: str,
+        template_name: str,
+        language_code: str = "en_US",
+        components: list[dict] | None = None,
+    ) -> dict[str, Any]:
+        """
+        Send WhatsApp template message via Meta Cloud API.
+
+        Template messages must be pre-approved by Meta.
+        Use this for marketing, notifications, and transactional messages.
+
+        Args:
+            to: Recipient phone number (+1234567890)
+            template_name: Name of approved template
+            language_code: Template language (default: en_US)
+            components: Optional template components (header, body, buttons)
+
+        Returns:
+            Dict with delivery status
+        """
         try:
             if not self.client:
-                # Try RingCentral as last resort
-                return await self._send_ringcentral_sms(to, message)
+                return {"success": False, "error": "Meta WhatsApp client not initialized"}
 
-            # Send SMS
-            twilio_message = self.client.messages.create(from_=self.sms_from, to=to, body=message)
+            phone_number = to.lstrip("+")
+            url = f"{self.META_API_BASE}/{self.phone_number_id}/messages"
 
-            return {
-                "success": True,
-                "channel": NotificationChannel.SMS,
-                "message_sid": twilio_message.sid,
-                "status": twilio_message.status,
+            headers = {
+                "Authorization": f"Bearer {self.access_token}",
+                "Content-Type": "application/json",
             }
 
-        except TwilioRestException as e:
-            logger.exception(f"Twilio SMS error: {e.msg}")
-            return {"success": False, "error": e.msg}
+            payload = {
+                "messaging_product": "whatsapp",
+                "recipient_type": "individual",
+                "to": phone_number,
+                "type": "template",
+                "template": {
+                    "name": template_name,
+                    "language": {"code": language_code},
+                },
+            }
+
+            if components:
+                payload["template"]["components"] = components
+
+            response = await self.client.post(url, headers=headers, json=payload)
+
+            if response.status_code == 200:
+                data = response.json()
+                message_id = data.get("messages", [{}])[0].get("id")
+                return {
+                    "success": True,
+                    "channel": NotificationChannel.WHATSAPP,
+                    "message_id": message_id,
+                    "status": "sent",
+                }
+            else:
+                error_data = response.json()
+                error_msg = error_data.get("error", {}).get("message", "Unknown error")
+                return {"success": False, "error": error_msg}
+
         except Exception as e:
-            logger.exception(f"SMS send failed: {e}")
+            logger.exception(f"Template message failed: {e}")
             return {"success": False, "error": str(e)}
 
     async def _send_ringcentral_sms(self, to: str, message: str) -> dict[str, Any]:
         """Fallback to RingCentral SMS"""
         try:
             # Import RingCentral service
-            from services.ringcentral_service import send_sms
+            from services.ringcentral_sms import RingCentralSMSService
 
-            result = await send_sms(to, message)
+            async with RingCentralSMSService() as sms_service:
+                result = await sms_service.send_sms(to, message)
 
-            if result.get("success"):
-                return {
-                    "success": True,
-                    "channel": NotificationChannel.SMS,
-                    "message_sid": result.get("message_id"),
-                    "status": "sent",
-                }
-            else:
-                return {"success": False, "error": result.get("error", "RingCentral SMS failed")}
+                if result.success:
+                    return {
+                        "success": True,
+                        "channel": NotificationChannel.SMS,
+                        "message_id": result.message_id,
+                        "status": "sent",
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "error": result.error or "RingCentral SMS failed",
+                    }
 
         except Exception as e:
             logger.exception(f"RingCentral SMS fallback failed: {e}")
             return {"success": False, "error": str(e)}
-
-    async def _send_to_admin_group(self, message: str) -> bool:
-        """Send notification to admin WhatsApp group via webhook"""
-        try:
-            if not self.group_webhook:
-                return False
-
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    self.group_webhook, json={"message": message}, timeout=10.0
-                )
-
-                if response.status_code == 200:
-                    logger.info("Admin group notification sent")
-                    return True
-                else:
-                    logger.warning(f"Admin group webhook failed: {response.status_code}")
-                    return False
-
-        except Exception as e:
-            logger.exception(f"Admin group notification failed: {e}")
-            return False
 
     def _build_payment_message(
         self,
@@ -378,7 +419,7 @@ class WhatsAppNotificationService:
             result = await self._send_whatsapp(admin_phone, message)
 
             if not result["success"]:
-                result = await self._send_sms(admin_phone, message)
+                result = await self._send_ringcentral_sms(admin_phone, message)
 
             return result
 
@@ -441,9 +482,9 @@ class WhatsAppNotificationService:
             result = await self._send_whatsapp(on_call_phone, message)
 
             if not result["success"]:
-                # Fallback to SMS
+                # Fallback to RingCentral SMS
                 logger.warning("WhatsApp failed for escalation alert, falling back to SMS")
-                result = await self._send_sms(on_call_phone, message)
+                result = await self._send_ringcentral_sms(on_call_phone, message)
 
             logger.info(
                 f"Escalation alert sent for {escalation_id} to {on_call_phone} "
@@ -455,6 +496,11 @@ class WhatsAppNotificationService:
         except Exception as e:
             logger.exception(f"Escalation alert failed: {e}")
             return {"success": False, "error": str(e), "channel": NotificationChannel.FAILED}
+
+    async def close(self):
+        """Close the HTTP client"""
+        if self.client:
+            await self.client.aclose()
 
 
 # Module-level instance
@@ -500,5 +546,7 @@ if __name__ == "__main__":
             match_score=175,
             booking_id=123,
         )
+
+        await service.close()
 
     asyncio.run(test())
