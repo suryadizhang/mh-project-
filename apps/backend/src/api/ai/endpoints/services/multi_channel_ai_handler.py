@@ -715,7 +715,7 @@ Subtotal: ${inquiry_details.get('party_size', 0) * 75 if inquiry_details.get('pa
 
 Protein Cost Breakdown:
 • Premium Upgrades: ${protein_info['upgrade_cost']}
-• Extra Proteins: ${protein_info['third_protein_cost']}
+• Extra Proteins: ${protein_info['extra_protein_cost']}
 • Total Protein Cost: ${protein_info['total_protein_cost']}
 
 Include this information naturally in your response!

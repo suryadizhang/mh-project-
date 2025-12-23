@@ -367,6 +367,46 @@ npx playwright test
 
 ## 🗄️ Database Migration Safety (MANDATORY)
 
+### 🔴 DATABASE ENVIRONMENT RULES (NEVER BREAK!)
+
+| Environment     | Database               | Use For                     |
+| --------------- | ---------------------- | --------------------------- |
+| **Development** | Supabase / Local       | Local dev, experiments      |
+| **Staging**     | `myhibachi_staging`    | ALL testing, QA, migrations |
+| **Production**  | `myhibachi_production` | Real customer data ONLY     |
+
+**NEVER insert test data into production database!**
+
+```bash
+# ✅ CORRECT - Run tests against staging
+pytest tests/integration/ --database-url="...myhibachi_staging"
+
+# ❌ FORBIDDEN - Never test against production
+pytest tests/integration/ --database-url="...myhibachi_production"
+```
+
+### ⚠️ CRITICAL: SQLAlchemy Model ↔ Production Sync
+
+**Every column in SQLAlchemy model MUST exist in production
+database.**
+
+See `19-DATABASE_SCHEMA_MANAGEMENT.instructions.md` for full details.
+
+**Quick Verification Command:**
+
+```bash
+# Check if a column exists before deploying code that uses it
+ssh root@VPS "sudo -u postgres psql -d myhibachi_production -c \"
+SELECT column_name FROM information_schema.columns
+WHERE table_schema='schema_name' AND table_name='table_name';\""
+```
+
+**Real Example (December 2024):**
+
+- Added `venue_lat`, `venue_lng` columns to booking model
+- Forgot to run migration on production
+- Result: All booking queries failed with 503 errors
+
 ### Pre-Migration Checklist:
 
 | Check                      | Action                                                   | Why                            |

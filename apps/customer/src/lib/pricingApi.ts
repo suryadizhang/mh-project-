@@ -86,7 +86,7 @@ export interface QuoteCalculationRequest {
     scallops?: number;
     filet_mignon?: number;
     lobster_tail?: number;
-    third_protein?: number;
+    extra_protein?: number;
   };
   addons?: {
     yakisoba_noodles?: number;
@@ -184,8 +184,8 @@ export async function getCurrentPricing(): Promise<CurrentPricingResponse | null
     cacheStrategy: {
       strategy: 'stale-while-revalidate',
       ttl: 5 * 60 * 1000, // 5 minutes
-      key: 'pricing:current'
-    }
+      key: 'pricing:current',
+    },
   });
 
   if (!response.success || !response.data) {
@@ -204,11 +204,11 @@ export async function getCurrentPricing(): Promise<CurrentPricingResponse | null
  * @returns Detailed quote breakdown with travel fees
  */
 export async function calculateQuote(
-  request: QuoteCalculationRequest
+  request: QuoteCalculationRequest,
 ): Promise<QuoteCalculationResponse | null> {
   const response = await api.post<QuoteCalculationResponse>(
     '/api/v1/pricing/calculate',
-    request as unknown as Record<string, unknown>
+    request as unknown as Record<string, unknown>,
   );
 
   if (!response.success || !response.data) {
@@ -230,8 +230,8 @@ export async function getPricingSummary(): Promise<PricingSummaryResponse | null
     cacheStrategy: {
       strategy: 'stale-while-revalidate',
       ttl: 5 * 60 * 1000, // 5 minutes
-      key: 'pricing:summary'
-    }
+      key: 'pricing:summary',
+    },
   });
 
   if (!response.success || !response.data) {
@@ -253,7 +253,7 @@ export function getBasePricing(pricing: CurrentPricingResponse | null) {
   return {
     adultPrice: pricing?.base_pricing.adult_price ?? 55,
     childPrice: pricing?.base_pricing.child_price ?? 30,
-    childFreeUnderAge: pricing?.base_pricing.child_free_under_age ?? 5
+    childFreeUnderAge: pricing?.base_pricing.child_free_under_age ?? 5,
   };
 }
 
@@ -272,25 +272,25 @@ export function getAddonPrices(pricing: CurrentPricingResponse | null): Record<s
       scallops: 5,
       filet_mignon: 5,
       lobster_tail: 15,
-      third_protein: 10,
+      extra_protein: 10,
       yakisoba_noodles: 5,
       extra_fried_rice: 5,
       extra_vegetables: 5,
       edamame: 5,
-      gyoza: 10
+      gyoza: 10,
     };
   }
 
   const prices: Record<string, number> = {};
 
   // Extract protein upgrades
-  pricing.addon_items.protein_upgrades.forEach(addon => {
+  pricing.addon_items.protein_upgrades.forEach((addon) => {
     const key = addon.name.toLowerCase().replace(/\s+/g, '_');
     prices[key] = addon.price;
   });
 
   // Extract enhancements
-  pricing.addon_items.enhancements.forEach(addon => {
+  pricing.addon_items.enhancements.forEach((addon) => {
     const key = addon.name.toLowerCase().replace(/\s+/g, '_');
     prices[key] = addon.price;
   });
@@ -306,10 +306,5 @@ export function getAddonPrices(pricing: CurrentPricingResponse | null): Record<s
  * @returns True if pricing data is valid
  */
 export function hasPricingData(pricing: CurrentPricingResponse | null): boolean {
-  return !!(
-    pricing &&
-    pricing.base_pricing &&
-    pricing.menu_items &&
-    pricing.addon_items
-  );
+  return !!(pricing && pricing.base_pricing && pricing.menu_items && pricing.addon_items);
 }

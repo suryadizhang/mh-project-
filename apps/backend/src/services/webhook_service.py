@@ -2,7 +2,7 @@
 WebhookService - Base handler pattern for webhook processing.
 
 This module provides a clean, testable architecture for processing webhooks
-from various platforms (Meta/Facebook, Twilio, Stripe, etc.).
+from various platforms (Meta/Facebook, RingCentral, Stripe, etc.).
 
 Key benefits:
 - Business logic separated from route handlers
@@ -80,7 +80,7 @@ class BaseWebhookHandler(ABC, BaseService, EventTrackingMixin):
 
         Each platform has different signature algorithms:
         - Meta: HMAC-SHA256 with 'sha256=' prefix
-        - Twilio: HMAC-SHA1 with base64 encoding
+        - RingCentral: Verification token or HMAC signature
         - Stripe: HMAC-SHA256 with timestamp
 
         Args:

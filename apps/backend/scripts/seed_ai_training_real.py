@@ -273,7 +273,7 @@ async def seed_faqs(conn):
             "Menu & Upgrades",
         ),
         (
-            "Can I add a third protein or more?",
+            "Can I add an extra protein or more?",
             "Yes! Each guest normally gets 2 proteins, but you can add an extra protein for +$10 each. Premium proteins (Salmon, Scallops, Filet Mignon) are +$10 + $5 upgrade, and Lobster Tail is +$10 + $15 upgrade.",
             "Menu & Upgrades",
         ),

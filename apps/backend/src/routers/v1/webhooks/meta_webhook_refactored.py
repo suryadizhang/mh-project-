@@ -178,133 +178,18 @@ async def webhook_health():
     }
 
 
-# Test endpoint for sending WhatsApp messages (admin only)
-@router.post("/test/send")
-async def test_send_whatsapp(
-    to: str = Query(..., description="Phone number in format 1XXXXXXXXXX"),
-    message: str = Query(default=None, description="Message to send (only works in 24hr window)"),
-    use_template: bool = Query(default=True, description="Use template instead of freeform text"),
-    template_name: str = Query(
-        default="hello_world", description="Template name (default: hello_world)"
-    ),
-):
-    """
-    Test endpoint to send WhatsApp message.
-
-    IMPORTANT:
-    - Freeform text only works within 24-hour window after user messages first
-    - For proactive outreach, use templates (use_template=true)
-    - The 'hello_world' template is pre-approved by Meta
-
-    Args:
-        to: Phone number (format: 1XXXXXXXXXX, no + sign)
-        message: Message text (ignored if use_template=true)
-        use_template: Use approved template instead of freeform text (default: true)
-        template_name: Template name to use (default: hello_world)
-
-    Returns:
-        API response from Meta
-    """
-    from services.whatsapp_notification_service import get_whatsapp_service
-
-    service = get_whatsapp_service()
-
-    if not service.client:
-        raise HTTPException(
-            status_code=503,
-            detail="WhatsApp service not configured (missing credentials)",
-        )
-
-    try:
-        if use_template:
-            # Use template message (works for proactive outreach)
-            result = await service.send_template_message(
-                to=to, template_name=template_name, language_code="en_US"
-            )
-        else:
-            # Use freeform text (only works in 24hr window)
-            if not message:
-                raise HTTPException(
-                    status_code=400, detail="message parameter required when use_template=false"
-                )
-            result = await service._send_whatsapp(to, message)
-
-        return {
-            "success": result.get("success", False),
-            "message_id": result.get("message_id"),
-            "template_used": template_name if use_template else None,
-            "details": result,
-        }
-    except Exception as e:
-        logger.error(f"Failed to send test WhatsApp: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-# Test endpoint for booking confirmation template
-@router.post("/test/booking-confirmation")
-async def test_booking_confirmation(
-    to: str = Query(..., description="Phone number in format 1XXXXXXXXXX"),
-    name: str = Query(default="John", description="Customer name"),
-    date: str = Query(default="Saturday, January 15, 2025", description="Event date"),
-    time: str = Query(default="6:00 PM", description="Event time"),
-    guests: int = Query(default=12, description="Number of guests"),
-    address: str = Query(default="123 Main St, Sacramento, CA 95814", description="Venue address"),
-    total: float = Query(default=850.00, description="Total amount"),
-    deposit: float = Query(default=100.00, description="Deposit paid"),
-    balance: float = Query(default=750.00, description="Balance due"),
-):
-    """
-    Test the booking_confirmation WhatsApp template.
-
-    NOTE: Template must be approved by Meta before this works.
-    Check template status at: https://business.facebook.com/wa/manage/message-templates/
-
-    Args:
-        to: Phone number (format: 1XXXXXXXXXX, no + sign)
-        name: Customer first name
-        date: Event date string
-        time: Event time string
-        guests: Number of guests
-        address: Venue address
-        total: Total booking amount
-        deposit: Deposit paid
-        balance: Balance due
-
-    Returns:
-        API response from Meta
-    """
-    from services.whatsapp_notification_service import get_whatsapp_service
-
-    service = get_whatsapp_service()
-
-    if not service.client:
-        raise HTTPException(
-            status_code=503,
-            detail="WhatsApp service not configured (missing credentials)",
-        )
-
-    try:
-        result = await service.send_booking_confirmation(
-            phone_number=to,
-            customer_name=name,
-            event_date=date,
-            event_time=time,
-            guest_count=guests,
-            venue_address=address,
-            total_amount=total,
-            deposit_paid=deposit,
-            balance_due=balance,
-        )
-
-        return {
-            "success": result.get("success", False),
-            "message_id": result.get("message_id"),
-            "template": "booking_confirmation",
-            "details": result,
-        }
-    except Exception as e:
-        logger.error(f"Failed to send booking confirmation: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+# ===========================================
+# WhatsApp sending endpoints REMOVED
+# ===========================================
+# WhatsApp business-initiated messages require templates approved by Meta.
+# Decision: Use IONOS SMTP email for staff notifications instead.
+# Meta webhook is kept for Instagram DM and Facebook Messenger (AI chat).
+#
+# For admin notifications, use:
+#   from services.staff_notification_service import get_staff_notification_service
+#   service = get_staff_notification_service()
+#   await service.notify_new_booking(...)
+# ===========================================
 
 
 # Debug endpoint to test webhook reception (bypasses signature for testing)

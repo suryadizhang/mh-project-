@@ -25,14 +25,8 @@ from redis import asyncio as aioredis
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Phase 2A: Twilio is optional dependency - handle import gracefully
-try:
-    from twilio.rest import Client as TwilioClient
-
-    TWILIO_AVAILABLE = True
-except ImportError:
-    TWILIO_AVAILABLE = False
-    TwilioClient = None  # type: ignore
+# Meta WhatsApp Cloud API health check uses httpx
+import httpx
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
@@ -155,52 +149,56 @@ async def check_redis_health() -> ComponentHealth:
         )
 
 
-async def check_twilio_health() -> ComponentHealth:
-    """Check Twilio service health"""
+async def check_meta_whatsapp_health() -> ComponentHealth:
+    """Check Meta WhatsApp Cloud API health"""
     start_time = time.time()
 
     try:
-        # Phase 2A: Check if Twilio is available
-        if not TWILIO_AVAILABLE:
+        # Check if Meta credentials are configured
+        if not settings.META_PAGE_ACCESS_TOKEN or not settings.META_PHONE_NUMBER_ID:
             return ComponentHealth(
-                name="twilio",
+                name="meta_whatsapp",
                 status="degraded",
-                message="Twilio library not installed",
+                message="Meta WhatsApp credentials not configured",
                 response_time_ms=0,
             )
 
-        if not settings.twilio_account_sid or not settings.twilio_auth_token:
-            return ComponentHealth(
-                name="twilio",
-                status="degraded",
-                message="Twilio credentials not configured",
-                response_time_ms=0,
-            )
+        # Test Meta Graph API connectivity
+        url = f"https://graph.facebook.com/v21.0/{settings.META_PHONE_NUMBER_ID}"
+        headers = {
+            "Authorization": f"Bearer {settings.META_PAGE_ACCESS_TOKEN}",
+        }
 
-        client = TwilioClient(settings.twilio_account_sid, settings.twilio_auth_token)
-
-        # Check account status
-        account = client.api.accounts(settings.twilio_account_sid).fetch()
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(url, headers=headers)
 
         response_time_ms = int((time.time() - start_time) * 1000)
 
-        return ComponentHealth(
-            name="twilio",
-            status="healthy",
-            message="Twilio connection successful",
-            response_time_ms=response_time_ms,
-            details={
-                "account_status": account.status,
-                "account_sid": settings.twilio_account_sid[:10] + "...",
-            },
-        )
+        if response.status_code == 200:
+            return ComponentHealth(
+                name="meta_whatsapp",
+                status="healthy",
+                message="Meta WhatsApp API connection successful",
+                response_time_ms=response_time_ms,
+                details={
+                    "phone_number_id": settings.META_PHONE_NUMBER_ID[:10] + "...",
+                    "api_version": "v21.0",
+                },
+            )
+        else:
+            return ComponentHealth(
+                name="meta_whatsapp",
+                status="unhealthy",
+                message=f"Meta API returned status {response.status_code}",
+                response_time_ms=response_time_ms,
+            )
 
     except Exception as e:
-        logger.exception(f"❌ Twilio health check failed: {e}")
+        logger.exception(f"❌ Meta WhatsApp health check failed: {e}")
         return ComponentHealth(
-            name="twilio",
+            name="meta_whatsapp",
             status="unhealthy",
-            message=f"Twilio connection failed: {e!s}",
+            message=f"Meta WhatsApp connection failed: {e!s}",
             response_time_ms=int((time.time() - start_time) * 1000),
         )
 
@@ -378,7 +376,7 @@ async def readiness_probe(db: AsyncSession = Depends(get_db)):
     Checks all critical dependencies:
     - Database connection
     - Redis cache
-    - External services (Twilio, Stripe, Email)
+    - External services (Meta WhatsApp, Stripe, Email)
 
     Returns 200 if all critical services are healthy
     Returns 503 if any critical service is unhealthy
@@ -390,7 +388,7 @@ async def readiness_probe(db: AsyncSession = Depends(get_db)):
         check_database_health(db),
         check_redis_health(),
         check_openai_health(),
-        check_twilio_health(),
+        check_meta_whatsapp_health(),
         check_stripe_health(),
         check_email_health(),
         return_exceptions=True,

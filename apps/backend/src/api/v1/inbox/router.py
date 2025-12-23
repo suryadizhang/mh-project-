@@ -387,20 +387,24 @@ class TCPAHandler:
 class SMSHandler:
     """SMS message handler"""
 
-    async def send_message(self, message: InboxMessage, request: SendMessageRequest) -> dict[str, Any]:
-        """Send SMS message via provider"""
-        # Implementation would integrate with SMS provider (Twilio, etc.)
+    async def send_message(
+        self, message: InboxMessage, request: SendMessageRequest
+    ) -> dict[str, Any]:
+        """Send SMS message via RingCentral"""
+        # Implementation would integrate with RingCentral SMS
         return {
             "success": True,
             "external_id": f"sms_{uuid4()}",
-            "metadata": {"provider": "twilio", "cost": 0.0075},
+            "metadata": {"provider": "ringcentral", "cost": 0.0075},
         }
 
 
 class EmailHandler:
     """Email message handler"""
 
-    async def send_message(self, message: InboxMessage, request: SendMessageRequest) -> dict[str, Any]:
+    async def send_message(
+        self, message: InboxMessage, request: SendMessageRequest
+    ) -> dict[str, Any]:
         """Send email message via provider"""
         # Implementation would integrate with email provider (SendGrid, etc.)
         return {
@@ -413,7 +417,9 @@ class EmailHandler:
 class WebSocketHandler:
     """WebSocket message handler"""
 
-    async def send_message(self, message: InboxMessage, request: SendMessageRequest) -> dict[str, Any]:
+    async def send_message(
+        self, message: InboxMessage, request: SendMessageRequest
+    ) -> dict[str, Any]:
         """Send WebSocket message to connected clients"""
         # Implementation would use WebSocket manager
         return {
@@ -429,7 +435,9 @@ class SocialMediaHandler:
     def __init__(self, platform: str):
         self.platform = platform
 
-    async def send_message(self, message: InboxMessage, request: SendMessageRequest) -> dict[str, Any]:
+    async def send_message(
+        self, message: InboxMessage, request: SendMessageRequest
+    ) -> dict[str, Any]:
         """Send social media message via platform API"""
         # Implementation would integrate with platform APIs
         return {

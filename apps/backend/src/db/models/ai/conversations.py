@@ -6,7 +6,7 @@ Merges the best features from:
 - AIConversation (emotion tracking, memory backend)
 - Conversation (multi-channel support, human escalation, shadow learning)
 
-Industry Standard: Twilio/Intercom/Zendesk pattern
+Industry Standard: Intercom/Zendesk pattern
 - Single conversation model for all channels
 - Channel-specific metadata in JSONB
 - Emotion tracking for customer engagement
