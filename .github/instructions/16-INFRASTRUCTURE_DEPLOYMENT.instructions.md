@@ -131,6 +131,24 @@ curl http://127.0.0.1:8002/health
 
 ## 🗄️ Database Configuration
 
+### 🔴 CRITICAL: Database Environment Separation
+
+**NEVER mix environments. Production = real customer data ONLY.**
+
+| Environment    | Database               | Port | Purpose                 |
+| -------------- | ---------------------- | ---- | ----------------------- |
+| **Staging**    | `myhibachi_staging`    | 8002 | Testing, QA, migrations |
+| **Production** | `myhibachi_production` | 8000 | Real customer data ONLY |
+
+**Rules:**
+
+- ✅ Run all tests against `myhibachi_staging`
+- ✅ Run migrations on staging first (48+ hours)
+- ✅ Create test data in staging only
+- ❌ NEVER insert test data into production
+- ❌ NEVER run destructive tests on production
+- ❌ NEVER use production for API testing
+
 ### Production Database (VPS)
 
 | Property     | Value                           |

@@ -43,7 +43,7 @@ class QuoteRequest(BaseModel):
     scallops: int = Field(default=0, ge=0, description="Number of scallop upgrades")
     filet_mignon: int = Field(default=0, ge=0, description="Number of filet mignon upgrades")
     lobster_tail: int = Field(default=0, ge=0, description="Number of lobster tail upgrades")
-    third_proteins: int = Field(default=0, ge=0, description="Number of extra protein additions")
+    extra_proteins: int = Field(default=0, ge=0, description="Number of extra protein additions")
 
     # Add-ons (per serving)
     yakisoba_noodles: int = Field(default=0, ge=0, description="Number of yakisoba noodle portions")
@@ -218,7 +218,7 @@ async def calculate_quote(
         upgrade_total += request.scallops * UPGRADE_PRICES["scallops"]
         upgrade_total += request.filet_mignon * UPGRADE_PRICES["filet_mignon"]
         upgrade_total += request.lobster_tail * UPGRADE_PRICES["lobster_tail"]
-        upgrade_total += request.third_proteins * UPGRADE_PRICES["extra_protein"]
+        upgrade_total += request.extra_proteins * UPGRADE_PRICES["extra_protein"]
 
         # Calculate addon total
         addon_total = 0.0

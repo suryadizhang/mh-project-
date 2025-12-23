@@ -1,36 +1,37 @@
 """
-Meta WhatsApp Business API Notification Service
+Notification Service - REFACTORED
 
-Implements WhatsApp Business API integration for payment notifications
-using the official Meta Cloud API.
+This file previously contained WhatsApp Business API integration.
+WhatsApp business-initiated messaging requires pre-approved templates,
+which is not suitable for our internal staff notification needs.
 
-Features:
-- WhatsApp Business API (Official Meta Cloud API)
-- Fallback to RingCentral SMS if WhatsApp fails
-- Template message support
-- Delivery tracking
-- Group notifications
-- Messenger and Instagram DM support
+DECISION:
+- WhatsApp sending functionality has been REMOVED
+- For staff notifications, use StaffNotificationService (email-based)
+- Meta webhook is KEPT for Instagram DM and Facebook Messenger (AI chat)
+- RingCentral SMS can still be used for customer notifications if needed
 
-Message Flow:
-Payment Detected → Try WhatsApp → If fail, send SMS via RingCentral → Log result
+MIGRATION GUIDE:
+    # Old code:
+    from services.whatsapp_notification_service import get_whatsapp_service
+    service = get_whatsapp_service()
+    await service.send_payment_notification(...)
 
-Environment Variables Required:
-- META_APP_ID: Meta App ID
-- META_APP_SECRET: Meta App Secret
-- META_PAGE_ACCESS_TOKEN: Permanent Page Access Token
-- META_VERIFY_TOKEN: Webhook verification token
-- META_PHONE_NUMBER_ID: WhatsApp Business Phone Number ID
-- RC_SMS_FROM: RingCentral fallback SMS number
+    # New code:
+    from services.staff_notification_service import get_staff_notification_service
+    service = get_staff_notification_service()
+    await service.notify_payment_received(...)
+
+For customer-facing SMS, use RingCentral directly:
+    from services.ringcentral_service import get_ringcentral_service
+    sms_service = get_ringcentral_service()
+    await sms_service.send_sms(to, message)
 """
 
 from datetime import datetime, timezone
 from enum import Enum
 import logging
-import os
 from typing import Any
-
-import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -38,61 +39,40 @@ logger = logging.getLogger(__name__)
 class NotificationChannel(str, Enum):
     """Notification delivery channels"""
 
-    WHATSAPP = "whatsapp"
-    SMS = "sms"
-    EMAIL = "email"
-    MESSENGER = "messenger"
-    INSTAGRAM = "instagram"
+    EMAIL = "email"  # Primary: IONOS SMTP via StaffNotificationService
+    SMS = "sms"  # Customer-facing via RingCentral
+    MESSENGER = "messenger"  # Facebook Messenger (AI chat)
+    INSTAGRAM = "instagram"  # Instagram DM (AI chat)
+    WHATSAPP = "whatsapp"  # DEPRECATED - redirects to email
     FAILED = "failed"
 
 
 class WhatsAppNotificationService:
     """
-    Handles WhatsApp notifications via Meta Cloud API.
+    DEPRECATED - This service now redirects to StaffNotificationService.
 
-    Features:
-    - WhatsApp via Meta Cloud API (official)
-    - Automatic fallback to RingCentral SMS
-    - Template support
-    - Delivery tracking
-    - Group notifications
+    Kept for backward compatibility with existing code that imports this class.
+    All notification methods redirect to email-based notifications.
 
-    Environment Variables Required:
-    - META_PAGE_ACCESS_TOKEN: Long-lived page access token
-    - META_PHONE_NUMBER_ID: WhatsApp Business phone number ID
-    - RC_SMS_FROM: RingCentral fallback SMS number
+    For new code, use StaffNotificationService directly.
     """
 
-    # Meta WhatsApp Cloud API base URL
-    META_API_BASE = "https://graph.facebook.com/v21.0"
-
     def __init__(self):
-        """Initialize Meta WhatsApp notification service"""
-        try:
-            # Get Meta credentials
-            self.access_token = os.getenv("META_PAGE_ACCESS_TOKEN")
-            self.phone_number_id = os.getenv("META_PHONE_NUMBER_ID")
-            self.app_id = os.getenv("META_APP_ID")
+        """Initialize - loads the new email-based service"""
+        self.client = None  # No WhatsApp client - we use email now
+        self._staff_service = None
+        logger.info(
+            "WhatsAppNotificationService initialized - " "notifications will be sent via email"
+        )
 
-            if not self.access_token or not self.phone_number_id:
-                logger.warning(
-                    "Meta WhatsApp credentials not found - "
-                    "notifications will use RingCentral SMS only"
-                )
-                self.client = None
-            else:
-                self.client = httpx.AsyncClient(timeout=30.0)
-                logger.info("Meta WhatsApp client initialized successfully")
+    @property
+    def staff_service(self):
+        """Lazy load staff notification service"""
+        if self._staff_service is None:
+            from services.staff_notification_service import get_staff_notification_service
 
-            # RingCentral fallback
-            self.sms_from = os.getenv("RC_SMS_FROM", "+19167408768")
-
-            logger.info(f"WhatsApp Phone Number ID: {self.phone_number_id}")
-            logger.info(f"SMS fallback from: {self.sms_from}")
-
-        except Exception as e:
-            logger.exception(f"Failed to initialize WhatsApp service: {e}")
-            self.client = None
+            self._staff_service = get_staff_notification_service()
+        return self._staff_service
 
     async def send_payment_notification(
         self,
@@ -106,193 +86,31 @@ class WhatsAppNotificationService:
         admin_group: bool = True,
     ) -> dict[str, Any]:
         """
-        Send payment notification via WhatsApp (with SMS fallback).
+        REDIRECTED to email notification.
 
-        Args:
-            phone_number: Customer phone (format: +1234567890)
-            customer_name: Name of customer who booked
-            amount: Payment amount
-            provider: Payment provider (Stripe, Venmo, Zelle, etc.)
-            sender_name: Name of person who sent payment
-            match_score: Confidence score (0-225)
-            booking_id: Associated booking ID
-            admin_group: Also send to admin group/number
-
-        Returns:
-            Dict with delivery status and details
+        Original: Sent WhatsApp message to admin
+        Now: Sends email notification via StaffNotificationService
         """
-        result = {
-            "success": False,
-            "channel": NotificationChannel.FAILED,
+        logger.info(
+            f"Payment notification redirected to email: "
+            f"${amount:.2f} from {customer_name} via {provider}"
+        )
+
+        result = await self.staff_service.notify_payment_received(
+            booking_id=str(booking_id) if booking_id else "N/A",
+            customer_name=customer_name,
+            amount=amount,
+            payment_method=provider,
+        )
+
+        return {
+            "success": result.get("success", False),
+            "channel": NotificationChannel.EMAIL,
             "message_id": None,
-            "error": None,
+            "error": result.get("error"),
             "timestamp": datetime.now(timezone.utc).isoformat(),
+            "note": "Redirected from WhatsApp to email notification",
         }
-
-        try:
-            # Format phone number
-            formatted_phone = self._format_phone_number(phone_number)
-
-            # Build message
-            message = self._build_payment_message(
-                customer_name=customer_name,
-                amount=amount,
-                provider=provider,
-                sender_name=sender_name,
-                match_score=match_score,
-                booking_id=booking_id,
-            )
-
-            # Try WhatsApp first
-            if self.client and self.access_token and self.phone_number_id:
-                whatsapp_result = await self._send_whatsapp(formatted_phone, message)
-
-                if whatsapp_result["success"]:
-                    result.update(whatsapp_result)
-                    logger.info(
-                        f"WhatsApp sent to {formatted_phone}: {whatsapp_result['message_id']}"
-                    )
-                else:
-                    # Fallback to RingCentral SMS
-                    logger.warning(
-                        f"WhatsApp failed, falling back to RingCentral SMS: "
-                        f"{whatsapp_result['error']}"
-                    )
-                    sms_result = await self._send_ringcentral_sms(formatted_phone, message)
-                    result.update(sms_result)
-            else:
-                # No Meta client, use RingCentral SMS directly
-                sms_result = await self._send_ringcentral_sms(formatted_phone, message)
-                result.update(sms_result)
-
-            # Send to admin if enabled
-            if admin_group:
-                admin_phone = os.getenv("ON_CALL_ADMIN_PHONE") or os.getenv(
-                    "BUSINESS_PHONE", "+19167408768"
-                )
-                await self._send_ringcentral_sms(admin_phone, f"[ADMIN] {message}")
-
-            return result
-
-        except Exception as e:
-            logger.error(f"Payment notification failed: {e}", exc_info=True)
-            result["error"] = str(e)
-            return result
-
-    async def _send_whatsapp(self, to: str, message: str) -> dict[str, Any]:
-        """Send WhatsApp message via Meta Cloud API"""
-        try:
-            if not self.client:
-                return {"success": False, "error": "Meta WhatsApp client not initialized"}
-
-            # Remove + from phone number for Meta API
-            phone_number = to.lstrip("+")
-
-            # Meta Cloud API endpoint
-            url = f"{self.META_API_BASE}/{self.phone_number_id}/messages"
-
-            headers = {
-                "Authorization": f"Bearer {self.access_token}",
-                "Content-Type": "application/json",
-            }
-
-            # Send text message
-            payload = {
-                "messaging_product": "whatsapp",
-                "recipient_type": "individual",
-                "to": phone_number,
-                "type": "text",
-                "text": {"preview_url": True, "body": message},
-            }
-
-            response = await self.client.post(url, headers=headers, json=payload)
-
-            if response.status_code == 200:
-                data = response.json()
-                message_id = data.get("messages", [{}])[0].get("id")
-                return {
-                    "success": True,
-                    "channel": NotificationChannel.WHATSAPP,
-                    "message_id": message_id,
-                    "status": "sent",
-                }
-            else:
-                error_data = response.json()
-                error_msg = error_data.get("error", {}).get("message", "Unknown error")
-                logger.warning(f"Meta WhatsApp API error: {error_msg}")
-                return {"success": False, "error": error_msg}
-
-        except Exception as e:
-            logger.exception(f"WhatsApp send failed: {e}")
-            return {"success": False, "error": str(e)}
-
-    async def send_template_message(
-        self,
-        to: str,
-        template_name: str,
-        language_code: str = "en_US",
-        components: list[dict] | None = None,
-    ) -> dict[str, Any]:
-        """
-        Send WhatsApp template message via Meta Cloud API.
-
-        Template messages must be pre-approved by Meta.
-        Use this for marketing, notifications, and transactional messages.
-
-        Args:
-            to: Recipient phone number (+1234567890)
-            template_name: Name of approved template
-            language_code: Template language (default: en_US)
-            components: Optional template components (header, body, buttons)
-
-        Returns:
-            Dict with delivery status
-        """
-        try:
-            if not self.client:
-                return {"success": False, "error": "Meta WhatsApp client not initialized"}
-
-            phone_number = to.lstrip("+")
-            url = f"{self.META_API_BASE}/{self.phone_number_id}/messages"
-
-            headers = {
-                "Authorization": f"Bearer {self.access_token}",
-                "Content-Type": "application/json",
-            }
-
-            payload = {
-                "messaging_product": "whatsapp",
-                "recipient_type": "individual",
-                "to": phone_number,
-                "type": "template",
-                "template": {
-                    "name": template_name,
-                    "language": {"code": language_code},
-                },
-            }
-
-            if components:
-                payload["template"]["components"] = components
-
-            response = await self.client.post(url, headers=headers, json=payload)
-
-            if response.status_code == 200:
-                data = response.json()
-                message_id = data.get("messages", [{}])[0].get("id")
-                return {
-                    "success": True,
-                    "channel": NotificationChannel.WHATSAPP,
-                    "message_id": message_id,
-                    "status": "sent",
-                }
-            else:
-                error_data = response.json()
-                error_msg = error_data.get("error", {}).get("message", "Unknown error")
-                return {"success": False, "error": error_msg}
-
-        except Exception as e:
-            logger.exception(f"Template message failed: {e}")
-            return {"success": False, "error": str(e)}
 
     async def send_booking_confirmation(
         self,
@@ -300,331 +118,156 @@ class WhatsAppNotificationService:
         customer_name: str,
         event_date: str,
         event_time: str,
-        guest_count: int | str,
+        guest_count: int,
         venue_address: str,
         total_amount: float,
         deposit_paid: float,
         balance_due: float,
     ) -> dict[str, Any]:
         """
-        Send booking confirmation via WhatsApp template.
+        REDIRECTED to email notification.
 
-        Uses the 'booking_confirmation' template with 8 variables.
-
-        Args:
-            phone_number: Customer phone (+1234567890)
-            customer_name: Customer first name
-            event_date: Formatted date (e.g., "Saturday, January 15, 2025")
-            event_time: Formatted time (e.g., "6:00 PM")
-            guest_count: Number of guests
-            venue_address: Full venue address
-            total_amount: Total booking amount
-            deposit_paid: Deposit amount paid
-            balance_due: Remaining balance
-
-        Returns:
-            Dict with delivery status
+        Original: Sent WhatsApp template message to customer
+        Now: Sends email notification (staff only - customer gets separate email)
         """
-        try:
-            # Format phone number
-            formatted_phone = self._format_phone_number(phone_number)
-
-            # Build template components with variables
-            # Variables: {{1}}=name, {{2}}=date, {{3}}=time, {{4}}=guests,
-            # {{5}}=address, {{6}}=total, {{7}}=deposit, {{8}}=balance
-            components = [
-                {
-                    "type": "body",
-                    "parameters": [
-                        {"type": "text", "text": customer_name},
-                        {"type": "text", "text": event_date},
-                        {"type": "text", "text": event_time},
-                        {"type": "text", "text": str(guest_count)},
-                        {"type": "text", "text": venue_address},
-                        {"type": "text", "text": f"{total_amount:.2f}"},
-                        {"type": "text", "text": f"{deposit_paid:.2f}"},
-                        {"type": "text", "text": f"{balance_due:.2f}"},
-                    ],
-                }
-            ]
-
-            result = await self.send_template_message(
-                to=formatted_phone,
-                template_name="booking_confirmation",
-                language_code="en",
-                components=components,
-            )
-
-            if result.get("success"):
-                logger.info(
-                    f"Booking confirmation sent to {formatted_phone}: "
-                    f"{result.get('message_id')}"
-                )
-            else:
-                logger.warning(
-                    f"Failed to send booking confirmation to {formatted_phone}: "
-                    f"{result.get('error')}"
-                )
-
-            return result
-
-        except Exception as e:
-            logger.exception(f"Booking confirmation failed: {e}")
-            return {"success": False, "error": str(e)}
-
-    async def _send_ringcentral_sms(self, to: str, message: str) -> dict[str, Any]:
-        """Fallback to RingCentral SMS"""
-        try:
-            # Import RingCentral service
-            from services.ringcentral_sms import RingCentralSMSService
-
-            async with RingCentralSMSService() as sms_service:
-                result = await sms_service.send_sms(to, message)
-
-                if result.success:
-                    return {
-                        "success": True,
-                        "channel": NotificationChannel.SMS,
-                        "message_id": result.message_id,
-                        "status": "sent",
-                    }
-                else:
-                    return {
-                        "success": False,
-                        "error": result.error or "RingCentral SMS failed",
-                    }
-
-        except Exception as e:
-            logger.exception(f"RingCentral SMS fallback failed: {e}")
-            return {"success": False, "error": str(e)}
-
-    def _build_payment_message(
-        self,
-        customer_name: str,
-        amount: float,
-        provider: str,
-        sender_name: str | None = None,
-        match_score: int = 0,
-        booking_id: int | None = None,
-    ) -> str:
-        """Build payment notification message"""
-
-        # Determine confidence level
-        if match_score >= 150:
-            confidence = "HIGH"
-            emoji = "✅"
-        elif match_score >= 100:
-            confidence = "MEDIUM"
-            emoji = "⚠️"
-        else:
-            confidence = "LOW"
-            emoji = "❓"
-
-        # Build message
-        lines = [
-            f"{emoji} Payment Detected - My Hibachi Chef",
-            "",
-            f"Amount: ${amount:.2f}",
-            f"Provider: {provider}",
-        ]
-
-        if sender_name:
-            lines.append(f"From: {sender_name}")
-
-        lines.append(f"Customer: {customer_name}")
-
-        if booking_id:
-            lines.append(f"Booking ID: #{booking_id}")
-
-        lines.extend(
-            [
-                "",
-                f"Match Confidence: {confidence} ({match_score}/225)",
-                "",
-                "View dashboard: https://admin.mysticdatanode.net/payments",
-            ]
+        logger.info(
+            f"Booking confirmation notification redirected to email: "
+            f"{customer_name} on {event_date}"
         )
 
-        return "\n".join(lines)
+        result = await self.staff_service.notify_new_booking(
+            booking_id="N/A",  # Will be populated by caller if needed
+            customer_name=customer_name,
+            event_date=event_date,
+            event_time=event_time,
+            guest_count=guest_count,
+        )
 
-    def _format_phone_number(self, phone: str) -> str:
-        """Format phone number to E.164 format (+1234567890)"""
-        # Remove all non-digits
-        digits = "".join(c for c in phone if c.isdigit())
-
-        # Add country code if missing
-        if len(digits) == 10:
-            return f"+1{digits}"
-        elif len(digits) == 11 and digits[0] == "1":
-            return f"+{digits}"
-        else:
-            return f"+{digits}"
+        return {
+            "success": result.get("success", False),
+            "channel": NotificationChannel.EMAIL,
+            "message_id": None,
+            "error": result.get("error"),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "note": "Redirected from WhatsApp to email notification",
+        }
 
     async def send_manual_review_alert(
         self,
-        notification_id: int,
-        amount: float,
-        provider: str,
-        sender_name: str | None = None,
-        reason: str = "Low match score",
+        alert_data: dict[str, Any],
     ) -> dict[str, Any]:
         """
-        Send alert for payments requiring manual review.
+        REDIRECTED to email notification.
 
-        This goes ONLY to admin (not customer).
+        Original: Sent WhatsApp alert for manual review needed
+        Now: Sends escalation email via StaffNotificationService
         """
-        message = (
-            f"🔔 Manual Review Required\n"
-            f"\n"
-            f"Notification ID: #{notification_id}\n"
-            f"Amount: ${amount:.2f}\n"
-            f"Provider: {provider}\n"
+        logger.info("Manual review alert redirected to email")
+
+        result = await self.staff_service.notify_escalation(
+            escalation_id=str(alert_data.get("id", "N/A")),
+            customer_phone=alert_data.get("phone", "Unknown"),
+            reason=alert_data.get("reason", "Manual review required"),
+            priority_level=alert_data.get("priority", "normal"),
         )
 
-        if sender_name:
-            message += f"From: {sender_name}\n"
-
-        message += (
-            f"Reason: {reason}\n"
-            f"\n"
-            f"Review now: https://admin.myhibachichef.com/payments/{notification_id}"
-        )
-
-        # Send to admin
-        admin_phone = os.getenv("BUSINESS_PHONE", "+19167408768")
-
-        try:
-            result = await self._send_whatsapp(admin_phone, message)
-
-            if not result["success"]:
-                result = await self._send_ringcentral_sms(admin_phone, message)
-
-            return result
-
-        except Exception as e:
-            logger.exception(f"Manual review alert failed: {e}")
-            return {"success": False, "error": str(e)}
+        return {
+            "success": result.get("success", False),
+            "channel": NotificationChannel.EMAIL,
+            "message_id": None,
+            "error": result.get("error"),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
 
     async def send_escalation_alert(
         self,
-        escalation_id: str,
-        priority: str,
-        customer_phone: str,
-        reason: str,
-        method: str,
-        conversation_id: str | None = None,
+        escalation_data: dict[str, Any],
     ) -> dict[str, Any]:
         """
-        Send WhatsApp alert to on-call admin when escalation is created.
+        REDIRECTED to email notification.
 
-        Args:
-            escalation_id: UUID of the escalation
-            priority: Priority level (low, medium, high, urgent)
-            customer_phone: Customer's phone number
-            reason: Escalation reason
-            method: Preferred contact method (sms, call, email)
-            conversation_id: Optional conversation ID
-
-        Returns:
-            Dict with delivery status and details
+        Original: Sent WhatsApp alert for escalation
+        Now: Sends escalation email via StaffNotificationService
         """
-        # Determine emoji based on priority
-        priority_emoji = {
-            "low": "📋",
-            "medium": "⚠️",
-            "high": "🔴",
-            "urgent": "🚨",
-        }.get(priority.lower(), "🔔")
+        logger.info("Escalation alert redirected to email")
 
-        # Build message
-        message = (
-            f"{priority_emoji} NEW ESCALATION\n"
-            f"\n"
-            f"Priority: {priority.upper()}\n"
-            f"Customer: {customer_phone}\n"
-            f"Method: {method.upper()}\n"
-            f"\n"
-            f"Reason:\n{reason[:200]}{'...' if len(reason) > 200 else ''}\n"
-            f"\n"
-            f"🔗 View Details:\n"
-            f"https://admin.myhibachichef.com/inbox/escalations/{escalation_id}"
+        result = await self.staff_service.notify_escalation(
+            escalation_id=str(escalation_data.get("id", "N/A")),
+            customer_phone=escalation_data.get("phone", "Unknown"),
+            reason=escalation_data.get("reason", "Escalation required"),
+            priority_level="high",
         )
 
-        # Get on-call admin phone
-        on_call_phone = os.getenv("ON_CALL_ADMIN_PHONE") or os.getenv(
-            "BUSINESS_PHONE", "+19167408768"
+        return {
+            "success": result.get("success", False),
+            "channel": NotificationChannel.EMAIL,
+            "message_id": None,
+            "error": result.get("error"),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+
+    async def send_template_message(
+        self,
+        to: str,
+        template_name: str,
+        language_code: str = "en_US",
+        components: list | None = None,
+    ) -> dict[str, Any]:
+        """
+        REMOVED - WhatsApp template messages no longer supported.
+
+        For customer communication, use email or RingCentral SMS.
+        """
+        logger.warning(
+            f"WhatsApp template message skipped (no longer supported): "
+            f"template={template_name}, to={to}"
         )
 
-        try:
-            # Try WhatsApp first
-            result = await self._send_whatsapp(on_call_phone, message)
+        return {
+            "success": False,
+            "channel": NotificationChannel.FAILED,
+            "error": "WhatsApp template messages removed. Use email or SMS instead.",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
 
-            if not result["success"]:
-                # Fallback to RingCentral SMS
-                logger.warning("WhatsApp failed for escalation alert, falling back to SMS")
-                result = await self._send_ringcentral_sms(on_call_phone, message)
+    async def _send_whatsapp(self, to: str, message: str) -> dict[str, Any]:
+        """
+        REMOVED - WhatsApp freeform messages no longer supported.
 
-            logger.info(
-                f"Escalation alert sent for {escalation_id} to {on_call_phone} "
-                f"via {result.get('channel', 'unknown')}"
-            )
+        For customer communication, use email or RingCentral SMS.
+        """
+        logger.warning(f"WhatsApp message skipped (no longer supported): to={to}")
 
-            return result
+        return {
+            "success": False,
+            "channel": NotificationChannel.FAILED,
+            "error": "WhatsApp messages removed. Use email or SMS instead.",
+        }
 
-        except Exception as e:
-            logger.exception(f"Escalation alert failed: {e}")
-            return {"success": False, "error": str(e), "channel": NotificationChannel.FAILED}
+    def _format_phone_number(self, phone: str) -> str:
+        """Format phone number - kept for compatibility"""
+        # Remove all non-digits
+        digits = "".join(filter(str.isdigit, phone))
 
-    async def close(self):
-        """Close the HTTP client"""
-        if self.client:
-            await self.client.aclose()
+        # US numbers: ensure 11 digits starting with 1
+        if len(digits) == 10:
+            digits = "1" + digits
+
+        return digits
 
 
-# Module-level instance
-_whatsapp_service: WhatsAppNotificationService | None = None
+# Global service instance
+_notification_service: WhatsAppNotificationService | None = None
 
 
 def get_whatsapp_service() -> WhatsAppNotificationService:
-    """Get or create WhatsApp notification service instance"""
-    global _whatsapp_service
-    if _whatsapp_service is None:
-        _whatsapp_service = WhatsAppNotificationService()
-    return _whatsapp_service
+    """
+    Get the notification service instance.
 
-
-# Convenience function
-async def send_payment_notification(
-    phone_number: str, customer_name: str, amount: float, provider: str, **kwargs
-) -> dict[str, Any]:
-    """Convenience function to send payment notification"""
-    service = get_whatsapp_service()
-    return await service.send_payment_notification(
-        phone_number=phone_number,
-        customer_name=customer_name,
-        amount=amount,
-        provider=provider,
-        **kwargs,
-    )
-
-
-if __name__ == "__main__":
-    import asyncio
-
-    async def test():
-        """Test WhatsApp notification"""
-        service = WhatsAppNotificationService()
-
-        await service.send_payment_notification(
-            phone_number="+12103884155",
-            customer_name="Suryadi Zhang",
-            amount=150.00,
-            provider="Venmo",
-            sender_name="Friend Zhang",
-            match_score=175,
-            booking_id=123,
-        )
-
-        await service.close()
-
-    asyncio.run(test())
+    DEPRECATED: Returns a service that redirects to email.
+    For new code, use get_staff_notification_service() directly.
+    """
+    global _notification_service
+    if _notification_service is None:
+        _notification_service = WhatsAppNotificationService()
+    return _notification_service

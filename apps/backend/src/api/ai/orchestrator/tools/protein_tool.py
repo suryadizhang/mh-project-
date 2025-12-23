@@ -46,7 +46,7 @@ class ProteinTool(BaseTool):
         Result: {
             "upgrade_cost": $25 (5 filet @ $5),
             "lobster_cost": $75 (5 lobster @ $15),
-            "third_protein_cost": $0,
+            "extra_protein_cost": $0,
             "total": $100
         }
     """
@@ -149,7 +149,7 @@ Note: Quantities are per portion, not per guest. Each guest gets 2 proteins.""",
                 "proteins_per_guest": round(sum(protein_selections.values()) / guest_count, 1),
                 "cost_breakdown": {
                     "upgrade_cost": result["upgrade_cost"],
-                    "third_protein_cost": result["third_protein_cost"],
+                    "extra_protein_cost": result["extra_protein_cost"],
                     "total_protein_cost": result["total_protein_cost"],
                 },
                 "protein_details": [],
@@ -165,7 +165,7 @@ Note: Quantities are per portion, not per guest. Each guest gets 2 proteins.""",
                     "total_cost": item["quantity"] * item["upgrade_price"],
                     "is_free": item["is_free"],
                     "is_upgrade": item["is_upgrade"],
-                    "is_third_protein": item["is_third_protein"],
+                    "is_extra_protein": item["is_extra_protein"],
                     "display_name": item["protein_name"].replace("_", " ").title(),
                 }
                 response_data["protein_details"].append(protein_detail)
@@ -183,18 +183,18 @@ Note: Quantities are per portion, not per guest. Each guest gets 2 proteins.""",
 
             # Upgrade proteins note
             upgrade_proteins = [
-                p for p in result["breakdown"] if p["is_upgrade"] and not p["is_third_protein"]
+                p for p in result["breakdown"] if p["is_upgrade"] and not p["is_extra_protein"]
             ]
             if upgrade_proteins and result["upgrade_cost"] > 0:
                 notes.append(f"Premium upgrades: ${result['upgrade_cost']:.2f}")
 
             # Extra protein note
-            if result["third_protein_cost"] > 0:
+            if result["extra_protein_cost"] > 0:
                 total_portions = sum(protein_selections.values())
                 allowed_free = guest_count * 2
                 extra_portions = total_portions - allowed_free
                 notes.append(
-                    f"Extra protein charge: ${result['third_protein_cost']:.2f} (+$10 per portion beyond 2 per guest, {extra_portions} extra portions)"
+                    f"Extra protein charge: ${result['extra_protein_cost']:.2f} (+$10 per portion beyond 2 per guest, {extra_portions} extra portions)"
                 )
 
             # Educational note
@@ -220,7 +220,7 @@ Note: Quantities are per portion, not per guest. Each guest gets 2 proteins.""",
             return ToolResult(
                 success=True,
                 data=response_data,
-                metadata={"calculator_version": "v2.0", "includes_third_protein_logic": True},
+                metadata={"calculator_version": "v2.0", "includes_extra_protein_logic": True},
             )
 
         except Exception as e:

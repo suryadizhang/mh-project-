@@ -673,7 +673,7 @@ Your appreciation means the world to our chefs! 🙏✨
                     "total": protein_item["quantity"] * protein_item["upgrade_price"],
                     "is_free": protein_item["is_free"],
                     "is_upgrade": protein_item["is_upgrade"],
-                    "is_third_protein": protein_item["is_third_protein"],
+                    "is_extra_protein": protein_item["is_extra_protein"],
                 }
         elif upgrades:
             # Legacy upgrade system (DEPRECATED - for backward compatibility)
@@ -805,7 +805,7 @@ Your appreciation means the world to our chefs! 🙏✨
                 "protein_explanation": protein_cost_data["explanation"],
                 "proteins_summary": protein_cost_data["proteins_summary"],
                 "upgrade_cost": protein_cost_data["upgrade_cost"],
-                "third_protein_cost": protein_cost_data["third_protein_cost"],
+                "extra_protein_cost": protein_cost_data["extra_protein_cost"],
                 "total_protein_cost": protein_cost_data["total_protein_cost"],
             }
 

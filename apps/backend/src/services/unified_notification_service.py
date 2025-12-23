@@ -10,8 +10,8 @@ Sends WhatsApp/SMS notifications for ALL business events:
 ✅ Customer complaints
 
 Features:
-- WhatsApp via Twilio or Meta Business API
-- Automatic SMS fallback
+- WhatsApp via Meta Business API
+- Automatic SMS fallback via RingCentral
 - Admin notifications for all events
 - Smart message formatting with emojis
 - Non-blocking async delivery
@@ -30,16 +30,6 @@ from typing import Any, Literal
 import httpx  # For Meta WhatsApp API calls
 
 logger = logging.getLogger(__name__)
-
-# Try to import Twilio (optional dependency)
-try:
-    from twilio.base.exceptions import TwilioRestException
-    from twilio.rest import Client
-
-    TWILIO_AVAILABLE = True
-except ImportError:
-    TWILIO_AVAILABLE = False
-    logger.warning("Twilio not installed - will use mock mode")
 
 
 class NotificationType(str, Enum):
@@ -67,23 +57,22 @@ class UnifiedNotificationService:
     Unified notification service for all business events.
 
     Supports:
-    1. WhatsApp (via Twilio or Meta)
-    2. SMS (via Twilio or RingCentral)
+    1. WhatsApp (via Meta Business API)
+    2. SMS (via RingCentral)
     3. Mock mode (for local testing)
 
     Environment Variables:
-    - WHATSAPP_PROVIDER: 'twilio' or 'meta' or 'mock'
-    - TWILIO_ACCOUNT_SID: Twilio account ID
-    - TWILIO_AUTH_TOKEN: Twilio auth token
-    - TWILIO_WHATSAPP_NUMBER: whatsapp:+14155238886
-    - TWILIO_SMS_NUMBER: +19167408768
-    - META_WHATSAPP_TOKEN: Meta WhatsApp Cloud API access token
-    - META_WHATSAPP_PHONE_ID: Meta phone number ID (not the phone number itself)
-    - META_WHATSAPP_BUSINESS_ACCOUNT_ID: WhatsApp Business Account ID
+    - WHATSAPP_PROVIDER: 'meta' or 'mock'
+    - META_APP_ID: Meta App ID
+    - META_PAGE_ACCESS_TOKEN: Meta page access token
+    - META_PHONE_NUMBER_ID: Meta phone number ID (not the phone number itself)
     - ADMIN_NOTIFICATION_PHONE: Admin phone for all alerts
     - NOTIFICATION_QUIET_START: 22 (10 PM)
     - NOTIFICATION_QUIET_END: 8 (8 AM)
     """
+
+    # Meta WhatsApp Cloud API base URL
+    META_API_BASE = "https://graph.facebook.com/v21.0"
 
     def __init__(self):
         """Initialize notification service"""
@@ -94,36 +83,17 @@ class UnifiedNotificationService:
         self.quiet_start = int(os.getenv("NOTIFICATION_QUIET_START", "22"))
         self.quiet_end = int(os.getenv("NOTIFICATION_QUIET_END", "8"))
 
-        # Initialize Twilio if selected
-        self.twilio_client = None
+        # Initialize Meta WhatsApp Cloud API
         self.meta_token = None
         self.meta_phone_id = None
+        self.http_client = None
 
-        if self.provider == "twilio" and TWILIO_AVAILABLE:
-            try:
-                account_sid = os.getenv("TWILIO_ACCOUNT_SID")
-                auth_token = os.getenv("TWILIO_AUTH_TOKEN")
-
-                if account_sid and auth_token and account_sid != "placeholder":
-                    self.twilio_client = Client(account_sid, auth_token)
-                    self.whatsapp_from = os.getenv(
-                        "TWILIO_WHATSAPP_NUMBER", "whatsapp:+14155238886"
-                    )
-                    self.sms_from = os.getenv("TWILIO_SMS_NUMBER", "+19167408768")
-                    logger.info("✅ Twilio WhatsApp service initialized")
-                else:
-                    logger.warning("⚠️ Twilio credentials missing or placeholder - using mock mode")
-                    self.provider = "mock"
-            except Exception as e:
-                logger.exception(f"❌ Twilio initialization failed: {e} - using mock mode")
-                self.provider = "mock"
-
-        # Initialize Meta WhatsApp Cloud API if selected
-        elif self.provider == "meta":
-            self.meta_token = os.getenv("META_WHATSAPP_TOKEN")
-            self.meta_phone_id = os.getenv("META_WHATSAPP_PHONE_ID")
+        if self.provider == "meta":
+            self.meta_token = os.getenv("META_PAGE_ACCESS_TOKEN")
+            self.meta_phone_id = os.getenv("META_PHONE_NUMBER_ID")
 
             if self.meta_token and self.meta_phone_id and self.meta_token != "placeholder":
+                self.http_client = httpx.AsyncClient(timeout=30.0)
                 logger.info("✅ Meta WhatsApp Cloud API initialized")
             else:
                 logger.warning(
@@ -612,7 +582,7 @@ Check admin portal for details."""
         self, to_phone: str, message: str, notification_type: NotificationType
     ) -> dict[str, Any]:
         """
-        Send message via WhatsApp or SMS with fallback.
+        Send message via Meta WhatsApp with RingCentral SMS fallback.
 
         Args:
             to_phone: Recipient phone number
@@ -637,20 +607,17 @@ Check admin portal for details."""
         if self.provider == "mock":
             return await self._send_mock(to_phone, message, notification_type)
 
-        # Meta WhatsApp Cloud API
+        # Meta WhatsApp Cloud API (primary)
         if self.provider == "meta" and self.meta_token:
-            return await self._send_via_meta_whatsapp(to_phone, message)
-
-        # Twilio WhatsApp/SMS
-        if self.provider == "twilio" and self.twilio_client:
-            # Try WhatsApp first
-            result = await self._send_via_twilio_whatsapp(to_phone, message)
+            result = await self._send_via_meta_whatsapp(to_phone, message)
             if result["success"]:
                 return result
 
-            # Fallback to SMS
-            logger.info(f"📱 WhatsApp failed, trying SMS fallback for {notification_type}")
-            return await self._send_via_twilio_sms(to_phone, message)
+            # Fallback to RingCentral SMS if WhatsApp fails
+            logger.info(
+                f"📱 WhatsApp failed, trying RingCentral SMS fallback for {notification_type}"
+            )
+            return await self._send_via_ringcentral_sms(to_phone, message)
 
         # No provider available
         logger.error(f"❌ No notification provider available for {notification_type}")
@@ -680,48 +647,44 @@ Check admin portal for details."""
             "notification_type": notification_type.value,
         }
 
-    async def _send_via_twilio_whatsapp(self, to_phone: str, message: str) -> dict[str, Any]:
-        """Send via Twilio WhatsApp"""
+    async def _send_via_ringcentral_sms(self, to_phone: str, message: str) -> dict[str, Any]:
+        """
+        Send SMS via RingCentral as fallback when WhatsApp fails.
+
+        Uses RingCentral SMS Service for delivery.
+        """
         try:
-            to_whatsapp = self._format_whatsapp(to_phone)
+            from services.ringcentral_sms import RingCentralSMSService
 
-            response = self.twilio_client.messages.create(
-                body=message, from_=self.whatsapp_from, to=to_whatsapp
-            )
+            rc_sms = RingCentralSMSService()
+            result = await rc_sms.send_sms(to_phone, message)
 
-            logger.info(f"✅ WhatsApp sent to {to_phone} - SID: {response.sid}")
+            if result.get("success"):
+                logger.info(f"✅ RingCentral SMS sent to {to_phone}")
+                return {
+                    "success": True,
+                    "channel": NotificationChannel.SMS,
+                    "message_id": result.get("message_id"),
+                    "to": to_phone,
+                    "provider": "ringcentral",
+                }
+            else:
+                logger.warning(f"⚠️ RingCentral SMS failed: {result.get('error')}")
+                return {
+                    "success": False,
+                    "channel": NotificationChannel.SMS,
+                    "error": result.get("error", "Unknown error"),
+                }
 
+        except ImportError:
+            logger.error("❌ RingCentral SMS service not available")
             return {
-                "success": True,
-                "channel": NotificationChannel.WHATSAPP,
-                "sid": response.sid,
-                "to": to_phone,
-                "status": response.status,
-            }
-
-        except Exception as e:
-            logger.warning(f"⚠️ WhatsApp send failed: {e}")
-            return {"success": False, "channel": NotificationChannel.WHATSAPP, "error": str(e)}
-
-    async def _send_via_twilio_sms(self, to_phone: str, message: str) -> dict[str, Any]:
-        """Send via Twilio SMS"""
-        try:
-            response = self.twilio_client.messages.create(
-                body=message, from_=self.sms_from, to=to_phone
-            )
-
-            logger.info(f"✅ SMS sent to {to_phone} - SID: {response.sid}")
-
-            return {
-                "success": True,
+                "success": False,
                 "channel": NotificationChannel.SMS,
-                "sid": response.sid,
-                "to": to_phone,
-                "status": response.status,
+                "error": "RingCentral not configured",
             }
-
         except Exception as e:
-            logger.exception(f"❌ SMS send failed: {e}")
+            logger.exception(f"❌ RingCentral SMS send failed: {e}")
             return {"success": False, "channel": NotificationChannel.SMS, "error": str(e)}
 
     async def _send_via_meta_whatsapp(self, to_phone: str, message: str) -> dict[str, Any]:

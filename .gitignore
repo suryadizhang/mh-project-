@@ -136,3 +136,5 @@ scripts/*.sh
 
 # Local server scripts
 scripts/*.sh
+
+playwright-report-prod/

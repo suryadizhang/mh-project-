@@ -41,9 +41,9 @@ class ConversationUnificationService:
 
     Conversation Sources:
     - SMS (RingCentral)
-    - WhatsApp (Twilio)
-    - Instagram DMs
-    - Facebook Messenger
+    - WhatsApp (Meta Business API)
+    - Instagram DMs (Meta)
+    - Facebook Messenger (Meta)
     - Voice calls (transcripts)
     """
 
@@ -291,7 +291,7 @@ class ConversationUnificationService:
         Returns unified timeline with:
         - Social media messages (Instagram, Facebook)
         - SMS messages (RingCentral)
-        - WhatsApp messages (Twilio)
+        - WhatsApp messages (Meta Business API)
         - Voice call transcripts
         - Lead interactions
 

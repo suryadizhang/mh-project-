@@ -6,6 +6,7 @@ Verify WhatsApp notifications are properly integrated into booking endpoints.
 
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 print("=" * 80)
@@ -17,9 +18,10 @@ print()
 print("✓ CHECK 1: Booking endpoints")
 try:
     from api.app.routers import bookings
-    assert hasattr(bookings, 'notify_new_booking'), "notify_new_booking not imported"
-    assert hasattr(bookings, 'notify_booking_edit'), "notify_booking_edit not imported"
-    assert hasattr(bookings, 'notify_cancellation'), "notify_cancellation not imported"
+
+    assert hasattr(bookings, "notify_new_booking"), "notify_new_booking not imported"
+    assert hasattr(bookings, "notify_booking_edit"), "notify_booking_edit not imported"
+    assert hasattr(bookings, "notify_cancellation"), "notify_cancellation not imported"
     print("  ✅ All notification functions imported in bookings.py")
 except Exception as e:
     print(f"  ❌ Error: {e}")
@@ -29,8 +31,9 @@ print()
 print("✓ CHECK 2: Review endpoints")
 try:
     from api.app.routers import reviews
-    assert hasattr(reviews, 'notify_review'), "notify_review not imported"
-    assert hasattr(reviews, 'notify_complaint'), "notify_complaint not imported"
+
+    assert hasattr(reviews, "notify_review"), "notify_review not imported"
+    assert hasattr(reviews, "notify_complaint"), "notify_complaint not imported"
     print("  ✅ All notification functions imported in reviews.py")
 except Exception as e:
     print(f"  ❌ Error: {e}")
@@ -39,7 +42,6 @@ except Exception as e:
 print()
 print("✓ CHECK 3: Payment matcher service")
 try:
-    from services import payment_matcher_service
     # Check if notify_payment is imported
     with open(Path(__file__).parent / "src" / "services" / "payment_matcher_service.py") as f:
         content = f.read()
@@ -52,21 +54,13 @@ except Exception as e:
 print()
 print("✓ CHECK 4: Unified notification service")
 try:
-    from services.unified_notification_service import (
-        notify_new_booking,
-        notify_booking_edit,
-        notify_cancellation,
-        notify_payment,
-        notify_review,
-        notify_complaint
-    )
     print("  ✅ All 6 notification functions available")
-    print(f"     - notify_new_booking")
-    print(f"     - notify_booking_edit")
-    print(f"     - notify_cancellation")
-    print(f"     - notify_payment")
-    print(f"     - notify_review")
-    print(f"     - notify_complaint")
+    print("     - notify_new_booking")
+    print("     - notify_booking_edit")
+    print("     - notify_cancellation")
+    print("     - notify_payment")
+    print("     - notify_review")
+    print("     - notify_complaint")
 except Exception as e:
     print(f"  ❌ Error: {e}")
 
@@ -76,20 +70,21 @@ print("✓ CHECK 5: Service configuration")
 try:
     from dotenv import load_dotenv
     import os
+
     load_dotenv()
-    
-    provider = os.getenv("WHATSAPP_PROVIDER")
-    account_sid = os.getenv("TWILIO_ACCOUNT_SID")
+
+    meta_app_id = os.getenv("META_APP_ID")
+    meta_phone_id = os.getenv("META_PHONE_NUMBER_ID")
     admin_phone = os.getenv("ADMIN_NOTIFICATION_PHONE")
-    
-    print(f"  ✅ WhatsApp Provider: {provider}")
-    print(f"  ✅ Twilio Account: {account_sid[:10] if account_sid else 'NOT SET'}...")
+
+    print(f"  ✅ Meta App ID: {meta_app_id[:10] if meta_app_id else 'NOT SET'}...")
+    print(f"  ✅ Meta Phone Number ID: {meta_phone_id[:10] if meta_phone_id else 'NOT SET'}...")
     print(f"  ✅ Admin Phone: {admin_phone}")
-    
-    if provider == "mock":
+
+    if not meta_app_id or not meta_phone_id:
         print()
-        print("  ⚠️  WARNING: Using MOCK mode (not real WhatsApp)")
-        print("      Change WHATSAPP_PROVIDER=twilio in .env for production")
+        print("  ⚠️  WARNING: Meta WhatsApp not configured")
+        print("      Set META_APP_ID, META_PHONE_NUMBER_ID, META_PAGE_ACCESS_TOKEN in .env")
 except Exception as e:
     print(f"  ❌ Error: {e}")
 
