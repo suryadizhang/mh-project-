@@ -357,7 +357,7 @@ async def scrape_website_data():
                     "extra_vegetables": 5.0,
                     "edamame": 5.0,
                     "gyoza": 10.0,
-                    "third_protein": 10.0,
+                    "extra_protein": 10.0,
                 },
             },
             "deposit": {

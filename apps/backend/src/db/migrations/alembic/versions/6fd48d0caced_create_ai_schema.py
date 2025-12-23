@@ -5,7 +5,7 @@ Creates the dedicated 'ai' schema for all AI/ML-related database tables.
 This migration follows industry best practices from:
 - Stripe: Dedicated schemas per domain (billing, identity, fraud)
 - Shopify: Separate schemas for different business units
-- Twilio: Isolated schemas for messaging, voice, video
+- Meta: Organized schemas for messaging platforms
 - Intercom: Schema separation for conversations, customers, articles
 
 Benefits of separate ai schema:
@@ -28,13 +28,14 @@ Revises: 55f201d7ea25
 Create Date: 2025-11-25 13:24:20.231384
 
 """
+
 from alembic import op
 import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '6fd48d0caced'
-down_revision = '55f201d7ea25'
+revision = "6fd48d0caced"
+down_revision = "55f201d7ea25"
 branch_labels = None
 depends_on = None
 
@@ -62,11 +63,13 @@ def upgrade() -> None:
     # """)
 
     # Add comment to schema for documentation
-    op.execute("""
+    op.execute(
+        """
         COMMENT ON SCHEMA ai IS
         'AI/ML features: conversations, engagement, analytics, shadow learning.
          Isolated for independent scaling and backup/restore operations.'
-    """)
+    """
+    )
 
 
 def downgrade() -> None:

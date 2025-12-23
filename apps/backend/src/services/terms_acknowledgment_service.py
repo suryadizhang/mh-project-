@@ -42,7 +42,7 @@ class TermsAcknowledgmentService:
         """
         Send terms and conditions via SMS.
 
-        TODO: Implement SMS delivery via Twilio/AWS SNS
+        TODO: Implement SMS delivery via RingCentral
 
         Args:
             phone_number: Recipient phone number
@@ -69,7 +69,9 @@ class TermsAcknowledgmentService:
         logger.info(f"TODO: Verify T&C acknowledgment for booking {booking_id}")
         return False  # Placeholder - assume not acknowledged
 
-    async def track_acknowledgment(self, booking_id: str, phone_number: str, acknowledged: bool) -> None:
+    async def track_acknowledgment(
+        self, booking_id: str, phone_number: str, acknowledged: bool
+    ) -> None:
         """
         Track acknowledgment status in database.
 
@@ -84,9 +86,7 @@ class TermsAcknowledgmentService:
 
 
 async def send_terms_for_phone_booking(
-    phone_number: str,
-    booking_id: str,
-    db: Optional[AsyncSession] = None
+    phone_number: str, booking_id: str, db: Optional[AsyncSession] = None
 ) -> bool:
     """
     Send terms and conditions for phone bookings.

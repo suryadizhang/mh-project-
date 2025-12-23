@@ -26,7 +26,7 @@ class ProteinBreakdown:
     is_free: bool
     is_upgrade: bool
     upgrade_price: Decimal
-    is_third_protein: bool
+    is_extra_protein: bool
 
 
 class ProteinCalculatorService:
@@ -62,7 +62,7 @@ class ProteinCalculatorService:
     }
 
     # Extra protein pricing (+$10 per protein beyond 2 per guest)
-    THIRD_PROTEIN_PRICE = Decimal("10.00")
+    EXTRA_PROTEIN_PRICE = Decimal("10.00")
 
     def __init__(self):
         """Initialize the protein calculator service"""
@@ -85,7 +85,7 @@ class ProteinCalculatorService:
         Returns:
             Dict with:
                 - upgrade_cost: Total cost for premium upgrades
-                - third_protein_cost: Total cost for extra proteins (beyond 2 per guest)
+                - extra_protein_cost: Total cost for extra proteins (beyond 2 per guest)
                 - total_protein_cost: Combined total
                 - breakdown: List of ProteinBreakdown objects
                 - explanation: Human-readable explanation
@@ -102,7 +102,7 @@ class ProteinCalculatorService:
 
         # Initialize costs
         upgrade_cost = Decimal("0.00")
-        third_protein_cost = Decimal("0.00")
+        extra_protein_cost = Decimal("0.00")
         breakdown = []
 
         # Track how many free proteins we've used
@@ -130,7 +130,7 @@ class ProteinCalculatorService:
                         is_free=False,
                         is_upgrade=True,
                         upgrade_price=upgrade_price_per,
-                        is_third_protein=False,
+                        is_extra_protein=False,
                     )
                 )
 
@@ -149,7 +149,7 @@ class ProteinCalculatorService:
                         is_free=True,
                         is_upgrade=False,
                         upgrade_price=Decimal("0.00"),
-                        is_third_protein=False,
+                        is_extra_protein=False,
                     )
                 )
 
@@ -160,10 +160,10 @@ class ProteinCalculatorService:
         # Second pass: Check if we have extra proteins beyond 2 per guest
         if total_proteins > free_protein_allowance:
             extra_proteins = total_proteins - free_protein_allowance
-            third_protein_cost = self.THIRD_PROTEIN_PRICE * extra_proteins
+            extra_protein_cost = self.EXTRA_PROTEIN_PRICE * extra_proteins
 
             logger.info(
-                f"Extra proteins detected: {extra_proteins} × ${self.THIRD_PROTEIN_PRICE} = ${third_protein_cost}"
+                f"Extra proteins detected: {extra_proteins} × ${self.EXTRA_PROTEIN_PRICE} = ${extra_protein_cost}"
             )
 
             # Update breakdown to mark extra proteins
@@ -174,11 +174,11 @@ class ProteinCalculatorService:
                     break
 
                 proteins_to_mark = min(item.quantity, extra_proteins - proteins_marked)
-                item.is_third_protein = True
+                item.is_extra_protein = True
                 proteins_marked += proteins_to_mark
 
         # Calculate total
-        total_protein_cost = upgrade_cost + third_protein_cost
+        total_protein_cost = upgrade_cost + extra_protein_cost
 
         # Generate explanation
         explanation = self._generate_explanation(
@@ -186,7 +186,7 @@ class ProteinCalculatorService:
             total_proteins,
             free_protein_allowance,
             upgrade_cost,
-            third_protein_cost,
+            extra_protein_cost,
             breakdown,
         )
 
@@ -195,7 +195,7 @@ class ProteinCalculatorService:
 
         return {
             "upgrade_cost": float(upgrade_cost),
-            "third_protein_cost": float(third_protein_cost),
+            "extra_protein_cost": float(extra_protein_cost),
             "total_protein_cost": float(total_protein_cost),
             "total_proteins": total_proteins,
             "free_protein_allowance": free_protein_allowance,
@@ -206,7 +206,7 @@ class ProteinCalculatorService:
                     "is_free": item.is_free,
                     "is_upgrade": item.is_upgrade,
                     "upgrade_price": float(item.upgrade_price),
-                    "is_third_protein": item.is_third_protein,
+                    "is_extra_protein": item.is_extra_protein,
                 }
                 for item in breakdown
             ],
@@ -220,7 +220,7 @@ class ProteinCalculatorService:
         total_proteins: int,
         free_allowance: int,
         upgrade_cost: Decimal,
-        third_protein_cost: Decimal,
+        extra_protein_cost: Decimal,
         breakdown: list[ProteinBreakdown],
     ) -> str:
         """Generate detailed explanation of protein costs"""
@@ -253,14 +253,14 @@ class ProteinCalculatorService:
             lines.append("")
 
         # Show extra protein charge if applicable
-        if third_protein_cost > 0:
+        if extra_protein_cost > 0:
             extra_count = total_proteins - free_allowance
             lines.append("🔢 **Extra Protein Charges:**")
             lines.append(
                 f"   • {extra_count} extra protein(s) beyond your {free_allowance} free allowance"
             )
             lines.append(
-                f"   • Extra protein fee: {extra_count} × ${self.THIRD_PROTEIN_PRICE} = ${third_protein_cost}"
+                f"   • Extra protein fee: {extra_count} × ${self.EXTRA_PROTEIN_PRICE} = ${extra_protein_cost}"
             )
             lines.append("")
 
@@ -268,10 +268,10 @@ class ProteinCalculatorService:
         lines.append("💰 **Protein Cost Summary:**")
         if upgrade_cost > 0:
             lines.append(f"   • Premium upgrades: ${upgrade_cost}")
-        if third_protein_cost > 0:
-            lines.append(f"   • Extra protein charges: ${third_protein_cost}")
+        if extra_protein_cost > 0:
+            lines.append(f"   • Extra protein charges: ${extra_protein_cost}")
 
-        total = upgrade_cost + third_protein_cost
+        total = upgrade_cost + extra_protein_cost
         if total > 0:
             lines.append(f"   • **Total protein extras: ${total}**")
         else:
@@ -347,7 +347,7 @@ class ProteinCalculatorService:
                 {"key": key, "name": info["name"], "price": float(info["price"])}
                 for key, info in self.PREMIUM_UPGRADES.items()
             ],
-            "third_protein_price": float(self.THIRD_PROTEIN_PRICE),
+            "extra_protein_price": float(self.EXTRA_PROTEIN_PRICE),
             "protein_allowance_per_guest": 2,
         }
 

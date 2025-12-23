@@ -76,7 +76,7 @@ PRICING = {
         "extra_fried_rice": 5,
         "edamame": 5,
         "vegetables": 5,
-        "third_protein": 10,
+        "extra_protein": 10,
         "gyoza": 10,
     },
     # Deposit & Fees

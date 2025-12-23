@@ -150,7 +150,7 @@ class SMSTermsRequest(BaseModel):
 class SMSTermsResponse(BaseModel):
     """Schema for SMS terms acknowledgment response"""
 
-    message_sid: str = Field(..., description="Twilio message SID")
+    message_sid: str = Field(..., description="Message ID from provider")
 
     to_phone: str = Field(..., description="Phone number terms were sent to")
 

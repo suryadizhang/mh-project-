@@ -80,7 +80,7 @@ interface QuoteData {
   scallops: number;
   filetMignon: number;
   lobsterTail: number;
-  thirdProteins: number;
+  extraProteins: number;
   yakisobaNoodles: number;
   extraFriedRice: number;
   extraVegetables: number;
@@ -251,7 +251,7 @@ export function QuoteCalculator() {
     scallops: 0,
     filetMignon: 0,
     lobsterTail: 0,
-    thirdProteins: 0,
+    extraProteins: 0,
     yakisobaNoodles: 0,
     extraFriedRice: 0,
     extraVegetables: 0,
@@ -477,7 +477,7 @@ export function QuoteCalculator() {
       scallops: quoteData.scallops,
       filetMignon: quoteData.filetMignon,
       lobsterTail: quoteData.lobsterTail,
-      thirdProteins: quoteData.thirdProteins,
+      extraProteins: quoteData.extraProteins,
       yakisobaNoodles: quoteData.yakisobaNoodles,
       extraFriedRice: quoteData.extraFriedRice,
       extraVegetables: quoteData.extraVegetables,
@@ -544,7 +544,7 @@ export function QuoteCalculator() {
           scallops: quoteData.scallops,
           filet_mignon: quoteData.filetMignon,
           lobster_tail: quoteData.lobsterTail,
-          third_proteins: quoteData.thirdProteins,
+          extra_proteins: quoteData.extraProteins,
           yakisoba_noodles: quoteData.yakisobaNoodles,
           extra_fried_rice: quoteData.extraFriedRice,
           extra_vegetables: quoteData.extraVegetables,
@@ -841,9 +841,9 @@ export function QuoteCalculator() {
               <UpgradeInput
                 label="Extra Protein"
                 price="+$10 each"
-                value={quoteData.thirdProteins}
-                onChange={(v) => handleInputChange('thirdProteins', v)}
-                hint="Add a third protein to your meal"
+                value={quoteData.extraProteins}
+                onChange={(v) => handleInputChange('extraProteins', v)}
+                hint="Add an extra protein to your meal"
               />
             </div>
           </div>

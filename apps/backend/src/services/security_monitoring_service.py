@@ -17,7 +17,7 @@ Alert Triggers:
 
 Integration:
 - Email: Resend API (via email_service)
-- WhatsApp: Twilio (via whatsapp_notification_service)
+- WhatsApp: Meta Business API (via whatsapp_notification_service)
 - Database: security.security_events + security.admin_alerts tables
 """
 
@@ -148,24 +148,18 @@ class SecurityMonitoringService:
         self._whatsapp_service = None
 
         # Load Super Admin notification settings
-        self.admin_email = os.getenv(
-            "SUPER_ADMIN_EMAIL", "admin@myhibachichef.com"
-        )
+        self.admin_email = os.getenv("SUPER_ADMIN_EMAIL", "admin@myhibachichef.com")
         self.admin_phone = os.getenv(
             "SUPER_ADMIN_PHONE",
             os.getenv("ADMIN_NOTIFICATION_PHONE", "+19167408768"),
         )
-        self.enable_email_alerts = (
-            os.getenv("SECURITY_EMAIL_ALERTS", "true").lower() == "true"
-        )
+        self.enable_email_alerts = os.getenv("SECURITY_EMAIL_ALERTS", "true").lower() == "true"
         self.enable_whatsapp_alerts = (
             os.getenv("SECURITY_WHATSAPP_ALERTS", "true").lower() == "true"
         )
 
         # Business hours (for after-hours detection)
-        self.business_start = int(
-            os.getenv("BUSINESS_HOURS_START", "8")
-        )  # 8 AM
+        self.business_start = int(os.getenv("BUSINESS_HOURS_START", "8"))  # 8 AM
         self.business_end = int(os.getenv("BUSINESS_HOURS_END", "22"))  # 10 PM
 
     @property
@@ -372,9 +366,7 @@ class SecurityMonitoringService:
                     "requires_action": row.requires_action,
                     "action_url": row.action_url,
                     "status": row.status,
-                    "created_at": (
-                        row.created_at.isoformat() if row.created_at else None
-                    ),
+                    "created_at": (row.created_at.isoformat() if row.created_at else None),
                 }
                 for row in rows
             ]
@@ -416,9 +408,7 @@ class SecurityMonitoringService:
     # Notification Methods
     # ============================================
 
-    async def send_email_alert(
-        self, subject: str, message: str, severity: AlertSeverity
-    ) -> bool:
+    async def send_email_alert(self, subject: str, message: str, severity: AlertSeverity) -> bool:
         """Send email alert to Super Admins"""
         if not self.enable_email_alerts or not self.email_service:
             logger.debug("Email alerts disabled or service unavailable")
@@ -499,9 +489,7 @@ View in Dashboard: https://admin.myhibachichef.com/security/alerts
                     )
                     logger.info(f"Security email sent to {email}")
                 except Exception as e:
-                    logger.error(
-                        f"Failed to send security email to {email}: {e}"
-                    )
+                    logger.error(f"Failed to send security email to {email}: {e}")
 
             return True
 
@@ -509,9 +497,7 @@ View in Dashboard: https://admin.myhibachichef.com/security/alerts
             logger.error(f"Failed to send email alert: {e}")
             return False
 
-    async def send_whatsapp_alert(
-        self, message: str, severity: AlertSeverity
-    ) -> bool:
+    async def send_whatsapp_alert(self, message: str, severity: AlertSeverity) -> bool:
         """Send WhatsApp alert to Super Admins"""
         if not self.enable_whatsapp_alerts or not self.whatsapp_service:
             logger.debug("WhatsApp alerts disabled or service unavailable")
@@ -532,9 +518,7 @@ View in Dashboard: https://admin.myhibachichef.com/security/alerts
             )
 
             result = await self.db.execute(query)
-            admin_phones = [
-                row.phone for row in result.fetchall() if row.phone
-            ]
+            admin_phones = [row.phone for row in result.fetchall() if row.phone]
 
             if not admin_phones:
                 admin_phones = [self.admin_phone]
@@ -560,9 +544,7 @@ Dashboard: admin.myhibachichef.com/security
             # Send to all admin phones
             for phone in admin_phones:
                 try:
-                    await self.whatsapp_service._send_whatsapp(
-                        phone, formatted_message
-                    )
+                    await self.whatsapp_service._send_whatsapp(phone, formatted_message)
                     logger.info(f"Security WhatsApp sent to {phone[-4:]}")
                 except Exception as e:
                     logger.error(f"Failed to send WhatsApp to {phone}: {e}")
@@ -595,9 +577,7 @@ Dashboard: admin.myhibachichef.com/security
         - Email notification
         - WhatsApp notification
         """
-        severity = (
-            AlertSeverity.CRITICAL if is_permanent else AlertSeverity.HIGH
-        )
+        severity = AlertSeverity.CRITICAL if is_permanent else AlertSeverity.HIGH
 
         # 1. Log security event
         event = SecurityEvent(
@@ -733,9 +713,7 @@ RECOMMENDED ACTION: Block this IP address immediately.
         )
         await self.create_dashboard_alert(alert)
 
-    async def check_for_brute_force(
-        self, ip_address: str, time_window_minutes: int = 15
-    ) -> bool:
+    async def check_for_brute_force(self, ip_address: str, time_window_minutes: int = 15) -> bool:
         """
         Check if IP is attempting brute force attack.
 
@@ -816,9 +794,7 @@ RECOMMENDED ACTION: Block this IP address immediately.
             geo = await geo_service.get_geolocation(ip_address)
 
             # Check if this is a new IP for the user
-            is_new_ip = not await geo_service.is_ip_known_for_user(
-                user_id, ip_address
-            )
+            is_new_ip = not await geo_service.is_ip_known_for_user(user_id, ip_address)
 
             if success:
                 # === CHECK SUSPICIOUS PATTERNS (only on successful login) ===
@@ -833,9 +809,7 @@ RECOMMENDED ACTION: Block this IP address immediately.
                         is_suspicious = True
 
                 # 2. Check for same IP hitting multiple accounts
-                accounts_from_ip = await geo_service.count_accounts_from_ip_1h(
-                    ip_address
-                )
+                accounts_from_ip = await geo_service.count_accounts_from_ip_1h(ip_address)
                 if accounts_from_ip >= 3:
                     multi_alert = await self._alert_multi_account_ip(
                         ip_address, accounts_from_ip, email
@@ -845,9 +819,7 @@ RECOMMENDED ACTION: Block this IP address immediately.
 
                 # 3. Check for bad IP reputation
                 if geo.reputation_score < 30 or geo.is_tor or geo.is_proxy:
-                    rep_alert = await self._alert_bad_ip_reputation(
-                        user_id, email, ip_address, geo
-                    )
+                    rep_alert = await self._alert_bad_ip_reputation(user_id, email, ip_address, geo)
                     alerts_triggered.append(rep_alert)
                     is_suspicious = True
 
@@ -862,9 +834,7 @@ RECOMMENDED ACTION: Block this IP address immediately.
                         is_suspicious = True
 
                 # Register this IP as known for user
-                await geo_service.register_user_ip(
-                    user_id, ip_address, geo.country, geo.city
-                )
+                await geo_service.register_user_ip(user_id, ip_address, geo.country, geo.city)
 
             # Log login to history
             await self._log_login_history(
@@ -880,9 +850,7 @@ RECOMMENDED ACTION: Block this IP address immediately.
 
             # Log security event
             event_type = (
-                SecurityEventType.LOGIN_SUCCESS
-                if success
-                else SecurityEventType.LOGIN_FAILED
+                SecurityEventType.LOGIN_SUCCESS if success else SecurityEventType.LOGIN_FAILED
             )
             if is_new_ip and success:
                 event_type = SecurityEventType.NEW_IP_LOGIN
@@ -893,9 +861,7 @@ RECOMMENDED ACTION: Block this IP address immediately.
                 email=email,
                 ip_address=ip_address,
                 user_agent=user_agent,
-                severity=(
-                    AlertSeverity.HIGH if is_suspicious else AlertSeverity.LOW
-                ),
+                severity=(AlertSeverity.HIGH if is_suspicious else AlertSeverity.LOW),
                 details={
                     "country": geo.country,
                     "city": geo.city,
@@ -943,9 +909,7 @@ RECOMMENDED ACTION: Block this IP address immediately.
         try:
             # Generate device fingerprint
             geo_service = IPGeolocationService(self.db)
-            device = geo_service.generate_device_fingerprint(
-                user_agent or "", ip_address
-            )
+            device = geo_service.generate_device_fingerprint(user_agent or "", ip_address)
 
             query = text(
                 """
@@ -1004,11 +968,7 @@ RECOMMENDED ACTION: Block this IP address immediately.
 
             # Get last login
             last_login = await geo_service.get_last_login(user_id)
-            if (
-                not last_login
-                or not last_login.get("latitude")
-                or not current_geo.latitude
-            ):
+            if not last_login or not last_login.get("latitude") or not current_geo.latitude:
                 return None
 
             # Calculate distance and time
@@ -1131,9 +1091,7 @@ Review the login history for this IP.
         )
         await self.create_dashboard_alert(alert)
 
-        logger.warning(
-            f"Multi-account IP alert: {ip_address} with {account_count} accounts"
-        )
+        logger.warning(f"Multi-account IP alert: {ip_address} with {account_count} accounts")
         return title
 
     async def _alert_bad_ip_reputation(
@@ -1251,9 +1209,7 @@ Consider contacting user to verify.
         )
         await self.create_dashboard_alert(alert)
 
-        logger.info(
-            f"Excessive new IPs alert: {email} with {new_ip_count} new IPs"
-        )
+        logger.info(f"Excessive new IPs alert: {email} with {new_ip_count} new IPs")
         return title
 
     async def get_user_login_history(
@@ -1299,9 +1255,7 @@ Consider contacting user to verify.
                     "is_new_ip": row.is_new_ip,
                     "is_suspicious": row.is_suspicious,
                     "success": row.success,
-                    "login_at": (
-                        row.login_at.isoformat() if row.login_at else None
-                    ),
+                    "login_at": (row.login_at.isoformat() if row.login_at else None),
                 }
                 for row in rows
             ]
@@ -1350,9 +1304,7 @@ Consider contacting user to verify.
                     "device_type": row.device_type,
                     "is_suspicious": row.is_suspicious,
                     "success": row.success,
-                    "login_at": (
-                        row.login_at.isoformat() if row.login_at else None
-                    ),
+                    "login_at": (row.login_at.isoformat() if row.login_at else None),
                 }
                 for row in rows
             ]

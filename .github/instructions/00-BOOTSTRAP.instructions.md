@@ -38,6 +38,8 @@ files in order:
     chef optimization
 18. `18-AI_MULTI_LLM_ARCHITECTURE.instructions.md` – Multi-LLM
     ensemble, Smart Router, Mistral integration
+19. `19-DATABASE_SCHEMA_MANAGEMENT.instructions.md` – SQLAlchemy model
+    to production DB sync, migration management
 
 ---
 
@@ -64,7 +66,8 @@ files in order:
 8. **Feature Flags** (08) – Flag management
 9. **Rollback Safety** (09) – Emergency procedures
 10. **Copilot Performance** (10) – Agent efficiency
-11. **User Request** – ONLY if no conflict with above
+11. **Database Schema** (19) – Model-to-DB sync rules
+12. **User Request** – ONLY if no conflict with above
 
 ---
 
@@ -84,6 +87,58 @@ If user request conflicts with any rulebook:
 | "Work on Batch 3 feature"  | Check batch status | May be out of scope (Rule 04)     |
 | "Just commit it quickly"   | Refuse             | Pre-commit review MANDATORY       |
 | "Skip the build check"     | Refuse             | Build must pass before commit     |
+| "Add this column to model" | Create migration   | Model alone won't work (Rule 19)  |
+| "Test this on production"  | Use staging DB     | Production = real data only       |
+
+---
+
+## 🗄️ DATABASE CHANGES (CRITICAL - RULE 19)
+
+**When adding/modifying SQLAlchemy model columns:**
+
+### The Problem (Real Example - December 2024):
+
+```python
+# Developer added 5 columns to Customer model
+class Customer(Base):
+    contact_preference: Mapped[str]  # Didn't exist in production!
+    ai_contact_ok: Mapped[bool]      # Didn't exist in production!
+    # Result: 503 errors in production
+```
+
+### The MANDATORY Process:
+
+| Step | Action                                          | Required? |
+| ---- | ----------------------------------------------- | --------- |
+| 1    | Add column to SQLAlchemy model                  | ✅        |
+| 2    | Create migration file in `database/migrations/` | ✅        |
+| 3    | Test migration locally                          | ✅        |
+| 4    | Run migration on staging (wait 48h)             | ✅        |
+| 5    | Run migration on production                     | ✅        |
+| 6    | Restart backend service                         | ✅        |
+
+### Quick Migration Template:
+
+```sql
+-- database/migrations/YYYYMMDDHHMMSS_description.sql
+ALTER TABLE schema.table
+ADD COLUMN IF NOT EXISTS new_column TYPE DEFAULT default_value;
+
+COMMENT ON COLUMN schema.table.new_column IS 'Description';
+```
+
+### Verification Command:
+
+```bash
+# Check if column exists in production BEFORE deploying
+ssh root@VPS "sudo -u postgres psql -d myhibachi_production -c \"
+SELECT column_name FROM information_schema.columns
+WHERE table_schema='schema' AND table_name='table'
+AND column_name='new_column';\""
+```
+
+> **See `19-DATABASE_SCHEMA_MANAGEMENT.instructions.md` for full
+> details.**
 
 ---
 

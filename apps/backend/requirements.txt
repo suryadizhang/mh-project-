@@ -27,6 +27,9 @@ celery[redis]>=5.3.4  # Celery with Redis broker support
 flower>=2.0.1  # Celery monitoring web UI (optional)
 billiard>=4.2.0  # Celery process pool implementation
 
+# Systemd integration (enterprise-standard watchdog support)
+sdnotify>=0.3.2  # Notify systemd of service readiness and health
+
 # Authentication and security
 python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4
@@ -40,11 +43,8 @@ aiohttp>=3.9.1
 # OpenAI integration
 openai>=1.50.0
 
-# RingCentral integration
+# RingCentral integration (SMS fallback)
 ringcentral>=0.9.2
-
-# Twilio integration (SMS fallback, phone verification)
-twilio>=8.10.0
 
 # Stripe integration
 stripe>=7.8.0

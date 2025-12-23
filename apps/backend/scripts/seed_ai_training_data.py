@@ -321,7 +321,7 @@ async def seed_faqs(session: AsyncSession):
             is_active=True,
         ),
         FAQItem(
-            question="Can I add a third protein or more?",
+            question="Can I add an extra protein or more?",
             answer="Yes! Each guest normally gets 2 proteins, but you can add an extra protein for +$10 each. This is an additional option that gives you more food, not an upgrade. If you want the extra protein to be a premium option (Salmon, Scallops, Filet Mignon: +$10 + $5 = $15, or Lobster Tail: +$10 + $15 = $25).",
             category="Menu & Upgrades",
             subcategory="Add-ons & Sides",
