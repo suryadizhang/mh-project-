@@ -176,3 +176,76 @@ async def webhook_health():
         "service": "meta_webhooks",
         "version": "2.0",  # Version 2.0 with service layer architecture
     }
+
+
+# Test endpoint for sending WhatsApp messages (admin only)
+@router.post("/test/send")
+async def test_send_whatsapp(
+    to: str = Query(..., description="Phone number in format 1XXXXXXXXXX"),
+    message: str = Query(..., description="Message to send"),
+):
+    """
+    Test endpoint to send WhatsApp message.
+
+    IMPORTANT: Only works within 24-hour window after user messages first,
+    OR using approved templates for proactive outreach.
+
+    Args:
+        to: Phone number (format: 1XXXXXXXXXX, no + sign)
+        message: Message text
+
+    Returns:
+        API response from Meta
+    """
+    from services.whatsapp_notification_service import get_whatsapp_service
+
+    service = get_whatsapp_service()
+
+    if not service.client:
+        raise HTTPException(
+            status_code=503,
+            detail="WhatsApp service not configured (missing credentials)",
+        )
+
+    try:
+        result = await service._send_whatsapp(to, message)
+        return {
+            "success": result.get("success", False),
+            "message_id": result.get("message_id"),
+            "details": result,
+        }
+    except Exception as e:
+        logger.error(f"Failed to send test WhatsApp: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Debug endpoint to test webhook reception (bypasses signature for testing)
+@router.post("/test/receive")
+async def test_receive_webhook(
+    request: Request,
+    webhook_handler: MetaWebhookHandler = Depends(get_meta_webhook_handler),
+):
+    """
+    Test endpoint that bypasses signature verification.
+
+    USE ONLY FOR DEBUGGING. Does not verify Meta signature.
+
+    Returns:
+        Webhook processing result
+    """
+    try:
+        payload = await request.body()
+        webhook_data = json.loads(payload.decode())
+
+        # Skip signature verification - process directly
+        result = await webhook_handler.process_event(
+            event_type=webhook_data.get("object", "unknown"),
+            data=webhook_data,
+        )
+
+        logger.info(f"Test webhook processed: {result}")
+        return {"success": True, "result": result}
+
+    except Exception as e:
+        logger.error(f"Test webhook error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
