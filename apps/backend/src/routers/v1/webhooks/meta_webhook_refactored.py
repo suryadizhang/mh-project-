@@ -142,7 +142,7 @@ async def meta_webhook(
         result = await webhook_handler.handle_webhook(
             payload=payload,
             signature=x_hub_signature_256 or "",
-            secret=settings.meta_app_secret,
+            secret=settings.META_APP_SECRET,
             data=webhook_data,
         )
 
