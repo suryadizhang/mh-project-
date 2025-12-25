@@ -134,6 +134,9 @@ export default function RootLayout({
 
           {/* Toast Notification System */}
           <Toaster />
+
+          {/* Portal container for date picker dropdown - renders outside stacking contexts */}
+          <div id="datepicker-portal" />
         </QueryProvider>
       </body>
     </html>
