@@ -38,7 +38,7 @@ export const SMSConsent: React.FC<SMSConsentProps> = ({
           className={`form-check-input ${error ? 'is-invalid' : ''}`}
           checked={checked}
           onChange={(e) => onChange(e.target.checked)}
-          required
+          aria-describedby="smsConsentDescription"
         />
         <label htmlFor="smsConsent" className="form-check-label">
           <strong>I consent to receive text messages from My Hibachi Chef</strong>
@@ -95,10 +95,10 @@ export const SMSConsent: React.FC<SMSConsentProps> = ({
         </label>
         {error && <div className="invalid-feedback d-block">{error}</div>}
       </div>
-      <div className="alert alert-secondary small mt-2 mb-0 py-2">
-        <strong>Why is this required?</strong> We need your permission to send you a booking
-        confirmation and the $100 deposit payment link via text message within 2 hours of your
-        booking request. Without SMS consent, you will only receive email notifications.
+      <div id="smsConsentDescription" className="alert alert-info small mt-2 mb-0 py-2">
+        <strong>Optional but recommended:</strong> Check this box to receive booking confirmation
+        and the $100 deposit payment link via text message. Without SMS consent, you will only
+        receive email notifications.
       </div>
     </div>
   );

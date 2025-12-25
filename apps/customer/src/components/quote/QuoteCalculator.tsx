@@ -918,8 +918,8 @@ export function QuoteCalculator() {
             </div>
           </div>
 
-          {/* SMS Consent - Required for RingCentral TCR Compliance */}
-          <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+          {/* SMS Consent - Optional checkbox for RingCentral TCR Compliance */}
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
             <div className="flex items-start gap-3">
               <input
                 type="checkbox"
@@ -927,20 +927,26 @@ export function QuoteCalculator() {
                 checked={quoteData.smsConsent}
                 onChange={(e) => handleInputChange('smsConsent', e.target.checked)}
                 className="mt-1 h-5 w-5 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                aria-describedby="smsConsentHelp"
               />
               <label htmlFor="smsConsent" className="text-sm text-gray-700">
-                <strong>I consent to receive text messages from My Hibachi Chef</strong>
+                <span className="flex items-center gap-2">
+                  <strong>I consent to receive text messages from My Hibachi Chef</strong>
+                  <span className="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700">
+                    Optional
+                  </span>
+                </span>
                 <p className="mt-1 text-xs text-gray-600">
                   I agree to receive the following types of SMS messages from my Hibachi LLC:
-                  <strong>booking confirmations</strong>, <strong>event reminders</strong>,
-                  <strong>chef notifications</strong>, <strong>booking updates</strong>,
-                  <strong>customer support responses</strong>, and{' '}
+                  <strong> booking confirmations</strong>, <strong>event reminders</strong>,
+                  <strong> chef notifications</strong>, <strong>booking updates</strong>,
+                  <strong> customer support responses</strong>, and{' '}
                   <strong>promotional offers</strong>.
                 </p>
                 <p className="mt-1 text-xs text-gray-600">
                   Message frequency varies. Message and data rates may apply. Reply{' '}
                   <strong>STOP</strong> to opt-out at any time. Reply <strong>HELP</strong> for
-                  assistance.
+                  assistance or call (916) 740-8786.
                 </p>
                 <p className="mt-1 text-xs text-gray-500">
                   View our{' '}
@@ -955,6 +961,9 @@ export function QuoteCalculator() {
                 </p>
               </label>
             </div>
+            <p id="smsConsentHelp" className="mt-2 text-xs text-gray-500">
+              Without SMS consent, you will only receive email notifications about your booking.
+            </p>
           </div>
 
           {/* Calculate Button */}
