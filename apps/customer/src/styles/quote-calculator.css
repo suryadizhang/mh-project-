@@ -7,19 +7,21 @@
    Ensure dropdowns appear above other content
    ============================================ */
 
-/* Date Picker (react-datepicker) */
+/* Date Picker (react-datepicker) - Must be very high to appear above all content */
 .react-datepicker-popper {
-  z-index: 9999 !important;
+  z-index: 99999 !important;
+  position: absolute !important;
 }
 
 .react-datepicker {
-  z-index: 9999 !important;
+  z-index: 99999 !important;
+  box-shadow: 0 4px 20px rgb(0 0 0 / 20%);
 }
 
 .react-datepicker-wrapper {
   width: 100%;
   position: relative;
-  z-index: 10;
+  z-index: 100;
 }
 
 .react-datepicker__input-container {
@@ -28,13 +30,14 @@
 
 /* Ensure the date picker container has proper stacking */
 .quote-page .react-datepicker-popper,
-.quote-calculator .react-datepicker-popper {
-  z-index: 9999 !important;
+.quote-calculator .react-datepicker-popper,
+body .react-datepicker-popper {
+  z-index: 99999 !important;
 }
 
 /* Google Places Autocomplete Dropdown */
 .pac-container {
-  z-index: 10000 !important;
+  z-index: 100000 !important;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgb(0 0 0 / 15%);
@@ -54,6 +57,14 @@
 .pac-item-query {
   font-weight: 600;
   color: #333;
+}
+
+/* Info section should have lower z-index to not interfere with dropdowns */
+.info-grid,
+.info-card,
+.pricing-summary {
+  position: relative;
+  z-index: 1;
 }
 
 /* ============================================ */
