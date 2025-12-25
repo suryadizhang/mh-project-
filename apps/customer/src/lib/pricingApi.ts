@@ -281,19 +281,35 @@ export function getAddonPrices(pricing: CurrentPricingResponse | null): Record<s
     };
   }
 
-  const prices: Record<string, number> = {};
+  const prices: Record<string, number> = {
+    // Start with defaults in case API data is incomplete
+    salmon: 5,
+    scallops: 5,
+    filet_mignon: 5,
+    lobster_tail: 15,
+    extra_protein: 10,
+    yakisoba_noodles: 5,
+    extra_fried_rice: 5,
+    extra_vegetables: 5,
+    edamame: 5,
+    gyoza: 10,
+  };
 
-  // Extract protein upgrades
-  pricing.addon_items.protein_upgrades.forEach((addon) => {
-    const key = addon.name.toLowerCase().replace(/\s+/g, '_');
-    prices[key] = addon.price;
-  });
+  // Extract protein upgrades (with safe null check)
+  if (pricing.addon_items?.protein_upgrades) {
+    pricing.addon_items.protein_upgrades.forEach((addon) => {
+      const key = addon.name.toLowerCase().replace(/\s+/g, '_');
+      prices[key] = addon.price;
+    });
+  }
 
-  // Extract enhancements
-  pricing.addon_items.enhancements.forEach((addon) => {
-    const key = addon.name.toLowerCase().replace(/\s+/g, '_');
-    prices[key] = addon.price;
-  });
+  // Extract enhancements (with safe null check)
+  if (pricing.addon_items?.enhancements) {
+    pricing.addon_items.enhancements.forEach((addon) => {
+      const key = addon.name.toLowerCase().replace(/\s+/g, '_');
+      prices[key] = addon.price;
+    });
+  }
 
   return prices;
 }
