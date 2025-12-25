@@ -248,7 +248,10 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # CORS - Multi-Domain Configuration (PRODUCTION)
-    CORS_ORIGINS: str = "https://myhibachichef.com,https://admin.mysticdatanode.net"
+    # NOTE: Include both www and non-www versions as site redirects to www
+    CORS_ORIGINS: str = (
+        "https://myhibachichef.com,https://www.myhibachichef.com,https://admin.mysticdatanode.net"
+    )
 
     @property
     def cors_origins_list(self) -> list[str]:
