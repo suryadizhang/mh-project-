@@ -562,12 +562,14 @@ export function QuoteCalculator() {
       const data = await response.json();
 
       // Set quote result with travel fee information
+      // Note: Use nullish coalescing (??) instead of || for numeric values
+      // because 0 is a valid distance/fee but is falsy with ||
       const result: QuoteResult = {
         baseTotal: data.base_total,
         upgradeTotal: data.upgrade_total,
         grandTotal: data.grand_total,
-        travelFee: data.travel_info?.travel_fee || 0,
-        travelDistance: data.travel_info?.distance_miles || undefined,
+        travelFee: data.travel_info?.travel_fee ?? undefined,
+        travelDistance: data.travel_info?.distance_miles ?? undefined,
         finalTotal: data.grand_total, // Already includes travel fee
       };
 
