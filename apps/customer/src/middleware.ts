@@ -23,9 +23,10 @@ const SECURITY_HEADERS = {
   'Referrer-Policy': 'strict-origin-when-cross-origin',
 
   // Cross-Origin policies
-  'Cross-Origin-Embedder-Policy': 'require-corp',
-  'Cross-Origin-Opener-Policy': 'same-origin',
-  'Cross-Origin-Resource-Policy': 'same-origin',
+  // NOTE: Cross-Origin-Embedder-Policy and Cross-Origin-Resource-Policy are intentionally NOT set
+  // because they block API calls to external services (mhapi.mysticdatanode.net, Google Maps)
+  // These headers require CORP headers on ALL cross-origin resources which our API doesn't provide
+  'Cross-Origin-Opener-Policy': 'same-origin-allow-popups', // Allow popups for OAuth flows
 
   // Permissions policy - restrict dangerous APIs
   'Permissions-Policy': [
