@@ -497,7 +497,27 @@ async def enhanced_global_exception_handler(request: Request, exc: Exception):
 
 logger.info("✅ Custom exception handlers registered (with Sentry integration)")
 
-# Request ID Middleware (must be first to trace all requests)
+# ============================================================================
+# MIDDLEWARE REGISTRATION ORDER (CRITICAL!)
+# ============================================================================
+# Starlette/FastAPI middleware runs in REVERSE order of registration:
+# - FIRST registered = runs LAST for incoming requests
+# - LAST registered = runs FIRST for incoming requests
+#
+# For CORS to work, CORSMiddleware must be registered LAST so it can
+# intercept OPTIONS preflight requests BEFORE any other middleware
+# potentially rejects them (like security middleware).
+#
+# Current order (runs first → last for incoming requests):
+# 1. CORSMiddleware (OPTIONS/CORS handling - MUST be first)
+# 2. GZipMiddleware (compression)
+# 3. RequestSizeLimiter (size validation)
+# 4. SecurityHeadersMiddleware (security headers)
+# 5. StructuredLoggingMiddleware (request logging)
+# 6. RequestIDMiddleware (request tracing)
+# ============================================================================
+
+# Request ID Middleware (runs last for incoming, first for outgoing)
 app.add_middleware(RequestIDMiddleware)
 logger.info("✅ Request ID middleware registered for distributed tracing")
 
@@ -522,19 +542,20 @@ logger.info("✅ Security headers middleware registered (HSTS, CSP, X-Frame-Opti
 app.add_middleware(RequestSizeLimiter, max_size=10 * 1024 * 1024)  # 10 MB limit
 logger.info("✅ Request size limiter registered (10 MB maximum)")
 
-# CORS Middleware (MULTI-DOMAIN SUPPORT)
+# GZip Compression Middleware (PERFORMANCE)
+app.add_middleware(GZipMiddleware, minimum_size=500)  # Compress responses > 500 bytes
+logger.info("✅ GZip compression middleware registered (min size: 500 bytes)")
+
+# CORS Middleware (MUST BE REGISTERED LAST to run FIRST!)
+# This ensures OPTIONS preflight requests are handled before other middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],  # Explicit OPTIONS
     allow_headers=["*"],
 )
 logger.info(f"✅ CORS middleware registered for origins: {settings.cors_origins_list}")
-
-# GZip Compression Middleware (PERFORMANCE)
-app.add_middleware(GZipMiddleware, minimum_size=500)  # Compress responses > 500 bytes
-logger.info("✅ GZip compression middleware registered (min size: 500 bytes)")
 
 # Caching Middleware (PERFORMANCE - Cache-Control headers)
 try:
