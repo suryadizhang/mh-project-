@@ -110,12 +110,13 @@ const nextConfig: NextConfig = {
             key: 'X-Permitted-Cross-Domain-Policies',
             value: 'none',
           },
-          // Note: Cross-Origin-Embedder-Policy and Cross-Origin-Resource-Policy removed
-          // because they block API calls to mhapi.mysticdatanode.net and Google Maps
-          // These headers require CORP headers on all cross-origin resources which our API doesn't provide
+          // COEP/CORP headers intentionally NOT included here
+          // These headers (Cross-Origin-Embedder-Policy: require-corp and Cross-Origin-Resource-Policy: same-origin)
+          // were removed because they block API calls to external services like mhapi.mysticdatanode.net
+          // and Google Maps API. These headers require CORP headers on ALL cross-origin resources.
           {
             key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin-allow-popups', // Allow popups for OAuth flows
+            value: 'same-origin-allow-popups', // Allows OAuth popups while maintaining isolation
           },
           {
             key: 'Content-Security-Policy',
