@@ -63,12 +63,13 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://use.fontawesome.com https://maxcdn.bootstrapcdn.com",
               "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net https://use.fontawesome.com https://maxcdn.bootstrapcdn.com",
               "img-src 'self' data: https: blob:",
-              "connect-src 'self' ws://localhost:8002 http://localhost:8002 http://localhost:8000 ws://localhost:8000 https://mhapi.mysticdatanode.net",
-              "frame-src 'self'",
+              // CRITICAL: Include all API and external service URLs
+              "connect-src 'self' https://mhapi.mysticdatanode.net https://api.stripe.com https://vitals.vercel-insights.com ws://localhost:8002 http://localhost:8002 http://localhost:8000 ws://localhost:8000",
+              "frame-src 'self' https://js.stripe.com",
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",
