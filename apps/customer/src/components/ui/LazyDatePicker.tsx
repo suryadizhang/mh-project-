@@ -78,7 +78,11 @@ export type LazyDatePickerProps = React.ComponentProps<typeof ReactDatePicker> &
 export function LazyDatePicker({ showSkeleton = true, ...props }: LazyDatePickerProps) {
   return (
     <Suspense fallback={showSkeleton ? <DatePickerSkeleton /> : null}>
-      <DatePickerComponent {...props} />
+      <DatePickerComponent
+        portalId="datepicker-portal"
+        popperClassName="datepicker-popper-portal"
+        {...props}
+      />
     </Suspense>
   );
 }
