@@ -214,7 +214,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-3 flex flex-wrap justify-center gap-3">
-                <Link href="/BookUs" className="btn-cta-primary btn-cta-shimmer">
+                <Link href="/book-us/" className="btn-cta-primary btn-cta-shimmer">
                   <span>📅</span>
                   <span>Check Your Date</span>
                 </Link>

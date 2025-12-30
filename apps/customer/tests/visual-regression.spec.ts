@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test'
 const criticalPages = [
   '/',
   '/menu',
-  '/BookUs',
+  '/book-us',
   '/quote',
   '/contact',
   '/blog',
@@ -48,7 +48,7 @@ test.describe('Visual Regression Tests - Critical Pages', () => {
 
 test.describe('Visual Regression Tests - Interactive Elements', () => {
   test('Booking form interactions', async ({ page }) => {
-    await page.goto('/BookUs')
+    await page.goto('/book-us/')
     await page.waitForLoadState('networkidle')
 
     // Test form in different states

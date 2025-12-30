@@ -524,3 +524,121 @@ def _estimate_distance(zip_code: str | None, address: str | None) -> float | Non
         return 20.0  # South Bay average
     else:
         return 50.0  # Outside Bay Area
+
+
+# ============================================================================
+# EMAIL QUOTE ENDPOINT
+# ============================================================================
+
+
+class EmailQuoteRequest(BaseModel):
+    """Schema for emailing a quote to customer."""
+
+    customerEmail: str = Field(..., description="Customer email address")
+    customerName: str = Field(..., description="Customer name")
+    customerPhone: str = Field(default="", description="Customer phone number")
+
+    # Event details
+    adults: int = Field(..., ge=0, description="Number of adults")
+    children: int = Field(default=0, ge=0, description="Number of children")
+    venueAddress: str = Field(default="", description="Venue address")
+    venueCity: str = Field(default="", description="Venue city")
+    venueZipcode: str = Field(default="", description="Venue ZIP code")
+
+    # Quote results
+    baseTotal: float = Field(..., ge=0, description="Base price total")
+    upgradeTotal: float = Field(default=0, ge=0, description="Upgrades total")
+    travelFee: float = Field(default=0, ge=0, description="Travel fee")
+    grandTotal: float = Field(..., ge=0, description="Grand total")
+    depositRequired: float = Field(default=100, ge=0, description="Deposit required")
+
+    # Upgrades selected (quantities)
+    salmon: int = Field(default=0, ge=0)
+    scallops: int = Field(default=0, ge=0)
+    filetMignon: int = Field(default=0, ge=0)
+    lobsterTail: int = Field(default=0, ge=0)
+    extraProteins: int = Field(default=0, ge=0)
+    yakisobaNoodles: int = Field(default=0, ge=0)
+    extraFriedRice: int = Field(default=0, ge=0)
+    extraVegetables: int = Field(default=0, ge=0)
+    edamame: int = Field(default=0, ge=0)
+    gyoza: int = Field(default=0, ge=0)
+
+
+class EmailQuoteResponse(BaseModel):
+    """Response for email quote endpoint."""
+
+    success: bool = Field(..., description="Whether email was sent successfully")
+    message: str = Field(..., description="Success or error message")
+
+
+@router.post(
+    "/email",
+    response_model=EmailQuoteResponse,
+    summary="Email Quote to Customer",
+    description="Send the calculated quote to customer's email in plain text format.",
+)
+async def email_quote(
+    request: EmailQuoteRequest,
+) -> EmailQuoteResponse:
+    """
+    Send the quote summary via email to the customer.
+
+    This endpoint:
+    1. Validates the email address
+    2. Formats the quote as a plain text email
+    3. Sends via SMTP (cs@myhibachichef.com)
+    """
+    from services.email_service import email_service
+
+    # Basic email validation
+    if not request.customerEmail or "@" not in request.customerEmail:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Valid email address is required",
+        )
+
+    # Build upgrades dict
+    upgrades = {
+        "salmon": request.salmon,
+        "scallops": request.scallops,
+        "filetMignon": request.filetMignon,
+        "lobsterTail": request.lobsterTail,
+        "extraProteins": request.extraProteins,
+        "yakisobaNoodles": request.yakisobaNoodles,
+        "extraFriedRice": request.extraFriedRice,
+        "extraVegetables": request.extraVegetables,
+        "edamame": request.edamame,
+        "gyoza": request.gyoza,
+    }
+
+    # Send the email
+    success = email_service.send_quote_email(
+        customer_email=request.customerEmail,
+        customer_name=request.customerName,
+        customer_phone=request.customerPhone,
+        adults=request.adults,
+        children=request.children,
+        venue_address=request.venueAddress,
+        venue_city=request.venueCity,
+        venue_zipcode=request.venueZipcode,
+        base_total=request.baseTotal,
+        upgrade_total=request.upgradeTotal,
+        travel_fee=request.travelFee,
+        grand_total=request.grandTotal,
+        deposit_required=request.depositRequired,
+        upgrades=upgrades,
+    )
+
+    if success:
+        logger.info(f"Quote email sent to {request.customerEmail}")
+        return EmailQuoteResponse(
+            success=True,
+            message=f"Quote sent to {request.customerEmail}",
+        )
+    else:
+        logger.error(f"Failed to send quote email to {request.customerEmail}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to send email. Please try again later.",
+        )

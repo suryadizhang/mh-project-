@@ -14,6 +14,9 @@ from typing import Any
 # Phase 1.1: Use canonical db.models.identity instead of deprecated station_models
 from db.models.identity import Station
 
+# SSoT: Import business config for dynamic pricing
+from services.business_config_service import get_business_config_sync
+
 # Import models
 # TODO: Legacy booking models not migrated yet - needs refactor
 import requests
@@ -37,34 +40,33 @@ class PricingService:
     NEVER hardcode prices - always query from this service
     """
 
-    # Base pricing from FAQ data (fallback if DB empty)
-    # These should match your customer-facing webpage
-    BASE_PRICING = {
-        "adult_base": 55.00,  # $55 per adult (13+)
-        "child_base": 30.00,  # $30 per child (6-12)
-        "child_free_under": 5,  # Free for under 5 years old
-        "party_minimum": 550.00,  # $550 minimum total
-    }
+    # =========================================================================
+    # FALLBACK CONSTANTS (used ONLY if database and SSoT are unavailable)
+    # These are last-resort values - actual pricing comes from:
+    # 1. dynamic_variables table (via get_business_config_sync)
+    # 2. Environment variables
+    # 3. These fallbacks (last resort)
+    # =========================================================================
+    _DEFAULT_ADULT_PRICE = 55.00  # $55 per adult (13+)
+    _DEFAULT_CHILD_PRICE = 30.00  # $30 per child (6-12)
+    _DEFAULT_CHILD_FREE_UNDER = 5  # Free for under 5 years old
+    _DEFAULT_PARTY_MINIMUM = 550.00  # $550 minimum total
+    _DEFAULT_DEPOSIT_AMOUNT = 100.00  # $100 fixed deposit
+    _ssot_last_sync: "datetime | None" = None  # Track last successful SSoT sync
 
-    # Premium upgrades (per person)
+    # Premium upgrades (per person) - TODO: move to dynamic_variables
     PREMIUM_UPGRADES = {
-        "filet_mignon": 5.00,  # +$5/person (NOT $15!)
+        "filet_mignon": 5.00,  # +$5/person
         "salmon": 5.00,  # +$5/person
         "scallops": 5.00,  # +$5/person
         "lobster_tail": 15.00,  # +$15/person
     }
 
-    # Add-ons (flat rate per party)
+    # Add-ons (flat rate per party) - TODO: move to dynamic_variables
     ADDONS = {
         "premium_sake_service": 25.00,
         "extended_performance": 50.00,
         "custom_menu_planning": 35.00,
-    }
-
-    # Travel fees (pulled from environment or database)
-    TRAVEL_PRICING = {
-        "free_radius_miles": int(os.getenv("TRAVEL_FREE_DISTANCE_MILES", 30)),
-        "per_mile_after": float(os.getenv("TRAVEL_FEE_PER_MILE_CENTS", 200)) / 100,
     }
 
     # Gratuity guidelines (not enforced, just guidance)
@@ -80,6 +82,11 @@ class PricingService:
         Args:
             db: SQLAlchemy database session (optional, uses fallback if None)
             station_id: Station ID for multi-tenant pricing (optional)
+
+        SSoT Integration:
+            On init, attempts to load from SSoT (get_business_config_sync).
+            If successful, UPDATES class constants (write-through cache)
+            so fallbacks always reflect latest known good values.
         """
         self.db = db
         self.station_id = station_id
@@ -88,11 +95,58 @@ class PricingService:
         self._cache_ttl_seconds = 300  # 5 minutes cache
         self._google_maps_api_key = os.getenv("GOOGLE_MAPS_API_KEY")
 
+        # Load from SSoT and sync to class constants (write-through cache)
+        self._sync_from_ssot()
+
         # Get station location for travel calculations
         self._station_address = None
         self._station_coordinates = None
         if self.db and self.station_id:
             self._load_station_location()
+
+    def _sync_from_ssot(self) -> None:
+        """
+        Write-through cache pattern: Load from SSoT and update class constants.
+
+        This ensures that even if SSoT becomes unavailable later, the class-level
+        fallback constants will reflect the last known good values from SSoT.
+
+        Called during __init__ so every instance gets the latest values and
+        updates the class constants for any future instances or fallback scenarios.
+        """
+        from datetime import datetime
+        try:
+            from src.services.business_config_service import get_business_config_sync
+
+            config = get_business_config_sync()
+            if config and config.source != "defaults":
+                # Write-through: Update class constants with SSoT values
+                # This makes fallbacks always reflect latest known good values
+                PricingService._DEFAULT_ADULT_PRICE = config.adult_price_cents / 100
+                PricingService._DEFAULT_CHILD_PRICE = config.child_price_cents / 100
+                PricingService._DEFAULT_CHILD_FREE_UNDER = config.child_free_under_age
+                PricingService._DEFAULT_PARTY_MINIMUM = config.party_minimum_cents / 100
+                PricingService._DEFAULT_DEPOSIT_AMOUNT = config.deposit_amount_cents / 100
+                PricingService._ssot_last_sync = datetime.now()
+
+                # Store instance config for this instance's use
+                self._config = config
+                logger.info(
+                    f"✅ SSoT sync successful (source: {config.source}): "
+                    f"adult=${config.adult_price_cents/100}, "
+                    f"child=${config.child_price_cents/100}, "
+                    f"minimum=${config.party_minimum_cents/100}"
+                )
+            else:
+                logger.info("📋 Using environment/default config values")
+                self._config = config
+
+        except ImportError as e:
+            logger.warning(f"⚠️ SSoT service not available: {e}, using class constants")
+            self._config = None
+        except Exception as e:
+            logger.warning(f"⚠️ SSoT sync failed: {e}, using class constants as fallback")
+            self._config = None
 
     def _load_station_location(self) -> None:
         """Load station location from database for travel calculations"""

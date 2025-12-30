@@ -62,7 +62,7 @@ export default function NotFound() {
             </Link>
 
             <Link
-              href="/BookUs"
+              href="/book-us/"
               className="inline-flex transform items-center rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 px-8 py-4 font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-blue-600 hover:to-purple-600 hover:shadow-lg"
             >
               <CalendarCheck className="mr-2 h-5 w-5" />

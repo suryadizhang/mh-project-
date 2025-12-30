@@ -165,15 +165,6 @@ export const LazyBookingForm = dynamic(() => import('@/components/booking/Bookin
   ssr: false,
 });
 
-// BookingFormContainer - Main booking container
-export const LazyBookingFormContainer = dynamic(
-  () => import('@/components/booking/BookingFormContainer'),
-  {
-    loading: () => React.createElement(FormSkeleton),
-    ssr: false,
-  },
-);
-
 // CustomerReviewForm - Heavy with image handling
 export const LazyCustomerReviewForm = dynamic(
   () => import('@/components/reviews/CustomerReviewForm'),

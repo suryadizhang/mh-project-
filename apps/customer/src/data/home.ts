@@ -65,7 +65,7 @@ export const homeData = {
       "We bring the hibachi experience to homes and venues across the Bay Area, Sacramento, San Jose and nearby communities. Need us a bit farther? Tell us your location—we'll make it work with transparent travel options.",
     ctaButtons: [
       {
-        href: '/BookUs',
+        href: '/book-us/',
         text: '📅 Check Your Date & Time',
         primary: true
       },
@@ -110,7 +110,7 @@ export const homeData = {
     subtitle: 'Book your unforgettable hibachi experience today!',
     buttons: [
       {
-        href: '/BookUs',
+        href: '/book-us/',
         text: '📅 Book Your Event',
         primary: true
       },

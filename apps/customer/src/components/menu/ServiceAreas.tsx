@@ -13,7 +13,7 @@ export default function ServiceAreas() {
       </h3>
       <p className={styles.serviceIntro}>{serviceAreas.subtitle}</p>
       <div className={styles.ctaButtons}>
-        <a href="/BookUs" className={styles.primaryBtn}>
+        <a href="/book-us/" className={styles.primaryBtn}>
           📅 Check Your Date & Time
         </a>
         <a href="/quote" className={styles.secondaryBtn}>

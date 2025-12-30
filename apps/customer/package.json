@@ -28,6 +28,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@my-hibachi/blog-types": "file:../../packages/blog-types",
+    "@myhibachi/forms": "file:../../packages/forms",
     "@myhibachi/types": "*",
     "@radix-ui/react-slot": "^1.2.3",
     "@stripe/react-stripe-js": "^3.10.0",

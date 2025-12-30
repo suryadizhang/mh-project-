@@ -55,6 +55,31 @@ class SuggestionResult(BaseModel):
 # ============================================================
 
 
+class CheckAndSuggestResult(BaseModel):
+    """Result from check_and_suggest method matching router expectations."""
+
+    requested_date: date
+    requested_time: time
+    is_requested_available: bool
+    conflict_reason: Optional[str] = None
+    suggestions: List["SlotSuggestion"] = []
+    message: str = ""
+
+
+class SlotSuggestion(BaseModel):
+    """A single slot suggestion matching router expectations."""
+
+    slot_time: time
+    slot_date: date
+    slot_label: str = ""
+    is_available: bool = True
+    conflict_reason: Optional[str] = None
+    adjusted_time: Optional[time] = None
+    travel_time_from_prev: Optional[int] = None
+    travel_time_to_next: Optional[int] = None
+    score: float = 0.0
+
+
 class SuggestionEngine:
     """
     Suggests alternative times when requested slot is unavailable.
@@ -67,6 +92,7 @@ class SuggestionEngine:
 
     def __init__(
         self,
+        db: Optional[object] = None,
         availability_engine: Optional[AvailabilityEngine] = None,
         slot_manager: Optional[SlotManager] = None,
     ):
@@ -74,11 +100,110 @@ class SuggestionEngine:
         Initialize suggestion engine.
 
         Args:
+            db: Database session (passed from router)
             availability_engine: For checking availability
             slot_manager: For slot management
         """
-        self.availability_engine = availability_engine or AvailabilityEngine()
+        self.db = db
+        # Create availability engine with db session if provided
+        self.availability_engine = availability_engine or AvailabilityEngine(db=db)
         self.slot_manager = slot_manager or SlotManager()
+
+    async def check_and_suggest(
+        self,
+        requested_date: date,
+        requested_time: time,
+        guest_count: int = 10,
+        venue_lat: Optional[float] = None,
+        venue_lng: Optional[float] = None,
+        preferred_chef_id: Optional[object] = None,
+    ) -> CheckAndSuggestResult:
+        """
+        Check if requested time is available and suggest alternatives if not.
+
+        This is the main entry point called by the API router.
+
+        Args:
+            requested_date: The requested event date
+            requested_time: The requested event time
+            guest_count: Number of guests
+            venue_lat: Venue latitude (optional)
+            venue_lng: Venue longitude (optional)
+            preferred_chef_id: Preferred chef UUID (optional)
+
+        Returns:
+            CheckAndSuggestResult with availability info and suggestions
+        """
+        # Check if requested slot is available
+        result = await self.availability_engine.check_specific_slot(
+            event_date=requested_date,
+            event_time=requested_time,
+            guest_count=guest_count,
+            venue_lat=float(venue_lat) if venue_lat else None,
+            venue_lng=float(venue_lng) if venue_lng else None,
+        )
+
+        if result.is_requested_available:
+            return CheckAndSuggestResult(
+                requested_date=requested_date,
+                requested_time=requested_time,
+                is_requested_available=True,
+                message="Your requested time is available!",
+                suggestions=[],
+            )
+
+        # Slot not available - get suggestions
+        all_slots = await self.availability_engine.get_available_slots_for_date(
+            requested_date, guest_count
+        )
+
+        suggestions: List[SlotSuggestion] = []
+
+        # Add same-day alternatives
+        for slot in all_slots:
+            if slot.is_available and slot.slot_time != requested_time:
+                suggestions.append(
+                    SlotSuggestion(
+                        slot_time=slot.slot_time,
+                        slot_date=requested_date,
+                        slot_label=slot.slot_name,
+                        is_available=True,
+                        score=1.0,
+                    )
+                )
+
+        # Add next-day alternatives if needed
+        if len(suggestions) < 3:
+            next_day = requested_date + timedelta(days=1)
+            next_day_slots = await self.availability_engine.get_available_slots_for_date(
+                next_day, guest_count
+            )
+            for slot in next_day_slots:
+                if slot.is_available:
+                    suggestions.append(
+                        SlotSuggestion(
+                            slot_time=slot.slot_time,
+                            slot_date=next_day,
+                            slot_label=slot.slot_name,
+                            is_available=True,
+                            score=0.8,
+                        )
+                    )
+                    if len(suggestions) >= 5:
+                        break
+
+        message = result.conflict_reason or "The requested time is not available."
+        if suggestions:
+            message += f" Here are {len(suggestions)} alternative options:"
+
+        return CheckAndSuggestResult(
+            requested_date=requested_date,
+            requested_time=requested_time,
+            is_requested_available=False,
+            conflict_reason=result.conflict_reason,
+            suggestions=suggestions,
+            message=message,
+        )
 
     async def get_suggestions(
         self,

@@ -28,11 +28,13 @@ interface UsePricingResult {
   isLoading: boolean;
   error: string | null;
 
-  // Convenience values
-  adultPrice: number;
-  childPrice: number;
-  childFreeUnderAge: number;
-  addonPrices: Record<string, number>;
+  // Convenience values - undefined when loading/unavailable (NO FALLBACKS - API is source of truth)
+  adultPrice: number | undefined;
+  childPrice: number | undefined;
+  childFreeUnderAge: number | undefined;
+  partyMinimum: number | undefined;
+  depositAmount: number | undefined;
+  addonPrices: Record<string, number> | undefined;
 
   // Helper functions
   hasData: boolean;
@@ -92,18 +94,26 @@ export function usePricing(): UsePricingResult {
     fetchPricing();
   }, []);
 
-  // Extract convenience values
-  const basePricing = getBasePricing(pricing);
-  const addonPrices = getAddonPrices(pricing);
+  // Extract convenience values - undefined when pricing not loaded
+  // NO FALLBACK VALUES: Per instruction 01-CORE_PRINCIPLES Rule #14,
+  // API is single source of truth. Frontend NEVER calculates or provides defaults.
+  const basePricing = pricing ? getBasePricing(pricing) : undefined;
+  const addonPrices = pricing ? getAddonPrices(pricing) : undefined;
   const hasData = hasPricingData(pricing);
+
+  // Get party minimum from pricing response - NO FALLBACK (API is source of truth)
+  const partyMinimum = (pricing as unknown as { policies?: { minimum_order?: number } })?.policies?.minimum_order;
+  const depositAmount = (pricing as unknown as { policies?: { deposit_amount?: number } })?.policies?.deposit_amount;
 
   return {
     pricing,
     isLoading,
     error,
-    adultPrice: basePricing.adultPrice,
-    childPrice: basePricing.childPrice,
-    childFreeUnderAge: basePricing.childFreeUnderAge,
+    adultPrice: basePricing?.adultPrice,
+    childPrice: basePricing?.childPrice,
+    childFreeUnderAge: basePricing?.childFreeUnderAge,
+    partyMinimum,
+    depositAmount,
     addonPrices,
     hasData,
     refetch: fetchPricing

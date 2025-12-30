@@ -40,6 +40,10 @@ files in order:
     ensemble, Smart Router, Mistral integration
 19. `19-DATABASE_SCHEMA_MANAGEMENT.instructions.md` – SQLAlchemy model
     to production DB sync, migration management
+20. `20-SINGLE_SOURCE_OF_TRUTH.instructions.md` – SSoT architecture,
+    dynamic variables, NO hardcoded values
+21. `21-BUSINESS_MODEL.instructions.md` – **CRITICAL**: 2 proteins
+    per person, pricing, allergens, chef workflow
 
 ---
 
@@ -67,7 +71,9 @@ files in order:
 9. **Rollback Safety** (09) – Emergency procedures
 10. **Copilot Performance** (10) – Agent efficiency
 11. **Database Schema** (19) – Model-to-DB sync rules
-12. **User Request** – ONLY if no conflict with above
+12. **SSoT / Dynamic Variables** (20) – NO hardcoded business values
+13. **Business Model** (21) – 2 proteins per person, pricing, allergens
+14. **User Request** – ONLY if no conflict with above
 
 ---
 
@@ -146,6 +152,36 @@ AND column_name='new_column';\""
 
 **NEVER create imaginary, placeholder, or made-up values.**
 
+### ⚠️ ALL PRICING IS DYNAMIC (CRITICAL!)
+
+**Every price, fee, minimum, and policy can change at any time via the Dynamic Variables System.**
+
+| What This Means | Action Required |
+|-----------------|----------------|
+| Prices are NOT hardcoded | Always fetch from `usePricing()` hook or API |
+| Documentation values can be STALE | Always verify against source before quoting |
+| User may have changed values | Check `dynamic_variables` table or API |
+| AI must NOT memorize prices | Always say "current pricing" or "as of [date]" |
+
+**Dynamic Variables System Flow:**
+```
+Database (dynamic_variables table)
+    ↓
+Backend API (/api/v1/pricing/current)
+    ↓
+Frontend (usePricing hook → pricingTemplates.ts fallback)
+    ↓
+UI Components (QuoteCalculator, Menu, Booking)
+```
+
+**When Writing About Prices:**
+```markdown
+❌ WRONG: "Adults are $55 per person"
+✅ RIGHT: "Adults are ${adultPrice} per person (currently $55)"
+✅ RIGHT: "Check current pricing at /api/v1/pricing/current"
+✅ RIGHT: "As of [date], adults are $55 (verify in dynamic_variables)"
+```
+
 ### This Rule Applies To:
 
 | Category              | Examples of FORBIDDEN made-up values      |
@@ -176,6 +212,77 @@ AND column_name='new_column';\""
 | **Terms & Policies**     | Terms page / knowledge base                       |
 | **Deposit %**            | Dynamic Variables → `deposit_percentage`          |
 | **Min/Max Guest Counts** | Dynamic Variables → `min_guests`, `max_guests`    |
+
+### 📂 EXACT FILE PATHS (Check These FIRST!):
+
+**Before writing ANY business value, search these files:**
+
+| Data Type | Frontend File | Backend File |
+|-----------|---------------|--------------|
+| **Core Pricing** | `apps/customer/src/lib/data/faqsData.ts` lines 98-111 | `apps/backend/src/services/dynamic_variables_service.py` |
+| **Upgrades/Add-ons** | `apps/customer/src/lib/data/faqsData.ts` lines 517-545 | `apps/backend/src/db/models/menu.py` |
+| **Deposit Policy** | `apps/customer/src/lib/data/faqsData.ts` (search "deposit") | `apps/backend/src/routers/v1/public_quote.py` |
+| **Travel Fees** | `apps/customer/src/lib/data/faqsData.ts` (search "travel") | `apps/backend/src/db/models/travel_fee.py` |
+| **Menu Items** | `apps/customer/src/lib/data/menu.ts` | `apps/backend/src/db/models/menu.py` |
+| **Default Values** | `apps/customer/src/lib/data/pricingTemplates.ts` | `apps/backend/src/core/config.py` |
+| **Refund/Cancel Policy** | `apps/customer/src/lib/data/faqsData.ts` (search "cancel\|refund") | Terms of Service docs |
+
+### 🔍 MANDATORY Search Before Writing Business Data:
+
+**Run these searches BEFORE writing any pricing, policy, or menu data:**
+
+```bash
+# Search for pricing data
+grep -r "\\$55\\|\\$30\\|\\$550\\|adult.*price\\|child.*price" apps/customer/src/lib/data/
+
+# Search for upgrades/add-ons
+grep -r "filet\\|lobster\\|salmon\\|scallop\\|\\+\\$5\\|\\+\\$10\\|\\+\\$15" apps/customer/src/lib/data/
+
+# Search for deposit/refund policy
+grep -r "deposit\\|refund\\|cancel\\|reschedule" apps/customer/src/lib/data/
+
+# Search for travel fees
+grep -r "travel\\|mile\\|distance\\|free.*mile" apps/customer/src/lib/data/
+```
+
+### ⚠️ RED FLAGS - STOP If You See These:
+
+If you're about to write ANY of these, **STOP and search first:**
+
+| Red Flag | You're Probably Inventing Data |
+|----------|--------------------------------|
+| Writing a dollar amount without checking source | ❌ STOP |
+| Mentioning a menu item you haven't verified | ❌ STOP |
+| Writing "refund within X hours/days" without source | ❌ STOP |
+| Creating upgrade/add-on names (Wagyu, King Crab) | ❌ STOP |
+| Writing percentage-based policies without source | ❌ STOP |
+| Treating any price as permanent/fixed | ❌ STOP |
+| Not mentioning prices are subject to change | ❌ STOP |
+
+**CORRECT BEHAVIOR:** Search `faqsData.ts` first, then write.
+
+### 🔄 Dynamic Variables Reference:
+
+**Key Variable Names (use these in code AND docs):**
+
+| Variable | Current Default | Can Change? | Source |
+|----------|-----------------|-------------|--------|
+| `adultPrice` | $55 | ✅ YES | dynamic_variables |
+| `childPrice` | $30 | ✅ YES | dynamic_variables |
+| `childFreeUnderAge` | 5 | ✅ YES | dynamic_variables |
+| `partyMinimum` | $550 | ✅ YES | dynamic_variables |
+| `depositAmount` | $100 | ✅ YES | dynamic_variables |
+| `freeMiles` | 30 | ✅ YES | travel_fee_configurations |
+| `perMileRate` | $2 | ✅ YES | travel_fee_configurations |
+
+**When Documenting Prices:**
+```markdown
+# In documentation, ALWAYS:
+1. Use variable name: "adultPrice (currently $55)"
+2. Add date: "As of 2025-01-26"
+3. Add disclaimer: "Prices subject to change via Dynamic Variables System"
+4. Reference API: "Verify at /api/v1/pricing/current"
+```
 
 ### What To Do Instead:
 
@@ -303,7 +410,44 @@ Agent Actions (automatic):
 
 ---
 
-## � MANDATORY PRE-COMMIT REVIEW (NEVER SKIP!)
+## 💡 Suggestion Mode (ALWAYS LET USER DECIDE)
+
+**When user asks for suggestions, improvements, or recommendations:**
+
+### NEVER Auto-Implement Suggestions
+
+| User Says                                  | Action                                      |
+| ------------------------------------------ | ------------------------------------------- |
+| "What do you suggest?"                     | Present options, **WAIT for user decision** |
+| "How can we improve X?"                    | List improvements, **WAIT for user choice** |
+| "What are the options?"                    | Show options, **WAIT for user selection**   |
+| "Can you suggest improvements?"            | Provide list, **DO NOT implement**          |
+| "What would make this better/failproof?"   | Describe options, **WAIT for approval**     |
+
+### Suggestion Response Format:
+
+When providing suggestions, always use this format:
+
+```markdown
+## Suggested Improvements
+
+| # | Suggestion | Effort | Impact | Status |
+|---|------------|--------|--------|--------|
+| 1 | Description... | Low/Med/High | Low/Med/High | 🔲 Pending your decision |
+| 2 | Description... | Low/Med/High | Low/Med/High | 🔲 Pending your decision |
+
+**Which would you like me to implement?** (Reply with numbers, "all", or "none")
+```
+
+### The Golden Rule for Suggestions:
+
+> **PRESENT options, WAIT for decision, THEN implement what user chooses.**
+>
+> Never assume. Never auto-implement. Always ask: "Which would you like me to do?"
+
+---
+
+## 🔧 MANDATORY PRE-COMMIT REVIEW (NEVER SKIP!)
 
 **Before EVERY commit, perform a full manual code review.**
 

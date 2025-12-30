@@ -2141,14 +2141,14 @@ async def get_available_times(
                 "message": "Date is in the past",
             }
 
-        # Check if date is too far in the future (90 days)
-        max_date = today + timedelta(days=90)
+        # Check if date is too far in the future (365 days = 1 year)
+        max_date = today + timedelta(days=365)
         if parsed_date > max_date:
             return {
                 "success": True,
                 "date": date,
                 "timeSlots": [],
-                "message": "Date is too far in the future (max 90 days)",
+                "message": "Date is too far in the future (max 1 year)",
             }
 
         # Define time slots (matching frontend expectations)

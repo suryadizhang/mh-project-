@@ -518,7 +518,7 @@ export default function AllergensPage() {
                 Call {protectedPhone || 'Loading...'}
               </a>
               <a
-                href="/BookUs"
+                href="/book-us/"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl shadow-md hover:from-green-700 hover:to-green-800 hover:shadow-lg transition-all duration-300"
               >
                 <CalendarCheck className="h-5 w-5" />

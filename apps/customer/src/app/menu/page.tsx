@@ -12,11 +12,21 @@ import { Calculator, Calendar, ChevronDown, ChevronUp, MessageCircle } from 'luc
 import Link from 'next/link';
 import { useState } from 'react';
 
+import { usePricing } from '@/hooks/usePricing';
 import { CenteredFlexGrid } from '@/components/ui/CenteredFlexGrid';
 
 export default function MenuPage() {
   const [isProteinsOpen, setIsProteinsOpen] = useState(false);
   const [isAdditionsOpen, setIsAdditionsOpen] = useState(false);
+
+  // Get dynamic pricing values - API is source of truth
+  const { adultPrice, childPrice, partyMinimum, childFreeUnderAge, isLoading: pricingLoading } = usePricing();
+
+  // Safe pricing display values (show placeholder during loading)
+  const displayAdultPrice = pricingLoading || adultPrice === undefined ? '...' : adultPrice;
+  const displayChildPrice = pricingLoading || childPrice === undefined ? '...' : childPrice;
+  const displayPartyMinimum = pricingLoading || partyMinimum === undefined ? 0 : partyMinimum;
+  const displayChildFreeUnderAge = pricingLoading || childFreeUnderAge === undefined ? 5 : childFreeUnderAge;
 
   return (
     <main>
@@ -121,7 +131,7 @@ export default function MenuPage() {
                       <div className="pricing-icon-container">
                         <span className="pricing-icon emoji-visible">👨‍👩‍👧‍👦</span>
                       </div>
-                      <div className="pricing-amount">$55</div>
+                      <div className="pricing-amount">${displayAdultPrice}</div>
                       <div className="pricing-label">per adult</div>
                       <div className="pricing-note">Ages 13+</div>
                       <div className="card-features">
@@ -146,9 +156,9 @@ export default function MenuPage() {
                       <div className="pricing-icon-container">
                         <span className="pricing-icon emoji-visible">🧒</span>
                       </div>
-                      <div className="pricing-amount">$30</div>
+                      <div className="pricing-amount">${displayChildPrice}</div>
                       <div className="pricing-label">per child</div>
-                      <div className="pricing-note">Ages 6-12</div>
+                      <div className="pricing-note">Ages {displayChildFreeUnderAge + 1}-12</div>
                       <div className="card-features">
                         <div className="feature">
                           <span className="feature-check">✓</span>
@@ -173,7 +183,7 @@ export default function MenuPage() {
                       </div>
                       <div className="pricing-amount">FREE</div>
                       <div className="pricing-label">for toddlers</div>
-                      <div className="pricing-note">Ages 5 & under</div>
+                      <div className="pricing-note">Ages {displayChildFreeUnderAge} & under</div>
                       <div className="card-features">
                         <div className="feature">
                           <span className="feature-check">✓</span>
@@ -201,7 +211,7 @@ export default function MenuPage() {
                     </div>
                     <div className="info-content">
                       <h5>Party Minimum</h5>
-                      <p>$550 total order (≈ 10 adults)</p>
+                      <p>${displayPartyMinimum} total order (≈ {displayPartyMinimum && displayAdultPrice !== '...' ? Math.ceil(displayPartyMinimum / Number(displayAdultPrice)) : '...'} adults)</p>
                     </div>
                   </div>
 
@@ -791,7 +801,7 @@ export default function MenuPage() {
               {/* Main CTA Button */}
               <div className="cta-button-wrapper mb-3">
                 <Link
-                  href="/BookUs"
+                  href="/book-us/"
                   aria-label="Order your hibachi experience now"
                   className="cta-link"
                 >

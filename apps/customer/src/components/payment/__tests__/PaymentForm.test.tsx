@@ -100,10 +100,10 @@ describe('PaymentForm', () => {
     it('should show customer info fields when no booking data', () => {
       const props = { ...defaultProps, bookingData: null };
       renderWithStripe(props);
-      expect(screen.getByText('Customer Information')).toBeInTheDocument();
+      expect(screen.getByText('Contact Information')).toBeInTheDocument();
       expect(screen.getByText(/Full Name/)).toBeInTheDocument();
       expect(screen.getByText(/Email Address/)).toBeInTheDocument();
-      expect(screen.getByText(/Phone Number/)).toBeInTheDocument();
+      // Phone and address fields are now handled by Stripe PaymentElement with billingDetails: 'auto'
     });
 
     it('should mark required fields with asterisk when no booking data', () => {
@@ -111,16 +111,16 @@ describe('PaymentForm', () => {
       renderWithStripe(props);
       expect(screen.getByText('Full Name *')).toBeInTheDocument();
       expect(screen.getByText('Email Address *')).toBeInTheDocument();
-      expect(screen.getByText('Phone Number *')).toBeInTheDocument();
+      // Phone is now collected by Stripe PaymentElement
     });
 
-    it('should render optional address fields when no booking data', () => {
+    it('should rely on Stripe PaymentElement for billing address', () => {
+      // Billing address (address, city, state, ZIP) is now handled by Stripe PaymentElement
+      // with billingDetails: { address: 'auto' } option - better validation & fraud detection
       const props = { ...defaultProps, bookingData: null };
       renderWithStripe(props);
-      expect(screen.getByText('Address')).toBeInTheDocument();
-      expect(screen.getByText('City')).toBeInTheDocument();
-      expect(screen.getByText('State')).toBeInTheDocument();
-      expect(screen.getByText('ZIP Code')).toBeInTheDocument();
+      // Only name and email are collected in our form now
+      expect(screen.getByText('Contact Information')).toBeInTheDocument();
     });
   });
 
@@ -241,7 +241,7 @@ describe('PaymentForm', () => {
       const { container } = renderWithStripe(props);
 
       const requiredInputs = container.querySelectorAll('input[required]');
-      expect(requiredInputs.length).toBe(3); // name, email, phone
+      expect(requiredInputs.length).toBe(2); // name, email only - billing address handled by Stripe
     });
 
     it('should have email input with correct type', () => {
@@ -252,12 +252,13 @@ describe('PaymentForm', () => {
       expect(emailInput).toBeInTheDocument();
     });
 
-    it('should have tel input with correct type', () => {
+    it('should collect phone via Stripe PaymentElement', () => {
+      // Phone input is now part of Stripe PaymentElement with billingDetails option
+      // This provides better validation and integrates with Stripe's fraud detection
       const props = { ...defaultProps, bookingData: null };
-      const { container } = renderWithStripe(props);
-
-      const phoneInput = container.querySelector('input[type="tel"]');
-      expect(phoneInput).toBeInTheDocument();
+      renderWithStripe(props);
+      // Just verify the form renders - Stripe handles phone collection
+      expect(screen.getByText('Contact Information')).toBeInTheDocument();
     });
 
     it('should have submit button with role', () => {

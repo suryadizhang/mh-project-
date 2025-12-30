@@ -7,6 +7,7 @@ import {
   MapPin,
   User,
   Phone,
+  Mail,
   Users,
   Baby,
   Navigation,
@@ -14,11 +15,12 @@ import {
   Clock,
   ArrowRight,
   Loader2,
+  Minus,
+  Plus,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, useCallback } from 'react';
-
-import { Minus, Plus } from 'lucide-react';
+import { useForm, Controller } from 'react-hook-form';
 
 import { LazyDatePicker } from '@/components/ui/LazyDatePicker';
 import { ProtectedPhone } from '@/components/ui/ProtectedPhone';
@@ -27,60 +29,36 @@ import { getApiUrl } from '@/lib/env';
 import { submitQuoteLead, submitLeadEvent } from '@/lib/leadService';
 import { logger } from '@/lib/logger';
 import { usePricing } from '@/hooks/usePricing';
+// Import shared Google Maps types
+import '@/types/googleMaps';
+import type { GoogleMapsAutocomplete } from '@/types/googleMaps';
 import type { GoogleAddressComponent } from '@/types/data';
 
-// Google Maps Autocomplete types
-interface GoogleMapsAutocomplete {
-  addListener: (event: string, callback: () => void) => void;
-  getPlace: () => {
-    formatted_address?: string;
-    address_components?: Array<{
-      long_name: string;
-      short_name: string;
-      types: string[];
-    }>;
-  };
-}
+/**
+ * Quote form data structure for react-hook-form
+ */
+interface QuoteFormData {
+  // Contact info
+  name: string;
+  phone: string;
+  email: string;
+  smsConsent: boolean;
 
-interface AutocompleteOptions {
-  componentRestrictions?: { country: string };
-  types?: string[];
-  fields?: string[];
-}
-
-declare global {
-  interface Window {
-    google?: {
-      maps: {
-        places: {
-          Autocomplete: new (
-            input: HTMLInputElement,
-            options?: AutocompleteOptions,
-          ) => GoogleMapsAutocomplete;
-        };
-        event: {
-          clearInstanceListeners: (instance: object) => void;
-        };
-      };
-    };
-    initAutocomplete?: () => void;
-  }
-}
-
-interface QuoteData {
+  // Event details
   adults: number;
   children: number;
   location: string;
   zipCode: string;
   venueAddress: string;
-  name: string;
-  phone: string;
-  smsConsent: boolean;
+
+  // Premium upgrades
   salmon: number;
   scallops: number;
   filetMignon: number;
   lobsterTail: number;
   extraProteins: number;
+
+  // Additional enhancements
   yakisobaNoodles: number;
   extraFriedRice: number;
   extraVegetables: number;
@@ -88,13 +66,8 @@ interface QuoteData {
   gyoza: number;
 }
 
-// Validation errors type
-interface ValidationErrors {
-  name?: string;
-  phone?: string;
-  adults?: string;
-  venueAddress?: string;
-}
+// Legacy interface alias for backward compatibility
+type QuoteData = QuoteFormData;
 
 interface QuoteResult {
   baseTotal: number;
@@ -103,6 +76,12 @@ interface QuoteResult {
   travelFee?: number;
   travelDistance?: number;
   finalTotal?: number;
+  /** Minimum order threshold */
+  partyMinimum?: number;
+  /** Whether minimum was applied to this quote */
+  appliedMinimum?: boolean;
+  /** Deposit amount required */
+  depositRequired?: number;
 }
 
 // Time slot from availability API
@@ -116,7 +95,7 @@ interface TimeSlot {
 // Funnel step for progressive reveal
 type FunnelStep = 'quote' | 'availability' | 'booking';
 
-// Input component with validation
+// Input component with validation (used for controlled inputs)
 interface FormInputProps {
   id: string;
   label: string;
@@ -164,11 +143,10 @@ const FormInput = ({
       min={min}
       max={max}
       autoComplete={autoComplete}
-      className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
-        error
-          ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
-          : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
-      }`}
+      className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${error
+        ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
+        : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
+        }`}
       required={required}
     />
     {error && (
@@ -235,35 +213,56 @@ const UpgradeInput = ({ label, price, value, onChange, hint, max = 99 }: Upgrade
 );
 
 export function QuoteCalculator() {
-  // Fetch dynamic pricing from database
-  const { adultPrice, childPrice, childFreeUnderAge } = usePricing();
+  // Fetch dynamic pricing from database - NO FALLBACKS, API is source of truth
+  const { adultPrice, childPrice, childFreeUnderAge, partyMinimum, depositAmount, isLoading: pricingLoading } = usePricing();
 
-  const [quoteData, setQuoteData] = useState<QuoteData>({
-    adults: 10,
-    children: 0,
-    location: '',
-    zipCode: '',
-    venueAddress: '', // NEW: Full venue address
-    name: '',
-    phone: '',
-    smsConsent: false,
-    salmon: 0,
-    scallops: 0,
-    filetMignon: 0,
-    lobsterTail: 0,
-    extraProteins: 0,
-    yakisobaNoodles: 0,
-    extraFriedRice: 0,
-    extraVegetables: 0,
-    edamame: 0,
-    gyoza: 0,
+  // React Hook Form setup with validation
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors, isValid, touchedFields },
+    trigger,
+  } = useForm<QuoteFormData>({
+    mode: 'onBlur',
+    defaultValues: {
+      name: '',
+      phone: '',
+      email: '',
+      smsConsent: false,
+      adults: 10,
+      children: 0,
+      location: '',
+      zipCode: '',
+      venueAddress: '',
+      salmon: 0,
+      scallops: 0,
+      filetMignon: 0,
+      lobsterTail: 0,
+      extraProteins: 0,
+      yakisobaNoodles: 0,
+      extraFriedRice: 0,
+      extraVegetables: 0,
+      edamame: 0,
+      gyoza: 0,
+    },
   });
+
+  // Watch all form values for calculations
+  const formValues = watch();
+
+  // Alias for backward compatibility with existing code
+  const quoteData = formValues;
 
   const [quoteResult, setQuoteResult] = useState<QuoteResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [calculationError, setCalculationError] = useState('');
-  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
-  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  // Email quote state
+  const [isEmailingQuote, setIsEmailingQuote] = useState(false);
+  const [emailQuoteSuccess, setEmailQuoteSuccess] = useState(false);
+  const [emailQuoteError, setEmailQuoteError] = useState('');
 
   // Progressive reveal state
   const [funnelStep, setFunnelStep] = useState<FunnelStep>('quote');
@@ -276,61 +275,17 @@ export function QuoteCalculator() {
   // Router for navigation
   const router = useRouter();
 
-  // Google Places Autocomplete refs
-  const venueAddressInputRef = useRef<HTMLInputElement>(null);
+  // Google Places Autocomplete refs - mutable ref for callback pattern
+  const venueAddressInputRef = useRef<HTMLInputElement | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const autocompleteRef = useRef<any>(null);
 
-  // Real-time validation
-  const validateField = useCallback(
-    (field: keyof QuoteData, value: string | number): string | undefined => {
-      switch (field) {
-        case 'name':
-          if (!String(value).trim()) return 'Please enter your name';
-          if (String(value).trim().length < 2) return 'Name must be at least 2 characters';
-          return undefined;
-        case 'phone':
-          const digitsOnly = String(value).replace(/\D/g, '');
-          if (!digitsOnly) return 'Please enter your phone number';
-          if (digitsOnly.length < 10) return 'Phone number must have at least 10 digits';
-          return undefined;
-        case 'adults':
-          if (Number(value) < 1) return 'At least 1 adult is required';
-          if (Number(value) > 50) return 'Maximum 50 adults per event';
-          return undefined;
-        case 'venueAddress':
-          // Optional but recommended
-          return undefined;
-        default:
-          return undefined;
-      }
-    },
-    [],
-  );
-
-  // Mark field as touched and validate
-  const handleBlur = useCallback(
-    (field: keyof QuoteData) => {
-      setTouched((prev) => ({ ...prev, [field]: true }));
-      // Skip validation for boolean fields
-      if (field === 'smsConsent') return;
-      const error = validateField(field, quoteData[field] as string | number);
-      setValidationErrors((prev) => ({ ...prev, [field]: error }));
-    },
-    [quoteData, validateField],
-  );
-
-  const handleInputChange = (field: keyof QuoteData, value: number | string | boolean) => {
-    setQuoteData((prev) => ({ ...prev, [field]: value }));
+  // Helper function to update form values (for upgrade inputs and Google autocomplete)
+  const handleInputChange = useCallback((field: keyof QuoteFormData, value: number | string | boolean) => {
+    setValue(field, value as never, { shouldValidate: true });
     setQuoteResult(null);
     setCalculationError('');
-
-    // Real-time validation for touched fields (skip boolean fields)
-    if (touched[field] && typeof value !== 'boolean') {
-      const error = validateField(field, value);
-      setValidationErrors((prev) => ({ ...prev, [field]: error }));
-    }
-  };
+  }, [setValue]);
 
   // Initialize Google Places Autocomplete
   useEffect(() => {
@@ -365,10 +320,7 @@ export function QuoteCalculator() {
 
         if (place.formatted_address) {
           // Update venue address with formatted address from Google
-          setQuoteData((prev) => ({
-            ...prev,
-            venueAddress: place.formatted_address,
-          }));
+          setValue('venueAddress', place.formatted_address);
 
           // Extract city and ZIP from address components
           if (place.address_components) {
@@ -385,11 +337,8 @@ export function QuoteCalculator() {
             });
 
             // Auto-fill location and zipCode fields
-            setQuoteData((prev) => ({
-              ...prev,
-              location: city || prev.location,
-              zipCode: zipCode || prev.zipCode,
-            }));
+            if (city) setValue('location', city);
+            if (zipCode) setValue('zipCode', zipCode);
           }
         }
       });
@@ -401,7 +350,7 @@ export function QuoteCalculator() {
         window.google?.maps.event.clearInstanceListeners(autocompleteRef.current);
       }
     };
-  }, []);
+  }, [setValue]);
 
   // Fetch availability when date is selected
   const fetchAvailability = useCallback(async (date: Date) => {
@@ -495,7 +444,69 @@ export function QuoteCalculator() {
     }
 
     sessionStorage.setItem('quoteBookingData', JSON.stringify(bookingData));
-    router.push('/BookUs');
+    router.push('/book-us/');
+  };
+
+  // Handle emailing the quote to customer
+  const handleEmailQuote = async () => {
+    if (!quoteResult || !quoteData.email) return;
+
+    setIsEmailingQuote(true);
+    setEmailQuoteError('');
+    setEmailQuoteSuccess(false);
+
+    try {
+      const response = await apiFetch(`${getApiUrl()}/api/v1/public/quote/email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerEmail: quoteData.email,
+          customerName: quoteData.name,
+          customerPhone: quoteData.phone,
+          adults: quoteData.adults,
+          children: quoteData.children,
+          venueAddress: quoteData.venueAddress,
+          venueCity: quoteData.location,
+          venueZipcode: quoteData.zipCode,
+          // Quote results
+          baseTotal: quoteResult.baseTotal,
+          upgradeTotal: quoteResult.upgradeTotal,
+          travelFee: quoteResult.travelFee ?? 0,
+          grandTotal: quoteResult.grandTotal,
+          depositRequired: quoteResult.depositRequired ?? 100,
+          // Upgrades selected
+          salmon: quoteData.salmon,
+          scallops: quoteData.scallops,
+          filetMignon: quoteData.filetMignon,
+          lobsterTail: quoteData.lobsterTail,
+          extraProteins: quoteData.extraProteins,
+          yakisobaNoodles: quoteData.yakisobaNoodles,
+          extraFriedRice: quoteData.extraFriedRice,
+          extraVegetables: quoteData.extraVegetables,
+          edamame: quoteData.edamame,
+          gyoza: quoteData.gyoza,
+        }),
+      });
+
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to send quote email');
+      }
+
+      setEmailQuoteSuccess(true);
+
+      // Track lead event
+      if (leadId) {
+        submitLeadEvent(leadId, 'quote_emailed', {
+          email: quoteData.email,
+          grandTotal: quoteResult.grandTotal,
+        });
+      }
+    } catch (error) {
+      logger.error('Failed to email quote:', error instanceof Error ? error : undefined);
+      setEmailQuoteError('Failed to send email. Please try again.');
+    } finally {
+      setIsEmailingQuote(false);
+    }
   };
 
   const calculateQuote = async () => {
@@ -564,6 +575,7 @@ export function QuoteCalculator() {
       // Set quote result with travel fee information
       // Note: Use nullish coalescing (??) instead of || for numeric values
       // because 0 is a valid distance/fee but is falsy with ||
+      // NO FALLBACKS: API response is source of truth (per instruction 01-CORE_PRINCIPLES Rule #14)
       const result: QuoteResult = {
         baseTotal: data.base_total,
         upgradeTotal: data.upgrade_total,
@@ -571,6 +583,9 @@ export function QuoteCalculator() {
         travelFee: data.travel_info?.travel_fee ?? undefined,
         travelDistance: data.travel_info?.distance_miles ?? undefined,
         finalTotal: data.grand_total, // Already includes travel fee
+        partyMinimum: data.party_minimum,
+        appliedMinimum: data.applied_minimum ?? false,
+        depositRequired: data.deposit_required,
       };
 
       setQuoteResult(result);
@@ -625,17 +640,42 @@ export function QuoteCalculator() {
             </p>
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <FormInput
-                id="name"
-                label="Your Name"
-                value={quoteData.name}
-                onChange={(v) => handleInputChange('name', v)}
-                placeholder="Enter your name"
-                required
-                error={touched.name ? validationErrors.name : undefined}
-                icon={<User className="h-4 w-4 text-gray-400" />}
-              />
+              {/* Name Input - react-hook-form */}
+              <div className="flex flex-col space-y-1.5">
+                <label
+                  htmlFor="name"
+                  className="flex items-center gap-2 text-sm font-semibold text-gray-700"
+                >
+                  <User className="h-4 w-4 text-gray-400" />
+                  Your Name
+                  <span className="text-red-500">*</span>
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  {...register('name', {
+                    required: 'Please enter your name',
+                    minLength: { value: 2, message: 'Name must be at least 2 characters' },
+                    onChange: () => {
+                      setQuoteResult(null);
+                      setCalculationError('');
+                    },
+                  })}
+                  placeholder="Enter your name"
+                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${errors.name
+                    ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                    : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
+                    }`}
+                />
+                {errors.name && (
+                  <p className="animate-in slide-in-from-top-1 flex items-center gap-1 text-sm text-red-600">
+                    <AlertCircle className="h-4 w-4" />
+                    {errors.name.message}
+                  </p>
+                )}
+              </div>
 
+              {/* Phone Input - react-hook-form */}
               <div className="flex flex-col space-y-1.5">
                 <label
                   htmlFor="phone"
@@ -648,29 +688,70 @@ export function QuoteCalculator() {
                 <input
                   id="phone"
                   type="tel"
-                  value={quoteData.phone}
-                  onChange={(e) =>
-                    handleInputChange(
-                      'phone',
-                      e.target.value.replace(/[^\d\s\-\(\)\+]/g, '').slice(0, 20),
-                    )
-                  }
-                  onBlur={() => handleBlur('phone')}
+                  {...register('phone', {
+                    required: 'Please enter your phone number',
+                    validate: (value) => {
+                      const digitsOnly = value.replace(/\D/g, '');
+                      if (digitsOnly.length < 10) return 'Phone number must have at least 10 digits';
+                      return true;
+                    },
+                    onChange: () => {
+                      setQuoteResult(null);
+                      setCalculationError('');
+                    },
+                  })}
                   placeholder="(916) 740-8768"
-                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
-                    touched.phone && validationErrors.phone
-                      ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                      : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
-                  }`}
-                  required
+                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${errors.phone
+                    ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                    : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
+                    }`}
                 />
-                {touched.phone && validationErrors.phone ? (
+                {errors.phone ? (
                   <p className="flex items-center gap-1 text-sm text-red-600">
                     <AlertCircle className="h-4 w-4" />
-                    {validationErrors.phone}
+                    {errors.phone.message}
                   </p>
                 ) : (
                   <p className="text-xs text-gray-500">We&apos;ll text you the quote instantly</p>
+                )}
+              </div>
+
+              {/* Email Input - react-hook-form (spans full width on mobile, half on desktop) */}
+              <div className="flex flex-col space-y-1.5 md:col-span-2">
+                <label
+                  htmlFor="email"
+                  className="flex items-center gap-2 text-sm font-semibold text-gray-700"
+                >
+                  <Mail className="h-4 w-4 text-gray-400" />
+                  Email Address
+                  <span className="text-gray-400 text-xs font-normal">(optional)</span>
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  {...register('email', {
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: 'Please enter a valid email address',
+                    },
+                    onChange: () => {
+                      setQuoteResult(null);
+                      setCalculationError('');
+                    },
+                  })}
+                  placeholder="your@email.com"
+                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${errors.email
+                    ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                    : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
+                    }`}
+                />
+                {errors.email ? (
+                  <p className="flex items-center gap-1 text-sm text-red-600">
+                    <AlertCircle className="h-4 w-4" />
+                    {errors.email.message}
+                  </p>
+                ) : (
+                  <p className="text-xs text-gray-500">Get your quote emailed for future reference</p>
                 )}
               </div>
             </div>
@@ -684,6 +765,7 @@ export function QuoteCalculator() {
             </h3>
 
             <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+              {/* Adults Input - react-hook-form */}
               <div className="flex flex-col space-y-1.5">
                 <label
                   htmlFor="adults"
@@ -698,17 +780,34 @@ export function QuoteCalculator() {
                   type="number"
                   min="1"
                   max="50"
-                  value={quoteData.adults}
-                  onChange={(e) =>
-                    handleInputChange('adults', Math.max(1, parseInt(e.target.value) || 1))
-                  }
-                  onBlur={() => handleBlur('adults')}
-                  className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:ring-offset-1 focus:outline-none"
-                  required
+                  {...register('adults', {
+                    required: 'At least 1 adult is required',
+                    min: { value: 1, message: 'At least 1 adult is required' },
+                    max: { value: 50, message: 'Maximum 50 adults per event' },
+                    valueAsNumber: true,
+                    onChange: () => {
+                      setQuoteResult(null);
+                      setCalculationError('');
+                    },
+                  })}
+                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:ring-offset-1 focus:outline-none ${errors.adults
+                    ? 'border-red-300 bg-red-50'
+                    : 'border-gray-200'
+                    }`}
                 />
-                <p className="text-xs font-medium text-green-600">${adultPrice} each</p>
+                {errors.adults ? (
+                  <p className="flex items-center gap-1 text-sm text-red-600">
+                    <AlertCircle className="h-4 w-4" />
+                    {errors.adults.message}
+                  </p>
+                ) : pricingLoading ? (
+                  <p className="text-xs text-gray-400">Loading pricing...</p>
+                ) : (
+                  <p className="text-xs font-medium text-green-600">${adultPrice} each</p>
+                )}
               </div>
 
+              {/* Children Input - react-hook-form */}
               <div className="flex flex-col space-y-1.5">
                 <label
                   htmlFor="children"
@@ -722,28 +821,52 @@ export function QuoteCalculator() {
                   type="number"
                   min="0"
                   max="20"
-                  value={quoteData.children}
-                  onChange={(e) =>
-                    handleInputChange('children', Math.max(0, parseInt(e.target.value) || 0))
-                  }
+                  {...register('children', {
+                    min: { value: 0, message: 'Cannot be negative' },
+                    max: { value: 20, message: 'Maximum 20 children' },
+                    valueAsNumber: true,
+                    onChange: () => {
+                      setQuoteResult(null);
+                      setCalculationError('');
+                    },
+                  })}
                   className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:ring-offset-1 focus:outline-none"
                 />
-                <p className="text-xs font-medium text-green-600">
-                  ${childPrice} each ({childFreeUnderAge} &amp; under free)
-                </p>
+                {pricingLoading ? (
+                  <p className="text-xs text-gray-400">Loading pricing...</p>
+                ) : (
+                  <p className="text-xs font-medium text-green-600">
+                    ${childPrice} each ({childFreeUnderAge} &amp; under free)
+                  </p>
+                )}
               </div>
             </div>
 
             <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-              <FormInput
-                id="location"
-                label="Event Location/City"
-                value={quoteData.location}
-                onChange={(v) => handleInputChange('location', v)}
-                placeholder="e.g., San Francisco, San Jose..."
-                icon={<MapPin className="h-4 w-4 text-gray-400" />}
-              />
+              {/* Location Input - react-hook-form */}
+              <div className="flex flex-col space-y-1.5">
+                <label
+                  htmlFor="location"
+                  className="flex items-center gap-2 text-sm font-semibold text-gray-700"
+                >
+                  <MapPin className="h-4 w-4 text-gray-400" />
+                  Event Location/City
+                </label>
+                <input
+                  id="location"
+                  type="text"
+                  {...register('location', {
+                    onChange: () => {
+                      setQuoteResult(null);
+                      setCalculationError('');
+                    },
+                  })}
+                  placeholder="e.g., San Francisco, San Jose..."
+                  className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:ring-offset-1 focus:outline-none"
+                />
+              </div>
 
+              {/* Zip Code Input - react-hook-form */}
               <div className="flex flex-col space-y-1.5">
                 <label
                   htmlFor="zipCode"
@@ -755,10 +878,12 @@ export function QuoteCalculator() {
                 <input
                   id="zipCode"
                   type="text"
-                  value={quoteData.zipCode}
-                  onChange={(e) =>
-                    handleInputChange('zipCode', e.target.value.replace(/\D/g, '').slice(0, 5))
-                  }
+                  {...register('zipCode', {
+                    onChange: () => {
+                      setQuoteResult(null);
+                      setCalculationError('');
+                    },
+                  })}
                   placeholder="94xxx"
                   maxLength={5}
                   className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:ring-offset-1 focus:outline-none"
@@ -767,7 +892,7 @@ export function QuoteCalculator() {
               </div>
             </div>
 
-            {/* Full Address Field - Full Width */}
+            {/* Full Address Field - Full Width with Google Places Autocomplete */}
             <div className="flex flex-col space-y-1.5">
               <label
                 htmlFor="venueAddress"
@@ -781,17 +906,33 @@ export function QuoteCalculator() {
                 </span>
               </label>
               <input
-                ref={venueAddressInputRef}
                 id="venueAddress"
                 type="text"
-                value={quoteData.venueAddress}
-                onChange={(e) => handleInputChange('venueAddress', e.target.value)}
+                {...register('venueAddress', {
+                  required: 'Please enter your venue address',
+                  onChange: () => {
+                    setQuoteResult(null);
+                    setCalculationError('');
+                  },
+                })}
+                ref={(e) => {
+                  // Merge refs: react-hook-form ref and Google Autocomplete ref
+                  register('venueAddress').ref(e);
+                  venueAddressInputRef.current = e;
+                }}
                 placeholder="Start typing your address... (e.g., 123 Main Street)"
-                className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:ring-offset-1 focus:outline-none"
-                required
+                className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:ring-offset-1 focus:outline-none ${errors.venueAddress
+                  ? 'border-red-300 bg-red-50'
+                  : 'border-gray-200'
+                  }`}
                 autoComplete="off"
               />
-              {quoteData.venueAddress && quoteData.location && quoteData.zipCode ? (
+              {errors.venueAddress ? (
+                <p className="flex items-center gap-1 text-sm text-red-600">
+                  <AlertCircle className="h-4 w-4" />
+                  {errors.venueAddress.message}
+                </p>
+              ) : quoteData.venueAddress && quoteData.location && quoteData.zipCode ? (
                 <p className="flex items-center gap-1 text-xs text-green-600">
                   ✓ Address verified: {quoteData.location}, {quoteData.zipCode}
                 </p>
@@ -921,31 +1062,42 @@ export function QuoteCalculator() {
           </div>
 
           {/* SMS Consent - Optional checkbox for RingCentral TCR Compliance */}
+          {/* CRITICAL: Must be unchecked by default, clearly marked OPTIONAL, and state consent not required for purchase */}
           <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+            {/* OPTIONAL Badge - Required for TCR compliance */}
+            <div className="mb-3 flex items-center gap-2">
+              <span className="rounded-full bg-blue-600 px-3 py-1 text-xs font-bold text-white">
+                OPTIONAL
+              </span>
+              <span className="text-xs text-gray-600">
+                Checking this box is not required to get your quote
+              </span>
+            </div>
+
             <div className="flex items-start gap-3">
               <input
                 type="checkbox"
                 id="smsConsent"
-                checked={quoteData.smsConsent}
-                onChange={(e) => handleInputChange('smsConsent', e.target.checked)}
+                {...register('smsConsent')}
                 className="mt-1 h-5 w-5 rounded border-gray-300 text-red-600 focus:ring-red-500"
                 aria-describedby="smsConsentHelp"
               />
               <label htmlFor="smsConsent" className="text-sm text-gray-700">
                 <span className="flex items-center gap-2">
                   <strong>I consent to receive text messages from My Hibachi Chef</strong>
-                  <span className="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700">
-                    Optional
-                  </span>
                 </span>
-                <p className="mt-1 text-xs text-gray-600">
-                  I agree to receive the following types of SMS messages from my Hibachi LLC:
-                  <strong> booking confirmations</strong>, <strong>event reminders</strong>,
-                  <strong> chef notifications</strong>, <strong>booking updates</strong>,
-                  <strong> customer support responses</strong>, and{' '}
-                  <strong>promotional offers</strong>.
+                <p className="mt-2 text-xs text-gray-600">
+                  By checking this box, I voluntarily agree to receive the following types of SMS messages from my Hibachi LLC (doing business as My Hibachi Chef):
                 </p>
-                <p className="mt-1 text-xs text-gray-600">
+                <ul className="mt-1 ml-4 list-disc text-xs text-gray-600">
+                  <li><strong>Booking confirmations</strong> with deposit payment instructions</li>
+                  <li><strong>Event reminders</strong> 48 hours and 24 hours before your event</li>
+                  <li><strong>Chef notifications</strong> about your assigned chef and arrival</li>
+                  <li><strong>Booking updates</strong> for any changes to your reservation</li>
+                  <li><strong>Customer support</strong> responses to your inquiries</li>
+                  <li><strong>Promotional offers</strong> (reply STOP to opt out of marketing separately)</li>
+                </ul>
+                <p className="mt-2 text-xs text-gray-600">
                   Message frequency varies. Message and data rates may apply. Reply{' '}
                   <strong>STOP</strong> to opt-out at any time. Reply <strong>HELP</strong> for
                   assistance or call (916) 740-8786.
@@ -953,28 +1105,33 @@ export function QuoteCalculator() {
                 <p className="mt-1 text-xs text-gray-500">
                   View our{' '}
                   <a href="/terms#sms" target="_blank" className="text-blue-600 hover:underline">
-                    SMS Terms
+                    SMS Terms of Service
                   </a>{' '}
                   and{' '}
                   <a href="/privacy" target="_blank" className="text-blue-600 hover:underline">
                     Privacy Policy
                   </a>
-                  . SMS consent is not shared with third parties.
+                  . SMS consent is not shared with third parties or affiliates.
+                </p>
+                {/* TCR Required: Consent not required for purchase */}
+                <p className="mt-2 text-xs font-semibold text-gray-500">
+                  Consent is not required to receive a quote or make a purchase.
                 </p>
               </label>
             </div>
-            <p id="smsConsentHelp" className="mt-2 text-xs text-gray-500">
-              Without SMS consent, you will only receive email notifications about your booking.
+            <p id="smsConsentHelp" className="mt-3 rounded-lg bg-gray-100 p-2 text-xs text-gray-600">
+              <strong>What happens if I don&apos;t check this box?</strong> You will still receive essential
+              transactional SMS messages related to your booking (confirmations, reminders, chef updates).
+              However, you will not receive promotional offers or marketing messages. You can opt in later by texting START.
             </p>
           </div>
 
           {/* Calculate Button */}
           <button
-            className={`w-full transform rounded-xl px-8 py-4 text-lg font-bold transition-all duration-300 ${
-              isCalculating
-                ? 'cursor-not-allowed bg-gray-400'
-                : 'bg-gradient-to-r from-red-600 to-red-700 hover:scale-[1.02] hover:from-red-700 hover:to-red-800 hover:shadow-xl active:scale-[0.98]'
-            } text-white shadow-lg`}
+            className={`w-full transform rounded-xl px-8 py-4 text-lg font-bold transition-all duration-300 ${isCalculating
+              ? 'cursor-not-allowed bg-gray-400'
+              : 'bg-gradient-to-r from-red-600 to-red-700 hover:scale-[1.02] hover:from-red-700 hover:to-red-800 hover:shadow-xl active:scale-[0.98]'
+              } text-white shadow-lg`}
             onClick={calculateQuote}
             disabled={isCalculating || quoteData.adults === 0}
           >
@@ -1024,6 +1181,16 @@ export function QuoteCalculator() {
             </div>
 
             <div className="space-y-6 p-6">
+              {/* Minimum Order Notice */}
+              {quoteResult.appliedMinimum && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                  <span className="font-medium">Minimum order: ${quoteResult.partyMinimum}</span>
+                  <span className="block text-amber-600">
+                    (Your selections ${quoteResult.baseTotal + quoteResult.upgradeTotal} → adjusted to ${quoteResult.partyMinimum})
+                  </span>
+                </div>
+              )}
+
               {/* Price Breakdown */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between border-b border-gray-100 py-3">
@@ -1119,6 +1286,63 @@ export function QuoteCalculator() {
                 </p>
               </div>
 
+              {/* Deposit Notice */}
+              <div className="rounded-xl border border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 p-4">
+                <p className="text-sm text-green-800">
+                  💳 <strong>${quoteResult.depositRequired ?? 100} deposit</strong> required today to confirm your booking.
+                  Balance due on event day.
+                </p>
+              </div>
+
+              {/* Email Quote Section */}
+              {quoteData.email && (
+                <div className="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-5 w-5 text-blue-600" />
+                      <span className="text-sm font-medium text-blue-800">
+                        Save this quote for later
+                      </span>
+                    </div>
+                    {emailQuoteSuccess ? (
+                      <div className="flex items-center gap-2 text-green-600">
+                        <CheckCircle className="h-5 w-5" />
+                        <span className="text-sm font-medium">Sent!</span>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={handleEmailQuote}
+                        disabled={isEmailingQuote}
+                        className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-700 disabled:opacity-50"
+                      >
+                        {isEmailingQuote ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Sending...
+                          </>
+                        ) : (
+                          <>
+                            <Mail className="h-4 w-4" />
+                            Email Quote
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                  {emailQuoteError && (
+                    <p className="mt-2 flex items-center gap-1 text-sm text-red-600">
+                      <AlertCircle className="h-4 w-4" />
+                      {emailQuoteError}
+                    </p>
+                  )}
+                  {emailQuoteSuccess && (
+                    <p className="mt-2 text-sm text-green-700">
+                      Quote sent to <strong>{quoteData.email}</strong>
+                    </p>
+                  )}
+                </div>
+              )}
+
               {/* Important Notes */}
               <div className="rounded-xl bg-gray-50 p-5">
                 <h4 className="mb-3 font-bold text-gray-800">Important Information:</h4>
@@ -1126,7 +1350,7 @@ export function QuoteCalculator() {
                   <li className="flex items-start gap-2">
                     <span className="mt-0.5 text-green-500">✓</span>
                     <span>
-                      <strong>Minimum:</strong> $550 party total automatically applied
+                      <strong>Minimum:</strong> ${quoteResult.partyMinimum} party total automatically applied
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
@@ -1145,7 +1369,7 @@ export function QuoteCalculator() {
                   <li className="flex items-start gap-2">
                     <span className="mt-0.5 text-green-500">✓</span>
                     <span>
-                      <strong>Deposit:</strong> $100 refundable deposit required (refunded if
+                      <strong>Deposit:</strong> ${depositAmount ?? 100} refundable deposit required (refunded if
                       canceled 7+ days before event)
                     </span>
                   </li>
@@ -1209,13 +1433,12 @@ export function QuoteCalculator() {
                                 type="button"
                                 onClick={() => slot.isAvailable && setSelectedTime(slot.time)}
                                 disabled={!slot.isAvailable}
-                                className={`rounded-lg px-4 py-3 text-center transition-all duration-200 ${
-                                  selectedTime === slot.time
-                                    ? 'scale-105 bg-blue-600 text-white shadow-lg'
-                                    : slot.isAvailable
-                                      ? 'border-2 border-gray-200 bg-white hover:border-blue-400 hover:bg-blue-50'
-                                      : 'cursor-not-allowed bg-gray-100 text-gray-400 line-through'
-                                }`}
+                                className={`rounded-lg px-4 py-3 text-center transition-all duration-200 ${selectedTime === slot.time
+                                  ? 'scale-105 bg-blue-600 text-white shadow-lg'
+                                  : slot.isAvailable
+                                    ? 'border-2 border-gray-200 bg-white hover:border-blue-400 hover:bg-blue-50'
+                                    : 'cursor-not-allowed bg-gray-100 text-gray-400 line-through'
+                                  }`}
                               >
                                 <div className="font-bold">{slot.label || slot.time}</div>
                                 <div className="mt-1 text-xs">
@@ -1260,7 +1483,7 @@ export function QuoteCalculator() {
               ) : (
                 <div className="flex flex-col gap-4 sm:flex-row">
                   <a
-                    href="/BookUs"
+                    href="/book-us/"
                     className="inline-flex flex-1 transform items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-red-700 px-6 py-4 font-bold text-white shadow-lg transition-all duration-300 hover:scale-[1.02] hover:from-red-700 hover:to-red-800 hover:shadow-xl"
                   >
                     🎉 Book Your Event Now

@@ -54,7 +54,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Assistant
     let citations = [{ title: topResult.title, href: topResult.href }]
 
     // Add context-aware suggestions
-    if (page === '/BookUs' && (message.toLowerCase().includes('book') || message.toLowerCase().includes('reserve'))) {
+    if (page === '/book-us/' && (message.toLowerCase().includes('book') || message.toLowerCase().includes('reserve'))) {
       answer += "\n\n≡ƒô₧ Ready to book? Use our booking form on this page or call (916) 740-8768!"
     } else if (message.toLowerCase().includes('price') || message.toLowerCase().includes('quote') || message.toLowerCase().includes('cost')) {
       answer += "\n\n≡ƒÆ░ Get an instant quote with our calculator!"
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Assistant
 
     if (message.toLowerCase().includes('time') && message.toLowerCase().includes('slot')) {
       answer = "≡ƒòÉ Our popular time slots are:\nΓÇó 12PM (Lunch)\nΓÇó 3PM (Afternoon) \nΓÇó 6PM (Dinner)\nΓÇó 9PM (Late dinner)\n\nWe need 48 hours advance notice for booking."
-      citations = [{ title: 'Booking Times', href: '/BookUs' }]
+      citations = [{ title: 'Booking Times', href: '/book-us/' }]
     }
 
     if (message.toLowerCase().includes('quote') || message.toLowerCase().includes('pricing') || message.toLowerCase().includes('how much')) {

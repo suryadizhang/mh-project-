@@ -1,33 +1,113 @@
 """
 AI Booking Assistant - Comprehensive Dynamic Configuration System
 
-This is the SINGLE SOURCE OF TRUTH for all AI booking assistant knowledge.
-All data is synced with customer-facing pages and dynamically loaded.
+This configuration file provides AI booking assistant knowledge with SSoT integration.
 
-CRITICAL: This configuration must ALWAYS match these business data sources:
-├── apps/customer/src/data/faqsData.ts ........... FAQs, policies, detailed business rules
-├── apps/customer/src/components/quote/QuoteCalculator.tsx ... Pricing calculator logic
-├── apps/customer/src/app/menu/page.tsx ........... Menu display, pricing cards
-├── apps/customer/src/app/terms/page.tsx .......... Terms & conditions, liability
-├── apps/customer/src/app/privacy/page.tsx ........ Privacy policy, data handling
-├── apps/customer/src/app/BookUs/page.tsx ......... Booking flow, requirements
-└── apps/backend/src/api/ai/orchestrator/tools/pricing_tool.py ... Calculation engine
+DYNAMIC VALUES (from database):
+- PRICING dict values are synced from `dynamic_variables` table
+- Use `sync_pricing_from_ssot()` to refresh from database
+- Fallback values are updated in-place when SSoT loads successfully
 
-**DYNAMIC DATA PHILOSOPHY:**
-This configuration is NOT static. It references the actual calculation logic and business
-rules used by the website. When prices change, FAQs update, or policies modify, this
-configuration MUST be updated simultaneously to prevent customer confusion.
+CRITICAL: All pricing must come from Single Source of Truth (SSoT):
+├── Database: dynamic_variables table (primary source)
+├── Service: business_config_service.py (sync access)
+├── Customer: apps/customer/src/data/faqsData.ts (uses {{PLACEHOLDER}} syntax)
+└── API: apps/backend/src/api/ai/orchestrator/tools/pricing_tool.py
 
-**AI REASONING MODEL:**
-The AI uses this configuration to:
-1. Calculate prices using EXACT formulas (not estimates)
-2. Explain policies using EXACT wording from Terms & Conditions
-3. Answer questions using EXACT data from FAQs
-4. Never contradict the website or give wrong information
+**SSoT WRITE-THROUGH CACHE PATTERN:**
+1. PRICING dict contains fallback values (last known good)
+2. sync_pricing_from_ssot() loads from database and updates PRICING in-place
+3. If SSoT unavailable, fallback values are used
+4. Successful SSoT loads update fallback values for future resilience
 
-Last Updated: 2025-11-16
-Synced Version: v2.0
+See: 20-SINGLE_SOURCE_OF_TRUTH.instructions.md
+
+Last Updated: 2025-01-27
+Synced Version: v3.0-ssot
 """
+
+import logging
+from typing import Any
+
+logger = logging.getLogger(__name__)
+
+# Track SSoT sync state
+_ssot_last_sync: str | None = None
+_ssot_source: str = "fallback"
+
+
+def sync_pricing_from_ssot() -> bool:
+    """
+    Sync PRICING dict values from Single Source of Truth (database).
+
+    Uses write-through cache pattern:
+    - On success: Updates PRICING dict in-place with SSoT values
+    - On failure: PRICING dict retains last known good values
+
+    Call this function:
+    - At module import (automatic via _auto_sync flag)
+    - Before critical pricing operations
+    - After admin updates pricing in database
+
+    Returns:
+        bool: True if sync successful, False if using fallback values
+    """
+    global _ssot_last_sync, _ssot_source
+
+    try:
+        # Import here to avoid circular imports
+        from services.business_config_service import get_business_config_sync
+
+        config = get_business_config_sync()
+
+        # Update PRICING dict in-place (write-through cache)
+        PRICING["adult_base"] = config.adult_price_cents // 100
+        PRICING["child_base"] = config.child_price_cents // 100
+        PRICING["children_free_age"] = config.child_free_under_age
+        PRICING["party_minimum"] = config.party_minimum_cents // 100
+        PRICING["deposit"] = config.deposit_amount_cents // 100
+        PRICING["deposit_refund_days"] = config.deposit_refundable_days
+        PRICING["travel_free_miles"] = config.travel_free_miles
+        PRICING["travel_per_mile"] = config.travel_per_mile_cents // 100
+
+        # Update MENU_ITEMS to match
+        MENU_ITEMS["kids_menu"]["price"] = config.child_price_cents // 100
+        MENU_ITEMS["kids_menu"]["free_age"] = f"{config.child_free_under_age} and under"
+
+        # Update premium proteins display with current prices
+        # Note: Upgrade prices come from SSoT when available
+        MENU_ITEMS["premium_proteins"] = [
+            f"Salmon (+${PRICING['upgrades']['salmon']})",
+            f"Scallops (+${PRICING['upgrades']['scallops']})",
+            f"Filet Mignon (+${PRICING['upgrades']['filet_mignon']})",
+            f"Lobster Tail (+${PRICING['upgrades']['lobster_tail']})",
+        ]
+
+        from datetime import datetime
+
+        _ssot_last_sync = datetime.utcnow().isoformat()
+        _ssot_source = config.source
+
+        logger.info(
+            f"✅ AI config synced from SSoT: adult=${PRICING['adult_base']}, "
+            f"child=${PRICING['child_base']}, min=${PRICING['party_minimum']}, "
+            f"source={_ssot_source}"
+        )
+        return True
+
+    except Exception as e:
+        logger.warning(f"⚠️ SSoT sync failed, using fallback values: {e}")
+        _ssot_source = "fallback"
+        return False
+
+
+def get_pricing_info() -> dict[str, Any]:
+    """Get current pricing info with SSoT sync status."""
+    return {
+        "pricing": PRICING.copy(),
+        "ssot_source": _ssot_source,
+        "ssot_last_sync": _ssot_last_sync,
+    }
 
 # ============================================================================
 # BRAND VOICE & PERSONALITY
@@ -124,6 +204,55 @@ MENU_ITEMS = {
 # AI INSTRUCTIONS & REASONING RULES
 # ============================================================================
 
+
+def get_ai_reasoning_rules() -> str:
+    """
+    Generate AI reasoning rules with current pricing from SSoT.
+
+    IMPORTANT: Call sync_pricing_from_ssot() before this for fresh values.
+    Uses current PRICING dict values (write-through cached from SSoT).
+    """
+    adult = PRICING["adult_base"]
+    child = PRICING["child_base"]
+    minimum = PRICING["party_minimum"]
+    salmon = PRICING["upgrades"]["salmon"]
+    filet = PRICING["upgrades"]["filet_mignon"]
+    lobster = PRICING["upgrades"]["lobster_tail"]
+
+    return f"""
+**CRITICAL PRICING LOGIC:**
+
+1. MINIMUM ORDER CALCULATION:
+   - The minimum is ${minimum} TOTAL DOLLAR AMOUNT (not number of people)
+   - This equals approximately {minimum // adult} adults × ${adult} = ${minimum}
+   - ANY party that totals ${minimum}+ meets the minimum (could be {minimum // adult} adults, {minimum // adult - 1} adults + {(minimum - (minimum // adult - 1) * adult) // child} kids, etc.)
+   - Example: 30 people = 30 × ${adult} = ${30 * adult} → EXCEEDS minimum by ${30 * adult - minimum} ✓
+
+2. PARTY SIZE CALCULATION:
+   - Calculate TOTAL cost first: (# adults × ${adult}) + (# kids × ${child})
+   - Compare total to ${minimum} minimum
+   - If total ≥ ${minimum} → They meet the minimum!
+   - DO NOT confuse the ${minimum} minimum with "{minimum // adult} people minimum"
+
+3. UPGRADE PRICING:
+   - Premium proteins are +${salmon} per person (Salmon, Scallops, Filet Mignon)
+   - Lobster Tail is +${lobster} per person
+   - Example: 30 people with Filet Mignon = (30 × ${adult}) + (30 × ${filet}) = ${30 * adult + 30 * filet}
+
+4. NEVER SAY:
+   - ❌ "You need at least {minimum // adult} adults" (when they already exceed ${minimum} minimum)
+   - ❌ "You need 20 adults to meet the minimum" (when 30 people = ${30 * adult})
+   - ❌ Confuse dollar amounts with people counts
+
+5. ALWAYS CALCULATE:
+   - Total party cost = (adults × ${adult}) + (children × ${child}) + (upgrades if mentioned)
+   - Check if total ≥ ${minimum}
+   - If yes → "Great! Your party total of $[amount] exceeds our ${minimum} minimum"
+"""
+
+
+# Legacy static variable - kept for backwards compatibility
+# NEW CODE: Use get_ai_reasoning_rules() function instead for dynamic values
 AI_REASONING_RULES = """
 **CRITICAL PRICING LOGIC:**
 
@@ -422,3 +551,21 @@ UPSELL_RULES = {
     "approach": "offer once, don't push",
     "positioning": "enhance their experience (not increase bill)",
 }
+
+
+# ============================================================================
+# AUTO-SYNC ON MODULE LOAD
+# ============================================================================
+# Attempt to sync with SSoT when module is imported.
+# This ensures PRICING dict has latest values from database.
+# If SSoT is unavailable, the fallback values defined above will be used.
+#
+# This implements the "write-through cache" pattern:
+# - On successful sync: PRICING dict is updated with database values
+# - On failure: Existing PRICING values (last known good) are preserved
+# - On first load without SSoT: Hardcoded defaults above are used
+#
+# See: 20-SINGLE_SOURCE_OF_TRUTH.instructions.md for architecture details
+# ============================================================================
+
+sync_pricing_from_ssot()

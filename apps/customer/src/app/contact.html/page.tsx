@@ -36,7 +36,7 @@ export default function ContactHtmlRedirect() {
 
     // Redirect to booking page after brief delay
     const timer = setTimeout(() => {
-      router.push('/BookUs/');
+      router.push('/book-us/');
     }, 500);
 
     return () => clearTimeout(timer);

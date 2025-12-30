@@ -46,11 +46,12 @@ export function useFaqsWithPricing(): UseFaqsWithPricingResult {
   const { adultPrice, childPrice, childFreeUnderAge, isLoading, error, pricing } = usePricing();
 
   // Build pricing values object, using defaults for missing values
+  // Note: FAQs require actual values for template interpolation, so we use defaults as fallback
   const pricingValues: PricingValues = useMemo(
     () => ({
-      adultPrice,
-      childPrice,
-      childFreeUnderAge,
+      adultPrice: adultPrice ?? DEFAULT_PRICING.adultPrice,
+      childPrice: childPrice ?? DEFAULT_PRICING.childPrice,
+      childFreeUnderAge: childFreeUnderAge ?? DEFAULT_PRICING.childFreeUnderAge,
       // These values come from travel_policy in pricing response
       partyMinimum: pricing?.travel_policy
         ? 550 // Default party minimum - not in current API response
