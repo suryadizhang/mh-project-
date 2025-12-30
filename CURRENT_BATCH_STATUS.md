@@ -1,6 +1,6 @@
 # 🎯 My Hibachi - Current Batch Status
 
-**Last Updated:** December 21, 2025 **Purpose:** Single source of truth
+**Last Updated:** December 27, 2025 **Purpose:** Single source of truth
 for current batch status
 
 ---
@@ -9,12 +9,84 @@ for current batch status
 
 | Field       | Value                                 |
 | ----------- | ------------------------------------- |
-| **Batch**   | **BATCH 1**                           |
-| **Name**    | Core Booking Engine + Security        |
-| **Status**  | ✅ CODE COMPLETE (Pending DevOps)     |
+| **Batch**   | **BATCH 1.x**                         |
+| **Name**    | Core Booking Engine + Security + SSoT |
+| **Status**  | 🔄 SSoT IMPLEMENTATION                |
 | **Branch**  | `feature/batch-1-core-infrastructure` |
 | **Started** | December 7, 2025                      |
-| **ETA**     | December 21, 2025 (2 weeks)           |
+| **ETA**     | January 10, 2026                      |
+
+---
+
+## 🔐 SSoT DECISIONS (December 27, 2025)
+
+**SINGLE SOURCE OF TRUTH - User decisions for implementation**
+
+| Decision | Choice | Impact | Batch |
+|----------|--------|--------|-------|
+| **AI Fallback Behavior** | B) Collect info first, THEN escalate | Better UX, graceful degradation | 1.x |
+| **Akaunting Structure** | Separate company per station | Multi-station tax compliance | 2 |
+| **Newsletter Template Editor** | A) Simple markdown editor | Faster development | 3-4 |
+| **Chef Payroll** | A) Akaunting vendors | Leverage existing system | 2 |
+| **FAQ Edit Permissions** | C) Customer Support can suggest (approval required) | Quality control | 1.x |
+
+**Full Implementation Plan:** [SSOT_IMPLEMENTATION_PLAN.md](./docs/04-DEPLOYMENT/SSOT_IMPLEMENTATION_PLAN.md)
+
+---
+
+## 🛡️ LEGAL PROTECTION DECISIONS (December 27, 2025)
+
+**FOOD SAFETY & LIABILITY PROTECTION - User decisions for implementation**
+
+| Decision | Choice | Batch |
+|----------|--------|-------|
+| **Digital Signature** | D1) Hybrid SignaturePad + timestamp + email PDF (7yr retention) | 1.x |
+| **Allergen System** | D1) Required + SMS confirmation (all booking channels) | 1.x |
+| **Chef Dashboard** | C1) GCal sync + Web dashboard (supplies, menu, checklist) | 2-3 |
+| **Claim Policy** | E1) Enhanced policy + pre-event health notice | 1.x |
+| **Photo Documentation** | Manual uploads + thermometer photos (required at 4 checkpoints) | 2-3 |
+| **Third-Party Disclaimer** | Include in Terms of Service | 1.x |
+| **Chef Certification** | Database tracking + expiration alerts (block if expired) | 2 |
+| **Incident Response** | Full investigation workflow | 3-4 |
+| **Chef Health Attestation** | Required before each event (48hr symptom check) | 2-3 |
+
+**Full Implementation Plan:** [LEGAL_PROTECTION_IMPLEMENTATION.md](./docs/04-DEPLOYMENT/LEGAL_PROTECTION_IMPLEMENTATION.md)
+
+### Legal Protection Implementation Phases
+
+| Phase | Focus | Priority | Batch | Status |
+|-------|-------|----------|-------|--------|
+| 1.1 | Digital Agreement System (SignaturePad + PDF) | 🔴 CRITICAL | 1.x | ⏳ PENDING |
+| 1.2 | Allergen Disclosure System | 🔴 CRITICAL | 1.x | ⏳ PENDING |
+| 1.3 | Terms of Service Updates (liability, claims) | 🔴 CRITICAL | 1.x | ⏳ PENDING |
+| 2.1 | Chef Certification Tracking | 🟠 HIGH | 2 | ⏳ PENDING |
+| 2.2 | Chef Event Dashboard + GCal | 🟠 HIGH | 2-3 | ⏳ PENDING |
+| 2.3 | Photo Documentation System | 🟠 HIGH | 2-3 | ⏳ PENDING |
+| 3.1 | Incident Response System | 🟡 MEDIUM | 3-4 | ⏳ PENDING |
+| 3.2 | Chef Health Attestation | 🟡 MEDIUM | 3-4 | ⏳ PENDING |
+
+### Key Legal Points
+
+- **Record Retention:** 7 YEARS for all signed agreements
+- **Digital Signature Validity:** ESIGN Act + UETA compliant
+- **Claim Window:** 72 hours to report, 3+ guests required
+- **Pre-Event Health Notice:** 24hr before event (SMS/Email)
+
+**Spec File:** [20-SINGLE_SOURCE_OF_TRUTH.instructions.md](./.github/instructions/20-SINGLE_SOURCE_OF_TRUTH.instructions.md)
+
+### SSoT Implementation Phases (Batch 1.x)
+
+| Phase | Focus | Priority | Est. Hours | Status |
+|-------|-------|----------|------------|--------|
+| 1 | AI Critical Fixes (remove hardcoded PRICING) | 🔴 CRITICAL | 4-6 hrs | ⏳ PENDING |
+| 2 | Legal Documents Template System | 🔴 CRITICAL | 3-4 hrs | ⏳ PENDING |
+| 3 | Digital Agreement + Allergen System | 🔴 CRITICAL | 12-16 hrs | ⏳ PENDING |
+| 4 | Terms of Service Updates (liability) | 🔴 CRITICAL | 2-3 hrs | ⏳ PENDING |
+| 5 | FAQ System with Approval Workflow | 🟠 HIGH | 4-6 hrs | ⏳ PENDING |
+| 6 | UI Text Centralization | 🟠 HIGH | 2-3 hrs | ⏳ PENDING |
+| 7 | Akaunting Install & Setup (No wiring yet) | 🟡 MEDIUM | 2-3 hrs | ⏳ PENDING |
+| 8 | Akaunting Integration (Wiring) | 🟡 MEDIUM | 8-10 hrs | Batch 2 |
+| 9 | Newsletter System | 🟢 LOWER | 6-8 hrs | Batch 3-4 |
 
 ---
 
@@ -202,8 +274,9 @@ Test coverage:
 | Batch | Name                    | Status         | Branch                              |
 | ----- | ----------------------- | -------------- | ----------------------------------- |
 | **0** | Repo Cleanup            | ✅ COMPLETE    | main, dev                           |
-| **1** | Core Booking + Security | 🔄 IN PROGRESS | feature/batch-1-core-infrastructure |
-| 2     | Payment Processing      | ⏳ Pending     | feature/batch-2-\*                  |
+| **1** | Core Booking + Security | ✅ CODE COMPLETE | feature/batch-1-core-infrastructure |
+| **1.x** | SSoT Implementation   | 🔄 IN PROGRESS | feature/batch-1-core-infrastructure |
+| 2     | Payment + Akaunting     | ⏳ Pending     | feature/batch-2-\*                  |
 | 3     | Core AI                 | ⏳ Pending     | feature/batch-3-\*                  |
 | 4     | Communications          | ⏳ Pending     | feature/batch-4-\*                  |
 | 5     | Advanced AI + Marketing | ⏳ Pending     | feature/batch-5-\*                  |

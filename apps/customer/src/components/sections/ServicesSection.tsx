@@ -108,7 +108,7 @@ export default function ServicesSection() {
         </div>
 
         <div className="services-cta mt-8 text-center">
-          <Link href="/BookUs" className="btn-cta-primary btn-cta-shimmer">
+          <Link href="/book-us/" className="btn-cta-primary btn-cta-shimmer">
             <CalendarCheck className="h-5 w-5" />
             <span>Book Your Premium Experience</span>
           </Link>

@@ -2,9 +2,16 @@
 
 import '@/styles/quote-calculator.css'
 
+import { usePricing } from '@/hooks/usePricing'
 import { QuoteCalculator } from '@/components/quote/QuoteCalculator'
 
 export default function QuotePage() {
+  const { adultPrice, childPrice, isLoading } = usePricing()
+
+  // Build dynamic price range for SEO - use placeholder when loading
+  const displayAdultPrice = adultPrice ?? 55 // Fallback for SEO only (not used in calculations)
+  const priceRange = `$${displayAdultPrice}-$${displayAdultPrice + 15} per person`
+
   return (
     <>
       <script
@@ -22,7 +29,7 @@ export default function QuotePage() {
               '@id': 'https://myhibachichef.com/#business',
               name: 'My Hibachi Chef',
               description: 'Professional hibachi catering service',
-              priceRange: '$55-$70 per person',
+              priceRange: priceRange,
               serviceArea: {
                 '@type': 'GeoCircle',
                 geoMidpoint: {

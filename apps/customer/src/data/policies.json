@@ -38,7 +38,7 @@
     "title": "Group Size & Pricing",
     "content": "👥 Minimum group size: 6 people (or ${{PARTY_MINIMUM}} minimum). Adult portions: ${{ADULT_PRICE}} per person. Children (under 12): ${{CHILD_PRICE}} per person. Final pricing based on menu selection and group size. Larger groups may receive volume discounts.",
     "category": "policies",
-    "href": "/BookUs",
+    "href": "/book-us/",
     "keywords": ["group size", "minimum", "adults", "children", "pricing", "volume discount"]
   },
   {
@@ -73,7 +73,7 @@
     "title": "Event Timing & Duration",
     "content": "⏰ Typical hibachi experience lasts 1.5-2 hours including setup, cooking show, and dining. Flexible timing available. Popular slots: 12PM lunch, 3PM afternoon, 6PM dinner, 9PM late dinner.",
     "category": "policies",
-    "href": "/BookUs",
+    "href": "/book-us/",
     "keywords": [
       "timing",
       "duration",

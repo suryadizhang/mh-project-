@@ -35,7 +35,7 @@ export function FAQsPageContainer({ faqs }: FAQsPageContainerProps) {
               <a href="/contact" className="contact-btn primary">
                 Contact Us
               </a>
-              <a href="/BookUs" className="book-btn secondary">
+              <a href="/book-us/" className="book-btn secondary">
                 Book Your Event
               </a>
             </div>

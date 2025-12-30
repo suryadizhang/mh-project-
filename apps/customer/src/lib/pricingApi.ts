@@ -247,13 +247,22 @@ export async function getPricingSummary(): Promise<PricingSummaryResponse | null
  * Useful for quick access to adult/child prices
  *
  * @param pricing - Current pricing response
- * @returns Base pricing object or default values
+ * @returns Base pricing object or undefined if no data (NO FALLBACKS - API is source of truth)
  */
-export function getBasePricing(pricing: CurrentPricingResponse | null) {
+export function getBasePricing(pricing: CurrentPricingResponse | null): {
+  adultPrice: number;
+  childPrice: number;
+  childFreeUnderAge: number;
+} | undefined {
+  // NO FALLBACK VALUES: Per instruction 01-CORE_PRINCIPLES Rule #14,
+  // API is single source of truth. Frontend NEVER provides default business values.
+  if (!pricing?.base_pricing) {
+    return undefined;
+  }
   return {
-    adultPrice: pricing?.base_pricing.adult_price ?? 55,
-    childPrice: pricing?.base_pricing.child_price ?? 30,
-    childFreeUnderAge: pricing?.base_pricing.child_free_under_age ?? 5,
+    adultPrice: pricing.base_pricing.adult_price,
+    childPrice: pricing.base_pricing.child_price,
+    childFreeUnderAge: pricing.base_pricing.child_free_under_age,
   };
 }
 
@@ -262,38 +271,16 @@ export function getBasePricing(pricing: CurrentPricingResponse | null) {
  * Useful for quote calculators and booking forms
  *
  * @param pricing - Current pricing response
- * @returns Map of addon names to prices
+ * @returns Map of addon names to prices, or undefined if no data (NO FALLBACKS - API is source of truth)
  */
-export function getAddonPrices(pricing: CurrentPricingResponse | null): Record<string, number> {
-  if (!pricing) {
-    // Default prices from FAQ (fallback)
-    return {
-      salmon: 5,
-      scallops: 5,
-      filet_mignon: 5,
-      lobster_tail: 15,
-      extra_protein: 10,
-      yakisoba_noodles: 5,
-      extra_fried_rice: 5,
-      extra_vegetables: 5,
-      edamame: 5,
-      gyoza: 10,
-    };
+export function getAddonPrices(pricing: CurrentPricingResponse | null): Record<string, number> | undefined {
+  // NO FALLBACK VALUES: Per instruction 01-CORE_PRINCIPLES Rule #14,
+  // API is single source of truth. Frontend NEVER provides default business values.
+  if (!pricing?.addon_items) {
+    return undefined;
   }
 
-  const prices: Record<string, number> = {
-    // Start with defaults in case API data is incomplete
-    salmon: 5,
-    scallops: 5,
-    filet_mignon: 5,
-    lobster_tail: 15,
-    extra_protein: 10,
-    yakisoba_noodles: 5,
-    extra_fried_rice: 5,
-    extra_vegetables: 5,
-    edamame: 5,
-    gyoza: 10,
-  };
+  const prices: Record<string, number> = {};
 
   // Extract protein upgrades (with safe null check)
   if (pricing.addon_items?.protein_upgrades) {

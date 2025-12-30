@@ -34,7 +34,7 @@ export default function Navbar() {
     { href: '/menu', label: 'Menu', icon: UtensilsCrossed },
     { href: '/service-areas', label: 'Service Areas', icon: MapPin },
     { href: '/quote', label: 'Get Quote', icon: Calculator },
-    { href: '/BookUs', label: 'Book Us', icon: Calendar },
+    { href: '/book-us/', label: 'Book Us', icon: Calendar },
     { href: '/faqs', label: 'FAQs', icon: HelpCircle },
     { href: '/contact', label: 'Contact', icon: MessageCircle },
     { href: '/blog', label: 'Blog', icon: BookOpen },

@@ -53,7 +53,7 @@ export default function Footer() {
           <h3>Quick Links</h3>
           <ul className={styles.links}>
             <li>
-              <Link href="/BookUs">
+              <Link href="/book-us/">
                 <ChevronRight size={14} className={styles.linkIcon} /> Book Now
               </Link>
             </li>

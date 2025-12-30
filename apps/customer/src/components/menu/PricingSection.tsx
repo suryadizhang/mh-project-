@@ -50,7 +50,7 @@ export default function PricingSection() {
               </div>
 
               <div className={styles.tierCta}>
-                <a href="/BookUs" className={styles.ctaButton}>
+                <a href="/book-us/" className={styles.ctaButton}>
                   Choose This Package
                 </a>
               </div>

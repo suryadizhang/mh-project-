@@ -430,3 +430,47 @@ export function useStationUsers(
     [stationId, includeUserDetails]
   );
 }
+
+// ============================================================================
+// SSoT Configuration Variables Hooks
+// ============================================================================
+
+import { configService, ConfigVariable, ConfigAuditEntry } from '@/services/api';
+
+/**
+ * Hook to fetch all SSoT configuration variables
+ * @param category - Optional category filter ('pricing' | 'deposit' | 'travel' | 'booking' | 'feature' | 'ai')
+ */
+export function useConfigVariables(category?: string) {
+  return useApiData<ConfigVariable[]>(
+    () =>
+      category
+        ? configService.getVariablesByCategory(category)
+        : configService.getVariables(),
+    [category]
+  );
+}
+
+/**
+ * Hook to fetch a single configuration variable
+ * @param category - Variable category
+ * @param key - Variable key
+ */
+export function useConfigVariable(category: string, key: string) {
+  return useApiData<ConfigVariable>(
+    () => configService.getVariable(category, key),
+    [category, key]
+  );
+}
+
+/**
+ * Hook to fetch configuration audit log
+ * @param category - Optional category filter
+ * @param limit - Max number of entries (default 50)
+ */
+export function useConfigAuditLog(category?: string, limit: number = 50) {
+  return useApiData<ConfigAuditEntry[]>(
+    () => configService.getAuditLog({ category, limit }),
+    [category, limit]
+  );
+}

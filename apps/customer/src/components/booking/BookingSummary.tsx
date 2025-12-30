@@ -17,7 +17,8 @@ export function BookingSummary({ formData, isSubmitting, onSubmit }: BookingSumm
   // Fetch dynamic pricing from database
   const { adultPrice, childPrice, isLoading: isPricingLoading } = usePricing();
 
-  const estimatedTotal = formData.guestCount * adultPrice; // Simplified calculation
+  // Estimated total - only calculate when pricing is available
+  const estimatedTotal = adultPrice !== undefined ? formData.guestCount * adultPrice : 0;
 
   return (
     <div className="booking-summary">

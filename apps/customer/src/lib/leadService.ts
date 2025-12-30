@@ -166,7 +166,8 @@ export async function submitLeadEvent(
     | 'funnel_checked_availability'
     | 'funnel_started_booking'
     | 'funnel_completed_booking'
-    | 'funnel_dropped',
+    | 'funnel_dropped'
+    | 'quote_emailed',
   payload?: Record<string, unknown>,
 ): Promise<{ success: boolean; error?: string }> {
   try {

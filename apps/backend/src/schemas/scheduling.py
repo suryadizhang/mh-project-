@@ -129,12 +129,17 @@ class SlotAvailabilityResponse(BaseModel):
     """Single time slot availability info."""
 
     slot_time: time
+    slot_date: Optional[date] = None  # For suggestions on different dates
     slot_label: str = ""  # "12PM", "3PM", "6PM", "9PM"
     is_available: bool
     available_chefs: int = 0
     conflict_reason: Optional[str] = None
     can_adjust: bool = False  # If slot can be shifted ±30/60 min
     adjustment_options: list[int] = []  # [-60, -30, 30, 60] minutes
+    adjusted_time: Optional[time] = None  # Suggested adjusted time if needed
+    travel_time_from_prev: Optional[int] = None  # Travel from previous booking
+    travel_time_to_next: Optional[int] = None  # Travel to next booking
+    score: float = 0.0  # Ranking score for suggestions
 
 
 class SuggestionResponse(BaseModel):
@@ -145,6 +150,7 @@ class SuggestionResponse(BaseModel):
     is_requested_available: bool
     conflict_reason: Optional[str] = None
     suggestions: list[SlotAvailabilityResponse] = []
+    message: str = ""  # Message for customer about availability
 
 
 class CalendarDayAvailability(BaseModel):

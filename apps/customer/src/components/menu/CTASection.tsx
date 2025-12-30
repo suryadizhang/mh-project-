@@ -13,7 +13,7 @@ export default function CTASection() {
         </p>
 
         <div className={styles.ctaButtons}>
-          <a href="/BookUs" className={styles.primaryCtaButton}>
+          <a href="/book-us/" className={styles.primaryCtaButton}>
             <Calendar className={styles.buttonIcon} />
             Book Your Event Now
           </a>

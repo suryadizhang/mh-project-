@@ -892,6 +892,16 @@ try:
 except ImportError as e:
     logger.warning(f"Public quote endpoints not available: {e}")
 
+# Include PUBLIC config endpoints (no auth required - for customer website SSoT)
+# These endpoints serve dynamic business config to frontend hooks (useConfig, usePolicies)
+try:
+    from routers.v1.public_config import router as public_config_router
+
+    app.include_router(public_config_router, prefix="/api/v1", tags=["public-config"])
+    logger.info("✅ Public config endpoints included (no auth - SSoT for customer website)")
+except ImportError as e:
+    logger.warning(f"Public config endpoints not available: {e}")
+
 # Include v1 API router (pricing, menu items, addon items)
 try:
     from api.v1.api import api_router as v1_api_router
@@ -1034,6 +1044,19 @@ except ImportError as e:
 # QR Code Tracking System - DELETED (Nov 22, 2025)
 # Not needed for hibachi catering business model
 # Files removed: routers/v1/qr_tracking.py, services/qr_tracking_service.py
+
+# Admin Dynamic Config (SSoT for pricing, policies, business rules)
+try:
+    from routers.v1.admin.config import router as admin_config_router
+
+    app.include_router(
+        admin_config_router,
+        prefix="/api",
+        tags=["admin", "config", "ssot"],
+    )
+    logger.info("✅ Admin Config endpoints included (dynamic variables SSoT)")
+except ImportError as e:
+    logger.error(f"❌ Admin Config endpoints not available: {e}")
 
 # Admin Error Logs (for monitoring and debugging) - NEW location
 try:

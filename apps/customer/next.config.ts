@@ -6,7 +6,7 @@ import type { NextConfig } from 'next';
 const withBundleAnalyzer =
   process.env.ANALYZE === 'true'
     ? // eslint-disable-next-line @typescript-eslint/no-require-imports
-      require('@next/bundle-analyzer')({ enabled: true })
+    require('@next/bundle-analyzer')({ enabled: true })
     : (config: NextConfig) => config;
 
 const nextConfig: NextConfig = {
@@ -96,11 +96,11 @@ const nextConfig: NextConfig = {
           // Only enable HSTS in production
           ...(isProduction
             ? [
-                {
-                  key: 'Strict-Transport-Security',
-                  value: 'max-age=31536000; includeSubDomains; preload',
-                },
-              ]
+              {
+                key: 'Strict-Transport-Security',
+                value: 'max-age=31536000; includeSubDomains; preload',
+              },
+            ]
             : []),
           {
             key: 'X-DNS-Prefetch-Control',
@@ -185,31 +185,41 @@ const nextConfig: NextConfig = {
   // URL redirects for legacy/shortened paths
   async redirects() {
     return [
-      // Redirect /booking and /book to /BookUs
+      // Redirect all booking-related paths to /book-us/
       {
         source: '/booking',
-        destination: '/BookUs/',
+        destination: '/book-us/',
         permanent: true,
       },
       {
         source: '/booking/',
-        destination: '/BookUs/',
+        destination: '/book-us/',
         permanent: true,
       },
       {
         source: '/book',
-        destination: '/BookUs/',
+        destination: '/book-us/',
+        permanent: false, // Soft redirect to avoid cache issues
+      },
+      // Redirect legacy /BookUs paths to new /book-us/
+      {
+        source: '/BookUs',
+        destination: '/book-us/',
         permanent: true,
       },
       {
-        source: '/book/',
-        destination: '/BookUs/',
+        source: '/BookUs/',
+        destination: '/book-us/',
         permanent: true,
       },
-      // Case-insensitive redirects for bookus variations
       {
         source: '/bookus',
-        destination: '/BookUs/',
+        destination: '/book-us/',
+        permanent: true,
+      },
+      {
+        source: '/bookus/',
+        destination: '/book-us/',
         permanent: true,
       },
     ];

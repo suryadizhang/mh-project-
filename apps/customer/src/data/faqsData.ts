@@ -58,7 +58,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Gratuity & Fees',
     tags: ['tipping', '20-35%', 'cash', 'venmo', 'zelle'],
     confidence: 'high',
-    source_urls: ['/BookUs'],
+    source_urls: ['/book-us/'],
   },
   {
     id: 'travel-fees',
@@ -145,7 +145,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'How to Book',
     tags: ['booking', 'online', 'text', '48 hours', '$100 deposit', 'refundable'],
     confidence: 'high',
-    source_urls: ['/BookUs'],
+    source_urls: ['/book-us/'],
   },
   {
     id: 'deposit-policy',
@@ -156,7 +156,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Deposits & Balance',
     tags: ['$100 deposit', 'refundable', '4 days', 'deducted', 'final bill'],
     confidence: 'high',
-    source_urls: ['/BookUs'],
+    source_urls: ['/book-us/'],
   },
   {
     id: 'payment-methods',
@@ -167,7 +167,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Payment Methods',
     tags: ['venmo', 'zelle', 'cash', 'credit card', 'online deposit'],
     confidence: 'high',
-    source_urls: ['/BookUs'],
+    source_urls: ['/book-us/'],
   },
   {
     id: 'advance-booking',
@@ -178,7 +178,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Scheduling & Availability',
     tags: ['48 hours minimum', 'weekends', 'holidays', '1-2 weeks'],
     confidence: 'high',
-    source_urls: ['/BookUs'],
+    source_urls: ['/book-us/'],
   },
 
   // Travel & Service Area
@@ -215,7 +215,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Space & Ventilation',
     tags: ['68x27x41 inches', 'level ground', 'outdoor', 'ventilated', 'table access'],
     confidence: 'high',
-    source_urls: ['/BookUs'],
+    source_urls: ['/book-us/'],
   },
   {
     id: 'table-setup',
@@ -273,7 +273,7 @@ export const faqs: FaqItem[] = [
       'cross-contamination',
     ],
     confidence: 'high',
-    source_urls: ['/BookUs', '/allergens'],
+    source_urls: ['/book-us/', '/allergens'],
   },
   {
     id: 'allergen-list',
@@ -429,7 +429,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Modifying a Booking',
     tags: ['menu changes', '12 hours', 'deadline', 'fresh ingredients', 'finalize menu'],
     confidence: 'high',
-    source_urls: ['/BookUs'],
+    source_urls: ['/book-us/'],
   },
   {
     id: 'food-refund-policy',
@@ -440,7 +440,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Refunds & Credits',
     tags: ['food refund', 'no refund', 'food safety', '4 hours', 'leftovers', 'uneaten food'],
     confidence: 'high',
-    source_urls: ['/BookUs'],
+    source_urls: ['/book-us/'],
   },
   {
     id: 'reschedule-timing',
@@ -451,7 +451,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Cancellation & Changes',
     tags: ['reschedule', 'free reschedule', '24 hours', '$100 fee', 'chef schedule'],
     confidence: 'high',
-    source_urls: ['/BookUs'],
+    source_urls: ['/book-us/'],
   },
 
   // Policies (Cancellation, Weather, Refunds)
@@ -473,7 +473,7 @@ export const faqs: FaqItem[] = [
       'food safety',
     ],
     confidence: 'high',
-    source_urls: ['/BookUs'],
+    source_urls: ['/book-us/'],
   },
   {
     id: 'weather-policy',
@@ -484,7 +484,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Weather / Backup Plan',
     tags: ['rain', 'overhead covering', 'tent', 'patio', 'garage', 'no refund'],
     confidence: 'high',
-    source_urls: ['/BookUs'],
+    source_urls: ['/book-us/'],
   },
 
   // Kids & Special Occasions
@@ -555,7 +555,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'General',
     tags: ['arrival time', '15-30 minutes early', 'setup time'],
     confidence: 'high',
-    source_urls: ['/BookUs'],
+    source_urls: ['/book-us/'],
   },
   {
     id: 'protein-choices-different',
@@ -577,7 +577,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Deposits & Balance',
     tags: ['deposit explanation', 'reservation confirmation', 'preparation costs'],
     confidence: 'high',
-    source_urls: ['/BookUs'],
+    source_urls: ['/book-us/'],
   },
   {
     id: 'safety-precautions',
@@ -599,7 +599,7 @@ export const faqs: FaqItem[] = [
     subcategory: 'Deposits & Balance',
     tags: ['receipt', 'invoice', 'business', 'expense reimbursement'],
     confidence: 'high',
-    source_urls: ['/BookUs'],
+    source_urls: ['/book-us/'],
   },
 ];
 

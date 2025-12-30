@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { FileText, AlertTriangle, Info, X, Check } from 'lucide-react';
+import { usePricing } from '@/hooks/usePricing';
 
 interface BookingAgreementModalProps {
   isOpen: boolean;
@@ -28,6 +29,9 @@ export default function BookingAgreementModal({
   willCommunicate,
   setWillCommunicate,
 }: BookingAgreementModalProps) {
+  // Get deposit amount from SSoT pricing system
+  const { depositAmount } = usePricing();
+
   if (!isOpen) return null;
 
   const allAcknowledged = allergenAcknowledged && riskAccepted && willCommunicate;
@@ -85,7 +89,7 @@ export default function BookingAgreementModal({
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-500 mt-0.5">✓</span>
-                  $100 refundable deposit required to secure booking
+                  ${depositAmount ?? 100} refundable deposit required to secure booking
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-500 mt-0.5">✓</span>
@@ -111,11 +115,11 @@ export default function BookingAgreementModal({
               <ul className="space-y-2 text-gray-600 text-sm ml-8">
                 <li className="flex items-start gap-2">
                   <span className="text-green-500 mt-0.5 font-bold">•</span>
-                  <span><strong>Deposit Refund:</strong> $100 deposit is refundable if canceled 4+ days before event, non-refundable within 4 days</span>
+                  <span><strong>Deposit Refund:</strong> ${depositAmount ?? 100} deposit is refundable if canceled 4+ days before event, non-refundable within 4 days</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-green-500 mt-0.5 font-bold">•</span>
-                  <span><strong>Free Reschedule:</strong> One free reschedule allowed if requested 24+ hours before event; additional reschedules cost $100</span>
+                  <span><strong>Free Reschedule:</strong> One free reschedule allowed if requested 24+ hours before event; additional reschedules cost ${depositAmount ?? 100}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-amber-500 mt-0.5 font-bold">•</span>
