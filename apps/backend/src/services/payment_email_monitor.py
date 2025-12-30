@@ -250,7 +250,9 @@ class PaymentEmailParser:
                 "customer_phone": (
                     phone_match.group(1) if phone_match else None
                 ),  # Customer's phone from memo
-                "customer_email": email_match.group(0) if email_match else None,  # Use sender email as customer email
+                "customer_email": (
+                    email_match.group(0) if email_match else None
+                ),  # Use sender email as customer email
                 "status": "pending",  # Zelle requires manual confirmation
                 "parsed_at": datetime.now(timezone.utc).isoformat(),
             }
@@ -343,7 +345,7 @@ class PaymentEmailParser:
 class PaymentEmailMonitor:
     """Monitor Gmail inbox for payment notification emails"""
 
-    MINIMUM_DEPOSIT = Decimal("100.00")  # $100 minimum deposit to lock booking date
+    # MINIMUM_DEPOSIT is loaded from SSoT in __init__
 
     def __init__(self, email_address: str, app_password: str, db_session=None):
         """
@@ -353,6 +355,12 @@ class PaymentEmailMonitor:
             email_address: Gmail address (myhibachichef@gmail.com)
             app_password: Gmail App Password (16-char code without spaces)
         """
+        # Load minimum deposit from SSoT (Single Source of Truth)
+        from services.business_config_service import get_business_config_sync
+
+        _config = get_business_config_sync()
+        self.MINIMUM_DEPOSIT = Decimal(str(_config.deposit_amount_cents / 100))
+
         self.email_address = email_address
         self.app_password = app_password
         self.imap_server = "imap.gmail.com"
@@ -413,9 +421,9 @@ class PaymentEmailMonitor:
             conditions = []
             if phone:
                 # Normalize phone: remove non-digits, ensure 10 digits
-                clean_phone = ''.join(filter(str.isdigit, phone))
+                clean_phone = "".join(filter(str.isdigit, phone))
                 # Remove country code if present (11 digits starting with 1)
-                if len(clean_phone) == 11 and clean_phone[0] == '1':
+                if len(clean_phone) == 11 and clean_phone[0] == "1":
                     clean_phone = clean_phone[1:]
                 # Match exact 10 digits (booking phones are stored as 10 digits)
                 if len(clean_phone) == 10:
@@ -436,17 +444,19 @@ class PaymentEmailMonitor:
 
             # Calculate payment totals
             from db.models.core import Payment
-            payments = self.db_session.query(Payment).filter(
-                Payment.booking_id == booking.id,
-                Payment.status == "completed"
-            ).all()
+
+            payments = (
+                self.db_session.query(Payment)
+                .filter(Payment.booking_id == booking.id, Payment.status == "completed")
+                .all()
+            )
 
             amount_paid = sum(p.amount for p in payments)
 
             # Calculate total amount (assuming $55/adult pricing logic exists in booking)
             # For now, use a placeholder - should integrate with booking_service pricing
             total_amount = Decimal("550.00")  # Minimum booking amount
-            if hasattr(booking, 'total_amount') and booking.total_amount:
+            if hasattr(booking, "total_amount") and booking.total_amount:
                 total_amount = booking.total_amount
 
             amount_remaining = total_amount - amount_paid
@@ -514,7 +524,9 @@ class PaymentEmailMonitor:
         elif amount_remaining <= 0:
             message = f"✅ Booking fully paid! ${new_amount_paid} total."
         else:
-            message = f"✅ Payment received: ${payment_amount}. ${amount_remaining} remaining balance."
+            message = (
+                f"✅ Payment received: ${payment_amount}. ${amount_remaining} remaining balance."
+            )
 
         return {
             "is_valid": is_valid,
@@ -558,13 +570,16 @@ class PaymentEmailMonitor:
             # IMAP search format: each criterion must be properly formatted
             search_criteria = [
                 "UNSEEN",  # Unread emails
-                f'SINCE {date_str}',  # Since date
-                "OR", "OR", "OR", "OR",  # Chain OR for multiple FROM
+                f"SINCE {date_str}",  # Since date
+                "OR",
+                "OR",
+                "OR",
+                "OR",  # Chain OR for multiple FROM
                 'FROM "stripe"',
                 'FROM "venmo"',
                 'FROM "zelle"',
                 'FROM "alerts@"',
-                'FROM "bankofamerica"'
+                'FROM "bankofamerica"',
             ]
 
             _, message_numbers = self.mail.search(None, " ".join(search_criteria))
