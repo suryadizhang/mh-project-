@@ -47,7 +47,16 @@ export default function BookingPage() {
   const { formatted: protectedPhone, tel: protectedTel } = useProtectedPhone();
 
   // Get dynamic pricing - NO FALLBACKS: API is single source of truth
-  const { adultPrice, childPrice, partyMinimum, depositAmount, isLoading: pricingLoading, error: pricingError } = usePricing();
+  const {
+    adultPrice,
+    childPrice,
+    partyMinimum,
+    depositAmount,
+    freeMiles,
+    perMileRate,
+    isLoading: pricingLoading,
+    error: pricingError,
+  } = usePricing();
 
   // Form state
   const [showAgreementModal, setShowAgreementModal] = useState(false);
@@ -119,37 +128,44 @@ export default function BookingPage() {
   const sectionCompletion = useMemo(() => {
     const personalComplete = Boolean(
       watchAll.firstName &&
-      watchAll.lastName &&
-      watchAll.email &&
-      watchAll.phone &&
-      watchAll.preferredCommunication
+        watchAll.lastName &&
+        watchAll.email &&
+        watchAll.phone &&
+        watchAll.preferredCommunication,
     );
 
     const venueComplete = Boolean(
-      watchAll.venueStreet &&
-      watchAll.venueCity &&
-      watchAll.venueState &&
-      watchAll.venueZipcode
+      watchAll.venueStreet && watchAll.venueCity && watchAll.venueState && watchAll.venueZipcode,
     );
 
-    const eventComplete = Boolean(
-      (watchAll.adultCount ?? 0) >= 1
-    );
+    const eventComplete = Boolean((watchAll.adultCount ?? 0) >= 1);
 
-    const dateTimeComplete = Boolean(
-      watchAll.eventDate &&
-      watchAll.timeSlot
-    );
+    const dateTimeComplete = Boolean(watchAll.eventDate && watchAll.timeSlot);
 
     return {
       personal: personalComplete,
       venue: venueComplete,
       event: eventComplete,
       dateTime: dateTimeComplete,
-      completedCount: [personalComplete, venueComplete, eventComplete, dateTimeComplete].filter(Boolean).length,
+      completedCount: [personalComplete, venueComplete, eventComplete, dateTimeComplete].filter(
+        Boolean,
+      ).length,
       totalSections: 4,
     };
-  }, [watchAll.firstName, watchAll.lastName, watchAll.email, watchAll.phone, watchAll.preferredCommunication, watchAll.venueStreet, watchAll.venueCity, watchAll.venueState, watchAll.venueZipcode, watchAll.adultCount, watchAll.eventDate, watchAll.timeSlot]);
+  }, [
+    watchAll.firstName,
+    watchAll.lastName,
+    watchAll.email,
+    watchAll.phone,
+    watchAll.preferredCommunication,
+    watchAll.venueStreet,
+    watchAll.venueCity,
+    watchAll.venueState,
+    watchAll.venueZipcode,
+    watchAll.adultCount,
+    watchAll.eventDate,
+    watchAll.timeSlot,
+  ]);
 
   // Calculate total cost
   const totalCost = useMemo(() => {
@@ -208,12 +224,7 @@ export default function BookingPage() {
       };
 
       // Build full venue address string
-      const fullAddress = [
-        data.venueStreet,
-        data.venueCity,
-        data.venueState,
-        data.venueZipcode,
-      ]
+      const fullAddress = [data.venueStreet, data.venueCity, data.venueState, data.venueZipcode]
         .filter(Boolean)
         .join(', ');
 
@@ -250,7 +261,9 @@ export default function BookingPage() {
         body: JSON.stringify(bookingData),
       });
 
-      const responseData = response.data as { id?: string; status?: string; message?: string } | undefined;
+      const responseData = response.data as
+        | { id?: string; status?: string; message?: string }
+        | undefined;
 
       if (response.success && responseData?.id) {
         setShowAgreementModal(false);
@@ -290,19 +303,17 @@ export default function BookingPage() {
 
         <div className="section-background py-8">
           <div className="mx-auto max-w-2xl px-4">
-            <div className="overflow-hidden rounded-xl bg-white p-8 shadow-xl text-center">
-              <CheckCircle2 className="mx-auto h-16 w-16 text-green-500 mb-4" />
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Thank You!</h2>
-              <p className="text-gray-600 mb-6">
-                Your booking has been submitted successfully.
-              </p>
+            <div className="overflow-hidden rounded-xl bg-white p-8 text-center shadow-xl">
+              <CheckCircle2 className="mx-auto mb-4 h-16 w-16 text-green-500" />
+              <h2 className="mb-2 text-2xl font-bold text-gray-900">Thank You!</h2>
+              <p className="mb-6 text-gray-600">Your booking has been submitted successfully.</p>
 
-              <div className="rounded-lg bg-green-50 border border-green-200 p-4 mb-6">
-                <p className="text-sm text-gray-600 mb-1">Confirmation Code</p>
-                <p className="text-2xl font-mono font-bold text-green-700">{bookingConfirmation}</p>
+              <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4">
+                <p className="mb-1 text-sm text-gray-600">Confirmation Code</p>
+                <p className="font-mono text-2xl font-bold text-green-700">{bookingConfirmation}</p>
               </div>
 
-              <div className="text-left space-y-4 mb-8 bg-gray-50 p-4 rounded-lg">
+              <div className="mb-8 space-y-4 rounded-lg bg-gray-50 p-4 text-left">
                 <h3 className="font-semibold text-gray-900">What's Next?</h3>
                 <ul className="space-y-2 text-sm text-gray-600">
                   <li className="flex items-center gap-2">
@@ -310,8 +321,8 @@ export default function BookingPage() {
                     You'll receive a confirmation email shortly
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="text-green-500">✓</span>
-                    A team member will contact you to finalize details
+                    <span className="text-green-500">✓</span>A team member will contact you to
+                    finalize details
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="text-green-500">✓</span>
@@ -320,24 +331,24 @@ export default function BookingPage() {
                 </ul>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="flex flex-col justify-center gap-3 sm:flex-row">
                 {/* Calendar link moved to email/SMS confirmation for user convenience */}
                 <Link
                   href="/"
-                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors"
+                  className="inline-flex items-center justify-center rounded-lg bg-red-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-red-700"
                 >
                   Return Home
                 </Link>
                 <a
                   href={`tel:${protectedTel}`}
-                  className="inline-flex items-center justify-center px-6 py-3 rounded-lg border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+                  className="inline-flex items-center justify-center rounded-lg border-2 border-gray-300 px-6 py-3 font-semibold text-gray-700 transition-colors hover:bg-gray-50"
                 >
                   Call Us: {protectedPhone}
                 </a>
               </div>
 
               {/* Calendar note */}
-              <p className="mt-4 text-sm text-gray-500 text-center">
+              <p className="mt-4 text-center text-sm text-gray-500">
                 📅 A calendar invite link will be included in your confirmation email
               </p>
             </div>
@@ -385,7 +396,6 @@ export default function BookingPage() {
 
             {/* Form */}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 p-5">
-
               {/* Section 1: Personal Information */}
               <PersonalInfoSection
                 control={control}
@@ -402,6 +412,8 @@ export default function BookingPage() {
                 errors={errors}
                 setValue={setValue}
                 onTravelFeeChange={handleTravelFeeChange}
+                freeMiles={freeMiles}
+                perMileRate={perMileRate}
               />
 
               {/* Section 3: Event Details + Cost Calculator */}
@@ -442,33 +454,40 @@ export default function BookingPage() {
               {submitError && (
                 <div className="rounded-lg border border-red-200 bg-red-50 p-4">
                   <div className="flex items-start gap-3">
-                    <span className="text-red-500 text-xl flex-shrink-0">⚠️</span>
+                    <span className="flex-shrink-0 text-xl text-red-500">⚠️</span>
                     <div className="flex-1">
-                      <p className="text-red-700 font-medium">{submitError}</p>
+                      <p className="font-medium text-red-700">{submitError}</p>
                       {/* Actionable help based on error type */}
                       {submitError.toLowerCase().includes('time slot') && (
-                        <p className="text-red-600 text-sm mt-2">
+                        <p className="mt-2 text-sm text-red-600">
                           💡 Tip: Try selecting a different time slot above, or choose another date.
                         </p>
                       )}
                       {submitError.toLowerCase().includes('48 hours') && (
-                        <p className="text-red-600 text-sm mt-2">
-                          💡 Tip: Please select a date at least 2 days from now. We need time to prepare your experience!
+                        <p className="mt-2 text-sm text-red-600">
+                          💡 Tip: Please select a date at least 2 days from now. We need time to
+                          prepare your experience!
                         </p>
                       )}
                       {submitError.toLowerCase().includes('network') && (
-                        <p className="text-red-600 text-sm mt-2">
-                          💡 Tip: Check your internet connection and try again. If the problem persists, call us.
+                        <p className="mt-2 text-sm text-red-600">
+                          💡 Tip: Check your internet connection and try again. If the problem
+                          persists, call us.
                         </p>
                       )}
-                      {(submitError.toLowerCase().includes('database') || submitError.toLowerCase().includes('server')) && (
-                        <p className="text-red-600 text-sm mt-2">
-                          💡 Tip: Our system is temporarily busy. Please wait a moment and try again.
+                      {(submitError.toLowerCase().includes('database') ||
+                        submitError.toLowerCase().includes('server')) && (
+                        <p className="mt-2 text-sm text-red-600">
+                          💡 Tip: Our system is temporarily busy. Please wait a moment and try
+                          again.
                         </p>
                       )}
-                      <p className="text-gray-600 text-sm mt-3">
+                      <p className="mt-3 text-sm text-gray-600">
                         Need help? Call us at{' '}
-                        <a href={`tel:${protectedTel}`} className="text-red-600 font-semibold hover:underline">
+                        <a
+                          href={`tel:${protectedTel}`}
+                          className="font-semibold text-red-600 hover:underline"
+                        >
                           {protectedPhone}
                         </a>
                       </p>
@@ -478,25 +497,39 @@ export default function BookingPage() {
               )}
 
               {/* Submit Button */}
-              <div className="text-center pt-4">
+              <div className="pt-4 text-center">
                 <button
                   type="submit"
                   disabled={sectionCompletion.completedCount < 4 || isSubmitting}
-                  className={`inline-flex items-center gap-3 rounded-full px-8 py-4 text-lg font-bold transition-all duration-300 ${sectionCompletion.completedCount === 4 && !isSubmitting
-                    ? 'bg-gradient-to-r from-red-600 to-red-500 text-white hover:scale-105 hover:shadow-2xl cursor-pointer'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    }`}
+                  className={`inline-flex items-center gap-3 rounded-full px-8 py-4 text-lg font-bold transition-all duration-300 ${
+                    sectionCompletion.completedCount === 4 && !isSubmitting
+                      ? 'cursor-pointer bg-gradient-to-r from-red-600 to-red-500 text-white hover:scale-105 hover:shadow-2xl'
+                      : 'cursor-not-allowed bg-gray-300 text-gray-500'
+                  }`}
                   style={{
-                    boxShadow: sectionCompletion.completedCount === 4 && !isSubmitting
-                      ? '0 8px 25px rgba(239, 68, 68, 0.4)'
-                      : 'none',
+                    boxShadow:
+                      sectionCompletion.completedCount === 4 && !isSubmitting
+                        ? '0 8px 25px rgba(239, 68, 68, 0.4)'
+                        : 'none',
                   }}
                 >
                   {isSubmitting ? (
                     <>
-                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
                       </svg>
                       Processing...
                     </>
@@ -506,9 +539,7 @@ export default function BookingPage() {
                       Book Your Hibachi Experience
                     </>
                   ) : (
-                    <>
-                      📝 Complete Form to Continue ({sectionCompletion.completedCount}/4)
-                    </>
+                    <>📝 Complete Form to Continue ({sectionCompletion.completedCount}/4)</>
                   )}
                 </button>
 
@@ -547,7 +578,18 @@ export default function BookingPage() {
 /**
  * Progress Indicator Component
  */
-function ProgressIndicator({ completion }: { completion: { personal: boolean; venue: boolean; event: boolean; dateTime: boolean; completedCount: number; totalSections: number } }) {
+function ProgressIndicator({
+  completion,
+}: {
+  completion: {
+    personal: boolean;
+    venue: boolean;
+    event: boolean;
+    dateTime: boolean;
+    completedCount: number;
+    totalSections: number;
+  };
+}) {
   const progressPercent = (completion.completedCount / completion.totalSections) * 100;
 
   return (
@@ -555,7 +597,7 @@ function ProgressIndicator({ completion }: { completion: { personal: boolean; ve
       <h3 className="mb-3 text-center text-base font-semibold text-gray-900">
         📋 Booking Progress
       </h3>
-      <div className="grid grid-cols-4 gap-2 text-center mb-4">
+      <div className="mb-4 grid grid-cols-4 gap-2 text-center">
         <ProgressStep emoji="👤" label="Info" complete={completion.personal} />
         <ProgressStep emoji="🎪" label="Venue" complete={completion.venue} />
         <ProgressStep emoji="👥" label="Event" complete={completion.event} />
@@ -577,12 +619,21 @@ function ProgressIndicator({ completion }: { completion: { personal: boolean; ve
   );
 }
 
-function ProgressStep({ emoji, label, complete }: { emoji: string; label: string; complete: boolean }) {
+function ProgressStep({
+  emoji,
+  label,
+  complete,
+}: {
+  emoji: string;
+  label: string;
+  complete: boolean;
+}) {
   return (
     <div className="space-y-1">
       <div
-        className={`mx-auto flex h-9 w-9 items-center justify-center rounded-full text-base font-bold ${complete ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
-          }`}
+        className={`mx-auto flex h-9 w-9 items-center justify-center rounded-full text-base font-bold ${
+          complete ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
+        }`}
       >
         {emoji}
       </div>
@@ -594,11 +645,20 @@ function ProgressStep({ emoji, label, complete }: { emoji: string; label: string
 /**
  * Status Badge Component
  */
-function StatusBadge({ label, icon, complete }: { label: string; icon: React.ReactNode; complete: boolean }) {
+function StatusBadge({
+  label,
+  icon,
+  complete,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  complete: boolean;
+}) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded px-2 py-1 text-xs ${complete ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'
-        }`}
+      className={`inline-flex items-center gap-1 rounded px-2 py-1 text-xs ${
+        complete ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'
+      }`}
     >
       {icon}
       {label}
@@ -609,10 +669,21 @@ function StatusBadge({ label, icon, complete }: { label: string; icon: React.Rea
 /**
  * Order Summary Component
  */
-function OrderSummary({ totalCost }: { totalCost: { foodCost: number; travelFee: number; subtotal: number; tip: number; total: number; deposit: number } }) {
+function OrderSummary({
+  totalCost,
+}: {
+  totalCost: {
+    foodCost: number;
+    travelFee: number;
+    subtotal: number;
+    tip: number;
+    total: number;
+    deposit: number;
+  };
+}) {
   return (
     <div className="rounded-xl border-2 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 p-6">
-      <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900 mb-4">
+      <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-gray-900">
         <DollarSign className="h-5 w-5 text-green-600" />
         Order Summary
       </h3>
@@ -637,13 +708,13 @@ function OrderSummary({ totalCost }: { totalCost: { foodCost: number; travelFee:
             <span className="font-medium">+${totalCost.tip.toFixed(2)}</span>
           </div>
         )}
-        <div className="border-t border-green-300 pt-2 mt-2">
+        <div className="mt-2 border-t border-green-300 pt-2">
           <div className="flex justify-between text-lg font-bold">
             <span className="text-gray-900">Total</span>
             <span className="text-green-700">${totalCost.total.toFixed(2)}</span>
           </div>
         </div>
-        <div className="flex justify-between text-amber-700 bg-amber-50 p-2 rounded mt-2">
+        <div className="mt-2 flex justify-between rounded bg-amber-50 p-2 text-amber-700">
           <span className="font-medium">Due Today (Deposit)</span>
           <span className="font-bold">${totalCost.deposit.toFixed(2)}</span>
         </div>
@@ -663,7 +734,14 @@ function AgreementModal({
   isSubmitting,
 }: {
   formData: BookingFormData;
-  totalCost: { foodCost: number; travelFee: number; subtotal: number; tip: number; total: number; deposit: number };
+  totalCost: {
+    foodCost: number;
+    travelFee: number;
+    subtotal: number;
+    tip: number;
+    total: number;
+    deposit: number;
+  };
   onConfirm: () => void;
   onCancel: () => void;
   isSubmitting: boolean;
@@ -680,11 +758,13 @@ function AgreementModal({
         <div className="max-h-[50vh] overflow-y-auto p-6">
           {/* Booking Summary */}
           <div className="mb-6 rounded-lg bg-gray-50 p-4">
-            <h4 className="font-bold text-gray-900 mb-3">Booking Summary</h4>
+            <h4 className="mb-3 font-bold text-gray-900">Booking Summary</h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-gray-500">Customer</p>
-                <p className="font-medium">{formData.firstName} {formData.lastName}</p>
+                <p className="font-medium">
+                  {formData.firstName} {formData.lastName}
+                </p>
               </div>
               <div>
                 <p className="text-gray-500">Contact</p>
@@ -712,9 +792,12 @@ function AgreementModal({
                 <p className="font-bold text-green-700">${totalCost.total.toFixed(2)}</p>
               </div>
             </div>
-            <div className="mt-3 pt-3 border-t">
-              <p className="text-gray-500 text-sm">Venue</p>
-              <p className="font-medium">{formData.venueStreet}, {formData.venueCity}, {formData.venueState} {formData.venueZipcode}</p>
+            <div className="mt-3 border-t pt-3">
+              <p className="text-sm text-gray-500">Venue</p>
+              <p className="font-medium">
+                {formData.venueStreet}, {formData.venueCity}, {formData.venueState}{' '}
+                {formData.venueZipcode}
+              </p>
             </div>
           </div>
 
@@ -723,14 +806,14 @@ function AgreementModal({
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
               <h4 className="font-bold text-amber-800">💳 Payment Terms</h4>
               <p className="mt-2 text-amber-700">
-                A ${totalCost.deposit.toFixed(2)} deposit is required to secure your booking.
-                The remaining balance is due on the day of the event.
+                A ${totalCost.deposit.toFixed(2)} deposit is required to secure your booking. The
+                remaining balance is due on the day of the event.
               </p>
             </div>
 
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
               <h4 className="font-bold text-gray-800">📅 Cancellation Policy</h4>
-              <ul className="mt-2 list-disc list-inside text-gray-600 space-y-1">
+              <ul className="mt-2 list-inside list-disc space-y-1 text-gray-600">
                 <li>Cancel more than 7 days before: Full deposit refund</li>
                 <li>Cancel 3-7 days before: 50% deposit refund</li>
                 <li>Cancel less than 3 days before: No refund</li>
@@ -739,7 +822,7 @@ function AgreementModal({
 
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
               <h4 className="font-bold text-gray-800">🏠 Venue Requirements</h4>
-              <ul className="mt-2 list-disc list-inside text-gray-600 space-y-1">
+              <ul className="mt-2 list-inside list-disc space-y-1 text-gray-600">
                 <li>Outdoor cooking space with proper ventilation</li>
                 <li>Access to electrical outlet within 25 feet</li>
                 <li>Flat, stable surface for cooking equipment</li>
@@ -749,7 +832,7 @@ function AgreementModal({
 
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
               <h4 className="font-bold text-blue-800">ℹ️ Important Notes</h4>
-              <ul className="mt-2 list-disc list-inside text-blue-700 space-y-1">
+              <ul className="mt-2 list-inside list-disc space-y-1 text-blue-700">
                 <li>Chef will arrive 30 minutes before event start time</li>
                 <li>All cooking equipment is provided by My Hibachi</li>
                 <li>Guests with allergies should notify us in advance</li>
@@ -777,9 +860,21 @@ function AgreementModal({
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
                   </svg>
                   Processing...
                 </span>

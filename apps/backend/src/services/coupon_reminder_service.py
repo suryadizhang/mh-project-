@@ -4,6 +4,11 @@ Coupon Reminder Service - Milestone-Based SMS Reminders via RingCentral
 Strategy: Event-focused reminders that feel helpful, not spammy
 Duration: 6 months (180 days)
 Final Reminder: 2 weeks before expiration (customers need planning time)
+
+SSoT Compliance:
+- All pricing values (party minimum, max discount) come from business_config_service
+- NEVER hardcode business values in SMS templates
+- See: 20-SINGLE_SOURCE_OF_TRUTH.instructions.md
 """
 
 from datetime import datetime, timedelta, timezone
@@ -18,6 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # TODO: Manual migration needed for: DiscountCoupon, CustomerReview
 # from models import DiscountCoupon, CustomerReview
 from services.ringcentral_sms import ringcentral_sms
+from services.business_config_service import get_business_config
 from core.config import get_settings
 
 settings = get_settings()
@@ -44,15 +50,20 @@ class CouponReminderService:
         Purpose: Confirm coupon receipt and provide key details.
         """
         try:
+            # SSoT: Fetch dynamic pricing values from database
+            config = await get_business_config(self.db)
+            max_discount = int(config.deposit_amount_cents / 100)
+            min_order = int(config.party_minimum_cents / 100)
+
             expiry_formatted = expiration_date.strftime("%B %d, %Y")
 
             message = (
                 f"Hi {customer_name}! 🎉\n\n"
                 f"Thank you for your feedback! We've issued you a special coupon:\n\n"
                 f"Code: {coupon_code}\n"
-                f"Discount: {discount_percentage}% off (max $100)\n"
+                f"Discount: {discount_percentage}% off (max ${max_discount})\n"
                 f"Valid: 6 months (until {expiry_formatted})\n"
-                f"Minimum: $550 order\n\n"
+                f"Minimum: ${min_order} order\n\n"
                 f"Use it for your next hibachi celebration!\n"
                 f"Book now: {settings.BOOKING_URL}"
             )
@@ -231,13 +242,17 @@ class CouponReminderService:
         Purpose: Create action motivation.
         """
         try:
+            # SSoT: Fetch dynamic pricing values from database
+            config = await get_business_config(self.db)
+            max_discount = int(config.deposit_amount_cents / 100)
+
             expiry_formatted = expiration_date.strftime("%B %d")
 
             message = (
                 f"Hi {customer_name}! ⚠️\n\n"
                 f"Your coupon {coupon_code} expires in 1 month ({expiry_formatted})!\n\n"
                 f"🎯 Don't miss out on your discount\n"
-                f"💰 Save up to $100 on your next event\n\n"
+                f"💰 Save up to ${max_discount} on your next event\n\n"
                 f"Book before it expires: {settings.BOOKING_URL}"
             )
 
@@ -269,13 +284,17 @@ class CouponReminderService:
         User requirement: "people need to prepare time for the party"
         """
         try:
+            # SSoT: Fetch dynamic pricing values from database
+            config = await get_business_config(self.db)
+            max_discount = int(config.deposit_amount_cents / 100)
+
             expiry_formatted = expiration_date.strftime("%B %d")
 
             message = (
                 f"🚨 FINAL REMINDER {customer_name}!\n\n"
                 f"Your coupon {coupon_code} expires in 2 WEEKS ({expiry_formatted}).\n\n"
                 f"⏰ Last chance to use it!\n"
-                f"💰 Save up to $100\n"
+                f"💰 Save up to ${max_discount}\n"
                 f"📅 Book NOW to secure your date\n\n"
                 f"Don't let it expire: {settings.BOOKING_URL}\n\n"
                 f"Need help? Call us: {settings.SUPPORT_PHONE}"

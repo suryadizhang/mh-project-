@@ -44,10 +44,13 @@ from db.models.core import Booking, BookingStatus
 # MIGRATED: from models.booking → db.models.core
 from db.models.core import Payment
 from core.database import get_db
+from services.business_config_service import get_business_config_sync
 
 logger = logging.getLogger(__name__)
 
-MINIMUM_DEPOSIT = Decimal("100.00")
+# Get deposit amount from SSoT (Single Source of Truth)
+_config = get_business_config_sync()
+MINIMUM_DEPOSIT = Decimal(str(_config.deposit_amount_cents / 100))
 CUSTOMER_DEADLINE_HOURS = 2  # Customer-facing deadline (urgency)
 INTERNAL_DEADLINE_HOURS = 24  # Actual enforcement deadline (grace)
 

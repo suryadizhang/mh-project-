@@ -22,8 +22,8 @@ from db.models.core import Booking, BookingStatus, Customer
 from repositories.booking_repository import BookingRepository
 from schemas.booking import BookingCreate
 from services.audit_service import AuditService
+from services.business_config_service import get_business_config_sync
 from services.terms_acknowledgment_service import send_terms_for_phone_booking
-from typing import Optional
 from sqlalchemy.exc import IntegrityError
 
 logger = logging.getLogger(__name__)
@@ -44,7 +44,7 @@ class BookingService:
         self,
         repository: BookingRepository,
         cache: CacheService | None = None,
-        lead_service: Optional['LeadService'] = None,  # Forward reference to avoid circular import
+        lead_service: Optional["LeadService"] = None,  # Forward reference to avoid circular import
         audit_service: Optional[AuditService] = None,
     ):
         """
@@ -245,21 +245,19 @@ class BookingService:
         try:
             event_time_obj = datetime.strptime(booking_data.event_time, "%H:%M").time()
             event_datetime = datetime.combine(
-                booking_data.event_date,
-                event_time_obj,
-                tzinfo=timezone.utc
+                booking_data.event_date, event_time_obj, tzinfo=timezone.utc
             )
         except ValueError as e:
             raise BusinessLogicException(
                 message=f"Invalid time format '{booking_data.event_time}': expected HH:MM (24-hour format)",
-                error_code=ErrorCode.BAD_REQUEST
+                error_code=ErrorCode.BAD_REQUEST,
             ) from e
 
         # Check availability
         is_available = self.repository.check_availability(
             booking_datetime=event_datetime,
             party_size=booking_data.party_size,
-            exclude_booking_id=None
+            exclude_booking_id=None,
         )
 
         if not is_available:
@@ -307,20 +305,20 @@ class BookingService:
         booking_dict = booking_data.model_dump(exclude_unset=True)
 
         # Convert event_date + event_time → booking_datetime
-        if 'event_date' in booking_dict and 'event_time' in booking_dict:
-            event_date = booking_dict.pop('event_date')
-            event_time = booking_dict.pop('event_time')
+        if "event_date" in booking_dict and "event_time" in booking_dict:
+            event_date = booking_dict.pop("event_date")
+            event_time = booking_dict.pop("event_time")
 
             try:
                 # Use strptime for robust parsing and validation (consistent with line 247)
                 time_obj = datetime.strptime(event_time, "%H:%M").time()
-                booking_dict['booking_datetime'] = datetime.combine(
+                booking_dict["booking_datetime"] = datetime.combine(
                     event_date, time_obj, tzinfo=timezone.utc
                 )
             except ValueError as e:
                 raise BusinessLogicException(
                     message=f"Invalid time format '{event_time}': expected HH:MM (24-hour format)",
-                    error_code=ErrorCode.BAD_REQUEST
+                    error_code=ErrorCode.BAD_REQUEST,
                 ) from e
 
         booking_dict["status"] = BookingStatus.PENDING
@@ -369,7 +367,9 @@ class BookingService:
                         },
                         failure_reason=f"Race condition: Time slot {booking_data.event_time} was booked by another request",
                     )
-                    logger.info(f"Captured failed booking (race condition) as lead for {booking_data.contact_email}")
+                    logger.info(
+                        f"Captured failed booking (race condition) as lead for {booking_data.contact_email}"
+                    )
                 except Exception as lead_err:
                     logger.warning(f"Failed to capture lead from race condition: {lead_err}")
 
@@ -393,21 +393,31 @@ class BookingService:
                 logger.warning(f"Failed to log booking creation audit: {e}")
 
         # Send terms & conditions acknowledgment for phone/SMS bookings
-        booking_source = getattr(booking_data, 'source', None) or getattr(booking_data, 'booking_source', 'web')
-        if booking_source in ['phone', 'sms', 'whatsapp']:
+        booking_source = getattr(booking_data, "source", None) or getattr(
+            booking_data, "booking_source", "web"
+        )
+        if booking_source in ["phone", "sms", "whatsapp"]:
             try:
                 # Get customer info for SMS
-                customer = self.repository.db.query(Customer).filter_by(id=booking_data.customer_id).first()
+                customer = (
+                    self.repository.db.query(Customer)
+                    .filter_by(id=booking_data.customer_id)
+                    .first()
+                )
                 if customer and customer.phone:
                     await send_terms_for_phone_booking(
                         db=self.repository.db,
                         customer_phone=customer.phone,
                         customer_name=customer.name,
-                        booking_id=booking.id
+                        booking_id=booking.id,
                     )
-                    logger.info(f"📱 Terms SMS sent to {customer.phone[-4:]} for booking {booking.id}")
+                    logger.info(
+                        f"📱 Terms SMS sent to {customer.phone[-4:]} for booking {booking.id}"
+                    )
                 else:
-                    logger.warning(f"⚠️ Cannot send terms SMS: customer {booking_data.customer_id} has no phone")
+                    logger.warning(
+                        f"⚠️ Cannot send terms SMS: customer {booking_data.customer_id} has no phone"
+                    )
             except Exception as e:
                 # Don't fail booking if terms SMS fails - staff can follow up manually
                 logger.error(f"❌ Failed to send terms SMS for booking {booking.id}: {e}")
@@ -489,7 +499,10 @@ class BookingService:
                     record_id=booking_id,
                     action="UPDATE",
                     old_values=old_values,
-                    new_values={"status": "confirmed", "confirmed_at": booking.confirmed_at.isoformat()},
+                    new_values={
+                        "status": "confirmed",
+                        "confirmed_at": booking.confirmed_at.isoformat(),
+                    },
                 )
             except Exception as e:
                 logger.warning(f"Failed to log booking confirmation audit: {e}")
@@ -536,7 +549,7 @@ class BookingService:
         old_values = {
             "status": booking.status.value,
             "cancelled_at": None,
-            "cancellation_reason": None
+            "cancellation_reason": None,
         }
 
         # Update status
@@ -557,7 +570,7 @@ class BookingService:
                     new_values={
                         "status": "cancelled",
                         "cancelled_at": booking.cancelled_at.isoformat(),
-                        "cancellation_reason": reason
+                        "cancellation_reason": reason,
                     },
                 )
             except Exception as e:
@@ -571,7 +584,7 @@ class BookingService:
         self,
         booking_id: UUID,
         staff_member: str,
-        reason: str = "Hold requested by customer service"
+        reason: str = "Hold requested by customer service",
     ) -> Booking:
         """
         Place an administrative hold on a booking to prevent auto-cancellation.
@@ -628,9 +641,7 @@ class BookingService:
             except Exception as e:
                 logger.warning(f"Failed to log hold action: {e}")
 
-        logger.info(
-            f"📌 Booking {booking_id} placed on hold by {staff_member}. Reason: {reason}"
-        )
+        logger.info(f"📌 Booking {booking_id} placed on hold by {staff_member}. Reason: {reason}")
         return updated_booking
 
     @invalidate_cache("booking:*")
@@ -728,10 +739,14 @@ class BookingService:
         """
         booking = await self.get_booking_by_id(booking_id)
 
-        # Validate amount
-        if amount < 100.00:
+        # Get deposit requirement from SSoT (Single Source of Truth)
+        config = get_business_config_sync()
+        required_deposit = config.deposit_amount_cents / 100  # Convert cents to dollars
+
+        # Validate amount against SSoT value
+        if amount < required_deposit:
             raise BusinessLogicException(
-                message=f"Deposit amount ${amount:.2f} is less than required $100.00",
+                message=f"Deposit amount ${amount:.2f} is less than required ${required_deposit:.2f}",
                 error_code=ErrorCode.BAD_REQUEST,
             )
 
@@ -831,11 +846,11 @@ class BookingService:
             logger.error(
                 f"Invalid time format in overlap check: "
                 f"slot1=({slot1_start}, {slot1_end}), slot2={slot2_start}",
-                exc_info=True
+                exc_info=True,
             )
             raise BusinessLogicException(
-                message=f"Invalid time format detected in availability check",
-                error_code=ErrorCode.DATA_INTEGRITY_ERROR
+                message="Invalid time format detected in availability check",
+                error_code=ErrorCode.DATA_INTEGRITY_ERROR,
             ) from e
 
         # Convert to minutes since midnight for accurate comparison

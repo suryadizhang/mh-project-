@@ -198,14 +198,27 @@ const dietaryBadges = [
 
 export default function ValuePropositionSection() {
   const { trackPageEngagement } = useAnalytics();
-  const { adultPrice, childPrice, childFreeUnderAge, partyMinimum, depositAmount, isLoading: pricingLoading } = usePricing();
+  const {
+    adultPrice,
+    childPrice,
+    childFreeUnderAge,
+    partyMinimum,
+    depositAmount,
+    freeMiles,
+    perMileRate,
+    isLoading: pricingLoading,
+  } = usePricing();
 
   // Safe display values for template usage
   const displayAdultPrice = pricingLoading || adultPrice === undefined ? '...' : adultPrice;
   const displayChildPrice = pricingLoading || childPrice === undefined ? '...' : childPrice;
-  const displayChildFreeUnderAge = pricingLoading || childFreeUnderAge === undefined ? 5 : childFreeUnderAge;
+  const displayChildFreeUnderAge =
+    pricingLoading || childFreeUnderAge === undefined ? 5 : childFreeUnderAge;
   const displayPartyMinimum = pricingLoading || partyMinimum === undefined ? 0 : partyMinimum;
-  const displayDepositAmount = pricingLoading || depositAmount === undefined ? '...' : depositAmount;
+  const displayDepositAmount =
+    pricingLoading || depositAmount === undefined ? '...' : depositAmount;
+  const displayFreeMiles = pricingLoading || freeMiles === undefined ? 30 : freeMiles;
+  const displayPerMileRate = pricingLoading || perMileRate === undefined ? 2 : perMileRate;
 
   return (
     <section className="value-proposition-section bg-gradient-to-br from-gray-50 to-gray-100 py-20">
@@ -525,10 +538,17 @@ export default function ValuePropositionSection() {
           </div>
           <div className="mt-6 text-center">
             <p className="text-gray-600">
-              <span className="font-semibold">${displayPartyMinimum} minimum</span> (approximately {displayPartyMinimum && displayAdultPrice !== '...' ? Math.ceil(displayPartyMinimum / Number(displayAdultPrice)) : '...'} adults) •
-              <span className="font-semibold"> ${displayDepositAmount} refundable deposit</span> secures your date
+              <span className="font-semibold">${displayPartyMinimum} minimum</span> (approximately{' '}
+              {displayPartyMinimum && displayAdultPrice !== '...'
+                ? Math.ceil(displayPartyMinimum / Number(displayAdultPrice))
+                : '...'}{' '}
+              adults) •
+              <span className="font-semibold"> ${displayDepositAmount} refundable deposit</span>{' '}
+              secures your date
             </p>
-            <p className="mt-2 text-sm text-gray-500">First 30 miles free travel • $2/mile after</p>
+            <p className="mt-2 text-sm text-gray-500">
+              First {displayFreeMiles} miles free travel • ${displayPerMileRate}/mile after
+            </p>
           </div>
         </div>
       </div>
