@@ -846,26 +846,190 @@ server stable for 1+ week □ All endpoints tested in production
 
 ---
 
-## �📝 Quick Commands Cheat Sheet
+## 📝 Quick Commands Cheat Sheet
+
+### 🌐 API URLs (Copy-Paste Ready)
+
+| Environment             | URL                                | Access                  |
+| ----------------------- | ---------------------------------- | ----------------------- |
+| **Production External** | `https://mhapi.mysticdatanode.net` | Public (via Cloudflare) |
+| **Production Internal** | `http://127.0.0.1:8000`            | VPS only                |
+| **Staging Internal**    | `http://127.0.0.1:8002`            | VPS only                |
+| **Customer Site**       | `https://myhibachichef.com`        | Public (Vercel)         |
+| **Admin Panel**         | `https://admin.mysticdatanode.net` | Public (Vercel)         |
+
+### 🔑 SSH Access
 
 ```bash
-# SSH to production
+# SSH to VPS (from any terminal)
 ssh root@108.175.12.154
 
-# Check backend health
+# SSH with specific key (if needed)
+ssh -i ~/.ssh/myhibachi_deploy root@108.175.12.154
+```
+
+### 💚 Health Checks (PowerShell - Windows)
+
+```powershell
+# Production API health check (external via Cloudflare)
+Invoke-RestMethod -Uri "https://mhapi.mysticdatanode.net/health" -Method GET
+
+# Alternative with Invoke-WebRequest
+Invoke-WebRequest -Uri "https://mhapi.mysticdatanode.net/health" -Method GET
+
+# Check API docs endpoint
+Invoke-RestMethod -Uri "https://mhapi.mysticdatanode.net/docs" -Method GET
+```
+
+### 💚 Health Checks (Bash/Linux/VPS)
+
+```bash
+# External production health (from anywhere)
 curl https://mhapi.mysticdatanode.net/health
 
-# View backend logs
-ssh root@108.175.12.154 "journalctl -u myhibachi-backend@8001 -f"
+# Internal production health (from VPS only)
+curl http://127.0.0.1:8000/health
 
-# Restart backend
-ssh root@108.175.12.154 "systemctl restart myhibachi-backend@8001"
+# Internal staging health (from VPS only)
+curl http://127.0.0.1:8002/health
 
-# Database backup
-ssh root@108.175.12.154 "pg_dump myhibachi_production > backup.sql"
+# Verbose health check (shows HTTP status)
+curl -v http://127.0.0.1:8000/health
+```
 
-# Run migration
-ssh root@108.175.12.154 "psql -U myhibachi_user -d myhibachi_production -f migration.sql"
+### 🔄 Service Management (Run on VPS after SSH)
+
+```bash
+# ═══════════════════════════════════════════════════════════
+# PRODUCTION SERVICE (myhibachi-backend.service)
+# ═══════════════════════════════════════════════════════════
+
+# Check production status
+sudo systemctl status myhibachi-backend.service
+
+# Restart production
+sudo systemctl restart myhibachi-backend.service
+
+# View production logs (last 50 lines)
+sudo journalctl -u myhibachi-backend.service -n 50
+
+# Follow production logs live
+sudo journalctl -u myhibachi-backend.service -f
+
+# ═══════════════════════════════════════════════════════════
+# STAGING SERVICE (myhibachi-staging.service)
+# ═══════════════════════════════════════════════════════════
+
+# Check staging status
+sudo systemctl status myhibachi-staging.service
+
+# Restart staging
+sudo systemctl restart myhibachi-staging.service
+
+# View staging logs (last 50 lines)
+sudo journalctl -u myhibachi-staging.service -n 50
+
+# Follow staging logs live
+sudo journalctl -u myhibachi-staging.service -f
+```
+
+### 📦 Git Deployment (Run on VPS after SSH)
+
+```bash
+# Navigate to backend directory
+cd /var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend/api
+
+# Pull latest code from main
+git pull origin main
+
+# Activate virtual environment
+source .venv/bin/activate
+
+# Install/update dependencies
+pip install -r requirements.txt
+
+# Restart services after deployment
+sudo systemctl restart myhibachi-backend.service
+sudo systemctl restart myhibachi-staging.service
+
+# Verify health after restart
+curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8002/health
+```
+
+### 🗄️ Database Commands (Run on VPS after SSH)
+
+```bash
+# Backup production database
+pg_dump -U myhibachi_user myhibachi_production > backup_$(date +%Y%m%d_%H%M).sql
+
+# Backup staging database
+pg_dump -U myhibachi_staging_user myhibachi_staging > staging_backup_$(date +%Y%m%d_%H%M).sql
+
+# Run migration on staging (ALWAYS FIRST!)
+sudo -u postgres psql -d myhibachi_staging -f /path/to/migration.sql
+
+# Run migration on production (after staging verified)
+sudo -u postgres psql -d myhibachi_production -f /path/to/migration.sql
+
+# Check PostgreSQL status
+sudo systemctl status postgresql
+
+# Check Redis status
+redis-cli ping
+```
+
+### 🔥 Emergency Commands
+
+```bash
+# Quick restart both services
+sudo systemctl restart myhibachi-backend.service && sudo systemctl restart myhibachi-staging.service
+
+# Check if services are running
+sudo systemctl is-active myhibachi-backend.service
+sudo systemctl is-active myhibachi-staging.service
+
+# View last errors in production
+sudo journalctl -u myhibachi-backend.service -p err -n 20
+
+# Kill and restart if frozen
+sudo systemctl stop myhibachi-backend.service
+sudo systemctl start myhibachi-backend.service
+```
+
+### 📋 Full Deployment Workflow (Copy-Paste)
+
+**Step 1: From Local Machine (PowerShell)**
+
+```powershell
+# Navigate to project
+cd "C:\Users\surya\projects\MH webapps"
+
+# Check status and commit
+git status
+git add .
+git commit -m "feat(batch-X): your message"
+git push origin main
+```
+
+**Step 2: On VPS (After SSH)**
+
+```bash
+# Full deployment sequence
+cd /var/www/vhosts/myhibachichef.com/mhapi.mysticdatanode.net/backend/api
+git pull origin main
+source .venv/bin/activate
+pip install -r requirements.txt
+sudo systemctl restart myhibachi-backend.service
+sudo systemctl restart myhibachi-staging.service
+curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8002/health
+```
+
+**Step 3: Verify from Local (PowerShell)**
+
+```powershell
+Invoke-RestMethod -Uri "https://mhapi.mysticdatanode.net/health" -Method GET
 ```
 
 ---

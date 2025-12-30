@@ -143,10 +143,11 @@ const FormInput = ({
       min={min}
       max={max}
       autoComplete={autoComplete}
-      className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${error
-        ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
-        : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
-        }`}
+      className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
+        error
+          ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
+          : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
+      }`}
       required={required}
     />
     {error && (
@@ -214,7 +215,16 @@ const UpgradeInput = ({ label, price, value, onChange, hint, max = 99 }: Upgrade
 
 export function QuoteCalculator() {
   // Fetch dynamic pricing from database - NO FALLBACKS, API is source of truth
-  const { adultPrice, childPrice, childFreeUnderAge, partyMinimum, depositAmount, isLoading: pricingLoading } = usePricing();
+  const {
+    adultPrice,
+    childPrice,
+    childFreeUnderAge,
+    partyMinimum,
+    depositAmount,
+    freeMiles,
+    perMileRate,
+    isLoading: pricingLoading,
+  } = usePricing();
 
   // React Hook Form setup with validation
   const {
@@ -281,11 +291,14 @@ export function QuoteCalculator() {
   const autocompleteRef = useRef<any>(null);
 
   // Helper function to update form values (for upgrade inputs and Google autocomplete)
-  const handleInputChange = useCallback((field: keyof QuoteFormData, value: number | string | boolean) => {
-    setValue(field, value as never, { shouldValidate: true });
-    setQuoteResult(null);
-    setCalculationError('');
-  }, [setValue]);
+  const handleInputChange = useCallback(
+    (field: keyof QuoteFormData, value: number | string | boolean) => {
+      setValue(field, value as never, { shouldValidate: true });
+      setQuoteResult(null);
+      setCalculationError('');
+    },
+    [setValue],
+  );
 
   // Initialize Google Places Autocomplete
   useEffect(() => {
@@ -662,10 +675,11 @@ export function QuoteCalculator() {
                     },
                   })}
                   placeholder="Enter your name"
-                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${errors.name
-                    ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                    : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
-                    }`}
+                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
+                    errors.name
+                      ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                      : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
+                  }`}
                 />
                 {errors.name && (
                   <p className="animate-in slide-in-from-top-1 flex items-center gap-1 text-sm text-red-600">
@@ -692,7 +706,8 @@ export function QuoteCalculator() {
                     required: 'Please enter your phone number',
                     validate: (value) => {
                       const digitsOnly = value.replace(/\D/g, '');
-                      if (digitsOnly.length < 10) return 'Phone number must have at least 10 digits';
+                      if (digitsOnly.length < 10)
+                        return 'Phone number must have at least 10 digits';
                       return true;
                     },
                     onChange: () => {
@@ -701,10 +716,11 @@ export function QuoteCalculator() {
                     },
                   })}
                   placeholder="(916) 740-8768"
-                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${errors.phone
-                    ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                    : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
-                    }`}
+                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
+                    errors.phone
+                      ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                      : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
+                  }`}
                 />
                 {errors.phone ? (
                   <p className="flex items-center gap-1 text-sm text-red-600">
@@ -724,7 +740,7 @@ export function QuoteCalculator() {
                 >
                   <Mail className="h-4 w-4 text-gray-400" />
                   Email Address
-                  <span className="text-gray-400 text-xs font-normal">(optional)</span>
+                  <span className="text-xs font-normal text-gray-400">(optional)</span>
                 </label>
                 <input
                   id="email"
@@ -740,10 +756,11 @@ export function QuoteCalculator() {
                     },
                   })}
                   placeholder="your@email.com"
-                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${errors.email
-                    ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                    : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
-                    }`}
+                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
+                    errors.email
+                      ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                      : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
+                  }`}
                 />
                 {errors.email ? (
                   <p className="flex items-center gap-1 text-sm text-red-600">
@@ -751,7 +768,9 @@ export function QuoteCalculator() {
                     {errors.email.message}
                   </p>
                 ) : (
-                  <p className="text-xs text-gray-500">Get your quote emailed for future reference</p>
+                  <p className="text-xs text-gray-500">
+                    Get your quote emailed for future reference
+                  </p>
                 )}
               </div>
             </div>
@@ -790,10 +809,9 @@ export function QuoteCalculator() {
                       setCalculationError('');
                     },
                   })}
-                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:ring-offset-1 focus:outline-none ${errors.adults
-                    ? 'border-red-300 bg-red-50'
-                    : 'border-gray-200'
-                    }`}
+                  className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:ring-offset-1 focus:outline-none ${
+                    errors.adults ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                  }`}
                 />
                 {errors.adults ? (
                   <p className="flex items-center gap-1 text-sm text-red-600">
@@ -921,10 +939,9 @@ export function QuoteCalculator() {
                   venueAddressInputRef.current = e;
                 }}
                 placeholder="Start typing your address... (e.g., 123 Main Street)"
-                className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:ring-offset-1 focus:outline-none ${errors.venueAddress
-                  ? 'border-red-300 bg-red-50'
-                  : 'border-gray-200'
-                  }`}
+                className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:ring-offset-1 focus:outline-none ${
+                  errors.venueAddress ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                }`}
                 autoComplete="off"
               />
               {errors.venueAddress ? (
@@ -1049,8 +1066,8 @@ export function QuoteCalculator() {
                 </h4>
                 <p className="text-blue-800">
                   <strong>Enter your venue address above</strong> and we&apos;ll calculate your
-                  exact travel fee using Google Maps! The first 30 miles are FREE, then $2 per mile
-                  for distances beyond that.
+                  exact travel fee using Google Maps! The first {freeMiles ?? 30} miles are FREE,
+                  then ${perMileRate ?? 2} per mile for distances beyond that.
                 </p>
                 <p className="mt-2 flex items-center gap-1 text-blue-700">
                   <span className="text-lg">✨</span>
@@ -1087,15 +1104,29 @@ export function QuoteCalculator() {
                   <strong>I consent to receive text messages from My Hibachi Chef</strong>
                 </span>
                 <p className="mt-2 text-xs text-gray-600">
-                  By checking this box, I voluntarily agree to receive the following types of SMS messages from my Hibachi LLC (doing business as My Hibachi Chef):
+                  By checking this box, I voluntarily agree to receive the following types of SMS
+                  messages from my Hibachi LLC (doing business as My Hibachi Chef):
                 </p>
                 <ul className="mt-1 ml-4 list-disc text-xs text-gray-600">
-                  <li><strong>Booking confirmations</strong> with deposit payment instructions</li>
-                  <li><strong>Event reminders</strong> 48 hours and 24 hours before your event</li>
-                  <li><strong>Chef notifications</strong> about your assigned chef and arrival</li>
-                  <li><strong>Booking updates</strong> for any changes to your reservation</li>
-                  <li><strong>Customer support</strong> responses to your inquiries</li>
-                  <li><strong>Promotional offers</strong> (reply STOP to opt out of marketing separately)</li>
+                  <li>
+                    <strong>Booking confirmations</strong> with deposit payment instructions
+                  </li>
+                  <li>
+                    <strong>Event reminders</strong> 48 hours and 24 hours before your event
+                  </li>
+                  <li>
+                    <strong>Chef notifications</strong> about your assigned chef and arrival
+                  </li>
+                  <li>
+                    <strong>Booking updates</strong> for any changes to your reservation
+                  </li>
+                  <li>
+                    <strong>Customer support</strong> responses to your inquiries
+                  </li>
+                  <li>
+                    <strong>Promotional offers</strong> (reply STOP to opt out of marketing
+                    separately)
+                  </li>
                 </ul>
                 <p className="mt-2 text-xs text-gray-600">
                   Message frequency varies. Message and data rates may apply. Reply{' '}
@@ -1119,19 +1150,24 @@ export function QuoteCalculator() {
                 </p>
               </label>
             </div>
-            <p id="smsConsentHelp" className="mt-3 rounded-lg bg-gray-100 p-2 text-xs text-gray-600">
-              <strong>What happens if I don&apos;t check this box?</strong> You will still receive essential
-              transactional SMS messages related to your booking (confirmations, reminders, chef updates).
-              However, you will not receive promotional offers or marketing messages. You can opt in later by texting START.
+            <p
+              id="smsConsentHelp"
+              className="mt-3 rounded-lg bg-gray-100 p-2 text-xs text-gray-600"
+            >
+              <strong>What happens if I don&apos;t check this box?</strong> You will still receive
+              essential transactional SMS messages related to your booking (confirmations,
+              reminders, chef updates). However, you will not receive promotional offers or
+              marketing messages. You can opt in later by texting START.
             </p>
           </div>
 
           {/* Calculate Button */}
           <button
-            className={`w-full transform rounded-xl px-8 py-4 text-lg font-bold transition-all duration-300 ${isCalculating
-              ? 'cursor-not-allowed bg-gray-400'
-              : 'bg-gradient-to-r from-red-600 to-red-700 hover:scale-[1.02] hover:from-red-700 hover:to-red-800 hover:shadow-xl active:scale-[0.98]'
-              } text-white shadow-lg`}
+            className={`w-full transform rounded-xl px-8 py-4 text-lg font-bold transition-all duration-300 ${
+              isCalculating
+                ? 'cursor-not-allowed bg-gray-400'
+                : 'bg-gradient-to-r from-red-600 to-red-700 hover:scale-[1.02] hover:from-red-700 hover:to-red-800 hover:shadow-xl active:scale-[0.98]'
+            } text-white shadow-lg`}
             onClick={calculateQuote}
             disabled={isCalculating || quoteData.adults === 0}
           >
@@ -1186,7 +1222,8 @@ export function QuoteCalculator() {
                 <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
                   <span className="font-medium">Minimum order: ${quoteResult.partyMinimum}</span>
                   <span className="block text-amber-600">
-                    (Your selections ${quoteResult.baseTotal + quoteResult.upgradeTotal} → adjusted to ${quoteResult.partyMinimum})
+                    (Your selections ${quoteResult.baseTotal + quoteResult.upgradeTotal} → adjusted
+                    to ${quoteResult.partyMinimum})
                   </span>
                 </div>
               )}
@@ -1289,8 +1326,8 @@ export function QuoteCalculator() {
               {/* Deposit Notice */}
               <div className="rounded-xl border border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 p-4">
                 <p className="text-sm text-green-800">
-                  💳 <strong>${quoteResult.depositRequired ?? 100} deposit</strong> required today to confirm your booking.
-                  Balance due on event day.
+                  💳 <strong>${quoteResult.depositRequired ?? 100} deposit</strong> required today
+                  to confirm your booking. Balance due on event day.
                 </p>
               </div>
 
@@ -1350,7 +1387,8 @@ export function QuoteCalculator() {
                   <li className="flex items-start gap-2">
                     <span className="mt-0.5 text-green-500">✓</span>
                     <span>
-                      <strong>Minimum:</strong> ${quoteResult.partyMinimum} party total automatically applied
+                      <strong>Minimum:</strong> ${quoteResult.partyMinimum} party total
+                      automatically applied
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
@@ -1363,14 +1401,15 @@ export function QuoteCalculator() {
                   <li className="flex items-start gap-2">
                     <span className="mt-0.5 text-green-500">✓</span>
                     <span>
-                      <strong>Travel Fee:</strong> First 30 miles FREE, then $2/mile
+                      <strong>Travel Fee:</strong> First {freeMiles ?? 30} miles FREE, then $
+                      {perMileRate ?? 2}/mile
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="mt-0.5 text-green-500">✓</span>
                     <span>
-                      <strong>Deposit:</strong> ${depositAmount ?? 100} refundable deposit required (refunded if
-                      canceled 7+ days before event)
+                      <strong>Deposit:</strong> ${depositAmount ?? 100} refundable deposit required
+                      (refunded if canceled 7+ days before event)
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
@@ -1433,12 +1472,13 @@ export function QuoteCalculator() {
                                 type="button"
                                 onClick={() => slot.isAvailable && setSelectedTime(slot.time)}
                                 disabled={!slot.isAvailable}
-                                className={`rounded-lg px-4 py-3 text-center transition-all duration-200 ${selectedTime === slot.time
-                                  ? 'scale-105 bg-blue-600 text-white shadow-lg'
-                                  : slot.isAvailable
-                                    ? 'border-2 border-gray-200 bg-white hover:border-blue-400 hover:bg-blue-50'
-                                    : 'cursor-not-allowed bg-gray-100 text-gray-400 line-through'
-                                  }`}
+                                className={`rounded-lg px-4 py-3 text-center transition-all duration-200 ${
+                                  selectedTime === slot.time
+                                    ? 'scale-105 bg-blue-600 text-white shadow-lg'
+                                    : slot.isAvailable
+                                      ? 'border-2 border-gray-200 bg-white hover:border-blue-400 hover:bg-blue-50'
+                                      : 'cursor-not-allowed bg-gray-100 text-gray-400 line-through'
+                                }`}
                               >
                                 <div className="font-bold">{slot.label || slot.time}</div>
                                 <div className="mt-1 text-xs">

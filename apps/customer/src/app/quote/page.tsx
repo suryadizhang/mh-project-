@@ -1,16 +1,16 @@
-'use client'
+'use client';
 
-import '@/styles/quote-calculator.css'
+import '@/styles/quote-calculator.css';
 
-import { usePricing } from '@/hooks/usePricing'
-import { QuoteCalculator } from '@/components/quote/QuoteCalculator'
+import { usePricing } from '@/hooks/usePricing';
+import { QuoteCalculator } from '@/components/quote/QuoteCalculator';
 
 export default function QuotePage() {
-  const { adultPrice, childPrice, isLoading } = usePricing()
+  const { adultPrice, childPrice, freeMiles, perMileRate, isLoading } = usePricing();
 
   // Build dynamic price range for SEO - use placeholder when loading
-  const displayAdultPrice = adultPrice ?? 55 // Fallback for SEO only (not used in calculations)
-  const priceRange = `$${displayAdultPrice}-$${displayAdultPrice + 15} per person`
+  const displayAdultPrice = adultPrice ?? 55; // Fallback for SEO only (not used in calculations)
+  const priceRange = `$${displayAdultPrice}-$${displayAdultPrice + 15} per person`;
 
   return (
     <>
@@ -35,12 +35,12 @@ export default function QuotePage() {
                 geoMidpoint: {
                   '@type': 'GeoCoordinates',
                   latitude: 37.5485,
-                  longitude: -121.9886
+                  longitude: -121.9886,
                 },
-                geoRadius: 150
-              }
-            }
-          })
+                geoRadius: 150,
+              },
+            },
+          }),
         }}
       />
 
@@ -84,8 +84,8 @@ export default function QuotePage() {
               <div className="info-card">
                 <h3>🚛 Travel Fee Transparency</h3>
                 <p>
-                  First 30 miles from our location are completely free. After that, it&apos;s just
-                  $2 per mile. No hidden fees or surprise charges.
+                  First {freeMiles ?? 30} miles from our location are completely free. After that,
+                  it&apos;s just ${perMileRate ?? 2} per mile. No hidden fees or surprise charges.
                 </p>
               </div>
             </div>
@@ -119,5 +119,5 @@ export default function QuotePage() {
         </section>
       </main>
     </>
-  )
+  );
 }
