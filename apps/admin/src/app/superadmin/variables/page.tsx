@@ -1,182 +1,149 @@
 'use client';
 
-import { AlertTriangle, Loader2, Save, Sliders } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { AlertTriangle, CheckCircle, Clock, Database, Loader2, RefreshCw, Save, Sliders, X, XCircle } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useConfigVariables } from '@/hooks/useApi';
+import { configService, ConfigVariable, ApprovalRequest } from '@/services/api';
 
+/**
+ * UI Variable interface - maps from backend ConfigVariable
+ */
 interface Variable {
   key: string;
   value: string | number | boolean;
   type: 'string' | 'number' | 'boolean';
   category:
-    | 'pricing'
-    | 'business'
-    | 'feature'
-    | 'environment'
-    | 'ai'
-    | 'monitoring';
+  | 'pricing'
+  | 'business'
+  | 'feature'
+  | 'environment'
+  | 'ai'
+  | 'monitoring';
   description: string;
   source: string;
   priority: 'critical' | 'high' | 'medium' | 'low';
   lastModified?: string;
+  // Backend fields for updates
+  backendCategory?: string;
+}
+
+/**
+ * Map backend category to frontend category
+ */
+function mapCategoryToFrontend(
+  backendCategory: string
+): Variable['category'] {
+  const categoryMap: Record<string, Variable['category']> = {
+    pricing: 'pricing',
+    deposit: 'pricing', // deposit maps to pricing for display
+    travel: 'pricing', // travel maps to pricing for display
+    booking: 'business',
+    feature: 'feature',
+    ai: 'ai',
+    environment: 'environment',
+    monitoring: 'monitoring',
+  };
+  return categoryMap[backendCategory] || 'business';
+}
+
+/**
+ * Determine priority based on category
+ */
+function determinePriority(category: string): Variable['priority'] {
+  const priorityMap: Record<string, Variable['priority']> = {
+    pricing: 'critical',
+    deposit: 'critical',
+    travel: 'high',
+    booking: 'high',
+    feature: 'medium',
+    ai: 'high',
+    environment: 'critical',
+    monitoring: 'medium',
+  };
+  return priorityMap[category] || 'medium';
+}
+
+/**
+ * Determine value type from the actual value
+ */
+function determineType(value: unknown): Variable['type'] {
+  if (typeof value === 'boolean') return 'boolean';
+  if (typeof value === 'number') return 'number';
+  return 'string';
+}
+
+/**
+ * Map backend ConfigVariable to frontend Variable
+ */
+function mapToVariable(cv: ConfigVariable): Variable {
+  return {
+    key: cv.key,
+    value: cv.value as string | number | boolean,
+    type: determineType(cv.value),
+    category: mapCategoryToFrontend(cv.category),
+    description: cv.description || `${cv.category} configuration`,
+    source: 'SSoT Database',
+    priority: determinePriority(cv.category),
+    lastModified: cv.updated_at
+      ? new Date(cv.updated_at).toISOString().split('T')[0]
+      : undefined,
+    backendCategory: cv.category, // Keep original for API calls
+  };
 }
 
 export default function VariablesManagementPage() {
   const [variables, setVariables] = useState<Variable[]>([]);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [pendingChanges, setPendingChanges] = useState<
     Record<string, string | number | boolean>
   >({});
-  // TODO: Implement sync status tracking
-  // const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
-  // const [lastSync, setLastSync] = useState<string>('');
-  // const [dataSource, setDataSource] = useState<'local' | 'gsm' | 'hybrid'>('hybrid');
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [pendingApprovals, setPendingApprovals] = useState<ApprovalRequest[]>([]);
+  const [approvalsLoading, setApprovalsLoading] = useState(false);
 
-  // Sample data - in real implementation, fetch from API
+  // Fetch variables from SSoT API
+  const {
+    data: configVars,
+    loading,
+    error,
+    refetch,
+  } = useConfigVariables();
+
+  // Transform API data to UI format when it changes
   useEffect(() => {
-    const sampleVariables: Variable[] = [
-      // Pricing Variables (Critical)
-      {
-        key: 'BASE_PRICE_PER_PERSON',
-        value: 75,
-        type: 'number',
-        category: 'pricing',
-        description: 'Base hibachi price per person before add-ons',
-        source: 'ai_booking_config_v2.py',
-        priority: 'critical',
-        lastModified: '2025-01-30',
-      },
-      {
-        key: 'DEPOSIT_AMOUNT',
-        value: 100,
-        type: 'number',
-        category: 'pricing',
-        description: 'Fixed deposit amount for all bookings',
-        source: 'faq.json, policies.json',
-        priority: 'critical',
-        lastModified: '2025-01-30',
-      },
-      {
-        key: 'TRAVEL_FEE_BASE_RATE',
-        value: 1.25,
-        type: 'number',
-        category: 'pricing',
-        description: 'Base travel fee per mile',
-        source: 'ai_booking_config_v2.py',
-        priority: 'critical',
-        lastModified: '2025-01-28',
-      },
+    if (configVars && Array.isArray(configVars)) {
+      const mappedVariables = configVars.map(mapToVariable);
+      setVariables(mappedVariables);
+    }
+  }, [configVars]);
 
-      // Business Rules (High Priority)
-      {
-        key: 'MINIMUM_GUESTS',
-        value: 8,
-        type: 'number',
-        category: 'business',
-        description: 'Minimum number of guests required for booking',
-        source: 'ai_booking_config_v2.py',
-        priority: 'high',
-        lastModified: '2025-01-25',
-      },
-      {
-        key: 'MAXIMUM_GUESTS',
-        value: 20,
-        type: 'number',
-        category: 'business',
-        description: 'Maximum guests per chef',
-        source: 'ai_booking_config_v2.py',
-        priority: 'high',
-        lastModified: '2025-01-25',
-      },
-      {
-        key: 'ADVANCE_BOOKING_HOURS',
-        value: 48,
-        type: 'number',
-        category: 'business',
-        description: 'Minimum advance notice required for booking',
-        source: 'policies.json',
-        priority: 'high',
-        lastModified: '2025-01-20',
-      },
-
-      // Feature Flags (Medium Priority)
-      {
-        key: 'FEATURE_AI_BOOKING_V3',
-        value: true,
-        type: 'boolean',
-        category: 'feature',
-        description: 'Enable AI Booking System V3',
-        source: 'env.ts',
-        priority: 'medium',
-        lastModified: '2025-01-30',
-      },
-      {
-        key: 'FEATURE_TRAVEL_FEE_V2',
-        value: false,
-        type: 'boolean',
-        category: 'feature',
-        description: 'Enable Travel Fee Calculation V2',
-        source: 'env.ts',
-        priority: 'medium',
-        lastModified: '2025-01-28',
-      },
-
-      // AI System Variables
-      {
-        key: 'AI_MODEL_VERSION',
-        value: 'gpt-4o',
-        type: 'string',
-        category: 'ai',
-        description: 'OpenAI model version for customer support',
-        source: 'ai_booking_config_v2.py',
-        priority: 'high',
-        lastModified: '2025-01-30',
-      },
-      {
-        key: 'AI_MAX_TOKENS',
-        value: 1500,
-        type: 'number',
-        category: 'ai',
-        description: 'Maximum tokens for AI responses',
-        source: 'ai_booking_config_v2.py',
-        priority: 'medium',
-        lastModified: '2025-01-25',
-      },
-
-      // Environment Variables
-      {
-        key: 'DATABASE_URL',
-        value: '***PROTECTED***',
-        type: 'string',
-        category: 'environment',
-        description: 'Database connection string',
-        source: '.env',
-        priority: 'critical',
-        lastModified: '2025-01-15',
-      },
-
-      // Monitoring Variables
-      {
-        key: 'ERROR_RATE_THRESHOLD',
-        value: 0.05,
-        type: 'number',
-        category: 'monitoring',
-        description: 'Alert threshold for error rate (5%)',
-        source: 'monitoring_config.py',
-        priority: 'medium',
-        lastModified: '2025-01-20',
-      },
-    ];
-
-    setVariables(sampleVariables);
-    setLoading(false);
+  // Fetch pending approvals for two-person approval workflow
+  const fetchPendingApprovals = useCallback(async () => {
+    setApprovalsLoading(true);
+    try {
+      const response = await configService.getPendingApprovals();
+      if (response.success && response.data) {
+        // API returns { data: ApprovalRequest[], total: number }
+        setPendingApprovals(response.data.data || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch pending approvals:', err);
+    } finally {
+      setApprovalsLoading(false);
+    }
   }, []);
+
+  // Load pending approvals on mount and after saves
+  useEffect(() => {
+    fetchPendingApprovals();
+  }, [fetchPendingApprovals]);
 
   const filteredVariables = variables.filter(variable => {
     const matchesSearch =
@@ -192,34 +159,152 @@ export default function VariablesManagementPage() {
       ...prev,
       [key]: value,
     }));
+    // Clear any previous save status when changes are made
+    setSaveSuccess(false);
+    setSaveError(null);
   };
 
   const handleSave = async () => {
     setSaving(true);
-    // In real implementation, send API request to update variables
+    setSaveError(null);
+    setSaveSuccess(false);
+
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Separate changes by priority - critical/high need approval, medium/low can be direct
+      const directUpdates: Array<{ variable: Variable; key: string; newValue: string | number | boolean }> = [];
+      const approvalRequests: Array<{ variable: Variable; key: string; newValue: string | number | boolean }> = [];
 
-      // Update local state
-      setVariables(prev =>
-        prev.map(variable =>
-          pendingChanges[variable.key] !== undefined
-            ? {
-                ...variable,
-                value: pendingChanges[variable.key],
-                lastModified: new Date().toISOString().split('T')[0],
-              }
-            : variable
-        )
+      Object.entries(pendingChanges).forEach(([key, newValue]) => {
+        const variable = variables.find((v) => v.key === key);
+        if (!variable) return;
+
+        const priority = determinePriority(variable.backendCategory || variable.category);
+        if (priority === 'critical' || priority === 'high') {
+          approvalRequests.push({ variable, key, newValue });
+        } else {
+          directUpdates.push({ variable, key, newValue });
+        }
+      });
+
+      const results: Array<{ success: boolean; key: string; error?: string; needsApproval?: boolean }> = [];
+
+      // Process direct updates (medium/low priority)
+      if (directUpdates.length > 0) {
+        const updatePromises = directUpdates.map(async ({ variable, key, newValue }) => {
+          const backendCategory = variable.backendCategory || variable.category;
+          const response = await configService.updateVariable(backendCategory, key, { value: newValue });
+          return { success: response.success, key, error: response.error };
+        });
+        const directResults = await Promise.all(updatePromises);
+        results.push(...directResults);
+      }
+
+      // Process approval requests (critical/high priority)
+      if (approvalRequests.length > 0) {
+        const approvalPromises = approvalRequests.map(async ({ variable, key, newValue }) => {
+          const backendCategory = variable.backendCategory || variable.category;
+          const response = await configService.requestApproval({
+            category: backendCategory,
+            key,
+            proposed_value: newValue,
+            reason: `Change requested via admin panel: ${variable.key} from ${variable.value} to ${newValue}`,
+          });
+          return {
+            success: response.success,
+            key,
+            error: response.error,
+            needsApproval: true,
+          };
+        });
+        const approvalResults = await Promise.all(approvalPromises);
+        results.push(...approvalResults);
+      }
+
+      // Check for failures
+      const failures = results.filter((r) => !r.success);
+      const approvalsPending = results.filter((r) => r.success && r.needsApproval);
+
+      if (failures.length > 0) {
+        setSaveError(
+          `Failed to update ${failures.length} variable(s): ${failures.map((f) => f.key).join(', ')}`
+        );
+      } else if (approvalsPending.length > 0 && directUpdates.length === 0) {
+        // All changes need approval
+        setSaveSuccess(true);
+        setSaveError(`${approvalsPending.length} change(s) submitted for approval. A second administrator must approve before changes take effect.`);
+        setPendingChanges({});
+        await fetchPendingApprovals();
+      } else if (approvalsPending.length > 0) {
+        // Mixed: some direct, some need approval
+        setSaveSuccess(true);
+        setSaveError(`${directUpdates.length} change(s) saved. ${approvalsPending.length} critical/high priority change(s) submitted for approval.`);
+        setPendingChanges({});
+        await refetch();
+        await fetchPendingApprovals();
+      } else {
+        setSaveSuccess(true);
+        setPendingChanges({});
+        await refetch();
+      }
+    } catch (err) {
+      setSaveError(
+        err instanceof Error ? err.message : 'Failed to save changes'
       );
-
-      setPendingChanges({});
-      alert('Variables updated successfully!');
-    } catch {
-      alert('Error updating variables');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleRefresh = useCallback(async () => {
+    await refetch();
+    setPendingChanges({});
+    setSaveSuccess(false);
+    setSaveError(null);
+  }, [refetch]);
+
+  const handleInvalidateCache = async () => {
+    try {
+      const result = await configService.invalidateCache();
+      if (result.success) {
+        await handleRefresh();
+        alert('Cache invalidated successfully!');
+      } else {
+        alert(`Failed to invalidate cache: ${result.error}`);
+      }
+    } catch (err) {
+      alert('Failed to invalidate cache');
+    }
+  };
+
+  const handleApprove = async (approvalId: string) => {
+    try {
+      const response = await configService.approveRequest(approvalId, 'Approved via admin panel');
+      if (response.success) {
+        await fetchPendingApprovals();
+        await refetch();
+        alert('Approval granted! Variable has been updated.');
+      } else {
+        alert(`Failed to approve: ${response.error}`);
+      }
+    } catch (err) {
+      alert('Failed to approve request');
+    }
+  };
+
+  const handleReject = async (approvalId: string) => {
+    const reason = window.prompt('Please provide a reason for rejection:');
+    if (reason === null) return; // User cancelled
+
+    try {
+      const response = await configService.rejectRequest(approvalId, reason || 'Rejected via admin panel');
+      if (response.success) {
+        await fetchPendingApprovals();
+        alert('Request rejected.');
+      } else {
+        alert(`Failed to reject: ${response.error}`);
+      }
+    } catch (err) {
+      alert('Failed to reject request');
     }
   };
 
@@ -282,26 +367,154 @@ export default function VariablesManagementPage() {
           </div>
         </div>
 
-        {hasChanges && (
+        <div className="flex items-center space-x-2">
+          {/* Refresh Button */}
           <Button
-            onClick={handleSave}
-            disabled={saving}
-            className="bg-green-600 hover:bg-green-700"
+            onClick={handleRefresh}
+            disabled={loading}
+            variant="outline"
+            className="border-gray-300"
           >
-            {saving ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4 mr-2" />
-                Save Changes ({Object.keys(pendingChanges).length})
-              </>
-            )}
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
           </Button>
-        )}
+
+          {/* Cache Invalidate Button */}
+          <Button
+            onClick={handleInvalidateCache}
+            variant="outline"
+            className="border-orange-300 text-orange-600 hover:bg-orange-50"
+          >
+            <Database className="w-4 h-4 mr-2" />
+            Invalidate Cache
+          </Button>
+
+          {/* Save Button - Only shown when there are changes */}
+          {hasChanges && (
+            <Button
+              onClick={handleSave}
+              disabled={saving}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Changes ({Object.keys(pendingChanges).length})
+                </>
+              )}
+            </Button>
+          )}
+        </div>
       </div>
+
+      {/* Success Message */}
+      {saveSuccess && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
+            <div>
+              <h3 className="text-sm font-medium text-green-800">Changes Saved Successfully</h3>
+              <p className="text-sm text-green-700">
+                All configuration changes have been applied and cache has been refreshed.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Message */}
+      {saveError && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <XCircle className="w-5 h-5 text-red-600 mr-3" />
+              <div>
+                <h3 className="text-sm font-medium text-red-800">Failed to Save Changes</h3>
+                <p className="text-sm text-red-700">{saveError}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setSaveError(null)}
+              className="text-red-600 hover:text-red-800"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Pending Approvals Section */}
+      {pendingApprovals.length > 0 && (
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center">
+              <Clock className="w-5 h-5 text-purple-600 mr-3" />
+              <h3 className="text-sm font-medium text-purple-800">
+                Pending Approvals ({pendingApprovals.length})
+              </h3>
+            </div>
+            {approvalsLoading && (
+              <span className="text-xs text-purple-600">Loading...</span>
+            )}
+          </div>
+          <div className="space-y-3">
+            {pendingApprovals.map((approval) => (
+              <div
+                key={approval.id}
+                className="bg-white border border-purple-100 rounded-md p-3"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-purple-700 bg-purple-100 px-2 py-0.5 rounded">
+                        {approval.category}
+                      </span>
+                      <span className="font-medium text-gray-900">
+                        {approval.key}
+                      </span>
+                    </div>
+                    <div className="mt-1 text-sm text-gray-600">
+                      <span className="text-red-600 line-through">
+                        {JSON.stringify(approval.current_value)}
+                      </span>
+                      <span className="mx-2">→</span>
+                      <span className="text-green-600 font-medium">
+                        {JSON.stringify(approval.proposed_value)}
+                      </span>
+                    </div>
+                    <div className="mt-1 text-xs text-gray-500">
+                      Requested by {approval.requester_name || approval.requester_id} •{' '}
+                      {new Date(approval.created_at).toLocaleString()}
+                      {approval.reason && (
+                        <span className="ml-2 italic">"{approval.reason}"</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 ml-4">
+                    <button
+                      onClick={() => handleApprove(approval.id)}
+                      className="px-3 py-1.5 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md transition-colors"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => handleReject(approval.id)}
+                      className="px-3 py-1.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Warning Banner */}
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
@@ -310,9 +523,9 @@ export default function VariablesManagementPage() {
           <div>
             <h3 className="text-sm font-medium text-amber-800">Important</h3>
             <p className="text-sm text-amber-700">
-              Changes to these variables affect the entire system. Critical
-              variables (pricing, business rules) require careful consideration
-              as they impact customer bookings and calculations.
+              Changes to these variables affect the entire system. Critical and
+              high priority variables require two-person approval before taking
+              effect. Medium and low priority changes are applied immediately.
             </p>
           </div>
         </div>
@@ -411,14 +624,22 @@ export default function VariablesManagementPage() {
                       >
                         <td className="px-6 py-4">
                           <div>
-                            <div className="text-sm font-medium text-gray-900 flex items-center">
+                            <div className="text-sm font-medium text-gray-900 flex items-center flex-wrap gap-1">
                               {getCategoryIcon(variable.category)}
                               <span className="ml-2">{variable.key}</span>
                               {pendingChanges[variable.key] !== undefined && (
-                                <span className="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
+                                <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
                                   Modified
                                 </span>
                               )}
+                              {pendingApprovals.some(
+                                a => a.key === variable.key && a.category === variable.category
+                              ) && (
+                                  <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full flex items-center gap-1">
+                                    <Clock className="w-3 h-3" />
+                                    Pending Approval
+                                  </span>
+                                )}
                             </div>
                             <div className="text-sm text-gray-500 mt-1">
                               {variable.description}

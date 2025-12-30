@@ -62,15 +62,16 @@ This tool provides EXACT pricing (not estimates) for hibachi party bookings. Use
 a customer asks about pricing, costs, or "how much does it cost".
 
 Key Features:
-- Base pricing: $55/adult (13+), $30/child (6-12), FREE under 5
-- Protein upgrades: Filet/Salmon/Scallops (+$5), Lobster (+$15)
-- FREE proteins: Chicken, NY Strip Steak, Shrimp, Tofu, Vegetables (2 per guest)
-- Extra protein: +$10 per extra protein beyond 2 per guest
-- Travel fees: FREE within 30 miles, $2/mile after
-- Party minimum: $550 total
+- Base pricing: Per-person rates for adults (13+), children (6-12), FREE for under 5
+- Protein upgrades: Premium proteins (Filet/Salmon/Scallops/Lobster) at upgrade fees
+- FREE proteins: Chicken, NY Strip Steak, Shrimp, Tofu, Vegetables (2 per guest included)
+- Extra protein: Additional fee per extra protein beyond 2 per guest
+- Travel fees: FREE within service radius, per-mile fee beyond
+- Party minimum: Minimum total applies to smaller parties
 - Addon services: Premium sake, extended performance, custom menu
 
-ALWAYS use this tool for pricing questions - NEVER estimate or guess prices."""
+ALWAYS use this tool for pricing questions - NEVER estimate or guess prices.
+The tool returns current pricing from our pricing system."""
 
     @property
     def parameters(self) -> list[ToolParameter]:
@@ -101,10 +102,10 @@ Example: {"chicken": 8, "filet_mignon": 3, "lobster_tail": 2}
 
 Valid protein names:
 - FREE: chicken, ny_strip_steak, steak, shrimp, tofu, vegetables
-- UPGRADE: filet_mignon, salmon, scallops (+$5 each)
-- PREMIUM: lobster_tail (+$15 each)
+- UPGRADE: filet_mignon, salmon, scallops (premium upgrade fee applies)
+- PREMIUM: lobster_tail (higher premium fee applies)
 
-Note: First 2 proteins per guest are FREE (if from FREE list). Extra protein adds +$10.""",
+Note: First 2 proteins per guest are included. Extra proteins add additional fee.""",
                 required=False,
             ),
             ToolParameter(
@@ -112,9 +113,10 @@ Note: First 2 proteins per guest are FREE (if from FREE list). Extra protein add
                 type="array",
                 description="""List of addon services requested. Optional.
 Valid addons:
-- "premium_sake_service" (+$25)
-- "extended_performance" (+$50)
-- "custom_menu_planning" (+$35)""",
+- "premium_sake_service" (premium fee)
+- "extended_performance" (premium fee)
+- "custom_menu_planning" (premium fee)
+Addon pricing is determined by current rates.""",
                 required=False,
                 items={"type": "string"},  # Required for OpenAI array schema validation
             ),
@@ -213,8 +215,10 @@ Use customer_address for more accurate calculation when possible.""",
             notes = []
 
             if quote.get("party_minimum_applied"):
+                # Use dynamic minimum from quote response (SSoT - no hardcoded values)
+                min_required = quote.get("minimum_required", 550)
                 notes.append(
-                    f"Party minimum of $550 applied (original subtotal: ${quote.get('subtotal_before_min', 0):.2f})"
+                    f"Party minimum of ${min_required:.2f} applied (original subtotal: ${quote.get('subtotal_before_min', 0):.2f})"
                 )
 
             if protein_selections:
@@ -231,11 +235,16 @@ Use customer_address for more accurate calculation when possible.""",
             if quote.get("travel_fee", 0) > 0:
                 travel_info = quote.get("travel_info", {})
                 distance = travel_info.get("distance_miles", 0)
+                # Use dynamic free_miles from travel_info (SSoT - no hardcoded values)
+                free_miles = travel_info.get("breakdown", {}).get("free_miles", 30)
                 notes.append(
-                    f"Travel fee: ${quote['travel_fee']:.2f} for {distance:.1f} miles (FREE first 30 miles)"
+                    f"Travel fee: ${quote['travel_fee']:.2f} for {distance:.1f} miles (FREE first {free_miles} miles)"
                 )
             elif customer_address or customer_zipcode:
-                notes.append("No travel fee (within FREE 30-mile radius)")
+                # Use dynamic free_miles from quote travel_info for consistency
+                travel_info = quote.get("travel_info", {})
+                free_miles = travel_info.get("breakdown", {}).get("free_miles", 30)
+                notes.append(f"No travel fee (within FREE {free_miles}-mile radius)")
 
             if children_under_5 > 0:
                 notes.append(f"Children under 5: {children_under_5} (FREE)")

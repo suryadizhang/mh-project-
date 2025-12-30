@@ -41,7 +41,7 @@ export default function ServiceAreasPage() {
               </p>
 
               <div className="mt-2 mb-3 text-center">
-                <Link href="/BookUs" className="btn btn-primary btn-sm me-2">
+                <Link href="/book-us/" className="btn btn-primary btn-sm me-2">
                   <Calendar className="me-1 inline h-4 w-4" />
                   Plan Your Date
                 </Link>
@@ -134,7 +134,7 @@ export default function ServiceAreasPage() {
 
                 <div className="cta-button-wrapper mb-3">
                   <Link
-                    href="/BookUs"
+                    href="/book-us/"
                     aria-label="Order your hibachi experience now"
                     className="cta-link"
                   >

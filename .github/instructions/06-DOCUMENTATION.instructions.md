@@ -207,6 +207,67 @@ Before committing docs:
 
 ---
 
+## 🚨 Business Data Verification (CRITICAL for AI/Pricing Docs)
+
+**When documenting business data (pricing, policies, menu items), you MUST verify from source:**
+
+### ⚠️ DYNAMIC PRICING WARNING
+
+**ALL pricing values are managed by the Dynamic Variables System and can change at any time!**
+
+| Rule | Reason |
+|------|--------|
+| Never treat prices as permanent | Owner can update via admin panel |
+| Always include "as of [date]" | Values may be stale |
+| Reference variable names, not just values | `adultPrice` not just `$55` |
+| Add "verify current pricing" notes | Remind readers to check API |
+
+**Dynamic Variables Source of Truth:**
+- **Backend:** `dynamic_variables` table → `dynamic_variables_service.py`
+- **API:** `GET /api/v1/pricing/current`
+- **Frontend:** `usePricing()` hook → `pricingTemplates.ts` (fallback only)
+
+### Pre-Documentation Checklist:
+
+- [ ] **Searched `faqsData.ts`** for pricing and policy data
+- [ ] **Searched `menu.ts`** for menu item names
+- [ ] **Searched `pricingTemplates.ts`** for default values
+- [ ] **NO invented values** - every number has a source
+- [ ] **Source cited** in document (e.g., "Source: faqsData.ts lines 98-111")
+- [ ] **Added "as of [date]"** to any specific price mentioned
+- [ ] **Referenced variable names** (e.g., `adultPrice`, `partyMinimum`)
+- [ ] **Added dynamic pricing disclaimer** if doc contains prices
+
+### Verification Commands:
+
+```bash
+# Before writing pricing documentation
+grep -r "\\$55\\|\\$30\\|deposit\\|refund" apps/customer/src/lib/data/
+
+# Before writing menu/upgrade documentation
+grep -r "filet\\|lobster\\|salmon\\|scallop\\|yakisoba\\|gyoza" apps/customer/src/lib/data/
+
+# Before writing policy documentation
+grep -r "cancel\\|reschedule\\|refund.*day" apps/customer/src/lib/data/
+```
+
+### Red Flags (STOP and Verify):
+
+| If You're About To Write... | STOP and Search For... |
+|-----------------------------|------------------------|
+| Any dollar amount ($X) | Exact value in faqsData.ts or pricingTemplates.ts |
+| Menu item name not seen before | Verify in menu.ts or faqsData.ts |
+| Refund policy with timeframes | Exact policy in faqsData.ts (search "refund\|cancel") |
+| Upgrade names (Wagyu, King Crab) | Verify exists in faqsData.ts |
+
+### If You Can't Find the Data:
+
+1. **ASK the user** - "What is the correct value for X?"
+2. **Mark as TBD** - Use `[TBD - need verified value]`
+3. **NEVER invent** - This causes real business problems
+
+---
+
 ## 🔗 Related Docs
 
 - `docs/README.md` – Documentation index

@@ -677,9 +677,11 @@ function invalidateCacheForMutation(method: string, path: string): void {
   try {
     // Booking mutations
     if (path.includes('/bookings')) {
-      // Clear booking-related caches
+      // Clear booking-related caches (both public and authenticated endpoints)
       cacheService.invalidate('GET:/api/v1/bookings/booked-dates');
+      cacheService.invalidate('GET:/api/v1/public/bookings/booked-dates');
       cacheService.invalidate('GET:/api/v1/bookings/availability*'); // Wildcard for query params
+      cacheService.invalidate('GET:/api/v1/public/bookings/available-times*');
       cacheService.invalidate('GET:/api/v1/customers/dashboard');
 
       // If specific booking modified, clear that too

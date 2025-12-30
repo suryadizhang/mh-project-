@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test'
 const pagestoCheck = [
   '/',
   '/menu',
-  '/BookUs',
+  '/book-us',
   '/quote',
   '/contact',
   '/blog',
@@ -105,7 +105,7 @@ test.describe('Link Integrity Tests', () => {
 
     const criticalLinks = [
       { selector: 'a[href="/menu"]', name: 'Menu' },
-      { selector: 'a[href="/BookUs"]', name: 'Book Us' },
+      { selector: 'a[href="/book-us/"]', name: 'Book Us' },
       { selector: 'a[href="/contact"]', name: 'Contact' },
       { selector: 'a[href="/quote"]', name: 'Quote' },
       { selector: 'a[href="/blog"]', name: 'Blog' }
@@ -125,7 +125,7 @@ test.describe('Link Integrity Tests', () => {
 
 test.describe('Form Functionality Tests', () => {
   test('Booking form basic functionality', async ({ page }) => {
-    await page.goto('/BookUs')
+    await page.goto('/book-us/')
     await page.waitForLoadState('networkidle')
 
     // Check if form elements exist

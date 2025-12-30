@@ -1,4 +1,4 @@
-﻿import type { Metadata } from 'next'
+import type { Metadata } from 'next'
 import './terms.css'
 import Link from 'next/link'
 
@@ -293,7 +293,7 @@ export default function TermsPage() {
                 <li><Link href="/privacy">Privacy Policy</Link></li>
                 <li><Link href="/contact">Contact Us</Link></li>
                 <li><Link href="/quote">Get a Quote</Link></li>
-                <li><Link href="/BookUs">Book Our Services</Link></li>
+                <li><Link href="/book-us/">Book Our Services</Link></li>
               </ul>
             </div>
           </section>

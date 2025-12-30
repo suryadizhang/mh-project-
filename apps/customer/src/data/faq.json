@@ -3,7 +3,7 @@
     "question": "How much does hibachi catering cost?",
     "answer": "Our hibachi catering starts at ${{ADULT_PRICE}} per person for adult portions and ${{CHILD_PRICE}} per child (under 12). This includes professional chef service, premium ingredients, and entertaining teppanyaki-style cooking. There's a ${{PARTY_MINIMUM}} minimum per party. Final pricing depends on menu selection and group size - contact us for a personalized quote!",
     "category": "pricing",
-    "href": "/BookUs",
+    "href": "/book-us/",
     "keywords": ["price", "cost", "expensive", "budget", "money", "quote"]
   },
   {
@@ -24,7 +24,7 @@
     "question": "What time slots are available?",
     "answer": "🕐 Our popular time slots are:\n• 12PM (Lunch)\n• 3PM (Afternoon) \n• 6PM (Dinner)\n• 9PM (Late dinner)\n\nWe need 48 hours advance notice for booking. Weekend slots fill up quickly!",
     "category": "scheduling",
-    "href": "/BookUs",
+    "href": "/book-us/",
     "keywords": ["time", "schedule", "availability", "when", "booking"]
   },
   {
@@ -45,7 +45,7 @@
     "question": "How many people minimum?",
     "answer": "We cater to groups of 6 people or more. Perfect for family gatherings, birthday parties, corporate events, and special celebrations. The more guests, the more fun the interactive experience becomes!",
     "category": "booking",
-    "href": "/BookUs",
+    "href": "/book-us/",
     "keywords": ["minimum", "group size", "people", "guests", "party size"]
   },
   {
@@ -66,7 +66,7 @@
     "question": "How do I book an event?",
     "answer": "📞 Easy! Call us at (916) 740-8768 or use our online booking form. We'll discuss your event details, menu preferences, and confirm availability. Book at least 48 hours in advance for best availability!",
     "category": "booking",
-    "href": "/BookUs",
+    "href": "/book-us/",
     "keywords": ["book", "reserve", "schedule", "contact", "phone", "online"]
   },
   {

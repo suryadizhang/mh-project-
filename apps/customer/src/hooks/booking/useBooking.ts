@@ -55,7 +55,8 @@ export function useBooking() {
     setLoadingDates(true);
     setDateError(null);
     try {
-      const result = await apiFetch('/api/v1/bookings/booked-dates');
+      // Use PUBLIC endpoint (no auth required) for customer booking site
+      const result = await apiFetch('/api/v1/public/bookings/booked-dates');
       if (result.success && result.data) {
         logger.debug('Booked dates response received');
         const responseData = result.data as BookedDatesResponse;
@@ -77,7 +78,8 @@ export function useBooking() {
     setLoadingTimeSlots(true);
     try {
       const dateStr = format(date, 'yyyy-MM-dd');
-      const response = await apiFetch(`/api/v1/bookings/availability?date=${dateStr}`);
+      // Use PUBLIC endpoint (no auth required) for customer booking site
+      const response = await apiFetch(`/api/v1/public/bookings/available-times?date=${dateStr}`);
 
       if (response.success && response.data) {
         const responseData = response.data as unknown as AvailabilityResponse;

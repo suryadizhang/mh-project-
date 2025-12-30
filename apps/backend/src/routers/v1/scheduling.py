@@ -99,12 +99,13 @@ async def check_availability(
             SlotAvailabilityResponse(
                 slot_time=s.slot_time,
                 slot_date=s.slot_date,
+                slot_label=getattr(s, 'slot_label', ''),
                 is_available=s.is_available,
                 conflict_reason=s.conflict_reason,
-                adjusted_time=s.adjusted_time,
-                travel_time_from_prev=s.travel_time_from_prev,
-                travel_time_to_next=s.travel_time_to_next,
-                score=s.score,
+                adjusted_time=getattr(s, 'adjusted_time', None),
+                travel_time_from_prev=getattr(s, 'travel_time_from_prev', None),
+                travel_time_to_next=getattr(s, 'travel_time_to_next', None),
+                score=getattr(s, 'score', 0.0),
             )
             for s in result.suggestions
         ],

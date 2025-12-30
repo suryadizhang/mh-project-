@@ -21,6 +21,7 @@ import os
 import smtplib
 import ssl
 from typing import Optional
+from urllib.parse import quote
 
 try:
     import resend
@@ -289,6 +290,10 @@ If you need immediate access, please contact us at support@myhibachi.com.
                 Please reply to this email with any allergies or dietary restrictions.
             </div>
 
+            <p style="text-align: center; margin: 20px 0;">
+                <a href="{google_calendar_url}" style="background-color: #4285f4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 5px;">📅 Add to Google Calendar</a>
+            </p>
+
             <p><strong>What's Next?</strong></p>
             <ul>
                 <li>Pay your $100 deposit within 2 hours to confirm</li>
@@ -327,6 +332,8 @@ WHAT'S NEXT:
 1. Pay your $100 deposit within 2 hours to confirm
 2. We'll send a reminder before your event
 3. Our chef will arrive 30 mins early to set up
+
+📅 Add to Google Calendar: {google_calendar_url}
 
 Questions? Reply to this email or call (916) 740-8768
 
@@ -404,6 +411,103 @@ This is an automated notification from My Hibachi Chef booking system.
         """,
     },
 }
+
+
+def generate_google_calendar_url(
+    event_date: str,
+    event_time: str,
+    guest_count: int,
+    location: str,
+) -> str:
+    """
+    Generate a Google Calendar event URL for the hibachi booking.
+
+    Args:
+        event_date: Date in format like "January 15, 2025"
+        event_time: Time in format like "6:00 PM"
+        guest_count: Number of guests
+        location: Venue address
+
+    Returns:
+        Google Calendar URL that opens with event pre-filled
+    """
+    try:
+        # Parse the date and time to create proper datetime
+        from datetime import datetime, timedelta
+
+        # Try to parse common date formats
+        date_formats = [
+            "%B %d, %Y",      # "January 15, 2025"
+            "%Y-%m-%d",       # "2025-01-15"
+            "%m/%d/%Y",       # "01/15/2025"
+        ]
+
+        parsed_date = None
+        for fmt in date_formats:
+            try:
+                parsed_date = datetime.strptime(event_date, fmt)
+                break
+            except ValueError:
+                continue
+
+        if not parsed_date:
+            # Fallback: use event_date as-is in title
+            parsed_date = datetime.now()
+
+        # Try to parse time
+        time_formats = [
+            "%I:%M %p",       # "6:00 PM"
+            "%H:%M",          # "18:00"
+            "%I %p",          # "6 PM"
+        ]
+
+        parsed_time = None
+        for fmt in time_formats:
+            try:
+                parsed_time = datetime.strptime(event_time.upper(), fmt)
+                break
+            except ValueError:
+                continue
+
+        if parsed_time:
+            parsed_date = parsed_date.replace(
+                hour=parsed_time.hour,
+                minute=parsed_time.minute
+            )
+
+        # Event duration: 2 hours for hibachi
+        end_datetime = parsed_date + timedelta(hours=2)
+
+        # Format for Google Calendar (YYYYMMDDTHHMMSS)
+        start_str = parsed_date.strftime("%Y%m%dT%H%M%S")
+        end_str = end_datetime.strftime("%Y%m%dT%H%M%S")
+
+        # Build the calendar URL
+        title = quote(f"🔥 My Hibachi Chef - Party for {guest_count}")
+        details = quote(
+            f"Your private hibachi chef experience for approximately {guest_count} guests.\n\n"
+            f"Our chef will arrive 30 minutes early to set up.\n\n"
+            f"Questions? Call (916) 740-8768\n\n"
+            f"© My Hibachi Chef - Northern California's Premier Hibachi Catering"
+        )
+        location_encoded = quote(location)
+
+        calendar_url = (
+            f"https://www.google.com/calendar/render?action=TEMPLATE"
+            f"&text={title}"
+            f"&dates={start_str}/{end_str}"
+            f"&details={details}"
+            f"&location={location_encoded}"
+            f"&sf=true"
+        )
+
+        return calendar_url
+
+    except Exception as e:
+        logger.warning(f"Failed to generate Google Calendar URL: {e}")
+        # Return a fallback URL that still works
+        title = quote(f"My Hibachi Chef Party - {event_date}")
+        return f"https://www.google.com/calendar/render?action=TEMPLATE&text={title}"
 
 
 class EmailService:
@@ -564,6 +668,15 @@ class EmailService:
         """Send booking confirmation email to customer"""
         try:
             template = EMAIL_TEMPLATES["new_booking_customer"]
+
+            # Generate Google Calendar URL for the booking
+            google_calendar_url = generate_google_calendar_url(
+                event_date=event_date,
+                event_time=event_time,
+                guest_count=guest_count,
+                location=location,
+            )
+
             html_body = template["html"].format(
                 customer_name=customer_name,
                 booking_id=booking_id,
@@ -571,6 +684,7 @@ class EmailService:
                 event_time=event_time,
                 guest_count=guest_count,
                 location=location,
+                google_calendar_url=google_calendar_url,
             )
             text_body = template["text"].format(
                 customer_name=customer_name,
@@ -579,6 +693,7 @@ class EmailService:
                 event_time=event_time,
                 guest_count=guest_count,
                 location=location,
+                google_calendar_url=google_calendar_url,
             )
 
             return self._send_email(
@@ -648,6 +763,141 @@ class EmailService:
             )
         except Exception as e:
             logger.exception(f"Failed to send booking alert email to admin {admin_email}: {e}")
+            return False
+
+    def send_quote_email(
+        self,
+        customer_email: str,
+        customer_name: str,
+        customer_phone: str,
+        adults: int,
+        children: int,
+        venue_address: str,
+        venue_city: str,
+        venue_zipcode: str,
+        base_total: float,
+        upgrade_total: float,
+        travel_fee: float,
+        grand_total: float,
+        deposit_required: float,
+        upgrades: dict,
+    ) -> bool:
+        """Send quote summary email to customer in plain text format."""
+        try:
+            # Build upgrades list
+            upgrade_lines = []
+            upgrade_items = [
+                ("Salmon", upgrades.get("salmon", 0)),
+                ("Scallops", upgrades.get("scallops", 0)),
+                ("Filet Mignon", upgrades.get("filetMignon", 0)),
+                ("Lobster Tail", upgrades.get("lobsterTail", 0)),
+                ("Extra Proteins", upgrades.get("extraProteins", 0)),
+                ("Yakisoba Noodles", upgrades.get("yakisobaNoodles", 0)),
+                ("Extra Fried Rice", upgrades.get("extraFriedRice", 0)),
+                ("Extra Vegetables", upgrades.get("extraVegetables", 0)),
+                ("Edamame", upgrades.get("edamame", 0)),
+                ("Gyoza", upgrades.get("gyoza", 0)),
+            ]
+            for name, qty in upgrade_items:
+                if qty and qty > 0:
+                    upgrade_lines.append(f"  - {name}: {qty}")
+
+            upgrades_text = "\n".join(upgrade_lines) if upgrade_lines else "  - None selected"
+
+            # Build the plain text email
+            text_body = f"""
+Hello {customer_name},
+
+Thank you for your interest in My Hibachi Chef!
+
+Here's a summary of your quote:
+
+═══════════════════════════════════════════════
+YOUR EVENT DETAILS
+═══════════════════════════════════════════════
+
+Guest Count:
+  - Adults: {adults}
+  - Children: {children}
+  - Total Guests: {adults + children}
+
+Venue Location:
+  {venue_address}
+  {venue_city}, {venue_zipcode}
+
+═══════════════════════════════════════════════
+PRICING BREAKDOWN
+═══════════════════════════════════════════════
+
+Base Price: ${base_total:.2f}
+Upgrades: ${upgrade_total:.2f}
+Travel Fee: ${travel_fee:.2f}
+-------------------------------------------
+TOTAL: ${grand_total:.2f}
+
+Deposit Required: ${deposit_required:.2f}
+
+═══════════════════════════════════════════════
+SELECTED UPGRADES
+═══════════════════════════════════════════════
+{upgrades_text}
+
+═══════════════════════════════════════════════
+WHAT'S INCLUDED
+═══════════════════════════════════════════════
+
+✓ Professional hibachi chef at your location
+✓ All cooking equipment and supplies
+✓ Fresh, high-quality ingredients
+✓ Complete setup and cleanup
+✓ Entertaining hibachi show
+✓ First 30 miles FREE (then $2/mile)
+
+═══════════════════════════════════════════════
+READY TO BOOK?
+═══════════════════════════════════════════════
+
+Book your event now at: {self.frontend_url}/book-us
+
+Questions? Call us: (916) 740-8768
+Email: cs@myhibachichef.com
+
+---
+This quote is an estimate. Final pricing will be confirmed
+during your booking consultation.
+
+My Hibachi Chef
+Bringing the hibachi experience to you!
+{self.frontend_url}
+            """.strip()
+
+            # Simple HTML version (just wrapping text in pre for readability)
+            html_body = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: 'Courier New', monospace; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        pre {{ white-space: pre-wrap; word-wrap: break-word; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <pre>{text_body}</pre>
+    </div>
+</body>
+</html>
+            """
+
+            return self._send_email(
+                to_email=customer_email,
+                subject=f"Your My Hibachi Quote - ${grand_total:.2f}",
+                html_body=html_body,
+                text_body=text_body,
+            )
+        except Exception as e:
+            logger.exception(f"Failed to send quote email to {customer_email}: {e}")
             return False
 
     def _send_email(

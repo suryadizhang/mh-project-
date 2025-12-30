@@ -86,7 +86,7 @@ describe('useBooking', () => {
       const { result } = renderHook(() => useBooking())
 
       await waitFor(() => {
-        expect(api.apiFetch).toHaveBeenCalledWith('/api/v1/bookings/booked-dates')
+        expect(api.apiFetch).toHaveBeenCalledWith('/api/v1/public/bookings/booked-dates')
       })
 
       await waitFor(() => {

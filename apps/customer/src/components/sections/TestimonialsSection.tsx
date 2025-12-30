@@ -221,8 +221,8 @@ export default function TestimonialsSection() {
             {/* Testimonial Content with Animation */}
             <div
               className={`relative z-10 transition-all duration-500 ease-out ${slideDirection === 'right'
-                  ? 'animate-in slide-in-from-right-4 fade-in'
-                  : 'animate-in slide-in-from-left-4 fade-in'
+                ? 'animate-in slide-in-from-right-4 fade-in'
+                : 'animate-in slide-in-from-left-4 fade-in'
                 }`}
               key={currentIndex}
             >
@@ -288,8 +288,8 @@ export default function TestimonialsSection() {
                 key={index}
                 onClick={() => goToTestimonial(index)}
                 className={`relative h-3 rounded-full transition-all duration-500 ${index === currentIndex
-                    ? 'w-8 bg-gradient-to-r from-red-500 to-orange-500'
-                    : 'w-3 bg-gray-300 hover:bg-gray-400'
+                  ? 'w-8 bg-gradient-to-r from-red-500 to-orange-500'
+                  : 'w-3 bg-gray-300 hover:bg-gray-400'
                   }`}
                 aria-label={`Go to testimonial from ${testimonial.name}`}
                 aria-current={index === currentIndex ? 'true' : 'false'}
@@ -306,8 +306,8 @@ export default function TestimonialsSection() {
           <button
             onClick={() => setIsAutoPlaying(!isAutoPlaying)}
             className={`text-sm px-4 py-1.5 rounded-full transition-all duration-300 ${isAutoPlaying
-                ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              ? 'bg-green-100 text-green-700 hover:bg-green-200'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
           >
             {isAutoPlaying ? '⏸ Auto-playing' : '▶ Resume auto-play'}
@@ -337,7 +337,7 @@ export default function TestimonialsSection() {
           </h3>
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
             <a
-              href="/BookUs"
+              href="/book-us/"
               className="inline-flex transform items-center justify-center rounded-lg bg-gradient-to-r from-red-600 to-red-700 px-8 py-3 font-semibold text-white shadow-lg transition-all hover:scale-105 hover:from-red-700 hover:to-red-800"
               onClick={() => trackPageEngagement('click', 'testimonials_book_now_cta')}
             >

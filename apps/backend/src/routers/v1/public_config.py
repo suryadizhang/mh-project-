@@ -1,0 +1,271 @@
+"""
+Public Configuration Endpoints (No Authentication Required)
+============================================================
+
+These endpoints provide SSoT business configuration to the customer website.
+They are public (no auth) and cached for performance.
+
+Endpoints:
+    GET /config/all       → Complete business configuration (nested structure)
+    GET /policies/current → Policies with human-readable text
+
+Frontend Consumers:
+    - apps/customer/src/hooks/useConfig.ts
+    - apps/customer/src/hooks/usePolicies.ts
+
+SSoT Architecture:
+    See: .github/instructions/20-SINGLE_SOURCE_OF_TRUTH.instructions.md
+"""
+
+from datetime import datetime
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.database import get_db
+from services.business_config_service import get_business_config
+
+# =============================================================================
+# Router Definition
+# =============================================================================
+
+router = APIRouter(tags=["public-config"])
+
+
+# =============================================================================
+# Response Models (Match Frontend TypeScript Interfaces)
+# =============================================================================
+
+# These models MUST match the TypeScript interfaces in:
+# apps/customer/src/hooks/useConfig.ts
+
+
+class PricingConfig(BaseModel):
+    """Pricing configuration values (all amounts in cents)."""
+
+    adult_price_cents: int = Field(..., description="Adult price per person in cents")
+    child_price_cents: int = Field(..., description="Child (6-12) price per person in cents")
+    child_free_under_age: int = Field(..., description="Age under which children are free")
+    party_minimum_cents: int = Field(..., description="Minimum party total in cents")
+
+
+class TravelConfig(BaseModel):
+    """Travel fee configuration."""
+
+    free_miles: int = Field(..., description="Free travel radius in miles")
+    per_mile_cents: int = Field(..., description="Cost per mile in cents after free radius")
+
+
+class DepositConfig(BaseModel):
+    """Deposit configuration."""
+
+    deposit_amount_cents: int = Field(..., description="Fixed deposit amount in cents")
+    deposit_refundable_days: int = Field(
+        ..., description="Days before event for deposit to be refundable"
+    )
+
+
+class BookingConfig(BaseModel):
+    """Booking rules configuration."""
+
+    min_advance_hours: int = Field(..., description="Minimum hours in advance to book")
+
+
+class GuestLimitsConfig(BaseModel):
+    """Guest count limits."""
+
+    minimum: int = Field(default=1, description="Minimum guest count")
+    maximum: int = Field(default=100, description="Maximum guest count")
+    minimum_for_hibachi: int = Field(
+        default=10, description="Minimum guests for standard hibachi"
+    )
+
+
+class BusinessConfigResponse(BaseModel):
+    """
+    Complete business configuration response.
+
+    This is the nested structure expected by the frontend useConfig hook.
+    Backend stores flat, we transform to nested here.
+    """
+
+    pricing: PricingConfig
+    travel: TravelConfig
+    deposit: DepositConfig
+    booking: BookingConfig
+    guest_limits: Optional[GuestLimitsConfig] = None
+    source: str = Field(default="api", description="Data source for debugging")
+
+
+# =============================================================================
+# Policies Response Models
+# =============================================================================
+
+# These models MUST match the TypeScript interfaces in:
+# apps/customer/src/hooks/usePolicies.ts
+
+
+class DepositPolicy(BaseModel):
+    """Deposit policy with amount and human-readable text."""
+
+    amount: int = Field(..., description="Deposit amount in dollars")
+    refund_days: int = Field(..., description="Days before event for refund eligibility")
+    text: str = Field(..., description="Human-readable policy text")
+
+
+class CancellationPolicy(BaseModel):
+    """Cancellation policy with human-readable text."""
+
+    refund_days: int = Field(..., description="Days before event for full refund")
+    text: str = Field(..., description="Human-readable policy text")
+
+
+class TravelPolicy(BaseModel):
+    """Travel policy with rates and human-readable text."""
+
+    free_miles: int = Field(..., description="Free travel radius in miles")
+    per_mile_rate: float = Field(..., description="Cost per mile in dollars")
+    text: str = Field(..., description="Human-readable policy text")
+
+
+class BookingPolicy(BaseModel):
+    """Booking policy with human-readable text."""
+
+    advance_hours: int = Field(..., description="Minimum advance booking hours")
+    text: str = Field(..., description="Human-readable policy text")
+
+
+class PoliciesResponse(BaseModel):
+    """
+    Complete policies response with human-readable text.
+
+    This is the structure expected by the frontend usePolicies hook.
+    Text fields are dynamically generated from config values.
+    """
+
+    deposit: DepositPolicy
+    cancellation: CancellationPolicy
+    travel: TravelPolicy
+    booking: BookingPolicy
+    source: str = Field(default="api", description="Data source for debugging")
+    fetched_at: str = Field(..., description="ISO timestamp when fetched")
+
+
+# =============================================================================
+# Endpoints
+# =============================================================================
+
+
+@router.get("/config/all", response_model=BusinessConfigResponse)
+async def get_all_config(
+    db: AsyncSession = Depends(get_db),
+) -> BusinessConfigResponse:
+    """
+    Get complete business configuration.
+
+    This endpoint is PUBLIC (no authentication required).
+    Used by customer website to display pricing, policies, etc.
+
+    Returns:
+        BusinessConfigResponse: Nested configuration matching frontend interfaces
+
+    Frontend Consumer:
+        apps/customer/src/hooks/useConfig.ts
+    """
+    try:
+        # Get flat config from service
+        config = await get_business_config(db)
+
+        # Transform flat → nested structure for frontend
+        response = BusinessConfigResponse(
+            pricing=PricingConfig(
+                adult_price_cents=config.adult_price_cents,
+                child_price_cents=config.child_price_cents,
+                child_free_under_age=config.child_free_under_age,
+                party_minimum_cents=config.party_minimum_cents,
+            ),
+            travel=TravelConfig(
+                free_miles=config.travel_free_miles,
+                per_mile_cents=config.travel_per_mile_cents,
+            ),
+            deposit=DepositConfig(
+                deposit_amount_cents=config.deposit_amount_cents,
+                deposit_refundable_days=config.deposit_refundable_days,
+            ),
+            booking=BookingConfig(
+                min_advance_hours=config.min_advance_hours,
+            ),
+            guest_limits=GuestLimitsConfig(
+                minimum=1,
+                maximum=100,
+                minimum_for_hibachi=10,  # Party minimum / adult price ≈ 10
+            ),
+            source=config.source,
+        )
+
+        return response
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to fetch configuration: {str(e)}",
+        )
+
+
+@router.get("/policies/current", response_model=PoliciesResponse)
+async def get_current_policies(
+    db: AsyncSession = Depends(get_db),
+) -> PoliciesResponse:
+    """
+    Get current policies with human-readable text.
+
+    This endpoint is PUBLIC (no authentication required).
+    Used by customer website to display policy information.
+
+    Returns:
+        PoliciesResponse: Policies with computed text fields
+
+    Frontend Consumer:
+        apps/customer/src/hooks/usePolicies.ts
+    """
+    try:
+        # Get flat config from service
+        config = await get_business_config(db)
+
+        # Convert cents to dollars for display
+        deposit_dollars = config.deposit_amount_cents // 100
+        per_mile_dollars = config.travel_per_mile_cents / 100
+
+        # Generate human-readable policy text
+        response = PoliciesResponse(
+            deposit=DepositPolicy(
+                amount=deposit_dollars,
+                refund_days=config.deposit_refundable_days,
+                text=f"${deposit_dollars} deposit required, refundable if canceled {config.deposit_refundable_days}+ days before event.",
+            ),
+            cancellation=CancellationPolicy(
+                refund_days=config.deposit_refundable_days,
+                text=f"Full refund if canceled {config.deposit_refundable_days}+ days before event.",
+            ),
+            travel=TravelPolicy(
+                free_miles=config.travel_free_miles,
+                per_mile_rate=per_mile_dollars,
+                text=f"First {config.travel_free_miles} miles free, then ${per_mile_dollars:.0f}/mile.",
+            ),
+            booking=BookingPolicy(
+                advance_hours=config.min_advance_hours,
+                text=f"Book at least {config.min_advance_hours} hours in advance.",
+            ),
+            source=config.source,
+            fetched_at=datetime.utcnow().isoformat() + "Z",
+        )
+
+        return response
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to fetch policies: {str(e)}",
+        )

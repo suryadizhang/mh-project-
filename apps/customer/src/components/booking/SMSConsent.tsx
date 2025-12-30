@@ -12,16 +12,19 @@ interface SMSConsentProps {
 
 /**
  * SMS Consent checkbox for TCPA and carrier compliance
- * Required at point of SMS collection for legal compliance
  *
- * RingCentral Requirements (TCR Registration):
- * - Must list ALL types of messages customer will receive
- * - Must include opt-out instructions (STOP)
- * - Must include help instructions (HELP)
- * - Must include frequency disclosure
- * - Must include data rates disclaimer
- * - Must link to Privacy Policy and SMS Terms
- * - NO EMOJIS per carrier compliance (Rejection Code 6103)
+ * CRITICAL: RingCentral/TCR Compliance Requirements:
+ * 1. Checkbox must be UNCHECKED by default (no forced opt-in)
+ * 2. Checkbox must be clearly marked as OPTIONAL
+ * 3. Must state "Consent is not required to make a purchase"
+ * 4. Must list ALL types of messages customer will receive
+ * 5. Must include opt-out instructions (STOP)
+ * 6. Must include help instructions (HELP)
+ * 7. Must include frequency disclosure
+ * 8. Must include data rates disclaimer
+ * 9. Must link to Privacy Policy and SMS Terms
+ * 10. NO EMOJIS per carrier compliance
+ * 11. SMS consent must not be shared with third parties
  */
 export const SMSConsent: React.FC<SMSConsentProps> = ({
   checked,
@@ -31,6 +34,12 @@ export const SMSConsent: React.FC<SMSConsentProps> = ({
 }) => {
   return (
     <div className={`bg-light rounded border p-3 ${className}`}>
+      {/* OPTIONAL Badge - Required for TCR compliance */}
+      <div className="d-flex align-items-center mb-2">
+        <span className="badge bg-info text-white me-2">OPTIONAL</span>
+        <span className="small text-muted">Checking this box is not required to complete your booking</span>
+      </div>
+
       <div className="form-check">
         <input
           type="checkbox"
@@ -43,7 +52,7 @@ export const SMSConsent: React.FC<SMSConsentProps> = ({
         <label htmlFor="smsConsent" className="form-check-label">
           <strong>I consent to receive text messages from My Hibachi Chef</strong>
           <p className="small mt-2 mb-2">
-            By checking this box and providing my phone number, I agree to receive the following
+            By checking this box and providing my phone number, I voluntarily agree to receive the following
             types of SMS text messages from my Hibachi LLC (doing business as My Hibachi Chef):
           </p>
           <ul className="small mb-2" style={{ paddingLeft: '1.2rem' }}>
@@ -67,10 +76,10 @@ export const SMSConsent: React.FC<SMSConsentProps> = ({
             </li>
             <li>
               <strong>Promotional Offers</strong> - Special discounts, seasonal offers, and
-              exclusive deals (optional - you may opt out of marketing messages separately)
+              exclusive deals (you may opt out of marketing messages separately by replying STOP)
             </li>
           </ul>
-          <p className="small mb-0" style={{ lineHeight: '1.5' }}>
+          <p className="small mb-2" style={{ lineHeight: '1.5' }}>
             <strong>Message frequency varies</strong> based on your booking activity.{' '}
             <strong>Message and data rates may apply.</strong> Reply <strong>STOP</strong> to
             opt-out at any time. Reply <strong>HELP</strong> for assistance or call (916) 740-8786.{' '}
@@ -90,15 +99,20 @@ export const SMSConsent: React.FC<SMSConsentProps> = ({
             >
               Privacy Policy
             </Link>
-            . SMS consent is not shared with third parties.
+            . SMS consent is not shared with third parties or affiliates.
+          </p>
+          {/* TCR Required: Consent not required for purchase */}
+          <p className="small mb-0 fw-bold text-muted">
+            Consent is not required to make a purchase. You can still complete your booking without checking this box.
           </p>
         </label>
         {error && <div className="invalid-feedback d-block">{error}</div>}
       </div>
-      <div id="smsConsentDescription" className="alert alert-info small mt-2 mb-0 py-2">
-        <strong>Optional but recommended:</strong> Check this box to receive booking confirmation
-        and the $100 deposit payment link via text message. Without SMS consent, you will only
-        receive email notifications.
+      <div id="smsConsentDescription" className="alert alert-secondary small mt-2 mb-0 py-2">
+        <strong>What happens if I don&apos;t check this box?</strong> You will still receive essential
+        transactional SMS messages related to your booking (confirmations, reminders, chef arrival updates).
+        However, you will not receive promotional offers or marketing messages. You can opt into marketing
+        messages later by texting START to our number.
       </div>
     </div>
   );

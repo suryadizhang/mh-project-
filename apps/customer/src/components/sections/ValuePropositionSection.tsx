@@ -20,6 +20,7 @@ import {
 import Link from 'next/link';
 
 import { useAnalytics } from '@/components/analytics/GoogleAnalytics';
+import { usePricing } from '@/hooks/usePricing';
 
 /**
  * Value Proposition + Urgency Section
@@ -197,6 +198,14 @@ const dietaryBadges = [
 
 export default function ValuePropositionSection() {
   const { trackPageEngagement } = useAnalytics();
+  const { adultPrice, childPrice, childFreeUnderAge, partyMinimum, depositAmount, isLoading: pricingLoading } = usePricing();
+
+  // Safe display values for template usage
+  const displayAdultPrice = pricingLoading || adultPrice === undefined ? '...' : adultPrice;
+  const displayChildPrice = pricingLoading || childPrice === undefined ? '...' : childPrice;
+  const displayChildFreeUnderAge = pricingLoading || childFreeUnderAge === undefined ? 5 : childFreeUnderAge;
+  const displayPartyMinimum = pricingLoading || partyMinimum === undefined ? 0 : partyMinimum;
+  const displayDepositAmount = pricingLoading || depositAmount === undefined ? '...' : depositAmount;
 
   return (
     <section className="value-proposition-section bg-gradient-to-br from-gray-50 to-gray-100 py-20">
@@ -461,7 +470,7 @@ export default function ValuePropositionSection() {
             {/* CTA Buttons - Enhanced Design */}
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Link
-                href="/BookUs"
+                href="/book-us/"
                 className="group relative inline-flex transform items-center justify-center gap-3 overflow-hidden rounded-xl bg-white px-8 py-4 text-lg font-bold text-red-600 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl"
                 onClick={() => trackPageEngagement('click', 'value_prop_book_now_cta')}
               >
@@ -502,22 +511,22 @@ export default function ValuePropositionSection() {
           <h3 className="mb-6 text-center text-2xl font-bold text-gray-800">Transparent Pricing</h3>
           <div className="grid gap-6 text-center md:grid-cols-3">
             <div className="p-4">
-              <div className="mb-2 text-4xl font-bold text-red-600">$55</div>
+              <div className="mb-2 text-4xl font-bold text-red-600">${displayAdultPrice}</div>
               <div className="text-gray-600">Per Adult (13+)</div>
             </div>
             <div className="p-4">
-              <div className="mb-2 text-4xl font-bold text-red-600">$30</div>
-              <div className="text-gray-600">Per Child (6-12)</div>
+              <div className="mb-2 text-4xl font-bold text-red-600">${displayChildPrice}</div>
+              <div className="text-gray-600">Per Child ({displayChildFreeUnderAge + 1}-12)</div>
             </div>
             <div className="p-4">
               <div className="mb-2 text-4xl font-bold text-green-600">FREE</div>
-              <div className="text-gray-600">Ages 5 & Under</div>
+              <div className="text-gray-600">Ages {displayChildFreeUnderAge} & Under</div>
             </div>
           </div>
           <div className="mt-6 text-center">
             <p className="text-gray-600">
-              <span className="font-semibold">$550 minimum</span> (approximately 10 adults) •
-              <span className="font-semibold"> $100 refundable deposit</span> secures your date
+              <span className="font-semibold">${displayPartyMinimum} minimum</span> (approximately {displayPartyMinimum && displayAdultPrice !== '...' ? Math.ceil(displayPartyMinimum / Number(displayAdultPrice)) : '...'} adults) •
+              <span className="font-semibold"> ${displayDepositAmount} refundable deposit</span> secures your date
             </p>
             <p className="mt-2 text-sm text-gray-500">First 30 miles free travel • $2/mile after</p>
           </div>

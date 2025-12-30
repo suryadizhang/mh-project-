@@ -1,4 +1,4 @@
-﻿import { Metadata } from 'next'
+import { Metadata } from 'next'
 import './privacy.css'
 import Link from 'next/link'
 
@@ -301,7 +301,7 @@ export default function PrivacyPage() {
                 <li><Link href="/terms">Terms & Conditions</Link></li>
                 <li><Link href="/contact">Contact Us</Link></li>
                 <li><Link href="/quote">Request a Quote</Link></li>
-                <li><Link href="/BookUs">Book Our Services</Link></li>
+                <li><Link href="/book-us/">Book Our Services</Link></li>
               </ul>
             </div>
           </section>

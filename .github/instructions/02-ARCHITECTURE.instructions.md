@@ -215,6 +215,11 @@ Customer Action
 3. **Schemas isolate domains** – No cross-schema direct access
 4. **Services encapsulate logic** – Routers are thin
 5. **Repositories handle data** – Services don't write SQL
+6. **API is single source of truth** – All pricing, rules, validation lives in backend
+7. **No local calculations** – Frontend NEVER calculates business values (prices, fees, etc.)
+8. **Unified system** – Admin, Customer, and API are ONE synchronized system
+
+> **See Rule #14 in `01-CORE_PRINCIPLES.instructions.md` for full Unified System Architecture details.**
 
 ---
 

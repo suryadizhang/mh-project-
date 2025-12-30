@@ -47,7 +47,7 @@ interface ChatWidgetProps {
 }
 
 const WELCOME_SUGGESTIONS: Record<string, string[]> = {
-  '/BookUs': [
+  '/book-us/': [
     'Book a table for tonight',
     "What's included in the menu?",
     'How much is the deposit?',

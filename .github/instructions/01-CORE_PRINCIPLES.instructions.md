@@ -104,6 +104,184 @@ applyTo: '**'
 - No credentials in logs
 - No sensitive data exposed
 
+### 12. NEVER Assume – Always Verify
+
+**When unsure about ANY value, ASK or SEARCH – never invent.**
+
+| If You Don't Know... | DO NOT... | INSTEAD... |
+|----------------------|-----------|------------|
+| A price or fee | Make up a number | Search `faqsData.ts` or ASK user |
+| A policy detail | Guess timeframes | Search existing docs or ASK user |
+| A menu item | Invent names | Search `menu.ts` or ASK user |
+| An endpoint URL | Create fake URLs | Check `routers/` folder or ASK |
+| A configuration value | Use placeholder | Check `config.py` or `.env.example` |
+| A database column | Assume it exists | Check model file or run migration |
+
+**The Rule:** If you're about to write a specific value and you haven't verified it from source code, STOP and verify first.
+
+### 13. Maximize External API/Service Capabilities (Build vs Buy)
+
+**Before building custom solutions, check what our external services
+already offer.**
+
+**Our External Services (check these FIRST before building custom):**
+
+| Service          | Use For                               | Capabilities We Should Maximize               |
+| ---------------- | ------------------------------------- | --------------------------------------------- |
+| **Stripe**       | Payments                              | Address Element, PaymentElement, invoicing    |
+| **Google Maps**  | Location                              | Places Autocomplete, Geocoding, Distance API  |
+| **RingCentral**  | Communications                        | SMS, Voice, WebRTC, call recording            |
+| **Deepgram**     | Transcription                         | Real-time STT, speaker diarization            |
+| **OpenAI**       | AI                                    | Function calling, embeddings, vision          |
+| **Resend**       | Email                                 | Templates, tracking, scheduling               |
+| **Cloudflare**   | Security/CDN                          | WAF, Access, Tunnel, R2 storage               |
+
+**Decision Process:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│   BEFORE BUILDING ANY NEW FEATURE                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  1. Does an external service we use already offer this?    │
+│     └── YES → Use their solution (even if less custom)     │
+│     └── NO  → Proceed to step 2                            │
+│                                                             │
+│  2. Does another external service offer this?              │
+│     └── YES → Evaluate cost vs build time                  │
+│     └── NO  → Build custom                                 │
+│                                                             │
+│  3. If building custom, can we use their primitives?       │
+│     └── Example: Use Stripe for billing address            │
+│               instead of building our own form             │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Real Examples:**
+
+| Need                  | ❌ DON'T Build Custom           | ✅ DO Use External Service        |
+| --------------------- | ------------------------------- | --------------------------------- |
+| Billing address form  | Custom 6-field form             | Stripe AddressElement             |
+| Address autocomplete  | Custom search + validation      | Google Places Autocomplete        |
+| Email templates       | Custom HTML builder             | Resend templates                  |
+| SMS verification      | Custom OTP system               | RingCentral verification          |
+| File storage          | Custom S3 integration           | Cloudflare R2                     |
+| Real-time transcripts | Custom audio processing         | Deepgram WebSocket                |
+| Invoice PDF           | Custom PDF generation           | Stripe Invoice                    |
+| Rate limiting         | Custom middleware               | Cloudflare Rate Limiting          |
+
+**When Custom IS Justified:**
+
+- External service doesn't offer needed feature
+- Cost exceeds $500/month for that specific feature
+- Critical business logic that must be under our control
+- External service has unacceptable latency/reliability
+
+### 14. Unified System Architecture – Admin, Customer, and API as ONE
+
+**The three apps (admin panel, customer site, backend API) are ONE synchronized system.**
+
+**Core Principle:**
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 UNIFIED SYSTEM = ONE TRUTH                   │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│   Backend API (FastAPI)                                     │
+│   └── SINGLE SOURCE OF TRUTH for ALL business logic        │
+│       ├── Pricing calculations                              │
+│       ├── Booking validation                                │
+│       ├── Business rules                                    │
+│       └── Data persistence                                  │
+│                                                             │
+│   Admin Panel (Next.js)                                     │
+│   └── Reads from API, writes through API                    │
+│       ├── Displays same data as customer sees              │
+│       ├── Uses same pricing from API                        │
+│       └── Changes propagate to customer site instantly     │
+│                                                             │
+│   Customer Site (Next.js)                                   │
+│   └── Reads from API, writes through API                    │
+│       ├── NEVER calculates business logic locally          │
+│       ├── Fetches ALL pricing/rules from API               │
+│       └── Frontend is ONLY for display and UX              │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**The Rules:**
+
+| Rule | Description |
+|------|-------------|
+| **API is truth** | Backend API is the ONLY source for pricing, rules, and validation |
+| **No local calculations** | Frontend NEVER calculates prices, travel fees, or applies business rules |
+| **Sync by design** | When admin changes pricing, customer site shows new prices automatically |
+| **Fetch, don't fallback** | Always use API data; local fallbacks are ONLY for loading states |
+| **Validate server-side** | Client validation is UX convenience; API validates everything again |
+
+**Anti-Patterns to Avoid:**
+
+| ❌ WRONG | ✅ RIGHT |
+|----------|----------|
+| `const price = guests * 55` (hardcoded in frontend) | `const { adultPrice } = await fetchPricing()` |
+| `if (deposit < 100)` (frontend validation only) | API validates deposit amount server-side |
+| Admin and customer use different pricing sources | Both fetch from `/api/v1/pricing/current` |
+| Local storage as source of truth | API response as source of truth |
+| Duplicate business logic in frontend | Single implementation in backend |
+
+**Why This Matters:**
+
+1. **Consistency** – Customer sees exactly what admin configured
+2. **Maintainability** – Change logic in ONE place (backend)
+3. **Security** – Business rules can't be bypassed via client
+4. **Reliability** – No sync issues between apps
+5. **Testing** – Test business logic once in API
+
+### 15. Frontend-Backend Sync is MANDATORY
+
+**When building features, BOTH ends must be implemented and verified together.**
+
+**The Golden Rule:**
+> When you create a backend endpoint, ensure the frontend hook/component that consumes it EXISTS and WORKS.
+> When you create a frontend hook, ensure the backend endpoint it calls EXISTS and WORKS.
+
+**Development Checklist (MUST complete before PR):**
+
+| Building... | MUST Also Verify... |
+|-------------|---------------------|
+| Backend endpoint `/api/v1/foo` | Frontend hook `useFoo()` or `apiFetch('/api/v1/foo')` calls it |
+| Frontend hook `useFoo()` | Backend endpoint `/api/v1/foo` exists and returns expected schema |
+| Pydantic response model | TypeScript interface matches the response structure |
+| Database column | Frontend displays/uses the new field |
+| Admin panel feature | Customer site reflects admin changes |
+
+**Anti-Patterns (NEVER DO):**
+
+| ❌ WRONG | ✅ RIGHT |
+|----------|----------|
+| Create frontend hook, assume backend exists | Verify endpoint exists with `curl` or Postman |
+| Create backend endpoint, forget frontend | Create or update the corresponding hook/component |
+| Change response schema without updating types | Update Pydantic model AND TypeScript interface |
+| Add admin feature without customer sync | Verify customer site reflects admin changes |
+
+**Verification Commands:**
+
+```bash
+# Before creating frontend hook, verify backend:
+curl -X GET http://localhost:8000/api/v1/config/all
+
+# Before deploying backend, verify frontend can consume:
+cd apps/customer && npm run build  # Type errors = schema mismatch
+```
+
+**Why This Matters:**
+
+1. **No Dead Code** – Every endpoint has a consumer, every hook has a provider
+2. **Type Safety** – Schema mismatches caught at build time
+3. **Complete Features** – No half-implemented features in production
+4. **Faster Debugging** – Issues found during development, not in production
+
 ---
 
 ## 🎯 Code Quality Standards

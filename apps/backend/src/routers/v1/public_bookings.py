@@ -291,14 +291,14 @@ async def get_available_times(
                 "message": "Date is in the past",
             }
 
-        # Check if date is too far in the future (90 days)
-        max_date = today + timedelta(days=90)
+        # Check if date is too far in the future (365 days = 1 year)
+        max_date = today + timedelta(days=365)
         if parsed_date > max_date:
             return {
                 "success": True,
                 "date": date,
                 "timeSlots": [],
-                "message": "Date is too far in the future (max 90 days)",
+                "message": "Date is too far in the future (max 1 year)",
             }
 
         # Define time slots (matching frontend expectations)
@@ -476,12 +476,12 @@ async def create_public_booking(
                 detail="Booking date must be at least 48 hours in the future",
             )
 
-        # Validate date is not too far in the future (90 days)
-        max_date = now + timedelta(days=90)
+        # Validate date is not too far in the future (365 days = 1 year)
+        max_date = now + timedelta(days=365)
         if booking_datetime > max_date:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Booking date cannot be more than 90 days in the future",
+                detail="Booking date cannot be more than 1 year in the future",
             )
 
         # Validate time is within business hours (11:00 - 22:00)

@@ -3,14 +3,16 @@ Business Configuration Service
 ==============================
 
 Centralizes all dynamic business configuration values.
-Fetches from database (business_rules table) with environment fallbacks.
+Fetches from database (dynamic_variables table) with environment fallbacks.
 
 NEVER hardcode business values - always use this service!
 
-Data Sources:
-1. business_rules table (primary) - Admin-managed via UI
-2. Environment variables (fallback) - For when DB unavailable
-3. PricingService defaults (last resort) - Hardcoded minimums
+Data Sources (Priority Order):
+1. Redis cache (if available) - Fastest, 15 min TTL
+2. dynamic_variables table (primary) - Admin-managed via UI
+3. business_rules table (legacy fallback) - Old format
+4. Environment variables (fallback) - For when DB unavailable
+5. Hardcoded defaults (last resort) - Safety net
 
 Usage:
     from services.business_config_service import get_business_config
@@ -19,26 +21,34 @@ Usage:
     deposit = config.deposit_amount_cents  # 10000 ($100)
     adult_price = config.adult_price_cents  # 5500 ($55)
 
+    # For individual variable access:
+    value = await get_dynamic_variable(db, 'pricing', 'adult_price_cents')
+
 Admin UI:
     - Super Admin can modify these values via /admin/settings/pricing
     - Changes take effect immediately (no restart required)
-    - All changes are logged for audit trail
+    - All changes are logged in config_audit_log
 
 Related Tables:
-    - business_rules: General policies (deposit, cancellation, etc.)
+    - public.dynamic_variables: NEW SSoT table for all configurable values
+    - public.config_audit_log: Immutable audit trail for changes
+    - business_rules: Legacy policies (deprecated, for migration)
     - core.travel_fee_configurations: Station-based travel fees
-    - pricing.menu_items: Menu item prices
-    - pricing.addon_items: Addon prices
 
 Caching:
     - Redis-cached for 15 minutes to reduce DB load
-    - Invalidate cache when admin updates business rules
+    - Invalidate cache when admin updates any dynamic variable
+
+SSoT Architecture:
+    See: 20-SINGLE_SOURCE_OF_TRUTH.instructions.md
+    See: database/migrations/004_dynamic_variables_ssot.sql
 """
 
 import logging
 import os
+import json
 from dataclasses import dataclass, asdict
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -51,6 +61,12 @@ logger = logging.getLogger(__name__)
 # Cache settings
 BUSINESS_CONFIG_CACHE_KEY = "config:business"
 BUSINESS_CONFIG_CACHE_TTL = 900  # 15 minutes
+
+# Dynamic variables category keys (must match database)
+CATEGORY_PRICING = "pricing"
+CATEGORY_TRAVEL = "travel"
+CATEGORY_BOOKING = "booking"
+CATEGORY_DEPOSIT = "deposit"
 
 
 @dataclass
@@ -107,9 +123,10 @@ async def get_business_config(
 
     Priority:
     1. Redis cache (if available) - Fastest
-    2. Database (business_rules table) - Primary source
-    3. Environment variables - Fallback for dev/testing
-    4. Hardcoded defaults - Last resort
+    2. dynamic_variables table (NEW SSoT) - Primary source
+    3. business_rules table (legacy) - Fallback for migration
+    4. Environment variables - Fallback for dev/testing
+    5. Hardcoded defaults - Last resort
 
     Args:
         db: Database session
@@ -140,75 +157,189 @@ async def get_business_config(
     config = BusinessConfig()
 
     try:
-        # Query business_rules table for pricing and policies
+        # PRIORITY 1: Query NEW dynamic_variables table (SSoT)
         result = await db.execute(
             text(
                 """
-            SELECT rule_type, title, value
-            FROM business_rules
+            SELECT category, key, value, value_type
+            FROM dynamic_variables
             WHERE is_active = true
-            AND rule_type IN ('PRICING', 'PAYMENT', 'BOOKING')
+            AND (effective_from IS NULL OR effective_from <= NOW())
+            AND (effective_to IS NULL OR effective_to > NOW())
         """
             )
         )
-        rules = result.fetchall()
+        variables = result.fetchall()
 
-        if rules:
-            config.source = "database"
-
-            for rule in rules:
-                rule_type, title, value = rule
-
-                # Parse JSON value
-                if isinstance(value, dict):
-                    rule_value = value
-                else:
-                    import json
-
-                    rule_value = json.loads(value) if value else {}
-
-                # Extract values based on rule type and title
-                if rule_type == "PAYMENT" and "Deposit" in title:
-                    if "deposit_amount" in rule_value:
-                        # Convert dollars to cents
-                        config.deposit_amount_cents = int(rule_value["deposit_amount"] * 100)
-
-                elif rule_type == "PRICING":
-                    if "Party Minimum" in title or "minimum_amount" in rule_value:
-                        if "minimum_amount" in rule_value:
-                            config.party_minimum_cents = int(rule_value["minimum_amount"] * 100)
-
-                    if "Travel Fee" in title:
-                        if "free_miles" in rule_value:
-                            config.travel_free_miles = int(rule_value["free_miles"])
-                        if "per_mile_rate" in rule_value:
-                            config.travel_per_mile_cents = int(rule_value["per_mile_rate"] * 100)
-
-                elif rule_type == "BOOKING":
-                    if "Advance" in title and "minimum_hours" in rule_value:
-                        config.min_advance_hours = int(rule_value["minimum_hours"])
-
+        if variables:
+            config.source = "database_dynamic_variables"
+            config = _map_dynamic_variables_to_config(variables, config)
             logger.info(
-                f"✅ Loaded business config from database: deposit=${config.deposit_amount_cents/100}"
+                f"✅ Loaded business config from dynamic_variables: deposit=${config.deposit_amount_cents/100}"
             )
-
-            # Cache the result for future requests
-            if cache:
-                try:
-                    await cache.set(
-                        BUSINESS_CONFIG_CACHE_KEY,
-                        asdict(config),
-                        ttl=BUSINESS_CONFIG_CACHE_TTL,
-                    )
-                    logger.debug("📦 Business config cached for 15 minutes")
-                except Exception as e:
-                    logger.warning(f"Failed to cache business config: {e}")
         else:
-            # Fall back to environment variables
-            config = _load_from_environment()
+            # PRIORITY 2: Fallback to legacy business_rules table
+            logger.warning("⚠️ No dynamic_variables found, falling back to business_rules")
+            config = await _load_from_business_rules(db, config)
+
+        # Cache the result for future requests
+        if cache:
+            try:
+                await cache.set(
+                    BUSINESS_CONFIG_CACHE_KEY,
+                    asdict(config),
+                    ttl=BUSINESS_CONFIG_CACHE_TTL,
+                )
+                logger.debug("📦 Business config cached for 15 minutes")
+            except Exception as e:
+                logger.warning(f"Failed to cache business config: {e}")
 
     except Exception as e:
         logger.warning(f"⚠️ Failed to load business config from DB: {e}, using environment fallback")
+        config = _load_from_environment()
+
+    return config
+
+
+def _map_dynamic_variables_to_config(
+    variables: list, config: BusinessConfig
+) -> BusinessConfig:
+    """
+    Map dynamic_variables rows to BusinessConfig dataclass.
+
+    Handles type conversion based on value_type column.
+    """
+    for row in variables:
+        category, key, value, value_type = row
+
+        # Parse value based on type
+        parsed_value = _parse_variable_value(value, value_type)
+
+        # Map to config fields
+        if category == CATEGORY_PRICING:
+            if key == "adult_price_cents":
+                config.adult_price_cents = int(parsed_value)
+            elif key == "child_price_cents":
+                config.child_price_cents = int(parsed_value)
+            elif key == "child_free_under_age":
+                config.child_free_under_age = int(parsed_value)
+            elif key == "party_minimum_cents":
+                config.party_minimum_cents = int(parsed_value)
+
+        elif category == CATEGORY_DEPOSIT:
+            if key == "deposit_amount_cents":
+                config.deposit_amount_cents = int(parsed_value)
+            elif key == "deposit_refundable_days":
+                config.deposit_refundable_days = int(parsed_value)
+
+        elif category == CATEGORY_TRAVEL:
+            if key == "travel_free_miles":
+                config.travel_free_miles = int(parsed_value)
+            elif key == "travel_per_mile_cents":
+                config.travel_per_mile_cents = int(parsed_value)
+
+        elif category == CATEGORY_BOOKING:
+            if key == "min_advance_hours":
+                config.min_advance_hours = int(parsed_value)
+
+    return config
+
+
+def _parse_variable_value(value: Any, value_type: str) -> Any:
+    """
+    Parse a dynamic variable value based on its declared type.
+
+    Handles JSONB storage where values may be strings, numbers, or objects.
+    """
+    if value is None:
+        return None
+
+    # If it's already the right type, return as-is
+    if value_type == "integer" and isinstance(value, int):
+        return value
+    if value_type == "number" and isinstance(value, (int, float)):
+        return value
+    if value_type == "boolean" and isinstance(value, bool):
+        return value
+    if value_type == "string" and isinstance(value, str):
+        return value
+
+    # Handle JSONB storage (value might be wrapped)
+    if isinstance(value, dict):
+        # Extract the actual value if wrapped
+        return value.get("value", value)
+
+    # Convert string representations
+    if isinstance(value, str):
+        if value_type == "integer":
+            return int(value)
+        elif value_type == "number":
+            return float(value)
+        elif value_type == "boolean":
+            return value.lower() in ("true", "1", "yes")
+
+    return value
+
+
+async def _load_from_business_rules(
+    db: AsyncSession, config: BusinessConfig
+) -> BusinessConfig:
+    """
+    Fallback: Load configuration from legacy business_rules table.
+
+    This is for backwards compatibility during migration.
+    Will be deprecated once all data is in dynamic_variables.
+    """
+    result = await db.execute(
+        text(
+            """
+        SELECT rule_type, title, value
+        FROM business_rules
+        WHERE is_active = true
+        AND rule_type IN ('PRICING', 'PAYMENT', 'BOOKING')
+    """
+        )
+    )
+    rules = result.fetchall()
+
+    if rules:
+        config.source = "database_business_rules"
+
+        for rule in rules:
+            rule_type, title, value = rule
+
+            # Parse JSON value
+            if isinstance(value, dict):
+                rule_value = value
+            else:
+                rule_value = json.loads(value) if value else {}
+
+            # Extract values based on rule type and title
+            if rule_type == "PAYMENT" and "Deposit" in title:
+                if "deposit_amount" in rule_value:
+                    # Convert dollars to cents
+                    config.deposit_amount_cents = int(rule_value["deposit_amount"] * 100)
+
+            elif rule_type == "PRICING":
+                if "Party Minimum" in title or "minimum_amount" in rule_value:
+                    if "minimum_amount" in rule_value:
+                        config.party_minimum_cents = int(rule_value["minimum_amount"] * 100)
+
+                if "Travel Fee" in title:
+                    if "free_miles" in rule_value:
+                        config.travel_free_miles = int(rule_value["free_miles"])
+                    if "per_mile_rate" in rule_value:
+                        config.travel_per_mile_cents = int(rule_value["per_mile_rate"] * 100)
+
+            elif rule_type == "BOOKING":
+                if "Advance" in title and "minimum_hours" in rule_value:
+                    config.min_advance_hours = int(rule_value["minimum_hours"])
+
+        logger.info(
+            f"✅ Loaded business config from business_rules: deposit=${config.deposit_amount_cents/100}"
+        )
+    else:
+        # Fall back to environment variables
         config = _load_from_environment()
 
     return config

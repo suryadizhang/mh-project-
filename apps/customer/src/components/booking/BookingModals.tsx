@@ -1,6 +1,7 @@
 import { AlertTriangle, ArrowRight, Check, FileText, X } from 'lucide-react';
 import React from 'react';
 
+import { usePricing } from '@/hooks/usePricing';
 import { BookingModalProps } from './types';
 
 const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
@@ -14,6 +15,9 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
   onAgreementCancel,
   // className = '' // Commented out as it's not used in this component
 }) => {
+  // Get deposit amount from SSoT pricing system
+  const { depositAmount } = usePricing();
+
   const handleCloseValidation = () => {
     setShowValidationModal(false);
   };
@@ -123,7 +127,7 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-green-500 mt-1">✓</span>
-                        $100 refundable deposit required to secure booking
+                        ${depositAmount ?? 100} refundable deposit required to secure booking
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-green-500 mt-1">✓</span>
@@ -156,7 +160,7 @@ const BookingModals: React.FC<BookingModalProps & { className?: string }> = ({
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-green-500 mt-1">✓</span>
-                        One free reschedule within 48 hours of booking; additional reschedules cost $100
+                        One free reschedule within 48 hours of booking; additional reschedules cost ${depositAmount ?? 100}
                       </li>
                     </ul>
                   </div>

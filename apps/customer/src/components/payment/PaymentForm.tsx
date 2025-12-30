@@ -43,14 +43,11 @@ function PaymentFormComponent({
   const [isLoading, setIsLoading] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  // Note: Billing address is now collected by Stripe PaymentElement (billingDetails: 'auto')
+  // We only need to track name/email for confirmation display
   const [customerInfo, setCustomerInfo] = useState({
     name: bookingData?.customerName || '',
     email: bookingData?.customerEmail || '',
-    phone: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
   });
 
   const handleSubmit = async (event: FormEvent) => {
@@ -70,25 +67,15 @@ function PaymentFormComponent({
         throw new Error(submitError.message);
       }
 
+      // Billing details are collected automatically by PaymentElement (billingDetails: 'auto')
+      // Stripe handles address validation, autocomplete, and fraud detection
       const { error } = await stripe.confirmPayment({
         elements,
         clientSecret,
         confirmParams: {
           return_url: `${window.location.origin}/payment/success`,
-          payment_method_data: {
-            billing_details: {
-              name: customerInfo.name,
-              email: customerInfo.email,
-              phone: customerInfo.phone,
-              address: {
-                line1: customerInfo.address,
-                city: customerInfo.city,
-                state: customerInfo.state,
-                postal_code: customerInfo.zipCode,
-                country: 'US',
-              },
-            },
-          },
+          // Only pass receipt email - billing address comes from PaymentElement
+          receipt_email: customerInfo.email || undefined,
         },
       });
 
@@ -149,10 +136,13 @@ function PaymentFormComponent({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Customer Information */}
+        {/* Customer Contact - Only shown when no booking data (standalone payment) */}
         {!bookingData && (
           <div className="rounded-lg bg-gray-50 p-4">
-            <h4 className="mb-3 font-medium text-gray-900">Customer Information</h4>
+            <h4 className="mb-3 font-medium text-gray-900">Contact Information</h4>
+            <p className="mb-3 text-sm text-gray-600">
+              For your payment receipt. Billing address will be collected below.
+            </p>
             <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <label className="mb-1 block text-sm font-medium text-gray-700">Full Name *</label>
@@ -176,63 +166,11 @@ function PaymentFormComponent({
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Phone Number *
-                </label>
-                <input
-                  type="tel"
-                  required
-                  value={customerInfo.phone}
-                  onChange={(e) => setCustomerInfo((prev) => ({ ...prev, phone: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Address</label>
-                <input
-                  type="text"
-                  value={customerInfo.address}
-                  onChange={(e) =>
-                    setCustomerInfo((prev) => ({ ...prev, address: e.target.value }))
-                  }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">City</label>
-                <input
-                  type="text"
-                  value={customerInfo.city}
-                  onChange={(e) => setCustomerInfo((prev) => ({ ...prev, city: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">State</label>
-                <input
-                  type="text"
-                  value={customerInfo.state}
-                  onChange={(e) => setCustomerInfo((prev) => ({ ...prev, state: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">ZIP Code</label>
-                <input
-                  type="text"
-                  value={customerInfo.zipCode}
-                  onChange={(e) =>
-                    setCustomerInfo((prev) => ({ ...prev, zipCode: e.target.value }))
-                  }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
             </div>
           </div>
         )}
 
-        {/* Stripe Payment Element */}
+        {/* Stripe Payment Element - Collects card + billing address automatically */}
         <div className="rounded-lg bg-gray-50 p-4">
           <h4 className="mb-3 flex items-center font-medium text-gray-900">
             <Lock className="mr-2 h-4 w-4 text-blue-600" />
@@ -242,6 +180,12 @@ function PaymentFormComponent({
             options={{
               layout: 'tabs',
               paymentMethodOrder: ['card', 'apple_pay', 'google_pay'],
+              // Let Stripe collect billing address - better validation, fraud detection
+              fields: {
+                billingDetails: {
+                  address: 'auto', // Stripe collects billing address
+                },
+              },
             }}
           />
         </div>

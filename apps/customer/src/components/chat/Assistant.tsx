@@ -23,7 +23,7 @@ interface AssistantProps {
 }
 
 const WELCOME_SUGGESTIONS: Record<string, string[]> = {
-  '/BookUs': [
+  '/book-us/': [
     'Contact a person',
     'How much will my party cost?',
     "What's included in the menu?",

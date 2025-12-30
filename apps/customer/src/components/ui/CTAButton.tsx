@@ -12,7 +12,7 @@ import { forwardRef } from 'react';
  *
  * @example
  * ```tsx
- * <CTAButton href="/BookUs" variant="primary" icon={<Calendar />}>
+ * <CTAButton href="/book-us/" variant="primary" icon={<Calendar />}>
  *   Book Your Date Now
  * </CTAButton>
  *
@@ -161,7 +161,7 @@ export default CTAButton;
  * @example
  * ```tsx
  * <CTAButtonGroup>
- *   <CTAButton href="/BookUs" variant="primary">Book Now</CTAButton>
+ *   <CTAButton href="/book-us/" variant="primary">Book Now</CTAButton>
  *   <CTAButton href="/quote" variant="secondary">Get Quote</CTAButton>
  * </CTAButtonGroup>
  * ```

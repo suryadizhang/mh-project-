@@ -966,3 +966,295 @@ export const smsService = {
     return api.get(url);
   },
 };
+
+// ==============================================================================
+// SSoT Config Service (Dynamic Variables Management)
+// ==============================================================================
+
+export interface ConfigVariable {
+  id?: string;
+  key: string;
+  value: unknown;
+  value_type: 'string' | 'integer' | 'number' | 'boolean' | 'json';
+  category: 'pricing' | 'deposit' | 'travel' | 'booking' | 'feature' | 'ai';
+  description?: string;
+  is_active?: boolean;
+  effective_from?: string;
+  effective_to?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ConfigVariableUpdate {
+  value: unknown;
+  description?: string;
+  is_active?: boolean;
+  effective_from?: string;
+  effective_to?: string;
+  [key: string]: unknown; // Index signature for Record<string, unknown> compatibility
+}
+
+export interface ConfigVariableCreate {
+  key: string;
+  value: unknown;
+  value_type: 'string' | 'integer' | 'number' | 'boolean' | 'json';
+  category: string;
+  description?: string;
+  is_active?: boolean;
+  [key: string]: unknown; // Index signature for Record<string, unknown> compatibility
+}
+
+export interface ConfigAuditEntry {
+  id: string;
+  category: string;
+  key: string;
+  old_value: unknown;
+  new_value: unknown;
+  changed_by: string;
+  changed_at: string;
+  reason?: string;
+}
+
+// ============================================
+// TWO-PERSON APPROVAL SYSTEM TYPES
+// ============================================
+
+/**
+ * Status of an approval request
+ */
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected' | 'cancelled' | 'expired';
+
+/**
+ * Priority levels that determine approval requirements
+ */
+export type VariablePriority = 'critical' | 'high' | 'medium' | 'low';
+
+/**
+ * Approval request for a variable change
+ */
+export interface ApprovalRequest {
+  id: string;
+  category: string;
+  key: string;
+  current_value: unknown;
+  proposed_value: unknown;
+  requester_id: string;
+  requester_name: string;
+  status: ApprovalStatus;
+  reason?: string;
+  scheduled_for?: string;
+  created_at: string;
+  expires_at?: string;
+  reviewed_by?: string;
+  reviewer_name?: string;
+  reviewed_at?: string;
+  rejection_reason?: string;
+}
+
+/**
+ * Request payload for creating an approval request
+ */
+export interface ApprovalRequestCreate {
+  category: string;
+  key: string;
+  proposed_value: unknown;
+  reason?: string;
+  scheduled_for?: string;
+  [key: string]: unknown; // Index signature for Record<string, unknown> compatibility
+}
+
+/**
+ * Response for approval status check
+ */
+export interface ApprovalStatusCheck {
+  has_pending_approval: boolean;
+  approval?: ApprovalRequest;
+}
+
+/**
+ * SSoT Configuration Service
+ *
+ * Manages dynamic business variables stored in PostgreSQL.
+ * All pricing, fees, and policies should be managed through this service.
+ *
+ * API Endpoints:
+ * - GET /api/v1/admin/config - List all variables
+ * - GET /api/v1/admin/config/{category} - List by category
+ * - POST /api/v1/admin/config - Create new variable
+ * - PUT /api/v1/admin/config/{category}/{key} - Update variable
+ * - DELETE /api/v1/admin/config/{category}/{key} - Delete variable
+ * - POST /api/v1/admin/config/cache/invalidate - Force cache invalidation
+ * - GET /api/v1/admin/config/audit - Get audit log
+ */
+export const configService = {
+  /**
+   * Get all configuration variables
+   */
+  async getVariables(): Promise<ApiResponse<{ data: ConfigVariable[] }>> {
+    return api.get<{ data: ConfigVariable[] }>('/api/v1/admin/config');
+  },
+
+  /**
+   * Get variables by category (pricing, deposit, travel, booking, etc.)
+   */
+  async getVariablesByCategory(category: string): Promise<ApiResponse<{ data: ConfigVariable[] }>> {
+    return api.get<{ data: ConfigVariable[] }>(`/api/v1/admin/config/${category}`);
+  },
+
+  /**
+   * Get a single variable by category and key
+   */
+  async getVariable(category: string, key: string): Promise<ApiResponse<ConfigVariable>> {
+    return api.get<ConfigVariable>(`/api/v1/admin/config/${category}/${key}`);
+  },
+
+  /**
+   * Create a new configuration variable
+   */
+  async createVariable(data: ConfigVariableCreate): Promise<ApiResponse<ConfigVariable>> {
+    return api.post<ConfigVariable>('/api/v1/admin/config', data);
+  },
+
+  /**
+   * Update an existing configuration variable
+   * Automatically invalidates cache on success
+   */
+  async updateVariable(
+    category: string,
+    key: string,
+    data: ConfigVariableUpdate
+  ): Promise<ApiResponse<ConfigVariable>> {
+    return api.put<ConfigVariable>(`/api/v1/admin/config/${category}/${key}`, data);
+  },
+
+  /**
+   * Delete a configuration variable
+   */
+  async deleteVariable(category: string, key: string): Promise<ApiResponse<{ success: boolean }>> {
+    return api.delete<{ success: boolean }>(`/api/v1/admin/config/${category}/${key}`);
+  },
+
+  /**
+   * Force invalidate all cached configuration
+   * Use after bulk updates or when debugging cache issues
+   */
+  async invalidateCache(): Promise<ApiResponse<{ success: boolean; message: string }>> {
+    return api.post<{ success: boolean; message: string }>('/api/v1/admin/config/cache/invalidate', {});
+  },
+
+  /**
+   * Get audit log for configuration changes
+   */
+  async getAuditLog(filters?: {
+    category?: string;
+    key?: string;
+    from_date?: string;
+    to_date?: string;
+    limit?: number;
+  }): Promise<ApiResponse<{ data: ConfigAuditEntry[] }>> {
+    const params = new URLSearchParams();
+    if (filters?.category) params.append('category', filters.category);
+    if (filters?.key) params.append('key', filters.key);
+    if (filters?.from_date) params.append('from_date', filters.from_date);
+    if (filters?.to_date) params.append('to_date', filters.to_date);
+    if (filters?.limit) params.append('limit', filters.limit.toString());
+
+    const query = params.toString();
+    const url = query ? `/api/v1/admin/config/audit?${query}` : '/api/v1/admin/config/audit';
+    return api.get<{ data: ConfigAuditEntry[] }>(url);
+  },
+
+  /**
+   * Bulk update multiple variables at once
+   * Useful for initial setup or migrations
+   */
+  async bulkUpdate(
+    updates: Array<{ category: string; key: string; value: unknown }>
+  ): Promise<ApiResponse<{ updated: number; failed: number }>> {
+    return api.post<{ updated: number; failed: number }>('/api/v1/admin/config/bulk', { updates });
+  },
+
+  // ============================================
+  // TWO-PERSON APPROVAL SYSTEM METHODS
+  // ============================================
+
+  /**
+   * Get all pending approval requests
+   * Super admins see all, others see only their own
+   */
+  async getPendingApprovals(filters?: {
+    category?: string;
+    status?: ApprovalStatus;
+    requester_id?: string;
+  }): Promise<ApiResponse<{ data: ApprovalRequest[]; total: number }>> {
+    const params = new URLSearchParams();
+    if (filters?.category) params.append('category', filters.category);
+    if (filters?.status) params.append('status', filters.status);
+    if (filters?.requester_id) params.append('requester_id', filters.requester_id);
+
+    const query = params.toString();
+    const url = query
+      ? `/api/v1/admin/config/approvals/pending?${query}`
+      : '/api/v1/admin/config/approvals/pending';
+    return api.get<{ data: ApprovalRequest[]; total: number }>(url);
+  },
+
+  /**
+   * Get a single approval request by ID
+   */
+  async getApproval(approvalId: string): Promise<ApiResponse<ApprovalRequest>> {
+    return api.get<ApprovalRequest>(`/api/v1/admin/config/approvals/${approvalId}`);
+  },
+
+  /**
+   * Request approval for a variable change
+   * Required for critical and high priority variables
+   */
+  async requestApproval(data: ApprovalRequestCreate): Promise<ApiResponse<ApprovalRequest>> {
+    return api.post<ApprovalRequest>('/api/v1/admin/config/approvals/request', data);
+  },
+
+  /**
+   * Approve a pending approval request
+   * Automatically applies the change on approval
+   */
+  async approveRequest(
+    approvalId: string,
+    reason?: string
+  ): Promise<ApiResponse<ApprovalRequest>> {
+    return api.post<ApprovalRequest>(`/api/v1/admin/config/approvals/${approvalId}/approve`, {
+      reason,
+    });
+  },
+
+  /**
+   * Reject a pending approval request
+   */
+  async rejectRequest(
+    approvalId: string,
+    rejection_reason: string
+  ): Promise<ApiResponse<ApprovalRequest>> {
+    return api.post<ApprovalRequest>(`/api/v1/admin/config/approvals/${approvalId}/reject`, {
+      rejection_reason,
+    });
+  },
+
+  /**
+   * Cancel an approval request (only by requester)
+   */
+  async cancelRequest(approvalId: string): Promise<ApiResponse<{ success: boolean }>> {
+    return api.delete<{ success: boolean }>(`/api/v1/admin/config/approvals/${approvalId}`);
+  },
+
+  /**
+   * Check if a variable has a pending approval
+   */
+  async checkApprovalStatus(
+    category: string,
+    key: string
+  ): Promise<ApiResponse<ApprovalStatusCheck>> {
+    return api.get<ApprovalStatusCheck>(
+      `/api/v1/admin/config/approvals/check/${category}/${key}`
+    );
+  },
+};
