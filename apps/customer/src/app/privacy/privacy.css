@@ -73,7 +73,7 @@
 }
 
 .sms-privacy-section::before {
-  content: "SMS PRIVACY";
+  content: 'SMS PRIVACY';
   position: absolute;
   top: -12px;
   left: 50%;
@@ -114,6 +114,21 @@
   border-radius: var(--radius-md);
   padding: 1.5rem;
   margin: 1.5rem 0;
+}
+
+.ringcentral-compliance {
+  background: #e8f5e9;
+  border: 2px solid #4caf50;
+  border-radius: var(--radius-md);
+  padding: 1rem 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.ringcentral-compliance .compliance-statement {
+  font-size: 1rem;
+  color: #2e7d32;
+  margin: 0;
+  line-height: 1.6;
 }
 
 .no-sale-statement {
