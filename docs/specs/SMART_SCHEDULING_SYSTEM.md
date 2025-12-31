@@ -10,8 +10,11 @@ assignment operations.
 
 ---
 
-> ⚠️ **DYNAMIC VALUES NOTICE**
-> Business values in this document (event durations, buffer times, distances) are configurable and may change. Always verify against `slot_configurations` table, `travel_fee_configurations` table, or relevant service files before using specific numbers.
+> ⚠️ **DYNAMIC VALUES NOTICE** Business values in this document (event
+> durations, buffer times, distances) are configurable and may change.
+> Always verify against `slot_configurations` table,
+> `travel_fee_configurations` table, or relevant service files before
+> using specific numbers.
 
 ---
 
