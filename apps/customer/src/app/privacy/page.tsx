@@ -102,8 +102,8 @@ export default function PrivacyPage() {
               </ul>
               <div className="ringcentral-compliance">
                 <p className="compliance-statement">
-                  <strong>🔒 Your Phone Number is Protected:</strong> We will never sell, rent, or
-                  share your mobile number or SMS consent with third parties for marketing purposes.
+                  <strong>🔒 SMS Privacy:</strong> Mobile opt-in, SMS consent, and phone numbers
+                  will not be shared with third parties and affiliates for marketing purposes.
                 </p>
               </div>
             </div>
