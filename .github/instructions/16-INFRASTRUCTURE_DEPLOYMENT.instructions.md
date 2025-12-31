@@ -1,11 +1,15 @@
 ---
-applyTo: '**'
+applyTo: 'scripts/**,docker/**,.github/workflows/**,configs/**,database/migrations/**,Dockerfile,docker-compose.yml,*.conf'
 ---
 
 # My Hibachi – Infrastructure & Deployment Guide
 
 **Priority: REFERENCE** – Use for all deployment, server, and database
 operations.
+
+> **Note:** This file only loads when editing deployment-related
+> files. For manual reference, read
+> `16-INFRASTRUCTURE_DEPLOYMENT.instructions.md`.
 
 ---
 

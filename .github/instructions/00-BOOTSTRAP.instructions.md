@@ -10,8 +10,15 @@ applyTo: '**'
 
 ## 🚀 Quick Start
 
-You are the **My Hibachi Dev Agent**. Before ANY action, load these
-files in order:
+You are the **My Hibachi Dev Agent**.
+
+### 📦 Smart Context Loading (Optimized)
+
+**Files load automatically based on what you're editing** via
+`applyTo` patterns. Some files ALWAYS load, others load only when
+editing relevant code.
+
+#### ALWAYS LOAD (Core Rules):
 
 1. `01-CORE_PRINCIPLES.instructions.md` – Non-negotiables
 2. `02-ARCHITECTURE.instructions.md` – System structure
@@ -23,31 +30,38 @@ files in order:
 8. `08-FEATURE_FLAGS.instructions.md` – Flag rules
 9. `09-ROLLBACK_SAFETY.instructions.md` – Emergency procedures
 10. `10-COPILOT_PERFORMANCE.instructions.md` – Agent efficiency
-11. `11-REACT_PERFORMANCE.instructions.md` – React re-rendering rules
-12. `12-CSS_ARCHITECTURE.instructions.md` – Tailwind v4 & CSS
-    organization
-13. `13-PYTHON_PERFORMANCE.instructions.md` – FastAPI & SQLAlchemy
-    patterns
-14. `14-MEDIA_OPTIMIZATION.instructions.md` – FFmpeg video/image
-    optimization
-15. `15-LIGHTHOUSE_WEB_VITALS.instructions.md` – Core Web Vitals &
-    Lighthouse standards
-16. `16-INFRASTRUCTURE_DEPLOYMENT.instructions.md` – Servers, DB, SSH,
-    deployment
-17. `17-SMART_SCHEDULING_SYSTEM.instructions.md` – Booking, slots,
-    chef optimization
-18. `18-AI_MULTI_LLM_ARCHITECTURE.instructions.md` – Multi-LLM
-    ensemble, Smart Router, Mistral integration
-19. `19-DATABASE_SCHEMA_MANAGEMENT.instructions.md` – SQLAlchemy model
-    to production DB sync, migration management
-20. `20-SINGLE_SOURCE_OF_TRUTH.instructions.md` – SSoT architecture,
-    dynamic variables, NO hardcoded values
-21. `21-BUSINESS_MODEL.instructions.md` – **CRITICAL**: 2 proteins per
-    person, pricing, allergens, chef workflow
-22. `22-QUALITY_CONTROL.instructions.md` – **CRITICAL**: 10-point
-    pre-commit checklist covering SSoT, types, security, performance,
-    testing, API contracts, error handling, DB safety, documentation,
-    accessibility
+11. `19-DATABASE_SCHEMA_MANAGEMENT.instructions.md` – DB sync rules
+12. `20-SINGLE_SOURCE_OF_TRUTH.instructions.md` – SSoT, NO hardcoded
+    values
+13. `21-BUSINESS_MODEL.instructions.md` – 2 proteins/person, pricing
+14. `22-QUALITY_CONTROL.instructions.md` – Pre-commit checklist
+15. `23-BATCH_CONTEXT_LOADER.instructions.md` – **NEW**: Batch-to-file
+    mapping
+
+#### CONDITIONAL LOAD (Based on File Being Edited):
+
+| File                           | Loads When Editing                                  |
+| ------------------------------ | --------------------------------------------------- |
+| `11-REACT_PERFORMANCE`         | `apps/customer/**`, `apps/admin/**`                 |
+| `12-CSS_ARCHITECTURE`          | `apps/customer/**`, `apps/admin/**`                 |
+| `13-PYTHON_PERFORMANCE`        | `apps/backend/**`                                   |
+| `14-MEDIA_OPTIMIZATION`        | Image/video files                                   |
+| `15-LIGHTHOUSE_WEB_VITALS`     | `apps/customer/**`, `apps/admin/**`                 |
+| `16-INFRASTRUCTURE_DEPLOYMENT` | `scripts/**`, `docker/**`, `configs/**`, migrations |
+
+#### ARCHIVED SPECS (Load On-Demand from `docs/specs/`):
+
+- `SMART_SCHEDULING_SYSTEM.md` – Chef scheduling, slots, optimization
+- `AI_MULTI_LLM_ARCHITECTURE.md` – Multi-LLM ensemble, Smart Router
+
+> **To load an archived spec:** Use `read_file` on
+> `docs/specs/FILENAME.md`
+
+### 🎯 Batch-Aware Context Loading
+
+**See `23-BATCH_CONTEXT_LOADER.instructions.md`** for which files to
+load based on current project batch. This ensures you have the right
+context for the current phase of work.
 
 ---
 
