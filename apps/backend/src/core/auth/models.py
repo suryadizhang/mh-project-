@@ -29,7 +29,6 @@ from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
-    Integer,
     String,
     Text,
     select,
@@ -179,7 +178,7 @@ class UserSession(Base):
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
     user_id = Column(
-        PostgresUUID(as_uuid=True), ForeignKey("identity.station_users.id"), nullable=False, index=True
+        PostgresUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=False, index=True
     )
 
     # Session identification
@@ -211,8 +210,8 @@ class UserSession(Base):
         DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now()
     )
 
-    # Relationships
-    user = relationship("StationUser", back_populates="sessions")
+    # Relationships - User model has back_populates="sessions"
+    user = relationship("User", back_populates="sessions")
 
 
 class AuditLog(Base):
@@ -225,7 +224,7 @@ class AuditLog(Base):
 
     # Who
     user_id = Column(
-        PostgresUUID(as_uuid=True), ForeignKey("identity.station_users.id"), nullable=True, index=True
+        PostgresUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=True, index=True
     )
     session_id = Column(
         PostgresUUID(as_uuid=True), ForeignKey("identity.user_sessions.id"), nullable=True
@@ -248,8 +247,8 @@ class AuditLog(Base):
     # Timestamp
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
 
-    # Relationships
-    user = relationship("StationUser", back_populates="audit_logs")
+    # Relationships - User model has back_populates="audit_logs"
+    user = relationship("User", back_populates="audit_logs")
 
 
 class PasswordResetToken(Base):
@@ -260,7 +259,7 @@ class PasswordResetToken(Base):
 
     id = Column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
     user_id = Column(
-        PostgresUUID(as_uuid=True), ForeignKey("identity.station_users.id"), nullable=False, index=True
+        PostgresUUID(as_uuid=True), ForeignKey("identity.users.id"), nullable=False, index=True
     )
 
     token_hash = Column(String(100), nullable=False, unique=True)
@@ -268,6 +267,9 @@ class PasswordResetToken(Base):
     used_at = Column(DateTime(timezone=True), nullable=True)
 
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
+
+    # Relationships - User model has back_populates="password_reset_tokens"
+    user = relationship("User", back_populates="password_reset_tokens")
 
 
 class AuthenticationService:
@@ -311,7 +313,9 @@ class AuthenticationService:
         except Exception:
             return False
 
-    async def authenticate_user(self, db: AsyncSession, email: str, password: str) -> "StationUser | None":
+    async def authenticate_user(
+        self, db: AsyncSession, email: str, password: str
+    ) -> "StationUser | None":
         """
         Authenticate user with email and password.
 
