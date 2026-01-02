@@ -16,6 +16,19 @@ Architecture:
 Author: MyHibachi Development Team
 Created: October 31, 2025
 Version: 2.0.0 (Phase 1A - Multi-Agent Foundation)
+
+# =============================================================================
+# MODULARIZATION TODO (BATCH 3 - Core AI)
+# This file is 1,700+ lines and exceeds the 500-line limit.
+# Target: Consider splitting into focused modules:
+#   - intent_router.py (intent classification)
+#   - tool_executor.py (tool/function calling)
+#   - response_generator.py (response composition)
+#   - conversation_manager.py (context management)
+#   - agent_selector.py (multi-agent selection)
+# Note: May require careful refactoring due to tight coupling.
+# See: .github/instructions/22-QUALITY_CONTROL.instructions.md
+# =============================================================================
 """
 
 from datetime import datetime, timezone
@@ -26,6 +39,9 @@ from typing import Any
 from uuid import uuid4
 
 from openai import OpenAI
+
+# Database context for on-demand service instantiation
+from core.database import get_db_context
 
 from .schemas import (
     OrchestratorConfig,
@@ -52,13 +68,22 @@ logger = logging.getLogger(__name__)
 # Week 1: AI Hospitality Training System
 try:
     from ..services.tone_analyzer import ToneAnalyzer
-    from ..services.knowledge_service import KnowledgeService
 
     TONE_ANALYZER_ENABLED = True
-    logger.info("✅ ToneAnalyzer and KnowledgeService imported successfully")
+    logger.info("✅ ToneAnalyzer imported successfully")
 except ImportError as e:
     TONE_ANALYZER_ENABLED = False
-    logger.warning(f"Tone analyzer and knowledge service not available: {e}")
+    logger.warning(f"Tone analyzer not available: {e}")
+
+# KnowledgeService - use canonical service from services/knowledge/
+try:
+    from services.knowledge import KnowledgeService
+
+    KNOWLEDGE_SERVICE_ENABLED = True
+    logger.info("✅ KnowledgeService imported successfully (canonical)")
+except ImportError as e:
+    KNOWLEDGE_SERVICE_ENABLED = False
+    logger.warning(f"Knowledge service not available: {e}")
 
 # Phase 1A: Import router and provider
 try:
@@ -252,16 +277,14 @@ class AIOrchestrator:
         if TONE_ANALYZER_ENABLED:
             try:
                 self.tone_analyzer = ToneAnalyzer()
-                # KnowledgeService will be initialized lazily (needs database session)
-                self.knowledge_service = None
+                # KnowledgeService is now instantiated on-demand in process_inquiry
+                # using get_db_context() for async database sessions
                 self.logger.info("✅ ToneAnalyzer initialized successfully")
             except Exception as e:
                 self.logger.warning(f"⚠️ Failed to initialize tone analyzer: {e}")
                 self.tone_analyzer = None
-                self.knowledge_service = None
         else:
             self.tone_analyzer = None
-            self.knowledge_service = None
 
         # Phase 1B: Initialize memory backend and emotion service (deferred to start())
         self.memory_backend = None
@@ -650,18 +673,21 @@ Generate accurate, helpful responses that make customers excited to book!"""
                     self.logger.warning(f"Tone detection failed, using default: {e}")
 
             # Step 1B: Get dynamic business knowledge (Week 1: Knowledge Service)
-            if self.knowledge_service:
+            # Create KnowledgeService on-demand with async db session
+            if KNOWLEDGE_SERVICE_ENABLED:
                 try:
-                    business_charter = await self.knowledge_service.get_business_charter()
+                    async with get_db_context() as db:
+                        knowledge_service = KnowledgeService(db=db)
+                        business_charter = await knowledge_service.get_business_charter()
 
-                    self.logger.debug(
-                        "Business knowledge loaded",
-                        extra={
-                            "last_updated": business_charter.get("last_updated"),
-                            "has_pricing": "pricing" in business_charter,
-                            "has_policies": "policies" in business_charter,
-                        },
-                    )
+                        self.logger.debug(
+                            "Business knowledge loaded",
+                            extra={
+                                "last_updated": business_charter.get("last_updated"),
+                                "has_pricing": "pricing" in business_charter,
+                                "has_policies": "policies" in business_charter,
+                            },
+                        )
                 except Exception as e:
                     self.logger.warning(f"Failed to load business knowledge: {e}")
 

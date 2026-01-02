@@ -276,7 +276,7 @@ export const bookingService = {
   },
 
   /**
-   * Cancel a booking
+   * Cancel a booking (legacy - direct cancellation)
    */
   async cancelBooking(
     bookingId: string,
@@ -289,6 +289,39 @@ export const bookingService = {
         refund_amount_cents: refundAmount,
       }),
     });
+  },
+
+  /**
+   * Request cancellation (2-step workflow - Step 1)
+   * Creates CANCELLATION_REQUESTED status, slot remains held
+   */
+  async requestCancellation(bookingId: string, reason: string) {
+    return api.post<ApiResponse<Booking>>(
+      `${ENDPOINTS.bookings}/${bookingId}/request-cancellation`,
+      { reason }
+    );
+  },
+
+  /**
+   * Approve cancellation request (2-step workflow - Step 2a)
+   * Changes status to CANCELLED, releases slot
+   */
+  async approveCancellation(bookingId: string, adminNotes?: string) {
+    return api.post<ApiResponse<Booking>>(
+      `${ENDPOINTS.bookings}/${bookingId}/approve-cancellation`,
+      { admin_notes: adminNotes }
+    );
+  },
+
+  /**
+   * Reject cancellation request (2-step workflow - Step 2b)
+   * Restores original status, slot remains held
+   */
+  async rejectCancellation(bookingId: string, adminNotes?: string) {
+    return api.post<ApiResponse<Booking>>(
+      `${ENDPOINTS.bookings}/${bookingId}/reject-cancellation`,
+      { admin_notes: adminNotes }
+    );
   },
 
   /**
@@ -1022,7 +1055,12 @@ export interface ConfigAuditEntry {
 /**
  * Status of an approval request
  */
-export type ApprovalStatus = 'pending' | 'approved' | 'rejected' | 'cancelled' | 'expired';
+export type ApprovalStatus =
+  | 'pending'
+  | 'approved'
+  | 'rejected'
+  | 'cancelled'
+  | 'expired';
 
 /**
  * Priority levels that determine approval requirements
@@ -1097,21 +1135,30 @@ export const configService = {
   /**
    * Get variables by category (pricing, deposit, travel, booking, etc.)
    */
-  async getVariablesByCategory(category: string): Promise<ApiResponse<{ data: ConfigVariable[] }>> {
-    return api.get<{ data: ConfigVariable[] }>(`/api/v1/admin/config/${category}`);
+  async getVariablesByCategory(
+    category: string
+  ): Promise<ApiResponse<{ data: ConfigVariable[] }>> {
+    return api.get<{ data: ConfigVariable[] }>(
+      `/api/v1/admin/config/${category}`
+    );
   },
 
   /**
    * Get a single variable by category and key
    */
-  async getVariable(category: string, key: string): Promise<ApiResponse<ConfigVariable>> {
+  async getVariable(
+    category: string,
+    key: string
+  ): Promise<ApiResponse<ConfigVariable>> {
     return api.get<ConfigVariable>(`/api/v1/admin/config/${category}/${key}`);
   },
 
   /**
    * Create a new configuration variable
    */
-  async createVariable(data: ConfigVariableCreate): Promise<ApiResponse<ConfigVariable>> {
+  async createVariable(
+    data: ConfigVariableCreate
+  ): Promise<ApiResponse<ConfigVariable>> {
     return api.post<ConfigVariable>('/api/v1/admin/config', data);
   },
 
@@ -1124,22 +1171,35 @@ export const configService = {
     key: string,
     data: ConfigVariableUpdate
   ): Promise<ApiResponse<ConfigVariable>> {
-    return api.put<ConfigVariable>(`/api/v1/admin/config/${category}/${key}`, data);
+    return api.put<ConfigVariable>(
+      `/api/v1/admin/config/${category}/${key}`,
+      data
+    );
   },
 
   /**
    * Delete a configuration variable
    */
-  async deleteVariable(category: string, key: string): Promise<ApiResponse<{ success: boolean }>> {
-    return api.delete<{ success: boolean }>(`/api/v1/admin/config/${category}/${key}`);
+  async deleteVariable(
+    category: string,
+    key: string
+  ): Promise<ApiResponse<{ success: boolean }>> {
+    return api.delete<{ success: boolean }>(
+      `/api/v1/admin/config/${category}/${key}`
+    );
   },
 
   /**
    * Force invalidate all cached configuration
    * Use after bulk updates or when debugging cache issues
    */
-  async invalidateCache(): Promise<ApiResponse<{ success: boolean; message: string }>> {
-    return api.post<{ success: boolean; message: string }>('/api/v1/admin/config/cache/invalidate', {});
+  async invalidateCache(): Promise<
+    ApiResponse<{ success: boolean; message: string }>
+  > {
+    return api.post<{ success: boolean; message: string }>(
+      '/api/v1/admin/config/cache/invalidate',
+      {}
+    );
   },
 
   /**
@@ -1160,7 +1220,9 @@ export const configService = {
     if (filters?.limit) params.append('limit', filters.limit.toString());
 
     const query = params.toString();
-    const url = query ? `/api/v1/admin/config/audit?${query}` : '/api/v1/admin/config/audit';
+    const url = query
+      ? `/api/v1/admin/config/audit?${query}`
+      : '/api/v1/admin/config/audit';
     return api.get<{ data: ConfigAuditEntry[] }>(url);
   },
 
@@ -1171,7 +1233,10 @@ export const configService = {
   async bulkUpdate(
     updates: Array<{ category: string; key: string; value: unknown }>
   ): Promise<ApiResponse<{ updated: number; failed: number }>> {
-    return api.post<{ updated: number; failed: number }>('/api/v1/admin/config/bulk', { updates });
+    return api.post<{ updated: number; failed: number }>(
+      '/api/v1/admin/config/bulk',
+      { updates }
+    );
   },
 
   // ============================================
@@ -1190,7 +1255,8 @@ export const configService = {
     const params = new URLSearchParams();
     if (filters?.category) params.append('category', filters.category);
     if (filters?.status) params.append('status', filters.status);
-    if (filters?.requester_id) params.append('requester_id', filters.requester_id);
+    if (filters?.requester_id)
+      params.append('requester_id', filters.requester_id);
 
     const query = params.toString();
     const url = query
@@ -1203,15 +1269,22 @@ export const configService = {
    * Get a single approval request by ID
    */
   async getApproval(approvalId: string): Promise<ApiResponse<ApprovalRequest>> {
-    return api.get<ApprovalRequest>(`/api/v1/admin/config/approvals/${approvalId}`);
+    return api.get<ApprovalRequest>(
+      `/api/v1/admin/config/approvals/${approvalId}`
+    );
   },
 
   /**
    * Request approval for a variable change
    * Required for critical and high priority variables
    */
-  async requestApproval(data: ApprovalRequestCreate): Promise<ApiResponse<ApprovalRequest>> {
-    return api.post<ApprovalRequest>('/api/v1/admin/config/approvals/request', data);
+  async requestApproval(
+    data: ApprovalRequestCreate
+  ): Promise<ApiResponse<ApprovalRequest>> {
+    return api.post<ApprovalRequest>(
+      '/api/v1/admin/config/approvals/request',
+      data
+    );
   },
 
   /**
@@ -1222,9 +1295,12 @@ export const configService = {
     approvalId: string,
     reason?: string
   ): Promise<ApiResponse<ApprovalRequest>> {
-    return api.post<ApprovalRequest>(`/api/v1/admin/config/approvals/${approvalId}/approve`, {
-      reason,
-    });
+    return api.post<ApprovalRequest>(
+      `/api/v1/admin/config/approvals/${approvalId}/approve`,
+      {
+        reason,
+      }
+    );
   },
 
   /**
@@ -1234,16 +1310,23 @@ export const configService = {
     approvalId: string,
     rejection_reason: string
   ): Promise<ApiResponse<ApprovalRequest>> {
-    return api.post<ApprovalRequest>(`/api/v1/admin/config/approvals/${approvalId}/reject`, {
-      rejection_reason,
-    });
+    return api.post<ApprovalRequest>(
+      `/api/v1/admin/config/approvals/${approvalId}/reject`,
+      {
+        rejection_reason,
+      }
+    );
   },
 
   /**
    * Cancel an approval request (only by requester)
    */
-  async cancelRequest(approvalId: string): Promise<ApiResponse<{ success: boolean }>> {
-    return api.delete<{ success: boolean }>(`/api/v1/admin/config/approvals/${approvalId}`);
+  async cancelRequest(
+    approvalId: string
+  ): Promise<ApiResponse<{ success: boolean }>> {
+    return api.delete<{ success: boolean }>(
+      `/api/v1/admin/config/approvals/${approvalId}`
+    );
   },
 
   /**

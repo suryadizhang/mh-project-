@@ -47,6 +47,7 @@ SSoT Architecture:
 import logging
 import os
 import json
+import time
 from dataclasses import dataclass, asdict
 from typing import TYPE_CHECKING, Any, Optional
 
@@ -111,6 +112,13 @@ class BusinessConfig:
 
     # Source tracking (for debugging)
     source: str = "defaults"  # "database" | "environment" | "defaults"
+
+
+# Module-level cache for sync fallback (tiered approach)
+# This gets populated by async get_business_config() and used by get_business_config_sync()
+_CACHED_CONFIG: Optional[BusinessConfig] = None
+_CACHED_CONFIG_TIMESTAMP: Optional[float] = None
+_SYNC_CACHE_TTL = 300  # 5 minutes for in-memory sync cache
 
 
 async def get_business_config(
@@ -198,12 +206,15 @@ async def get_business_config(
         logger.warning(f"⚠️ Failed to load business config from DB: {e}, using environment fallback")
         config = _load_from_environment()
 
+    # Populate module-level cache for sync fallback
+    global _CACHED_CONFIG, _CACHED_CONFIG_TIMESTAMP
+    _CACHED_CONFIG = config
+    _CACHED_CONFIG_TIMESTAMP = time.time()
+
     return config
 
 
-def _map_dynamic_variables_to_config(
-    variables: list, config: BusinessConfig
-) -> BusinessConfig:
+def _map_dynamic_variables_to_config(variables: list, config: BusinessConfig) -> BusinessConfig:
     """
     Map dynamic_variables rows to BusinessConfig dataclass.
 
@@ -281,9 +292,7 @@ def _parse_variable_value(value: Any, value_type: str) -> Any:
     return value
 
 
-async def _load_from_business_rules(
-    db: AsyncSession, config: BusinessConfig
-) -> BusinessConfig:
+async def _load_from_business_rules(db: AsyncSession, config: BusinessConfig) -> BusinessConfig:
     """
     Fallback: Load configuration from legacy business_rules table.
 
@@ -425,9 +434,27 @@ def _load_from_environment() -> BusinessConfig:
 # Synchronous version for places where async isn't available
 def get_business_config_sync() -> BusinessConfig:
     """
-    Get business configuration synchronously (environment-only).
+    Get business configuration synchronously with tiered fallback.
 
-    Use this ONLY when async is not available (e.g., in validators).
-    Prefer get_business_config() for full database support.
+    Priority:
+    1. Module-level cache (populated by async get_business_config) - if < 5 min old
+    2. Environment variables - fallback
+    3. Hardcoded defaults - last resort
+
+    Use this ONLY when async is not available (e.g., in validators, Pydantic models).
+    Prefer get_business_config() for full database support with Redis caching.
     """
+    global _CACHED_CONFIG, _CACHED_CONFIG_TIMESTAMP
+
+    # Check if module-level cache is valid (< 5 minutes old)
+    if _CACHED_CONFIG is not None and _CACHED_CONFIG_TIMESTAMP is not None:
+        cache_age = time.time() - _CACHED_CONFIG_TIMESTAMP
+        if cache_age < _SYNC_CACHE_TTL:
+            logger.debug(f"📦 Using module-level cached config (age: {cache_age:.1f}s)")
+            return _CACHED_CONFIG
+        else:
+            logger.debug(
+                f"⏰ Module-level cache expired (age: {cache_age:.1f}s), using environment"
+            )
+
     return _load_from_environment()

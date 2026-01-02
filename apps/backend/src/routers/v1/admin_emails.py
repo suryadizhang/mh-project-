@@ -8,6 +8,20 @@ Provides Gmail-style email interface for 2 inboxes:
 - IMAP IDLE auto-syncs emails to database
 - API reads from database (no IMAP connection needed)
 - Fallback to IMAP if database is empty or unavailable
+
+# =============================================================================
+# MODULARIZATION TODO (BATCH 4 - Communications)
+# This file is 1,400+ lines and exceeds the 500-line limit.
+# Target: Convert to `routers/v1/admin_emails/` package with:
+#   - __init__.py (router combiner)
+#   - schemas.py (Pydantic models)
+#   - inbox.py (inbox listing, search)
+#   - messages.py (read, reply, forward)
+#   - compose.py (compose, send)
+#   - threads.py (conversation threading)
+#   - attachments.py (attachment handling)
+# See: .github/instructions/22-QUALITY_CONTROL.instructions.md
+# =============================================================================
 """
 
 from datetime import datetime, timezone

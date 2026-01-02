@@ -24,6 +24,7 @@ celery_app = Celery(
         "workers.outbox_processors",
         "workers.monitoring_tasks",  # Added monitoring tasks
         "workers.campaign_metrics_tasks",  # Added campaign metrics tasks
+        "workers.slot_hold_tasks",  # Slot hold auto-cancel tasks (Batch 1)
     ],
 )
 
@@ -37,6 +38,8 @@ celery_app.conf.update(
         "workers.outbox_processors.*": {"queue": "outbox"},
         "monitoring.*": {"queue": "monitoring"},  # Added monitoring queue
         "workers.campaign_metrics_tasks.*": {"queue": "campaigns"},  # Added campaign metrics queue
+        "workers.slot_hold_tasks.*": {"queue": "holds"},  # Slot hold auto-cancel (Batch 1)
+        "slot_holds.*": {"queue": "holds"},  # Slot hold tasks by name prefix
     },
     # Task queues
     task_queues=(
@@ -46,6 +49,7 @@ celery_app.conf.update(
         Queue("outbox", routing_key="outbox"),
         Queue("monitoring", routing_key="monitoring"),  # Added monitoring queue
         Queue("campaigns", routing_key="campaigns"),  # Added campaigns queue
+        Queue("holds", routing_key="holds"),  # Slot hold auto-cancel queue (Batch 1)
         Queue("default", routing_key="default"),
     ),
     # Task settings
@@ -118,6 +122,27 @@ celery_app.conf.beat_schedule = {
     "cleanup-completed-campaign-metrics": {
         "task": "workers.campaign_metrics_tasks.cleanup_completed_campaign_metrics",
         "schedule": 3600.0,  # Every hour
+    },
+    # ============================================================
+    # Slot Hold Auto-Cancel System (Batch 1 - Legal Protection)
+    # 2 hours to sign agreement, 4 hours to pay deposit after signing
+    # 1 hour warning before each deadline
+    # ============================================================
+    "check-signing-warnings": {
+        "task": "slot_holds.check_signing_warnings",
+        "schedule": 300.0,  # Every 5 minutes
+    },
+    "check-payment-warnings": {
+        "task": "slot_holds.check_payment_warnings",
+        "schedule": 300.0,  # Every 5 minutes
+    },
+    "expire-unsigned-holds": {
+        "task": "slot_holds.expire_unsigned_holds",
+        "schedule": 300.0,  # Every 5 minutes
+    },
+    "expire-unpaid-holds": {
+        "task": "slot_holds.expire_unpaid_holds",
+        "schedule": 300.0,  # Every 5 minutes
     },
 }
 

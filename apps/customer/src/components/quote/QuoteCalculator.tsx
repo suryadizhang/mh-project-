@@ -17,6 +17,7 @@ import {
   Loader2,
   Minus,
   Plus,
+  MessageSquare,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, useCallback } from 'react';
@@ -24,6 +25,7 @@ import { useForm, Controller } from 'react-hook-form';
 
 import { LazyDatePicker } from '@/components/ui/LazyDatePicker';
 import { ProtectedPhone } from '@/components/ui/ProtectedPhone';
+import { SMSConsentCheckbox } from '@/components/ui/SMSConsentCheckbox';
 import { apiFetch } from '@/lib/api';
 import { getApiUrl } from '@/lib/env';
 import { submitQuoteLead, submitLeadEvent } from '@/lib/leadService';
@@ -42,6 +44,7 @@ interface QuoteFormData {
   name: string;
   phone: string;
   email: string;
+  preferredCommunication: '' | 'phone' | 'text' | 'email';
   smsConsent: boolean;
 
   // Event details
@@ -240,6 +243,7 @@ export function QuoteCalculator() {
       name: '',
       phone: '',
       email: '',
+      preferredCommunication: '',
       smsConsent: false,
       adults: 10,
       children: 0,
@@ -773,6 +777,39 @@ export function QuoteCalculator() {
                   </p>
                 )}
               </div>
+
+              {/* Preferred Communication - Dropdown with auto-check SMS consent */}
+              <div className="flex flex-col space-y-1.5 md:col-span-2">
+                <label
+                  htmlFor="preferredCommunication"
+                  className="flex items-center gap-2 text-sm font-semibold text-gray-700"
+                >
+                  <MessageSquare className="h-4 w-4 text-gray-400" />
+                  Preferred Communication
+                </label>
+                <select
+                  id="preferredCommunication"
+                  {...register('preferredCommunication', {
+                    onChange: (e) => {
+                      // Auto-check SMS consent when text is selected
+                      if (e.target.value === 'text') {
+                        setValue('smsConsent', true);
+                      }
+                      setQuoteResult(null);
+                      setCalculationError('');
+                    },
+                  })}
+                  className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:ring-offset-1 focus:outline-none"
+                >
+                  <option value="">Select how we should contact you</option>
+                  <option value="phone">📞 Phone Call</option>
+                  <option value="text">💬 Text Message</option>
+                  <option value="email">📧 Email</option>
+                </select>
+                <p className="text-xs text-gray-500">
+                  Choose your preferred method for receiving your quote
+                </p>
+              </div>
             </div>
           </div>
 
@@ -1069,97 +1106,18 @@ export function QuoteCalculator() {
                   exact travel fee using Google Maps! The first {freeMiles ?? 30} miles are FREE,
                   then ${perMileRate ?? 2} per mile for distances beyond that.
                 </p>
-                <p className="mt-2 flex items-center gap-1 text-blue-700">
-                  <span className="text-lg">✨</span>
-                  <strong>New!</strong> Get instant travel fee calculation when you enter your venue
-                  address
-                </p>
               </div>
             </div>
           </div>
 
-          {/* SMS Consent - Optional checkbox for RingCentral TCR Compliance */}
-          {/* CRITICAL: Must be unchecked by default, clearly marked OPTIONAL, and state consent not required for purchase */}
-          <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
-            {/* OPTIONAL Badge - Required for TCR compliance */}
-            <div className="mb-3 flex items-center gap-2">
-              <span className="rounded-full bg-blue-600 px-3 py-1 text-xs font-bold text-white">
-                OPTIONAL
-              </span>
-              <span className="text-xs text-gray-600">
-                Checking this box is not required to get your quote
-              </span>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <input
-                type="checkbox"
-                id="smsConsent"
-                {...register('smsConsent')}
-                className="mt-1 h-5 w-5 rounded border-gray-300 text-red-600 focus:ring-red-500"
-                aria-describedby="smsConsentHelp"
-              />
-              <label htmlFor="smsConsent" className="text-sm text-gray-700">
-                <span className="flex items-center gap-2">
-                  <strong>I consent to receive text messages from My Hibachi Chef</strong>
-                </span>
-                <p className="mt-2 text-xs text-gray-600">
-                  By checking this box, I voluntarily agree to receive the following types of SMS
-                  messages from my Hibachi LLC (doing business as My Hibachi Chef):
-                </p>
-                <ul className="mt-1 ml-4 list-disc text-xs text-gray-600">
-                  <li>
-                    <strong>Booking confirmations</strong> with deposit payment instructions
-                  </li>
-                  <li>
-                    <strong>Event reminders</strong> 48 hours and 24 hours before your event
-                  </li>
-                  <li>
-                    <strong>Chef notifications</strong> about your assigned chef and arrival
-                  </li>
-                  <li>
-                    <strong>Booking updates</strong> for any changes to your reservation
-                  </li>
-                  <li>
-                    <strong>Customer support</strong> responses to your inquiries
-                  </li>
-                  <li>
-                    <strong>Promotional offers</strong> (reply STOP to opt out of marketing
-                    separately)
-                  </li>
-                </ul>
-                <p className="mt-2 text-xs text-gray-600">
-                  Message frequency varies. Message and data rates may apply. Reply{' '}
-                  <strong>STOP</strong> to opt-out at any time. Reply <strong>HELP</strong> for
-                  assistance or call (916) 740-8786.
-                </p>
-                <p className="mt-1 text-xs text-gray-500">
-                  View our{' '}
-                  <a href="/terms#sms" target="_blank" className="text-blue-600 hover:underline">
-                    SMS Terms of Service
-                  </a>{' '}
-                  and{' '}
-                  <a href="/privacy" target="_blank" className="text-blue-600 hover:underline">
-                    Privacy Policy
-                  </a>
-                  . SMS consent is not shared with third parties or affiliates.
-                </p>
-                {/* TCR Required: Consent not required for purchase */}
-                <p className="mt-2 text-xs font-semibold text-gray-500">
-                  Consent is not required to receive a quote or make a purchase.
-                </p>
-              </label>
-            </div>
-            <p
-              id="smsConsentHelp"
-              className="mt-3 rounded-lg bg-gray-100 p-2 text-xs text-gray-600"
-            >
-              <strong>What happens if I don&apos;t check this box?</strong> You will still receive
-              essential transactional SMS messages related to your booking (confirmations,
-              reminders, chef updates). However, you will not receive promotional offers or
-              marketing messages. You can opt in later by texting START.
-            </p>
-          </div>
+          {/* SMS Consent - Reusable component with minimal styling for quote page */}
+          <SMSConsentCheckbox
+            checked={quoteData.smsConsent}
+            onChange={(checked) => setValue('smsConsent', checked)}
+            variant="minimal"
+            showFullDisclosure={true}
+            id="quote-sms-consent"
+          />
 
           {/* Calculate Button */}
           <button

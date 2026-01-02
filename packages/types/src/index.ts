@@ -1,6 +1,22 @@
 import { z } from 'zod';
 
+// ===========================================================
+// RE-EXPORTS FROM NEW MODULES
+// ===========================================================
+
+// Slot Hold types (Batch 1 - 2-step booking flow)
+export * from './slot-hold';
+
+// Agreement types (Batch 1 - Digital signing)
+export * from './agreement';
+
+// Error codes (Descriptive string codes)
+export * from './errors';
+
+// ===========================================================
 // Core domain types
+// ===========================================================
+
 export interface User {
   id: string;
   email: string;

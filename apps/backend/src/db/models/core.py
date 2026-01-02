@@ -66,6 +66,8 @@ class BookingStatus(str, enum.Enum):
     COMPLETED = "completed"
     CANCELLED = "cancelled"
     NO_SHOW = "no_show"
+    # 2-Step Cancellation Workflow
+    CANCELLATION_REQUESTED = "cancellation_requested"  # Slot still held, awaiting approval
 
 
 class MenuCategory(str, enum.Enum):
@@ -275,6 +277,24 @@ class Booking(Base):
     held_by: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     held_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     hold_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # 2-Step Cancellation Workflow (NEW - for cancellation request/approval flow)
+    cancellation_requested_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    cancellation_requested_by: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    cancellation_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    previous_status: Mapped[Optional[str]] = mapped_column(
+        String(50), nullable=True
+    )  # Stores status before cancellation request for potential rejection revert
+    cancelled_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    cancelled_by: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    cancellation_approved_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    cancellation_rejected_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    cancellation_rejected_by: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    cancellation_rejection_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Menu & Notes (UPDATED - match database)
     menu_items: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)

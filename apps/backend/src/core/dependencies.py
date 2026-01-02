@@ -23,6 +23,8 @@ from typing import AsyncGenerator, Optional, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 
+from fastapi import Request
+
 from core.database import AsyncSessionLocal
 from services.lead_service import LeadService
 from services.newsletter_service import SubscriberService
@@ -34,18 +36,36 @@ from core.compliance import ComplianceValidator
 from core.cache import CacheService
 
 
+def get_optional_cache(request: Request) -> Optional[CacheService]:
+    """
+    Provide optional CacheService from app state.
+
+    Returns None if cache isn't configured (e.g., during tests or local dev).
+    This allows services to work without cache, just with degraded performance.
+
+    Args:
+        request: FastAPI request (automatically injected)
+
+    Returns:
+        CacheService or None if not configured
+    """
+    if hasattr(request.app.state, "cache"):
+        return request.app.state.cache
+    return None
+
+
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
     Provide database session for the request lifecycle.
-    
+
     Automatically handles session creation, cleanup, and rollback on errors.
-    
+
     Usage:
         @router.get("/users")
         async def get_users(db: AsyncSession = Depends(get_db)):
             result = await db.execute(select(User))
             return result.scalars().all()
-    
+
     Yields:
         AsyncSession: Database session that will be automatically closed
     """
@@ -63,22 +83,20 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 async def get_compliance_validator() -> ComplianceValidator:
     """
     Provide ComplianceValidator instance.
-    
+
     Returns:
         ComplianceValidator: Validator for TCPA/CAN-SPAM compliance
     """
     return ComplianceValidator()
 
 
-async def get_event_service(
-    db: AsyncSession = Depends(get_db)
-) -> EventService:
+async def get_event_service(db: AsyncSession = Depends(get_db)) -> EventService:
     """
     Provide EventService with database dependency injected.
-    
+
     Args:
         db: Database session (automatically injected by FastAPI)
-    
+
     Returns:
         EventService: Service for tracking events across the system
     """
@@ -92,20 +110,20 @@ async def get_lead_service(
 ) -> LeadService:
     """
     Provide LeadService with all dependencies injected.
-    
+
     Automatically injects:
     - Database session for data access
     - ComplianceValidator for TCPA validation
     - EventService for event tracking
-    
+
     Args:
         db: Database session
         compliance_validator: TCPA/CAN-SPAM validator
         event_service: Event tracking service
-    
+
     Returns:
         LeadService: Fully configured lead service
-    
+
     Example:
         @router.post("/api/v1/leads")
         async def create_lead(
@@ -128,20 +146,20 @@ async def get_newsletter_service(
 ) -> SubscriberService:
     """
     Provide SubscriberService (NewsletterService) with all dependencies injected.
-    
+
     Automatically injects:
     - Database session for data access
     - ComplianceValidator for CAN-SPAM validation
     - EventService for subscription tracking
-    
+
     Args:
         db: Database session
         compliance_validator: CAN-SPAM validator
         event_service: Event tracking service
-    
+
     Returns:
         SubscriberService: Fully configured newsletter service
-    
+
     Example:
         @router.post("/api/v1/newsletter/subscribe")
         async def subscribe(
@@ -160,21 +178,21 @@ async def get_newsletter_service(
 async def get_booking_service(
     db: AsyncSession = Depends(get_db),
     lead_service: LeadService = Depends(get_lead_service),
-    cache: Optional[CacheService] = None,
+    cache: Optional[CacheService] = Depends(get_optional_cache),
 ) -> BookingService:
     """
     Provide BookingService with all dependencies injected.
-    
+
     Automatically injects:
     - Database session via BookingRepository
     - LeadService for failed booking capture
-    - CacheService for performance optimization (optional)
-    
+    - CacheService for performance optimization (optional, via app.state)
+
     Args:
         db: Database session
         lead_service: Lead service for capturing failed bookings
         cache: Optional cache service
-    
+
     Returns:
         BookingService: Fully configured booking service
     """
@@ -193,20 +211,20 @@ async def get_meta_webhook_handler(
 ) -> MetaWebhookHandler:
     """
     Provide MetaWebhookHandler with all dependencies injected.
-    
+
     Automatically injects:
     - Database session
     - LeadService for lead capture from social messages
     - EventService for webhook event tracking
-    
+
     Args:
         db: Database session
         lead_service: Service for lead management
         event_service: Event tracking service
-    
+
     Returns:
         MetaWebhookHandler: Fully configured Meta webhook handler
-    
+
     Example:
         @router.post("/webhooks/meta")
         async def process_webhook(
@@ -228,20 +246,20 @@ async def get_referral_service(
 ) -> "ReferralService":
     """
     Provide ReferralService with all dependencies injected.
-    
+
     Automatically injects:
     - Database session for data access
     - EventService for referral tracking
     - NotificationService for sending referral emails (optional)
-    
+
     Args:
         db: Database session
         event_service: Event tracking service
         notification_service: Optional notification service
-    
+
     Returns:
         ReferralService: Fully configured referral service
-    
+
     Example:
         @router.post("/api/v1/referrals")
         async def create_referral(
@@ -251,6 +269,7 @@ async def get_referral_service(
             return await service.create_referral(...)
     """
     from services.referral_service import ReferralService
+
     return ReferralService(
         db=db,
         event_service=event_service,
@@ -265,20 +284,20 @@ async def get_nurture_campaign_service(
 ) -> "NurtureCampaignService":
     """
     Provide NurtureCampaignService with all dependencies injected.
-    
+
     Automatically injects:
     - Database session for data access
     - EventService for campaign tracking
     - NotificationService for sending campaign messages (optional)
-    
+
     Args:
         db: Database session
         event_service: Event tracking service
         notification_service: Optional notification service
-    
+
     Returns:
         NurtureCampaignService: Fully configured nurture campaign service
-    
+
     Example:
         @router.post("/api/v1/campaigns/enroll")
         async def enroll_lead(
@@ -288,6 +307,7 @@ async def get_nurture_campaign_service(
             return await service.enroll_lead(...)
     """
     from services.nurture_campaign_service import NurtureCampaignService
+
     return NurtureCampaignService(
         db=db,
         event_service=event_service,

@@ -112,3 +112,6 @@ export interface CustomerFilters extends PaginationParams {
   status?: string;
   search?: string;
 }
+
+// Re-export chef portal types
+export * from './chef-portal';

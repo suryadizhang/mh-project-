@@ -15,7 +15,6 @@ from typing import Any
 from db.models.identity import Station
 
 # SSoT: Import business config for dynamic pricing
-from services.business_config_service import get_business_config_sync
 
 # Import models
 # TODO: Legacy booking models not migrated yet - needs refactor
@@ -52,6 +51,8 @@ class PricingService:
     _DEFAULT_CHILD_FREE_UNDER = 5  # Free for under 5 years old
     _DEFAULT_PARTY_MINIMUM = 550.00  # $550 minimum total
     _DEFAULT_DEPOSIT_AMOUNT = 100.00  # $100 fixed deposit
+    _DEFAULT_FREE_RADIUS_MILES = 30.0  # First 30 miles free
+    _DEFAULT_PER_MILE_RATE = 2.00  # $2 per mile after free radius
     _ssot_last_sync: "datetime | None" = None  # Track last successful SSoT sync
 
     # Premium upgrades (per person) - TODO: move to dynamic_variables
@@ -74,6 +75,35 @@ class PricingService:
         "suggested_min_percent": 20,
         "suggested_max_percent": 35,
     }
+
+    @property
+    def BASE_PRICING(self) -> dict[str, float]:
+        """
+        Dynamic base pricing dictionary built from SSoT-synced class constants.
+
+        Used for compatibility with code that expects dictionary access pattern.
+        Values are updated via _sync_from_ssot() from the SSoT database.
+        """
+        return {
+            "adult_base": self._DEFAULT_ADULT_PRICE,
+            "child_base": self._DEFAULT_CHILD_PRICE,
+            "child_free_under": self._DEFAULT_CHILD_FREE_UNDER,
+            "party_minimum": self._DEFAULT_PARTY_MINIMUM,
+            "deposit_amount": self._DEFAULT_DEPOSIT_AMOUNT,
+        }
+
+    @property
+    def TRAVEL_PRICING(self) -> dict[str, float]:
+        """
+        Dynamic travel pricing dictionary built from SSoT-synced class constants.
+
+        Used for compatibility with code that expects dictionary access pattern.
+        Values are updated via _sync_from_ssot() from the SSoT database.
+        """
+        return {
+            "free_radius_miles": self._DEFAULT_FREE_RADIUS_MILES,
+            "per_mile_after": self._DEFAULT_PER_MILE_RATE,
+        }
 
     def __init__(self, db: Session | None = None, station_id: str | None = None):
         """
@@ -115,6 +145,7 @@ class PricingService:
         updates the class constants for any future instances or fallback scenarios.
         """
         from datetime import datetime
+
         try:
             from src.services.business_config_service import get_business_config_sync
 
@@ -127,6 +158,8 @@ class PricingService:
                 PricingService._DEFAULT_CHILD_FREE_UNDER = config.child_free_under_age
                 PricingService._DEFAULT_PARTY_MINIMUM = config.party_minimum_cents / 100
                 PricingService._DEFAULT_DEPOSIT_AMOUNT = config.deposit_amount_cents / 100
+                PricingService._DEFAULT_FREE_RADIUS_MILES = float(config.travel_free_miles)
+                PricingService._DEFAULT_PER_MILE_RATE = config.travel_per_mile_cents / 100
                 PricingService._ssot_last_sync = datetime.now()
 
                 # Store instance config for this instance's use
@@ -135,7 +168,9 @@ class PricingService:
                     f"✅ SSoT sync successful (source: {config.source}): "
                     f"adult=${config.adult_price_cents/100}, "
                     f"child=${config.child_price_cents/100}, "
-                    f"minimum=${config.party_minimum_cents/100}"
+                    f"minimum=${config.party_minimum_cents/100}, "
+                    f"free_miles={config.travel_free_miles}, "
+                    f"per_mile=${config.travel_per_mile_cents/100}"
                 )
             else:
                 logger.info("📋 Using environment/default config values")
@@ -602,6 +637,24 @@ Your appreciation means the world to our chefs! 🙏✨
 
         # Fallback to configuration
         return Decimal(str(self.BASE_PRICING["child_base"]))
+
+    async def get_party_minimum(self) -> Decimal:
+        """
+        Get current party minimum from SSoT.
+
+        Returns:
+            Decimal: Party minimum in dollars (e.g., 550.00)
+        """
+        return Decimal(str(self.BASE_PRICING["party_minimum"]))
+
+    async def get_deposit_amount(self) -> Decimal:
+        """
+        Get current deposit amount from SSoT.
+
+        Returns:
+            Decimal: Deposit amount in dollars (e.g., 100.00)
+        """
+        return Decimal(str(self.BASE_PRICING["deposit_amount"]))
 
     def get_upgrade_price(self, upgrade_name: str) -> Decimal:
         """

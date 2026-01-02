@@ -180,27 +180,79 @@ postgresql+asyncpg://myhibachi_user:<PASSWORD>@localhost:5432/myhibachi_producti
 - `ai` – AI conversations, messages
 - `security` – Security events, alerts
 
-### Staging Database (Cloud Server - TO BE SETUP)
+### Staging Database (VPS - ACTIVE)
 
 | Property     | Value                    |
 | ------------ | ------------------------ |
-| **Type**     | PostgreSQL 15            |
-| **Host**     | IONOS Cloud Server IP    |
+| **Type**     | PostgreSQL 13.22         |
+| **Host**     | `localhost` (from VPS)   |
 | **Port**     | `5432`                   |
 | **Database** | `myhibachi_staging`      |
 | **User**     | `myhibachi_staging_user` |
+| **Password** | `staging_13Agustus`      |
 
-### Development Database (Supabase - Temporary)
+**Connection String (on VPS):**
 
-| Property      | Value                                                       |
-| ------------- | ----------------------------------------------------------- |
-| **Type**      | PostgreSQL (Supabase)                                       |
-| **Host**      | `db.yuchqvpctookhjovvdwi.supabase.co`                       |
-| **Database**  | `postgres`                                                  |
-| **Dashboard** | https://supabase.com/dashboard/project/yuchqvpctookhjovvdwi |
+```
+postgresql+asyncpg://myhibachi_staging_user:staging_13Agustus@localhost:5432/myhibachi_staging
+```
 
-**⚠️ Note:** Supabase is for development only. Never use for
-production.
+### Local Development (SSH Tunnel to Staging) ⭐ PREFERRED
+
+**🚫 DEPRECATED:** Supabase and local SQLite are NO LONGER USED. We
+now use an SSH tunnel to connect to the VPS staging database.
+
+| Property       | Value                          |
+| -------------- | ------------------------------ |
+| **Type**       | PostgreSQL 13.22 (VPS via SSH) |
+| **Local Port** | `5433` (tunneled to VPS:5432)  |
+| **Database**   | `myhibachi_staging`            |
+| **User**       | `myhibachi_staging_user`       |
+| **Password**   | `staging_13Agustus`            |
+
+**Why SSH Tunnel:**
+
+- ✅ Real PostgreSQL 13.22 (matches production)
+- ✅ Same schema as production
+- ✅ No DNS resolution issues (Supabase DNS was failing)
+- ✅ No SQLite/PostgreSQL compatibility issues
+- ✅ All test data stays on staging (never production)
+
+**SSH Tunnel Setup (Required for local dev/tests):**
+
+```powershell
+# Option 1: Use the helper script (RECOMMENDED)
+.\scripts\start-db-tunnel.ps1          # Start tunnel
+.\scripts\start-db-tunnel.ps1 -Status  # Check status
+.\scripts\start-db-tunnel.ps1 -Stop    # Stop tunnel
+
+# Option 2: Manual SSH tunnel command
+ssh -f -N -L 5433:localhost:5432 root@108.175.12.154
+# This forwards localhost:5433 -> VPS:5432
+```
+
+**Local .env Configuration:**
+
+```dotenv
+DATABASE_URL=postgresql+asyncpg://myhibachi_staging_user:staging_13Agustus@127.0.0.1:5433/myhibachi_staging
+DATABASE_URL_SYNC=postgresql+psycopg2://myhibachi_staging_user:staging_13Agustus@127.0.0.1:5433/myhibachi_staging
+```
+
+**Verify Connection:**
+
+```powershell
+# Check tunnel is running
+netstat -an | Select-String "5433.*LISTENING"
+
+# Test database connection
+python -c "from sqlalchemy import create_engine; e = create_engine('postgresql+psycopg2://myhibachi_staging_user:staging_13Agustus@127.0.0.1:5433/myhibachi_staging'); print('Connected to:', e.execute('SELECT current_database()').scalar())"
+```
+
+**⚠️ Important:** Always start the SSH tunnel before running:
+
+- Backend dev server (`python src/main.py`)
+- pytest tests (`python -m pytest tests/`)
+- Any database migrations
 
 ---
 
@@ -447,7 +499,8 @@ Hostname equals mhapi.mysticdatanode.net
 │                                                                  │
 │  Layer 4: Application (FastAPI)                                 │
 │  ├── JWT Authentication                                        │
-│  ├── RBAC (4-tier: Super Admin → Admin → Staff → Customer)    │
+│  ├── RBAC (5-tier: Super Admin → Admin → Customer Support     │
+│  │        → Station Manager → Chef) with role-specific views  │
 │  └── Input validation & sanitization                           │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘

@@ -928,6 +928,26 @@ try:
 except ImportError as e:
     logger.warning(f"Smart Scheduling endpoints not available: {e}")
 
+# Include Chef Portal endpoints (Chef self-service availability + Station Manager oversight)
+try:
+    from routers.v1.chef_portal import router as chef_portal_router
+
+    app.include_router(chef_portal_router, prefix="/api/v1", tags=["chef-portal"])
+    logger.info("✅ Chef Portal endpoints included (chef availability, time-off requests)")
+except ImportError as e:
+    logger.warning(f"Chef Portal endpoints not available: {e}")
+
+# Include Legal Agreements endpoints (Batch 1.x - Liability waiver, allergen disclosure)
+try:
+    from routers.v1.agreements import router as agreements_router
+
+    app.include_router(agreements_router, prefix="/api/v1", tags=["agreements"])
+    logger.info(
+        "✅ Legal Agreements endpoints included (liability waiver, allergen disclosure, slot holds)"
+    )
+except ImportError as e:
+    logger.warning(f"Legal Agreements endpoints not available: {e}")
+
 # Include Address Management endpoints (Enterprise geocoding with caching)
 try:
     from routers.v1.addresses import router as addresses_router
