@@ -1,4 +1,19 @@
-"""Newsletter and campaign management API endpoints."""
+"""Newsletter and campaign management API endpoints.
+
+# =============================================================================
+# MODULARIZATION TODO (BATCH 4 - Communications)
+# This file is 1,100+ lines and exceeds the 500-line limit.
+# Target: Convert to `routers/v1/newsletter/` package with:
+#   - __init__.py (router combiner)
+#   - schemas.py (Pydantic models)
+#   - subscribers.py (subscriber management)
+#   - campaigns.py (campaign CRUD)
+#   - sending.py (campaign sending/scheduling)
+#   - analytics.py (open/click tracking)
+#   - templates.py (email template management)
+# See: .github/instructions/22-QUALITY_CONTROL.instructions.md
+# =============================================================================
+"""
 
 from datetime import datetime, timedelta, timezone
 import logging

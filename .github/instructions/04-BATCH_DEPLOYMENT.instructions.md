@@ -61,11 +61,30 @@ applyTo: '**'
 
 - Core booking CRUD
 - Authentication (JWT + API keys)
-- 4-tier RBAC system
+- 5-tier RBAC system with role-specific views
 - Audit trail
 - Failed booking lead capture
 - Cloudflare security setup
 - Scaling measurement system
+
+### 5-Tier RBAC System (Updated 2025-01-30):
+
+| Role                 | Access Level     | Page View                                   |
+| -------------------- | ---------------- | ------------------------------------------- |
+| **SUPER_ADMIN**      | Full system      | All admin dashboard options                 |
+| **ADMIN**            | Scoped           | Admin dashboard (assigned stations)         |
+| **CUSTOMER_SUPPORT** | Customer-focused | Bookings, reviews, leads                    |
+| **STATION_MANAGER**  | Station-specific | Chef scheduling, station bookings           |
+| **CHEF**             | Self-only        | Own schedule, availability, assigned events |
+
+**KEY UX PRINCIPLE:** Each role has a dedicated page/view showing ONLY
+their job-relevant options.
+
+- **Source of Truth:** `apps/backend/src/utils/auth.py` (UserRole,
+  Permission classes)
+- **Database:** `identity.users.role` with CHECK constraint
+  (migration 006)
+- **Frontend:** Role-based routing in admin app
 
 ### Key Files:
 

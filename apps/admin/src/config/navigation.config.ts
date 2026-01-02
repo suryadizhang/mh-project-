@@ -14,6 +14,7 @@ export enum UserRole {
   ADMIN = 'admin',
   CUSTOMER_SUPPORT = 'customer_support',
   STATION_MANAGER = 'station_manager',
+  CHEF = 'chef',
 }
 
 export interface NavItem {
@@ -381,11 +382,12 @@ export function getQuickActions(userPreferences?: string[]): NavItem[] {
 /**
  * Role hierarchy (for permission checking)
  */
-export const ROLE_HIERARCHY = {
+export const ROLE_HIERARCHY: Record<UserRole, number> = {
   [UserRole.SUPER_ADMIN]: 4,
   [UserRole.ADMIN]: 3,
   [UserRole.CUSTOMER_SUPPORT]: 2,
   [UserRole.STATION_MANAGER]: 1,
+  [UserRole.CHEF]: 0,
 };
 
 /**
@@ -402,11 +404,12 @@ export function hasPermission(
  * Get role display name
  */
 export function getRoleDisplayName(role: UserRole): string {
-  const names = {
+  const names: Record<UserRole, string> = {
     [UserRole.SUPER_ADMIN]: 'Super Admin',
     [UserRole.ADMIN]: 'Admin',
     [UserRole.CUSTOMER_SUPPORT]: 'Customer Support',
     [UserRole.STATION_MANAGER]: 'Station Manager',
+    [UserRole.CHEF]: 'Chef',
   };
   return names[role];
 }

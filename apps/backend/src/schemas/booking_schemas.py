@@ -22,13 +22,9 @@ from pydantic import BaseModel, EmailStr
 # Re-export analytics for backward compatibility
 from schemas.analytics import CustomerAnalytics
 
-
-class UserRole(str, Enum):
-    """User role enumeration."""
-
-    CUSTOMER = "customer"
-    ADMIN = "admin"
-    SUPERADMIN = "superadmin"
+# Import UserRole from auth.py (Single Source of Truth)
+# This replaces the legacy 3-role enum (CUSTOMER, ADMIN, SUPERADMIN)
+from utils.auth import UserRole
 
 
 class BookingStatus(str, Enum):

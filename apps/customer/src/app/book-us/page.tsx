@@ -4,7 +4,16 @@ import './datepicker.css';
 
 import { BookingSubmitResponseSchema } from '@myhibachi/types/schemas';
 import { format } from 'date-fns';
-import { CheckCircle2, Clock, MapPin, User, Users, DollarSign, Flame } from 'lucide-react';
+import {
+  CheckCircle2,
+  Clock,
+  MapPin,
+  User,
+  Users,
+  DollarSign,
+  Flame,
+  ChevronDown,
+} from 'lucide-react';
 import Link from 'next/link';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
@@ -21,6 +30,7 @@ import {
   type TravelFeeResult,
   DEFAULT_BOOKING_FORM_VALUES,
 } from '@/components/booking/modules';
+import BookingAgreementModal from '@/components/booking/BookingAgreementModal';
 import { useProtectedPhone } from '@/components/ui/ProtectedPhone';
 import { apiFetch } from '@/lib/api';
 import { logger } from '@/lib/logger';
@@ -64,6 +74,14 @@ export default function BookingPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [bookingConfirmation, setBookingConfirmation] = useState<string | null>(null);
+
+  // Agreement acknowledgment states (for BookingAgreementModal)
+  const [allergenAcknowledged, setAllergenAcknowledged] = useState(false);
+  const [riskAccepted, setRiskAccepted] = useState(false);
+  const [willCommunicate, setWillCommunicate] = useState(false);
+
+  // Note: useAgreements hook available for slot-hold flow in future phases
+  // For MVP, signature is included directly in booking payload
 
   // Cost tracking state
   const [costBreakdown, setCostBreakdown] = useState<CostBreakdown | null>(null);
@@ -209,7 +227,7 @@ export default function BookingPage() {
   };
 
   // Handle agreement confirmation with actual booking submission
-  const handleAgreementConfirm = async () => {
+  const handleAgreementConfirm = async (signatureBase64: string) => {
     const data = watch();
     setIsSubmitting(true);
     setSubmitError(null);
@@ -254,6 +272,11 @@ export default function BookingPage() {
         total_amount: totalCost.total,
         deposit_amount: totalCost.deposit,
         travel_fee: totalCost.travelFee,
+        // Include signature data for agreement
+        signature_image_base64: signatureBase64,
+        allergen_acknowledged: allergenAcknowledged,
+        risk_accepted: riskAccepted,
+        will_communicate: willCommunicate,
       };
 
       const response = await apiFetch<BookingSubmitResponse>('/api/v1/public/bookings', {
@@ -266,10 +289,12 @@ export default function BookingPage() {
         | undefined;
 
       if (response.success && responseData?.id) {
+        // Signature and acknowledgments are included in bookingData above
+        // The backend will store them with the booking (no separate agreement API call needed for MVP)
         setShowAgreementModal(false);
         setBookingConfirmation(responseData.id);
         setSubmitSuccess(true);
-        logger.info('Booking created successfully', { bookingId: responseData.id });
+        logger.info('Booking created successfully with signature', { bookingId: responseData.id });
       } else {
         setSubmitError(response.error || 'Booking failed. Please try again.');
         logger.error('Booking submission failed', new Error(response.error || 'Unknown error'));
@@ -360,16 +385,19 @@ export default function BookingPage() {
 
   return (
     <>
-      {/* Agreement Modal */}
-      {showAgreementModal && (
-        <AgreementModal
-          formData={watch()}
-          totalCost={totalCost}
-          onConfirm={handleAgreementConfirm}
-          onCancel={handleAgreementCancel}
-          isSubmitting={isSubmitting}
-        />
-      )}
+      {/* Agreement Modal with Digital Signature */}
+      <BookingAgreementModal
+        isOpen={showAgreementModal}
+        onConfirm={handleAgreementConfirm}
+        onCancel={handleAgreementCancel}
+        isSubmitting={isSubmitting}
+        allergenAcknowledged={allergenAcknowledged}
+        setAllergenAcknowledged={setAllergenAcknowledged}
+        riskAccepted={riskAccepted}
+        setRiskAccepted={setRiskAccepted}
+        willCommunicate={willCommunicate}
+        setWillCommunicate={setWillCommunicate}
+      />
 
       {/* Hero Section */}
       <section className="page-hero-background py-10 text-center text-white">
@@ -402,6 +430,7 @@ export default function BookingPage() {
                 watch={watch}
                 errors={errors}
                 register={register}
+                setValue={setValue}
               />
 
               {/* Section 2: Venue Address */}
@@ -439,16 +468,13 @@ export default function BookingPage() {
                 venueCoordinates={watchAll.venueCoordinates}
               />
 
-              {/* Section 5: Tip Calculator */}
-              <TipCalculator
+              {/* Section 5: Order Summary & Gratuity (Collapsible) */}
+              <PricingSummarySection
+                totalCost={totalCost}
                 control={control}
                 watch={watch}
-                subtotal={totalCost.subtotal}
                 onTipChange={handleTipChange}
               />
-
-              {/* Order Summary */}
-              <OrderSummary totalCost={totalCost} />
 
               {/* Submit Error with Actionable Guidance */}
               {submitError && (
@@ -667,7 +693,74 @@ function StatusBadge({
 }
 
 /**
- * Order Summary Component
+ * Pricing Summary Section - Collapsible dropdown with Order Summary + Gratuity
+ */
+function PricingSummarySection({
+  totalCost,
+  control,
+  watch,
+  onTipChange,
+}: {
+  totalCost: {
+    foodCost: number;
+    travelFee: number;
+    subtotal: number;
+    tip: number;
+    total: number;
+    deposit: number;
+  };
+  control: ReturnType<typeof useForm<BookingFormData>>['control'];
+  watch: ReturnType<typeof useForm<BookingFormData>>['watch'];
+  onTipChange: (tip: number) => void;
+}) {
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  return (
+    <div className="overflow-hidden rounded-xl border-2 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50">
+      {/* Collapsible Header Button */}
+      <button
+        type="button"
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="flex w-full items-center justify-between p-4 transition-colors hover:bg-green-100/50"
+        aria-expanded={isExpanded}
+        aria-controls="pricing-summary-content"
+      >
+        <div className="flex items-center gap-2">
+          <DollarSign className="h-5 w-5 text-green-600" />
+          <span className="text-lg font-bold text-gray-900">Pricing & Gratuity</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-lg font-bold text-green-700">${totalCost.total.toFixed(2)}</span>
+          <ChevronDown
+            className={`h-5 w-5 text-gray-500 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+          />
+        </div>
+      </button>
+
+      {/* Collapsible Content */}
+      <div
+        id="pricing-summary-content"
+        className={`transition-all duration-200 ease-in-out ${isExpanded ? 'max-h-[800px] opacity-100' : 'max-h-0 overflow-hidden opacity-0'}`}
+      >
+        <div className="space-y-4 px-4 pb-4">
+          {/* Order Summary */}
+          <OrderSummary totalCost={totalCost} />
+
+          {/* Gratuity Section */}
+          <TipCalculator
+            control={control}
+            watch={watch}
+            subtotal={totalCost.subtotal}
+            onTipChange={onTipChange}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Order Summary Component (inner content, no outer wrapper)
  */
 function OrderSummary({
   totalCost,
@@ -682,208 +775,37 @@ function OrderSummary({
   };
 }) {
   return (
-    <div className="rounded-xl border-2 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 p-6">
-      <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-gray-900">
-        <DollarSign className="h-5 w-5 text-green-600" />
-        Order Summary
-      </h3>
-      <div className="space-y-2 text-sm">
+    <div className="space-y-2 text-sm">
+      <h4 className="mb-2 font-semibold text-gray-800">Order Summary</h4>
+      <div className="flex justify-between">
+        <span className="text-gray-600">Food & Beverages</span>
+        <span className="font-medium">${totalCost.foodCost.toFixed(2)}</span>
+      </div>
+      {totalCost.travelFee > 0 && (
         <div className="flex justify-between">
-          <span className="text-gray-600">Food & Beverages</span>
-          <span className="font-medium">${totalCost.foodCost.toFixed(2)}</span>
+          <span className="text-gray-600">Travel Fee</span>
+          <span className="font-medium">${totalCost.travelFee.toFixed(2)}</span>
         </div>
-        {totalCost.travelFee > 0 && (
-          <div className="flex justify-between">
-            <span className="text-gray-600">Travel Fee</span>
-            <span className="font-medium">${totalCost.travelFee.toFixed(2)}</span>
-          </div>
-        )}
-        <div className="flex justify-between">
-          <span className="text-gray-600">Subtotal</span>
-          <span className="font-medium">${totalCost.subtotal.toFixed(2)}</span>
+      )}
+      <div className="flex justify-between">
+        <span className="text-gray-600">Subtotal</span>
+        <span className="font-medium">${totalCost.subtotal.toFixed(2)}</span>
+      </div>
+      {totalCost.tip > 0 && (
+        <div className="flex justify-between text-green-700">
+          <span>Gratuity</span>
+          <span className="font-medium">+${totalCost.tip.toFixed(2)}</span>
         </div>
-        {totalCost.tip > 0 && (
-          <div className="flex justify-between text-green-700">
-            <span>Gratuity</span>
-            <span className="font-medium">+${totalCost.tip.toFixed(2)}</span>
-          </div>
-        )}
-        <div className="mt-2 border-t border-green-300 pt-2">
-          <div className="flex justify-between text-lg font-bold">
-            <span className="text-gray-900">Total</span>
-            <span className="text-green-700">${totalCost.total.toFixed(2)}</span>
-          </div>
-        </div>
-        <div className="mt-2 flex justify-between rounded bg-amber-50 p-2 text-amber-700">
-          <span className="font-medium">Due Today (Deposit)</span>
-          <span className="font-bold">${totalCost.deposit.toFixed(2)}</span>
+      )}
+      <div className="mt-2 border-t border-green-300 pt-2">
+        <div className="flex justify-between text-lg font-bold">
+          <span className="text-gray-900">Total</span>
+          <span className="text-green-700">${totalCost.total.toFixed(2)}</span>
         </div>
       </div>
-    </div>
-  );
-}
-
-/**
- * Agreement Modal Component
- */
-function AgreementModal({
-  formData,
-  totalCost,
-  onConfirm,
-  onCancel,
-  isSubmitting,
-}: {
-  formData: BookingFormData;
-  totalCost: {
-    foodCost: number;
-    travelFee: number;
-    subtotal: number;
-    tip: number;
-    total: number;
-    deposit: number;
-  };
-  onConfirm: () => void;
-  onCancel: () => void;
-  isSubmitting: boolean;
-}) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-xl bg-white shadow-2xl">
-        <div className="bg-red-600 p-6 text-center text-white">
-          <div className="mb-2 text-4xl">📋</div>
-          <h3 className="text-2xl font-bold">My Hibachi Catering Agreement</h3>
-          <p className="mt-2 text-red-100">Please review and confirm the terms below</p>
-        </div>
-
-        <div className="max-h-[50vh] overflow-y-auto p-6">
-          {/* Booking Summary */}
-          <div className="mb-6 rounded-lg bg-gray-50 p-4">
-            <h4 className="mb-3 font-bold text-gray-900">Booking Summary</h4>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-gray-500">Customer</p>
-                <p className="font-medium">
-                  {formData.firstName} {formData.lastName}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-500">Contact</p>
-                <p className="font-medium">{formData.email}</p>
-                <p className="font-medium">{formData.phone}</p>
-              </div>
-              <div>
-                <p className="text-gray-500">Event Date</p>
-                <p className="font-medium">
-                  {formData.eventDate ? format(formData.eventDate, 'EEEE, MMMM d, yyyy') : '-'}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-500">Time</p>
-                <p className="font-medium">{formData.timeSlot || '-'}</p>
-              </div>
-              <div>
-                <p className="text-gray-500">Guests</p>
-                <p className="font-medium">
-                  {formData.adultCount || 0} Adults, {formData.childCount || 0} Children
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-500">Total</p>
-                <p className="font-bold text-green-700">${totalCost.total.toFixed(2)}</p>
-              </div>
-            </div>
-            <div className="mt-3 border-t pt-3">
-              <p className="text-sm text-gray-500">Venue</p>
-              <p className="font-medium">
-                {formData.venueStreet}, {formData.venueCity}, {formData.venueState}{' '}
-                {formData.venueZipcode}
-              </p>
-            </div>
-          </div>
-
-          {/* Agreement Terms */}
-          <div className="space-y-4 text-sm">
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-              <h4 className="font-bold text-amber-800">💳 Payment Terms</h4>
-              <p className="mt-2 text-amber-700">
-                A ${totalCost.deposit.toFixed(2)} deposit is required to secure your booking. The
-                remaining balance is due on the day of the event.
-              </p>
-            </div>
-
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-              <h4 className="font-bold text-gray-800">📅 Cancellation Policy</h4>
-              <ul className="mt-2 list-inside list-disc space-y-1 text-gray-600">
-                <li>Cancel more than 7 days before: Full deposit refund</li>
-                <li>Cancel 3-7 days before: 50% deposit refund</li>
-                <li>Cancel less than 3 days before: No refund</li>
-              </ul>
-            </div>
-
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-              <h4 className="font-bold text-gray-800">🏠 Venue Requirements</h4>
-              <ul className="mt-2 list-inside list-disc space-y-1 text-gray-600">
-                <li>Outdoor cooking space with proper ventilation</li>
-                <li>Access to electrical outlet within 25 feet</li>
-                <li>Flat, stable surface for cooking equipment</li>
-                <li>Protection from rain (tent or covered area if outdoors)</li>
-              </ul>
-            </div>
-
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-              <h4 className="font-bold text-blue-800">ℹ️ Important Notes</h4>
-              <ul className="mt-2 list-inside list-disc space-y-1 text-blue-700">
-                <li>Chef will arrive 30 minutes before event start time</li>
-                <li>All cooking equipment is provided by My Hibachi</li>
-                <li>Guests with allergies should notify us in advance</li>
-                <li>Event duration is typically 90-120 minutes</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div className="border-t bg-gray-50 p-6">
-          <div className="flex gap-4">
-            <button
-              type="button"
-              onClick={onCancel}
-              disabled={isSubmitting}
-              className="flex-1 rounded-lg border-2 border-gray-300 px-4 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:opacity-50"
-            >
-              ← Go Back
-            </button>
-            <button
-              type="button"
-              onClick={onConfirm}
-              disabled={isSubmitting}
-              className="flex-1 rounded-lg bg-red-600 px-4 py-3 font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
-            >
-              {isSubmitting ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  Processing...
-                </span>
-              ) : (
-                '✅ Confirm Booking & Accept Agreement'
-              )}
-            </button>
-          </div>
-        </div>
+      <div className="mt-2 flex justify-between rounded bg-amber-50 p-2 text-amber-700">
+        <span className="font-medium">Due Today (Deposit)</span>
+        <span className="font-bold">${totalCost.deposit.toFixed(2)}</span>
       </div>
     </div>
   );

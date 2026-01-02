@@ -78,8 +78,8 @@ async def switch_role(
             detail="Only SUPER_ADMIN can switch roles",
         )
 
-    # Validate target role
-    valid_roles = ["admin", "customer_support", "station_manager"]
+    # Validate target role (includes CHEF for testing chef-specific views)
+    valid_roles = ["admin", "customer_support", "station_manager", "chef"]
     if request.target_role not in valid_roles:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -220,6 +220,11 @@ async def get_available_roles(
                 "role": "station_manager",
                 "name": "Station Manager",
                 "description": "Manage station-specific operations and staff",
+            },
+            {
+                "role": "chef",
+                "name": "Chef",
+                "description": "Manage personal availability and view assigned bookings",
             },
         ],
         "current_role": current_user.get("role"),

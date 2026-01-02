@@ -13,11 +13,15 @@ import {
   Plus,
   Search,
   Users,
+  XCircle,
+  CheckCircle,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { CancellationRequestModal } from '@/components/booking/CancellationRequestModal';
+import { CancellationReviewModal } from '@/components/booking/CancellationReviewModal';
 import {
   useBookings,
   useFilters,
@@ -25,6 +29,7 @@ import {
   useSearch,
   useSort,
 } from '@/hooks/useApi';
+import { bookingService } from '@/services/api';
 import type { BookingFilters } from '@/types';
 
 export default function BookingPage() {
@@ -47,6 +52,14 @@ export default function BookingPage() {
     date_from: '',
     date_to: '',
   });
+
+  // Cancellation modal state
+  const [cancelModalBooking, setCancelModalBooking] = useState<any | null>(
+    null
+  );
+  const [reviewModalBooking, setReviewModalBooking] = useState<any | null>(
+    null
+  );
 
   // Sort state - default to upcoming events first
   const { sortBy, sortOrder, toggleSort } = useSort<
@@ -105,6 +118,8 @@ export default function BookingPage() {
         return 'bg-yellow-100 text-yellow-800';
       case 'cancelled':
         return 'bg-red-100 text-red-800';
+      case 'cancellation_requested':
+        return 'bg-orange-100 text-orange-800';
       case 'completed':
         return 'bg-blue-100 text-blue-800';
       default:
@@ -167,6 +182,42 @@ export default function BookingPage() {
     setPage(1);
   };
 
+  // Handle cancellation request submission
+  const handleRequestCancellation = async (reason: string) => {
+    if (!cancelModalBooking) return;
+    await bookingService.requestCancellation(
+      cancelModalBooking.booking_id,
+      reason
+    );
+    setCancelModalBooking(null);
+    // Refresh bookings list
+    window.location.reload();
+  };
+
+  // Handle cancellation approval
+  const handleApproveCancellation = async (adminNotes?: string) => {
+    if (!reviewModalBooking) return;
+    await bookingService.approveCancellation(
+      reviewModalBooking.booking_id,
+      adminNotes
+    );
+    setReviewModalBooking(null);
+    // Refresh bookings list
+    window.location.reload();
+  };
+
+  // Handle cancellation rejection
+  const handleRejectCancellation = async (adminNotes?: string) => {
+    if (!reviewModalBooking) return;
+    await bookingService.rejectCancellation(
+      reviewModalBooking.booking_id,
+      adminNotes
+    );
+    setReviewModalBooking(null);
+    // Refresh bookings list
+    window.location.reload();
+  };
+
   if (error) {
     return (
       <div className="space-y-6">
@@ -224,6 +275,7 @@ export default function BookingPage() {
               <option>All Status</option>
               <option>Confirmed</option>
               <option>Pending</option>
+              <option>Cancellation Requested</option>
               <option>Cancelled</option>
             </select>
             <Button variant="outline">
@@ -509,8 +561,10 @@ export default function BookingPage() {
                       <span
                         className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(booking.status)}`}
                       >
-                        {booking.status.charAt(0).toUpperCase() +
-                          booking.status.slice(1)}
+                        {booking.status === 'cancellation_requested'
+                          ? 'Pending Cancellation'
+                          : booking.status.charAt(0).toUpperCase() +
+                            booking.status.slice(1)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -529,11 +583,29 @@ export default function BookingPage() {
                         <button className="text-gray-600 hover:text-gray-900">
                           Edit
                         </button>
-                        {booking.status !== 'cancelled' && (
-                          <button className="text-red-600 hover:text-red-900">
-                            Cancel
-                          </button>
+                        {/* Show Approve/Reject for cancellation_requested status */}
+                        {booking.status === 'cancellation_requested' && (
+                          <>
+                            <button
+                              className="text-green-600 hover:text-green-900 flex items-center"
+                              onClick={() => setReviewModalBooking(booking)}
+                            >
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Review
+                            </button>
+                          </>
                         )}
+                        {/* Show Cancel button for non-cancelled, non-pending-cancellation bookings */}
+                        {booking.status !== 'cancelled' &&
+                          booking.status !== 'cancellation_requested' && (
+                            <button
+                              className="text-red-600 hover:text-red-900 flex items-center"
+                              onClick={() => setCancelModalBooking(booking)}
+                            >
+                              <XCircle className="w-3 h-3 mr-1" />
+                              Cancel
+                            </button>
+                          )}
                       </div>
                     </td>
                   </tr>
@@ -613,6 +685,26 @@ export default function BookingPage() {
           </div>
         </div>
       )}
+
+      {/* Cancellation Request Modal - Step 1 */}
+      <CancellationRequestModal
+        isOpen={cancelModalBooking !== null}
+        onClose={() => setCancelModalBooking(null)}
+        onSubmit={handleRequestCancellation}
+        bookingName={cancelModalBooking?.customer?.name ?? ''}
+      />
+
+      {/* Cancellation Review Modal - Step 2 */}
+      <CancellationReviewModal
+        isOpen={reviewModalBooking !== null}
+        onClose={() => setReviewModalBooking(null)}
+        onApprove={handleApproveCancellation}
+        onReject={handleRejectCancellation}
+        bookingName={reviewModalBooking?.customer?.name ?? ''}
+        cancellationReason={reviewModalBooking?.cancellation_reason ?? ''}
+        requestedAt={reviewModalBooking?.cancellation_requested_at}
+        requestedBy={reviewModalBooking?.cancellation_requested_by?.name}
+      />
     </div>
   );
 }
