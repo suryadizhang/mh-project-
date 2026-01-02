@@ -14,6 +14,7 @@ import { usePathname } from 'next/navigation';
 import { ReactNode, useEffect, useState } from 'react';
 
 import ChatBot from '@/components/ChatBot';
+import RoleSwitcher from '@/components/superadmin/RoleSwitcher';
 import {
   DEFAULT_QUICK_ACTIONS,
   getNavigationForRole,
@@ -53,6 +54,7 @@ export default function AdminLayoutNew({ children }: AdminLayoutProps) {
       admin: UserRole.ADMIN,
       customer_support: UserRole.CUSTOMER_SUPPORT,
       station_manager: UserRole.STATION_MANAGER,
+      chef: UserRole.CHEF,
     };
 
     return roleMap[stationContext.role.toLowerCase()] || UserRole.ADMIN;
@@ -175,6 +177,9 @@ export default function AdminLayoutNew({ children }: AdminLayoutProps) {
 
             {/* Right: Actions */}
             <div className="flex items-center space-x-2 sm:space-x-4">
+              {/* Role Switcher - Super Admin Only (Dev Mode) */}
+              {isSuperAdmin() && <RoleSwitcher />}
+
               {/* View Site Link - Hidden on small mobile */}
               <Link
                 href={

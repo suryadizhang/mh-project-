@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight, Facebook, FileText, Instagram, MessageCircle, Phone, Shield } from 'lucide-react';
+import { FileText, Instagram, MessageCircle, Phone, Shield } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -26,64 +26,12 @@ export default function Footer() {
           <p className={styles.description}>
             Premium mobile hibachi catering for unforgettable events.
           </p>
-          <div className={styles.social}>
-            <a
-              href={SITE_CONFIG.social.instagram}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.socialIcon}
-              aria-label="Follow us on Instagram"
-            >
-              <Instagram size={20} />
-            </a>
-            <a
-              href={SITE_CONFIG.social.facebook}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.socialIcon}
-              aria-label="Follow us on Facebook"
-            >
-              <Facebook size={20} />
-            </a>
-          </div>
         </div>
 
-        {/* Quick Links */}
+        {/* Legal */}
         <div className={styles.menu}>
-          <h3>Quick Links</h3>
+          <h3>Legal</h3>
           <ul className={styles.links}>
-            <li>
-              <Link href="/book-us/">
-                <ChevronRight size={14} className={styles.linkIcon} /> Book Now
-              </Link>
-            </li>
-            <li>
-              <Link href="/menu">
-                <ChevronRight size={14} className={styles.linkIcon} /> Menu
-              </Link>
-            </li>
-            <li>
-              <Link href="/quote">
-                <ChevronRight size={14} className={styles.linkIcon} /> Get Quote
-              </Link>
-            </li>
-            <li>
-              <Link href="/faqs">
-                <ChevronRight size={14} className={styles.linkIcon} /> FAQs
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Legal & Contact */}
-        <div className={styles.menu}>
-          <h3>Support</h3>
-          <ul className={styles.links}>
-            <li>
-              <Link href="/contact">
-                <ChevronRight size={14} className={styles.linkIcon} /> Contact Us
-              </Link>
-            </li>
             <li>
               <Link href="/privacy">
                 <Shield size={14} className={styles.linkIcon} /> Privacy Policy
@@ -91,7 +39,7 @@ export default function Footer() {
             </li>
             <li>
               <Link href="/terms">
-                <FileText size={14} className={styles.linkIcon} /> Terms
+                <FileText size={14} className={styles.linkIcon} /> Terms of Service
               </Link>
             </li>
           </ul>
@@ -107,11 +55,7 @@ export default function Footer() {
             </li>
             <li>
               <Instagram size={16} className={styles.contactIcon} />
-              <a
-                href="https://ig.me/m/my_hibachi_chef"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="https://ig.me/m/my_hibachi_chef" target="_blank" rel="noopener noreferrer">
                 DM @my_hibachi_chef
               </a>
             </li>

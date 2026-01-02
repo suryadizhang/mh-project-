@@ -266,14 +266,16 @@ def cached(ttl: int = 300, key_prefix: str = "", key_builder: Callable | None = 
 
             # Try to get from cache
             cached_value = await cache_service.get(cache_key)
+
+            # Extract key prefix for logging (without exposing full key for security)
+            key_prefix_part = cache_key.split(":")[0] if ":" in cache_key else "unknown"
+
             if cached_value is not None:
-                # Log cache hit without exposing full key (security)
-                key_prefix_part = cache_key.split(':')[0] if ':' in cache_key else 'unknown'
-                logger.debug("Cache HIT", extra={'key_prefix': key_prefix_part})
+                logger.debug("Cache HIT", extra={"key_prefix": key_prefix_part})
                 return cached_value
 
             # Cache miss, execute function
-            logger.debug("Cache MISS", extra={'key_prefix': key_prefix_part if ':' in cache_key else 'unknown'})
+            logger.debug("Cache MISS", extra={"key_prefix": key_prefix_part})
             result = await func(*args, **kwargs)
 
             # Store in cache

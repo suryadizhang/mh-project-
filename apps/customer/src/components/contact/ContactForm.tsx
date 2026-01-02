@@ -1,15 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Send, CheckCircle, AlertCircle, Loader2, MessageSquare } from 'lucide-react';
 import { SITE_CONFIG } from '@/lib/seo-config';
+import { SMSConsentCheckbox } from '@/components/ui/SMSConsentCheckbox';
 
 interface FormData {
   name: string;
   email: string;
   phone: string;
+  preferredCommunication: '' | 'phone' | 'text' | 'email';
   subject: string;
   message: string;
+  smsConsent: boolean;
 }
 
 interface FormErrors {
@@ -25,8 +28,10 @@ export default function ContactForm() {
     name: '',
     email: '',
     phone: '',
+    preferredCommunication: '',
     subject: 'General Inquiry',
     message: '',
+    smsConsent: false,
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -77,8 +82,10 @@ export default function ContactForm() {
           name: formData.name,
           email: formData.email,
           phone: formData.phone || null,
+          preferred_communication: formData.preferredCommunication || null,
           subject: formData.subject,
           message: formData.message,
+          sms_consent: formData.smsConsent,
           source: 'website_contact_form',
         }),
       });
@@ -92,8 +99,10 @@ export default function ContactForm() {
         name: '',
         email: '',
         phone: '',
+        preferredCommunication: '',
         subject: 'General Inquiry',
         message: '',
+        smsConsent: false,
       });
 
       // Reset success message after 5 seconds
@@ -103,13 +112,13 @@ export default function ContactForm() {
     } catch (error) {
       setStatus('error');
       setErrorMessage(
-        error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.'
+        error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.',
       );
     }
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -153,10 +162,11 @@ export default function ContactForm() {
           name="name"
           value={formData.name}
           onChange={handleChange}
-          className={`w-full rounded-xl border-2 px-4 py-3 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500/20 ${errors.name
+          className={`w-full rounded-xl border-2 px-4 py-3 transition-colors focus:ring-2 focus:ring-red-500/20 focus:outline-none ${
+            errors.name
               ? 'border-red-300 bg-red-50'
               : 'border-gray-200 bg-white focus:border-red-500'
-            }`}
+          }`}
           placeholder="John Doe"
           aria-invalid={!!errors.name}
           aria-describedby={errors.name ? 'name-error' : undefined}
@@ -179,10 +189,11 @@ export default function ContactForm() {
           name="email"
           value={formData.email}
           onChange={handleChange}
-          className={`w-full rounded-xl border-2 px-4 py-3 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500/20 ${errors.email
+          className={`w-full rounded-xl border-2 px-4 py-3 transition-colors focus:ring-2 focus:ring-red-500/20 focus:outline-none ${
+            errors.email
               ? 'border-red-300 bg-red-50'
               : 'border-gray-200 bg-white focus:border-red-500'
-            }`}
+          }`}
           placeholder="john@example.com"
           aria-invalid={!!errors.email}
           aria-describedby={errors.email ? 'email-error' : undefined}
@@ -205,9 +216,38 @@ export default function ContactForm() {
           name="phone"
           value={formData.phone}
           onChange={handleChange}
-          className="w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3 transition-colors focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
+          className="w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3 transition-colors focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none"
           placeholder="(555) 123-4567"
         />
+      </div>
+
+      {/* Preferred Communication */}
+      <div>
+        <label
+          htmlFor="contact-preferredCommunication"
+          className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700"
+        >
+          <MessageSquare className="h-4 w-4 text-gray-400" />
+          Preferred Communication
+        </label>
+        <select
+          id="contact-preferredCommunication"
+          name="preferredCommunication"
+          value={formData.preferredCommunication}
+          onChange={(e) => {
+            handleChange(e);
+            // Auto-check SMS consent when text is selected
+            if (e.target.value === 'text') {
+              setFormData((prev) => ({ ...prev, smsConsent: true }));
+            }
+          }}
+          className="w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3 transition-colors focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none"
+        >
+          <option value="">Select how we should contact you</option>
+          <option value="phone">📞 Phone Call</option>
+          <option value="text">💬 Text Message</option>
+          <option value="email">📧 Email</option>
+        </select>
       </div>
 
       {/* Subject Field */}
@@ -220,7 +260,7 @@ export default function ContactForm() {
           name="subject"
           value={formData.subject}
           onChange={handleChange}
-          className="w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3 transition-colors focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
+          className="w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3 transition-colors focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none"
         >
           <option value="General Inquiry">General Inquiry</option>
           <option value="Booking Question">Booking Question</option>
@@ -242,10 +282,11 @@ export default function ContactForm() {
           value={formData.message}
           onChange={handleChange}
           rows={5}
-          className={`w-full resize-none rounded-xl border-2 px-4 py-3 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500/20 ${errors.message
+          className={`w-full resize-none rounded-xl border-2 px-4 py-3 transition-colors focus:ring-2 focus:ring-red-500/20 focus:outline-none ${
+            errors.message
               ? 'border-red-300 bg-red-50'
               : 'border-gray-200 bg-white focus:border-red-500'
-            }`}
+          }`}
           placeholder="Tell us about your event, questions, or how we can help..."
           aria-invalid={!!errors.message}
           aria-describedby={errors.message ? 'message-error' : undefined}
@@ -256,6 +297,14 @@ export default function ContactForm() {
           </p>
         )}
       </div>
+
+      {/* SMS Consent - Always visible - RingCentral TCR Compliant */}
+      <SMSConsentCheckbox
+        checked={formData.smsConsent}
+        onChange={(checked) => setFormData((prev) => ({ ...prev, smsConsent: checked }))}
+        variant="minimal"
+        id="contact-sms-consent"
+      />
 
       {/* Submit Button */}
       <button
@@ -278,7 +327,10 @@ export default function ContactForm() {
 
       <p className="text-center text-sm text-gray-500">
         We typically respond within 1-2 hours. For urgent inquiries, call{' '}
-        <a href={`tel:${SITE_CONFIG.contact.phoneTel}`} className="font-medium text-red-600 hover:underline">
+        <a
+          href={`tel:${SITE_CONFIG.contact.phoneTel}`}
+          className="font-medium text-red-600 hover:underline"
+        >
           {SITE_CONFIG.contact.phone}
         </a>
       </p>

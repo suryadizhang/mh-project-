@@ -13,11 +13,41 @@ database.
 
 **NEVER mix environments. NEVER use production for testing.**
 
-| Environment     | Database               | Purpose                        | Can Write Test Data? |
-| --------------- | ---------------------- | ------------------------------ | -------------------- |
-| **Development** | Supabase (local/cloud) | Local development, experiments | ✅ YES               |
-| **Staging**     | `myhibachi_staging`    | Testing, QA, migration testing | ✅ YES               |
-| **Production**  | `myhibachi_production` | Real customer data ONLY        | ❌ NEVER             |
+| Environment    | Database               | Purpose                        | Can Write Test Data? |
+| -------------- | ---------------------- | ------------------------------ | -------------------- |
+| **Local Dev**  | `myhibachi_staging`    | Local dev via SSH tunnel       | ✅ YES               |
+| **Staging**    | `myhibachi_staging`    | Testing, QA, migration testing | ✅ YES               |
+| **Production** | `myhibachi_production` | Real customer data ONLY        | ❌ NEVER             |
+
+**🚫 DEPRECATED:** Supabase and local SQLite are NO LONGER USED. Local
+development now uses SSH tunnel to VPS staging database.
+
+### Local Development Database Setup (SSH Tunnel)
+
+**Why SSH Tunnel:**
+
+- ✅ Real PostgreSQL 13.22 (matches VPS production)
+- ✅ Same schema as production
+- ✅ No DNS resolution issues (Supabase DNS was failing)
+- ✅ No SQLite/PostgreSQL compatibility issues
+- ✅ Test data stays on staging (never production)
+
+**Before running tests or dev server, start the SSH tunnel:**
+
+```powershell
+# Option 1: Use helper script (RECOMMENDED)
+.\scripts\start-db-tunnel.ps1
+
+# Option 2: Manual command
+ssh -f -N -L 5433:localhost:5432 root@108.175.12.154
+```
+
+**Local .env Configuration:**
+
+```dotenv
+DATABASE_URL=postgresql+asyncpg://myhibachi_staging_user:***REMOVED***@127.0.0.1:5433/myhibachi_staging
+DATABASE_URL_SYNC=postgresql+psycopg2://myhibachi_staging_user:***REMOVED***@127.0.0.1:5433/myhibachi_staging
+```
 
 ### The Golden Rules:
 
@@ -27,7 +57,7 @@ database.
    - Never run destructive tests
 
 2. **All testing happens on staging**
-   - API integration tests → staging
+   - API integration tests → staging (local via SSH tunnel or on VPS)
    - Migration testing → staging first
    - Load testing → staging
    - New feature testing → staging
@@ -49,10 +79,13 @@ psql -c "SELECT current_database();"
 ### Environment Connection Strings:
 
 ```bash
-# Staging (USE FOR TESTING)
-DATABASE_URL=postgresql+asyncpg://myhibachi_staging_user:<PASS>@localhost:5432/myhibachi_staging
+# Local Development (via SSH tunnel - port 5433)
+DATABASE_URL=postgresql+asyncpg://myhibachi_staging_user:***REMOVED***@127.0.0.1:5433/myhibachi_staging
 
-# Production (REAL DATA ONLY)
+# Staging on VPS (direct - port 5432)
+DATABASE_URL=postgresql+asyncpg://myhibachi_staging_user:***REMOVED***@localhost:5432/myhibachi_staging
+
+# Production (REAL DATA ONLY - port 5432)
 DATABASE_URL=postgresql+asyncpg://myhibachi_user:<PASS>@localhost:5432/myhibachi_production
 ```
 

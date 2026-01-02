@@ -760,7 +760,166 @@ grep -rn ": any\|as any" apps/ --include="*.ts" --include="*.tsx"
 
 ---
 
-## 🔗 Related Documentation
+## � FILE SIZE LIMITS & MODULARIZATION (CRITICAL)
+
+**Rule:** Files over 500 lines MUST be split into modular packages.
+
+### Maximum File Size Limits
+
+| File Type                                          | Max Lines | Action When Exceeded          |
+| -------------------------------------------------- | --------- | ----------------------------- |
+| **Router files** (`routers/v1/*.py`)               | 500 lines | Split into package            |
+| **Service files** (`services/*.py`)                | 500 lines | Split by responsibility       |
+| **Model files** (`db/models/*.py`)                 | 700 lines | Split by domain               |
+| **Config files** (`config/*.py`, `core/config.py`) | 800 lines | Acceptable (mostly constants) |
+| **Migration files** (`migrations/*.py`)            | No limit  | Auto-generated                |
+| **Test files** (`tests/*.py`)                      | 600 lines | Split by test category        |
+
+### Modularization Pattern (Example: Router Package)
+
+When a router file exceeds 500 lines, convert it to a package:
+
+**Before (single file):**
+
+```
+routers/v1/bookings.py  # 2500+ lines ❌
+```
+
+**After (modular package):**
+
+```
+routers/v1/bookings/
+├── __init__.py       # Router combiner (~60 lines)
+├── schemas.py        # Pydantic models (~300 lines)
+├── constants.py      # Business constants (~100 lines)
+├── crud.py           # GET/POST/PUT endpoints (~500 lines)
+├── delete.py         # DELETE with soft-delete (~200 lines)
+├── calendar.py       # Calendar views (~300 lines)
+├── availability.py   # Slot checking (~250 lines)
+├── cancellation.py   # 2-step workflow (~500 lines)
+└── notifications.py  # Async helpers (~200 lines)
+```
+
+### Module Responsibilities
+
+| Module             | Contains                         | Max Lines |
+| ------------------ | -------------------------------- | --------- |
+| `__init__.py`      | Router imports, combiner         | 100       |
+| `schemas.py`       | Pydantic request/response models | 400       |
+| `constants.py`     | Enums, constants, mappings       | 150       |
+| `crud.py`          | Create, Read, Update endpoints   | 500       |
+| `delete.py`        | Delete/archive operations        | 250       |
+| `helpers.py`       | Shared utility functions         | 300       |
+| `notifications.py` | Email/SMS/webhook triggers       | 250       |
+
+### **init**.py Pattern (Router Combiner)
+
+```python
+"""
+Bookings Router Package
+=======================
+Modular package for booking-related endpoints.
+
+Modules:
+- crud.py: GET/POST/PUT operations
+- delete.py: Soft-delete with RBAC
+- calendar.py: Weekly/monthly views
+- availability.py: Slot checking
+- cancellation.py: 2-step workflow
+- notifications.py: Async helpers
+"""
+
+from fastapi import APIRouter
+
+# Import sub-routers
+from .crud import router as crud_router
+from .delete import router as delete_router
+from .calendar import router as calendar_router
+from .availability import router as availability_router
+from .cancellation import router as cancellation_router
+
+# Combine into single router
+router = APIRouter()
+router.include_router(crud_router)
+router.include_router(delete_router)
+router.include_router(calendar_router)
+router.include_router(availability_router)
+router.include_router(cancellation_router)
+
+# Re-export for backwards compatibility
+__all__ = ["router"]
+```
+
+### Service Modularization Pattern
+
+For large service files, split by domain:
+
+```
+services/email_service.py  # 900+ lines ❌
+
+services/email/
+├── __init__.py           # Re-exports
+├── templates.py          # Email templates
+├── transactional.py      # Booking confirmations, receipts
+├── marketing.py          # Campaigns, newsletters
+├── smtp_client.py        # SMTP connection handling
+└── tracking.py           # Open/click tracking
+```
+
+### When to Modularize (Checklist)
+
+Before creating or modifying files, check:
+
+- [ ] Is this file already over 500 lines?
+- [ ] Will my changes push it over 500 lines?
+- [ ] Does this file have 3+ distinct responsibilities?
+- [ ] Are there logical groupings that could be separate modules?
+
+**If YES to any:** Modularize BEFORE adding new code!
+
+### Files Pending Modularization by Batch
+
+Track large files and their target batch:
+
+| File                                     | Lines | Batch   | Status                                          |
+| ---------------------------------------- | ----- | ------- | ----------------------------------------------- |
+| `routers/v1/bookings.py`                 | 2502  | Batch 1 | ✅ DONE → `routers/v1/bookings/` (9 files)      |
+| `core/security.py`                       | 1085  | Batch 1 | ✅ DONE → `core/security/` (13 files)           |
+| `utils/auth.py`                          | 1003  | Batch 1 | ✅ DONE → `utils/auth/` (8 files)               |
+| `routers/v1/auth.py`                     | 634   | Batch 1 | ⚠️ MONITOR (close to limit, defer until growth) |
+| `routers/v1/leads.py`                    | 629   | Batch 1 | ⚠️ MONITOR (close to limit, defer until growth) |
+| `routers/v1/stripe.py`                   | 1196  | Batch 2 | 📋 FUTURE                                       |
+| `routers/v1/admin_analytics.py`          | 1323  | Batch 2 | 📋 FUTURE                                       |
+| `api/ai/orchestrator/ai_orchestrator.py` | 1535  | Batch 3 | 📋 FUTURE                                       |
+| `routers/v1/newsletter.py`               | 963   | Batch 4 | 📋 FUTURE                                       |
+| `routers/v1/admin_emails.py`             | 1168  | Batch 4 | 📋 FUTURE                                       |
+| `main.py`                                | 1424  | Batch 1 | ⚠️ REVIEW (entry point - special handling)      |
+
+### Scan for Large Files Command
+
+```bash
+# Find files over 500 lines that need modularization
+Get-ChildItem -Path "apps/backend/src" -Recurse -Include "*.py" | `
+  ForEach-Object {
+    $lines = (Get-Content $_.FullName | Measure-Object -Line).Lines
+    if ($lines -gt 500) {
+      [PSCustomObject]@{Lines=$lines; Path=$_.Name}
+    }
+  } | Sort-Object Lines -Descending
+```
+
+### Benefits of Modularization
+
+1. **Faster Code Navigation** - Find code quickly by module name
+2. **Reduced Merge Conflicts** - Smaller files = fewer conflicts
+3. **Easier Testing** - Test modules in isolation
+4. **Better Code Review** - Review smaller, focused PRs
+5. **Cleaner Imports** - Import only what you need
+6. **Single Responsibility** - Each module has one job
+
+---
+
+## �🔗 Related Documentation
 
 - [01-CORE_PRINCIPLES.instructions.md](./01-CORE_PRINCIPLES.instructions.md)
   – Non-negotiables

@@ -3,19 +3,19 @@ Availability Engine - Slot Availability Checking
 
 Checks if slots are available considering:
 - Existing bookings
-- Chef availability
+- Chef availability (from ops.chef_availability table)
+- Chef time-off (from ops.chef_timeoff table)
 - Travel time constraints
 - Setup/cleanup buffers
 """
 
-from datetime import date, time, datetime, timedelta
+from datetime import date, time
 from typing import List, Optional
-from uuid import UUID
 import logging
 
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, not_
 
 logger = logging.getLogger(__name__)
 
@@ -116,16 +116,19 @@ class AvailabilityEngine:
             }
 
         # Check database for existing bookings
-        booking_count = await self._get_booking_count_for_slot(
-            event_date, slot_time, slot_number
-        )
+        booking_count = await self._get_booking_count_for_slot(event_date, slot_time, slot_number)
 
         is_available = booking_count < self.max_bookings_per_slot
         conflict_reason = None if is_available else "Slot is already booked"
 
-        # For now, assume we have chefs if slot is available
-        # Full chef optimization will be added later
-        available_chefs = 3 if is_available else 0
+        # Get real available chef count from database
+        # This replaces the hardcoded "available_chefs = 3"
+        available_chefs = await self._get_available_chef_count(event_date, slot_time)
+
+        # If no chefs available, mark slot as unavailable
+        if available_chefs == 0 and is_available:
+            is_available = False
+            conflict_reason = "No chefs available for this time slot"
 
         return {
             "is_available": is_available,
@@ -133,6 +136,99 @@ class AvailabilityEngine:
             "conflict_reason": conflict_reason,
             "booking_count": booking_count,
         }
+
+    async def _get_available_chef_count(
+        self,
+        event_date: date,
+        slot_time: time,
+    ) -> int:
+        """
+        Get count of chefs available for a specific date and time.
+
+        Checks:
+        1. ChefAvailability - weekly recurring schedule
+        2. ChefTimeOff - approved time-off that blocks availability
+        3. Chef status - only active chefs
+
+        Returns:
+            Number of chefs available for the given date/time
+        """
+        if not self.db:
+            # Fallback if no database connection
+            logger.warning("No database connection, returning default chef count")
+            return 3
+
+        try:
+            from db.models.ops import (
+                Chef,
+                ChefAvailability,
+                ChefTimeOff,
+                ChefStatus,
+                DayOfWeek,
+                TimeOffStatus,
+            )
+
+            # Get day of week from event date
+            day_names = {
+                0: DayOfWeek.MONDAY,
+                1: DayOfWeek.TUESDAY,
+                2: DayOfWeek.WEDNESDAY,
+                3: DayOfWeek.THURSDAY,
+                4: DayOfWeek.FRIDAY,
+                5: DayOfWeek.SATURDAY,
+                6: DayOfWeek.SUNDAY,
+            }
+            event_day = day_names[event_date.weekday()]
+
+            # Query chefs with matching weekly availability
+            # Chef must be:
+            # 1. Active status
+            # 2. Has availability entry for this day of week
+            # 3. Slot time falls within their start_time - end_time
+            # 4. is_available = True in their availability entry
+
+            available_query = (
+                select(ChefAvailability.chef_id)
+                .join(Chef, Chef.id == ChefAvailability.chef_id)
+                .where(
+                    and_(
+                        Chef.status == ChefStatus.ACTIVE,
+                        Chef.is_active == True,
+                        ChefAvailability.day_of_week == event_day,
+                        ChefAvailability.is_available == True,
+                        ChefAvailability.start_time <= slot_time,
+                        ChefAvailability.end_time >= slot_time,
+                    )
+                )
+            )
+
+            # Get chefs who have approved time-off on this date
+            timeoff_subquery = select(ChefTimeOff.chef_id).where(
+                and_(
+                    ChefTimeOff.status == TimeOffStatus.APPROVED,
+                    ChefTimeOff.start_date <= event_date,
+                    ChefTimeOff.end_date >= event_date,
+                )
+            )
+
+            # Exclude chefs on approved time-off
+            final_query = available_query.where(
+                not_(ChefAvailability.chef_id.in_(timeoff_subquery))
+            )
+
+            result = await self.db.execute(final_query)
+            available_chef_ids = result.scalars().all()
+
+            chef_count = len(set(available_chef_ids))  # Dedupe in case of multiple entries
+
+            logger.debug(f"Found {chef_count} available chefs for {event_date} at {slot_time}")
+
+            return chef_count
+
+        except Exception as e:
+            logger.warning(f"Error checking chef availability: {e}")
+            # Fallback to a safe default on error
+            return 3
 
     async def _get_booking_count_for_slot(
         self,

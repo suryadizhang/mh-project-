@@ -136,11 +136,14 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
   const isComplete = Boolean(venueAddress && venueCity && venueState && venueZipCode);
 
   // Use callback alias if provided
-  const handleTravelFeeResult = useCallback((result: TravelFeeResult) => {
-    setTravelFeeResult(result);
-    onTravelFeeCalculated?.(result);
-    onTravelFeeChange?.(result);
-  }, [onTravelFeeCalculated, onTravelFeeChange]);
+  const handleTravelFeeResult = useCallback(
+    (result: TravelFeeResult) => {
+      setTravelFeeResult(result);
+      onTravelFeeCalculated?.(result);
+      onTravelFeeChange?.(result);
+    },
+    [onTravelFeeCalculated, onTravelFeeChange],
+  );
 
   /**
    * Calculate distance between two coordinates using Haversine formula
@@ -153,13 +156,13 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
       const a =
         Math.sin(dLat / 2) * Math.sin(dLat / 2) +
         Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+          Math.cos((lat2 * Math.PI) / 180) *
+          Math.sin(dLon / 2) *
+          Math.sin(dLon / 2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       return R * c;
     },
-    []
+    [],
   );
 
   /**
@@ -180,7 +183,7 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
         isWithinServiceArea,
       };
     },
-    [freeMiles, perMileRate, maxServiceDistance]
+    [freeMiles, perMileRate, maxServiceDistance],
   );
 
   /**
@@ -252,7 +255,7 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
             stationCoordinates.lat,
             stationCoordinates.lng,
             lat,
-            lng
+            lng,
           );
           const result = calculateTravelFee(distance);
           handleTravelFeeResult(result);
@@ -303,7 +306,7 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
           types: ['address'],
           componentRestrictions: { country: 'us' },
           fields: ['formatted_address', 'address_components', 'geometry'],
-        }
+        },
       );
 
       autocompleteRef.current.addListener('place_changed', handlePlaceSelect);
@@ -317,9 +320,7 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
     }
 
     // Load Google Maps script
-    const existingScript = document.querySelector(
-      'script[src*="maps.googleapis.com/maps/api/js"]'
-    );
+    const existingScript = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]');
 
     if (existingScript) {
       // Script exists, wait for it to load
@@ -351,11 +352,56 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
 
   // US States for dropdown
   const US_STATES = [
-    'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
-    'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
-    'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
-    'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
-    'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
+    'AL',
+    'AK',
+    'AZ',
+    'AR',
+    'CA',
+    'CO',
+    'CT',
+    'DE',
+    'FL',
+    'GA',
+    'HI',
+    'ID',
+    'IL',
+    'IN',
+    'IA',
+    'KS',
+    'KY',
+    'LA',
+    'ME',
+    'MD',
+    'MA',
+    'MI',
+    'MN',
+    'MS',
+    'MO',
+    'MT',
+    'NE',
+    'NV',
+    'NH',
+    'NJ',
+    'NM',
+    'NY',
+    'NC',
+    'ND',
+    'OH',
+    'OK',
+    'OR',
+    'PA',
+    'RI',
+    'SC',
+    'SD',
+    'TN',
+    'TX',
+    'UT',
+    'VT',
+    'VA',
+    'WA',
+    'WV',
+    'WI',
+    'WY',
   ];
 
   return (
@@ -382,7 +428,8 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
       </div>
 
       <p className="mb-4 text-sm text-gray-600">
-        Where will your hibachi party be? We need this to calculate travel and check chef availability.
+        Where will your hibachi party be? We need this to calculate travel and check chef
+        availability.
       </p>
 
       {/* Google Places Autocomplete Search */}
@@ -409,19 +456,18 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
                 id="venueAddress"
                 type="text"
                 placeholder={
-                  googleMapsLoaded
-                    ? 'Start typing your address...'
-                    : 'Loading address search...'
+                  googleMapsLoaded ? 'Start typing your address...' : 'Loading address search...'
                 }
-                className={`w-full rounded-lg border-2 px-4 py-3 pr-10 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${errors.venueAddress
+                className={`w-full rounded-lg border-2 px-4 py-3 pr-10 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
+                  errors.venueAddress
                     ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
                     : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
-                  }`}
+                }`}
                 autoComplete="off"
               />
             )}
           />
-          <MapPin className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+          <MapPin className="absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-gray-400" />
         </div>
         {errors.venueAddress && (
           <p className="mt-1 flex items-center gap-1 text-sm text-red-600">
@@ -429,9 +475,6 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
             {(errors.venueAddress as { message?: string })?.message || 'Invalid address'}
           </p>
         )}
-        <p className="mt-1 text-xs text-gray-500">
-          💡 Start typing and select from Google suggestions for best results
-        </p>
       </div>
 
       {/* City, State, ZIP fields */}
@@ -446,10 +489,11 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
             type="text"
             {...register('venueCity', { required: 'City is required' })}
             placeholder="City"
-            className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${errors.venueCity
+            className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
+              errors.venueCity
                 ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
                 : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
-              }`}
+            }`}
           />
           {errors.venueCity && (
             <p className="flex items-center gap-1 text-sm text-red-600">
@@ -472,10 +516,11 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
               <select
                 {...field}
                 id="venueState"
-                className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${errors.venueState
+                className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
+                  errors.venueState
                     ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
                     : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
-                  }`}
+                }`}
               >
                 <option value="">Select State</option>
                 {US_STATES.map((state) => (
@@ -511,10 +556,11 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
             })}
             placeholder="12345"
             maxLength={10}
-            className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${errors.venueZipCode
+            className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
+              errors.venueZipCode
                 ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
                 : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
-              }`}
+            }`}
           />
           {errors.venueZipCode && (
             <p className="flex items-center gap-1 text-sm text-red-600">
@@ -541,17 +587,23 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Free miles included:</span>
-                <span className="font-medium text-green-600">{travelFeeResult.freeMiles} miles</span>
+                <span className="font-medium text-green-600">
+                  {travelFeeResult.freeMiles} miles
+                </span>
               </div>
               {travelFeeResult.billableMiles > 0 ? (
                 <>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Billable miles:</span>
-                    <span className="font-medium">{travelFeeResult.billableMiles} miles × ${travelFeeResult.perMileRate}</span>
+                    <span className="font-medium">
+                      {travelFeeResult.billableMiles} miles × ${travelFeeResult.perMileRate}
+                    </span>
                   </div>
                   <div className="mt-2 flex justify-between border-t pt-2">
                     <span className="font-semibold text-gray-900">Travel Fee:</span>
-                    <span className="font-bold text-red-600">${travelFeeResult.travelFee.toFixed(2)}</span>
+                    <span className="font-bold text-red-600">
+                      ${travelFeeResult.travelFee.toFixed(2)}
+                    </span>
                   </div>
                 </>
               ) : (
@@ -562,8 +614,9 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
             </div>
           ) : (
             <div className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-              <strong>⚠️ Location Notice:</strong> Your venue is {travelFeeResult.distanceMiles} miles from our station.
-              Our maximum service area is {maxServiceDistance} miles. Please contact us to discuss special arrangements.
+              <strong>⚠️ Location Notice:</strong> Your venue is {travelFeeResult.distanceMiles}{' '}
+              miles from our station. Our maximum service area is {maxServiceDistance} miles. Please
+              contact us to discuss special arrangements.
             </div>
           )}
         </div>

@@ -36,8 +36,10 @@ export const SMSConsent: React.FC<SMSConsentProps> = ({
     <div className={`bg-light rounded border p-3 ${className}`}>
       {/* OPTIONAL Badge - Required for TCR compliance */}
       <div className="d-flex align-items-center mb-2">
-        <span className="badge bg-info text-white me-2">OPTIONAL</span>
-        <span className="small text-muted">Checking this box is not required to complete your booking</span>
+        <span className="badge bg-info me-2 text-white">OPTIONAL</span>
+        <span className="small text-muted">
+          Checking this box is not required to complete your booking
+        </span>
       </div>
 
       <div className="form-check">
@@ -52,8 +54,9 @@ export const SMSConsent: React.FC<SMSConsentProps> = ({
         <label htmlFor="smsConsent" className="form-check-label">
           <strong>I consent to receive text messages from My Hibachi Chef</strong>
           <p className="small mt-2 mb-2">
-            By checking this box and providing my phone number, I voluntarily agree to receive the following
-            types of SMS text messages from my Hibachi LLC (doing business as My Hibachi Chef):
+            By checking this box and providing my phone number, I voluntarily agree to receive the
+            following types of SMS text messages from my Hibachi LLC (doing business as My Hibachi
+            Chef):
           </p>
           <ul className="small mb-2" style={{ paddingLeft: '1.2rem' }}>
             <li>
@@ -102,17 +105,11 @@ export const SMSConsent: React.FC<SMSConsentProps> = ({
             . SMS consent is not shared with third parties or affiliates.
           </p>
           {/* TCR Required: Consent not required for purchase */}
-          <p className="small mb-0 fw-bold text-muted">
-            Consent is not required to make a purchase. You can still complete your booking without checking this box.
+          <p className="small fw-bold text-muted mb-0">
+            Consent is not required to make a purchase.
           </p>
         </label>
         {error && <div className="invalid-feedback d-block">{error}</div>}
-      </div>
-      <div id="smsConsentDescription" className="alert alert-secondary small mt-2 mb-0 py-2">
-        <strong>What happens if I don&apos;t check this box?</strong> You will still receive essential
-        transactional SMS messages related to your booking (confirmations, reminders, chef arrival updates).
-        However, you will not receive promotional offers or marketing messages. You can opt into marketing
-        messages later by texting START to our number.
       </div>
     </div>
   );
