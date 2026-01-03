@@ -297,7 +297,7 @@ export default function BookingAgreementModal({
               </ul>
               <p className="mt-3 ml-8 text-xs text-gray-500 italic">
                 This waiver shall be binding upon Client, their heirs, executors, and assigns. This
-                agreement shall be governed by the laws of the State of California.
+                agreement shall be governed by the laws of the state where the event takes place.
               </p>
 
               {/* Digital Signature Section */}
