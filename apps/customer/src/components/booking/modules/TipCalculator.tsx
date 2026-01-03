@@ -142,8 +142,8 @@ export const TipCalculator: React.FC<TipCalculatorProps> = ({
             Gratuity for Your Chef
           </h2>
           <p className="mt-1 text-sm text-gray-600">
-            Your hibachi chef provides a personalized entertainment and dining experience.
-            Gratuity is a wonderful way to show appreciation for their skill and showmanship.
+            Your hibachi chef provides a personalized entertainment and dining experience. Gratuity
+            is a wonderful way to show appreciation for their skill and showmanship.
           </p>
         </div>
       )}
@@ -152,7 +152,7 @@ export const TipCalculator: React.FC<TipCalculatorProps> = ({
       <Controller
         name="tipPercentage"
         control={control}
-        defaultValue={25}
+        defaultValue={0}
         render={({ field }) => (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {TIP_OPTIONS.map((option) => {
@@ -168,7 +168,7 @@ export const TipCalculator: React.FC<TipCalculatorProps> = ({
                   aria-label={`Select ${option.label} tip`}
                 >
                   {option.recommended && (
-                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-amber-500 px-2 py-0.5 text-xs font-bold text-white whitespace-nowrap">
+                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-amber-500 px-2 py-0.5 text-xs font-bold whitespace-nowrap text-white">
                       RECOMMENDED
                     </span>
                   )}
@@ -192,10 +192,9 @@ export const TipCalculator: React.FC<TipCalculatorProps> = ({
           control={control}
           render={({ field }) => (
             <div
-              className={`rounded-lg border-2 p-4 transition-all ${field.value === 'custom'
-                  ? 'border-red-500 bg-red-50'
-                  : 'border-gray-200 bg-gray-50'
-                }`}
+              className={`rounded-lg border-2 p-4 transition-all ${
+                field.value === 'custom' ? 'border-red-500 bg-red-50' : 'border-gray-200 bg-gray-50'
+              }`}
             >
               <label className="flex cursor-pointer items-center gap-3">
                 <input
@@ -246,10 +245,11 @@ export const TipCalculator: React.FC<TipCalculatorProps> = ({
           <button
             type="button"
             onClick={() => field.onChange(0)}
-            className={`mt-3 w-full rounded-lg border-2 p-3 text-center text-sm transition-all ${field.value === 0
+            className={`mt-3 w-full rounded-lg border-2 p-3 text-center text-sm transition-all ${
+              field.value === 0
                 ? 'border-gray-500 bg-gray-100 font-semibold text-gray-700'
                 : 'border-gray-200 text-gray-500 hover:border-gray-300'
-              }`}
+            }`}
           >
             No tip at this time
           </button>
@@ -266,7 +266,8 @@ export const TipCalculator: React.FC<TipCalculatorProps> = ({
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">
-                Gratuity {tipPercentage !== 'custom' && tipPercentage > 0 ? `(${tipPercentage}%)` : ''}
+                Gratuity{' '}
+                {tipPercentage !== 'custom' && tipPercentage > 0 ? `(${tipPercentage}%)` : ''}
               </span>
               <span className="font-medium text-green-600">
                 {tipAmount > 0 ? `+$${tipAmount.toFixed(2)}` : '$0.00'}

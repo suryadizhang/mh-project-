@@ -713,7 +713,7 @@ function PricingSummarySection({
   watch: ReturnType<typeof useForm<BookingFormData>>['watch'];
   onTipChange: (tip: number) => void;
 }) {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false); // Collapsed by default - user expands if needed
 
   return (
     <div className="overflow-hidden rounded-xl border-2 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50">
