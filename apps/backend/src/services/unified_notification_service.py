@@ -191,6 +191,9 @@ We track: shellfish, fish, gluten, soy, eggs, celery, corn, sulfites.
 
 ⚠️ We use shared cooking surfaces and cannot guarantee 100% allergen-free.
 
+⚠️ HEALTH NOTICE:
+Please ensure no one who has had vomiting, diarrhea, or fever in the past 48 hours attends your event.
+
 Reply with allergies or "NONE" to confirm.
 
 Questions? Call {self.admin_phone}
