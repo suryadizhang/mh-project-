@@ -1,14 +1,18 @@
 'use client';
 
-import { AlertCircle, Baby, Car, ChevronDown, ChevronUp, DollarSign, Heart, Minus, Plus, Sparkles, Star, Users } from 'lucide-react';
-import React, { useCallback, useMemo, useState } from 'react';
 import {
-  Control,
-  Controller,
-  FieldErrors,
-  UseFormSetValue,
-  UseFormWatch,
-} from 'react-hook-form';
+  AlertCircle,
+  Baby,
+  Car,
+  ChevronDown,
+  ChevronUp,
+  DollarSign,
+  Minus,
+  Plus,
+  Users,
+} from 'lucide-react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Control, Controller, FieldErrors, UseFormSetValue, UseFormWatch } from 'react-hook-form';
 
 /**
  * Event Details form data structure (with toddlers and tips)
@@ -79,23 +83,6 @@ export interface EventDetailsSectionProps {
 }
 
 /**
- * Tip option configuration
- */
-interface TipOption {
-  percentage: TipPercentage;
-  label: string;
-  sublabel: string;
-  icon: React.ReactNode;
-  recommended?: boolean;
-}
-
-const TIP_OPTIONS: TipOption[] = [
-  { percentage: 20, label: '20%', sublabel: 'Good', icon: <Star className="h-5 w-5" /> },
-  { percentage: 25, label: '25%', sublabel: 'Recommended', icon: <Sparkles className="h-5 w-5" />, recommended: true },
-  { percentage: 30, label: '30%', sublabel: 'Exceptional', icon: <Sparkles className="h-5 w-5 text-amber-500" /> },
-];
-
-/**
  * Counter input component with +/- buttons
  */
 const CounterInput: React.FC<{
@@ -123,78 +110,81 @@ const CounterInput: React.FC<{
   icon,
   required = false,
 }) => {
-    const handleDecrement = () => {
-      if (value > min) onChange(value - 1);
-    };
+  const handleDecrement = () => {
+    if (value > min) onChange(value - 1);
+  };
 
-    const handleIncrement = () => {
-      if (value < max) onChange(value + 1);
-    };
+  const handleIncrement = () => {
+    if (value < max) onChange(value + 1);
+  };
 
-    return (
-      <div className="flex flex-col space-y-1.5">
-        <label htmlFor={id} className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-          {icon}
-          {label}
-          {required && <span className="text-red-500">*</span>}
-        </label>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleDecrement}
-            disabled={value <= min}
-            className={`flex h-10 w-10 items-center justify-center rounded-lg border-2 transition-all duration-200 ${value <= min
+  return (
+    <div className="flex flex-col space-y-1.5">
+      <label htmlFor={id} className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+        {icon}
+        {label}
+        {required && <span className="text-red-500">*</span>}
+      </label>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={handleDecrement}
+          disabled={value <= min}
+          className={`flex h-10 w-10 items-center justify-center rounded-lg border-2 transition-all duration-200 ${
+            value <= min
               ? 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400'
               : 'border-gray-300 bg-white text-gray-700 hover:border-red-500 hover:bg-red-50'
-              }`}
-            aria-label={`Decrease ${label}`}
-          >
-            <Minus className="h-4 w-4" />
-          </button>
-          <input
-            id={id}
-            type="number"
-            min={min}
-            max={max}
-            value={value}
-            onChange={(e) => {
-              const newValue = parseInt(e.target.value, 10);
-              if (!isNaN(newValue) && newValue >= min && newValue <= max) {
-                onChange(newValue);
-              }
-            }}
-            className={`h-10 w-16 rounded-lg border-2 text-center text-lg font-semibold transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${error
+          }`}
+          aria-label={`Decrease ${label}`}
+        >
+          <Minus className="h-4 w-4" />
+        </button>
+        <input
+          id={id}
+          type="number"
+          min={min}
+          max={max}
+          value={value}
+          onChange={(e) => {
+            const newValue = parseInt(e.target.value, 10);
+            if (!isNaN(newValue) && newValue >= min && newValue <= max) {
+              onChange(newValue);
+            }
+          }}
+          className={`h-10 w-16 rounded-lg border-2 text-center text-lg font-semibold transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
+            error
               ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
               : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
-              }`}
-          />
-          <button
-            type="button"
-            onClick={handleIncrement}
-            disabled={value >= max}
-            className={`flex h-10 w-10 items-center justify-center rounded-lg border-2 transition-all duration-200 ${value >= max
+          }`}
+        />
+        <button
+          type="button"
+          onClick={handleIncrement}
+          disabled={value >= max}
+          className={`flex h-10 w-10 items-center justify-center rounded-lg border-2 transition-all duration-200 ${
+            value >= max
               ? 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400'
               : 'border-gray-300 bg-white text-gray-700 hover:border-red-500 hover:bg-red-50'
-              }`}
-            aria-label={`Increase ${label}`}
-          >
-            <Plus className="h-4 w-4" />
-          </button>
-        </div>
-        {error ? (
-          <p className="flex items-center gap-1 text-sm text-red-600">
-            <AlertCircle className="h-4 w-4" />
-            {error}
-          </p>
-        ) : (
-          <>
-            {priceLabel && <p className="text-xs font-medium text-green-600">{priceLabel}</p>}
-            {hint && <div className="text-xs text-gray-500">{hint}</div>}
-          </>
-        )}
+          }`}
+          aria-label={`Increase ${label}`}
+        >
+          <Plus className="h-4 w-4" />
+        </button>
       </div>
-    );
-  };
+      {error ? (
+        <p className="flex items-center gap-1 text-sm text-red-600">
+          <AlertCircle className="h-4 w-4" />
+          {error}
+        </p>
+      ) : (
+        <>
+          {priceLabel && <p className="text-xs font-medium text-green-600">{priceLabel}</p>}
+          {hint && <div className="text-xs text-gray-500">{hint}</div>}
+        </>
+      )}
+    </div>
+  );
+};
 
 /**
  * EventDetailsSection - Guest counts, toddlers, tips, and total cost estimate
@@ -267,7 +257,17 @@ export const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({
       minimumApplied,
       partyMinimum,
     } as CostBreakdown;
-  }, [adults, children, adultPrice, childPrice, travelFee, tipPercentage, customTipAmount, partyMinimum, depositAmountProp]);
+  }, [
+    adults,
+    children,
+    adultPrice,
+    childPrice,
+    travelFee,
+    tipPercentage,
+    customTipAmount,
+    partyMinimum,
+    depositAmountProp,
+  ]);
 
   // Notify parent of cost changes
   React.useEffect(() => {
@@ -280,16 +280,8 @@ export const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({
     (field: string, value: number) => {
       setValue(field, value, { shouldValidate: true });
     },
-    [setValue]
+    [setValue],
   );
-
-  // Get tip button classes
-  const getTipClasses = (option: TipOption, isSelected: boolean): string => {
-    const base = 'relative flex flex-col items-center justify-center rounded-lg border-2 p-3 transition-all duration-200 cursor-pointer';
-    if (isSelected) return `${base} border-red-500 bg-red-50 text-red-700 ring-2 ring-red-200`;
-    if (option.recommended) return `${base} border-amber-300 bg-amber-50 text-amber-700 hover:border-amber-400`;
-    return `${base} border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50`;
-  };
 
   // Show loading state when pricing data is loading
   if (isLoading) {
@@ -402,9 +394,7 @@ export const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({
                 max={15}
                 priceLabel="FREE! 🎉"
                 hint={
-                  <span className="text-amber-600">
-                    Please let us know for food preparation
-                  </span>
+                  <span className="text-amber-600">Please let us know for food preparation</span>
                 }
                 error={(errors.toddlers as { message?: string })?.message}
                 onChange={(v) => handleCounterChange('toddlers', v)}
@@ -439,11 +429,11 @@ export const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({
           </h3>
 
           {/* Collapsible Cost Breakdown */}
-          <div className="border-b border-green-200 pb-3 mb-3">
+          <div className="mb-3 border-b border-green-200 pb-3">
             <button
               type="button"
               onClick={() => setIsBreakdownExpanded(!isBreakdownExpanded)}
-              className="flex w-full items-center justify-between text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              className="flex w-full items-center justify-between text-sm text-gray-600 transition-colors hover:text-gray-900"
               aria-expanded={isBreakdownExpanded}
             >
               <span className="font-medium">View price breakdown</span>
@@ -456,8 +446,9 @@ export const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({
 
             {/* Expandable breakdown details */}
             <div
-              className={`overflow-hidden transition-all duration-300 ease-in-out ${isBreakdownExpanded ? 'max-h-60 opacity-100 mt-3' : 'max-h-0 opacity-0'
-                }`}
+              className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                isBreakdownExpanded ? 'mt-3 max-h-60 opacity-100' : 'max-h-0 opacity-0'
+              }`}
             >
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
@@ -479,13 +470,16 @@ export const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({
                   <div className="my-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
                     <span className="font-medium">Minimum order: ${partyMinimum}</span>
                     <span className="block text-amber-600">
-                      (Your selection ${costBreakdown.foodCost?.toFixed(0)} → adjusted to ${costBreakdown.effectiveFoodCost?.toFixed(0)})
+                      (Your selection ${costBreakdown.foodCost?.toFixed(0)} → adjusted to $
+                      {costBreakdown.effectiveFoodCost?.toFixed(0)})
                     </span>
                   </div>
                 )}
                 {toddlers > 0 && (
                   <div className="flex justify-between text-green-600">
-                    <span>{toddlers} Toddler{toddlers !== 1 ? 's' : ''}</span>
+                    <span>
+                      {toddlers} Toddler{toddlers !== 1 ? 's' : ''}
+                    </span>
                     <span className="font-medium">FREE</span>
                   </div>
                 )}
@@ -502,142 +496,18 @@ export const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({
             </div>
           </div>
 
-          {/* Tip Selection */}
-          <div className="border-t border-green-200 pt-4">
-            <p className="mb-3 text-sm font-semibold text-gray-700">
-              🍳 Gratuity for Your Chef
+          {/* Subtotal Display */}
+          <div className="rounded-lg bg-white/70 p-4">
+            <div className="flex justify-between">
+              <span className="text-lg font-bold text-gray-900">Subtotal (Food + Travel)</span>
+              <span className="text-2xl font-bold text-green-700">
+                ${costBreakdown.subtotal.toFixed(2)}
+              </span>
+            </div>
+            <p className="mt-2 text-xs text-gray-500 italic">
+              * Gratuity selection available in the order summary below
             </p>
-            <Controller
-              name="tipPercentage"
-              control={control}
-              defaultValue={25}
-              render={({ field }) => (
-                <div className="grid grid-cols-3 gap-2">
-                  {TIP_OPTIONS.map((option) => {
-                    const isSelected = field.value === option.percentage;
-                    const calcAmount = (costBreakdown.subtotal * (option.percentage as number)) / 100;
-                    return (
-                      <button
-                        key={option.percentage}
-                        type="button"
-                        onClick={() => field.onChange(option.percentage)}
-                        className={getTipClasses(option, isSelected)}
-                        aria-label={`Select ${option.label} tip`}
-                      >
-                        {option.recommended && (
-                          <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white whitespace-nowrap">
-                            BEST
-                          </span>
-                        )}
-                        <span className="text-lg font-bold">{option.label}</span>
-                        <span className="text-xs">{option.sublabel}</span>
-                        <span className="mt-1 text-xs font-semibold text-green-600">
-                          ${calcAmount.toFixed(0)}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            />
-
-            {/* Custom tip and no tip options */}
-            <div className="mt-3 flex gap-2">
-              <Controller
-                name="tipPercentage"
-                control={control}
-                render={({ field }) => (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => field.onChange('custom')}
-                      className={`flex-1 rounded-lg border-2 p-2 text-xs transition-all ${field.value === 'custom'
-                        ? 'border-red-500 bg-red-50 font-semibold'
-                        : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                    >
-                      Custom
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => field.onChange(0)}
-                      className={`flex-1 rounded-lg border-2 p-2 text-xs transition-all ${field.value === 0
-                        ? 'border-gray-500 bg-gray-100 font-semibold'
-                        : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                        }`}
-                    >
-                      No tip
-                    </button>
-                  </>
-                )}
-              />
-            </div>
-
-            {/* Custom amount input */}
-            {tipPercentage === 'custom' && (
-              <div className="mt-3">
-                <Controller
-                  name="customTipAmount"
-                  control={control}
-                  render={({ field }) => (
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-600">Custom tip:</span>
-                      <span className="text-lg font-semibold">$</span>
-                      <input
-                        type="number"
-                        min={0}
-                        step={5}
-                        value={field.value || ''}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                        placeholder="0"
-                        className="w-24 rounded-md border border-gray-300 px-3 py-2 text-right font-semibold focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:outline-none"
-                      />
-                    </div>
-                  )}
-                />
-              </div>
-            )}
           </div>
-
-          {/* Grand Total */}
-          <div className="mt-4 rounded-lg bg-white/70 p-4">
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Subtotal (Food + Travel)</span>
-                <span className="font-medium">${costBreakdown.subtotal.toFixed(2)}</span>
-              </div>
-              {costBreakdown.tipAmount > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">
-                    Gratuity {tipPercentage !== 'custom' && tipPercentage > 0 ? `(${tipPercentage}%)` : ''}
-                  </span>
-                  <span className="font-medium text-green-600">+${costBreakdown.tipAmount.toFixed(2)}</span>
-                </div>
-              )}
-              <div className="flex justify-between border-t border-gray-200 pt-2">
-                <span className="text-lg font-bold text-gray-900">Estimated Total</span>
-                <span className="text-2xl font-bold text-green-700">${costBreakdown.total.toFixed(2)}</span>
-              </div>
-            </div>
-
-            {/* Deposit info */}
-            <div className="mt-3 rounded-lg bg-amber-50 p-3 text-center">
-              <p className="text-sm text-amber-800">
-                💳 <strong>${(costBreakdown.depositAmount ?? 100).toFixed(0)} deposit</strong> required today to confirm your booking
-              </p>
-            </div>
-          </div>
-
-          {/* Chef appreciation note */}
-          <div className="mt-4 flex items-start gap-2 text-xs text-gray-600">
-            <Heart className="h-4 w-4 flex-shrink-0 text-red-400 mt-0.5" />
-            <p>100% of gratuity goes directly to your chef. They bring the restaurant experience to your home!</p>
-          </div>
-
-          {/* Menu note */}
-          <p className="mt-3 text-center text-xs text-gray-500 italic">
-            * Menu selection and upgrades are chosen 5 days before your event
-          </p>
         </div>
       )}
     </div>
