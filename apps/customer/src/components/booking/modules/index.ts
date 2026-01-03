@@ -48,8 +48,7 @@ export { TipCalculator, type TipFormData, type TipPercentage } from './TipCalcul
 /**
  * Combined form data type for the complete booking form
  */
-export interface BookingFormData
-  extends Record<string, unknown> {
+export interface BookingFormData extends Record<string, unknown> {
   // Personal Info
   firstName: string;
   lastName: string;
@@ -107,7 +106,7 @@ export const DEFAULT_BOOKING_FORM_VALUES: Partial<BookingFormData> = {
   lastName: '',
   email: '',
   phone: '',
-  preferredCommunication: 'text',
+  preferredCommunication: undefined, // No default - let user select
   smsConsent: false,
   venueStreet: '',
   venueCity: '',
@@ -132,7 +131,7 @@ export const DEFAULT_BOOKING_FORM_VALUES: Partial<BookingFormData> = {
   specialDietaryRequests: '',
   eventDate: null,
   timeSlot: null,
-  tipPercentage: 25, // Recommended default
+  tipPercentage: 0, // No default - let user select
   customTipAmount: 0,
   agreedToTerms: false,
 };
