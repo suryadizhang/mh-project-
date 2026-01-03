@@ -290,6 +290,13 @@ If you need immediate access, please contact us at support@myhibachi.com.
                 Please reply to this email with any allergies or dietary restrictions.
             </div>
 
+            <div class="warning">
+                <strong>⚠️ Health Notice:</strong> To protect all guests, please ensure that no one who has experienced
+                vomiting, diarrhea, or fever within the past 48 hours attends your event. Norovirus and other stomach
+                bugs spread easily at gatherings. If you have questions about food safety, contact us at
+                <a href="mailto:cs@myhibachichef.com">cs@myhibachichef.com</a>.
+            </div>
+
             <p style="text-align: center; margin: 20px 0;">
                 <a href="{google_calendar_url}" style="background-color: #4285f4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 5px;">📅 Add to Google Calendar</a>
             </p>
@@ -327,6 +334,11 @@ BOOKING DETAILS:
 
 ⚠️ ALLERGEN NOTICE: We use shared cooking surfaces and cannot guarantee 100% allergen-free.
 Please reply with any allergies or dietary restrictions.
+
+⚠️ HEALTH NOTICE: To protect all guests, please ensure that no one who has
+experienced vomiting, diarrhea, or fever within the past 48 hours attends your event.
+Norovirus and other stomach bugs spread easily at gatherings. Questions about food
+safety? Contact us at cs@myhibachichef.com.
 
 WHAT'S NEXT:
 1. Pay your $100 deposit within 2 hours to confirm
@@ -437,9 +449,9 @@ def generate_google_calendar_url(
 
         # Try to parse common date formats
         date_formats = [
-            "%B %d, %Y",      # "January 15, 2025"
-            "%Y-%m-%d",       # "2025-01-15"
-            "%m/%d/%Y",       # "01/15/2025"
+            "%B %d, %Y",  # "January 15, 2025"
+            "%Y-%m-%d",  # "2025-01-15"
+            "%m/%d/%Y",  # "01/15/2025"
         ]
 
         parsed_date = None
@@ -456,9 +468,9 @@ def generate_google_calendar_url(
 
         # Try to parse time
         time_formats = [
-            "%I:%M %p",       # "6:00 PM"
-            "%H:%M",          # "18:00"
-            "%I %p",          # "6 PM"
+            "%I:%M %p",  # "6:00 PM"
+            "%H:%M",  # "18:00"
+            "%I %p",  # "6 PM"
         ]
 
         parsed_time = None
@@ -470,10 +482,7 @@ def generate_google_calendar_url(
                 continue
 
         if parsed_time:
-            parsed_date = parsed_date.replace(
-                hour=parsed_time.hour,
-                minute=parsed_time.minute
-            )
+            parsed_date = parsed_date.replace(hour=parsed_time.hour, minute=parsed_time.minute)
 
         # Event duration: 2 hours for hibachi
         end_datetime = parsed_date + timedelta(hours=2)

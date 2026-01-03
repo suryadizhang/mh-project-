@@ -79,7 +79,7 @@ export default function BookingAgreementModal({
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 text-green-500">✓</span>
-                  2-hour service duration (additional time available upon request)
+                  Approximately 90-minute service duration (additional time available upon request)
                 </li>
               </ul>
             </div>
@@ -294,6 +294,33 @@ export default function BookingAgreementModal({
                   <strong>Third-Party Claims:</strong> Any claims by guests, venue owners, or third
                   parties arising from the event
                 </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 text-gray-400">•</span>
+                  <strong>Pre-Event Health:</strong> Illness claims where guests attended despite
+                  experiencing vomiting, diarrhea, or fever within 48 hours prior
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 text-gray-400">•</span>
+                  <strong>Post-Service Food Handling:</strong> Illness from leftovers not
+                  refrigerated within 2 hours of service completion
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 text-gray-400">•</span>
+                  <strong>Third-Party Food:</strong> Illness from food, beverages, or ice not
+                  prepared by My Hibachi chef
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 text-gray-400">•</span>
+                  <strong>Foodborne Illness Claims:</strong> Claims not reported within 72 hours,
+                  lacking medical documentation, or affecting fewer than 3 guests
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 text-gray-400">•</span>
+                  <strong>Norovirus Acknowledgment:</strong> Norovirus spreads person-to-person
+                  through direct contact, not through properly cooked food—if multiple guests
+                  develop symptoms 12-48 hours post-event, transmission likely occurred at the
+                  gathering
+                </li>
               </ul>
               <p className="mt-3 ml-8 text-xs text-gray-500 italic">
                 This waiver shall be binding upon Client, their heirs, executors, and assigns. This
@@ -345,7 +372,7 @@ export default function BookingAgreementModal({
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 text-blue-500">•</span>
                   <strong>Setup Space:</strong> Provide adequate outdoor space (minimum 8×6 feet
-                  clearance) with access to electrical outlet within 25 feet
+                  clearance) on level ground with proper ventilation
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 text-blue-500">•</span>

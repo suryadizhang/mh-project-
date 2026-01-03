@@ -210,7 +210,7 @@ export const faqs: FaqItem[] = [
     id: 'space-requirements',
     question: 'What space do you need for the hibachi setup?',
     answer:
-      'We need a minimum 8×6 feet clear area for our grill (dimensions: 68.3"L × 27.5"W × 41.3"H) plus access space for the chef. Requirements: level ground, outdoor space OR well-ventilated indoor area, electrical outlet within 25 feet (for lighting/accessories), and table access so guests can watch the show. Keep 10+ feet clearance from any flammable materials.',
+      'We need a minimum 8×6 feet clear area for our grill (dimensions: 68.3"L × 27.5"W × 41.3"H) plus access space for the chef. Requirements: level ground, outdoor space OR well-ventilated indoor area, and table access so guests can watch the show. Keep 10+ feet clearance from any flammable materials.',
     category: 'On‑Site Setup & Requirements',
     subcategory: 'Space & Ventilation',
     tags: [
@@ -220,7 +220,6 @@ export const faqs: FaqItem[] = [
       'outdoor',
       'ventilated',
       'table access',
-      'electrical outlet',
       'clearance',
     ],
     confidence: 'high',
@@ -581,10 +580,10 @@ export const faqs: FaqItem[] = [
     id: 'service-duration',
     question: 'How long does the hibachi experience last?',
     answer:
-      'Standard service is approximately 2 hours, which includes setup, the full hibachi cooking show and meal service, and cleanup. For larger parties (20+ guests), service may extend up to 2.5-3 hours. Additional time is available upon request for an extra fee. Contact us to discuss timing for your specific event.',
+      'Standard service is approximately 90 minutes, which includes setup, the full hibachi cooking show and meal service, and cleanup. For larger parties (20+ guests), service may extend up to 2-2.5 hours. Additional time is available upon request for an extra fee. Contact us to discuss timing for your specific event.',
     category: 'On-Site Setup & Requirements',
     subcategory: 'General',
-    tags: ['service duration', '2 hours', 'how long', 'time', 'cooking show', 'large parties'],
+    tags: ['service duration', '90 minutes', 'how long', 'time', 'cooking show', 'large parties'],
     confidence: 'high',
     source_urls: ['/book-us/'],
   },
@@ -631,6 +630,67 @@ export const faqs: FaqItem[] = [
     tags: ['receipt', 'invoice', 'business', 'expense reimbursement'],
     confidence: 'high',
     source_urls: ['/book-us/'],
+  },
+
+  // Food Safety & Illness Prevention
+  {
+    id: 'food-safety-policy',
+    question: 'What are your food safety standards?',
+    answer:
+      'Our chefs follow strict food safety protocols: proteins are cooked to FDA-recommended internal temperatures (165°F+ for poultry, 145°F+ for beef/seafood), ingredients are transported in temperature-controlled coolers, and we maintain proper hygiene throughout service. The hibachi grill reaches 400°F+, ensuring thorough cooking. For any food safety concerns, please report within 72 hours to cs@myhibachichef.com. Customer is responsible for proper storage of any leftovers after our chef departs.',
+    category: 'Policies (Cancellation, Weather, Refunds)',
+    subcategory: 'Food Safety',
+    tags: [
+      'food safety',
+      'FDA',
+      'temperature',
+      'cooking standards',
+      'hygiene',
+      'claims',
+      'leftovers',
+    ],
+    confidence: 'high',
+    source_urls: ['/book-us/'],
+  },
+  {
+    id: 'norovirus-clarification',
+    question: 'What if multiple guests get sick after an event?',
+    answer:
+      'Norovirus ("stomach flu") spreads person-to-person through direct contact, NOT through properly cooked food. Our hibachi grill reaches 400°F+, which kills all foodborne pathogens. If multiple guests develop vomiting/diarrhea 12-48 hours after an event, it is statistically more likely that an already-infected guest attended and transmitted the virus to others through contact. This is a common occurrence at gatherings where people share food, utensils, and close spaces.',
+    category: 'Policies (Cancellation, Weather, Refunds)',
+    subcategory: 'Food Safety',
+    tags: [
+      'norovirus',
+      'stomach flu',
+      'illness',
+      'transmission',
+      'person-to-person',
+      'cooked food',
+    ],
+    confidence: 'high',
+    source_urls: [],
+  },
+  {
+    id: 'pre-event-health-notice',
+    question: 'What if a guest is feeling unwell before the event?',
+    answer:
+      '⚠️ IMPORTANT: To protect all guests, anyone who has experienced vomiting, diarrhea, or fever within the past 48 hours should NOT attend the event. Norovirus and other stomach bugs spread extremely easily at gatherings. If you need to reschedule due to illness, we offer flexible options—just contact us. Attending while sick puts other guests at risk of infection.',
+    category: 'Policies (Cancellation, Weather, Refunds)',
+    subcategory: 'Food Safety',
+    tags: ['illness', 'sick', 'unwell', 'vomiting', 'fever', 'reschedule', 'contagious'],
+    confidence: 'high',
+    source_urls: ['/book-us/'],
+  },
+  {
+    id: 'leftover-food-storage',
+    question: 'How should I store leftover hibachi food?',
+    answer:
+      'Refrigerate all leftovers within 2 hours of service completion to prevent bacterial growth. Store at 40°F or below and consume within 3-4 days. My Hibachi is not responsible for illness resulting from improperly stored leftovers after our chef departs.',
+    category: 'Policies (Cancellation, Weather, Refunds)',
+    subcategory: 'Food Safety',
+    tags: ['leftovers', 'storage', 'refrigerate', 'food safety', '2 hours', 'bacterial growth'],
+    confidence: 'high',
+    source_urls: [],
   },
 ];
 
@@ -689,6 +749,7 @@ export const subcategories = {
     'Weather / Backup Plan',
     'Refunds & Credits',
     'Late / No‑Show',
+    'Food Safety',
   ],
   'Kids & Special Occasions': [
     'Children Pricing & Portions',
