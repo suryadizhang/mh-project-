@@ -95,20 +95,20 @@ export default function BookingAgreementModal({
               <ul className="ml-8 space-y-1 text-sm text-gray-600">
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 text-green-500">✓</span>
-                  Final pricing will be confirmed based on guest count and menu selection
+                  Final pricing confirmed based on guest count and menu selection
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="mt-0.5 text-green-500">✓</span>${depositAmount ?? 100} refundable
-                  deposit required to secure booking
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="mt-0.5 text-green-500">✓</span>
-                  Deposit is refundable if canceled 4+ days before event, non-refundable within 4
-                  days
+                  <span className="mt-0.5 text-green-500">✓</span>${depositAmount ?? 100} deposit
+                  required to secure booking
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 text-green-500">✓</span>
-                  Remaining balance due on event day
+                  <strong>48-hour full refund guarantee</strong> - cancel 48+ hours before event for
+                  full deposit refund
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 text-green-500">✓</span>
+                  Remaining balance due on event day (cash, Venmo, Zelle, or credit card)
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 text-green-500">✓</span>
@@ -129,29 +129,35 @@ export default function BookingAgreementModal({
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 font-bold text-green-500">•</span>
                   <span>
-                    <strong>Deposit Refund:</strong> ${depositAmount ?? 100} deposit is refundable
-                    if canceled 4+ days before event, non-refundable within 4 days
+                    <strong>48-Hour Full Refund:</strong> Cancel 48+ hours before event for full
+                    deposit refund, no questions asked
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 font-bold text-green-500">•</span>
                   <span>
-                    <strong>Free Reschedule:</strong> One free reschedule allowed if requested 24+
-                    hours before event; additional reschedules cost ${depositAmount ?? 100}
+                    <strong>Free Rescheduling:</strong> Reschedule free of charge with 48+ hours
+                    notice; $200 rescheduling fee applies with less than 48 hours notice
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 font-bold text-amber-500">•</span>
+                  <span>
+                    <strong>Guest Count Changes:</strong> Final guest count required 24+ hours
+                    before event (we prepare fresh ingredients specifically for your party size)
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 font-bold text-amber-500">•</span>
                   <span>
                     <strong>Menu Changes:</strong> No menu changes allowed within 12 hours of event
-                    (we prepare fresh ingredients specifically for your party)
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 font-bold text-red-500">•</span>
                   <span>
                     <strong>Food Safety:</strong> No refund for ordered food as we cannot keep food
-                    that has been out of refrigeration for more than 4 hours
+                    that has been out of refrigeration for more than 4 hours (per FDA guidelines)
                   </span>
                 </li>
               </ul>
@@ -258,26 +264,41 @@ export default function BookingAgreementModal({
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-red-100 text-sm font-bold text-red-600">
                   4
                 </span>
-                Liability Waiver
+                Liability Waiver & Release
               </h6>
               <p className="mb-2 ml-8 text-sm text-gray-600">
-                By confirming this booking, I release My Hibachi LLC from liability for allergic
-                reactions resulting from:
+                By signing below, I (the &quot;Client&quot;) agree to release My Hibachi LLC, its
+                owners, employees, and contractors from all liability for:
               </p>
               <ul className="ml-8 space-y-1 text-sm text-gray-600">
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 text-gray-400">•</span>
-                  Failure to communicate allergies in advance
+                  <strong>Allergic Reactions:</strong> Reactions resulting from failure to
+                  communicate allergies in advance, cross-contamination despite reasonable
+                  precautions, or consumption of items known to contain allergens
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 text-gray-400">•</span>
-                  Cross-contamination despite reasonable precautions taken by staff
+                  <strong>Property Damage:</strong> Any damage to property, furniture, surfaces,
+                  flooring, or structures at the Client&apos;s premises arising from cooking
+                  activities, heat, smoke, oil splatter, or equipment setup
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 text-gray-400">•</span>
-                  Consumption of menu items known to contain allergens
+                  <strong>Personal Injury:</strong> Any injury to guests resulting from proximity to
+                  cooking equipment, hot surfaces, or entertainment elements, provided reasonable
+                  safety measures were maintained
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 text-gray-400">•</span>
+                  <strong>Third-Party Claims:</strong> Any claims by guests, venue owners, or third
+                  parties arising from the event
                 </li>
               </ul>
+              <p className="mt-3 ml-8 text-xs text-gray-500 italic">
+                This waiver shall be binding upon Client, their heirs, executors, and assigns. This
+                agreement shall be governed by the laws of the State of California.
+              </p>
 
               {/* Digital Signature Section */}
               <div className="mt-6 ml-8">
@@ -317,15 +338,29 @@ export default function BookingAgreementModal({
               <ul className="ml-8 space-y-1 text-sm text-gray-600">
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 text-blue-500">•</span>
-                  Provide adequate outdoor space with access to power outlet
+                  <strong>Weather Protection:</strong> Provide covering for outdoor events (tent,
+                  covered patio, garage, or indoor space with proper ventilation). Chef cannot cook
+                  in rain without protection.
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 text-blue-500">•</span>
-                  Ensure safe and clean cooking environment
+                  <strong>Setup Space:</strong> Provide adequate outdoor space (minimum 8×6 feet
+                  clearance) with access to electrical outlet within 25 feet
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="mt-0.5 text-blue-500">•</span>
-                  Communicate all food allergies and dietary restrictions in advance
+                  <strong>Tables & Seating:</strong> Provide tables, chairs, plates, utensils, and
+                  napkins for guests (2 × 8-foot or 3 × 6-foot tables recommended)
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 text-blue-500">•</span>
+                  <strong>Safe Environment:</strong> Ensure cooking area is clear of flammable
+                  materials within 10 feet of grill, with proper ventilation
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-0.5 text-blue-500">•</span>
+                  <strong>Guest Allergies:</strong> Communicate ALL guest allergies 48+ hours in
+                  advance and confirm verbally with chef upon arrival
                 </li>
               </ul>
             </div>
