@@ -210,10 +210,19 @@ export const faqs: FaqItem[] = [
     id: 'space-requirements',
     question: 'What space do you need for the hibachi setup?',
     answer:
-      'Clear area 68.3"L × 27.5"W × 41.3"H for our grill. Need level ground, outdoor space or well-ventilated indoor area, and table access so guests can watch the show.',
+      'We need a minimum 8×6 feet clear area for our grill (dimensions: 68.3"L × 27.5"W × 41.3"H) plus access space for the chef. Requirements: level ground, outdoor space OR well-ventilated indoor area, electrical outlet within 25 feet (for lighting/accessories), and table access so guests can watch the show. Keep 10+ feet clearance from any flammable materials.',
     category: 'On‑Site Setup & Requirements',
     subcategory: 'Space & Ventilation',
-    tags: ['68x27x41 inches', 'level ground', 'outdoor', 'ventilated', 'table access'],
+    tags: [
+      '8x6 feet',
+      '68x27x41 inches',
+      'level ground',
+      'outdoor',
+      'ventilated',
+      'table access',
+      'electrical outlet',
+      'clearance',
+    ],
     confidence: 'high',
     source_urls: ['/book-us/'],
   },
@@ -432,6 +441,17 @@ export const faqs: FaqItem[] = [
     source_urls: ['/book-us/'],
   },
   {
+    id: 'guest-count-changes',
+    question: 'When do I need to finalize my guest count?',
+    answer:
+      'Final guest count is required 24+ hours before your event. We prepare fresh ingredients specifically for your party size, so accurate guest counts ensure proper portions. If your guest count changes significantly within 24 hours, contact us immediately at (916) 740-8768 and we will do our best to accommodate, but this cannot be guaranteed.',
+    category: 'Policies (Cancellation, Weather, Refunds)',
+    subcategory: 'Cancellation & Changes',
+    tags: ['guest count', '24 hours', 'finalize', 'party size', 'changes', 'fresh ingredients'],
+    confidence: 'high',
+    source_urls: ['/book-us/'],
+  },
+  {
     id: 'food-refund-policy',
     question: 'Can I get a refund for leftover or uneaten food?',
     answer:
@@ -554,6 +574,17 @@ export const faqs: FaqItem[] = [
     category: 'On-Site Setup & Requirements',
     subcategory: 'General',
     tags: ['arrival time', '15-30 minutes early', 'setup time'],
+    confidence: 'high',
+    source_urls: ['/book-us/'],
+  },
+  {
+    id: 'service-duration',
+    question: 'How long does the hibachi experience last?',
+    answer:
+      'Standard service is approximately 2 hours, which includes setup, the full hibachi cooking show and meal service, and cleanup. For larger parties (20+ guests), service may extend up to 2.5-3 hours. Additional time is available upon request for an extra fee. Contact us to discuss timing for your specific event.',
+    category: 'On-Site Setup & Requirements',
+    subcategory: 'General',
+    tags: ['service duration', '2 hours', 'how long', 'time', 'cooking show', 'large parties'],
     confidence: 'high',
     source_urls: ['/book-us/'],
   },
