@@ -99,18 +99,28 @@ export function usePricing(): UsePricingResult {
     setError(null);
 
     try {
-      // Fetch from /api/v1/config/all - the SSoT endpoint with ALL business data
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      const configResponse = await fetch(`${apiUrl}/api/v1/config/all`, {
+      // Fetch from local proxy route to avoid CORS issues
+      // The proxy route forwards to backend /api/v1/config/all
+      // NOTE: Must include trailing slash to avoid 308 redirect from Next.js
+      console.log('[usePricing] Starting fetch from /api/v1/config/');
+      const configResponse = await fetch('/api/v1/config/', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
 
+      console.log('[usePricing] Response status:', configResponse.status, configResponse.ok);
+
       if (configResponse.ok) {
         const configData = await configResponse.json();
+        console.log('[usePricing] Received config data:', {
+          hasPricing: !!configData?.pricing,
+          adultPriceCents: configData?.pricing?.adult_price_cents,
+          partyMinimumCents: configData?.pricing?.party_minimum_cents,
+          depositCents: configData?.deposit?.deposit_amount_cents,
+        });
         setBusinessConfig(configData);
       } else {
-        console.error('Failed to fetch config:', configResponse.status);
+        console.error('[usePricing] Failed to fetch config:', configResponse.status);
         setError('Failed to fetch pricing configuration');
       }
 
@@ -150,6 +160,18 @@ export function usePricing(): UsePricingResult {
   const perMileRate = businessConfig?.travel?.per_mile_cents
     ? businessConfig.travel.per_mile_cents / 100
     : undefined;
+
+  // Debug logging for pricing extraction
+  console.log('[usePricing] Extracted values:', {
+    businessConfig: businessConfig !== null,
+    adultPrice,
+    childPrice,
+    partyMinimum,
+    depositAmount,
+    freeMiles,
+    perMileRate,
+    isLoading,
+  });
 
   // Addon prices from /api/v1/pricing/current
   const addonPrices = pricing ? getAddonPrices(pricing) : undefined;

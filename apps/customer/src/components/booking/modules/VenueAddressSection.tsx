@@ -32,10 +32,10 @@ export interface VenueCoordinates {
  * Venue Address form data structure
  */
 export interface VenueAddressFormData {
-  venueAddress: string;
+  venueStreet: string;
   venueCity: string;
   venueState: string;
-  venueZipCode: string;
+  venueZipcode: string;
   venueCoordinates?: VenueCoordinates;
 }
 
@@ -128,12 +128,77 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
   const [googleMapsLoaded, setGoogleMapsLoaded] = useState(false);
 
   // Check if section is complete
-  const venueAddress = watch('venueAddress');
+  const venueStreet = watch('venueStreet');
   const venueCity = watch('venueCity');
   const venueState = watch('venueState');
-  const venueZipCode = watch('venueZipCode');
+  const venueZipcode = watch('venueZipcode');
 
-  const isComplete = Boolean(venueAddress && venueCity && venueState && venueZipCode);
+  const isComplete = Boolean(venueStreet && venueCity && venueState && venueZipcode);
+
+  // Watch venue coordinates from form
+  const venueCoordinates = watch('venueCoordinates');
+
+  // Recalculate travel fee when stationCoordinates arrives AFTER venue was already selected
+  // This fixes the timing issue where user picks address before station coords load
+  useEffect(() => {
+    // Only calculate if we have both coordinates AND haven't calculated yet
+    if (
+      stationCoordinates &&
+      venueCoordinates?.lat &&
+      venueCoordinates?.lng &&
+      showTravelFeePreview &&
+      !travelFeeResult
+    ) {
+      setIsCalculatingDistance(true);
+      try {
+        const R = 3959; // Earth's radius in miles
+        const lat1 = stationCoordinates.lat;
+        const lon1 = stationCoordinates.lng;
+        const lat2 = venueCoordinates.lat;
+        const lon2 = venueCoordinates.lng;
+
+        const dLat = ((lat2 - lat1) * Math.PI) / 180;
+        const dLon = ((lon2 - lon1) * Math.PI) / 180;
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos((lat1 * Math.PI) / 180) *
+            Math.cos((lat2 * Math.PI) / 180) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = R * c;
+
+        const billableMiles = Math.max(0, distance - freeMiles);
+        const travelFee = billableMiles * perMileRate;
+        const isWithinServiceArea = distance <= maxServiceDistance;
+
+        const result: TravelFeeResult = {
+          distanceMiles: distance,
+          freeMiles,
+          billableMiles,
+          perMileRate,
+          travelFee,
+          isWithinServiceArea,
+        };
+
+        setTravelFeeResult(result);
+        onTravelFeeCalculated?.(result);
+        onTravelFeeChange?.(result);
+      } finally {
+        setIsCalculatingDistance(false);
+      }
+    }
+  }, [
+    stationCoordinates,
+    venueCoordinates,
+    showTravelFeePreview,
+    travelFeeResult,
+    freeMiles,
+    perMileRate,
+    maxServiceDistance,
+    onTravelFeeCalculated,
+    onTravelFeeChange,
+  ]);
 
   // Use callback alias if provided
   const handleTravelFeeResult = useCallback(
@@ -200,7 +265,7 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
     }
 
     // Update venue address with formatted address
-    setValue('venueAddress', place.formatted_address, { shouldValidate: true });
+    setValue('venueStreet', place.formatted_address, { shouldValidate: true });
 
     // Extract address components
     let city = '';
@@ -218,7 +283,18 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
       if (types.includes('route')) {
         streetName = component.long_name;
       }
-      if (types.includes('locality') || types.includes('sublocality')) {
+      // Check multiple types for city - Google returns different types depending on the address
+      // Priority: locality > sublocality > sublocality_level_1 > neighborhood
+      if (!city && types.includes('locality')) {
+        city = component.long_name;
+      }
+      if (!city && types.includes('sublocality')) {
+        city = component.long_name;
+      }
+      if (!city && types.includes('sublocality_level_1')) {
+        city = component.long_name;
+      }
+      if (!city && types.includes('neighborhood')) {
         city = component.long_name;
       }
       if (types.includes('administrative_area_level_1')) {
@@ -232,7 +308,7 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
     // Update form values
     if (city) setValue('venueCity', city, { shouldValidate: true });
     if (state) setValue('venueState', state, { shouldValidate: true });
-    if (zipCode) setValue('venueZipCode', zipCode, { shouldValidate: true });
+    if (zipCode) setValue('venueZipcode', zipCode, { shouldValidate: true });
 
     // Get coordinates
     if (place.geometry?.location) {
@@ -248,6 +324,7 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
       }
 
       // Calculate travel fee if station coordinates available
+
       if (stationCoordinates && showTravelFeePreview) {
         setIsCalculatingDistance(true);
         try {
@@ -258,24 +335,18 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
             lng,
           );
           const result = calculateTravelFee(distance);
+
           handleTravelFeeResult(result);
         } finally {
           setIsCalculatingDistance(false);
         }
+      } else {
+        console.warn('[VenueAddressSection] Cannot calculate travel fee:', {
+          hasStationCoordinates: !!stationCoordinates,
+          showTravelFeePreview,
+        });
       }
     }
-
-    // Log for debugging
-    console.log('Place selected:', {
-      address: place.formatted_address,
-      street: `${streetNumber} ${streetName}`.trim(),
-      city,
-      state,
-      zipCode,
-      coordinates: place.geometry?.location
-        ? { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() }
-        : null,
-    });
   }, [
     setValue,
     stationCoordinates,
@@ -434,7 +505,7 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
 
       {/* Google Places Autocomplete Search */}
       <div className="mb-4">
-        <label htmlFor="venueAddress" className="mb-1.5 block text-sm font-semibold text-gray-700">
+        <label htmlFor="venueStreet" className="mb-1.5 block text-sm font-semibold text-gray-700">
           <span className="flex items-center gap-2">
             <Navigation className="h-4 w-4 text-gray-400" />
             Search Address
@@ -443,7 +514,7 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
         </label>
         <div className="relative">
           <Controller
-            name="venueAddress"
+            name="venueStreet"
             control={control}
             rules={{ required: 'Please enter your venue address' }}
             render={({ field }) => (
@@ -453,13 +524,13 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
                   field.ref(e);
                   venueAddressInputRef.current = e;
                 }}
-                id="venueAddress"
+                id="venueStreet"
                 type="text"
                 placeholder={
                   googleMapsLoaded ? 'Start typing your address...' : 'Loading address search...'
                 }
                 className={`w-full rounded-lg border-2 px-4 py-3 pr-10 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
-                  errors.venueAddress
+                  errors.venueStreet
                     ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
                     : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
                 }`}
@@ -469,31 +540,39 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
           />
           <MapPin className="absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-gray-400" />
         </div>
-        {errors.venueAddress && (
+        {errors.venueStreet && (
           <p className="mt-1 flex items-center gap-1 text-sm text-red-600">
             <AlertCircle className="h-4 w-4" />
-            {(errors.venueAddress as { message?: string })?.message || 'Invalid address'}
+            {(errors.venueStreet as { message?: string })?.message || 'Invalid address'}
           </p>
         )}
       </div>
 
       {/* City, State, ZIP fields */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {/* City */}
+        {/* City - using Controller for controlled input so setValue updates display */}
         <div className="flex flex-col space-y-1.5">
           <label htmlFor="venueCity" className="text-sm font-semibold text-gray-700">
             City <span className="text-red-500">*</span>
           </label>
-          <input
-            id="venueCity"
-            type="text"
-            {...register('venueCity', { required: 'City is required' })}
-            placeholder="City"
-            className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
-              errors.venueCity
-                ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
-            }`}
+          <Controller
+            name="venueCity"
+            control={control}
+            rules={{ required: 'City is required' }}
+            render={({ field }) => (
+              <input
+                {...field}
+                id="venueCity"
+                type="text"
+                placeholder="City"
+                autoComplete="address-level2"
+                className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
+                  errors.venueCity
+                    ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                    : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
+                }`}
+              />
+            )}
           />
           {errors.venueCity && (
             <p className="flex items-center gap-1 text-sm text-red-600">
@@ -539,33 +618,41 @@ export const VenueAddressSection: React.FC<VenueAddressSectionProps> = ({
           )}
         </div>
 
-        {/* ZIP Code */}
+        {/* ZIP Code - using Controller for controlled input so setValue updates display */}
         <div className="flex flex-col space-y-1.5">
-          <label htmlFor="venueZipCode" className="text-sm font-semibold text-gray-700">
+          <label htmlFor="venueZipcode" className="text-sm font-semibold text-gray-700">
             ZIP Code <span className="text-red-500">*</span>
           </label>
-          <input
-            id="venueZipCode"
-            type="text"
-            {...register('venueZipCode', {
+          <Controller
+            name="venueZipcode"
+            control={control}
+            rules={{
               required: 'ZIP code is required',
               pattern: {
                 value: /^\d{5}(-\d{4})?$/,
                 message: 'Please enter a valid ZIP code',
               },
-            })}
-            placeholder="12345"
-            maxLength={10}
-            className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
-              errors.venueZipCode
-                ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
-            }`}
+            }}
+            render={({ field }) => (
+              <input
+                {...field}
+                id="venueZipcode"
+                type="text"
+                placeholder="12345"
+                maxLength={10}
+                autoComplete="postal-code"
+                className={`w-full rounded-lg border-2 px-4 py-3 transition-all duration-200 focus:ring-2 focus:ring-offset-1 focus:outline-none ${
+                  errors.venueZipcode
+                    ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                    : 'border-gray-200 hover:border-gray-300 focus:border-red-500 focus:ring-red-200'
+                }`}
+              />
+            )}
           />
-          {errors.venueZipCode && (
+          {errors.venueZipcode && (
             <p className="flex items-center gap-1 text-sm text-red-600">
               <AlertCircle className="h-4 w-4" />
-              {(errors.venueZipCode as { message?: string })?.message || 'ZIP code is required'}
+              {(errors.venueZipcode as { message?: string })?.message || 'ZIP code is required'}
             </p>
           )}
         </div>

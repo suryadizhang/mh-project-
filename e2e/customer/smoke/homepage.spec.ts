@@ -208,11 +208,11 @@ test.describe('Footer', () => {
     // Verify footer elements
     await expect(page.locator('footer')).toBeVisible();
 
-    // Check for copyright text - actual format may vary
+    // Check for copyright text - using dynamic year (2024-2030)
     await expect(
       page
         .locator('footer')
-        .getByText(/©.*2025|copyright/i)
+        .getByText(/©.*20(2[4-9]|30)|copyright|All rights reserved/i)
         .first()
     ).toBeVisible();
   });
@@ -224,10 +224,14 @@ test.describe('Footer', () => {
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(500); // Wait for scroll to complete
 
-    // Check for social links - use first() to avoid strict mode violation
+    // Check for social links - footer uses ig.me/m for Instagram DM and m.me for Facebook Messenger
     const footer = page.locator('footer');
     await expect(
-      footer.locator('a[href*="facebook"], a[href*="instagram"]').first()
+      footer
+        .locator(
+          'a[href*="ig.me"], a[href*="m.me"], a[href*="facebook"], a[href*="instagram"]'
+        )
+        .first()
     ).toBeVisible();
   });
 });

@@ -99,13 +99,13 @@ async def check_availability(
             SlotAvailabilityResponse(
                 slot_time=s.slot_time,
                 slot_date=s.slot_date,
-                slot_label=getattr(s, 'slot_label', ''),
+                slot_label=getattr(s, "slot_label", ""),
                 is_available=s.is_available,
                 conflict_reason=s.conflict_reason,
-                adjusted_time=getattr(s, 'adjusted_time', None),
-                travel_time_from_prev=getattr(s, 'travel_time_from_prev', None),
-                travel_time_to_next=getattr(s, 'travel_time_to_next', None),
-                score=getattr(s, 'score', 0.0),
+                adjusted_time=getattr(s, "adjusted_time", None),
+                travel_time_from_prev=getattr(s, "travel_time_from_prev", None),
+                travel_time_to_next=getattr(s, "travel_time_to_next", None),
+                score=getattr(s, "score", 0.0),
             )
             for s in result.suggestions
         ],
@@ -247,7 +247,7 @@ async def geocode_address(
     """
     geocoding_service = GeocodingService(db)
 
-    result = await geocoding_service.geocode(address.full_address)
+    result = await geocoding_service.geocode(address.address)
 
     if result is None:
         raise HTTPException(
@@ -257,7 +257,7 @@ async def geocode_address(
 
     return GeocodedAddressResponse(
         original_address=result.original_address,
-        normalized_address=result.normalized_address,
+        formatted_address=result.normalized_address,
         lat=result.lat,
         lng=result.lng,
         city=result.city,

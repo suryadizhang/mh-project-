@@ -8,7 +8,15 @@ Assigns chefs to bookings based on:
 - Rating score (15% weight) - Higher rated chefs preferred
 - Customer preference (10% weight + 50 bonus if requested)
 
+Travel Time Strategy (Updated 2025-01-27):
+- Uses TravelTimeService for accurate Google Maps travel times when available
+- Falls back to Haversine estimation when many chefs need scoring (performance)
+- Threshold is adjustable: use_google_maps_threshold controls when to use real API
+- For 1-5 chefs: Always use Google Maps for accuracy
+- For 5+ chefs: Use Haversine for quick scoring (scheduling decision only)
+
 Full implementation completed: 2025-12-21
+Updated with TravelTimeService integration: 2025-01-27
 """
 
 from datetime import date, time, datetime
@@ -16,6 +24,7 @@ from decimal import Decimal
 from typing import List, Optional, Tuple
 from uuid import UUID
 import logging
+from math import radians, sin, cos, sqrt, atan2
 
 from pydantic import BaseModel, Field
 from sqlalchemy import select, func, and_
@@ -52,6 +61,19 @@ LARGE_PARTY_MIN = 31
 
 # Workload threshold (bookings per day)
 MAX_DAILY_BOOKINGS = 3
+
+# ============================================================================
+# Travel Time Strategy Constants (Adjustable)
+# ============================================================================
+
+# When to use Google Maps API vs Haversine estimation
+# If chef count <= this threshold, use Google Maps for accuracy
+# If chef count > this threshold, use Haversine for performance
+USE_GOOGLE_MAPS_THRESHOLD = 5
+
+# Haversine constants
+AVERAGE_SPEED_MPH = 30  # Average speed for Haversine estimation
+RUSH_HOUR_MULTIPLIER = 1.5  # Rush hour travel time multiplier
 
 
 # ============================================================================
@@ -138,7 +160,15 @@ class ChefOptimizer:
 
     def __init__(self, db: AsyncSession):
         self.db = db
-        self._travel_service = None
+        self._travel_service = None  # Lazy-loaded TravelTimeService
+
+    def _get_travel_service(self):
+        """Lazy-load TravelTimeService to avoid circular imports."""
+        if self._travel_service is None:
+            from services.scheduling.travel_time_service import TravelTimeService
+
+            self._travel_service = TravelTimeService(self.db)
+        return self._travel_service
 
     async def get_optimal_assignment(
         self,
@@ -195,6 +225,10 @@ class ChefOptimizer:
         workloads = await self._get_chef_workloads([c.chef_id for c in available_chefs], event_date)
 
         # 4. Score all available chefs
+        # Pass chef_count to enable smart travel time strategy:
+        # - Few chefs (≤5): Use Google Maps for accuracy
+        # - Many chefs (>5): Use Haversine for fast scoring
+        chef_count = len(available_chefs)
         scored_chefs: List[ChefScore] = []
         for chef in available_chefs:
             score = await self._score_chef(
@@ -207,6 +241,7 @@ class ChefOptimizer:
                 daily_bookings=workloads.get(chef.chef_id, 0),
                 preferred_chef_id=preferred_chef_id,
                 customer_id=customer_id,
+                chef_count=chef_count,  # Smart travel time strategy
             )
             scored_chefs.append(score)
 
@@ -361,6 +396,7 @@ class ChefOptimizer:
         daily_bookings: int,
         preferred_chef_id: Optional[UUID],
         customer_id: Optional[UUID],
+        chef_count: int = 1,  # For smart travel time strategy
     ) -> ChefScore:
         """
         Calculate comprehensive score for a chef assignment.
@@ -371,10 +407,16 @@ class ChefOptimizer:
         - Workload (15%): Balance across chefs
         - Rating (15%): Chef's average rating
         - Preference (10%): Customer requested + 50 bonus
+
+        Travel Time Strategy (based on chef_count):
+        - chef_count <= 5: Use Google Maps for accurate travel times
+        - chef_count > 5: Use Haversine for fast estimation
+        - Threshold adjustable via USE_GOOGLE_MAPS_THRESHOLD constant
         """
         is_preferred = bool(preferred_chef_id and chef.chef_id == preferred_chef_id)
 
         # 1. Calculate travel score (40% weight)
+        # Pass chef_count for smart strategy selection
         travel_time, travel_distance = await self._calculate_travel(
             float(chef.home_lat),
             float(chef.home_lng),
@@ -382,6 +424,7 @@ class ChefOptimizer:
             float(venue_lng),
             event_date,
             event_time,
+            chef_count=chef_count,  # Smart strategy based on chef availability
         )
         travel_score = self._score_travel(travel_time)
 
@@ -440,16 +483,85 @@ class ChefOptimizer:
         dest_lng: float,
         event_date: date,
         event_time: time,
+        chef_count: int = 1,
     ) -> Tuple[int, float]:
         """
         Calculate travel time and distance from chef to venue.
 
-        Returns (travel_time_minutes, distance_miles)
-        """
-        # Use Haversine formula for distance estimation
-        # In production, this would use TravelTimeService with Google Maps
-        from math import radians, sin, cos, sqrt, atan2
+        Uses a smart strategy based on chef availability:
+        - If chef_count <= USE_GOOGLE_MAPS_THRESHOLD (5): Use Google Maps for accuracy
+        - If chef_count > threshold: Use Haversine for fast estimation (scheduling decision)
 
+        This is adjustable per user requirement: "the logic must be adjustable
+        to how many chef available at that day"
+
+        Args:
+            origin_lat: Chef home latitude
+            origin_lng: Chef home longitude
+            dest_lat: Venue latitude
+            dest_lng: Venue longitude
+            event_date: Date of event
+            event_time: Time of event
+            chef_count: Number of chefs being scored (adjusts API usage)
+
+        Returns:
+            Tuple of (travel_time_minutes, distance_miles)
+        """
+        # Determine strategy based on chef count
+        use_google_maps = chef_count <= USE_GOOGLE_MAPS_THRESHOLD
+
+        if use_google_maps:
+            # Use TravelTimeService for accurate Google Maps data
+            try:
+                travel_service = self._get_travel_service()
+                result = await travel_service.get_travel_time_for_scheduling(
+                    origin_lat=origin_lat,
+                    origin_lng=origin_lng,
+                    dest_lat=dest_lat,
+                    dest_lng=dest_lng,
+                    event_date=event_date,
+                    event_time=event_time,
+                )
+
+                if result and result.get("travel_time_minutes"):
+                    travel_minutes = result["travel_time_minutes"]
+                    distance_miles = result.get("distance_miles", 0.0)
+
+                    logger.debug(
+                        f"ChefOptimizer: Using TravelTimeService - "
+                        f"{travel_minutes} min, {distance_miles} mi "
+                        f"(source: {result.get('source', 'unknown')})"
+                    )
+                    return travel_minutes, round(distance_miles, 1)
+
+            except Exception as e:
+                logger.warning(
+                    f"ChefOptimizer: TravelTimeService failed, falling back to Haversine: {e}"
+                )
+
+        # Fall back to Haversine estimation (for many chefs or API failure)
+        return self._calculate_travel_haversine(
+            origin_lat, origin_lng, dest_lat, dest_lng, event_date, event_time
+        )
+
+    def _calculate_travel_haversine(
+        self,
+        origin_lat: float,
+        origin_lng: float,
+        dest_lat: float,
+        dest_lng: float,
+        event_date: date,
+        event_time: time,
+    ) -> Tuple[int, float]:
+        """
+        Fast Haversine estimation for scheduling decisions only.
+
+        NOTE: This is for SCHEDULING only, not for customer-facing travel fees.
+        Travel fees use TravelTimeService with Google Maps → OpenRouteService → Human.
+
+        Returns:
+            Tuple of (travel_time_minutes, distance_miles)
+        """
         R = 3959  # Earth's radius in miles
 
         lat1, lon1 = radians(origin_lat), radians(origin_lng)
@@ -463,14 +575,18 @@ class ChefOptimizer:
 
         distance_miles = R * c
 
-        # Estimate time: 30 mph average (metro traffic)
-        average_speed = 30
-        travel_minutes = int((distance_miles / average_speed) * 60)
+        # Estimate time using average speed
+        travel_minutes = int((distance_miles / AVERAGE_SPEED_MPH) * 60)
 
-        # Apply rush hour multiplier if applicable
+        # Apply rush hour multiplier using EVENT datetime (not now!)
         event_dt = datetime.combine(event_date, event_time)
         if self._is_rush_hour(event_dt):
-            travel_minutes = int(travel_minutes * 1.5)
+            travel_minutes = int(travel_minutes * RUSH_HOUR_MULTIPLIER)
+
+        logger.debug(
+            f"ChefOptimizer: Using Haversine estimation - "
+            f"{travel_minutes} min, {round(distance_miles, 1)} mi"
+        )
 
         return travel_minutes, round(distance_miles, 1)
 

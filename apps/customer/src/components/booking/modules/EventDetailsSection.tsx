@@ -8,11 +8,13 @@ import {
   ChevronUp,
   DollarSign,
   Minus,
+  Phone,
   Plus,
   Users,
 } from 'lucide-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Control, Controller, FieldErrors, UseFormSetValue, UseFormWatch } from 'react-hook-form';
+import { Modal } from '@/components/ui/Modal';
 
 /**
  * Event Details form data structure (with toddlers and tips)
@@ -216,8 +218,25 @@ export const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({
   // State for collapsible breakdown
   const [isBreakdownExpanded, setIsBreakdownExpanded] = useState(false);
 
+  // State for large party modal (100+ guests)
+  const [showLargePartyModal, setShowLargePartyModal] = useState(false);
+
   // Check if section is complete
   const isComplete = adults >= 1;
+
+  // Calculate total guests
+  const totalGuests = adults + children + toddlers;
+
+  // Large party threshold - 100+ guests require special handling
+  const LARGE_PARTY_THRESHOLD = 100;
+  const isLargeParty = totalGuests >= LARGE_PARTY_THRESHOLD;
+
+  // Show modal when reaching 100+ guests (only triggers once per threshold crossing)
+  useEffect(() => {
+    if (isLargeParty && !showLargePartyModal) {
+      setShowLargePartyModal(true);
+    }
+  }, [isLargeParty, showLargePartyModal]);
 
   // Calculate all costs with minimum order enforcement
   const costBreakdown = useMemo<CostBreakdown>(() => {
@@ -336,7 +355,7 @@ export const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({
             rules={{
               required: 'At least 1 adult is required',
               min: { value: 1, message: 'At least 1 adult is required' },
-              max: { value: 50, message: 'Maximum 50 adults' },
+              max: { value: 150, message: 'Maximum 150 adults' },
             }}
             render={({ field }) => (
               <CounterInput
@@ -344,7 +363,7 @@ export const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({
                 label="Adults (13+)"
                 value={field.value || 0}
                 min={1}
-                max={50}
+                max={150}
                 priceLabel={`$${adultPrice} per person`}
                 error={(errors.adults as { message?: string })?.message}
                 onChange={(v) => handleCounterChange('adults', v)}
@@ -360,7 +379,7 @@ export const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({
             control={control}
             rules={{
               min: { value: 0, message: 'Cannot be negative' },
-              max: { value: 20, message: 'Maximum 20 children' },
+              max: { value: 75, message: 'Maximum 75 children' },
             }}
             render={({ field }) => (
               <CounterInput
@@ -368,7 +387,7 @@ export const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({
                 label="Children (6-12)"
                 value={field.value || 0}
                 min={0}
-                max={20}
+                max={75}
                 priceLabel={`$${childPrice} per child`}
                 error={(errors.children as { message?: string })?.message}
                 onChange={(v) => handleCounterChange('children', v)}
@@ -383,7 +402,7 @@ export const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({
             control={control}
             rules={{
               min: { value: 0, message: 'Cannot be negative' },
-              max: { value: 15, message: 'Maximum 15 toddlers' },
+              max: { value: 50, message: 'Maximum 50 toddlers' },
             }}
             render={({ field }) => (
               <CounterInput
@@ -391,7 +410,7 @@ export const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({
                 label={`Toddlers (${childFreeUnderAge} & under)`}
                 value={field.value || 0}
                 min={0}
-                max={15}
+                max={50}
                 priceLabel="FREE! 🎉"
                 hint={
                   <span className="text-amber-600">Please let us know for food preparation</span>
@@ -510,6 +529,74 @@ export const EventDetailsSection: React.FC<EventDetailsSectionProps> = ({
           </div>
         </div>
       )}
+
+      {/* Large Party Modal (100+ guests) */}
+      <Modal
+        isOpen={showLargePartyModal}
+        onClose={() => setShowLargePartyModal(false)}
+        title="Large Party Booking"
+        variant="warning"
+        icon={<Phone className="h-6 w-6" />}
+        size="md"
+        footer={
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={() => setShowLargePartyModal(false)}
+              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 sm:w-auto"
+            >
+              Continue Anyway
+            </button>
+            <a
+              href="tel:+19167408768"
+              className="w-full rounded-lg bg-amber-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-amber-700 sm:w-auto"
+            >
+              <Phone className="mr-2 inline-block h-4 w-4" />
+              Call Now
+            </a>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-gray-700">
+            <strong>Your party of {totalGuests} guests</strong> requires special coordination from
+            our team.
+          </p>
+
+          <div className="rounded-lg bg-amber-50 p-4">
+            <h4 className="font-semibold text-amber-800">Why contact us?</h4>
+            <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-amber-700">
+              <li>Parties of 100+ may require multiple chefs</li>
+              <li>Custom setup and equipment arrangements</li>
+              <li>Special pricing and scheduling available</li>
+              <li>Personalized menu consultation</li>
+            </ul>
+          </div>
+
+          <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <h4 className="font-semibold text-gray-800">Contact Customer Support</h4>
+            <div className="mt-3 space-y-2 text-sm">
+              <p className="flex items-center gap-2 text-gray-600">
+                <Phone className="h-4 w-4 text-gray-400" />
+                <a href="tel:+19167408768" className="text-blue-600 hover:underline">
+                  (916) 740-8768
+                </a>
+              </p>
+              <p className="flex items-center gap-2 text-gray-600">
+                <span className="text-gray-400">📧</span>
+                <a href="mailto:cs@myhibachichef.com" className="text-blue-600 hover:underline">
+                  cs@myhibachichef.com
+                </a>
+              </p>
+            </div>
+          </div>
+
+          <p className="text-xs text-gray-500">
+            You can still continue with online booking, but we recommend contacting us for the best
+            experience with large parties.
+          </p>
+        </div>
+      </Modal>
     </div>
   );
 };

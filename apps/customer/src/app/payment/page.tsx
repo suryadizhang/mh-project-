@@ -48,7 +48,7 @@ export default function PaymentPage() {
   // Calculate totals
   const baseAmount = selectedBooking
     ? paymentType === 'deposit'
-      ? 100
+      ? selectedBooking.depositAmount
       : selectedBooking.remainingBalance
     : parseFloat(customAmount) || 0;
 
@@ -287,7 +287,9 @@ export default function PaymentPage() {
                   >
                     <div className="text-left">
                       <div className="font-medium">Deposit Payment</div>
-                      <div className="text-sm text-gray-600">$100.00 to secure your booking</div>
+                      <div className="text-sm text-gray-600">
+                        ${selectedBooking.depositAmount.toFixed(2)} to secure your booking
+                      </div>
                       {selectedBooking.depositPaid && (
                         <div className="mt-1 text-xs text-green-600">✓ Already Paid</div>
                       )}
