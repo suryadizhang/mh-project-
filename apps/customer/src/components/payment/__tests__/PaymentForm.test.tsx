@@ -31,10 +31,16 @@ describe('PaymentForm', () => {
     remainingBalance: 1500,
   };
 
-  const defaultProps = {
+  const defaultProps: {
+    amount: number;
+    bookingData: typeof mockBookingData | null;
+    paymentType: 'deposit' | 'balance';
+    tipAmount: number;
+    clientSecret: string;
+  } = {
     amount: 500,
     bookingData: mockBookingData,
-    paymentType: 'deposit' as const,
+    paymentType: 'deposit',
     tipAmount: 0,
     clientSecret: 'test_client_secret',
   };

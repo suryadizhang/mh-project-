@@ -33,6 +33,7 @@ import {
 import BookingAgreementModal from '@/components/booking/BookingAgreementModal';
 import { useProtectedPhone } from '@/components/ui/ProtectedPhone';
 import { apiFetch } from '@/lib/api';
+import { getBaseLocation } from '@/lib/baseLocationUtils';
 import { logger } from '@/lib/logger';
 import { usePricing } from '@/hooks/usePricing';
 
@@ -88,6 +89,11 @@ export default function BookingPage() {
   const [travelFeeResult, setTravelFeeResult] = useState<TravelFeeResult | null>(null);
   const [tipAmount, setTipAmount] = useState(0);
 
+  // Station coordinates for travel fee calculation (SSoT from backend)
+  const [stationCoordinates, setStationCoordinates] = useState<{ lat: number; lng: number } | null>(
+    null,
+  );
+
   // React Hook Form setup
   const {
     register,
@@ -141,6 +147,23 @@ export default function BookingPage() {
       logger.warn('Could not read quote data from sessionStorage', { error });
     }
   }, [setValue]);
+
+  // Fetch station coordinates from backend for travel fee calculation (SSoT)
+  useEffect(() => {
+    getBaseLocation()
+      .then((location) => {
+        if (location.lat && location.lng) {
+          setStationCoordinates({ lat: location.lat, lng: location.lng });
+          logger.info('Station coordinates loaded from SSoT', {
+            lat: location.lat,
+            lng: location.lng,
+          });
+        }
+      })
+      .catch((error) => {
+        logger.warn('Could not fetch station coordinates', { error });
+      });
+  }, []);
 
   // Calculate section completion
   const sectionCompletion = useMemo(() => {
@@ -443,6 +466,8 @@ export default function BookingPage() {
                 onTravelFeeChange={handleTravelFeeChange}
                 freeMiles={freeMiles}
                 perMileRate={perMileRate}
+                stationCoordinates={stationCoordinates ?? undefined}
+                showTravelFeePreview={true}
               />
 
               {/* Section 3: Event Details + Cost Calculator */}

@@ -25,6 +25,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import SignaturePad from '@/components/agreements/SignaturePad';
 import { apiFetch } from '@/lib/api';
+import { usePricing } from '@/hooks/usePricing';
 
 // Error codes (descriptive strings per user decision)
 const SIGNING_ERROR_CODES = {
@@ -64,6 +65,7 @@ export default function SigningPage() {
   const params = useParams();
   const router = useRouter();
   const token = params.token as string;
+  const { depositAmount } = usePricing();
 
   const [pageState, setPageState] = useState<PageState>('loading');
   const [errorCode, setErrorCode] = useState<SigningErrorCode | null>(null);
@@ -296,7 +298,7 @@ export default function SigningPage() {
           <p className="mb-6 text-gray-600">
             {holdInfo?.deposit_paid
               ? 'Your booking is confirmed! Check your email for details.'
-              : 'Please complete your $100 deposit to confirm your booking.'}
+              : `Please complete your $${depositAmount ?? 100} deposit to confirm your booking.`}
           </p>
 
           <div className="space-y-3">
@@ -305,7 +307,7 @@ export default function SigningPage() {
                 href={`/checkout?hold=${token}`}
                 className="block w-full rounded-lg bg-amber-500 px-4 py-3 font-medium text-white transition-colors hover:bg-amber-600"
               >
-                Pay $100 Deposit
+                Pay ${depositAmount ?? 100} Deposit
               </Link>
             )}
 
@@ -381,7 +383,7 @@ export default function SigningPage() {
 
           <p className="mt-4 text-sm text-gray-500">
             By signing above, you agree to the terms and conditions of this service agreement. After
-            signing, you will be redirected to pay the $100 refundable deposit.
+            signing, you will be redirected to pay the ${depositAmount ?? 100} refundable deposit.
           </p>
 
           {/* Error message */}

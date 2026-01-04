@@ -138,6 +138,9 @@ from .stripe import (
     WebhookEventStatus,
 )
 
+# Travel Cache (1 table) - Travel time API response caching
+from .travel_cache import TravelCache
+
 # All models for easy iteration
 __all__ = [
     # Base
@@ -217,6 +220,8 @@ __all__ = [
     "PaymentStatus",
     "RefundStatus",
     "WebhookEventStatus",
+    # Travel Cache (1 model)
+    "TravelCache",
 ]
 
 # Model registry by schema (useful for reflection/introspection)
@@ -298,6 +303,9 @@ MODELS_BY_SCHEMA = {
         StripePayment,
         WebhookEvent,
     ],
+    "public": [
+        TravelCache,  # Travel time API response caching (Smart Scheduling)
+    ],
 }
 
 # Total model count (should match actual models created)
@@ -310,5 +318,6 @@ MODELS_BY_SCHEMA = {
 # Added models:
 # - Stripe: Invoice, Refund, StripeCustomer, StripePayment, WebhookEvent (5 models)
 # - Smart Scheduling Phase 1: Address, NegotiationIncentive (2 models)
+# - Travel Cache: TravelCache (1 model) - API response caching
 TOTAL_MODELS = sum(len(models) for models in MODELS_BY_SCHEMA.values())
-assert TOTAL_MODELS == 55, f"Expected 55 models, found {TOTAL_MODELS}"
+assert TOTAL_MODELS == 56, f"Expected 56 models, found {TOTAL_MODELS}"

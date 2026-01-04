@@ -295,14 +295,17 @@ async def calculate_quote(
                 logger.warning(f"TravelTimeService failed, using ZIP fallback: {e}")
                 # Fall through to ZIP estimation
 
-        # Fallback: ZIP code estimation if Google Maps didn't work
-        if travel_info.distance_miles is None and (request.venue_address or request.zip_code):
-            estimated_distance = _estimate_distance(request.zip_code, request.venue_address)
-            travel_info.distance_miles = estimated_distance
-            travel_info.source = "zip_estimate"
-
-            if estimated_distance and estimated_distance > free_miles:
-                travel_info.travel_fee = (estimated_distance - free_miles) * per_mile_rate
+        # FAIL-SAFE: If Google Maps didn't work, return error state instead of inaccurate estimates
+        # Per user requirement: NO fallback estimates - only accurate Google Maps or human agent
+        if travel_info.distance_miles is None:
+            # Mark as calculation error - frontend will show "contact live agent" message
+            travel_info.source = "error"
+            travel_info.distance_miles = None
+            travel_info.travel_fee = 0.0  # Will be ignored by frontend when source is 'error'
+            logger.warning(
+                f"⚠️ Travel fee calculation failed for address: {request.venue_address} "
+                f"(ZIP: {request.zip_code}). Returning error state for human agent escalation."
+            )
 
         # Calculate grand total
         grand_total = subtotal + travel_info.travel_fee
@@ -488,6 +491,23 @@ def _estimate_distance(zip_code: str | None, address: str | None) -> float | Non
         "94596": 26,
         "94597": 27,
         "94598": 28,
+        # Vacaville/Fairfield/Solano County (45-55 miles)
+        "94533": 45,  # Fairfield
+        "94534": 48,  # Fairfield
+        "94535": 50,  # Travis AFB
+        "95687": 50,  # Vacaville
+        "95688": 50,  # Vacaville
+        "95696": 52,  # Vacaville
+        "94585": 42,  # Suisun City
+        "94510": 35,  # Benicia
+        "94590": 38,  # Vallejo
+        "94591": 40,  # Vallejo
+        "94592": 42,  # Mare Island
+        # Napa area (50-60 miles)
+        "94558": 55,  # Napa
+        "94559": 55,  # Napa
+        "94574": 60,  # St. Helena
+        "94599": 55,  # Yountville
         # Sacramento area (80+ miles)
         "95814": 85,
         "95816": 85,
@@ -518,10 +538,27 @@ def _estimate_distance(zip_code: str | None, address: str | None) -> float | Non
         return float(distance)
 
     # Default estimation based on ZIP code prefix
-    if zip_code.startswith("94"):
-        return 25.0  # East Bay average
+    # More granular prefix matching for California regions
+    if zip_code.startswith("945"):
+        return 8.0  # Fremont/Hayward area (local)
+    elif zip_code.startswith("944"):
+        return 30.0  # San Leandro/Oakland area
+    elif zip_code.startswith("946") or zip_code.startswith("947"):
+        return 35.0  # Berkeley/Richmond area
+    elif zip_code.startswith("9458") or zip_code.startswith("9459"):
+        return 40.0  # Vallejo/Benicia area
+    elif zip_code.startswith("951") or zip_code.startswith("950"):
+        return 18.0  # San Jose/Milpitas area (South Bay)
+    elif zip_code.startswith("956") or zip_code.startswith("957"):
+        return 50.0  # Vacaville/Fairfield/Solano area
+    elif zip_code.startswith("958"):
+        return 85.0  # Sacramento area
+    elif zip_code.startswith("940"):
+        return 40.0  # San Francisco area
+    elif zip_code.startswith("94"):
+        return 25.0  # Other East Bay
     elif zip_code.startswith("95"):
-        return 20.0  # South Bay average
+        return 35.0  # Other 95xxx (could be North Bay or Central Valley)
     else:
         return 50.0  # Outside Bay Area
 

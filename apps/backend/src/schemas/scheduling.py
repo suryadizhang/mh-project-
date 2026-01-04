@@ -50,9 +50,9 @@ class NegotiationReasonEnum(str, Enum):
 class AddressInput(BaseModel):
     """Input for geocoding an address."""
 
-    full_address: str = Field(..., min_length=10, max_length=500)
+    address: str = Field(..., min_length=5, max_length=500)
 
-    @field_validator("full_address")
+    @field_validator("address")
     @classmethod
     def validate_address(cls, v: str) -> str:
         if not v or not v.strip():
@@ -92,7 +92,7 @@ class GeocodedAddressResponse(BaseModel):
     """Response from geocoding endpoint."""
 
     original_address: str
-    normalized_address: Optional[str]
+    formatted_address: Optional[str] = Field(None, description="Normalized address from geocoder")
     lat: Optional[Decimal]
     lng: Optional[Decimal]
     city: Optional[str]
