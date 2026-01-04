@@ -1,16 +1,17 @@
 /**
  * Pricing API Client
- * Connects customer frontend to backend pricing endpoints
+ * Connects customer frontend to backend pricing endpoints via Next.js proxy routes
  *
  * Features:
  * - Fetch current menu items and addon pricing from database
  * - Calculate party quotes with travel fees
  * - Get pricing summary
- * - Automatic caching for menu data (5 minutes TTL)
+ * - Uses Next.js API routes as proxy to avoid CORS issues
  * - Type-safe responses
+ *
+ * IMPORTANT: All calls go through /api/v1/pricing/* proxy routes
+ * which forward to the backend API server-side.
  */
-
-import { api } from '@/lib/api';
 
 /**
  * Menu Item from database
@@ -174,30 +175,36 @@ export interface PricingSummaryResponse {
 }
 
 /**
- * Fetch current pricing from database
- * Cached for 5 minutes to reduce database load
+ * Fetch current pricing from database via proxy
+ * Server-side cached for 5 minutes to reduce database load
  *
  * @returns Current menu items, addons, and pricing policies
  */
 export async function getCurrentPricing(): Promise<CurrentPricingResponse | null> {
-  const response = await api.get<CurrentPricingResponse>('/api/v1/pricing/current', {
-    cacheStrategy: {
-      strategy: 'stale-while-revalidate',
-      ttl: 5 * 60 * 1000, // 5 minutes
-      key: 'pricing:current',
-    },
-  });
+  try {
+    // Use local proxy route to avoid CORS issues
+    const response = await fetch('/api/v1/pricing/current', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-  if (!response.success || !response.data) {
-    console.error('Failed to fetch current pricing:', response.error);
+    if (!response.ok) {
+      console.error(`Failed to fetch current pricing: ${response.status} ${response.statusText}`);
+      return null;
+    }
+
+    const data: CurrentPricingResponse = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Failed to fetch current pricing:', error);
     return null;
   }
-
-  return response.data;
 }
 
 /**
- * Calculate party quote with travel fees
+ * Calculate party quote with travel fees via proxy
  * Not cached - each quote is unique
  *
  * @param request - Quote calculation parameters
@@ -206,40 +213,56 @@ export async function getCurrentPricing(): Promise<CurrentPricingResponse | null
 export async function calculateQuote(
   request: QuoteCalculationRequest,
 ): Promise<QuoteCalculationResponse | null> {
-  const response = await api.post<QuoteCalculationResponse>(
-    '/api/v1/pricing/calculate',
-    request as unknown as Record<string, unknown>,
-  );
+  try {
+    // Use local proxy route to avoid CORS issues
+    const response = await fetch('/api/v1/pricing/calculate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
+    });
 
-  if (!response.success || !response.data) {
-    console.error('Failed to calculate quote:', response.error);
+    if (!response.ok) {
+      console.error(`Failed to calculate quote: ${response.status} ${response.statusText}`);
+      return null;
+    }
+
+    const data: QuoteCalculationResponse = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Failed to calculate quote:', error);
     return null;
   }
-
-  return response.data;
 }
 
 /**
- * Get comprehensive pricing summary
- * Cached for 5 minutes
+ * Get comprehensive pricing summary via proxy
+ * Server-side cached for 5 minutes
  *
  * @returns Pricing summary with sample quotes and policies
  */
 export async function getPricingSummary(): Promise<PricingSummaryResponse | null> {
-  const response = await api.get<PricingSummaryResponse>('/api/v1/pricing/summary', {
-    cacheStrategy: {
-      strategy: 'stale-while-revalidate',
-      ttl: 5 * 60 * 1000, // 5 minutes
-      key: 'pricing:summary',
-    },
-  });
+  try {
+    // Use local proxy route to avoid CORS issues
+    const response = await fetch('/api/v1/pricing/summary', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-  if (!response.success || !response.data) {
-    console.error('Failed to fetch pricing summary:', response.error);
+    if (!response.ok) {
+      console.error(`Failed to fetch pricing summary: ${response.status} ${response.statusText}`);
+      return null;
+    }
+
+    const data: PricingSummaryResponse = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Failed to fetch pricing summary:', error);
     return null;
   }
-
-  return response.data;
 }
 
 /**
@@ -249,11 +272,13 @@ export async function getPricingSummary(): Promise<PricingSummaryResponse | null
  * @param pricing - Current pricing response
  * @returns Base pricing object or undefined if no data (NO FALLBACKS - API is source of truth)
  */
-export function getBasePricing(pricing: CurrentPricingResponse | null): {
-  adultPrice: number;
-  childPrice: number;
-  childFreeUnderAge: number;
-} | undefined {
+export function getBasePricing(pricing: CurrentPricingResponse | null):
+  | {
+      adultPrice: number;
+      childPrice: number;
+      childFreeUnderAge: number;
+    }
+  | undefined {
   // NO FALLBACK VALUES: Per instruction 01-CORE_PRINCIPLES Rule #14,
   // API is single source of truth. Frontend NEVER provides default business values.
   if (!pricing?.base_pricing) {
@@ -273,7 +298,9 @@ export function getBasePricing(pricing: CurrentPricingResponse | null): {
  * @param pricing - Current pricing response
  * @returns Map of addon names to prices, or undefined if no data (NO FALLBACKS - API is source of truth)
  */
-export function getAddonPrices(pricing: CurrentPricingResponse | null): Record<string, number> | undefined {
+export function getAddonPrices(
+  pricing: CurrentPricingResponse | null,
+): Record<string, number> | undefined {
   // NO FALLBACK VALUES: Per instruction 01-CORE_PRINCIPLES Rule #14,
   // API is single source of truth. Frontend NEVER provides default business values.
   if (!pricing?.addon_items) {

@@ -27,7 +27,6 @@ import { LazyDatePicker } from '@/components/ui/LazyDatePicker';
 import { ProtectedPhone } from '@/components/ui/ProtectedPhone';
 import { SMSConsentCheckbox } from '@/components/ui/SMSConsentCheckbox';
 import { apiFetch } from '@/lib/api';
-import { getApiUrl } from '@/lib/env';
 import { submitQuoteLead, submitLeadEvent } from '@/lib/leadService';
 import { logger } from '@/lib/logger';
 import { usePricing } from '@/hooks/usePricing';
@@ -78,6 +77,8 @@ interface QuoteResult {
   grandTotal: number;
   travelFee?: number;
   travelDistance?: number;
+  /** Source of travel calculation: 'google_maps', 'cache', 'error', etc. */
+  travelFeeSource?: string;
   finalTotal?: number;
   /** Minimum order threshold */
   partyMinimum?: number;
@@ -306,27 +307,15 @@ export function QuoteCalculator() {
 
   // Initialize Google Places Autocomplete
   useEffect(() => {
-    // Load Google Maps script if not already loaded
-    if (!window.google) {
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`;
-      script.async = true;
-      script.defer = true;
-      script.onload = initializeAutocomplete;
-      document.head.appendChild(script);
-    } else {
-      initializeAutocomplete();
-    }
-
     function initializeAutocomplete() {
-      if (!venueAddressInputRef.current || !window.google) return;
+      if (!venueAddressInputRef.current || !window.google?.maps?.places) return;
 
       // Initialize autocomplete
       autocompleteRef.current = new window.google.maps.places.Autocomplete(
         venueAddressInputRef.current,
         {
           types: ['address'],
-          componentRestrictions: { country: 'us' }, // Restrict to US addresses
+          componentRestrictions: { country: 'us' },
           fields: ['formatted_address', 'address_components', 'geometry'],
         },
       );
@@ -336,10 +325,8 @@ export function QuoteCalculator() {
         const place = autocompleteRef.current.getPlace();
 
         if (place.formatted_address) {
-          // Update venue address with formatted address from Google
           setValue('venueAddress', place.formatted_address);
 
-          // Extract city and ZIP from address components
           if (place.address_components) {
             let city = '';
             let zipCode = '';
@@ -353,13 +340,44 @@ export function QuoteCalculator() {
               }
             });
 
-            // Auto-fill location and zipCode fields
             if (city) setValue('location', city);
             if (zipCode) setValue('zipCode', zipCode);
           }
         }
       });
     }
+
+    // Check if Google Maps is already loaded
+    if (window.google?.maps?.places) {
+      initializeAutocomplete();
+      return;
+    }
+
+    // Check for existing Google Maps script (may be loading from another component)
+    const existingScript = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]');
+    if (existingScript) {
+      // Script exists, wait for it to load
+      existingScript.addEventListener('load', initializeAutocomplete);
+      // Also check if already loaded
+      if (window.google?.maps?.places) {
+        initializeAutocomplete();
+      }
+      return;
+    }
+
+    // No existing script, load it
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      console.warn('Google Maps API key not configured');
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    script.onload = initializeAutocomplete;
+    document.head.appendChild(script);
 
     return () => {
       // Cleanup
@@ -473,7 +491,7 @@ export function QuoteCalculator() {
     setEmailQuoteSuccess(false);
 
     try {
-      const response = await apiFetch(`${getApiUrl()}/api/v1/public/quote/email`, {
+      const response = await apiFetch('/api/v1/public/quote/email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -558,9 +576,9 @@ export function QuoteCalculator() {
         return;
       }
 
-      // Call backend API to calculate quote with travel fee
-      const API_BASE = getApiUrl();
-      const response = await fetch(`${API_BASE}/api/v1/public/quote/calculate`, {
+      // Call proxy API to calculate quote with travel fee
+      // Uses Next.js API route to avoid CORS issues
+      const response = await fetch('/api/v1/public/quote/calculate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -599,6 +617,7 @@ export function QuoteCalculator() {
         grandTotal: data.grand_total,
         travelFee: data.travel_info?.travel_fee ?? undefined,
         travelDistance: data.travel_info?.distance_miles ?? undefined,
+        travelFeeSource: data.travel_info?.source ?? undefined,
         finalTotal: data.grand_total, // Already includes travel fee
         partyMinimum: data.party_minimum,
         appliedMinimum: data.applied_minimum ?? false,
@@ -1203,7 +1222,30 @@ export function QuoteCalculator() {
                 )}
 
                 {/* Travel Fee Display */}
-                {quoteResult.travelDistance !== undefined && quoteResult.travelFee !== undefined ? (
+                {quoteResult.travelFeeSource === 'error' ? (
+                  /* Error State: Google Maps API failed - direct to live agent */
+                  <div className="-mx-2 rounded-lg border-b border-amber-200 bg-amber-50 px-4 py-4">
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">⚠️</span>
+                      <div className="flex-1">
+                        <p className="mb-1 font-semibold text-amber-800">
+                          Travel Fee Calculation Unavailable
+                        </p>
+                        <p className="mb-2 text-sm text-amber-700">
+                          We couldn&apos;t calculate the exact travel fee for your address. Please
+                          contact our live agent for an accurate quote.
+                        </p>
+                        <a
+                          href="tel:+19167408768"
+                          className="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-amber-700"
+                        >
+                          📞 Call (916) 740-8768
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                ) : quoteResult.travelDistance !== undefined &&
+                  quoteResult.travelFee !== undefined ? (
                   <div className="flex items-center justify-between border-b border-gray-100 py-3">
                     <span className="font-medium text-gray-600">
                       Travel Fee ({quoteResult.travelDistance.toFixed(1)} miles):
@@ -1230,7 +1272,11 @@ export function QuoteCalculator() {
                 {/* Total */}
                 <div className="-mx-2 flex items-center justify-between rounded-xl bg-gradient-to-r from-red-600 to-red-700 px-4 py-4">
                   <span className="text-lg font-bold text-white">
-                    {quoteResult.travelFee !== undefined ? 'Total:' : 'Estimated Subtotal:'}
+                    {quoteResult.travelFeeSource === 'error'
+                      ? 'Subtotal (excl. travel):'
+                      : quoteResult.travelFee !== undefined
+                        ? 'Total:'
+                        : 'Estimated Subtotal:'}
                   </span>
                   <span className="text-3xl font-bold text-white">
                     ${quoteResult.grandTotal.toFixed(2)}
