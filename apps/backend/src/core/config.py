@@ -146,16 +146,19 @@ class Settings(BaseSettings):
             loaded_secrets = await self._gsm_config.get_secrets_batch(critical_secrets)
 
             # Update Settings with GSM values (if loaded)
+            # Also export to os.environ so services using os.getenv() get GSM values
             gsm_count = 0
             env_count = 0
 
             for category, key, env_var in critical_secrets:
                 if key in loaded_secrets:
-                    # Secret loaded from GSM - update Settings
+                    # Secret loaded from GSM - update Settings AND os.environ
                     if hasattr(self, env_var):
                         setattr(self, env_var, loaded_secrets[key])
+                        # Also export to os.environ for services using os.getenv()
+                        os.environ[env_var] = loaded_secrets[key]
                         gsm_count += 1
-                        logger.debug(f"✅ Loaded {env_var} from GSM")
+                        logger.debug(f"✅ Loaded {env_var} from GSM (Settings + os.environ)")
                 else:
                     # Fallback to environment variable (already loaded by Pydantic)
                     env_count += 1
