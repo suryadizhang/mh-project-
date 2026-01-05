@@ -137,6 +137,9 @@ class Settings(BaseSettings):
                 ("backend-api", "DB_URL", "DATABASE_URL"),
                 ("backend-api", "REDIS_URL", "REDIS_URL"),
                 ("backend-api", "SMTP_PASSWORD", "SMTP_PASSWORD"),
+                # Google OAuth for admin panel authentication
+                ("backend-api", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_ID"),
+                ("backend-api", "GOOGLE_CLIENT_SECRET", "GOOGLE_CLIENT_SECRET"),
             ]
 
             # Load secrets from GSM
@@ -286,9 +289,9 @@ class Settings(BaseSettings):
     GBP_ACCOUNT_ID: str
     GBP_LOCATION_ID: str
 
-    # Google OAuth - For admin panel authentication (optional in dev/test)
-    GOOGLE_CLIENT_ID: str | None = "test-google-client-id"
-    GOOGLE_CLIENT_SECRET: str | None = "test-google-client-secret"
+    # Google OAuth - For admin panel authentication (loaded from GSM in production)
+    GOOGLE_CLIENT_ID: str | None = None
+    GOOGLE_CLIENT_SECRET: str | None = None
     GOOGLE_REDIRECT_URI: str | None = "http://localhost:3001/auth/google/callback"
 
     # Google Maps API - For geocoding and travel time calculations
