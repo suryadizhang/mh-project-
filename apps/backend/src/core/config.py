@@ -140,6 +140,7 @@ class Settings(BaseSettings):
                 # Google OAuth for admin panel authentication
                 ("backend-api", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_ID"),
                 ("backend-api", "GOOGLE_CLIENT_SECRET", "GOOGLE_CLIENT_SECRET"),
+                ("backend-api", "GOOGLE_REDIRECT_URI", "GOOGLE_REDIRECT_URI"),
             ]
 
             # Load secrets from GSM
