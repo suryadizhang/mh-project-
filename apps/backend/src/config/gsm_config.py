@@ -153,12 +153,27 @@ _gsm_config: Optional[GSMConfig] = None
 
 @lru_cache()
 def get_gsm_config() -> GSMConfig:
-    """Get singleton GSM configuration instance"""
+    """Get singleton GSM configuration instance.
+
+    Environment Variables:
+        GCP_PROJECT_ID: Google Cloud project ID (default: my-hibachi-crm)
+        GSM_ENVIRONMENT: GSM secret prefix (default: prod)
+            - Use 'prod' for production secrets (prod-backend-api-*)
+            - Use 'staging' for staging secrets (staging-backend-api-*)
+            - This is SEPARATE from the ENVIRONMENT variable used by Settings/Pydantic
+
+    Note:
+        GSM_ENVIRONMENT controls the secret naming prefix in GSM.
+        ENVIRONMENT controls the Pydantic Settings validation (development/staging/production).
+        These are intentionally separate to allow flexible naming in each system.
+    """
     global _gsm_config
     if _gsm_config is None:
         project_id = os.getenv("GCP_PROJECT_ID", "my-hibachi-crm")
-        environment = os.getenv("ENVIRONMENT", "prod")
-        _gsm_config = GSMConfig(project_id, environment)
+        # Use GSM_ENVIRONMENT for secret prefix, separate from ENVIRONMENT (Pydantic enum)
+        # Default to "prod" to match existing GSM secrets (prod-backend-api-*)
+        gsm_environment = os.getenv("GSM_ENVIRONMENT", "prod")
+        _gsm_config = GSMConfig(project_id, gsm_environment)
     return _gsm_config
 
 
