@@ -25,7 +25,8 @@ const nextConfig = {
     optimizePackageImports: [
       'lucide-react',
       'date-fns',
-      '@radix-ui/react-slot',
+      // NOTE: Do NOT add @radix-ui/react-slot here - it causes infinite loop issues
+      // due to how the Slot component handles children forwarding
       'framer-motion',
       'react-hook-form',
       '@hookform/resolvers',
