@@ -2,19 +2,58 @@
 
 import { useGoogleLogin } from '@react-oauth/google';
 import { Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { logger } from '@/lib/logger';
+
+/**
+ * Generate a state token that includes CSRF protection and the origin URL.
+ * This allows the backend callback to redirect back to the correct frontend (admin vs customer).
+ *
+ * Format: URL-safe base64 encoded JSON: {"csrf": "<random>", "origin": "<current_origin>"}
+ */
+function generateStateWithOrigin(): string {
+  // Generate a random CSRF token
+  const csrfToken = Array.from(crypto.getRandomValues(new Uint8Array(24)))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+
+  // Get current origin (e.g., https://admin.mysticdatanode.net)
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+
+  // Create state object
+  const stateData = {
+    csrf: csrfToken,
+    origin: origin,
+  };
+
+  // Encode as URL-safe base64
+  const jsonString = JSON.stringify(stateData);
+  // Use btoa for base64 encoding, then make URL-safe
+  const base64 = btoa(jsonString)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+
+  return base64;
+}
 
 export default function GoogleSignInButton() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Generate state token once per component mount (includes origin)
+  const stateToken = useMemo(() => generateStateWithOrigin(), []);
+
   const handleGoogleLogin = useGoogleLogin({
     flow: 'auth-code',
     ux_mode: 'redirect',
     redirect_uri: `${process.env.NEXT_PUBLIC_API_URL}/auth/google/callback`,
+    // Include state with CSRF token and origin URL for proper redirect after callback
+    state: stateToken,
+    // Always show account chooser so user can pick which Google account to use
+    select_account: true,
     onError: error => {
       logger.error(new Error(`Google OAuth error: ${JSON.stringify(error)}`), {
         context: 'google_oauth_login',

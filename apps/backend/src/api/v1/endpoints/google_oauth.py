@@ -24,7 +24,7 @@ from core.database import get_db
 from core.security import create_access_token
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
-from db.models.identity import User, AuthProvider, UserStatus, GoogleOAuthAccount
+from db.models.identity import User, AuthProvider, UserStatus
 from pydantic import BaseModel
 from services.google_oauth import google_oauth_service
 from sqlalchemy import select
@@ -46,12 +46,16 @@ class GoogleAuthResponse(BaseModel):
 
 
 @router.get("/authorize")
-async def google_authorize(request: Request, redirect_url: str | None = None):
+async def google_authorize(
+    request: Request, redirect_url: str | None = None, origin: str | None = None
+):
     """
     Step 1: Redirect user to Google OAuth authorization page
 
     Query params:
-        redirect_url: Optional URL to redirect to after successful login
+        redirect_url: Optional URL to redirect to after successful login (deprecated)
+        origin: Frontend origin URL (e.g., https://admin.mysticdatanode.net)
+                Used to redirect back to the correct frontend after OAuth
 
     Returns:
         Redirect to Google authorization page
@@ -62,16 +66,17 @@ async def google_authorize(request: Request, redirect_url: str | None = None):
             detail="Google OAuth is not configured. Please contact administrator.",
         )
 
-    # Generate state token for CSRF protection
-    state = google_oauth_service.generate_state_token()
+    # Use origin parameter, falling back to redirect_url for backwards compatibility
+    frontend_origin = origin or redirect_url
 
-    # Store state and redirect URL in session (you'll need to implement session storage)
-    # For now, we'll include redirect_url in state (not production-ready)
+    # Generate state token with origin URL encoded for CSRF protection
+    # This allows the callback to know which frontend to redirect to
+    state = google_oauth_service.generate_state_token(origin_url=frontend_origin)
 
     # Get authorization URL
     auth_url = google_oauth_service.get_authorization_url(state)
 
-    logger.info(f"Redirecting to Google OAuth: {auth_url}")
+    logger.info(f"Redirecting to Google OAuth. Origin: {frontend_origin}")
 
     return RedirectResponse(url=auth_url)
 
@@ -85,7 +90,7 @@ async def google_callback(
 
     Query params:
         code: Authorization code from Google
-        state: CSRF protection token
+        state: CSRF protection token (may contain encoded origin URL)
 
     Returns:
         Redirect to frontend with token or error
@@ -94,6 +99,14 @@ async def google_callback(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Authorization code not provided"
         )
+
+    # Decode state to get CSRF token and origin URL
+    csrf_token, origin_url = google_oauth_service.decode_state_token(state)
+
+    # Determine redirect URL: use origin from state, or fall back to FRONTEND_URL
+    frontend_url = origin_url or settings.FRONTEND_URL or "http://localhost:3001"
+
+    logger.info(f"OAuth callback - Origin from state: {origin_url}, Using: {frontend_url}")
 
     try:
         # Exchange code for access token
@@ -178,7 +191,7 @@ async def google_callback(
             logger.info(f"New user {email} signed up via Google - awaiting approval")
 
             # Return to frontend with pending approval message
-            frontend_url = settings.FRONTEND_URL or "http://localhost:3001"
+            # Uses frontend_url determined at start of callback (from state or FRONTEND_URL)
             return RedirectResponse(url=f"{frontend_url}/auth/pending-approval?email={email}")
 
         elif user.status != UserStatus.ACTIVE:
@@ -197,7 +210,7 @@ async def google_callback(
         logger.info(f"User {email} logged in successfully via Google OAuth")
 
         # Redirect to frontend with token
-        frontend_url = settings.FRONTEND_URL or "http://localhost:3001"
+        # Uses frontend_url determined at start of callback (from state or FRONTEND_URL)
         return RedirectResponse(
             url=f"{frontend_url}/auth/callback?token={jwt_token}&new_user={is_new_user}"
         )
