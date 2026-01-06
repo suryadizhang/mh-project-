@@ -7,13 +7,14 @@ Handles Google OAuth 2.0 login flow:
 3. Google redirects back with code
 4. Exchange code for token
 5. Fetch user profile
-6. Create or update user in database
+6. Create or link GoogleOAuthAccount
 7. Return JWT token
 
 Features:
 - Pending approval workflow for new users
 - Super admin approval required
 - Automatic email verification (Google verifies emails)
+- Uses GoogleOAuthAccount table for OAuth linking
 """
 
 from datetime import datetime, timezone
@@ -24,7 +25,8 @@ from core.database import get_db
 from core.security import create_access_token
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
-from db.models.identity import User, AuthProvider, UserStatus
+from db.models.identity import User, UserStatus
+from db.models.identity.admin import GoogleOAuthAccount
 from pydantic import BaseModel
 from services.google_oauth import google_oauth_service
 from sqlalchemy import select
@@ -134,45 +136,86 @@ async def google_callback(
                 detail="Failed to get required user information from Google",
             )
 
-        # Check if user already exists
-        result = await db.execute(select(User).where(User.google_id == google_id))
-        user = result.scalar_one_or_none()
+        # Check if Google OAuth account already exists
+        result = await db.execute(
+            select(GoogleOAuthAccount).where(GoogleOAuthAccount.provider_account_id == google_id)
+        )
+        oauth_account = result.scalar_one_or_none()
 
+        user = None
         is_new_user = False
 
-        if not user:
-            # Check if email already exists (maybe registered with email/password)
+        if oauth_account:
+            # OAuth account exists - get the linked user
+            result = await db.execute(select(User).where(User.id == oauth_account.user_id))
+            user = result.scalar_one_or_none()
+
+            if not user:
+                logger.error(f"OAuth account {google_id} has no linked user")
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="OAuth account has no linked user - contact administrator",
+                )
+
+            # Update OAuth account with latest info
+            oauth_account.provider_account_email = email.lower()
+            oauth_account.display_name = full_name
+            oauth_account.avatar_url = avatar_url
+            oauth_account.last_login_at = datetime.now(timezone.utc)
+        else:
+            # No OAuth account - check if email already exists
             result = await db.execute(select(User).where(User.email == email.lower()))
             user = result.scalar_one_or_none()
 
             if user:
                 # Link Google account to existing user
-                user.google_id = google_id
-                user.auth_provider = AuthProvider.GOOGLE
-                user.avatar_url = avatar_url or user.avatar_url
-                user.is_email_verified = email_verified
-                user.email_verified_at = (
-                    datetime.now(timezone.utc) if email_verified else user.email_verified_at
+                oauth_account = GoogleOAuthAccount(
+                    user_id=user.id,
+                    provider="google",
+                    provider_account_id=google_id,
+                    provider_account_email=email.lower(),
+                    display_name=full_name,
+                    avatar_url=avatar_url,
+                    is_approved=user.status == UserStatus.ACTIVE,  # Auto-approve if user is active
+                    approved_at=(
+                        datetime.now(timezone.utc) if user.status == UserStatus.ACTIVE else None
+                    ),
                 )
+                db.add(oauth_account)
+                logger.info(f"Linked Google account {google_id} to existing user {user.email}")
             else:
                 # Create new user with PENDING status (awaiting approval)
                 user = User(
                     email=email.lower(),
-                    full_name=full_name,
+                    first_name=full_name.split()[0] if full_name else None,
+                    last_name=(
+                        " ".join(full_name.split()[1:])
+                        if full_name and len(full_name.split()) > 1
+                        else None
+                    ),
                     avatar_url=avatar_url,
-                    auth_provider=AuthProvider.GOOGLE,
-                    google_id=google_id,
                     status=UserStatus.PENDING,  # Requires super admin approval
-                    is_email_verified=email_verified,
-                    email_verified_at=datetime.now(timezone.utc) if email_verified else None,
                 )
                 db.add(user)
-                is_new_user = True
+                await db.flush()  # Get user.id for OAuth account
 
-        # Update last login
+                # Create OAuth account linked to new user
+                oauth_account = GoogleOAuthAccount(
+                    user_id=user.id,
+                    provider="google",
+                    provider_account_id=google_id,
+                    provider_account_email=email.lower(),
+                    display_name=full_name,
+                    avatar_url=avatar_url,
+                    is_approved=False,  # Needs approval
+                )
+                db.add(oauth_account)
+                is_new_user = True
+                logger.info(f"Created new user {email} via Google OAuth - pending approval")
+
+        # Update user's last login
         user.last_login_at = datetime.now(timezone.utc)
-        user.last_login_ip = request.client.host if request.client else None
-        user.last_activity_at = datetime.now(timezone.utc)
+        user.avatar_url = avatar_url or user.avatar_url
 
         await db.commit()
         await db.refresh(user)
@@ -182,7 +225,8 @@ async def google_callback(
             try:
                 from services.email_service import email_service
 
-                email_service.send_welcome_email(user.email, user.full_name)
+                first_name = user.first_name or full_name or "there"
+                email_service.send_welcome_email(user.email, first_name)
             except Exception as e:
                 logger.warning(f"Failed to send welcome email to {user.email}: {e}")
 
