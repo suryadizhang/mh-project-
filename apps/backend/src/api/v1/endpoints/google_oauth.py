@@ -25,12 +25,13 @@ from core.database import get_db
 from core.security import create_access_token
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
-from db.models.identity import User, UserStatus
+from db.models.identity import User, UserStatus, UserRole
 from db.models.identity.admin import GoogleOAuthAccount
 from pydantic import BaseModel
 from services.google_oauth import google_oauth_service
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 router = APIRouter(prefix="/auth/google", tags=["Google OAuth"])
 logger = logging.getLogger(__name__)
@@ -147,7 +148,12 @@ async def google_callback(
 
         if oauth_account:
             # OAuth account exists - get the linked user
-            result = await db.execute(select(User).where(User.id == oauth_account.user_id))
+            # Use selectinload to eagerly load user_roles and role for is_super_admin check
+            result = await db.execute(
+                select(User)
+                .where(User.id == oauth_account.user_id)
+                .options(selectinload(User.user_roles).selectinload(UserRole.role))
+            )
             user = result.scalar_one_or_none()
 
             if not user:
@@ -163,7 +169,12 @@ async def google_callback(
             oauth_account.last_login_at = datetime.now(timezone.utc)
         else:
             # No OAuth account - check if email already exists
-            result = await db.execute(select(User).where(User.email == email.lower()))
+            # Use selectinload to eagerly load user_roles and role for is_super_admin check
+            result = await db.execute(
+                select(User)
+                .where(User.email == email.lower())
+                .options(selectinload(User.user_roles).selectinload(UserRole.role))
+            )
             user = result.scalar_one_or_none()
 
             if user:
@@ -215,7 +226,15 @@ async def google_callback(
         user.avatar_url = avatar_url or user.avatar_url
 
         await db.commit()
-        await db.refresh(user)
+
+        # Re-fetch user with eager-loaded relationships for is_super_admin check
+        # db.refresh() doesn't load relationships, so we need to query again
+        result = await db.execute(
+            select(User)
+            .where(User.id == user.id)
+            .options(selectinload(User.user_roles).selectinload(UserRole.role))
+        )
+        user = result.scalar_one()
 
         # Send welcome email for new users
         if is_new_user:
