@@ -51,8 +51,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setToken(storedToken);
       setStationContext(storedStationContext);
       setIsAuthenticated(true);
-    } else if (pathname !== '/login') {
-      // Redirect to login if no token and not already on login page
+    } else if (pathname !== '/login' && !pathname.startsWith('/auth/')) {
+      // Redirect to login if no token and not already on login or auth callback page
+      // Note: /auth/callback handles OAuth token from URL params before storing to localStorage
       router.push('/login');
     }
 
