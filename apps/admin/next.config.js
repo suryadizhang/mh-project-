@@ -63,16 +63,20 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://use.fontawesome.com https://maxcdn.bootstrapcdn.com",
-              "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net https://use.fontawesome.com https://maxcdn.bootstrapcdn.com",
+              // Scripts: self, inline, eval, Stripe, Google OAuth, Cloudflare
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://accounts.google.com https://apis.google.com https://static.cloudflareinsights.com",
+              // Styles: self, inline, Google Fonts, CDNs
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com https://cdn.jsdelivr.net https://use.fontawesome.com https://maxcdn.bootstrapcdn.com",
+              // Fonts: self, Google Fonts, CDNs
+              "font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net https://use.fontawesome.com https://maxcdn.bootstrapcdn.com data:",
               "img-src 'self' data: https: blob:",
-              // CRITICAL: Include all API and external service URLs
-              "connect-src 'self' https://mhapi.mysticdatanode.net https://api.stripe.com https://vitals.vercel-insights.com ws://localhost:8002 http://localhost:8002 http://localhost:8000 ws://localhost:8000",
-              "frame-src 'self' https://js.stripe.com",
+              // Connect: API, Stripe, Vercel, Google OAuth, Cloudflare, localhost
+              "connect-src 'self' https://mhapi.mysticdatanode.net https://api.stripe.com https://vitals.vercel-insights.com https://accounts.google.com https://oauth2.googleapis.com ws://localhost:8002 http://localhost:8002 http://localhost:8000 ws://localhost:8000",
+              // Frames: Stripe, Google OAuth
+              "frame-src 'self' https://js.stripe.com https://accounts.google.com",
               "object-src 'none'",
               "base-uri 'self'",
-              "form-action 'self'",
+              "form-action 'self' https://accounts.google.com",
             ].join('; '),
           },
         ],
