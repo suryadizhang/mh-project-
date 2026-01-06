@@ -210,8 +210,9 @@ class UserSession(Base):
         DateTime(timezone=True), nullable=False, default=func.now(), onupdate=func.now()
     )
 
-    # Relationships - User model has back_populates="sessions"
-    user = relationship("User", back_populates="sessions")
+    # Relationship to User (one-way - User model doesn't have back_populates for sessions
+    # because UserSession is not registered in the main model registry)
+    user = relationship("User")
 
 
 class AuditLog(Base):
@@ -247,8 +248,9 @@ class AuditLog(Base):
     # Timestamp
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
 
-    # Relationships - User model has back_populates="audit_logs"
-    user = relationship("User", back_populates="audit_logs")
+    # Relationship to User (one-way - User model doesn't have back_populates for audit_logs
+    # because AuditLog is not registered in the main model registry)
+    user = relationship("User")
 
 
 class PasswordResetToken(Base):
@@ -268,8 +270,9 @@ class PasswordResetToken(Base):
 
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
 
-    # Relationships - User model has back_populates="password_reset_tokens"
-    user = relationship("User", back_populates="password_reset_tokens")
+    # Relationship to User (one-way - User model doesn't have back_populates for password_reset_tokens
+    # because PasswordResetToken is not registered in the main model registry)
+    user = relationship("User")
 
 
 class AuthenticationService:

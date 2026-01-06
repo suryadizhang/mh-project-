@@ -189,16 +189,23 @@ class User(Base):
         foreign_keys="[AdminInvitation.accepted_by_user_id]",
         back_populates="accepted_user",
     )
-    # Auth session tracking (from core/auth/models.py UserSession)
-    sessions: Mapped[List["UserSession"]] = relationship("UserSession", back_populates="user")
 
-    # Audit logs (from core/auth/models.py AuditLog)
-    audit_logs: Mapped[List["AuditLog"]] = relationship("AuditLog", back_populates="user")
-
-    # Password reset tokens (from core/auth/models.py PasswordResetToken)
-    password_reset_tokens: Mapped[List["PasswordResetToken"]] = relationship(
-        "PasswordResetToken", back_populates="user"
-    )
+    # NOTE: The following relationships are commented out because the models
+    # (UserSession, AuditLog, PasswordResetToken) are defined in core/auth/models.py
+    # but not registered with the main SQLAlchemy ORM registry. This causes mapper
+    # initialization failures. TODO: Properly integrate these models or move them
+    # to db/models/identity/ and register in __init__.py
+    #
+    # # Auth session tracking (from core/auth/models.py UserSession)
+    # sessions: Mapped[List["UserSession"]] = relationship("UserSession", back_populates="user")
+    #
+    # # Audit logs (from core/auth/models.py AuditLog)
+    # audit_logs: Mapped[List["AuditLog"]] = relationship("AuditLog", back_populates="user")
+    #
+    # # Password reset tokens (from core/auth/models.py PasswordResetToken)
+    # password_reset_tokens: Mapped[List["PasswordResetToken"]] = relationship(
+    #     "PasswordResetToken", back_populates="user"
+    # )
 
     def __repr__(self) -> str:
         return f"<User(id={self.id}, email={self.email}, status={self.status})>"
