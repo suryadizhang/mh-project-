@@ -159,8 +159,7 @@ async def google_callback(
 
             # Update OAuth account with latest info
             oauth_account.provider_account_email = email.lower()
-            oauth_account.display_name = full_name
-            oauth_account.avatar_url = avatar_url
+            oauth_account.profile_picture_url = avatar_url
             oauth_account.last_login_at = datetime.now(timezone.utc)
         else:
             # No OAuth account - check if email already exists
@@ -174,8 +173,7 @@ async def google_callback(
                     provider="google",
                     provider_account_id=google_id,
                     provider_account_email=email.lower(),
-                    display_name=full_name,
-                    avatar_url=avatar_url,
+                    profile_picture_url=avatar_url,
                     is_approved=user.status == UserStatus.ACTIVE,  # Auto-approve if user is active
                     approved_at=(
                         datetime.now(timezone.utc) if user.status == UserStatus.ACTIVE else None
@@ -205,8 +203,7 @@ async def google_callback(
                     provider="google",
                     provider_account_id=google_id,
                     provider_account_email=email.lower(),
-                    display_name=full_name,
-                    avatar_url=avatar_url,
+                    profile_picture_url=avatar_url,
                     is_approved=False,  # Needs approval
                 )
                 db.add(oauth_account)
