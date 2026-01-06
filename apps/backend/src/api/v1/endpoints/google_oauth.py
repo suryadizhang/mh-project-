@@ -271,9 +271,11 @@ async def google_callback(
 
         # Redirect to frontend with token
         # Uses frontend_url determined at start of callback (from state or FRONTEND_URL)
-        return RedirectResponse(
-            url=f"{frontend_url}/auth/callback?token={jwt_token}&new_user={is_new_user}"
-        )
+        redirect_url = f"{frontend_url}/auth/callback?token={jwt_token}&new_user={is_new_user}"
+        logger.info(f"Redirecting to: {redirect_url[:100]}...")  # Log first 100 chars for debugging
+
+        # Use 302 Found instead of default 307 - browser will follow redirect properly
+        return RedirectResponse(url=redirect_url, status_code=302)
 
     except HTTPException:
         raise
