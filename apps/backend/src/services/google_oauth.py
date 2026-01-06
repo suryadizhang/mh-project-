@@ -29,10 +29,6 @@ class GoogleOAuthService:
     - Token exchange
     - User profile fetching
     - Token refresh (for future use)
-
-    Note: Credentials are lazy-loaded via properties to support GSM initialization.
-    GSM exports secrets to os.environ AFTER module imports, so we must read
-    credentials on first use, not at instantiation time.
     """
 
     # Google OAuth endpoints
@@ -48,66 +44,75 @@ class GoogleOAuthService:
     ]
 
     def __init__(self):
-        """
-        Initialize Google OAuth service.
-
-        Note: Credentials are NOT loaded here - they are lazy-loaded via properties
-        to support GSM (Google Secret Manager) which exports secrets to os.environ
-        AFTER all modules are imported but BEFORE the first request is handled.
-        """
-        # Internal cache for credentials (None = not yet loaded)
-        self._client_id: str | None = None
-        self._client_secret: str | None = None
-        self._redirect_uri: str | None = None
-        self._credentials_loaded = False
-
-    def _load_credentials(self) -> None:
-        """Load credentials from environment (called on first use)"""
-        if self._credentials_loaded:
-            return
-
-        self._client_id = os.getenv("GOOGLE_CLIENT_ID")
-        self._client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
-        self._redirect_uri = os.getenv(
+        """Initialize Google OAuth service with credentials from environment"""
+        self.client_id = os.getenv("GOOGLE_CLIENT_ID")
+        self.client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+        self.redirect_uri = os.getenv(
             "GOOGLE_REDIRECT_URI", "http://localhost:3001/auth/google/callback"
         )
-        self._credentials_loaded = True
 
-        if not self._client_id or not self._client_secret:
+        if not self.client_id or not self.client_secret:
             logger.warning("Google OAuth credentials not configured")
-        else:
-            logger.info("✅ Google OAuth credentials loaded successfully")
-
-    @property
-    def client_id(self) -> str | None:
-        """Get Google OAuth client ID (lazy-loaded from environment)"""
-        self._load_credentials()
-        return self._client_id
-
-    @property
-    def client_secret(self) -> str | None:
-        """Get Google OAuth client secret (lazy-loaded from environment)"""
-        self._load_credentials()
-        return self._client_secret
-
-    @property
-    def redirect_uri(self) -> str:
-        """Get OAuth redirect URI (lazy-loaded from environment)"""
-        self._load_credentials()
-        return self._redirect_uri or "http://localhost:3001/auth/google/callback"
 
     def is_configured(self) -> bool:
         """Check if Google OAuth is properly configured"""
         return bool(self.client_id and self.client_secret)
 
-    def generate_state_token(self) -> str:
+    def generate_state_token(self, origin_url: str | None = None) -> str:
         """
-        Generate a random state token for CSRF protection
+        Generate a state token for CSRF protection with optional origin URL.
+
+        The state parameter is used for:
+        1. CSRF protection (random token)
+        2. Storing the origin URL to redirect back to the correct frontend
+
+        Format: {csrf_token}|{origin_url} (URL-safe base64 encoded)
+
+        Args:
+            origin_url: Optional frontend URL to redirect back to after OAuth
 
         Returns:
-            Random 32-character hex string
+            URL-safe encoded state string
         """
-        return secrets.token_urlsafe(32)
+        import base64
+        import json
+
+        csrf_token = secrets.token_urlsafe(32)
+
+        # If no origin provided, just return the CSRF token
+        if not origin_url:
+            return csrf_token
+
+        # Encode both CSRF token and origin URL
+        state_data = {"csrf": csrf_token, "origin": origin_url}
+        state_json = json.dumps(state_data)
+        return base64.urlsafe_b64encode(state_json.encode()).decode()
+
+    def decode_state_token(self, state: str) -> tuple[str, str | None]:
+        """
+        Decode a state token to extract CSRF token and origin URL.
+
+        Args:
+            state: The state parameter from OAuth callback
+
+        Returns:
+            Tuple of (csrf_token, origin_url or None)
+        """
+        import base64
+        import json
+
+        try:
+            # Try to decode as JSON (new format with origin)
+            # Add padding if needed (frontend strips padding for URL safety)
+            padding_needed = 4 - (len(state) % 4)
+            if padding_needed < 4:
+                state = state + ("=" * padding_needed)
+            state_json = base64.urlsafe_b64decode(state.encode()).decode()
+            state_data = json.loads(state_json)
+            return state_data.get("csrf", state), state_data.get("origin")
+        except Exception:
+            # Fallback: treat as plain CSRF token (old format)
+            return state, None
 
     def get_authorization_url(self, state: str, redirect_uri: str | None = None) -> str:
         """
