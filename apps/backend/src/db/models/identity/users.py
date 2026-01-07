@@ -93,13 +93,30 @@ class LowercaseEnumType(TypeDecorator):
         raise ValueError(f"Invalid value for {self.enum_class.__name__}: {value}")
 
     def process_result_value(self, value, dialect):
-        """Convert database value (lowercase string) to Python enum."""
+        """
+        Convert database value to Python enum.
+
+        Handles BOTH uppercase (ACTIVE) and lowercase (active) from database,
+        since different PostgreSQL enum types may use different cases.
+        """
         if value is None:
             return None
-        # Find enum member by value (lowercase)
+
+        # Normalize to lowercase for comparison
+        value_lower = value.lower() if isinstance(value, str) else value
+
+        # Find enum member by value (case-insensitive comparison)
         for member in self.enum_class:
-            if member.value == value:
+            if member.value.lower() == value_lower:
                 return member
+
+        # Also try matching by enum NAME (e.g., "ACTIVE" matches UserStatus.ACTIVE)
+        if isinstance(value, str):
+            try:
+                return self.enum_class[value.upper()]
+            except KeyError:
+                pass
+
         raise ValueError(f"Unknown {self.enum_class.__name__} value: {value}")
 
 
