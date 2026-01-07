@@ -358,6 +358,29 @@ class AuthenticationService:
         except Exception:
             return None
 
+    async def get_user_by_email(self, db: AsyncSession, email: str) -> "User | None":
+        """
+        Get user from identity.users table by email address.
+
+        Unlike authenticate_user which uses StationUser with encrypted email,
+        this method queries the User model with plain email field.
+
+        Args:
+            db: Database session
+            email: User's email address (plain text)
+
+        Returns:
+            User object if found, None otherwise
+        """
+        try:
+            from db.models.identity.users import User
+
+            stmt = select(User).where(User.email == email)
+            result = await db.execute(stmt)
+            return result.scalar_one_or_none()
+        except Exception:
+            return None
+
     def generate_mfa_secret(self) -> str:
         """Generate TOTP secret for MFA."""
         return pyotp.random_base32()
