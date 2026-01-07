@@ -46,16 +46,19 @@ export default function LoginPage() {
           formData.email
         );
 
-        if (stationsResponse.data && stationsResponse.data.length > 1) {
+        // Extract stations from nested response structure
+        // Backend returns: { success: true, data: { stations: [...] } }
+        // After apiFetch wrapping: { data: { success: true, data: { stations: [...] } }, success: true }
+        const rawData = stationsResponse.data as any;
+        const stations = rawData?.data?.stations || rawData?.stations || [];
+
+        if (stations.length > 1) {
           // Multiple stations - show station selection
-          setUserStations(stationsResponse.data);
+          setUserStations(stations);
           setStep('station');
-        } else if (
-          stationsResponse.data &&
-          stationsResponse.data.length === 1
-        ) {
+        } else if (stations.length === 1) {
           // Single station - auto-select and continue
-          const station = stationsResponse.data[0];
+          const station = stations[0];
           await completeStationLogin(
             response.data.access_token,
             station.id.toString()
@@ -87,7 +90,7 @@ export default function LoginPage() {
       const response = await authService.stationLogin(
         formData.email,
         formData.password,
-        parseInt(stationId)
+        stationId // Pass UUID string directly, no parseInt
       );
 
       if (response.data?.access_token && response.data?.station_context) {

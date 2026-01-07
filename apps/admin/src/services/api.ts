@@ -172,7 +172,7 @@ export const authService = {
   /**
    * Station-aware login
    */
-  async stationLogin(email: string, password: string, stationId?: number) {
+  async stationLogin(email: string, password: string, stationId?: string) {
     return api.post<StationLoginResponse>(ENDPOINTS.stationAuth, {
       email,
       password,

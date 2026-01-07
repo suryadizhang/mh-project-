@@ -4,6 +4,7 @@ Provides station-aware authentication endpoints for the admin interface.
 """
 
 from typing import Any
+from uuid import UUID
 
 from core.auth.middleware import get_current_user, get_db_session
 from core.auth.models import AuthenticationService
@@ -22,7 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 class StationLoginRequest(BaseModel):
     email: EmailStr
     password: str
-    station_id: int | None = None
+    station_id: str | None = None  # UUID string from frontend
 
 
 class StationLoginResponse(BaseModel):
@@ -91,9 +92,16 @@ async def station_login(
             )
 
         # If specific station requested, validate access
-        target_station_id = None
+        target_station_id: UUID | None = None
         if request.station_id:
-            target_station_id = request.station_id
+            # Convert string to UUID for comparison with accessible_stations (which contains UUIDs)
+            try:
+                target_station_id = UUID(request.station_id)
+            except (ValueError, TypeError):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid station ID format",
+                )
             if target_station_id not in station_context.accessible_stations:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
