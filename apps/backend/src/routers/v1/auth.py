@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from core.database import get_db
-from core.security import verify_password, create_access_token
+from core.security import verify_password, create_access_token, require_auth
 from core.config import settings
 from db.models.identity import User, UserStatus
 
@@ -410,7 +410,10 @@ async def login(credentials: LoginRequest, db: AsyncSession = Depends(get_db)) -
         },
     },
 )
-async def get_current_user_info() -> dict[str, Any]:
+async def get_current_user_info(
+    current_user: dict[str, Any] = Depends(require_auth),
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
     """
     Get current user information.
 
@@ -420,14 +423,37 @@ async def get_current_user_info() -> dict[str, Any]:
     Raises:
         HTTPException(401): Missing or invalid authentication token
     """
-    # This is a placeholder for your existing auth system
-    # In development, return mock data
+    # Get user from database to fetch full profile
+    user_id = current_user.get("id")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token payload",
+        )
+
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    # Determine admin status from role
+    role = current_user.get("role")
+    is_admin = (
+        role and role.value in ("super_admin", "admin", "station_manager")
+        if hasattr(role, "value")
+        else False
+    )
+
     return {
-        "id": "dev-user-123",
-        "email": "dev@myhibachi.com",
-        "name": "Dev User",
-        "is_admin": True,
-        "created_at": "2024-01-01T00:00:00Z",
+        "id": str(user.id),
+        "email": user.email,
+        "name": user.full_name or user.email,
+        "is_admin": is_admin or user.is_super_admin,
+        "created_at": user.created_at.isoformat() if user.created_at else "2024-01-01T00:00:00Z",
     }
 
 
