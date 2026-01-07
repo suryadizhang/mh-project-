@@ -20,16 +20,83 @@ Models:
 
 import enum
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Type
 from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, DateTime, Index, String
-from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import Boolean, DateTime, Index, String, TypeDecorator
 from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
+from sqlalchemy.dialects.postgresql import ENUM as PG_ENUM
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db.base_class import Base
+
+
+# ==================== CUSTOM TYPE FOR LOWERCASE ENUMS ====================
+
+
+class LowercaseEnumType(TypeDecorator):
+    """
+    SQLAlchemy TypeDecorator for PostgreSQL enums with lowercase values.
+
+    Solves the mismatch between:
+    - Python enum NAMES: ACTIVE, GOOGLE, EMAIL (uppercase)
+    - PostgreSQL enum VALUES: active, google, email (lowercase)
+
+    This properly handles BOTH:
+    - Writing: Python enum → lowercase value for database
+    - Reading: lowercase value from database → Python enum
+    """
+
+    impl = String  # Base implementation
+    cache_ok = True
+
+    def __init__(self, enum_class: Type[enum.Enum], pg_enum_name: str, schema: str = "public"):
+        self.enum_class = enum_class
+        self.pg_enum_name = pg_enum_name
+        self.schema = schema
+        super().__init__()
+
+    def load_dialect_impl(self, dialect):
+        """Return the PostgreSQL ENUM type for this column."""
+        if dialect.name == "postgresql":
+            return dialect.type_descriptor(
+                PG_ENUM(
+                    *[e.value for e in self.enum_class],
+                    name=self.pg_enum_name,
+                    schema=self.schema,
+                    create_type=False,
+                )
+            )
+        return dialect.type_descriptor(String(50))
+
+    def process_bind_param(self, value, dialect):
+        """Convert Python enum to database value (lowercase string)."""
+        if value is None:
+            return None
+        if isinstance(value, self.enum_class):
+            return value.value  # Return lowercase: "active", "google"
+        if isinstance(value, str):
+            # Already a string, validate it
+            valid_values = [e.value for e in self.enum_class]
+            if value in valid_values:
+                return value
+            # Try to find by name (uppercase)
+            try:
+                return self.enum_class[value].value
+            except KeyError:
+                pass
+        raise ValueError(f"Invalid value for {self.enum_class.__name__}: {value}")
+
+    def process_result_value(self, value, dialect):
+        """Convert database value (lowercase string) to Python enum."""
+        if value is None:
+            return None
+        # Find enum member by value (lowercase)
+        for member in self.enum_class:
+            if member.value == value:
+                return member
+        raise ValueError(f"Unknown {self.enum_class.__name__} value: {value}")
 
 
 # ==================== ENUMS ====================
@@ -147,14 +214,8 @@ class User(Base):
     apple_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
     # Auth provider tracking
-    auth_provider: Mapped[str] = mapped_column(
-        SQLEnum(
-            AuthProvider,
-            name="authprovider",
-            schema="public",
-            create_type=False,
-            values_callable=lambda x: [e.value for e in x],  # Use lowercase values, not names
-        ),
+    auth_provider: Mapped[AuthProvider] = mapped_column(
+        LowercaseEnumType(AuthProvider, "authprovider", "public"),
         nullable=False,
         default=AuthProvider.EMAIL,
     )
@@ -168,13 +229,7 @@ class User(Base):
 
     # Status
     status: Mapped[UserStatus] = mapped_column(
-        SQLEnum(
-            UserStatus,
-            name="userstatus",
-            schema="public",
-            create_type=False,
-            values_callable=lambda x: [e.value for e in x],  # Use lowercase values, not names
-        ),
+        LowercaseEnumType(UserStatus, "userstatus", "public"),
         nullable=False,
         default=UserStatus.ACTIVE,
         index=True,
