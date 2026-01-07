@@ -7,10 +7,11 @@ from typing import Any
 
 from core.auth.middleware import get_current_user, get_db_session
 from core.auth.models import AuthenticationService
-from db.models.identity import User
+from db.models.identity import User, Station
 from core.auth.station_auth import (
     StationAuthenticationService,
 )
+from sqlalchemy import select
 from cqrs.crm_operations import ApiResponse
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr
@@ -53,9 +54,7 @@ def get_station_auth_service():
     from core.security import FieldEncryption
 
     settings = get_settings()
-    return StationAuthenticationService(
-        FieldEncryption(), settings.jwt_secret_key
-    )
+    return StationAuthenticationService(FieldEncryption(), settings.jwt_secret_key)
 
 
 @router.post("/station-login", response_model=ApiResponse)
@@ -63,9 +62,7 @@ async def station_login(
     request: StationLoginRequest,
     db: AsyncSession = Depends(get_db_session),
     auth_service: AuthenticationService = Depends(get_auth_service),
-    station_auth_service: StationAuthenticationService = Depends(
-        get_station_auth_service
-    ),
+    station_auth_service: StationAuthenticationService = Depends(get_station_auth_service),
 ):
     """
     Station-aware login endpoint.
@@ -85,9 +82,7 @@ async def station_login(
             )
 
         # Get user's station access
-        station_context = await station_auth_service.get_user_station_context(
-            db=db, user=user
-        )
+        station_context = await station_auth_service.get_user_station_context(db=db, user=user)
 
         if not station_context or not station_context.accessible_stations:
             raise HTTPException(
@@ -131,16 +126,9 @@ async def station_login(
         station_info = {
             "station_id": target_station_id,
             "station_name": f"Station {target_station_id}",  # In production, get from DB
-            "role": station_context.station_roles.get(
-                target_station_id, "user"
-            ),
-            "permissions": list(
-                station_context.station_permissions.get(
-                    target_station_id, set()
-                )
-            ),
-            "is_super_admin": station_context.highest_role.value
-            == "super_admin",
+            "role": station_context.station_roles.get(target_station_id, "user"),
+            "permissions": list(station_context.station_permissions.get(target_station_id, set())),
+            "is_super_admin": station_context.highest_role.value == "super_admin",
         }
 
         return ApiResponse(
@@ -166,9 +154,7 @@ async def get_user_stations(
     email: str,
     db: AsyncSession = Depends(get_db_session),
     auth_service: AuthenticationService = Depends(get_auth_service),
-    station_auth_service: StationAuthenticationService = Depends(
-        get_station_auth_service
-    ),
+    station_auth_service: StationAuthenticationService = Depends(get_station_auth_service),
 ):
     """
     Get available stations for a user by email.
@@ -178,19 +164,34 @@ async def get_user_stations(
         # Find user by email
         user = await auth_service.get_user_by_email(db=db, email=email)
         if not user:
-            return ApiResponse(
-                success=True, data=UserStationsResponse(stations=[])
-            )
+            return ApiResponse(success=True, data=UserStationsResponse(stations=[]))
 
-        # Get station context
-        station_context = await station_auth_service.get_user_station_context(
-            db=db, user=user
-        )
+        # SUPER_ADMIN bypass: super admins get access to all active stations
+        # without needing explicit station_users entries
+        if user.is_super_admin:
+            stmt = select(Station).where(Station.status == "active")
+            result = await db.execute(stmt)
+            all_stations = result.scalars().all()
+
+            stations = []
+            for idx, station in enumerate(all_stations):
+                stations.append(
+                    {
+                        "id": str(station.id),
+                        "name": station.name,
+                        "location": getattr(station, "display_name", station.name) or station.name,
+                        "role": "super_admin",
+                        "is_primary": idx == 0,  # First station is primary
+                    }
+                )
+
+            return ApiResponse(success=True, data=UserStationsResponse(stations=stations))
+
+        # Get station context for regular users
+        station_context = await station_auth_service.get_user_station_context(db=db, user=user)
 
         if not station_context:
-            return ApiResponse(
-                success=True, data=UserStationsResponse(stations=[])
-            )
+            return ApiResponse(success=True, data=UserStationsResponse(stations=[]))
 
         # Build stations list (in production, fetch actual station details)
         stations = []
@@ -200,17 +201,12 @@ async def get_user_stations(
                     "id": station_id,
                     "name": f"Station {station_id}",
                     "location": f"Location {station_id}",
-                    "role": station_context.station_roles.get(
-                        station_id, "user"
-                    ),
-                    "is_primary": station_id
-                    == station_context.primary_station_id,
+                    "role": station_context.station_roles.get(station_id, "user"),
+                    "is_primary": station_id == station_context.primary_station_id,
                 }
             )
 
-        return ApiResponse(
-            success=True, data=UserStationsResponse(stations=stations)
-        )
+        return ApiResponse(success=True, data=UserStationsResponse(stations=stations))
 
     except Exception as e:
         raise HTTPException(
@@ -224,9 +220,7 @@ async def switch_station(
     station_id: int,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
-    station_auth_service: StationAuthenticationService = Depends(
-        get_station_auth_service
-    ),
+    station_auth_service: StationAuthenticationService = Depends(get_station_auth_service),
 ):
     """
     Switch user's current station context.
@@ -273,11 +267,8 @@ async def switch_station(
             "station_id": station_id,
             "station_name": f"Station {station_id}",
             "role": station_context.station_roles.get(station_id, "user"),
-            "permissions": list(
-                station_context.station_permissions.get(station_id, set())
-            ),
-            "is_super_admin": station_context.highest_role.value
-            == "super_admin",
+            "permissions": list(station_context.station_permissions.get(station_id, set())),
+            "is_super_admin": station_context.highest_role.value == "super_admin",
         }
 
         return ApiResponse(
