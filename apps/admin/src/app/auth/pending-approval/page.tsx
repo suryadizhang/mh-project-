@@ -2,11 +2,13 @@
 
 import { ArrowLeft, Clock, Mail } from 'lucide-react';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 
-export default function PendingApprovalPage() {
+// Inner component that uses useSearchParams (must be wrapped in Suspense)
+function PendingApprovalContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || 'your email';
 
@@ -93,5 +95,26 @@ export default function PendingApprovalPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Loading fallback for Suspense
+function PendingApprovalFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600 mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
+// Main exported component with Suspense boundary
+export default function PendingApprovalPage() {
+  return (
+    <Suspense fallback={<PendingApprovalFallback />}>
+      <PendingApprovalContent />
+    </Suspense>
   );
 }

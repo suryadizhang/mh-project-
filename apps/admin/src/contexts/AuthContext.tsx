@@ -98,8 +98,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return stationContext?.is_super_admin || false;
   };
 
-  // Show loading spinner while checking authentication
-  if (loading) {
+  // Allow access to login page and auth callback pages without authentication
+  // These pages handle their own auth flow (login form, OAuth callback)
+  const isPublicAuthPage =
+    pathname === '/login' || pathname.startsWith('/auth/');
+
+  // Show loading spinner while checking authentication (skip for public auth pages)
+  if (loading && !isPublicAuthPage) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -107,8 +112,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     );
   }
 
-  // Allow access to login page without authentication
-  if (pathname === '/login') {
+  // Allow access to login and auth callback pages without authentication
+  if (isPublicAuthPage) {
     return (
       <AuthContext.Provider
         value={{
