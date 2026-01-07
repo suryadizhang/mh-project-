@@ -14,6 +14,7 @@ from core.auth.models import (  # Phase 2C: Updated from api.app.auth.models
     StationUser,
     UserSession,
 )
+
 # Phase 1.1: Use canonical db.models.identity instead of deprecated station_models
 from db.models.identity import (
     Station,
@@ -21,11 +22,11 @@ from db.models.identity import (
     StationAuditLog,
     StationUser,  # Renamed from UserStationAssignment
 )
+
 # Import enums from canonical identity models
 from db.models.identity import (
     StationPermission,
     StationRole,
-    AuditAction,
 )
 from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
 import jwt
@@ -137,10 +138,45 @@ class StationAuthenticationService(BaseAuthenticationService):
         # Station-specific token settings
         self.station_token_lifetime = timedelta(hours=4)  # Shorter for station tokens
 
-    async def get_user_station_context(self, db: AsyncSession, user: StationUser) -> StationContext | None:
+    async def get_user_station_context(
+        self, db: AsyncSession, user: StationUser
+    ) -> StationContext | None:
         """Get station context for a user including all assignments and permissions."""
         try:
-            # Get user's station assignments with station details
+            # SUPER_ADMIN bypass: Give access to ALL active stations without requiring
+            # explicit station_users assignment. This allows super admins to login
+            # and access the system even without being in the station_users table.
+            if getattr(user, "is_super_admin", False):
+                # Get all active stations for SUPER_ADMIN
+                all_stations_stmt = select(Station).where(Station.status == "active")
+                all_stations_result = await db.execute(all_stations_stmt)
+                all_stations = all_stations_result.scalars().all()
+
+                if all_stations:
+                    station_assignments = []
+                    for station in all_stations:
+                        # Grant SUPER_ADMIN role with all permissions for each station
+                        permissions = get_station_permissions(StationRole.SUPER_ADMIN, None)
+                        assignment = {
+                            "station_id": station.id,
+                            "station_code": station.code,
+                            "station_name": station.name,
+                            "role": StationRole.SUPER_ADMIN.value,
+                            "permissions": list(permissions),
+                            "is_primary": True,  # First one is primary
+                            "assigned_at": None,
+                            "expires_at": None,
+                        }
+                        station_assignments.append(assignment)
+
+                    return StationContext(
+                        user_id=user.id,
+                        station_assignments=station_assignments,
+                        primary_station_id=all_stations[0].id,
+                        highest_role=StationRole.SUPER_ADMIN.value,
+                    )
+
+            # Regular users: Get user's station assignments with station details
             # Phase 1.1: Use StationUser (canonical name from db.models.identity)
             stmt = (
                 select(StationUser, Station)
