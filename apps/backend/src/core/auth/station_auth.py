@@ -38,6 +38,128 @@ from sqlalchemy.orm import selectinload
 logger = logging.getLogger(__name__)
 
 
+def get_station_permissions(
+    role: StationRole, additional_permissions: list[str] | None
+) -> set[str]:
+    """
+    Get permissions for a station role with optional additional permissions.
+
+    Args:
+        role: The StationRole to get base permissions for
+        additional_permissions: Optional list of extra permissions to grant
+
+    Returns:
+        Set of permission strings for the role
+    """
+    # Define permission sets by role (hierarchical - higher roles get all lower permissions)
+    all_permissions = {p.value for p in StationPermission}
+
+    # Role-based permission mapping
+    role_permissions = {
+        StationRole.SUPER_ADMIN: all_permissions,  # Gets everything
+        StationRole.ADMIN: {
+            # Station management
+            StationPermission.STATION_READ.value,
+            StationPermission.STATION_UPDATE.value,
+            StationPermission.STATION_MANAGE_USERS.value,
+            # Cross-station
+            StationPermission.CROSS_STATION_READ.value,
+            StationPermission.CROSS_STATION_ANALYTICS.value,
+            # All booking
+            StationPermission.BOOKING_CREATE.value,
+            StationPermission.BOOKING_READ.value,
+            StationPermission.BOOKING_UPDATE.value,
+            StationPermission.BOOKING_CANCEL.value,
+            StationPermission.BOOKING_REPORTS.value,
+            # All customer
+            StationPermission.CUSTOMER_CREATE.value,
+            StationPermission.CUSTOMER_READ.value,
+            StationPermission.CUSTOMER_UPDATE.value,
+            StationPermission.CUSTOMER_DELETE.value,
+            StationPermission.CUSTOMER_EXPORT.value,
+            # All payment
+            StationPermission.PAYMENT_RECORD.value,
+            StationPermission.PAYMENT_READ.value,
+            StationPermission.PAYMENT_REFUND.value,
+            StationPermission.PAYMENT_REPORTS.value,
+            # Communication
+            StationPermission.MESSAGE_READ.value,
+            StationPermission.MESSAGE_SEND.value,
+            StationPermission.MESSAGE_DELETE.value,
+            StationPermission.SMS_SEND.value,
+            StationPermission.EMAIL_SEND.value,
+            # Leads
+            StationPermission.LEAD_CREATE.value,
+            StationPermission.LEAD_READ.value,
+            StationPermission.LEAD_UPDATE.value,
+            StationPermission.LEAD_CONVERT.value,
+            # AI
+            StationPermission.AI_CHAT.value,
+            StationPermission.AI_BOOKING_ASSIST.value,
+            StationPermission.AI_ANALYTICS.value,
+        },
+        StationRole.STATION_ADMIN: {
+            # Station read only
+            StationPermission.STATION_READ.value,
+            # All booking
+            StationPermission.BOOKING_CREATE.value,
+            StationPermission.BOOKING_READ.value,
+            StationPermission.BOOKING_UPDATE.value,
+            StationPermission.BOOKING_CANCEL.value,
+            StationPermission.BOOKING_REPORTS.value,
+            # Customer management
+            StationPermission.CUSTOMER_CREATE.value,
+            StationPermission.CUSTOMER_READ.value,
+            StationPermission.CUSTOMER_UPDATE.value,
+            # Payment
+            StationPermission.PAYMENT_RECORD.value,
+            StationPermission.PAYMENT_READ.value,
+            # Communication
+            StationPermission.MESSAGE_READ.value,
+            StationPermission.MESSAGE_SEND.value,
+            StationPermission.SMS_SEND.value,
+            StationPermission.EMAIL_SEND.value,
+            # Leads
+            StationPermission.LEAD_CREATE.value,
+            StationPermission.LEAD_READ.value,
+            StationPermission.LEAD_UPDATE.value,
+            StationPermission.LEAD_CONVERT.value,
+            # AI
+            StationPermission.AI_CHAT.value,
+            StationPermission.AI_BOOKING_ASSIST.value,
+        },
+        StationRole.CUSTOMER_SUPPORT: {
+            # Read-only station
+            StationPermission.STATION_READ.value,
+            # Booking read/update only
+            StationPermission.BOOKING_READ.value,
+            StationPermission.BOOKING_UPDATE.value,
+            # Customer read only
+            StationPermission.CUSTOMER_READ.value,
+            # Communication
+            StationPermission.MESSAGE_READ.value,
+            StationPermission.MESSAGE_SEND.value,
+            StationPermission.SMS_SEND.value,
+            StationPermission.EMAIL_SEND.value,
+            # Leads
+            StationPermission.LEAD_READ.value,
+            StationPermission.LEAD_UPDATE.value,
+            # AI
+            StationPermission.AI_CHAT.value,
+            StationPermission.AI_BOOKING_ASSIST.value,
+        },
+    }
+
+    # Get base permissions for the role (default to empty set if role not found)
+    permissions = role_permissions.get(role, set()).copy()
+
+    # Add any additional permissions
+    if additional_permissions:
+        permissions.update(additional_permissions)
+
+    return permissions
+
+
 class StationContext:
     """Context object containing station information for authenticated users."""
 
