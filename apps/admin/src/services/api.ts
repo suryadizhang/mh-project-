@@ -157,15 +157,14 @@ const ENDPOINTS = {
  */
 export const authService = {
   /**
-   * Login with admin credentials (legacy)
+   * Login with admin credentials
    */
   async login(email: string, password: string) {
     return api.post<{ access_token: string; token_type: string }>(
       `${ENDPOINTS.auth}/login`,
       {
-        username: email, // FastAPI uses 'username' field
+        email, // Backend LoginRequest expects 'email' field
         password,
-        grant_type: 'password',
       }
     );
   },
