@@ -1,14 +1,28 @@
 # MyHibachi Backend VPS Deployment Guide
 
+> **⚠️ IMPORTANT - Actual VPS Configuration (January 2025)**
+>
+> The VPS uses **Apache httpd (RHEL/CentOS style)**, NOT nginx or
+> Debian-style Apache.
+>
+> - Config location: `/etc/httpd/conf.d/`
+> - Service name: `httpd` (not `apache2` or `nginx`)
+> - SSL: Handled by Cloudflare (VirtualHosts listen on port 80 only)
+> - Production API: Port 8000 → `/etc/httpd/conf.d/myhibachi-api.conf`
+> - Staging API: Port 8002 → `/etc/httpd/conf.d/staging-api.conf`
+>
+> Some sections below may reference Plesk/nginx which is outdated.
+
 ## Quick Reference
 
 ### Domains & Hosting
 
-| Service           | Domain                     | Hosting                |
-| ----------------- | -------------------------- | ---------------------- |
-| **Backend API**   | `mhapi.mysticdatanode.net` | VPS (`108.175.12.154`) |
-| **Admin Panel**   | `admin.mysticdatanode.net` | Vercel (auto)          |
-| **Customer Site** | `myhibachichef.com`        | Vercel (auto)          |
+| Service           | Domain                           | Hosting                |
+| ----------------- | -------------------------------- | ---------------------- |
+| **Backend API**   | `mhapi.mysticdatanode.net`       | VPS (`108.175.12.154`) |
+| **Staging API**   | `staging-api.mysticdatanode.net` | VPS (`108.175.12.154`) |
+| **Admin Panel**   | `admin.mysticdatanode.net`       | Vercel (auto)          |
+| **Customer Site** | `myhibachichef.com`              | Vercel (auto)          |
 
 > **Note**: Admin panel domain currently points to `74.208.236.184`
 > temporarily. Once Vercel is configured, update DNS to point to

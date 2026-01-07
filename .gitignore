@@ -138,3 +138,8 @@ scripts/*.sh
 scripts/*.sh
 
 playwright-report-prod/
+
+# Security-sensitive files (added 2025-01-30)
+gsm-service-account-key.json
+*-service-account*.json
+playwright-report-staging/
