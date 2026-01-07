@@ -216,7 +216,7 @@ async def get_user_stations(
 
         # Build stations list (in production, fetch actual station details)
         stations = []
-        for station_id in station_context.accessible_stations:
+        for station_id in station_context.accessible_station_ids:
             stations.append(
                 {
                     "id": station_id,
@@ -260,7 +260,7 @@ async def switch_station(
             )
 
         # Validate access to target station
-        if station_id not in station_context.accessible_stations:
+        if station_id not in station_context.accessible_station_ids:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Access denied to requested station",

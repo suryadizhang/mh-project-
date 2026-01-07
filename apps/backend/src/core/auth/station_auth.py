@@ -3,6 +3,7 @@ Station-Aware Authentication Service
 Extends the existing authentication system with multi-tenant station context.
 """
 
+import logging
 from datetime import datetime, timezone, timedelta
 import hashlib
 import secrets
@@ -11,7 +12,6 @@ from uuid import UUID, uuid4
 
 from core.auth.models import (  # Phase 2C: Updated from api.app.auth.models
     AuthenticationService as BaseAuthenticationService,
-    StationUser,
     UserSession,
 )
 
@@ -20,7 +20,7 @@ from db.models.identity import (
     Station,
     StationAccessToken,
     StationAuditLog,
-    StationUser,  # Renamed from UserStationAssignment
+    StationUser,  # This is the canonical model for station_users table
 )
 
 # Import enums from canonical identity models
@@ -33,6 +33,9 @@ import jwt
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+
+# Configure logging for debugging
+logger = logging.getLogger(__name__)
 
 
 class StationContext:
@@ -143,14 +146,22 @@ class StationAuthenticationService(BaseAuthenticationService):
     ) -> StationContext | None:
         """Get station context for a user including all assignments and permissions."""
         try:
+            logger.debug(
+                f"Getting station context for user {user.id}, is_super_admin={getattr(user, 'is_super_admin', False)}"
+            )
+
             # SUPER_ADMIN bypass: Give access to ALL active stations without requiring
             # explicit station_users assignment. This allows super admins to login
             # and access the system even without being in the station_users table.
             if getattr(user, "is_super_admin", False):
+                logger.info(f"SUPER_ADMIN detected for user {user.id}, granting all station access")
+
                 # Get all active stations for SUPER_ADMIN
                 all_stations_stmt = select(Station).where(Station.status == "active")
                 all_stations_result = await db.execute(all_stations_stmt)
                 all_stations = all_stations_result.scalars().all()
+
+                logger.debug(f"Found {len(all_stations)} active stations for SUPER_ADMIN")
 
                 if all_stations:
                     station_assignments = []
@@ -169,10 +180,24 @@ class StationAuthenticationService(BaseAuthenticationService):
                         }
                         station_assignments.append(assignment)
 
-                    return StationContext(
+                    context = StationContext(
                         user_id=user.id,
                         station_assignments=station_assignments,
                         primary_station_id=all_stations[0].id,
+                        highest_role=StationRole.SUPER_ADMIN.value,
+                    )
+                    logger.info(
+                        f"SUPER_ADMIN context created with {len(station_assignments)} stations"
+                    )
+                    return context
+                else:
+                    # SUPER_ADMIN with no active stations - still create a valid context
+                    # This prevents 403 errors when there are no stations configured yet
+                    logger.warning(f"No active stations found for SUPER_ADMIN user {user.id}")
+                    return StationContext(
+                        user_id=user.id,
+                        station_assignments=[],
+                        primary_station_id=None,
                         highest_role=StationRole.SUPER_ADMIN.value,
                     )
 
@@ -189,6 +214,7 @@ class StationAuthenticationService(BaseAuthenticationService):
             assignments = result.fetchall()
 
             if not assignments:
+                logger.debug(f"No station assignments found for user {user.id}")
                 return None
 
             station_assignments = []
@@ -219,14 +245,20 @@ class StationAuthenticationService(BaseAuthenticationService):
             if not primary_station_id and station_assignments:
                 primary_station_id = station_assignments[0]["station_id"]
 
+            logger.debug(
+                f"Created station context with {len(station_assignments)} assignments for user {user.id}"
+            )
             return StationContext(
                 user_id=user.id,
                 station_assignments=station_assignments,
                 primary_station_id=primary_station_id,
             )
 
-        except Exception:
-            # Log error but don't expose details
+        except Exception as e:
+            # Log error with full traceback for debugging
+            logger.exception(
+                f"Error getting station context for user {getattr(user, 'id', 'unknown')}: {e}"
+            )
             return None
 
     def create_station_aware_jwt_tokens(
