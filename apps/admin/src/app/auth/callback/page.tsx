@@ -56,11 +56,12 @@ function CallbackContent() {
         // CRITICAL: Must use 'admin_token' key to match tokenManager.getToken() in api.ts
         localStorage.setItem('admin_token', token);
 
-        console.log('[OAuth Callback] Calling /auth/me to validate token');
+        console.log('[OAuth Callback] Calling /api/auth/me to validate token');
 
         // Verify token is valid by making a test request
+        // CRITICAL: Auth router is mounted at /api/auth, NOT /api/v1/auth
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/me`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -68,7 +69,7 @@ function CallbackContent() {
           }
         );
 
-        console.log('[OAuth Callback] /auth/me response:', response.status);
+        console.log('[OAuth Callback] /api/auth/me response:', response.status);
 
         if (response.ok) {
           const userData = await response.json();
