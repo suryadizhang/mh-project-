@@ -494,7 +494,8 @@ class StationAuthenticationService(BaseAuthenticationService):
             "typ": "access",
             "session_id": str(session_id),
             # Original role and permissions (for backward compatibility)
-            "role": user.role,
+            # Use highest_role from station_context instead of user.role (which doesn't exist)
+            "role": station_context.highest_role.value,
             "permissions": list(self.get_user_permissions(user)),
             # Station-specific context
             "station_context": {
