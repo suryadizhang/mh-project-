@@ -141,9 +141,22 @@ class User(Base):
         String(255), nullable=True
     )  # NULL for OAuth-only users
 
+    # OAuth Provider IDs (for social login linking)
+    google_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, index=True)
+    microsoft_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    apple_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+
+    # Auth provider tracking
+    auth_provider: Mapped[str] = mapped_column(
+        SQLEnum(AuthProvider, name="authprovider", schema="public", create_type=False),
+        nullable=False,
+        default=AuthProvider.EMAIL,
+    )
+
     # Profile
     first_name: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     last_name: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    full_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     avatar_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
@@ -155,6 +168,8 @@ class User(Base):
         index=True,
     )
     is_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    is_email_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    is_super_admin: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     # Metadata (extensible JSON for custom fields)
     user_metadata: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
@@ -169,6 +184,23 @@ class User(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
+
+    # MFA / Security (WebAuthn, PIN, Lockout)
+    # These columns exist in production database - do NOT remove
+    webauthn_credentials: Mapped[list] = mapped_column(JSONB, nullable=True, default=list)
+    pin_hash: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    pin_attempts: Mapped[int] = mapped_column(default=0)
+    pin_locked_until: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    mfa_setup_complete: Mapped[bool] = mapped_column(Boolean, nullable=True, default=False)
+    mfa_setup_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    pin_reset_required: Mapped[bool] = mapped_column(Boolean, nullable=True, default=False)
+    lockout_count: Mapped[int] = mapped_column(default=0)
+    last_lockout_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    is_security_disabled: Mapped[bool] = mapped_column(Boolean, nullable=True, default=False)
 
     # Relationships
     user_roles: Mapped[List["UserRole"]] = relationship(
@@ -210,16 +242,18 @@ class User(Base):
     def __repr__(self) -> str:
         return f"<User(id={self.id}, email={self.email}, status={self.status})>"
 
-    @property
-    def full_name(self) -> str:
-        """Get user's full name."""
+    def get_display_name(self) -> str:
+        """Get user's display name (computed from first_name/last_name or stored full_name)."""
+        # Prefer stored full_name if set
+        if self.full_name:
+            return self.full_name
+        # Fall back to computed name
         if self.first_name and self.last_name:
             return f"{self.first_name} {self.last_name}"
         return self.first_name or self.last_name or self.email
 
-    @property
-    def is_super_admin(self) -> bool:
-        """Check if user has SUPER_ADMIN role."""
+    def has_super_admin_role(self) -> bool:
+        """Check if user has SUPER_ADMIN role via the user_roles relationship."""
         if not self.user_roles:
             return False
         for user_role in self.user_roles:

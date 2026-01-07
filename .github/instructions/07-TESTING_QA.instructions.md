@@ -359,9 +359,37 @@ npm test
 # Run with coverage
 npm test -- --coverage
 
-# Run E2E
+# Run E2E (local)
 npx playwright test
 ```
+
+### Staging E2E Tests:
+
+```bash
+# Run all staging E2E tests
+npm run test:e2e:staging
+
+# Run specific project
+npm run test:e2e:staging:customer  # Customer site desktop
+npm run test:e2e:staging:admin     # Admin site desktop
+npm run test:e2e:staging:api       # API tests only
+npm run test:e2e:staging:mobile    # Customer site mobile viewport
+
+# Production E2E (use with caution!)
+npm run test:e2e:prod
+```
+
+**Playwright Configuration Files:**
+
+| Config File                    | Target Environment | URLs                        |
+| ------------------------------ | ------------------ | --------------------------- |
+| `playwright.config.ts`         | Local              | `localhost:3000`            |
+| `playwright.staging.config.ts` | Staging            | `staging.myhibachichef.com` |
+| `playwright.prod.config.ts`    | Production         | `myhibachichef.com`         |
+
+**⚠️ Vercel Protection:** For staging E2E to work, disable Vercel
+Deployment Protection on the `dev` branch. See
+`docs/04-DEPLOYMENT/STAGING_ENVIRONMENT_SETUP_GUIDE.md`.
 
 ---
 
