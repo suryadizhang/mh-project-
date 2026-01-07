@@ -383,6 +383,90 @@ class StationAuthenticationService(BaseAuthenticationService):
             )
             return None
 
+    async def create_station_session(
+        self,
+        db: AsyncSession,
+        user: StationUser,
+        station_id: UUID,
+        ip_address: str = "127.0.0.1",
+        user_agent: str = "Admin Interface",
+    ) -> tuple[str, str, UUID] | None:
+        """
+        Create a station-aware session with JWT tokens.
+
+        This method:
+        1. Gets the user's station context
+        2. Creates a UserSession record in the database
+        3. Generates station-aware JWT tokens
+        4. Returns (access_token, refresh_token, session_id)
+
+        Args:
+            db: Database session
+            user: The authenticated user (StationUser model)
+            station_id: Target station ID for the session
+            ip_address: Client IP address
+            user_agent: Client user agent
+
+        Returns:
+            Tuple of (access_token, refresh_token, session_id) or None on failure
+        """
+        try:
+            logger.debug(f"Creating station session for user {user.id}, station {station_id}")
+
+            # Step 1: Get station context for the user
+            station_context = await self.get_user_station_context(db, user)
+            if not station_context:
+                logger.error(f"Failed to get station context for user {user.id}")
+                return None
+
+            # Step 2: Create session ID and tokens
+            session_id = uuid4()
+            session_token = self.generate_session_token()
+            device_fingerprint = self.generate_device_fingerprint(user_agent, ip_address)
+
+            # Step 3: Create JWT tokens with station context
+            access_token, refresh_token, access_jti, refresh_jti = (
+                self.create_station_aware_jwt_tokens(
+                    user=user,
+                    session_id=session_id,
+                    station_context=station_context,
+                    target_station_id=station_id,
+                )
+            )
+
+            # Step 4: Hash refresh token for storage
+            refresh_token_hash = self.hash_refresh_token(refresh_token)
+
+            # Step 5: Create UserSession record
+            session = UserSession(
+                id=session_id,
+                user_id=user.id,
+                session_token=session_token,
+                refresh_token_hash=refresh_token_hash,
+                access_token_jti=access_jti,
+                refresh_token_jti=refresh_jti,
+                device_fingerprint=device_fingerprint,
+                user_agent=user_agent,
+                ip_address=ip_address,
+                status="active",
+                expires_at=datetime.now(timezone.utc) + self.refresh_lifetime,
+            )
+
+            db.add(session)
+            await db.commit()
+            await db.refresh(session)
+
+            logger.info(
+                f"Created station session {session_id} for user {user.id} at station {station_id}"
+            )
+
+            return access_token, refresh_token, session_id
+
+        except Exception as e:
+            logger.exception(f"Failed to create station session for user {user.id}: {e}")
+            await db.rollback()
+            return None
+
     def create_station_aware_jwt_tokens(
         self,
         user: StationUser,
