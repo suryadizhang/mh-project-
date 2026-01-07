@@ -419,8 +419,11 @@ NEXT_PUBLIC_AI_API_BASE_URL=https://mhapi.mysticdatanode.net    # AI API endpoin
 🌐 Production Environment
 ├── 🎨 Customer Frontend → Vercel (myhibachichef.com)
 ├── ⚙️ Admin Frontend → Vercel (admin.mysticdatanode.net)
-├── 🚀 Main API → VPS:8001 → Nginx → mhapi.mysticdatanode.net
-└── 🤖 AI API → VPS:8002 → Nginx → mhapi.mysticdatanode.net
+├── 🚀 Production API → VPS:8000 → Apache httpd → mhapi.mysticdatanode.net
+└── 🧪 Staging API → VPS:8002 → Apache httpd → staging-api.mysticdatanode.net
+
+Note: VPS uses Apache httpd (RHEL/CentOS style), SSL is handled by Cloudflare.
+Config files are at /etc/httpd/conf.d/
 ```
 
 ### ⚡ **Key Features**
