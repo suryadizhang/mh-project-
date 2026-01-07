@@ -25,7 +25,7 @@ from core.database import get_db
 from core.security import create_access_token
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
-from db.models.identity import User, UserStatus, UserRole
+from db.models.identity import User, UserStatus, UserRole, AuthProvider
 from db.models.identity.admin import GoogleOAuthAccount
 from pydantic import BaseModel
 from services.google_oauth import google_oauth_service
@@ -204,6 +204,7 @@ async def google_callback(
                     ),
                     avatar_url=avatar_url,
                     status=UserStatus.PENDING,  # Requires super admin approval
+                    auth_provider=AuthProvider.GOOGLE,  # Set auth provider for Google OAuth
                 )
                 db.add(user)
                 await db.flush()  # Get user.id for OAuth account
