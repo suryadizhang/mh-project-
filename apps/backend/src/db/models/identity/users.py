@@ -26,7 +26,6 @@ from uuid import UUID, uuid4
 from sqlalchemy import Boolean, DateTime, Index, String, TypeDecorator
 from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
-from sqlalchemy.dialects.postgresql import ENUM as PG_ENUM
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db.base_class import Base
@@ -46,9 +45,14 @@ class LowercaseEnumType(TypeDecorator):
     This properly handles BOTH:
     - Writing: Python enum → lowercase value for database
     - Reading: lowercase value from database → Python enum
+
+    IMPORTANT: We use String as the implementation (NOT PG_ENUM) to ensure
+    process_bind_param is always called. Using PG_ENUM causes SQLAlchemy
+    to bypass process_bind_param and use its internal enum lookup which fails.
+    PostgreSQL will still cast the string to the enum type automatically.
     """
 
-    impl = String  # Base implementation
+    impl = String  # MUST be String, not PG_ENUM - see docstring
     cache_ok = True
 
     def __init__(self, enum_class: Type[enum.Enum], pg_enum_name: str, schema: str = "public"):
@@ -58,16 +62,16 @@ class LowercaseEnumType(TypeDecorator):
         super().__init__()
 
     def load_dialect_impl(self, dialect):
-        """Return the PostgreSQL ENUM type for this column."""
-        if dialect.name == "postgresql":
-            return dialect.type_descriptor(
-                PG_ENUM(
-                    *[e.value for e in self.enum_class],
-                    name=self.pg_enum_name,
-                    schema=self.schema,
-                    create_type=False,
-                )
-            )
+        """
+        Return String type for all dialects.
+
+        NOTE: We intentionally return String instead of PG_ENUM because:
+        1. When PG_ENUM is returned, SQLAlchemy uses its internal _object_lookup
+           which tries to match Python enum names ('ACTIVE') against PostgreSQL
+           values ('active') and fails.
+        2. By using String, we ensure process_bind_param is always called.
+        3. PostgreSQL will automatically cast the string to the enum type.
+        """
         return dialect.type_descriptor(String(50))
 
     def process_bind_param(self, value, dialect):
