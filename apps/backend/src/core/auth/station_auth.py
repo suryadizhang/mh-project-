@@ -496,7 +496,8 @@ class StationAuthenticationService(BaseAuthenticationService):
             # Original role and permissions (for backward compatibility)
             # Use highest_role from station_context instead of user.role (which doesn't exist)
             "role": station_context.highest_role.value,
-            "permissions": list(self.get_user_permissions(user)),
+            # Use station_permissions from station_context (user.role doesn't exist on User model)
+            "permissions": list(station_permissions),
             # Station-specific context
             "station_context": {
                 "current_station_id": str(current_station_id),
