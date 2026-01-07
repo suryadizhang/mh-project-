@@ -8,6 +8,7 @@ from uuid import UUID
 
 from core.auth.middleware import get_current_user, get_db_session
 from core.auth.models import AuthenticationService
+from core.security import verify_password
 from db.models.identity import User, Station
 from core.auth.station_auth import (
     StationAuthenticationService,
@@ -71,12 +72,19 @@ async def station_login(
     If not provided, returns available stations for selection.
     """
     try:
-        # First, authenticate the user credentials
-        user = await auth_service.authenticate_user(
-            db=db, email=request.email, password=request.password
-        )
+        # First, authenticate the user credentials by querying User directly
+        # (Not StationUser which has encrypted email - that's the wrong table!)
+        result = await db.execute(select(User).where(User.email == request.email.lower()))
+        user = result.scalar_one_or_none()
 
         if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials",
+            )
+
+        # Verify password
+        if not user.password_hash or not verify_password(request.password, user.password_hash):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials",
@@ -85,7 +93,12 @@ async def station_login(
         # Get user's station access
         station_context = await station_auth_service.get_user_station_context(db=db, user=user)
 
-        if not station_context or not station_context.accessible_stations:
+        # SUPER_ADMIN bypass: super admins always have station access
+        # accessible_station_ids is the correct property name on StationContext
+        if not station_context or (
+            not station_context.accessible_station_ids
+            and not getattr(user, "is_super_admin", False)
+        ):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="No station access available",
@@ -102,7 +115,7 @@ async def station_login(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Invalid station ID format",
                 )
-            if target_station_id not in station_context.accessible_stations:
+            if target_station_id not in station_context.accessible_station_ids:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="Access denied to requested station",
@@ -110,7 +123,7 @@ async def station_login(
         else:
             # Default to primary station or first accessible station
             target_station_id = station_context.primary_station_id or next(
-                iter(station_context.accessible_stations)
+                iter(station_context.accessible_station_ids), None
             )
 
         # Create station-aware session and tokens
