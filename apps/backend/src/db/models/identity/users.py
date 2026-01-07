@@ -148,7 +148,13 @@ class User(Base):
 
     # Auth provider tracking
     auth_provider: Mapped[str] = mapped_column(
-        SQLEnum(AuthProvider, name="authprovider", schema="public", create_type=False),
+        SQLEnum(
+            AuthProvider,
+            name="authprovider",
+            schema="public",
+            create_type=False,
+            values_callable=lambda x: [e.value for e in x],  # Use lowercase values, not names
+        ),
         nullable=False,
         default=AuthProvider.EMAIL,
     )
@@ -162,7 +168,13 @@ class User(Base):
 
     # Status
     status: Mapped[UserStatus] = mapped_column(
-        SQLEnum(UserStatus, name="userstatus", schema="public", create_type=False),
+        SQLEnum(
+            UserStatus,
+            name="userstatus",
+            schema="public",
+            create_type=False,
+            values_callable=lambda x: [e.value for e in x],  # Use lowercase values, not names
+        ),
         nullable=False,
         default=UserStatus.ACTIVE,
         index=True,
