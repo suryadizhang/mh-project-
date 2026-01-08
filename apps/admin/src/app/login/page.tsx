@@ -2,8 +2,8 @@
 
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Building, Eye, EyeOff, LogIn } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react';
 
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 import { Button } from '@/components/ui/button';
@@ -12,8 +12,9 @@ import { logger } from '@/lib/logger';
 import type { Station, StationLoginResponse } from '@/services/api';
 import { authService } from '@/services/api';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login } = useAuth();
   const [step, setStep] = useState<'login' | 'station'>('login');
   const [formData, setFormData] = useState({
@@ -26,6 +27,48 @@ export default function LoginPage() {
   const [userStations, setUserStations] = useState<Station[]>([]);
   const [selectedStation, setSelectedStation] = useState<string>('');
   const [tempToken, setTempToken] = useState<string>('');
+  const [isOAuthFlow, setIsOAuthFlow] = useState(false);
+  const [oauthEmail, setOauthEmail] = useState<string>('');
+
+  // Handle OAuth redirect with token and email params
+  useEffect(() => {
+    const oauthToken = searchParams.get('oauth_token');
+    const email = searchParams.get('email');
+
+    if (oauthToken && email) {
+      console.log(
+        '[Login] OAuth redirect detected, loading stations for:',
+        email
+      );
+      setIsOAuthFlow(true);
+      setOauthEmail(email);
+      setTempToken(oauthToken);
+      setFormData(prev => ({ ...prev, email }));
+
+      // Fetch stations for OAuth user
+      (async () => {
+        setLoading(true);
+        try {
+          const stationsResponse = await authService.getUserStations(email);
+          const rawData = stationsResponse.data as any;
+          const stations = rawData?.data?.stations || rawData?.stations || [];
+          console.log('[Login] OAuth user stations:', stations);
+
+          if (stations.length > 0) {
+            setUserStations(stations);
+            setStep('station');
+          } else {
+            setError('No stations assigned to your account.');
+          }
+        } catch (err: any) {
+          logger.error(err, { context: 'oauth_stations', email });
+          setError('Failed to load stations. Please try again.');
+        } finally {
+          setLoading(false);
+        }
+      })();
+    }
+  }, [searchParams]);
 
   const handleInitialLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,6 +186,64 @@ export default function LoginPage() {
     }
   };
 
+  // OAuth-specific station login (uses OAuth token instead of password)
+  const completeOAuthStationLogin = async (
+    oauthToken: string,
+    stationId: string
+  ) => {
+    setLoading(true);
+    setError('');
+
+    try {
+      console.log('[Login] OAuth station login for station:', stationId);
+
+      // Call station-login endpoint with OAuth token
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL || 'https://mhapi.mysticdatanode.net';
+      const response = await fetch(`${apiUrl}/api/auth/station-login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${oauthToken}`,
+        },
+        body: JSON.stringify({
+          station_id: stationId,
+          oauth_token: oauthToken,
+        }),
+      });
+
+      const data = await response.json();
+      console.log('[Login] OAuth station login response:', data);
+
+      if (!response.ok) {
+        throw new Error(data.detail || 'Station login failed');
+      }
+
+      // Extract login data (handle nested response structure)
+      const loginData = data?.data || data;
+
+      if (loginData?.access_token && loginData?.station_context) {
+        console.log('[Login] OAuth station login successful');
+        login(loginData.access_token, loginData.station_context);
+        router.push('/');
+      } else {
+        console.error('[Login] OAuth station login missing data:', data);
+        setError(
+          'Station login failed: Missing access token or station context.'
+        );
+      }
+    } catch (err: any) {
+      logger.error(err as Error, {
+        context: 'oauth_station_login',
+        email: oauthEmail,
+        station_id: stationId,
+      });
+      setError(err.message || 'Station login failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleStationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedStation) {
@@ -150,7 +251,12 @@ export default function LoginPage() {
       return;
     }
 
-    await completeStationLogin(tempToken, selectedStation);
+    // Use OAuth-specific login if in OAuth flow, otherwise use password-based login
+    if (isOAuthFlow) {
+      await completeOAuthStationLogin(tempToken, selectedStation);
+    } else {
+      await completeStationLogin(tempToken, selectedStation);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -347,5 +453,19 @@ export default function LoginPage() {
         {step === 'login' ? renderLoginForm() : renderStationSelection()}
       </div>
     </main>
+  );
+}
+// Wrap with Suspense because we use useSearchParams
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </main>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }
