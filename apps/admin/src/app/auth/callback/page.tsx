@@ -4,6 +4,7 @@ import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 
+import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 
 /**
@@ -13,6 +14,7 @@ import { logger } from '@/lib/logger';
 function CallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { login } = useAuth();
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>(
     'processing'
   );
@@ -74,14 +76,111 @@ function CallbackContent() {
         if (response.ok) {
           const userData = await response.json();
           console.log('[OAuth Callback] User data received:', userData);
-          setStatus('success');
-          setMessage(`Welcome back, ${userData.data?.full_name || 'User'}!`);
+          const userEmail = userData.data?.email || userData.email;
 
-          // Redirect to dashboard after 1 second
-          setTimeout(() => {
-            console.log('[OAuth Callback] Redirecting to dashboard');
-            router.push('/');
-          }, 1000);
+          if (!userEmail) {
+            throw new Error('User email not found in response');
+          }
+
+          // Fetch user's stations to determine if station selection is needed
+          console.log('[OAuth Callback] Fetching stations for:', userEmail);
+          const stationsResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/station/user-stations?email=${encodeURIComponent(userEmail)}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (!stationsResponse.ok) {
+            throw new Error('Failed to fetch user stations');
+          }
+
+          const stationsData = await stationsResponse.json();
+          console.log('[OAuth Callback] Stations response:', stationsData);
+
+          // Extract stations from response (handle nested structure)
+          const stations =
+            stationsData?.data?.stations ||
+            stationsData?.stations ||
+            stationsData?.data ||
+            [];
+          console.log('[OAuth Callback] Extracted stations:', stations);
+
+          if (stations.length === 0) {
+            setStatus('error');
+            setMessage(
+              'No stations assigned to your account. Please contact an administrator.'
+            );
+            setTimeout(() => router.push('/login'), 3000);
+            return;
+          }
+
+          if (stations.length === 1) {
+            // Single station - auto-select and complete login
+            const station = stations[0];
+            console.log(
+              '[OAuth Callback] Auto-selecting single station:',
+              station
+            );
+
+            // Call station-login to get proper station context
+            const stationLoginResponse = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/auth/station-login`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                  email: userEmail,
+                  station_id: station.id.toString(),
+                  oauth_token: token, // Pass OAuth token for verification
+                }),
+              }
+            );
+
+            if (!stationLoginResponse.ok) {
+              throw new Error('Station login failed');
+            }
+
+            const stationLoginData = await stationLoginResponse.json();
+            console.log(
+              '[OAuth Callback] Station login response:',
+              stationLoginData
+            );
+
+            // Extract login data (handle nested structure)
+            const loginData = stationLoginData?.data || stationLoginData;
+            if (loginData?.access_token && loginData?.station_context) {
+              login(loginData.access_token, loginData.station_context);
+              setStatus('success');
+              setMessage(
+                `Welcome back, ${userData.data?.full_name || 'User'}!`
+              );
+              setTimeout(() => router.push('/'), 1000);
+            } else {
+              throw new Error(
+                'Station login response missing access_token or station_context'
+              );
+            }
+          } else {
+            // Multiple stations - redirect to login page for station selection
+            console.log(
+              '[OAuth Callback] Multiple stations, redirecting to station selection'
+            );
+            setStatus('success');
+            setMessage('Multiple stations found. Please select a station.');
+
+            // Redirect to login page with OAuth token for station selection
+            setTimeout(() => {
+              router.push(
+                `/login?oauth_token=${encodeURIComponent(token)}&email=${encodeURIComponent(userEmail)}`
+              );
+            }, 1000);
+          }
         } else {
           throw new Error('Token validation failed');
         }
