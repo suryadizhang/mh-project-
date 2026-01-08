@@ -545,8 +545,25 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 client_ip = request.client.host if request.client else "unknown"
                 identifier = f"ip:{client_ip}"
 
-            # Check for login endpoint
-            is_login_endpoint = "/auth/login" in request.url.path or "/login" in request.url.path
+            # Check for MANUAL login endpoint only (NOT OAuth!)
+            # OAuth endpoints like /auth/google/login should NOT be rate-limited
+            # because OAuth uses external provider for authentication
+            path = request.url.path
+            is_manual_login = path.endswith(
+                "/auth/login"
+            ) or path.endswith(  # Standard login endpoint
+                "/api/v1/auth/login"
+            )  # Full path match
+            # Explicitly exclude OAuth paths
+            is_oauth = any(
+                oauth_path in path
+                for oauth_path in [
+                    "/auth/google/",
+                    "/auth/facebook/",
+                    "/auth/oauth/",
+                ]
+            )
+            is_login_endpoint = is_manual_login and not is_oauth
 
             if is_login_endpoint:
                 # Check for existing lockout before processing (NO tracking yet!)
