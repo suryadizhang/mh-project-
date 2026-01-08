@@ -23,8 +23,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # Request/Response Models
 class StationLoginRequest(BaseModel):
     email: EmailStr
-    password: str
+    password: str | None = None  # Required for password login
+    oauth_token: str | None = None  # Required for OAuth login
     station_id: str | None = None  # UUID string from frontend
+
+    # Validate that either password or oauth_token is provided
+    def model_post_init(self, __context):
+        if not self.password and not self.oauth_token:
+            raise ValueError("Either password or oauth_token must be provided")
 
 
 class StationLoginResponse(BaseModel):
@@ -68,26 +74,66 @@ async def station_login(
 ):
     """
     Station-aware login endpoint.
+    Supports both password-based and OAuth token-based authentication.
     If station_id is provided, user will be logged into that specific station.
     If not provided, returns available stations for selection.
     """
     try:
-        # First, authenticate the user credentials by querying User directly
-        # (Not StationUser which has encrypted email - that's the wrong table!)
-        result = await db.execute(select(User).where(User.email == request.email.lower()))
-        user = result.scalar_one_or_none()
+        user = None
 
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid credentials",
-            )
+        # METHOD 1: OAuth Token Authentication
+        if request.oauth_token:
+            # Verify the OAuth token and extract user
+            try:
+                from jose import jwt, JWTError
+                from core.config import get_settings
 
-        # Verify password
-        if not user.password_hash or not verify_password(request.password, user.password_hash):
+                settings = get_settings()
+                payload = jwt.decode(
+                    request.oauth_token, settings.jwt_secret_key, algorithms=["HS256"]
+                )
+                token_email = payload.get("sub")
+
+                # Verify token email matches request email
+                if token_email and token_email.lower() == request.email.lower():
+                    result = await db.execute(
+                        select(User).where(User.email == request.email.lower())
+                    )
+                    user = result.scalar_one_or_none()
+
+                if not user:
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail="Invalid OAuth token or user not found",
+                    )
+            except JWTError as e:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail=f"Invalid OAuth token: {e!s}",
+                )
+
+        # METHOD 2: Password Authentication
+        elif request.password:
+            # Authenticate the user credentials by querying User directly
+            result = await db.execute(select(User).where(User.email == request.email.lower()))
+            user = result.scalar_one_or_none()
+
+            if not user:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid credentials",
+                )
+
+            # Verify password
+            if not user.password_hash or not verify_password(request.password, user.password_hash):
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid credentials",
+                )
+        else:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid credentials",
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Either password or oauth_token must be provided",
             )
 
         # Get user's station access
