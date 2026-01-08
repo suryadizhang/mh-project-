@@ -198,9 +198,10 @@ function LoginContent() {
       console.log('[Login] OAuth station login for station:', stationId);
 
       // Call station-login endpoint with OAuth token
+      // NOTE: station_auth router is mounted at /api/station, not /api/auth
       const apiUrl =
         process.env.NEXT_PUBLIC_API_URL || 'https://mhapi.mysticdatanode.net';
-      const response = await fetch(`${apiUrl}/api/auth/station-login`, {
+      const response = await fetch(`${apiUrl}/api/station/station-login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
