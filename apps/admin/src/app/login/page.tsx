@@ -9,7 +9,7 @@ import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
-import type { Station } from '@/services/api';
+import type { Station, StationLoginResponse } from '@/services/api';
 import { authService } from '@/services/api';
 
 export default function LoginPage() {
@@ -93,11 +93,43 @@ export default function LoginPage() {
         stationId // Pass UUID string directly, no parseInt
       );
 
-      if (response.data?.access_token && response.data?.station_context) {
-        login(response.data.access_token, response.data.station_context);
+      console.log(
+        'Station login full response:',
+        JSON.stringify(response, null, 2)
+      );
+
+      // Check if the API call itself failed (network error, CORS, etc.)
+      if (!response.success) {
+        console.error('Station login API call failed:', response.error);
+        setError(response.error || 'Station login failed. Please try again.');
+        return;
+      }
+
+      // Backend wraps response in { success: true, data: StationLoginResponse }
+      // apiFetch adds another layer: { data: backendResponse, success: true }
+      // So the actual structure is:
+      //   response.data = { success: true, data: { access_token, station_context } }
+      // OR if backend returns flat response:
+      //   response.data = { access_token, station_context }
+      // We need to handle both cases
+      const backendResponse = response.data as unknown as Record<
+        string,
+        unknown
+      >;
+      const loginData =
+        (backendResponse?.data as StationLoginResponse) ||
+        (backendResponse as unknown as StationLoginResponse);
+
+      console.log('Extracted loginData:', JSON.stringify(loginData, null, 2));
+
+      if (loginData?.access_token && loginData?.station_context) {
+        login(loginData.access_token, loginData.station_context);
         router.push('/');
       } else {
-        setError('Station login failed. Please try again.');
+        console.error('Station login response missing data:', response);
+        setError(
+          'Station login failed: Missing access token or station context.'
+        );
       }
     } catch (err: any) {
       logger.error(err as Error, {
