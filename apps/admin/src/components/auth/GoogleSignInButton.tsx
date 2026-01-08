@@ -46,10 +46,13 @@ export default function GoogleSignInButton() {
   // Generate state token once per component mount (includes origin)
   const stateToken = useMemo(() => generateStateWithOrigin(), []);
 
+  // Trim API URL to remove any accidental trailing spaces from env var
+  const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').trim();
+
   const handleGoogleLogin = useGoogleLogin({
     flow: 'auth-code',
     ux_mode: 'redirect',
-    redirect_uri: `${process.env.NEXT_PUBLIC_API_URL}/auth/google/callback`,
+    redirect_uri: `${apiUrl}/auth/google/callback`,
     // Include state with CSRF token and origin URL for proper redirect after callback
     state: stateToken,
     // Always show account chooser so user can pick which Google account to use
