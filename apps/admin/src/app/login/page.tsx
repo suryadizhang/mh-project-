@@ -208,6 +208,7 @@ function LoginContent() {
           Authorization: `Bearer ${oauthToken}`,
         },
         body: JSON.stringify({
+          email: oauthEmail, // Required for validation
           station_id: stationId,
           oauth_token: oauthToken,
         }),
