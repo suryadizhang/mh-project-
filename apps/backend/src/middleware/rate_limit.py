@@ -61,12 +61,8 @@ class InMemoryRateLimitStore:
     """
 
     def __init__(self):
-        self.rate_limits: dict[str, list[float]] = (
-            {}
-        )  # identifier -> [timestamps]
-        self.login_attempts: dict[str, list[float]] = (
-            {}
-        )  # identifier -> [timestamps]
+        self.rate_limits: dict[str, list[float]] = {}  # identifier -> [timestamps]
+        self.login_attempts: dict[str, list[float]] = {}  # identifier -> [timestamps]
         self.lockouts: dict[str, dict] = {}  # identifier -> lockout_data
         self._last_cleanup = time.time()
         self._cleanup_interval = 300  # Clean up every 5 minutes
@@ -82,8 +78,7 @@ class InMemoryRateLimitStore:
             self.rate_limits[key] = [
                 ts
                 for ts in self.rate_limits[key]
-                if current_time - ts
-                < RateLimitConfig.RATE_LIMIT_WINDOW_SECONDS
+                if current_time - ts < RateLimitConfig.RATE_LIMIT_WINDOW_SECONDS
             ]
             if not self.rate_limits[key]:
                 del self.rate_limits[key]
@@ -93,8 +88,7 @@ class InMemoryRateLimitStore:
             self.login_attempts[key] = [
                 ts
                 for ts in self.login_attempts[key]
-                if current_time - ts
-                < RateLimitConfig.LOGIN_ATTEMPT_WINDOW_SECONDS
+                if current_time - ts < RateLimitConfig.LOGIN_ATTEMPT_WINDOW_SECONDS
             ]
             if not self.login_attempts[key]:
                 del self.login_attempts[key]
@@ -102,9 +96,7 @@ class InMemoryRateLimitStore:
         # Clean expired lockouts
         now = datetime.now(timezone.utc)
         for key in list(self.lockouts.keys()):
-            lockout_until = datetime.fromisoformat(
-                self.lockouts[key]["lockout_until"]
-            )
+            lockout_until = datetime.fromisoformat(self.lockouts[key]["lockout_until"])
             if now >= lockout_until:
                 del self.lockouts[key]
 
@@ -133,10 +125,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         # If Redis was unavailable, retry after interval
         if not self.redis_available:
-            if (
-                current_time - self._redis_check_time
-                < self._redis_retry_interval
-            ):
+            if current_time - self._redis_check_time < self._redis_retry_interval:
                 return None  # Don't retry yet
 
         if self.redis_client is None:
@@ -162,9 +151,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 return None
         return self.redis_client
 
-    async def _get_user_info(
-        self, request: Request
-    ) -> tuple[str | None, str | None]:
+    async def _get_user_info(self, request: Request) -> tuple[str | None, str | None]:
         """
         Extract user ID and role from request
         Returns: (user_id, role)
@@ -216,9 +203,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             # Remove old entries
             window_start = current_time - self.config.RATE_LIMIT_WINDOW_SECONDS
             self.memory_store.rate_limits[identifier] = [
-                ts
-                for ts in self.memory_store.rate_limits[identifier]
-                if ts > window_start
+                ts for ts in self.memory_store.rate_limits[identifier] if ts > window_start
             ]
 
             # Count and add current request
@@ -231,9 +216,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         # Redis path
         key = f"{self.config.RATE_LIMIT_PREFIX}:{identifier}"
-        window_start = (
-            int(current_time) - self.config.RATE_LIMIT_WINDOW_SECONDS
-        )
+        window_start = int(current_time) - self.config.RATE_LIMIT_WINDOW_SECONDS
 
         # Use Redis sorted set for sliding window
         pipe = redis.pipeline()
@@ -277,15 +260,11 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         lockout_data = await redis.get(lockout_key)
         if lockout_data:
             lockout_info = json.loads(lockout_data)
-            lockout_until = datetime.fromisoformat(
-                lockout_info["lockout_until"]
-            )
+            lockout_until = datetime.fromisoformat(lockout_info["lockout_until"])
 
             if datetime.now(timezone.utc) < lockout_until:
                 remaining_seconds = int(
-                    (
-                        lockout_until - datetime.now(timezone.utc)
-                    ).total_seconds()
+                    (lockout_until - datetime.now(timezone.utc)).total_seconds()
                 )
                 remaining_minutes = remaining_seconds // 60
 
@@ -368,9 +347,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             "warning": warning,
         }
 
-    def _track_login_attempt_memory(
-        self, identifier: str, success: bool
-    ) -> dict:
+    def _track_login_attempt_memory(self, identifier: str, success: bool) -> dict:
         """
         Track login attempt using in-memory store when Redis is unavailable.
         Mirrors the Redis logic but uses dictionaries.
@@ -384,15 +361,11 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         # Check if locked
         if lockout_key in self.memory_store.lockouts:
             lockout_data = self.memory_store.lockouts[lockout_key]
-            lockout_until = datetime.fromisoformat(
-                lockout_data["lockout_until"]
-            )
+            lockout_until = datetime.fromisoformat(lockout_data["lockout_until"])
 
             if datetime.now(timezone.utc) < lockout_until:
                 remaining_seconds = int(
-                    (
-                        lockout_until - datetime.now(timezone.utc)
-                    ).total_seconds()
+                    (lockout_until - datetime.now(timezone.utc)).total_seconds()
                 )
                 remaining_minutes = remaining_seconds // 60
 
@@ -424,9 +397,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         # Remove old attempts outside the window
         self.memory_store.login_attempts[attempt_key] = [
-            ts
-            for ts in self.memory_store.login_attempts[attempt_key]
-            if ts > window_start
+            ts for ts in self.memory_store.login_attempts[attempt_key] if ts > window_start
         ]
 
         # Add current attempt
@@ -476,6 +447,78 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             "warning": warning,
         }
 
+    async def _check_lockout_only(self, redis: aioredis.Redis | None, identifier: str) -> dict:
+        """
+        Check if account is locked out WITHOUT tracking a new attempt.
+        This is used BEFORE processing a login request to reject locked accounts.
+
+        Returns: dict with lockout info if locked, or {"locked": False} if not
+        """
+        # Use in-memory store if Redis unavailable
+        if redis is None:
+            return self._check_lockout_only_memory(identifier)
+
+        lockout_key = f"{self.config.LOCKOUT_PREFIX}:{identifier}"
+
+        # Check if account is locked out
+        lockout_data = await redis.get(lockout_key)
+        if lockout_data:
+            lockout_info = json.loads(lockout_data)
+            lockout_until = datetime.fromisoformat(lockout_info["lockout_until"])
+
+            if datetime.now(timezone.utc) < lockout_until:
+                remaining_seconds = int(
+                    (lockout_until - datetime.now(timezone.utc)).total_seconds()
+                )
+                remaining_minutes = remaining_seconds // 60
+
+                return {
+                    "locked": True,
+                    "remaining_minutes": remaining_minutes,
+                    "remaining_seconds": remaining_seconds,
+                    "message": f"⚠️ Account locked due to multiple failed login attempts. Please try again in {remaining_minutes} minutes.",
+                    "lockout_until": lockout_until.isoformat(),
+                }
+            else:
+                # Lockout expired, clean up
+                attempt_key = f"{self.config.LOGIN_ATTEMPT_PREFIX}:{identifier}"
+                await redis.delete(lockout_key)
+                await redis.delete(attempt_key)
+
+        return {"locked": False}
+
+    def _check_lockout_only_memory(self, identifier: str) -> dict:
+        """
+        Check lockout status using in-memory store without tracking.
+        """
+        lockout_key = f"login_lockout:{identifier}"
+
+        if lockout_key in self.memory_store.lockouts:
+            lockout_data = self.memory_store.lockouts[lockout_key]
+            lockout_until = datetime.fromisoformat(lockout_data["lockout_until"])
+
+            if datetime.now(timezone.utc) < lockout_until:
+                remaining_seconds = int(
+                    (lockout_until - datetime.now(timezone.utc)).total_seconds()
+                )
+                remaining_minutes = remaining_seconds // 60
+
+                return {
+                    "locked": True,
+                    "remaining_minutes": remaining_minutes,
+                    "remaining_seconds": remaining_seconds,
+                    "message": f"⚠️ Account locked due to multiple failed login attempts. Please try again in {remaining_minutes} minutes.",
+                    "lockout_until": lockout_until.isoformat(),
+                }
+            else:
+                # Lockout expired, clean up
+                del self.memory_store.lockouts[lockout_key]
+                attempt_key = f"login_attempts:{identifier}"
+                if attempt_key in self.memory_store.login_attempts:
+                    del self.memory_store.login_attempts[attempt_key]
+
+        return {"locked": False}
+
     async def dispatch(self, request: Request, call_next):
         """Process request with rate limiting"""
 
@@ -499,22 +542,15 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 identifier = f"user:{user_id}"
             else:
                 # Use IP address for unauthenticated requests
-                client_ip = (
-                    request.client.host if request.client else "unknown"
-                )
+                client_ip = request.client.host if request.client else "unknown"
                 identifier = f"ip:{client_ip}"
 
             # Check for login endpoint
-            is_login_endpoint = (
-                "/auth/login" in request.url.path
-                or "/login" in request.url.path
-            )
+            is_login_endpoint = "/auth/login" in request.url.path or "/login" in request.url.path
 
             if is_login_endpoint:
-                # Check for existing lockout before processing
-                lockout_check = await self._track_login_attempt(
-                    redis, identifier, success=False
-                )
+                # Check for existing lockout before processing (NO tracking yet!)
+                lockout_check = await self._check_lockout_only(redis, identifier)
 
                 if lockout_check["locked"]:
                     logger.warning(
@@ -527,19 +563,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                         content={
                             "detail": lockout_check["message"],
                             "locked": True,
-                            "remaining_minutes": lockout_check[
-                                "remaining_minutes"
-                            ],
-                            "remaining_seconds": lockout_check[
-                                "remaining_seconds"
-                            ],
+                            "remaining_minutes": lockout_check["remaining_minutes"],
+                            "remaining_seconds": lockout_check["remaining_seconds"],
                             "lockout_until": lockout_check["lockout_until"],
                             "retry_after": lockout_check["remaining_seconds"],
                         },
                         headers={
-                            "Retry-After": str(
-                                lockout_check["remaining_seconds"]
-                            ),
+                            "Retry-After": str(lockout_check["remaining_seconds"]),
                             "X-RateLimit-Locked": "true",
                             "X-RateLimit-Remaining-Minutes": str(
                                 lockout_check["remaining_minutes"]
@@ -558,8 +588,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 limit = self.config.MAX_LOGIN_ATTEMPTS
             else:
                 limit = self._get_rate_limit_for_role(role)
-                is_allowed, current_count, remaining = (
-                    await self._check_rate_limit(redis, identifier, limit)
+                is_allowed, current_count, remaining = await self._check_rate_limit(
+                    redis, identifier, limit
                 )
 
             # Add rate limit headers
@@ -569,14 +599,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
                 # Track successful login if applicable
                 if is_login_endpoint and response.status_code == 200:
-                    await self._track_login_attempt(
-                        redis, identifier, success=True
-                    )
+                    await self._track_login_attempt(redis, identifier, success=True)
                 elif is_login_endpoint and response.status_code in [401, 403]:
                     # Failed login
-                    lockout_info = await self._track_login_attempt(
-                        redis, identifier, success=False
-                    )
+                    lockout_info = await self._track_login_attempt(redis, identifier, success=False)
 
                     # Add warning to response if present
                     if lockout_info.get("warning"):
@@ -588,9 +614,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                         try:
                             content = json.loads(body)
                             content["warning"] = lockout_info["warning"]
-                            content["remaining_attempts"] = lockout_info[
-                                "remaining_attempts"
-                            ]
+                            content["remaining_attempts"] = lockout_info["remaining_attempts"]
 
                             response = JSONResponse(
                                 status_code=response.status_code,
@@ -630,9 +654,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             )
 
             if not is_allowed:
-                response.headers["Retry-After"] = str(
-                    self.config.RATE_LIMIT_WINDOW_SECONDS
-                )
+                response.headers["Retry-After"] = str(self.config.RATE_LIMIT_WINDOW_SECONDS)
 
             return response
 
@@ -645,9 +667,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
 
 # Standalone function for checking lockout status (can be used in auth endpoints)
-async def check_login_lockout(
-    identifier: str, redis_url: str | None = None
-) -> dict:
+async def check_login_lockout(identifier: str, redis_url: str | None = None) -> dict:
     """
     Check if an account is locked out
     Can be called from auth endpoints before processing login
@@ -660,9 +680,7 @@ async def check_login_lockout(
         Dict with lockout status and details
     """
     redis_url = redis_url or settings.redis_url
-    redis = await aioredis.from_url(
-        redis_url, encoding="utf-8", decode_responses=True
-    )
+    redis = await aioredis.from_url(redis_url, encoding="utf-8", decode_responses=True)
 
     lockout_key = f"{RateLimitConfig.LOCKOUT_PREFIX}:{identifier}"
     lockout_data = await redis.get(lockout_key)
@@ -674,9 +692,7 @@ async def check_login_lockout(
     lockout_until = datetime.fromisoformat(lockout_info["lockout_until"])
 
     if datetime.now(timezone.utc) < lockout_until:
-        remaining_seconds = int(
-            (lockout_until - datetime.now(timezone.utc)).total_seconds()
-        )
+        remaining_seconds = int((lockout_until - datetime.now(timezone.utc)).total_seconds())
         return {
             "locked": True,
             "remaining_minutes": remaining_seconds // 60,
