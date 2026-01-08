@@ -126,8 +126,9 @@ function CallbackContent() {
             );
 
             // Call station-login to get proper station context
+            // NOTE: station_auth router is mounted at /api/station, not /api/auth
             const stationLoginResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/api/auth/station-login`,
+              `${process.env.NEXT_PUBLIC_API_URL}/api/station/station-login`,
               {
                 method: 'POST',
                 headers: {
