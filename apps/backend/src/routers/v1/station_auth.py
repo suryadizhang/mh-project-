@@ -92,7 +92,9 @@ async def station_login(
                 payload = jwt.decode(
                     request.oauth_token, settings.jwt_secret_key, algorithms=["HS256"]
                 )
-                token_email = payload.get("sub")
+                # Token has "sub" = user_id and "email" = user email
+                token_email = payload.get("email")
+                token_user_id = payload.get("sub")
 
                 # Verify token email matches request email
                 if token_email and token_email.lower() == request.email.lower():
