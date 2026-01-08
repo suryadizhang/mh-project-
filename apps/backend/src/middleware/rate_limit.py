@@ -606,28 +606,42 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
                     # Add warning to response if present
                     if lockout_info.get("warning"):
-                        # Modify response to include warning
-                        body = b""
-                        async for chunk in response.body_iterator:
-                            body += chunk
-
-                        try:
-                            content = json.loads(body)
-                            content["warning"] = lockout_info["warning"]
-                            content["remaining_attempts"] = lockout_info["remaining_attempts"]
-
-                            response = JSONResponse(
-                                status_code=response.status_code,
-                                content=content,
-                                headers=dict(response.headers),
+                        # Check if response is compressed - if so, skip modification
+                        content_encoding = response.headers.get("content-encoding", "")
+                        if content_encoding in ("gzip", "br", "deflate"):
+                            # Cannot safely modify compressed response, just pass through
+                            logger.debug(
+                                f"⚠️ Skipping warning injection for compressed response ({content_encoding})"
                             )
-                        except Exception:
-                            # If can't parse JSON, just pass through
-                            response = JSONResponse(
-                                status_code=response.status_code,
-                                content=body.decode(),
-                                headers=dict(response.headers),
-                            )
+                        else:
+                            # Modify response to include warning
+                            body = b""
+                            async for chunk in response.body_iterator:
+                                body += chunk
+
+                            try:
+                                content = json.loads(body)
+                                content["warning"] = lockout_info["warning"]
+                                content["remaining_attempts"] = lockout_info["remaining_attempts"]
+
+                                response = JSONResponse(
+                                    status_code=response.status_code,
+                                    content=content,
+                                    headers=dict(response.headers),
+                                )
+                            except (json.JSONDecodeError, UnicodeDecodeError) as e:
+                                # If can't parse JSON (binary/compressed data), recreate response from bytes
+                                logger.debug(
+                                    f"⚠️ Could not parse response body for warning injection: {e}"
+                                )
+                                from starlette.responses import Response
+
+                                response = Response(
+                                    content=body,
+                                    status_code=response.status_code,
+                                    headers=dict(response.headers),
+                                    media_type=response.media_type,
+                                )
             else:
                 logger.warning(
                     f"🚫 Rate limit exceeded: {identifier} ({role or 'unauthenticated'}), "
