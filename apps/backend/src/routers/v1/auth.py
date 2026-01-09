@@ -883,14 +883,14 @@ async def refresh_token(
     },
 )
 async def reset_password(
-    email: EmailStr,
+    request: PasswordResetRequest,
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, str]:
     """
     Request password reset link.
 
     Args:
-        email: User's email address
+        request: Password reset request with email address
         db: Database session
 
     Returns:
@@ -902,16 +902,25 @@ async def reset_password(
     """
     try:
         service = PasswordResetService(db)
-        await service.request_reset(email)
+        await service.request_reset(request.email)
     except HTTPException:
         # Re-raise HTTP exceptions (rate limiting, etc.)
         raise
     except Exception as e:
         # Log error but don't expose details (security)
-        logger.error(f"Password reset error for {email}: {e}")
+        logger.error(f"Password reset error for {request.email}: {e}")
 
     # Always return success to prevent user enumeration
     return {"message": "If an account with that email exists, a password reset link has been sent."}
+
+
+# Schema for password reset request
+class PasswordResetRequest(BaseModel):
+    """Request body for requesting password reset."""
+
+    email: EmailStr = Field(..., description="Email address to send reset link")
+
+    model_config = {"json_schema_extra": {"examples": [{"email": "user@example.com"}]}}
 
 
 # Schema for confirm password reset request
