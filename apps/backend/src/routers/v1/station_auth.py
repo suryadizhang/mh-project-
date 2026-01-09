@@ -54,7 +54,8 @@ def get_auth_service():
     from core.security import FieldEncryption
 
     settings = get_settings()
-    return AuthenticationService(FieldEncryption(), settings.jwt_secret_key)
+    # Use SECRET_KEY for consistency with token creation in OAuth flow
+    return AuthenticationService(FieldEncryption(), settings.SECRET_KEY)
 
 
 def get_station_auth_service():
@@ -62,7 +63,8 @@ def get_station_auth_service():
     from core.security import FieldEncryption
 
     settings = get_settings()
-    return StationAuthenticationService(FieldEncryption(), settings.jwt_secret_key)
+    # Use SECRET_KEY for consistency with token creation in OAuth flow
+    return StationAuthenticationService(FieldEncryption(), settings.SECRET_KEY)
 
 
 @router.post("/station-login", response_model=ApiResponse)
@@ -78,6 +80,10 @@ async def station_login(
     If station_id is provided, user will be logged into that specific station.
     If not provided, returns available stations for selection.
     """
+    import logging
+
+    logger = logging.getLogger(__name__)
+
     try:
         user = None
 
@@ -89,12 +95,50 @@ async def station_login(
                 from core.config import get_settings
 
                 settings = get_settings()
-                payload = jwt.decode(
-                    request.oauth_token, settings.jwt_secret_key, algorithms=["HS256"]
+
+                # DEBUG: Log token and key info (first 20 chars only for security)
+                token_preview = (
+                    request.oauth_token[:50] + "..."
+                    if len(request.oauth_token) > 50
+                    else request.oauth_token
                 )
+                key_preview = (
+                    settings.jwt_secret_key[:20] + "..."
+                    if len(settings.jwt_secret_key) > 20
+                    else settings.jwt_secret_key
+                )
+                secret_key_preview = (
+                    settings.SECRET_KEY[:20] + "..."
+                    if len(settings.SECRET_KEY) > 20
+                    else settings.SECRET_KEY
+                )
+
+                logger.warning(f"🔍 DEBUG station-login: Token preview: {token_preview}")
+                logger.warning(f"🔍 DEBUG station-login: jwt_secret_key preview: {key_preview}")
+                logger.warning(f"🔍 DEBUG station-login: SECRET_KEY preview: {secret_key_preview}")
+                logger.warning(
+                    f"🔍 DEBUG station-login: Keys match: {settings.jwt_secret_key == settings.SECRET_KEY}"
+                )
+
+                # Try decoding with SECRET_KEY directly first (like verify_token does)
+                try:
+                    test_payload = jwt.decode(
+                        request.oauth_token, settings.SECRET_KEY, algorithms=["HS256"]
+                    )
+                    logger.warning(
+                        f"✅ DEBUG: Decode with SECRET_KEY SUCCESS: {list(test_payload.keys())}"
+                    )
+                except Exception as e:
+                    logger.warning(f"❌ DEBUG: Decode with SECRET_KEY FAILED: {e}")
+
+                payload = jwt.decode(request.oauth_token, settings.SECRET_KEY, algorithms=["HS256"])
                 # Token has "sub" = user_id and "email" = user email
                 token_email = payload.get("email")
                 token_user_id = payload.get("sub")
+
+                logger.warning(
+                    f"✅ DEBUG station-login: Decode SUCCESS! email={token_email}, sub={token_user_id}"
+                )
 
                 # Verify token email matches request email
                 if token_email and token_email.lower() == request.email.lower():
@@ -191,13 +235,41 @@ async def station_login(
 
         access_token, refresh_token, session_id = session_info
 
-        # Build station context response
+        # Fetch actual station details from database
+        station_name = "Unknown Station"
+        if target_station_id:
+            station_result = await db.execute(
+                select(Station).where(Station.id == target_station_id)
+            )
+            station_record = station_result.scalar_one_or_none()
+            if station_record:
+                station_name = (
+                    station_record.display_name
+                    or station_record.name
+                    or f"Station {target_station_id}"
+                )
+
+        # Determine if this is a global role (super_admin, admin, customer_support)
+        # Global roles don't need station context in UI header
+        user_role = station_context.highest_role.value
+        is_global_role = user_role in ["super_admin", "admin", "customer_support"]
+
+        # Count accessible stations for multi-station dropdown logic
+        station_count = len(station_context.accessible_station_ids)
+
+        # Build station context response with enhanced data
         station_info = {
-            "station_id": target_station_id,
-            "station_name": f"Station {target_station_id}",  # In production, get from DB
+            "station_id": str(target_station_id) if target_station_id else None,
+            "station_name": station_name,
             "role": station_context.station_roles.get(target_station_id, "user"),
             "permissions": list(station_context.station_permissions.get(target_station_id, set())),
-            "is_super_admin": station_context.highest_role.value == "super_admin",
+            "is_super_admin": user_role == "super_admin",
+            # New fields for dashboard UX
+            "user_email": user.email,
+            "user_name": user.full_name or user.email,
+            "is_global_role": is_global_role,
+            "station_count": station_count,
+            "highest_role": user_role,
         }
 
         return ApiResponse(
@@ -262,18 +334,38 @@ async def get_user_stations(
         if not station_context:
             return ApiResponse(success=True, data=UserStationsResponse(stations=[]))
 
-        # Build stations list (in production, fetch actual station details)
+        # Build stations list with actual station details from DB
         stations = []
-        for station_id in station_context.accessible_station_ids:
-            stations.append(
-                {
-                    "id": station_id,
-                    "name": f"Station {station_id}",
-                    "location": f"Location {station_id}",
-                    "role": station_context.station_roles.get(station_id, "user"),
-                    "is_primary": station_id == station_context.primary_station_id,
-                }
-            )
+        if station_context.accessible_station_ids:
+            # Fetch all accessible stations in one query
+            stmt = select(Station).where(Station.id.in_(station_context.accessible_station_ids))
+            result = await db.execute(stmt)
+            station_records = {str(s.id): s for s in result.scalars().all()}
+
+            for station_id in station_context.accessible_station_ids:
+                station_id_str = str(station_id)
+                station_record = station_records.get(station_id_str)
+                if station_record:
+                    stations.append(
+                        {
+                            "id": station_id_str,
+                            "name": station_record.name,
+                            "location": station_record.display_name or station_record.name,
+                            "role": station_context.station_roles.get(station_id, "user"),
+                            "is_primary": station_id == station_context.primary_station_id,
+                        }
+                    )
+                else:
+                    # Fallback if station not found in DB
+                    stations.append(
+                        {
+                            "id": station_id_str,
+                            "name": f"Station {station_id}",
+                            "location": "Unknown Location",
+                            "role": station_context.station_roles.get(station_id, "user"),
+                            "is_primary": station_id == station_context.primary_station_id,
+                        }
+                    )
 
         return ApiResponse(success=True, data=UserStationsResponse(stations=stations))
 
@@ -331,13 +423,30 @@ async def switch_station(
 
         access_token, refresh_token, _, _ = new_tokens
 
-        # Build new station context
+        # Fetch actual station details from database
+        station_name = "Unknown Station"
+        station_result = await db.execute(select(Station).where(Station.id == station_id))
+        station_record = station_result.scalar_one_or_none()
+        if station_record:
+            station_name = station_record.display_name or station_record.name
+
+        # Determine if this is a global role
+        user_role = station_context.highest_role.value
+        is_global_role = user_role in ["super_admin", "admin", "customer_support"]
+
+        # Build new station context with enhanced data
         station_info = {
-            "station_id": station_id,
-            "station_name": f"Station {station_id}",
+            "station_id": str(station_id),
+            "station_name": station_name,
             "role": station_context.station_roles.get(station_id, "user"),
             "permissions": list(station_context.station_permissions.get(station_id, set())),
-            "is_super_admin": station_context.highest_role.value == "super_admin",
+            "is_super_admin": user_role == "super_admin",
+            # Enhanced fields
+            "user_email": current_user.email,
+            "user_name": current_user.full_name or current_user.email,
+            "is_global_role": is_global_role,
+            "station_count": len(station_context.accessible_station_ids),
+            "highest_role": user_role,
         }
 
         return ApiResponse(
