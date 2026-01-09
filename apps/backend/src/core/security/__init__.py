@@ -39,6 +39,7 @@ from .config import SecurityConfig
 from .password import (
     verify_password,
     get_password_hash,
+    hash_password,
     hash_password_bcrypt,
     verify_password_bcrypt,
 )
@@ -46,8 +47,11 @@ from .password import (
 # JWT tokens
 from .tokens import (
     create_access_token,
+    create_refresh_token,
     verify_token,
+    verify_refresh_token,
     extract_user_from_token,
+    decode_access_token,
 )
 
 # Encryption
@@ -133,12 +137,16 @@ __all__ = [
     # Password
     "verify_password",
     "get_password_hash",
+    "hash_password",
     "hash_password_bcrypt",
     "verify_password_bcrypt",
     # Tokens
     "create_access_token",
+    "create_refresh_token",
     "verify_token",
+    "verify_refresh_token",
     "extract_user_from_token",
+    "decode_access_token",
     # Encryption
     "get_fernet_key",
     "encrypt_pii",

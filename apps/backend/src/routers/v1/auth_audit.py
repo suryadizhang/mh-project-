@@ -2,6 +2,7 @@
 Authentication router with security audit logging
 """
 
+import logging
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -11,8 +12,10 @@ from core.database import get_db
 from core.security import create_access_token, verify_password, get_password_hash
 from db.models.identity import User, UserStatus
 from services.audit_service import get_audit_service, AuditService
+from services.token_blacklist_service import TokenBlacklistService
 from sqlalchemy import select
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
@@ -155,6 +158,9 @@ async def change_password(
 ):
     """
     Change password endpoint with security audit logging.
+
+    SECURITY: Invalidates ALL existing tokens after password change.
+    User must re-login on all devices.
     """
 
     client_info = await get_client_info(request)
@@ -177,6 +183,20 @@ async def change_password(
     current_user.password_changed_at = datetime.utcnow()
     await db.commit()
 
+    # SECURITY: Invalidate ALL existing tokens for this user
+    # This forces re-login on all devices after password change
+    try:
+        cache = getattr(request.app.state, "cache", None) if request else None
+        blacklist_service = TokenBlacklistService(db=db, cache=cache)
+        await blacklist_service.blacklist_all_user_tokens(
+            user_id=str(current_user.id),
+            reason="password_changed",
+        )
+        logger.info(f"All tokens invalidated for user {current_user.id} after password change")
+    except Exception as e:
+        # Don't fail the password change if blacklisting fails
+        logger.warning(f"Failed to blacklist tokens for user {current_user.id}: {e}")
+
     # Log password change
     await audit_service.log_security_event(
         event_type="PASSWORD_CHANGE",
@@ -186,4 +206,4 @@ async def change_password(
         **client_info,
     )
 
-    return {"message": "Password changed successfully"}
+    return {"message": "Password changed successfully. Please log in again on all devices."}
