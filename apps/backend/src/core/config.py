@@ -245,7 +245,18 @@ class Settings(BaseSettings):
     )
     FIELD_ENCRYPTION_KEY_OLD: str | None = None  # Previous key for rotation support
 
+    # JWT Token Settings
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
+    # Refresh Token Settings (Option B Security Implementation)
+    # Refresh tokens use a different secret for security isolation
+    # If not set, falls back to JWT_SECRET (not recommended for production)
+    REFRESH_TOKEN_SECRET: str | None = None  # Separate secret for refresh tokens
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7  # 7-day refresh token expiry
+
+    # Password Reset Token Settings
+    PASSWORD_RESET_EXPIRE_MINUTES: int = 60  # 1-hour password reset link expiry
+    PASSWORD_RESET_MAX_ATTEMPTS: int = 3  # Max reset requests per hour per email
 
     # CORS - Multi-Domain Configuration (PRODUCTION)
     # NOTE: Include both www and non-www versions as site redirects to www
