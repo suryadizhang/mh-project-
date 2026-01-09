@@ -40,9 +40,14 @@ def verify_password_bcrypt(password: str, hashed: str) -> bool:
     return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
 
 
+# Alias for backward compatibility with services that import hash_password
+hash_password = get_password_hash
+
+
 __all__ = [
     "verify_password",
     "get_password_hash",
+    "hash_password",
     "hash_password_bcrypt",
     "verify_password_bcrypt",
 ]

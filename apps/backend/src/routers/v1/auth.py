@@ -11,20 +11,34 @@ This module handles user authentication operations including:
 All endpoints except /login and /register require JWT Bearer token authentication.
 """
 
+import logging
+from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from core.database import get_db
-from core.security import verify_password, create_access_token, require_auth
+from core.security import (
+    verify_password,
+    create_access_token,
+    create_refresh_token,
+    verify_refresh_token,
+    require_auth,
+    decode_access_token,
+)
 from core.config import settings
 from db.models.identity import User, UserStatus
+from services.token_blacklist_service import TokenBlacklistService
+from services.password_reset_service import PasswordResetService
 
 router = APIRouter(tags=["authentication"])
+security = HTTPBearer()
+logger = logging.getLogger(__name__)
 
 
 # Pydantic Schemas
@@ -334,13 +348,8 @@ async def login(credentials: LoginRequest, db: AsyncSession = Depends(get_db)) -
         }
     )
 
-    # Create refresh token (longer expiry)
-    refresh_token = create_access_token(
-        data={
-            "sub": str(user.id),
-            "type": "refresh",
-        }
-    )
+    # Create refresh token with separate secret and longer expiry (7 days)
+    refresh_token = create_refresh_token(user_id=str(user.id))
 
     return {
         "access_token": access_token,
@@ -491,9 +500,18 @@ async def get_current_user_info(
         },
     },
 )
-async def logout() -> dict[str, str]:
+async def logout(
+    request: Request,
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, str]:
     """
     Logout user and invalidate tokens.
+
+    This endpoint:
+    1. Extracts JTI from the current access token
+    2. Adds the JTI to the blacklist (Redis + DB)
+    3. Token becomes invalid for future requests
 
     Returns:
         Success message
@@ -501,8 +519,133 @@ async def logout() -> dict[str, str]:
     Raises:
         HTTPException(401): Missing or invalid authentication token
     """
-    # Placeholder implementation
-    return {"message": "Logged out successfully"}
+    try:
+        token = credentials.credentials
+        payload = decode_access_token(token)
+
+        if not payload:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token",
+            )
+
+        jti = payload.get("jti")
+        user_id = payload.get("user_id") or payload.get("sub")
+        exp = payload.get("exp")
+
+        if not jti:
+            # Token without JTI - still accept logout but log warning
+            logger.warning(f"Logout with token missing JTI for user {user_id}")
+            return {"message": "Logged out successfully"}
+
+        # Get cache from app state
+        cache = getattr(request.app.state, "cache", None)
+
+        # Blacklist the token
+        blacklist_service = TokenBlacklistService(db=db, cache=cache)
+        await blacklist_service.blacklist_token(
+            jti=jti,
+            user_id=str(user_id) if user_id else None,
+            token_type="access",
+            expires_at_unix=exp,
+            reason="user_logout",
+        )
+
+        logger.info(f"User {user_id} logged out successfully, token {jti[:8]}... blacklisted")
+        return {"message": "Logged out successfully"}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Logout error: {e}")
+        # Don't fail logout - user intent is clear
+        return {"message": "Logged out successfully"}
+
+
+@router.post(
+    "/logout-all-devices",
+    summary="Logout from all devices",
+    description="""
+    Invalidate ALL tokens for the current user.
+
+    ## Use Cases:
+    - Security concern (account may be compromised)
+    - Changed password and want to force re-login everywhere
+    - Lost a device with saved login
+
+    ## Process:
+    1. Identifies the current user from their access token
+    2. Blacklists ALL tokens for that user (access + refresh)
+    3. All other sessions become invalid immediately
+    4. User must re-authenticate on all devices
+
+    ## Returns:
+    - Success message with count of invalidated sessions
+    """,
+    responses={
+        200: {
+            "description": "All sessions invalidated successfully",
+            "content": {
+                "application/json": {
+                    "example": {"message": "All sessions invalidated", "sessions_invalidated": 5}
+                }
+            },
+        },
+        401: {"description": "Invalid or expired authentication token", "model": ErrorResponse},
+    },
+)
+async def logout_all_devices(
+    request: Request,
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
+    """
+    Logout from all devices by invalidating all user tokens.
+
+    This is the "nuclear option" for security - use when:
+    - User suspects account compromise
+    - User changed password
+    - User lost a device
+    """
+    try:
+        token = credentials.credentials
+        payload = decode_access_token(token)
+
+        if not payload:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token",
+            )
+
+        user_id = payload.get("user_id") or payload.get("sub")
+
+        if not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token missing user identifier",
+            )
+
+        # Get cache from app state
+        cache = getattr(request.app.state, "cache", None)
+
+        # Blacklist ALL tokens for this user
+        blacklist_service = TokenBlacklistService(db=db, cache=cache)
+        count = await blacklist_service.blacklist_all_user_tokens(
+            user_id=str(user_id),
+            reason="logout_all_devices",
+        )
+
+        logger.info(f"User {user_id} logged out from all devices, {count} tokens blacklisted")
+        return {"message": "All sessions invalidated", "sessions_invalidated": count}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Logout all devices error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to logout from all devices",
+        )
 
 
 @router.post(
@@ -563,12 +706,23 @@ async def logout() -> dict[str, str]:
         },
     },
 )
-async def refresh_token(refresh_token: str) -> dict[str, Any]:
+async def refresh_token(
+    refresh_token: str,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
     """
     Generate new access token using refresh token.
 
+    Implements secure token rotation:
+    1. Validates the refresh token with separate secret
+    2. Checks if token is blacklisted
+    3. Creates new access token
+    4. Rotates refresh token (new token, blacklists old one)
+    5. Returns new token pair
+
     Args:
         refresh_token: Valid refresh token from login response
+        db: Database session
 
     Returns:
         New access token and refresh token
@@ -576,12 +730,98 @@ async def refresh_token(refresh_token: str) -> dict[str, Any]:
     Raises:
         HTTPException(401): Invalid, expired, or already used refresh token
     """
-    # Placeholder implementation
+    from services.token_blacklist_service import TokenBlacklistService
+
+    # 1. Verify the refresh token
+    payload = verify_refresh_token(refresh_token)
+    if payload is None:
+        logger.warning("🔒 Refresh token verification failed")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired refresh token. Please login again.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # 2. Check if token is blacklisted
+    jti = payload.get("jti")
+    if jti:
+        blacklist_service = TokenBlacklistService(db)
+        is_blacklisted = await blacklist_service.is_blacklisted(jti)
+        if is_blacklisted:
+            logger.warning(f"🔒 Attempt to use blacklisted refresh token: {jti[:8]}...")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Refresh token has already been used. Please login again.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+    # 3. Extract user info
+    user_id = payload.get("sub")
+    if not user_id:
+        logger.error("🔒 Refresh token missing user ID")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token. Please login again.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # 4. Blacklist the old refresh token (token rotation)
+    if jti:
+        try:
+            await blacklist_service.blacklist_token(
+                jti=jti,
+                user_id=user_id,
+                token_type="refresh",
+                reason="token_rotation",
+                expires_at=datetime.fromtimestamp(payload.get("exp", 0)),
+            )
+            logger.info(f"✅ Rotated refresh token for user {user_id[:8]}...")
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to blacklist old refresh token: {e}")
+            # Continue anyway - the new token will still be valid
+
+    # 5. Get user info for new tokens
+    from db.models.identity import User
+
+    user = await db.get(User, user_id)
+    if not user:
+        logger.error(f"🔒 User not found for refresh: {user_id}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found. Please login again.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Check if user is still active
+    if not user.is_active:
+        logger.warning(f"🔒 Inactive user attempted refresh: {user_id}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Account is deactivated. Please contact support.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # 6. Create new access token
+    access_token_data = {
+        "sub": str(user.id),
+        "email": user.email,
+        "role": user.role,
+    }
+    if user.station_id:
+        access_token_data["station_id"] = str(user.station_id)
+
+    new_access_token = create_access_token(data=access_token_data)
+
+    # 7. Create new refresh token (rotation)
+    new_refresh_token = create_refresh_token(user_id=str(user.id))
+
+    logger.info(f"✅ Token refresh successful for user {user.email}")
+
     return {
-        "access_token": "new-dev-token-456",
+        "access_token": new_access_token,
         "token_type": "bearer",
-        "expires_in": 3600,
-        "refresh_token": "new-dev-refresh-token-456",
+        "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        "refresh_token": new_refresh_token,
     }
 
 
@@ -642,12 +882,16 @@ async def refresh_token(refresh_token: str) -> dict[str, Any]:
         },
     },
 )
-async def reset_password(email: EmailStr) -> dict[str, str]:
+async def reset_password(
+    email: EmailStr,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, str]:
     """
     Request password reset link.
 
     Args:
         email: User's email address
+        db: Database session
 
     Returns:
         Success message (always returns success for security)
@@ -656,5 +900,126 @@ async def reset_password(email: EmailStr) -> dict[str, str]:
         HTTPException(400): Invalid email format
         HTTPException(429): Too many reset requests
     """
-    # Placeholder implementation
+    try:
+        service = PasswordResetService(db)
+        await service.request_reset(email)
+    except HTTPException:
+        # Re-raise HTTP exceptions (rate limiting, etc.)
+        raise
+    except Exception as e:
+        # Log error but don't expose details (security)
+        logger.error(f"Password reset error for {email}: {e}")
+
+    # Always return success to prevent user enumeration
     return {"message": "If an account with that email exists, a password reset link has been sent."}
+
+
+# Schema for confirm password reset request
+class ConfirmPasswordResetRequest(BaseModel):
+    """Request body for confirming password reset."""
+
+    token: str = Field(..., description="Password reset token from email link")
+    new_password: str = Field(
+        ...,
+        min_length=8,
+        description="New password (min 8 chars, must include upper, lower, number)",
+    )
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [{"token": "abc123xyz789...", "new_password": "NewSecurePass123!"}]
+        }
+    }
+
+
+@router.post(
+    "/confirm-reset-password",
+    status_code=status.HTTP_200_OK,
+    summary="Confirm password reset with token",
+    description="""
+    Complete password reset using the token from the email link.
+
+    ## Process:
+    1. Validates reset token (not expired, not used)
+    2. Verifies new password meets requirements
+    3. Updates user password (hashed)
+    4. Invalidates all existing sessions (security)
+    5. Marks token as used (one-time use)
+    6. Logs security event
+
+    ## Password Requirements:
+    - Minimum 8 characters
+    - At least one uppercase letter
+    - At least one lowercase letter
+    - At least one number
+
+    ## Security:
+    - Token expires in 1 hour
+    - Token is one-time use only
+    - All existing sessions are invalidated
+    - Password is hashed with bcrypt
+
+    ## Request Body:
+    ```json
+    {
+        "token": "abc123xyz789...",
+        "new_password": "NewSecurePass123!"
+    }
+    ```
+    """,
+    responses={
+        200: {
+            "description": "Password reset successful",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "message": "Password has been reset successfully. Please login with your new password."
+                    }
+                }
+            },
+        },
+        400: {
+            "description": "Invalid or expired token",
+            "model": ErrorResponse,
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "Invalid or expired reset token. Please request a new one."
+                    }
+                }
+            },
+        },
+        422: {
+            "description": "Invalid password format",
+            "model": ErrorResponse,
+        },
+    },
+)
+async def confirm_reset_password(
+    request: ConfirmPasswordResetRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, str]:
+    """
+    Confirm password reset with token from email.
+
+    Args:
+        request: Token and new password
+        db: Database session
+
+    Returns:
+        Success message
+
+    Raises:
+        HTTPException(400): Invalid or expired token
+        HTTPException(422): Invalid password format
+    """
+    service = PasswordResetService(db)
+    success = await service.reset_password(token=request.token, new_password=request.new_password)
+
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token. Please request a new one.",
+        )
+
+    return {"message": "Password has been reset successfully. Please login with your new password."}
