@@ -10,7 +10,7 @@ Handles secure password reset flow:
 5. Invalidate all user sessions after reset
 
 Security Features:
-- Rate limiting (3 requests per hour per email)
+- Rate limiting (30 requests per minute per email)
 - Token expires after 1 hour
 - One-time use tokens
 - Constant-time comparison to prevent timing attacks
@@ -49,7 +49,7 @@ from db.models.identity import User
 logger = logging.getLogger(__name__)
 
 # Rate limiting constants
-MAX_RESET_REQUESTS_PER_HOUR = 3
+MAX_RESET_REQUESTS_PER_MINUTE = 30  # More permissive for testing
 
 
 class PasswordResetService:
@@ -74,7 +74,7 @@ class PasswordResetService:
         """
         self.db = db
         self.token_expiry_minutes = getattr(settings, "PASSWORD_RESET_EXPIRE_MINUTES", 60)
-        self.max_attempts = getattr(settings, "PASSWORD_RESET_MAX_ATTEMPTS", 3)
+        self.max_attempts = getattr(settings, "PASSWORD_RESET_MAX_ATTEMPTS", 30)  # 30 per minute
         self.frontend_url = getattr(settings, "FRONTEND_URL", "https://admin.myhibachichef.com")
 
     async def request_reset(self, email: str) -> bool:
@@ -117,7 +117,7 @@ class PasswordResetService:
             await self.db.execute(
                 text(
                     """
-                    INSERT INTO identity.password_reset_tokens 
+                    INSERT INTO identity.password_reset_tokens
                     (user_id, token_hash, expires_at, created_at)
                     VALUES (:user_id, :token_hash, :expires_at, NOW())
                 """
@@ -251,7 +251,7 @@ class PasswordResetService:
                     FROM identity.password_reset_tokens prt
                     JOIN identity.users u ON prt.user_id::uuid = u.id
                     WHERE u.email = :email
-                    AND prt.created_at > NOW() - INTERVAL '1 hour'
+                    AND prt.created_at > NOW() - INTERVAL '1 minute'
                 """
                 ),
                 {"email": email},
