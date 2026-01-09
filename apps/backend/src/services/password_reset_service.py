@@ -249,7 +249,7 @@ class PasswordResetService:
                     """
                     SELECT COUNT(*) as request_count
                     FROM identity.password_reset_tokens prt
-                    JOIN identity.users u ON prt.user_id = u.id::text
+                    JOIN identity.users u ON prt.user_id::uuid = u.id
                     WHERE u.email = :email
                     AND prt.created_at > NOW() - INTERVAL '1 hour'
                 """
