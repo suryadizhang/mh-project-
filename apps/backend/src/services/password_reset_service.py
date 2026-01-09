@@ -117,7 +117,7 @@ class PasswordResetService:
             await self.db.execute(
                 text(
                     """
-                    INSERT INTO security.password_reset_tokens 
+                    INSERT INTO identity.password_reset_tokens 
                     (user_id, token_hash, expires_at, created_at)
                     VALUES (:user_id, :token_hash, :expires_at, NOW())
                 """
@@ -169,7 +169,7 @@ class PasswordResetService:
                 text(
                     """
                     SELECT id, user_id, expires_at, used_at
-                    FROM security.password_reset_tokens
+                    FROM identity.password_reset_tokens
                     WHERE token_hash = :token_hash
                     ORDER BY created_at DESC
                     LIMIT 1
@@ -209,7 +209,7 @@ class PasswordResetService:
             await self.db.execute(
                 text(
                     """
-                    UPDATE security.password_reset_tokens
+                    UPDATE identity.password_reset_tokens
                     SET used_at = NOW()
                     WHERE id = :token_id
                 """
@@ -248,7 +248,7 @@ class PasswordResetService:
                 text(
                     """
                     SELECT COUNT(*) as request_count
-                    FROM security.password_reset_tokens prt
+                    FROM identity.password_reset_tokens prt
                     JOIN identity.users u ON prt.user_id = u.id::text
                     WHERE u.email = :email
                     AND prt.created_at > NOW() - INTERVAL '1 hour'
