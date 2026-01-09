@@ -17,11 +17,18 @@ import type {
 
 // Station-aware types
 export interface StationContext {
-  station_id: number;
+  station_id: string | null;
   station_name: string;
+  station_code: string | null;
   role: string;
   permissions: string[];
   is_super_admin: boolean;
+  // Extended fields for dashboard UX
+  user_email?: string;
+  user_name?: string;
+  is_global_role?: boolean;
+  station_count?: number;
+  highest_role?: string;
 }
 
 export interface StationLoginRequest {

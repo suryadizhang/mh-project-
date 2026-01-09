@@ -1,21 +1,14 @@
 'use client';
 
 import { format } from 'date-fns';
-import {
-  Bot,
-  Building,
-  Calendar,
-  Mail,
-  TrendingUp,
-  Users,
-} from 'lucide-react';
+import { Bot, Building, Calendar, Mail, TrendingUp, Users } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 import { AdminChatWidget } from '@/components/AdminChatWidget';
 import { StationManager } from '@/components/StationManager';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
-import { type MockBooking,mockDataService } from '@/services/mockDataService';
+import { type MockBooking, mockDataService } from '@/services/mockDataService';
 
 // Use MockBooking type from service
 type Booking = MockBooking;
@@ -493,10 +486,18 @@ export default function AdminDashboard() {
           </h1>
           <div className="flex items-center space-x-4 text-gray-600">
             <p>
-              Station: <strong>{stationContext?.station_name}</strong>
+              Station:{' '}
+              <strong>
+                {stationContext?.station_code ||
+                  stationContext?.station_name ||
+                  'N/A'}
+              </strong>
             </p>
             <p>
-              Role: <strong>{stationContext?.role}</strong>
+              Role:{' '}
+              <strong>
+                {stationContext?.highest_role || stationContext?.role}
+              </strong>
             </p>
             {isSuperAdmin() && (
               <span className="text-red-600 font-semibold">SUPER ADMIN</span>
