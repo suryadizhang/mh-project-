@@ -825,6 +825,15 @@ async def refresh_token(
     }
 
 
+# Schema for password reset request
+class PasswordResetRequest(BaseModel):
+    """Request body for requesting password reset."""
+
+    email: EmailStr = Field(..., description="Email address to send reset link")
+
+    model_config = {"json_schema_extra": {"examples": [{"email": "user@example.com"}]}}
+
+
 @router.post(
     "/reset-password",
     status_code=status.HTTP_200_OK,
@@ -912,15 +921,6 @@ async def reset_password(
 
     # Always return success to prevent user enumeration
     return {"message": "If an account with that email exists, a password reset link has been sent."}
-
-
-# Schema for password reset request
-class PasswordResetRequest(BaseModel):
-    """Request body for requesting password reset."""
-
-    email: EmailStr = Field(..., description="Email address to send reset link")
-
-    model_config = {"json_schema_extra": {"examples": [{"email": "user@example.com"}]}}
 
 
 # Schema for confirm password reset request
