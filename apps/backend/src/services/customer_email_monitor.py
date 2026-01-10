@@ -16,7 +16,6 @@ from email.header import decode_header
 from email.message import Message
 import imaplib
 import logging
-import os
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -218,9 +217,7 @@ class CustomerEmailMonitor:
 
                     emails.append(email_data)
 
-                    logger.info(
-                        f"📧 Fetched email from {from_address}: {subject[:50]}..."
-                    )
+                    logger.info(f"📧 Fetched email from {from_address}: {subject[:50]}...")
 
                     # Mark as read if requested
                     if mark_as_read:
@@ -244,9 +241,7 @@ class CustomerEmailMonitor:
 
         try:
             self.imap_connection.select("INBOX")
-            _, msg_nums = self.imap_connection.search(
-                None, f'HEADER Message-ID "{message_id}"'
-            )
+            _, msg_nums = self.imap_connection.search(None, f'HEADER Message-ID "{message_id}"')
             email_ids = msg_nums[0].split()
 
             if email_ids:
@@ -283,10 +278,30 @@ class CustomerEmailMonitor:
             return {"total": 0, "unread": 0}
 
 
-# Global instance (initialize with environment variables)
-customer_email_monitor = CustomerEmailMonitor(
-    email_address=os.getenv("SMTP_USER", "cs@myhibachichef.com"),
-    password=os.getenv("SMTP_PASSWORD", ""),
-    imap_server=os.getenv("IMAP_SERVER", "imap.ionos.com"),
-    imap_port=int(os.getenv("IMAP_PORT", "993")),
-)
+def get_customer_email_monitor() -> CustomerEmailMonitor:
+    """
+    Factory function to create CustomerEmailMonitor instance.
+    Uses settings from GSM instead of os.getenv().
+    """
+    from core.config import get_settings
+
+    settings = get_settings()
+
+    return CustomerEmailMonitor(
+        email_address=getattr(settings, "SMTP_USER", "cs@myhibachichef.com"),
+        password=getattr(settings, "SMTP_PASSWORD", ""),
+        imap_server=getattr(settings, "IMAP_SERVER", "imap.ionos.com"),
+        imap_port=int(getattr(settings, "IMAP_PORT", 993)),
+    )
+
+
+# Lazy-loaded global instance
+_customer_email_monitor: Optional[CustomerEmailMonitor] = None
+
+
+def customer_email_monitor() -> CustomerEmailMonitor:
+    """Get the global CustomerEmailMonitor instance (lazy initialization)."""
+    global _customer_email_monitor
+    if _customer_email_monitor is None:
+        _customer_email_monitor = get_customer_email_monitor()
+    return _customer_email_monitor
