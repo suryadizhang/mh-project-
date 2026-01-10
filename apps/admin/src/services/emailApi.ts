@@ -109,7 +109,7 @@ export async function getEmailStats(): Promise<{
   const response = await api.get<{
     customer_support: EmailStats;
     payments: EmailStats;
-  }>('/admin/emails/stats');
+  }>('/api/v1/admin/emails/stats');
   return response.data!;
 }
 
@@ -136,8 +136,8 @@ export async function getCustomerSupportEmails(params?: {
 
   const queryString = queryParams.toString();
   const url = queryString
-    ? `/admin/emails/customer-support?${queryString}`
-    : '/admin/emails/customer-support';
+    ? `/api/v1/admin/emails/customer-support?${queryString}`
+    : '/api/v1/admin/emails/customer-support';
 
   const response = await api.get<EmailListResponse>(url);
   return response.data!;
@@ -161,8 +161,8 @@ export async function getPaymentEmails(params?: {
 
   const queryString = queryParams.toString();
   const url = queryString
-    ? `/admin/emails/payments?${queryString}`
-    : '/admin/emails/payments';
+    ? `/api/v1/admin/emails/payments?${queryString}`
+    : '/api/v1/admin/emails/payments';
 
   const response = await api.get<EmailListResponse>(url);
   return response.data!;
@@ -175,7 +175,7 @@ export async function getCustomerSupportThread(
   thread_id: string
 ): Promise<EmailThread> {
   const response = await api.get<EmailThread>(
-    `/admin/emails/customer-support/${thread_id}`
+    `/api/v1/admin/emails/customer-support/${thread_id}`
   );
   return response.data!;
 }
@@ -191,7 +191,7 @@ export async function sendCustomerSupportEmail(
     message_id: string;
     recipient: string;
   }>(
-    '/admin/emails/customer-support/send',
+    '/api/v1/admin/emails/customer-support/send',
     request as unknown as Record<string, unknown>
   );
   return response.data!;
@@ -213,7 +213,7 @@ export async function updateCustomerSupportEmail(
     message_id: string;
     updated_fields: UpdateEmailRequest;
   }>(
-    `/admin/emails/customer-support/${message_id}`,
+    `/api/v1/admin/emails/customer-support/${message_id}`,
     update as unknown as Record<string, unknown>
   );
   return response.data!;
@@ -246,7 +246,7 @@ export async function bulkUpdateCustomerSupportEmails(
     success_count: number;
     failed_count: number;
     errors: Array<{ message_id: string; error: string }>;
-  }>('/admin/emails/customer-support/bulk', {
+  }>('/api/v1/admin/emails/customer-support/bulk', {
     message_ids,
     action,
   } as unknown as Record<string, unknown>);
@@ -263,7 +263,7 @@ export async function deleteCustomerSupportEmail(
     success: boolean;
     message_id: string;
     action: string;
-  }>(`/admin/emails/customer-support/${message_id}`);
+  }>(`/api/v1/admin/emails/customer-support/${message_id}`);
   return response.data!;
 }
 
@@ -277,7 +277,7 @@ export async function deletePaymentEmail(
     success: boolean;
     message_id: string;
     action: string;
-  }>(`/admin/emails/payments/${message_id}`);
+  }>(`/api/v1/admin/emails/payments/${message_id}`);
   return response.data!;
 }
 

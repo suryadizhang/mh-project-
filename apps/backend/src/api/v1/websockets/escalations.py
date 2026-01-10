@@ -25,10 +25,10 @@ async def escalation_websocket(
 ):
     """
     WebSocket endpoint for escalation real-time updates.
-    
+
     Connection URL:
     ws://localhost:8000/api/v1/ws/escalations?token=your_jwt_token
-    
+
     Message Types (Server → Client):
     - connection_established: Initial connection confirmation
     - escalation_created: New escalation created
@@ -36,12 +36,12 @@ async def escalation_websocket(
     - escalation_resolved: Escalation resolved
     - stats_updated: Escalation stats changed (counts)
     - pong: Response to ping (keep-alive)
-    
+
     Message Types (Client → Server):
     - ping: Keep connection alive
     - subscribe: Subscribe to specific escalation updates
     - unsubscribe: Unsubscribe from escalation updates
-    
+
     Authentication:
     - Requires valid JWT token in query parameter
     - Must have admin permissions
@@ -52,21 +52,36 @@ async def escalation_websocket(
     try:
         # Authenticate connection
         if not token:
-            await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="Missing authentication token")
+            await websocket.close(
+                code=status.WS_1008_POLICY_VIOLATION, reason="Missing authentication token"
+            )
             return
 
         try:
             # Verify JWT token
             payload = verify_token(token)
+
+            # Check if token verification failed (returns None for invalid tokens)
+            if payload is None:
+                logger.warning("WebSocket authentication failed: Invalid or expired token")
+                await websocket.close(
+                    code=status.WS_1008_POLICY_VIOLATION, reason="Invalid or expired token"
+                )
+                return
+
             admin_id = payload.get("sub")  # User ID from token
 
             if not admin_id:
-                await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="Invalid token payload")
+                await websocket.close(
+                    code=status.WS_1008_POLICY_VIOLATION, reason="Invalid token payload"
+                )
                 return
 
         except Exception as e:
             logger.error(f"WebSocket authentication failed: {e}")
-            await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="Authentication failed")
+            await websocket.close(
+                code=status.WS_1008_POLICY_VIOLATION, reason="Authentication failed"
+            )
             return
 
         # Connect to manager
@@ -146,7 +161,7 @@ async def escalation_websocket(
 async def get_websocket_stats():
     """
     Get WebSocket connection statistics.
-    
+
     Returns connection counts and active admins.
     Useful for monitoring and debugging.
     """
@@ -154,10 +169,12 @@ async def get_websocket_stats():
 
 
 # Helper function for broadcasting (called from other modules)
-async def broadcast_escalation_event(event_type: str, escalation_data: dict[str, Any], exclude_admin: str | None = None):
+async def broadcast_escalation_event(
+    event_type: str, escalation_data: dict[str, Any], exclude_admin: str | None = None
+):
     """
     Broadcast escalation event to all connected admins.
-    
+
     Args:
         event_type: Type of event (created, updated, resolved)
         escalation_data: Escalation data to send
@@ -175,7 +192,7 @@ async def broadcast_escalation_event(event_type: str, escalation_data: dict[str,
 async def send_to_admin(admin_id: str, event_type: str, data: dict[str, Any]):
     """
     Send escalation event to specific admin.
-    
+
     Args:
         admin_id: Admin user ID
         event_type: Type of event
