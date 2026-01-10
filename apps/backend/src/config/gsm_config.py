@@ -203,6 +203,12 @@ async def load_config() -> Dict[str, Any]:
         ("backend-api", "DEEPGRAM_API_KEY", "DEEPGRAM_API_KEY"),
         ("backend-api", "SMTP_PASSWORD", "SMTP_PASSWORD"),
         ("backend-api", "GMAIL_APP_PASSWORD", "GMAIL_APP_PASSWORD"),
+        # Cloudflare R2 Storage secrets
+        ("backend-api", "cloudflare-r2-account-id", "CLOUDFLARE_R2_ACCOUNT_ID"),
+        ("backend-api", "cloudflare-r2-access-key-id", "CLOUDFLARE_R2_ACCESS_KEY_ID"),
+        ("backend-api", "cloudflare-r2-secret-access-key", "CLOUDFLARE_R2_SECRET_ACCESS_KEY"),
+        ("backend-api", "cloudflare-r2-bucket", "CLOUDFLARE_R2_BUCKET"),
+        ("backend-api", "cloudflare-r2-endpoint", "CLOUDFLARE_R2_ENDPOINT"),
     ]
 
     logger.info("🔑 Loading configuration from GSM...")
