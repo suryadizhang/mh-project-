@@ -10,7 +10,7 @@ import {
   User,
   XCircle,
 } from 'lucide-react';
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +22,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+
+// API base URL from environment variable
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || 'https://mhapi.mysticdatanode.net';
 
 interface PaymentNotification {
   email_id: string;
@@ -70,7 +74,7 @@ export default function PaymentEmailMonitoringDashboard() {
     try {
       // Fetch recent notifications
       const recentRes = await fetch(
-        '/api/v1/payments/email-notifications/recent?since_hours=48&limit=20'
+        `${API_BASE_URL}/api/v1/payments/email-notifications/recent?since_hours=48&limit=20`
       );
       if (!recentRes.ok)
         throw new Error('Failed to fetch recent notifications');
@@ -79,7 +83,7 @@ export default function PaymentEmailMonitoringDashboard() {
 
       // Fetch unmatched notifications
       const unmatchedRes = await fetch(
-        '/api/v1/payments/email-notifications/unmatched?since_hours=48'
+        `${API_BASE_URL}/api/v1/payments/email-notifications/unmatched?since_hours=48`
       );
       if (!unmatchedRes.ok)
         throw new Error('Failed to fetch unmatched notifications');
@@ -88,7 +92,7 @@ export default function PaymentEmailMonitoringDashboard() {
 
       // Fetch monitor status
       const statusRes = await fetch(
-        '/api/v1/payments/email-notifications/status'
+        `${API_BASE_URL}/api/v1/payments/email-notifications/status`
       );
       if (!statusRes.ok) throw new Error('Failed to fetch monitor status');
       const statusData = await statusRes.json();
@@ -107,15 +111,18 @@ export default function PaymentEmailMonitoringDashboard() {
     setError(null);
 
     try {
-      const res = await fetch('/api/v1/payments/email-notifications/process', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          since_hours: 24,
-          auto_confirm: true,
-          mark_as_read: true,
-        }),
-      });
+      const res = await fetch(
+        `${API_BASE_URL}/api/v1/payments/email-notifications/process`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            since_hours: 24,
+            auto_confirm: true,
+            mark_as_read: true,
+          }),
+        }
+      );
 
       if (!res.ok) throw new Error('Failed to process emails');
 
@@ -147,7 +154,7 @@ export default function PaymentEmailMonitoringDashboard() {
 
     try {
       const res = await fetch(
-        '/api/v1/payments/email-notifications/manual-match',
+        `${API_BASE_URL}/api/v1/payments/email-notifications/manual-match`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
