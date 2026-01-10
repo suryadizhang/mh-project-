@@ -81,7 +81,8 @@ class GSMConfig:
                 response = await asyncio.get_event_loop().run_in_executor(
                     None, self.client.access_secret_version, {"name": secret_path}
                 )
-                value = response.payload.data.decode("UTF-8")
+                # Strip whitespace to handle Windows line endings (\r\n) in secret values
+                value = response.payload.data.decode("UTF-8").strip()
 
                 # Cache the result
                 self._cache[secret_name] = value
