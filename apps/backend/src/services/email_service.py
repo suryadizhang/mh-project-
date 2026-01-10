@@ -23,6 +23,8 @@ import ssl
 from typing import Optional
 from urllib.parse import quote
 
+from core.config import get_settings
+
 try:
     import resend
 except ImportError:
@@ -523,20 +525,25 @@ class EmailService:
     """Service for sending email notifications using SMTP or Resend API"""
 
     def __init__(self):
-        self.enabled = os.getenv("EMAIL_ENABLED", "false").lower() == "true"
-        self.provider = os.getenv("EMAIL_PROVIDER", "smtp").lower()  # smtp or resend
-        self.from_name = os.getenv("EMAIL_FROM_NAME", "My Hibachi Chef")
-        self.frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3001")
+        # Load settings from GSM (single source of truth)
+        settings = get_settings()
 
-        # SMTP Configuration (IONOS)
-        self.smtp_host = os.getenv("SMTP_HOST", "smtp.ionos.com")
-        self.smtp_port = int(os.getenv("SMTP_PORT", "587"))
-        self.smtp_from_email = os.getenv("SMTP_FROM_EMAIL", "cs@myhibachichef.com")
-        self.smtp_password = os.getenv("SMTP_PASSWORD", "")
+        self.enabled = getattr(settings, "EMAIL_ENABLED", False)
+        if isinstance(self.enabled, str):
+            self.enabled = self.enabled.lower() == "true"
+        self.provider = getattr(settings, "EMAIL_PROVIDER", "smtp").lower()  # smtp or resend
+        self.from_name = getattr(settings, "EMAIL_FROM_NAME", "My Hibachi Chef")
+        self.frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:3001")
+
+        # SMTP Configuration (IONOS) - from GSM settings
+        self.smtp_host = getattr(settings, "SMTP_HOST", "smtp.ionos.com")
+        self.smtp_port = int(getattr(settings, "SMTP_PORT", 465))
+        self.smtp_from_email = getattr(settings, "SMTP_USER", "cs@myhibachichef.com")
+        self.smtp_password = getattr(settings, "SMTP_PASSWORD", "")
 
         # Resend Configuration (fallback)
-        self.resend_api_key = os.getenv("RESEND_API_KEY")
-        self.resend_from_email = os.getenv("RESEND_FROM_EMAIL", "cs@myhibachichef.com")
+        self.resend_api_key = getattr(settings, "RESEND_API_KEY", None)
+        self.resend_from_email = getattr(settings, "RESEND_FROM_EMAIL", "cs@myhibachichef.com")
 
         # Determine active from_email based on provider
         if self.provider == "resend":
@@ -957,11 +964,16 @@ Bringing the hibachi experience to you!
             # Create secure SSL/TLS context
             context = ssl.create_default_context()
 
-            # Connect and send
-            with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
-                server.starttls(context=context)
-                server.login(self.smtp_from_email, self.smtp_password)
-                server.sendmail(self.smtp_from_email, to_email, msg.as_string())
+            # Connect and send - Port 465 uses SMTP_SSL (implicit TLS), others use STARTTLS
+            if self.smtp_port == 465:
+                with smtplib.SMTP_SSL(self.smtp_host, self.smtp_port, context=context) as server:
+                    server.login(self.smtp_from_email, self.smtp_password)
+                    server.sendmail(self.smtp_from_email, to_email, msg.as_string())
+            else:
+                with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
+                    server.starttls(context=context)
+                    server.login(self.smtp_from_email, self.smtp_password)
+                    server.sendmail(self.smtp_from_email, to_email, msg.as_string())
 
             logger.info(f"✅ Email sent via SMTP to {to_email} | Subject: {subject}")
             return True
