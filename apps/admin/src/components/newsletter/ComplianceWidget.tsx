@@ -57,7 +57,14 @@ export function ComplianceWidget() {
     fetchComplianceMetrics();
 
     // Set up WebSocket connection for real-time updates
-    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000';
+    // Environment-aware WebSocket URL
+    const wsUrl =
+      process.env.NEXT_PUBLIC_WS_URL ||
+      (process.env.NEXT_PUBLIC_API_URL
+        ? process.env.NEXT_PUBLIC_API_URL.replace(/^http/, 'ws').replace(/^https/, 'wss')
+        : typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+          ? 'wss://mhapi.mysticdatanode.net'
+          : 'ws://localhost:8000');
     let ws: WebSocket | null = null;
 
     try {

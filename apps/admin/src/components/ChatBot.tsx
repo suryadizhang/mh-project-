@@ -23,6 +23,15 @@ import {
 import React, { useEffect,useRef, useState } from 'react';
 
 import { useWebSocket } from '@/hooks/useWebSocket';
+
+// Environment-aware WebSocket URL
+const WS_BASE_URL =
+  process.env.NEXT_PUBLIC_WS_URL ||
+  (process.env.NEXT_PUBLIC_API_URL
+    ? process.env.NEXT_PUBLIC_API_URL.replace(/^http/, 'ws').replace(/^https/, 'wss')
+    : typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+      ? 'wss://mhapi.mysticdatanode.net'
+      : 'ws://localhost:8002');
 import { logger } from '@/lib/logger';
 import {
   type AdminChatResponse,
@@ -70,7 +79,7 @@ export default function ChatBot({
 
   // WebSocket connection for real-time chat
   const wsConfig = {
-    url: 'ws://localhost:8002/ws/chat',
+    url: `${WS_BASE_URL}/ws/chat`,
     conversationId: conversationId || undefined,
     userId: 'admin',
     channel: 'admin',

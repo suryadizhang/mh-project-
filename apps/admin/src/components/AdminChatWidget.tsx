@@ -8,6 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 
+// Environment-aware WebSocket URL
+const WS_BASE_URL =
+  process.env.NEXT_PUBLIC_WS_URL ||
+  (process.env.NEXT_PUBLIC_API_URL
+    ? process.env.NEXT_PUBLIC_API_URL.replace(/^http/, 'ws').replace(/^https/, 'wss')
+    : typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+      ? 'wss://mhapi.mysticdatanode.net'
+      : 'ws://localhost:8002');
+
 interface Message {
   id: string;
   type: 'user' | 'assistant' | 'system';
@@ -82,7 +91,7 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
 
     // Use the new unified chat WebSocket endpoint with station context
     const wsUrl =
-      `ws://localhost:8002/ws/chat?` +
+      `${WS_BASE_URL}/ws/chat?` +
       `station_id=${stationContext.station_id}&` +
       `role=${stationContext.role}&` +
       `channel=admin_panel`;
