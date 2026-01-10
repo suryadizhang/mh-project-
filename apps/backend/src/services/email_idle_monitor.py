@@ -69,7 +69,6 @@ from email.header import decode_header
 from email.message import Message
 import imaplib
 import logging
-import os
 import select
 import socket
 from datetime import datetime, timezone, timedelta
@@ -126,6 +125,7 @@ class EmailIdleMonitor:
         # Import settings for adaptive polling
         try:
             from core.config import get_settings
+
             settings = get_settings()
             self.poll_interval_business = settings.EMAIL_POLL_INTERVAL_BUSINESS_HOURS
             self.poll_interval_off_hours = settings.EMAIL_POLL_INTERVAL_OFF_HOURS
@@ -154,12 +154,16 @@ class EmailIdleMonitor:
             self.imap_connection.login(self.email_address, self.password)
 
             # Check if IDLE is supported
-            if b'IDLE' in self.imap_connection.capabilities:
+            if b"IDLE" in self.imap_connection.capabilities:
                 self.idle_supported = True
-                logger.info(f"✅ Connected to {self.email_address} - IDLE supported (real-time push)")
+                logger.info(
+                    f"✅ Connected to {self.email_address} - IDLE supported (real-time push)"
+                )
             else:
                 self.idle_supported = False
-                logger.warning(f"⚠️ Connected to {self.email_address} - IDLE not supported (using {self.poll_interval}s polling)")
+                logger.warning(
+                    f"⚠️ Connected to {self.email_address} - IDLE not supported (using {self.poll_interval}s polling)"
+                )
 
             # Select INBOX
             self.imap_connection.select("INBOX")
@@ -193,12 +197,12 @@ class EmailIdleMonitor:
         try:
             # Send IDLE command
             self._idle_tag = self.imap_connection._new_tag().decode()
-            self.imap_connection.send(f'{self._idle_tag} IDLE\r\n'.encode())
+            self.imap_connection.send(f"{self._idle_tag} IDLE\r\n".encode())
 
             # Wait for continuation response
             response = self.imap_connection.readline()
 
-            if b'+ idling' in response.lower() or b'+ waiting' in response.lower():
+            if b"+ idling" in response.lower() or b"+ waiting" in response.lower():
                 logger.debug(f"📬 IDLE mode started for {self.email_address}")
                 return True
             else:
@@ -218,7 +222,7 @@ class EmailIdleMonitor:
 
         try:
             # Send DONE command
-            self.imap_connection.send(b'DONE\r\n')
+            self.imap_connection.send(b"DONE\r\n")
 
             # Read response
             response = self.imap_connection.readline()
@@ -250,10 +254,10 @@ class EmailIdleMonitor:
             if ready[0]:
                 # Data available - read response
                 response = self.imap_connection.readline()
-                response_str = response.decode('utf-8', errors='ignore')
+                response_str = response.decode("utf-8", errors="ignore")
 
                 # Check if it's a new email notification
-                if 'EXISTS' in response_str or 'RECENT' in response_str:
+                if "EXISTS" in response_str or "RECENT" in response_str:
                     logger.info(f"📧 New email notification received for {self.email_address}")
                     return True
                 else:
@@ -379,6 +383,7 @@ class EmailIdleMonitor:
                     # Parse date
                     try:
                         from email.utils import parsedate_to_datetime
+
                         received_at = parsedate_to_datetime(received_at_str)
                     except Exception:
                         received_at = datetime.now(timezone.utc)
@@ -458,9 +463,7 @@ class EmailIdleMonitor:
                 # Wait for notification (29 minutes max)
                 loop = asyncio.get_event_loop()
                 has_new_email = await loop.run_in_executor(
-                    None,
-                    self._wait_for_idle_response,
-                    self.idle_timeout
+                    None, self._wait_for_idle_response, self.idle_timeout
                 )
 
                 # Stop IDLE
@@ -499,7 +502,9 @@ class EmailIdleMonitor:
                 f"   - Idle mode (no activity {self.idle_threshold_minutes}+ min): {self.poll_interval_idle}s"
             )
         else:
-            logger.info(f"🔄 Starting polling loop for {self.email_address} (every {self.poll_interval}s)")
+            logger.info(
+                f"🔄 Starting polling loop for {self.email_address} (every {self.poll_interval}s)"
+            )
 
         while self.running:
             try:
@@ -523,7 +528,10 @@ class EmailIdleMonitor:
                 # Calculate next poll interval
                 if self.adaptive_polling:
                     next_interval = self._get_adaptive_poll_interval()
-                    if self.consecutive_empty_checks > 0 and self.consecutive_empty_checks % 10 == 0:
+                    if (
+                        self.consecutive_empty_checks > 0
+                        and self.consecutive_empty_checks % 10 == 0
+                    ):
                         logger.debug(
                             f"📊 Adaptive polling stats: {self.consecutive_empty_checks} empty checks, "
                             f"next interval: {next_interval}s"
@@ -597,26 +605,40 @@ class EmailIdleMonitor:
 
 # Factory function for customer support email monitor
 def create_customer_support_monitor(
-    on_new_email_callback: Optional[Callable] = None
+    on_new_email_callback: Optional[Callable] = None,
 ) -> EmailIdleMonitor:
-    """Create IMAP IDLE monitor for cs@myhibachichef.com"""
+    """Create IMAP IDLE monitor for cs@myhibachichef.com
+
+    Uses settings from core.config instead of os.getenv() to get
+    credentials from GSM (Google Secret Manager).
+    """
+    from core.config import get_settings
+
+    settings = get_settings()
+
     return EmailIdleMonitor(
-        email_address=os.getenv("SMTP_USER", "cs@myhibachichef.com"),
-        password=os.getenv("SMTP_PASSWORD", ""),
-        imap_server=os.getenv("IMAP_SERVER", "imap.ionos.com"),
-        imap_port=int(os.getenv("IMAP_PORT", "993")),
+        email_address=getattr(settings, "SMTP_USER", "cs@myhibachichef.com"),
+        password=getattr(settings, "SMTP_PASSWORD", ""),
+        imap_server=getattr(settings, "IMAP_SERVER", "imap.ionos.com"),
+        imap_port=int(getattr(settings, "IMAP_PORT", 993)),
         on_new_email_callback=on_new_email_callback,
     )
 
 
 # Factory function for payment email monitor (Gmail)
-def create_payment_monitor(
-    on_new_email_callback: Optional[Callable] = None
-) -> EmailIdleMonitor:
-    """Create IMAP IDLE monitor for myhibachichef@gmail.com"""
+def create_payment_monitor(on_new_email_callback: Optional[Callable] = None) -> EmailIdleMonitor:
+    """Create IMAP IDLE monitor for myhibachichef@gmail.com
+
+    Uses settings from core.config instead of os.getenv() to get
+    credentials from GSM (Google Secret Manager).
+    """
+    from core.config import get_settings
+
+    settings = get_settings()
+
     return EmailIdleMonitor(
-        email_address=os.getenv("GMAIL_USER", "myhibachichef@gmail.com"),
-        password=os.getenv("GMAIL_APP_PASSWORD", ""),
+        email_address=getattr(settings, "GMAIL_USER", "myhibachichef@gmail.com"),
+        password=getattr(settings, "GMAIL_APP_PASSWORD", ""),
         imap_server="imap.gmail.com",
         imap_port=993,
         on_new_email_callback=on_new_email_callback,
@@ -626,7 +648,7 @@ def create_payment_monitor(
 if __name__ == "__main__":
     # Test IMAP IDLE monitor
     async def on_new_email(email_dict):
-        print(f"\n📧 NEW EMAIL RECEIVED:")
+        print("\n📧 NEW EMAIL RECEIVED:")
         print(f"   From: {email_dict['from_name']} <{email_dict['from_address']}>")
         print(f"   Subject: {email_dict['subject']}")
         print(f"   Preview: {email_dict['text_body'][:100]}...")

@@ -38,14 +38,13 @@ import sys
 import time
 from datetime import datetime, timezone
 from typing import List, Dict, Optional
-import imaplib
 import email
-from email.header import decode_header
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add parent directory to path for imports
 import os
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../.."))
 
 from core.database import get_db_context
@@ -57,8 +56,7 @@ from repositories.email_repository import EmailRepository
 from scripts.error_logger import EmailBackfillErrorLogger
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -88,11 +86,7 @@ class EmailBackfillService:
         self.retry_delay = 2  # seconds
 
     async def backfill_inbox(
-        self,
-        inbox: str,
-        limit: Optional[int] = None,
-        batch_size: int = 100,
-        dry_run: bool = False
+        self, inbox: str, limit: Optional[int] = None, batch_size: int = 100, dry_run: bool = False
     ) -> Dict:
         """
         Backfill emails from IMAP to database.
@@ -134,16 +128,16 @@ class EmailBackfillService:
             return self.stats
 
         # Connect to IMAP with retry logic
-        logger.info(f"📡 Connecting to IMAP server...")
+        logger.info("📡 Connecting to IMAP server...")
         connected = False
         for attempt in range(self.max_retries):
             try:
                 if monitor.connect():
                     connected = True
-                    logger.info(f"✅ Connected to IMAP server")
+                    logger.info("✅ Connected to IMAP server")
                     break
                 else:
-                    raise ConnectionError(f"IMAP connection returned False")
+                    raise ConnectionError("IMAP connection returned False")
             except Exception as e:
                 self.stats["total_retries"] += 1
                 await self.error_logger.log_imap_connection_error(
@@ -152,7 +146,7 @@ class EmailBackfillService:
                     retry_attempt=attempt + 1,
                 )
                 if attempt < self.max_retries - 1:
-                    wait_time = self.retry_delay * (2 ** attempt)  # Exponential backoff
+                    wait_time = self.retry_delay * (2**attempt)  # Exponential backoff
                     logger.warning(
                         f"⚠️  IMAP connection attempt {attempt + 1}/{self.max_retries} failed. "
                         f"Retrying in {wait_time}s..."
@@ -190,12 +184,14 @@ class EmailBackfillService:
 
             # Process in batches
             for i in range(0, len(email_ids), batch_size):
-                batch_ids = email_ids[i:i + batch_size]
+                batch_ids = email_ids[i : i + batch_size]
                 batch_num = (i // batch_size) + 1
                 total_batches = (len(email_ids) + batch_size - 1) // batch_size
 
                 logger.info("")
-                logger.info(f"📦 Processing batch {batch_num}/{total_batches} ({len(batch_ids)} emails)")
+                logger.info(
+                    f"📦 Processing batch {batch_num}/{total_batches} ({len(batch_ids)} emails)"
+                )
 
                 # Process batch with error tracking
                 try:
@@ -243,30 +239,23 @@ class EmailBackfillService:
                 email_address="cs@myhibachichef.com",
                 password=settings.SMTP_PASSWORD,
                 imap_server="imap.ionos.com",
-                imap_port=993
+                imap_port=993,
             )
         elif inbox == "payments":
-            # Get Gmail credentials from environment
-            gmail_user = os.getenv("GMAIL_USER", "myhibachichef@gmail.com")
-            gmail_password = os.getenv("GMAIL_APP_PASSWORD_IMAP", "")
+            # Get Gmail credentials from settings (GSM)
+            gmail_user = getattr(settings, "GMAIL_USER", "myhibachichef@gmail.com")
+            gmail_password = getattr(settings, "GMAIL_APP_PASSWORD", "")
 
             if not gmail_password:
-                logger.error("❌ GMAIL_APP_PASSWORD_IMAP not set in environment")
+                logger.error("❌ GMAIL_APP_PASSWORD not set in settings")
                 return None
 
-            return PaymentEmailMonitor(
-                email_address=gmail_user,
-                app_password=gmail_password
-            )
+            return PaymentEmailMonitor(email_address=gmail_user, app_password=gmail_password)
         else:
             logger.error(f"❌ Unknown inbox: {inbox}")
             return None
 
-    def _fetch_all_email_ids(
-        self,
-        monitor,
-        limit: Optional[int] = None
-    ) -> List[bytes]:
+    def _fetch_all_email_ids(self, monitor, limit: Optional[int] = None) -> List[bytes]:
         """Fetch all email IDs from IMAP inbox"""
         try:
             # Select inbox
@@ -286,13 +275,7 @@ class EmailBackfillService:
             logger.exception(f"❌ Failed to fetch email IDs: {e}")
             return []
 
-    async def _process_batch(
-        self,
-        monitor,
-        email_ids: List[bytes],
-        inbox: str,
-        batch_num: int = 1
-    ):
+    async def _process_batch(self, monitor, email_ids: List[bytes], inbox: str, batch_num: int = 1):
         """
         Process a batch of emails with comprehensive error handling.
 
@@ -343,9 +326,7 @@ class EmailBackfillService:
                     continue
 
                 # Check if already exists in database
-                existing = await self.repository.get_message_by_message_id(
-                    email_data["message_id"]
-                )
+                existing = await self.repository.get_message_by_message_id(email_data["message_id"])
 
                 if existing:
                     await self.error_logger.log_duplicate_email(
@@ -353,7 +334,9 @@ class EmailBackfillService:
                         message_id=email_data["message_id"],
                         inbox=inbox,
                     )
-                    logger.debug(f"   ⏭️  [{idx}/{len(email_ids)}] Skipped (already exists): {email_data['subject'][:50]}")
+                    logger.debug(
+                        f"   ⏭️  [{idx}/{len(email_ids)}] Skipped (already exists): {email_data['subject'][:50]}"
+                    )
                     self.stats["total_skipped"] += 1
                     continue
 
@@ -385,9 +368,7 @@ class EmailBackfillService:
                                 error=sync_error,
                                 email_id=str(email_id),
                             )
-                            logger.error(
-                                f"   ❌ [{idx}/{len(email_ids)}] Failed: {sync_error}"
-                            )
+                            logger.error(f"   ❌ [{idx}/{len(email_ids)}] Failed: {sync_error}")
                             self.stats["total_errors"] += 1
                             batch_errors += 1
 
@@ -403,19 +384,16 @@ class EmailBackfillService:
                     email_id=str(email_id),
                     inbox=inbox,
                 )
-                logger.exception(f"   ❌ [{idx}/{len(email_ids)}] Error processing email {email_id}: {e}")
+                logger.exception(
+                    f"   ❌ [{idx}/{len(email_ids)}] Error processing email {email_id}: {e}"
+                )
                 self.stats["total_errors"] += 1
                 batch_errors += 1
 
         # Log batch summary
         logger.info(f"📊 Batch {batch_num} complete: {batch_success} synced, {batch_errors} errors")
 
-    def _fetch_email_data(
-        self,
-        monitor,
-        email_id: bytes,
-        inbox: str
-    ) -> Optional[Dict]:
+    def _fetch_email_data(self, monitor, email_id: bytes, inbox: str) -> Optional[Dict]:
         """Fetch email data from IMAP"""
         try:
             # Fetch email
@@ -439,6 +417,7 @@ class EmailBackfillService:
             # Parse date
             try:
                 from email.utils import parsedate_to_datetime
+
                 received_at = parsedate_to_datetime(date_str)
                 if received_at.tzinfo is None:
                     received_at = received_at.replace(tzinfo=timezone.utc)
@@ -471,11 +450,13 @@ class EmailBackfillService:
                 has_attachments = True
                 filename = part.get_filename()
                 if filename:
-                    attachments.append({
-                        "filename": filename,
-                        "content_type": part.get_content_type(),
-                        "size_bytes": len(part.get_payload(decode=True) or b"")
-                    })
+                    attachments.append(
+                        {
+                            "filename": filename,
+                            "content_type": part.get_content_type(),
+                            "size_bytes": len(part.get_payload(decode=True) or b""),
+                        }
+                    )
 
             return {
                 "message_id": message_id,
@@ -514,8 +495,8 @@ class EmailBackfillService:
         logger.info(f"   Total retries: {self.stats['total_retries']} 🔄")
         logger.info(f"   Elapsed time:  {elapsed:.1f}s")
 
-        if self.stats['total_fetched'] > 0:
-            success_rate = (self.stats['total_synced'] / self.stats['total_fetched']) * 100
+        if self.stats["total_fetched"] > 0:
+            success_rate = (self.stats["total_synced"] / self.stats["total_fetched"]) * 100
             logger.info(f"   Success rate:  {success_rate:.1f}%")
 
         # Log error breakdown
@@ -533,32 +514,25 @@ class EmailBackfillService:
 
 async def main():
     """Main entry point"""
-    parser = argparse.ArgumentParser(
-        description="Backfill emails from IMAP to PostgreSQL database"
-    )
+    parser = argparse.ArgumentParser(description="Backfill emails from IMAP to PostgreSQL database")
     parser.add_argument(
         "--inbox",
         type=str,
         choices=["customer_support", "payments"],
         required=True,
-        help="Inbox to backfill (customer_support or payments)"
+        help="Inbox to backfill (customer_support or payments)",
     )
     parser.add_argument(
-        "--limit",
-        type=int,
-        default=None,
-        help="Maximum number of emails to sync (default: all)"
+        "--limit", type=int, default=None, help="Maximum number of emails to sync (default: all)"
     )
     parser.add_argument(
         "--batch-size",
         type=int,
         default=100,
-        help="Number of emails to process per batch (default: 100)"
+        help="Number of emails to process per batch (default: 100)",
     )
     parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Preview without syncing to database"
+        "--dry-run", action="store_true", help="Preview without syncing to database"
     )
 
     args = parser.parse_args()
@@ -571,10 +545,7 @@ async def main():
 
             # Run backfill
             stats = await backfill_service.backfill_inbox(
-                inbox=args.inbox,
-                limit=args.limit,
-                batch_size=args.batch_size,
-                dry_run=args.dry_run
+                inbox=args.inbox, limit=args.limit, batch_size=args.batch_size, dry_run=args.dry_run
             )
 
             # Exit with appropriate code
