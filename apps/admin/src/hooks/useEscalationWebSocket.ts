@@ -77,8 +77,14 @@ export interface UseEscalationWebSocketResult {
   reconnect: () => void;
 }
 
+// Environment-aware WebSocket URL
 const WS_BASE_URL =
-  process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/api/v1';
+  process.env.NEXT_PUBLIC_WS_URL ||
+  (process.env.NEXT_PUBLIC_API_URL
+    ? process.env.NEXT_PUBLIC_API_URL.replace(/^http/, 'ws').replace(/^https/, 'wss')
+    : typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+      ? 'wss://mhapi.mysticdatanode.net'
+      : 'ws://localhost:8000');
 const PING_INTERVAL = 30000; // 30 seconds
 const RECONNECT_INTERVAL = 3000; // 3 seconds
 const MAX_RECONNECT_ATTEMPTS = 5;
