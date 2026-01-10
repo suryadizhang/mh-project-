@@ -18,8 +18,8 @@ from api.ai.endpoints.websocket_manager import (
 )
 
 # Lead generation and newsletter services
-from api.app.services.lead_service import LeadService
-from api.app.services.newsletter_service import NewsletterService
+from services.lead_service import LeadService
+from services.newsletter_service import NewsletterService
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 
 logger = logging.getLogger(__name__)
