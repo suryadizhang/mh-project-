@@ -1089,7 +1089,7 @@ except ImportError as e:
 try:
     from routers.v1.admin_emails import router as admin_emails_router
 
-    app.include_router(admin_emails_router, prefix="/api", tags=["admin", "emails"])
+    app.include_router(admin_emails_router, prefix="/api/v1", tags=["admin", "emails"])
     logger.info("✅ Admin Email Management endpoints included (cs@ + gmail)")
 except ImportError as e:
     logger.error(f"❌ Admin Email Management endpoints not available: {e}")
