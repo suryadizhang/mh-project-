@@ -141,6 +141,16 @@ class Settings(BaseSettings):
                 ("backend-api", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_ID"),
                 ("backend-api", "GOOGLE_CLIENT_SECRET", "GOOGLE_CLIENT_SECRET"),
                 ("backend-api", "GOOGLE_REDIRECT_URI", "GOOGLE_REDIRECT_URI"),
+                # Cloudflare R2 Storage secrets (for media uploads)
+                ("backend-api", "cloudflare-r2-account-id", "CLOUDFLARE_R2_ACCOUNT_ID"),
+                ("backend-api", "cloudflare-r2-access-key-id", "CLOUDFLARE_R2_ACCESS_KEY_ID"),
+                (
+                    "backend-api",
+                    "cloudflare-r2-secret-access-key",
+                    "CLOUDFLARE_R2_SECRET_ACCESS_KEY",
+                ),
+                ("backend-api", "cloudflare-r2-bucket", "CLOUDFLARE_R2_BUCKET"),
+                ("backend-api", "cloudflare-r2-endpoint", "CLOUDFLARE_R2_ENDPOINT"),
             ]
 
             # Load secrets from GSM
