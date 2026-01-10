@@ -331,6 +331,13 @@ class Settings(BaseSettings):
     CLOUDINARY_API_KEY: str
     CLOUDINARY_API_SECRET: str
 
+    # Cloudflare R2 (Object Storage) - Loaded from GSM in production
+    CLOUDFLARE_R2_ACCOUNT_ID: str | None = None
+    CLOUDFLARE_R2_ACCESS_KEY_ID: str | None = None
+    CLOUDFLARE_R2_SECRET_ACCESS_KEY: str | None = None
+    CLOUDFLARE_R2_BUCKET: str | None = None
+    CLOUDFLARE_R2_ENDPOINT: str | None = None
+
     # Resend Email Service (Replaces SMTP) - REQUIRED: Must come from .env
     RESEND_API_KEY: str
     RESEND_FROM_EMAIL: str = "cs@myhibachichef.com"
