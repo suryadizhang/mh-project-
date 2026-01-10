@@ -91,7 +91,7 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
 
     // Use the new unified chat WebSocket endpoint with station context
     const wsUrl =
-      `${WS_BASE_URL}/ws/chat?` +
+      `${WS_BASE_URL}/api/v1/ws/chat?` +
       `station_id=${stationContext.station_id}&` +
       `role=${stationContext.role}&` +
       `channel=admin_panel`;
@@ -443,13 +443,12 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
               className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[80%] rounded-lg p-3 ${
-                  message.type === 'user'
+                className={`max-w-[80%] rounded-lg p-3 ${message.type === 'user'
                     ? 'bg-blue-600 text-white'
                     : message.type === 'system'
                       ? 'bg-yellow-50 border border-yellow-200 text-yellow-800'
                       : 'bg-gray-100 text-gray-800'
-                }`}
+                  }`}
               >
                 <div className="flex items-start space-x-2">
                   {message.type === 'assistant' && (

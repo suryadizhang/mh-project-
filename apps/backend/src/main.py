@@ -1183,6 +1183,16 @@ except ImportError as e:
         }
 
 
+# AI WebSocket endpoints (real-time chat)
+try:
+    from api.ai.endpoints.routers.websocket import router as ai_websocket_router
+
+    app.include_router(ai_websocket_router, prefix="/api/v1", tags=["ai-websocket"])
+    logger.info("✅ AI WebSocket endpoints included (/api/v1/ws/chat)")
+except ImportError as e:
+    logger.warning(f"AI WebSocket endpoints not available: {e}")
+
+
 # NLP Monitoring endpoints
 try:
     from api.ai.endpoints.routers.nlp_monitoring import (

@@ -24,11 +24,11 @@ export interface EscalationData {
   id: string;
   priority?: 'low' | 'medium' | 'high' | 'urgent';
   status?:
-    | 'pending'
-    | 'assigned'
-    | 'in_progress'
-    | 'waiting_customer'
-    | 'resolved';
+  | 'pending'
+  | 'assigned'
+  | 'in_progress'
+  | 'waiting_customer'
+  | 'resolved';
   customer_phone?: string;
   reason?: string;
   method?: 'sms' | 'call' | 'email';
@@ -115,7 +115,7 @@ export function useEscalationWebSocket(): UseEscalationWebSocketResult {
       throw new Error('No authentication token available');
     }
 
-    const wsUrl = `${WS_BASE_URL}/ws/escalations?token=${encodeURIComponent(token)}`;
+    const wsUrl = `${WS_BASE_URL}/api/v1/ws/escalations?token=${encodeURIComponent(token)}`;
     return wsUrl;
   }, [token]);
 
