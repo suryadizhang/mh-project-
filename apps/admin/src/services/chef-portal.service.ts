@@ -38,7 +38,7 @@ import type {
  * GET /api/v1/chef-portal/me
  */
 export async function getMyChefProfile(): Promise<ApiResponse<ChefProfile>> {
-  return api.get<ChefProfile>('/chef-portal/me');
+  return api.get<ChefProfile>('/api/v1/chef-portal/me');
 }
 
 /**
@@ -48,7 +48,7 @@ export async function getMyChefProfile(): Promise<ApiResponse<ChefProfile>> {
 export async function getMyAvailability(): Promise<
   ApiResponse<ChefWeeklyAvailability>
 > {
-  return api.get<ChefWeeklyAvailability>('/chef-portal/me/availability');
+  return api.get<ChefWeeklyAvailability>('/api/v1/chef-portal/me/availability');
 }
 
 /**
@@ -59,7 +59,7 @@ export async function addAvailabilitySlot(
   slot: ChefAvailabilityCreate
 ): Promise<ApiResponse<ChefAvailabilitySlot>> {
   return api.post<ChefAvailabilitySlot>(
-    '/chef-portal/me/availability',
+    '/api/v1/chef-portal/me/availability',
     slot as unknown as Record<string, unknown>
   );
 }
@@ -73,7 +73,7 @@ export async function updateAvailabilitySlot(
   update: ChefAvailabilityUpdate
 ): Promise<ApiResponse<ChefAvailabilitySlot>> {
   return api.put<ChefAvailabilitySlot>(
-    `/chef-portal/me/availability/${slotId}`,
+    `/api/v1/chef-portal/me/availability/${slotId}`,
     update as unknown as Record<string, unknown>
   );
 }
@@ -85,7 +85,7 @@ export async function updateAvailabilitySlot(
 export async function deleteAvailabilitySlot(
   slotId: string
 ): Promise<ApiResponse<void>> {
-  return api.delete<void>(`/chef-portal/me/availability/${slotId}`);
+  return api.delete<void>(`/api/v1/chef-portal/me/availability/${slotId}`);
 }
 
 /**
@@ -96,7 +96,7 @@ export async function bulkUpdateAvailability(
   update: BulkAvailabilityUpdate
 ): Promise<ApiResponse<ChefWeeklyAvailability>> {
   return api.put<ChefWeeklyAvailability>(
-    '/chef-portal/me/availability/bulk',
+    '/api/v1/chef-portal/me/availability/bulk',
     update as unknown as Record<string, unknown>
   );
 }
@@ -108,7 +108,7 @@ export async function bulkUpdateAvailability(
 export async function getMyTimeOffRequests(): Promise<
   ApiResponse<TimeOffRequestList>
 > {
-  return api.get<TimeOffRequestList>('/chef-portal/me/timeoff');
+  return api.get<TimeOffRequestList>('/api/v1/chef-portal/me/timeoff');
 }
 
 /**
@@ -119,7 +119,7 @@ export async function submitTimeOffRequest(
   request: TimeOffRequestCreate
 ): Promise<ApiResponse<TimeOffRequest>> {
   return api.post<TimeOffRequest>(
-    '/chef-portal/me/timeoff',
+    '/api/v1/chef-portal/me/timeoff',
     request as unknown as Record<string, unknown>
   );
 }
@@ -131,7 +131,7 @@ export async function submitTimeOffRequest(
 export async function cancelTimeOffRequest(
   requestId: string
 ): Promise<ApiResponse<void>> {
-  return api.delete<void>(`/chef-portal/me/timeoff/${requestId}`);
+  return api.delete<void>(`/api/v1/chef-portal/me/timeoff/${requestId}`);
 }
 
 // ============================================================================
@@ -143,7 +143,7 @@ export async function cancelTimeOffRequest(
  * GET /api/v1/chef-portal/station/chefs
  */
 export async function getStationChefs(): Promise<ApiResponse<StationChefList>> {
-  return api.get<StationChefList>('/chef-portal/station/chefs');
+  return api.get<StationChefList>('/api/v1/chef-portal/station/chefs');
 }
 
 /**
@@ -154,7 +154,7 @@ export async function getChefAvailability(
   chefId: string
 ): Promise<ApiResponse<ChefWeeklyAvailability>> {
   return api.get<ChefWeeklyAvailability>(
-    `/chef-portal/station/chefs/${chefId}/availability`
+    `/api/v1/chef-portal/station/chefs/${chefId}/availability`
   );
 }
 
@@ -165,7 +165,9 @@ export async function getChefAvailability(
 export async function getPendingTimeOffRequests(): Promise<
   ApiResponse<TimeOffRequestList>
 > {
-  return api.get<TimeOffRequestList>('/chef-portal/station/timeoff/pending');
+  return api.get<TimeOffRequestList>(
+    '/api/v1/chef-portal/station/timeoff/pending'
+  );
 }
 
 /**
@@ -177,7 +179,7 @@ export async function processTimeOffRequest(
   approval: TimeOffApprovalRequest
 ): Promise<ApiResponse<TimeOffRequest>> {
   return api.post<TimeOffRequest>(
-    `/chef-portal/station/timeoff/${requestId}/approve`,
+    `/api/v1/chef-portal/station/timeoff/${requestId}/approve`,
     approval as unknown as Record<string, unknown>
   );
 }
