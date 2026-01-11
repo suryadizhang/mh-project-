@@ -155,6 +155,9 @@ class ContactChannel(str, Enum):
 
     EMAIL = "email"
     SMS = "sms"
+    PHONE = "phone"
+    WHATSAPP = "whatsapp"
+    IN_APP = "in_app"
     INSTAGRAM = "instagram"
     FACEBOOK = "facebook"
     GOOGLE = "google"
