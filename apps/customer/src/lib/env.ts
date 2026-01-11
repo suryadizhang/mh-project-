@@ -152,6 +152,26 @@ export const getAiApiUrl = () => {
 };
 
 /**
+ * Get WebSocket URL with proper protocol (ws/wss)
+ * Derives from API URL if NEXT_PUBLIC_WS_URL is not set
+ *
+ * @returns WebSocket base URL (without path)
+ *
+ * @example
+ * const wsUrl = `${getWsUrl()}/api/v1/ws/chat?user_id=123`;
+ */
+export const getWsUrl = () => {
+  // If NEXT_PUBLIC_WS_URL is explicitly set, use it
+  if (process.env.NEXT_PUBLIC_WS_URL) {
+    return process.env.NEXT_PUBLIC_WS_URL;
+  }
+
+  // Derive from API URL - convert http(s) to ws(s)
+  const apiUrl = env.NEXT_PUBLIC_API_URL;
+  return apiUrl.replace(/^https/, 'wss').replace(/^http/, 'ws');
+};
+
+/**
  * Type-safe feature flag checker for customer site
  *
  * @param flag - Feature flag name (must start with NEXT_PUBLIC_FEATURE_)
