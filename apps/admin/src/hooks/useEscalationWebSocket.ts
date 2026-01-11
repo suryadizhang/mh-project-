@@ -1,6 +1,11 @@
 /**
  * WebSocket Hook for Real-time Escalation Updates
  * Connects admins to escalation events in real-time
+ *
+ * Token Refresh Support:
+ * - Uses tokenManager.ensureValidToken() before connecting
+ * - Automatically refreshes expired tokens using refresh_token
+ * - Falls back to logout if refresh fails
  */
 
 'use client';
@@ -9,6 +14,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
+import { tokenManager } from '@/services/api';
 
 // Escalation WebSocket message types
 export type EscalationEventType =
@@ -90,7 +96,7 @@ const RECONNECT_INTERVAL = 3000; // 3 seconds
 const MAX_RECONNECT_ATTEMPTS = 5;
 
 export function useEscalationWebSocket(): UseEscalationWebSocketResult {
-  const { token, isAuthenticated } = useAuth();
+  const { token, isAuthenticated, logout } = useAuth();
 
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -110,17 +116,13 @@ export function useEscalationWebSocket(): UseEscalationWebSocketResult {
   const pingInterval = useRef<NodeJS.Timeout | null>(null);
 
   // Build WebSocket URL with JWT token
-  const buildWebSocketUrl = useCallback(() => {
-    if (!token) {
-      throw new Error('No authentication token available');
-    }
-
-    const wsUrl = `${WS_BASE_URL}/api/v1/ws/escalations?token=${encodeURIComponent(token)}`;
+  const buildWebSocketUrl = useCallback((validToken: string) => {
+    const wsUrl = `${WS_BASE_URL}/api/v1/ws/escalations?token=${encodeURIComponent(validToken)}`;
     return wsUrl;
-  }, [token]);
+  }, []);
 
-  // Connect to WebSocket
-  const connect = useCallback(() => {
+  // Connect to WebSocket with token refresh support
+  const connect = useCallback(async () => {
     if (!isAuthenticated || !token) {
       // Silent return - this is expected before authentication completes
       // Not an error, just waiting for auth
@@ -138,7 +140,22 @@ export function useEscalationWebSocket(): UseEscalationWebSocketResult {
     setConnectionError(null);
 
     try {
-      const wsUrl = buildWebSocketUrl();
+      // Ensure we have a valid (non-expired) token before connecting
+      // This will automatically refresh the token if it's expired
+      const validToken = await tokenManager.ensureValidToken();
+
+      if (!validToken) {
+        logger.error(new Error('Token refresh failed - unable to get valid token'), {
+          context: 'escalation_websocket_auth',
+        });
+        setConnectionError('Authentication expired. Please log in again.');
+        setIsConnecting(false);
+        // Logout and redirect to login page
+        logout();
+        return;
+      }
+
+      const wsUrl = buildWebSocketUrl(validToken);
       logger.info('Connecting to escalation WebSocket', { url: WS_BASE_URL });
 
       ws.current = new WebSocket(wsUrl);
@@ -276,7 +293,7 @@ export function useEscalationWebSocket(): UseEscalationWebSocketResult {
       setConnectionError('Failed to create WebSocket connection');
       setIsConnecting(false);
     }
-  }, [isAuthenticated, token, buildWebSocketUrl]);
+  }, [isAuthenticated, token, buildWebSocketUrl, logout]);
 
   // Disconnect from WebSocket
   const disconnect = useCallback(() => {
