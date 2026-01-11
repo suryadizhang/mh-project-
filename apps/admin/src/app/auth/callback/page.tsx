@@ -6,6 +6,7 @@ import { Suspense, useEffect, useState } from 'react';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
+import { tokenManager } from '@/services/api';
 
 /**
  * Inner component that uses useSearchParams
@@ -23,14 +24,22 @@ function CallbackContent() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Get token and error from URL params
+        // Get token, refresh_token, and error from URL params
         const token = searchParams.get('token');
+        const refreshToken = searchParams.get('refresh_token');
         const error = searchParams.get('error');
 
         console.log('[OAuth Callback] Processing callback...', {
           hasToken: !!token,
+          hasRefreshToken: !!refreshToken,
           hasError: !!error,
         });
+
+        // Store refresh token if provided (for token refresh support)
+        if (refreshToken) {
+          tokenManager.setRefreshToken(refreshToken);
+          console.log('[OAuth Callback] Refresh token stored');
+        }
 
         if (error) {
           setStatus('error');
@@ -156,6 +165,11 @@ function CallbackContent() {
             // Extract login data (handle nested structure)
             const loginData = stationLoginData?.data || stationLoginData;
             if (loginData?.access_token && loginData?.station_context) {
+              // Store refresh token if provided (for token refresh support)
+              if (loginData?.refresh_token) {
+                tokenManager.setRefreshToken(loginData.refresh_token);
+                console.log('[OAuth Callback] Station login refresh token stored');
+              }
               login(loginData.access_token, loginData.station_context);
               setStatus('success');
               setMessage(
