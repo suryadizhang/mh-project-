@@ -872,6 +872,15 @@ try:
 except ImportError as e:
     logger.warning(f"Public config endpoints not available: {e}")
 
+# Include PUBLIC contact form endpoint (no auth required - website contact form)
+try:
+    from routers.v1.contact import router as contact_router
+
+    app.include_router(contact_router, prefix="/api/v1/contact", tags=["contact"])
+    logger.info("✅ Contact form endpoint included (no auth - website contact)")
+except ImportError as e:
+    logger.warning(f"Contact form endpoint not available: {e}")
+
 # Include v1 API router (pricing, menu items, addon items)
 try:
     from api.v1.api import api_router as v1_api_router
@@ -1098,7 +1107,7 @@ except ImportError as e:
 try:
     from routers.v1.reviews import router as reviews_router
 
-    app.include_router(reviews_router, prefix="/api/reviews", tags=["reviews", "feedback"])
+    app.include_router(reviews_router, prefix="/api/v1/reviews", tags=["reviews", "feedback"])
     logger.info(
         "✅ Customer Review System included from NEW location (legacy comprehensive version)"
     )

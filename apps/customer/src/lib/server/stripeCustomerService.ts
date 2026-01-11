@@ -1,34 +1,59 @@
+/**
+ * Stripe Customer Service
+ * =======================
+ *
+ * ⚠️ BATCH 2 DEPENDENCY: This service requires the Stripe router to be enabled
+ * in the backend. Currently, the Stripe router is DISABLED in main.py (lines ~973)
+ * because StripeCustomer model has not been migrated to production.
+ *
+ * API Endpoints Used (all require Batch 2 completion):
+ * - POST /api/v1/customers/create-or-update
+ * - GET /api/v1/customers/{customerId}/payment-preferences
+ * - PUT /api/v1/customers/{customerId}/payment-preferences
+ * - POST /api/v1/customers/{customerId}/save-payment-method
+ * - GET /api/v1/customers/{customerId}/payment-methods
+ *
+ * BATCH 2 CHECKLIST:
+ * 1. Run Stripe schema migration on production
+ * 2. Enable Stripe router in main.py (uncomment lines 838-871)
+ * 3. Verify all endpoints work with test data
+ * 4. Remove this warning header
+ *
+ * See: docs/04-DEPLOYMENT/BATCH_CHECKLISTS.md → Batch 2
+ * See: 04-BATCH_DEPLOYMENT.instructions.md
+ */
+
 // src/lib/server/stripeCustomerService.ts
 // This service now calls the backend API instead of using Stripe directly
-import { apiFetch } from '../api'
+import { apiFetch } from '../api';
 
 export interface CustomerData {
-  email: string
-  name: string
-  phone?: string
+  email: string;
+  name: string;
+  phone?: string;
   address?: {
-    line1?: string
-    city?: string
-    state?: string
-    postal_code?: string
-    country?: string
-  }
+    line1?: string;
+    city?: string;
+    state?: string;
+    postal_code?: string;
+    country?: string;
+  };
 }
 
 export interface PaymentPreferences {
-  preferredPaymentMethod: 'zelle' | 'venmo' | 'stripe'
-  totalBookings?: number
-  totalSpent?: number
-  zelleUsageCount?: number
-  totalSavingsFromZelle?: number
+  preferredPaymentMethod: 'zelle' | 'venmo' | 'stripe';
+  totalBookings?: number;
+  totalSpent?: number;
+  zelleUsageCount?: number;
+  totalSavingsFromZelle?: number;
 }
 
 export interface StripeCustomer {
-  id: string
-  email: string
-  name: string
-  phone?: string
-  metadata: Record<string, string>
+  id: string;
+  email: string;
+  name: string;
+  phone?: string;
+  metadata: Record<string, string>;
 }
 
 export class StripeCustomerService {
@@ -37,49 +62,49 @@ export class StripeCustomerService {
     try {
       const response = await apiFetch('/api/v1/customers/create-or-update', {
         method: 'POST',
-        body: JSON.stringify(customerData)
-      })
+        body: JSON.stringify(customerData),
+      });
       if (!response.success || !response.data) {
-        throw new Error(response.error || 'Failed to create/update customer')
+        throw new Error(response.error || 'Failed to create/update customer');
       }
-      return response.data as unknown as StripeCustomer
+      return response.data as unknown as StripeCustomer;
     } catch (error) {
-      console.error('Error creating/updating customer:', error)
-      throw error
+      console.error('Error creating/updating customer:', error);
+      throw error;
     }
   }
 
   // Update payment preferences via backend API
   static async updatePaymentPreferences(
     stripeCustomerId: string,
-    preferences: PaymentPreferences
+    preferences: PaymentPreferences,
   ): Promise<StripeCustomer> {
     try {
       const response = await apiFetch(`/api/v1/customers/${stripeCustomerId}/preferences`, {
         method: 'PUT',
-        body: JSON.stringify(preferences)
-      })
+        body: JSON.stringify(preferences),
+      });
       if (!response.success || !response.data) {
-        throw new Error(response.error || 'Failed to update preferences')
+        throw new Error(response.error || 'Failed to update preferences');
       }
-      return response.data as unknown as StripeCustomer
+      return response.data as unknown as StripeCustomer;
     } catch (error) {
-      console.error('Error updating customer preferences:', error)
-      throw error
+      console.error('Error updating customer preferences:', error);
+      throw error;
     }
   }
 
   // Get customer with analytics via backend API
   static async getCustomerAnalytics(stripeCustomerId: string) {
     try {
-      const response = await apiFetch(`/api/v1/customers/${stripeCustomerId}/analytics`)
+      const response = await apiFetch(`/api/v1/customers/${stripeCustomerId}/analytics`);
       if (!response.success) {
-        throw new Error(response.error || 'Failed to get analytics')
+        throw new Error(response.error || 'Failed to get analytics');
       }
-      return response.data
+      return response.data;
     } catch (error) {
-      console.error('Error getting customer analytics:', error)
-      throw error
+      console.error('Error getting customer analytics:', error);
+      throw error;
     }
   }
 
@@ -88,14 +113,14 @@ export class StripeCustomerService {
     try {
       const response = await apiFetch(`/api/v1/customers/${customerId}/track-payment`, {
         method: 'POST',
-        body: JSON.stringify({ paymentMethod })
-      })
+        body: JSON.stringify({ paymentMethod }),
+      });
       if (!response.success) {
-        throw new Error(response.error || 'Failed to track payment preference')
+        throw new Error(response.error || 'Failed to track payment preference');
       }
-      console.log(`[PAYMENT PREFERENCE TRACKED] Customer: ${customerId}, Method: ${paymentMethod}`)
+      console.log(`[PAYMENT PREFERENCE TRACKED] Customer: ${customerId}, Method: ${paymentMethod}`);
     } catch (error) {
-      console.error('Error tracking payment preference:', error)
+      console.error('Error tracking payment preference:', error);
     }
   }
 
@@ -103,15 +128,15 @@ export class StripeCustomerService {
   static async findCustomerByEmail(email: string): Promise<StripeCustomer | null> {
     try {
       const response = await apiFetch(
-        `/api/v1/customers/find-by-email?email=${encodeURIComponent(email)}`
-      )
+        `/api/v1/customers/find-by-email?email=${encodeURIComponent(email)}`,
+      );
       if (!response.success) {
-        return null // Customer not found
+        return null; // Customer not found
       }
-      return response.data as unknown as StripeCustomer
+      return response.data as unknown as StripeCustomer;
     } catch (error) {
-      console.error('Error finding customer by email:', error)
-      return null
+      console.error('Error finding customer by email:', error);
+      return null;
     }
   }
 
@@ -120,15 +145,15 @@ export class StripeCustomerService {
     try {
       const response = await apiFetch(`/api/v1/customers/${stripeCustomerId}/portal`, {
         method: 'POST',
-        body: JSON.stringify({ returnUrl })
-      })
+        body: JSON.stringify({ returnUrl }),
+      });
       if (!response.success || !response.data) {
-        throw new Error(response.error || 'Failed to create portal session')
+        throw new Error(response.error || 'Failed to create portal session');
       }
-      return response.data
+      return response.data;
     } catch (error) {
-      console.error('Error creating portal session:', error)
-      throw error
+      console.error('Error creating portal session:', error);
+      throw error;
     }
   }
 }

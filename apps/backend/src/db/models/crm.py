@@ -119,6 +119,7 @@ class LeadSource(str, Enum):
     """Where the lead originated"""
 
     WEB_QUOTE = "web_quote"
+    WEBSITE = "website"  # Contact form, general inquiries
     CHAT = "chat"
     INSTAGRAM = "instagram"
     FACEBOOK = "facebook"

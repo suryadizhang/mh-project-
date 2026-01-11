@@ -138,6 +138,7 @@ export const emailService = {
 
 /**
  * Label Endpoints
+ * Backend route: /api/v1/admin/emails/labels
  */
 export const labelService = {
   /**
@@ -145,7 +146,7 @@ export const labelService = {
    */
   getLabels: async (includeArchived: boolean = false): Promise<Label[]> => {
     const response = await api.get<Label[]>(
-      `/api/v1/admin/labels?include_archived=${includeArchived}`
+      `/api/v1/admin/emails/labels?include_archived=${includeArchived}`
     );
     return extractData(response);
   },
@@ -155,7 +156,7 @@ export const labelService = {
    */
   createLabel: async (data: LabelCreate): Promise<Label> => {
     const response = await api.post<Label>(
-      '/api/v1/admin/labels',
+      '/api/v1/admin/emails/labels',
       data as unknown as Record<string, unknown>
     );
     return extractData(response);
@@ -166,7 +167,7 @@ export const labelService = {
    */
   updateLabel: async (labelId: number, data: LabelUpdate): Promise<Label> => {
     const response = await api.patch<Label>(
-      `/api/v1/admin/labels/${labelId}`,
+      `/api/v1/admin/emails/labels/${labelId}`,
       data as Record<string, unknown>
     );
     return extractData(response);
@@ -177,7 +178,7 @@ export const labelService = {
    */
   deleteLabel: async (labelId: number): Promise<{ success: boolean }> => {
     const response = await api.delete<{ success: boolean }>(
-      `/api/v1/admin/labels/${labelId}`
+      `/api/v1/admin/emails/labels/${labelId}`
     );
     return extractData(response);
   },
