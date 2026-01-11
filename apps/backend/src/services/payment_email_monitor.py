@@ -6,8 +6,17 @@ Monitors myhibachichef@gmail.com for incoming payment confirmations from:
 - Venmo (You received $X from...)
 - Bank of America (Payment received...)
 - Zelle (You received $X via Zelle...)
+- Future: PayPal
 
 Automatically parses and updates payment/booking status in the database.
+
+KEY FEATURE: Database-tracked email processing
+- Tracks processed emails in payments.processed_emails table
+- Works regardless of email read/unread status in Gmail
+- Prevents duplicate processing
+- Provides full audit trail for financial reconciliation
+
+See: database/migrations/014_processed_payment_emails.sql
 """
 
 from datetime import datetime, timezone, timedelta
@@ -17,6 +26,8 @@ from email.header import decode_header
 import imaplib
 import logging
 import re
+from typing import Optional
+from uuid import UUID
 
 logger = logging.getLogger(__name__)
 
@@ -373,10 +384,10 @@ class PaymentEmailMonitor:
         try:
             self.mail = imaplib.IMAP4_SSL(self.imap_server, self.imap_port)
             self.mail.login(self.email_address, self.app_password)
-            logger.info(f"✅ Connected to Gmail IMAP for {self.email_address}")
+            logger.info(f"Γ£à Connected to Gmail IMAP for {self.email_address}")
             return True
         except Exception as e:
-            logger.exception(f"❌ Failed to connect to Gmail IMAP: {e}")
+            logger.exception(f"Γ¥î Failed to connect to Gmail IMAP: {e}")
             return False
 
     def disconnect(self):
@@ -388,6 +399,191 @@ class PaymentEmailMonitor:
                 logger.info("✅ Disconnected from Gmail IMAP")
             except Exception as e:
                 logger.exception(f"Error disconnecting: {e}")
+
+    # ========================================================================
+    # DATABASE TRACKING METHODS
+    # ========================================================================
+    # These methods track processed emails in payments.processed_emails table
+    # to prevent duplicate processing and provide financial audit trail.
+    # See: database/migrations/014_processed_payment_emails.sql
+
+    def is_email_processed(self, email_message_id: str) -> bool:
+        """
+        Check if an email has already been processed.
+
+        Args:
+            email_message_id: The Message-ID header from the email
+
+        Returns:
+            True if email was already processed, False otherwise
+        """
+        if not self.db_session or not email_message_id:
+            return False
+
+        try:
+            from sqlalchemy import text
+
+            result = self.db_session.execute(
+                text(
+                    """
+                    SELECT EXISTS(
+                        SELECT 1 FROM payments.processed_emails
+                        WHERE email_account = :account
+                        AND email_message_id = :message_id
+                    )
+                """
+                ),
+                {"account": self.email_address, "message_id": email_message_id},
+            )
+            exists = result.scalar()
+            return bool(exists)
+        except Exception as e:
+            logger.error(f"Error checking if email processed: {e}")
+            # On error, return False to allow processing (prefer duplicate over miss)
+            return False
+
+    def record_processed_email(
+        self,
+        email_message_id: str,
+        email_uid: str,
+        payment_provider: str,
+        amount_cents: int,
+        sender_name: Optional[str] = None,
+        sender_identifier: Optional[str] = None,
+        email_subject: Optional[str] = None,
+        email_received_at: Optional[datetime] = None,
+        matched_booking_id: Optional[UUID] = None,
+        matched_customer_id: Optional[UUID] = None,
+        processing_status: str = "processed",
+        processing_notes: Optional[str] = None,
+    ) -> bool:
+        """
+        Record a processed email to the database.
+
+        Args:
+            email_message_id: The Message-ID header from the email
+            email_uid: IMAP UID of the email
+            payment_provider: 'venmo', 'zelle', 'stripe', 'bank_of_america', etc.
+            amount_cents: Payment amount in cents
+            sender_name: Name of the person who sent the payment
+            sender_identifier: Phone, email, or username of sender
+            email_subject: Subject line of the email
+            email_received_at: When the email was received (stored as email_date)
+            matched_booking_id: If matched to a booking
+            matched_customer_id: If matched to a customer
+            processing_status: 'processed', 'matched', 'applied', 'failed', 'skipped'
+            processing_notes: Any notes about processing
+
+        Returns:
+            True if recorded successfully, False otherwise
+        """
+        if not self.db_session or not email_message_id:
+            logger.warning("Cannot record processed email: no db_session or message_id")
+            return False
+
+        try:
+            from sqlalchemy import text
+
+            self.db_session.execute(
+                text(
+                    """
+                    INSERT INTO payments.processed_emails (
+                        email_provider,
+                        email_account,
+                        email_message_id,
+                        email_uid,
+                        payment_provider,
+                        amount_cents,
+                        sender_name,
+                        sender_identifier,
+                        email_subject,
+                        email_date,
+                        matched_booking_id,
+                        matched_customer_id,
+                        processing_status,
+                        processing_notes,
+                        processed_at
+                    ) VALUES (
+                        :email_provider,
+                        :account,
+                        :message_id,
+                        :email_uid,
+                        :provider,
+                        :amount_cents,
+                        :sender_name,
+                        :sender_identifier,
+                        :subject,
+                        :email_date,
+                        :booking_id,
+                        :customer_id,
+                        :status,
+                        :notes,
+                        NOW()
+                    )
+                    ON CONFLICT (email_account, email_message_id) DO UPDATE SET
+                        processing_status = EXCLUDED.processing_status,
+                        processing_notes = COALESCE(EXCLUDED.processing_notes, payments.processed_emails.processing_notes),
+                        matched_booking_id = COALESCE(EXCLUDED.matched_booking_id, payments.processed_emails.matched_booking_id),
+                        matched_customer_id = COALESCE(EXCLUDED.matched_customer_id, payments.processed_emails.matched_customer_id)
+                """
+                ),
+                {
+                    "email_provider": "gmail",
+                    "account": self.email_address,
+                    "message_id": email_message_id,
+                    "email_uid": str(email_uid) if email_uid else None,
+                    "provider": payment_provider,
+                    "amount_cents": amount_cents,
+                    "sender_name": sender_name,
+                    "sender_identifier": sender_identifier,
+                    "subject": email_subject[:500] if email_subject else None,
+                    "email_date": email_received_at,
+                    "booking_id": str(matched_booking_id) if matched_booking_id else None,
+                    "customer_id": str(matched_customer_id) if matched_customer_id else None,
+                    "status": processing_status,
+                    "notes": processing_notes,
+                },
+            )
+            self.db_session.commit()
+            logger.info(
+                f"📝 Recorded processed email: {payment_provider} ${amount_cents/100:.2f} from {sender_name}"
+            )
+            return True
+        except Exception as e:
+            logger.error(f"Error recording processed email: {e}")
+            try:
+                self.db_session.rollback()
+            except Exception:
+                pass
+            return False
+
+    def get_processed_email_count(self, days: int = 30) -> int:
+        """Get count of processed emails in the last N days."""
+        if not self.db_session:
+            return 0
+        try:
+            from sqlalchemy import text
+
+            result = self.db_session.execute(
+                text(
+                    """
+                    SELECT COUNT(*) FROM payments.processed_emails
+                    WHERE email_account = :account
+                    AND processed_at > NOW() - INTERVAL ':days days'
+                """.replace(
+                        ":days", str(days)
+                    )
+                ),
+                {"account": self.email_address},
+            )
+            return result.scalar() or 0
+        except Exception as e:
+            logger.error(f"Error getting processed email count: {e}")
+            return 0
+
+    # ========================================================================
+    # BOOKING LOOKUP METHODS
+    # ========================================================================
 
     def find_booking_by_contact_info(self, phone: str | None, email: str | None) -> dict | None:
         """
@@ -517,15 +713,15 @@ class PaymentEmailMonitor:
             is_valid = False
             message = f"Overpayment: ${payment_amount} exceeds remaining ${booking_info['amount_remaining']}"
         elif not was_deposit_met and meets_deposit_now:
-            message = f"✅ Deposit met! ${new_amount_paid} paid, ${amount_remaining} remaining. Booking date is LOCKED."
+            message = f"Γ£à Deposit met! ${new_amount_paid} paid, ${amount_remaining} remaining. Booking date is LOCKED."
         elif not meets_deposit_now:
             shortage = self.MINIMUM_DEPOSIT - new_amount_paid
-            message = f"⚠️ Partial payment received: ${payment_amount}. Need ${shortage} more to meet $100 deposit and lock booking date."
+            message = f"ΓÜá∩╕Å Partial payment received: ${payment_amount}. Need ${shortage} more to meet $100 deposit and lock booking date."
         elif amount_remaining <= 0:
-            message = f"✅ Booking fully paid! ${new_amount_paid} total."
+            message = f"Γ£à Booking fully paid! ${new_amount_paid} total."
         else:
             message = (
-                f"✅ Payment received: ${payment_amount}. ${amount_remaining} remaining balance."
+                f"Γ£à Payment received: ${payment_amount}. ${amount_remaining} remaining balance."
             )
 
         return {
@@ -544,14 +740,17 @@ class PaymentEmailMonitor:
         self, since_date: datetime | None = None, limit: int = 50
     ) -> list[dict]:
         """
-        Fetch unread payment notification emails
+        Fetch payment notification emails (regardless of read/unread status).
+
+        Uses database tracking to prevent duplicate processing.
+        Emails are tracked by Message-ID in payments.processed_emails table.
 
         Args:
             since_date: Only fetch emails since this date (default: last 7 days)
             limit: Maximum number of emails to fetch
 
         Returns:
-            List of parsed payment notifications
+            List of parsed payment notifications (only unprocessed ones)
         """
         if not self.mail and not self.connect():
             return []
@@ -566,10 +765,10 @@ class PaymentEmailMonitor:
 
             date_str = since_date.strftime("%d-%b-%Y")
 
-            # Search for unread emails from payment providers
-            # IMAP search format: each criterion must be properly formatted
+            # Search for emails from payment providers
+            # NOTE: Removed "UNSEEN" - we now use database tracking instead
+            # This allows processing emails that were already read in Gmail
             search_criteria = [
-                "UNSEEN",  # Unread emails
                 f"SINCE {date_str}",  # Since date
                 "OR",
                 "OR",
@@ -586,19 +785,35 @@ class PaymentEmailMonitor:
 
             email_ids = message_numbers[0].split()
             if not email_ids:
-                logger.info("No new payment notification emails found")
+                logger.info("No payment notification emails found in date range")
                 return []
 
             # Limit number of emails
             email_ids = email_ids[-limit:]
 
             parsed_emails = []
+            skipped_count = 0
+            already_processed_count = 0
 
             for email_id in email_ids:
                 try:
+                    # Fetch email with headers for Message-ID
                     _, msg_data = self.mail.fetch(email_id, "(RFC822)")
                     email_body = msg_data[0][1]
                     email_message = email.message_from_bytes(email_body)
+
+                    # Get Message-ID header for deduplication
+                    message_id = email_message.get("Message-ID", "")
+                    if not message_id:
+                        # Generate a fallback ID from date + subject
+                        date_header = email_message.get("Date", "")
+                        subject_header = email_message.get("Subject", "")
+                        message_id = f"<fallback-{hash(date_header + subject_header)}@gmail>"
+
+                    # Check if already processed in database
+                    if self.is_email_processed(message_id):
+                        already_processed_count += 1
+                        continue
 
                     # Decode subject
                     subject, encoding = decode_header(email_message["Subject"])[0]
@@ -625,19 +840,47 @@ class PaymentEmailMonitor:
                     parsed = PaymentEmailParser.detect_and_parse(subject, from_email, body)
 
                     if parsed:
+                        # Add email metadata
                         parsed["email_id"] = email_id.decode()
+                        parsed["message_id"] = message_id
                         parsed["subject"] = subject
                         parsed["from"] = from_email
                         parsed["received_at"] = email_message.get("Date")
                         parsed_emails.append(parsed)
 
+                        # Record to database for tracking
+                        amount_cents = int(parsed.get("amount", Decimal("0")) * 100)
+                        self.record_processed_email(
+                            email_message_id=message_id,
+                            email_uid=email_id.decode(),
+                            payment_provider=parsed.get("provider", "unknown"),
+                            amount_cents=amount_cents,
+                            sender_name=parsed.get("sender_name"),
+                            sender_identifier=parsed.get("phone") or parsed.get("username"),
+                            email_subject=subject,
+                            email_received_at=None,  # Would need to parse Date header
+                            processing_status="processed",
+                            processing_notes="Auto-processed by PaymentEmailMonitor",
+                        )
+
                         logger.info(
                             f"✅ Parsed payment email: {parsed['provider']} - ${parsed['amount']}"
                         )
 
+                    else:
+                        skipped_count += 1
+
                 except Exception as e:
                     logger.exception(f"Error processing email {email_id}: {e}")
                     continue
+
+            if already_processed_count > 0:
+                logger.info(f"📋 Skipped {already_processed_count} already-processed emails")
+
+            if skipped_count > 0:
+                logger.info(f"⏭️ Skipped {skipped_count} non-payment emails")
+
+            logger.info(f"✅ Found {len(parsed_emails)} new payment emails to process")
 
             return parsed_emails
 
