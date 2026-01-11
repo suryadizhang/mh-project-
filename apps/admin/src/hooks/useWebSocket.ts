@@ -1,6 +1,10 @@
 /**
  * WebSocket Service for Real-time AI Chat
  * Handles WebSocket connections to AI API for live chat functionality
+ *
+ * AUTHENTICATION: WebSocket connections require JWT token for authorization.
+ * Token is passed via query parameter: ?token=<jwt_token>
+ * The hook will automatically fetch and refresh tokens using tokenManager.
  */
 
 'use client';
@@ -8,6 +12,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { logger } from '@/lib/logger';
+import { tokenManager } from '@/services/api';
 
 export interface WebSocketMessage {
   type:
@@ -31,6 +36,7 @@ export interface WebSocketConfig {
   userId?: string;
   channel?: string;
   userRole?: string;
+  token?: string; // JWT token for WebSocket authentication
   autoReconnect?: boolean;
   reconnectInterval?: number;
   maxReconnectAttempts?: number;
@@ -54,6 +60,7 @@ export function useWebSocket(config: WebSocketConfig): WebSocketHookResult {
     userId = 'admin',
     channel = 'admin',
     userRole = 'admin',
+    token,
     autoReconnect = true,
     reconnectInterval = 3000,
     maxReconnectAttempts = 5,
@@ -63,25 +70,28 @@ export function useWebSocket(config: WebSocketConfig): WebSocketHookResult {
   const [isConnecting, setIsConnecting] = useState(false);
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
   const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [authToken, setAuthToken] = useState<string | null>(token || null);
 
   const ws = useRef<WebSocket | null>(null);
   const reconnectAttempts = useRef(0);
   const reconnectTimeout = useRef<NodeJS.Timeout | null>(null);
   const messageQueue = useRef<string[]>([]);
 
-  // Build WebSocket URL with query parameters
-  const buildWebSocketUrl = useCallback(() => {
+  // Build WebSocket URL with query parameters including auth token
+  const buildWebSocketUrl = useCallback((wsToken: string | null) => {
     const wsUrl = new URL(url);
     if (conversationId)
       wsUrl.searchParams.append('conversation_id', conversationId);
     if (userId) wsUrl.searchParams.append('user_id', userId);
     if (channel) wsUrl.searchParams.append('channel', channel);
     if (userRole) wsUrl.searchParams.append('user_role', userRole);
+    // Add JWT token for authentication
+    if (wsToken) wsUrl.searchParams.append('token', wsToken);
     return wsUrl.toString();
   }, [url, conversationId, userId, channel, userRole]);
 
-  // Connect to WebSocket
-  const connect = useCallback(() => {
+  // Connect to WebSocket with authentication
+  const connect = useCallback(async () => {
     if (ws.current?.readyState === WebSocket.OPEN) {
       return;
     }
@@ -90,8 +100,28 @@ export function useWebSocket(config: WebSocketConfig): WebSocketHookResult {
     setConnectionError(null);
 
     try {
-      const wsUrl = buildWebSocketUrl();
-      logger.websocket('connect', { url: wsUrl });
+      // Get authentication token (use provided token or fetch fresh one)
+      let wsToken = authToken;
+      if (!wsToken) {
+        try {
+          wsToken = await tokenManager.ensureValidToken();
+          if (wsToken) {
+            setAuthToken(wsToken);
+          }
+        } catch (tokenError) {
+          logger.error(tokenError as Error, { context: 'websocket_token_fetch' });
+        }
+      }
+
+      if (!wsToken) {
+        logger.websocket('connect', { error: 'No authentication token available' });
+        setConnectionError('Authentication required for WebSocket connection');
+        setIsConnecting(false);
+        return;
+      }
+
+      const wsUrl = buildWebSocketUrl(wsToken);
+      logger.websocket('connect', { url: wsUrl.replace(/token=[^&]+/, 'token=***') });
 
       ws.current = new WebSocket(wsUrl);
 
@@ -132,6 +162,12 @@ export function useWebSocket(config: WebSocketConfig): WebSocketHookResult {
         setIsConnected(false);
         setIsConnecting(false);
 
+        // Check for auth failure (1008 = Policy Violation)
+        if (event.code === 1008) {
+          // Token might be expired, clear it for next attempt
+          setAuthToken(null);
+        }
+
         // Attempt reconnection if enabled
         if (autoReconnect && reconnectAttempts.current < maxReconnectAttempts) {
           reconnectAttempts.current++;
@@ -153,7 +189,7 @@ export function useWebSocket(config: WebSocketConfig): WebSocketHookResult {
           event instanceof ErrorEvent
             ? event.message || 'WebSocket connection error'
             : 'WebSocket connection error';
-        logger.websocket('error', { error: errorMessage, url: wsUrl });
+        logger.websocket('error', { error: errorMessage });
         setConnectionError(errorMessage);
         setIsConnecting(false);
       };
@@ -167,6 +203,7 @@ export function useWebSocket(config: WebSocketConfig): WebSocketHookResult {
     autoReconnect,
     reconnectInterval,
     maxReconnectAttempts,
+    authToken,
   ]);
 
   // Disconnect from WebSocket
