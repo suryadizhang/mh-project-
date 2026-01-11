@@ -22,7 +22,7 @@ import logging
 
 from core.config import get_settings
 from core.database import get_db
-from core.security import create_access_token
+from core.security import create_access_token, create_refresh_token
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
 from db.models.identity import User, UserStatus, UserRole, AuthProvider
@@ -263,16 +263,17 @@ async def google_callback(
                 detail=f"Account is {user.status}. Please contact administrator.",
             )
 
-        # Generate JWT token for the user
+        # Generate JWT tokens for the user
         jwt_token = create_access_token(
             data={"sub": str(user.id), "email": user.email, "is_super_admin": user.is_super_admin}
         )
+        refresh_token = create_refresh_token(user_id=str(user.id))
 
         logger.info(f"User {email} logged in successfully via Google OAuth")
 
-        # Redirect to frontend with token
+        # Redirect to frontend with both tokens for token refresh support
         # Uses frontend_url determined at start of callback (from state or FRONTEND_URL)
-        redirect_url = f"{frontend_url}/auth/callback?token={jwt_token}&new_user={is_new_user}"
+        redirect_url = f"{frontend_url}/auth/callback?token={jwt_token}&refresh_token={refresh_token}&new_user={is_new_user}"
         logger.info(f"Redirecting to: {redirect_url[:100]}...")  # Log first 100 chars for debugging
 
         # Use 302 Found instead of default 307 - browser will follow redirect properly

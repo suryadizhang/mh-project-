@@ -35,6 +35,7 @@ class StationLoginRequest(BaseModel):
 
 class StationLoginResponse(BaseModel):
     access_token: str
+    refresh_token: str | None = None  # For token refresh support
     token_type: str = "bearer"
     expires_in: int
     station_context: dict[str, Any]
@@ -276,6 +277,7 @@ async def station_login(
             success=True,
             data=StationLoginResponse(
                 access_token=access_token,
+                refresh_token=refresh_token,  # Include refresh token for token refresh support
                 expires_in=3600,
                 station_context=station_info,  # 1 hour
             ),

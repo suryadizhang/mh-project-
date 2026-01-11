@@ -3,7 +3,7 @@
  * Handles all backend communication for the admin dashboard
  */
 
-import { api } from '@/lib/api';
+import { api, API_BASE_URL } from '@/lib/api';
 import type {
   ApiResponse,
   Booking,
@@ -167,7 +167,7 @@ export const authService = {
    * Login with admin credentials
    */
   async login(email: string, password: string) {
-    return api.post<{ access_token: string; token_type: string }>(
+    return api.post<{ access_token: string; token_type: string; refresh_token?: string }>(
       `${ENDPOINTS.auth}/login`,
       {
         email, // Backend LoginRequest expects 'email' field
@@ -700,6 +700,152 @@ export const tokenManager = {
   isSuperAdmin(): boolean {
     const context = this.getStationContext();
     return context?.is_super_admin || false;
+  },
+
+  // Refresh token management
+  getRefreshToken(): string | null {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('admin_refresh_token');
+  },
+
+  setRefreshToken(token: string): void {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('admin_refresh_token', token);
+  },
+
+  removeRefreshToken(): void {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem('admin_refresh_token');
+  },
+
+  /**
+   * Decode JWT and check if expired (with 60 second buffer)
+   * Returns true if token is expired or cannot be decoded
+   */
+  isTokenExpired(token?: string | null): boolean {
+    const tokenToCheck = token ?? this.getToken();
+    if (!tokenToCheck) return true;
+
+    try {
+      // JWT format: header.payload.signature
+      const parts = tokenToCheck.split('.');
+      if (parts.length !== 3) return true;
+
+      // Decode payload (base64url)
+      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      const exp = payload.exp;
+      if (!exp) return true;
+
+      // Check if expired with 60 second buffer (refresh before actual expiration)
+      const now = Math.floor(Date.now() / 1000);
+      return now >= (exp - 60);
+    } catch {
+      return true;
+    }
+  },
+
+  /**
+   * Get time until token expires in seconds (for logging/debugging)
+   */
+  getTokenExpiresIn(token?: string | null): number | null {
+    const tokenToCheck = token ?? this.getToken();
+    if (!tokenToCheck) return null;
+
+    try {
+      const parts = tokenToCheck.split('.');
+      if (parts.length !== 3) return null;
+
+      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      const exp = payload.exp;
+      if (!exp) return null;
+
+      const now = Math.floor(Date.now() / 1000);
+      return exp - now;
+    } catch {
+      return null;
+    }
+  },
+
+  /**
+   * Refresh the access token using the refresh token
+   * Returns new access token or null if refresh failed
+   */
+  async refreshTokens(): Promise<string | null> {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) {
+      console.warn('[tokenManager] No refresh token available');
+      return null;
+    }
+
+    try {
+      console.log('[tokenManager] Attempting token refresh...');
+      
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
+
+      if (!response.ok) {
+        console.error('[tokenManager] Token refresh failed:', response.status);
+        // If refresh fails, clear tokens (user needs to re-login)
+        if (response.status === 401 || response.status === 403) {
+          this.removeToken();
+          this.removeRefreshToken();
+        }
+        return null;
+      }
+
+      const data = await response.json();
+      
+      // Store new tokens
+      if (data.access_token) {
+        this.setToken(data.access_token);
+        console.log('[tokenManager] New access token stored');
+      }
+      if (data.refresh_token) {
+        this.setRefreshToken(data.refresh_token);
+        console.log('[tokenManager] New refresh token stored (rotation)');
+      }
+
+      const expiresIn = this.getTokenExpiresIn(data.access_token);
+      console.log(`[tokenManager] Token refresh successful, expires in ${expiresIn}s`);
+      
+      return data.access_token;
+    } catch (error) {
+      console.error('[tokenManager] Token refresh error:', error);
+      return null;
+    }
+  },
+
+  /**
+   * Ensure we have a valid (non-expired) token, refreshing if needed
+   * Returns valid access token or null if cannot obtain one
+   */
+  async ensureValidToken(): Promise<string | null> {
+    const currentToken = this.getToken();
+    
+    // If current token is valid, return it
+    if (currentToken && !this.isTokenExpired(currentToken)) {
+      const expiresIn = this.getTokenExpiresIn(currentToken);
+      console.log(`[tokenManager] Current token valid, expires in ${expiresIn}s`);
+      return currentToken;
+    }
+
+    // Token expired or missing, try to refresh
+    console.log('[tokenManager] Token expired or missing, attempting refresh...');
+    return this.refreshTokens();
+  },
+
+  /**
+   * Clear all auth tokens (for logout)
+   */
+  clearAllTokens(): void {
+    this.removeToken();
+    this.removeRefreshToken();
+    this.removeStationContext();
   },
 };
 
