@@ -3,7 +3,7 @@
  * All backend communication should go through this module
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8003';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8003';
 
 // Type definitions
 export interface ApiResponse<T = Record<string, unknown>> {
@@ -181,5 +181,3 @@ if (typeof window !== 'undefined') {
     console.warn('NEXT_PUBLIC_API_URL not set, using default:', API_BASE_URL);
   }
 }
-
-export { API_BASE_URL };

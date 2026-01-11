@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
 import type { Station, StationLoginResponse } from '@/services/api';
-import { authService } from '@/services/api';
+import { authService, tokenManager } from '@/services/api';
 
 function LoginContent() {
   const router = useRouter();
@@ -84,6 +84,12 @@ function LoginContent() {
 
       if (response.data?.access_token) {
         setTempToken(response.data.access_token);
+
+        // Store refresh token for token refresh
+        if (response.data?.refresh_token) {
+          tokenManager.setRefreshToken(response.data.refresh_token);
+          console.log('[Login] Refresh token stored');
+        }
 
         // Get user's stations (pass email, not token!)
         const stationsResponse = await authService.getUserStations(
