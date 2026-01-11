@@ -111,6 +111,9 @@ class EmailMessage(Base):
     is_sent: Mapped[bool] = mapped_column(Boolean, default=False)
     """Sent by us flag"""
 
+    is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    """Soft delete flag (message moved to trash)"""
+
     # Attachments
     has_attachments: Mapped[bool] = mapped_column(Boolean, default=False)
     """Whether the message has attachments"""
@@ -209,6 +212,9 @@ class EmailThread(Base):
 
     is_archived: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     """Thread is archived"""
+
+    is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    """Soft delete flag (thread moved to trash)"""
 
     has_attachments: Mapped[bool] = mapped_column(Boolean, default=False)
     """Thread contains attachments"""

@@ -8,20 +8,6 @@ Provides Gmail-style email interface for 2 inboxes:
 - IMAP IDLE auto-syncs emails to database
 - API reads from database (no IMAP connection needed)
 - Fallback to IMAP if database is empty or unavailable
-
-# =============================================================================
-# MODULARIZATION TODO (BATCH 4 - Communications)
-# This file is 1,400+ lines and exceeds the 500-line limit.
-# Target: Convert to `routers/v1/admin_emails/` package with:
-#   - __init__.py (router combiner)
-#   - schemas.py (Pydantic models)
-#   - inbox.py (inbox listing, search)
-#   - messages.py (read, reply, forward)
-#   - compose.py (compose, send)
-#   - threads.py (conversation threading)
-#   - attachments.py (attachment handling)
-# See: .github/instructions/22-QUALITY_CONTROL.instructions.md
-# =============================================================================
 """
 
 from datetime import datetime, timezone
@@ -41,8 +27,6 @@ from core.config import get_settings
 from services.customer_email_monitor import customer_email_monitor
 from services.payment_email_monitor import PaymentEmailMonitor
 from repositories.email_repository import EmailRepository
-
-# MIGRATED: from models.email → db.models.email
 from db.models.email import EmailMessage
 from utils.auth import superadmin_required
 
@@ -1108,54 +1092,54 @@ async def resend_webhook(
         event_data = json.loads(payload)
         event_type = event_data.get("type")
 
-        logger.info(f"📧 Resend webhook received: {event_type}")
+        logger.info(f"≡ƒôº Resend webhook received: {event_type}")
         logger.debug(f"Event data: {event_data}")
 
         # Handle different event types
         if event_type == "email.sent":
             # Email successfully sent from Resend
             email_id = event_data.get("data", {}).get("email_id")
-            logger.info(f"✅ Email sent: {email_id}")
+            logger.info(f"Γ£à Email sent: {email_id}")
 
         elif event_type == "email.delivered":
             # Email delivered to recipient's inbox
             email_id = event_data.get("data", {}).get("email_id")
             recipient = event_data.get("data", {}).get("to", [])[0]
-            logger.info(f"📬 Email delivered to {recipient}: {email_id}")
+            logger.info(f"≡ƒô¼ Email delivered to {recipient}: {email_id}")
 
         elif event_type == "email.bounced":
             # Email bounced (permanent failure)
             email_id = event_data.get("data", {}).get("email_id")
             recipient = event_data.get("data", {}).get("to", [])[0]
-            logger.error(f"❌ Email bounced for {recipient}: {email_id}")
+            logger.error(f"Γ¥î Email bounced for {recipient}: {email_id}")
             # TODO: Mark email as bounced in database, notify admin
 
         elif event_type == "email.delivery_delayed":
             # Temporary delivery failure
             email_id = event_data.get("data", {}).get("email_id")
-            logger.warning(f"⏳ Email delivery delayed: {email_id}")
+            logger.warning(f"ΓÅ│ Email delivery delayed: {email_id}")
 
         elif event_type == "email.complained":
             # Recipient marked as spam
             email_id = event_data.get("data", {}).get("email_id")
             recipient = event_data.get("data", {}).get("to", [])[0]
-            logger.error(f"🚨 Email marked as spam by {recipient}: {email_id}")
+            logger.error(f"≡ƒÜ¿ Email marked as spam by {recipient}: {email_id}")
             # TODO: Add recipient to suppression list
 
         elif event_type == "email.opened":
             # Email opened (tracking must be enabled)
             email_id = event_data.get("data", {}).get("email_id")
-            logger.info(f"👀 Email opened: {email_id}")
+            logger.info(f"≡ƒæÇ Email opened: {email_id}")
             # TODO: Track open metrics
 
         elif event_type == "email.clicked":
             # Link clicked in email
             email_id = event_data.get("data", {}).get("email_id")
-            logger.info(f"🖱️ Link clicked in email: {email_id}")
+            logger.info(f"≡ƒû▒∩╕Å Link clicked in email: {email_id}")
             # TODO: Track click metrics
 
         else:
-            logger.warning(f"⚠️ Unknown webhook event type: {event_type}")
+            logger.warning(f"ΓÜá∩╕Å Unknown webhook event type: {event_type}")
 
         # TODO: Store webhook events in database for tracking
 
@@ -1269,7 +1253,7 @@ async def create_label(
     """
     Create a new email label.
 
-    Label slug is auto-generated from name (e.g., "Follow Up" → "follow-up").
+    Label slug is auto-generated from name (e.g., "Follow Up" ΓåÆ "follow-up").
     Label names must be unique.
     """
     from sqlalchemy import select
