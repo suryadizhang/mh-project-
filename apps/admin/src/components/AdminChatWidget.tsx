@@ -12,7 +12,10 @@ import { logger } from '@/lib/logger';
 const WS_BASE_URL =
   process.env.NEXT_PUBLIC_WS_URL ||
   (process.env.NEXT_PUBLIC_API_URL
-    ? process.env.NEXT_PUBLIC_API_URL.replace(/^http/, 'ws').replace(/^https/, 'wss')
+    ? process.env.NEXT_PUBLIC_API_URL.replace(/^http/, 'ws').replace(
+        /^https/,
+        'wss'
+      )
     : typeof window !== 'undefined' && window.location.hostname !== 'localhost'
       ? 'wss://mhapi.mysticdatanode.net'
       : 'ws://localhost:8002');
@@ -443,12 +446,13 @@ export const AdminChatWidget: React.FC<AdminChatWidgetProps> = ({
               className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[80%] rounded-lg p-3 ${message.type === 'user'
+                className={`max-w-[80%] rounded-lg p-3 ${
+                  message.type === 'user'
                     ? 'bg-blue-600 text-white'
                     : message.type === 'system'
                       ? 'bg-yellow-50 border border-yellow-200 text-yellow-800'
                       : 'bg-gray-100 text-gray-800'
-                  }`}
+                }`}
               >
                 <div className="flex items-start space-x-2">
                   {message.type === 'assistant' && (

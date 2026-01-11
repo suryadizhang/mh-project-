@@ -32,16 +32,16 @@ class RateLimitConfig:
     """Rate limit configuration constants"""
 
     # Role-based limits (requests per minute)
-    CUSTOMER_LIMIT = 10
-    ADMIN_LIMIT = 100
-    STATION_MANAGER_LIMIT = 100
-    CHEF_LIMIT = 50
-    UNAUTHENTICATED_LIMIT = 5
+    CUSTOMER_LIMIT = 30  # Increased from 10 for better UX
+    ADMIN_LIMIT = 200  # Increased from 100 for power users
+    STATION_MANAGER_LIMIT = 200  # Increased from 100 for operational efficiency
+    CHEF_LIMIT = 50  # Already appropriate for mobile app usage
+    UNAUTHENTICATED_LIMIT = 20  # Increased from 5 for public API access
 
     # Login attempt tracking
-    MAX_LOGIN_ATTEMPTS = 3  # Max 3 failed attempts before lockout
-    LOCKOUT_DURATION_MINUTES = 60  # 1 hour lockout
-    WARNING_THRESHOLD = 2  # Warn user after 2 failed attempts
+    MAX_LOGIN_ATTEMPTS = 5  # Increased from 3 for typo tolerance
+    LOCKOUT_DURATION_MINUTES = 15  # Reduced from 60 for better UX
+    WARNING_THRESHOLD = 3  # Warn user after 3 failed attempts
 
     # Redis key prefixes
     RATE_LIMIT_PREFIX = "rate_limit"
