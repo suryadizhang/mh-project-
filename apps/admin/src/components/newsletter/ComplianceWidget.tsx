@@ -1,6 +1,12 @@
 'use client';
 
-import { AlertTriangle, CheckCircle, RefreshCw, ShieldCheck, XCircle } from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCircle,
+  RefreshCw,
+  ShieldCheck,
+  XCircle,
+} from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 interface ComplianceMetrics {
@@ -33,11 +39,14 @@ export function ComplianceWidget() {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      const response = await fetch(`${apiUrl}/api/newsletter/compliance/metrics`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
-        },
-      });
+      const response = await fetch(
+        `${apiUrl}/api/newsletter/compliance/metrics`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+          },
+        }
+      );
 
       if (!response.ok) throw new Error('Failed to fetch compliance metrics');
 
@@ -61,8 +70,12 @@ export function ComplianceWidget() {
     const wsUrl =
       process.env.NEXT_PUBLIC_WS_URL ||
       (process.env.NEXT_PUBLIC_API_URL
-        ? process.env.NEXT_PUBLIC_API_URL.replace(/^http/, 'ws').replace(/^https/, 'wss')
-        : typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+        ? process.env.NEXT_PUBLIC_API_URL.replace(/^http/, 'ws').replace(
+            /^https/,
+            'wss'
+          )
+        : typeof window !== 'undefined' &&
+            window.location.hostname !== 'localhost'
           ? 'wss://mhapi.mysticdatanode.net'
           : 'ws://localhost:8000');
     let ws: WebSocket | null = null;
@@ -74,14 +87,14 @@ export function ComplianceWidget() {
         console.log('Connected to compliance updates WebSocket');
       };
 
-      ws.onmessage = (event) => {
+      ws.onmessage = event => {
         const data = JSON.parse(event.data);
         if (data.type === 'compliance_update') {
           fetchComplianceMetrics();
         }
       };
 
-      ws.onerror = (error) => {
+      ws.onerror = error => {
         console.error('WebSocket error:', error);
       };
 
@@ -153,7 +166,9 @@ export function ComplianceWidget() {
     }
   };
 
-  const criticalViolations = metrics.violations.filter(v => v.severity === 'critical');
+  const criticalViolations = metrics.violations.filter(
+    v => v.severity === 'critical'
+  );
   const highViolations = metrics.violations.filter(v => v.severity === 'high');
 
   return (
@@ -169,7 +184,8 @@ export function ComplianceWidget() {
               </h2>
               {lastUpdated && (
                 <p className="text-xs text-gray-500 mt-1">
-                  Last updated: {new Date().getTime() - lastUpdated.getTime() < 60000
+                  Last updated:{' '}
+                  {new Date().getTime() - lastUpdated.getTime() < 60000
                     ? `${Math.floor((new Date().getTime() - lastUpdated.getTime()) / 1000)} seconds ago`
                     : `${Math.floor((new Date().getTime() - lastUpdated.getTime()) / 60000)} minutes ago`}
                 </p>
@@ -181,7 +197,9 @@ export function ComplianceWidget() {
             disabled={isRefreshing}
             className="flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`}
+            />
             Refresh
           </button>
         </div>
@@ -195,7 +213,9 @@ export function ComplianceWidget() {
               <p className="text-sm font-medium text-gray-700">
                 Overall Compliance Score
               </p>
-              <p className={`text-3xl font-bold ${getComplianceStatusColor(metrics.compliance_score)}`}>
+              <p
+                className={`text-3xl font-bold ${getComplianceStatusColor(metrics.compliance_score)}`}
+              >
                 {metrics.compliance_score.toFixed(1)}%
               </p>
             </div>
@@ -214,8 +234,8 @@ export function ComplianceWidget() {
                   metrics.compliance_score >= 95
                     ? 'bg-green-600'
                     : metrics.compliance_score >= 90
-                    ? 'bg-yellow-600'
-                    : 'bg-red-600'
+                      ? 'bg-yellow-600'
+                      : 'bg-red-600'
                 }`}
                 style={{ width: `${metrics.compliance_score}%` }}
               />
@@ -273,7 +293,8 @@ export function ComplianceWidget() {
               {metrics.consent_rate.toFixed(1)}%
             </p>
             <p className="text-xs text-gray-500 mt-1">
-              {metrics.sms_consented.toLocaleString()} / {metrics.total_subscribers.toLocaleString()} subscribers
+              {metrics.sms_consented.toLocaleString()} /{' '}
+              {metrics.total_subscribers.toLocaleString()} subscribers
             </p>
           </div>
 
@@ -281,7 +302,9 @@ export function ComplianceWidget() {
             <p className="text-sm text-gray-600">Unsubscribe Rate</p>
             <p
               className={`text-2xl font-bold mt-1 ${
-                metrics.unsubscribe_rate <= 0.5 ? 'text-green-600' : 'text-red-600'
+                metrics.unsubscribe_rate <= 0.5
+                  ? 'text-green-600'
+                  : 'text-red-600'
               }`}
             >
               {metrics.unsubscribe_rate.toFixed(2)}%
@@ -295,28 +318,28 @@ export function ComplianceWidget() {
             <p className="text-sm text-gray-600">Delivery Success Rate</p>
             <p
               className={`text-2xl font-bold mt-1 ${
-                metrics.delivery_success_rate >= 95 ? 'text-green-600' : 'text-yellow-600'
+                metrics.delivery_success_rate >= 95
+                  ? 'text-green-600'
+                  : 'text-yellow-600'
               }`}
             >
               {metrics.delivery_success_rate.toFixed(1)}%
             </p>
-            <p className="text-xs text-gray-500 mt-1">
-              Target: &gt; 95%
-            </p>
+            <p className="text-xs text-gray-500 mt-1">Target: &gt; 95%</p>
           </div>
 
           <div className="border border-gray-200 rounded-lg p-4">
             <p className="text-sm text-gray-600">Complaint Rate</p>
             <p
               className={`text-2xl font-bold mt-1 ${
-                metrics.complaint_rate <= 0.1 ? 'text-green-600' : 'text-red-600'
+                metrics.complaint_rate <= 0.1
+                  ? 'text-green-600'
+                  : 'text-red-600'
               }`}
             >
               {metrics.complaint_rate.toFixed(3)}%
             </p>
-            <p className="text-xs text-gray-500 mt-1">
-              Target: &lt; 0.1%
-            </p>
+            <p className="text-xs text-gray-500 mt-1">Target: &lt; 0.1%</p>
           </div>
         </div>
 
@@ -359,9 +382,13 @@ export function ComplianceWidget() {
                       >
                         {violation.severity.toUpperCase()}
                       </span>
-                      <span className="text-sm text-gray-900">{violation.type}</span>
+                      <span className="text-sm text-gray-900">
+                        {violation.type}
+                      </span>
                     </div>
-                    <p className="text-xs text-gray-600 mt-1">{violation.message}</p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      {violation.message}
+                    </p>
                   </div>
                   <span className="text-sm font-medium text-gray-700">
                     {violation.count}

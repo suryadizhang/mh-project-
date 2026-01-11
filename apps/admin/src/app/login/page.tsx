@@ -2,6 +2,7 @@
 
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Building, Eye, EyeOff, LogIn } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
 
@@ -316,6 +317,15 @@ function LoginContent() {
             )}
           </button>
         </div>
+      </div>
+
+      <div className="flex items-center justify-end">
+        <Link
+          href="/forgot-password"
+          className="text-sm font-medium text-blue-600 hover:text-blue-500"
+        >
+          Forgot your password?
+        </Link>
       </div>
 
       {error && (
