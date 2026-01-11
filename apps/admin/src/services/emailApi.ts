@@ -110,7 +110,12 @@ export async function getEmailStats(): Promise<{
     customer_support: EmailStats;
     payments: EmailStats;
   }>('/api/v1/admin/emails/stats');
-  return response.data!;
+
+  if (!response.success || !response.data) {
+    console.error('Failed to fetch email stats:', response.error);
+    throw new Error(response.error || 'Failed to fetch email statistics');
+  }
+  return response.data;
 }
 
 /**
@@ -140,7 +145,14 @@ export async function getCustomerSupportEmails(params?: {
     : '/api/v1/admin/emails/customer-support';
 
   const response = await api.get<EmailListResponse>(url);
-  return response.data!;
+
+  if (!response.success || !response.data) {
+    console.error('Failed to fetch customer support emails:', response.error);
+    throw new Error(
+      response.error || 'Failed to fetch customer support emails'
+    );
+  }
+  return response.data;
 }
 
 /**
@@ -165,7 +177,12 @@ export async function getPaymentEmails(params?: {
     : '/api/v1/admin/emails/payments';
 
   const response = await api.get<EmailListResponse>(url);
-  return response.data!;
+
+  if (!response.success || !response.data) {
+    console.error('Failed to fetch payment emails:', response.error);
+    throw new Error(response.error || 'Failed to fetch payment emails');
+  }
+  return response.data;
 }
 
 /**
@@ -177,7 +194,12 @@ export async function getCustomerSupportThread(
   const response = await api.get<EmailThread>(
     `/api/v1/admin/emails/customer-support/${thread_id}`
   );
-  return response.data!;
+
+  if (!response.success || !response.data) {
+    console.error('Failed to fetch email thread:', response.error);
+    throw new Error(response.error || 'Failed to fetch email thread');
+  }
+  return response.data;
 }
 
 /**
@@ -194,7 +216,12 @@ export async function sendCustomerSupportEmail(
     '/api/v1/admin/emails/customer-support/send',
     request as unknown as Record<string, unknown>
   );
-  return response.data!;
+
+  if (!response.success || !response.data) {
+    console.error('Failed to send email:', response.error);
+    throw new Error(response.error || 'Failed to send email');
+  }
+  return response.data;
 }
 
 /**
@@ -216,7 +243,12 @@ export async function updateCustomerSupportEmail(
     `/api/v1/admin/emails/customer-support/${message_id}`,
     update as unknown as Record<string, unknown>
   );
-  return response.data!;
+
+  if (!response.success || !response.data) {
+    console.error('Failed to update email:', response.error);
+    throw new Error(response.error || 'Failed to update email');
+  }
+  return response.data;
 }
 
 /**
@@ -250,7 +282,12 @@ export async function bulkUpdateCustomerSupportEmails(
     message_ids,
     action,
   } as unknown as Record<string, unknown>);
-  return response.data!;
+
+  if (!response.success || !response.data) {
+    console.error('Failed to bulk update emails:', response.error);
+    throw new Error(response.error || 'Failed to bulk update emails');
+  }
+  return response.data;
 }
 
 /**
@@ -264,7 +301,12 @@ export async function deleteCustomerSupportEmail(
     message_id: string;
     action: string;
   }>(`/api/v1/admin/emails/customer-support/${message_id}`);
-  return response.data!;
+
+  if (!response.success || !response.data) {
+    console.error('Failed to delete email:', response.error);
+    throw new Error(response.error || 'Failed to delete email');
+  }
+  return response.data;
 }
 
 /**
@@ -278,7 +320,12 @@ export async function deletePaymentEmail(
     message_id: string;
     action: string;
   }>(`/api/v1/admin/emails/payments/${message_id}`);
-  return response.data!;
+
+  if (!response.success || !response.data) {
+    console.error('Failed to delete payment email:', response.error);
+    throw new Error(response.error || 'Failed to delete payment email');
+  }
+  return response.data;
 }
 
 // ============================================================================
