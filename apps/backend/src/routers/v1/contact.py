@@ -24,7 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
 from db.models.crm import Lead, LeadSource, LeadStatus, ContactChannel
-from db.models.lead import LeadContact, LeadContext
+from db.models.lead import LeadContact, LeadContext, LeadEvent
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["contact"])
@@ -122,16 +122,18 @@ async def submit_contact_form(
         )
         db.add(context)
 
-        # Add creation event for tracking
-        lead.add_event(
-            "contact_form_submitted",
-            {
+        # Add creation event for tracking (create directly, don't use relationship)
+        event = LeadEvent(
+            lead_id=lead.id,
+            event_type="contact_form_submitted",
+            payload={
                 "source": request.source,
                 "subject": request.subject,
                 "has_phone": bool(request.phone),
                 "sms_consent": request.sms_consent,
             },
         )
+        db.add(event)
 
         await db.commit()
 
