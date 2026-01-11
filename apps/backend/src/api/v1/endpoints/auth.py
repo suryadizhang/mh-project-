@@ -202,15 +202,28 @@ async def get_current_user_info(current_user: dict = Depends(get_current_user)):
     )
 
 
-@router.post("/refresh", response_model=Token, tags=["Authentication"])
-async def refresh_token(refresh_data: RefreshTokenRequest, db: AsyncSession = Depends(get_db)):
+@router.post("/refresh", tags=["Authentication"])
+async def refresh_token_endpoint(
+    refresh_data: RefreshTokenRequest, db: AsyncSession = Depends(get_db)
+):
     """
-    Refresh access token.
+    Refresh access token using refresh token.
 
-    Note: Full refresh token rotation requires additional infrastructure.
-    For now, this endpoint is not implemented.
+    Delegates to the full implementation in routers/v1/auth.py which provides:
+    - Token validation with separate refresh secret
+    - Token blacklist checking
+    - Secure token rotation (new tokens, old one blacklisted)
+
+    Args:
+        refresh_data: Request body containing refresh_token
+
+    Returns:
+        New access_token and refresh_token pair
     """
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Refresh token functionality not yet implemented. Please login again.",
+    # Import and delegate to the real implementation
+    from routers.v1.auth import refresh_token as refresh_token_impl
+
+    return await refresh_token_impl(
+        refresh_token=refresh_data.refresh_token,
+        db=db,
     )
