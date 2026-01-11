@@ -16,6 +16,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { ApiErrorBoundary } from '@/components/ErrorBoundary';
 import { useProtectedPhone, useProtectedPaymentEmail } from '@/components/ui/ProtectedPhone';
+import { getWsUrl } from '@/lib/env';
 import { logger, logWebSocket } from '@/lib/logger';
 
 // Lazy load EscalationForm - only 5% of users escalate
@@ -197,8 +198,9 @@ function ChatWidgetComponent({ page }: ChatWidgetProps) {
       return; // Already connected
     }
 
-    // Updated to use new AI API WebSocket endpoint (port 8002) with customer role
-    const wsUrl = `ws://localhost:8002/ws/chat?user_id=${userIdRef.current}&thread_id=${threadIdRef.current}&channel=website&user_role=customer`;
+    // Use centralized WebSocket URL helper (derives wss:// from API URL in production)
+    const wsBaseUrl = getWsUrl();
+    const wsUrl = `${wsBaseUrl}/api/v1/ws/chat?user_id=${userIdRef.current}&thread_id=${threadIdRef.current}&channel=website&user_role=customer`;
 
     try {
       const ws = new WebSocket(wsUrl);
