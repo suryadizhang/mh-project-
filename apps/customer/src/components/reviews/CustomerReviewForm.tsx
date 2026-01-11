@@ -238,42 +238,55 @@ export default function CustomerReviewForm() {
     setIsSubmitting(true);
 
     try {
-      // Prepare form data
+      // Prepare form data - matches backend POST /api/v1/reviews/submit-public
       const submitData = new FormData();
-      submitData.append('customer_id', '1'); // TODO: Get from auth
-      submitData.append('customer_name', formData.customerName || '');
-      submitData.append('customer_email', formData.customerEmail || '');
-      submitData.append('customer_phone', formData.customerPhone || '');
-      submitData.append('show_initials_only', String(formData.showInitialsOnly || false));
-      submitData.append('title', formData.title || '');
-      submitData.append('content', formData.content || '');
       submitData.append('rating', String(formData.rating || 0));
+      submitData.append('review_text', formData.content || '');
+      submitData.append('customer_email', formData.customerEmail || '');
+      submitData.append('customer_name', formData.customerName || '');
 
-      if (formData.googleReviewUrl) {
-        submitData.append('reviewed_on_google', 'true');
-        submitData.append('google_review_link', formData.googleReviewUrl);
-      }
-      if (formData.yelpReviewUrl) {
-        submitData.append('reviewed_on_yelp', 'true');
-        submitData.append('yelp_review_link', formData.yelpReviewUrl);
-      }
+      // booking_id is optional - only append if available from URL params or context
+      // submitData.append('booking_id', bookingId);
 
-      // Add media files
-      mediaFiles.forEach((media) => {
-        submitData.append('media_files', media.file);
+      // Add media files (max 5)
+      const filesToUpload = mediaFiles.slice(0, 5);
+      filesToUpload.forEach((media) => {
+        submitData.append('files', media.file);
       });
 
-      // Submit to backend
-      const response = await fetch('http://localhost:8000/api/customer-reviews/submit-review', {
+      // Submit to backend - use environment variable or relative path
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const response = await fetch(`${apiBaseUrl}/api/v1/reviews/submit-public`, {
         method: 'POST',
         body: submitData,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to submit review');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Failed to submit review');
       }
 
       const result = await response.json();
+
+      // Track external reviews if provided
+      if (result.review_id && (formData.googleReviewUrl || formData.yelpReviewUrl)) {
+        // Track on Google
+        if (formData.googleReviewUrl) {
+          await fetch(`${apiBaseUrl}/api/v1/reviews/${result.review_id}/track-external`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ platform: 'google' }),
+          }).catch(console.error);
+        }
+        // Track on Yelp
+        if (formData.yelpReviewUrl) {
+          await fetch(`${apiBaseUrl}/api/v1/reviews/${result.review_id}/track-external`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ platform: 'yelp' }),
+          }).catch(console.error);
+        }
+      }
 
       // Success!
       setSubmitted(true);
@@ -281,7 +294,6 @@ export default function CustomerReviewForm() {
 
       // Cleanup media previews
       mediaFiles.forEach((media) => URL.revokeObjectURL(media.preview));
-
     } catch (error) {
       console.error('Submit error:', error);
       alert('Failed to submit review. Please try again.');
@@ -296,17 +308,15 @@ export default function CustomerReviewForm() {
 
   if (submitted) {
     return (
-      <div className="max-w-2xl mx-auto p-8">
-        <div className="bg-green-50 border border-green-200 rounded-lg p-8 text-center">
-          <div className="text-6xl mb-4">🎉</div>
-          <h2 className="text-3xl font-bold text-green-800 mb-4">
-            Thank You for Your Review!
-          </h2>
-          <p className="text-lg text-green-700 mb-6">
+      <div className="mx-auto max-w-2xl p-8">
+        <div className="rounded-lg border border-green-200 bg-green-50 p-8 text-center">
+          <div className="mb-4 text-6xl">🎉</div>
+          <h2 className="mb-4 text-3xl font-bold text-green-800">Thank You for Your Review!</h2>
+          <p className="mb-6 text-lg text-green-700">
             Your review has been submitted and is pending approval by our team.
             {"We'll"} review it shortly and it will appear on our website once approved.
           </p>
-          <div className="flex gap-4 justify-center">
+          <div className="flex justify-center gap-4">
             <button
               onClick={() => {
                 setSubmitted(false);
@@ -314,13 +324,13 @@ export default function CustomerReviewForm() {
                 setFormData({});
                 setMediaFiles([]);
               }}
-              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+              className="rounded-lg bg-green-600 px-6 py-3 text-white transition hover:bg-green-700"
             >
               Submit Another Review
             </button>
             <Link
               href="/"
-              className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+              className="rounded-lg bg-gray-200 px-6 py-3 text-gray-800 transition hover:bg-gray-300"
             >
               Back to Home
             </Link>
@@ -332,13 +342,13 @@ export default function CustomerReviewForm() {
 
   if (showPreview) {
     return (
-      <div className="max-w-4xl mx-auto p-8">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-3xl font-bold mb-6">Preview Your Review</h2>
+      <div className="mx-auto max-w-4xl p-8">
+        <div className="rounded-lg bg-white p-8 shadow-lg">
+          <h2 className="mb-6 text-3xl font-bold">Preview Your Review</h2>
 
-          <div className="border-2 border-gray-200 rounded-lg p-6 mb-6">
+          <div className="mb-6 rounded-lg border-2 border-gray-200 p-6">
             {/* Rating Stars */}
-            <div className="flex items-center gap-2 mb-4">
+            <div className="mb-4 flex items-center gap-2">
               {[1, 2, 3, 4, 5].map((star) => (
                 <span
                   key={star}
@@ -352,32 +362,35 @@ export default function CustomerReviewForm() {
             </div>
 
             {/* Title */}
-            <h3 className="text-2xl font-bold mb-4">{formData.title}</h3>
+            <h3 className="mb-4 text-2xl font-bold">{formData.title}</h3>
 
             {/* Content */}
-            <p className="text-gray-700 whitespace-pre-wrap mb-6">{formData.content}</p>
+            <p className="mb-6 whitespace-pre-wrap text-gray-700">{formData.content}</p>
 
             {/* Media Gallery */}
             {mediaFiles.length > 0 && (
               <div className="mb-6">
-                <h4 className="font-semibold mb-3">Media ({mediaFiles.length})</h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <h4 className="mb-3 font-semibold">Media ({mediaFiles.length})</h4>
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
                   {mediaFiles.map((media, index) => (
-                    <div key={index} className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                    <div
+                      key={index}
+                      className="relative aspect-video overflow-hidden rounded-lg bg-gray-100"
+                    >
                       {media.type === 'image' ? (
                         <img
                           src={media.preview}
                           alt={`Preview ${index + 1}`}
-                          className="w-full h-full object-cover"
+                          className="h-full w-full object-cover"
                         />
                       ) : (
                         <video
                           src={media.preview}
-                          className="w-full h-full object-cover"
+                          className="h-full w-full object-cover"
                           controls
                         />
                       )}
-                      <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                      <div className="absolute top-2 right-2 rounded bg-black/70 px-2 py-1 text-xs text-white">
                         {media.type}
                       </div>
                     </div>
@@ -387,7 +400,7 @@ export default function CustomerReviewForm() {
             )}
 
             {/* Customer Info */}
-            <div className="border-t pt-4 mt-4">
+            <div className="mt-4 border-t pt-4">
               <p className="font-semibold text-gray-900">
                 {formData.showInitialsOnly ? (
                   <>
@@ -402,26 +415,24 @@ export default function CustomerReviewForm() {
                   formData.customerName
                 )}
               </p>
-              <p className="text-xs text-gray-500 italic mt-1">
-                {formData.showInitialsOnly ? (
-                  '✓ Showing initials only (full name kept private)'
-                ) : (
-                  '✓ Your email and phone are private (not shown publicly)'
-                )}
+              <p className="mt-1 text-xs text-gray-500 italic">
+                {formData.showInitialsOnly
+                  ? '✓ Showing initials only (full name kept private)'
+                  : '✓ Your email and phone are private (not shown publicly)'}
               </p>
             </div>
 
             {/* External Links */}
             {(formData.googleReviewUrl || formData.yelpReviewUrl) && (
-              <div className="border-t pt-4 mt-4">
-                <p className="text-sm font-semibold mb-2">Also reviewed on:</p>
+              <div className="mt-4 border-t pt-4">
+                <p className="mb-2 text-sm font-semibold">Also reviewed on:</p>
                 <div className="flex gap-3">
                   {formData.googleReviewUrl && (
                     <a
                       href={formData.googleReviewUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline text-sm"
+                      className="text-sm text-blue-600 hover:underline"
                     >
                       Google Reviews →
                     </a>
@@ -431,7 +442,7 @@ export default function CustomerReviewForm() {
                       href={formData.yelpReviewUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline text-sm"
+                      className="text-sm text-blue-600 hover:underline"
                     >
                       Yelp →
                     </a>
@@ -442,17 +453,17 @@ export default function CustomerReviewForm() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-4 justify-between">
+          <div className="flex justify-between gap-4">
             <button
               onClick={() => setShowPreview(false)}
-              className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+              className="rounded-lg bg-gray-200 px-6 py-3 text-gray-800 transition hover:bg-gray-300"
             >
               ← Edit Review
             </button>
             <button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold"
+              className="rounded-lg bg-green-600 px-8 py-3 font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-400"
             >
               {isSubmitting ? (
                 <span className="flex items-center gap-2">
@@ -474,28 +485,23 @@ export default function CustomerReviewForm() {
   // ============================================================================
 
   return (
-    <div className="max-w-3xl mx-auto p-8">
-      <div className="bg-white rounded-lg shadow-lg p-8">
+    <div className="mx-auto max-w-3xl p-8">
+      <div className="rounded-lg bg-white p-8 shadow-lg">
         {/* Progress Steps */}
         <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
+          <div className="mb-4 flex items-center justify-between">
             {[1, 2, 3, 4].map((step) => (
-              <div
-                key={step}
-                className={`flex items-center ${step < 4 ? 'flex-1' : ''}`}
-              >
+              <div key={step} className={`flex items-center ${step < 4 ? 'flex-1' : ''}`}>
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                    step <= currentStep
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-500'
+                  className={`flex h-10 w-10 items-center justify-center rounded-full font-bold ${
+                    step <= currentStep ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'
                   }`}
                 >
                   {step}
                 </div>
                 {step < 4 && (
                   <div
-                    className={`flex-1 h-1 mx-2 ${
+                    className={`mx-2 h-1 flex-1 ${
                       step < currentStep ? 'bg-blue-600' : 'bg-gray-200'
                     }`}
                   />
@@ -514,8 +520,8 @@ export default function CustomerReviewForm() {
         {/* Step 1: Rating */}
         {currentStep === 1 && (
           <div>
-            <h2 className="text-2xl font-bold mb-6">How would you rate your experience?</h2>
-            <div className="flex justify-center gap-4 mb-8">
+            <h2 className="mb-6 text-2xl font-bold">How would you rate your experience?</h2>
+            <div className="mb-8 flex justify-center gap-4">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
@@ -532,11 +538,11 @@ export default function CustomerReviewForm() {
                 </button>
               ))}
             </div>
-            {errors.rating && <p className="text-red-600 text-center mb-4">{errors.rating}</p>}
+            {errors.rating && <p className="mb-4 text-center text-red-600">{errors.rating}</p>}
             <div className="flex justify-end">
               <button
                 onClick={handleNext}
-                className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                className="rounded-lg bg-blue-600 px-8 py-3 text-white transition hover:bg-blue-700"
               >
                 Next →
               </button>
@@ -547,84 +553,92 @@ export default function CustomerReviewForm() {
         {/* Step 2: Content */}
         {currentStep === 2 && (
           <div>
-            <h2 className="text-2xl font-bold mb-6">Tell us about your experience</h2>
+            <h2 className="mb-6 text-2xl font-bold">Tell us about your experience</h2>
 
             {/* Privacy Notice */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
               <div className="flex items-start gap-3">
                 <span className="text-2xl">🔒</span>
                 <div>
-                  <p className="font-semibold text-blue-900 mb-1">Your Privacy Matters</p>
+                  <p className="mb-1 font-semibold text-blue-900">Your Privacy Matters</p>
                   <p className="text-sm text-blue-800">
-                    By default, your <strong>full name</strong> will be shown publicly with your review.
-                    You can choose to show only your <strong>initials</strong> instead (e.g., &ldquo;JD&rdquo; for &ldquo;John Doe&rdquo;).
-                    Your email and phone number are always kept private and used only for verification
-                    and communication.
+                    By default, your <strong>full name</strong> will be shown publicly with your
+                    review. You can choose to show only your <strong>initials</strong> instead
+                    (e.g., &ldquo;JD&rdquo; for &ldquo;John Doe&rdquo;). Your email and phone number
+                    are always kept private and used only for verification and communication.
                   </p>
                 </div>
               </div>
             </div>
 
             {/* Customer Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-semibold mb-2">Your Name *</label>
+                <label className="mb-2 block text-sm font-semibold">Your Name *</label>
                 <input
                   type="text"
                   value={formData.customerName || ''}
                   onChange={(e) => handleInputChange('customerName', e.target.value)}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="John Doe"
                 />
-                {errors.customerName && <p className="text-red-600 text-sm mt-1">{errors.customerName}</p>}
+                {errors.customerName && (
+                  <p className="mt-1 text-sm text-red-600">{errors.customerName}</p>
+                )}
               </div>
 
               <div>
-                <label className="block text-sm font-semibold mb-2">Email *</label>
+                <label className="mb-2 block text-sm font-semibold">Email *</label>
                 <input
                   type="email"
                   value={formData.customerEmail || ''}
                   onChange={(e) => handleInputChange('customerEmail', e.target.value)}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="john@example.com"
                 />
-                {errors.customerEmail && <p className="text-red-600 text-sm mt-1">{errors.customerEmail}</p>}
+                {errors.customerEmail && (
+                  <p className="mt-1 text-sm text-red-600">{errors.customerEmail}</p>
+                )}
               </div>
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-semibold mb-2">Phone (Optional)</label>
+              <label className="mb-2 block text-sm font-semibold">Phone (Optional)</label>
               <input
                 type="tel"
                 value={formData.customerPhone || ''}
                 onChange={(e) => handleInputChange('customerPhone', e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="(555) 123-4567"
               />
             </div>
 
             {/* Privacy Option - Show Initials Only */}
-            <div className="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
-              <label className="flex items-start gap-3 cursor-pointer">
+            <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <label className="flex cursor-pointer items-start gap-3">
                 <input
                   type="checkbox"
                   checked={formData.showInitialsOnly || false}
                   onChange={(e) => handleInputChange('showInitialsOnly', e.target.checked)}
-                  className="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                  className="mt-1 h-5 w-5 rounded text-blue-600 focus:ring-2 focus:ring-blue-500"
                 />
                 <div className="flex-1">
-                  <span className="font-semibold text-gray-900">Show only my initials publicly</span>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <span className="font-semibold text-gray-900">
+                    Show only my initials publicly
+                  </span>
+                  <p className="mt-1 text-sm text-gray-600">
                     {formData.customerName ? (
                       <>
                         Instead of showing &ldquo;<strong>{formData.customerName}</strong>&rdquo;,
-                        your review will display &ldquo;<strong>{
-                          (() => {
+                        your review will display &ldquo;
+                        <strong>
+                          {(() => {
                             const words = formData.customerName.trim().split(' ');
                             if (words.length === 1) return words[0][0]?.toUpperCase() || '?';
                             return (words[0][0] + words[words.length - 1][0]).toUpperCase();
-                          })()
-                        }</strong>&rdquo;
+                          })()}
+                        </strong>
+                        &rdquo;
                       </>
                     ) : (
                       'Your initials will be generated from your name (e.g., &ldquo;John Doe&rdquo; → &ldquo;JD&rdquo;)'
@@ -636,44 +650,44 @@ export default function CustomerReviewForm() {
 
             {/* Review Title */}
             <div className="mb-4">
-              <label className="block text-sm font-semibold mb-2">Review Title *</label>
+              <label className="mb-2 block text-sm font-semibold">Review Title *</label>
               <input
                 type="text"
                 value={formData.title || ''}
                 onChange={(e) => handleInputChange('title', e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Amazing food and service!"
                 maxLength={200}
               />
-              {errors.title && <p className="text-red-600 text-sm mt-1">{errors.title}</p>}
+              {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
             </div>
 
             {/* Review Content */}
             <div className="mb-6">
-              <label className="block text-sm font-semibold mb-2">Your Review *</label>
+              <label className="mb-2 block text-sm font-semibold">Your Review *</label>
               <textarea
                 value={formData.content || ''}
                 onChange={(e) => handleInputChange('content', e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none h-40 resize-none"
+                className="h-40 w-full resize-none rounded-lg border px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Share your experience with us... (minimum 20 characters)"
                 maxLength={5000}
               />
-              <div className="text-sm text-gray-600 mt-1">
+              <div className="mt-1 text-sm text-gray-600">
                 {(formData.content || '').length} / 5000 characters
               </div>
-              {errors.content && <p className="text-red-600 text-sm mt-1">{errors.content}</p>}
+              {errors.content && <p className="mt-1 text-sm text-red-600">{errors.content}</p>}
             </div>
 
             <div className="flex justify-between">
               <button
                 onClick={handleBack}
-                className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+                className="rounded-lg bg-gray-200 px-6 py-3 text-gray-800 transition hover:bg-gray-300"
               >
                 ← Back
               </button>
               <button
                 onClick={handleNext}
-                className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                className="rounded-lg bg-blue-600 px-8 py-3 text-white transition hover:bg-blue-700"
               >
                 Next →
               </button>
@@ -684,8 +698,8 @@ export default function CustomerReviewForm() {
         {/* Step 3: Media Upload */}
         {currentStep === 3 && (
           <div>
-            <h2 className="text-2xl font-bold mb-6">Add Photos or Videos (Optional)</h2>
-            <p className="text-gray-600 mb-6">
+            <h2 className="mb-6 text-2xl font-bold">Add Photos or Videos (Optional)</h2>
+            <p className="mb-6 text-gray-600">
               Upload up to 10 images or videos to showcase your experience
             </p>
 
@@ -695,16 +709,15 @@ export default function CustomerReviewForm() {
               onDragLeave={handleDrag}
               onDragOver={handleDrag}
               onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-lg p-8 text-center mb-6 transition ${
+              className={`mb-6 rounded-lg border-2 border-dashed p-8 text-center transition ${
                 dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
               }`}
             >
-              <div className="text-6xl mb-4">📸🎥</div>
-              <p className="text-lg font-semibold mb-2">
-                Drag & Drop or Click to Upload
-              </p>
-              <p className="text-sm text-gray-600 mb-4">
-                Images: JPG, PNG, WEBP, GIF (10MB max)<br />
+              <div className="mb-4 text-6xl">📸🎥</div>
+              <p className="mb-2 text-lg font-semibold">Drag & Drop or Click to Upload</p>
+              <p className="mb-4 text-sm text-gray-600">
+                Images: JPG, PNG, WEBP, GIF (10MB max)
+                <br />
                 Videos: MP4, MOV, WEBM, AVI (100MB max)
               </p>
               <input
@@ -717,7 +730,7 @@ export default function CustomerReviewForm() {
               />
               <label
                 htmlFor="media-upload"
-                className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
+                className="inline-block cursor-pointer rounded-lg bg-blue-600 px-6 py-3 text-white transition hover:bg-blue-700"
               >
                 Choose Files
               </label>
@@ -726,38 +739,33 @@ export default function CustomerReviewForm() {
             {/* Media Preview Grid */}
             {mediaFiles.length > 0 && (
               <div className="mb-6">
-                <h3 className="font-semibold mb-3">
-                  Uploaded Media ({mediaFiles.length}/10)
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <h3 className="mb-3 font-semibold">Uploaded Media ({mediaFiles.length}/10)</h3>
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
                   {mediaFiles.map((media, index) => (
                     <div
                       key={index}
-                      className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden group"
+                      className="group relative aspect-video overflow-hidden rounded-lg bg-gray-100"
                     >
                       {media.type === 'image' ? (
                         <img
                           src={media.preview}
                           alt={`Upload ${index + 1}`}
-                          className="w-full h-full object-cover"
+                          className="h-full w-full object-cover"
                         />
                       ) : (
-                        <div className="relative w-full h-full">
-                          <video
-                            src={media.preview}
-                            className="w-full h-full object-cover"
-                          />
+                        <div className="relative h-full w-full">
+                          <video src={media.preview} className="h-full w-full object-cover" />
                           <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                            <span className="text-white text-4xl">▶</span>
+                            <span className="text-4xl text-white">▶</span>
                           </div>
                         </div>
                       )}
-                      <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                      <div className="absolute top-2 right-2 rounded bg-black/70 px-2 py-1 text-xs text-white">
                         {media.type}
                       </div>
                       <button
                         onClick={() => removeMedia(index)}
-                        className="absolute top-2 left-2 bg-red-600 text-white w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 transition"
+                        className="absolute top-2 left-2 h-8 w-8 rounded-full bg-red-600 text-white opacity-0 transition group-hover:opacity-100"
                       >
                         ✕
                       </button>
@@ -770,13 +778,13 @@ export default function CustomerReviewForm() {
             <div className="flex justify-between">
               <button
                 onClick={handleBack}
-                className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+                className="rounded-lg bg-gray-200 px-6 py-3 text-gray-800 transition hover:bg-gray-300"
               >
                 ← Back
               </button>
               <button
                 onClick={handleNext}
-                className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                className="rounded-lg bg-blue-600 px-8 py-3 text-white transition hover:bg-blue-700"
               >
                 Next →
               </button>
@@ -787,49 +795,49 @@ export default function CustomerReviewForm() {
         {/* Step 4: External Links */}
         {currentStep === 4 && (
           <div>
-            <h2 className="text-2xl font-bold mb-6">Add External Review Links (Optional)</h2>
-            <p className="text-gray-600 mb-6">
+            <h2 className="mb-6 text-2xl font-bold">Add External Review Links (Optional)</h2>
+            <p className="mb-6 text-gray-600">
               Have you also reviewed us on Google or Yelp? Share the links!
             </p>
 
             <div className="mb-4">
-              <label className="block text-sm font-semibold mb-2">
-                Google Review URL
-              </label>
+              <label className="mb-2 block text-sm font-semibold">Google Review URL</label>
               <input
                 type="url"
                 value={formData.googleReviewUrl || ''}
                 onChange={(e) => handleInputChange('googleReviewUrl', e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="https://g.page/..."
               />
-              {errors.googleReviewUrl && <p className="text-red-600 text-sm mt-1">{errors.googleReviewUrl}</p>}
+              {errors.googleReviewUrl && (
+                <p className="mt-1 text-sm text-red-600">{errors.googleReviewUrl}</p>
+              )}
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-semibold mb-2">
-                Yelp Review URL
-              </label>
+              <label className="mb-2 block text-sm font-semibold">Yelp Review URL</label>
               <input
                 type="url"
                 value={formData.yelpReviewUrl || ''}
                 onChange={(e) => handleInputChange('yelpReviewUrl', e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="https://yelp.com/biz/..."
               />
-              {errors.yelpReviewUrl && <p className="text-red-600 text-sm mt-1">{errors.yelpReviewUrl}</p>}
+              {errors.yelpReviewUrl && (
+                <p className="mt-1 text-sm text-red-600">{errors.yelpReviewUrl}</p>
+              )}
             </div>
 
             <div className="flex justify-between">
               <button
                 onClick={handleBack}
-                className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+                className="rounded-lg bg-gray-200 px-6 py-3 text-gray-800 transition hover:bg-gray-300"
               >
                 ← Back
               </button>
               <button
                 onClick={handlePreview}
-                className="px-8 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold"
+                className="rounded-lg bg-purple-600 px-8 py-3 font-semibold text-white transition hover:bg-purple-700"
               >
                 Preview Review 👁
               </button>

@@ -85,6 +85,22 @@ class QRCodeType(str, enum.Enum):
     EVENT = "event"
 
 
+class MediaProcessingStatus(str, enum.Enum):
+    """Media processing status for review uploads"""
+
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
+class MediaType(str, enum.Enum):
+    """Type of media file"""
+
+    IMAGE = "image"
+    VIDEO = "video"
+
+
 # ==================== FEEDBACK SCHEMA ====================
 
 
@@ -169,6 +185,90 @@ class CustomerReview(Base):
     escalations: Mapped[list["ReviewEscalation"]] = relationship(
         "ReviewEscalation", back_populates="review"
     )
+    media: Mapped[list["ReviewMedia"]] = relationship(
+        "ReviewMedia", back_populates="review", order_by="ReviewMedia.display_order"
+    )
+
+
+class ReviewMedia(Base):
+    """
+    Review media entity
+
+    Stores image and video attachments for customer reviews.
+    Media is stored in Cloudflare R2 with processing pipeline:
+    - Original file stored as-is
+    - Optimized version (resized, compressed)
+    - Thumbnail for preview
+
+    Processing is async via background tasks.
+    """
+
+    __tablename__ = "review_media"
+    __table_args__ = (
+        Index("idx_review_media_review_id", "review_id"),
+        Index("idx_review_media_status", "processing_status"),
+        {"schema": "feedback"},
+    )
+
+    # Primary Key
+    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+
+    # Foreign Key
+    review_id: Mapped[UUID] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("feedback.customer_reviews.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    # Media Type
+    media_type: Mapped[MediaType] = mapped_column(
+        SQLEnum(MediaType, name="media_type", schema="feedback", create_type=False),
+        nullable=False,
+    )
+
+    # File Info
+    original_filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    file_size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
+    content_type: Mapped[str] = mapped_column(String(100), nullable=False)
+
+    # R2 Storage URLs
+    original_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    optimized_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    thumbnail_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+
+    # Image/Video Dimensions (after processing)
+    width: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    height: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
+    # Processing Status
+    processing_status: Mapped[MediaProcessingStatus] = mapped_column(
+        SQLEnum(
+            MediaProcessingStatus,
+            name="media_processing_status",
+            schema="feedback",
+            create_type=False,
+        ),
+        nullable=False,
+        server_default="pending",
+        index=True,
+    )
+    processing_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Display Order (for carousel/gallery)
+    display_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+    )
+    processed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    # Relationships
+    review: Mapped["CustomerReview"] = relationship("CustomerReview", back_populates="media")
 
 
 class DiscountCoupon(Base):

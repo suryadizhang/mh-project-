@@ -28,15 +28,15 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 const WS_BASE_URL =
   process.env.NEXT_PUBLIC_WS_URL ||
   (process.env.NEXT_PUBLIC_API_URL
-    ? process.env.NEXT_PUBLIC_API_URL.replace(/^http/, 'ws').replace(/^https/, 'wss')
+    ? process.env.NEXT_PUBLIC_API_URL.replace(/^http/, 'ws').replace(
+        /^https/,
+        'wss'
+      )
     : typeof window !== 'undefined' && window.location.hostname !== 'localhost'
       ? 'wss://mhapi.mysticdatanode.net'
       : 'ws://localhost:8002');
 import { logger } from '@/lib/logger';
-import {
-  type AdminChatResponse,
-  aiApiService,
-} from '@/services/ai-api';
+import { type AdminChatResponse, aiApiService } from '@/services/ai-api';
 
 interface Message {
   id: string;
@@ -394,12 +394,14 @@ export default function ChatBot({
           {messages.map(message => (
             <div
               key={message.id}
-              className={`flex items-start gap-2 ${message.isBot ? 'flex-row' : 'flex-row-reverse'
-                }`}
+              className={`flex items-start gap-2 ${
+                message.isBot ? 'flex-row' : 'flex-row-reverse'
+              }`}
             >
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${message.isBot ? 'bg-blue-500' : 'bg-gray-500'
-                  }`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${
+                  message.isBot ? 'bg-blue-500' : 'bg-gray-500'
+                }`}
               >
                 {message.isBot ? <Bot size={16} /> : <User size={16} />}
               </div>
@@ -407,10 +409,11 @@ export default function ChatBot({
                 className={`flex-1 ${message.isBot ? 'text-left' : 'text-right'}`}
               >
                 <div
-                  className={`inline-block p-3 rounded-lg max-w-xs ${message.isBot
+                  className={`inline-block p-3 rounded-lg max-w-xs ${
+                    message.isBot
                       ? 'bg-gray-100 text-gray-800'
                       : 'bg-blue-600 text-white'
-                    }`}
+                  }`}
                 >
                   <p className="text-sm">{message.content}</p>
 
@@ -512,24 +515,24 @@ export default function ChatBot({
 
           {enableWebSocket
             ? !wsConnected && (
-              <div className="mt-2 text-xs text-red-600 flex items-center gap-1">
-                <AlertCircle size={12} />
-                <span>
-                  {wsConnecting
-                    ? 'Connecting to real-time chat...'
-                    : wsError ||
-                    'Real-time chat is not available. Messages will use REST API.'}
-                </span>
-              </div>
-            )
+                <div className="mt-2 text-xs text-red-600 flex items-center gap-1">
+                  <AlertCircle size={12} />
+                  <span>
+                    {wsConnecting
+                      ? 'Connecting to real-time chat...'
+                      : wsError ||
+                        'Real-time chat is not available. Messages will use REST API.'}
+                  </span>
+                </div>
+              )
             : !isConnected && (
-              <div className="mt-2 text-xs text-red-600 flex items-center gap-1">
-                <AlertCircle size={12} />
-                <span>
-                  AI service is not available. Check the connection.
-                </span>
-              </div>
-            )}
+                <div className="mt-2 text-xs text-red-600 flex items-center gap-1">
+                  <AlertCircle size={12} />
+                  <span>
+                    AI service is not available. Check the connection.
+                  </span>
+                </div>
+              )}
         </div>
       </div>
     </div>
