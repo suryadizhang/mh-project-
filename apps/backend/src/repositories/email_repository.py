@@ -3,7 +3,7 @@ Email Repository - Database operations for email storage
 Handles CRUD operations for EmailMessage, EmailThread, and EmailSyncStatus models
 """
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import List, Optional, Dict, Any
 from sqlalchemy import select, and_, or_, desc, func, update, String
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -431,8 +431,56 @@ class EmailRepository:
         )
         today_count = today_result.scalar() or 0
 
+        # Week's count
+        week_start = today_start - timedelta(days=7)
+        week_result = await self.session.execute(
+            select(func.count(EmailMessage.id)).where(
+                and_(
+                    EmailMessage.inbox == inbox,
+                    EmailMessage.is_deleted == False,
+                    EmailMessage.received_at >= week_start,
+                )
+            )
+        )
+        week_count = week_result.scalar() or 0
+
+        # Thread counts (using email_threads table)
+        total_threads_result = await self.session.execute(
+            select(func.count(EmailThread.id)).where(
+                and_(
+                    EmailThread.inbox == inbox,
+                    EmailThread.is_deleted == False,
+                    EmailThread.is_archived == False,
+                )
+            )
+        )
+        total_threads = total_threads_result.scalar() or 0
+
+        archived_threads_result = await self.session.execute(
+            select(func.count(EmailThread.id)).where(
+                and_(
+                    EmailThread.inbox == inbox,
+                    EmailThread.is_deleted == False,
+                    EmailThread.is_archived == True,
+                )
+            )
+        )
+        archived_threads = archived_threads_result.scalar() or 0
+
+        # Return keys matching what admin_emails.py expects
         return {
             "inbox": inbox,
+            # Message-level stats (for /stats endpoint)
+            "total_messages": total_count,
+            "unread_messages": unread_count,
+            "starred_messages": starred_count,
+            "archived_messages": archived_count,
+            "today_messages": today_count,
+            "week_messages": week_count,
+            # Thread-level stats (for /customer-support endpoint)
+            "total_threads": total_threads,
+            "archived_threads": archived_threads,
+            # Backward compatibility aliases
             "total_emails": total_count,
             "unread_emails": unread_count,
             "starred_emails": starred_count,
