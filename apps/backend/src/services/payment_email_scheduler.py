@@ -72,10 +72,11 @@ class PaymentEmailScheduler:
             db = SessionLocal()
 
             try:
-                # Initialize services
+                # Initialize services with db session for recording processed emails
                 email_monitor = PaymentEmailMonitor(
                     email_address=settings.GMAIL_USER,
                     app_password=settings.GMAIL_APP_PASSWORD,
+                    db_session=db,  # Pass db session to enable email recording
                 )
 
                 email_service = EmailService()
