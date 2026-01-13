@@ -16,13 +16,14 @@ import {
   ReplyAll,
   Forward,
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useToast } from '@/components/ui/Toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import {
   getEmailStats,
   getCustomerSupportEmails,
@@ -104,6 +105,10 @@ export default function EmailsPage() {
   // Bulk selection
   const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
   const [bulkProcessing, setBulkProcessing] = useState(false);
+
+  // Delete confirmation modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
 
   // Load email stats
   const loadStats = async () => {
@@ -454,6 +459,45 @@ export default function EmailsPage() {
     setSelectedEmails(newSelection);
   };
 
+  // Execute the actual bulk delete after modal confirmation
+  const executeBulkDelete = useCallback(async (reason: string) => {
+    if (pendingDeleteIds.length === 0) return;
+
+    setBulkProcessing(true);
+    try {
+      const result = await bulkUpdateCustomerSupportEmails(pendingDeleteIds, 'delete');
+
+      if (result.success_count > 0) {
+        toast.success(
+          'Emails deleted',
+          `${result.success_count} email(s) permanently deleted. Reason: "${reason.substring(0, 50)}${reason.length > 50 ? '...' : ''}"`
+        );
+        // Log to console for audit trail (backend already logs this)
+        console.info(`[AUDIT] Bulk email delete by super admin. Count: ${result.success_count}. Reason: ${reason}`);
+      }
+
+      if (result.failed_count > 0) {
+        toast.error(
+          'Some deletions failed',
+          `${result.failed_count} email(s) could not be deleted`
+        );
+      }
+
+      // Clear selection and refresh
+      setSelectedEmails(new Set());
+      setPendingDeleteIds([]);
+      loadThreads();
+      loadStats();
+      setSelectedThread(null);
+    } catch (error) {
+      console.error('Bulk delete failed:', error);
+      toast.error('Delete failed', 'Could not complete bulk delete operation');
+    } finally {
+      setBulkProcessing(false);
+      setShowDeleteModal(false);
+    }
+  }, [pendingDeleteIds, toast]);
+
   const handleBulkAction = async (
     action:
       | 'mark_read'
@@ -480,29 +524,27 @@ export default function EmailsPage() {
       return;
     }
 
-    // Confirm delete action
+    // Get message IDs from selected threads
+    const messageIds = threads
+      .filter(t => selectedEmails.has(t.thread_id))
+      .map(t => t.messages[0]?.message_id)
+      .filter(Boolean) as string[];
+
+    // Handle delete action with modal confirmation
     if (action === 'delete') {
       if (!isSuperAdmin()) {
         toast.error('Permission Denied', 'Only super admins can delete emails');
         return;
       }
-      if (
-        !confirm(
-          `Are you sure you want to permanently delete ${selectedEmails.size} email(s)? This action cannot be undone.`
-        )
-      ) {
-        return;
-      }
+      // Store the IDs and show the modal
+      setPendingDeleteIds(messageIds);
+      setShowDeleteModal(true);
+      return;
     }
 
+    // For non-delete actions, proceed immediately
     setBulkProcessing(true);
     try {
-      // Get message IDs from selected threads
-      const messageIds = threads
-        .filter(t => selectedEmails.has(t.thread_id))
-        .map(t => t.messages[0]?.message_id)
-        .filter(Boolean) as string[];
-
       const result = await bulkUpdateCustomerSupportEmails(messageIds, action);
 
       if (result.success_count > 0) {
@@ -571,11 +613,10 @@ export default function EmailsPage() {
             {/* Customer Support Tab */}
             <button
               onClick={() => setActiveTab('customer_support')}
-              className={`px-6 py-3 text-sm font-medium transition-colors relative ${
-                activeTab === 'customer_support'
+              className={`px-6 py-3 text-sm font-medium transition-colors relative ${activeTab === 'customer_support'
                   ? 'text-red-600 border-b-2 border-red-600'
                   : 'text-gray-600 hover:text-gray-900'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-2">
                 <Inbox className="w-4 h-4" />
@@ -595,11 +636,10 @@ export default function EmailsPage() {
             {/* Payments Tab */}
             <button
               onClick={() => setActiveTab('payments')}
-              className={`px-6 py-3 text-sm font-medium transition-colors relative ${
-                activeTab === 'payments'
+              className={`px-6 py-3 text-sm font-medium transition-colors relative ${activeTab === 'payments'
                   ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-gray-600 hover:text-gray-900'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4" />
@@ -677,22 +717,20 @@ export default function EmailsPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => setShowUnreadOnly(!showUnreadOnly)}
-                className={`px-3 py-1.5 text-xs rounded-full transition-colors ${
-                  showUnreadOnly
+                className={`px-3 py-1.5 text-xs rounded-full transition-colors ${showUnreadOnly
                     ? 'bg-red-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 Unread Only
               </button>
               {activeTab === 'customer_support' && (
                 <button
                   onClick={() => setShowStarredOnly(!showStarredOnly)}
-                  className={`px-3 py-1.5 text-xs rounded-full transition-colors ${
-                    showStarredOnly
+                  className={`px-3 py-1.5 text-xs rounded-full transition-colors ${showStarredOnly
                       ? 'bg-yellow-500 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                    }`}
                 >
                   Starred Only
                 </button>
@@ -791,7 +829,7 @@ export default function EmailsPage() {
                   />
                   <span className="text-sm text-gray-600">
                     {selectedEmails.size === threads.length &&
-                    threads.length > 0
+                      threads.length > 0
                       ? 'Deselect all'
                       : 'Select all'}
                   </span>
@@ -822,13 +860,12 @@ export default function EmailsPage() {
                 return (
                   <div
                     key={thread.thread_id}
-                    className={`p-4 border-b border-gray-200 transition-colors ${
-                      isSelected
+                    className={`p-4 border-b border-gray-200 transition-colors ${isSelected
                         ? 'bg-red-50 border-l-4 border-l-red-600'
                         : thread.is_read
                           ? 'hover:bg-gray-50'
                           : 'bg-blue-50 bg-opacity-30 hover:bg-blue-50 hover:bg-opacity-50'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-start gap-3">
                       {/* Checkbox (Customer Support only) */}
@@ -1240,6 +1277,19 @@ export default function EmailsPage() {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal - Enterprise-grade with audit trail */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setPendingDeleteIds([]);
+        }}
+        onConfirm={executeBulkDelete}
+        resourceType="email"
+        resourceName={`${pendingDeleteIds.length} customer support email${pendingDeleteIds.length !== 1 ? 's' : ''}`}
+        warningMessage="These emails will be PERMANENTLY DELETED from the database. This action cannot be undone. A security audit log will be created."
+      />
     </div>
   );
 }
