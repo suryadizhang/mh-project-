@@ -169,7 +169,7 @@ async def get_business_config(
         result = await db.execute(
             text(
                 """
-            SELECT category, key, value, value_type
+            SELECT category, key, value
             FROM dynamic_variables
             WHERE is_active = true
             AND (effective_from IS NULL OR effective_from <= NOW())
@@ -218,13 +218,13 @@ def _map_dynamic_variables_to_config(variables: list, config: BusinessConfig) ->
     """
     Map dynamic_variables rows to BusinessConfig dataclass.
 
-    Handles type conversion based on value_type column.
+    Type is inferred from the JSONB value structure.
     """
     for row in variables:
-        category, key, value, value_type = row
+        category, key, value = row
 
-        # Parse value based on type
-        parsed_value = _parse_variable_value(value, value_type)
+        # Parse value (type is inferred from JSONB structure)
+        parsed_value = _parse_variable_value(value)
 
         # Map to config fields
         if category == CATEGORY_PRICING:
@@ -256,45 +256,32 @@ def _map_dynamic_variables_to_config(variables: list, config: BusinessConfig) ->
     return config
 
 
-def _parse_variable_value(value: Any, value_type: str) -> Any:
+def _parse_variable_value(value: Any) -> Any:
     """
-    Parse a dynamic variable value based on its declared type.
+    Parse a dynamic variable value from JSONB storage.
 
-    Handles JSONB storage where values may be strings, numbers, or objects.
+    Handles multiple formats:
+    - Direct values: 5500, "string", true
+    - Wrapped values: {"amount": 5500}, {"value": 30}, {"list": [...]}
+
+    Returns the unwrapped value for further processing.
     """
     if value is None:
         return None
 
-    # If it's already the right type, return as-is
-    if value_type == "integer" and isinstance(value, int):
-        return value
-    if value_type == "number" and isinstance(value, (int, float)):
-        return value
-    if value_type == "boolean" and isinstance(value, bool):
-        return value
-    if value_type == "string" and isinstance(value, str):
-        return value
-
-    # Handle JSONB storage (value might be wrapped)
+    # Handle JSONB storage (value might be wrapped in a dict)
     if isinstance(value, dict):
-        # Extract the actual value if wrapped - support both "value" and "amount" keys
+        # Extract the actual value if wrapped - support multiple keys
         if "value" in value:
             return value["value"]
         elif "amount" in value:
             return value["amount"]
         elif "list" in value:
             return value["list"]
+        # If it's a dict but not wrapped, return as-is (for complex config objects)
         return value
 
-    # Convert string representations
-    if isinstance(value, str):
-        if value_type == "integer":
-            return int(value)
-        elif value_type == "number":
-            return float(value)
-        elif value_type == "boolean":
-            return value.lower() in ("true", "1", "yes")
-
+    # Direct values (int, float, str, bool) - return as-is
     return value
 
 
