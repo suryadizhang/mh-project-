@@ -82,7 +82,7 @@ class PaymentMatcher:
                 if phone_match:
                     logger.info(
                         f"✅ PHONE MATCH: Found payment by customer phone {customer_phone[-4:]}: "
-                        f"ID={phone_match.id}, Amount=${phone_match.total_amount}"
+                        f"ID={phone_match.id}, Amount=${phone_match.amount}"
                     )
                     return phone_match
 
@@ -115,8 +115,8 @@ class PaymentMatcher:
                     and_(
                         Payment.status.in_([PaymentStatus.PENDING, PaymentStatus.PROCESSING]),
                         Payment.payment_method == payment_method,
-                        Payment.total_amount >= min_amount,
-                        Payment.total_amount <= max_amount,
+                        Payment.amount >= min_amount,
+                        Payment.amount <= max_amount,
                         Payment.created_at >= time_start,
                         Payment.created_at <= time_end,
                     )
@@ -139,7 +139,7 @@ class PaymentMatcher:
                 payment = potential_matches[0]
                 logger.info(
                     f"✅ Found matching payment: ID={payment.id}, "
-                    f"Amount=${payment.total_amount}, Method={payment.payment_method}"
+                    f"Amount=${payment.amount}, Method={payment.payment_method}"
                 )
                 return payment
 
@@ -151,7 +151,7 @@ class PaymentMatcher:
                 if best_match:
                     logger.info(
                         f"✅ Found best matching payment using sender info: ID={best_match.id}, "
-                        f"Amount=${best_match.total_amount}, Method={best_match.payment_method}"
+                        f"Amount=${best_match.amount}, Method={best_match.payment_method}"
                     )
                     return best_match
 
@@ -159,7 +159,7 @@ class PaymentMatcher:
             payment = PaymentMatcher._pick_closest_booking(potential_matches, received_at)
             logger.warning(
                 f"⚠️ Multiple matches found, returning closest booking: ID={payment.id}, "
-                f"Amount=${payment.total_amount}, Created={payment.created_at}"
+                f"Amount=${payment.amount}, Created={payment.created_at}"
             )
             return payment
 
@@ -239,7 +239,7 @@ class PaymentMatcher:
 
             for payment in matches:
                 # Score based on amount difference and time difference
-                amount_diff = abs(float(payment.total_amount - amount))
+                amount_diff = abs(float(payment.amount - amount))
                 time_diff = abs((payment.created_at - received_at).total_seconds() / 3600)  # Hours
 
                 # Lower is better (smaller diff = better match)
@@ -427,7 +427,7 @@ class PaymentMatcher:
                     score += 100
 
             # Amount exact match bonus
-            if payment.total_amount == Decimal(str(sender_info.get("amount", 0))):
+            if payment.amount == Decimal(str(sender_info.get("amount", 0))):
                 score += 25
 
             scored_matches.append((payment, score))
@@ -494,7 +494,7 @@ class PaymentMatcher:
             logger.info(
                 f"✅ Payment confirmed: Payment ID={payment.id}, "
                 f"Booking ID={booking.id if booking else 'N/A'}, "
-                f"Amount=${payment.total_amount}"
+                f"Amount=${payment.amount}"
             )
 
             # Send customer confirmation email
@@ -503,7 +503,7 @@ class PaymentMatcher:
                     email_service.send_payment_confirmation(
                         to_email=booking.customer_email,
                         booking_id=booking.id,
-                        amount=float(payment.total_amount),
+                        amount=float(payment.amount),
                         payment_method=payment.payment_method,
                     )
                     logger.info(f"📧 Sent payment confirmation to {booking.customer_email}")
@@ -516,7 +516,7 @@ class PaymentMatcher:
                     notify_service.send_payment_received_notification(
                         payment_id=payment.id,
                         booking_id=booking.id if booking else None,
-                        amount=float(payment.total_amount),
+                        amount=float(payment.amount),
                         method=payment.payment_method,
                     )
                     logger.info(f"🔔 Sent admin notification for payment {payment.id}")
@@ -533,7 +533,7 @@ class PaymentMatcher:
                         notify_payment(
                             customer_name=booking.customer_name,
                             customer_phone=booking.customer_phone,
-                            amount=float(payment.total_amount),
+                            amount=float(payment.amount),
                             payment_method=payment.payment_method,
                             booking_id=str(booking.id),
                             balance_due=(
