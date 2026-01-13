@@ -548,16 +548,113 @@ async def get_payment_emails(
         search: Search query (subject, sender, body)
     """
     try:
-        # TODO: Implement PaymentEmailMonitor.fetch_emails()
-        # For now, return empty list
+        from sqlalchemy import text
+
+        # Calculate pagination offset
+        offset = (page - 1) * limit
+
+        # Build base query for processed payment emails
+        base_query = """
+            SELECT
+                id,
+                email_message_id,
+                email_uid,
+                payment_provider,
+                amount_cents,
+                sender_name,
+                sender_identifier,
+                subject,
+                email_date,
+                matched_booking_id,
+                matched_customer_id,
+                processing_status,
+                processing_notes,
+                processed_at
+            FROM payments.processed_emails
+            WHERE email_account = :account
+        """
+
+        # Add search filter if provided
+        if search:
+            base_query += " AND (subject ILIKE :search OR sender_name ILIKE :search OR sender_identifier ILIKE :search)"
+
+        # Order by most recent first
+        count_query = f"SELECT COUNT(*) FROM ({base_query}) AS subq"
+        base_query += " ORDER BY email_date DESC NULLS LAST, processed_at DESC"
+        base_query += " LIMIT :limit OFFSET :offset"
+
+        # Execute queries
+        params = {
+            "account": "myhibachichef@gmail.com",
+            "limit": limit,
+            "offset": offset,
+        }
+        if search:
+            params["search"] = f"%{search}%"
+
+        # Get total count
+        count_result = db.execute(
+            text(count_query.replace(" LIMIT :limit OFFSET :offset", "")), params
+        )
+        total_count = count_result.scalar() or 0
+
+        # Get emails
+        result = db.execute(text(base_query), params)
+        rows = result.fetchall()
+
+        # Convert to Email models
+        emails = []
+        for row in rows:
+            # Create email model from processed_emails row
+            email = Email(
+                message_id=row.email_message_id or f"payment_{row.id}",
+                thread_id=f"payment_{row.payment_provider}_{row.id}",
+                from_address=row.sender_identifier or "unknown@payment.com",
+                from_name=row.sender_name or row.payment_provider.title(),
+                to_address="myhibachichef@gmail.com",
+                to_name="My Hibachi Payments",
+                cc=[],
+                bcc=[],
+                subject=row.subject
+                or f"{row.payment_provider.title()} Payment: ${row.amount_cents/100:.2f}",
+                text_body=f"Payment received: ${row.amount_cents/100:.2f} from {row.sender_name} via {row.payment_provider.title()}\n\nStatus: {row.processing_status}\nNotes: {row.processing_notes or 'None'}",
+                html_body=None,
+                received_at=row.email_date or row.processed_at,
+                is_read=row.processing_status == "processed",
+                is_starred=row.matched_booking_id is not None,
+                is_archived=False,
+                has_attachments=False,
+                attachments=[],
+                labels=(
+                    [row.payment_provider, row.processing_status] if row.payment_provider else []
+                ),
+            )
+            emails.append(email)
+
+        # Group into threads by payment provider
+        threads = _group_emails_into_threads(emails)
+
+        # Calculate unread count (unmatched payments)
+        unread_result = db.execute(
+            text(
+                """
+                SELECT COUNT(*) FROM payments.processed_emails
+                WHERE email_account = :account
+                AND (processing_status != 'processed' OR matched_booking_id IS NULL)
+            """
+            ),
+            {"account": "myhibachichef@gmail.com"},
+        )
+        unread_count = unread_result.scalar() or 0
+
         return EmailListResponse(
             inbox="myhibachichef@gmail.com",
-            threads=[],
-            total_count=0,
-            unread_count=0,
+            threads=threads,
+            total_count=total_count,
+            unread_count=unread_count,
             page=page,
             limit=limit,
-            has_more=False,
+            has_more=len(rows) == limit,
         )
 
     except Exception as e:
