@@ -530,7 +530,7 @@ async def get_payment_emails(
     limit: int = Query(50, ge=1, le=100),
     unread_only: bool = Query(False),
     search: Optional[str] = Query(None),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Get emails from myhibachichef@gmail.com (Payment Monitoring - READ ONLY)
@@ -593,13 +593,13 @@ async def get_payment_emails(
             params["search"] = f"%{search}%"
 
         # Get total count
-        count_result = db.execute(
+        count_result = await db.execute(
             text(count_query.replace(" LIMIT :limit OFFSET :offset", "")), params
         )
         total_count = count_result.scalar() or 0
 
         # Get emails
-        result = db.execute(text(base_query), params)
+        result = await db.execute(text(base_query), params)
         rows = result.fetchall()
 
         # Convert to Email models
@@ -635,7 +635,7 @@ async def get_payment_emails(
         threads = _group_emails_into_threads(emails)
 
         # Calculate unread count (unmatched payments)
-        unread_result = db.execute(
+        unread_result = await db.execute(
             text(
                 """
                 SELECT COUNT(*) FROM payments.processed_emails
