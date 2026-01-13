@@ -124,7 +124,11 @@ async def station_login(
                 # Try decoding with SECRET_KEY directly first (like verify_token does)
                 try:
                     test_payload = jwt.decode(
-                        request.oauth_token, settings.SECRET_KEY, algorithms=["HS256"]
+                        request.oauth_token,
+                        settings.SECRET_KEY,
+                        algorithms=["HS256"],
+                        audience="myhibachi-api",
+                        options={"verify_aud": True},
                     )
                     logger.warning(
                         f"✅ DEBUG: Decode with SECRET_KEY SUCCESS: {list(test_payload.keys())}"
@@ -132,7 +136,13 @@ async def station_login(
                 except Exception as e:
                     logger.warning(f"❌ DEBUG: Decode with SECRET_KEY FAILED: {e}")
 
-                payload = jwt.decode(request.oauth_token, settings.SECRET_KEY, algorithms=["HS256"])
+                payload = jwt.decode(
+                    request.oauth_token,
+                    settings.SECRET_KEY,
+                    algorithms=["HS256"],
+                    audience="myhibachi-api",
+                    options={"verify_aud": True},
+                )
                 # Token has "sub" = user_id and "email" = user email
                 token_email = payload.get("email")
                 token_user_id = payload.get("sub")
