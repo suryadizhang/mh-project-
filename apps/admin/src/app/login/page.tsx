@@ -173,7 +173,17 @@ function LoginContent() {
       console.log('Extracted loginData:', JSON.stringify(loginData, null, 2));
 
       if (loginData?.access_token && loginData?.station_context) {
-        login(loginData.access_token, loginData.station_context);
+        // Pass refresh_token to login() so token refresh works correctly
+        // This is CRITICAL - without it, WebSocket reconnections fail after token expires
+        login(
+          loginData.access_token,
+          loginData.station_context,
+          loginData.refresh_token
+        );
+        console.log(
+          '[StationLogin] Refresh token passed to login:',
+          !!loginData.refresh_token
+        );
         router.push('/');
       } else {
         console.error('Station login response missing data:', response);

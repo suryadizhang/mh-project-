@@ -10,7 +10,11 @@ interface AuthContextType {
   isAuthenticated: boolean;
   token: string | null;
   stationContext: StationContext | null;
-  login: (token: string, stationContext?: StationContext) => void;
+  login: (
+    token: string,
+    stationContext?: StationContext,
+    refreshToken?: string
+  ) => void;
   logout: () => void;
   loading: boolean;
   hasPermission: (permission: string) => boolean;
@@ -60,10 +64,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setLoading(false);
   }, [pathname, router]);
 
-  const login = (newToken: string, newStationContext?: StationContext) => {
+  const login = (
+    newToken: string,
+    newStationContext?: StationContext,
+    refreshToken?: string
+  ) => {
     tokenManager.setToken(newToken);
     setToken(newToken);
     setIsAuthenticated(true);
+
+    // Store refresh token if provided (critical for token refresh to work)
+    if (refreshToken) {
+      tokenManager.setRefreshToken(refreshToken);
+      console.log('[AuthContext] Refresh token stored');
+    }
 
     if (newStationContext) {
       tokenManager.setStationContext(newStationContext);
