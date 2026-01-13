@@ -13,7 +13,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from jose import JWTError, jwt
+from jose import ExpiredSignatureError, JWTError, jwt
 
 from core.config import settings
 from utils.auth import UserRole
@@ -140,7 +140,11 @@ def verify_token(token: str) -> dict[str, Any] | None:
             return None
 
         return payload
-    except JWTError:
+    except ExpiredSignatureError:
+        logger.warning("Access token verification failed: Token has expired")
+        return None
+    except JWTError as e:
+        logger.warning(f"Access token verification failed: {e}")
         return None
 
 
