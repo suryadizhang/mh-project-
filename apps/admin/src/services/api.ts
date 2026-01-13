@@ -39,6 +39,7 @@ export interface StationLoginRequest {
 
 export interface StationLoginResponse {
   access_token: string;
+  refresh_token?: string; // Optional refresh token for token refresh support
   token_type: string;
   expires_in: number;
   station_context: StationContext;
