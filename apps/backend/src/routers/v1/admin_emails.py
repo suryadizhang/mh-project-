@@ -554,6 +554,7 @@ async def get_payment_emails(
         offset = (page - 1) * limit
 
         # Build base query for processed payment emails
+        # Column names match actual payments.processed_emails schema
         base_query = """
             SELECT
                 id,
@@ -563,7 +564,7 @@ async def get_payment_emails(
                 amount_cents,
                 sender_name,
                 sender_identifier,
-                subject,
+                email_subject,
                 email_date,
                 matched_booking_id,
                 matched_customer_id,
@@ -576,7 +577,7 @@ async def get_payment_emails(
 
         # Add search filter if provided
         if search:
-            base_query += " AND (subject ILIKE :search OR sender_name ILIKE :search OR sender_identifier ILIKE :search)"
+            base_query += " AND (email_subject ILIKE :search OR sender_name ILIKE :search OR sender_identifier ILIKE :search)"
 
         # Order by most recent first
         count_query = f"SELECT COUNT(*) FROM ({base_query}) AS subq"
@@ -615,7 +616,7 @@ async def get_payment_emails(
                 to_name="My Hibachi Payments",
                 cc=[],
                 bcc=[],
-                subject=row.subject
+                subject=row.email_subject
                 or f"{row.payment_provider.title()} Payment: ${row.amount_cents/100:.2f}",
                 text_body=f"Payment received: ${row.amount_cents/100:.2f} from {row.sender_name} via {row.payment_provider.title()}\n\nStatus: {row.processing_status}\nNotes: {row.processing_notes or 'None'}",
                 html_body=None,
