@@ -2,6 +2,7 @@ import {
   Activity,
   AlertTriangle,
   Database,
+  FileText,
   Key,
   Settings,
   Shield,
@@ -81,13 +82,12 @@ export default function SuperAdminPage() {
               <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
               <p className="text-sm text-gray-600">{stat.label}</p>
               <div
-                className={`mt-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                  stat.status === 'excellent'
+                className={`mt-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${stat.status === 'excellent'
                     ? 'bg-green-100 text-green-800'
                     : stat.status === 'good'
                       ? 'bg-blue-100 text-blue-800'
                       : 'bg-gray-100 text-gray-800'
-                }`}
+                  }`}
               >
                 {stat.status}
               </div>
@@ -117,6 +117,12 @@ export default function SuperAdminPage() {
               <Button variant="outline">
                 <Key className="w-4 h-4 mr-2" />
                 Role Management
+              </Button>
+            </Link>
+            <Link href="/superadmin/audit-logs">
+              <Button variant="outline">
+                <FileText className="w-4 h-4 mr-2" />
+                Audit Logs
               </Button>
             </Link>
           </div>
@@ -152,13 +158,12 @@ export default function SuperAdminPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        user.role === 'Super Admin'
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.role === 'Super Admin'
                           ? 'bg-red-100 text-red-800'
                           : user.role === 'Manager'
                             ? 'bg-blue-100 text-blue-800'
                             : 'bg-gray-100 text-gray-800'
-                      }`}
+                        }`}
                     >
                       {user.role}
                     </span>

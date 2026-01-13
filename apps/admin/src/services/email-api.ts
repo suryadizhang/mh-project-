@@ -19,30 +19,16 @@ import type {
 
 // Helper to safely extract data from API response
 function extractData<T>(response: ApiResponse<T>): T {
-  console.log('[extractData] Received response:', {
-    success: response.success,
-    hasData: !!response.data,
-    hasError: !!response.error,
-    error: response.error,
-  });
-
   if (!response || typeof response !== 'object') {
-    console.error(
-      '[extractData] Invalid response type:',
-      typeof response,
-      response
-    );
     throw new Error('Invalid API response format');
   }
 
   if (!response.success) {
     const errorMsg = response.error || 'API request failed';
-    console.error('[extractData] API returned error:', errorMsg);
     throw new Error(errorMsg);
   }
 
   if (!response.data) {
-    console.error('[extractData] API success but no data:', response);
     throw new Error('API returned success but no data');
   }
 
@@ -71,12 +57,7 @@ export const emailService = {
     const queryString = queryParams.toString();
     const path = `/api/v1/admin/emails/customer-support${queryString ? `?${queryString}` : ''}`;
 
-    console.log('Calling API:', path);
     const response = await api.get<EmailListResponse>(path);
-    console.log('Raw API response:', response);
-    console.log('Response.success:', response.success);
-    console.log('Response.data:', response.data);
-    console.log('Response.error:', response.error);
     return extractData(response);
   },
 

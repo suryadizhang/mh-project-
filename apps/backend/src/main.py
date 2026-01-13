@@ -1070,6 +1070,19 @@ try:
 except ImportError as e:
     logger.error(f"❌ Admin Error Logs endpoints not available: {e}")
 
+# Admin Audit Logs (comprehensive system activity logging for super admins)
+try:
+    from routers.v1.admin.audit_logs import router as audit_logs_router
+
+    app.include_router(
+        audit_logs_router,
+        prefix="/api/admin/audit-logs",
+        tags=["admin", "audit-logs", "superadmin"],
+    )
+    logger.info("✅ Admin Audit Logs endpoints included")
+except ImportError as e:
+    logger.error(f"❌ Admin Audit Logs endpoints not available: {e}")
+
 # Notification Groups Admin - NEW location
 try:
     from routers.v1.admin.notification_groups import (
