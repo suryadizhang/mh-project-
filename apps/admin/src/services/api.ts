@@ -167,13 +167,14 @@ export const authService = {
    * Login with admin credentials
    */
   async login(email: string, password: string) {
-    return api.post<{ access_token: string; token_type: string; refresh_token?: string }>(
-      `${ENDPOINTS.auth}/login`,
-      {
-        email, // Backend LoginRequest expects 'email' field
-        password,
-      }
-    );
+    return api.post<{
+      access_token: string;
+      token_type: string;
+      refresh_token?: string;
+    }>(`${ENDPOINTS.auth}/login`, {
+      email, // Backend LoginRequest expects 'email' field
+      password,
+    });
   },
 
   /**
@@ -636,26 +637,32 @@ export const stationService = {
 
 /**
  * Token management utilities with station context
+ *
+ * SECURITY: Uses sessionStorage instead of localStorage
+ * - Tokens cleared when browser window closes
+ * - Shared across tabs in same window
+ * - Separate sessions per browser window (can use different accounts)
+ * - Prevents unauthorized access on shared computers
  */
 export const tokenManager = {
   getToken(): string | null {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem('admin_token');
+    return sessionStorage.getItem('admin_token');
   },
 
   setToken(token: string): void {
     if (typeof window === 'undefined') return;
-    localStorage.setItem('admin_token', token);
+    sessionStorage.setItem('admin_token', token);
   },
 
   removeToken(): void {
     if (typeof window === 'undefined') return;
-    localStorage.removeItem('admin_token');
+    sessionStorage.removeItem('admin_token');
   },
 
   getStationContext(): StationContext | null {
     if (typeof window === 'undefined') return null;
-    const stored = localStorage.getItem('station_context');
+    const stored = sessionStorage.getItem('station_context');
     if (!stored) return null;
 
     try {
@@ -667,12 +674,12 @@ export const tokenManager = {
 
   setStationContext(context: StationContext): void {
     if (typeof window === 'undefined') return;
-    localStorage.setItem('station_context', JSON.stringify(context));
+    sessionStorage.setItem('station_context', JSON.stringify(context));
   },
 
   removeStationContext(): void {
     if (typeof window === 'undefined') return;
-    localStorage.removeItem('station_context');
+    sessionStorage.removeItem('station_context');
   },
 
   getAuthHeaders(): Record<string, string> {
@@ -702,20 +709,20 @@ export const tokenManager = {
     return context?.is_super_admin || false;
   },
 
-  // Refresh token management
+  // Refresh token management (also sessionStorage for security)
   getRefreshToken(): string | null {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem('admin_refresh_token');
+    return sessionStorage.getItem('admin_refresh_token');
   },
 
   setRefreshToken(token: string): void {
     if (typeof window === 'undefined') return;
-    localStorage.setItem('admin_refresh_token', token);
+    sessionStorage.setItem('admin_refresh_token', token);
   },
 
   removeRefreshToken(): void {
     if (typeof window === 'undefined') return;
-    localStorage.removeItem('admin_refresh_token');
+    sessionStorage.removeItem('admin_refresh_token');
   },
 
   /**
@@ -732,13 +739,15 @@ export const tokenManager = {
       if (parts.length !== 3) return true;
 
       // Decode payload (base64url)
-      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      const payload = JSON.parse(
+        atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
+      );
       const exp = payload.exp;
       if (!exp) return true;
 
       // Check if expired with 60 second buffer (refresh before actual expiration)
       const now = Math.floor(Date.now() / 1000);
-      return now >= (exp - 60);
+      return now >= exp - 60;
     } catch {
       return true;
     }
@@ -755,7 +764,9 @@ export const tokenManager = {
       const parts = tokenToCheck.split('.');
       if (parts.length !== 3) return null;
 
-      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      const payload = JSON.parse(
+        atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
+      );
       const exp = payload.exp;
       if (!exp) return null;
 
@@ -779,7 +790,7 @@ export const tokenManager = {
 
     try {
       console.log('[tokenManager] Attempting token refresh...');
-      
+
       const response = await fetch(`${API_BASE_URL}/api/v1/auth/refresh`, {
         method: 'POST',
         headers: {
@@ -799,7 +810,7 @@ export const tokenManager = {
       }
 
       const data = await response.json();
-      
+
       // Store new tokens
       if (data.access_token) {
         this.setToken(data.access_token);
@@ -811,8 +822,10 @@ export const tokenManager = {
       }
 
       const expiresIn = this.getTokenExpiresIn(data.access_token);
-      console.log(`[tokenManager] Token refresh successful, expires in ${expiresIn}s`);
-      
+      console.log(
+        `[tokenManager] Token refresh successful, expires in ${expiresIn}s`
+      );
+
       return data.access_token;
     } catch (error) {
       console.error('[tokenManager] Token refresh error:', error);
@@ -826,16 +839,20 @@ export const tokenManager = {
    */
   async ensureValidToken(): Promise<string | null> {
     const currentToken = this.getToken();
-    
+
     // If current token is valid, return it
     if (currentToken && !this.isTokenExpired(currentToken)) {
       const expiresIn = this.getTokenExpiresIn(currentToken);
-      console.log(`[tokenManager] Current token valid, expires in ${expiresIn}s`);
+      console.log(
+        `[tokenManager] Current token valid, expires in ${expiresIn}s`
+      );
       return currentToken;
     }
 
     // Token expired or missing, try to refresh
-    console.log('[tokenManager] Token expired or missing, attempting refresh...');
+    console.log(
+      '[tokenManager] Token expired or missing, attempting refresh...'
+    );
     return this.refreshTokens();
   },
 
