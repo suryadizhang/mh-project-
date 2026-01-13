@@ -41,13 +41,15 @@ def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = 
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
 
-    # Add standard claims
+    # Add standard claims including audience for validation
     to_encode.update(
         {
             "exp": expire,
             "iat": datetime.now(timezone.utc),
             "jti": str(uuid.uuid4()),  # Unique token ID for blacklisting
             "type": "access",
+            "aud": "myhibachi-api",  # Audience claim for token validation
+            "iss": "myhibachi-crm",  # Issuer claim
         }
     )
 
@@ -132,7 +134,16 @@ def verify_token(token: str) -> dict[str, Any] | None:
         Decoded payload if valid, None otherwise
     """
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        # NOTE: Tokens created by core/auth/station_auth.py include "aud": "myhibachi-api"
+        # python-jose validates audience if present, so we must specify expected audience
+        # or disable validation with options={"verify_aud": False}
+        payload = jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=["HS256"],
+            audience="myhibachi-api",
+            options={"verify_aud": True},  # Explicitly validate audience
+        )
 
         # Reject refresh tokens presented as access tokens
         if payload.get("type") == "refresh":
@@ -184,7 +195,15 @@ def decode_access_token(token: str) -> dict[str, Any] | None:
         Decoded payload if valid, None otherwise
     """
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        # NOTE: Tokens created by core/auth/station_auth.py include "aud": "myhibachi-api"
+        # python-jose validates audience if present, so we must specify expected audience
+        payload = jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=["HS256"],
+            audience="myhibachi-api",
+            options={"verify_aud": True},
+        )
 
         # Reject refresh tokens presented as access tokens
         if payload.get("type") == "refresh":

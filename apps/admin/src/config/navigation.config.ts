@@ -313,6 +313,15 @@ const ADVANCED_FEATURES: NavSection = {
       showInQuickBar: false,
     },
     {
+      name: 'Audit Logs',
+      href: '/superadmin/audit-logs',
+      icon: '📋',
+      roles: [UserRole.SUPER_ADMIN],
+      tier: 'monthly',
+      description: 'Security audit trail and user activity',
+      showInQuickBar: false,
+    },
+    {
       name: 'System Logs',
       href: '/logs',
       icon: '📝',

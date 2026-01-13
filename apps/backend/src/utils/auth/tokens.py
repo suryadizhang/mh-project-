@@ -20,7 +20,14 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
     # Add timestamp and jti for token tracking
     now = datetime.now(UTC)
-    to_encode.update({"iat": now, "jti": secrets.token_urlsafe(16)})  # Unique token ID
+    to_encode.update(
+        {
+            "iat": now,
+            "jti": secrets.token_urlsafe(16),  # Unique token ID
+            "aud": "myhibachi-api",  # Audience claim for token validation
+            "iss": "myhibachi-crm",  # Issuer claim
+        }
+    )
 
     if expires_delta:
         expire = now + expires_delta
