@@ -277,8 +277,14 @@ def _parse_variable_value(value: Any, value_type: str) -> Any:
 
     # Handle JSONB storage (value might be wrapped)
     if isinstance(value, dict):
-        # Extract the actual value if wrapped
-        return value.get("value", value)
+        # Extract the actual value if wrapped - support both "value" and "amount" keys
+        if "value" in value:
+            return value["value"]
+        elif "amount" in value:
+            return value["amount"]
+        elif "list" in value:
+            return value["list"]
+        return value
 
     # Convert string representations
     if isinstance(value, str):
