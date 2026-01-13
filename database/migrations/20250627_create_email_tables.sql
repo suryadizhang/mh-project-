@@ -10,16 +10,16 @@ BEGIN;
 -- Create email_messages table
 CREATE TABLE IF NOT EXISTS public.email_messages (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    
+
     -- IMAP Identifiers
     message_id VARCHAR(500) NOT NULL UNIQUE,
     imap_uid INTEGER,
     thread_id VARCHAR(500),
-    
+
     -- Inbox/Folder
     inbox VARCHAR(100) NOT NULL,
     folder VARCHAR(200) DEFAULT 'INBOX',
-    
+
     -- Email Headers
     subject VARCHAR(1000),
     from_address VARCHAR(500) NOT NULL,
@@ -28,15 +28,15 @@ CREATE TABLE IF NOT EXISTS public.email_messages (
     cc_addresses JSONB DEFAULT '[]'::jsonb,
     bcc_addresses JSONB DEFAULT '[]'::jsonb,
     reply_to VARCHAR(500),
-    
+
     -- Message Content
     text_body TEXT,
     html_body TEXT,
-    
+
     -- Metadata
     received_at TIMESTAMPTZ NOT NULL,
     sent_at TIMESTAMPTZ,
-    
+
     -- Flags and Status
     is_read BOOLEAN DEFAULT FALSE,
     is_starred BOOLEAN DEFAULT FALSE,
@@ -45,21 +45,21 @@ CREATE TABLE IF NOT EXISTS public.email_messages (
     is_draft BOOLEAN DEFAULT FALSE,
     is_sent BOOLEAN DEFAULT FALSE,
     is_deleted BOOLEAN DEFAULT FALSE,
-    
+
     -- Attachments
     has_attachments BOOLEAN DEFAULT FALSE,
     attachments JSONB DEFAULT '[]'::jsonb,
-    
+
     -- Labels/Tags
     labels JSONB DEFAULT '[]'::jsonb,
-    
+
     -- Raw Data
     raw_headers JSONB DEFAULT '{}'::jsonb,
-    
+
     -- Sync Metadata
     last_synced_at TIMESTAMPTZ,
     sync_error TEXT,
-    
+
     -- Timestamps
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -85,35 +85,35 @@ CREATE INDEX IF NOT EXISTS idx_email_messages_from_received ON public.email_mess
 -- Create email_threads table
 CREATE TABLE IF NOT EXISTS public.email_threads (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    
+
     -- Thread Identifier
     thread_id VARCHAR(500) NOT NULL UNIQUE,
-    
+
     -- Inbox
     inbox VARCHAR(100) NOT NULL,
-    
+
     -- Thread Metadata
     subject VARCHAR(1000),
     participants JSONB DEFAULT '[]'::jsonb,
-    
+
     -- Counts
     message_count INTEGER DEFAULT 0,
     unread_count INTEGER DEFAULT 0,
-    
+
     -- Timestamps
     first_message_at TIMESTAMPTZ,
     last_message_at TIMESTAMPTZ,
-    
+
     -- Thread Status
     is_read BOOLEAN DEFAULT FALSE,
     is_starred BOOLEAN DEFAULT FALSE,
     is_archived BOOLEAN DEFAULT FALSE,
     is_deleted BOOLEAN DEFAULT FALSE,
     has_attachments BOOLEAN DEFAULT FALSE,
-    
+
     -- Labels
     labels JSONB DEFAULT '[]'::jsonb,
-    
+
     -- Timestamps
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -135,10 +135,10 @@ CREATE INDEX IF NOT EXISTS idx_email_threads_inbox_read_archived ON public.email
 -- Create email_sync_status table
 CREATE TABLE IF NOT EXISTS public.email_sync_status (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    
+
     -- Inbox
     inbox VARCHAR(100) NOT NULL UNIQUE,
-    
+
     -- Sync Status
     last_sync_at TIMESTAMPTZ,
     last_sync_uid INTEGER,
@@ -146,15 +146,15 @@ CREATE TABLE IF NOT EXISTS public.email_sync_status (
     sync_errors INTEGER DEFAULT 0,
     last_error TEXT,
     last_error_at TIMESTAMPTZ,
-    
+
     -- IMAP Connection Info
     imap_host VARCHAR(200),
     imap_folder VARCHAR(200) DEFAULT 'INBOX',
-    
+
     -- Status
     is_syncing BOOLEAN DEFAULT FALSE,
     is_enabled BOOLEAN DEFAULT TRUE,
-    
+
     -- Timestamps
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -166,25 +166,25 @@ CREATE INDEX IF NOT EXISTS idx_email_sync_status_inbox ON public.email_sync_stat
 -- Create email_labels table
 CREATE TABLE IF NOT EXISTS public.email_labels (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    
+
     -- Label Info
     name VARCHAR(100) NOT NULL,
     color VARCHAR(50) DEFAULT '#3B82F6',
     description TEXT,
-    
+
     -- Which inbox this label belongs to
     inbox VARCHAR(100),
-    
+
     -- System or user-created
     is_system BOOLEAN DEFAULT FALSE,
-    
+
     -- Order for display
     display_order INTEGER DEFAULT 0,
-    
+
     -- Timestamps
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
-    
+
     -- Unique constraint: label name per inbox
     UNIQUE(name, inbox)
 );
@@ -196,7 +196,7 @@ CREATE INDEX IF NOT EXISTS idx_email_labels_display_order ON public.email_labels
 
 -- Insert default labels
 INSERT INTO public.email_labels (name, color, is_system, display_order)
-VALUES 
+VALUES
     ('inbox', '#3B82F6', TRUE, 1),
     ('important', '#EF4444', TRUE, 2),
     ('starred', '#F59E0B', TRUE, 3),

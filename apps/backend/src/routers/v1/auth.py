@@ -780,11 +780,25 @@ async def refresh_token(
             logger.warning(f"⚠️ Failed to blacklist old refresh token: {e}")
             # Continue anyway - the new token will still be valid
 
-    # 5. Get user info for new tokens
-    from db.models.identity import User
+    # 5. Get user info for new tokens using SQL query (same pattern as login)
+    # The User model has relationships, not direct role/station_id attributes
+    from sqlalchemy import text
 
-    user = await db.get(User, user_id)
-    if not user:
+    query = text(
+        """
+        SELECT u.id, u.email, u.status, r.role_type as role,
+               su.station_id
+        FROM identity.users u
+        LEFT JOIN identity.user_roles ur ON u.id = ur.user_id
+        LEFT JOIN identity.roles r ON ur.role_id = r.id
+        LEFT JOIN identity.station_users su ON u.id = su.user_id
+        WHERE u.id = :user_id
+    """
+    )
+    result = await db.execute(query, {"user_id": user_id})
+    user_row = result.fetchone()
+
+    if not user_row:
         logger.error(f"🔒 User not found for refresh: {user_id}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -792,8 +806,11 @@ async def refresh_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+    db_user_id, email, user_status, role, station_id = user_row
+
     # Check if user is still active
-    if not user.is_active:
+    status_str = str(user_status).upper() if user_status else ""
+    if "ACTIVE" not in status_str:
         logger.warning(f"🔒 Inactive user attempted refresh: {user_id}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -801,21 +818,36 @@ async def refresh_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+    # Map role to UserRole enum value (UPPERCASE to match login endpoint)
+    from core.config import UserRole
+
+    role_str = str(role).upper() if role else "CUSTOMER_SUPPORT"
+    role_mapping = {
+        "SUPER_ADMIN": UserRole.SUPER_ADMIN,
+        "ADMIN": UserRole.ADMIN,
+        "MANAGER": UserRole.CUSTOMER_SUPPORT,
+        "CUSTOMER_SUPPORT": UserRole.CUSTOMER_SUPPORT,
+        "STAFF": UserRole.STATION_MANAGER,
+        "STATION_MANAGER": UserRole.STATION_MANAGER,
+        "CHEF": UserRole.CHEF,
+    }
+    user_role = role_mapping.get(role_str, UserRole.CUSTOMER_SUPPORT)
+
     # 6. Create new access token
     access_token_data = {
-        "sub": str(user.id),
-        "email": user.email,
-        "role": user.role,
+        "sub": str(db_user_id),
+        "email": email,
+        "role": user_role.value,  # Use .value for uppercase string
     }
-    if user.station_id:
-        access_token_data["station_id"] = str(user.station_id)
+    if station_id:
+        access_token_data["station_id"] = str(station_id)
 
     new_access_token = create_access_token(data=access_token_data)
 
     # 7. Create new refresh token (rotation)
-    new_refresh_token = create_refresh_token(user_id=str(user.id))
+    new_refresh_token = create_refresh_token(user_id=str(db_user_id))
 
-    logger.info(f"✅ Token refresh successful for user {user.email}")
+    logger.info(f"✅ Token refresh successful for user {email}")
 
     return {
         "access_token": new_access_token,
