@@ -16,12 +16,12 @@ import { tokenManager } from '@/services/api';
 
 export interface WebSocketMessage {
   type:
-    | 'message'
-    | 'typing'
-    | 'system'
-    | 'error'
-    | 'connection_status'
-    | 'ai_response';
+  | 'message'
+  | 'typing'
+  | 'system'
+  | 'error'
+  | 'connection_status'
+  | 'ai_response';
   conversation_id: string;
   content: string;
   timestamp: string;

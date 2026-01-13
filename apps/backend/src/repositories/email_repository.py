@@ -298,9 +298,7 @@ class EmailRepository:
     async def get_sync_status(self, inbox: str) -> Optional[EmailSyncStatus]:
         """Get sync status for inbox"""
         result = await self.session.execute(
-            select(EmailSyncStatus).where(
-                and_(EmailSyncStatus.inbox == inbox, EmailSyncStatus.is_deleted == False)
-            )
+            select(EmailSyncStatus).where(EmailSyncStatus.inbox == inbox)
         )
         return result.scalar_one_or_none()
 

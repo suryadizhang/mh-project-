@@ -15,7 +15,7 @@ from datetime import timedelta
 import bcrypt
 from api.deps import get_current_user, get_db
 from core.config import UserRole, get_settings
-from core.security import create_access_token
+from core.security import create_access_token, create_refresh_token
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr
 from sqlalchemy import text
@@ -31,6 +31,7 @@ class Token(BaseModel):
     access_token: str
     token_type: str
     expires_in: int
+    refresh_token: str  # Added: Required for token refresh flow
     user: "UserResponse"
 
 
@@ -151,12 +152,16 @@ async def login(login_data: LoginRequest, db: AsyncSession = Depends(get_db)):
             expires_delta=access_token_expires,
         )
 
+        # Create refresh token (longer-lived for token rotation)
+        refresh_token = create_refresh_token(user_id=str(user_id))
+
         logger.info(f"Login successful for: {login_data.email}")
 
         return Token(
             access_token=access_token,
             token_type="bearer",
             expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            refresh_token=refresh_token,
             user=UserResponse(
                 id=str(user_id),
                 email=email,

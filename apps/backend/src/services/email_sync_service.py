@@ -11,7 +11,11 @@ import re
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from repositories.email_repository import EmailRepository
-# Fixed: Use standard logging instead of missing core.logging_config\nimport logging\n\nlogger = logging.getLogger(__name__)
+
+# Fixed: Use standard logging instead of missing core.logging_config
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class EmailSyncService:

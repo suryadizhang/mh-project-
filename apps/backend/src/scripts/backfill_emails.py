@@ -425,7 +425,7 @@ class EmailBackfillService:
                 received_at = datetime.now(timezone.utc)
 
             # Extract body
-            text_body, html_body = monitor._extract_email_body(msg)
+            text_body, html_body = monitor._get_email_body(msg)
 
             # Parse to/cc addresses
             to_addresses = []

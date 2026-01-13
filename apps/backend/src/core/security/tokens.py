@@ -149,17 +149,18 @@ def extract_user_from_token(token: str) -> dict[str, Any] | None:
     payload = verify_token(token)
     if payload:
         user_id: str = payload.get("sub")
-        role_str: str = payload.get("role", "customer")
+        role_str: str = payload.get("role", "CUSTOMER_SUPPORT")
         email: str = payload.get("email")
 
         if user_id is None:
             return None
 
         # Safely convert role string to UserRole enum
+        # UserRole enum uses UPPERCASE values (SUPER_ADMIN, ADMIN, etc.)
         try:
-            role = UserRole(role_str.lower())
+            role = UserRole(role_str.upper())
         except (ValueError, AttributeError):
-            role = None  # No default role - must be valid staff role
+            role = UserRole.CUSTOMER_SUPPORT  # Default to basic staff role
 
         return {"id": user_id, "email": email, "role": role}
     return None
