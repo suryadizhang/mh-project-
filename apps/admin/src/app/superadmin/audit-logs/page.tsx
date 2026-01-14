@@ -19,6 +19,7 @@ import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import { logger } from '@/lib/logger';
 
 interface AuditLog {
@@ -100,7 +101,7 @@ export default function AuditLogsPage() {
     try {
       const token = localStorage.getItem('access_token');
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/audit-logs/stats`,
+        `${process.env.NEXT_PUBLIC_API_URL}${API_ENDPOINTS.ADMIN.AUDIT_LOGS_STATS}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -123,7 +124,7 @@ export default function AuditLogsPage() {
     try {
       const token = localStorage.getItem('access_token');
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/audit-logs/actions`,
+        `${process.env.NEXT_PUBLIC_API_URL}${API_ENDPOINTS.ADMIN.AUDIT_LOGS_ACTIONS}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -158,7 +159,7 @@ export default function AuditLogsPage() {
       if (dateTo) params.append('date_to', dateTo);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/audit-logs/?${params.toString()}`,
+        `${process.env.NEXT_PUBLIC_API_URL}${API_ENDPOINTS.ADMIN.AUDIT_LOGS}?${params.toString()}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -220,7 +221,7 @@ export default function AuditLogsPage() {
       if (dateTo) params.append('date_to', dateTo);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/audit-logs/?${params.toString()}`,
+        `${process.env.NEXT_PUBLIC_API_URL}${API_ENDPOINTS.ADMIN.AUDIT_LOGS}?${params.toString()}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
