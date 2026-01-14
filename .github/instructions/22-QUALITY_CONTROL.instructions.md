@@ -100,6 +100,70 @@ UI Components (QuoteCalculator, Menu, Booking)
 
 ---
 
+### Category A.5: API Path Verification (CRITICAL)
+
+**Rule:** ALL frontend API paths MUST start with `/api/` and use
+centralized constants.
+
+**See:** `24-API_ROUTING_STANDARDS.instructions.md` for complete
+specification.
+
+#### Path Verification Commands
+
+```bash
+# Find potentially incorrect API paths (missing /api/ prefix)
+grep -rn "NEXT_PUBLIC_API_URL}/admin\|NEXT_PUBLIC_API_URL}/v1" apps/admin/src apps/customer/src --include="*.ts" --include="*.tsx"
+
+# Find hardcoded API paths (should use API_ENDPOINTS constants)
+grep -rn '"/api/v1\|"/api/admin' apps/admin/src --include="*.ts" --include="*.tsx" | grep -v node_modules
+
+# Verify all API calls use proper structure
+grep -rn "fetch.*NEXT_PUBLIC_API_URL" apps/admin/src apps/customer/src --include="*.tsx" --include="*.ts"
+```
+
+#### ❌ WRONG (Hardcoded Paths)
+
+```typescript
+// Missing /api/ prefix - WILL FAIL!
+fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/audit-logs`);
+fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/bookings`);
+
+// Hardcoded path - HARD TO MAINTAIN
+fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/audit-logs`);
+```
+
+#### ✅ CORRECT (Centralized Constants)
+
+```typescript
+import { API_ENDPOINTS } from '@/lib/api/endpoints';
+
+// Uses centralized constant
+fetch(
+  `${process.env.NEXT_PUBLIC_API_URL}${API_ENDPOINTS.ADMIN.AUDIT_LOGS}`
+);
+fetch(
+  `${process.env.NEXT_PUBLIC_API_URL}${API_ENDPOINTS.V1.BOOKINGS}`
+);
+```
+
+#### API Path Validation Checklist
+
+| Check                     | What to Verify                                       | Pass? |
+| ------------------------- | ---------------------------------------------------- | ----- |
+| **Prefix correct**        | All backend calls use `/api/` prefix                 | ☐     |
+| **Constants used**        | Using `API_ENDPOINTS` from `@/lib/api/endpoints`     | ☐     |
+| **apiFetch() vs fetch()** | Backend calls use apiFetch, local Next.js uses fetch | ☐     |
+| **No trailing slashes**   | Paths don't end with `/` before query params         | ☐     |
+
+#### Centralized Constants Location
+
+| App      | Constants File                                              |
+| -------- | ----------------------------------------------------------- |
+| Admin    | `apps/admin/src/lib/api/endpoints.ts`                       |
+| Customer | `apps/customer/src/lib/api/endpoints.ts` (create if needed) |
+
+---
+
 ### Category B: Type Safety
 
 **Rule:** TypeScript strict mode, Python type hints, NO `any` types.
