@@ -48,8 +48,9 @@ class FieldEncryption:
                 from core.config import get_settings
 
                 settings = get_settings()
-                master_key_b64 = settings.field_encryption_key
-            except ImportError:
+                # Use UPPERCASE field name (Pydantic v2 preserves case)
+                master_key_b64 = settings.FIELD_ENCRYPTION_KEY
+            except (ImportError, AttributeError):
                 # Fallback to environment variable for standalone usage
                 master_key_b64 = os.environ.get("FIELD_ENCRYPTION_KEY")
 
