@@ -18,12 +18,7 @@ import { useEffect, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { logger } from '@/lib/logger';
 
 interface AuditLog {
@@ -69,7 +64,9 @@ interface FilterOptions {
 export default function AuditLogsPage() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [stats, setStats] = useState<AuditStats | null>(null);
-  const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -103,7 +100,7 @@ export default function AuditLogsPage() {
     try {
       const token = localStorage.getItem('access_token');
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/audit-logs/stats`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/audit-logs/stats`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -126,7 +123,7 @@ export default function AuditLogsPage() {
     try {
       const token = localStorage.getItem('access_token');
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/audit-logs/actions`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/audit-logs/actions`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -161,7 +158,7 @@ export default function AuditLogsPage() {
       if (dateTo) params.append('date_to', dateTo);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/audit-logs/?${params.toString()}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/audit-logs/?${params.toString()}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -223,7 +220,7 @@ export default function AuditLogsPage() {
       if (dateTo) params.append('date_to', dateTo);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/audit-logs/?${params.toString()}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/admin/audit-logs/?${params.toString()}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -234,7 +231,10 @@ export default function AuditLogsPage() {
       if (response.ok) {
         const data = await response.json();
         const csv = convertToCSV(data.data || []);
-        downloadCSV(csv, `audit-logs-${new Date().toISOString().split('T')[0]}.csv`);
+        downloadCSV(
+          csv,
+          `audit-logs-${new Date().toISOString().split('T')[0]}.csv`
+        );
       }
     } catch (err) {
       logger.error(err as Error, { context: 'export_audit_logs' });
@@ -268,7 +268,10 @@ export default function AuditLogsPage() {
       log.ip_address || '',
       log.status_code?.toString() || '',
     ]);
-    return [headers.join(','), ...rows.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n');
+    return [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
+    ].join('\n');
   };
 
   const downloadCSV = (csv: string, filename: string) => {
@@ -363,31 +366,41 @@ export default function AuditLogsPage() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <Card>
             <CardContent className="pt-6 text-center">
-              <p className="text-2xl font-bold text-gray-900">{stats.total_events.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {stats.total_events.toLocaleString()}
+              </p>
               <p className="text-sm text-gray-600">Total Events</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6 text-center">
-              <p className="text-2xl font-bold text-blue-600">{stats.events_today.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-blue-600">
+                {stats.events_today.toLocaleString()}
+              </p>
               <p className="text-sm text-gray-600">Events Today</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6 text-center">
-              <p className="text-2xl font-bold text-orange-600">{stats.security_events.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-orange-600">
+                {stats.security_events.toLocaleString()}
+              </p>
               <p className="text-sm text-gray-600">Security Events</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6 text-center">
-              <p className="text-2xl font-bold text-red-600">{stats.failed_actions.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-red-600">
+                {stats.failed_actions.toLocaleString()}
+              </p>
               <p className="text-sm text-gray-600">Failed Actions</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6 text-center">
-              <p className="text-2xl font-bold text-green-600">{stats.success_rate.toFixed(1)}%</p>
+              <p className="text-2xl font-bold text-green-600">
+                {stats.success_rate.toFixed(1)}%
+              </p>
               <p className="text-sm text-gray-600">Success Rate</p>
             </CardContent>
           </Card>
@@ -421,7 +434,7 @@ export default function AuditLogsPage() {
                   type="text"
                   placeholder="Search by description, email, action type..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 />
               </div>
@@ -441,16 +454,18 @@ export default function AuditLogsPage() {
                 </label>
                 <select
                   value={actionCategory}
-                  onChange={(e) => {
+                  onChange={e => {
                     setActionCategory(e.target.value);
                     setPage(1);
                   }}
                   className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500"
                 >
                   <option value="">All Categories</option>
-                  {filterOptions?.action_categories.map((cat) => (
+                  {filterOptions?.action_categories.map(cat => (
                     <option key={cat} value={cat}>
-                      {cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      {cat
+                        .replace(/_/g, ' ')
+                        .replace(/\b\w/g, l => l.toUpperCase())}
                     </option>
                   ))}
                 </select>
@@ -461,16 +476,18 @@ export default function AuditLogsPage() {
                 </label>
                 <select
                   value={actionType}
-                  onChange={(e) => {
+                  onChange={e => {
                     setActionType(e.target.value);
                     setPage(1);
                   }}
                   className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500"
                 >
                   <option value="">All Types</option>
-                  {filterOptions?.action_types.map((type) => (
+                  {filterOptions?.action_types.map(type => (
                     <option key={type} value={type}>
-                      {type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      {type
+                        .replace(/_/g, ' ')
+                        .replace(/\b\w/g, l => l.toUpperCase())}
                     </option>
                   ))}
                 </select>
@@ -481,14 +498,14 @@ export default function AuditLogsPage() {
                 </label>
                 <select
                   value={severity}
-                  onChange={(e) => {
+                  onChange={e => {
                     setSeverity(e.target.value);
                     setPage(1);
                   }}
                   className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500"
                 >
                   <option value="">All Severities</option>
-                  {filterOptions?.severities.map((sev) => (
+                  {filterOptions?.severities.map(sev => (
                     <option key={sev} value={sev}>
                       {sev.charAt(0).toUpperCase() + sev.slice(1)}
                     </option>
@@ -503,7 +520,7 @@ export default function AuditLogsPage() {
                 <input
                   type="date"
                   value={dateFrom}
-                  onChange={(e) => {
+                  onChange={e => {
                     setDateFrom(e.target.value);
                     setPage(1);
                   }}
@@ -518,7 +535,7 @@ export default function AuditLogsPage() {
                 <input
                   type="date"
                   value={dateTo}
-                  onChange={(e) => {
+                  onChange={e => {
                     setDateTo(e.target.value);
                     setPage(1);
                   }}
@@ -536,7 +553,9 @@ export default function AuditLogsPage() {
           <div className="flex items-center">
             <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
             <div>
-              <h3 className="text-sm font-medium text-red-800">Error Loading Audit Logs</h3>
+              <h3 className="text-sm font-medium text-red-800">
+                Error Loading Audit Logs
+              </h3>
               <p className="text-sm text-red-700">{error}</p>
             </div>
           </div>
@@ -561,7 +580,10 @@ export default function AuditLogsPage() {
           {loading ? (
             <div className="space-y-4">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="animate-pulse flex space-x-4 p-4 border rounded-lg">
+                <div
+                  key={i}
+                  className="animate-pulse flex space-x-4 p-4 border rounded-lg"
+                >
                   <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
                   <div className="flex-1 space-y-2">
                     <div className="h-4 bg-gray-200 rounded w-3/4"></div>
@@ -573,8 +595,12 @@ export default function AuditLogsPage() {
           ) : logs.length === 0 ? (
             <div className="text-center py-12">
               <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900">No audit logs found</h3>
-              <p className="text-gray-500">Try adjusting your filters or search query</p>
+              <h3 className="text-lg font-medium text-gray-900">
+                No audit logs found
+              </h3>
+              <p className="text-gray-500">
+                Try adjusting your filters or search query
+              </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -602,7 +628,7 @@ export default function AuditLogsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {logs.map((log) => (
+                  {logs.map(log => (
                     <tr key={log.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                         <div className="flex items-center">
@@ -615,7 +641,9 @@ export default function AuditLogsPage() {
                           {getCategoryIcon(log.action_category)}
                           <div>
                             <div className="text-sm font-medium text-gray-900">
-                              {log.action_category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                              {log.action_category
+                                .replace(/_/g, ' ')
+                                .replace(/\b\w/g, l => l.toUpperCase())}
                             </div>
                             <div className="text-xs text-gray-500">
                               {log.action_type.replace(/_/g, ' ')}
@@ -636,12 +664,17 @@ export default function AuditLogsPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="text-sm text-gray-900 max-w-xs truncate" title={log.description}>
+                        <div
+                          className="text-sm text-gray-900 max-w-xs truncate"
+                          title={log.description}
+                        >
                           {log.description}
                         </div>
                         {log.target_type && (
                           <div className="text-xs text-gray-500">
-                            Target: {log.target_type} {log.target_id && `(${log.target_id.substring(0, 8)}...)`}
+                            Target: {log.target_type}{' '}
+                            {log.target_id &&
+                              `(${log.target_id.substring(0, 8)}...)`}
                           </div>
                         )}
                       </td>
@@ -651,19 +684,25 @@ export default function AuditLogsPage() {
                         </Badge>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
-                        {log.ip_address && (
-                          <div>IP: {log.ip_address}</div>
-                        )}
+                        {log.ip_address && <div>IP: {log.ip_address}</div>}
                         {log.status_code && (
                           <div>
                             Status:{' '}
-                            <span className={log.status_code >= 400 ? 'text-red-600' : 'text-green-600'}>
+                            <span
+                              className={
+                                log.status_code >= 400
+                                  ? 'text-red-600'
+                                  : 'text-green-600'
+                              }
+                            >
                               {log.status_code}
                             </span>
                           </div>
                         )}
                         {log.request_method && (
-                          <div>{log.request_method} {log.request_path}</div>
+                          <div>
+                            {log.request_method} {log.request_path}
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -677,7 +716,9 @@ export default function AuditLogsPage() {
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-6 pt-4 border-t">
               <div className="text-sm text-gray-600">
-                Showing {((page - 1) * pageSize) + 1} to {Math.min(page * pageSize, totalCount)} of {totalCount.toLocaleString()} entries
+                Showing {(page - 1) * pageSize + 1} to{' '}
+                {Math.min(page * pageSize, totalCount)} of{' '}
+                {totalCount.toLocaleString()} entries
               </div>
               <div className="flex items-center gap-2">
                 <Button
