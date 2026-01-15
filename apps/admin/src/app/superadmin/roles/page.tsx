@@ -9,12 +9,13 @@ import {
   Trash2,
   Users,
 } from 'lucide-react';
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent,CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { logger } from '@/lib/logger';
+import { tokenManager } from '@/services/api';
 
 interface Permission {
   id: string;
@@ -76,7 +77,7 @@ export default function RoleManagementPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('access_token');
+      const token = tokenManager.getToken();
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
       // Load roles, permissions, and users in parallel
@@ -114,7 +115,7 @@ export default function RoleManagementPage() {
 
   const loadUserRoles = async (userId: string) => {
     try {
-      const token = localStorage.getItem('access_token');
+      const token = tokenManager.getToken();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/admin/roles/users/${userId}/permissions`,
         {
@@ -141,7 +142,7 @@ export default function RoleManagementPage() {
 
     try {
       setAssigningRole(true);
-      const token = localStorage.getItem('access_token');
+      const token = tokenManager.getToken();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/admin/roles/users/${selectedUser.id}/roles`,
         {
@@ -178,7 +179,7 @@ export default function RoleManagementPage() {
     if (!selectedUser) return;
 
     try {
-      const token = localStorage.getItem('access_token');
+      const token = tokenManager.getToken();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/admin/roles/users/${selectedUser.id}/roles/${roleId}`,
         {

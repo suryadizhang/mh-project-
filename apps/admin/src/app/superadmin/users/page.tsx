@@ -10,17 +10,13 @@ import {
   Users,
   UserX,
 } from 'lucide-react';
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { logger } from '@/lib/logger';
+import { tokenManager } from '@/services/api';
 
 interface User {
   id: string;
@@ -52,7 +48,7 @@ export default function UserManagementPage() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
+      const token = tokenManager.getToken();
       const endpoint =
         filter === 'pending'
           ? `${process.env.NEXT_PUBLIC_API_URL}/admin/users/pending`
@@ -80,7 +76,7 @@ export default function UserManagementPage() {
   const handleApprove = async (userId: string) => {
     setActionLoading(userId);
     try {
-      const token = localStorage.getItem('access_token');
+      const token = tokenManager.getToken();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/admin/users/${userId}/approve`,
         {
@@ -115,7 +111,7 @@ export default function UserManagementPage() {
 
     setActionLoading(userId);
     try {
-      const token = localStorage.getItem('access_token');
+      const token = tokenManager.getToken();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/admin/users/${userId}/reject`,
         {
@@ -146,7 +142,7 @@ export default function UserManagementPage() {
 
     setActionLoading(userId);
     try {
-      const token = localStorage.getItem('access_token');
+      const token = tokenManager.getToken();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/admin/users/${userId}/suspend`,
         {
