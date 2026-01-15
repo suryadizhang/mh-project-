@@ -118,36 +118,36 @@ export const API_ENDPOINTS = {
     AUDIT_LOGS: `${ADMIN}/audit-logs/`,
     AUDIT_LOGS_STATS: `${ADMIN}/audit-logs/stats/`,
     AUDIT_LOGS_ACTIONS: `${ADMIN}/audit-logs/actions/`,
-    AUDIT_LOG_DETAIL: (id: string) => `${ADMIN}/audit-logs/${id}`,
-    AUDIT_LOG_RESTORE: (id: string) => `${ADMIN}/audit-logs/${id}/restore`,
+    AUDIT_LOG_DETAIL: (id: string) => `${ADMIN}/audit-logs/${id}/`,
+    AUDIT_LOG_RESTORE: (id: string) => `${ADMIN}/audit-logs/${id}/restore/`,
 
-    // Error Logs
-    ERROR_LOGS: `${ADMIN}/error-logs`,
-    ERROR_LOGS_STATS: `${ADMIN}/error-logs/stats`,
-    ERROR_LOG_DETAIL: (id: string) => `${ADMIN}/error-logs/${id}`,
+    // Error Logs (trailing slash required to avoid 307 redirect)
+    ERROR_LOGS: `${ADMIN}/error-logs/`,
+    ERROR_LOGS_STATS: `${ADMIN}/error-logs/stats/`,
+    ERROR_LOG_DETAIL: (id: string) => `${ADMIN}/error-logs/${id}/`,
 
     // AI Readiness & Learning Queue
-    AI_READINESS: `${ADMIN}/ai-readiness`,
-    LEARNING_QUEUE: `${ADMIN}/learning-queue`,
+    AI_READINESS: `${ADMIN}/ai-readiness/`,
+    LEARNING_QUEUE: `${ADMIN}/learning-queue/`,
     LEARNING_QUEUE_APPROVE: (id: string) =>
-      `${ADMIN}/learning-queue/${id}/approve`,
+      `${ADMIN}/learning-queue/${id}/approve/`,
 
-    // Analytics
-    ANALYTICS_OVERVIEW: `${ADMIN}/analytics/overview`,
-    ANALYTICS_BOOKINGS: `${ADMIN}/analytics/bookings`,
-    ANALYTICS_REVENUE: `${ADMIN}/analytics/revenue`,
-    ANALYTICS_CUSTOMERS: `${ADMIN}/analytics/customers`,
+    // Analytics (trailing slash required to avoid 307 redirect)
+    ANALYTICS_OVERVIEW: `${ADMIN}/analytics/overview/`,
+    ANALYTICS_BOOKINGS: `${ADMIN}/analytics/bookings/`,
+    ANALYTICS_REVENUE: `${ADMIN}/analytics/revenue/`,
+    ANALYTICS_CUSTOMERS: `${ADMIN}/analytics/customers/`,
 
     // Dynamic Variables (SSoT)
-    DYNAMIC_VARIABLES: `${ADMIN}/config/variables`,
+    DYNAMIC_VARIABLES: `${ADMIN}/config/variables/`,
     DYNAMIC_VARIABLE_UPDATE: (category: string, key: string) =>
-      `${ADMIN}/config/${category}/${key}`,
+      `${ADMIN}/config/${category}/${key}/`,
 
     // Users & Roles
-    USERS: `${ADMIN}/users`,
-    USER_DETAIL: (id: string) => `${ADMIN}/users/${id}`,
-    USER_ROLES: (id: string) => `${ADMIN}/users/${id}/roles`,
-    ADMIN_INVITATIONS: `${ADMIN}/invitations`,
+    USERS: `${ADMIN}/users/`,
+    USER_DETAIL: (id: string) => `${ADMIN}/users/${id}/`,
+    USER_ROLES: (id: string) => `${ADMIN}/users/${id}/roles/`,
+    ADMIN_INVITATIONS: `${ADMIN}/invitations/`,
   },
 } as const;
 
