@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import { logger } from '@/lib/logger';
+import { tokenManager } from '@/services/api';
 
 interface AuditLog {
   id: string;
@@ -99,7 +100,7 @@ export default function AuditLogsPage() {
   const fetchStats = async () => {
     setStatsLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
+      const token = tokenManager.getToken();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}${API_ENDPOINTS.ADMIN.AUDIT_LOGS_STATS}`,
         {
@@ -122,7 +123,7 @@ export default function AuditLogsPage() {
 
   const fetchFilterOptions = async () => {
     try {
-      const token = localStorage.getItem('access_token');
+      const token = tokenManager.getToken();
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}${API_ENDPOINTS.ADMIN.AUDIT_LOGS_ACTIONS}`,
         {
@@ -145,7 +146,7 @@ export default function AuditLogsPage() {
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('access_token');
+      const token = tokenManager.getToken();
       const params = new URLSearchParams({
         page: page.toString(),
         page_size: pageSize.toString(),
@@ -207,7 +208,7 @@ export default function AuditLogsPage() {
 
   const exportLogs = async () => {
     try {
-      const token = localStorage.getItem('access_token');
+      const token = tokenManager.getToken();
       const params = new URLSearchParams({
         page: '1',
         page_size: '1000',
