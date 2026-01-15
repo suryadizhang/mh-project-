@@ -47,7 +47,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Check for token and station context in localStorage on component mount
+    // Check for token and station context in sessionStorage on component mount
     const storedToken = tokenManager.getToken();
     const storedStationContext = tokenManager.getStationContext();
 
@@ -57,7 +57,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsAuthenticated(true);
     } else if (pathname !== '/login' && !pathname.startsWith('/auth/')) {
       // Redirect to login if no token and not already on login or auth callback page
-      // Note: /auth/callback handles OAuth token from URL params before storing to localStorage
+      // Note: /auth/callback handles OAuth token from URL params before storing to sessionStorage
       router.push('/login');
     }
 
@@ -76,7 +76,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Store refresh token if provided (critical for token refresh to work)
     if (refreshToken) {
       tokenManager.setRefreshToken(refreshToken);
-      console.log('[AuthContext] Refresh token stored');
     }
 
     if (newStationContext) {
@@ -149,6 +148,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
+    console.log(
+      '[AuthContext] Showing spinner (NOT authenticated) - THIS IS THE PROBLEM'
+    );
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
