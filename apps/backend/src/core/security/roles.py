@@ -47,8 +47,53 @@ def is_super_admin(role: UserRole | str | None) -> bool:
     return role == UserRole.SUPER_ADMIN
 
 
+def normalize_role_str(role: str | None) -> str:
+    """
+    Normalize a role string for case-insensitive comparison.
+
+    Handles:
+    - UPPERCASE values from UserRole enum ("SUPER_ADMIN", "ADMIN")
+    - lowercase values from StationRole enum ("super_admin", "admin")
+    - No-underscore variants ("superadmin")
+
+    Returns:
+        Normalized lowercase string without underscores (e.g., "superadmin")
+    """
+    if role is None:
+        return ""
+    return role.lower().replace("_", "")
+
+
+def role_matches(role: str | None, *targets: str) -> bool:
+    """
+    Check if role matches any of the target role strings.
+
+    Handles case/underscore variations automatically.
+
+    Args:
+        role: The role string to check (can be any case/format)
+        *targets: Target role names to match against (normalized internally)
+
+    Returns:
+        True if role matches any target
+
+    Examples:
+        role_matches("SUPER_ADMIN", "super_admin")  # True
+        role_matches("super_admin", "superadmin")   # True
+        role_matches("ADMIN", "admin", "superadmin") # True
+    """
+    if role is None:
+        return False
+
+    normalized = normalize_role_str(role)
+    normalized_targets = [normalize_role_str(t) for t in targets]
+    return normalized in normalized_targets
+
+
 __all__ = [
     "get_user_rate_limit_tier",
     "is_admin_user",
     "is_super_admin",
+    "normalize_role_str",
+    "role_matches",
 ]
