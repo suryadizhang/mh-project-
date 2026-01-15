@@ -32,7 +32,7 @@ import {
   useSearch,
   useSocialThreads,
 } from '@/hooks/useApi';
-import { smsService } from '@/services/api';
+import { smsService, tokenManager } from '@/services/api';
 import { emailService, labelService } from '@/services/email-api';
 import type { Email, EmailThread, Label } from '@/types/email';
 
@@ -331,7 +331,7 @@ export default function UnifiedInboxPage() {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+            Authorization: `Bearer ${tokenManager.getToken()}`,
           },
           body: JSON.stringify({ status: 'read' }),
         });
@@ -366,7 +366,7 @@ export default function UnifiedInboxPage() {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+              Authorization: `Bearer ${tokenManager.getToken()}`,
             },
             body: JSON.stringify({
               content: messageText,
@@ -407,7 +407,7 @@ export default function UnifiedInboxPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${tokenManager.getToken()}`,
         },
         body: JSON.stringify({
           thread_id: threadId,
@@ -458,7 +458,7 @@ export default function UnifiedInboxPage() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+            Authorization: `Bearer ${tokenManager.getToken()}`,
           },
         }
       );
@@ -489,7 +489,7 @@ export default function UnifiedInboxPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${tokenManager.getToken()}`,
         },
         body: JSON.stringify({
           assignee_id: parseInt(assigneeId),
