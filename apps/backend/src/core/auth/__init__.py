@@ -33,6 +33,9 @@ def require_roles(roles: list[str | UserRole]):
 
     OLD system - kept for backward compatibility with Station Auth endpoints.
     New endpoints should use api/deps_enhanced.py instead.
+
+    NOTE: Handles both Role enum (lowercase: "super_admin") from core/auth/models.py
+    and UserRole enum (uppercase: "SUPER_ADMIN") from core/config.py.
     """
 
     async def role_checker(current_user=Depends(get_current_active_user)):
@@ -43,26 +46,40 @@ def require_roles(roles: list[str | UserRole]):
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        # Convert string roles to UserRole if needed
-        required_roles = []
-        for role in roles:
-            if isinstance(role, str):
-                try:
-                    required_roles.append(UserRole(role))
-                except ValueError:
-                    required_roles.append(role)
-            else:
-                required_roles.append(role)
-
-        # Check if user has any of the required roles
-        user_roles = getattr(current_user, "roles", [])
-        if not any(role in user_roles for role in required_roles):
+        # Get user's role - AuthenticatedUser has 'role' (singular), not 'roles' (plural)
+        # The role is a Role enum from core/auth/models.py with lowercase values
+        user_role = getattr(current_user, "role", None)
+        if user_role is None:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Insufficient permissions. Required roles: {[str(r) for r in required_roles]}",
+                detail="User has no assigned role",
             )
 
-        return current_user
+        # Get the string value of the user's role (lowercase, e.g., "super_admin")
+        user_role_value = user_role.value if hasattr(user_role, "value") else str(user_role)
+
+        # Check if user's role matches any of the required roles
+        # Handle both UserRole (UPPERCASE) and Role (lowercase) enums
+        for role in roles:
+            if isinstance(role, UserRole):
+                # UserRole has UPPERCASE values like "SUPER_ADMIN"
+                # Compare case-insensitively
+                if user_role_value.upper() == role.value:
+                    return current_user
+            elif isinstance(role, str):
+                # String comparison - try both cases
+                if user_role_value.upper() == role.upper():
+                    return current_user
+            else:
+                # Other enum types - compare values case-insensitively
+                role_value = role.value if hasattr(role, "value") else str(role)
+                if user_role_value.upper() == role_value.upper():
+                    return current_user
+
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Insufficient permissions. Required roles: {[str(r) for r in roles]}, User role: {user_role_value}",
+        )
 
     return role_checker
 
