@@ -211,8 +211,10 @@ async def get_chat_stats(user: dict[str, Any] = Depends(get_current_user_optiona
         "channels": {"web": 45, "sms": 85, "instagram": 15, "facebook": 5},
     }
 
-    # Additional admin stats
-    if user and user.get("role") in ["admin", "manager", "owner"]:
+    # Additional admin stats (normalize role for case-insensitive comparison)
+    user_role = user.get("role") if user else None
+    role_normalized = user_role.lower().replace("_", "") if user_role else ""
+    if role_normalized in ("admin", "superadmin", "stationmanager"):
         stats.update(
             {
                 "cost_per_request": 0.02,
