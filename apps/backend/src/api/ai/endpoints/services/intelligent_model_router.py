@@ -245,8 +245,10 @@ class IntelligentModelRouter:
             reason = "high_complexity"
             cost_level = "high"
 
-        # Check user role (admins get better models)
-        if context and context.get("user_role") in ["admin", "super_admin", "manager"]:
+        # Check user role (admins get better models) - normalize for case-insensitive comparison
+        user_role = context.get("user_role") if context else None
+        role_normalized = user_role.lower().replace("_", "") if user_role else ""
+        if role_normalized in ("admin", "superadmin", "stationmanager"):
             if model == "gpt-3.5-turbo":
                 model = "gpt-4-turbo"
                 reason = "admin_user_upgrade"

@@ -31,6 +31,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.audit_logger import audit_logger
 from core.database import get_db
 from core.security import decrypt_pii
+from core.security.roles import role_matches
 from db.models.core import Booking, BookingStatus
 from utils.auth import can_access_station, require_customer_support
 
@@ -128,7 +129,7 @@ async def request_cancellation(
         )
 
     # Multi-tenant check: STATION_MANAGER can only cancel from their station
-    if current_user.get("role") == "STATION_MANAGER":
+    if role_matches(current_user.get("role"), "STATION_MANAGER"):
         if not can_access_station(current_user, str(booking.station_id)):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -254,7 +255,7 @@ async def approve_cancellation(
         )
 
     # Multi-tenant check
-    if current_user.get("role") == "STATION_MANAGER":
+    if role_matches(current_user.get("role"), "STATION_MANAGER"):
         if not can_access_station(current_user, str(booking.station_id)):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -407,7 +408,7 @@ async def reject_cancellation(
         )
 
     # Multi-tenant check
-    if current_user.get("role") == "STATION_MANAGER":
+    if role_matches(current_user.get("role"), "STATION_MANAGER"):
         if not can_access_station(current_user, str(booking.station_id)):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
