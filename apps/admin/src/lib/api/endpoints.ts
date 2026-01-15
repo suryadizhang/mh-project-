@@ -114,16 +114,15 @@ export const API_ENDPOINTS = {
   // ADMIN ENDPOINTS (Requires admin+ role)
   // ============================================
   ADMIN: {
-    // Audit Logs - NO trailing slash for /stats and /actions (backend routes don't have them)
-    // Root list endpoint (/) does use trailing slash for consistency
-    AUDIT_LOGS: `${ADMIN}/audit-logs/`,
+    // Audit Logs - NO trailing slash to avoid 307 redirects
+    AUDIT_LOGS: `${ADMIN}/audit-logs`,
     AUDIT_LOGS_STATS: `${ADMIN}/audit-logs/stats`,
     AUDIT_LOGS_ACTIONS: `${ADMIN}/audit-logs/actions`,
     AUDIT_LOG_DETAIL: (id: string) => `${ADMIN}/audit-logs/${id}`,
     AUDIT_LOG_RESTORE: (id: string) => `${ADMIN}/audit-logs/${id}/restore`,
 
-    // Error Logs - NO trailing slash for sub-routes (backend routes don't have them)
-    ERROR_LOGS: `${ADMIN}/error-logs/`,
+    // Error Logs - NO trailing slash to avoid 307 redirects
+    ERROR_LOGS: `${ADMIN}/error-logs`,
     ERROR_LOGS_STATS: `${ADMIN}/error-logs/stats`,
     ERROR_LOG_DETAIL: (id: string) => `${ADMIN}/error-logs/${id}`,
 
