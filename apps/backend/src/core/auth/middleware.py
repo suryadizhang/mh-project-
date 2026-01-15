@@ -18,6 +18,7 @@ from core.auth.models import (  # Phase 2C: Updated from api.app.auth.models
     UserSession,
     UserStatus,
 )
+from core.config import get_settings  # Added for jwt_secret_key access
 from core.database import get_db_session  # Phase 2C: Updated from api.app.database
 from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
 from fastapi import Depends, HTTPException, Request, status
@@ -84,8 +85,9 @@ class JWTBearer(HTTPBearer):
 
             # Initialize services if needed
             if not self.auth_service:
+                settings = get_settings()
                 self.auth_service = AuthenticationService(
-                    FieldEncryption(), request.app.state.jwt_secret
+                    FieldEncryption(), settings.jwt_secret_key
                 )
 
             # Verify token
