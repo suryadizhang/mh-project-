@@ -101,7 +101,7 @@ class ResolveErrorRequest(BaseModel):
     resolution_notes: str | None = None
 
 
-@router.get("/", response_model=list[ErrorLogResponse])
+@router.get("", response_model=list[ErrorLogResponse])
 @require_role(["admin", "super_admin"])
 async def list_error_logs(
     db: AsyncSession = Depends(get_db),

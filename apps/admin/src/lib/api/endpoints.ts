@@ -114,14 +114,14 @@ export const API_ENDPOINTS = {
   // ADMIN ENDPOINTS (Requires admin+ role)
   // ============================================
   ADMIN: {
-    // Audit Logs - NO trailing slash to avoid 307 redirects
+    // Audit Logs
     AUDIT_LOGS: `${ADMIN}/audit-logs`,
     AUDIT_LOGS_STATS: `${ADMIN}/audit-logs/stats`,
     AUDIT_LOGS_ACTIONS: `${ADMIN}/audit-logs/actions`,
     AUDIT_LOG_DETAIL: (id: string) => `${ADMIN}/audit-logs/${id}`,
     AUDIT_LOG_RESTORE: (id: string) => `${ADMIN}/audit-logs/${id}/restore`,
 
-    // Error Logs - NO trailing slash to avoid 307 redirects
+    // Error Logs
     ERROR_LOGS: `${ADMIN}/error-logs`,
     ERROR_LOGS_STATS: `${ADMIN}/error-logs/stats`,
     ERROR_LOG_DETAIL: (id: string) => `${ADMIN}/error-logs/${id}`,
