@@ -266,7 +266,7 @@ class ActionTypesResponse(BaseModel):
 # =============================================================================
 
 
-@router.get("/", response_model=AuditLogListResponse, response_model_by_alias=True)
+@router.get("", response_model=AuditLogListResponse, response_model_by_alias=True)
 async def get_audit_logs(
     # Accept both 'action' and 'action_type' from frontend
     action: Optional[str] = Query(

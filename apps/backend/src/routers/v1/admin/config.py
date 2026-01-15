@@ -211,7 +211,7 @@ def get_current_user_id(current_user) -> Optional[UUID]:
 # =============================================================================
 
 
-@router.get("/", response_model=VariableListResponse)
+@router.get("", response_model=VariableListResponse)
 async def list_all_variables(
     include_inactive: bool = Query(False, description="Include inactive variables"),
     db: AsyncSession = Depends(get_db),
@@ -506,7 +506,7 @@ async def update_variable(
         )
 
 
-@router.post("/", response_model=SuccessResponse)
+@router.post("", response_model=SuccessResponse)
 async def create_variable(
     request: VariableCreateRequest,
     db: AsyncSession = Depends(get_db),
