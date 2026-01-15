@@ -274,7 +274,10 @@ async def station_login(
             "station_name": station_name,
             "role": station_context.station_roles.get(target_station_id, "user"),
             "permissions": list(station_context.station_permissions.get(target_station_id, set())),
-            "is_super_admin": user_role == "super_admin",
+            # Handle both "super_admin" and "superadmin" formats
+            "is_super_admin": (
+                user_role.lower().replace("_", "") == "superadmin" if user_role else False
+            ),
             # New fields for dashboard UX
             "user_email": user.email,
             "user_name": user.full_name or user.email,
@@ -452,7 +455,10 @@ async def switch_station(
             "station_name": station_name,
             "role": station_context.station_roles.get(station_id, "user"),
             "permissions": list(station_context.station_permissions.get(station_id, set())),
-            "is_super_admin": user_role == "super_admin",
+            # Handle both "super_admin" and "superadmin" formats
+            "is_super_admin": (
+                user_role.lower().replace("_", "") == "superadmin" if user_role else False
+            ),
             # Enhanced fields
             "user_email": current_user.email,
             "user_name": current_user.full_name or current_user.email,
