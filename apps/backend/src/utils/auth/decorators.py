@@ -14,7 +14,8 @@ from .roles import UserRole, normalize_role
 
 def superadmin_required(user=Depends(get_current_user_oauth)):
     """Dependency to require superadmin privileges."""
-    if user.get("role") != "superadmin":
+    user_role = normalize_role(user.get("role"))
+    if user_role != UserRole.SUPER_ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Superadmin privileges required",
@@ -24,7 +25,8 @@ def superadmin_required(user=Depends(get_current_user_oauth)):
 
 def admin_required(user=Depends(get_current_user_oauth)):
     """Dependency to require admin privileges."""
-    if user.get("role") not in ("admin", "superadmin"):
+    user_role = normalize_role(user.get("role"))
+    if user_role not in (UserRole.ADMIN, UserRole.SUPER_ADMIN):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin privileges required",
@@ -36,7 +38,8 @@ async def get_admin_user(
     current_user: dict = Depends(get_current_user),
 ) -> dict:
     """Ensure current user is admin (legacy compatibility)."""
-    if current_user.get("role") not in ("admin", "superadmin"):
+    user_role = normalize_role(current_user.get("role"))
+    if user_role not in (UserRole.ADMIN, UserRole.SUPER_ADMIN):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin access required",
