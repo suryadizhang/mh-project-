@@ -13,6 +13,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { StatsCard } from '@/components/ui/stats-card';
+import { tokenManager } from '@/services/api';
 
 interface AnalyticsData {
   overview: {
@@ -76,7 +77,7 @@ export default function NewsletterAnalyticsPage() {
         `/api/newsletter/analytics?period=${timeRange}`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+            Authorization: `Bearer ${tokenManager.getToken()}`,
           },
         }
       );
