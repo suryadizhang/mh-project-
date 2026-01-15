@@ -17,7 +17,6 @@ Endpoints:
 import logging
 from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
-from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
@@ -259,9 +258,7 @@ class ActionTypesResponse(BaseModel):
     action_categories: list[str] = Field(
         default_factory=lambda: ["authentication", "data_change", "security", "system"]
     )
-    severities: list[str] = Field(
-        default_factory=lambda: ["info", "warning", "error", "critical"]
-    )
+    severities: list[str] = Field(default_factory=lambda: ["info", "warning", "error", "critical"])
 
 
 # =============================================================================
@@ -269,35 +266,55 @@ class ActionTypesResponse(BaseModel):
 # =============================================================================
 
 
-@router.get("/", response_model=AuditLogListResponse)
+@router.get("/", response_model=AuditLogListResponse, response_model_by_alias=True)
 async def get_audit_logs(
     # Accept both 'action' and 'action_type' from frontend
-    action: Optional[str] = Query(None, description="Filter by action type (VIEW, CREATE, UPDATE, DELETE, LOGIN, etc.)"),
-    action_type: Optional[str] = Query(None, description="Alias for action (frontend compatibility)"),
+    action: Optional[str] = Query(
+        None, description="Filter by action type (VIEW, CREATE, UPDATE, DELETE, LOGIN, etc.)"
+    ),
+    action_type: Optional[str] = Query(
+        None, description="Alias for action (frontend compatibility)"
+    ),
     # Accept both 'resource_type' and 'target_type' from frontend
-    resource_type: Optional[str] = Query(None, description="Filter by resource type (booking, customer, user, etc.)"),
-    target_type: Optional[str] = Query(None, description="Alias for resource_type (frontend compatibility)"),
+    resource_type: Optional[str] = Query(
+        None, description="Filter by resource type (booking, customer, user, etc.)"
+    ),
+    target_type: Optional[str] = Query(
+        None, description="Alias for resource_type (frontend compatibility)"
+    ),
     # New action_category filter for frontend
-    action_category: Optional[str] = Query(None, description="Filter by category (authentication, data_change, security, system)"),
+    action_category: Optional[str] = Query(
+        None, description="Filter by category (authentication, data_change, security, system)"
+    ),
     # New severity filter for frontend
-    severity: Optional[str] = Query(None, description="Filter by severity (info, warning, error, critical)"),
+    severity: Optional[str] = Query(
+        None, description="Filter by severity (info, warning, error, critical)"
+    ),
     user_id: Optional[str] = Query(None, description="Filter by user ID"),
     user_email: Optional[str] = Query(None, description="Filter by user email (partial match)"),
     station_id: Optional[str] = Query(None, description="Filter by station ID"),
     # Accept both 'start_date' and 'date_from' from frontend
     start_date: Optional[datetime] = Query(None, description="Filter by start date (ISO format)"),
-    date_from: Optional[datetime] = Query(None, description="Alias for start_date (frontend compatibility)"),
+    date_from: Optional[datetime] = Query(
+        None, description="Alias for start_date (frontend compatibility)"
+    ),
     # Accept both 'end_date' and 'date_to' from frontend
     end_date: Optional[datetime] = Query(None, description="Filter by end date (ISO format)"),
-    date_to: Optional[datetime] = Query(None, description="Alias for end_date (frontend compatibility)"),
-    days: int = Query(7, ge=1, le=365, description="Number of days to look back (default: 7)"),
-    search: Optional[str] = Query(None, description="Search in resource_name, user_name, user_email"),
+    date_to: Optional[datetime] = Query(
+        None, description="Alias for end_date (frontend compatibility)"
+    ),
+    days: int = Query(365, ge=1, le=365, description="Number of days to look back (default: 365)"),
+    search: Optional[str] = Query(
+        None, description="Search in resource_name, user_name, user_email"
+    ),
     include_security: bool = Query(True, description="Include security events"),
     include_config: bool = Query(True, description="Include configuration changes"),
     page: int = Query(1, ge=1, description="Page number"),
     # Accept both 'limit' and 'page_size' from frontend
     limit: int = Query(50, ge=1, le=200, description="Items per page"),
-    page_size: Optional[int] = Query(None, ge=1, le=200, description="Alias for limit (frontend compatibility)"),
+    page_size: Optional[int] = Query(
+        None, ge=1, le=200, description="Alias for limit (frontend compatibility)"
+    ),
     db: AsyncSession = Depends(get_db),
     current_user: Any = Depends(require_roles([UserRole.SUPER_ADMIN])),
 ):
@@ -375,11 +392,12 @@ async def get_audit_logs(
         # Filter by action_category (computed field - map to actual actions)
         if action_category:
             category_actions = [
-                act for act, cat in ACTION_CATEGORY_MAP.items()
-                if cat == action_category.lower()
+                act for act, cat in ACTION_CATEGORY_MAP.items() if cat == action_category.lower()
             ]
             if category_actions:
-                action_placeholders = ", ".join([f":cat_action_{i}" for i in range(len(category_actions))])
+                action_placeholders = ", ".join(
+                    [f":cat_action_{i}" for i in range(len(category_actions))]
+                )
                 conditions.append(f"action IN ({action_placeholders})")
                 for i, act in enumerate(category_actions):
                     params[f"cat_action_{i}"] = act
@@ -387,11 +405,12 @@ async def get_audit_logs(
         # Filter by severity (computed field - map to actual actions)
         if severity:
             severity_actions = [
-                act for act, sev in ACTION_SEVERITY_MAP.items()
-                if sev == severity.lower()
+                act for act, sev in ACTION_SEVERITY_MAP.items() if sev == severity.lower()
             ]
             if severity_actions:
-                sev_placeholders = ", ".join([f":sev_action_{i}" for i in range(len(severity_actions))])
+                sev_placeholders = ", ".join(
+                    [f":sev_action_{i}" for i in range(len(severity_actions))]
+                )
                 conditions.append(f"action IN ({sev_placeholders})")
                 for i, act in enumerate(severity_actions):
                     params[f"sev_action_{i}"] = act
@@ -399,16 +418,19 @@ async def get_audit_logs(
         where_clause = " AND ".join(conditions)
 
         # Get total count
-        count_query = text(f"""
+        count_query = text(
+            f"""
             SELECT COUNT(*) as total
             FROM audit_logs
             WHERE {where_clause}
-        """)
+        """
+        )
         count_result = await db.execute(count_query, params)
         total = count_result.scalar() or 0
 
         # Get paginated entries
-        main_query = text(f"""
+        main_query = text(
+            f"""
             SELECT
                 id::text,
                 created_at,
@@ -434,39 +456,43 @@ async def get_audit_logs(
             WHERE {where_clause}
             ORDER BY created_at DESC
             LIMIT :limit OFFSET :offset
-        """)
+        """
+        )
 
         result = await db.execute(main_query, params)
         rows = result.fetchall()
 
         for row in rows:
-            entries.append(AuditLogEntry(
-                id=row.id,
-                created_at=row.created_at,
-                user_id=row.user_id,
-                user_role=row.user_role,
-                user_name=row.user_name,
-                user_email=row.user_email,
-                action=row.action,
-                resource_type=row.resource_type,
-                resource_id=row.resource_id,
-                resource_name=row.resource_name,
-                ip_address=row.ip_address,
-                user_agent=row.user_agent,
-                station_id=row.station_id,
-                delete_reason=row.delete_reason,
-                old_values=row.old_values,
-                new_values=row.new_values,
-                metadata=row.metadata,
-                success=row.success,
-                error_message=row.error_message,
-                source=row.source,
-            ))
+            entries.append(
+                AuditLogEntry(
+                    id=row.id,
+                    created_at=row.created_at,
+                    user_id=row.user_id,
+                    user_role=row.user_role,
+                    user_name=row.user_name,
+                    user_email=row.user_email,
+                    action=row.action,
+                    resource_type=row.resource_type,
+                    resource_id=row.resource_id,
+                    resource_name=row.resource_name,
+                    ip_address=row.ip_address,
+                    user_agent=row.user_agent,
+                    station_id=row.station_id,
+                    delete_reason=row.delete_reason,
+                    old_values=row.old_values,
+                    new_values=row.new_values,
+                    metadata=row.metadata,
+                    success=row.success,
+                    error_message=row.error_message,
+                    source=row.source,
+                )
+            )
 
         # Optionally include security events (only when not filtering by specific action/resource)
         if include_security and not effective_action and not effective_resource_type:
             try:
-                security_query = text("""
+                security_query = text(
+                    """
                     SELECT
                         id::text,
                         created_at,
@@ -492,43 +518,50 @@ async def get_audit_logs(
                     WHERE created_at >= :start_date AND created_at <= :end_date
                     ORDER BY created_at DESC
                     LIMIT 20
-                """)
-                sec_result = await db.execute(security_query, {
-                    "start_date": effective_start_date,
-                    "end_date": effective_end_date,
-                })
+                """
+                )
+                sec_result = await db.execute(
+                    security_query,
+                    {
+                        "start_date": effective_start_date,
+                        "end_date": effective_end_date,
+                    },
+                )
                 sec_rows = sec_result.fetchall()
 
                 for row in sec_rows:
-                    entries.append(AuditLogEntry(
-                        id=row.id,
-                        created_at=row.created_at,
-                        user_id=row.user_id,
-                        user_role=row.user_role,
-                        user_name=row.user_name,
-                        user_email=row.user_email,
-                        action=row.action,
-                        resource_type=row.resource_type,
-                        resource_id=row.resource_id,
-                        resource_name=row.resource_name,
-                        ip_address=row.ip_address,
-                        user_agent=row.user_agent,
-                        station_id=row.station_id,
-                        delete_reason=row.delete_reason,
-                        old_values=row.old_values,
-                        new_values=row.new_values,
-                        metadata=row.metadata,
-                        success=row.success,
-                        error_message=row.error_message,
-                        source=row.source,
-                    ))
+                    entries.append(
+                        AuditLogEntry(
+                            id=row.id,
+                            created_at=row.created_at,
+                            user_id=row.user_id,
+                            user_role=row.user_role,
+                            user_name=row.user_name,
+                            user_email=row.user_email,
+                            action=row.action,
+                            resource_type=row.resource_type,
+                            resource_id=row.resource_id,
+                            resource_name=row.resource_name,
+                            ip_address=row.ip_address,
+                            user_agent=row.user_agent,
+                            station_id=row.station_id,
+                            delete_reason=row.delete_reason,
+                            old_values=row.old_values,
+                            new_values=row.new_values,
+                            metadata=row.metadata,
+                            success=row.success,
+                            error_message=row.error_message,
+                            source=row.source,
+                        )
+                    )
             except Exception as e:
                 logger.warning(f"Could not fetch security events: {e}")
 
         # Optionally include config audit log
         if include_config and not effective_action and not effective_resource_type:
             try:
-                config_query = text("""
+                config_query = text(
+                    """
                     SELECT
                         id::text,
                         changed_at as created_at,
@@ -554,36 +587,42 @@ async def get_audit_logs(
                     WHERE changed_at >= :start_date AND changed_at <= :end_date
                     ORDER BY changed_at DESC
                     LIMIT 20
-                """)
-                config_result = await db.execute(config_query, {
-                    "start_date": effective_start_date,
-                    "end_date": effective_end_date,
-                })
+                """
+                )
+                config_result = await db.execute(
+                    config_query,
+                    {
+                        "start_date": effective_start_date,
+                        "end_date": effective_end_date,
+                    },
+                )
                 config_rows = config_result.fetchall()
 
                 for row in config_rows:
-                    entries.append(AuditLogEntry(
-                        id=row.id,
-                        created_at=row.created_at,
-                        user_id=row.user_id,
-                        user_role=row.user_role,
-                        user_name=row.user_name,
-                        user_email=row.user_email,
-                        action=row.action,
-                        resource_type=row.resource_type,
-                        resource_id=row.resource_id,
-                        resource_name=row.resource_name,
-                        ip_address=row.ip_address,
-                        user_agent=row.user_agent,
-                        station_id=row.station_id,
-                        delete_reason=row.delete_reason,
-                        old_values=row.old_values,
-                        new_values=row.new_values,
-                        metadata=row.metadata,
-                        success=row.success,
-                        error_message=row.error_message,
-                        source=row.source,
-                    ))
+                    entries.append(
+                        AuditLogEntry(
+                            id=row.id,
+                            created_at=row.created_at,
+                            user_id=row.user_id,
+                            user_role=row.user_role,
+                            user_name=row.user_name,
+                            user_email=row.user_email,
+                            action=row.action,
+                            resource_type=row.resource_type,
+                            resource_id=row.resource_id,
+                            resource_name=row.resource_name,
+                            ip_address=row.ip_address,
+                            user_agent=row.user_agent,
+                            station_id=row.station_id,
+                            delete_reason=row.delete_reason,
+                            old_values=row.old_values,
+                            new_values=row.new_values,
+                            metadata=row.metadata,
+                            success=row.success,
+                            error_message=row.error_message,
+                            source=row.source,
+                        )
+                    )
             except Exception as e:
                 logger.warning(f"Could not fetch config audit log: {e}")
 
@@ -614,7 +653,7 @@ async def get_audit_logs(
         )
 
 
-@router.get("/stats", response_model=AuditLogStatsResponse)
+@router.get("/stats", response_model=AuditLogStatsResponse, response_model_by_alias=True)
 async def get_audit_stats(
     days: int = Query(7, ge=1, le=30, description="Number of days for stats"),
     db: AsyncSession = Depends(get_db),
@@ -658,26 +697,30 @@ async def get_audit_stats(
         entries_this_week = week_result.scalar() or 0
 
         # Actions breakdown
-        actions_query = text("""
+        actions_query = text(
+            """
             SELECT action, COUNT(*) as count
             FROM audit_logs
             WHERE created_at >= :week_start
             GROUP BY action
             ORDER BY count DESC
             LIMIT 10
-        """)
+        """
+        )
         actions_result = await db.execute(actions_query, {"week_start": week_start})
         actions_breakdown = {row.action: row.count for row in actions_result.fetchall()}
 
         # Top users
-        users_query = text("""
+        users_query = text(
+            """
             SELECT user_email, user_name, COUNT(*) as count
             FROM audit_logs
             WHERE created_at >= :week_start AND user_email IS NOT NULL
             GROUP BY user_email, user_name
             ORDER BY count DESC
             LIMIT 5
-        """)
+        """
+        )
         users_result = await db.execute(users_query, {"week_start": week_start})
         top_users = [
             {"email": row.user_email, "name": row.user_name, "count": row.count}
@@ -685,48 +728,57 @@ async def get_audit_stats(
         ]
 
         # Top resources
-        resources_query = text("""
+        resources_query = text(
+            """
             SELECT resource_type, COUNT(*) as count
             FROM audit_logs
             WHERE created_at >= :week_start AND resource_type IS NOT NULL
             GROUP BY resource_type
             ORDER BY count DESC
             LIMIT 5
-        """)
+        """
+        )
         resources_result = await db.execute(resources_query, {"week_start": week_start})
         top_resources = [
-            {"type": row.resource_type, "count": row.count}
-            for row in resources_result.fetchall()
+            {"type": row.resource_type, "count": row.count} for row in resources_result.fetchall()
         ]
 
         # === Additional stats for frontend compatibility ===
 
         # Unique users count
-        unique_users_query = text("""
+        unique_users_query = text(
+            """
             SELECT COUNT(DISTINCT user_id) FROM audit_logs
             WHERE created_at >= :week_start AND user_id IS NOT NULL
-        """)
+        """
+        )
         unique_users_result = await db.execute(unique_users_query, {"week_start": week_start})
         unique_users = unique_users_result.scalar() or 0
 
         # Failed actions count (success = false)
-        failed_query = text("""
+        failed_query = text(
+            """
             SELECT COUNT(*) FROM audit_logs
             WHERE created_at >= :week_start AND success = false
-        """)
+        """
+        )
         failed_result = await db.execute(failed_query, {"week_start": week_start})
         failed_actions = failed_result.scalar() or 0
 
         # Success rate calculation
         success_rate = 100.0
         if entries_this_week > 0:
-            success_rate = round(((entries_this_week - failed_actions) / entries_this_week) * 100, 2)
+            success_rate = round(
+                ((entries_this_week - failed_actions) / entries_this_week) * 100, 2
+            )
 
         # Count events by category using the action type mappings
         # Security events (from security_events table or action patterns)
         security_events = 0
         try:
-            sec_count_query = text("SELECT COUNT(*) FROM security.security_events WHERE created_at >= :week_start")
+            sec_count_query = text(
+                "SELECT COUNT(*) FROM security.security_events WHERE created_at >= :week_start"
+            )
             sec_count_result = await db.execute(sec_count_query, {"week_start": week_start})
             security_events = sec_count_result.scalar() or 0
         except Exception:
@@ -773,7 +825,7 @@ async def get_audit_stats(
         )
 
 
-@router.get("/actions", response_model=ActionTypesResponse)
+@router.get("/actions", response_model=ActionTypesResponse, response_model_by_alias=True)
 async def get_action_types(
     db: AsyncSession = Depends(get_db),
     current_user: Any = Depends(require_roles([UserRole.SUPER_ADMIN])),
@@ -783,20 +835,24 @@ async def get_action_types(
     """
     try:
         # Get distinct actions
-        actions_query = text("""
+        actions_query = text(
+            """
             SELECT DISTINCT action FROM audit_logs
             WHERE action IS NOT NULL
             ORDER BY action
-        """)
+        """
+        )
         actions_result = await db.execute(actions_query)
         actions = [row.action for row in actions_result.fetchall()]
 
         # Get distinct resource types
-        resources_query = text("""
+        resources_query = text(
+            """
             SELECT DISTINCT resource_type FROM audit_logs
             WHERE resource_type IS NOT NULL
             ORDER BY resource_type
-        """)
+        """
+        )
         resources_result = await db.execute(resources_query)
         resource_types = [row.resource_type for row in resources_result.fetchall()]
 
