@@ -37,6 +37,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
+import { tokenManager } from '@/services/api';
 
 // ============================================================================
 // Types
@@ -369,7 +370,7 @@ export default function ScalingDashboardPage() {
     setError(null);
 
     try {
-      const token = localStorage.getItem('access_token');
+      const token = tokenManager.getToken();
       const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
       // Fetch both endpoints in parallel
@@ -401,7 +402,10 @@ export default function ScalingDashboardPage() {
             timestamp: new Date().toISOString(),
             checks: readinessJson.checks || {},
             ready: false,
-            details: typeof readinessJson.detail === 'string' ? readinessJson.detail : 'Service not ready',
+            details:
+              typeof readinessJson.detail === 'string'
+                ? readinessJson.detail
+                : 'Service not ready',
           });
         }
       }
@@ -490,7 +494,11 @@ export default function ScalingDashboardPage() {
   }
 
   return (
-    <main className="container mx-auto p-6 space-y-6" role="main" aria-label="Scaling Health Dashboard">
+    <main
+      className="container mx-auto p-6 space-y-6"
+      role="main"
+      aria-label="Scaling Health Dashboard"
+    >
       {/* Header */}
       <header className="flex items-center justify-between">
         <div>
@@ -516,7 +524,10 @@ export default function ScalingDashboardPage() {
               aria-label={`Auto-refresh is ${autoRefresh ? 'enabled' : 'disabled'}`}
             >
               {autoRefresh ? (
-                <Wifi className="h-4 w-4 mr-1 text-green-600" aria-hidden="true" />
+                <Wifi
+                  className="h-4 w-4 mr-1 text-green-600"
+                  aria-hidden="true"
+                />
               ) : (
                 <WifiOff className="h-4 w-4 mr-1" aria-hidden="true" />
               )}
