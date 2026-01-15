@@ -45,7 +45,7 @@ from enum import Enum
 from typing import Any, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -55,6 +55,7 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 # ENUMS
 # =============================================================================
+
 
 class ApprovalStatus(str, Enum):
     PENDING = "pending"
@@ -82,8 +83,10 @@ class UserRole(str, Enum):
 # PYDANTIC MODELS
 # =============================================================================
 
+
 class PendingApproval(BaseModel):
     """A pending variable change awaiting approval."""
+
     id: UUID
     variable_id: Optional[UUID] = None
     category: str
@@ -108,6 +111,7 @@ class PendingApproval(BaseModel):
 
 class ApprovalActionRecord(BaseModel):
     """A record of an approval/rejection action."""
+
     id: UUID
     pending_approval_id: UUID
     actor_id: UUID
@@ -123,6 +127,7 @@ class ApprovalActionRecord(BaseModel):
 
 class ApprovalResult(BaseModel):
     """Result of an approval action."""
+
     success: bool
     status: ApprovalStatus
     message: str
@@ -134,6 +139,7 @@ class ApprovalResult(BaseModel):
 
 class CriticalVariableRule(BaseModel):
     """Configuration for which variables require approval."""
+
     category_pattern: str
     key_pattern: Optional[str] = None
     approvals_required: int = 2
@@ -143,6 +149,7 @@ class CriticalVariableRule(BaseModel):
 # =============================================================================
 # APPROVAL SERVICE
 # =============================================================================
+
 
 class ApprovalService:
     """
@@ -163,12 +170,7 @@ class ApprovalService:
     # APPROVAL REQUIREMENT CHECKS
     # -------------------------------------------------------------------------
 
-    async def requires_approval(
-        self,
-        category: str,
-        key: str,
-        actor_role: str = "admin"
-    ) -> bool:
+    async def requires_approval(self, category: str, key: str, actor_role: str = "admin") -> bool:
         """
         Check if a variable change requires approval.
 
@@ -183,13 +185,15 @@ class ApprovalService:
             True if approval is required, False if can apply immediately
         """
         # Super Admin bypasses all approval requirements
-        if actor_role.lower() == "super_admin":
+        # Handle both "super_admin" and "superadmin" formats
+        if actor_role.lower().replace("_", "") == "superadmin":
             logger.info(f"🔓 Super Admin bypass for {category}/{key}")
             return False
 
         # Check database for critical variable patterns
         result = await self.db.execute(
-            text("""
+            text(
+                """
                 SELECT EXISTS (
                     SELECT 1 FROM critical_variable_config
                     WHERE is_active = true
@@ -199,8 +203,9 @@ class ApprovalService:
                         OR :key LIKE REPLACE(key_pattern, '*', '%')
                     )
                 )
-            """),
-            {"category": category, "key": key}
+            """
+            ),
+            {"category": category, "key": key},
         )
         is_critical = result.scalar()
 
@@ -210,9 +215,7 @@ class ApprovalService:
         return is_critical or False
 
     async def get_approval_requirements(
-        self,
-        category: str,
-        key: str
+        self, category: str, key: str
     ) -> Optional[CriticalVariableRule]:
         """
         Get the approval requirements for a specific variable.
@@ -221,7 +224,8 @@ class ApprovalService:
             CriticalVariableRule if critical, None otherwise
         """
         result = await self.db.execute(
-            text("""
+            text(
+                """
                 SELECT
                     category_pattern,
                     key_pattern,
@@ -238,8 +242,9 @@ class ApprovalService:
                     CASE WHEN key_pattern IS NOT NULL THEN 0 ELSE 1 END,
                     created_at DESC
                 LIMIT 1
-            """),
-            {"category": category, "key": key}
+            """
+            ),
+            {"category": category, "key": key},
         )
         row = result.fetchone()
 
@@ -248,7 +253,7 @@ class ApprovalService:
                 category_pattern=row.category_pattern,
                 key_pattern=row.key_pattern,
                 approvals_required=row.approvals_required,
-                super_admin_can_bypass=row.super_admin_can_bypass
+                super_admin_can_bypass=row.super_admin_can_bypass,
             )
         return None
 
@@ -269,7 +274,7 @@ class ApprovalService:
         effective_from: Optional[datetime] = None,
         effective_to: Optional[datetime] = None,
         change_reason: Optional[str] = None,
-        expires_in_days: int = DEFAULT_EXPIRY_DAYS
+        expires_in_days: int = DEFAULT_EXPIRY_DAYS,
     ) -> PendingApproval:
         """
         Create a new pending approval request.
@@ -298,7 +303,8 @@ class ApprovalService:
         expires_at = datetime.utcnow() + timedelta(days=expires_in_days)
 
         result = await self.db.execute(
-            text("""
+            text(
+                """
                 INSERT INTO pending_variable_approvals (
                     variable_id,
                     category,
@@ -333,7 +339,8 @@ class ApprovalService:
                     :expires_at
                 )
                 RETURNING *
-            """),
+            """
+            ),
             {
                 "variable_id": str(variable_id) if variable_id else None,
                 "category": category,
@@ -347,8 +354,8 @@ class ApprovalService:
                 "requested_by": str(requested_by),
                 "requested_by_email": requested_by_email,
                 "approvals_required": approvals_required,
-                "expires_at": expires_at
-            }
+                "expires_at": expires_at,
+            },
         )
         row = result.fetchone()
         await self.db.commit()
@@ -370,7 +377,7 @@ class ApprovalService:
         actor_id: UUID,
         actor_email: str,
         actor_role: str,
-        comment: Optional[str] = None
+        comment: Optional[str] = None,
     ) -> ApprovalResult:
         """
         Approve a pending variable change request.
@@ -394,9 +401,7 @@ class ApprovalService:
         pending = await self.get_pending_approval(pending_id)
         if not pending:
             return ApprovalResult(
-                success=False,
-                status=ApprovalStatus.PENDING,
-                message="Pending approval not found"
+                success=False, status=ApprovalStatus.PENDING, message="Pending approval not found"
             )
 
         # Check if already processed
@@ -404,7 +409,7 @@ class ApprovalService:
             return ApprovalResult(
                 success=False,
                 status=pending.status,
-                message=f"Request already {pending.status.value}"
+                message=f"Request already {pending.status.value}",
             )
 
         # Check for self-approval
@@ -412,79 +417,92 @@ class ApprovalService:
             return ApprovalResult(
                 success=False,
                 status=ApprovalStatus.PENDING,
-                message="Cannot approve your own request"
+                message="Cannot approve your own request",
             )
 
         # Check if user already approved
         existing = await self.db.execute(
-            text("""
+            text(
+                """
                 SELECT 1 FROM variable_approval_actions
                 WHERE pending_approval_id = :pending_id
                 AND actor_id = :actor_id
                 AND action = 'approve'
-            """),
-            {"pending_id": str(pending_id), "actor_id": str(actor_id)}
+            """
+            ),
+            {"pending_id": str(pending_id), "actor_id": str(actor_id)},
         )
         if existing.fetchone():
             return ApprovalResult(
                 success=False,
                 status=ApprovalStatus.PENDING,
-                message="You have already approved this request"
+                message="You have already approved this request",
             )
 
         # Record the approval action
         await self.db.execute(
-            text("""
+            text(
+                """
                 INSERT INTO variable_approval_actions (
                     pending_approval_id, actor_id, actor_email, actor_role, action, comment
                 ) VALUES (
                     :pending_id, :actor_id, :actor_email, :actor_role, 'approve', :comment
                 )
-            """),
+            """
+            ),
             {
                 "pending_id": str(pending_id),
                 "actor_id": str(actor_id),
                 "actor_email": actor_email,
                 "actor_role": actor_role,
-                "comment": comment
-            }
+                "comment": comment,
+            },
         )
 
         # Determine if fully approved
-        is_super_admin = actor_role.lower() == "super_admin"
+        # Handle both "super_admin" and "superadmin" formats
+        is_super_admin = actor_role.lower().replace("_", "") == "superadmin"
         new_approvals = pending.approvals_received + 1
 
         if is_super_admin:
             # Super Admin bypasses - immediate full approval
             new_status = ApprovalStatus.AUTO_APPROVED
             is_complete = True
-            logger.info(f"⚡ Super Admin {actor_email} auto-approved {pending.category}/{pending.key}")
+            logger.info(
+                f"⚡ Super Admin {actor_email} auto-approved {pending.category}/{pending.key}"
+            )
         elif new_approvals >= pending.approvals_required:
             # Met threshold with regular admins
             new_status = ApprovalStatus.APPROVED
             is_complete = True
-            logger.info(f"✅ Fully approved {pending.category}/{pending.key} ({new_approvals}/{pending.approvals_required})")
+            logger.info(
+                f"✅ Fully approved {pending.category}/{pending.key} ({new_approvals}/{pending.approvals_required})"
+            )
         else:
             # Partial approval
             new_status = ApprovalStatus.PENDING
             is_complete = False
-            logger.info(f"📊 Partial approval {pending.category}/{pending.key} ({new_approvals}/{pending.approvals_required})")
+            logger.info(
+                f"📊 Partial approval {pending.category}/{pending.key} ({new_approvals}/{pending.approvals_required})"
+            )
 
         # Update pending approval status
         await self.db.execute(
-            text("""
+            text(
+                """
                 UPDATE pending_variable_approvals
                 SET
                     approvals_received = :new_approvals,
                     status = :new_status,
                     updated_at = NOW()
                 WHERE id = :pending_id
-            """),
+            """
+            ),
             {
                 "pending_id": str(pending_id),
                 "new_approvals": new_approvals,
-                "new_status": new_status.value
-            }
+                "new_status": new_status.value,
+            },
         )
 
         applied_variable_id = None
@@ -495,12 +513,14 @@ class ApprovalService:
 
             # Update status to APPLIED
             await self.db.execute(
-                text("""
+                text(
+                    """
                     UPDATE pending_variable_approvals
                     SET status = 'applied', updated_at = NOW()
                     WHERE id = :pending_id
-                """),
-                {"pending_id": str(pending_id)}
+                """
+                ),
+                {"pending_id": str(pending_id)},
             )
 
         await self.db.commit()
@@ -508,11 +528,15 @@ class ApprovalService:
         return ApprovalResult(
             success=True,
             status=new_status if not is_complete else ApprovalStatus.APPLIED,
-            message="Approved and applied" if is_complete else f"Approved ({new_approvals}/{pending.approvals_required})",
+            message=(
+                "Approved and applied"
+                if is_complete
+                else f"Approved ({new_approvals}/{pending.approvals_required})"
+            ),
             approvals_received=new_approvals,
             approvals_required=pending.approvals_required,
             is_complete=is_complete,
-            applied_variable_id=applied_variable_id
+            applied_variable_id=applied_variable_id,
         )
 
     async def reject_request(
@@ -521,7 +545,7 @@ class ApprovalService:
         actor_id: UUID,
         actor_email: str,
         actor_role: str,
-        comment: Optional[str] = None
+        comment: Optional[str] = None,
     ) -> ApprovalResult:
         """
         Reject a pending variable change request.
@@ -542,9 +566,7 @@ class ApprovalService:
         pending = await self.get_pending_approval(pending_id)
         if not pending:
             return ApprovalResult(
-                success=False,
-                status=ApprovalStatus.PENDING,
-                message="Pending approval not found"
+                success=False, status=ApprovalStatus.PENDING, message="Pending approval not found"
             )
 
         # Check if already processed
@@ -552,35 +574,39 @@ class ApprovalService:
             return ApprovalResult(
                 success=False,
                 status=pending.status,
-                message=f"Request already {pending.status.value}"
+                message=f"Request already {pending.status.value}",
             )
 
         # Record the rejection
         await self.db.execute(
-            text("""
+            text(
+                """
                 INSERT INTO variable_approval_actions (
                     pending_approval_id, actor_id, actor_email, actor_role, action, comment
                 ) VALUES (
                     :pending_id, :actor_id, :actor_email, :actor_role, 'reject', :comment
                 )
-            """),
+            """
+            ),
             {
                 "pending_id": str(pending_id),
                 "actor_id": str(actor_id),
                 "actor_email": actor_email,
                 "actor_role": actor_role,
-                "comment": comment
-            }
+                "comment": comment,
+            },
         )
 
         # Update status to rejected
         await self.db.execute(
-            text("""
+            text(
+                """
                 UPDATE pending_variable_approvals
                 SET status = 'rejected', updated_at = NOW()
                 WHERE id = :pending_id
-            """),
-            {"pending_id": str(pending_id)}
+            """
+            ),
+            {"pending_id": str(pending_id)},
         )
 
         await self.db.commit()
@@ -593,15 +619,11 @@ class ApprovalService:
             message=f"Rejected by {actor_email}",
             approvals_received=pending.approvals_received,
             approvals_required=pending.approvals_required,
-            is_complete=True
+            is_complete=True,
         )
 
     async def cancel_request(
-        self,
-        pending_id: UUID,
-        actor_id: UUID,
-        actor_email: str,
-        actor_role: str
+        self, pending_id: UUID, actor_id: UUID, actor_email: str, actor_role: str
     ) -> ApprovalResult:
         """
         Cancel a pending approval request.
@@ -611,54 +633,57 @@ class ApprovalService:
         pending = await self.get_pending_approval(pending_id)
         if not pending:
             return ApprovalResult(
-                success=False,
-                status=ApprovalStatus.PENDING,
-                message="Pending approval not found"
+                success=False, status=ApprovalStatus.PENDING, message="Pending approval not found"
             )
 
         if pending.status != ApprovalStatus.PENDING:
             return ApprovalResult(
                 success=False,
                 status=pending.status,
-                message=f"Request already {pending.status.value}"
+                message=f"Request already {pending.status.value}",
             )
 
         # Only requester or super admin can cancel
-        is_super_admin = actor_role.lower() == "super_admin"
+        # Handle both "super_admin" and "superadmin" formats
+        is_super_admin = actor_role.lower().replace("_", "") == "superadmin"
         is_requester = str(pending.requested_by) == str(actor_id)
 
         if not is_super_admin and not is_requester:
             return ApprovalResult(
                 success=False,
                 status=ApprovalStatus.PENDING,
-                message="Only the requester or a super admin can cancel"
+                message="Only the requester or a super admin can cancel",
             )
 
         # Record cancellation
         await self.db.execute(
-            text("""
+            text(
+                """
                 INSERT INTO variable_approval_actions (
                     pending_approval_id, actor_id, actor_email, actor_role, action, comment
                 ) VALUES (
                     :pending_id, :actor_id, :actor_email, :actor_role, 'cancel', 'Cancelled by user'
                 )
-            """),
+            """
+            ),
             {
                 "pending_id": str(pending_id),
                 "actor_id": str(actor_id),
                 "actor_email": actor_email,
-                "actor_role": actor_role
-            }
+                "actor_role": actor_role,
+            },
         )
 
         # Soft delete by marking expired
         await self.db.execute(
-            text("""
+            text(
+                """
                 UPDATE pending_variable_approvals
                 SET status = 'expired', updated_at = NOW()
                 WHERE id = :pending_id
-            """),
-            {"pending_id": str(pending_id)}
+            """
+            ),
+            {"pending_id": str(pending_id)},
         )
 
         await self.db.commit()
@@ -667,7 +692,7 @@ class ApprovalService:
             success=True,
             status=ApprovalStatus.EXPIRED,
             message="Request cancelled",
-            is_complete=True
+            is_complete=True,
         )
 
     # -------------------------------------------------------------------------
@@ -677,11 +702,13 @@ class ApprovalService:
     async def get_pending_approval(self, pending_id: UUID) -> Optional[PendingApproval]:
         """Get a single pending approval by ID."""
         result = await self.db.execute(
-            text("""
+            text(
+                """
                 SELECT * FROM pending_variable_approvals
                 WHERE id = :pending_id
-            """),
-            {"pending_id": str(pending_id)}
+            """
+            ),
+            {"pending_id": str(pending_id)},
         )
         row = result.fetchone()
         return self._row_to_pending_approval(row) if row else None
@@ -691,7 +718,7 @@ class ApprovalService:
         status: Optional[ApprovalStatus] = None,
         category: Optional[str] = None,
         limit: int = 50,
-        offset: int = 0
+        offset: int = 0,
     ) -> list[PendingApproval]:
         """
         Get pending approvals with optional filtering.
@@ -721,29 +748,30 @@ class ApprovalService:
         where_clause = " AND ".join(filters) if filters else "1=1"
 
         result = await self.db.execute(
-            text(f"""
+            text(
+                f"""
                 SELECT * FROM pending_variable_approvals
                 WHERE {where_clause}
                 ORDER BY created_at DESC
                 LIMIT :limit OFFSET :offset
-            """),
-            params
+            """
+            ),
+            params,
         )
         rows = result.fetchall()
         return [self._row_to_pending_approval(row) for row in rows]
 
-    async def get_approval_actions(
-        self,
-        pending_id: UUID
-    ) -> list[ApprovalActionRecord]:
+    async def get_approval_actions(self, pending_id: UUID) -> list[ApprovalActionRecord]:
         """Get all approval actions for a pending request."""
         result = await self.db.execute(
-            text("""
+            text(
+                """
                 SELECT * FROM variable_approval_actions
                 WHERE pending_approval_id = :pending_id
                 ORDER BY acted_at ASC
-            """),
-            {"pending_id": str(pending_id)}
+            """
+            ),
+            {"pending_id": str(pending_id)},
         )
         rows = result.fetchall()
         return [
@@ -755,7 +783,7 @@ class ApprovalService:
                 actor_role=row.actor_role,
                 action=ApprovalAction(row.action),
                 comment=row.comment,
-                acted_at=row.acted_at
+                acted_at=row.acted_at,
             )
             for row in rows
         ]
@@ -851,12 +879,13 @@ class ApprovalService:
             approvals_required=row.approvals_required,
             approvals_received=row.approvals_received,
             expires_at=row.expires_at,
-            created_at=row.created_at
+            created_at=row.created_at,
         )
 
     def _to_json_str(self, value: Any) -> Optional[str]:
         """Convert a value to JSON string for JSONB storage."""
         import json
+
         if value is None:
             return None
         if isinstance(value, str):
@@ -868,11 +897,9 @@ class ApprovalService:
 # HELPER FUNCTION
 # =============================================================================
 
+
 async def check_approval_required(
-    db: AsyncSession,
-    category: str,
-    key: str,
-    actor_role: str
+    db: AsyncSession, category: str, key: str, actor_role: str
 ) -> bool:
     """
     Convenience function to check if approval is required.

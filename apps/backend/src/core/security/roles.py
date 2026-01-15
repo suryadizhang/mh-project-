@@ -29,7 +29,9 @@ def is_admin_user(role: UserRole | str | None) -> bool:
         return False
 
     if isinstance(role, str):
-        return role.lower() in ["admin", "super_admin", "station_manager"]
+        # Handle both underscore and no-underscore formats, case-insensitive
+        role_normalized = role.lower().replace("_", "")
+        return role_normalized in ["admin", "superadmin", "stationmanager"]
     return role in [UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.STATION_MANAGER]
 
 
@@ -39,7 +41,9 @@ def is_super_admin(role: UserRole | str | None) -> bool:
         return False
 
     if isinstance(role, str):
-        return role.lower() == "super_admin"
+        # Handle both underscore and no-underscore formats, case-insensitive
+        role_normalized = role.lower().replace("_", "")
+        return role_normalized == "superadmin"
     return role == UserRole.SUPER_ADMIN
 
 

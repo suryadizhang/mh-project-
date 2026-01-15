@@ -50,13 +50,17 @@ def extract_station_context(authorization: str | None = Header(None)) -> Station
         if not station_data:
             return None
 
+        # Handle both "super_admin" and "superadmin" formats
+        role_value = station_data.get("role", "customer_support")
+        is_super = role_value.lower().replace("_", "") == "superadmin" if role_value else False
+
         return StationContext(
             station_id=station_data.get("station_id"),
             station_name=station_data.get("station_name", ""),
             user_id=payload.get("user_id"),
-            role=station_data.get("role", "customer_support"),
+            role=role_value,
             permissions=station_data.get("permissions", []),
-            is_super_admin=station_data.get("role") == "super_admin",
+            is_super_admin=is_super,
         )
 
     except Exception as e:

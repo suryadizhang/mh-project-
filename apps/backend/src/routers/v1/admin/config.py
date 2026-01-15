@@ -35,10 +35,8 @@ Related:
 """
 
 import logging
-from datetime import datetime
 from typing import Optional, Any, List
 from uuid import UUID
-from enum import Enum
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -93,16 +91,12 @@ class VariableCreateRequest(BaseModel):
     category: str = Field(..., description="Category: pricing, deposit, travel, booking")
     key: str = Field(..., description="Variable key, e.g., adult_price_cents")
     value: Any = Field(..., description="Variable value")
-    value_type: str = Field(
-        "integer", description="Type: integer, number, boolean, string, json"
-    )
+    value_type: str = Field("integer", description="Type: integer, number, boolean, string, json")
     description: Optional[str] = Field(None, description="Human-readable description")
     effective_from: Optional[str] = Field(
         None, description="ISO datetime when value becomes effective"
     )
-    effective_to: Optional[str] = Field(
-        None, description="ISO datetime when value expires"
-    )
+    effective_to: Optional[str] = Field(None, description="ISO datetime when value expires")
 
 
 class VariableUpdateRequest(BaseModel):
@@ -113,9 +107,7 @@ class VariableUpdateRequest(BaseModel):
     effective_from: Optional[str] = Field(
         None, description="ISO datetime when value becomes effective"
     )
-    effective_to: Optional[str] = Field(
-        None, description="ISO datetime when value expires"
-    )
+    effective_to: Optional[str] = Field(None, description="ISO datetime when value expires")
 
 
 class BulkUpdateRequest(BaseModel):
@@ -159,9 +151,7 @@ class ApprovalRequestCreate(BaseModel):
     effective_from: Optional[str] = Field(
         None, description="ISO datetime when value becomes effective"
     )
-    effective_to: Optional[str] = Field(
-        None, description="ISO datetime when value expires"
-    )
+    effective_to: Optional[str] = Field(None, description="ISO datetime when value expires")
 
 
 class ApprovalActionRequest(BaseModel):
@@ -264,7 +254,6 @@ async def list_categories(
     # Extract unique categories (keys of grouped dict)
     categories = sorted(all_vars.keys())
 
-
     return {"categories": categories, "count": len(categories)}
 
 
@@ -313,10 +302,7 @@ async def list_variables_by_category(
     service = DynamicVariablesService(db)
     category_vars = await service.get_category(category=category)
     # Convert to list format
-    variables = [
-        {"category": category, "key": key, **info}
-        for key, info in category_vars.items()
-    ]
+    variables = [{"category": category, "key": key, **info} for key, info in category_vars.items()]
 
     return VariableListResponse(
         variables=variables,
@@ -370,14 +356,16 @@ async def update_variable(
     user_id = get_current_user_id(current_user)
 
     # Determine if current user is super admin (god mode - bypasses approval)
+    # Note: AuthenticatedUser has .role (singular), not .roles (plural)
+    user_role = getattr(current_user, "role", None)
     is_super_admin = False
-    if hasattr(current_user, 'role'):
-        is_super_admin = current_user.role == UserRole.SUPER_ADMIN
-    elif hasattr(current_user, 'roles'):
-        is_super_admin = UserRole.SUPER_ADMIN in current_user.roles
+    if user_role:
+        # Handle both Role enum (lowercase) and UserRole enum (UPPERCASE)
+        role_value = user_role.value if hasattr(user_role, "value") else str(user_role)
+        is_super_admin = role_value.upper() == UserRole.SUPER_ADMIN.value
 
     # Get actor info for audit trail
-    actor_email = getattr(current_user, 'email', 'unknown@myhibachi.com')
+    actor_email = getattr(current_user, "email", "unknown@myhibachi.com")
     actor_role = "super_admin" if is_super_admin else "admin"
 
     try:
@@ -391,13 +379,17 @@ async def update_variable(
             if request.effective_from:
                 try:
                     from datetime import datetime as dt
-                    effective_from_dt = dt.fromisoformat(request.effective_from.replace('Z', '+00:00'))
+
+                    effective_from_dt = dt.fromisoformat(
+                        request.effective_from.replace("Z", "+00:00")
+                    )
                 except (ValueError, AttributeError):
                     pass
             if request.effective_to:
                 try:
                     from datetime import datetime as dt
-                    effective_to_dt = dt.fromisoformat(request.effective_to.replace('Z', '+00:00'))
+
+                    effective_to_dt = dt.fromisoformat(request.effective_to.replace("Z", "+00:00"))
                 except (ValueError, AttributeError):
                     pass
 
@@ -468,7 +460,7 @@ async def update_variable(
             value=request.value,
             user_id=user_id,
             reason=request.change_reason or "Admin update",
-            user_email=getattr(current_user, 'email', 'unknown@myhibachi.com'),
+            user_email=getattr(current_user, "email", "unknown@myhibachi.com"),
         )
 
         if not result:
@@ -492,6 +484,7 @@ async def update_variable(
         try:
             from services.business_config_service import invalidate_business_config_cache
             from core.cache import get_cache_service
+
             cache = await get_cache_service()
             if cache:
                 await invalidate_business_config_cache(cache)
@@ -539,13 +532,13 @@ async def create_variable(
             category=request.category,
             key=request.key,
             value=request.value,
-            display_name=request.key.replace('_', ' ').title(),
+            display_name=request.key.replace("_", " ").title(),
             description=request.description,
             unit=None,
             validation_rules=None,
             user_id=user_id,
             reason="Initial creation",
-            user_email=getattr(current_user, 'email', 'unknown@myhibachi.com'),
+            user_email=getattr(current_user, "email", "unknown@myhibachi.com"),
         )
 
         logger.info(
@@ -597,7 +590,7 @@ async def bulk_update_variables(
     try:
         # Process each update individually
         results = []
-        user_email = getattr(current_user, 'email', 'unknown@myhibachi.com')
+        user_email = getattr(current_user, "email", "unknown@myhibachi.com")
         for update in request.updates:
             # Validate required fields
             category = update.get("category")
@@ -667,7 +660,7 @@ async def delete_variable(
 
     try:
         # Use single delete_variable method (soft delete by default)
-        user_email = getattr(current_user, 'email', 'unknown@myhibachi.com')
+        user_email = getattr(current_user, "email", "unknown@myhibachi.com")
         result = await service.delete_variable(
             category=category,
             key=key,
@@ -773,7 +766,9 @@ async def invalidate_config_cache(
 
 @router.get("/approvals/pending", response_model=ApprovalListResponse)
 async def list_pending_approvals(
-    status: Optional[str] = Query(None, description="Filter by status: pending, approved, rejected, expired"),
+    status: Optional[str] = Query(
+        None, description="Filter by status: pending, approved, rejected, expired"
+    ),
     db: AsyncSession = Depends(get_db),
     current_user=Depends(require_roles([UserRole.ADMIN, UserRole.SUPER_ADMIN])),
 ):
@@ -796,14 +791,14 @@ async def list_pending_approvals(
             except ValueError:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Invalid status. Must be one of: pending, approved, rejected, expired",
+                    detail="Invalid status. Must be one of: pending, approved, rejected, expired",
                 )
 
         approvals = await approval_service.get_pending_approvals(status=status_enum)
 
         # Convert PendingApproval objects to dicts for response
         approvals_dicts = [
-            approval.model_dump() if hasattr(approval, 'model_dump') else vars(approval)
+            approval.model_dump() if hasattr(approval, "model_dump") else vars(approval)
             for approval in approvals
         ]
 
@@ -851,7 +846,7 @@ async def create_approval_request(
             raise HTTPException(
                 status_code=400,
                 detail=f"Variable {request.category}/{request.key} does not require approval. "
-                       f"Use PUT /{request.category}/{request.key} to update directly.",
+                f"Use PUT /{request.category}/{request.key} to update directly.",
             )
 
         # Parse effective dates if provided
@@ -860,7 +855,10 @@ async def create_approval_request(
         if request.effective_from:
             try:
                 from datetime import datetime
-                effective_from_dt = datetime.fromisoformat(request.effective_from.replace('Z', '+00:00'))
+
+                effective_from_dt = datetime.fromisoformat(
+                    request.effective_from.replace("Z", "+00:00")
+                )
             except ValueError:
                 raise HTTPException(
                     status_code=400,
@@ -869,7 +867,10 @@ async def create_approval_request(
         if request.effective_to:
             try:
                 from datetime import datetime
-                effective_to_dt = datetime.fromisoformat(request.effective_to.replace('Z', '+00:00'))
+
+                effective_to_dt = datetime.fromisoformat(
+                    request.effective_to.replace("Z", "+00:00")
+                )
             except ValueError:
                 raise HTTPException(
                     status_code=400,
@@ -883,7 +884,7 @@ async def create_approval_request(
                 detail="User ID required for approval requests",
             )
 
-        actor_email = getattr(current_user, 'email', 'unknown@myhibachi.com')
+        actor_email = getattr(current_user, "email", "unknown@myhibachi.com")
 
         # Create the approval request
         pending = await approval_service.create_approval_request(
@@ -911,7 +912,7 @@ async def create_approval_request(
         return SuccessResponse(
             success=True,
             message=f"Approval request created for {request.category}/{request.key}. "
-                    f"Requires 2 Admin approvals or 1 Super Admin approval.",
+            f"Requires 2 Admin approvals or 1 Super Admin approval.",
             data={
                 "approval_id": str(approval_id),
                 "category": request.category,
@@ -986,11 +987,13 @@ async def approve_request(
         user_id = get_current_user_id(current_user)
 
         # Determine if current user is super admin
+        # Note: AuthenticatedUser has .role (singular), not .roles (plural)
+        user_role = getattr(current_user, "role", None)
         is_super_admin = False
-        if hasattr(current_user, 'role'):
-            is_super_admin = current_user.role == UserRole.SUPER_ADMIN
-        elif hasattr(current_user, 'roles'):
-            is_super_admin = UserRole.SUPER_ADMIN in current_user.roles
+        if user_role:
+            # Handle both Role enum (lowercase) and UserRole enum (UPPERCASE)
+            role_value = user_role.value if hasattr(user_role, "value") else str(user_role)
+            is_super_admin = role_value.upper() == UserRole.SUPER_ADMIN.value
 
         # Validate user_id
         if not user_id:
@@ -1000,7 +1003,7 @@ async def approve_request(
             )
 
         # Get actor email for audit trail
-        actor_email = getattr(current_user, 'email', 'unknown@myhibachi.com')
+        actor_email = getattr(current_user, "email", "unknown@myhibachi.com")
         actor_role = "super_admin" if is_super_admin else "admin"
 
         result = await approval_service.approve_request(
@@ -1035,6 +1038,7 @@ async def approve_request(
             try:
                 from services.business_config_service import invalidate_business_config_cache
                 from core.cache import get_cache_service
+
                 cache = await get_cache_service()
                 if cache:
                     await invalidate_business_config_cache(cache)
@@ -1042,11 +1046,15 @@ async def approve_request(
                 logger.warning(f"Failed to invalidate cache after approval: {cache_error}")
 
         # Convert result to dict for response
-        result_data = result.model_dump() if hasattr(result, 'model_dump') else {
-            "success": result.success,
-            "message": result.message,
-            "is_complete": result.is_complete,
-        }
+        result_data = (
+            result.model_dump()
+            if hasattr(result, "model_dump")
+            else {
+                "success": result.success,
+                "message": result.message,
+                "is_complete": result.is_complete,
+            }
+        )
 
         return SuccessResponse(
             success=True,
@@ -1083,11 +1091,13 @@ async def reject_request(
         user_id = get_current_user_id(current_user)
 
         # Determine actor role for audit trail
+        # Note: AuthenticatedUser has .role (singular), not .roles (plural)
+        user_role = getattr(current_user, "role", None)
         is_super_admin = False
-        if hasattr(current_user, 'role'):
-            is_super_admin = current_user.role == UserRole.SUPER_ADMIN
-        elif hasattr(current_user, 'roles'):
-            is_super_admin = UserRole.SUPER_ADMIN in current_user.roles
+        if user_role:
+            # Handle both Role enum (lowercase) and UserRole enum (UPPERCASE)
+            role_value = user_role.value if hasattr(user_role, "value") else str(user_role)
+            is_super_admin = role_value.upper() == UserRole.SUPER_ADMIN.value
 
         # Validate user_id
         if not user_id:
@@ -1096,7 +1106,7 @@ async def reject_request(
                 detail="User ID required for rejection actions",
             )
 
-        actor_email = getattr(current_user, 'email', 'unknown@myhibachi.com')
+        actor_email = getattr(current_user, "email", "unknown@myhibachi.com")
         actor_role = "super_admin" if is_super_admin else "admin"
 
         result = await approval_service.reject_request(
@@ -1123,11 +1133,15 @@ async def reject_request(
         )
 
         # Convert result to dict for response
-        result_data = result.model_dump() if hasattr(result, 'model_dump') else {
-            "success": result.success,
-            "message": result.message,
-            "is_complete": result.is_complete,
-        }
+        result_data = (
+            result.model_dump()
+            if hasattr(result, "model_dump")
+            else {
+                "success": result.success,
+                "message": result.message,
+                "is_complete": result.is_complete,
+            }
+        )
 
         return SuccessResponse(
             success=True,
@@ -1164,11 +1178,13 @@ async def cancel_approval_request(
         user_id = get_current_user_id(current_user)
 
         # Check if user is super admin
+        # Note: AuthenticatedUser has .role (singular), not .roles (plural)
+        user_role = getattr(current_user, "role", None)
         is_super_admin = False
-        if hasattr(current_user, 'role'):
-            is_super_admin = current_user.role == UserRole.SUPER_ADMIN
-        elif hasattr(current_user, 'roles'):
-            is_super_admin = UserRole.SUPER_ADMIN in current_user.roles
+        if user_role:
+            # Handle both Role enum (lowercase) and UserRole enum (UPPERCASE)
+            role_value = user_role.value if hasattr(user_role, "value") else str(user_role)
+            is_super_admin = role_value.upper() == UserRole.SUPER_ADMIN.value
 
         # Validate user_id
         if not user_id:
@@ -1177,7 +1193,7 @@ async def cancel_approval_request(
                 detail="User ID required for cancellation actions",
             )
 
-        actor_email = getattr(current_user, 'email', 'unknown@myhibachi.com')
+        actor_email = getattr(current_user, "email", "unknown@myhibachi.com")
         actor_role = "super_admin" if is_super_admin else "admin"
 
         result = await approval_service.cancel_request(
@@ -1203,11 +1219,15 @@ async def cancel_approval_request(
         )
 
         # Convert result to dict for response
-        result_data = result.model_dump() if hasattr(result, 'model_dump') else {
-            "success": result.success,
-            "message": result.message,
-            "is_complete": result.is_complete,
-        }
+        result_data = (
+            result.model_dump()
+            if hasattr(result, "model_dump")
+            else {
+                "success": result.success,
+                "message": result.message,
+                "is_complete": result.is_complete,
+            }
+        )
 
         return SuccessResponse(
             success=True,
@@ -1250,7 +1270,11 @@ async def check_requires_approval(
                 "category": category,
                 "key": key,
                 "requires_approval": requires,
-                "approval_info": "Requires 2 Admin approvals or 1 Super Admin" if requires else "No approval required",
+                "approval_info": (
+                    "Requires 2 Admin approvals or 1 Super Admin"
+                    if requires
+                    else "No approval required"
+                ),
             },
         }
 
