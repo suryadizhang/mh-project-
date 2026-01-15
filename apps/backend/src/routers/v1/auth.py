@@ -449,13 +449,15 @@ async def get_current_user_info(
             detail="User not found",
         )
 
-    # Determine admin status from role
+    # Determine admin status from role (handles both string and enum)
     role = current_user.get("role")
-    is_admin = (
-        role and role.value in ("super_admin", "admin", "station_manager")
-        if hasattr(role, "value")
-        else False
-    )
+    if role:
+        # Normalize role to string
+        role_str = role.value if hasattr(role, "value") else str(role)
+        role_normalized = role_str.lower().replace("_", "")
+        is_admin = role_normalized in ("superadmin", "admin", "stationmanager")
+    else:
+        is_admin = False
 
     return {
         "id": str(user.id),
