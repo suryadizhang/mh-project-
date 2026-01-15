@@ -8,6 +8,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import { tokenManager } from '@/services/api';
 
 interface ComplianceMetrics {
   consent_rate: number;
@@ -43,7 +44,7 @@ export function ComplianceWidget() {
         `${apiUrl}/api/newsletter/compliance/metrics`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+            Authorization: `Bearer ${tokenManager.getToken()}`,
           },
         }
       );

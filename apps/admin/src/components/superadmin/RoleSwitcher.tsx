@@ -4,6 +4,7 @@ import { ChevronDown, RefreshCw, Shield, User } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { apiFetch } from '@/lib/api';
+import { tokenManager } from '@/services/api';
 
 interface AvailableRole {
   role: string;
@@ -63,7 +64,7 @@ export default function RoleSwitcher() {
 
   const fetchRoleInfo = async () => {
     try {
-      const token = localStorage.getItem('admin_token');
+      const token = tokenManager.getToken();
       if (!token) return;
 
       const [rolesRes, currentRes] = await Promise.all([
@@ -92,7 +93,7 @@ export default function RoleSwitcher() {
     setError(null);
 
     try {
-      const token = localStorage.getItem('admin_token');
+      const token = tokenManager.getToken();
       if (!token) throw new Error('Not authenticated');
 
       const response = await apiFetch<{ success: boolean; message: string }>(
@@ -128,7 +129,7 @@ export default function RoleSwitcher() {
     setError(null);
 
     try {
-      const token = localStorage.getItem('admin_token');
+      const token = tokenManager.getToken();
       if (!token) throw new Error('Not authenticated');
 
       const response = await apiFetch<{ success: boolean; message: string }>(

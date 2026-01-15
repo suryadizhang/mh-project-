@@ -1,13 +1,14 @@
 'use client';
 
 import { Download, Mail, Plus, Upload, UserCheck, UserX } from 'lucide-react';
-import { useEffect, useMemo,useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Modal } from '@/components/ui/modal';
 import { StatsCard } from '@/components/ui/stats-card';
+import { tokenManager } from '@/services/api';
 
 // Newsletter subscriber statuses
 const STATUSES = ['active', 'unsubscribed', 'bounced', 'complained'] as const;
@@ -58,7 +59,7 @@ export default function NewsletterSubscribersPage() {
         `/api/newsletter/subscribers?${params.toString()}`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+            Authorization: `Bearer ${tokenManager.getToken()}`,
           },
         }
       );
@@ -146,7 +147,7 @@ export default function NewsletterSubscribersPage() {
         method,
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${tokenManager.getToken()}`,
         },
         body: JSON.stringify(formData),
       });
@@ -170,7 +171,7 @@ export default function NewsletterSubscribersPage() {
         {
           method: 'DELETE',
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+            Authorization: `Bearer ${tokenManager.getToken()}`,
           },
         }
       );
@@ -192,7 +193,7 @@ export default function NewsletterSubscribersPage() {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+            Authorization: `Bearer ${tokenManager.getToken()}`,
           },
           body: JSON.stringify({ status: 'unsubscribed' }),
         }
@@ -211,7 +212,7 @@ export default function NewsletterSubscribersPage() {
     try {
       const response = await fetch('/api/newsletter/subscribers?export=csv', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${tokenManager.getToken()}`,
         },
       });
 
@@ -245,7 +246,7 @@ export default function NewsletterSubscribersPage() {
       const response = await fetch('/api/newsletter/subscribers/import', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${tokenManager.getToken()}`,
         },
         body: formData,
       });

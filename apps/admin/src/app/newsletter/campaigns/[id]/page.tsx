@@ -14,12 +14,13 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { StatsCard } from '@/components/ui/stats-card';
+import { tokenManager } from '@/services/api';
 
 interface Campaign {
   id: number;
@@ -53,7 +54,7 @@ export default function CampaignDetailsPage() {
       setIsLoading(true);
       const response = await fetch(`/api/newsletter/campaigns/${campaignId}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${tokenManager.getToken()}`,
         },
       });
 
@@ -86,7 +87,7 @@ export default function CampaignDetailsPage() {
         {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+            Authorization: `Bearer ${tokenManager.getToken()}`,
           },
         }
       );
@@ -108,7 +109,7 @@ export default function CampaignDetailsPage() {
       const response = await fetch(`/api/newsletter/campaigns/${campaignId}`, {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${tokenManager.getToken()}`,
         },
       });
 

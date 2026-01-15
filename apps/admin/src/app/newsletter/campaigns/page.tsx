@@ -22,6 +22,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Modal } from '@/components/ui/modal';
 import { StatsCard } from '@/components/ui/stats-card';
+import { tokenManager } from '@/services/api';
 
 interface Campaign {
   id: number;
@@ -84,7 +85,7 @@ export default function NewsletterCampaignsPage() {
       setIsLoading(true);
       const response = await fetch('/api/newsletter/campaigns', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${tokenManager.getToken()}`,
         },
       });
 
@@ -160,7 +161,7 @@ export default function NewsletterCampaignsPage() {
       const response = await fetch('/api/newsletter/campaigns/ai-content', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${tokenManager.getToken()}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ prompt: aiPrompt }),
@@ -197,7 +198,7 @@ export default function NewsletterCampaignsPage() {
       const response = await fetch(url, {
         method: modalMode === 'edit' ? 'PUT' : 'POST',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${tokenManager.getToken()}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
@@ -220,7 +221,7 @@ export default function NewsletterCampaignsPage() {
       const response = await fetch(`/api/newsletter/campaigns/${campaignId}`, {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${tokenManager.getToken()}`,
         },
       });
 
@@ -247,7 +248,7 @@ export default function NewsletterCampaignsPage() {
         {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+            Authorization: `Bearer ${tokenManager.getToken()}`,
           },
         }
       );
@@ -267,7 +268,7 @@ export default function NewsletterCampaignsPage() {
       const response = await fetch('/api/newsletter/campaigns', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('admin_token')}`,
+          Authorization: `Bearer ${tokenManager.getToken()}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
