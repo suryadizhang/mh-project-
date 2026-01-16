@@ -505,18 +505,19 @@ logger.info("✅ Custom exception handlers registered (with Sentry integration)"
 #
 # For CORS to work, CORSMiddleware must be registered LAST so it can
 # intercept OPTIONS preflight requests BEFORE any other middleware
-# potentially rejects them (like security middleware).
+# potentially rejects them (like RateLimitMiddleware returning 405).
 #
-# Current order (runs first → last for incoming requests):
-# 1. CORSMiddleware (OPTIONS/CORS handling - MUST be first)
-# 2. GZipMiddleware (compression)
-# 3. RequestSizeLimiter (size validation)
-# 4. SecurityHeadersMiddleware (security headers)
-# 5. StructuredLoggingMiddleware (request logging)
-# 6. RequestIDMiddleware (request tracing)
-# 7. CachingMiddleware (Cache-Control headers)
-# 8. RateLimitMiddleware (Login brute-force protection - 5 attempts = 15-min lockout)
-# 9. General rate limiting (role-based limits via @app.middleware)
+# Current registration order (bottom = runs first for incoming requests):
+# 1. RequestIDMiddleware (registered first → runs LAST)
+# 2. StructuredLoggingMiddleware
+# 3. SecurityHeadersMiddleware
+# 4. RequestSizeLimiter
+# 5. GZipMiddleware
+# 6. CachingMiddleware
+# 7. RateLimitMiddleware
+# 8. CORSMiddleware (registered LAST → runs FIRST for OPTIONS handling)
+#
+# FIX 2025-01-30: CORS must be registered LAST to run FIRST!
 # ============================================================================
 
 # Request ID Middleware (runs last for incoming, first for outgoing)
@@ -548,8 +549,40 @@ logger.info("✅ Request size limiter registered (10 MB maximum)")
 app.add_middleware(GZipMiddleware, minimum_size=500)  # Compress responses > 500 bytes
 logger.info("✅ GZip compression middleware registered (min size: 500 bytes)")
 
+# Caching Middleware (PERFORMANCE - Cache-Control headers)
+# NOTE: Must be registered BEFORE CORS so CORS runs FIRST
+try:
+    from middleware.caching import CachingMiddleware
+
+    app.add_middleware(CachingMiddleware, enable_etag=True)
+    logger.info("✅ Caching middleware registered (Cache-Control headers + ETag)")
+except ImportError:
+    logger.warning("⚠️ Caching middleware not available")
+
+# Login Rate Limiting Middleware (SECURITY - Brute Force Protection)
+# This provides login-specific protection: 3 failed attempts = 1-hour lockout
+# NOTE: Must be registered BEFORE CORS so CORS runs FIRST
+try:
+    from middleware.rate_limit import RateLimitMiddleware
+
+    app.add_middleware(RateLimitMiddleware, redis_url=settings.redis_url)
+    logger.info("✅ Login rate limit middleware registered (3 attempts, 1-hour lockout)")
+except ImportError as e:
+    logger.warning(f"⚠️ Login rate limit middleware not available: {e}")
+except Exception as e:
+    logger.error(f"❌ Failed to register login rate limit middleware: {e}")
+
 # CORS Middleware (MUST BE REGISTERED LAST to run FIRST!)
-# This ensures OPTIONS preflight requests are handled before other middleware
+# ============================================================================
+# CRITICAL: In Starlette/FastAPI, middleware runs in REVERSE order:
+# - LAST registered = runs FIRST for incoming requests
+# - CORS must intercept OPTIONS preflight BEFORE any other middleware
+#   (like RateLimitMiddleware) can reject the request with 405/401
+#
+# FIX APPLIED 2025-01-30: Moved CORS to be registered LAST to fix:
+# - OPTIONS returning 405 instead of 200/204 with CORS headers
+# - Missing Access-Control-Allow-Origin on error responses
+# ============================================================================
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
@@ -564,28 +597,9 @@ app.add_middleware(
     ],  # Explicit OPTIONS
     allow_headers=["*"],
 )
-logger.info(f"✅ CORS middleware registered for origins: {settings.cors_origins_list}")
-
-# Caching Middleware (PERFORMANCE - Cache-Control headers)
-try:
-    from middleware.caching import CachingMiddleware
-
-    app.add_middleware(CachingMiddleware, enable_etag=True)
-    logger.info("✅ Caching middleware registered (Cache-Control headers + ETag)")
-except ImportError:
-    logger.warning("⚠️ Caching middleware not available")
-
-# Login Rate Limiting Middleware (SECURITY - Brute Force Protection)
-# This provides login-specific protection: 3 failed attempts = 1-hour lockout
-try:
-    from middleware.rate_limit import RateLimitMiddleware
-
-    app.add_middleware(RateLimitMiddleware, redis_url=settings.redis_url)
-    logger.info("✅ Login rate limit middleware registered (3 attempts, 1-hour lockout)")
-except ImportError as e:
-    logger.warning(f"⚠️ Login rate limit middleware not available: {e}")
-except Exception as e:
-    logger.error(f"❌ Failed to register login rate limit middleware: {e}")
+logger.info(
+    f"✅ CORS middleware registered LAST (runs FIRST) for origins: {settings.cors_origins_list}"
+)
 
 
 # OLD General Rate Limiting Middleware - DISABLED
