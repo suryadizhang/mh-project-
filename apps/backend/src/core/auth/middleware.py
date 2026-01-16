@@ -18,6 +18,7 @@ from core.auth.models import (  # Phase 2C: Updated from api.app.auth.models
     UserSession,
     UserStatus,
 )
+from db.models.identity.users import User  # Required for get_current_user query
 from core.config import get_settings  # Added for jwt_secret_key access
 from core.database import get_db_session  # Phase 2C: Updated from api.app.database
 from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
