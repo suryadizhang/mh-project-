@@ -350,7 +350,8 @@ class AuthenticationService:
                 return None
 
             # Check if user is active
-            if user.status != UserStatus.ACTIVE.value:
+            # NOTE: User.status is a PostgreSQL ENUM type, so compare directly to enum, not .value
+            if user.status != UserStatus.ACTIVE:
                 return None
 
             return user
