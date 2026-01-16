@@ -10,16 +10,17 @@ from typing import Any
 from uuid import UUID
 
 from db.models.identity import StationUser  # Junction table for station-user relationships
-from core.auth.models import UserSession  # Phase 2C: Updated from api.app.auth.models
+from db.models.identity.users import User  # User model for auth checks
+from core.auth.models import UserSession, UserStatus  # Phase 2C: Updated from api.app.auth.models
 from core.auth.station_auth import (  # Phase 2C: Updated from api.app.auth.station_auth
     StationAuthenticationService,
     StationContext,
 )
+
 # Import enums from canonical identity models (migrated from deprecated station_models)
 from db.models.identity import (
     StationPermission,
     StationRole,
-    StationStatus,
 )
 from core.database import get_db_session  # Phase 2C: Updated from api.app.database
 from utils.encryption import FieldEncryption  # Phase 2C: Updated from api.app.utils.encryption
@@ -38,7 +39,11 @@ class AuthenticatedUser:
     """Enhanced user object with station context."""
 
     def __init__(
-        self, user: StationUser, session: UserSession, station_context: StationContext, request: Request
+        self,
+        user: StationUser,
+        session: UserSession,
+        station_context: StationContext,
+        request: Request,
     ):
         self.user = user
         self.session = session
@@ -128,7 +133,7 @@ async def get_current_station_user(
         user_result = await db.execute(user_stmt)
         user = user_result.scalar_one_or_none()
 
-        if not user or user.status != "active":
+        if not user or user.status != UserStatus.ACTIVE:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="User account not found or inactive",
