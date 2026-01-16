@@ -179,6 +179,9 @@ async def get_current_user(
         )
 
     # Get user and session from database
+    # NOTE: User.status uses PostgreSQL ENUM type via LowercaseEnumType,
+    # so we compare to the enum directly (not .value) to let SQLAlchemy handle conversion.
+    # UserSession.status is a VARCHAR column, so .value is correct there.
     stmt = (
         select(User, UserSession)
         .join(UserSession, User.id == UserSession.user_id)
@@ -186,7 +189,7 @@ async def get_current_user(
             and_(
                 User.id == user_id,
                 UserSession.id == session_id,
-                User.status == UserStatus.ACTIVE.value,
+                User.status == UserStatus.ACTIVE,  # Compare to enum, not .value
                 UserSession.status == SessionStatus.ACTIVE.value,
                 UserSession.expires_at > datetime.now(timezone.utc),
             )
