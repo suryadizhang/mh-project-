@@ -32,6 +32,7 @@ interface AvailableRolesResponse {
  * to test and experience the UI as that role would see it.
  *
  * DEV MODE ONLY - Backend validates this.
+ * Only makes API calls when NEXT_PUBLIC_DEV_MODE is enabled.
  */
 export default function RoleSwitcher() {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,6 +42,9 @@ export default function RoleSwitcher() {
     useState<CurrentRoleResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Check if dev mode is enabled (skip API calls in production)
+  const isDevModeEnabled = process.env.NEXT_PUBLIC_DEV_MODE === 'true';
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -57,10 +61,17 @@ export default function RoleSwitcher() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Fetch available roles and current role status on mount
+  // Fetch available roles and current role status on mount (only in dev mode)
   useEffect(() => {
-    fetchRoleInfo();
-  }, []);
+    if (isDevModeEnabled) {
+      fetchRoleInfo();
+    }
+  }, [isDevModeEnabled]);
+
+  // Don't render anything if dev mode is disabled
+  if (!isDevModeEnabled) {
+    return null;
+  }
 
   const fetchRoleInfo = async () => {
     try {
