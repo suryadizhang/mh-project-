@@ -77,13 +77,17 @@ jobs:
   # ===========================================
   # Job 2: Deploy to VPS
   # ===========================================
+  # DISABLED: VPS auto-deploy disabled - causes failures due to missing CF secrets
+  # Manual deployment via SSH is preferred. Re-enable when secrets are configured.
+  # To re-enable: change `if: false` to the original condition below
   deploy:
     name: Deploy to VPS
     runs-on: ubuntu-latest
     needs: test # Only deploy if tests pass
 
-    # Only deploy from main branch or manual trigger
-    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    # DISABLED: Causes CI/CD failures due to missing Cloudflare Access secrets
+    # Original condition: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    if: false
 
     steps:
       - name: Checkout code

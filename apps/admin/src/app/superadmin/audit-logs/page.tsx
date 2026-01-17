@@ -78,9 +78,38 @@ export default function AuditLogsPage() {
   const [actionCategory, setActionCategory] = useState<string>('');
   const [actionType, setActionType] = useState<string>('');
   const [severity, setSeverity] = useState<string>('');
+  const [userRole, setUserRole] = useState<string>('');
   const [dateFrom, setDateFrom] = useState<string>('');
   const [dateTo, setDateTo] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
+
+  // 5-Tier RBAC roles for filtering
+  const USER_ROLES = [
+    { value: 'SUPER_ADMIN', label: 'Super Admin', icon: '👑' },
+    { value: 'ADMIN', label: 'Admin', icon: '🔧' },
+    { value: 'CUSTOMER_SUPPORT', label: 'Customer Support', icon: '🎧' },
+    { value: 'STATION_MANAGER', label: 'Station Manager', icon: '📍' },
+    { value: 'CHEF', label: 'Chef', icon: '👨‍🍳' },
+  ];
+
+  // Category tabs for quick navigation
+  const CATEGORY_TABS = [
+    { value: '', label: 'All Events', icon: '📋', color: 'gray' },
+    {
+      value: 'authentication',
+      label: 'Authentication',
+      icon: '🔐',
+      color: 'blue',
+    },
+    {
+      value: 'data_modification',
+      label: 'Data Changes',
+      icon: '📝',
+      color: 'green',
+    },
+    { value: 'security', label: 'Security', icon: '🛡️', color: 'red' },
+    { value: 'system', label: 'System', icon: '⚙️', color: 'purple' },
+  ];
 
   // Pagination
   const [page, setPage] = useState(1);
@@ -95,7 +124,7 @@ export default function AuditLogsPage() {
 
   useEffect(() => {
     fetchLogs();
-  }, [page, actionCategory, actionType, severity, dateFrom, dateTo]);
+  }, [page, actionCategory, actionType, severity, userRole, dateFrom, dateTo]);
 
   const fetchStats = async () => {
     setStatsLoading(true);
@@ -156,6 +185,7 @@ export default function AuditLogsPage() {
       if (actionCategory) params.append('action_category', actionCategory);
       if (actionType) params.append('action_type', actionType);
       if (severity) params.append('severity', severity);
+      if (userRole) params.append('user_role', userRole);
       if (dateFrom) params.append('date_from', dateFrom);
       if (dateTo) params.append('date_to', dateTo);
 
@@ -201,6 +231,7 @@ export default function AuditLogsPage() {
     setActionCategory('');
     setActionType('');
     setSeverity('');
+    setUserRole('');
     setDateFrom('');
     setDateTo('');
     setPage(1);
@@ -218,6 +249,7 @@ export default function AuditLogsPage() {
       if (actionCategory) params.append('action_category', actionCategory);
       if (actionType) params.append('action_type', actionType);
       if (severity) params.append('severity', severity);
+      if (userRole) params.append('user_role', userRole);
       if (dateFrom) params.append('date_from', dateFrom);
       if (dateTo) params.append('date_to', dateTo);
 
@@ -409,6 +441,42 @@ export default function AuditLogsPage() {
         </div>
       ) : null}
 
+      {/* Category Sub-Navigation Tabs */}
+      <div className="flex flex-wrap gap-2 bg-white rounded-lg p-2 shadow-sm border">
+        {CATEGORY_TABS.map(tab => (
+          <button
+            key={tab.value}
+            onClick={() => {
+              setActionCategory(tab.value);
+              setPage(1);
+            }}
+            className={`
+              px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200
+              flex items-center gap-2
+              ${
+                actionCategory === tab.value
+                  ? tab.color === 'blue'
+                    ? 'bg-blue-100 text-blue-800 ring-2 ring-blue-500'
+                    : tab.color === 'green'
+                      ? 'bg-green-100 text-green-800 ring-2 ring-green-500'
+                      : tab.color === 'red'
+                        ? 'bg-red-100 text-red-800 ring-2 ring-red-500'
+                        : tab.color === 'purple'
+                          ? 'bg-purple-100 text-purple-800 ring-2 ring-purple-500'
+                          : 'bg-gray-100 text-gray-800 ring-2 ring-gray-500'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              }
+            `}
+          >
+            <span>{tab.icon}</span>
+            <span>{tab.label}</span>
+            {actionCategory === tab.value && (
+              <span className="ml-1 text-xs opacity-75">●</span>
+            )}
+          </button>
+        ))}
+      </div>
+
       {/* Filters Card */}
       <Card>
         <CardHeader className="pb-4">
@@ -449,7 +517,7 @@ export default function AuditLogsPage() {
 
           {/* Advanced Filters */}
           {showFilters && (
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 pt-4 border-t">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 pt-4 border-t">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Category
@@ -510,6 +578,26 @@ export default function AuditLogsPage() {
                   {filterOptions?.severities.map(sev => (
                     <option key={sev} value={sev}>
                       {sev.charAt(0).toUpperCase() + sev.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  User Role
+                </label>
+                <select
+                  value={userRole}
+                  onChange={e => {
+                    setUserRole(e.target.value);
+                    setPage(1);
+                  }}
+                  className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500"
+                >
+                  <option value="">All Roles</option>
+                  {USER_ROLES.map(role => (
+                    <option key={role.value} value={role.value}>
+                      {role.icon} {role.label}
                     </option>
                   ))}
                 </select>
@@ -600,9 +688,40 @@ export default function AuditLogsPage() {
               <h3 className="text-lg font-medium text-gray-900">
                 No audit logs found
               </h3>
-              <p className="text-gray-500">
-                Try adjusting your filters or search query
+              <p className="text-gray-500 mb-4">
+                {searchQuery ||
+                actionCategory ||
+                actionType ||
+                severity ||
+                userRole ||
+                dateFrom ||
+                dateTo
+                  ? 'Try adjusting your filters or search query'
+                  : 'Audit logs will appear here as users perform actions in the system'}
               </p>
+              {(searchQuery ||
+                actionCategory ||
+                actionType ||
+                severity ||
+                userRole ||
+                dateFrom ||
+                dateTo) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setActionCategory('');
+                    setActionType('');
+                    setSeverity('');
+                    setUserRole('');
+                    setDateFrom('');
+                    setDateTo('');
+                  }}
+                >
+                  Clear All Filters
+                </Button>
+              )}
             </div>
           ) : (
             <div className="overflow-x-auto">

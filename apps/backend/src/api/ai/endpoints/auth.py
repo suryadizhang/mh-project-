@@ -9,6 +9,7 @@ from typing import Any
 from fastapi import Header, HTTPException, status
 import jwt
 from pydantic import BaseModel
+from core.security.roles import role_matches
 
 logger = logging.getLogger(__name__)
 
@@ -111,15 +112,15 @@ def has_agent_access(context: StationContext | None, agent: str) -> bool:
         return agent == "customer"
 
     # Super admin and admin can access all agents
-    if context.role in ["super_admin", "admin"]:
+    if role_matches(context.role, "super_admin", "admin"):
         return True
 
     # Station admin can access customer, staff, and support agents
-    if context.role == "station_admin":
+    if role_matches(context.role, "station_admin"):
         return agent in ["customer", "staff", "support"]
 
     # Customer support can access customer and support agents
-    if context.role == "customer_support":
+    if role_matches(context.role, "customer_support"):
         return agent in ["customer", "support"]
 
     # Default: only customer agent
