@@ -24,8 +24,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
-from core.auth import require_roles
-from core.config import UserRole
+from core.security.dependencies import require_super_admin
 
 logger = logging.getLogger(__name__)
 
@@ -292,6 +291,10 @@ async def get_audit_logs(
     ),
     user_id: Optional[str] = Query(None, description="Filter by user ID"),
     user_email: Optional[str] = Query(None, description="Filter by user email (partial match)"),
+    user_role: Optional[str] = Query(
+        None,
+        description="Filter by user role (SUPER_ADMIN, ADMIN, CUSTOMER_SUPPORT, STATION_MANAGER, CHEF)",
+    ),
     station_id: Optional[str] = Query(None, description="Filter by station ID"),
     # Accept both 'start_date' and 'date_from' from frontend
     start_date: Optional[datetime] = Query(None, description="Filter by start date (ISO format)"),
@@ -316,7 +319,7 @@ async def get_audit_logs(
         None, ge=1, le=200, description="Alias for limit (frontend compatibility)"
     ),
     db: AsyncSession = Depends(get_db),
-    current_user: Any = Depends(require_roles([UserRole.SUPER_ADMIN])),
+    current_user: dict = Depends(require_super_admin),
 ):
     """
     Get comprehensive audit logs for super admin.
@@ -378,6 +381,10 @@ async def get_audit_logs(
         if user_email:
             conditions.append("LOWER(user_email) LIKE :user_email")
             params["user_email"] = f"%{user_email.lower()}%"
+
+        if user_role:
+            conditions.append("user_role = :user_role")
+            params["user_role"] = user_role.upper()
 
         if station_id:
             conditions.append("station_id = :station_id")
@@ -657,7 +664,7 @@ async def get_audit_logs(
 async def get_audit_stats(
     days: int = Query(7, ge=1, le=30, description="Number of days for stats"),
     db: AsyncSession = Depends(get_db),
-    current_user: Any = Depends(require_roles([UserRole.SUPER_ADMIN])),
+    current_user: dict = Depends(require_super_admin),
 ):
     """
     Get audit log statistics for dashboard.
@@ -755,11 +762,14 @@ async def get_audit_stats(
         unique_users_result = await db.execute(unique_users_query, {"week_start": week_start})
         unique_users = unique_users_result.scalar() or 0
 
-        # Failed actions count (success = false)
+        # Failed actions count
+        # Note: The audit_logs table doesn't have a 'success' column
+        # We can infer failed actions from action names containing 'FAILED' or 'ERROR'
         failed_query = text(
             """
             SELECT COUNT(*) FROM audit_logs
-            WHERE created_at >= :week_start AND success = false
+            WHERE created_at >= :week_start
+            AND (action ILIKE '%FAILED%' OR action ILIKE '%ERROR%' OR action ILIKE '%DENIED%')
         """
         )
         failed_result = await db.execute(failed_query, {"week_start": week_start})
@@ -828,7 +838,7 @@ async def get_audit_stats(
 @router.get("/actions", response_model=ActionTypesResponse, response_model_by_alias=True)
 async def get_action_types(
     db: AsyncSession = Depends(get_db),
-    current_user: Any = Depends(require_roles([UserRole.SUPER_ADMIN])),
+    current_user: dict = Depends(require_super_admin),
 ):
     """
     Get list of available action types and resource types for filtering.

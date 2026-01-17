@@ -572,6 +572,18 @@ except ImportError as e:
 except Exception as e:
     logger.error(f"❌ Failed to register login rate limit middleware: {e}")
 
+# Audit Logging Middleware (SECURITY - Log all admin actions)
+# Must be registered BEFORE CORS so it runs AFTER request processing
+try:
+    from middleware.audit_middleware import AuditMiddleware
+
+    app.add_middleware(AuditMiddleware)
+    logger.info("✅ Audit middleware registered - logging all admin POST/PUT/PATCH/DELETE actions")
+except ImportError as e:
+    logger.warning(f"⚠️ Audit middleware not available: {e}")
+except Exception as e:
+    logger.error(f"❌ Failed to register audit middleware: {e}")
+
 # CORS Middleware (MUST BE REGISTERED LAST to run FIRST!)
 # ============================================================================
 # CRITICAL: In Starlette/FastAPI, middleware runs in REVERSE order:
