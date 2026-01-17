@@ -16,6 +16,7 @@ from api.ai.endpoints.auth import (
     has_agent_access,
 )
 from api.ai.endpoints.database import get_db
+from core.security.roles import role_matches
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
@@ -29,30 +30,35 @@ router = APIRouter(prefix="/v1", tags=["v1-unified-chat"])
 def get_agent_gateway():
     """Lazy load agent gateway service (AI models)"""
     from api.ai.endpoints.services.agent_gateway import StationAwareAgentGatewayService
+
     return StationAwareAgentGatewayService()
 
 
 def get_monitoring_service():
     """Lazy load monitoring service"""
     from api.ai.endpoints.services.monitoring import MonitoringService
+
     return MonitoringService()
 
 
 def get_prompt_registry():
     """Lazy load prompt registry service"""
     from api.ai.endpoints.services.prompt_registry import PromptRegistryService
+
     return PromptRegistryService()
 
 
 def get_tool_registry():
     """Lazy load tool registry service"""
     from api.ai.endpoints.services.tool_registry import ToolRegistryService
+
     return ToolRegistryService()
 
 
 def get_model_ladder():
     """Lazy load model ladder service"""
     from api.ai.endpoints.services.model_ladder import ModelLadderService
+
     return ModelLadderService()
 
 
@@ -191,11 +197,11 @@ def detect_agent_from_request(
 
     # Station role-based defaults
     if station_context:
-        if station_context.role in ["super_admin", "admin"]:
+        if role_matches(station_context.role, "super_admin", "admin"):
             return "admin"
-        elif station_context.role == "station_admin":
+        elif role_matches(station_context.role, "station_admin"):
             return "staff"
-        elif station_context.role == "customer_support":
+        elif role_matches(station_context.role, "customer_support"):
             return "support"
 
     # Default to customer agent (always available)
@@ -208,8 +214,8 @@ async def unified_chat(
     agent: str = Depends(detect_agent_from_request),
     station_context: StationContext | None = Depends(get_station_context_optional),
     db: Session = Depends(get_db),
-    gateway = Depends(get_agent_gateway),
-    monitoring = Depends(get_monitoring_service),
+    gateway=Depends(get_agent_gateway),
+    monitoring=Depends(get_monitoring_service),
 ) -> UnifiedChatResponse:
     """
     Unified chat endpoint with agent-aware routing and station-scoped permissions.
@@ -237,7 +243,7 @@ async def unified_chat(
 
     try:
         # Services injected via dependencies (lazy loaded on first call)
-        
+
         # Log request
         await monitoring.log_request(
             message_id=message_id,
@@ -327,7 +333,7 @@ async def unified_chat_stream(
     agent: str = Depends(detect_agent_from_request),
     station_context: StationContext | None = Depends(get_station_context_optional),
     db: Session = Depends(get_db),
-    gateway = Depends(get_agent_gateway),
+    gateway=Depends(get_agent_gateway),
 ):
     """
     Streaming version of unified chat endpoint.
@@ -401,7 +407,7 @@ async def unified_chat_stream(
 
 
 @router.get("/agents")
-async def list_agents(gateway = Depends(get_agent_gateway)):
+async def list_agents(gateway=Depends(get_agent_gateway)):
     """
     List available agents and their capabilities.
 
@@ -423,7 +429,7 @@ async def list_agents(gateway = Depends(get_agent_gateway)):
 
 
 @router.get("/agents/{agent_name}")
-async def get_agent_info(agent_name: str, gateway = Depends(get_agent_gateway)):
+async def get_agent_info(agent_name: str, gateway=Depends(get_agent_gateway)):
     """
     Get detailed information about a specific agent.
 
@@ -452,10 +458,10 @@ async def get_agent_info(agent_name: str, gateway = Depends(get_agent_gateway)):
 
 @router.get("/health")
 async def unified_api_health(
-    gateway = Depends(get_agent_gateway),
-    prompt_registry = Depends(get_prompt_registry),
-    tool_registry = Depends(get_tool_registry),
-    model_ladder = Depends(get_model_ladder)
+    gateway=Depends(get_agent_gateway),
+    prompt_registry=Depends(get_prompt_registry),
+    tool_registry=Depends(get_tool_registry),
+    model_ladder=Depends(get_model_ladder),
 ):
     """
     Health check for unified API system.

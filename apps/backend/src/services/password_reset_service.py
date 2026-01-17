@@ -150,6 +150,84 @@ class PasswordResetService:
             logger.exception(f"❌ Error in password reset request: {e}")
             return True  # Always return True for security
 
+    async def request_invite(self, email: str, invited_by: str = "Admin") -> bool:
+        """
+        Send admin invitation email with one-time password setup link.
+
+        Similar to request_reset() but with invitation-specific messaging.
+        Used when super admin creates a new user without setting a password.
+
+        Args:
+            email: New admin's email address
+            invited_by: Name of the admin who sent the invitation
+
+        Returns:
+            True (always, for security - don't reveal if email exists)
+        """
+        try:
+            email_lower = email.lower().strip()
+            logger.info(f"📧 Processing admin invitation for: {email_lower[:3]}***")
+
+            # Find user (should exist - created by super admin)
+            result = await self.db.execute(
+                text("SELECT id, full_name, email FROM identity.users WHERE email = :email"),
+                {"email": email_lower},
+            )
+            user = result.fetchone()
+
+            if not user:
+                logger.warning(
+                    f"⚠️ Invitation requested for non-existent user: {email_lower[:3]}***"
+                )
+                return True  # Don't reveal if user exists
+
+            # Check rate limiting
+            if await self._is_rate_limited(email_lower):
+                logger.warning(f"⚠️ Rate limit exceeded for invitation: {email_lower[:3]}***")
+                return True
+
+            # Generate secure token (256 bits of entropy)
+            raw_token = secrets.token_urlsafe(32)
+            token_hash = self._hash_token(raw_token)
+            expires_at = datetime.utcnow() + timedelta(minutes=self.token_expiry_minutes)
+
+            # Store token hash (never the raw token)
+            await self.db.execute(
+                text(
+                    """
+                    INSERT INTO identity.password_reset_tokens (user_id, token_hash, expires_at)
+                    VALUES (:user_id, :token_hash, :expires_at)
+                """
+                ),
+                {
+                    "user_id": str(user.id),
+                    "token_hash": token_hash,
+                    "expires_at": expires_at,
+                },
+            )
+            await self.db.commit()
+
+            # Send invitation email
+            setup_url = f"{self.frontend_url}/reset-password?token={raw_token}"
+            email_sent = await self._send_invite_email(
+                to_email=email_lower,
+                user_name=user.full_name or user.email,
+                setup_url=setup_url,
+                expires_in_minutes=self.token_expiry_minutes,
+                invited_by=invited_by,
+            )
+
+            if email_sent:
+                logger.info(f"✅ Admin invitation email sent to {email_lower[:3]}***")
+            else:
+                logger.error(f"❌ Failed to send admin invitation email to {email_lower[:3]}***")
+
+            return True
+
+        except Exception as e:
+            logger.exception(f"❌ Error in admin invitation: {e}")
+            return True  # Always return True for security
+
     async def reset_password(self, token: str, new_password: str) -> tuple[bool, str]:
         """
         Verify reset token and update password.
@@ -398,6 +476,121 @@ For security, all your active sessions will be logged out after you reset your p
 
         except Exception as e:
             logger.exception(f"❌ Failed to send reset email: {e}")
+            return False
+
+    async def _send_invite_email(
+        self,
+        to_email: str,
+        user_name: str,
+        setup_url: str,
+        expires_in_minutes: int,
+        invited_by: str,
+    ) -> bool:
+        """
+        Send admin invitation email with one-time password setup link.
+
+        Args:
+            to_email: Recipient email address
+            user_name: User's display name
+            setup_url: One-time password setup URL
+            expires_in_minutes: Link expiration time
+            invited_by: Name of the admin who sent the invitation
+
+        Returns:
+            True if email sent successfully
+        """
+        from services.email_service import EmailService
+
+        try:
+            email_service = EmailService()
+
+            subject = "You've Been Invited to My Hibachi Admin"
+
+            html_body = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
+            <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
+                <div style="background-color: white; padding: 40px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <h1 style="color: #1a1a1a; margin: 0; font-size: 28px;">🎉 Welcome to My Hibachi Chef!</h1>
+                    </div>
+
+                    <p style="font-size: 16px; color: #333; line-height: 1.6;">
+                        Hello <strong>{user_name}</strong>,
+                    </p>
+
+                    <p style="font-size: 16px; color: #333; line-height: 1.6;">
+                        <strong>{invited_by}</strong> has invited you to join the My Hibachi Admin team!
+                    </p>
+
+                    <p style="font-size: 16px; color: #333; line-height: 1.6;">
+                        Click the button below to set up your password and access the admin dashboard:
+                    </p>
+
+                    <div style="text-align: center; margin: 35px 0;">
+                        <a href="{setup_url}"
+                           style="display: inline-block; background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);">
+                            Set Up Your Password
+                        </a>
+                    </div>
+
+                    <div style="background-color: #fff3e0; border-left: 4px solid #ff9800; padding: 15px 20px; margin: 25px 0; border-radius: 0 8px 8px 0;">
+                        <p style="margin: 0; color: #e65100; font-size: 14px;">
+                            <strong>⏰ Important:</strong> This link will expire in <strong>{expires_in_minutes} minutes</strong>.
+                        </p>
+                    </div>
+
+                    <p style="font-size: 14px; color: #666; line-height: 1.6;">
+                        If the button doesn't work, copy and paste this URL into your browser:
+                    </p>
+                    <p style="font-size: 12px; color: #888; word-break: break-all; background: #f8f9fa; padding: 12px; border-radius: 6px;">
+                        {setup_url}
+                    </p>
+
+                    <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+
+                    <p style="font-size: 12px; color: #999; text-align: center; margin: 0;">
+                        If you didn't expect this invitation, please contact the My Hibachi team.<br>
+                        This is an automated message from My Hibachi Chef.
+                    </p>
+                </div>
+            </body>
+            </html>
+            """
+
+            text_body = f"""
+Welcome to My Hibachi Chef!
+
+Hello {user_name},
+
+{invited_by} has invited you to join the My Hibachi Admin team!
+
+Click the link below to set up your password and access the admin dashboard:
+
+{setup_url}
+
+IMPORTANT: This link will expire in {expires_in_minutes} minutes.
+
+If you didn't expect this invitation, please contact the My Hibachi team.
+
+---
+This is an automated message from My Hibachi Chef.
+            """
+
+            return email_service._send_email(
+                to_email=to_email,
+                subject=subject,
+                html_body=html_body,
+                text_body=text_body,
+                tags=["admin-invite", "onboarding"],
+            )
+
+        except Exception as e:
+            logger.exception(f"❌ Failed to send invite email: {e}")
             return False
 
 
