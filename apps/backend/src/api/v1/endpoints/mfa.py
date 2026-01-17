@@ -21,6 +21,7 @@ from typing import Optional
 import bcrypt
 from core.config import get_settings
 from core.security import create_access_token
+from core.security.roles import role_matches
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import text
@@ -843,7 +844,7 @@ async def reset_user_pin(
     """
     # Check if current user is SUPER_ADMIN
     caller_role = current_user.get("role")
-    if caller_role != "super_admin":
+    if not role_matches(caller_role, "super_admin", "SUPER_ADMIN"):
         raise HTTPException(status_code=403, detail="Only SUPER_ADMIN can reset user PINs")
 
     # Reset the target user's PIN

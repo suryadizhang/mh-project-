@@ -538,12 +538,14 @@ class EmailService:
         # SMTP Configuration (IONOS) - from GSM settings
         self.smtp_host = getattr(settings, "SMTP_HOST", "smtp.ionos.com")
         self.smtp_port = int(getattr(settings, "SMTP_PORT", 465))
-        self.smtp_from_email = getattr(settings, "SMTP_USER", "cs@myhibachichef.com")
+        self.smtp_from_email = getattr(settings, "SMTP_USER", "internal@myhibachichef.com")
         self.smtp_password = getattr(settings, "SMTP_PASSWORD", "")
 
         # Resend Configuration (fallback)
         self.resend_api_key = getattr(settings, "RESEND_API_KEY", None)
-        self.resend_from_email = getattr(settings, "RESEND_FROM_EMAIL", "cs@myhibachichef.com")
+        self.resend_from_email = getattr(
+            settings, "RESEND_FROM_EMAIL", "internal@myhibachichef.com"
+        )
 
         # Determine active from_email based on provider
         if self.provider == "resend":

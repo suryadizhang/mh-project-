@@ -25,6 +25,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
 from core.database import get_db
+from core.security.roles import role_matches
 from db.models.core import Booking, BookingStatus, Customer
 from services.encryption_service import SecureDataHandler
 from api.ai.endpoints.services.pricing_service import get_pricing_service
@@ -91,7 +92,7 @@ async def list_bookings(
 
     # Apply station filtering based on user role
     user_role = current_user.get("role", "")
-    if user_role == "STATION_MANAGER":
+    if role_matches(user_role, "STATION_MANAGER", "station_manager"):
         station_ids = current_user.get("station_ids", [])
         if station_ids:
             query = query.where(Booking.station_id.in_([UUID(sid) for sid in station_ids]))

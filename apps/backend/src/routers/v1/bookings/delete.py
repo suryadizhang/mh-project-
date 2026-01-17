@@ -24,6 +24,7 @@ from sqlalchemy.orm import joinedload
 
 from core.audit_logger import audit_logger
 from core.database import get_db
+from core.security.roles import role_matches
 from services.encryption_service import SecureDataHandler
 from db.models.core import Booking, BookingStatus
 from utils.auth import can_access_station, require_customer_support
@@ -105,7 +106,7 @@ async def delete_booking(
         )
 
     # Multi-tenant authorization check
-    if user_role == "STATION_MANAGER":
+    if role_matches(user_role, "STATION_MANAGER", "station_manager"):
         station_ids = current_user.get("station_ids", [])
         booking_station_id = str(booking.station_id) if booking.station_id else None
 

@@ -6,6 +6,7 @@ Provides station-aware authentication endpoints for the admin interface.
 from typing import Any
 from uuid import UUID
 
+from core.security.roles import role_matches
 from core.auth.middleware import get_current_user, get_db_session
 from core.auth.models import AuthenticationService
 from core.security import verify_password
@@ -263,7 +264,7 @@ async def station_login(
         # Determine if this is a global role (super_admin, admin, customer_support)
         # Global roles don't need station context in UI header
         user_role = station_context.highest_role.value
-        is_global_role = user_role in ["super_admin", "admin", "customer_support"]
+        is_global_role = role_matches(user_role, "super_admin", "admin", "customer_support")
 
         # Count accessible stations for multi-station dropdown logic
         station_count = len(station_context.accessible_station_ids)
@@ -447,7 +448,7 @@ async def switch_station(
 
         # Determine if this is a global role
         user_role = station_context.highest_role.value
-        is_global_role = user_role in ["super_admin", "admin", "customer_support"]
+        is_global_role = role_matches(user_role, "super_admin", "admin", "customer_support")
 
         # Build new station context with enhanced data
         station_info = {
