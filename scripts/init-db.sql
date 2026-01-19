@@ -2,7 +2,8 @@
 CREATE DATABASE IF NOT EXISTS myhibachi_db;
 
 -- Create application user if not exists
-CREATE USER IF NOT EXISTS 'myhibachi_user'@'%' IDENTIFIED BY 'REDACTED_DB_PASSWORD';
+-- NOTE: Replace SECURE_PASSWORD_HERE with actual password (never commit real passwords!)
+CREATE USER IF NOT EXISTS 'myhibachi_user'@'%' IDENTIFIED BY 'SECURE_PASSWORD_HERE';
 GRANT ALL PRIVILEGES ON myhibachi_db.* TO 'myhibachi_user'@'%';
 
 -- Basic tables for development

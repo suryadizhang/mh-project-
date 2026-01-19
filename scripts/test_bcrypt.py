@@ -1,21 +1,28 @@
 #!/usr/bin/env python3
 """
 Direct bcrypt password test - no database needed.
-Run with: python3 test_bcrypt.py
+Run with: python3 test_bcrypt.py <password> <hash>
 """
+import os
+import sys
+
 import bcrypt
 
-# Password to test
-test_password = "REDACTED_PASSWORD"
+# Get password from command line or environment
+test_password = os.getenv("TEST_PASSWORD") or (
+    sys.argv[1] if len(sys.argv) > 1 else None
+)
 
-# Hash from database
-stored_hash = "REDACTED_HASH"
+# Hash from command line argument or environment
+stored_hash = os.getenv("TEST_HASH") or (
+    sys.argv[2] if len(sys.argv) > 2 else None
+)
 
-if stored_hash == "HASH_PLACEHOLDER":
-    print("ERROR: Update stored_hash with the actual hash from database!")
-    print(
-        "Run: sudo -u postgres psql -d myhibachi_production -t -c \"SELECT password_hash FROM identity.users WHERE email='suryadizhang.swe@gmail.com';\""
-    )
+if not test_password or not stored_hash:
+    print("ERROR: Missing password or hash!")
+    print("Usage: python3 test_bcrypt.py <password> <hash>")
+    print("   OR: TEST_PASSWORD=xxx TEST_HASH=yyy python3 test_bcrypt.py")
+    sys.exit(1)
     exit(1)
 
 print(f"Testing password: {test_password}")
