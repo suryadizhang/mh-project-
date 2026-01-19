@@ -3,7 +3,8 @@
  * All backend communication should go through this module
  */
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8003';
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8003';
 
 // Type definitions
 export interface ApiResponse<T = Record<string, unknown>> {
@@ -156,6 +157,150 @@ export const api = {
     path: string,
     options?: ApiRequestOptions
   ) => apiFetch<T>(path, { ...options, method: 'DELETE' }),
+};
+
+/**
+ * Chef types and API
+ */
+export interface Chef {
+  id: string;
+  name: string;
+  phone?: string;
+  email?: string;
+  is_active: boolean;
+  is_lead_chef: boolean;
+  hire_date?: string;
+  avatar_url?: string;
+  color?: string;
+}
+
+export interface StationChefListResponse {
+  success: boolean;
+  chefs: Chef[];
+  total: number;
+  message?: string;
+}
+
+/**
+ * Chef-related API calls
+ */
+export const chefService = {
+  /**
+   * Get all chefs for the current user's station
+   * Endpoint: GET /api/v1/chef-portal/station/chefs
+   */
+  getStationChefs: async () =>
+    api.get<StationChefListResponse>('/api/v1/chef-portal/station/chefs'),
+};
+
+/**
+ * Booking types and API
+ */
+export interface Booking {
+  id: string;
+  booking_id?: number;
+  date: string;
+  time?: string;
+  slot?: string;
+  status: string;
+  customer_name?: string;
+  customer_email?: string;
+  customer_phone?: string;
+  party_adults?: number;
+  party_kids?: number;
+  guests?: number;
+  total_due_cents?: number;
+  chef_id?: string | null;
+  chef_name?: string | null;
+  station_id?: string;
+  address_encrypted?: string;
+  location_address?: string;
+  special_requests?: string;
+  created_at?: string;
+}
+
+export interface BookingListResponse {
+  items: Booking[];
+  total: number;
+  page: number;
+  limit: number;
+  success?: boolean;
+}
+
+export interface BookingUpdateData {
+  date?: string;
+  time?: string;
+  guests?: number;
+  location_address?: string;
+  special_requests?: string;
+  status?: string;
+  chef_id?: string | null;
+}
+
+export interface BookingUpdateResponse {
+  id: string;
+  message: string;
+  date?: string;
+  time?: string;
+  guests?: number;
+  status?: string;
+  chef_id?: string | null;
+  changes?: string[];
+}
+
+/**
+ * Booking-related API calls
+ */
+export const bookingService = {
+  /**
+   * Get bookings with optional filters
+   * Endpoint: GET /api/v1/crm/bookings
+   */
+  getBookings: async (params?: {
+    dateFrom?: string;
+    dateTo?: string;
+    status?: string;
+    page?: number;
+    limit?: number;
+  }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.dateFrom) searchParams.append('date_from', params.dateFrom);
+    if (params?.dateTo) searchParams.append('date_to', params.dateTo);
+    if (params?.status) searchParams.append('status', params.status);
+    if (params?.page) searchParams.append('page', String(params.page));
+    if (params?.limit) searchParams.append('limit', String(params.limit));
+
+    const queryString = searchParams.toString();
+    return api.get<BookingListResponse>(
+      `/api/v1/crm/bookings${queryString ? `?${queryString}` : ''}`
+    );
+  },
+
+  /**
+   * Update a booking (including chef assignment)
+   * Endpoint: PUT /api/v1/bookings/{booking_id}
+   */
+  updateBooking: async (bookingId: string, data: BookingUpdateData) =>
+    api.put<BookingUpdateResponse>(
+      `/api/v1/bookings/${bookingId}`,
+      data as Record<string, unknown>
+    ),
+
+  /**
+   * Assign a chef to a booking
+   */
+  assignChef: async (bookingId: string, chefId: string) =>
+    api.put<BookingUpdateResponse>(`/api/v1/bookings/${bookingId}`, {
+      chef_id: chefId,
+    }),
+
+  /**
+   * Unassign chef from a booking
+   */
+  unassignChef: async (bookingId: string) =>
+    api.put<BookingUpdateResponse>(`/api/v1/bookings/${bookingId}`, {
+      chef_id: null,
+    }),
 };
 
 /**

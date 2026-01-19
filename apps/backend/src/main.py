@@ -57,6 +57,34 @@ try:
 except ImportError:
     SDNOTIFY_AVAILABLE = False
 
+
+# Custom operation ID generator to avoid duplicates when routers are mounted at multiple prefixes
+# Industry standard approach for FastAPI multi-mount scenarios
+from fastapi.routing import APIRoute
+
+
+def generate_unique_operation_id(route: APIRoute, prefix: str = "") -> str:
+    """
+    Generate a unique operation ID for a route, incorporating the prefix.
+
+    This is necessary when the same router is mounted at multiple prefixes
+    (e.g., /api/leads and /api/v1/public/leads) to avoid duplicate operation IDs.
+
+    Args:
+        route: The FastAPI route
+        prefix: The URL prefix where this router is mounted
+
+    Returns:
+        A unique operation ID string
+    """
+    # Clean the prefix for use in operation ID
+    clean_prefix = prefix.strip("/").replace("/", "_").replace("-", "_")
+    operation_id = route.name
+    if clean_prefix:
+        return f"{clean_prefix}_{operation_id}"
+    return operation_id
+
+
 # Configure settings
 settings = get_settings()
 
@@ -1189,8 +1217,14 @@ try:
     )
 
     app.include_router(leads_router, prefix="/api/leads", tags=["leads"])
+    # Use generate_unique_id_function for second mount to avoid duplicate operation IDs
     app.include_router(
-        leads_router, prefix="/api/v1/public/leads", tags=["leads-public"]
+        leads_router,
+        prefix="/api/v1/public/leads",
+        tags=["leads-public"],
+        generate_unique_id_function=lambda route: generate_unique_operation_id(
+            route, "public_leads"
+        ),
     )  # Public endpoint
     app.include_router(newsletter_router, prefix="/api/newsletter", tags=["newsletter"])
     app.include_router(
@@ -1213,22 +1247,11 @@ except ImportError as e:
 # This was duplicate of lines 671-677 above - now removed
 
 # AI Chat endpoints from moved AI API
-try:
-    from api.ai.endpoints.routers.chat import router as ai_chat_router
-
-    app.include_router(ai_chat_router, prefix="/api/v1/ai", tags=["ai-chat"])
-    logger.info("✅ AI Chat endpoints included")
-except ImportError as e:
-    logger.warning(f"AI Chat endpoints not available: {e}")
-
-    # Add a placeholder AI endpoint
-    @app.post("/api/v1/ai/chat", tags=["ai-chat"])
-    async def ai_chat_placeholder():
-        return {
-            "status": "success",
-            "message": "AI chat endpoint - moved from apps/ai-api",
-            "note": "Full implementation pending import path fixes",
-        }
+# NOTE: Removed duplicate mount - ai_chat_router was conflicting with chat.router from api/v1/api.py
+# Both were mounting at /api/v1/ai/chat causing duplicate operation ID warnings.
+# The chat.router from api/v1/endpoints/ai/chat.py is already included via v1_api_router.
+# If the real AI chat implementation is needed, consider using a different prefix like /api/v2/ai/chat
+# or removing the mock implementation from api/v1/endpoints/ai/chat.py
 
 
 # AI WebSocket endpoints (real-time chat)

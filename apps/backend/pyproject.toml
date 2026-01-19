@@ -111,6 +111,17 @@ markers = [
 ]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+# Filter warnings from external libraries we cannot fix
+# Industry standard: Suppress external lib deprecation warnings until they update
+filterwarnings = [
+    # External library warnings - nothing we can do until they update
+    "ignore:Please use `import python_multipart`:PendingDeprecationWarning:sentry_sdk",
+    "ignore:Type google._upb._message:DeprecationWarning",
+    "ignore:starlette.middleware.wsgi is deprecated:DeprecationWarning:starlette",
+    "ignore:websockets.legacy is deprecated:DeprecationWarning:websockets",
+    # Pydantic V2 config deprecation - from external libs using old patterns
+    "ignore:Support for class-based `config` is deprecated:pydantic.warnings.PydanticDeprecatedSince20",
+]
 
 [tool.coverage.run]
 source = ["src"]

@@ -7,7 +7,7 @@ from datetime import datetime, timezone, timedelta
 import logging
 from typing import Any
 
-from api.ai.shadow.models import AITutorPair
+from db.models.ai.shadow_learning import AITutorPair
 from core.config import get_settings
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession

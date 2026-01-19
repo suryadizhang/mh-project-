@@ -9,7 +9,8 @@ from datetime import UTC, datetime
 from zoneinfo import ZoneInfo
 
 # Default timezone if station timezone is not specified
-DEFAULT_TIMEZONE = "America/New_York"
+# Fremont, CA (Pacific Time) is the canonical first station location
+DEFAULT_TIMEZONE = "America/Los_Angeles"
 
 # Common US timezones for hibachi chef services
 COMMON_TIMEZONES = {

@@ -284,7 +284,7 @@ class BookingService:
 
             raise ConflictException(
                 message=f"Time slot {booking_data.event_time} on {booking_data.event_date} is not available",
-                error_code=ErrorCode.BOOKING_NOT_AVAILABLE,
+                conflicting_resource="time_slot",
             )
 
         # Check for duplicate bookings (same customer, same date/time)
@@ -297,7 +297,7 @@ class BookingService:
         if existing_booking:
             raise ConflictException(
                 message=f"Booking already exists for this customer at {booking_data.event_time} on {booking_data.event_date}",
-                error_code=ErrorCode.BOOKING_NOT_AVAILABLE,
+                conflicting_resource="duplicate_booking",
             )
 
         # Create booking from validated data
@@ -332,7 +332,9 @@ class BookingService:
         booking_dict["deposit_deadline"] = now + timedelta(hours=2)  # Backward compat
 
         # Record SMS consent timestamp if consent given
-        if booking_data.sms_consent:
+        # Note: sms_consent field was removed from BookingCreate schema,
+        # but we keep this for backward compatibility with legacy bookings
+        if getattr(booking_data, "sms_consent", False):
             booking_dict["sms_consent_timestamp"] = now
 
         # Create booking with race condition protection
@@ -376,7 +378,7 @@ class BookingService:
             # Return user-friendly error
             raise ConflictException(
                 message=f"Time slot {booking_data.event_time} on {booking_data.event_date} was just booked by another customer. Please select a different time.",
-                error_code=ErrorCode.BOOKING_NOT_AVAILABLE,
+                conflicting_resource="time_slot",
             ) from e
 
         # Audit log: Track booking creation

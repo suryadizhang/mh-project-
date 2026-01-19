@@ -22,6 +22,7 @@ from uuid import UUID, uuid4
 from core.database import get_db
 from core.security.roles import role_matches
 from db.models.core import Booking, BookingStatus, Customer
+from utils.timezone_utils import DEFAULT_TIMEZONE
 from utils.auth import (
     can_access_station,
     get_current_user,
@@ -805,7 +806,7 @@ async def create_booking(
                 consent_sms=True,  # Implied consent from booking
                 consent_email=True,
                 consent_updated_at=now,
-                timezone="America/Chicago",  # Default to Central Time
+                timezone=DEFAULT_TIMEZONE,  # Pacific Time (Fremont, CA)
             )
             db.add(customer)
             await db.flush()  # Get customer ID

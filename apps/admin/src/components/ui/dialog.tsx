@@ -38,42 +38,107 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
   );
 }
 
-export function DialogContent({ className = '', children }: DialogContentProps) {
+export function DialogContent({
+  className = '',
+  children,
+}: DialogContentProps) {
   return (
-    <div className={`relative z-50 bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 ${className}`}>
+    <div
+      className={`relative z-50 bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 ${className}`}
+    >
       {children}
     </div>
   );
 }
 
-export function DialogHeader({ className = '', children }: { className?: string; children: React.ReactNode }) {
+export function DialogHeader({
+  className = '',
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return <div className={`px-6 pt-6 pb-4 ${className}`}>{children}</div>;
+}
+
+export function DialogTitle({
+  className = '',
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return <h2 className={`text-lg font-semibold ${className}`}>{children}</h2>;
+}
+
+export function DialogDescription({
+  className = '',
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <div className={`px-6 pt-6 pb-4 ${className}`}>
-      {children}
-    </div>
+    <p className={`text-sm text-gray-500 mt-1 ${className}`}>{children}</p>
   );
 }
 
-export function DialogTitle({ className = '', children }: { className?: string; children: React.ReactNode }) {
-  return (
-    <h2 className={`text-lg font-semibold ${className}`}>
-      {children}
-    </h2>
-  );
-}
-
-export function DialogDescription({ className = '', children }: { className?: string; children: React.ReactNode }) {
-  return (
-    <p className={`text-sm text-gray-500 mt-1 ${className}`}>
-      {children}
-    </p>
-  );
-}
-
-export function DialogFooter({ className = '', children }: { className?: string; children: React.ReactNode }) {
+export function DialogFooter({
+  className = '',
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className={`px-6 pb-6 pt-4 flex justify-end gap-2 ${className}`}>
       {children}
     </div>
+  );
+}
+
+// DialogTrigger - renders children that trigger the dialog
+// When using controlled Dialog (with open/onOpenChange), this just renders children
+// The parent should handle the onClick to set open=true
+interface DialogTriggerProps {
+  asChild?: boolean;
+  children: React.ReactNode;
+  onClick?: () => void;
+}
+
+export function DialogTrigger({
+  asChild,
+  children,
+  onClick,
+}: DialogTriggerProps) {
+  if (asChild && React.isValidElement(children)) {
+    // Clone the child and add onClick handler
+    return React.cloneElement(
+      children as React.ReactElement<{
+        onClick?: (e: React.MouseEvent) => void;
+      }>,
+      {
+        onClick: (e: React.MouseEvent) => {
+          // Call the original onClick if it exists
+          const originalOnClick = (
+            children as React.ReactElement<{
+              onClick?: (e: React.MouseEvent) => void;
+            }>
+          ).props.onClick;
+          if (originalOnClick) {
+            originalOnClick(e);
+          }
+          // Call the trigger's onClick
+          if (onClick) {
+            onClick();
+          }
+        },
+      }
+    );
+  }
+  return (
+    <button type="button" onClick={onClick}>
+      {children}
+    </button>
   );
 }

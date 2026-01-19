@@ -39,7 +39,7 @@ See: database/migrations/011_travel_cache_table.sql
 import logging
 from collections import OrderedDict
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from sqlalchemy import select, update, delete, and_
@@ -184,7 +184,7 @@ class TravelCacheService:
                         TravelCache.dest_lat == d_lat,
                         TravelCache.dest_lng == d_lng,
                         TravelCache.is_rush_hour == is_rush_hour,
-                        TravelCache.expires_at > datetime.utcnow(),  # Not expired
+                        TravelCache.expires_at > datetime.now(timezone.utc),  # Not expired
                     )
                 )
                 .limit(1)
@@ -295,7 +295,7 @@ class TravelCacheService:
                         travel_time_minutes=travel_time_minutes,
                         distance_miles=distance_miles,
                         source=source,
-                        expires_at=datetime.utcnow() + timedelta(days=CACHE_TTL_DAYS),
+                        expires_at=datetime.now(timezone.utc) + timedelta(days=CACHE_TTL_DAYS),
                         hit_count=0,  # Reset on update
                     )
                 )
@@ -311,7 +311,7 @@ class TravelCacheService:
                     distance_miles=distance_miles,
                     is_rush_hour=is_rush_hour,
                     source=source,
-                    expires_at=datetime.utcnow() + timedelta(days=CACHE_TTL_DAYS),
+                    expires_at=datetime.now(timezone.utc) + timedelta(days=CACHE_TTL_DAYS),
                 )
                 self.db.add(new_entry)
                 logger.debug(f"✨ Created cache entry: {cache_key}")
@@ -335,7 +335,7 @@ class TravelCacheService:
         """
         try:
             result = await self.db.execute(
-                delete(TravelCache).where(TravelCache.expires_at < datetime.utcnow())
+                delete(TravelCache).where(TravelCache.expires_at < datetime.now(timezone.utc))
             )
             await self.db.commit()
             deleted = result.rowcount
