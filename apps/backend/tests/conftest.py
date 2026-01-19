@@ -54,8 +54,10 @@ def is_tunnel_available(host: str = "127.0.0.1", port: int = 5433, timeout: floa
 if not is_tunnel_available():
     print("\n⚠️  SSH tunnel not detected on port 5433. Using direct VPS connection for tests.")
     # Direct connection to VPS staging database (bypass tunnel)
-    VPS_STAGING_URL = "postgresql+asyncpg://myhibachi_staging_user:***REMOVED***@108.175.12.154:5432/myhibachi_staging"
-    VPS_STAGING_URL_SYNC = "postgresql+psycopg2://myhibachi_staging_user:***REMOVED***@108.175.12.154:5432/myhibachi_staging"
+    # Get password from environment variable or use placeholder
+    STAGING_DB_PASSWORD = os.environ.get("STAGING_DB_PASSWORD", "<STAGING_DB_PASSWORD>")
+    VPS_STAGING_URL = f"postgresql+asyncpg://myhibachi_staging_user:{STAGING_DB_PASSWORD}@108.175.12.154:5432/myhibachi_staging"
+    VPS_STAGING_URL_SYNC = f"postgresql+psycopg2://myhibachi_staging_user:{STAGING_DB_PASSWORD}@108.175.12.154:5432/myhibachi_staging"
     os.environ["DATABASE_URL"] = VPS_STAGING_URL
     os.environ["DATABASE_URL_SYNC"] = VPS_STAGING_URL_SYNC
 else:
