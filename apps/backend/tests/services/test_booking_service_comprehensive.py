@@ -101,9 +101,8 @@ def sample_booking_data():
         event_date=future_date,
         event_time="18:00",
         party_size=10,
-        contact_phone="2103884155",
+        contact_phone="+12103884155",
         contact_email="test@example.com",
-        sms_consent=True,
         special_requests="Vegetarian menu",
         duration_hours=3,
     )
@@ -124,9 +123,8 @@ def sample_booking():
     booking.booking_datetime = future_dt
     booking.party_size = 10
     booking.status = BookingStatus.PENDING
-    booking.contact_phone = "2103884155"
+    booking.contact_phone = "+12103884155"
     booking.contact_email = "test@example.com"
-    booking.sms_consent = True
     booking.special_requests = "Vegetarian menu"
     booking.created_at = datetime.now(timezone.utc)
     booking.updated_at = datetime.now(timezone.utc)
@@ -428,18 +426,20 @@ class TestAvailabilityChecking:
 class TestCreateBooking:
     """Test booking creation with validation and integrations"""
 
-    @pytest.mark.skip(reason="SQLAlchemy registry conflict - will fix in Base consolidation")
     @pytest.mark.asyncio
     async def test_create_booking_success(
         self, booking_service, mock_repository, sample_booking_data, sample_booking
     ):
         """Test: Successfully create booking with all validations"""
         # Arrange
-        mock_repository.find_by_date_range.return_value = []  # No conflicts
+        mock_repository.check_availability.return_value = True  # Slot is available
         mock_repository.create.return_value = sample_booking
 
-        # Mock duplicate check
-        with patch.object(booking_service, "_check_duplicate_booking", return_value=None):
+        # Mock duplicate check and Booking class to avoid SQLAlchemy instantiation
+        with (
+            patch.object(booking_service, "_check_duplicate_booking", return_value=None),
+            patch("services.booking_service.Booking", return_value=sample_booking),
+        ):
             # Act
             result = await booking_service.create_booking(sample_booking_data)
 
@@ -447,31 +447,20 @@ class TestCreateBooking:
         assert result == sample_booking
         mock_repository.create.assert_called_once()
 
-        # Verify booking_datetime was created from event_date + event_time
-        call_args = mock_repository.create.call_args[0][0]
-        assert hasattr(call_args, "booking_datetime")
-
-    @pytest.mark.skip(reason="SQLAlchemy registry conflict - will fix in Base consolidation")
     @pytest.mark.asyncio
     async def test_create_booking_slot_unavailable(
         self, booking_service, mock_repository, sample_booking_data, mock_lead_service
     ):
         """Test: Raises ConflictException when slot is unavailable"""
-        # Arrange - existing booking at same time
-        existing = MagicMock(spec=Booking)
-        existing.booking_datetime = datetime.combine(
-            sample_booking_data.event_date, datetime.min.time().replace(hour=18)
-        )
-        existing.status = BookingStatus.CONFIRMED
-
-        mock_repository.find_by_date_range.return_value = [existing]
+        # Arrange - slot is not available (check_availability returns False)
+        mock_repository.check_availability.return_value = False
 
         # Act & Assert
         with pytest.raises(ConflictException):
             await booking_service.create_booking(sample_booking_data)
 
         # Verify lead capture was attempted
-        assert mock_lead_service.capture_failed_booking.called
+        mock_lead_service.capture_failed_booking.assert_called_once()
 
 
 # ============================================================================
@@ -565,7 +554,6 @@ class TestEdgeCases:
         # Assert
         assert result["average_party_size"] == 0  # No crash
 
-    @pytest.mark.skip(reason="SQLAlchemy registry conflict - will fix in Base consolidation")
     @pytest.mark.asyncio
     async def test_create_booking_audit_failure_does_not_fail_booking(
         self,
@@ -577,12 +565,15 @@ class TestEdgeCases:
     ):
         """Test: Booking succeeds even if audit logging fails (graceful degradation)"""
         # Arrange
-        mock_repository.find_by_date_range.return_value = []
+        mock_repository.check_availability.return_value = True  # Slot is available
         mock_repository.create.return_value = sample_booking
         mock_audit_service.log_change.side_effect = Exception("Audit service down")
 
-        # Mock duplicate check
-        with patch.object(booking_service, "_check_duplicate_booking", return_value=None):
+        # Mock duplicate check and Booking class to avoid SQLAlchemy instantiation
+        with (
+            patch.object(booking_service, "_check_duplicate_booking", return_value=None),
+            patch("services.booking_service.Booking", return_value=sample_booking),
+        ):
             # Act - should not raise exception
             result = await booking_service.create_booking(sample_booking_data)
 

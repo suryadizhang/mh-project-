@@ -87,7 +87,7 @@ import {
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api';
 
-import BaseLocationManager from '@/components/super-admin/BaseLocationManager';
+import { BaseLocationManager } from '@/components/BaseLocationManager';
 
 // Types
 interface AdminUser {
@@ -152,9 +152,9 @@ function DashboardTab() {
     try {
       // Fetch all users to calculate stats
       const response = await apiFetch('/api/admin/users');
-      if (response.ok) {
-        const data = await response.json();
-        const users = data.users || data || [];
+      if (response.success) {
+        const data = response.data as Record<string, unknown>;
+        const users = (data?.users || data || []) as AdminUser[];
 
         setStats({
           totalUsers: users.length,
@@ -312,9 +312,9 @@ function UsersTab() {
     setLoading(true);
     try {
       const response = await apiFetch('/api/admin/users');
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data.users || data || []);
+      if (response.success) {
+        const data = response.data as Record<string, unknown>;
+        setUsers((data?.users || data || []) as AdminUser[]);
       }
     } catch (error) {
       console.error('Failed to load users:', error);
@@ -327,9 +327,9 @@ function UsersTab() {
   const loadRoles = async () => {
     try {
       const response = await apiFetch('/api/admin/roles');
-      if (response.ok) {
-        const data = await response.json();
-        setRoles(data.roles || data || []);
+      if (response.success) {
+        const data = response.data as Record<string, unknown>;
+        setRoles((data?.roles || data || []) as Role[]);
       }
     } catch (error) {
       console.error('Failed to load roles:', error);
@@ -354,7 +354,7 @@ function UsersTab() {
         }),
       });
 
-      if (response.ok) {
+      if (response.success) {
         toast.success('Admin user created successfully');
         setCreateDialogOpen(false);
         setNewUserEmail('');
@@ -363,8 +363,9 @@ function UsersTab() {
         setNewUserPassword('');
         loadUsers();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Failed to create user');
+        toast.error(
+          response.error || response.message || 'Failed to create user'
+        );
       }
     } catch (error) {
       console.error('Failed to create user:', error);
@@ -386,13 +387,14 @@ function UsersTab() {
         }
       );
 
-      if (response.ok) {
+      if (response.success) {
         toast.success(`Password reset email sent to ${selectedUser.email}`);
         setResetPasswordDialogOpen(false);
         setSelectedUser(null);
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Failed to send reset email');
+        toast.error(
+          response.error || response.message || 'Failed to send reset email'
+        );
       }
     } catch (error) {
       console.error('Failed to reset password:', error);
@@ -408,12 +410,13 @@ function UsersTab() {
         method: 'POST',
       });
 
-      if (response.ok) {
+      if (response.success) {
         toast.success('User approved successfully');
         loadUsers();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Failed to approve user');
+        toast.error(
+          response.error || response.message || 'Failed to approve user'
+        );
       }
     } catch (error) {
       console.error('Failed to approve user:', error);
@@ -427,12 +430,13 @@ function UsersTab() {
         method: 'POST',
       });
 
-      if (response.ok) {
+      if (response.success) {
         toast.success('User rejected');
         loadUsers();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Failed to reject user');
+        toast.error(
+          response.error || response.message || 'Failed to reject user'
+        );
       }
     } catch (error) {
       console.error('Failed to reject user:', error);
@@ -446,12 +450,13 @@ function UsersTab() {
         method: 'POST',
       });
 
-      if (response.ok) {
+      if (response.success) {
         toast.success('User suspended');
         loadUsers();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Failed to suspend user');
+        toast.error(
+          response.error || response.message || 'Failed to suspend user'
+        );
       }
     } catch (error) {
       console.error('Failed to suspend user:', error);
@@ -468,14 +473,15 @@ function UsersTab() {
         method: 'DELETE',
       });
 
-      if (response.ok) {
+      if (response.success) {
         toast.success('User deleted successfully');
         setDeleteDialogOpen(false);
         setSelectedUser(null);
         loadUsers();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Failed to delete user');
+        toast.error(
+          response.error || response.message || 'Failed to delete user'
+        );
       }
     } catch (error) {
       console.error('Failed to delete user:', error);
@@ -870,9 +876,9 @@ function EditRolesDialog({
       const response = await apiFetch(
         `/api/admin/roles/users/${user.id}/permissions`
       );
-      if (response.ok) {
-        const data = await response.json();
-        setUserRoles(data.roles || []);
+      if (response.success) {
+        const data = response.data as Record<string, unknown>;
+        setUserRoles((data?.roles || []) as Role[]);
       }
     } catch (error) {
       console.error('Failed to load user roles:', error);
@@ -893,12 +899,11 @@ function EditRolesDialog({
         }
       );
 
-      if (response.ok) {
+      if (response.success) {
         toast.success('Role added successfully');
         loadUserRoles();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Failed to add role');
+        toast.error(response.error || response.message || 'Failed to add role');
       }
     } catch (error) {
       console.error('Failed to add role:', error);
@@ -919,12 +924,13 @@ function EditRolesDialog({
         }
       );
 
-      if (response.ok) {
+      if (response.success) {
         toast.success('Role removed successfully');
         loadUserRoles();
       } else {
-        const error = await response.json();
-        toast.error(error.detail || 'Failed to remove role');
+        toast.error(
+          response.error || response.message || 'Failed to remove role'
+        );
       }
     } catch (error) {
       console.error('Failed to remove role:', error);
@@ -1022,9 +1028,9 @@ function RolesTab() {
     setLoading(true);
     try {
       const response = await apiFetch('/api/admin/roles');
-      if (response.ok) {
-        const data = await response.json();
-        setRoles(data.roles || data || []);
+      if (response.success) {
+        const data = response.data as Record<string, unknown>;
+        setRoles((data?.roles || data || []) as Role[]);
       }
     } catch (error) {
       console.error('Failed to load roles:', error);
@@ -1036,9 +1042,9 @@ function RolesTab() {
   const loadPermissions = async () => {
     try {
       const response = await apiFetch('/api/admin/roles/permissions/all');
-      if (response.ok) {
-        const data = await response.json();
-        setPermissions(data.permissions || data || []);
+      if (response.success) {
+        const data = response.data as Record<string, unknown>;
+        setPermissions((data?.permissions || data || []) as string[]);
       }
     } catch (error) {
       console.error('Failed to load permissions:', error);
@@ -1187,11 +1193,13 @@ function AuditLogsTab() {
       }
 
       const response = await apiFetch(`/api/admin/audit-logs?${params}`);
-      if (response.ok) {
-        const data = await response.json();
-        setLogs(data.logs || data.items || data || []);
+      if (response.success) {
+        const data = response.data as Record<string, unknown>;
+        setLogs((data?.logs || data?.items || data || []) as AuditLog[]);
         setTotalPages(
-          data.total_pages || Math.ceil((data.total || 0) / 20) || 1
+          (data?.total_pages as number) ||
+            Math.ceil(((data?.total as number) || 0) / 20) ||
+            1
         );
       }
     } catch (error) {
@@ -1343,8 +1351,12 @@ function SystemTab() {
     setLoadingHealth(true);
     try {
       const response = await apiFetch('/api/health');
-      if (response.ok) {
-        const data = await response.json();
+      if (response.success) {
+        const data = response.data as {
+          status: string;
+          database: string;
+          cache: string;
+        };
         setHealthStatus(data);
         toast.success('System health check completed');
       }

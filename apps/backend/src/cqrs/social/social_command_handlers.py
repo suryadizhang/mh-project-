@@ -19,8 +19,9 @@ from db.models.legacy_core import CoreCustomer  # Phase 2C: Updated from api.app
 
 # Fixed: Use unified lead schema instead of legacy model
 from db.models.crm import Lead
-# MIGRATED: from models.legacy_events → db.models.legacy_events
-from db.models.legacy_events import OutboxEntry  # Phase 2C: Updated from api.app.models.events
+
+# MIGRATED: Using new Outbox model from db.models.events
+from db.models.events import Outbox
 
 # MIGRATED: from models.legacy_social → db.models.legacy_social
 from db.models.legacy_social import (  # Phase 2C: Updated from api.app.models.social
@@ -133,7 +134,7 @@ class CreateLeadFromSocialHandler(CommandHandler[CreateLeadFromSocialCommand]):
                 },
             }
 
-            outbox_event = OutboxEntry(**event_data)
+            outbox_event = Outbox(**event_data)
             session.add(outbox_event)
 
             await session.commit()
@@ -226,7 +227,7 @@ class SendSocialReplyHandler(CommandHandler[SendSocialReplyCommand]):
                 },
             }
 
-            outbox_event = OutboxEntry(**event_data)
+            outbox_event = Outbox(**event_data)
             session.add(outbox_event)
 
             await session.commit()
@@ -300,7 +301,7 @@ class LinkSocialIdentityToCustomerHandler(CommandHandler[LinkSocialIdentityToCus
                 },
             }
 
-            outbox_event = OutboxEntry(**event_data)
+            outbox_event = Outbox(**event_data)
             session.add(outbox_event)
 
             await session.commit()
@@ -368,7 +369,7 @@ class AcknowledgeReviewHandler(CommandHandler[AcknowledgeReviewCommand]):
                 },
             }
 
-            outbox_event = OutboxEntry(**event_data)
+            outbox_event = Outbox(**event_data)
             session.add(outbox_event)
 
             await session.commit()
@@ -443,7 +444,7 @@ class UpdateThreadStatusHandler(CommandHandler[UpdateThreadStatusCommand]):
                 },
             }
 
-            outbox_event = OutboxEntry(**event_data)
+            outbox_event = Outbox(**event_data)
             session.add(outbox_event)
 
             await session.commit()
@@ -521,7 +522,7 @@ class CreateSocialAccountHandler(CommandHandler[CreateSocialAccountCommand]):
                 },
             }
 
-            outbox_event = OutboxEntry(**event_data)
+            outbox_event = Outbox(**event_data)
             session.add(outbox_event)
 
             await session.commit()

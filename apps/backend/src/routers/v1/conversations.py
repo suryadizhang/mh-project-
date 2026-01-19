@@ -30,20 +30,18 @@ async def get_customer_conversations(
     customer_id: UUID,
     limit: int = Query(20, ge=1, le=100, description="Number of conversations to return"),
     offset: int = Query(0, ge=0, description="Pagination offset"),
-    include_no_transcript: bool = Query(
-        False, description="Include calls without transcripts"
-    ),
+    include_no_transcript: bool = Query(False, description="Include calls without transcripts"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
 ):
     """
     Get conversation history for a specific customer.
-    
+
     Returns all call recordings with transcripts, sorted by most recent.
     Includes AI insights, sentiment analysis, and topics.
-    
+
     **Permissions**: Admin only
-    
+
     **Response**:
     - `customer_id`: Customer UUID
     - `customer_name`: Full name
@@ -60,7 +58,7 @@ async def get_customer_conversations(
       - `transcript_confidence`: 0-100 confidence score
       - `ai_insights`: Sentiment, topics, intent, action items
     - `pagination`: Limit, offset, has_more flag
-    
+
     **Example**:
     ```
     GET /api/v1/conversations/customer/123e4567-e89b-12d3-a456-426614174000?limit=10
@@ -87,9 +85,7 @@ async def get_customer_conversations(
         raise
     except Exception as e:
         logger.error(f"Error in get_customer_conversations: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500, detail="Failed to retrieve customer conversations"
-        )
+        raise HTTPException(status_code=500, detail="Failed to retrieve customer conversations")
 
 
 @router.get("/booking/{booking_id}")
@@ -100,17 +96,17 @@ async def get_booking_conversations(
 ):
     """
     Get all conversations related to a specific booking.
-    
+
     Groups conversations by timeline:
     - **Pre-booking**: Calls before booking date
     - **Day-of**: Calls on booking date
     - **Post-booking**: Calls after booking date
-    
+
     Useful for understanding customer communication patterns and
     identifying common questions or concerns at each stage.
-    
+
     **Permissions**: Admin only
-    
+
     **Response**:
     - `booking_id`: Booking UUID
     - `booking_datetime`: ISO timestamp
@@ -122,10 +118,10 @@ async def get_booking_conversations(
       - `pre_booking`: List of conversations before booking
       - `day_of`: List of conversations on booking day
       - `post_booking`: List of conversations after booking
-    - `key_insights`: 
+    - `key_insights`:
       - `common_topics`: Most discussed topics
       - `sentiment_summary`: Sentiment distribution
-    
+
     **Example**:
     ```
     GET /api/v1/conversations/booking/123e4567-e89b-12d3-a456-426614174000
@@ -147,47 +143,43 @@ async def get_booking_conversations(
         raise
     except Exception as e:
         logger.error(f"Error in get_booking_conversations: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500, detail="Failed to retrieve booking conversations"
-        )
+        raise HTTPException(status_code=500, detail="Failed to retrieve booking conversations")
 
 
 @router.get("/customer/{customer_id}/ai-context")
 async def get_customer_ai_context(
     customer_id: UUID,
-    max_conversations: int = Query(
-        5, ge=1, le=10, description="Maximum conversations to include"
-    ),
+    max_conversations: int = Query(5, ge=1, le=10, description="Maximum conversations to include"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
 ):
     """
     Get AI-formatted conversation context for a customer.
-    
+
     Returns a concise text summary of recent interactions that AI agents
     can inject into their prompts for personalized service.
-    
+
     **Permissions**: Admin only
-    
+
     **Response**:
     - `customer_id`: Customer UUID
     - `context`: Formatted context string
-    
+
     **Context Format**:
     ```
     Customer: John Smith (555-0123)
     Recent interactions (last 5 calls):
     - 2024-11-15 10:27: Asked about vegetarian options. Positive sentiment.
     - 2024-11-10 14:20: Booking confirmation. Positive sentiment.
-    
+
     Key topics discussed: catering, dietary requirements, parking
     Active booking: 2024-11-15, 30 guests, confirmed
     ```
-    
+
     **Usage**:
     AI agents should prepend this context to their system prompts when
     handling calls or messages from this customer.
-    
+
     **Example**:
     ```
     GET /api/v1/conversations/customer/123e4567-e89b-12d3-a456-426614174000/ai-context
@@ -207,9 +199,7 @@ async def get_customer_ai_context(
 
     except Exception as e:
         logger.error(f"Error in get_customer_ai_context: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500, detail="Failed to generate AI context"
-        )
+        raise HTTPException(status_code=500, detail="Failed to generate AI context")
 
 
 @router.get("/search")
@@ -220,7 +210,7 @@ async def search_transcripts(
     date_from: Optional[datetime] = Query(None, description="Start date (ISO format)"),
     date_to: Optional[datetime] = Query(None, description="End date (ISO format)"),
     sentiment: Optional[str] = Query(
-        None, regex="^(positive|neutral|negative)$", description="Filter by sentiment"
+        None, pattern="^(positive|neutral|negative)$", description="Filter by sentiment"
     ),
     limit: int = Query(50, ge=1, le=100, description="Number of results"),
     offset: int = Query(0, ge=0, description="Pagination offset"),
@@ -229,12 +219,12 @@ async def search_transcripts(
 ):
     """
     Search across all call transcripts.
-    
+
     Performs full-text search on transcript content with optional filters.
     Returns matching conversations with surrounding context highlighted.
-    
+
     **Permissions**: Admin only
-    
+
     **Query Parameters**:
     - `q`: Search query (minimum 3 characters) - **Required**
     - `customer_id`: Filter by specific customer (optional)
@@ -244,7 +234,7 @@ async def search_transcripts(
     - `sentiment`: Filter by sentiment: positive, neutral, negative (optional)
     - `limit`: Results per page (1-100, default 50)
     - `offset`: Pagination offset (default 0)
-    
+
     **Response**:
     - `query`: Original search query
     - `total_results`: Total matching conversations
@@ -252,19 +242,19 @@ async def search_transcripts(
       - All standard conversation fields
       - `search_context`: Text excerpt showing query in context (±100 chars)
     - `pagination`: Limit, offset, has_more flag
-    
+
     **Examples**:
     ```
     # Search for "vegetarian"
     GET /api/v1/conversations/search?q=vegetarian
-    
+
     # Search with filters
     GET /api/v1/conversations/search?q=party&sentiment=positive&date_from=2024-11-01
-    
+
     # Search for specific customer
     GET /api/v1/conversations/search?q=refund&customer_id=123e4567-e89b-12d3-a456-426614174000
     ```
-    
+
     **Use Cases**:
     - Find all calls mentioning specific topics ("allergy", "refund", "parking")
     - Identify sentiment patterns ("complaint", "thank you")
@@ -306,17 +296,17 @@ async def get_sentiment_overview(
 ):
     """
     Get sentiment distribution across conversations.
-    
+
     Provides aggregate statistics about sentiment in call transcripts.
     Useful for monitoring customer satisfaction trends.
-    
+
     **Permissions**: Admin only
-    
+
     **Query Parameters**:
     - `date_from`: Start date for analysis (optional)
     - `date_to`: End date for analysis (optional)
     - `customer_id`: Analyze specific customer only (optional)
-    
+
     **Response**:
     - `total_conversations`: Total analyzed
     - `sentiment_distribution`:
@@ -325,7 +315,7 @@ async def get_sentiment_overview(
       - `negative`: Count and percentage
       - `unknown`: Count and percentage
     - `filters`: Applied filters
-    
+
     **Example**:
     ```
     GET /api/v1/conversations/stats/sentiment-overview?date_from=2024-11-01&date_to=2024-11-30
@@ -334,7 +324,7 @@ async def get_sentiment_overview(
     try:
         # This is a placeholder - implement actual stats logic
         # Could use service method or direct SQL aggregation
-        
+
         return {
             "total_conversations": 0,
             "sentiment_distribution": {
@@ -353,6 +343,4 @@ async def get_sentiment_overview(
 
     except Exception as e:
         logger.error(f"Error in get_sentiment_overview: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500, detail="Failed to retrieve sentiment overview"
-        )
+        raise HTTPException(status_code=500, detail="Failed to retrieve sentiment overview")

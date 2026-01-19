@@ -32,7 +32,8 @@ from core.security import (
     decode_access_token,
 )
 from core.config import settings
-from db.models.identity import User, UserStatus
+from db.models.identity import User, UserStatus, StationUser, UserRole, Role
+from db.models.ops import Chef
 from services.token_blacklist_service import TokenBlacklistService
 from services.password_reset_service import PasswordResetService
 
@@ -339,14 +340,77 @@ async def login(credentials: LoginRequest, db: AsyncSession = Depends(get_db)) -
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password"
         )
 
-    # Create access token with user info
-    access_token = create_access_token(
-        data={
-            "sub": str(user.id),
-            "email": user.email,
-            "is_super_admin": user.is_super_admin,
-        }
+    # =========================================================================
+    # ENRICH TOKEN WITH ROLE, STATION_IDS, AND CHEF_ID
+    # Per 25-TOKEN_AUTHENTICATION_STANDARDS.instructions.md
+    # =========================================================================
+
+    # 1. Get user's primary role by querying UserRole -> Role
+    user_role = None
+    try:
+        role_result = await db.execute(
+            select(Role.role_type)
+            .join(UserRole, UserRole.role_id == Role.id)
+            .where(UserRole.user_id == user.id)
+            .limit(1)  # Take first/primary role
+        )
+        role_row = role_result.scalar_one_or_none()
+        if role_row:
+            # role_type is an enum, get its string value
+            user_role = role_row.value if hasattr(role_row, "value") else str(role_row)
+            logger.debug(f"User {user.email} has role: {user_role}")
+    except Exception as e:
+        logger.warning(f"Failed to load role for user {user.email}: {e}")
+
+    # 2. Get user's station_ids from StationUser table
+    station_ids = []
+    try:
+        station_result = await db.execute(
+            select(StationUser.station_id).where(
+                StationUser.user_id == user.id, StationUser.is_active == True
+            )
+        )
+        station_ids = [str(row[0]) for row in station_result.fetchall()]
+        logger.debug(f"User {user.email} has station_ids: {station_ids}")
+    except Exception as e:
+        logger.warning(f"Failed to load station_ids for user {user.email}: {e}")
+
+    # 3. Get chef_id if user is a CHEF (Chef links via email, not user_id)
+    chef_id = None
+    if user_role and user_role.upper() == "CHEF":
+        try:
+            chef_result = await db.execute(select(Chef.id).where(Chef.email == user.email))
+            chef_row = chef_result.scalar_one_or_none()
+            if chef_row:
+                chef_id = str(chef_row)
+                logger.debug(f"User {user.email} has chef_id: {chef_id}")
+        except Exception as e:
+            logger.warning(f"Failed to load chef_id for user {user.email}: {e}")
+
+    # Create access token with enriched user info (role, stations, chef_id)
+    token_data = {
+        "sub": str(user.id),
+        "email": user.email,
+        "is_super_admin": user.is_super_admin,
+    }
+
+    # Add role if available
+    if user_role:
+        token_data["role"] = user_role
+
+    # Add station_ids if available (for STATION_MANAGER filtering)
+    if station_ids:
+        token_data["station_ids"] = station_ids
+
+    # Add chef_id if available (for CHEF filtering)
+    if chef_id:
+        token_data["chef_id"] = chef_id
+
+    logger.info(
+        f"Creating token for {user.email} with role={user_role}, stations={len(station_ids)}, chef_id={chef_id is not None}"
     )
+
+    access_token = create_access_token(data=token_data)
 
     # Create refresh token with separate secret and longer expiry (7 days)
     refresh_token = create_refresh_token(user_id=str(user.id))
@@ -361,6 +425,11 @@ async def login(credentials: LoginRequest, db: AsyncSession = Depends(get_db)) -
             "email": user.email,
             "full_name": user.full_name,
             "is_super_admin": user.is_super_admin,
+            "role": user_role,  # Include role for frontend navigation
+            "station_ids": (
+                station_ids if station_ids else None
+            ),  # Include station_ids for STATION_MANAGER
+            "chef_id": chef_id,  # Include chef_id for CHEF role
         },
     }
 

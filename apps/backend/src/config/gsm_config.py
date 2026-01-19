@@ -210,6 +210,8 @@ async def load_config() -> Dict[str, Any]:
         ("backend-api", "cloudflare-r2-secret-access-key", "CLOUDFLARE_R2_SECRET_ACCESS_KEY"),
         ("backend-api", "cloudflare-r2-bucket", "CLOUDFLARE_R2_BUCKET"),
         ("backend-api", "cloudflare-r2-endpoint", "CLOUDFLARE_R2_ENDPOINT"),
+        # Google Calendar integration (service account JSON)
+        ("backend-api", "google-calendar-service-account", "GOOGLE_SERVICE_ACCOUNT_JSON"),
     ]
 
     logger.info("🔑 Loading configuration from GSM...")

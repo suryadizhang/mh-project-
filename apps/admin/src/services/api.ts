@@ -29,6 +29,8 @@ export interface StationContext {
   is_global_role?: boolean;
   station_count?: number;
   highest_role?: string;
+  // Chef-specific field (populated when user is a chef)
+  chef_id?: string | null;
 }
 
 export interface StationLoginRequest {

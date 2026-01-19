@@ -148,17 +148,17 @@ class TestOutboxWorker:
     """Test outbox worker pattern works correctly"""
 
     def test_outbox_entry_model_fields(self):
-        """Verify OutboxEntry has correct fields"""
-        from models.legacy_events import OutboxEntry  # Phase 2B: Updated from api.app.models.events
+        """Verify Outbox model has correct fields for outbox pattern"""
+        from db.models.events import Outbox  # Updated: Use new unified architecture
 
-        # Check model has correct fields
-        assert hasattr(OutboxEntry, "status")
-        assert hasattr(OutboxEntry, "attempts")
-        assert hasattr(OutboxEntry, "next_attempt_at")
-        assert hasattr(OutboxEntry, "completed_at")
-        assert hasattr(OutboxEntry, "last_error")
-        assert hasattr(OutboxEntry, "payload")
-        print("✅ OutboxEntry has correct fields")
+        # Check model has correct fields (new field names in unified architecture)
+        assert hasattr(Outbox, "status")  # OutboxStatus enum
+        assert hasattr(Outbox, "retry_count")  # Was: attempts
+        assert hasattr(Outbox, "next_retry_at")  # Was: next_attempt_at
+        assert hasattr(Outbox, "processed_at")  # Was: completed_at
+        assert hasattr(Outbox, "error_message")  # Was: last_error
+        assert hasattr(Outbox, "payload")
+        print("✅ Outbox model has correct fields")
 
     def test_worker_uses_context_manager(self):
         """Verify worker uses get_db_context"""
