@@ -97,8 +97,9 @@ ENVIRONMENT=staging
 DEBUG=true
 
 # Staging Database (ISOLATED from production!)
-DATABASE_URL=postgresql+asyncpg://myhibachi_staging_user:***REMOVED***@localhost:5432/myhibachi_staging
-DATABASE_URL_SYNC=postgresql+psycopg2://myhibachi_staging_user:***REMOVED***@localhost:5432/myhibachi_staging
+# Get <STAGING_DB_PASSWORD> from team lead or secure password manager
+DATABASE_URL=postgresql+asyncpg://myhibachi_staging_user:<STAGING_DB_PASSWORD>@localhost:5432/myhibachi_staging
+DATABASE_URL_SYNC=postgresql+psycopg2://myhibachi_staging_user:<STAGING_DB_PASSWORD>@localhost:5432/myhibachi_staging
 
 # Staging API runs on port 8002
 PORT=8002

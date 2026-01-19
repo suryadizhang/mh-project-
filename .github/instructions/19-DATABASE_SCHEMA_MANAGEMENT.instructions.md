@@ -45,8 +45,9 @@ ssh -f -N -L 5433:localhost:5432 root@108.175.12.154
 **Local .env Configuration:**
 
 ```dotenv
-DATABASE_URL=postgresql+asyncpg://myhibachi_staging_user:***REMOVED***@127.0.0.1:5433/myhibachi_staging
-DATABASE_URL_SYNC=postgresql+psycopg2://myhibachi_staging_user:***REMOVED***@127.0.0.1:5433/myhibachi_staging
+# Get <STAGING_DB_PASSWORD> from team lead or secure password manager
+DATABASE_URL=postgresql+asyncpg://myhibachi_staging_user:<STAGING_DB_PASSWORD>@127.0.0.1:5433/myhibachi_staging
+DATABASE_URL_SYNC=postgresql+psycopg2://myhibachi_staging_user:<STAGING_DB_PASSWORD>@127.0.0.1:5433/myhibachi_staging
 ```
 
 ### The Golden Rules:
@@ -80,13 +81,14 @@ psql -c "SELECT current_database();"
 
 ```bash
 # Local Development (via SSH tunnel - port 5433)
-DATABASE_URL=postgresql+asyncpg://myhibachi_staging_user:***REMOVED***@127.0.0.1:5433/myhibachi_staging
+# Get <STAGING_DB_PASSWORD> from team lead
+DATABASE_URL=postgresql+asyncpg://myhibachi_staging_user:<STAGING_DB_PASSWORD>@127.0.0.1:5433/myhibachi_staging
 
 # Staging on VPS (direct - port 5432)
-DATABASE_URL=postgresql+asyncpg://myhibachi_staging_user:***REMOVED***@localhost:5432/myhibachi_staging
+DATABASE_URL=postgresql+asyncpg://myhibachi_staging_user:<STAGING_DB_PASSWORD>@localhost:5432/myhibachi_staging
 
 # Production (REAL DATA ONLY - port 5432)
-DATABASE_URL=postgresql+asyncpg://myhibachi_user:<PASS>@localhost:5432/myhibachi_production
+DATABASE_URL=postgresql+asyncpg://myhibachi_user:<PROD_DB_PASSWORD>@localhost:5432/myhibachi_production
 ```
 
 ---

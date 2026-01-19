@@ -126,7 +126,8 @@ if (Test-TunnelRunning) {
   Write-Host "  Database: myhibachi_staging" -ForegroundColor White
   Write-Host "  User: myhibachi_staging_user" -ForegroundColor White
   Write-Host ""
-  Write-Host "DATABASE_URL=postgresql+asyncpg://myhibachi_staging_user:***REMOVED***@127.0.0.1:${LOCAL_PORT}/myhibachi_staging" -ForegroundColor DarkGray
+  Write-Host "DATABASE_URL=postgresql+asyncpg://myhibachi_staging_user:<STAGING_DB_PASSWORD>@127.0.0.1:${LOCAL_PORT}/myhibachi_staging" -ForegroundColor DarkGray
+  Write-Host "(Get password from team lead or .env.local file)" -ForegroundColor DarkGray
   Write-Host ""
   Write-Host "You can now run tests or start the backend." -ForegroundColor Green
 }

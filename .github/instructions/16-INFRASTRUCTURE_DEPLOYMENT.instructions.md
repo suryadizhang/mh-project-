@@ -182,19 +182,19 @@ postgresql+asyncpg://myhibachi_user:<PASSWORD>@localhost:5432/myhibachi_producti
 
 ### Staging Database (VPS - ACTIVE)
 
-| Property     | Value                    |
-| ------------ | ------------------------ |
-| **Type**     | PostgreSQL 13.22         |
-| **Host**     | `localhost` (from VPS)   |
-| **Port**     | `5432`                   |
-| **Database** | `myhibachi_staging`      |
-| **User**     | `myhibachi_staging_user` |
-| **Password** | `***REMOVED***`      |
+| Property     | Value                                        |
+| ------------ | -------------------------------------------- |
+| **Type**     | PostgreSQL 13.22                             |
+| **Host**     | `localhost` (from VPS)                       |
+| **Port**     | `5432`                                       |
+| **Database** | `myhibachi_staging`                          |
+| **User**     | `myhibachi_staging_user`                     |
+| **Password** | `<STAGING_DB_PASSWORD>` (get from team lead) |
 
 **Connection String (on VPS):**
 
 ```
-postgresql+asyncpg://myhibachi_staging_user:***REMOVED***@localhost:5432/myhibachi_staging
+postgresql+asyncpg://myhibachi_staging_user:<STAGING_DB_PASSWORD>@localhost:5432/myhibachi_staging
 ```
 
 ### Local Development (SSH Tunnel to Staging) ⭐ PREFERRED
@@ -202,13 +202,13 @@ postgresql+asyncpg://myhibachi_staging_user:***REMOVED***@localhost:5432/myhibac
 **🚫 DEPRECATED:** Supabase and local SQLite are NO LONGER USED. We
 now use an SSH tunnel to connect to the VPS staging database.
 
-| Property       | Value                          |
-| -------------- | ------------------------------ |
-| **Type**       | PostgreSQL 13.22 (VPS via SSH) |
-| **Local Port** | `5433` (tunneled to VPS:5432)  |
-| **Database**   | `myhibachi_staging`            |
-| **User**       | `myhibachi_staging_user`       |
-| **Password**   | `***REMOVED***`            |
+| Property       | Value                                        |
+| -------------- | -------------------------------------------- |
+| **Type**       | PostgreSQL 13.22 (VPS via SSH)               |
+| **Local Port** | `5433` (tunneled to VPS:5432)                |
+| **Database**   | `myhibachi_staging`                          |
+| **User**       | `myhibachi_staging_user`                     |
+| **Password**   | `<STAGING_DB_PASSWORD>` (get from team lead) |
 
 **Why SSH Tunnel:**
 
@@ -234,8 +234,9 @@ ssh -f -N -L 5433:localhost:5432 root@108.175.12.154
 **Local .env Configuration:**
 
 ```dotenv
-DATABASE_URL=postgresql+asyncpg://myhibachi_staging_user:***REMOVED***@127.0.0.1:5433/myhibachi_staging
-DATABASE_URL_SYNC=postgresql+psycopg2://myhibachi_staging_user:***REMOVED***@127.0.0.1:5433/myhibachi_staging
+# Get <STAGING_DB_PASSWORD> from team lead or secure password manager
+DATABASE_URL=postgresql+asyncpg://myhibachi_staging_user:<STAGING_DB_PASSWORD>@127.0.0.1:5433/myhibachi_staging
+DATABASE_URL_SYNC=postgresql+psycopg2://myhibachi_staging_user:<STAGING_DB_PASSWORD>@127.0.0.1:5433/myhibachi_staging
 ```
 
 **Verify Connection:**
@@ -244,8 +245,8 @@ DATABASE_URL_SYNC=postgresql+psycopg2://myhibachi_staging_user:***REMOVED***@127
 # Check tunnel is running
 netstat -an | Select-String "5433.*LISTENING"
 
-# Test database connection
-python -c "from sqlalchemy import create_engine; e = create_engine('postgresql+psycopg2://myhibachi_staging_user:***REMOVED***@127.0.0.1:5433/myhibachi_staging'); print('Connected to:', e.execute('SELECT current_database()').scalar())"
+# Test database connection (replace <STAGING_DB_PASSWORD> with actual password)
+python -c "from sqlalchemy import create_engine; e = create_engine('postgresql+psycopg2://myhibachi_staging_user:<STAGING_DB_PASSWORD>@127.0.0.1:5433/myhibachi_staging'); print('Connected to:', e.execute('SELECT current_database()').scalar())"
 ```
 
 **⚠️ Important:** Always start the SSH tunnel before running:
