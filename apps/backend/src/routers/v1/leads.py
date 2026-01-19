@@ -403,14 +403,16 @@ async def update_lead(
     return lead
 
 
-@router.post("/{lead_id}/events")
-async def add_lead_event(
+# NOTE: Removed explicit operation_id to allow generate_unique_id_function to work
+# when this router is mounted at multiple prefixes in main.py
+@router.post("/{lead_id}/events/simple")
+async def add_simple_lead_event(
     lead_id: UUID,
     event_type: str,
     payload: dict[str, Any] | None = None,
     db: AsyncSession = Depends(get_db),
 ):
-    """Add an event to a lead."""
+    """Add an event to a lead using simple parameters (alternative to Pydantic model)."""
 
     if payload is None:
         payload = {}

@@ -11,6 +11,8 @@ Related Endpoints:
 - Cancellation: 2-step cancellation workflow
 """
 
+from uuid import UUID
+
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -103,6 +105,10 @@ class BookingUpdate(BaseModel):
         None, max_length=500, description="Updated special requests"
     )
     status: str | None = Field(None, description="Updated status")
+    chef_id: UUID | None = Field(
+        None,
+        description="Assign chef to booking (UUID). Set to null to unassign chef.",
+    )
 
 
 # =============================================================================

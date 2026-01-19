@@ -28,6 +28,7 @@ python-multipart==0.0.9
 python-dotenv==1.0.1
 python-dateutil==2.8.2
 pytz==2024.1
+tzfpy==1.1.1  # Derive timezone from lat/lng coordinates (lightweight, no C++ deps)
 
 # Email functionality
 emails==0.6.0

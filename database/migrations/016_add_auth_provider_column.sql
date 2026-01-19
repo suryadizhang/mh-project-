@@ -25,7 +25,7 @@ BEGIN
         AND table_name = 'users'
         AND column_name = 'auth_provider'
     ) THEN
-        ALTER TABLE identity.users 
+        ALTER TABLE identity.users
         ADD COLUMN auth_provider public.authprovider NOT NULL DEFAULT 'email';
         RAISE NOTICE 'Added auth_provider column to identity.users';
     ELSE

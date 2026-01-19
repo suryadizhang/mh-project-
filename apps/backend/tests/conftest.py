@@ -4,6 +4,7 @@ Adds src to sys.path for proper imports and provides test fixtures
 """
 
 import sys
+import os
 from pathlib import Path
 import asyncio
 import time
@@ -23,6 +24,42 @@ from dotenv import load_dotenv
 # Force load real .env file (not .env.test)
 env_path = Path(__file__).parent.parent / ".env"
 load_dotenv(dotenv_path=env_path, override=True)
+
+# ============================================================================
+# TEST ENVIRONMENT OVERRIDES
+# Disable rate limiting during tests to prevent 429 errors
+# ============================================================================
+os.environ["FEATURE_FLAG_ENABLE_RATE_LIMITING"] = "False"
+
+# ============================================================================
+# DATABASE CONNECTION CONFIGURATION
+# Try local SSH tunnel first, fall back to direct VPS connection if unavailable
+# ============================================================================
+import socket
+
+
+def is_tunnel_available(host: str = "127.0.0.1", port: int = 5433, timeout: float = 1.0) -> bool:
+    """Check if the SSH tunnel to staging DB is available."""
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(timeout)
+        result = sock.connect_ex((host, port))
+        sock.close()
+        return result == 0
+    except socket.error:
+        return False
+
+
+# Check if SSH tunnel is running
+if not is_tunnel_available():
+    print("\n⚠️  SSH tunnel not detected on port 5433. Using direct VPS connection for tests.")
+    # Direct connection to VPS staging database (bypass tunnel)
+    VPS_STAGING_URL = "postgresql+asyncpg://myhibachi_staging_user:***REMOVED***@108.175.12.154:5432/myhibachi_staging"
+    VPS_STAGING_URL_SYNC = "postgresql+psycopg2://myhibachi_staging_user:***REMOVED***@108.175.12.154:5432/myhibachi_staging"
+    os.environ["DATABASE_URL"] = VPS_STAGING_URL
+    os.environ["DATABASE_URL_SYNC"] = VPS_STAGING_URL_SYNC
+else:
+    print("\n✅ SSH tunnel detected on port 5433. Using tunnel connection for tests.")
 
 # Fix for Windows event loop issues with pytest-asyncio
 if sys.platform == "win32":

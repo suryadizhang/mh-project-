@@ -23,7 +23,7 @@ from fastapi import (
     Query,
     status,
 )
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from sqlalchemy import and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -44,42 +44,46 @@ class SMSCampaignCreate(BaseModel):
 
     name: str = Field(..., min_length=1, max_length=200)
     message: str = Field(..., min_length=1, max_length=1600)  # Max 10 segments
-    recipient_filter: str = Field("sms_consent_only", regex="^(all|sms_consent_only|tags|custom)$")
+    recipient_filter: str = Field(
+        "sms_consent_only", pattern="^(all|sms_consent_only|tags|custom)$"
+    )
     selected_tags: list[str] | None = None
     custom_phones: list[str] | None = None
-    send_option: str = Field("schedule", regex="^(now|schedule)$")
+    send_option: str = Field("schedule", pattern="^(now|schedule)$")
     scheduled_at: datetime | None = None
     timezone: str = Field("America/Los_Angeles")
 
-    @validator("message")
-    def validate_message_length(cls, v):
+    @field_validator("message")
+    @classmethod
+    def validate_message_length(cls, v: str) -> str:
         """Ensure message isn't too long (max 10 SMS segments)."""
         segments = calculate_sms_segments(v)
         if segments > 10:
             raise ValueError(f"Message too long: {segments} segments (max 10)")
         return v
 
-    @validator("scheduled_at")
-    def validate_schedule_time(cls, v, values):
+    @model_validator(mode="after")
+    def validate_schedule_time(self) -> "SMSCampaignCreate":
         """Validate scheduled time is in the future and within business hours."""
-        if values.get("send_option") == "schedule":
-            if not v:
+        if self.send_option == "schedule":
+            if not self.scheduled_at:
                 raise ValueError("scheduled_at required when send_option is 'schedule'")
 
-            if v <= datetime.now(timezone.utc):
+            if self.scheduled_at <= datetime.now(timezone.utc):
                 raise ValueError("Scheduled time must be in the future")
 
             # Check business hours (8am - 9pm local time)
-            hour = v.hour
+            hour = self.scheduled_at.hour
             if hour < 8 or hour >= 21:
                 raise ValueError(
                     "SMS must be scheduled between 8:00 AM and 9:00 PM (TCPA compliance)"
                 )
 
-        return v
+        return self
 
-    @validator("custom_phones")
-    def validate_phones(cls, v):
+    @field_validator("custom_phones")
+    @classmethod
+    def validate_phones(cls, v: list[str] | None) -> list[str] | None:
         """Validate phone number format."""
         if v:
             import re

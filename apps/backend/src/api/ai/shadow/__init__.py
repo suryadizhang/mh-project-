@@ -9,7 +9,7 @@ from api.ai.shadow.confidence_predictor import (
 )
 from api.ai.shadow.local_model import LocalLLMService, get_local_llm_service
 from api.ai.shadow.model_router import ModelRouter, get_model_router
-from api.ai.shadow.models import AIExportJob, AIRLHFScore, AITutorPair
+from db.models.ai.shadow_learning import AIExportJob, AIRLHFScore, AITutorPair
 from api.ai.shadow.quality_monitor import QualityMonitor, get_quality_monitor
 from api.ai.shadow.readiness_service import (
     AIReadinessService,

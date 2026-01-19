@@ -395,7 +395,7 @@ async def get_engagement_trends(days: int = Query(30, le=365), db: Session = Dep
 @router.get("/revenue-trends")
 async def get_revenue_trends(
     days: int = Query(30, le=365),
-    interval: str = Query("day", regex="^(day|week|month)$"),
+    interval: str = Query("day", pattern="^(day|week|month)$"),
     db: Session = Depends(get_db),
 ):
     """

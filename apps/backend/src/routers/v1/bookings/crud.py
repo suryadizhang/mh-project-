@@ -31,6 +31,7 @@ from services.encryption_service import SecureDataHandler
 from api.ai.endpoints.services.pricing_service import get_pricing_service
 from utils.auth import get_current_user
 from utils.pagination import paginate_query
+from utils.timezone_utils import DEFAULT_TIMEZONE
 
 from .schemas import (
     BookingCreate,
@@ -44,6 +45,7 @@ from .constants import (
     PARTY_MINIMUM_CENTS,
 )
 from .notifications import notify_new_booking, notify_booking_edit
+from services.google_calendar_service import create_chef_assignment_event
 
 router = APIRouter(tags=["bookings"])
 logger = logging.getLogger(__name__)
@@ -90,12 +92,23 @@ async def list_bookings(
         .order_by(Booking.created_at.desc())
     )
 
-    # Apply station filtering based on user role
+    # Apply role-based filtering
     user_role = current_user.get("role", "")
+
+    # STATION_MANAGER: Can only see bookings for their assigned stations
     if role_matches(user_role, "STATION_MANAGER", "station_manager"):
         station_ids = current_user.get("station_ids", [])
         if station_ids:
             query = query.where(Booking.station_id.in_([UUID(sid) for sid in station_ids]))
+
+    # CHEF: Can only see bookings assigned to themselves
+    elif role_matches(user_role, "CHEF", "chef"):
+        chef_id = current_user.get("chef_id")
+        if chef_id:
+            query = query.where(Booking.chef_id == UUID(chef_id))
+        else:
+            # If no chef_id in token, chef sees nothing (security measure)
+            query = query.where(Booking.id.is_(None))
 
     # Apply user filter
     if user_id:
@@ -391,12 +404,17 @@ async def create_booking(
     "/{booking_id}",
     summary="Update an existing booking",
     description="""
-    Update booking details such as date, time, guest count, or location.
+    Update booking details such as date, time, guest count, location, or chef assignment.
 
     ## Update Rules:
     - Only pending or confirmed bookings can be updated
     - Date/time changes must be at least 72 hours before event
     - Pricing is recalculated if guest count changes
+
+    ## Chef Assignment:
+    - SUPER_ADMIN, ADMIN, or STATION_MANAGER can assign/unassign chefs
+    - Set chef_id to a valid chef UUID to assign
+    - Set chef_id to null to unassign the chef
     """,
 )
 async def update_booking(
@@ -406,35 +424,155 @@ async def update_booking(
     current_user: dict[str, Any] = Depends(get_current_user),
 ) -> dict[str, Any]:
     """Update an existing booking."""
-    response = {
-        "id": booking_id,
-        "message": "Booking updated successfully",
-        **booking_data.model_dump(exclude_none=True),
-    }
+    # Validate booking_id is a valid UUID
+    try:
+        booking_uuid = UUID(booking_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid booking ID format",
+        )
+
+    # Fetch the booking from database
+    result = await db.execute(
+        select(Booking)
+        .options(joinedload(Booking.customer))
+        .where(
+            Booking.id == booking_uuid,
+            Booking.deleted_at.is_(None),
+        )
+    )
+    booking = result.scalar_one_or_none()
+
+    if not booking:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Booking {booking_id} not found",
+        )
+
+    # Check if booking status allows updates
+    if booking.status not in [BookingStatus.PENDING, BookingStatus.CONFIRMED]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot update booking with status: {booking.status.value}",
+        )
 
     # Build change list for notification
     changes = []
-    if booking_data.date:
-        changes.append(f"Date changed to {booking_data.date}")
-    if booking_data.time:
-        changes.append(f"Time changed to {booking_data.time}")
-    if booking_data.guests:
-        changes.append(f"Guest count changed to {booking_data.guests}")
-    if booking_data.location_address:
+
+    # Apply updates to booking
+    update_data = booking_data.model_dump(exclude_none=True)
+
+    if "date" in update_data:
+        booking.date = datetime.strptime(update_data["date"], "%Y-%m-%d").date()
+        changes.append(f"Date changed to {update_data['date']}")
+
+    if "time" in update_data:
+        time_parts = update_data["time"].split(":")
+        booking.time = time_type(int(time_parts[0]), int(time_parts[1]))
+        changes.append(f"Time changed to {update_data['time']}")
+
+    if "guests" in update_data:
+        booking.guests = update_data["guests"]
+        changes.append(f"Guest count changed to {update_data['guests']}")
+
+    if "location_address" in update_data:
+        booking.venue_address = update_data["location_address"]
         changes.append("Location changed")
 
+    if "special_requests" in update_data:
+        booking.special_requests = update_data["special_requests"]
+        changes.append("Special requests updated")
+
+    if "status" in update_data:
+        try:
+            new_status = BookingStatus(update_data["status"])
+            booking.status = new_status
+            changes.append(f"Status changed to {new_status.value}")
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid status: {update_data['status']}",
+            )
+
+    # Handle chef assignment
+    if "chef_id" in update_data:
+        chef_id = update_data["chef_id"]
+        old_chef_id = booking.chef_id
+
+        if chef_id is None:
+            # Unassign chef
+            booking.chef_id = None
+            if old_chef_id:
+                changes.append("Chef unassigned from booking")
+                logger.info(f"🍳 Chef {old_chef_id} unassigned from booking {booking_id}")
+        else:
+            # Assign new chef
+            booking.chef_id = chef_id
+            if old_chef_id and old_chef_id != chef_id:
+                changes.append(f"Chef changed from {old_chef_id} to {chef_id}")
+                logger.info(
+                    f"🍳 Chef changed from {old_chef_id} to {chef_id} for booking {booking_id}"
+                )
+            else:
+                changes.append(f"Chef {chef_id} assigned to booking")
+                logger.info(f"🍳 Chef {chef_id} assigned to booking {booking_id}")
+
+            # Trigger Google Calendar sync for chef (async background task)
+            asyncio.create_task(
+                create_chef_assignment_event(db=db, booking=booking, chef_id=chef_id)
+            )
+
+    booking.updated_at = datetime.now(timezone.utc)
+
+    try:
+        await db.commit()
+        await db.refresh(booking)
+    except IntegrityError as e:
+        await db.rollback()
+        error_msg = str(e.orig) if e.orig else str(e)
+        if "ix_core_bookings_chef_slot_unique" in error_msg:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Chef is already assigned to another booking at this date/time slot",
+            )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update booking",
+        )
+
+    # Send edit notification if there were changes
     if changes:
+        customer_name = "Customer"
+        customer_phone = "+10000000000"
+
+        if booking.customer:
+            customer_name = f"{booking.customer.first_name} {booking.customer.last_name}"
+            # Decrypt phone if needed
+
         asyncio.create_task(
             notify_booking_edit(
-                customer_name="Customer Name",  # TODO: Get from DB
-                customer_phone="+14155551234",  # TODO: Get from DB
+                customer_name=customer_name,
+                customer_phone=customer_phone,
                 booking_id=booking_id,
                 changes=", ".join(changes),
-                event_date=booking_data.date or "Original Date",
-                event_time=booking_data.time or "Original Time",
+                event_date=str(booking.date),
+                event_time=str(booking.time),
             )
         )
         logger.info(f"📧 Edit notification queued for booking {booking_id}")
+
+    # Build response
+    response = {
+        "id": str(booking.id),
+        "message": "Booking updated successfully",
+        "date": str(booking.date),
+        "time": str(booking.time),
+        "guests": booking.guests,
+        "status": booking.status.value,
+        "chef_id": str(booking.chef_id) if booking.chef_id else None,
+        "changes": changes,
+    }
 
     return response
 
@@ -473,7 +611,7 @@ async def _find_or_create_customer(
             consent_sms=True,
             consent_email=True,
             consent_updated_at=now,
-            timezone="America/Chicago",
+            timezone=DEFAULT_TIMEZONE,  # Pacific Time (Fremont, CA)
         )
         db.add(customer)
         await db.flush()

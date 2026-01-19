@@ -4,7 +4,7 @@ Request/response models for customer support escalations
 """
 
 from datetime import datetime
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 import re
 from typing import Optional
 
@@ -23,8 +23,9 @@ class EscalationCreateRequest(BaseModel):
     customer_consent: bool = Field(True, description="Customer consent to receive SMS/calls")
     metadata: dict = Field(default_factory=dict, description="Additional context")
 
-    @validator("phone")
-    def validate_phone(cls, v):
+    @field_validator("phone")
+    @classmethod
+    def validate_phone(cls, v: str) -> str:
         """Validate phone number format"""
         # Remove all non-digit characters
         digits_only = re.sub(r"\D", "", v)
@@ -36,16 +37,18 @@ class EscalationCreateRequest(BaseModel):
         # Return formatted phone (keep original format or normalize)
         return v
 
-    @validator("preferred_method")
-    def validate_method(cls, v):
+    @field_validator("preferred_method")
+    @classmethod
+    def validate_method(cls, v: str) -> str:
         """Validate preferred contact method"""
         valid_methods = ["sms", "call", "email"]
         if v.lower() not in valid_methods:
             raise ValueError(f"Method must be one of: {', '.join(valid_methods)}")
         return v.lower()
 
-    @validator("priority")
-    def validate_priority(cls, v):
+    @field_validator("priority")
+    @classmethod
+    def validate_priority(cls, v: str) -> str:
         """Validate priority level"""
         valid_priorities = ["low", "medium", "high", "urgent"]
         if v.lower() not in valid_priorities:

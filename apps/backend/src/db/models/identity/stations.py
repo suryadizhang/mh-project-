@@ -244,7 +244,7 @@ class Station(Base):
     # Geographic and Contact (REQUIRED FIELDS)
     country: Mapped[str] = mapped_column(String(100), nullable=False, server_default=text("'US'"))
     timezone: Mapped[str] = mapped_column(
-        String(50), nullable=False, server_default=text("'America/New_York'")
+        String(50), nullable=False, server_default=text("'America/Los_Angeles'")
     )
 
     # Status (REQUIRED FIELD)

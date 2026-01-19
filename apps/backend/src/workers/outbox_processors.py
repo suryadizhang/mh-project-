@@ -13,9 +13,8 @@ from typing import Any
 import aiohttp
 from core.database import get_db_context
 
-# MIGRATED: Imports moved from OLD models to NEW db.models system
-# TODO: Manual migration needed for: OutboxEntry
-# from models import OutboxEntry
+# MIGRATED: Using new Outbox model from db.models.events
+from db.models.events import Outbox
 from utils.encryption import decrypt_field, get_field_encryption
 from sqlalchemy import and_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -88,19 +87,19 @@ class OutboxWorkerBase:
                     await self._handle_event_error(event, str(e), db)
                     await db.commit()
 
-    async def _get_pending_events(self, db: AsyncSession) -> list[OutboxEntry]:
+    async def _get_pending_events(self, db: AsyncSession) -> list[Outbox]:
         """Get pending events for this worker type."""
         # First, fetch candidate pending entries (no JSON extraction in SQL)
         query = (
-            select(OutboxEntry)
+            select(Outbox)
             .where(
                 and_(
-                    OutboxEntry.status == "pending",
-                    OutboxEntry.attempts < self.config.max_retries,
-                    OutboxEntry.next_attempt_at <= datetime.now(timezone.utc),
+                    Outbox.status == "pending",
+                    Outbox.retry_count < self.config.max_retries,
+                    Outbox.next_retry_at <= datetime.now(timezone.utc),
                 )
             )
-            .order_by(OutboxEntry.created_at)
+            .order_by(Outbox.created_at)
             .limit(self.config.batch_size * 4)  # fetch some extra to filter in-Python
         )
 
@@ -117,14 +116,14 @@ class OutboxWorkerBase:
     async def _mark_event_processed(self, event_id: str, db: AsyncSession):
         """Mark event as processed."""
         await db.execute(
-            update(OutboxEntry)
-            .where(OutboxEntry.id == event_id)
-            .values(completed_at=datetime.now(timezone.utc), status="completed")
+            update(Outbox)
+            .where(Outbox.id == event_id)
+            .values(processed_at=datetime.now(timezone.utc), status="completed")
         )
 
-    async def _handle_event_error(self, event: OutboxEntry, error_message: str, db: AsyncSession):
+    async def _handle_event_error(self, event: Outbox, error_message: str, db: AsyncSession):
         """Handle event processing error with exponential backoff."""
-        retry_count = (getattr(event, "attempts", None) or 0) + 1
+        retry_count = (getattr(event, "retry_count", None) or 0) + 1
 
         # Calculate next retry time with exponential backoff
         delay_seconds = min(
@@ -135,23 +134,25 @@ class OutboxWorkerBase:
         if retry_count >= self.config.max_retries:
             # Mark as failed after max retries
             await db.execute(
-                update(OutboxEntry)
-                .where(OutboxEntry.id == event.id)
+                update(Outbox)
+                .where(Outbox.id == event.id)
                 .values(
                     status="failed",
-                    last_error=error_message,
-                    completed_at=datetime.now(timezone.utc),
-                    attempts=retry_count,
+                    error_message=error_message,
+                    processed_at=datetime.now(timezone.utc),
+                    retry_count=retry_count,
                 )
             )
             logger.error(f"Event {event.id} failed after {retry_count} retries: {error_message}")
         else:
             # Schedule for retry
             await db.execute(
-                update(OutboxEntry)
-                .where(OutboxEntry.id == event.id)
+                update(Outbox)
+                .where(Outbox.id == event.id)
                 .values(
-                    attempts=retry_count, last_error=error_message, next_attempt_at=next_retry_at
+                    retry_count=retry_count,
+                    error_message=error_message,
+                    next_retry_at=next_retry_at,
                 )
             )
             logger.warning(
@@ -162,7 +163,7 @@ class OutboxWorkerBase:
         """Get list of event types this worker handles."""
         raise NotImplementedError
 
-    async def _process_event(self, event: OutboxEntry, db: AsyncSession):
+    async def _process_event(self, event: Outbox, db: AsyncSession):
         """Process a single event."""
         raise NotImplementedError
 
@@ -179,7 +180,7 @@ class SMSWorker(OutboxWorkerBase):
     def get_supported_event_types(self) -> list[str]:
         return ["sms_send", "sms_reminder", "sms_confirmation"]
 
-    async def _process_event(self, event: OutboxEntry, db: AsyncSession):
+    async def _process_event(self, event: Outbox, db: AsyncSession):
         """Process SMS event."""
         event_data = json.loads(event.event_data)
 
@@ -286,7 +287,7 @@ class EmailWorker(OutboxWorkerBase):
     def get_supported_event_types(self) -> list[str]:
         return ["email_send", "email_confirmation", "email_reminder", "email_receipt"]
 
-    async def _process_event(self, event: OutboxEntry, db: AsyncSession):
+    async def _process_event(self, event: Outbox, db: AsyncSession):
         """Process email event."""
         event_data = json.loads(event.event_data)
 
@@ -495,7 +496,7 @@ class StripeWorker(OutboxWorkerBase):
     def get_supported_event_types(self) -> list[str]:
         return ["stripe_payment_intent", "stripe_refund", "stripe_customer_create"]
 
-    async def _process_event(self, event: OutboxEntry, db: AsyncSession):
+    async def _process_event(self, event: Outbox, db: AsyncSession):
         """Process Stripe event."""
         event_data = json.loads(event.event_data)
         event_type = event.event_type
